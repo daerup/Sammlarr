@@ -1,0 +1,52 @@
+@page "/"
+@using Microsoft.EntityFrameworkCore
+@inject SammlarrDbContext DbContext
+
+<PageTitle>Collections</PageTitle>
+
+<div class="px-6 py-10">
+    <h1 class="text-3xl font-semibold mb-2">Sammlarr Collections</h1>
+    <p class="text-muted-foreground mb-6">A simple overview of the curated items stored in the local database.</p>
+
+    @if (_items == null)
+    {
+        <p>Loading collections...</p>
+    }
+    else if (!_items.Any())
+    {
+        <p class="text-muted-foreground">No collections yet. Add items via the admin view.</p>
+    }
+    else
+    {
+        <table class="min-w-full text-left border-collapse">
+            <thead class="border-b">
+                <tr class="text-sm uppercase tracking-wide text-muted-foreground">
+                    <th class="py-2">Name</th>
+                    <th class="py-2">Description</th>
+                    <th class="py-2">Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in _items)
+                {
+                    <tr class="border-b last:border-none">
+                        <td class="py-3 font-medium">@item.Name</td>
+                        <td class="py-3 text-sm text-muted-foreground">@item.Description</td>
+                        <td class="py-3 text-sm">@item.CreatedAt.ToLocalTime():g</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private IReadOnlyList<CollectionItem>? _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await DbContext.CollectionItems
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+    }
+}

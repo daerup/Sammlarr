@@ -1,0 +1,23 @@
+<Project>
+	<PropertyGroup>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageVersion Include="BlazorBlueprint.Components" Version="3.9.2" />
+		<PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.0" />
+		<PackageVersion Include="BlazorBlueprint.Primitives" Version="3.9.2" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+		<PackageVersion Include="StronglyTypedId" Version="0.2.1" />
+		<PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.5" />
+		<PackageVersion Include="Vogen" Version="8.0.5" />
+	</ItemGroup>
+</Project>

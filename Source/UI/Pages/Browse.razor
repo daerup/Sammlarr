@@ -1,0 +1,476 @@
+@page "/browse"
+@implements IDisposable
+@implements IAsyncDisposable
+@using API.Plex
+@using Contracts.Auth
+@using Contracts.Media
+@using Contracts.Watchlist
+@using global::Shared
+@using global::Shared.DI
+@inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
+@inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistServiceIndex
+@inject ICredentialStore CredentialStore
+@inject ProfileDropdownService ProfileDropdownService
+@inject IApiKeyStore ApiKeyStore
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Browse Movies</PageTitle>
+
+<div class="px-6 py-10">
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-3xl font-bold tracking-wide antialiased">Trending Movies & Shows</h1>
+            <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Discover what's popular this week</p>
+        </div>
+
+        @if (_isAuthenticated)
+        {
+            <BbButton Variant="ButtonVariant.Outline" @onclick="OpenSearchSheet">
+                <LucideIcon Name="search" Size="16" Class="mr-2"/>
+                <span>Add from Search</span>
+                <BbBadge Variant="BadgeVariant.Outline" Class="ml-2 text-[10px] px-1.5 py-0.5">Ctrl+K</BbBadge>
+            </BbButton>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_addStatusMessage))
+    {
+        <div class="mb-4 rounded-lg border bg-surface p-3 text-sm @(_isAddStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground")">
+            @_addStatusMessage
+        </div>
+    }
+
+    @if (!_isAuthenticated)
+    {
+        <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+            <LucideIcon Name="lock" Size="40" class="mx-auto text-muted-foreground"/>
+            <p class="text-muted-foreground">You need to connect your Plex account before browsing trending media.</p>
+            <BbButton Variant="ButtonVariant.Outline" OnClick="ProfileDropdownService.RequestOpenAsync">
+                Connect Plex Account
+            </BbButton>
+        </div>
+    }
+    else if (!_hasTmdbKey)
+    {
+        <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+            <LucideIcon Name="key" Size="40" class="mx-auto text-muted-foreground"/>
+            <p class="text-muted-foreground">A TMDB API key is required to browse trending media.</p>
+            <BbButton Variant="ButtonVariant.Outline" OnClick='() => NavigationManager.NavigateTo("/settings")'>
+                Configure API Key
+            </BbButton>
+        </div>
+    }
+    else if (_isLoading)
+    {
+        <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+            @for (int i = 0; i < 20; i++)
+            {
+                <div class="space-y-3">
+                    <BbSkeleton Class="w-full" Height="300px"/>
+                </div>
+            }
+        </div>
+    }
+    else if (_trendingMedia != null)
+    {
+        <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+            @foreach (var media in _trendingMedia)
+            {
+                <div class="cursor-pointer group" @onclick="() => SelectMedia(media)">
+                    <div class="relative overflow-hidden rounded-lg media-backdrop">
+                        <img src="@media.BackdropUrl" alt="@media.Title"/>
+
+                        <div class="absolute top-4 right-4 z-10">
+                            <LucideIcon
+                                Name="bookmark"
+                                Size="25"
+                                Color="orange"
+                                Fill="@(IsInWatchlist(media) ? "orange" : "transparent")"/>
+                        </div>
+
+                        <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
+                            <div class="flex items-center gap-1.5 text-yellow-400 text-sm tracking-wide antialiased">
+                                <LucideIcon Name="star" Size="16" Fill="currentColor"/>
+                                <span class="font-medium">
+                                    @(media.Rating == 0 ? "N/A" : media.Rating.ToString("F1"))
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2">
+                                <h3 class="text-white text-base font-bold text-lg">
+                                    @media.Title
+                                </h3>
+                                <span class="text-white/70 font-medium text-sm shrink-0">
+                                    @media.ReleaseDate.Year
+                                </span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="flex items-center justify-center gap-4 mt-5">
+            <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage <= 1)" OnClick="GoToPreviousPageAsync">
+                <LucideIcon Name="chevron-left" Size="16" Class="mr-1"/>
+                Previous
+            </BbButton>
+            <span class="text-sm text-muted-foreground font-medium">Page @_currentPage</span>
+            <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage >= _totalPages)" OnClick="GoToNextPageAsync">
+                Next
+                <LucideIcon Name="chevron-right" Size="16" Class="ml-1"/>
+            </BbButton>
+        </div>
+    }
+</div>
+
+<SearchModal @bind-IsOpen="_isSearchModalOpen"
+             IsInWatchlist="IsInWatchlist"
+             AddToWatchlistAsync="AddFromSearchAsync"/>
+
+<BbSheet @bind-Open="_isSheetOpen">
+    <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
+        @if (_selectedMedia != null)
+        {
+            <BbSheetHeader>
+                <BbSheetTitle Class="font-bold tracking-wide">@_selectedMedia.Title</BbSheetTitle>
+                <BbSheetDescription Class="font-normal tracking-wide">
+                    <span class="flex items-center justify-center gap-1.5">
+                        @if(_selectedMedia.MediaType is MediaType.Movie)
+                        {
+                            <LucideIcon Name="film" Size="16"/>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="tv" Size="16" />
+                        }
+                        <span>@_selectedMedia.MediaType.GetDescription() • @_selectedMedia.ReleaseDate.Year</span>
+                    </span>
+                </BbSheetDescription>
+            </BbSheetHeader>
+
+            <div class="space-y-6 py-6">
+                <div class="flex justify-center">
+                    <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[200px]">
+                        <img src="@_selectedMedia.PosterUrl"
+                             alt="@_selectedMedia.Title"
+                             class="w-full aspect-[2/3] object-cover"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm font-medium tracking-wide antialiased">
+                    <div class="flex items-center gap-1.5 text-yellow-400">
+                        <LucideIcon Name="star" Size="16" Fill="currentColor"/>
+                        <span class="font-semibold">@_selectedMedia.Rating.ToString("F1")</span>
+                    </div>
+                    <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-4"/>
+                    <span class="text-muted-foreground font-medium">
+                        @_selectedMedia.ReleaseDate.ToString("MMM d, yyyy")
+                    </span>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold tracking-wide">Overview</h3>
+                    <p class="text-sm text-muted-foreground leading-relaxed font-normal tracking-wide antialiased">
+                        @_selectedMedia.Description
+                    </p>
+                </div>
+
+                <BbSeparator/>
+
+                <div class="flex gap-2">
+                    <BbButton Class="flex-1"
+                              OnClick="ToggleWatchlistAsync"
+                              Disabled="@_isAddingToWatchlist"
+                              Variant="@((_selectedMedia != null && IsInWatchlist(_selectedMedia)) ? ButtonVariant.Secondary : ButtonVariant.Default)">
+                        @if (_isAddingToWatchlist)
+                        {
+                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            <span>Processing...</span>
+                        }
+                        else if (_selectedMedia != null && IsInWatchlist(_selectedMedia))
+                        {
+                            <LucideIcon Name="x" Size="16" Class="mr-2"/>
+                            <span>Remove from Watchlist</span>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="plus" Size="16" Class="mr-2"/>
+                            <span>Add to Watchlist</span>
+                        }
+                    </BbButton>
+                </div>
+
+                @if (_isError && !string.IsNullOrEmpty(_statusMessage))
+                {
+                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-3">
+                        <p class="text-sm text-destructive">
+                            @_statusMessage
+                        </p>
+                    </div>
+                }
+            </div>
+        }
+    </BbSheetContent>
+</BbSheet>
+
+@code {
+    private IReadOnlyList<ITrendingMedia>? _trendingMedia;
+    private ITrendingMedia? _selectedMedia;
+    private bool _isLoading = true;
+    private bool _isSheetOpen;
+    private bool _isSearchModalOpen;
+    private bool _isAddingToWatchlist;
+    private string? _statusMessage;
+    private string? _addStatusMessage;
+    private bool _isAddStatusError;
+    private bool _isError;
+    private bool _isAuthenticated;
+    private bool _hasTmdbKey;
+    private HashSet<string> _watchlistedPlexIds = new();
+    private int _currentPage = 1;
+    private int _totalPages = 1;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private DotNetObjectReference<Browse>? _shortcutDotNetRef;
+    private bool _isShortcutRegistered;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var credential = await CredentialStore.GetAsync(AuthProvider.Plex, _cancellationTokenSource.Token);
+        _isAuthenticated = credential is not null && !string.IsNullOrWhiteSpace(credential.AccessToken);
+
+        if (!_isAuthenticated) return;
+
+        var tmdbKey = await ApiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, _cancellationTokenSource.Token);
+        _hasTmdbKey = !string.IsNullOrWhiteSpace(tmdbKey);
+
+        if (!_hasTmdbKey) return;
+
+        var watchlistService = WatchlistServiceIndex[AuthProvider.Plex];
+        var watchlistPage = await watchlistService.GetWatchlistAsync(1, _cancellationTokenSource.Token);
+        if (_cancellationTokenSource.IsCancellationRequested) return;
+
+        _watchlistedPlexIds = watchlistPage.Items.Select(item => item.SourceId).OfType<PlexId>().Select(id => id.Value).ToHashSet();
+
+        await LoadPageAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_isAuthenticated && !_isShortcutRegistered)
+        {
+            _shortcutDotNetRef = DotNetObjectReference.Create(this);
+            await JsRuntime.InvokeVoidAsync("registerBrowseSearchShortcut", _shortcutDotNetRef);
+            _isShortcutRegistered = true;
+        }
+        else if (!_isAuthenticated && _isShortcutRegistered)
+        {
+            await UnregisterShortcutAsync();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OpenSearchFromShortcutAsync()
+    {
+        if (!_isAuthenticated || _isSearchModalOpen)
+        {
+            return;
+        }
+
+        _isSearchModalOpen = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async ValueTask UnregisterShortcutAsync()
+    {
+        if (!_isShortcutRegistered)
+        {
+            return;
+        }
+
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("unregisterBrowseSearchShortcut");
+        }
+        catch (JSDisconnectedException)
+        {
+            // Component is disposing and JS runtime may already be gone.
+        }
+
+        _shortcutDotNetRef?.Dispose();
+        _shortcutDotNetRef = null;
+        _isShortcutRegistered = false;
+    }
+
+    private async Task LoadPageAsync()
+    {
+        await TryStateHasChangedAsync();
+
+        try
+        {
+            var recommendationService = RecommendationServiceIndex[MediaProvider.Tmdb];
+            (_trendingMedia, _totalPages) = await recommendationService.GetTrendingAsync(_currentPage, _cancellationTokenSource.Token);
+        }
+        finally
+        {
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                _isLoading = false;
+                await TryStateHasChangedAsync();
+            }
+        }
+    }
+
+    private async Task TryStateHasChangedAsync()
+    {
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (ObjectDisposedException) {}
+    }
+
+    private async Task GoToPreviousPageAsync()
+    {
+        if (_currentPage <= 1) return;
+        _currentPage--;
+        await LoadPageAsync();
+        await ScrollToTopAsync();
+    }
+
+    private async Task GoToNextPageAsync()
+    {
+        if (_currentPage >= _totalPages) return;
+        _currentPage++;
+        await LoadPageAsync();
+        await ScrollToTopAsync();
+    }
+
+    private async Task ScrollToTopAsync()
+    {
+        await Task.Delay(10, _cancellationTokenSource.Token);
+        await JsRuntime.InvokeVoidAsync("scrollTo", new { top = 0, behavior = "smooth" });
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await UnregisterShortcutAsync();
+        Dispose();
+    }
+
+    private bool IsInWatchlist(ITrendingMedia media)
+    {
+        return media.ExternalId is PlexId plexId && _watchlistedPlexIds.Contains(plexId.Value);
+    }
+
+    private bool IsInWatchlist(PlexId plexId)
+    {
+        return _watchlistedPlexIds.Contains(plexId.Value);
+    }
+
+    private void OpenSearchSheet()
+    {
+        _isSearchModalOpen = true;
+    }
+
+    private async Task<bool> AddFromSearchAsync(PlexId plexId, string title)
+    {
+        if (IsInWatchlist(plexId))
+        {
+            _addStatusMessage = $"'{title}' is already in your watchlist.";
+            _isAddStatusError = false;
+            return false;
+        }
+
+        _addStatusMessage = null;
+        _isAddStatusError = false;
+
+        try
+        {
+            var watchlistService = WatchlistServiceIndex[AuthProvider.Plex];
+            var added = await watchlistService.AddToWatchlistAsync(plexId, _cancellationTokenSource.Token);
+
+            if (!added)
+            {
+                _addStatusMessage = "Could not add item to Plex watchlist. Please try again.";
+                _isAddStatusError = true;
+                return false;
+            }
+
+            _watchlistedPlexIds.Add(plexId.Value);
+            _addStatusMessage = null;
+            _isAddStatusError = false;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _addStatusMessage = $"Failed to add item: {ex.Message}";
+            _isAddStatusError = true;
+            return false;
+        }
+    }
+
+    private void SelectMedia(ITrendingMedia media)
+    {
+        _selectedMedia = media;
+        _isSheetOpen = true;
+        _statusMessage = null;
+        _isError = false;
+    }
+
+    private async Task ToggleWatchlistAsync()
+    {
+        if (_selectedMedia?.ExternalId is not PlexId plexId)
+        {
+            _statusMessage = "Unable to modify watchlist: No Plex ID available";
+            _isError = true;
+            return;
+        }
+
+        _isAddingToWatchlist = true;
+        _statusMessage = null;
+        _isError = false;
+
+        var watchlistService = WatchlistServiceIndex[AuthProvider.Plex];
+        var isCurrentlyInWatchlist = _watchlistedPlexIds.Contains(plexId.Value);
+        bool success;
+
+        if (isCurrentlyInWatchlist)
+        {
+            success = await watchlistService.RemoveFromWatchlistAsync(plexId);
+            if (success)
+            {
+                _watchlistedPlexIds.Remove(plexId.Value);
+                _isSheetOpen = false;
+            }
+        }
+        else
+        {
+            success = await watchlistService.AddToWatchlistAsync(plexId);
+            if (success)
+            {
+                _watchlistedPlexIds.Add(plexId.Value);
+                _isSheetOpen = false;
+            }
+        }
+
+        _isAddingToWatchlist = false;
+
+        if (!success)
+        {
+            _statusMessage = $"Failed to {(isCurrentlyInWatchlist ? "remove from" : "add to")} watchlist. Please try again.";
+            _isError = true;
+        }
+    }
+}

@@ -1,0 +1,96 @@
+@inherits LayoutComponentBase
+
+<div class="relative min-h-screen flex flex-col">
+    <header class="sticky top-0 z-50 w-full border-b bg-background">
+        <div class="flex h-14 items-center px-6">
+            <div class="mr-4 flex">
+                <a href="/" class="mr-6 flex items-center space-x-2">
+                    <LucideIcon Name="box" Size="24" class="text-primary" />
+                    <span class="font-bold">UI</span>
+                </a>
+            </div>
+            <nav class="flex items-center space-x-6 text-sm font-medium">
+                <NavLink href="/" Match="NavLinkMatch.All" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
+                    Home
+                </NavLink>
+                <NavLink href="/browse" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
+                    Browse
+                </NavLink>
+                <NavLink href="/watchlist" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
+                    Watchlist
+                </NavLink>
+            </nav>
+            <div class="flex flex-1 items-center justify-end space-x-2">
+                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" @onclick="ToggleDarkMode">
+                    @if (_isDarkMode)
+                    {
+                        <LucideIcon Name="sun" Size="20" />
+                    }
+                    else
+                    {
+                        <LucideIcon Name="moon" Size="20" />
+                    }
+                </BbButton>
+
+                <BbDropdownMenu>
+                    <BbDropdownMenuTrigger>
+                        <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0">
+                            <BbAvatar Size="AvatarSize.Small" ShowDot="@_isAuthenticated" DotClass="bg-green-500">
+                                <BbAvatarImage Source="@_avatarUrl" Alt="@_username" />
+                                <BbAvatarFallback>
+                                    <LucideIcon Name="user" Size="16" />
+                                </BbAvatarFallback>
+                            </BbAvatar>
+                        </BbButton>
+                    </BbDropdownMenuTrigger>
+                    <BbDropdownMenuContent Align="PopoverAlign.End">
+                        @if (_isAuthenticated && _username is not null)
+                        {
+                            <BbDropdownMenuLabel>@_username</BbDropdownMenuLabel>
+                        }
+                        else
+                        {
+                            <BbDropdownMenuLabel>Plex Account</BbDropdownMenuLabel>
+                        }
+                        <BbDropdownMenuSeparator />
+                        <BbDropdownMenuItem OnClick='() => NavigationManager.NavigateTo("/settings")'>
+                            <LucideIcon Name="settings" Size="16" Class="mr-2" />
+                            Settings
+                        </BbDropdownMenuItem>
+                        <BbDropdownMenuSeparator />
+                        @if (_isAuthenticated)
+                        {
+                            <BbDropdownMenuItem OnClick="DisconnectAsync" Class="text-destructive focus:text-destructive">
+                                <LucideIcon Name="log-out" Size="16" Class="mr-2" />
+                                Disconnect
+                            </BbDropdownMenuItem>
+                        }
+                        else
+                        {
+                            <BbDropdownMenuItem OnClick="InitiateAuthAsync" Disabled="@_isProcessing">
+                                <LucideIcon Name="log-in" Size="16" Class="mr-2" />
+                                @(_isProcessing ? "Connecting…" : "Sign in with Plex")
+                            </BbDropdownMenuItem>
+                        }
+                    </BbDropdownMenuContent>
+                </BbDropdownMenu>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        @Body
+    </main>
+
+    <footer class="border-t py-6 md:py-0">
+        <div class="flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row px-6">
+            <p class="text-sm text-muted-foreground">
+                Built with <a href="https://blazorblueprintui.com" target="_blank" class="font-medium underline underline-offset-4">BlazorBlueprint</a>
+            </p>
+        </div>
+    </footer>
+</div>
+
+<BbToastProvider Position="ToastPosition.BottomRight" />
+<BbDialogProvider />
+<BbPortalHost />
