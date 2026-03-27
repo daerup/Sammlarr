@@ -1,0 +1,7 @@
+﻿services:
+  ui:
+    image: ui
+    build:
+      context: .
+      dockerfile: UI/Dockerfile
+

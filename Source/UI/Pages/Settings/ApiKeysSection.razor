@@ -1,0 +1,178 @@
+@using Contracts.Media
+@using API.TMDB
+
+@inject IApiKeyStore ApiKeyStore
+@inject TmdbClient TmdbClient
+
+<div class="max-w-lg">
+    <div class="rounded-lg border">
+        <!-- Card header -->
+        <div class="flex items-center gap-3 px-6 py-4 border-b">
+            <LucideIcon Name="film" Size="16" Class="text-muted-foreground"/>
+            <h3 class="text-sm font-semibold">TMDB</h3>
+        </div>
+
+        <!-- Card body -->
+        <div class="px-6 py-6 space-y-6">
+            <div class="space-y-3">
+                <div>
+                    <div class="mb-1 flex items-center gap-1.5">
+                        <label class="text-sm font-medium block" for="tmdb-api-key">API Key</label>
+                    </div>
+                    <p class="text-xs text-muted-foreground leading-relaxed">
+                        Your TMDB v3 API key. Get one at
+                        <a href="https://www.themoviedb.org/settings/api" target="_blank"
+                           class="underline underline-offset-2 hover:text-foreground transition-colors">
+                            themoviedb.org
+                        </a>.
+                    </p>
+                </div>
+                <BbField>
+                    <BbFieldContent>
+                        <div class="relative">
+                            <BbInput Id="tmdb-api-key"
+                                     @bind-Value="TmdbApiKey"
+                                     UpdateTiming="UpdateTiming.Immediate"
+                                     Class="pr-10"
+                                     Placeholder="e.g. vbXaPNFIkXCj8mI53XQ3LwxaeIRKx9Xw"/>
+                            @if (_state is State.Success or State.Saving or State.Saved)
+                            {
+                                <span class="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <LucideIcon Name="check" Size="12" Class="text-success"/>
+                                </span>
+                            }
+                            else if (_state == State.Failed)
+                            {
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-help" title="Invalid TMDB API key">
+                                    <LucideIcon Name="x-circle" Size="12" Class="text-destructive"/>
+                                </span>
+                            }
+                        </div>
+                    </BbFieldContent>
+                </BbField>
+            </div>
+
+            <div class="flex items-center gap-3">
+                @if (_state == State.Idle)
+                {
+                    <BbButton Variant="ButtonVariant.Default" OnClick="HandleButtonClickAsync">
+                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                        <span>Test</span>
+                    </BbButton>
+                }
+                else if (_state == State.Testing)
+                {
+                    <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Testing…</span>
+                    </BbButton>
+                }
+                else if (_state == State.Success)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-success border-success hover:bg-success"
+                              OnClick="HandleButtonClickAsync">
+                        <LucideIcon Name="save" Size="14" Class="mr-2"/>
+                        <span>Save</span>
+                    </BbButton>
+                }
+                else if (_state == State.Saving)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-success border-success hover:bg-success"
+                              Disabled="true">
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Saving…</span>
+                    </BbButton>
+                }
+                else if (_state == State.Saved)
+                {
+                    <BbButton Variant="ButtonVariant.Default"
+                              Class="border-success bg-success text-white"
+                              Disabled="true">
+                        <LucideIcon Name="check" Size="14" Class="mr-2"/>
+                        <span>Saved</span>
+                    </BbButton>
+                }
+                else if (_state == State.Failed)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                              Disabled="true">
+                        <LucideIcon Name="x" Size="14" Class="mr-2"/>
+                        <span>Failed</span>
+                    </BbButton>
+                }
+
+                @if (_tmdbApiKeyInput != _savedApiKey || _state is State.Failed or State.Success)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                              OnClick="CancelAsync"
+                              Disabled="@(_state is State.Testing or State.Saving)">
+                        Cancel
+                    </BbButton>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private enum State { Idle, Testing, Success, Saving, Saved, Failed }
+
+    private string _tmdbApiKeyInput = string.Empty;
+    private string _savedApiKey = string.Empty;
+    private State _state = State.Idle;
+
+    private string TmdbApiKey
+    {
+        get => _tmdbApiKeyInput;
+        set
+        {
+            if (_tmdbApiKeyInput == value) return;
+            _tmdbApiKeyInput = value;
+            _state = State.Idle;        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var key = await ApiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb);
+        _savedApiKey = key ?? string.Empty;
+        _tmdbApiKeyInput = _savedApiKey;
+    }
+
+    private Task HandleButtonClickAsync() => _state == State.Success ? SaveAsync() : TestAsync();
+
+    private async Task TestAsync()
+    {
+        _state = State.Testing;
+
+        try
+        {
+            var ok = await TmdbClient.ValidateApiKeyAsync(_tmdbApiKeyInput.Trim());
+            _state = ok ? State.Success : State.Failed;
+        }
+        catch (Exception)
+        {
+            _state = State.Failed;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _state = State.Saving;
+
+        await ApiKeyStore.SetApiKeyAsync(MediaProvider.Tmdb, _tmdbApiKeyInput.Trim());
+        _savedApiKey = _tmdbApiKeyInput.Trim();
+
+        _state = State.Saved;
+    }
+
+    private Task CancelAsync()
+    {
+        _tmdbApiKeyInput = _savedApiKey;
+        _state = State.Idle;
+        return Task.CompletedTask;
+    }
+}

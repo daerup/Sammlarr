@@ -1,0 +1,444 @@
+@page "/watchlist"
+@implements IDisposable
+@using API.Plex
+@using Contracts.Auth
+@using Contracts.Media
+@using Contracts.Watchlist
+@using global::Shared
+@using global::Shared.DI
+@using Microsoft.AspNetCore.Components.Web
+@inject ProfileDropdownService ProfileDropdownService
+@inject ICredentialStore CredentialStore
+@inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistStoreIndex
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Plex Watchlist</PageTitle>
+
+<div class="px-6 py-10">
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-3xl font-bold tracking-wide antialiased">Plex Watchlist</h1>
+            <p class="text-muted-foreground mt-1 font-normal tracking-wide">Your saved movies and shows from Plex</p>
+        </div>
+
+        @if (_isAuthenticated)
+        {
+            <div class="flex items-center gap-2">
+                <BbButton Variant="ButtonVariant.Outline" @onclick="OpenSearchSheet">
+                    <LucideIcon Name="search" Size="16" Class="mr-2"/>
+                    <span>Add from Search</span>
+                </BbButton>
+
+                <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <span>Refreshing...</span>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="refresh-cw" Size="16" class="mr-2"/>
+                        <span>Refresh</span>
+                    }
+                </BbButton>
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_addStatusMessage))
+    {
+        <div
+            class="mb-4 rounded-lg border bg-surface p-3 text-sm @(_isAddStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground")">
+            @_addStatusMessage
+        </div>
+    }
+
+    <div class="mt-6">
+        @if (!_isAuthenticated)
+        {
+            <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+                <LucideIcon Name="lock" Size="40" class="mx-auto text-muted-foreground"/>
+                <p class="text-muted-foreground">You need to connect your Plex account before viewing your watchlist.</p>
+                <BbButton Variant="ButtonVariant.Outline"
+                          OnClick="ProfileDropdownService.RequestOpenAsync">
+                    Connect Plex Account
+                </BbButton>
+            </div>
+        }
+        else if (_isLoading)
+        {
+            <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                @for (var i = 0; i < 12; i++)
+                {
+                    <div class="space-y-3">
+                        <BbSkeleton Class="w-full" Height="300px"/>
+                    </div>
+                }
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
+                <p class="text-sm text-destructive font-medium">@_errorMessage</p>
+                <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync">
+                    <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+                    Retry
+                </BbButton>
+            </div>
+        }
+        else if (_items is not null && _items.Count == 0)
+        {
+            <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
+                <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
+                <p class="text-muted-foreground">Your Plex watchlist is empty.</p>
+            </div>
+        }
+        else if (_items is not null)
+        {
+            <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+                @foreach (var item in _items)
+                {
+                    <div class="cursor-pointer group" @onclick="() => SelectItem(item)">
+                        <div class="relative overflow-hidden rounded-lg media-backdrop">
+                            <img src="@item.ArtUrl" alt="@item.Title"/>
+
+
+                            <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
+                                <div class="flex items-center justify-between gap-2">
+                                    <h3 class="text-white text-base font-bold text-lg">@item.Title</h3>
+                                </div>
+
+                                <p class="text-white text-xs line-clamp-2">@GetDescription(item)</p>
+                                @* Added seems to be wrongly parsed from Plex's API *@
+                                @* <p class="text-white/65 text-xs">Added @GetAddedDateText(item)</p> *@
+                            </div>
+
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="flex items-center justify-center gap-4 mt-5">
+                <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage <= 1)" OnClick="GoToPreviousPageAsync">
+                    <LucideIcon Name="chevron-left" Size="16" Class="mr-1"/>
+                    Previous
+                </BbButton>
+                <span class="text-sm text-muted-foreground font-medium">Page @_currentPage</span>
+                <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage >= _totalPages)" OnClick="GoToNextPageAsync">
+                    Next
+                    <LucideIcon Name="chevron-right" Size="16" Class="ml-1"/>
+                </BbButton>
+            </div>
+        }
+    </div>
+</div>
+
+<SearchModal @bind-IsOpen="_isSearchModalOpen"
+                      IsInWatchlist="IsInWatchlist"
+                      AddToWatchlistAsync="AddFromSearchAsync"/>
+
+
+<BbSheet @bind-Open="_isSheetOpen">
+    <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
+        @if (_selectedItem is not null)
+        {
+            <BbSheetHeader>
+                <BbSheetTitle Class="font-bold tracking-wide">@_selectedItem.Title</BbSheetTitle>
+                <BbSheetDescription Class="font-normal tracking-wide">
+                    <span class="flex items-center justify-center gap-1.5">
+                        @if(_selectedItem.MediaType is MediaType.Movie)
+                        {
+                            <LucideIcon Name="film" Size="16"/>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="tv" Size="16" />
+                        }
+                        <span>@_selectedItem.MediaType.GetDescription() • @_selectedItem.ReleaseDate.Year</span>
+                    </span>
+                </BbSheetDescription>
+            </BbSheetHeader>
+
+            <div class="space-y-6 py-6">
+                <div class="flex justify-center">
+                    <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[260px]">
+                        <img src="@GetDetailImageUrl(_selectedItem)"
+                             alt="@_selectedItem.Title"
+                             class="w-full aspect-[2/3] object-cover"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </div>
+                </div>
+
+                <BbSeparator/>
+
+                <div class="flex gap-2">
+                    <BbButton Class="flex-1"
+                              OnClick="RemoveSelectedFromWatchlistAsync"
+                              Disabled="@_isRemoving"
+                              Variant="ButtonVariant.Secondary">
+                        @if (_isRemoving)
+                        {
+                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            <span>Removing...</span>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="x" Size="16" Class="mr-2"/>
+                            <span>Remove from Watchlist</span>
+                        }
+                    </BbButton>
+                </div>
+
+                @if (_isSheetError && !string.IsNullOrWhiteSpace(_sheetStatusMessage))
+                {
+                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-3">
+                        <p class="text-sm text-destructive">@_sheetStatusMessage</p>
+                    </div>
+                }
+            </div>
+        }
+    </BbSheetContent>
+</BbSheet>
+
+@code {
+    private IReadOnlyList<IWatchlistItem>? _items;
+    private IWatchlistItem? _selectedItem;
+    private bool _isAuthenticated;
+    private bool _isLoading;
+    private bool _isSearchModalOpen;
+    private bool _isRemoving;
+    private bool _isSheetOpen;
+    private bool _isSheetError;
+    private string? _sheetStatusMessage;
+    private string? _errorMessage;
+    private string? _addStatusMessage;
+    private bool _isAddStatusError;
+    private int _currentPage = 1;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private int _totalPages;
+
+    private IWatchlistService WatchlistService => WatchlistStoreIndex[AuthProvider.Plex];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var credential = await CredentialStore.GetAsync(AuthProvider.Plex, _cancellationTokenSource.Token);
+        _isAuthenticated = credential is not null && !string.IsNullOrWhiteSpace(credential.AccessToken);
+
+        if (_isAuthenticated)
+        {
+            await LoadWatchlistAsync();
+        }
+    }
+
+    private async Task LoadWatchlistAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        await TryStateHasChangedAsync();
+
+        try
+        {
+            (_items, _totalPages) = await WatchlistService.GetWatchlistAsync(_currentPage, _cancellationTokenSource.Token);
+
+            if (_selectedItem is not null)
+            {
+                _selectedItem = _items.FirstOrDefault(item => item.SourceId.Equals(_selectedItem.SourceId));
+                if (_selectedItem is null)
+                {
+                    _isSheetOpen = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to load watchlist: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            await TryStateHasChangedAsync();
+        }
+    }
+
+    private async Task TryStateHasChangedAsync()
+    {
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Ignore updates queued after page disposal.
+        }
+    }
+
+    private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Description) ? "No overview available." : item.Description;
+
+    private const string DisplayDateFormat = "MMM d, yyyy";
+
+    private static string GetReleaseYear(IWatchlistItem item) => FormatYear(item.ReleaseDate.Year, "N/A");
+
+
+    private static string GetDetailImageUrl(IWatchlistItem item)
+    {
+        return NormalizePlexImageUrl(item.PosterUrl) ?? NormalizePlexImageUrl(item.ArtUrl) ?? item.ArtUrl;
+    }
+
+    private static string GetAddedDateText(IWatchlistItem item) => FormatDate(item.AddedDate, DisplayDateFormat, "Unknown date");
+
+    private static string FormatDate(DateTime value, string format, string fallback)
+    {
+        return value.Year > 1 ? value.ToString(format) : fallback;
+    }
+
+    private static string FormatDate(DateTimeOffset value, string format, string fallback)
+    {
+        return value.Year > 1 ? value.ToString(format) : fallback;
+    }
+
+    private static string FormatYear(int year, string fallback)
+    {
+        return year > 0 ? year.ToString(System.Globalization.CultureInfo.InvariantCulture) : fallback;
+    }
+
+    private bool IsInWatchlist(PlexId plexId)
+    {
+        return _items?.Any(item => item.SourceId is PlexId existing && existing.Value == plexId.Value) == true;
+    }
+
+    private void OpenSearchSheet()
+    {
+        _isSearchModalOpen = true;
+    }
+
+    private async Task<bool> AddFromSearchAsync(PlexId plexId, string title)
+    {
+        if (IsInWatchlist(plexId))
+        {
+            _addStatusMessage = $"'{title}' is already in your watchlist.";
+            _isAddStatusError = false;
+            return false;
+        }
+
+        _addStatusMessage = null;
+        _isAddStatusError = false;
+
+        try
+        {
+            var added = await WatchlistService.AddToWatchlistAsync(plexId, _cancellationTokenSource.Token);
+            if (!added)
+            {
+                _addStatusMessage = "Could not add item to Plex watchlist. Please try again.";
+                _isAddStatusError = true;
+                return false;
+            }
+
+            _addStatusMessage = $"Added '{title}' to Plex watchlist.";
+            _currentPage = 1;
+            await LoadWatchlistAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _addStatusMessage = $"Failed to add item: {ex.Message}";
+            _isAddStatusError = true;
+            return false;
+        }
+    }
+
+    private static string? NormalizePlexImageUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out _))
+        {
+            return url;
+        }
+
+        return $"https://metadata.provider.plex.tv{url}";
+    }
+
+    private void SelectItem(IWatchlistItem item)
+    {
+        _selectedItem = item;
+        _sheetStatusMessage = null;
+        _isSheetError = false;
+        _isSheetOpen = true;
+    }
+
+    private async Task RemoveSelectedFromWatchlistAsync()
+    {
+        if (_selectedItem?.SourceId is not PlexId plexId)
+        {
+            _sheetStatusMessage = "Unable to remove this item: no Plex rating key is available.";
+            _isSheetError = true;
+            return;
+        }
+
+        _isRemoving = true;
+        _sheetStatusMessage = null;
+        _isSheetError = false;
+
+        try
+        {
+            var removed = await WatchlistService.RemoveFromWatchlistAsync(plexId, _cancellationTokenSource.Token);
+            if (!removed)
+            {
+                _sheetStatusMessage = "Failed to remove from watchlist. Please try again.";
+                _isSheetError = true;
+                return;
+            }
+
+            var removedLastVisibleItem = _items is not null && _items.Count == 1;
+            if (removedLastVisibleItem && _currentPage > 1)
+            {
+                _currentPage--;
+            }
+
+            await LoadWatchlistAsync();
+            _isSheetOpen = false;
+            _selectedItem = null;
+        }
+        catch (Exception ex)
+        {
+            _sheetStatusMessage = $"Failed to remove item: {ex.Message}";
+            _isSheetError = true;
+        }
+        finally
+        {
+            _isRemoving = false;
+        }
+    }
+
+    private async Task GoToPreviousPageAsync()
+    {
+        if (_currentPage <= 1) return;
+        _currentPage--;
+        await LoadWatchlistAsync();
+        await ScrollToTopAsync();
+    }
+
+    private async Task GoToNextPageAsync()
+    {
+        if (_currentPage >= _totalPages) return;
+        _currentPage++;
+        await LoadWatchlistAsync();
+        await ScrollToTopAsync();
+    }
+
+    private async Task ScrollToTopAsync()
+    {
+        await Task.Delay(10, _cancellationTokenSource.Token);
+        await JsRuntime.InvokeVoidAsync("scrollTo", new { top = 0, behavior = "smooth" });
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+}

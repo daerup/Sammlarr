@@ -1,0 +1,489 @@
+@using API.Plex
+@using Contracts.Media
+@using Microsoft.AspNetCore.Components.Web
+@implements IAsyncDisposable
+@if (IsOpen)
+{
+    <div class="search-modal" role="dialog" aria-modal="true" aria-label="Search Plex Catalog">
+        <div class="search-modal-backdrop" @onclick="CloseAsync"></div>
+
+        <div class="search-modal-content">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold tracking-wide">Search Plex Catalog</h2>
+                    <p class="text-sm text-muted-foreground">Find a movie or show and add it to your watchlist.</p>
+                </div>
+                <BbButton Variant="ButtonVariant.Ghost" OnClick="CloseAsync">
+                    <LucideIcon Name="x" Size="18"/>
+                </BbButton>
+            </div>
+
+            <div class="search-modal-body space-y-4 mt-4">
+                <div class="flex items-center gap-2">
+                    <BbField Class="flex-1">
+                        <BbFieldLabel For="search-input" Class="sr-only">Search query</BbFieldLabel>
+                        <BbFieldContent>
+                            <BbInput Id="search-input"
+                                     @bind-Value="_searchQuery"
+                                     @onkeydown="HandleSearchKeyDown"
+                                     UpdateTiming="UpdateTiming.Immediate"
+                                     Placeholder="Search title"/>
+                        </BbFieldContent>
+                    </BbField>
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching">
+                        @if (_isSearching)
+                        {
+                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            <span>Searching...</span>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="search" Size="16" Class="mr-2"/>
+                            <span>Search</span>
+                        }
+                    </BbButton>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(_searchStatusMessage))
+                {
+                    <div class="rounded-lg border p-3 text-sm @(_isSearchStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground bg-surface")">
+                        @_searchStatusMessage
+                    </div>
+                }
+
+                @if (_searchResults.Count > 0)
+                {
+                    <div class="search-modal-results space-y-2 pr-1">
+                        @foreach (var result in _searchResults)
+                        {
+                            <div class="rounded-lg border p-3 bg-surface">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex items-start gap-3 min-w-0">
+                                        <div class="search-result-poster">
+                                            @if (!string.IsNullOrWhiteSpace(result.PosterUrl))
+                                            {
+                                                <img src="@result.PosterUrl" alt="@result.Title"/>
+                                            }
+                                            else
+                                            {
+                                                <LucideIcon Name="image-off" Size="16" Class="text-muted-foreground"/>
+                                            }
+                                        </div>
+                                        <div class="search-result-content min-w-0">
+                                            <p class="font-semibold truncate">@result.Title</p>
+                                            <p class="text-xs text-muted-foreground flex items-center gap-1.5">
+                                                @if (result.MediaType is MediaType.Movie)
+                                                {
+                                                    <LucideIcon Name="film" Size="13"/>
+                                                }
+                                                else if (result.MediaType is MediaType.Show)
+                                                {
+                                                    <LucideIcon Name="tv" Size="13"/>
+                                                }
+                                                else
+                                                {
+                                                    <LucideIcon Name="circle-help" Size="13"/>
+                                                }
+                                                <span>@GetSearchYearLabel(result.Year)</span>
+                                            </p>
+
+                                            @if (!string.IsNullOrWhiteSpace(result.Tagline))
+                                            {
+                                                <p class="text-xs text-muted-foreground italic line-clamp-1">@result.Tagline</p>
+                                            }
+
+                                            @if (!string.IsNullOrWhiteSpace(result.Description))
+                                            {
+                                                <p class="text-xs text-muted-foreground line-clamp-2">@result.Description</p>
+                                            }
+
+                                            @if (GetDisplayFacts(result).Count > 0)
+                                            {
+                                                <div class="search-result-facts">
+                                                    @foreach (var fact in GetDisplayFacts(result))
+                                                    {
+                                                        <span class="search-result-fact">@fact</span>
+                                                    }
+                                                </div>
+                                            }
+
+                                            @if (result.Genres.Count > 0)
+                                            {
+                                                <div class="search-result-genres">
+                                                    @foreach (var genre in result.Genres)
+                                                    {
+                                                        <BbBadge Variant="BadgeVariant.Outline" Class="text-[11px] px-2 py-0.5">@genre</BbBadge>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <BbButton Variant="ButtonVariant.Secondary"
+                                              OnClick="() => AddSearchResultAsync(result)"
+                                              Disabled="@(_isAdding || InWatchlist(result.PlexId))">
+                                        @if (_isAdding && _activeAddRatingKey == result.PlexId.Value)
+                                        {
+                                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                                            <span>Adding...</span>
+                                        }
+                                        else if (InWatchlist(result.PlexId))
+                                        {
+                                            <LucideIcon Name="check" Size="16" Class="mr-2"/>
+                                            <span>In Watchlist</span>
+                                        }
+                                        else
+                                        {
+                                            <LucideIcon Name="plus" Size="16" Class="mr-2"/>
+                                            <span>Add</span>
+                                        }
+                                    </BbButton>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (!_isSearching && _hasSearched)
+                {
+                    <div class="rounded-lg border bg-surface p-6 text-center space-y-2">
+                        <LucideIcon Name="search-x" Size="28" Class="mx-auto text-muted-foreground"/>
+                        <p class="text-sm text-muted-foreground">No matches found.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Inject] private PlexApi PlexApi { get; set; } = default!;
+    [Inject] private IJSRuntime JsRuntime { get; set; } = default!;
+    [Inject] private ToastService ToastService { get; set; } = default!;
+
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public Func<PlexId, bool>? IsInWatchlist { get; set; }
+    [Parameter] public Func<PlexId, string, Task<bool>>? AddToWatchlistAsync { get; set; }
+
+    private bool _isSearching;
+    private bool _hasSearched;
+    private bool _isAdding;
+    private string _searchQuery = string.Empty;
+    private string? _searchStatusMessage;
+    private bool _isSearchStatusError;
+    private string? _activeAddRatingKey;
+    private List<SearchResultItem> _searchResults = [];
+    private bool _wasOpen;
+    private bool _isEscapeHandlerRegistered;
+    private DotNetObjectReference<SearchModal>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsOpen && !_wasOpen)
+        {
+            await JsRuntime.InvokeVoidAsync("focusSearchInput", "search-input");
+            await RegisterEscapeHandlerAsync();
+        }
+        else if (!IsOpen && _wasOpen)
+        {
+            await UnregisterEscapeHandlerAsync();
+        }
+
+        _wasOpen = IsOpen;
+    }
+
+    [JSInvokable]
+    public async Task CloseFromEscapeAsync()
+    {
+        if (IsOpen)
+        {
+            await CloseAsync();
+        }
+    }
+
+    private async Task RegisterEscapeHandlerAsync()
+    {
+        if (_isEscapeHandlerRegistered)
+        {
+            return;
+        }
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JsRuntime.InvokeVoidAsync("registerSearchModalEscape", _dotNetRef);
+        _isEscapeHandlerRegistered = true;
+    }
+
+    private async Task UnregisterEscapeHandlerAsync()
+    {
+        if (!_isEscapeHandlerRegistered)
+        {
+            return;
+        }
+
+        try
+        {
+            await JsRuntime.InvokeVoidAsync("unregisterSearchModalEscape");
+        }
+        catch (JSDisconnectedException)
+        {
+            // Component is being torn down; JS runtime may no longer be available.
+        }
+
+        _dotNetRef?.Dispose();
+        _dotNetRef = null;
+        _isEscapeHandlerRegistered = false;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await UnregisterEscapeHandlerAsync();
+    }
+
+    private bool InWatchlist(PlexId plexId)
+    {
+        return IsInWatchlist?.Invoke(plexId) == true;
+    }
+
+    private async Task CloseAsync()
+    {
+        await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task HandleSearchKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key is "Enter")
+        {
+            await SearchAsync();
+        }
+    }
+
+    private async Task SearchAsync()
+    {
+        var query = _searchQuery.Trim();
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            _searchStatusMessage = "Enter a title to search.";
+            _isSearchStatusError = true;
+            _searchResults = [];
+            _hasSearched = false;
+            return;
+        }
+
+        _isSearching = true;
+        _searchStatusMessage = null;
+        _isSearchStatusError = false;
+
+        try
+        {
+            var results = await PlexApi.SearchAsync(query, [MediaType.Movie, MediaType.Show]);
+            _searchResults = results
+                .Select(result => new SearchResultItem(
+                    result.PlexId,
+                    result.Title,
+                    ParseMediaType(result.Type),
+                    result.Year,
+                    NormalizePosterUrl(result.Thumb),
+                    result.Summary,
+                    result.Tagline,
+                    result.Rating,
+                    result.AudienceRating,
+                    result.Duration,
+                    (result.Genre ?? [])
+                        .Select(genre => genre.Tag)
+                        .Where(tag => !string.IsNullOrWhiteSpace(tag))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Take(4)
+                        .ToList(),
+                    result.OriginallyAvailableAt))
+                .DistinctBy(result => result.PlexId.Value)
+                .ToList();
+
+            _hasSearched = true;
+        }
+        catch (Exception ex)
+        {
+            _searchStatusMessage = $"Search failed: {ex.Message}";
+            _isSearchStatusError = true;
+            _searchResults = [];
+            _hasSearched = false;
+        }
+        finally
+        {
+            _isSearching = false;
+        }
+    }
+
+    private async Task AddSearchResultAsync(SearchResultItem result)
+    {
+        if (_isAdding || InWatchlist(result.PlexId))
+        {
+            return;
+        }
+
+        _isAdding = true;
+        _activeAddRatingKey = result.PlexId.Value;
+        _searchStatusMessage = null;
+        _isSearchStatusError = false;
+
+        try
+        {
+            if (AddToWatchlistAsync is null)
+            {
+                _searchStatusMessage = "Add action is not configured.";
+                _isSearchStatusError = true;
+                return;
+            }
+
+            var added = await AddToWatchlistAsync(result.PlexId, result.Title);
+            if (!added)
+            {
+                _searchStatusMessage = $"Could not add '{result.Title}'. Please try again.";
+                _isSearchStatusError = true;
+                return;
+            }
+
+            _searchStatusMessage = null;
+            _isSearchStatusError = false;
+            ToastService.Success($"Added '{result.Title}' to your watchlist.", "Watchlist updated");
+        }
+        catch (Exception ex)
+        {
+            _searchStatusMessage = $"Failed to add item: {ex.Message}";
+            _isSearchStatusError = true;
+        }
+        finally
+        {
+            _isAdding = false;
+            _activeAddRatingKey = null;
+        }
+    }
+
+    private static MediaType ParseMediaType(string value)
+    {
+        return value.ToLowerInvariant() switch
+        {
+            "movie" => MediaType.Movie,
+            "show" => MediaType.Show,
+            _ => MediaType.Unknown,
+        };
+    }
+
+    private static string GetSearchYearLabel(int year)
+    {
+        return year > 0 ? year.ToString(System.Globalization.CultureInfo.InvariantCulture) : "Unknown year";
+    }
+
+    private static IReadOnlyList<string> GetDisplayFacts(SearchResultItem result)
+    {
+        var facts = new List<string>();
+
+        var rating = GetDisplayRating(result);
+        if (!string.IsNullOrWhiteSpace(rating))
+        {
+            facts.Add(rating);
+        }
+
+        var runtime = GetRuntimeLabel(result.MediaType, result.DurationMilliseconds);
+        if (!string.IsNullOrWhiteSpace(runtime))
+        {
+            facts.Add(runtime);
+        }
+
+        var releaseDate = GetReleaseDateLabel(result.OriginallyAvailableAt);
+        if (!string.IsNullOrWhiteSpace(releaseDate))
+        {
+            facts.Add(releaseDate);
+        }
+
+        return facts;
+    }
+
+    private static string? GetDisplayRating(SearchResultItem result)
+    {
+        var score = result.AudienceRating ?? result.Rating;
+        if (score is null || score <= 0)
+        {
+            return null;
+        }
+
+        return $"Rating {score.Value:F1}";
+    }
+
+    private static string? GetRuntimeLabel(MediaType mediaType, int? durationMilliseconds)
+    {
+        if (mediaType is MediaType.Show)
+        {
+            return null;
+        }
+
+        if (durationMilliseconds is null || durationMilliseconds <= 0)
+        {
+            return null;
+        }
+
+        var totalMinutes = (int)Math.Round(durationMilliseconds.Value / 60000d, MidpointRounding.AwayFromZero);
+        if (totalMinutes <= 0)
+        {
+            return null;
+        }
+
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+
+        return hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
+    }
+
+    private static string? GetReleaseDateLabel(string? originallyAvailableAt)
+    {
+        if (string.IsNullOrWhiteSpace(originallyAvailableAt))
+        {
+            return null;
+        }
+
+        return DateOnly.TryParse(originallyAvailableAt, out var releaseDate)
+            ? releaseDate.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture)
+            : null;
+    }
+
+    private static string? NormalizePosterUrl(string? url)
+    {
+        return NormalizePlexImageUrl(url);
+    }
+
+    private static string? NormalizePlexImageUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out _))
+        {
+            return url;
+        }
+
+        return $"https://metadata.provider.plex.tv{url}";
+    }
+
+    private sealed record SearchResultItem(
+        PlexId PlexId,
+        string Title,
+        MediaType MediaType,
+        int Year,
+        string? PosterUrl,
+        string? Description,
+        string? Tagline,
+        double? Rating,
+        double? AudienceRating,
+        int? DurationMilliseconds,
+        IReadOnlyList<string> Genres,
+        string? OriginallyAvailableAt
+    );
+}
+
+
+
+
+
+
+
+
