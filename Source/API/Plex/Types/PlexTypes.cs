@@ -87,15 +87,14 @@ internal static class PlexTypes
 			[property: JsonPropertyName("ratingKey")] string RatingKey,
 			[property: JsonPropertyName("title")] string Title,
 			[property: JsonPropertyName("thumb")] string? Thumb,
+			[property: JsonPropertyName("art")] string? Art,
 			[property: JsonPropertyName("type")] string Type,
 			[property: JsonPropertyName("year")] int Year,
-			[property: JsonPropertyName("summary")] string? Summary,
-			[property: JsonPropertyName("tagline")] string? Tagline,
-			[property: JsonPropertyName("rating")] double? Rating,
-			[property: JsonPropertyName("audienceRating")] double? AudienceRating,
 			[property: JsonPropertyName("duration")] int? Duration,
 			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre>? Genre,
-			[property: JsonPropertyName("originallyAvailableAt")] string? OriginallyAvailableAt
+			[property: JsonPropertyName("originallyAvailableAt")] string? OriginallyAvailableAt,
+			[property: JsonPropertyName("childCount")] int? SeasonCount,
+			[property: JsonPropertyName("leafCount")] int? EpisodeCount
 		)
 		{
 			public PlexId PlexId => PlexId.From(RatingKey);

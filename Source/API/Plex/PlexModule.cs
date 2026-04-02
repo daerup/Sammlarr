@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Contracts.Auth;
 using Contracts.Media;
+using Contracts.Media.Search;
 using Contracts.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;

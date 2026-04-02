@@ -55,7 +55,7 @@ internal class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(Me
 
 	private async ValueTask<PlexWatchlistItem> BuildWatchlistItemAsync(PlexTypes.Watchlist.Metadata parsed)
 	{
-		var externalIds = await plexIdConverter.ConvertAsync(parsed.PlexId, MediaType.Unknown);
+		var externalIds = await plexIdConverter.ConvertAsync(parsed.PlexId, default);
 		return new PlexWatchlistItem
 		{
 			Title = parsed.Title,

@@ -1,4 +1,5 @@
 @using Contracts.Media
+@using Contracts.Media.Search
 @using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaSearchService> SearchServiceIndex
 @inject IJSRuntime JsRuntime
@@ -48,7 +49,8 @@
 
                 @if (!string.IsNullOrWhiteSpace(_searchStatusMessage))
                 {
-                    <div class="rounded-lg p-3 text-sm @(_isSearchStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground bg-surface")">
+                    <div
+                        class="rounded-lg p-3 text-sm @(_isSearchStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground bg-surface")">
                         @_searchStatusMessage
                     </div>
                 }
@@ -82,13 +84,17 @@
                     <div class="search-modal-results space-y-2 pr-1">
                         @foreach (var result in _searchResults)
                         {
-                            <div class="rounded-lg p-3 bg-surface">
+                            var displayFacts = GetDisplayFacts(result);
+
+                            var backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(result.BackdropUrl) ? result.PosterUrl ?? "" : result.BackdropUrl)}')";
+
+                            <div class="search-result-row rounded-lg bg-black hover-bg" style="@backgroundStyle">
                                 <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start gap-3 min-w-0">
+                                    <div class="flex items-start">
                                         <div class="search-result-poster">
                                             @if (!string.IsNullOrWhiteSpace(result.PosterUrl))
                                             {
-                                                <img src="@result.PosterUrl" alt="@result.Title"/>
+                                                <img src="@result.PosterUrl" alt="@result.Title" class="rounded-lg"/>
                                             }
                                             else
                                             {
@@ -96,7 +102,6 @@
                                             }
                                         </div>
                                         <div class="search-result-content min-w-0">
-                                            <p class="font-semibold truncate">@result.Title</p>
                                             <p class="text-xs text-muted-foreground flex items-center gap-1.5">
                                                 @if (result.MediaType is MediaType.Movie)
                                                 {
@@ -110,57 +115,40 @@
                                                 {
                                                     <LucideIcon Name="circle-help" Size="13"/>
                                                 }
-                                                <span>@GetSearchYearLabel(result.Year)</span>
+                                                <span>@result.ReleaseDate?.Year</span>
+                                                @if (displayFacts.Count > 0)
+                                                {
+                                                    <span aria-hidden="true">•</span>
+                                                    <span>@string.Join(" • ", displayFacts)</span>
+                                                }
                                             </p>
-
-                                            @if (!string.IsNullOrWhiteSpace(result.Tagline))
-                                            {
-                                                <p class="text-xs text-muted-foreground italic line-clamp-1">@result.Tagline</p>
-                                            }
-
-                                            @if (!string.IsNullOrWhiteSpace(result.Description))
-                                            {
-                                                <p class="text-xs text-muted-foreground line-clamp-2">@result.Description</p>
-                                            }
-
-                                            @if (GetDisplayFacts(result).Count > 0)
-                                            {
-                                                <div class="search-result-facts">
-                                                    @foreach (var fact in GetDisplayFacts(result))
-                                                    {
-                                                        <span class="search-result-fact">@fact</span>
-                                                    }
-                                                </div>
-                                            }
+                                            <p class="font-bold truncate text-xl pt-2">@result.Title</p>
 
                                             @if (result.Genres.Count > 0)
                                             {
-                                                <div class="search-result-genres">
+                                                <div class="search-result-genres pt-1">
                                                     @foreach (var genre in result.Genres)
                                                     {
-                                                        <BbBadge Variant="BadgeVariant.Outline" Class="text-[11px] px-2 py-0.5">@genre</BbBadge>
+                                                        <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@genre</BbBadge>
                                                     }
                                                 </div>
                                             }
                                         </div>
                                     </div>
-                                    <BbButton Variant="ButtonVariant.Secondary"
-                                              OnClick="() => AddSearchResultAsync(result)"
-                                              Disabled="@(_isAdding || !CanAddToWatchlist(result) || IsSearchResultInWatchlist(result))">
+                                    <BbButton Variant="ButtonVariant.Link"
+                                              OnClick="() => ToggleWatchlistAsync(result)"
+                                              Disabled="@(_isAdding || !CanAddToWatchlist(result))">
                                         @if (_isAdding && Equals(_activeAddSourceId, result.SourceId))
                                         {
-                                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                                            <span>Adding...</span>
+                                            <BbSpinner Size="SpinnerSize.Default"/>
                                         }
                                         else if (IsSearchResultInWatchlist(result))
                                         {
-                                            <LucideIcon Name="check" Size="16" Class="mr-2"/>
-                                            <span>In Watchlist</span>
+                                            <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange" />
                                         }
                                         else
                                         {
-                                            <LucideIcon Name="plus" Size="16" Class="mr-2"/>
-                                            <span>Add</span>
+                                            <LucideIcon Name="bookmark" Size="24"/>
                                         }
                                     </BbButton>
                                 </div>
@@ -187,7 +175,8 @@
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
     [Parameter] public MediaProvider SearchProvider { get; set; } = MediaProvider.Plex;
     [Parameter] public Func<PlexId, bool>? IsInWatchlist { get; set; }
-    [Parameter] public Func<PlexId, string, Task<bool>>? AddToWatchlistAsync { get; set; }
+    [Parameter] public Func<PlexId, string, Task<bool>> AddToWatchlistAsync { get; set; }
+    [Parameter] public Func<PlexId, string, Task<bool>> RemoveFromWatchlistAsync { get; set; }
 
     private bool _isSearching;
     private bool _hasSearched;
@@ -196,7 +185,7 @@
     private string? _searchStatusMessage;
     private bool _isSearchStatusError;
     private IMediaId? _activeAddSourceId;
-    private List<MediaSearchResult> _searchResults = [];
+    private List<IMediaSearchResult> _searchResults = [];
     private bool _wasOpen;
     private bool _isEscapeHandlerRegistered;
     private DotNetObjectReference<SearchModal>? _dotNetRef;
@@ -248,9 +237,7 @@
         {
             await JsRuntime.InvokeVoidAsync("unregisterSearchModalEscape");
         }
-        catch (JSDisconnectedException)
-        {
-        }
+        catch (JSDisconnectedException) {}
 
         _dotNetRef?.Dispose();
         _dotNetRef = null;
@@ -267,12 +254,12 @@
         return IsInWatchlist?.Invoke(plexId) == true;
     }
 
-    private bool IsSearchResultInWatchlist(MediaSearchResult result)
+    private bool IsSearchResultInWatchlist(IMediaSearchResult result)
     {
         return result.SourceId is PlexId plexId && InWatchlist(plexId);
     }
 
-    private static bool CanAddToWatchlist(MediaSearchResult result)
+    private static bool CanAddToWatchlist(IMediaSearchResult result)
     {
         return result.SourceId is PlexId;
     }
@@ -326,16 +313,16 @@
         }
     }
 
-    private async Task AddSearchResultAsync(MediaSearchResult result)
+    private async Task ToggleWatchlistAsync(IMediaSearchResult result)
     {
-        if (_isAdding || IsSearchResultInWatchlist(result))
+        if (_isAdding)
         {
             return;
         }
 
         if (result.SourceId is not PlexId plexId)
         {
-            _searchStatusMessage = $"Could not add '{result.Title}': the search result is missing a Plex identifier.";
+            _searchStatusMessage = $"Could not modify watchlist for '{result.Title}': missing Plex identifier.";
             _isSearchStatusError = true;
             return;
         }
@@ -345,87 +332,60 @@
         _searchStatusMessage = null;
         _isSearchStatusError = false;
 
-        try
+        if (IsSearchResultInWatchlist(result))
         {
-            if (AddToWatchlistAsync is null)
-            {
-                _searchStatusMessage = "Add action is not configured.";
-                _isSearchStatusError = true;
-                return;
-            }
-
-            var added = await AddToWatchlistAsync(plexId, result.Title);
-            if (!added)
-            {
-                _searchStatusMessage = $"Could not add '{result.Title}'. Please try again.";
-                _isSearchStatusError = true;
-                return;
-            }
-
-            _searchStatusMessage = null;
-            _isSearchStatusError = false;
-            ToastService.Success($"Added '{result.Title}' to your watchlist.", "Watchlist updated");
+            await RemoveFromWatchlistAsync(plexId, result.Title);
         }
-        catch (Exception ex)
+        else
         {
-            _searchStatusMessage = $"Failed to add item: {ex.Message}";
-            _isSearchStatusError = true;
+            await AddToWatchlistAsync(plexId, result.Title);
         }
-        finally
-        {
-            _isAdding = false;
-            _activeAddSourceId = null;
-        }
+        _isAdding = false;
+        _activeAddSourceId = null;
     }
 
-    private static string GetSearchYearLabel(int? year)
-    {
-        return year is > 0 ? year.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "Unknown year";
-    }
-
-    private static IReadOnlyList<string> GetDisplayFacts(MediaSearchResult result)
+    private static IReadOnlyList<string> GetDisplayFacts(IMediaSearchResult result)
     {
         var facts = new List<string>();
 
-        var rating = GetDisplayRating(result);
-        if (!string.IsNullOrWhiteSpace(rating))
+        switch (result)
         {
-            facts.Add(rating);
-        }
-
-        var runtime = GetRuntimeLabel(result.MediaType, result.Runtime);
-        if (!string.IsNullOrWhiteSpace(runtime))
-        {
-            facts.Add(runtime);
-        }
-
-        var releaseDate = GetReleaseDateLabel(result.ReleaseDate);
-        if (!string.IsNullOrWhiteSpace(releaseDate))
-        {
-            facts.Add(releaseDate);
+            case ShowSearchResult showResult:
+                AddCountFact(facts, showResult.Seasons, "season");
+                AddCountFact(facts, showResult.Episodes, "episode");
+                break;
+            case MovieSearchResult movieResult:
+                var runtime = GetRuntimeLabel(movieResult.Runtime);
+                if (!string.IsNullOrWhiteSpace(runtime))
+                {
+                    facts.Add(runtime);
+                }
+                break;
+            default:
+                var fallbackRuntime = GetRuntimeLabel(result.Runtime);
+                if (!string.IsNullOrWhiteSpace(fallbackRuntime))
+                {
+                    facts.Add(fallbackRuntime);
+                }
+                break;
         }
 
         return facts;
     }
 
-    private static string? GetDisplayRating(MediaSearchResult result)
+    private static void AddCountFact(ICollection<string> facts, int count, string singularLabel)
     {
-        var score = result.AudienceRating ?? result.Rating;
-        if (score is null || score <= 0)
+        if (count <= 0)
         {
-            return null;
+            return;
         }
 
-        return $"Rating {score.Value:F1}";
+        var suffix = count == 1 ? string.Empty : "s";
+        facts.Add($"{count} {singularLabel}{suffix}");
     }
 
-    private static string? GetRuntimeLabel(MediaType mediaType, TimeSpan? runtime)
+    private static string? GetRuntimeLabel(TimeSpan? runtime)
     {
-        if (mediaType is MediaType.Show)
-        {
-            return null;
-        }
-
         if (runtime is null || runtime <= TimeSpan.Zero)
         {
             return null;
@@ -443,18 +403,4 @@
         return hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
     }
 
-    private static string? GetReleaseDateLabel(DateOnly? releaseDate)
-    {
-        return releaseDate is not null
-            ? releaseDate.Value.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture)
-            : null;
-    }
 }
-
-
-
-
-
-
-
-

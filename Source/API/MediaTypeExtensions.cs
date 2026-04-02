@@ -10,9 +10,8 @@ internal static class MediaTypeExtensions
 		{
 			return mediaType.ToLowerInvariant() switch
 			{
-				"movie" => MediaType.Movie,
+				"movie" or "movies" => MediaType.Movie,
 				"show" or "series" or "tv" => MediaType.Show,
-				_ => MediaType.Unknown,
 			};
 		}
 	}
