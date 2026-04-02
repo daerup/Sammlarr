@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Auth;
-using DB.Data.Stores;
 using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
 

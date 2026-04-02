@@ -1,13 +1,10 @@
-using Contracts.Auth;
-using DB.Data.Entities;
-
-namespace DB.Data.Stores;
+namespace Contracts.Auth;
 
 public interface ICredentialStore
 {
-	Task<Credential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default);
+	Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default);
 
-	public Task StoreAsync(
+	Task StoreAsync(
 		AuthProvider authProvider,
 		string accessToken,
 		DateTimeOffset accessTokenExpiresAt,

@@ -1,5 +1,4 @@
 using Contracts.Auth;
-using DB.Data.Stores;
 
 namespace API.Plex;
 

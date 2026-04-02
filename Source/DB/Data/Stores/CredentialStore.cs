@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Stores;
 
-public sealed class CredentialStore(SammlarrDbContext context) : ICredentialStore
+public sealed class CredentialStore(SammlarrDbContext context) : Contracts.Auth.ICredentialStore
 {
-	public Task<Credential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
+	public async Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
 	{
-		return context.Credentials.FirstOrDefaultAsync(c => c.AuthProvider == authProvider, cancellationToken);
+		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.AuthProvider == authProvider, cancellationToken);
+		return credential is null ? null : new StoredCredential(credential.AuthProvider, credential.ClientId, credential.AccessToken, credential.ExpiresAt);
 	}
 
 	public async Task StoreAsync(

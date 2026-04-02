@@ -1,12 +1,11 @@
 using API.Plex;
 using API.Plex.Types;
 using Contracts.Media;
-using DB.Data.Stores;
 using Shared;
 
 namespace API.TMDB;
 
-public sealed class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, MediaIdRepository idRepository) : IMediaIdConverter
+public sealed class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, IMediaIdStore idStore) : IMediaIdConverter
 {
 	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType mediaType)
 	{
@@ -15,7 +14,7 @@ public sealed class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, MediaIdRep
 			return [];
 		}
 
-		var cachedIds = await idRepository.GetByIdAsync(tmdbId);
+		var cachedIds = await idStore.GetByIdAsync(tmdbId);
 		if (cachedIds.OfType<PlexId>().Any())
 		{
 			return cachedIds;
@@ -32,11 +31,11 @@ public sealed class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, MediaIdRep
 
 		if (cachedIds.Any())
 		{
-			await idRepository.AppendAsync(cachedIds.First(), allIds);
+			await idStore.AppendAsync(cachedIds.First(), allIds);
 		}
 		else
 		{
-			await idRepository.CreateAsync(allIds);
+			await idStore.CreateAsync(allIds);
 		}
 		var tmdbIds = allIds.OfType<TmdbId>().Cast<IMediaId>();
 		return allIds.Except(tmdbIds).ToList();
