@@ -310,8 +310,9 @@
 
     private async Task LoadPageAsync()
     {
-        await TryStateHasChangedAsync();
+        _isLoading = true;
 
+        await TryStateHasChangedAsync();
         try
         {
             var recommendationService = RecommendationServiceIndex[MediaProvider.Tmdb];
@@ -340,16 +341,16 @@
     {
         if (_currentPage <= 1) return;
         _currentPage--;
-        await LoadPageAsync();
         await ScrollToTopAsync();
+        await LoadPageAsync();
     }
 
     private async Task GoToNextPageAsync()
     {
         if (_currentPage >= _totalPages) return;
         _currentPage++;
-        await LoadPageAsync();
         await ScrollToTopAsync();
+        await LoadPageAsync();
     }
 
     private async Task ScrollToTopAsync()
