@@ -14,6 +14,7 @@
 @inject IApiKeyStore ApiKeyStore
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
+@inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
 
@@ -33,13 +34,6 @@
             </BbButton>
         }
     </div>
-
-    @if (!string.IsNullOrWhiteSpace(_addStatusMessage))
-    {
-        <div class="mb-4 rounded-lg border bg-surface p-3 text-sm @(_isAddStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground")">
-            @_addStatusMessage
-        </div>
-    }
 
     @if (!_isAuthenticated)
     {
@@ -131,7 +125,8 @@
 <SearchModal @bind-IsOpen="_isSearchModalOpen"
              SearchProvider="MediaProvider.Plex"
              IsInWatchlist="IsInWatchlist"
-             AddToWatchlistAsync="AddFromSearchAsync"/>
+             AddToWatchlistAsync="AddFromSearchAsync"
+             RemoveFromWatchlistAsync="RemoveFromSearchAsync"/>
 
 <BbSheet @bind-Open="_isSheetOpen">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
@@ -141,13 +136,13 @@
                 <BbSheetTitle Class="font-bold tracking-wide">@_selectedMedia.Title</BbSheetTitle>
                 <BbSheetDescription Class="font-normal tracking-wide">
                     <span class="flex items-center justify-center gap-1.5">
-                        @if(_selectedMedia.MediaType is MediaType.Movie)
+                        @if (_selectedMedia.MediaType is MediaType.Movie)
                         {
                             <LucideIcon Name="film" Size="16"/>
                         }
                         else
                         {
-                            <LucideIcon Name="tv" Size="16" />
+                            <LucideIcon Name="tv" Size="16"/>
                         }
                         <span>@_selectedMedia.MediaType.GetDescription() • @_selectedMedia.ReleaseDate.Year</span>
                     </span>
@@ -228,8 +223,6 @@
     private bool _isSearchModalOpen;
     private bool _isAddingToWatchlist;
     private string? _statusMessage;
-    private string? _addStatusMessage;
-    private bool _isAddStatusError;
     private bool _isError;
     private bool _isAuthenticated;
     private bool _hasTmdbKey;
@@ -239,10 +232,11 @@
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private DotNetObjectReference<Browse>? _shortcutDotNetRef;
     private bool _isShortcutRegistered;
+    private const AuthProvider AuthProvider = Contracts.Auth.AuthProvider.Plex;
 
     protected override async Task OnInitializedAsync()
     {
-        var credential = await CredentialStore.GetAsync(AuthProvider.Plex, _cancellationTokenSource.Token);
+        var credential = await CredentialStore.GetAsync(AuthProvider, _cancellationTokenSource.Token);
         _isAuthenticated = credential is not null && !string.IsNullOrWhiteSpace(credential.AccessToken);
 
         if (!_isAuthenticated) return;
@@ -252,7 +246,7 @@
 
         if (!_hasTmdbKey) return;
 
-        var watchlistService = WatchlistServiceIndex[AuthProvider.Plex];
+        var watchlistService = WatchlistServiceIndex[AuthProvider];
         var watchlistPage = await watchlistService.GetWatchlistAsync(1, _cancellationTokenSource.Token);
         if (_cancellationTokenSource.IsCancellationRequested) return;
 
@@ -390,37 +384,43 @@
     {
         if (IsInWatchlist(plexId))
         {
-            _addStatusMessage = $"'{title}' is already in your watchlist.";
-            _isAddStatusError = false;
+            ToastService.Warning($"'{title}' is already in your watchlist.");
             return false;
         }
 
-        _addStatusMessage = null;
-        _isAddStatusError = false;
-
-        try
+        var watchlistService = WatchlistServiceIndex[AuthProvider];
+        var removed = await watchlistService.AddToWatchlistAsync(plexId, _cancellationTokenSource.Token);
+        if (!removed)
         {
-            var watchlistService = WatchlistServiceIndex[AuthProvider.Plex];
-            var added = await watchlistService.AddToWatchlistAsync(plexId, _cancellationTokenSource.Token);
-
-            if (!added)
-            {
-                _addStatusMessage = "Could not add item to Plex watchlist. Please try again.";
-                _isAddStatusError = true;
-                return false;
-            }
-
-            _watchlistedPlexIds.Add(plexId.Value);
-            _addStatusMessage = null;
-            _isAddStatusError = false;
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _addStatusMessage = $"Failed to add item: {ex.Message}";
-            _isAddStatusError = true;
+            ToastService.Warning("Failed to add item to watchlist. Please try again.");
             return false;
         }
+
+        _watchlistedPlexIds.Add(plexId.Value);
+        ToastService.Success($"'{title}' has been added to your watchlist.");
+        return true;
+    }
+
+    private async Task<bool> RemoveFromSearchAsync(PlexId plexId, string title)
+    {
+        if (!IsInWatchlist(plexId))
+        {
+            ToastService.Warning($"'{title}' is not in your watchlist.");
+            return false;
+        }
+
+        var watchlistService = WatchlistServiceIndex[AuthProvider];
+        var added = await watchlistService.RemoveFromWatchlistAsync(plexId, _cancellationTokenSource.Token);
+
+        if (!added)
+        {
+            ToastService.Warning("Failed to remove item from watchlist. Please try again.");
+            return false;
+        }
+
+        _watchlistedPlexIds.Remove(plexId.Value);
+        ToastService.Success($"'{title}' has been removed from your watchlist.");
+        return true;
     }
 
     private void SelectMedia(ITrendingMedia media)
@@ -444,7 +444,7 @@
         _statusMessage = null;
         _isError = false;
 
-        var watchlistService = WatchlistServiceIndex[AuthProvider.Plex];
+        var watchlistService = WatchlistServiceIndex[AuthProvider];
         var isCurrentlyInWatchlist = _watchlistedPlexIds.Contains(plexId.Value);
         bool success;
 

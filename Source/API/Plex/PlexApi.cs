@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Media;
+using Contracts.Media.Search;
 
 namespace API.Plex;
 
@@ -20,7 +21,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		return result!.MediaContainer.Metadata[0];
 	}
 
-	public async Task<IReadOnlyList<MediaSearchResult>> SearchAsync(
+	public async Task<IReadOnlyList<IMediaSearchResult>> SearchAsync(
 		string title,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -43,24 +44,52 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 			.ToList();
 	}
 
-	private static MediaSearchResult MapSearchResult(PlexTypes.Search.Metadata result)
+	private static IMediaSearchResult MapSearchResult(PlexTypes.Search.Metadata result)
 	{
-		return new MediaSearchResult(result.PlexId, result.Title)
+		var mediatype = ParseMediaType(result.Type);
+		return mediatype switch
 		{
-			MediaType = ParseMediaType(result.Type),
+			MediaType.Movie => MapMovieResult(result),
+			MediaType.Show => MapShowResult(result),
+		};
+	}
+
+	private static MovieSearchResult MapMovieResult(PlexTypes.Search.Metadata result)
+	{
+		return new MovieSearchResult
+		{
+			Title = result.Title,
+			SourceId = result.PlexId,
 			Year = result.Year > 0 ? result.Year : null,
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),
-			Description = result.Summary,
-			Tagline = result.Tagline,
-			Rating = result.Rating,
-			AudienceRating = result.AudienceRating,
+			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = (result.Genre ?? [])
 				.Select(genre => genre.Tag)
 				.Where(tag => !string.IsNullOrWhiteSpace(tag))
 				.Distinct(StringComparer.OrdinalIgnoreCase)
-				.Take(4)
+				.ToList(),
+		};
+	}
+
+	private static ShowSearchResult MapShowResult(PlexTypes.Search.Metadata result)
+	{
+		return new ShowSearchResult
+		{
+			Title = result.Title,
+			SourceId = result.PlexId,
+			Seasons = result.SeasonCount ?? 0,
+			Episodes = result.EpisodeCount ?? 0,
+			Year = result.Year > 0 ? result.Year : null,
+			PosterUrl = NormalizePlexImageUrl(result.Thumb),
+			BackdropUrl = NormalizePlexImageUrl(result.Art),
+			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			Genres = (result.Genre ?? [])
+				.Select(genre => genre.Tag)
+				.Where(tag => !string.IsNullOrWhiteSpace(tag))
+				.Distinct(StringComparer.OrdinalIgnoreCase)
 				.ToList(),
 		};
 	}
@@ -71,7 +100,6 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		{
 			"movie" => MediaType.Movie,
 			"show" => MediaType.Show,
-			_ => MediaType.Unknown,
 		};
 	}
 

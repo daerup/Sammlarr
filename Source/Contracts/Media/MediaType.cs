@@ -4,9 +4,6 @@ namespace Contracts.Media;
 
 public enum MediaType
 {
-	[Description("Unknown")]
-	Unknown,
-
 	[Description("Movie")]
 	Movie,
 
