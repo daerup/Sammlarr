@@ -7,7 +7,10 @@ applyTo: '**/*.cs'
 
 ## C# Instructions
 - Always use the latest version C#, currently C# 14 features.
-- Write clear and concise comments for each function.
+- Use the most restrictive access modifier possible (private by default, only widening when necessary).
+- Avoid sealed unless there is a specific, justified reason (e.g., preventing unintended inheritance in a security-sensitive or performance-critical context); do not use it as a default.
+- Prefer record and record struct types for immutable data carriers, DTOs, and value objects.
+- For simple records with few fields, use primary constructor syntax. For larger records with many fields, use explicit properties for clarity and maintainability.
 
 ## General Instructions
 - Make only high confidence suggestions when reviewing code changes.
