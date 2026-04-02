@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Stores;
 
-public class CredentialStore(SammlarrDbContext context) : Contracts.Auth.ICredentialStore
+internal class CredentialStore(SammlarrDbContext context) : ICredentialStore
 {
 	public async Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
 	{

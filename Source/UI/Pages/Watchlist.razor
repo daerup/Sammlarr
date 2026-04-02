@@ -1,12 +1,10 @@
 @page "/watchlist"
 @implements IDisposable
-@using API.Plex
 @using Contracts.Auth
 @using Contracts.Media
 @using Contracts.Watchlist
 @using global::Shared
 @using global::Shared.DI
-@using Microsoft.AspNetCore.Components.Web
 @inject ProfileDropdownService ProfileDropdownService
 @inject ICredentialStore CredentialStore
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistStoreIndex
@@ -135,6 +133,7 @@
 </div>
 
 <SearchModal @bind-IsOpen="_isSearchModalOpen"
+             SearchProvider="MediaProvider.Plex"
                       IsInWatchlist="IsInWatchlist"
                       AddToWatchlistAsync="AddFromSearchAsync"/>
 

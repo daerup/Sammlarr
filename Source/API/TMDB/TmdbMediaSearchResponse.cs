@@ -1,4 +1,5 @@
 using Contracts.Media;
+using Contracts.Media.Trending;
 
 namespace API.TMDB;
 

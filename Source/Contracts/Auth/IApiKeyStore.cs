@@ -1,4 +1,6 @@
-namespace Contracts.Media;
+using Contracts.Media;
+
+namespace Contracts.Auth;
 
 public interface IApiKeyStore
 {

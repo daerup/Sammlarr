@@ -1,4 +1,4 @@
-namespace Contracts.Media;
+namespace Contracts.Media.Trending;
 
 public interface ITrendingMedia
 {

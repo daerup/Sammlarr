@@ -4,7 +4,7 @@ using UI.Shared;
 
 namespace UI;
 
-public class UiModule : IServiceModule
+internal class UiModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{

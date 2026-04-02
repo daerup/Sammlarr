@@ -1,10 +1,11 @@
 using System.Web;
+using Contracts.Auth;
 using Contracts.Media;
 using Shared.Options;
 
 namespace API.TMDB;
 
-public class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyStore apiKeyStore)
+internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyStore apiKeyStore) : IApiKeyValidator
 {
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,

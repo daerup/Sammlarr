@@ -1,6 +1,5 @@
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media;
 using DB.Data;
 using DB.Data.Stores;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +24,7 @@ public class DbModule : IServiceModule
 			}
 		);
 
-		services.AddScoped<ICredentialStore, CredentialStore>();
+		services.AddScoped<Contracts.Auth.ICredentialStore, CredentialStore>();
 		services.AddScoped<IApiKeyStore, ApiKeyStore>();
 		services.AddScoped<IMediaIdStore, MediaIdRepository>();
 	}

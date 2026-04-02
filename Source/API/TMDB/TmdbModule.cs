@@ -1,10 +1,11 @@
+using Contracts.Auth;
 using Contracts.Media;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
 namespace API.TMDB;
 
-public class TmdbModule : IServiceModule
+internal class TmdbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
@@ -12,5 +13,7 @@ public class TmdbModule : IServiceModule
 		services.AddHttpClient<TmdbClient>();
 		services.AddKeyedScoped<IMediaRecommendationService, TmdbApi>(MediaProvider.Tmdb);
 		services.AddKeyedScoped<IMediaIdConverter, TmdbIdConverter>(MediaProvider.Tmdb);
+		// Expose TmdbClient through the IApiKeyValidator contract so UI does not hard-reference the concrete type.
+		services.AddKeyedScoped<IApiKeyValidator>(MediaProvider.Tmdb, (sp, _) => sp.GetRequiredService<TmdbClient>());
 	}
 }

@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Shared.DI;
 
-public class KeyedServiceIndex<TKey, TService>(IServiceProvider serviceProvider) : IKeyedServiceIndex<TKey, TService>
+internal class KeyedServiceIndex<TKey, TService>(IServiceProvider serviceProvider) : IKeyedServiceIndex<TKey, TService>
 	where TKey : struct, Enum
 	where TService : class
 {

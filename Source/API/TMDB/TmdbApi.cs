@@ -1,13 +1,13 @@
 using System.Text.Json;
 using API.TMDB.Types;
 using Contracts.Media;
-using Shared;
+using Contracts.Media.Trending;
 using Shared.DI;
 using Shared.Options;
 
 namespace API.TMDB;
 
-public class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedServiceIndex<MediaProvider, IMediaIdConverter> converterIndex)
+internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedServiceIndex<MediaProvider, IMediaIdConverter> converterIndex)
 	: IMediaRecommendationService
 {
 	public async Task<TrendingPageResult> GetTrendingAsync(int page, CancellationToken cancellationToken = default)

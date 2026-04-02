@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace API.Plex;
 
-public record PlexTokenResponse(string AccessToken, string? RefreshToken, string TokenType, int ExpiresIn)
+internal record PlexTokenResponse(string AccessToken, string? RefreshToken, string TokenType, int ExpiresIn)
 {
 	public static PlexTokenResponse FromJson(JsonElement root)
 	{

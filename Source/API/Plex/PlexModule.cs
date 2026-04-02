@@ -8,11 +8,12 @@ using Shared.Options;
 
 namespace API.Plex;
 
-public class PlexModule : IServiceModule
+internal class PlexModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<PlexApi>();
+		services.AddKeyedScoped<IMediaSearchService>(MediaProvider.Plex, (sp, _) => sp.GetRequiredService<PlexApi>());
 		services.AddKeyedScoped<IOAuthService, PlexOAuthService>(AuthProvider.Plex);
 		services.AddKeyedScoped<IWatchlistService, PlexWatchListService>(AuthProvider.Plex);
 		services.AddKeyedScoped<IMediaIdConverter, PlexIdConverter>(MediaProvider.Plex);

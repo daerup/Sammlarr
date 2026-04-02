@@ -1,11 +1,16 @@
 using API.Plex;
 using API.Plex.Types;
 using Contracts.Media;
-using Shared;
+using Shared.DI;
 
 namespace API.TMDB;
 
-public class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, IMediaIdStore idStore) : IMediaIdConverter
+internal class TmdbIdConverter(
+	TmdbApi tmdbApi,
+	PlexApi plexApi,
+	IMediaIdStore idStore,
+	IKeyedServiceIndex<MediaProvider, IMediaSearchService> searchServiceIndex
+) : IMediaIdConverter
 {
 	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType mediaType)
 	{
@@ -20,8 +25,24 @@ public class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, IMediaIdStore idS
 			return cachedIds;
 		}
 		var details = await tmdbApi.GetDetailAsync(tmdbId, mediaType);
-		var searchResult = await plexApi.SearchAsync(details.DisplayOriginalTitle, mediaType);
-		var match = await searchResult.ToAsyncEnumerable().SelectAwait(LoadPlexDetailsAsync).FirstOrDefaultAsync(d => d.TmdbId.Contains(tmdbId));
+		var searchResults = await searchServiceIndex[MediaProvider.Plex].SearchAsync(details.DisplayOriginalTitle, [mediaType]);
+		PlexTypes.ById.Metadata? match = null;
+
+		foreach (var searchResult in searchResults)
+		{
+			if (searchResult.SourceId is not PlexId plexId)
+			{
+				continue;
+			}
+
+			var plexDetails = await LoadPlexDetailsAsync(plexId);
+			if (plexDetails.TmdbId.Contains(tmdbId))
+			{
+				match = plexDetails;
+				break;
+			}
+		}
+
 		if (match is null)
 		{
 			return [];
@@ -41,8 +62,8 @@ public class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, IMediaIdStore idS
 		return allIds.Except(tmdbIds).ToList();
 	}
 
-	private async ValueTask<PlexTypes.ById.Metadata> LoadPlexDetailsAsync(PlexTypes.Search.Metadata metadata)
+	private async ValueTask<PlexTypes.ById.Metadata> LoadPlexDetailsAsync(PlexId plexId)
 	{
-		return await plexApi.ByIdAsync(metadata.PlexId);
+		return await plexApi.ByIdAsync(plexId);
 	}
 }

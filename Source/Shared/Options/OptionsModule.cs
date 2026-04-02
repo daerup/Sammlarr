@@ -3,7 +3,7 @@ using Shared.DI;
 
 namespace Shared.Options;
 
-public record OptionsModule : IServiceModule
+internal record OptionsModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
