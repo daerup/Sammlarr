@@ -3,7 +3,7 @@ using Contracts.Media;
 
 namespace API.Plex.Types;
 
-public static class PlexTypes
+internal static class PlexTypes
 {
 	public static class Watchlist
 	{

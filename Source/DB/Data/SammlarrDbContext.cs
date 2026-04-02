@@ -1,11 +1,10 @@
-using Contracts.Media;
 using DB.Data.Entities;
 using DB.ModelBuilders;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data;
 
-public class SammlarrDbContext : DbContext
+internal class SammlarrDbContext : DbContext
 {
 	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options)
 		: base(options)

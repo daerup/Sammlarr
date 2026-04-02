@@ -3,7 +3,7 @@ using Contracts.Media;
 
 namespace API.TMDB.Types;
 
-public static class TmdbTypes
+internal static class TmdbTypes
 {
 	public static class Trending
 	{

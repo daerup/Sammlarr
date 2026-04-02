@@ -1,6 +1,8 @@
-@using API.Plex
 @using Contracts.Media
-@using Microsoft.AspNetCore.Components.Web
+@using global::Shared.DI
+@inject IKeyedServiceIndex<MediaProvider, IMediaSearchService> SearchServiceIndex
+@inject IJSRuntime JsRuntime
+@inject ToastService ToastService
 @implements IAsyncDisposable
 @if (IsOpen)
 {
@@ -120,13 +122,13 @@
                                     </div>
                                     <BbButton Variant="ButtonVariant.Secondary"
                                               OnClick="() => AddSearchResultAsync(result)"
-                                              Disabled="@(_isAdding || InWatchlist(result.PlexId))">
-                                        @if (_isAdding && _activeAddRatingKey == result.PlexId.Value)
+                                              Disabled="@(_isAdding || !CanAddToWatchlist(result) || IsSearchResultInWatchlist(result))">
+                                        @if (_isAdding && Equals(_activeAddSourceId, result.SourceId))
                                         {
                                             <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
                                             <span>Adding...</span>
                                         }
-                                        else if (InWatchlist(result.PlexId))
+                                        else if (IsSearchResultInWatchlist(result))
                                         {
                                             <LucideIcon Name="check" Size="16" Class="mr-2"/>
                                             <span>In Watchlist</span>
@@ -155,12 +157,10 @@
 }
 
 @code {
-    [Inject] private PlexApi PlexApi { get; set; } = default!;
-    [Inject] private IJSRuntime JsRuntime { get; set; } = default!;
-    [Inject] private ToastService ToastService { get; set; } = default!;
 
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [Parameter] public MediaProvider SearchProvider { get; set; } = MediaProvider.Plex;
     [Parameter] public Func<PlexId, bool>? IsInWatchlist { get; set; }
     [Parameter] public Func<PlexId, string, Task<bool>>? AddToWatchlistAsync { get; set; }
 
@@ -170,8 +170,8 @@
     private string _searchQuery = string.Empty;
     private string? _searchStatusMessage;
     private bool _isSearchStatusError;
-    private string? _activeAddRatingKey;
-    private List<SearchResultItem> _searchResults = [];
+    private IMediaId? _activeAddSourceId;
+    private List<MediaSearchResult> _searchResults = [];
     private bool _wasOpen;
     private bool _isEscapeHandlerRegistered;
     private DotNetObjectReference<SearchModal>? _dotNetRef;
@@ -225,7 +225,6 @@
         }
         catch (JSDisconnectedException)
         {
-            // Component is being torn down; JS runtime may no longer be available.
         }
 
         _dotNetRef?.Dispose();
@@ -241,6 +240,16 @@
     private bool InWatchlist(PlexId plexId)
     {
         return IsInWatchlist?.Invoke(plexId) == true;
+    }
+
+    private bool IsSearchResultInWatchlist(MediaSearchResult result)
+    {
+        return result.SourceId is PlexId plexId && InWatchlist(plexId);
+    }
+
+    private static bool CanAddToWatchlist(MediaSearchResult result)
+    {
+        return result.SourceId is PlexId;
     }
 
     private async Task CloseAsync()
@@ -274,28 +283,8 @@
 
         try
         {
-            var results = await PlexApi.SearchAsync(query, [MediaType.Movie, MediaType.Show]);
-            _searchResults = results
-                .Select(result => new SearchResultItem(
-                    result.PlexId,
-                    result.Title,
-                    ParseMediaType(result.Type),
-                    result.Year,
-                    NormalizePosterUrl(result.Thumb),
-                    result.Summary,
-                    result.Tagline,
-                    result.Rating,
-                    result.AudienceRating,
-                    result.Duration,
-                    (result.Genre ?? [])
-                        .Select(genre => genre.Tag)
-                        .Where(tag => !string.IsNullOrWhiteSpace(tag))
-                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .Take(4)
-                        .ToList(),
-                    result.OriginallyAvailableAt))
-                .DistinctBy(result => result.PlexId.Value)
-                .ToList();
+            var searchService = SearchServiceIndex[SearchProvider];
+            _searchResults = [.. await searchService.SearchAsync(query, [MediaType.Movie, MediaType.Show])];
 
             _hasSearched = true;
         }
@@ -312,15 +301,22 @@
         }
     }
 
-    private async Task AddSearchResultAsync(SearchResultItem result)
+    private async Task AddSearchResultAsync(MediaSearchResult result)
     {
-        if (_isAdding || InWatchlist(result.PlexId))
+        if (_isAdding || IsSearchResultInWatchlist(result))
         {
             return;
         }
 
+        if (result.SourceId is not PlexId plexId)
+        {
+            _searchStatusMessage = $"Could not add '{result.Title}': the search result is missing a Plex identifier.";
+            _isSearchStatusError = true;
+            return;
+        }
+
         _isAdding = true;
-        _activeAddRatingKey = result.PlexId.Value;
+        _activeAddSourceId = result.SourceId;
         _searchStatusMessage = null;
         _isSearchStatusError = false;
 
@@ -333,7 +329,7 @@
                 return;
             }
 
-            var added = await AddToWatchlistAsync(result.PlexId, result.Title);
+            var added = await AddToWatchlistAsync(plexId, result.Title);
             if (!added)
             {
                 _searchStatusMessage = $"Could not add '{result.Title}'. Please try again.";
@@ -353,26 +349,16 @@
         finally
         {
             _isAdding = false;
-            _activeAddRatingKey = null;
+            _activeAddSourceId = null;
         }
     }
 
-    private static MediaType ParseMediaType(string value)
+    private static string GetSearchYearLabel(int? year)
     {
-        return value.ToLowerInvariant() switch
-        {
-            "movie" => MediaType.Movie,
-            "show" => MediaType.Show,
-            _ => MediaType.Unknown,
-        };
+        return year is > 0 ? year.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "Unknown year";
     }
 
-    private static string GetSearchYearLabel(int year)
-    {
-        return year > 0 ? year.ToString(System.Globalization.CultureInfo.InvariantCulture) : "Unknown year";
-    }
-
-    private static IReadOnlyList<string> GetDisplayFacts(SearchResultItem result)
+    private static IReadOnlyList<string> GetDisplayFacts(MediaSearchResult result)
     {
         var facts = new List<string>();
 
@@ -382,13 +368,13 @@
             facts.Add(rating);
         }
 
-        var runtime = GetRuntimeLabel(result.MediaType, result.DurationMilliseconds);
+        var runtime = GetRuntimeLabel(result.MediaType, result.Runtime);
         if (!string.IsNullOrWhiteSpace(runtime))
         {
             facts.Add(runtime);
         }
 
-        var releaseDate = GetReleaseDateLabel(result.OriginallyAvailableAt);
+        var releaseDate = GetReleaseDateLabel(result.ReleaseDate);
         if (!string.IsNullOrWhiteSpace(releaseDate))
         {
             facts.Add(releaseDate);
@@ -397,7 +383,7 @@
         return facts;
     }
 
-    private static string? GetDisplayRating(SearchResultItem result)
+    private static string? GetDisplayRating(MediaSearchResult result)
     {
         var score = result.AudienceRating ?? result.Rating;
         if (score is null || score <= 0)
@@ -408,19 +394,19 @@
         return $"Rating {score.Value:F1}";
     }
 
-    private static string? GetRuntimeLabel(MediaType mediaType, int? durationMilliseconds)
+    private static string? GetRuntimeLabel(MediaType mediaType, TimeSpan? runtime)
     {
         if (mediaType is MediaType.Show)
         {
             return null;
         }
 
-        if (durationMilliseconds is null || durationMilliseconds <= 0)
+        if (runtime is null || runtime <= TimeSpan.Zero)
         {
             return null;
         }
 
-        var totalMinutes = (int)Math.Round(durationMilliseconds.Value / 60000d, MidpointRounding.AwayFromZero);
+        var totalMinutes = (int)Math.Round(runtime.Value.TotalMinutes, MidpointRounding.AwayFromZero);
         if (totalMinutes <= 0)
         {
             return null;
@@ -432,52 +418,12 @@
         return hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
     }
 
-    private static string? GetReleaseDateLabel(string? originallyAvailableAt)
+    private static string? GetReleaseDateLabel(DateOnly? releaseDate)
     {
-        if (string.IsNullOrWhiteSpace(originallyAvailableAt))
-        {
-            return null;
-        }
-
-        return DateOnly.TryParse(originallyAvailableAt, out var releaseDate)
-            ? releaseDate.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture)
+        return releaseDate is not null
+            ? releaseDate.Value.ToString("MMM d, yyyy", System.Globalization.CultureInfo.InvariantCulture)
             : null;
     }
-
-    private static string? NormalizePosterUrl(string? url)
-    {
-        return NormalizePlexImageUrl(url);
-    }
-
-    private static string? NormalizePlexImageUrl(string? url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            return null;
-        }
-
-        if (Uri.TryCreate(url, UriKind.Absolute, out _))
-        {
-            return url;
-        }
-
-        return $"https://metadata.provider.plex.tv{url}";
-    }
-
-    private record SearchResultItem(
-        PlexId PlexId,
-        string Title,
-        MediaType MediaType,
-        int Year,
-        string? PosterUrl,
-        string? Description,
-        string? Tagline,
-        double? Rating,
-        double? AudienceRating,
-        int? DurationMilliseconds,
-        IReadOnlyList<string> Genres,
-        string? OriginallyAvailableAt
-    );
 }
 
 

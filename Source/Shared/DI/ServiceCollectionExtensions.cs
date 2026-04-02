@@ -4,9 +4,12 @@ namespace Shared.DI;
 
 public static class ServiceCollectionExtensions
 {
-	public static void AddModule<TModule>(this IServiceCollection services)
-		where TModule : IServiceModule, new()
+	extension(IServiceCollection services)
 	{
-		new TModule().RegisterServices(services);
+		public void AddModule<TModule>()
+			where TModule : IServiceModule, new()
+		{
+			new TModule().RegisterServices(services);
+		}
 	}
 }

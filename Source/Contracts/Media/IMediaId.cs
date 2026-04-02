@@ -1,4 +1,3 @@
-using Contracts.Media;
 using Vogen;
 
 namespace Contracts.Media;

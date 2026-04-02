@@ -1,8 +1,9 @@
+@using Contracts.Auth
 @using Contracts.Media
-@using API.TMDB
+@using global::Shared.DI
 
 @inject IApiKeyStore ApiKeyStore
-@inject TmdbClient TmdbClient
+@inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 
 <div class="max-w-lg">
     <div class="rounded-lg border">
@@ -150,7 +151,7 @@
 
         try
         {
-            var ok = await TmdbClient.ValidateApiKeyAsync(_tmdbApiKeyInput.Trim());
+            var ok = await ApiKeyValidatorIndex[MediaProvider.Tmdb].ValidateApiKeyAsync(_tmdbApiKeyInput.Trim());
             _state = ok ? State.Success : State.Failed;
         }
         catch (Exception)

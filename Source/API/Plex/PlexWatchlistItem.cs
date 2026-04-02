@@ -3,7 +3,7 @@ using Contracts.Watchlist;
 
 namespace API.Plex;
 
-public class PlexWatchlistItem : IWatchlistItem
+internal class PlexWatchlistItem : IWatchlistItem
 {
 	public IMediaId SourceId => RatingKey;
 	public required PlexId RatingKey { get; set; }

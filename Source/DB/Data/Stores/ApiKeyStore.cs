@@ -1,10 +1,11 @@
+using Contracts.Auth;
 using Contracts.Media;
 using DB.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Stores;
 
-public class ApiKeyStore(SammlarrDbContext context) : Contracts.Media.IApiKeyStore
+internal class ApiKeyStore(SammlarrDbContext context) : IApiKeyStore
 {
 	public Task<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{

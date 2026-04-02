@@ -1,7 +1,6 @@
 namespace UI.Shared;
 
-/// <summary>Allows any page to programmatically open the profile dropdown in the header.</summary>
-public class ProfileDropdownService
+internal class ProfileDropdownService
 {
 	public event Func<Task>? OnOpenRequested;
 
