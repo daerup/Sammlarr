@@ -5,7 +5,7 @@ using Shared;
 
 namespace API.TMDB;
 
-public sealed class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, IMediaIdStore idStore) : IMediaIdConverter
+public class TmdbIdConverter(TmdbApi tmdbApi, PlexApi plexApi, IMediaIdStore idStore) : IMediaIdConverter
 {
 	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType mediaType)
 	{

@@ -7,7 +7,7 @@ using Shared.Options;
 
 namespace API.TMDB;
 
-public sealed class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedServiceIndex<MediaProvider, IMediaIdConverter> converterIndex)
+public class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedServiceIndex<MediaProvider, IMediaIdConverter> converterIndex)
 	: IMediaRecommendationService
 {
 	public async Task<TrendingPageResult> GetTrendingAsync(int page, CancellationToken cancellationToken = default)

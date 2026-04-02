@@ -1,3 +1,3 @@
 namespace Contracts.Media;
 
-public sealed record TrendingPageResult(IReadOnlyList<ITrendingMedia> Items, int TotalPages);
+public record TrendingPageResult(IReadOnlyList<ITrendingMedia> Items, int TotalPages);

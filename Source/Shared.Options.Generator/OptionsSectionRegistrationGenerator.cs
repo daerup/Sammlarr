@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace Shared.Options.Generator;
 
 [Generator]
-public sealed class OptionsSectionRegistrationGenerator : IIncrementalGenerator
+public class OptionsSectionRegistrationGenerator : IIncrementalGenerator
 {
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{

@@ -2,7 +2,7 @@ using Contracts.Media;
 
 namespace API.Plex;
 
-internal sealed class PlexIdConverter(PlexApi plexApi, IMediaIdStore mediaIdStore) : IMediaIdConverter
+internal class PlexIdConverter(PlexApi plexApi, IMediaIdStore mediaIdStore) : IMediaIdConverter
 {
 	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType mediaType)
 	{

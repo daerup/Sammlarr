@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DB.Data.Entities;
 
-public sealed record CollectionItem : Entity<Guid>
+public record CollectionItem : Entity<Guid>
 {
 	[Required]
 	[MaxLength(200)]

@@ -7,7 +7,7 @@ using Shared;
 
 namespace API.Plex;
 
-public sealed class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(MediaProvider.Plex)] IMediaIdConverter plexIdConverter) : IWatchlistService
+public class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(MediaProvider.Plex)] IMediaIdConverter plexIdConverter) : IWatchlistService
 {
 	private const string AddToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/addToWatchlist?ratingKey={0}";
 	private const string RemoveToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/removeFromWatchlist?ratingKey={0}";
