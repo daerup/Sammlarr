@@ -22,12 +22,7 @@
         @if (_isAuthenticated)
         {
             <div class="flex items-center gap-2">
-                <BbButton Variant="ButtonVariant.Outline" @onclick="OpenSearchSheet">
-                    <LucideIcon Name="search" Size="16" Class="mr-2"/>
-                    <span>Add from Search</span>
-                </BbButton>
-
-                <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
+               <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
                     @if (_isLoading)
                     {
                         <span>Refreshing...</span>
@@ -132,12 +127,6 @@
     </div>
 </div>
 
-<SearchModal @bind-IsOpen="_isSearchModalOpen"
-             SearchProvider="MediaProvider.Plex"
-                      IsInWatchlist="IsInWatchlist"
-                      AddToWatchlistAsync="AddFromSearchAsync"/>
-
-
 <BbSheet @bind-Open="_isSheetOpen">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
         @if (_selectedItem is not null)
@@ -205,7 +194,6 @@
     private IWatchlistItem? _selectedItem;
     private bool _isAuthenticated;
     private bool _isLoading;
-    private bool _isSearchModalOpen;
     private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _isSheetError;
@@ -274,26 +262,9 @@
 
     private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Description) ? "No overview available." : item.Description;
 
-    private const string DisplayDateFormat = "MMM d, yyyy";
-
-    private static string GetReleaseYear(IWatchlistItem item) => FormatYear(item.ReleaseDate.Year, "N/A");
-
-
     private static string GetDetailImageUrl(IWatchlistItem item)
     {
         return NormalizePlexImageUrl(item.PosterUrl) ?? NormalizePlexImageUrl(item.ArtUrl) ?? item.ArtUrl;
-    }
-
-    private static string GetAddedDateText(IWatchlistItem item) => FormatDate(item.AddedDate, DisplayDateFormat, "Unknown date");
-
-    private static string FormatDate(DateTime value, string format, string fallback)
-    {
-        return value.Year > 1 ? value.ToString(format) : fallback;
-    }
-
-    private static string FormatDate(DateTimeOffset value, string format, string fallback)
-    {
-        return value.Year > 1 ? value.ToString(format) : fallback;
     }
 
     private static string FormatYear(int year, string fallback)
@@ -304,46 +275,6 @@
     private bool IsInWatchlist(PlexId plexId)
     {
         return _items?.Any(item => item.SourceId is PlexId existing && existing.Value == plexId.Value) == true;
-    }
-
-    private void OpenSearchSheet()
-    {
-        _isSearchModalOpen = true;
-    }
-
-    private async Task<bool> AddFromSearchAsync(PlexId plexId, string title)
-    {
-        if (IsInWatchlist(plexId))
-        {
-            _addStatusMessage = $"'{title}' is already in your watchlist.";
-            _isAddStatusError = false;
-            return false;
-        }
-
-        _addStatusMessage = null;
-        _isAddStatusError = false;
-
-        try
-        {
-            var added = await WatchlistService.AddToWatchlistAsync(plexId, _cancellationTokenSource.Token);
-            if (!added)
-            {
-                _addStatusMessage = "Could not add item to Plex watchlist. Please try again.";
-                _isAddStatusError = true;
-                return false;
-            }
-
-            _addStatusMessage = $"Added '{title}' to Plex watchlist.";
-            _currentPage = 1;
-            await LoadWatchlistAsync();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _addStatusMessage = $"Failed to add item: {ex.Message}";
-            _isAddStatusError = true;
-            return false;
-        }
     }
 
     private static string? NormalizePlexImageUrl(string? url)
