@@ -5,26 +5,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Shared\Shared.csproj" />
 		<ProjectReference Include="..\DB\DB.csproj" />
+		<ProjectReference Include="..\Shared\Shared.csproj" />
 		<ProjectReference Include="..\API\API.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Remove="Data\SammlarrDbContext.cs" />
-		<Compile Remove="Data\Entities\CollectionItem.cs" />
-		<Compile Remove="Data\Entities\Entity.cs" />
-		<Compile Remove="Data\Entities\IAuditable.cs" />
-		<Compile Remove="Data\Entities\IIdentifiable.cs" />
-		<Compile Remove="Data\Entities\PlexCredential.cs" />
-		<Compile Remove="Data\Stores\IPlexCredentialStore.cs" />
-		<Compile Remove="Data\Stores\PlexCredentialStore.cs" />
-		<Compile Remove="Data\Stores\IPlexOAuthService.cs" />
-		<Compile Remove="Data\Stores\IWatchlistStore.cs" />
-		<Compile Remove="Data\Stores\PlexAuthenticationOptions.cs" />
-		<Compile Remove="Data\Stores\PlexOAuthService.cs" />
-		<Compile Remove="Data\Stores\PlexTokenResponse.cs" />
-		<Compile Remove="Data\Stores\PlexWatchListStore.cs" />
-		<Compile Remove="Data\Stores\PlexWatchlistItem.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="BlazorBlueprint.Components" />
@@ -35,8 +18,5 @@
 		<Content Update="Pages\Browse.razor.css">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="wwwroot\images\" />
 	</ItemGroup>
 </Project>

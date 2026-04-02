@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Stores;
 
-public sealed class ApiKeyStore(SammlarrDbContext context) : IApiKeyStore
+public sealed class ApiKeyStore(SammlarrDbContext context) : Contracts.Media.IApiKeyStore
 {
 	public Task<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{

@@ -1,6 +1,4 @@
-using Contracts.Media;
-
-namespace DB.Data.Stores;
+namespace Contracts.Media;
 
 public interface IApiKeyStore
 {
