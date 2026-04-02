@@ -4,7 +4,7 @@ using Shared.Options;
 
 namespace API.TMDB;
 
-public sealed class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyStore apiKeyStore)
+public class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyStore apiKeyStore)
 {
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,

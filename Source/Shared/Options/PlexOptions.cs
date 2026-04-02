@@ -1,7 +1,7 @@
 namespace Shared.Options;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-public sealed record PlexOptions : IOptionsSection
+public record PlexOptions : IOptionsSection
 {
 	public static string SectionName => "Plex";
 

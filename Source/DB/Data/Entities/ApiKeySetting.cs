@@ -5,7 +5,7 @@ using Contracts.Media;
 namespace DB.Data.Entities;
 
 [Table("ApiKeySettings")]
-public sealed record ApiKeySetting : Entity<Guid>
+public record ApiKeySetting : Entity<Guid>
 {
 	[Required]
 	public required MediaProvider Provider { get; set; }

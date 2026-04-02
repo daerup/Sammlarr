@@ -1,6 +1,6 @@
 namespace Shared.Options;
 
-public sealed record OAuthenticationOptions
+public record OAuthenticationOptions
 {
 	public required string ProductName { get; set; } = "Sammlarr";
 }

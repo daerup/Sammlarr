@@ -4,7 +4,7 @@ using Contracts.Media;
 
 namespace API.Plex;
 
-public sealed class PlexApi(PlexClient plexClient)
+public class PlexApi(PlexClient plexClient)
 {
 	private const string RatingKeyMetadataEndpoint = "https://metadata.provider.plex.tv/library/metadata/{0}?includeGuids=1&includeExternalMedia=1";
 	private const string SerachMetadataEndpoint =

@@ -5,7 +5,7 @@ using Contracts.Auth;
 namespace DB.Data.Entities;
 
 [Table("PlexCredentials")]
-public sealed record Credential : Entity<Guid>
+public record Credential : Entity<Guid>
 {
 	[Required]
 	public required AuthProvider AuthProvider { get; set; }

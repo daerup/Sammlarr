@@ -2,7 +2,7 @@ using Contracts.Auth;
 
 namespace API.Plex;
 
-public sealed class PlexClient(HttpClient client, ICredentialStore credentialStore)
+public class PlexClient(HttpClient client, ICredentialStore credentialStore)
 {
 	public const string Unauthenticated = "Plex";
 	public const int ContainerSize = 100;

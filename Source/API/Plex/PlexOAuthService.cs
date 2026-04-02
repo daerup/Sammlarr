@@ -8,7 +8,7 @@ using Shared.Options;
 
 namespace API.Plex;
 
-public sealed class PlexOAuthService(ICredentialStore credentialStore, IHttpClientFactory httpClientFactory, PlexOptions options, PlexClient plexClient)
+public class PlexOAuthService(ICredentialStore credentialStore, IHttpClientFactory httpClientFactory, PlexOptions options, PlexClient plexClient)
 	: IOAuthService
 {
 	private const string PlexAuthAppUrl = "https://app.plex.tv/auth";
