@@ -7,7 +7,7 @@ public record MediaIdEntry : Entity<Guid>
 {
 	[Required]
 	[MaxLength(64)]
-	public MediaProvider Source { get; set; }
+	public required MediaProvider Source { get; set; }
 
 	[Required]
 	[MaxLength(64)]
