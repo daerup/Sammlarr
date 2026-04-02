@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data;
 
-internal class SammlarrDbContext : DbContext
+internal sealed class SammlarrDbContext : DbContext
 {
 	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options)
 		: base(options)
