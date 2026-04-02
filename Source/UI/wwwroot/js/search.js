@@ -22,6 +22,11 @@ window.focusSearchInput = (elementId) => {
 window.registerSearchModalEscape = (dotNetRef) => {
     window.unregisterSearchModalEscape();
 
+    if (typeof window.__searchModalPreviousOverflow === "undefined") {
+        window.__searchModalPreviousOverflow = document.body.style.overflow;
+    }
+    document.body.style.overflow = "hidden";
+
     const handler = (event) => {
         if (event.key !== "Escape") {
             return;
@@ -36,6 +41,11 @@ window.registerSearchModalEscape = (dotNetRef) => {
 };
 
 window.unregisterSearchModalEscape = () => {
+    if (typeof window.__searchModalPreviousOverflow !== "undefined") {
+        document.body.style.overflow = window.__searchModalPreviousOverflow;
+        window.__searchModalPreviousOverflow = undefined;
+    }
+
     if (!window.__searchModalEscapeHandler) {
         return;
     }
