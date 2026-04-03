@@ -108,28 +108,7 @@
     outline-offset: 2px;
 }
 
-.search-result-toggle-btn:not(.in-watchlist):hover:not(:disabled) {
-    color: orange;
-    background: transparent;
-}
 
-.search-result-toggle-btn:not(.in-watchlist):hover:not(:disabled) ::deep svg {
-    stroke: orange;
-    fill: rgba(255, 165, 0, 0.15);
-    transition: stroke 0.15s ease, fill 0.15s ease;
-}
-
-.search-result-toggle-btn.in-watchlist {
-    background: rgba(255, 165, 0, 0.12);
-    color: orange;
-}
-
-.search-result-toggle-btn.in-watchlist:hover:not(:disabled) {
-    opacity: 1;
-    background: rgba(255, 165, 0, 0.22);
-}
-
-/* no svg override for in-watchlist hover — keep the filled orange icon as-is */
 .search-result-content{
     padding-left: 20px;
 }
@@ -142,7 +121,6 @@
     padding: 10px;
 }
 
-/* background layer */
 .search-result-row::before {
     content: "";
     position: absolute;
@@ -167,29 +145,21 @@
     opacity: 0.5;
     transform: scale(1.06);
 }
-.search-result-row.hover-bg:hover .text-muted-foreground,
-.search-result-row.hover-bg:hover .font-bold,
-.search-result-row.hover-bg.row-focused .text-muted-foreground,
-.search-result-row.hover-bg.row-focused .font-bold {
-    color: white;
-}
 
-/* Activate bookmark hover state when hovering or row is focused */
-.search-result-row.row-focused .search-result-toggle-btn:not(.in-watchlist):not(:disabled) {
+.search-result-toggle-btn.in-watchlist {
+    background: rgba(255, 165, 0, 0.1);
     color: orange;
-    background: transparent;
 }
 
-.search-result-row.row-focused .search-result-toggle-btn:not(.in-watchlist):not(:disabled) ::deep svg {
+.search-result-row.row-focused .search-result-toggle-btn.in-watchlist:not(:disabled),
+.search-result-toggle-btn.in-watchlist:hover:not(:disabled) {
+    opacity: 1;
+    background: none;
+}
+
+.search-result-row.row-focused .search-result-toggle-btn:not(.in-watchlist):not(:disabled) ::deep svg,
+.search-result-toggle-btn:not(.in-watchlist):hover:not(:disabled) ::deep svg {
     stroke: orange;
     fill: rgba(255, 165, 0, 0.15);
     transition: stroke 0.15s ease, fill 0.15s ease;
 }
-
-.search-result-row.row-focused .search-result-toggle-btn.in-watchlist:not(:disabled) {
-    opacity: 1;
-    background: rgba(255, 165, 0, 0.22);
-}
-
-/* no svg override for in-watchlist — keep the filled orange icon as-is */
-
