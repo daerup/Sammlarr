@@ -75,40 +75,14 @@
         <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
             @foreach (var media in _trendingMedia)
             {
-                <div class="cursor-pointer group" @onclick="() => SelectMedia(media)">
-                    <div class="relative overflow-hidden rounded-lg media-backdrop">
-                        <img src="@media.BackdropUrl" alt="@media.Title"/>
-
-                        <div class="absolute top-4 right-4 z-10">
-                            <LucideIcon
-                                Name="bookmark"
-                                Size="25"
-                                Color="orange"
-                                Fill="@(IsInWatchlist(media) ? "orange" : "transparent")"/>
-                        </div>
-
-                        <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-                            <div class="flex items-center gap-1.5 text-yellow-400 text-sm tracking-wide antialiased">
-                                <LucideIcon Name="star" Size="16" Fill="currentColor"/>
-                                <span class="font-medium">
-                                    @(media.Rating == 0 ? "N/A" : media.Rating.ToString("F1"))
-                                </span>
-                            </div>
-
-                            <div class="flex items-center justify-between gap-2">
-                                <h3 class="text-white text-base font-bold text-lg">
-                                    @media.Title
-                                </h3>
-                                <span class="text-white/70 font-medium text-sm shrink-0">
-                                    @media.ReleaseDate.Year
-                                </span>
-                            </div>
-                        </div>
-
-                        <div
-                            class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                </div>
+                <MediaCard @key="media"
+                           ImageUrl="@media.BackdropUrl"
+                           Title="@media.Title"
+                           OnClick="() => SelectMedia(media)"
+                           ShowBookmark="true"
+                           IsInWatchlist="@IsInWatchlist(media)"
+                           Rating="@media.Rating"
+                           Date="@media.ReleaseDate"/>
             }
         </div>
 

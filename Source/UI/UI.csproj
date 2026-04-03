@@ -14,9 +14,4 @@
 		<PackageReference Include="BlazorBlueprint.Primitives" />
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
 	</ItemGroup>
-	<ItemGroup>
-		<Content Update="Pages\Browse.razor.css">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-		</Content>
-	</ItemGroup>
 </Project>
