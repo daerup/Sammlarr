@@ -1,14 +1,14 @@
-.media-backdrop {
+.media-card-backdrop {
     position: relative;
     display: inline-block;
     transition: transform 0.4s ease;
 }
 
-.media-backdrop:hover {
+.media-card-backdrop:hover {
     transform: scale(1.05);
 }
 
-.media-backdrop img {
+.media-card-backdrop img {
     display: block;
     width: 100%;
     min-height: 300px;
@@ -16,11 +16,11 @@
     transition: transform 0.4s ease;
 }
 
-.media-backdrop:hover img {
+.media-card-backdrop:hover img {
     transform: scale(1.07);
 }
 
-.media-backdrop::before {
+.media-card-backdrop::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -33,7 +33,7 @@
     );
 }
 
-.media-backdrop::after {
+.media-card-backdrop::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -45,3 +45,4 @@
             transparent 100%
     );
 }
+

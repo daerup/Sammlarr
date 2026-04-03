@@ -1,0 +1,52 @@
+<div class="cursor-pointer group" @onclick="OnClick">
+    <div class="relative overflow-hidden rounded-lg media-card-backdrop">
+        <img src="@ImageUrl" alt="@Title"/>
+
+        @if (ShowBookmark)
+        {
+            <div class="absolute top-4 right-4 z-10">
+                <LucideIcon Name="bookmark"
+                            Size="25"
+                            Color="orange"
+                            Fill="@(IsInWatchlist ? "orange" : "transparent")"/>
+            </div>
+        }
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
+            @if (Rating.HasValue)
+            {
+                <div class="flex items-center gap-1.5 text-yellow-400 text-sm tracking-wide antialiased">
+                    <LucideIcon Name="star" Size="16" Fill="currentColor"/>
+                    <span class="font-medium">@(Rating.Value == 0 ? "N/A" : Rating.Value.ToString("F1"))</span>
+                </div>
+            }
+
+            <div class="flex items-center justify-between gap-2">
+                <h3 class="text-white text-base font-bold text-lg">@Title</h3>
+                @if (Date.HasValue)
+                {
+                    <span class="text-white/70 font-medium text-sm shrink-0">@Date.Value.ToString("MMM d, yyyy")</span>
+                }
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Description))
+            {
+                <p class="text-white text-xs line-clamp-2">@Description</p>
+            }
+        </div>
+
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required string ImageUrl { get; set; }
+    [Parameter, EditorRequired] public required string Title { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public bool ShowBookmark { get; set; }
+    [Parameter] public bool IsInWatchlist { get; set; }
+    [Parameter] public float? Rating { get; set; }
+    [Parameter] public DateTimeOffset? Date { get; set; }
+    [Parameter] public string? Description { get; set; }
+}
+

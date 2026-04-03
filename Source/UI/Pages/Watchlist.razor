@@ -89,25 +89,11 @@
             <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
                 @foreach (var item in _items)
                 {
-                    <div class="cursor-pointer group" @onclick="() => SelectItem(item)">
-                        <div class="relative overflow-hidden rounded-lg media-backdrop">
-                            <img src="@item.ArtUrl" alt="@item.Title"/>
-
-
-                            <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-                                <div class="flex items-center justify-between gap-2">
-                                    <h3 class="text-white text-base font-bold text-lg">@item.Title</h3>
-                                </div>
-
-                                <p class="text-white text-xs line-clamp-2">@GetDescription(item)</p>
-                                @* Added seems to be wrongly parsed from Plex's API *@
-                                @* <p class="text-white/65 text-xs">Added @GetAddedDateText(item)</p> *@
-                            </div>
-
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-                    </div>
+                    <MediaCard @key="item"
+                               ImageUrl="@item.ArtUrl"
+                               Title="@item.Title"
+                               OnClick="() => SelectItem(item)"
+                               Description="@GetDescription(item)"/>
                 }
             </div>
 
