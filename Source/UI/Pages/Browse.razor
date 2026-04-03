@@ -94,92 +94,18 @@
     </div>
 </div>
 
-<BbSheet @bind-Open="_isSheetOpen">
-    <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
-        @if (_selectedMedia != null)
-        {
-            <BbSheetHeader>
-                <BbSheetTitle Class="font-bold tracking-wide">@_selectedMedia.Title</BbSheetTitle>
-                <BbSheetDescription Class="font-normal tracking-wide">
-                    <span class="flex items-center justify-center gap-1.5">
-                        @if (_selectedMedia.MediaType is MediaType.Movie)
-                        {
-                            <LucideIcon Name="film" Size="16"/>
-                        }
-                        else
-                        {
-                            <LucideIcon Name="tv" Size="16"/>
-                        }
-                        <span>@_selectedMedia.MediaType.GetDescription() • @_selectedMedia.ReleaseDate.Year</span>
-                    </span>
-                </BbSheetDescription>
-            </BbSheetHeader>
-
-            <div class="space-y-6 py-6">
-                <div class="flex justify-center">
-                    <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[200px]">
-                        <img src="@_selectedMedia.PosterUrl"
-                             alt="@_selectedMedia.Title"
-                             class="w-full aspect-[2/3] object-cover"/>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-4 text-sm font-medium tracking-wide antialiased">
-                    <div class="flex items-center gap-1.5 text-yellow-400">
-                        <LucideIcon Name="star" Size="16" Fill="currentColor"/>
-                        <span class="font-semibold">@_selectedMedia.Rating.ToString("F1")</span>
-                    </div>
-                    <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-4"/>
-                    <span class="text-muted-foreground font-medium">
-                        @_selectedMedia.ReleaseDate.ToString("MMM d, yyyy")
-                    </span>
-                </div>
-
-                <div class="space-y-3">
-                    <h3 class="text-sm font-bold tracking-wide">Overview</h3>
-                    <p class="text-sm text-muted-foreground leading-relaxed font-normal tracking-wide antialiased">
-                        @_selectedMedia.Description
-                    </p>
-                </div>
-
-                <BbSeparator/>
-
-                <div class="flex gap-2">
-                    <BbButton Class="flex-1"
-                              OnClick="ToggleWatchlistAsync"
-                              Disabled="@_isAddingToWatchlist"
-                              Variant="@((_selectedMedia != null && IsInWatchlist(_selectedMedia)) ? ButtonVariant.Secondary : ButtonVariant.Default)">
-                        @if (_isAddingToWatchlist)
-                        {
-                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                            <span>Processing...</span>
-                        }
-                        else if (_selectedMedia != null && IsInWatchlist(_selectedMedia))
-                        {
-                            <LucideIcon Name="x" Size="16" Class="mr-2"/>
-                            <span>Remove from Watchlist</span>
-                        }
-                        else
-                        {
-                            <LucideIcon Name="plus" Size="16" Class="mr-2"/>
-                            <span>Add to Watchlist</span>
-                        }
-                    </BbButton>
-                </div>
-
-                @if (_isError && !string.IsNullOrEmpty(_statusMessage))
-                {
-                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-3">
-                        <p class="text-sm text-destructive">
-                            @_statusMessage
-                        </p>
-                    </div>
-                }
-            </div>
-        }
-    </BbSheetContent>
-</BbSheet>
+<MediaDetailsSideMenu @bind-Open="_isSheetOpen"
+                      ShowContent="@(_selectedMedia is not null)"
+                      Title="@(_selectedMedia?.Title ?? string.Empty)"
+                      MediaType="@(_selectedMedia?.MediaType ?? MediaType.Movie)"
+                      ReleaseDate="@(_selectedMedia?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                      ImageUrl="@(_selectedMedia?.PosterUrl ?? string.Empty)"
+                      Rating="@(_selectedMedia?.Rating)"
+                      ShowMetadataRow="true"
+                      Description="@_selectedMedia?.Description"
+                      ButtonAction="ToggleWatchlistAsync"
+                      ButtonText="GetSideMenuButtonText"
+                      ButtonIcon="GetSideMenuButtonIcon"/>
 
 @code {
     private IReadOnlyList<ITrendingMedia>? _trendingMedia;
@@ -187,9 +113,6 @@
     private bool _isLoading;
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
-    private bool _isAddingToWatchlist;
-    private string? _statusMessage;
-    private bool _isError;
     private bool _isAuthenticated;
     private bool _hasTmdbKey;
     private HashSet<string> _watchlistedPlexIds = new();
@@ -421,22 +344,28 @@
     {
         _selectedMedia = media;
         _isSheetOpen = true;
-        _statusMessage = null;
-        _isError = false;
+    }
+
+    private string GetSideMenuButtonText()
+    {
+        return _selectedMedia != null && IsInWatchlist(_selectedMedia)
+            ? "Remove from Watchlist"
+            : "Add to Watchlist";
+    }
+
+    private string GetSideMenuButtonIcon()
+    {
+        return _selectedMedia != null && IsInWatchlist(_selectedMedia)
+            ? "x"
+            : "plus";
     }
 
     private async Task ToggleWatchlistAsync()
     {
         if (_selectedMedia?.ExternalId is not PlexId plexId)
         {
-            _statusMessage = "Unable to modify watchlist: No Plex ID available";
-            _isError = true;
             return;
         }
-
-        _isAddingToWatchlist = true;
-        _statusMessage = null;
-        _isError = false;
 
         var watchlistService = WatchlistServiceIndex[AuthProvider];
         var isCurrentlyInWatchlist = _watchlistedPlexIds.Contains(plexId.Value);
@@ -461,12 +390,5 @@
             }
         }
 
-        _isAddingToWatchlist = false;
-
-        if (!success)
-        {
-            _statusMessage = $"Failed to {(isCurrentlyInWatchlist ? "remove from" : "add to")} watchlist. Please try again.";
-            _isError = true;
-        }
     }
 }
