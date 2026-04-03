@@ -14,6 +14,7 @@
 @inject IApiKeyStore ApiKeyStore
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
+@inject IKeyboardShortcutService KeyboardShortcutService
 @inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
@@ -27,11 +28,15 @@
 
         @if (_isAuthenticated)
         {
-            <BbButton Variant="ButtonVariant.Outline" @onclick="OpenSearchSheet" Class="bg-secondary">
-                <LucideIcon Name="search" Size="16" Class="mr-2"/>
-                <span>Add from Search</span>
-                <BbBadge Class="bg-card ml-2 text-[10px] text-primary">Ctrl+K</BbBadge>
-            </BbButton>
+            <div class="ml-auto self-center">
+                <BbCommand Class="border">
+                    <BbCommandItem OnSelect="OpenSearchSheet" Value="search" class="search-command-item">
+                        <LucideIcon Name="search" Class="mr-2"/>
+                        Add from Search
+                        <kbd class="search-command-item-shortcut">CTRL + K</kbd>
+                    </BbCommandItem>
+                </BbCommand>
+            </div>
         }
     </div>
 
@@ -230,8 +235,9 @@
     private int _currentPage = 1;
     private int _totalPages = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private DotNetObjectReference<Browse>? _shortcutDotNetRef;
+    private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
+    private const string BrowseSearchShortcutId = "browse-search-shortcut";
     private const AuthProvider AuthProvider = Contracts.Auth.AuthProvider.Plex;
 
     protected override async Task OnInitializedAsync()
@@ -259,8 +265,7 @@
     {
         if (_isAuthenticated && !_isShortcutRegistered)
         {
-            _shortcutDotNetRef = DotNetObjectReference.Create(this);
-            await JsRuntime.InvokeVoidAsync("registerBrowseSearchShortcut", _shortcutDotNetRef);
+            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+K", OpenSearchFromShortcutAsync, BrowseSearchShortcutId);
             _isShortcutRegistered = true;
         }
         else if (!_isAuthenticated && _isShortcutRegistered)
@@ -269,8 +274,7 @@
         }
     }
 
-    [JSInvokable]
-    public async Task OpenSearchFromShortcutAsync()
+    private async Task OpenSearchFromShortcutAsync()
     {
         if (!_isAuthenticated || _isSearchModalOpen)
         {
@@ -281,25 +285,20 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async ValueTask UnregisterShortcutAsync()
+    private ValueTask UnregisterShortcutAsync()
     {
         if (!_isShortcutRegistered)
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
-        try
-        {
-            await JsRuntime.InvokeVoidAsync("unregisterBrowseSearchShortcut");
-        }
-        catch (JSDisconnectedException)
-        {
-            // Component is disposing and JS runtime may already be gone.
-        }
+        _shortcutRegistration?.Dispose();
+        _shortcutRegistration = null;
 
-        _shortcutDotNetRef?.Dispose();
-        _shortcutDotNetRef = null;
+        // Keep explicit ID-based cleanup so stale registrations cannot survive circuit reconnections.
+        KeyboardShortcutService.Unregister(BrowseSearchShortcutId);
         _isShortcutRegistered = false;
+        return ValueTask.CompletedTask;
     }
 
     private async Task LoadPageAsync()
@@ -365,7 +364,8 @@
         Dispose();
     }
 
-    private bool IsInWatchlist(ITrendingMedia media)
+    private bool IsInWatchlist
+        (ITrendingMedia media)
     {
         return media.ExternalId is PlexId plexId && _watchlistedPlexIds.Contains(plexId.Value);
     }
