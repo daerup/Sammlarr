@@ -1,0 +1,60 @@
+@using Contracts.Auth
+@using Contracts.Media
+@using global::Shared
+
+@inject IApiKeyStore ApiKeyStore
+@inject NavigationManager NavigationManager
+
+@if (_isChecking)
+{
+}
+else if (_hasAccess)
+{
+    @ChildContent
+}
+else if (!HideFallback)
+{
+    <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+        <LucideIcon Name="key" Size="40" Class="mx-auto text-muted-foreground"/>
+        <p class="text-muted-foreground">A @ProviderName API key is required to @RequirementDescription.</p>
+        <BbButton Variant="ButtonVariant.Outline" OnClick="NavigateToSettings">
+            Configure API Key
+        </BbButton>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public MediaProvider Provider { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<bool> AccessChanged { get; set; }
+    [Parameter] public string RequirementDescription { get; set; } = "continue";
+    [Parameter] public string SettingsUrl { get; set; } = "/settings";
+    [Parameter] public bool HideFallback { get; set; }
+
+    private bool _hasAccess;
+    private bool _isChecking = true;
+    private bool? _lastReportedAccess;
+
+    private string ProviderName => Provider.GetDescription();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isChecking = true;
+
+        var apiKey = await ApiKeyStore.GetApiKeyAsync(Provider);
+        _hasAccess = !string.IsNullOrWhiteSpace(apiKey);
+        _isChecking = false;
+
+        if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
+        {
+            _lastReportedAccess = _hasAccess;
+            await AccessChanged.InvokeAsync(_hasAccess);
+        }
+    }
+
+    private void NavigateToSettings()
+    {
+        NavigationManager.NavigateTo(SettingsUrl);
+    }
+}
+
