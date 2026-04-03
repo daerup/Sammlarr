@@ -3,11 +3,14 @@
 @using global::Shared
 @using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaSearchService> SearchServiceIndex
-@inject IJSRuntime JsRuntime
-@implements IAsyncDisposable
 @if (IsOpen)
 {
-    <div class="search-modal" role="dialog" aria-modal="true" aria-label="@SearchModalTitle">
+    <div class="search-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-label="@SearchModalTitle"
+         tabindex="-1"
+         @onkeydown="HandleModalKeyDown">
         <div class="search-modal-backdrop" @onclick="CloseAsync"></div>
 
         <div class="search-modal-content">
@@ -26,12 +29,14 @@
                     <BbField Class="flex-1">
                         <BbFieldLabel For="search-input" Class="sr-only">Search query</BbFieldLabel>
                         <BbFieldContent>
-                            <BbInput Id="search-input"
-                                     Class=" bg-secondary"
-                                     @bind-Value="_searchQuery"
-                                     @onkeydown="HandleSearchKeyDown"
-                                     UpdateTiming="UpdateTiming.Immediate"
-                                     Placeholder="Search title"/>
+                            <input id="search-input"
+                                   class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                   type="search"
+                                   @bind="_searchQuery"
+                                   @bind:event="oninput"
+                                   @onkeydown="HandleSearchKeyDown"
+                                   @ref="_searchInputRef"
+                                   placeholder="Search title" />
                         </BbFieldContent>
                     </BbField>
                     <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary">
@@ -187,71 +192,31 @@
     private bool _isSearchStatusError;
     private IMediaId? _activeAddSourceId;
     private List<IMediaSearchResult> _searchResults = [];
+    private ElementReference _searchInputRef;
+    private bool _shouldFocusSearchInput;
     private bool _wasOpen;
-    private bool _isEscapeHandlerRegistered;
-    private DotNetObjectReference<SearchModal>? _dotNetRef;
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => $"Search {SearchProviderName}";
     private string SearchModalDescription => $"Find a movie or show from {SearchProviderName} and add it to your watchlist.";
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnParametersSet()
     {
         if (IsOpen && !_wasOpen)
         {
-            await JsRuntime.InvokeVoidAsync("focusSearchInput", "search-input");
-            await RegisterEscapeHandlerAsync();
+            _shouldFocusSearchInput = true;
         }
-        else if (!IsOpen && _wasOpen)
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (IsOpen && _shouldFocusSearchInput)
         {
-            await UnregisterEscapeHandlerAsync();
+            _shouldFocusSearchInput = false;
+            await _searchInputRef.FocusAsync();
         }
 
         _wasOpen = IsOpen;
-    }
-
-    [JSInvokable]
-    public async Task CloseFromEscapeAsync()
-    {
-        if (IsOpen)
-        {
-            await CloseAsync();
-        }
-    }
-
-    private async Task RegisterEscapeHandlerAsync()
-    {
-        if (_isEscapeHandlerRegistered)
-        {
-            return;
-        }
-
-        _dotNetRef = DotNetObjectReference.Create(this);
-        await JsRuntime.InvokeVoidAsync("registerSearchModalEscape", _dotNetRef);
-        _isEscapeHandlerRegistered = true;
-    }
-
-    private async Task UnregisterEscapeHandlerAsync()
-    {
-        if (!_isEscapeHandlerRegistered)
-        {
-            return;
-        }
-
-        try
-        {
-            await JsRuntime.InvokeVoidAsync("unregisterSearchModalEscape");
-        }
-        catch (JSDisconnectedException) {}
-
-        _dotNetRef?.Dispose();
-        _dotNetRef = null;
-        _isEscapeHandlerRegistered = false;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await UnregisterEscapeHandlerAsync();
     }
 
     private bool InWatchlist(IMediaId mediaId)
@@ -274,6 +239,18 @@
         if (args.Key is "Enter")
         {
             await SearchAsync();
+        }
+        else if (args.Key is "Escape" && IsOpen)
+        {
+            await CloseAsync();
+        }
+    }
+
+    private async Task HandleModalKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key is "Escape" && IsOpen)
+        {
+            await CloseAsync();
         }
     }
 
