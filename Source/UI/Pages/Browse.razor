@@ -27,10 +27,10 @@
 
         @if (_isAuthenticated)
         {
-            <BbButton Variant="ButtonVariant.Outline" @onclick="OpenSearchSheet">
+            <BbButton Variant="ButtonVariant.Outline" @onclick="OpenSearchSheet" Class="bg-secondary">
                 <LucideIcon Name="search" Size="16" Class="mr-2"/>
                 <span>Add from Search</span>
-                <BbBadge Variant="BadgeVariant.Outline" Class="ml-2 text-[10px] px-1.5 py-0.5">Ctrl+K</BbBadge>
+                <BbBadge Class="bg-card ml-2 text-[10px] text-primary">Ctrl+K</BbBadge>
             </BbButton>
         }
     </div>

@@ -27,13 +27,14 @@
                         <BbFieldLabel For="search-input" Class="sr-only">Search query</BbFieldLabel>
                         <BbFieldContent>
                             <BbInput Id="search-input"
+                                     Class=" bg-secondary"
                                      @bind-Value="_searchQuery"
                                      @onkeydown="HandleSearchKeyDown"
                                      UpdateTiming="UpdateTiming.Immediate"
                                      Placeholder="Search title"/>
                         </BbFieldContent>
                     </BbField>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching">
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary">
                         @if (_isSearching)
                         {
                             <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
