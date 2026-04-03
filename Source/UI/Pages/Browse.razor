@@ -9,10 +9,6 @@
 @using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistServiceIndex
-@inject ICredentialStore CredentialStore
-@inject ProfileDropdownService ProfileDropdownService
-@inject IApiKeyStore ApiKeyStore
-@inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject ToastService ToastService
 
@@ -25,86 +21,78 @@
             <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Discover what's popular this week</p>
         </div>
 
-        @if (_isAuthenticated)
-        {
-            <div class="ml-auto self-center">
+        <OauthGuard Provider="AuthProvider.Plex"
+                    RequirementDescription="searching Plex media"
+                    HideFallback="true">
+            <div class="flex items-center gap-2">
                 <BbCommand Class="border">
                     <BbCommandItem OnSelect="OpenSearchSheet" Value="search" class="search-command-item">
                         <LucideIcon Name="search" Class="mr-2"/>
                         Add from Search
-                            <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut" />
+                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut" />
                     </BbCommandItem>
                 </BbCommand>
             </div>
-        }
+        </OauthGuard>
     </div>
 
-    @if (!_isAuthenticated)
-    {
-        <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
-            <LucideIcon Name="lock" Size="40" class="mx-auto text-muted-foreground"/>
-            <p class="text-muted-foreground">You need to connect your Plex account before browsing trending media.</p>
-            <BbButton Variant="ButtonVariant.Outline" OnClick="ProfileDropdownService.RequestOpenAsync">
-                Connect Plex Account
-            </BbButton>
-        </div>
-    }
-    else if (!_hasTmdbKey)
-    {
-        <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
-            <LucideIcon Name="key" Size="40" class="mx-auto text-muted-foreground"/>
-            <p class="text-muted-foreground">A TMDB API key is required to browse trending media.</p>
-            <BbButton Variant="ButtonVariant.Outline" OnClick='() => NavigationManager.NavigateTo("/settings")'>
-                Configure API Key
-            </BbButton>
-        </div>
-    }
-    else if (_isLoading)
-    {
-        <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-            @for (int i = 0; i < 20; i++)
+    <div class="mt-6">
+        <OauthGuard Provider="AuthProvider.Plex"
+                    RequirementDescription="browsing trending media"
+                    AccessChanged="HandleOAuthAccessChanged">
+
+        <ApiKeyGuard Provider="MediaProvider.Tmdb"
+                     RequirementDescription="browse trending media"
+                     AccessChanged="HandleTmdbAccessChanged">
+            @if (_isLoading)
             {
-                <div class="space-y-3">
-                    <BbSkeleton Class="w-full" Height="300px"/>
+                <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                    @for (int i = 0; i < 20; i++)
+                    {
+                        <div class="space-y-3">
+                            <BbSkeleton Class="w-full" Height="300px"/>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    }
-    else if (_trendingMedia != null)
-    {
-        <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-            @foreach (var media in _trendingMedia)
+            else if (_trendingMedia != null)
             {
-                <MediaCard @key="media"
-                           ImageUrl="@media.BackdropUrl"
-                           Title="@media.Title"
-                           OnClick="() => SelectMedia(media)"
-                           ShowBookmark="true"
-                           IsInWatchlist="@IsInWatchlist(media)"
-                           Rating="@media.Rating"
-                           Date="@media.ReleaseDate"/>
+                <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+                    @foreach (var media in _trendingMedia)
+                    {
+                        <MediaCard @key="media"
+                                   ImageUrl="@media.BackdropUrl"
+                                   Title="@media.Title"
+                                   OnClick="() => SelectMedia(media)"
+                                   ShowBookmark="true"
+                                   IsInWatchlist="@IsInWatchlist(media)"
+                                   Rating="@media.Rating"
+                                   Date="@media.ReleaseDate"/>
+                    }
+                </div>
+
+                <div class="flex items-center justify-center gap-4 mt-5">
+                    <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage <= 1)" OnClick="GoToPreviousPageAsync">
+                        <LucideIcon Name="chevron-left" Size="16" Class="mr-1"/>
+                        Previous
+                    </BbButton>
+                    <span class="text-sm text-muted-foreground font-medium">Page @_currentPage</span>
+                    <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage >= _totalPages)" OnClick="GoToNextPageAsync">
+                        Next
+                        <LucideIcon Name="chevron-right" Size="16" Class="ml-1"/>
+                    </BbButton>
+                </div>
             }
-        </div>
+        </ApiKeyGuard>
 
-        <div class="flex items-center justify-center gap-4 mt-5">
-            <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage <= 1)" OnClick="GoToPreviousPageAsync">
-                <LucideIcon Name="chevron-left" Size="16" Class="mr-1"/>
-                Previous
-            </BbButton>
-            <span class="text-sm text-muted-foreground font-medium">Page @_currentPage</span>
-            <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage >= _totalPages)" OnClick="GoToNextPageAsync">
-                Next
-                <LucideIcon Name="chevron-right" Size="16" Class="ml-1"/>
-            </BbButton>
-        </div>
-    }
+            <SearchModal @bind-IsOpen="_isSearchModalOpen"
+                         SearchProvider="MediaProvider.Plex"
+                         IsInWatchlist="id => IsInWatchlist((PlexId)id)"
+                         AddToWatchlistAsync="(id, title) => AddFromSearchAsync((PlexId)id, title)"
+                         RemoveFromWatchlistAsync="(id, title) =>  RemoveFromSearchAsync((PlexId)id, title)"/>
+        </OauthGuard>
+    </div>
 </div>
-
-<SearchModal @bind-IsOpen="_isSearchModalOpen"
-             SearchProvider="MediaProvider.Plex"
-             IsInWatchlist="id => IsInWatchlist((PlexId)id)"
-             AddToWatchlistAsync="(id, title) => AddFromSearchAsync((PlexId)id, title)"
-             RemoveFromWatchlistAsync="(id, title) =>  RemoveFromSearchAsync((PlexId)id, title)"/>
 
 <BbSheet @bind-Open="_isSheetOpen">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
@@ -196,7 +184,7 @@
 @code {
     private IReadOnlyList<ITrendingMedia>? _trendingMedia;
     private ITrendingMedia? _selectedMedia;
-    private bool _isLoading = true;
+    private bool _isLoading;
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
     private bool _isAddingToWatchlist;
@@ -214,23 +202,44 @@
     private const string BrowseSearchShortcutId = "browse-search-shortcut";
     private const AuthProvider AuthProvider = Contracts.Auth.AuthProvider.Plex;
 
-    protected override async Task OnInitializedAsync()
+    private async Task HandleOAuthAccessChanged(bool isAuthenticated)
     {
-        var credential = await CredentialStore.GetAsync(AuthProvider, _cancellationTokenSource.Token);
-        _isAuthenticated = credential is not null && !string.IsNullOrWhiteSpace(credential.AccessToken);
+        _isAuthenticated = isAuthenticated;
 
-        if (!_isAuthenticated) return;
+        if (!_isAuthenticated)
+        {
+            _hasTmdbKey = false;
+            _watchlistedPlexIds.Clear();
+            _trendingMedia = null;
+            _selectedMedia = null;
+            _isSheetOpen = false;
+            _isSearchModalOpen = false;
+            _isLoading = false;
+            return;
+        }
 
-        var tmdbKey = await ApiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, _cancellationTokenSource.Token);
-        _hasTmdbKey = !string.IsNullOrWhiteSpace(tmdbKey);
+        await LoadWatchlistIdsAsync();
+    }
 
-        if (!_hasTmdbKey) return;
+    private async Task HandleTmdbAccessChanged(bool hasTmdbKey)
+    {
+        _hasTmdbKey = hasTmdbKey;
 
-        var watchlistService = WatchlistServiceIndex[AuthProvider];
-        var watchlistPage = await watchlistService.GetWatchlistAsync(1, _cancellationTokenSource.Token);
-        if (_cancellationTokenSource.IsCancellationRequested) return;
+        if (!_hasTmdbKey)
+        {
+            _trendingMedia = null;
+            _selectedMedia = null;
+            _isSheetOpen = false;
+            _currentPage = 1;
+            _totalPages = 1;
+            _isLoading = false;
+            return;
+        }
 
-        _watchlistedPlexIds = watchlistPage.Items.Select(item => item.SourceId).OfType<PlexId>().Select(id => id.Value).ToHashSet();
+        if (_currentPage < 1)
+        {
+            _currentPage = 1;
+        }
 
         await LoadPageAsync();
     }
@@ -273,6 +282,18 @@
         KeyboardShortcutService.Unregister(BrowseSearchShortcutId);
         _isShortcutRegistered = false;
         return ValueTask.CompletedTask;
+    }
+
+    private async Task LoadWatchlistIdsAsync()
+    {
+        var watchlistService = WatchlistServiceIndex[AuthProvider];
+        var watchlistPage = await watchlistService.GetWatchlistAsync(1, _cancellationTokenSource.Token);
+        if (_cancellationTokenSource.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _watchlistedPlexIds = watchlistPage.Items.Select(item => item.SourceId).OfType<PlexId>().Select(id => id.Value).ToHashSet();
     }
 
     private async Task LoadPageAsync()

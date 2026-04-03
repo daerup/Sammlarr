@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using Contracts.Auth;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Shared.DI;
 
@@ -10,10 +11,7 @@ namespace UI.Shared;
 public partial class MainLayout : LayoutComponentBase, IDisposable
 {
 	[Inject]
-	private ICredentialStore CredentialStore { get; set; } = null!;
-
-	[Inject]
-	private IKeyedServiceIndex<AuthProvider, IOAuthService> OAuthServiceIndex { get; set; } = null!;
+	private IServiceScopeFactory ScopeFactory { get; set; } = null!;
 
 	[Inject]
 	private NavigationManager NavigationManager { get; set; } = null!;
@@ -28,8 +26,8 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 	private bool _isProcessing;
 	private string? _avatarUrl;
 	private string? _username;
-
-	private IOAuthService OAuthService => OAuthServiceIndex[AuthProvider.Plex];
+	private readonly CancellationTokenSource _disposeCts = new();
+	private bool _isDisposed;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -47,15 +45,36 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		}
 	}
 
-	private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+	private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
 	{
-		await RefreshAuthStatusAsync();
+		_ = HandleLocationChangedAsync();
+	}
+
+	private async Task HandleLocationChangedAsync()
+	{
+		if (_isDisposed || _disposeCts.IsCancellationRequested)
+		{
+			return;
+		}
+
+		await RefreshAuthStatusAsync(_disposeCts.Token);
+
+		if (_isDisposed || _disposeCts.IsCancellationRequested)
+		{
+			return;
+		}
+
 		await InvokeAsync(StateHasChanged);
 	}
 
-	private async Task RefreshAuthStatusAsync()
+	private async Task RefreshAuthStatusAsync(CancellationToken cancellationToken = default)
 	{
-		var credential = await CredentialStore.GetAsync(AuthProvider.Plex);
+		await using var scope = ScopeFactory.CreateAsyncScope();
+		var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
+		var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<AuthProvider, IOAuthService>>();
+		var oauthService = oauthServiceIndex[AuthProvider.Plex];
+
+		var credential = await credentialStore.GetAsync(AuthProvider.Plex, cancellationToken);
 		if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
 		{
 			_isAuthenticated = false;
@@ -64,13 +83,13 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 			return;
 		}
 
-		var userInfo = await OAuthService.GetLoggedInUser();
+		var userInfo = await oauthService.GetLoggedInUser();
 		_isAuthenticated = userInfo is not null;
 		_avatarUrl = userInfo?.AvatarUrl;
 		_username = userInfo?.Username;
 
 		if (userInfo is null)
-			await CredentialStore.ClearAsync(AuthProvider.Plex);
+			await credentialStore.ClearAsync(AuthProvider.Plex, cancellationToken);
 	}
 
 	private async Task InitiateAuthAsync()
@@ -78,8 +97,12 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		_isProcessing = true;
 		try
 		{
+			await using var scope = ScopeFactory.CreateAsyncScope();
+			var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<AuthProvider, IOAuthService>>();
+			var oauthService = oauthServiceIndex[AuthProvider.Plex];
+
 			var forwardUrl = NavigationManager.ToAbsoluteUri("/plex-auth?pinId={0}&clientId={1}").ToString();
-			var authUrl = await OAuthService.GetOAuthUrl(forwardUrl);
+			var authUrl = await oauthService.GetOAuthUrl(forwardUrl, _disposeCts.Token);
 			NavigationManager.NavigateTo(authUrl, forceLoad: true);
 		}
 		catch
@@ -90,7 +113,9 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
 	private async Task DisconnectAsync()
 	{
-		await CredentialStore.ClearAsync(AuthProvider.Plex);
+		await using var scope = ScopeFactory.CreateAsyncScope();
+		var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
+		await credentialStore.ClearAsync(AuthProvider.Plex, _disposeCts.Token);
 		NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
 	}
 
@@ -102,6 +127,14 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
 	public void Dispose()
 	{
+		if (_isDisposed)
+		{
+			return;
+		}
+
+		_isDisposed = true;
+		_disposeCts.Cancel();
+		_disposeCts.Dispose();
 		NavigationManager.LocationChanged -= HandleLocationChanged;
 		ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
 	}
