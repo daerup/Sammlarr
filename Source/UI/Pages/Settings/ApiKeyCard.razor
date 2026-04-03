@@ -1,0 +1,201 @@
+@using Contracts.Auth
+@using Contracts.Media
+@using global::Shared.DI
+
+@inject IApiKeyStore ApiKeyStore
+@inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
+
+<div class="w-full max-w-lg">
+    <div class="rounded-lg border">
+        <div class="flex items-center gap-3 px-6 py-4 border-b">
+            <LucideIcon Name="key" Size="16" Class="text-muted-foreground"/>
+            <h3 class="text-sm font-semibold">@Title</h3>
+        </div>
+
+        <div class="px-6 py-6 space-y-6">
+            <div class="space-y-3">
+                <div>
+                    <div class="mb-1 flex items-center gap-1.5">
+                        <label class="text-sm font-medium block" for="@InputId">API Key</label>
+                    </div>
+                    <p class="text-xs text-muted-foreground leading-relaxed">
+                        @Description
+                    </p>
+                </div>
+                <BbField>
+                    <BbFieldContent>
+                        <div class="relative">
+                            <BbInput Id="@InputId"
+                                     @bind-Value="ApiKey"
+                                     UpdateTiming="UpdateTiming.Immediate"
+                                     Class="pr-10"
+                                     Placeholder="Enter API key"/>
+                            @if (_state is State.Success or State.Saving or State.Saved)
+                            {
+                                <span class="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <LucideIcon Name="check" Size="12" Class="text-success"/>
+                                </span>
+                            }
+                            else if (_state == State.Failed)
+                            {
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-help" title="@InvalidApiKeyMessage">
+                                    <LucideIcon Name="x-circle" Size="12" Class="text-destructive"/>
+                                </span>
+                            }
+                        </div>
+                    </BbFieldContent>
+                </BbField>
+            </div>
+
+            <div class="flex items-center gap-3">
+                @if (_state == State.Idle)
+                {
+                    <BbButton Variant="ButtonVariant.Default" OnClick="HandleButtonClickAsync">
+                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                        <span>Test</span>
+                    </BbButton>
+                }
+                else if (_state == State.Testing)
+                {
+                    <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Testing…</span>
+                    </BbButton>
+                }
+                else if (_state == State.Success)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-success border-success hover:bg-success"
+                              OnClick="HandleButtonClickAsync">
+                        <LucideIcon Name="save" Size="14" Class="mr-2"/>
+                        <span>Save</span>
+                    </BbButton>
+                }
+                else if (_state == State.Saving)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-success border-success hover:bg-success"
+                              Disabled="true">
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Saving…</span>
+                    </BbButton>
+                }
+                else if (_state == State.Saved)
+                {
+                    <BbButton Variant="ButtonVariant.Default"
+                              Class="border-success bg-success text-white"
+                              Disabled="true">
+                        <LucideIcon Name="check" Size="14" Class="mr-2"/>
+                        <span>Saved</span>
+                    </BbButton>
+                }
+                else if (_state == State.Failed)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                              Disabled="true">
+                        <LucideIcon Name="x" Size="14" Class="mr-2"/>
+                        <span>Failed</span>
+                    </BbButton>
+                }
+
+                @if (_apiKeyInput != _savedApiKey || _state is State.Failed or State.Success)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                              OnClick="CancelAsync"
+                              Disabled="@(_state is State.Testing or State.Saving)">
+                        Cancel
+                    </BbButton>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private enum State { Idle, Testing, Success, Saving, Saved, Failed }
+
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    [Parameter, EditorRequired]
+    public required MediaProvider Provider { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment Description { get; set; }
+
+    private string _apiKeyInput = string.Empty;
+    private string _savedApiKey = string.Empty;
+    private MediaProvider? _loadedProvider;
+    private State _state = State.Idle;
+
+    private string ApiKey
+    {
+        get => _apiKeyInput;
+        set
+        {
+            if (_apiKeyInput == value)
+            {
+                return;
+            }
+
+            _apiKeyInput = value;
+            _state = State.Idle;
+        }
+    }
+
+    private string InputId => $"{Provider.ToString().ToLowerInvariant()}-api-key";
+
+    private string InvalidApiKeyMessage => $"Invalid {Title} API key";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedProvider == Provider)
+        {
+            return;
+        }
+
+        var key = await ApiKeyStore.GetApiKeyAsync(Provider);
+        _savedApiKey = key ?? string.Empty;
+        _apiKeyInput = _savedApiKey;
+        _state = State.Idle;
+        _loadedProvider = Provider;
+    }
+
+    private Task HandleButtonClickAsync() => _state == State.Success ? SaveAsync() : TestAsync();
+
+    private async Task TestAsync()
+    {
+        _state = State.Testing;
+
+        try
+        {
+            var ok = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_apiKeyInput.Trim());
+            _state = ok ? State.Success : State.Failed;
+        }
+        catch (Exception)
+        {
+            _state = State.Failed;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _state = State.Saving;
+
+        var trimmedApiKey = _apiKeyInput.Trim();
+
+        await ApiKeyStore.SetApiKeyAsync(Provider, trimmedApiKey);
+        _savedApiKey = trimmedApiKey;
+
+        _state = State.Saved;
+    }
+
+    private Task CancelAsync()
+    {
+        _apiKeyInput = _savedApiKey;
+        _state = State.Idle;
+        return Task.CompletedTask;
+    }
+}
