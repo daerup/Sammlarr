@@ -129,9 +129,9 @@
 
 <SearchModal @bind-IsOpen="_isSearchModalOpen"
              SearchProvider="MediaProvider.Plex"
-             IsInWatchlist="IsInWatchlist"
-             AddToWatchlistAsync="AddFromSearchAsync"
-             RemoveFromWatchlistAsync="RemoveFromSearchAsync"/>
+             IsInWatchlist="id => IsInWatchlist((PlexId)id)"
+             AddToWatchlistAsync="(id, title) => AddFromSearchAsync((PlexId)id, title)"
+             RemoveFromWatchlistAsync="(id, title) =>  RemoveFromSearchAsync((PlexId)id, title)"/>
 
 <BbSheet @bind-Open="_isSheetOpen">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
@@ -364,8 +364,7 @@
         Dispose();
     }
 
-    private bool IsInWatchlist
-        (ITrendingMedia media)
+    private bool IsInWatchlist(ITrendingMedia media)
     {
         return media.ExternalId is PlexId plexId && _watchlistedPlexIds.Contains(plexId.Value);
     }

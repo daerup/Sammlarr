@@ -1,20 +1,20 @@
 @using Contracts.Media
 @using Contracts.Media.Search
+@using global::Shared
 @using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaSearchService> SearchServiceIndex
 @inject IJSRuntime JsRuntime
-@inject ToastService ToastService
 @implements IAsyncDisposable
 @if (IsOpen)
 {
-    <div class="search-modal" role="dialog" aria-modal="true" aria-label="Search Plex Catalog">
+    <div class="search-modal" role="dialog" aria-modal="true" aria-label="@SearchModalTitle">
         <div class="search-modal-backdrop" @onclick="CloseAsync"></div>
 
         <div class="search-modal-content">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-bold tracking-wide">Search Plex Catalog</h2>
-                    <p class="text-sm text-muted-foreground">Find a movie or show and add it to your watchlist.</p>
+                    <h2 class="text-lg font-bold tracking-wide">@SearchModalTitle</h2>
+                    <p class="text-sm text-muted-foreground">@SearchModalDescription</p>
                 </div>
                 <BbButton Variant="ButtonVariant.Ghost" OnClick="CloseAsync">
                     <LucideIcon Name="x" Size="18"/>
@@ -138,7 +138,7 @@
                                     </div>
                                     <BbButton Variant="ButtonVariant.Link"
                                               OnClick="() => ToggleWatchlistAsync(result)"
-                                              Disabled="@(_isAdding || !CanAddToWatchlist(result))">
+                                              Disabled="@_isAdding">
                                         @if (_isAdding && Equals(_activeAddSourceId, result.SourceId))
                                         {
                                             <BbSpinner Size="SpinnerSize.Default"/>
@@ -174,10 +174,10 @@
 
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
-    [Parameter] public MediaProvider SearchProvider { get; set; } = MediaProvider.Plex;
-    [Parameter] public Func<PlexId, bool>? IsInWatchlist { get; set; }
-    [Parameter] public Func<PlexId, string, Task<bool>> AddToWatchlistAsync { get; set; }
-    [Parameter] public Func<PlexId, string, Task<bool>> RemoveFromWatchlistAsync { get; set; }
+    [Parameter, EditorRequired] public MediaProvider SearchProvider { get; set; }
+    [Parameter] public Func<IMediaId, bool>? IsInWatchlist { get; set; }
+    [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> AddToWatchlistAsync { get; set; }
+    [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> RemoveFromWatchlistAsync { get; set; }
 
     private bool _isSearching;
     private bool _hasSearched;
@@ -190,6 +190,10 @@
     private bool _wasOpen;
     private bool _isEscapeHandlerRegistered;
     private DotNetObjectReference<SearchModal>? _dotNetRef;
+
+    private string SearchProviderName => SearchProvider.GetDescription();
+    private string SearchModalTitle => $"Search {SearchProviderName}";
+    private string SearchModalDescription => $"Find a movie or show from {SearchProviderName} and add it to your watchlist.";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -250,19 +254,14 @@
         await UnregisterEscapeHandlerAsync();
     }
 
-    private bool InWatchlist(PlexId plexId)
+    private bool InWatchlist(IMediaId mediaId)
     {
-        return IsInWatchlist?.Invoke(plexId) == true;
+        return IsInWatchlist?.Invoke(mediaId) == true;
     }
 
     private bool IsSearchResultInWatchlist(IMediaSearchResult result)
     {
-        return result.SourceId is PlexId plexId && InWatchlist(plexId);
-    }
-
-    private static bool CanAddToWatchlist(IMediaSearchResult result)
-    {
-        return result.SourceId is PlexId;
+        return  InWatchlist(result.SourceId);
     }
 
     private async Task CloseAsync()
@@ -321,13 +320,6 @@
             return;
         }
 
-        if (result.SourceId is not PlexId plexId)
-        {
-            _searchStatusMessage = $"Could not modify watchlist for '{result.Title}': missing Plex identifier.";
-            _isSearchStatusError = true;
-            return;
-        }
-
         _isAdding = true;
         _activeAddSourceId = result.SourceId;
         _searchStatusMessage = null;
@@ -335,11 +327,11 @@
 
         if (IsSearchResultInWatchlist(result))
         {
-            await RemoveFromWatchlistAsync(plexId, result.Title);
+            await RemoveFromWatchlistAsync(_activeAddSourceId, result.Title);
         }
         else
         {
-            await AddToWatchlistAsync(plexId, result.Title);
+            await AddToWatchlistAsync(_activeAddSourceId, result.Title);
         }
         _isAdding = false;
         _activeAddSourceId = null;
