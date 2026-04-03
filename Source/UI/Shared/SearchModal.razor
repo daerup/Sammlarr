@@ -13,6 +13,8 @@
          @onkeydown="HandleModalKeyDown">
         <div class="search-modal-backdrop" @onclick="CloseAsync"></div>
 
+        <div tabindex="0" class="sr-only" aria-hidden="true" @onfocus="FocusTrapLoopAsync"></div>
+
         <div class="search-modal-content">
             <div class="flex items-start justify-between gap-4">
                 <div>
@@ -35,6 +37,7 @@
                                    @bind="_searchQuery"
                                    @bind:event="oninput"
                                    @onkeydown="HandleSearchKeyDown"
+                                   @onfocus="() => _focusedResult = null"
                                    @ref="_searchInputRef"
                                    placeholder="Search title" />
                         </BbFieldContent>
@@ -63,7 +66,7 @@
 
                 @if (_isSearching)
                 {
-                    <div class="search-modal-results space-y-2 pr-1" aria-hidden="true">
+                    <div class="search-modal-results space-y-2 pr-1" aria-hidden="true" tabindex="-1">
                         @for (var i = 0; i < 4; i++)
                         {
                             <div class="rounded-lg p-3 bg-surface">
@@ -87,14 +90,17 @@
                 }
                 else if (_searchResults.Count > 0)
                 {
-                    <div class="search-modal-results space-y-2 pr-1">
+                    <div class="search-modal-results space-y-2 pr-1" tabindex="-1">
                         @foreach (var result in _searchResults)
                         {
                             var displayFacts = GetDisplayFacts(result);
 
                             var backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(result.BackdropUrl) ? result.PosterUrl ?? "" : result.BackdropUrl)}')";
 
-                            <div class="search-result-row rounded-lg bg-black hover-bg" style="@backgroundStyle">
+                            <div @key="result"
+                                 class="search-result-row rounded-lg bg-black hover-bg @(_focusedResult == result ? "row-focused" : "")"
+                                 style="@backgroundStyle"
+                                 @onfocusin="() => _focusedResult = result">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex items-start">
                                         <div class="search-result-poster">
@@ -141,22 +147,28 @@
                                             }
                                         </div>
                                     </div>
-                                    <BbButton Variant="ButtonVariant.Link"
-                                              OnClick="() => ToggleWatchlistAsync(result)"
-                                              Disabled="@_isAdding">
-                                        @if (_isAdding && Equals(_activeAddSourceId, result.SourceId))
-                                        {
-                                            <BbSpinner Size="SpinnerSize.Default"/>
-                                        }
-                                        else if (IsSearchResultInWatchlist(result))
-                                        {
-                                            <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange" />
-                                        }
-                                        else
-                                        {
-                                            <LucideIcon Name="bookmark" Size="24"/>
-                                        }
-                                    </BbButton>
+                                    <button type="button"
+                                            class="search-result-toggle-btn @(IsSearchResultInWatchlist(result) ? "in-watchlist" : "") @(_isAdding && Equals(_activeAddSourceId, result.SourceId) ? "pointer-events-none" : "")"
+                                            @onclick="() => ToggleWatchlistAsync(result)">
+                                        <span class="relative inline-flex items-center justify-center w-6 h-6">
+                                            @if (IsSearchResultInWatchlist(result))
+                                            {
+                                                <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange"
+                                                            Class="transition-opacity duration-150 @(_isAdding && Equals(_activeAddSourceId, result.SourceId) ? "opacity-0" : "")" />
+                                            }
+                                            else
+                                            {
+                                                <LucideIcon Name="bookmark" Size="24"
+                                                            Class="transition-opacity duration-150 @(_isAdding && Equals(_activeAddSourceId, result.SourceId) ? "opacity-0" : "")" />
+                                            }
+                                            @if (_isAdding && Equals(_activeAddSourceId, result.SourceId))
+                                            {
+                                                <span class="absolute inset-0 flex items-center justify-center">
+                                                    <BbSpinner Size="SpinnerSize.Small" />
+                                                </span>
+                                            }
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                         }
@@ -172,6 +184,9 @@
                 }
             </div>
         </div>
+
+        <div tabindex="0" class="sr-only" aria-hidden="true" @onfocus="FocusTrapLoopAsync"></div>
+
     </div>
 }
 
@@ -195,6 +210,7 @@
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
+    private IMediaSearchResult? _focusedResult;
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => $"Search {SearchProviderName}";
@@ -219,6 +235,11 @@
         _wasOpen = IsOpen;
     }
 
+    private async Task FocusTrapLoopAsync()
+    {
+        await _searchInputRef.FocusAsync();
+    }
+
     private bool InWatchlist(IMediaId mediaId)
     {
         return IsInWatchlist?.Invoke(mediaId) == true;
@@ -231,6 +252,7 @@
 
     private async Task CloseAsync()
     {
+        _focusedResult = null;
         await IsOpenChanged.InvokeAsync(false);
     }
 
