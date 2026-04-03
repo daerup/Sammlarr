@@ -39,7 +39,7 @@
                                    @onkeydown="HandleSearchKeyDown"
                                    @onfocus="() => _focusedResult = null"
                                    @ref="_searchInputRef"
-                                   placeholder="Search title" />
+                                   placeholder="Search title"/>
                         </BbFieldContent>
                     </BbField>
                     <BbButton Variant="ButtonVariant.Outline" OnClick="SearchAsync" Disabled="@_isSearching" Class="bg-secondary">
@@ -94,6 +94,8 @@
                         @foreach (var result in _searchResults)
                         {
                             var displayFacts = GetDisplayFacts(result);
+                            var isActiveToggle = _isAdding && Equals(_activeToggledSourceId, result.SourceId);
+                            var bookmarkIconClass = $"transition-opacity duration-150 {(isActiveToggle ? "opacity-0" : string.Empty)}";
 
                             var backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(result.BackdropUrl) ? result.PosterUrl ?? "" : result.BackdropUrl)}')";
 
@@ -148,20 +150,20 @@
                                         </div>
                                     </div>
                                     <button type="button"
-                                            class="search-result-toggle-btn @(IsSearchResultInWatchlist(result) ? "in-watchlist" : "") @(_isAdding && Equals(_activeAddSourceId, result.SourceId) ? "pointer-events-none" : "")"
+                                            class="search-result-toggle-btn @(IsSearchResultInWatchlist(result) ? "in-watchlist" : "") @(isActiveToggle ? "pointer-events-none" : "")"
                                             @onclick="() => ToggleWatchlistAsync(result)">
                                         <span class="relative inline-flex items-center justify-center w-6 h-6">
                                             @if (IsSearchResultInWatchlist(result))
                                             {
                                                 <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange"
-                                                            Class="transition-opacity duration-150 @(_isAdding && Equals(_activeAddSourceId, result.SourceId) ? "opacity-0" : "")" />
+                                                            Class="@bookmarkIconClass" />
                                             }
                                             else
                                             {
                                                 <LucideIcon Name="bookmark" Size="24"
-                                                            Class="transition-opacity duration-150 @(_isAdding && Equals(_activeAddSourceId, result.SourceId) ? "opacity-0" : "")" />
+                                                            Class="@bookmarkIconClass" />
                                             }
-                                            @if (_isAdding && Equals(_activeAddSourceId, result.SourceId))
+                                            @if (isActiveToggle)
                                             {
                                                 <span class="absolute inset-0 flex items-center justify-center">
                                                     <BbSpinner Size="SpinnerSize.Small" />
@@ -205,7 +207,7 @@
     private string? _searchQuery = string.Empty;
     private string? _searchStatusMessage;
     private bool _isSearchStatusError;
-    private IMediaId? _activeAddSourceId;
+    private IMediaId? _activeToggledSourceId;
     private List<IMediaSearchResult> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
@@ -247,7 +249,7 @@
 
     private bool IsSearchResultInWatchlist(IMediaSearchResult result)
     {
-        return  InWatchlist(result.SourceId);
+        return InWatchlist(result.SourceId);
     }
 
     private async Task CloseAsync()
@@ -320,20 +322,20 @@
         }
 
         _isAdding = true;
-        _activeAddSourceId = result.SourceId;
+        _activeToggledSourceId = result.SourceId;
         _searchStatusMessage = null;
         _isSearchStatusError = false;
 
         if (IsSearchResultInWatchlist(result))
         {
-            await RemoveFromWatchlistAsync(_activeAddSourceId, result.Title);
+            await RemoveFromWatchlistAsync(_activeToggledSourceId, result.Title);
         }
         else
         {
-            await AddToWatchlistAsync(_activeAddSourceId, result.Title);
+            await AddToWatchlistAsync(_activeToggledSourceId, result.Title);
         }
         _isAdding = false;
-        _activeAddSourceId = null;
+        _activeToggledSourceId = null;
     }
 
     private static IReadOnlyList<string> GetDisplayFacts(IMediaSearchResult result)
