@@ -21,18 +21,9 @@
                 </NavLink>
             </nav>
             <div class="flex flex-1 items-center justify-end space-x-2">
-                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" @onclick="ToggleDarkMode">
-                    @if (_isDarkMode)
-                    {
-                        <LucideIcon Name="sun" Size="20" />
-                    }
-                    else
-                    {
-                        <LucideIcon Name="moon" Size="20" />
-                    }
-                </BbButton>
+                <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" />
 
-                <BbDropdownMenu>
+                <BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
                     <BbDropdownMenuTrigger>
                         <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0">
                             <BbAvatar Size="AvatarSize.Small" ShowDot="@_isAuthenticated" DotClass="bg-green-500">
@@ -94,3 +85,8 @@
 <BbToastProvider Position="ToastPosition.BottomRight" />
 <BbDialogProvider />
 <BbPortalHost />
+
+@code {
+    private bool _isProfileDropdownOpen;
+}
+

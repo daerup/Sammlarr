@@ -10,9 +10,6 @@ namespace UI.Shared;
 public partial class MainLayout : LayoutComponentBase, IDisposable
 {
 	[Inject]
-	private ThemeService ThemeService { get; set; } = null!;
-
-	[Inject]
 	private ICredentialStore CredentialStore { get; set; } = null!;
 
 	[Inject]
@@ -27,7 +24,6 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 	[Inject]
 	private ProfileDropdownService ProfileDropdownService { get; set; } = null!;
 
-	private bool _isDarkMode;
 	private bool _isAuthenticated;
 	private bool _isProcessing;
 	private string? _avatarUrl;
@@ -44,10 +40,6 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 	{
 		if (firstRender)
 		{
-			ThemeService.OnThemeChanged += HandleThemeChanged;
-			await ThemeService.InitializeAsync();
-			_isDarkMode = ThemeService.IsDarkMode;
-
 			NavigationManager.LocationChanged += HandleLocationChanged;
 			ProfileDropdownService.OnOpenRequested += HandleProfileDropdownOpenRequestedAsync;
 
@@ -102,25 +94,14 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
 	}
 
-	private async Task ToggleDarkMode()
-	{
-		await ThemeService.ToggleDarkModeAsync();
-	}
-
-	private async void HandleThemeChanged()
-	{
-		_isDarkMode = ThemeService.IsDarkMode;
-		await InvokeAsync(StateHasChanged);
-	}
-
 	private async Task HandleProfileDropdownOpenRequestedAsync()
 	{
-		await Js.InvokeVoidAsync("eval", "document.getElementById('profile-dropdown-trigger')?.click()");
+		_isProfileDropdownOpen = true;
+		await InvokeAsync(StateHasChanged);
 	}
 
 	public void Dispose()
 	{
-		ThemeService.OnThemeChanged -= HandleThemeChanged;
 		NavigationManager.LocationChanged -= HandleLocationChanged;
 		ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
 	}
