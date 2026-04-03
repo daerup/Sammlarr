@@ -4,13 +4,13 @@ namespace Contracts.Media;
 
 public enum MediaProvider
 {
-	[Description("The Movie Database")]
+	[Description("TMDB")]
 	Tmdb,
 
-	[Description("Internet Movie Database")]
+	[Description("IMDb")]
 	Imdb,
 
-	[Description("The TV Show Database")]
+	[Description("TVDB")]
 	Tvdb,
 
 	[Description("Plex")]
