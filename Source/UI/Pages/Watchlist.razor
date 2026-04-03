@@ -96,67 +96,16 @@
     </div>
 </div>
 
-<BbSheet @bind-Open="_isSheetOpen">
-    <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
-        @if (_selectedItem is not null)
-        {
-            <BbSheetHeader>
-                <BbSheetTitle Class="font-bold tracking-wide">@_selectedItem.Title</BbSheetTitle>
-                <BbSheetDescription Class="font-normal tracking-wide">
-                    <span class="flex items-center justify-center gap-1.5">
-                        @if(_selectedItem.MediaType is MediaType.Movie)
-                        {
-                            <LucideIcon Name="film" Size="16"/>
-                        }
-                        else
-                        {
-                            <LucideIcon Name="tv" Size="16" />
-                        }
-                        <span>@_selectedItem.MediaType.GetDescription() • @_selectedItem.ReleaseDate.Year</span>
-                    </span>
-                </BbSheetDescription>
-            </BbSheetHeader>
-
-            <div class="space-y-6 py-6">
-                <div class="flex justify-center">
-                    <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[260px]">
-                        <img src="@GetDetailImageUrl(_selectedItem)"
-                             alt="@_selectedItem.Title"
-                             class="w-full aspect-[2/3] object-cover"/>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    </div>
-                </div>
-
-                <BbSeparator/>
-
-                <div class="flex gap-2">
-                    <BbButton Class="flex-1"
-                              OnClick="RemoveSelectedFromWatchlistAsync"
-                              Disabled="@_isRemoving"
-                              Variant="ButtonVariant.Secondary">
-                        @if (_isRemoving)
-                        {
-                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                            <span>Removing...</span>
-                        }
-                        else
-                        {
-                            <LucideIcon Name="x" Size="16" Class="mr-2"/>
-                            <span>Remove from Watchlist</span>
-                        }
-                    </BbButton>
-                </div>
-
-                @if (_isSheetError && !string.IsNullOrWhiteSpace(_sheetStatusMessage))
-                {
-                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-3">
-                        <p class="text-sm text-destructive">@_sheetStatusMessage</p>
-                    </div>
-                }
-            </div>
-        }
-    </BbSheetContent>
-</BbSheet>
+<MediaDetailsSideMenu @bind-Open="_isSheetOpen"
+                      ShowContent="@(_selectedItem is not null)"
+                      Title="@(_selectedItem?.Title ?? string.Empty)"
+                      MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
+                      ReleaseDate="@(_selectedItem?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                      ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
+                      ShowMetadataRow="false"
+                      ButtonAction="RemoveSelectedFromWatchlistAsync"
+                      ButtonText="@(() => "Remove from Watchlist")"
+                      ButtonIcon="@(() => "x")"/>
 
 @code {
     private IReadOnlyList<IWatchlistItem>? _items;
@@ -164,8 +113,6 @@
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
-    private bool _isSheetError;
-    private string? _sheetStatusMessage;
     private string? _errorMessage;
     private int _currentPage = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -182,8 +129,6 @@
             _selectedItem = null;
             _isSheetOpen = false;
             _errorMessage = null;
-            _sheetStatusMessage = null;
-            _isSheetError = false;
             _isLoading = false;
             _currentPage = 1;
             _totalPages = 0;
@@ -242,55 +187,31 @@
 
     private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Description) ? "No overview available." : item.Description;
 
-    private static string GetDetailImageUrl(IWatchlistItem item)
-    {
-        return NormalizePlexImageUrl(item.PosterUrl) ?? NormalizePlexImageUrl(item.ArtUrl) ?? item.ArtUrl;
-    }
-
-
-    private static string? NormalizePlexImageUrl(string? url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            return null;
-        }
-
-        if (Uri.TryCreate(url, UriKind.Absolute, out _))
-        {
-            return url;
-        }
-
-        return $"https://metadata.provider.plex.tv{url}";
-    }
-
     private void SelectItem(IWatchlistItem item)
     {
         _selectedItem = item;
-        _sheetStatusMessage = null;
-        _isSheetError = false;
         _isSheetOpen = true;
     }
 
     private async Task RemoveSelectedFromWatchlistAsync()
     {
+        if (_isRemoving)
+        {
+            return;
+        }
+
         if (_selectedItem?.SourceId is not PlexId plexId)
         {
-            _sheetStatusMessage = "Unable to remove this item: no Plex rating key is available.";
-            _isSheetError = true;
             return;
         }
 
         _isRemoving = true;
-        _sheetStatusMessage = null;
-        _isSheetError = false;
 
         try
         {
             var removed = await WatchlistService.RemoveFromWatchlistAsync(plexId, _cancellationTokenSource.Token);
             if (!removed)
             {
-                _sheetStatusMessage = "Failed to remove from watchlist. Please try again.";
-                _isSheetError = true;
                 return;
             }
 
@@ -303,11 +224,6 @@
             await LoadWatchlistAsync();
             _isSheetOpen = false;
             _selectedItem = null;
-        }
-        catch (Exception ex)
-        {
-            _sheetStatusMessage = $"Failed to remove item: {ex.Message}";
-            _isSheetError = true;
         }
         finally
         {

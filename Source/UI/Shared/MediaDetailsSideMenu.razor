@@ -1,0 +1,167 @@
+@using Contracts.Media
+@using global::Shared
+
+<BbSheet @bind-Open="Open">
+    <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
+        @if (ShowContent)
+        {
+            <BbSheetHeader>
+                <BbSheetTitle Class="font-bold tracking-wide">@Title</BbSheetTitle>
+                <BbSheetDescription Class="font-normal tracking-wide">
+                    <span class="flex items-center justify-center gap-1.5">
+                        @if (MediaType is MediaType.Movie)
+                        {
+                            <LucideIcon Name="film" Size="16"/>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="tv" Size="16"/>
+                        }
+                        <span>@MediaType.GetDescription() • @ReleaseDate.Year</span>
+                    </span>
+                </BbSheetDescription>
+            </BbSheetHeader>
+
+            <div class="space-y-6 py-6">
+                <div class="flex justify-center">
+                    <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[260px]">
+                        <img src="@ImageUrl"
+                             alt="@Title"
+                             class="w-full aspect-[2/3] object-cover"/>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    </div>
+                </div>
+
+                @if (ShowMetadataRow)
+                {
+                    <div class="flex items-center gap-4 text-sm font-medium tracking-wide antialiased">
+                        @if (Rating is not null)
+                        {
+                            <div class="flex items-center gap-1.5 text-yellow-400">
+                                <LucideIcon Name="star" Size="16" Fill="currentColor"/>
+                                <span class="font-semibold">@Rating.Value.ToString("F1")</span>
+                            </div>
+                            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-4"/>
+                        }
+                        <span class="text-muted-foreground font-medium">
+                            @ReleaseDate.ToString("MMM d, yyyy")
+                        </span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Description))
+                {
+                    <div class="space-y-3">
+                        <h3 class="text-sm font-bold tracking-wide">Overview</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed font-normal tracking-wide antialiased">
+                            @Description
+                        </p>
+                    </div>
+                }
+
+                <BbSeparator/>
+
+                <div class="flex gap-2">
+                    <BbButton Class="flex-1"
+                              OnClick="HandleButtonClickedAsync"
+                              Disabled="@_isButtonBusy">
+                        @if (_isButtonBusy)
+                        {
+                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            <span>Processing...</span>
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrWhiteSpace(ResolvedButtonIcon))
+                            {
+                                <LucideIcon Name="@ResolvedButtonIcon" Size="16" Class="mr-2"/>
+                            }
+                            <span>@ButtonText()</span>
+                        }
+                    </BbButton>
+                </div>
+                <BbSeparator/>
+
+                @if (IsStatusError && !string.IsNullOrWhiteSpace(StatusMessage))
+                {
+                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-3">
+                        <p class="text-sm text-destructive">
+                            @StatusMessage
+                        </p>
+                    </div>
+                }
+            </div>
+        }
+    </BbSheetContent>
+</BbSheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter]
+    public bool ShowContent { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public MediaType MediaType { get; set; }
+
+    [Parameter]
+    public DateTimeOffset ReleaseDate { get; set; }
+
+    [Parameter]
+    public string ImageUrl { get; set; } = string.Empty;
+
+    [Parameter]
+    public float? Rating { get; set; }
+
+    [Parameter]
+    public bool ShowMetadataRow { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public required Func<string> ButtonText { get; init; }
+
+    [Parameter]
+    public required Func<Task> ButtonAction { get; init; }
+
+    [Parameter]
+    public required Func<string> ButtonIcon { get; init; }
+
+    [Parameter]
+    public string? StatusMessage { get; set; }
+
+    [Parameter]
+    public bool IsStatusError { get; set; }
+
+    private bool _isButtonBusy;
+    private string? ResolvedButtonIcon => ButtonIcon.Invoke();
+
+    private async Task HandleButtonClickedAsync()
+    {
+        if (_isButtonBusy)
+        {
+            return;
+        }
+
+        _isButtonBusy = true;
+        try
+        {
+            await ButtonAction();
+        }
+        finally
+        {
+            _isButtonBusy = false;
+            Open = false;
+            await OpenChanged.InvokeAsync(false);
+        }
+    }
+}
+
