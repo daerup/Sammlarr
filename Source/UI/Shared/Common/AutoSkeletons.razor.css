@@ -1,0 +1,25 @@
+.auto-skeleton-media-card {
+    border-radius: 0.5rem;
+}
+
+.auto-skeleton-search-result-poster {
+    width: clamp(10rem, 20vw, 12rem);
+    height: clamp(15rem, 30vw, 18rem);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auto-skeleton-search-result-content {
+    gap: 0.25rem;
+    padding-left: 20px;
+}
+
+.auto-skeleton-search-result-action {
+    width: 0.3rem;
+    min-width: 0.3rem;
+    height: clamp(15rem, 30vw, 18rem);
+    border-radius: 9999px;
+    opacity: 0.75;
+}
