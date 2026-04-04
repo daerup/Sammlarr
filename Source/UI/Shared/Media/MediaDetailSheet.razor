@@ -1,6 +1,10 @@
 @using Contracts.Media
 @using global::Shared
 
+@if (Open)
+{
+    <div class="sheet-modal-backdrop"></div>
+}
 <BbSheet Open="Open" OpenChanged="HandleSheetOpenChangedAsync">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
         @if (ShowContent)

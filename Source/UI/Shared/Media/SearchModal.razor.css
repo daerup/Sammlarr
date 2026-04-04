@@ -10,7 +10,8 @@
 .search-modal-backdrop {
     position: absolute;
     inset: 0;
-    backdrop-filter: blur(20px) saturate(125%);
+    backdrop-filter: blur(20px) saturate(150%);
+    background: rgba(0, 0, 0, 0.7);
 }
 
 .search-modal-content {

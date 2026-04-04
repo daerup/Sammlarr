@@ -19,5 +19,8 @@
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 		<Content Remove="Shared\Media\SearchTile\Skeleton.razor" />
+		<Content Update="Shared\Media\MediaDetailSheet.razor.css">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
 	</ItemGroup>
 </Project>
