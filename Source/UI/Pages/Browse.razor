@@ -71,17 +71,10 @@
                     }
                 </div>
 
-                <div class="flex items-center justify-center gap-4 mt-5">
-                    <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage <= 1)" OnClick="GoToPreviousPageAsync">
-                        <LucideIcon Name="chevron-left" Size="16" Class="mr-1"/>
-                        Previous
-                    </BbButton>
-                    <span class="text-sm text-muted-foreground font-medium">Page @_currentPage</span>
-                    <BbButton Variant="ButtonVariant.Outline" Disabled="@(_currentPage >= _totalPages)" OnClick="GoToNextPageAsync">
-                        Next
-                        <LucideIcon Name="chevron-right" Size="16" Class="ml-1"/>
-                    </BbButton>
-                </div>
+                <PaginationControls CurrentPage="_currentPage"
+                                    TotalPages="_totalPages"
+                                    IsDisabled="_isLoading"
+                                    PageChanged="HandlePageChangedAsync"/>
             }
         </ApiKeyGuard>
 
@@ -248,18 +241,14 @@
         catch (ObjectDisposedException) {}
     }
 
-    private async Task GoToPreviousPageAsync()
+    private async Task HandlePageChangedAsync(int newPage)
     {
-        if (_currentPage <= 1) return;
-        _currentPage--;
-        await ScrollToTopAsync();
-        await LoadPageAsync();
-    }
+        if (newPage == _currentPage)
+        {
+            return;
+        }
 
-    private async Task GoToNextPageAsync()
-    {
-        if (_currentPage >= _totalPages) return;
-        _currentPage++;
+        _currentPage = newPage;
         await ScrollToTopAsync();
         await LoadPageAsync();
     }

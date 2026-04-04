@@ -1,0 +1,103 @@
+<BbPagination Class="mt-5"
+              CurrentPage="CurrentPage"
+              TotalPages="TotalPages"
+              CurrentPageChanged="HandleCurrentPageChangedAsync">
+    <BbPaginationContent Class="justify-center gap-2">
+        <BbPaginationItem>
+            <BbPaginationFirst Disabled="@(IsDisabled || CurrentPage <= 1)"
+                               />
+        </BbPaginationItem>
+        <BbPaginationItem>
+            <BbPaginationPrevious Disabled="@(IsDisabled || CurrentPage <= 1)"
+                                  ShowText="false"
+                                  Size="PaginationLinkSize.Icon"
+                                  />
+        </BbPaginationItem>
+        <BbPaginationItem Class="px-2">
+            <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Page</span>
+                <div @onfocusout="CommitJumpValueAsync" @onkeydown="HandleJumpInputKeyDownAsync">
+                    <BbNumericInput TValue="int"
+                                    Value="_jumpPageValue"
+                                    ValueChanged="HandleJumpValueChangedAsync"
+                                    Min="1"
+                                    Max="@Math.Max(TotalPages, 1)"
+                                    DisableDebounce="false"
+                                    Disabled="@(IsDisabled || TotalPages < 1)"
+                                    Class="w-14"/>
+                </div>
+                <span>of @TotalPages</span>
+            </div>
+        </BbPaginationItem>
+        <BbPaginationItem>
+            <BbPaginationNext Disabled="@(IsDisabled || CurrentPage >= TotalPages)"
+                              ShowText="false"
+                              Size="PaginationLinkSize.Icon"
+                              />
+        </BbPaginationItem>
+        <BbPaginationItem>
+            <BbPaginationLast Disabled="@(IsDisabled || CurrentPage >= TotalPages)"
+                              />
+        </BbPaginationItem>
+    </BbPaginationContent>
+</BbPagination>
+
+@code {
+    private int _jumpPageValue = 1;
+
+    [Parameter]
+    public int CurrentPage { get; set; } = 1;
+
+    [Parameter]
+    public int TotalPages { get; set; } = 1;
+
+    [Parameter]
+    public bool IsDisabled { get; set; }
+
+    [Parameter]
+    public EventCallback<int> PageChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _jumpPageValue = CurrentPage;
+    }
+
+    private Task HandleCurrentPageChangedAsync(int newPage)
+    {
+        return ChangePageAsync(newPage);
+    }
+
+    private async Task ChangePageAsync(int newPage)
+    {
+        if (IsDisabled || newPage < 1 || newPage > TotalPages || newPage == CurrentPage)
+        {
+            return;
+        }
+
+        await PageChanged.InvokeAsync(newPage);
+    }
+
+    private Task HandleJumpValueChangedAsync(int value)
+    {
+        var clampedPage = Math.Clamp(value, 1, Math.Max(TotalPages, 1));
+        _jumpPageValue = clampedPage;
+        return Task.CompletedTask;
+    }
+
+    private Task CommitJumpValueAsync()
+    {
+        return ChangePageAsync(_jumpPageValue);
+    }
+
+    private Task HandleJumpInputKeyDownAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            return CommitJumpValueAsync();
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+
