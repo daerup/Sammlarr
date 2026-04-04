@@ -122,11 +122,11 @@
         if (!hasAccess)
         {
             _items = null;
-            CloseSelectedMedia();
             _errorMessage = null;
             _isLoading = false;
             _currentPage = 1;
             _totalPages = 0;
+            CloseSelectedMedia();
             return;
         }
 
@@ -142,7 +142,7 @@
     {
         _isLoading = true;
         _errorMessage = null;
-        await TryStateHasChangedAsync();
+        StateHasChanged();
 
         try
         {
@@ -164,21 +164,10 @@
         finally
         {
             _isLoading = false;
-            await TryStateHasChangedAsync();
+            StateHasChanged();
         }
     }
 
-    private async Task TryStateHasChangedAsync()
-    {
-        try
-        {
-            await InvokeAsync(StateHasChanged);
-        }
-        catch (ObjectDisposedException)
-        {
-            // Ignore updates queued after page disposal.
-        }
-    }
 
     private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Description) ? "No overview available." : item.Description;
 
@@ -216,8 +205,8 @@
                 _currentPage--;
             }
 
-            await LoadWatchlistAsync();
             CloseSelectedMedia();
+            await LoadWatchlistAsync();
         }
         finally
         {

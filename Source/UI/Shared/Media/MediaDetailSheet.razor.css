@@ -1,0 +1,7 @@
+
+.sheet-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(20px) saturate(125%);
+    z-index: 10;
+}
