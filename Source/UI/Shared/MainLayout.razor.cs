@@ -101,7 +101,9 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 			var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<AuthProvider, IOAuthService>>();
 			var oauthService = oauthServiceIndex[AuthProvider.Plex];
 
-			var forwardUrl = NavigationManager.ToAbsoluteUri("/plex-auth?pinId={0}&clientId={1}").ToString();
+			var returnUrl = GetReturnUrlForOAuth();
+			var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
+			var forwardUrl = NavigationManager.ToAbsoluteUri($"/plex-auth?pinId={{0}}&clientId={{1}}&returnUrl={escapedReturnUrl}").ToString();
 			var authUrl = await oauthService.GetOAuthUrl(forwardUrl, _disposeCts.Token);
 			NavigationManager.NavigateTo(authUrl, forceLoad: true);
 		}
@@ -109,6 +111,22 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		{
 			_isProcessing = false;
 		}
+	}
+
+	private string GetReturnUrlForOAuth()
+	{
+		var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+		if (string.IsNullOrWhiteSpace(relative))
+		{
+			return "/";
+		}
+
+		if (relative.StartsWith("plex-auth", StringComparison.OrdinalIgnoreCase))
+		{
+			return "/";
+		}
+
+		return relative.StartsWith('/') ? relative : $"/{relative}";
 	}
 
 	private async Task DisconnectAsync()
