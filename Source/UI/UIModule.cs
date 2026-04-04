@@ -1,6 +1,6 @@
 using BlazorBlueprint.Components;
 using Shared.DI;
-using UI.Shared;
+using UI.Shared.Services;
 
 namespace UI;
 

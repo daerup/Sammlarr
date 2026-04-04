@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Shared.DI;
+using UI.Shared.Services;
 
-namespace UI.Shared;
+namespace UI.Shared.Layout;
 
 public partial class MainLayout : LayoutComponentBase, IDisposable
 {
