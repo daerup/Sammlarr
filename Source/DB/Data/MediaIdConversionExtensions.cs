@@ -1,7 +1,7 @@
 using Contracts.Media;
 using DB.Data.Entities;
 
-namespace DB.Data.Stores;
+namespace DB.Data;
 
 internal static class MediaIdConversionExtensions
 {
@@ -9,14 +9,14 @@ internal static class MediaIdConversionExtensions
 	{
 		public MediaIdEntry MapEntity()
 		{
-			var value = id switch
+			var value = id.Source switch
 			{
-				ImdbId imdbId => imdbId.Value,
-				PlexId plexId => plexId.Value,
-				TmdbId tmdbId => tmdbId.Value.ToString(),
-				TvdbId tvdbId => tvdbId.Value.ToString(),
+				MediaProvider.Tmdb => id.ToString(),
+				MediaProvider.Imdb => id.ToString(),
+				MediaProvider.Tvdb => id.ToString(),
+				MediaProvider.Plex => id.ToString(),
 			};
-			return new MediaIdEntry { Source = id.Source, ExternalId = value };
+			return new MediaIdEntry { Source = id.Source, ExternalId = value! };
 		}
 	}
 

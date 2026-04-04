@@ -28,6 +28,6 @@ public class DbModule : IServiceModule
 
 		services.AddScoped<ICredentialStore, CredentialStore>();
 		services.AddScoped<IApiKeyStore, ApiKeyStore>();
-		services.AddScoped<IMediaIdStore, MediaIdRepository>();
+		services.AddScoped<IMediaIdMappingStore, MediaIdMappingMappingStore>();
 	}
 }
