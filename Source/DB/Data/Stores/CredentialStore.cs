@@ -1,15 +1,25 @@
 using Contracts.Auth;
 using DB.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DB.Data.Stores;
 
-internal class CredentialStore(SammlarrDbContext context) : ICredentialStore
+internal class CredentialStore(SammlarrDbContext context, IMemoryCache cache) : ICredentialStore
 {
 	public async Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
 	{
+		if (cache.TryGetValue(authProvider, out StoredCredential? cached))
+		{
+			return cached;
+		}
+
 		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.AuthProvider == authProvider, cancellationToken);
-		return credential is null ? null : new StoredCredential(credential.AuthProvider, credential.ClientId, credential.AccessToken, credential.ExpiresAt);
+		if (credential is null)
+		{
+			return null;
+		}
+		return new StoredCredential(credential.AuthProvider, credential.ClientId, credential.AccessToken, credential.ExpiresAt);
 	}
 
 	public async Task StoreAsync(
@@ -39,6 +49,7 @@ internal class CredentialStore(SammlarrDbContext context) : ICredentialStore
 		}
 
 		await context.SaveChangesAsync(cancellationToken);
+		cache.Set(authProvider, credential);
 	}
 
 	public async Task ClearAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
@@ -51,5 +62,6 @@ internal class CredentialStore(SammlarrDbContext context) : ICredentialStore
 
 		context.Credentials.Remove(credential);
 		await context.SaveChangesAsync(cancellationToken);
+		cache.Remove(authProvider);
 	}
 }
