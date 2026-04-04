@@ -1,18 +1,70 @@
-@if (CanRenderContent)
+@using Contracts.Auth
+@using Contracts.Media
+@using global::Shared
+
+@if (GuardState())
 {
     @ChildContent
 }
-else if (!HideFallback)
+else if (ShowFallback)
 {
-    @FallbackContent
+    <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+        <LucideIcon Name="@FallbackIcon" Size="40" Class="mx-auto text-muted-foreground"/>
+        <p class="text-muted-foreground">@GetFallbackMessage()</p>
+
+        @if (FallbackAction.HasDelegate)
+        {
+            <BbButton Variant="ButtonVariant.Outline" OnClick="InvokeFallbackActionAsync">
+                @GetFallbackActionText()
+            </BbButton>
+        }
+    </div>
 }
 
 @code {
-    [Parameter] public bool IsAllowed { get; set; }
-    [Parameter] public Func<bool>? GuardState { get; set; }
+    [Parameter, EditorRequired] public Func<bool> GuardState { get; set; } = () => true;
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
-    [Parameter] public RenderFragment? FallbackContent { get; set; }
-    [Parameter] public bool HideFallback { get; set; }
+    [Parameter] public bool ShowFallback { get; set; } = true;
 
-    private bool CanRenderContent => GuardState?.Invoke() ?? IsAllowed;
+    [Parameter] public AuthProvider? AuthProvider { get; set; }
+    [Parameter] public MediaProvider? MediaProvider { get; set; }
+    [Parameter] public string DeniedActionDescription { get; set; } = "access this section";
+    [Parameter] public EventCallback FallbackAction { get; set; }
+
+    private string FallbackIcon => MediaProvider.HasValue ? "key" : "lock";
+
+    private string GetFallbackMessage()
+    {
+        if (AuthProvider.HasValue)
+        {
+            return $"You need to connect your {AuthProvider.Value} account before {DeniedActionDescription}.";
+        }
+
+        if (MediaProvider.HasValue)
+        {
+            return $"A valid {MediaProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
+        }
+
+        return "You do not have access to this section.";
+    }
+
+    private string GetFallbackActionText()
+    {
+        if (AuthProvider.HasValue)
+        {
+            return $"Connect {AuthProvider.Value} Account";
+        }
+
+        if (MediaProvider.HasValue)
+        {
+            return "Configure API Key";
+        }
+
+        return "Continue";
+    }
+
+    private Task InvokeFallbackActionAsync()
+    {
+        return FallbackAction.InvokeAsync();
+    }
 }
