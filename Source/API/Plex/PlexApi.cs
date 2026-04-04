@@ -9,6 +9,7 @@ namespace API.Plex;
 internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 {
 	private const string RatingKeyMetadataEndpoint = "https://metadata.provider.plex.tv/library/metadata/{0}?includeGuids=1&includeExternalMedia=1";
+
 	private const string SerachMetadataEndpoint =
 		"https://discover.provider.plex.tv/library/search?searchTypes={0}&searchProviders=discover&includeMetadata=1&query={1}";
 

@@ -10,6 +10,7 @@ internal class UiModule : IServiceModule
 	{
 		services.AddRazorComponents().AddInteractiveServerComponents();
 		services.AddBlazorBlueprintComponents();
+		services.AddScoped<ScrollService>();
 		services.AddScoped<ProfileDropdownService>();
 	}
 }
