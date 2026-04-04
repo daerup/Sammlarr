@@ -26,7 +26,7 @@ public class DbModule : IServiceModule
 			}
 		);
 
-		services.AddScoped<Contracts.Auth.ICredentialStore, CredentialStore>();
+		services.AddScoped<ICredentialStore, CredentialStore>();
 		services.AddScoped<IApiKeyStore, ApiKeyStore>();
 		services.AddScoped<IMediaIdStore, MediaIdRepository>();
 	}
