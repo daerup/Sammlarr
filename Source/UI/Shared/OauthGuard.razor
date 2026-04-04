@@ -3,14 +3,7 @@
 @inject ICredentialStore CredentialStore
 @inject ProfileDropdownService ProfileDropdownService
 
-@if (_isChecking)
-{
-}
-else if (_hasAccess)
-{
-    @ChildContent
-}
-else if (!HideFallback)
+@if (!_isChecking && !_hasAccess && !HideFallback)
 {
     <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
         <LucideIcon Name="lock" Size="40" Class="mx-auto text-muted-foreground"/>
@@ -23,7 +16,6 @@ else if (!HideFallback)
 
 @code {
     [Parameter, EditorRequired] public AuthProvider Provider { get; set; }
-    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }
     [Parameter] public string RequirementDescription { get; set; } = "accessing this area";
     [Parameter] public bool HideFallback { get; set; }
@@ -49,4 +41,3 @@ else if (!HideFallback)
         }
     }
 }
-

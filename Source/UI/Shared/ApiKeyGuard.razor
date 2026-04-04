@@ -1,22 +1,17 @@
 @using Contracts.Auth
 @using Contracts.Media
 @using global::Shared
+@using global::Shared.DI
 
 @inject IApiKeyStore ApiKeyStore
+@inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 @inject NavigationManager NavigationManager
 
-@if (_isChecking)
-{
-}
-else if (_hasAccess)
-{
-    @ChildContent
-}
-else if (!HideFallback)
+@if (!_isChecking && !_hasAccess && !HideFallback)
 {
     <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
         <LucideIcon Name="key" Size="40" Class="mx-auto text-muted-foreground"/>
-        <p class="text-muted-foreground">A @ProviderName API key is required to @RequirementDescription.</p>
+        <p class="text-muted-foreground">@GetFallbackMessage()</p>
         <BbButton Variant="ButtonVariant.Outline" OnClick="NavigateToSettings">
             Configure API Key
         </BbButton>
@@ -25,15 +20,19 @@ else if (!HideFallback)
 
 @code {
     [Parameter, EditorRequired] public MediaProvider Provider { get; set; }
-    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }
     [Parameter] public string RequirementDescription { get; set; } = "continue";
     [Parameter] public string SettingsUrl { get; set; } = "/settings";
+    [Parameter] public string InvalidKeyFallbackMessage { get; set; } = "The configured API key is invalid. Please update it in settings.";
     [Parameter] public bool HideFallback { get; set; }
 
     private bool _hasAccess;
     private bool _isChecking = true;
+    private bool _lastHadKey;
     private bool? _lastReportedAccess;
+    private string? _lastValidatedKey;
+    private MediaProvider? _lastValidatedProvider;
+    private bool _lastValidationResult;
 
     private string ProviderName => Provider.GetDescription();
 
@@ -42,7 +41,7 @@ else if (!HideFallback)
         _isChecking = true;
 
         var apiKey = await ApiKeyStore.GetApiKeyAsync(Provider);
-        _hasAccess = !string.IsNullOrWhiteSpace(apiKey);
+        _hasAccess = await ValidateApiKeyAsync(apiKey);
         _isChecking = false;
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
@@ -52,9 +51,50 @@ else if (!HideFallback)
         }
     }
 
+    private async Task<bool> ValidateApiKeyAsync(string? apiKey)
+    {
+        var normalizedApiKey = apiKey?.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedApiKey))
+        {
+            _lastHadKey = false;
+            return false;
+        }
+
+        _lastHadKey = true;
+        var keyToValidate = normalizedApiKey;
+
+        // Avoid re-validating the same provider/key pair on every render.
+        if (_lastValidatedProvider == Provider && string.Equals(_lastValidatedKey, keyToValidate, StringComparison.Ordinal))
+        {
+            return _lastValidationResult;
+        }
+
+        try
+        {
+            var isValid = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(keyToValidate);
+            _lastValidatedProvider = Provider;
+            _lastValidatedKey = keyToValidate;
+            _lastValidationResult = isValid;
+            return isValid;
+        }
+        catch
+        {
+            _lastValidatedProvider = Provider;
+            _lastValidatedKey = keyToValidate;
+            _lastValidationResult = false;
+            return false;
+        }
+    }
+
+    private string GetFallbackMessage()
+    {
+        return _lastHadKey
+            ? InvalidKeyFallbackMessage
+            : $"A {ProviderName} API key is required to {RequirementDescription}.";
+    }
+
     private void NavigateToSettings()
     {
         NavigationManager.NavigateTo(SettingsUrl);
     }
 }
-
