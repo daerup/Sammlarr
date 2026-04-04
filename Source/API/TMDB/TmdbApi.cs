@@ -44,7 +44,11 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 
 	private async ValueTask<TmdbTrendingMedia?> BuildTrendingMediaAsync(TmdbTypes.Trending.Result response)
 	{
-		var mediaType = MediaType.FromString(response.MediaType);
+		if (!MediaType.TryParse(response.MediaType, out var mediaType))
+		{
+			return null;
+		}
+
 		var externalId = await converterIndex[MediaProvider.Tmdb].ConvertToOrDefaultAsync<PlexId>(response.TmdbId, mediaType);
 		if (externalId is null)
 		{
