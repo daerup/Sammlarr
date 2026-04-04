@@ -5,7 +5,7 @@ namespace API.TMDB.Types;
 
 internal static class TmdbTypes
 {
-	public static class Trending
+	internal static class Trending
 	{
 		public record Result(
 			[property: JsonPropertyName("adult")] bool Adult,

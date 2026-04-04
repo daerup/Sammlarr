@@ -37,7 +37,6 @@
 
         var keyToValidate = normalizedApiKey;
 
-        // Avoid re-validating the same provider/key pair on every render.
         if (_lastValidatedProvider == Provider && string.Equals(_lastValidatedKey, keyToValidate, StringComparison.Ordinal))
         {
             return _lastValidationResult;
