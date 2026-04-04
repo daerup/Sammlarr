@@ -6,6 +6,7 @@
 @using global::Shared
 @using global::Shared.DI
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistStoreIndex
+@inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 
 <PageTitle>Plex Watchlist</PageTitle>
@@ -13,7 +14,7 @@
 <OauthGuard Provider="AuthProvider.Plex"
             AccessChanged="HandleAccessChanged"/>
 
-<div class="px-6 py-10" tabindex="-1" @ref="_pageTopRef">
+<div class="px-6 py-10">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
             <h1 class="text-3xl font-bold tracking-wide antialiased">Plex Watchlist</h1>
@@ -22,7 +23,7 @@
 
         <ProtectedSection GuardState="IsOAuthAllowed" ShowFallback="false">
             <div class="flex items-center gap-2">
-               <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
+                <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
                     @if (_isLoading)
                     {
                         <span>Refreshing...</span>
@@ -41,62 +42,62 @@
         <ProtectedSection GuardState="IsOAuthAllowed"
                           AuthProvider="AuthProvider.Plex"
                           DeniedActionDescription="viewing your watchlist"
-                          FallbackAction="OpenProfileDropdownAsync">
-                @if (_isLoading)
-                {
-                    <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
-                    </div>
-                }
-                else if (!string.IsNullOrEmpty(_errorMessage))
-                {
-                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
-                        <p class="text-sm text-destructive font-medium">@_errorMessage</p>
-                        <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync">
-                            <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
-                            Retry
-                        </BbButton>
-                    </div>
-                }
-                else if (_items is not null && _items.Count == 0)
-                {
-                    <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
-                        <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
-                        <p class="text-muted-foreground">Your Plex watchlist is empty.</p>
-                    </div>
-                }
-                else if (_items is not null)
-                {
-                    <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-                        @foreach (var item in _items)
-                        {
-                            <MediaGridTile @key="item"
+                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+            @if (_isLoading)
+            {
+                <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                    <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
+                    <p class="text-sm text-destructive font-medium">@_errorMessage</p>
+                    <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync">
+                        <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+                        Retry
+                    </BbButton>
+                </div>
+            }
+            else if (_items is not null && _items.Count == 0)
+            {
+                <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
+                    <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
+                    <p class="text-muted-foreground">Your Plex watchlist is empty.</p>
+                </div>
+            }
+            else if (_items is not null)
+            {
+                <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+                    @foreach (var item in _items)
+                    {
+                        <MediaGridTile @key="item"
                                        ImageUrl="@item.ArtUrl"
                                        Title="@item.Title"
                                        OnClick="() => SelectItem(item)"
                                        Description="@GetDescription(item)"/>
-                        }
-                    </div>
+                    }
+                </div>
 
-                    <PaginationControls CurrentPage="_currentPage"
-                                        TotalPages="_totalPages"
-                                        IsDisabled="_isLoading"
-                                        PageChanged="HandlePageChangedAsync"/>
-                }
+                <PaginationControls CurrentPage="_currentPage"
+                                    TotalPages="_totalPages"
+                                    IsDisabled="_isLoading"
+                                    PageChanged="HandlePageChangedAsync"/>
+            }
         </ProtectedSection>
     </div>
 </div>
 
 <MediaDetailSheet @bind-Open="_isSheetOpen"
-                      ShowContent="@(_selectedItem is not null)"
-                      Title="@(_selectedItem?.Title ?? string.Empty)"
-                      MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
-                      ReleaseDate="@(_selectedItem?.ReleaseDate ?? DateTimeOffset.MinValue)"
-                      ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
-                      ShowMetadataRow="false"
-                      ButtonAction="RemoveSelectedFromWatchlistAsync"
-                      ButtonText="@(() => "Remove from Watchlist")"
-                      ButtonIcon="@(() => "x")"/>
+                  ShowContent="@(_selectedItem is not null)"
+                  Title="@(_selectedItem?.Title ?? string.Empty)"
+                  MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
+                  ReleaseDate="@(_selectedItem?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                  ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
+                  ShowMetadataRow="false"
+                  ButtonAction="RemoveSelectedFromWatchlistAsync"
+                  ButtonText="@(() => "Remove from Watchlist")"
+                  ButtonIcon="@(() => "x")"/>
 
 @code {
     private IReadOnlyList<IWatchlistItem>? _items;
@@ -109,7 +110,6 @@
     private int _currentPage = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private int _totalPages;
-    private ElementReference _pageTopRef;
 
     private IWatchlistService WatchlistService => WatchlistStoreIndex[AuthProvider.Plex];
     private bool IsOAuthAllowed() => _hasOAuthAccess;
@@ -223,6 +223,7 @@
             _isRemoving = false;
         }
     }
+
     private void CloseSelectedMedia()
     {
         _isSheetOpen = false;
@@ -238,15 +239,10 @@
         CloseSelectedMedia();
 
         _currentPage = newPage;
-        await LoadWatchlistAsync();
-        await ScrollToTopAsync();
+
+        await ScrollService.ToTopAfterAsync(LoadWatchlistAsync, _cancellationTokenSource.Token);
     }
 
-    private async Task ScrollToTopAsync()
-    {
-        await Task.Delay(10, _cancellationTokenSource.Token);
-        await _pageTopRef.FocusAsync();
-    }
 
     public void Dispose()
     {
@@ -254,9 +250,5 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private Task OpenProfileDropdownAsync()
-    {
-        return ProfileDropdownService.RequestOpenAsync();
-    }
 }
 

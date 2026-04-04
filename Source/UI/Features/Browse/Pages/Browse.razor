@@ -5,13 +5,13 @@
 @using Contracts.Media
 @using Contracts.Media.Trending
 @using Contracts.Watchlist
-@using global::Shared
 @using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistServiceIndex
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
+@inject ScrollService ScrollService
 @inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
@@ -21,7 +21,7 @@
 
 <ApiKeyGuard Provider="MediaProvider.Tmdb" AccessChanged="HandleTmdbAccessChanged"/>
 
-<div class="px-6 py-10" tabindex="-1" @ref="_pageTopRef">
+<div class="px-6 py-10">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
             <h1 class="text-3xl font-bold tracking-wide antialiased">Trending Movies & Shows</h1>
@@ -45,11 +45,11 @@
         <ProtectedSection GuardState="HasOAuthAccess"
                           AuthProvider="AuthProvider.Plex"
                           DeniedActionDescription="browsing trending media"
-                          FallbackAction="OpenProfileDropdownAsync">
+                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
             <ProtectedSection GuardState="HasTmdbAccess"
                               MediaProvider="MediaProvider.Tmdb"
                               DeniedActionDescription="browse trending media"
-                              FallbackAction="NavigateToSettings">
+                              FallbackAction="@(() => NavigationManager.NavigateTo("/settings"))">
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
@@ -62,13 +62,13 @@
                         @foreach (var media in _trendingMedia)
                         {
                             <MediaGridTile @key="media"
-                                       ImageUrl="@media.BackdropUrl"
-                                       Title="@media.Title"
-                                       OnClick="() => SelectMedia(media)"
-                                       ShowBookmark="true"
-                                       IsInWatchlist="@IsInWatchlist(media)"
-                                       Rating="@media.Rating"
-                                       Date="@media.ReleaseDate"/>
+                                           ImageUrl="@media.BackdropUrl"
+                                           Title="@media.Title"
+                                           OnClick="() => SelectMedia(media)"
+                                           ShowBookmark="true"
+                                           IsInWatchlist="@IsInWatchlist(media)"
+                                           Rating="@media.Rating"
+                                           Date="@media.ReleaseDate"/>
                         }
                     </div>
 
@@ -91,17 +91,17 @@
 </div>
 
 <MediaDetailSheet @bind-Open="_isSheetOpen"
-                      ShowContent="@(_selectedMedia is not null)"
-                      Title="@(_selectedMedia?.Title ?? string.Empty)"
-                      MediaType="@(_selectedMedia?.MediaType ?? MediaType.Movie)"
-                      ReleaseDate="@(_selectedMedia?.ReleaseDate ?? DateTimeOffset.MinValue)"
-                      ImageUrl="@(_selectedMedia?.PosterUrl ?? string.Empty)"
-                      Rating="@(_selectedMedia?.Rating)"
-                      ShowMetadataRow="true"
-                      Description="@_selectedMedia?.Description"
-                      ButtonAction="ToggleWatchlistAsync"
-                      ButtonText="GetSideMenuButtonText"
-                      ButtonIcon="GetSideMenuButtonIcon"/>
+                  ShowContent="@(_selectedMedia is not null)"
+                  Title="@(_selectedMedia?.Title ?? string.Empty)"
+                  MediaType="@(_selectedMedia?.MediaType ?? MediaType.Movie)"
+                  ReleaseDate="@(_selectedMedia?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                  ImageUrl="@(_selectedMedia?.PosterUrl ?? string.Empty)"
+                  Rating="@(_selectedMedia?.Rating)"
+                  ShowMetadataRow="true"
+                  Description="@_selectedMedia?.Description"
+                  ButtonAction="ToggleWatchlistAsync"
+                  ButtonText="GetSideMenuButtonText"
+                  ButtonIcon="GetSideMenuButtonIcon"/>
 
 @code {
     private IReadOnlyList<ITrendingMedia>? _trendingMedia;
@@ -115,7 +115,6 @@
     private int _currentPage = 1;
     private int _totalPages = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private ElementReference _pageTopRef;
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
     private const string BrowseSearchShortcutId = "browse-search-shortcut";
@@ -258,14 +257,8 @@
         CloseSelectedMedia();
 
         _currentPage = newPage;
-        await ScrollToTopAsync();
-        await LoadPageAsync();
-    }
 
-    private async Task ScrollToTopAsync()
-    {
-        await Task.Delay(10, _cancellationTokenSource.Token);
-        await _pageTopRef.FocusAsync();
+        await ScrollService.ToTopAfterAsync(LoadPageAsync, _cancellationTokenSource.Token);
     }
 
     public void Dispose()
@@ -386,14 +379,5 @@
 
     }
 
-    private Task OpenProfileDropdownAsync()
-    {
-        return ProfileDropdownService.RequestOpenAsync();
-    }
-
-    private void NavigateToSettings()
-    {
-        NavigationManager.NavigateTo("/settings");
-    }
 }
 
