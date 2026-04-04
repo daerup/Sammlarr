@@ -53,12 +53,7 @@
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                        @for (int i = 0; i < 20; i++)
-                        {
-                            <div class="space-y-3">
-                                <BbSkeleton Class="w-full" Height="300px"/>
-                            </div>
-                        }
+                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaCard" Count="20"/>
                     </div>
                 }
                 else if (_trendingMedia != null)

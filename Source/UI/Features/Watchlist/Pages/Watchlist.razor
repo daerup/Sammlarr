@@ -45,12 +45,7 @@
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                        @for (var i = 0; i < 12; i++)
-                        {
-                            <div class="space-y-3">
-                                <BbSkeleton Class="w-full" Height="300px"/>
-                            </div>
-                        }
+                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaCard" Count="12"/>
                     </div>
                 }
                 else if (!string.IsNullOrEmpty(_errorMessage))
