@@ -59,7 +59,7 @@ internal class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(Me
 		return new PlexWatchlistItem
 		{
 			Title = parsed.Title,
-			MediaType = MediaType.FromString(parsed.Type),
+			MediaType = MediaType.Parse(parsed.Type),
 			Description = parsed.Tagline ?? string.Empty,
 			ArtUrl = parsed.Art,
 			PosterUrl = parsed.Thumb,
