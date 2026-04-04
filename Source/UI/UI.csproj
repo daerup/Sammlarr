@@ -14,4 +14,9 @@
 		<PackageReference Include="BlazorBlueprint.Primitives" />
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Content Update="Shared\PaginationControls.razor.css">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	  </Content>
+	</ItemGroup>
 </Project>

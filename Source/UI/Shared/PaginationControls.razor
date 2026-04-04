@@ -5,26 +5,23 @@
     <BbPaginationContent Class="justify-center gap-2">
         <BbPaginationItem>
             <BbPaginationFirst Disabled="@(IsDisabled || CurrentPage <= 1)"
-                               />
+            />
         </BbPaginationItem>
         <BbPaginationItem>
             <BbPaginationPrevious Disabled="@(IsDisabled || CurrentPage <= 1)"
                                   ShowText="false"
                                   Size="PaginationLinkSize.Icon"
-                                  />
+            />
         </BbPaginationItem>
         <BbPaginationItem Class="px-2">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Page</span>
-                <div @onfocusout="CommitJumpValueAsync" @onkeydown="HandleJumpInputKeyDownAsync">
+                <div @onfocusout="CommitJumpValueAsync" @onkeydown="HandleJumpInputKeyDownAsync" class="jump-input" style="@JumpInputStyle">
                     <BbNumericInput TValue="int"
                                     Value="_jumpPageValue"
                                     ValueChanged="HandleJumpValueChangedAsync"
-                                    Min="1"
-                                    Max="@Math.Max(TotalPages, 1)"
-                                    DisableDebounce="false"
-                                    Disabled="@(IsDisabled || TotalPages < 1)"
-                                    Class="w-14"/>
+                                    DisableDebounce="true"
+                                    Disabled="@(IsDisabled || TotalPages < 1)"/>
                 </div>
                 <span>of @TotalPages</span>
             </div>
@@ -33,17 +30,18 @@
             <BbPaginationNext Disabled="@(IsDisabled || CurrentPage >= TotalPages)"
                               ShowText="false"
                               Size="PaginationLinkSize.Icon"
-                              />
+            />
         </BbPaginationItem>
         <BbPaginationItem>
             <BbPaginationLast Disabled="@(IsDisabled || CurrentPage >= TotalPages)"
-                              />
+            />
         </BbPaginationItem>
     </BbPaginationContent>
 </BbPagination>
 
 @code {
     private int _jumpPageValue = 1;
+    private string JumpInputStyle => $"width: calc({Math.Max(1, _jumpPageValue.ToString().Length)} * 9px + 28px);";
 
     [Parameter]
     public int CurrentPage { get; set; } = 1;
@@ -79,13 +77,14 @@
 
     private Task HandleJumpValueChangedAsync(int value)
     {
-        var clampedPage = Math.Clamp(value, 1, Math.Max(TotalPages, 1));
-        _jumpPageValue = clampedPage;
+        _jumpPageValue = value;
+        StateHasChanged();
         return Task.CompletedTask;
     }
 
     private Task CommitJumpValueAsync()
     {
+        _jumpPageValue = Math.Clamp(_jumpPageValue, 1, TotalPages);
         return ChangePageAsync(_jumpPageValue);
     }
 
@@ -99,5 +98,3 @@
         return Task.CompletedTask;
     }
 }
-
-
