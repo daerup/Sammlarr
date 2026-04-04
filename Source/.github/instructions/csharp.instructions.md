@@ -14,9 +14,9 @@ applyTo: '**/*.cs'
 
 ## General Instructions
 - Make only high confidence suggestions when reviewing code changes.
-- Write code with good maintainability practices, including comments on why certain design decisions were made.
+- **Do NOT create comments unless explicitly requested by the user.** Write clean, self-documenting code with clear naming conventions.
 - Handle edge cases and write clear exception handling.
-- For libraries or external dependencies, mention their usage and purpose in comments.
+- When explicitly requested, add comments explaining design decisions or complex logic.
 
 ## Naming Conventions
 

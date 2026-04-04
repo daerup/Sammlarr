@@ -66,6 +66,18 @@ description: 'Sammlarr architecture and project-level coding constraints'
 - External API protocol concerns stay in typed clients/services (`PlexClient`, `TmdbClient`, `PlexOAuthService`, etc.).
 - Keep cancellation/disposal patterns in long-running pages (`CancellationTokenSource`, dispose cleanup).
 
+## Testing Framework and Tools
+- **Test Framework**: TUnit (modern, next-gen testing framework for .NET)
+- **Assertions**: AwesomeAssertions (expressive, readable assertion library)
+- **Mocking**: Imposter (flexible mocking library for HTTP, databases, and other dependencies)
+- Use these consistently across all test projects for unit, integration, and E2E testing.
+- Write tests that are clear, maintainable, and follow existing test patterns.
+
+## Documentation Policy
+- **Do NOT create Markdown files** unless explicitly requested by the user.
+- Focus on code implementation and inline documentation instead.
+- If documentation is essential, confirm with user before creating any `.md` files.
+
 ## Coding Conventions to Preserve
 - Follow `.editorconfig` formatting and naming.
 - Use file-scoped namespaces, async/await, and nullability-aware patterns.
