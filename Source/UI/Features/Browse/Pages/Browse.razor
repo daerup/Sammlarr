@@ -31,7 +31,7 @@
         <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
             <div class="flex items-center gap-2">
                 <BbCommand Class="border">
-                    <BbCommandItem OnSelect="OpenSearchSheet" Value="search" class="search-command-item">
+                    <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
                         <LucideIcon Name="search" Class="mr-2"/>
                         Add from Search
                         <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
@@ -90,7 +90,8 @@
     </div>
 </div>
 
-<MediaDetailSheet @bind-Open="_isSheetOpen"
+<MediaDetailSheet Open="_isSheetOpen"
+                  OnOpenChanged="DetailsOpenChangedAsync"
                   ShowContent="@(_selectedMedia is not null)"
                   Title="@(_selectedMedia?.Title ?? string.Empty)"
                   MediaType="@(_selectedMedia?.MediaType ?? MediaType.Movie)"
@@ -187,7 +188,7 @@
             return;
         }
 
-        _isSearchModalOpen = true;
+        OpenSearchModal();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -283,7 +284,7 @@
         return _watchlistedPlexIds.Contains(plexId.Value);
     }
 
-    private void OpenSearchSheet()
+    private void OpenSearchModal()
     {
         _isSearchModalOpen = true;
     }
@@ -379,5 +380,13 @@
 
     }
 
+    private Task DetailsOpenChangedAsync(bool isOpen)
+    {
+        if (!isOpen)
+        {
+            CloseSelectedMedia();
+        }
+        return Task.CompletedTask;
+    }
 }
 

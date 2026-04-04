@@ -1,7 +1,7 @@
 @using Contracts.Media
 @using global::Shared
 
-<BbSheet @bind-Open="Open">
+<BbSheet Open="Open" OpenChanged="HandleSheetOpenChangedAsync">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
         @if (ShowContent)
         {
@@ -80,16 +80,7 @@
                         }
                     </BbButton>
                 </div>
-                <BbSeparator/>
 
-                @if (IsStatusError && !string.IsNullOrWhiteSpace(StatusMessage))
-                {
-                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-3">
-                        <p class="text-sm text-destructive">
-                            @StatusMessage
-                        </p>
-                    </div>
-                }
             </div>
         }
     </BbSheetContent>
@@ -100,7 +91,7 @@
     public bool Open { get; set; }
 
     [Parameter]
-    public EventCallback<bool> OpenChanged { get; set; }
+    public EventCallback<bool> OnOpenChanged { get; set; }
 
     [Parameter]
     public bool ShowContent { get; set; }
@@ -144,6 +135,12 @@
     private bool _isButtonBusy;
     private string ResolvedButtonIcon => ButtonIcon.Invoke();
 
+    private async Task HandleSheetOpenChangedAsync(bool isOpen)
+    {
+        Open = isOpen;
+        await OnOpenChanged.InvokeAsync(isOpen);
+    }
+
     private async Task HandleButtonClickedAsync()
     {
         if (_isButtonBusy)
@@ -160,11 +157,7 @@
         {
             _isButtonBusy = false;
             Open = false;
-            await OpenChanged.InvokeAsync(false);
+            await OnOpenChanged.InvokeAsync(false);
         }
     }
 }
-
-
-
-
