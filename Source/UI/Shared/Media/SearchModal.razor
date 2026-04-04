@@ -75,86 +75,13 @@
                     <div class="search-modal-results space-y-2 pr-1" tabindex="-1">
                         @foreach (var result in _searchResults)
                         {
-                            var displayFacts = GetDisplayFacts(result);
-                            var isActiveToggle = _isAdding && Equals(_activeToggledSourceId, result.SourceId);
-                            var bookmarkIconClass = $"transition-opacity duration-150 {(isActiveToggle ? "opacity-0" : string.Empty)}";
-
-                            var backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(result.BackdropUrl) ? result.PosterUrl ?? "" : result.BackdropUrl)}')";
-
-                            <div @key="result"
-                                 class="search-result-row rounded-lg bg-black hover-bg @(_focusedResult == result ? "row-focused" : "")"
-                                 style="@backgroundStyle"
-                                 @onfocusin="() => _focusedResult = result">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-start">
-                                        <div class="search-result-poster">
-                                            @if (!string.IsNullOrWhiteSpace(result.PosterUrl))
-                                            {
-                                                <img src="@result.PosterUrl" alt="@result.Title" class="rounded-lg"/>
-                                            }
-                                            else
-                                            {
-                                                <LucideIcon Name="image-off" Size="16" Class="text-muted-foreground"/>
-                                            }
-                                        </div>
-                                        <div class="search-result-content min-w-0">
-                                            <p class="text-xs text-muted-foreground flex items-center gap-1.5">
-                                                @if (result.MediaType is MediaType.Movie)
-                                                {
-                                                    <LucideIcon Name="film" Size="13"/>
-                                                }
-                                                else if (result.MediaType is MediaType.Show)
-                                                {
-                                                    <LucideIcon Name="tv" Size="13"/>
-                                                }
-                                                else
-                                                {
-                                                    <LucideIcon Name="circle-help" Size="13"/>
-                                                }
-                                                <span>@result.ReleaseDate?.Year</span>
-                                                @if (displayFacts.Count > 0)
-                                                {
-                                                    <span aria-hidden="true">•</span>
-                                                    <span>@string.Join(" • ", displayFacts)</span>
-                                                }
-                                            </p>
-                                            <p class="font-bold truncate text-xl pt-2">@result.Title</p>
-
-                                            @if (result.Genres.Count > 0)
-                                            {
-                                                <div class="search-result-genres pt-1">
-                                                    @foreach (var genre in result.Genres)
-                                                    {
-                                                        <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@genre</BbBadge>
-                                                    }
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                            class="search-result-toggle-btn @(IsSearchResultInWatchlist(result) ? "in-watchlist" : "") @(isActiveToggle ? "pointer-events-none" : "")"
-                                            @onclick="() => ToggleWatchlistAsync(result)">
-                                        <span class="relative inline-flex items-center justify-center w-6 h-6">
-                                            @if (IsSearchResultInWatchlist(result))
-                                            {
-                                                <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange"
-                                                            Class="@bookmarkIconClass" />
-                                            }
-                                            else
-                                            {
-                                                <LucideIcon Name="bookmark" Size="24"
-                                                            Class="@bookmarkIconClass" />
-                                            }
-                                            @if (isActiveToggle)
-                                            {
-                                                <span class="absolute inset-0 flex items-center justify-center">
-                                                    <BbSpinner Size="SpinnerSize.Small" />
-                                                </span>
-                                            }
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
+                            <SearchResultRow @key="result"
+                                             Result="result"
+                                             IsInWatchlist="IsSearchResultInWatchlist(result)"
+                                             IsActiveToggle="_isAdding && Equals(_activeToggledSourceId, result.SourceId)"
+                                             IsFocused="_focusedResult == result"
+                                             OnFocusIn="() => _focusedResult = result"
+                                             OnToggleWatchlist="r => ToggleWatchlistAsync(r)"/>
                         }
                     </div>
                     <BbSeparator/>
@@ -320,64 +247,6 @@
         _activeToggledSourceId = null;
     }
 
-    private static IReadOnlyList<string> GetDisplayFacts(IMediaSearchResult result)
-    {
-        var facts = new List<string>();
-
-        switch (result)
-        {
-            case ShowSearchResult showResult:
-                AddCountFact(facts, showResult.Seasons, "season");
-                AddCountFact(facts, showResult.Episodes, "episode");
-                break;
-            case MovieSearchResult movieResult:
-                var runtime = GetRuntimeLabel(movieResult.Runtime);
-                if (!string.IsNullOrWhiteSpace(runtime))
-                {
-                    facts.Add(runtime);
-                }
-                break;
-            default:
-                var fallbackRuntime = GetRuntimeLabel(result.Runtime);
-                if (!string.IsNullOrWhiteSpace(fallbackRuntime))
-                {
-                    facts.Add(fallbackRuntime);
-                }
-                break;
-        }
-
-        return facts;
-    }
-
-    private static void AddCountFact(ICollection<string> facts, int count, string singularLabel)
-    {
-        if (count <= 0)
-        {
-            return;
-        }
-
-        var suffix = count == 1 ? string.Empty : "s";
-        facts.Add($"{count} {singularLabel}{suffix}");
-    }
-
-    private static string? GetRuntimeLabel(TimeSpan? runtime)
-    {
-        if (runtime is null || runtime <= TimeSpan.Zero)
-        {
-            return null;
-        }
-
-        var totalMinutes = (int)Math.Round(runtime.Value.TotalMinutes, MidpointRounding.AwayFromZero);
-        if (totalMinutes <= 0)
-        {
-            return null;
-        }
-
-        var hours = totalMinutes / 60;
-        var minutes = totalMinutes % 60;
-
-        return hours > 0 ? $"{hours}h {minutes}m" : $"{minutes}m";
-    }
 
 }
 
