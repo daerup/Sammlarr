@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Stores;
 
-internal class MediaIdRepository(SammlarrDbContext dbContext) : IMediaIdStore
+internal class MediaIdMappingMappingStore(SammlarrDbContext dbContext) : IMediaIdMappingStore
 {
 	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
