@@ -88,7 +88,8 @@
     </div>
 </div>
 
-<MediaDetailSheet @bind-Open="_isSheetOpen"
+<MediaDetailSheet Open="_isSheetOpen"
+                  OnOpenChanged="DetailsOpenChangedAsync"
                   ShowContent="@(_selectedItem is not null)"
                   Title="@(_selectedItem?.Title ?? string.Empty)"
                   MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
@@ -243,12 +244,19 @@
         await ScrollService.ToTopAfterAsync(LoadWatchlistAsync, _cancellationTokenSource.Token);
     }
 
+    private Task DetailsOpenChangedAsync(bool isOpen)
+    {
+        if (!isOpen)
+        {
+            CloseSelectedMedia();
+        }
+        return Task.CompletedTask;
+    }
 
     public void Dispose()
     {
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }
-
 }
 
