@@ -4,7 +4,7 @@ using Contracts.Auth;
 
 namespace DB.Data.Entities;
 
-[Table("PlexCredentials")]
+[Table("Credentials")]
 public record Credential : Entity<Guid>
 {
 	[Required]

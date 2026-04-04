@@ -1,11 +1,9 @@
-using Contracts.Auth;
-using Contracts.Media;
 using DB.Data;
-using DB.Data.Stores;
+using DB.Encryption;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
+using Shared.Options;
 
 namespace DB;
 
@@ -13,21 +11,20 @@ public class DbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddMemoryCache();
+		services.AddModule<EncryptionModule>();
+		services.AddModule<DataAccessModule>();
 
 		services.AddDbContext<SammlarrDbContext>(
 			(sp, options) =>
 			{
-				var configuration = sp.GetRequiredService<IConfiguration>();
-				var connectionString =
-					configuration.GetConnectionString("Sammlarr") ?? throw new InvalidOperationException("Connection string 'Sammlarr' is not configured.");
+				var sammlarOptions = sp.GetRequiredService<SammlarOptions>();
+				if (string.IsNullOrWhiteSpace(sammlarOptions.ConnectionString))
+				{
+					throw new InvalidOperationException("ConnectionString in Sammlarr options is not configured.");
+				}
 
-				options.UseSqlite(connectionString);
+				options.UseSqlite(sammlarOptions.ConnectionString);
 			}
 		);
-
-		services.AddScoped<ICredentialStore, CredentialStore>();
-		services.AddScoped<IApiKeyStore, ApiKeyStore>();
-		services.AddScoped<IMediaIdMappingStore, MediaIdMappingMappingStore>();
 	}
 }

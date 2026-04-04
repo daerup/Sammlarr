@@ -1,14 +1,24 @@
 using DB.Data.Entities;
+using DB.Encryption;
 using DB.ModelBuilders;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Data;
+namespace DB;
 
 internal sealed class SammlarrDbContext : DbContext
 {
+	private readonly IDataProtectionService? _dataProtectionService;
+
 	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options)
 		: base(options)
 	{
+		Database.EnsureCreated();
+	}
+
+	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options, IDataProtectionService dataProtectionService)
+		: base(options)
+	{
+		_dataProtectionService = dataProtectionService ?? throw new ArgumentNullException(nameof(dataProtectionService));
 		Database.EnsureCreated();
 	}
 
@@ -28,9 +38,16 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<Credential>().HasIndex(c => c.AuthProvider).IsUnique();
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
-
 		modelBuilder.Entity<MediaIdEntry>().HasKey(e => new { e.Source, e.ExternalId });
 		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).OnDelete(DeleteBehavior.Cascade);
+
+		if (_dataProtectionService is not null)
+		{
+			var encryptedStringConverter = new EncryptedStringConverter(_dataProtectionService);
+			modelBuilder.Entity<Credential>().Property(c => c.AccessToken).HasConversion(encryptedStringConverter);
+			modelBuilder.Entity<ApiKeySetting>().Property(a => a.ApiKey).HasConversion(encryptedStringConverter);
+		}
+
 		if (Database.ProviderName == SQLiteModelBuilder.Fullname)
 		{
 			SQLiteModelBuilder.OnModelCreating(modelBuilder);
