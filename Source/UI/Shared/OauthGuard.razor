@@ -1,38 +1,18 @@
 @using Contracts.Auth
 
 @inject ICredentialStore CredentialStore
-@inject ProfileDropdownService ProfileDropdownService
-
-@if (!_isChecking && !_hasAccess && !HideFallback)
-{
-    <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
-        <LucideIcon Name="lock" Size="40" Class="mx-auto text-muted-foreground"/>
-        <p class="text-muted-foreground">You need to connect your @ProviderName account before @RequirementDescription.</p>
-        <BbButton Variant="ButtonVariant.Outline" OnClick="ProfileDropdownService.RequestOpenAsync">
-            Connect @ProviderName Account
-        </BbButton>
-    </div>
-}
 
 @code {
     [Parameter, EditorRequired] public AuthProvider Provider { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }
-    [Parameter] public string RequirementDescription { get; set; } = "accessing this area";
-    [Parameter] public bool HideFallback { get; set; }
 
     private bool _hasAccess;
-    private bool _isChecking = true;
     private bool? _lastReportedAccess;
-
-    private string ProviderName => Provider.ToString();
 
     protected override async Task OnParametersSetAsync()
     {
-        _isChecking = true;
-
         var credential = await CredentialStore.GetAsync(Provider);
         _hasAccess = credential is not null && !string.IsNullOrWhiteSpace(credential.AccessToken);
-        _isChecking = false;
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
         {

@@ -6,11 +6,11 @@
 @using global::Shared
 @using global::Shared.DI
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistStoreIndex
+@inject ProfileDropdownService ProfileDropdownService
 
 <PageTitle>Plex Watchlist</PageTitle>
 
 <OauthGuard Provider="AuthProvider.Plex"
-            RequirementDescription="viewing your watchlist"
             AccessChanged="HandleAccessChanged"/>
 
 <div class="px-6 py-10" tabindex="-1" @ref="_pageTopRef">
@@ -20,7 +20,7 @@
             <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Your saved movies and shows from Plex</p>
         </div>
 
-        <ProtectedSection GuardState="IsOAuthAllowed" HideFallback="true">
+        <ProtectedSection GuardState="IsOAuthAllowed" ShowFallback="false">
             <div class="flex items-center gap-2">
                <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
                     @if (_isLoading)
@@ -38,53 +38,56 @@
     </div>
 
     <div class="mt-6">
-        <ProtectedSection GuardState="IsOAuthAllowed" HideFallback="true">
-            @if (_isLoading)
-            {
-                <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                    @for (var i = 0; i < 12; i++)
-                    {
-                        <div class="space-y-3">
-                            <BbSkeleton Class="w-full" Height="300px"/>
-                        </div>
-                    }
-                </div>
-            }
-            else if (!string.IsNullOrEmpty(_errorMessage))
-            {
-                <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
-                    <p class="text-sm text-destructive font-medium">@_errorMessage</p>
-                    <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync">
-                        <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
-                        Retry
-                    </BbButton>
-                </div>
-            }
-            else if (_items is not null && _items.Count == 0)
-            {
-                <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
-                    <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
-                    <p class="text-muted-foreground">Your Plex watchlist is empty.</p>
-                </div>
-            }
-            else if (_items is not null)
-            {
-                <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-                    @foreach (var item in _items)
-                    {
-                        <MediaCard @key="item"
-                                   ImageUrl="@item.ArtUrl"
-                                   Title="@item.Title"
-                                   OnClick="() => SelectItem(item)"
-                                   Description="@GetDescription(item)"/>
-                    }
-                </div>
+        <ProtectedSection GuardState="IsOAuthAllowed"
+                          AuthProvider="AuthProvider.Plex"
+                          DeniedActionDescription="viewing your watchlist"
+                          FallbackAction="OpenProfileDropdownAsync">
+                @if (_isLoading)
+                {
+                    <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                        @for (var i = 0; i < 12; i++)
+                        {
+                            <div class="space-y-3">
+                                <BbSkeleton Class="w-full" Height="300px"/>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
+                        <p class="text-sm text-destructive font-medium">@_errorMessage</p>
+                        <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync">
+                            <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+                            Retry
+                        </BbButton>
+                    </div>
+                }
+                else if (_items is not null && _items.Count == 0)
+                {
+                    <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
+                        <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
+                        <p class="text-muted-foreground">Your Plex watchlist is empty.</p>
+                    </div>
+                }
+                else if (_items is not null)
+                {
+                    <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+                        @foreach (var item in _items)
+                        {
+                            <MediaCard @key="item"
+                                       ImageUrl="@item.ArtUrl"
+                                       Title="@item.Title"
+                                       OnClick="() => SelectItem(item)"
+                                       Description="@GetDescription(item)"/>
+                        }
+                    </div>
 
-                <PaginationControls CurrentPage="_currentPage"
-                                    TotalPages="_totalPages"
-                                    IsDisabled="_isLoading"
-                                    PageChanged="HandlePageChangedAsync"/>
-            }
+                    <PaginationControls CurrentPage="_currentPage"
+                                        TotalPages="_totalPages"
+                                        IsDisabled="_isLoading"
+                                        PageChanged="HandlePageChangedAsync"/>
+                }
         </ProtectedSection>
     </div>
 </div>
@@ -250,5 +253,10 @@
     {
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
+    }
+
+    private Task OpenProfileDropdownAsync()
+    {
+        return ProfileDropdownService.RequestOpenAsync();
     }
 }

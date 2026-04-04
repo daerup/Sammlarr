@@ -10,19 +10,16 @@
 @inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistServiceIndex
 @inject IKeyboardShortcutService KeyboardShortcutService
+@inject NavigationManager NavigationManager
+@inject ProfileDropdownService ProfileDropdownService
 @inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
 
 <OauthGuard Provider="AuthProvider.Plex"
-            RequirementDescription="browsing trending media"
             AccessChanged="HandleOAuthAccessChanged"/>
 
-<ProtectedSection GuardState="HasOAuthAccess" HideFallback="true">
-    <ApiKeyGuard Provider="MediaProvider.Tmdb"
-                 RequirementDescription="browse trending media"
-                 AccessChanged="HandleTmdbAccessChanged"/>
-</ProtectedSection>
+<ApiKeyGuard Provider="MediaProvider.Tmdb" AccessChanged="HandleTmdbAccessChanged"/>
 
 <div class="px-6 py-10" tabindex="-1" @ref="_pageTopRef">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -31,13 +28,13 @@
             <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Discover what's popular this week</p>
         </div>
 
-        <ProtectedSection GuardState="HasOAuthAccess" HideFallback="true">
+        <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
             <div class="flex items-center gap-2">
                 <BbCommand Class="border">
                     <BbCommandItem OnSelect="OpenSearchSheet" Value="search" class="search-command-item">
                         <LucideIcon Name="search" Class="mr-2"/>
                         Add from Search
-                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut" />
+                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
                     </BbCommandItem>
                 </BbCommand>
             </div>
@@ -45,42 +42,50 @@
     </div>
 
     <div class="mt-6">
-        <ProtectedSection GuardState="HasBrowseAccess" HideFallback="true">
-            @if (_isLoading)
-            {
-                <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                    @for (int i = 0; i < 20; i++)
-                    {
-                        <div class="space-y-3">
-                            <BbSkeleton Class="w-full" Height="300px"/>
-                        </div>
-                    }
-                </div>
-            }
-            else if (_trendingMedia != null)
-            {
-                <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-                    @foreach (var media in _trendingMedia)
-                    {
-                        <MediaCard @key="media"
-                                   ImageUrl="@media.BackdropUrl"
-                                   Title="@media.Title"
-                                   OnClick="() => SelectMedia(media)"
-                                   ShowBookmark="true"
-                                   IsInWatchlist="@IsInWatchlist(media)"
-                                   Rating="@media.Rating"
-                                   Date="@media.ReleaseDate"/>
-                    }
-                </div>
+        <ProtectedSection GuardState="HasOAuthAccess"
+                          AuthProvider="AuthProvider.Plex"
+                          DeniedActionDescription="browsing trending media"
+                          FallbackAction="OpenProfileDropdownAsync">
+            <ProtectedSection GuardState="HasTmdbAccess"
+                              MediaProvider="MediaProvider.Tmdb"
+                              DeniedActionDescription="browse trending media"
+                              FallbackAction="NavigateToSettings">
+                @if (_isLoading)
+                {
+                    <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                        @for (int i = 0; i < 20; i++)
+                        {
+                            <div class="space-y-3">
+                                <BbSkeleton Class="w-full" Height="300px"/>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (_trendingMedia != null)
+                {
+                    <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+                        @foreach (var media in _trendingMedia)
+                        {
+                            <MediaCard @key="media"
+                                       ImageUrl="@media.BackdropUrl"
+                                       Title="@media.Title"
+                                       OnClick="() => SelectMedia(media)"
+                                       ShowBookmark="true"
+                                       IsInWatchlist="@IsInWatchlist(media)"
+                                       Rating="@media.Rating"
+                                       Date="@media.ReleaseDate"/>
+                        }
+                    </div>
 
-                <PaginationControls CurrentPage="_currentPage"
-                                    TotalPages="_totalPages"
-                                    IsDisabled="_isLoading"
-                                    PageChanged="HandlePageChangedAsync"/>
-            }
+                    <PaginationControls CurrentPage="_currentPage"
+                                        TotalPages="_totalPages"
+                                        IsDisabled="_isLoading"
+                                        PageChanged="HandlePageChangedAsync"/>
+                }
+            </ProtectedSection>
         </ProtectedSection>
 
-        <ProtectedSection GuardState="HasOAuthAccess" HideFallback="true">
+        <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
             <SearchModal @bind-IsOpen="_isSearchModalOpen"
                          SearchProvider="MediaProvider.Plex"
                          IsInWatchlist="id => IsInWatchlist((PlexId)id)"
@@ -121,7 +126,7 @@
     private const string BrowseSearchShortcutId = "browse-search-shortcut";
     private const AuthProvider AuthProvider = Contracts.Auth.AuthProvider.Plex;
     private bool HasOAuthAccess() => _isAuthenticated;
-    private bool HasBrowseAccess() => _isAuthenticated && _hasTmdbKey;
+    private bool HasTmdbAccess() => _hasTmdbKey;
 
     private async Task HandleOAuthAccessChanged(bool isAuthenticated)
     {
@@ -342,16 +347,12 @@
 
     private string GetSideMenuButtonText()
     {
-        return _selectedMedia != null && IsInWatchlist(_selectedMedia)
-            ? "Remove from Watchlist"
-            : "Add to Watchlist";
+        return _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "Remove from Watchlist" : "Add to Watchlist";
     }
 
     private string GetSideMenuButtonIcon()
     {
-        return _selectedMedia != null && IsInWatchlist(_selectedMedia)
-            ? "x"
-            : "plus";
+        return _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "x" : "plus";
     }
 
     private async Task ToggleWatchlistAsync()
@@ -384,5 +385,15 @@
             }
         }
 
+    }
+
+    private Task OpenProfileDropdownAsync()
+    {
+        return ProfileDropdownService.RequestOpenAsync();
+    }
+
+    private void NavigateToSettings()
+    {
+        NavigationManager.NavigateTo("/settings");
     }
 }
