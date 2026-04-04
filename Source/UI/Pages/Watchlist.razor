@@ -9,6 +9,10 @@
 
 <PageTitle>Plex Watchlist</PageTitle>
 
+<OauthGuard Provider="AuthProvider.Plex"
+            RequirementDescription="viewing your watchlist"
+            AccessChanged="HandleAccessChanged"/>
+
 <div class="px-6 py-10" tabindex="-1" @ref="_pageTopRef">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -16,9 +20,7 @@
             <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Your saved movies and shows from Plex</p>
         </div>
 
-        <OauthGuard Provider="AuthProvider.Plex"
-                    RequirementDescription="viewing your watchlist"
-                    HideFallback="true">
+        <ProtectedSection GuardState="IsOAuthAllowed" HideFallback="true">
             <div class="flex items-center gap-2">
                <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
                     @if (_isLoading)
@@ -32,13 +34,11 @@
                     }
                 </BbButton>
             </div>
-        </OauthGuard>
+        </ProtectedSection>
     </div>
 
     <div class="mt-6">
-        <OauthGuard Provider="AuthProvider.Plex"
-                    RequirementDescription="viewing your watchlist"
-                    AccessChanged="HandleAccessChanged">
+        <ProtectedSection GuardState="IsOAuthAllowed" HideFallback="true">
             @if (_isLoading)
             {
                 <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
@@ -85,7 +85,7 @@
                                     IsDisabled="_isLoading"
                                     PageChanged="HandlePageChangedAsync"/>
             }
-        </OauthGuard>
+        </ProtectedSection>
     </div>
 </div>
 
@@ -106,6 +106,7 @@
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
+    private bool _hasOAuthAccess;
     private string? _errorMessage;
     private int _currentPage = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -113,9 +114,12 @@
     private ElementReference _pageTopRef;
 
     private IWatchlistService WatchlistService => WatchlistStoreIndex[AuthProvider.Plex];
+    private bool IsOAuthAllowed() => _hasOAuthAccess;
 
     private async Task HandleAccessChanged(bool hasAccess)
     {
+        _hasOAuthAccess = hasAccess;
+
         if (!hasAccess)
         {
             _items = null;

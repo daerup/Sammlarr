@@ -1,0 +1,18 @@
+@if (CanRenderContent)
+{
+    @ChildContent
+}
+else if (!HideFallback)
+{
+    @FallbackContent
+}
+
+@code {
+    [Parameter] public bool IsAllowed { get; set; }
+    [Parameter] public Func<bool>? GuardState { get; set; }
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FallbackContent { get; set; }
+    [Parameter] public bool HideFallback { get; set; }
+
+    private bool CanRenderContent => GuardState?.Invoke() ?? IsAllowed;
+}
