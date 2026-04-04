@@ -50,7 +50,6 @@ internal class TmdbIdConverter(
 		}
 
 		List<IMediaId> allIds = [match.PlexId, .. match.TmdbId, .. match.ImdbId, .. match.TvdbId];
-
 		if (cachedIds.Any())
 		{
 			await idStore.AppendAsync(cachedIds.First(), allIds);

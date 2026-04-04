@@ -23,8 +23,8 @@ internal class MediaIdRepository(SammlarrDbContext dbContext) : IMediaIdStore
 			if (await dbContext.MediaIds.AnyAsync(MatchesId(id), cancellationToken))
 				throw new InvalidOperationException("A group containing one of the provided IDs already exists");
 		}
-		dbContext.MediaIdGroups.Add(new MediaIdGroup { MediaIds = idList.Select(id => id.MapEntity()).ToList() });
 
+		await dbContext.MediaIdGroups.AddAsync(new MediaIdGroup { MediaIds = [.. idList.Select(id => id.MapEntity())] }, cancellationToken);
 		await dbContext.SaveChangesAsync(cancellationToken);
 	}
 
@@ -38,7 +38,7 @@ internal class MediaIdRepository(SammlarrDbContext dbContext) : IMediaIdStore
 			throw new InvalidOperationException("No group found for the provided ID");
 
 		var toAdd = newIds.Except(group.MediaIds.Select(e => e.MapValueObject())).Distinct().Select(id => id.MapEntity() with { Group = group });
-		group.MediaIds.AddRange(toAdd);
+		await dbContext.MediaIds.AddRangeAsync(toAdd, cancellationToken);
 		await dbContext.SaveChangesAsync(cancellationToken);
 	}
 
