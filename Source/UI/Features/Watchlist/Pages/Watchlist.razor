@@ -45,7 +45,7 @@
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaCard" Count="12"/>
+                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
                     </div>
                 }
                 else if (!string.IsNullOrEmpty(_errorMessage))
@@ -70,7 +70,7 @@
                     <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
                         @foreach (var item in _items)
                         {
-                            <MediaCard @key="item"
+                            <MediaGridTile @key="item"
                                        ImageUrl="@item.ArtUrl"
                                        Title="@item.Title"
                                        OnClick="() => SelectItem(item)"
@@ -87,7 +87,7 @@
     </div>
 </div>
 
-<MediaDetailsSideMenu @bind-Open="_isSheetOpen"
+<MediaDetailSheet @bind-Open="_isSheetOpen"
                       ShowContent="@(_selectedItem is not null)"
                       Title="@(_selectedItem?.Title ?? string.Empty)"
                       MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"

@@ -53,7 +53,7 @@
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
-                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaCard" Count="20"/>
+                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="20"/>
                     </div>
                 }
                 else if (_trendingMedia != null)
@@ -61,7 +61,7 @@
                     <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
                         @foreach (var media in _trendingMedia)
                         {
-                            <MediaCard @key="media"
+                            <MediaGridTile @key="media"
                                        ImageUrl="@media.BackdropUrl"
                                        Title="@media.Title"
                                        OnClick="() => SelectMedia(media)"
@@ -90,7 +90,7 @@
     </div>
 </div>
 
-<MediaDetailsSideMenu @bind-Open="_isSheetOpen"
+<MediaDetailSheet @bind-Open="_isSheetOpen"
                       ShowContent="@(_selectedMedia is not null)"
                       Title="@(_selectedMedia?.Title ?? string.Empty)"
                       MediaType="@(_selectedMedia?.MediaType ?? MediaType.Movie)"
