@@ -1,4 +1,4 @@
-namespace UI.Shared;
+namespace UI.Shared.Services;
 
 internal class ProfileDropdownService
 {
