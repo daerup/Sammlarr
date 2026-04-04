@@ -142,7 +142,7 @@
     public bool IsStatusError { get; set; }
 
     private bool _isButtonBusy;
-    private string? ResolvedButtonIcon => ButtonIcon.Invoke();
+    private string ResolvedButtonIcon => ButtonIcon.Invoke();
 
     private async Task HandleButtonClickedAsync()
     {
@@ -164,5 +164,7 @@
         }
     }
 }
+
+
 
 
