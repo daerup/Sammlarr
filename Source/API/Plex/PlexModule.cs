@@ -25,12 +25,12 @@ internal class PlexModule : IServiceModule
 
 	private static void ConfigurePlexClient(IServiceProvider sp, HttpClient client)
 	{
-		var options = sp.GetRequiredService<PlexOptions>();
-		var auth = options.Authentication;
+		var plexOptions = sp.GetRequiredService<PlexOptions>();
+		var auth = plexOptions.Authentication;
 
-		client.BaseAddress = new Uri(options.BaseUrl);
+		client.BaseAddress = new Uri(plexOptions.BaseUrl);
 		client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-		client.DefaultRequestHeaders.UserAgent.ParseAdd("Sammlarr/1.0");
+		client.DefaultRequestHeaders.UserAgent.ParseAdd($"{auth.ProductName}/1.0");
 		client.DefaultRequestHeaders.Add("X-Plex-Product", auth.ProductName);
 		client.DefaultRequestHeaders.Add("X-Plex-Version", "1.0");
 		client.DefaultRequestHeaders.Add("X-Plex-Device", "Web");

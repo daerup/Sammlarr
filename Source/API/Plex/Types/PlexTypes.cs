@@ -5,7 +5,7 @@ namespace API.Plex.Types;
 
 internal static class PlexTypes
 {
-	public static class Watchlist
+	internal static class Watchlist
 	{
 		public record MediaContainer(
 			[property: JsonPropertyName("identifier")] string Identifier,
@@ -35,7 +35,7 @@ internal static class PlexTypes
 		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 	}
 
-	public static class ById
+	internal static class ById
 	{
 		public record Guid([property: JsonPropertyName("id")] string Id);
 
@@ -74,7 +74,7 @@ internal static class PlexTypes
 		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 	}
 
-	public static class Search
+	internal static class Search
 	{
 		public record MediaContainer(
 			[property: JsonPropertyName("suggestedTerms")] IReadOnlyList<object> SuggestedTerms,
@@ -112,7 +112,7 @@ internal static class PlexTypes
 		public record NestedSearchResult([property: JsonPropertyName("Metadata")] Metadata Metadata);
 	}
 
-	public static class Auth
+	internal static class Auth
 	{
 		public record Root(
 			[property: JsonPropertyName("id")] int PinId,
@@ -127,7 +127,7 @@ internal static class PlexTypes
 		);
 	}
 
-	public static class User
+	internal static class User
 	{
 		public record Root(
 			[property: JsonPropertyName("username")] string Username,
