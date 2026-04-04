@@ -32,6 +32,7 @@
 @code {
     private string? _errorMessage;
     private bool _isHandlingCallback;
+    private string _returnUrl = "/";
 
     private IOAuthService OAuthService => OAuthServiceIndex[AuthProvider.Plex];
 
@@ -39,6 +40,7 @@
     {
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var query = QueryHelpers.ParseQuery(uri.Query);
+        _returnUrl = GetSafeReturnUrl(query.TryGetValue("returnUrl", out var returnUrlValues) ? returnUrlValues.FirstOrDefault() : null);
 
         if (
             query.TryGetValue("pinId", out var pinIdValues) && int.TryParse(pinIdValues.FirstOrDefault(), out var pinId) &&
@@ -49,12 +51,37 @@
             _isHandlingCallback = false;
 
             if (_errorMessage is null)
-                NavigationManager.NavigateTo("/", replace: true);
+                NavigationManager.NavigateTo(_returnUrl, replace: true);
         }
         else
         {
             NavigationManager.NavigateTo("/");
         }
+    }
+
+    private static string GetSafeReturnUrl(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return "/";
+        }
+
+        if (!Uri.TryCreate(returnUrl, UriKind.Relative, out _))
+        {
+            return "/";
+        }
+
+        if (!returnUrl.StartsWith('/'))
+        {
+            return "/";
+        }
+
+        if (returnUrl.StartsWith("//", StringComparison.Ordinal))
+        {
+            return "/";
+        }
+
+        return returnUrl;
     }
 
     private async Task HandlePinCallbackAsync(int pinId, Guid clientId)
