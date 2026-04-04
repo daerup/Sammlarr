@@ -13,6 +13,8 @@ public class DbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddMemoryCache();
+
 		services.AddDbContext<SammlarrDbContext>(
 			(sp, options) =>
 			{
