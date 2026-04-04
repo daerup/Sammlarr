@@ -1,17 +1,19 @@
-<BbPagination Class="mt-5"
+<BbPagination Class="mt-5 pagination-controls"
               CurrentPage="CurrentPage"
               TotalPages="TotalPages"
               CurrentPageChanged="HandleCurrentPageChangedAsync">
     <BbPaginationContent Class="justify-center gap-2">
-        <BbPaginationItem>
-            <BbPaginationFirst Disabled="@(IsDisabled || CurrentPage <= 1)"
-            />
+        <BbPaginationItem Class="pagnation-control">
+            <div style="@GetDisabledCursorStyle(IsFirstOrPreviousDisabled)">
+                <BbPaginationFirst Disabled="@IsFirstOrPreviousDisabled"/>
+            </div>
         </BbPaginationItem>
-        <BbPaginationItem>
-            <BbPaginationPrevious Disabled="@(IsDisabled || CurrentPage <= 1)"
-                                  ShowText="false"
-                                  Size="PaginationLinkSize.Icon"
-            />
+        <BbPaginationItem Class="pagnation-control">
+            <div style="@GetDisabledCursorStyle(IsFirstOrPreviousDisabled)">
+                <BbPaginationPrevious Disabled="@IsFirstOrPreviousDisabled"
+                                      ShowText="false"
+                                      Size="PaginationLinkSize.Icon"/>
+            </div>
         </BbPaginationItem>
         <BbPaginationItem Class="px-2">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
@@ -21,20 +23,22 @@
                                     Value="_jumpPageValue"
                                     ValueChanged="HandleJumpValueChangedAsync"
                                     DisableDebounce="true"
-                                    Disabled="@(IsDisabled || TotalPages < 1)"/>
+                                    Disabled="@(IsDisabled || TotalPages <= 1)"/>
                 </div>
                 <span>of @TotalPages</span>
             </div>
+        </BbPaginationItem >
+        <BbPaginationItem Class="pagnation-control">
+            <div style="@GetDisabledCursorStyle(IsNextOrLastDisabled)">
+                <BbPaginationNext Disabled="@IsNextOrLastDisabled"
+                                  ShowText="false"
+                                  Size="PaginationLinkSize.Icon"/>
+            </div>
         </BbPaginationItem>
-        <BbPaginationItem>
-            <BbPaginationNext Disabled="@(IsDisabled || CurrentPage >= TotalPages)"
-                              ShowText="false"
-                              Size="PaginationLinkSize.Icon"
-            />
-        </BbPaginationItem>
-        <BbPaginationItem>
-            <BbPaginationLast Disabled="@(IsDisabled || CurrentPage >= TotalPages)"
-            />
+        <BbPaginationItem Class="pagnation-control">
+            <div style="@GetDisabledCursorStyle(IsNextOrLastDisabled)">
+                <BbPaginationLast Disabled="@IsNextOrLastDisabled"/>
+            </div>
         </BbPaginationItem>
     </BbPaginationContent>
 </BbPagination>
@@ -54,6 +58,11 @@
 
     [Parameter]
     public EventCallback<int> PageChanged { get; set; }
+
+    private static string? GetDisabledCursorStyle(bool isDisabled) => isDisabled ? "cursor: not-allowed;" : null;
+
+    private bool IsFirstOrPreviousDisabled => IsDisabled || CurrentPage <= 1;
+    private bool IsNextOrLastDisabled => IsDisabled || CurrentPage >= TotalPages;
 
     protected override void OnParametersSet()
     {

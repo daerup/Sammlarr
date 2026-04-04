@@ -132,14 +132,18 @@
             _hasTmdbKey = false;
             _watchlistedPlexIds.Clear();
             _trendingMedia = null;
-            _selectedMedia = null;
-            _isSheetOpen = false;
+            CloseSelectedMedia();
             _isSearchModalOpen = false;
             _isLoading = false;
             return;
         }
 
         await LoadWatchlistIdsAsync();
+    }
+    private void CloseSelectedMedia()
+    {
+        _selectedMedia = null;
+        _isSheetOpen = false;
     }
 
     private async Task HandleTmdbAccessChanged(bool hasTmdbKey)
@@ -149,8 +153,7 @@
         if (!_hasTmdbKey)
         {
             _trendingMedia = null;
-            _selectedMedia = null;
-            _isSheetOpen = false;
+            CloseSelectedMedia();
             _currentPage = 1;
             _totalPages = 1;
             _isLoading = false;
@@ -252,6 +255,7 @@
         {
             return;
         }
+        CloseSelectedMedia();
 
         _currentPage = newPage;
         await ScrollToTopAsync();

@@ -121,8 +121,7 @@
         if (!hasAccess)
         {
             _items = null;
-            _selectedItem = null;
-            _isSheetOpen = false;
+            CloseSelectedMedia();
             _errorMessage = null;
             _isLoading = false;
             _currentPage = 1;
@@ -217,13 +216,17 @@
             }
 
             await LoadWatchlistAsync();
-            _isSheetOpen = false;
-            _selectedItem = null;
+            CloseSelectedMedia();
         }
         finally
         {
             _isRemoving = false;
         }
+    }
+    private void CloseSelectedMedia()
+    {
+        _isSheetOpen = false;
+        _selectedItem = null;
     }
 
     private async Task HandlePageChangedAsync(int newPage)
@@ -232,6 +235,7 @@
         {
             return;
         }
+        CloseSelectedMedia();
 
         _currentPage = newPage;
         await LoadWatchlistAsync();
