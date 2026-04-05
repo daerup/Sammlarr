@@ -5,12 +5,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DB.Tests.Integration;
 
-internal class EncryptionTestFixture : IAsyncDisposable
+internal class SQLiteFixture : IAsyncDisposable
 {
 	private readonly ServiceProvider _serviceProvider;
 	private readonly SqliteConnection _connection;
 
-	public EncryptionTestFixture()
+	internal SammlarrDbContext Context => field ??= CreateDbContext();
+	internal RawDbContext RawContext => field ??= new RawDbContext(Context);
+
+	public SQLiteFixture()
 	{
 		var services = new ServiceCollection();
 		services.AddDataProtection();
