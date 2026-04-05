@@ -46,6 +46,7 @@ internal class CredentialStore(SammlarrDbContext context, IMemoryCache cache) : 
 		{
 			credential.AccessToken = accessToken;
 			credential.ExpiresAt = accessTokenExpiresAt;
+			credential.ClientId = clientId;
 		}
 
 		await context.SaveChangesAsync(cancellationToken);

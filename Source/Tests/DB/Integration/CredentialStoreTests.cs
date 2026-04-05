@@ -1,7 +1,6 @@
 using Contracts.Auth;
 using DB.Data.Entities;
 using DB.Data.Stores;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace DB.Tests.Integration;
@@ -53,6 +52,38 @@ public class CredentialStoreTests : IAsyncDisposable
 
 		await Assert.That(encrypted).IsNotEqualTo(plainToken);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
+	}
+
+	[Test]
+	public async Task StoreCredential_WithClientIdEncryption_StoresEncryptedClientIdInDatabase()
+	{
+		var authProvider = AuthProvider.Plex;
+		var clientId = Guid.NewGuid();
+		var token = "secret-token";
+		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
+
+		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
+
+		var encryptedClientId = (await RawContext.Table<Credential>().QueryAsync<string>(nameof(Credential.ClientId))).Single();
+
+		await Assert.That(encryptedClientId).IsNotEqualTo(clientId.ToString());
+		await Assert.That(encryptedClientId).Satisfies(IsBase64OrEmpty);
+	}
+
+	[Test]
+	public async Task StoreCredential_WithClientIdEncryption_RetrievesDecryptedGuid()
+	{
+		var authProvider = AuthProvider.Plex;
+		var clientId = Guid.NewGuid();
+		var token = "secret-token";
+		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
+
+		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
+
+		var credential = await Store.GetAsync(authProvider);
+
+		await Assert.That(credential).IsNotNull();
+		await Assert.That(credential!.ClientId).IsEqualTo(clientId);
 	}
 
 	[Test]

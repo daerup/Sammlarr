@@ -44,7 +44,9 @@ internal sealed class SammlarrDbContext : DbContext
 		if (_dataProtectionService is not null)
 		{
 			var encryptedStringConverter = new EncryptedStringConverter(_dataProtectionService);
+			var encryptedGuidConverter = new EncryptedGuidConverter(_dataProtectionService);
 			modelBuilder.Entity<Credential>().Property(c => c.AccessToken).HasConversion(encryptedStringConverter);
+			modelBuilder.Entity<Credential>().Property(c => c.ClientId).HasConversion(encryptedGuidConverter);
 			modelBuilder.Entity<ApiKeySetting>().Property(a => a.ApiKey).HasConversion(encryptedStringConverter);
 		}
 

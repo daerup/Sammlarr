@@ -39,6 +39,14 @@ internal class RawDbContext<TTable>
 		return await connection.QueryAsync<TColumn>(sql);
 	}
 
+	public async Task<IEnumerable<TColumn>> QueryAsync<TColumn>(string columnName)
+	{
+		var tableName = _context.Model.FindEntityType(typeof(TTable))!.GetTableName()!;
+		var connection = _context.Database.GetDbConnection();
+		var sql = $"SELECT {columnName} FROM {tableName}";
+		return await connection.QueryAsync<TColumn>(sql);
+	}
+
 	private DbConnection GetConnection<TColumn>(Expression<Func<TTable, TColumn>> propertySelector, out string columnName, out string tableName)
 	{
 		tableName = _context.Model.FindEntityType(typeof(TTable))!.GetTableName()!;
