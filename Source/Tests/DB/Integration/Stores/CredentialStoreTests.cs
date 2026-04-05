@@ -2,13 +2,15 @@ using Contracts.Auth;
 using DB.Data.Entities;
 using DB.Data.Stores;
 using Microsoft.Extensions.Caching.Memory;
+using Shared.Caching;
 
 namespace DB.Tests.Integration.Stores;
 
 public class CredentialStoreTests : IAsyncDisposable
 {
 	private readonly SQLiteFixture _fixture = new();
-	private ICredentialStore Store => field ??= new CredentialStore(_fixture.Context, new MemoryCache(new MemoryCacheOptions()));
+	private ICredentialStore Store =>
+		field ??= new CredentialStore(_fixture.Context, new TypedMemoryCache<AuthProvider, Credential>(new MemoryCache(new MemoryCacheOptions())));
 
 	public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 

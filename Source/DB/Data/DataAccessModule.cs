@@ -10,7 +10,6 @@ internal class DataAccessModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddMemoryCache();
 		services.AddScoped<ICredentialStore, CredentialStore>();
 		services.AddScoped<IApiKeyStore, ApiKeyStore>();
 		services.AddScoped<IMediaIdMappingStore, MediaIdMappingMappingStore>();
