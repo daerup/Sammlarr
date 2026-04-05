@@ -1,8 +1,8 @@
 using System.Text.Json;
 using API.TMDB.Types;
+using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Trending;
-using Shared.DI;
 using Shared.Options;
 
 namespace API.TMDB;

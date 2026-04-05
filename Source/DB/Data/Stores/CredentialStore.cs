@@ -1,7 +1,7 @@
 using Contracts.Auth;
+using Contracts.Caching;
 using DB.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Shared.Caching;
 
 namespace DB.Data.Stores;
 

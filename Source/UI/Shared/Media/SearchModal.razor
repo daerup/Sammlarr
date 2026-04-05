@@ -1,7 +1,7 @@
+@using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Search
 @using global::Shared
-@using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaSearchService> SearchServiceIndex
 @if (IsOpen)
 {

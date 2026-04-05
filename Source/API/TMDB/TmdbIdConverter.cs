@@ -1,8 +1,8 @@
 using API.Plex;
 using API.Plex.Types;
+using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Search;
-using Shared.DI;
 
 namespace API.TMDB;
 

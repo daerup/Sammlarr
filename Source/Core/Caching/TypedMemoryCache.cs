@@ -1,8 +1,9 @@
+using Contracts.Caching;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Shared.Caching;
+namespace Core.Caching;
 
-public class TypedMemoryCache<TKey, TValue>(IMemoryCache cache) : ITypedMemoryCache<TKey, TValue>
+internal class TypedMemoryCache<TKey, TValue>(IMemoryCache cache) : ITypedMemoryCache<TKey, TValue>
 	where TKey : notnull
 {
 	public bool TryGetValue(TKey key, out TValue? value) => cache.TryGetValue(key, out value);

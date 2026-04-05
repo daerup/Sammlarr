@@ -1,7 +1,8 @@
+using Contracts.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
-namespace Shared.Caching;
+namespace Core.Caching;
 
 internal class CachingModule : IServiceModule
 {
