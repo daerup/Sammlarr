@@ -18,10 +18,10 @@ public class EncryptedGuidConverterTests
 	public async Task Convert_WithValidGuid_ReturnsEncryptedString()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedGuidConverter(service);
+		var testee = new EncryptedGuidConverter(service);
 		var guidValue = Guid.NewGuid();
 
-		var encrypted = converter.ConvertToProvider(guidValue);
+		var encrypted = testee.ConvertToProvider(guidValue);
 
 		await Assert.That(encrypted).IsNotNull();
 		await Assert.That(encrypted).IsNotEqualTo(guidValue.ToString());
@@ -31,11 +31,11 @@ public class EncryptedGuidConverterTests
 	public async Task ConvertBack_WithEncryptedString_ReturnsOriginalGuid()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedGuidConverter(service);
+		var testee = new EncryptedGuidConverter(service);
 		var originalGuid = Guid.NewGuid();
-		var encrypted = converter.ConvertToProvider(originalGuid);
+		var encrypted = testee.ConvertToProvider(originalGuid);
 
-		var decrypted = converter.ConvertFromProvider(encrypted);
+		var decrypted = testee.ConvertFromProvider(encrypted);
 
 		await Assert.That(decrypted).IsEqualTo(originalGuid);
 	}
@@ -44,14 +44,14 @@ public class EncryptedGuidConverterTests
 	public async Task Encrypt_ThenDecrypt_WithVariousGuids_RoundTripSucceeds()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedGuidConverter(service);
+		var testee = new EncryptedGuidConverter(service);
 		var testGuids = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.Empty, Guid.NewGuid() };
 
 		using var _ = Assert.Multiple();
 		foreach (var guid in testGuids)
 		{
-			var encrypted = converter.ConvertToProvider(guid);
-			var decrypted = converter.ConvertFromProvider(encrypted);
+			var encrypted = testee.ConvertToProvider(guid);
+			var decrypted = testee.ConvertFromProvider(encrypted);
 			await Assert.That(decrypted).IsEqualTo(guid);
 		}
 	}
@@ -60,10 +60,10 @@ public class EncryptedGuidConverterTests
 	public async Task EncryptedValue_IsBase64Encoded()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedGuidConverter(service);
+		var testee = new EncryptedGuidConverter(service);
 		var guidValue = Guid.NewGuid();
 
-		var encrypted = converter.ConvertToProvider(guidValue);
+		var encrypted = testee.ConvertToProvider(guidValue);
 		var encryptedString = (encrypted as string) ?? string.Empty;
 
 		var isBase64 = IsBase64String(encryptedString);
@@ -84,12 +84,12 @@ public class EncryptedGuidConverterTests
 	{
 		var service1 = CreateDataProtectionService();
 		var service2 = CreateDataProtectionService();
-		var converter1 = new EncryptedGuidConverter(service1);
-		var converter2 = new EncryptedGuidConverter(service2);
+		var testee1 = new EncryptedGuidConverter(service1);
+		var testee2 = new EncryptedGuidConverter(service2);
 		var guidValue = Guid.NewGuid();
 
-		var encrypted1 = converter1.ConvertToProvider(guidValue);
-		var encrypted2 = converter2.ConvertToProvider(guidValue);
+		var encrypted1 = testee1.ConvertToProvider(guidValue);
+		var encrypted2 = testee2.ConvertToProvider(guidValue);
 
 		await Assert.That(encrypted1).IsNotEqualTo(encrypted2);
 	}
@@ -98,19 +98,19 @@ public class EncryptedGuidConverterTests
 	public async Task ConvertBack_WithInvalidBase64_ThrowsInvalidOperationException()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedGuidConverter(service);
+		var testee = new EncryptedGuidConverter(service);
 
-		await Assert.That(() => converter.ConvertFromProvider("not-valid-base64!!!")).Throws<InvalidOperationException>();
+		await Assert.That(() => testee.ConvertFromProvider("not-valid-base64!!!")).Throws<InvalidOperationException>();
 	}
 
 	[Test]
 	public async Task ConvertBack_WithInvalidGuidString_ThrowsFormatException()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedGuidConverter(service);
+		var testee = new EncryptedGuidConverter(service);
 		var invalidGuidString = "not-a-valid-guid";
 		var encrypted = service.Encrypt(invalidGuidString);
 
-		await Assert.That(() => converter.ConvertFromProvider(encrypted)).Throws<FormatException>();
+		await Assert.That(() => testee.ConvertFromProvider(encrypted)).Throws<FormatException>();
 	}
 }

@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 namespace DB.Tests.Integration.Stores;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
+public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private IApiKeyStore _testee = null!;
 	private Mock<ITypedMemoryCache<MediaProvider, string>> _cache = null!;
 
-	public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
 		_cache = ITypedMemoryCache<MediaProvider, string>.Mock();
-		_testee = new ApiKeyStore(_fixture.Context, _cache.Object);
+		_testee = new ApiKeyStore(fixture.Context, _cache.Object);
 	}
 
 	[Test]
@@ -38,7 +38,7 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 
 		await _testee.SetApiKeyAsync(provider, plainKey);
 
-		var setting = await _fixture.Context.ApiKeySettings.SingleAsync(s => s.Provider == provider);
+		var setting = await fixture.Context.ApiKeySettings.SingleAsync(s => s.Provider == provider);
 
 		await Assert.That(setting.ApiKey).IsEqualTo(plainKey);
 	}
@@ -51,7 +51,7 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 
 		await _testee.SetApiKeyAsync(provider, plainKey);
 
-		var encrypted = (await _fixture.RawContext.Table<ApiKeySetting>().QueryAsync(x => x.ApiKey)).Single();
+		var encrypted = (await fixture.RawContext.Table<ApiKeySetting>().QueryAsync(x => x.ApiKey)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainKey);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -69,7 +69,7 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 
 		await _testee.SetApiKeyAsync(provider, apiKey);
 
-		var setting = await _fixture.Context.ApiKeySettings.SingleAsync();
+		var setting = await fixture.Context.ApiKeySettings.SingleAsync();
 
 		await Assert.That(setting.ApiKey).IsEqualTo(apiKey);
 	}
@@ -83,7 +83,7 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 		var newKey = "new-api-key-12345";
 		await _testee.SetApiKeyAsync(provider, newKey);
 
-		var all = await _fixture.Context.ApiKeySettings.ToListAsync();
+		var all = await fixture.Context.ApiKeySettings.ToListAsync();
 
 		var stored = await Assert.That(all).HasSingleItem();
 		await Assert.That(stored.ApiKey).IsEqualTo(newKey);
@@ -97,7 +97,7 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 		await _testee.SetApiKeyAsync(MediaProvider.Tmdb, key);
 		await _testee.SetApiKeyAsync(MediaProvider.Imdb, key);
 
-		var keys = await _fixture.Context.ApiKeySettings.ToListAsync();
+		var keys = await fixture.Context.ApiKeySettings.ToListAsync();
 		var tmdb = keys.Single(s => s.Provider == MediaProvider.Tmdb);
 		var imdb = keys.Single(s => s.Provider == MediaProvider.Imdb);
 
@@ -113,7 +113,7 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 		await SetUpApiKeyAsync(provider, "secret-api-key");
 
 		await _testee.ClearApiKeyAsync(provider);
-		var exists = await _fixture.Context.ApiKeySettings.AnyAsync(s => s.Provider == provider);
+		var exists = await fixture.Context.ApiKeySettings.AnyAsync(s => s.Provider == provider);
 
 		await Assert.That(exists).IsFalse();
 	}
@@ -155,8 +155,8 @@ public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 
 	private async Task SetUpApiKeyAsync(MediaProvider provider, string apiKey)
 	{
-		await _fixture.Context.ApiKeySettings.AddAsync(new ApiKeySetting { Provider = provider, ApiKey = apiKey });
-		await _fixture.Context.SaveChangesAsync();
+		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeySetting { Provider = provider, ApiKey = apiKey });
+		await fixture.Context.SaveChangesAsync();
 	}
 
 	private static bool IsBase64OrEmpty(string? value)

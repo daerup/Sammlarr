@@ -13,13 +13,13 @@ public class MediaIdConversionExtensionsTests
 	[Arguments(MediaProvider.Plex, "plex-123")]
 	public async Task MapEntity_WhenMediaIdProvided_MapsSourceAndExternalId(MediaProvider source, string externalId)
 	{
-		var typedId = CreateMediaId(source, externalId);
+		var testee = CreateMediaId(source, externalId);
 
-		var entry = typedId.MapEntity();
+		var entry = testee.MapEntity();
 
 		await Assert.That(entry.Source).IsEqualTo(source);
 		await Assert.That(entry.ExternalId).IsEqualTo(externalId);
-		await Assert.That(entry.ExternalId).IsEqualTo(externalId);
+		await Assert.That(entry.MapValueObject()).IsEqualTo(testee);
 	}
 
 	[Test]
@@ -29,14 +29,14 @@ public class MediaIdConversionExtensionsTests
 	[Arguments(MediaProvider.Plex, "plex-123")]
 	public async Task MapValueObject_WhenEntryProvided_MapsBackToSameValueObject(MediaProvider source, string externalId)
 	{
-		var entry = new MediaIdEntry { Source = source, ExternalId = externalId };
-		var typedId = CreateMediaId(source, externalId);
+		var testee = new MediaIdEntry { Source = source, ExternalId = externalId };
+		var expected = CreateMediaId(source, externalId);
 
-		var mediaId = entry.MapValueObject();
+		var mediaId = testee.MapValueObject();
 
 		await Assert.That(mediaId.Source).IsEqualTo(source);
 		await Assert.That(mediaId.ToString()).IsEqualTo(externalId);
-		await Assert.That(mediaId).IsEqualTo(typedId);
+		await Assert.That(mediaId).IsEqualTo(expected);
 	}
 
 	private static IMediaId CreateMediaId(MediaProvider source, string externalId)

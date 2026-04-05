@@ -27,7 +27,7 @@ internal static class OptionsRegistrationSource
 			            services.AddOptions();
 
 			            {{registrationCalls}}
-			                
+
 			            return services;
 			        }
 

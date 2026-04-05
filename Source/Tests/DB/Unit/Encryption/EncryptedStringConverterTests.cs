@@ -18,8 +18,8 @@ public class EncryptedStringConverterTests
 	public async Task ConvertToProvider_WithValidString_ReturnsBase64EncodedCiphertext()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedStringConverter(service);
-		var convertToProvider = converter.ConvertToProviderExpression.Compile();
+		var testee = new EncryptedStringConverter(service);
+		var convertToProvider = testee.ConvertToProviderExpression.Compile();
 		var plaintext = "super-secret-token";
 
 		var encrypted = convertToProvider(plaintext);
@@ -32,8 +32,8 @@ public class EncryptedStringConverterTests
 	public async Task ConvertToProvider_WithEmptyString_ReturnsEmptyString()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedStringConverter(service);
-		var convertToProvider = converter.ConvertToProviderExpression.Compile();
+		var testee = new EncryptedStringConverter(service);
+		var convertToProvider = testee.ConvertToProviderExpression.Compile();
 
 		var encrypted = convertToProvider("");
 
@@ -44,9 +44,9 @@ public class EncryptedStringConverterTests
 	public async Task ConvertFromProvider_WithValidCiphertext_ReturnsOriginalPlaintext()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedStringConverter(service);
-		var convertToProvider = converter.ConvertToProviderExpression.Compile();
-		var convertFromProvider = converter.ConvertFromProviderExpression.Compile();
+		var testee = new EncryptedStringConverter(service);
+		var convertToProvider = testee.ConvertToProviderExpression.Compile();
+		var convertFromProvider = testee.ConvertFromProviderExpression.Compile();
 		var plaintext = "api-key-12345";
 		var encrypted = convertToProvider(plaintext);
 
@@ -59,9 +59,9 @@ public class EncryptedStringConverterTests
 	public async Task ConvertToProvider_ThenConvertFromProvider_WithVariousValues_RoundTripSucceeds()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedStringConverter(service);
-		var convertToProvider = converter.ConvertToProviderExpression.Compile();
-		var convertFromProvider = converter.ConvertFromProviderExpression.Compile();
+		var testee = new EncryptedStringConverter(service);
+		var convertToProvider = testee.ConvertToProviderExpression.Compile();
+		var convertFromProvider = testee.ConvertFromProviderExpression.Compile();
 		string[] testValues = ["simple-text", "text-with-spaces ", "special!@#$%^&*()", "unicode-café-naïve", "very-long-" + new string('x', 1000)];
 
 		using var _ = Assert.Multiple();
@@ -77,8 +77,8 @@ public class EncryptedStringConverterTests
 	public async Task ConvertFromProvider_WithInvalidBase64_ThrowsInvalidOperationException()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedStringConverter(service);
-		var convertFromProvider = converter.ConvertFromProviderExpression.Compile();
+		var testee = new EncryptedStringConverter(service);
+		var convertFromProvider = testee.ConvertFromProviderExpression.Compile();
 
 		await Assert.That(() => convertFromProvider("not-valid-base64!!!")).Throws<InvalidOperationException>();
 	}
@@ -88,10 +88,10 @@ public class EncryptedStringConverterTests
 	{
 		var service1 = CreateDataProtectionService();
 		var service2 = CreateDataProtectionService();
-		var converter1 = new EncryptedStringConverter(service1);
-		var converter2 = new EncryptedStringConverter(service2);
-		var convertToProvider1 = converter1.ConvertToProviderExpression.Compile();
-		var convertToProvider2 = converter2.ConvertToProviderExpression.Compile();
+		var testee1 = new EncryptedStringConverter(service1);
+		var testee2 = new EncryptedStringConverter(service2);
+		var convertToProvider1 = testee1.ConvertToProviderExpression.Compile();
+		var convertToProvider2 = testee2.ConvertToProviderExpression.Compile();
 		var plaintext = "same-value";
 
 		var encrypted1 = convertToProvider1(plaintext);
@@ -104,8 +104,8 @@ public class EncryptedStringConverterTests
 	public async Task ConvertFromProvider_WithEmptyString_ReturnsEmptyString()
 	{
 		var service = CreateDataProtectionService();
-		var converter = new EncryptedStringConverter(service);
-		var convertFromProvider = converter.ConvertFromProviderExpression.Compile();
+		var testee = new EncryptedStringConverter(service);
+		var convertFromProvider = testee.ConvertFromProviderExpression.Compile();
 
 		var decrypted = convertFromProvider("");
 
