@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DB.Tests.Integration;
 
-internal class SQLiteFixture : IAsyncDisposable
+public class SQLiteFixture : IAsyncDisposable
 {
 	private readonly ServiceProvider _serviceProvider;
 	private readonly SqliteConnection _connection;
@@ -25,7 +25,7 @@ internal class SQLiteFixture : IAsyncDisposable
 
 	private DbContextOptions<SammlarrDbContext> BuildOptions() => new DbContextOptionsBuilder<SammlarrDbContext>().UseSqlite(_connection).Options;
 
-	public SammlarrDbContext CreateDbContext()
+	private SammlarrDbContext CreateDbContext()
 	{
 		var ctx = new SammlarrDbContext(BuildOptions(), _serviceProvider.GetRequiredService<IDataProtectionService>());
 		ctx.Database.EnsureCreated();

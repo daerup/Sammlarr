@@ -1,23 +1,31 @@
 using Contracts.Auth;
+using Contracts.Caching;
 using Contracts.Media;
 using DB.Data.Entities;
 using DB.Data.Stores;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Stores;
 
-public class ApiKeyStoreTests : IAsyncDisposable
+[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
+public class ApiKeyStoreTests(SQLiteFixture _fixture) : IAsyncDisposable
 {
-	private readonly SQLiteFixture _fixture = new();
-	private IApiKeyStore Store =>
-		field ??= new ApiKeyStore(_fixture.Context, new TypedMemoryCache<MediaProvider, string>(new MemoryCache(new MemoryCacheOptions())));
+	private IApiKeyStore _testee = null!;
+	private Mock<ITypedMemoryCache<MediaProvider, string>> _cache = null!;
 
 	public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
+
+	[Before(Test)]
+	public void Setup()
+	{
+		_cache = ITypedMemoryCache<MediaProvider, string>.Mock();
+		_testee = new ApiKeyStore(_fixture.Context, _cache.Object);
+	}
 
 	[Test]
 	public async Task GetApiKey_WhenNotSet_ReturnsNull()
 	{
-		var apiKey = await Store.GetApiKeyAsync(MediaProvider.Tmdb);
+		var apiKey = await _testee.GetApiKeyAsync(MediaProvider.Tmdb);
 
 		await Assert.That(apiKey).IsNull();
 	}
@@ -28,11 +36,11 @@ public class ApiKeyStoreTests : IAsyncDisposable
 		var provider = MediaProvider.Tmdb;
 		var plainKey = "tmdb-api-key-12345";
 
-		await Store.SetApiKeyAsync(provider, plainKey);
+		await _testee.SetApiKeyAsync(provider, plainKey);
 
-		var retrieved = await Store.GetApiKeyAsync(provider);
+		var setting = await _fixture.Context.ApiKeySettings.SingleAsync(s => s.Provider == provider);
 
-		await Assert.That(retrieved).IsEqualTo(plainKey);
+		await Assert.That(setting.ApiKey).IsEqualTo(plainKey);
 	}
 
 	[Test]
@@ -41,7 +49,7 @@ public class ApiKeyStoreTests : IAsyncDisposable
 		var provider = MediaProvider.Tmdb;
 		var plainKey = "secret-api-key";
 
-		await Store.SetApiKeyAsync(provider, plainKey);
+		await _testee.SetApiKeyAsync(provider, plainKey);
 
 		var encrypted = (await _fixture.RawContext.Table<ApiKeySetting>().QueryAsync(x => x.ApiKey)).Single();
 
@@ -59,27 +67,26 @@ public class ApiKeyStoreTests : IAsyncDisposable
 	{
 		var provider = MediaProvider.Tmdb;
 
-		await Store.SetApiKeyAsync(provider, apiKey);
+		await _testee.SetApiKeyAsync(provider, apiKey);
 
-		var retrieved = await Store.GetApiKeyAsync(provider);
+		var setting = await _fixture.Context.ApiKeySettings.SingleAsync();
 
-		await Assert.That(retrieved).IsEqualTo(apiKey);
+		await Assert.That(setting.ApiKey).IsEqualTo(apiKey);
 	}
 
 	[Test]
 	public async Task UpdateApiKey_WithNewKey_UpdatesValue()
 	{
 		var provider = MediaProvider.Tmdb;
-
-		var oldKey = "old-key";
-		await Store.SetApiKeyAsync(provider, oldKey);
+		await SetUpApiKeyAsync(provider, "old-key");
 
 		var newKey = "new-api-key-12345";
-		await Store.SetApiKeyAsync(provider, newKey);
+		await _testee.SetApiKeyAsync(provider, newKey);
 
-		var retrieved = await Store.GetApiKeyAsync(provider);
+		var all = await _fixture.Context.ApiKeySettings.ToListAsync();
 
-		await Assert.That(retrieved).IsEqualTo(newKey);
+		var stored = await Assert.That(all).HasSingleItem();
+		await Assert.That(stored.ApiKey).IsEqualTo(newKey);
 	}
 
 	[Test]
@@ -87,28 +94,69 @@ public class ApiKeyStoreTests : IAsyncDisposable
 	{
 		var key = "shared-api-key";
 
-		await Store.SetApiKeyAsync(MediaProvider.Tmdb, key);
-		await Store.SetApiKeyAsync(MediaProvider.Imdb, key);
+		await _testee.SetApiKeyAsync(MediaProvider.Tmdb, key);
+		await _testee.SetApiKeyAsync(MediaProvider.Imdb, key);
 
-		var tmdbKey = await Store.GetApiKeyAsync(MediaProvider.Tmdb);
-		var imdbKey = await Store.GetApiKeyAsync(MediaProvider.Imdb);
+		var keys = await _fixture.Context.ApiKeySettings.ToListAsync();
+		var tmdb = keys.Single(s => s.Provider == MediaProvider.Tmdb);
+		var imdb = keys.Single(s => s.Provider == MediaProvider.Imdb);
 
-		await Assert.That(tmdbKey).IsEqualTo(key);
-		await Assert.That(imdbKey).IsEqualTo(key);
+		await Assert.That(keys).Count().IsEqualTo(2);
+		await Assert.That(tmdb.ApiKey).IsEqualTo(key);
+		await Assert.That(imdb.ApiKey).IsEqualTo(key);
 	}
 
 	[Test]
 	public async Task ClearApiKey_RemovesStoredData()
 	{
 		var provider = MediaProvider.Tmdb;
+		await SetUpApiKeyAsync(provider, "secret-api-key");
+
+		await _testee.ClearApiKeyAsync(provider);
+		var exists = await _fixture.Context.ApiKeySettings.AnyAsync(s => s.Provider == provider);
+
+		await Assert.That(exists).IsFalse();
+	}
+
+	[Test]
+	public async Task GetApiKeyAsync_ReadsFromCache()
+	{
+		var provider = MediaProvider.Tmdb;
+
+		await _testee.GetApiKeyAsync(provider);
+
+		_cache.TryGetValue(provider).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task SetApiKey_AddsToCache()
+	{
+		var provider = MediaProvider.Tmdb;
 		var apiKey = "secret-api-key";
 
-		await Store.SetApiKeyAsync(provider, apiKey);
+		await _testee.SetApiKeyAsync(provider, apiKey);
 
-		await Store.ClearApiKeyAsync(provider);
-		var storedAfter = await Store.GetApiKeyAsync(provider);
+		_cache.Set(provider, apiKey).WasCalled(Times.Once);
+		_cache.VerifyNoOtherCalls();
+	}
 
-		await Assert.That(storedAfter).IsNull();
+	[Test]
+	public async Task ClearApiKey_RemovesFromCache()
+	{
+		var provider = MediaProvider.Tmdb;
+		await SetUpApiKeyAsync(provider, "secret-api-key");
+		_cache.Reset();
+
+		await _testee.ClearApiKeyAsync(provider);
+
+		_cache.Remove(provider).WasCalled(Times.Once);
+		_cache.VerifyNoOtherCalls();
+	}
+
+	private async Task SetUpApiKeyAsync(MediaProvider provider, string apiKey)
+	{
+		await _fixture.Context.ApiKeySettings.AddAsync(new ApiKeySetting { Provider = provider, ApiKey = apiKey });
+		await _fixture.Context.SaveChangesAsync();
 	}
 
 	private static bool IsBase64OrEmpty(string? value)

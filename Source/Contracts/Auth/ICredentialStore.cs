@@ -2,7 +2,7 @@ namespace Contracts.Auth;
 
 public interface ICredentialStore
 {
-	Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default);
+	ValueTask<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default);
 
 	Task StoreAsync(
 		AuthProvider authProvider,

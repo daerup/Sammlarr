@@ -21,10 +21,10 @@
 		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
 		<PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.5" />
 		<PackageVersion Include="TUnit.Core" Version="1.25.0" />
+		<PackageVersion Include="TUnit.Mocks" Version="1.28.0-beta" />
 		<PackageVersion Include="Vogen" Version="8.0.5" />
 		<PackageVersion Include="TUnit" Version="1.25.0" />
 		<PackageVersion Include="TUnit.Assertions" Version="1.25.0" />
-		<PackageVersion Include="Imposter" Version="0.1.9" />
 		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
 		<PackageVersion Include="Bogus" Version="35.6.5" />
 	</ItemGroup>

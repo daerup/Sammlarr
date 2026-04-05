@@ -14,12 +14,9 @@
 		<PackageReference Include="TUnit.Assertions" />
 		<PackageReference Include="TUnit.Core" />
 		<PackageReference Include="Bogus" />
-		<PackageReference Include="Imposter" />
+		<PackageReference Include="TUnit.Mocks" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\DB\DB.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Unit\Stores\" />
 	</ItemGroup>
 </Project>
