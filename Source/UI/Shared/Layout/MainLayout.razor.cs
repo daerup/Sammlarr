@@ -1,8 +1,6 @@
-using BlazorBlueprint.Components;
 using Contracts.Auth;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Shared.DI;
 using UI.Shared.Services;
