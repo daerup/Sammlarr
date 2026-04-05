@@ -2,23 +2,24 @@ using Contracts.Auth;
 using Contracts.Media;
 using DB.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Shared.Caching;
 
 namespace DB.Data.Stores;
 
-internal class ApiKeyStore(SammlarrDbContext context, IMemoryCache cache) : IApiKeyStore
+internal class ApiKeyStore(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache) : IApiKeyStore
 {
 	public async Task<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(provider, out string? cached))
+		if (cache.TryGetValue(provider, out var cached))
 		{
 			return cached;
 		}
 
 		var apiKey = await context.ApiKeySettings.Where(s => s.Provider == provider).Select(s => (string?)s.ApiKey).FirstOrDefaultAsync(cancellationToken);
-
-		cache.Set(provider, apiKey);
-
+		if (apiKey is not null)
+		{
+			cache.Set(provider, apiKey);
+		}
 		return apiKey;
 	}
 
@@ -35,8 +36,7 @@ internal class ApiKeyStore(SammlarrDbContext context, IMemoryCache cache) : IApi
 		}
 
 		await context.SaveChangesAsync(cancellationToken);
-
-		cache.Remove(provider);
+		cache.Set(provider, apiKey);
 	}
 
 	public async Task ClearApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)

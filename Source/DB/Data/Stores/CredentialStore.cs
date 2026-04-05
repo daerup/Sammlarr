@@ -1,17 +1,17 @@
 using Contracts.Auth;
 using DB.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Shared.Caching;
 
 namespace DB.Data.Stores;
 
-internal class CredentialStore(SammlarrDbContext context, IMemoryCache cache) : ICredentialStore
+internal class CredentialStore(SammlarrDbContext context, ITypedMemoryCache<AuthProvider, Credential> cache) : ICredentialStore
 {
 	public async Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(authProvider, out StoredCredential? cached))
+		if (cache.TryGetValue(authProvider, out var cached))
 		{
-			return cached;
+			return new StoredCredential(cached!.AuthProvider, cached.ClientId, cached.AccessToken, cached.ExpiresAt);
 		}
 
 		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.AuthProvider == authProvider, cancellationToken);
