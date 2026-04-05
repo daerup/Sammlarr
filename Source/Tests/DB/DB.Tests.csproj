@@ -18,7 +18,4 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\DB\DB.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Unit\" />
-	</ItemGroup>
 </Project>

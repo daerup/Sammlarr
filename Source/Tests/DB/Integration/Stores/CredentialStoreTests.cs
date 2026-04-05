@@ -3,14 +3,12 @@ using DB.Data.Entities;
 using DB.Data.Stores;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace DB.Tests.Integration;
+namespace DB.Tests.Integration.Stores;
 
 public class CredentialStoreTests : IAsyncDisposable
 {
-	private readonly EncryptionTestFixture _fixture = new();
-	private SammlarrDbContext Context => field ??= _fixture.CreateDbContext();
-	private RawDbContext RawContext => field ??= new RawDbContext(Context);
-	private ICredentialStore Store => field ??= new CredentialStore(Context, new MemoryCache(new MemoryCacheOptions()));
+	private readonly SQLiteFixture _fixture = new();
+	private ICredentialStore Store => field ??= new CredentialStore(_fixture.Context, new MemoryCache(new MemoryCacheOptions()));
 
 	public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 
@@ -48,7 +46,7 @@ public class CredentialStoreTests : IAsyncDisposable
 
 		await Store.StoreAsync(authProvider, plainToken, expiresAt, clientId);
 
-		var encrypted = (await RawContext.Table<Credential>().QueryAsync(x => x.AccessToken)).Single();
+		var encrypted = (await _fixture.RawContext.Table<Credential>().QueryAsync(x => x.AccessToken)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainToken);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -64,7 +62,7 @@ public class CredentialStoreTests : IAsyncDisposable
 
 		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		var encryptedClientId = (await RawContext.Table<Credential>().QueryAsync<string>(nameof(Credential.ClientId))).Single();
+		var encryptedClientId = (await _fixture.RawContext.Table<Credential>().QueryAsync<string>(nameof(Credential.ClientId))).Single();
 
 		await Assert.That(encryptedClientId).IsNotEqualTo(clientId.ToString());
 		await Assert.That(encryptedClientId).Satisfies(IsBase64OrEmpty);

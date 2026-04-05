@@ -2,17 +2,14 @@ using Contracts.Auth;
 using Contracts.Media;
 using DB.Data.Entities;
 using DB.Data.Stores;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace DB.Tests.Integration;
+namespace DB.Tests.Integration.Stores;
 
 public class ApiKeyStoreTests : IAsyncDisposable
 {
-	private readonly EncryptionTestFixture _fixture = new();
-	private SammlarrDbContext Context => field ??= _fixture.CreateDbContext();
-	private RawDbContext RawContext => field ??= new RawDbContext(Context);
-	private IApiKeyStore Store => field ??= new ApiKeyStore(Context, new MemoryCache(new MemoryCacheOptions()));
+	private readonly SQLiteFixture _fixture = new();
+	private IApiKeyStore Store => field ??= new ApiKeyStore(_fixture.Context, new MemoryCache(new MemoryCacheOptions()));
 
 	public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
 
@@ -45,7 +42,7 @@ public class ApiKeyStoreTests : IAsyncDisposable
 
 		await Store.SetApiKeyAsync(provider, plainKey);
 
-		var encrypted = (await RawContext.Table<ApiKeySetting>().QueryAsync(x => x.ApiKey)).Single();
+		var encrypted = (await _fixture.RawContext.Table<ApiKeySetting>().QueryAsync(x => x.ApiKey)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainKey);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
