@@ -68,8 +68,6 @@ description: 'Sammlarr architecture and project-level coding constraints'
 
 ## Testing Framework and Tools
 - **Test Framework**: TUnit (modern, next-gen testing framework for .NET)
-- **Assertions**: AwesomeAssertions (expressive, readable assertion library)
-- **Mocking**: Imposter (flexible mocking library for HTTP, databases, and other dependencies)
 - Use these consistently across all test projects for unit, integration, and E2E testing.
 - Write tests that are clear, maintainable, and follow existing test patterns.
 

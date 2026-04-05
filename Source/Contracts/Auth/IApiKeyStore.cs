@@ -4,7 +4,7 @@ namespace Contracts.Auth;
 
 public interface IApiKeyStore
 {
-	Task<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default);
+	ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default);
 
 	Task SetApiKeyAsync(MediaProvider provider, string apiKey, CancellationToken cancellationToken = default);
 

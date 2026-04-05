@@ -8,7 +8,7 @@ namespace DB.Data.Stores;
 
 internal class ApiKeyStore(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache) : IApiKeyStore
 {
-	public async Task<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
+	public async ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
 		if (cache.TryGetValue(provider, out var cached))
 		{

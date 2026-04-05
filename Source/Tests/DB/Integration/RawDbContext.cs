@@ -32,6 +32,13 @@ internal class RawDbContext<TTable>
 		return await connection.QuerySingleAsync<TColumn>(sql, new { id });
 	}
 
+	public async Task<IEnumerable<TColumn>> QueryAsync<TColumn>(string columnName)
+	{
+		var connection = GetConnection(out var tableName);
+		var sql = $"SELECT {columnName} FROM {tableName}";
+		return await connection.QueryAsync<TColumn>(sql);
+	}
+
 	public async Task<IEnumerable<TColumn>> QueryAsync<TColumn>(Expression<Func<TTable, TColumn>> propertySelector)
 	{
 		var connection = GetConnection(propertySelector, out var columnName, out var tableName);
@@ -39,18 +46,15 @@ internal class RawDbContext<TTable>
 		return await connection.QueryAsync<TColumn>(sql);
 	}
 
-	public async Task<IEnumerable<TColumn>> QueryAsync<TColumn>(string columnName)
-	{
-		var tableName = _context.Model.FindEntityType(typeof(TTable))!.GetTableName()!;
-		var connection = _context.Database.GetDbConnection();
-		var sql = $"SELECT {columnName} FROM {tableName}";
-		return await connection.QueryAsync<TColumn>(sql);
-	}
-
 	private DbConnection GetConnection<TColumn>(Expression<Func<TTable, TColumn>> propertySelector, out string columnName, out string tableName)
 	{
-		tableName = _context.Model.FindEntityType(typeof(TTable))!.GetTableName()!;
 		columnName = (propertySelector.Body as MemberExpression)?.Member.Name!;
+		return GetConnection(out tableName);
+	}
+
+	private DbConnection GetConnection(out string tableName)
+	{
+		tableName = _context.Model.FindEntityType(typeof(TTable))!.GetTableName()!;
 		return _context.Database.GetDbConnection();
 	}
 }

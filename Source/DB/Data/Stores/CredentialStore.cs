@@ -7,7 +7,7 @@ namespace DB.Data.Stores;
 
 internal class CredentialStore(SammlarrDbContext context, ITypedMemoryCache<AuthProvider, Credential> cache) : ICredentialStore
 {
-	public async Task<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
+	public async ValueTask<StoredCredential?> GetAsync(AuthProvider authProvider, CancellationToken cancellationToken = default)
 	{
 		if (cache.TryGetValue(authProvider, out var cached))
 		{

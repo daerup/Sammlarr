@@ -1,22 +1,30 @@
 using Contracts.Auth;
+using Contracts.Caching;
 using DB.Data.Entities;
 using DB.Data.Stores;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Stores;
 
-public class CredentialStoreTests : IAsyncDisposable
+[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
+public class CredentialStoreTests(SQLiteFixture fixture)
 {
-	private readonly SQLiteFixture _fixture = new();
-	private ICredentialStore Store =>
-		field ??= new CredentialStore(_fixture.Context, new TypedMemoryCache<AuthProvider, Credential>(new MemoryCache(new MemoryCacheOptions())));
+	private ICredentialStore _testee = null!;
+	private Mock<ITypedMemoryCache<AuthProvider, Credential>> _cache = null!;
 
-	public async ValueTask DisposeAsync() => await _fixture.DisposeAsync();
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	[Before(Test)]
+	public void Setup()
+	{
+		_cache = ITypedMemoryCache<AuthProvider, Credential>.Mock();
+		_testee = new CredentialStore(fixture.Context, _cache.Object);
+	}
 
 	[Test]
 	public async Task GetCredential_WhenNotStored_ReturnsNull()
 	{
-		var credential = await Store.GetAsync(AuthProvider.Plex);
+		var credential = await _testee.GetAsync(AuthProvider.Plex);
 
 		await Assert.That(credential).IsNull();
 	}
@@ -29,12 +37,15 @@ public class CredentialStoreTests : IAsyncDisposable
 		var accessToken = "test-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await Store.StoreAsync(authProvider, accessToken, expiresAt, clientId);
+		await _testee.StoreAsync(authProvider, accessToken, expiresAt, clientId);
 
-		var credential = await Store.GetAsync(authProvider);
+		var credential = await fixture.Context.Credentials.SingleAsync();
 
 		await Assert.That(credential).IsNotNull();
-		await Assert.That(credential!.AccessToken).IsEqualTo(accessToken);
+		await Assert.That(credential.AuthProvider).IsEqualTo(authProvider);
+		await Assert.That(credential.AccessToken).IsEqualTo(accessToken);
+		await Assert.That(credential.ExpiresAt).IsEqualTo(expiresAt);
+		await Assert.That(credential.ClientId).IsEqualTo(clientId);
 	}
 
 	[Test]
@@ -45,9 +56,9 @@ public class CredentialStoreTests : IAsyncDisposable
 		var plainToken = "secret-access-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await Store.StoreAsync(authProvider, plainToken, expiresAt, clientId);
+		await _testee.StoreAsync(authProvider, plainToken, expiresAt, clientId);
 
-		var encrypted = (await _fixture.RawContext.Table<Credential>().QueryAsync(x => x.AccessToken)).Single();
+		var encrypted = (await fixture.RawContext.Table<Credential>().QueryAsync(x => x.AccessToken)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainToken);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -61,9 +72,9 @@ public class CredentialStoreTests : IAsyncDisposable
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
+		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		var encryptedClientId = (await _fixture.RawContext.Table<Credential>().QueryAsync<string>(nameof(Credential.ClientId))).Single();
+		var encryptedClientId = (await fixture.RawContext.Table<Credential>().QueryAsync<string>(nameof(Credential.ClientId))).Single();
 
 		await Assert.That(encryptedClientId).IsNotEqualTo(clientId.ToString());
 		await Assert.That(encryptedClientId).Satisfies(IsBase64OrEmpty);
@@ -77,9 +88,10 @@ public class CredentialStoreTests : IAsyncDisposable
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
+		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
+		fixture.Context.ChangeTracker.Clear();
 
-		var credential = await Store.GetAsync(authProvider);
+		var credential = await _testee.GetAsync(authProvider);
 
 		await Assert.That(credential).IsNotNull();
 		await Assert.That(credential!.ClientId).IsEqualTo(clientId);
@@ -97,12 +109,13 @@ public class CredentialStoreTests : IAsyncDisposable
 		var clientId = Guid.NewGuid();
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
+		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		var credential = await Store.GetAsync(authProvider);
+		var credential = await fixture.Context.Credentials.SingleAsync();
 
 		await Assert.That(credential).IsNotNull();
-		await Assert.That(credential!.AccessToken).IsEqualTo(token);
+		await Assert.That(credential.AccessToken).IsEqualTo(token);
+		await Assert.That(credential.AuthProvider).IsEqualTo(authProvider);
 	}
 
 	[Test]
@@ -112,16 +125,20 @@ public class CredentialStoreTests : IAsyncDisposable
 		var clientId1 = Guid.NewGuid();
 		var clientId2 = Guid.NewGuid();
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
-		var oldToken = "old-token";
 		var newToken = "new-token";
 
-		await Store.StoreAsync(authProvider, oldToken, expiresAt, clientId1);
-		await Store.StoreAsync(authProvider, newToken, expiresAt, clientId2);
+		await SetUpCredentialAsync(authProvider, "old-token", expiresAt, clientId1);
+		await _testee.StoreAsync(authProvider, newToken, expiresAt, clientId2);
 
-		var retrieved = await Store.GetAsync(authProvider);
+		var storedKeys = await fixture.Context.Credentials.ToListAsync();
 
-		await Assert.That(retrieved).IsNotNull();
-		await Assert.That(retrieved!.AccessToken).IsEqualTo(newToken);
+		await Assert.That(storedKeys).IsNotNull();
+		await Assert.That(storedKeys).Count().IsEqualTo(1);
+		await Assert
+			.That(storedKeys.Single())
+			.Satisfies(c =>
+				c is not null && c.AuthProvider == authProvider && c.AccessToken == newToken && c.ClientId == clientId2 && c.ExpiresAt == expiresAt
+			);
 	}
 
 	[Test]
@@ -132,12 +149,71 @@ public class CredentialStoreTests : IAsyncDisposable
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await Store.StoreAsync(authProvider, token, expiresAt, clientId);
+		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
 
-		await Store.ClearAsync(authProvider);
-		var storedAfter = await Store.GetAsync(authProvider);
+		await _testee.ClearAsync(authProvider);
+		var exists = await fixture.Context.Credentials.AnyAsync();
 
-		await Assert.That(storedAfter).IsNull();
+		await Assert.That(exists).IsFalse();
+	}
+
+	[Test]
+	public async Task GetAsync_ReadsFromCache()
+	{
+		var authProvider = AuthProvider.Plex;
+
+		await _testee.GetAsync(authProvider);
+
+		_cache.TryGetValue(authProvider).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task StoreAsync_AddsToCache()
+	{
+		var authProvider = AuthProvider.Plex;
+		var clientId = Guid.NewGuid();
+		var token = "secret-token";
+		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
+
+		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
+
+		_cache.Set(authProvider, Is<Credential>(MatchCredential)).WasCalled(Times.Once);
+		_cache.VerifyNoOtherCalls();
+		return;
+
+		bool MatchCredential(Credential? c) =>
+			c is not null && c.AuthProvider == authProvider && c.AccessToken == token && c.ClientId == clientId && c.ExpiresAt == expiresAt;
+	}
+
+	[Test]
+	public async Task ClearAsync_RemovesFromCache()
+	{
+		var authProvider = AuthProvider.Plex;
+		var clientId = Guid.NewGuid();
+		var token = "secret-token";
+		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
+
+		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
+		_cache.Reset();
+
+		await _testee.ClearAsync(authProvider);
+
+		_cache.Remove(authProvider).WasCalled(Times.Once);
+		_cache.VerifyNoOtherCalls();
+	}
+
+	private async Task SetUpCredentialAsync(AuthProvider authProvider, string accessToken, DateTimeOffset expiresAt, Guid clientId)
+	{
+		await fixture.Context.Credentials.AddAsync(
+			new Credential
+			{
+				AuthProvider = authProvider,
+				AccessToken = accessToken,
+				ExpiresAt = expiresAt,
+				ClientId = clientId,
+			}
+		);
+		await fixture.Context.SaveChangesAsync();
 	}
 
 	private static bool IsBase64OrEmpty(string? value)
