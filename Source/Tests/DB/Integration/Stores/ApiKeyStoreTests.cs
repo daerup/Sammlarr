@@ -3,7 +3,6 @@ using Contracts.Media;
 using DB.Data.Entities;
 using DB.Data.Stores;
 using Microsoft.Extensions.Caching.Memory;
-using Shared.Caching;
 
 namespace DB.Tests.Integration.Stores;
 

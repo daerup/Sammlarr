@@ -1,4 +1,4 @@
-namespace Shared.DI;
+namespace Contracts.DI;
 
 public interface IKeyedServiceIndex<in TKey, out TService>
 	where TKey : struct, Enum

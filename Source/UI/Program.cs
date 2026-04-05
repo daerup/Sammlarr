@@ -1,4 +1,5 @@
 using API;
+using Core;
 using DB;
 using Shared;
 using Shared.DI;
@@ -7,6 +8,7 @@ using UI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
+builder.Services.AddModule<CoreModule>();
 builder.Services.AddModule<SharedModule>();
 builder.Services.AddModule<DbModule>();
 builder.Services.AddModule<ApiModule>();

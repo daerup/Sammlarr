@@ -2,10 +2,10 @@
 @implements IDisposable
 @implements IAsyncDisposable
 @using Contracts.Auth
+@using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Trending
 @using Contracts.Watchlist
-@using global::Shared.DI
 @inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistServiceIndex
 @inject IKeyboardShortcutService KeyboardShortcutService

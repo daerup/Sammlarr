@@ -1,4 +1,4 @@
-namespace Shared.Caching;
+namespace Contracts.Caching;
 
 public interface ITypedMemoryCache<in TKey, TValue>
 	where TKey : notnull

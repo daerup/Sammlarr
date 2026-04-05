@@ -1,6 +1,8 @@
+using Contracts.DI;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.DI;
 
-namespace Shared.DI;
+namespace Core.DI;
 
 internal class DiModule : IServiceModule
 {
