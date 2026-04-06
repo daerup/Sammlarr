@@ -3,6 +3,7 @@ using API.Plex.Types;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Search;
+using Shared;
 
 namespace API.TMDB;
 
@@ -27,23 +28,12 @@ internal class TmdbIdConverter(
 		}
 		var details = await tmdbApi.GetDetailAsync(tmdbId, mediaType);
 		var searchResults = await searchServiceIndex[MediaProvider.Plex].SearchAsync(details.DisplayOriginalTitle, [mediaType]);
-		PlexTypes.ById.Metadata? match = null;
-
-		foreach (var searchResult in searchResults)
-		{
-			if (searchResult.SourceId is not PlexId plexId)
-			{
-				continue;
-			}
-
-			var plexDetails = await LoadPlexDetailsAsync(plexId);
-			if (plexDetails.TmdbId.Contains(tmdbId))
-			{
-				match = plexDetails;
-				break;
-			}
-		}
-
+		var match = await searchResults
+			.Select(s => s.SourceId)
+			.OfType<PlexId>()
+			.ToAsyncEnumerable()
+			.SelectAwait(LoadPlexDetailsAsync)
+			.FirstOrDefaultAsync(d => d.TmdbId.Contains(tmdbId));
 		if (match is null)
 		{
 			return [];

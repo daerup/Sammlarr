@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
@@ -9,12 +8,42 @@ using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Search;
+using Imposter.Abstractions;
 using Shared.Options;
+using ImposterArg = Imposter.Abstractions.Arg;
+using MediaIdMappingStoreMock = TUnit.Mocks.Generated.Contracts.Media.IMediaIdMappingStoreMock;
+using MediaSearchServiceMock = TUnit.Mocks.Generated.Contracts.Media.Search.IMediaSearchServiceMock;
 
 namespace API.Tests.TMDB;
 
 public class TmdbIdConverterTests
 {
+	private const string TmdbBaseUrl = "https://api.themoviedb.org/3";
+	private const string TmdbImageBaseUrl = "https://image.tmdb.org/t/p/original";
+	private const string PlexBaseUrl = "https://plex.tv";
+	private readonly Faker<MovieSearchResult> _movieSearchResultFaker = new Faker<MovieSearchResult>()
+		.RuleFor(x => x.Title, f => f.Lorem.Sentence(2))
+		.RuleFor(x => x.Year, f => f.Date.Past().Year)
+		.RuleFor(x => x.PosterUrl, f => f.Internet.Url())
+		.RuleFor(x => x.BackdropUrl, f => f.Internet.Url())
+		.RuleFor(x => x.Runtime, (f, _) => TimeSpan.FromMinutes(f.Random.Int(60, 240)))
+		.RuleFor(x => x.ReleaseDate, f => f.Date.PastDateOnly())
+		.RuleFor(x => x.Genres, f => [f.Music.Genre(), f.Music.Genre()]);
+
+	private MediaIdMappingStoreMock store = null!;
+	private MediaSearchServiceMock searchService = null!;
+	private IKeyedServiceIndexImposter<MediaProvider, IMediaSearchService> searchServiceIndex = null!;
+
+	[Before(Test)]
+	public void BeforeTest()
+	{
+		store = IMediaIdMappingStore.Mock();
+		searchService = IMediaSearchService.Mock();
+		var keyedServiceIndex = IKeyedServiceIndex<MediaProvider, IMediaSearchService>.Imposter<MediaProvider, IMediaSearchService>();
+		keyedServiceIndex[ImposterArg.Any].Getter().Returns(searchService);
+		searchServiceIndex = keyedServiceIndex;
+	}
+
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsNotTmdbId_ReturnsEmptyList()
 	{
@@ -29,80 +58,85 @@ public class TmdbIdConverterTests
 	public async Task ConvertAsync_WhenCacheHasPlexId_ReturnsCachedIds()
 	{
 		var cachedIds = new List<IMediaId> { TmdbId.From(100), PlexId.From("plex-1") };
-		var store = IMediaIdMappingStore.Mock();
-		store.GetByIdAsync(Any(), Any()).Returns(cachedIds);
+		store.GetByIdAsync(TmdbId.From(100), CancellationToken.None).Returns(cachedIds);
 		var testee = new TmdbIdConverter(null!, null!, store, null!);
 
 		var result = await testee.ConvertAsync(TmdbId.From(100), MediaType.Movie);
 
 		await Assert.That(result).IsEquivalentTo(cachedIds);
+		store.GetByIdAsync(TmdbId.From(100), CancellationToken.None).WasCalled(Times.Once);
+		store.VerifyNoOtherCalls();
 	}
 
 	[Test]
 	public async Task ConvertAsync_WhenSearchReturnsNoResults_ReturnsEmptyList()
 	{
-		var tmdbPayload = CreateTmdbDetailsPayload();
-		var store = IMediaIdMappingStore.Mock();
-		store.GetByIdAsync(Any(), Any()).Returns([]);
-		var searchService = IMediaSearchService.Mock();
-		searchService.SearchAsync(Any(), Any(), Any()).Returns([]);
-		var testee = new TmdbIdConverter(CreateTmdbApi(new FakeJsonHandler(tmdbPayload.Json)), null!, store, new TestSearchIndex(searchService));
+		var (tmdb, plex) = CreatePayloads(includeTvdbId: true);
+		store.GetByIdAsync(tmdb.Id, Any()).Returns([]);
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).Returns([]);
 
-		var result = await testee.ConvertAsync(tmdbPayload.TmdbId, MediaType.Movie);
+		var testee = new TmdbIdConverter(tmdb.Api, plex.Api, store, searchServiceIndex.Instance());
+
+		var result = await testee.ConvertAsync(tmdb.Id, MediaType.Movie);
 
 		await Assert.That(result).IsEmpty();
+		store.GetByIdAsync(tmdb.Id, Any()).WasCalled(Times.Once);
+		store.VerifyNoOtherCalls();
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).WasCalled(Times.Once);
+		searchService.VerifyNoOtherCalls();
+	}
+
+	[Test]
+	public async Task ConvertAsync_WhenMatchFoundWithTvdb_ReturnsNonTmdbIds()
+	{
+		var (tmdb, plex) = CreatePayloads(includeTvdbId: true);
+		store.GetByIdAsync(tmdb.Id, Any()).Returns([]);
+		List<IMediaSearchResult> searchResults = [_movieSearchResultFaker.RuleFor(x => x.SourceId, plex.Id).Generate()];
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).Returns(searchResults);
+
+		var testee = new TmdbIdConverter(tmdb.Api, plex.Api, store, searchServiceIndex.Instance());
+
+		var result = await testee.ConvertAsync(tmdb.Id, MediaType.Movie);
+
+		await Assert.That(result).Count().IsEqualTo(3);
+		await Assert.That(result.OfType<PlexId>().Single()).IsEqualTo(plex.Id);
+		await Assert.That(result.OfType<ImdbId>().Single()).IsEqualTo(plex.ImdbId);
+		await Assert.That(result.OfType<TvdbId>().Single()).IsEqualTo(plex.TvdbId!.Value);
+		await Assert.That(result.OfType<TmdbId>()).IsEmpty();
+		store.GetByIdAsync(tmdb.Id, CancellationToken.None).WasCalled(Times.Once);
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).WasCalled(Times.Once);
+		searchService.VerifyNoOtherCalls();
 	}
 
 	[Test]
 	public async Task ConvertAsync_WhenMatchFound_ReturnsNonTmdbIds()
 	{
-		var tmdbPayload = CreateTmdbDetailsPayload();
-		var plexPayload = CreatePlexByIdPayload(tmdbPayload.TmdbId, includeTvdbId: true);
-		var store = IMediaIdMappingStore.Mock();
-		store.GetByIdAsync(Any(), Any()).Returns([]);
-		var searchService = IMediaSearchService.Mock();
-		IReadOnlyList<IMediaSearchResult> searchResults = [CreateMovieSearchResult(plexPayload.PlexId)];
-		searchService.SearchAsync(Any(), Any(), Any()).Returns(searchResults);
-		var testee = new TmdbIdConverter(
-			CreateTmdbApi(new FakeJsonHandler(tmdbPayload.Json)),
-			CreatePlexApi(new FakeJsonHandler(plexPayload.Json)),
-			store,
-			new TestSearchIndex(searchService)
-		);
+		var (tmdb, plex) = CreatePayloads(includeTvdbId: false);
+		var existingCacheIds = new List<IMediaId> { tmdb.Id };
+		store.GetByIdAsync(tmdb.Id, CancellationToken.None).Returns(existingCacheIds);
+		IReadOnlyList<IMediaSearchResult> searchResults = [_movieSearchResultFaker.RuleFor(x => x.SourceId, plex.Id).Generate()];
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).Returns(searchResults);
 
-		var result = await testee.ConvertAsync(tmdbPayload.TmdbId, MediaType.Movie);
+		var testee = new TmdbIdConverter(tmdb.Api, plex.Api, store, searchServiceIndex.Instance());
 
-		await Assert.That(result).Count().IsEqualTo(3);
-		await Assert.That(result.OfType<PlexId>().Single()).IsEqualTo(plexPayload.PlexId);
-		await Assert.That(result.OfType<ImdbId>().Single()).IsEqualTo(plexPayload.ImdbId);
-		await Assert.That(result.OfType<TvdbId>().Single()).IsEqualTo(plexPayload.TvdbId.GetValueOrDefault());
-		await Assert.That(result.OfType<TmdbId>()).IsEmpty();
+		await testee.ConvertAsync(tmdb.Id, MediaType.Movie);
+
+		store.GetByIdAsync(tmdb.Id, CancellationToken.None).WasCalled(Times.Once);
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).WasCalled(Times.Once);
+		store.VerifyNoOtherCalls();
+		searchService.VerifyNoOtherCalls();
 	}
 
-	[Test]
-	public async Task ConvertAsync_WhenMatchFoundAndCacheHasNonPlexIds_AppendsAndReturnsNonTmdbIds()
+	private static ((TmdbId Id, string OriginalTitle, TmdbApi Api) Tmdb, (PlexId Id, ImdbId ImdbId, TvdbId? TvdbId, PlexApi Api) Plex) CreatePayloads(
+		bool includeTvdbId
+	)
 	{
-		var tmdbPayload = CreateTmdbDetailsPayload();
-		var plexPayload = CreatePlexByIdPayload(tmdbPayload.TmdbId, includeTvdbId: false);
-		var existingCacheIds = new List<IMediaId> { tmdbPayload.TmdbId };
-		var store = IMediaIdMappingStore.Mock();
-		store.GetByIdAsync(Any(), Any()).Returns(existingCacheIds);
-		var searchService = IMediaSearchService.Mock();
-		IReadOnlyList<IMediaSearchResult> searchResults = [CreateMovieSearchResult(plexPayload.PlexId)];
-		searchService.SearchAsync(Any(), Any(), Any()).Returns(searchResults);
-		var testee = new TmdbIdConverter(
-			CreateTmdbApi(new FakeJsonHandler(tmdbPayload.Json)),
-			CreatePlexApi(new FakeJsonHandler(plexPayload.Json)),
-			store,
-			new TestSearchIndex(searchService)
-		);
-
-		await testee.ConvertAsync(tmdbPayload.TmdbId, MediaType.Movie);
-
-		store.AppendAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+		var (tmdbJson, tmdbId, originalTitle) = CreateTmdbDetailsPayload();
+		var (plexJson, plexId, imdbId, tvdbId) = CreatePlexByIdPayload(tmdbId, includeTvdbId);
+		return ((tmdbId, originalTitle, CreateTmdbApi(tmdbJson)), (plexId, imdbId, tvdbId, CreatePlexApi(plexJson)));
 	}
 
-	private static TmdbDetailsPayload CreateTmdbDetailsPayload()
+	private static (string Json, TmdbId TmdbId, string OriginalTitle) CreateTmdbDetailsPayload()
 	{
 		var faker = new Faker();
 		var tmdbId = TmdbId.From(faker.Random.Int(1, 1_000_000));
@@ -117,10 +151,10 @@ public class TmdbIdConverterTests
 			Name: null
 		);
 
-		return new TmdbDetailsPayload(JsonSerializer.Serialize(details), tmdbId);
+		return (JsonSerializer.Serialize(details), tmdbId, title);
 	}
 
-	private static PlexByIdPayload CreatePlexByIdPayload(TmdbId tmdbId, bool includeTvdbId)
+	private static (string Json, PlexId PlexId, ImdbId ImdbId, TvdbId? TvdbId) CreatePlexByIdPayload(TmdbId tmdbId, bool includeTvdbId)
 	{
 		var faker = new Faker();
 		var plexId = PlexId.From($"plex-{faker.Random.AlphaNumeric(10)}");
@@ -149,52 +183,28 @@ public class TmdbIdConverterTests
 		);
 		var root = new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata]));
 
-		return new PlexByIdPayload(JsonSerializer.Serialize(root), plexId, imdbId, tvdbId);
+		return (JsonSerializer.Serialize(root), plexId, imdbId, tvdbId);
 	}
 
-	private static TmdbApi CreateTmdbApi(HttpMessageHandler httpHandler)
+	private static TmdbApi CreateTmdbApi(string json)
 	{
-		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(json);
+		var options = new TmdbOptions { BaseUrl = TmdbBaseUrl, ImageBaseUrl = TmdbImageBaseUrl };
 		var apiKeyStore = IApiKeyStore.Mock();
-		apiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, Any()).Returns("test-api-key");
-		var tmdbClient = new TmdbClient(new HttpClient(httpHandler), options, apiKeyStore);
+		apiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, CancellationToken.None).Returns("test-api-key");
+		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore);
 		return new TmdbApi(tmdbClient, options, null!);
 	}
 
-	private static PlexApi CreatePlexApi(HttpMessageHandler httpHandler)
+	private static PlexApi CreatePlexApi(string json)
 	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(json);
 		var credential = new StoredCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		var plexClient = new PlexClient(new HttpClient(httpHandler), credentialStore);
+		credentialStore.GetAsync(AuthProvider.Plex, CancellationToken.None).Returns(credential);
+		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore);
 		return new PlexApi(plexClient);
 	}
-
-	private static MovieSearchResult CreateMovieSearchResult(IMediaId sourceId) =>
-		new()
-		{
-			SourceId = sourceId,
-			Title = "Test Movie",
-			Year = 2021,
-			PosterUrl = null,
-			BackdropUrl = null,
-			Runtime = null,
-			ReleaseDate = null,
-			Genres = [],
-		};
-
-	private sealed class TestSearchIndex(IMediaSearchService searchService) : IKeyedServiceIndex<MediaProvider, IMediaSearchService>
-	{
-		public IMediaSearchService this[MediaProvider key] => searchService;
-	}
-
-	private sealed class FakeJsonHandler(string json) : HttpMessageHandler
-	{
-		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-			Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json") });
-	}
-
-	private record TmdbDetailsPayload(string Json, TmdbId TmdbId);
-
-	private record PlexByIdPayload(string Json, PlexId PlexId, ImdbId ImdbId, TvdbId? TvdbId);
 }
