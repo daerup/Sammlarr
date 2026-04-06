@@ -56,3 +56,5 @@ nunit-*.xml
 # Rider/ReSharper user settings
 *.DotSettings.user
 *.sln.DotSettings.user
+Results/
+**/Benchmark/Old/
