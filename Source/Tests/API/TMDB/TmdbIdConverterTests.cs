@@ -109,6 +109,26 @@ public class TmdbIdConverterTests
 	}
 
 	[Test]
+	public async Task ConvertAsync_WhenNoMatchFound_ReturnsNonTmdbIds()
+	{
+		var (tmdb, plex) = CreatePayloads(includeTvdbId: false);
+		List<IMediaId> exptectedIds = [plex.Id, tmdb.Id, plex.ImdbId];
+		store.GetByIdAsync(tmdb.Id, CancellationToken.None).Returns([]);
+		IReadOnlyList<IMediaSearchResult> searchResults = [_movieSearchResultFaker.RuleFor(x => x.SourceId, plex.Id).Generate()];
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).Returns(searchResults);
+
+		var testee = new TmdbIdConverter(tmdb.Api, plex.Api, store, searchServiceIndex.Instance());
+
+		await testee.ConvertAsync(tmdb.Id, MediaType.Movie);
+
+		store.GetByIdAsync(tmdb.Id, CancellationToken.None).WasCalled(Times.Once);
+		store.CreateAsync(SequenceEquals<IEnumerable<IMediaId>, IMediaId>(exptectedIds), Any()).WasCalled(Times.Once);
+		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).WasCalled(Times.Once);
+		store.VerifyNoOtherCalls();
+		searchService.VerifyNoOtherCalls();
+	}
+
+	[Test]
 	public async Task ConvertAsync_WhenMatchFound_ReturnsNonTmdbIds()
 	{
 		var (tmdb, plex) = CreatePayloads(includeTvdbId: false);
@@ -122,6 +142,7 @@ public class TmdbIdConverterTests
 		await testee.ConvertAsync(tmdb.Id, MediaType.Movie);
 
 		store.GetByIdAsync(tmdb.Id, CancellationToken.None).WasCalled(Times.Once);
+		store.AppendAsync(tmdb.Id, Any(), Any()).WasCalled(Times.Once);
 		searchService.SearchAsync(tmdb.OriginalTitle, Any(), Any()).WasCalled(Times.Once);
 		store.VerifyNoOtherCalls();
 		searchService.VerifyNoOtherCalls();

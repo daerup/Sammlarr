@@ -20,7 +20,7 @@ internal class PlexIdConverter(PlexApi plexApi, IMediaIdMappingStore mediaIdMapp
 		var plexMetaData = await plexApi.ByIdAsync(plexId);
 		List<IMediaId> ids = [.. plexMetaData.TmdbId, .. plexMetaData.TvdbId, .. plexMetaData.ImdbId];
 
-		await mediaIdMappingStore.CreateAsync(ids.Prepend(plexId).ToList());
+		await mediaIdMappingStore.CreateOrAppendAsync(ids.Prepend(plexId));
 		return ids;
 	}
 }

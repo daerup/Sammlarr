@@ -6,5 +6,7 @@ public interface IMediaIdMappingStore
 
 	Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default);
 
+	Task CreateOrAppendAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default);
+
 	Task AppendAsync(IMediaId existingId, IEnumerable<IMediaId> newIds, CancellationToken cancellationToken = default);
 }
