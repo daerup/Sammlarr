@@ -60,7 +60,7 @@ public class PlexIdConverterTests
 
 		await testee.ConvertAsync(payload.PlexId, MediaType.Movie);
 
-		store.CreateAsync(Is<IEnumerable<IMediaId>>(x => x!.Contains(payload.PlexId)), Any()).WasCalled(Times.Once);
+		store.CreateOrAppendAsync(Is<IEnumerable<IMediaId>>(x => x!.Contains(payload.PlexId)), Any()).WasCalled(Times.Once);
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeImdbId, bool includeTvdbId)

@@ -18,13 +18,35 @@ internal class MediaIdMappingMappingStore(SammlarrDbContext dbContext) : IMediaI
 	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
 	{
 		var idList = ids.DistinctBy(id => (id.Source, id.ToString())).ToList();
-		foreach (var id in idList)
+		await dbContext.MediaIdGroups.AddAsync(new MediaIdGroup { MediaIds = [.. idList.Select(id => id.MapEntity())] }, cancellationToken);
+		await dbContext.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task CreateOrAppendAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
+	{
+		var idList = ids.DistinctBy(id => (id.Source, id.ToString())).ToList();
+		if (idList.Count is 0)
 		{
-			if (await dbContext.MediaIds.AnyAsync(MatchesId(id), cancellationToken))
-				throw new InvalidOperationException("A group containing one of the provided IDs already exists");
+			return;
 		}
 
-		await dbContext.MediaIdGroups.AddAsync(new MediaIdGroup { MediaIds = [.. idList.Select(id => id.MapEntity())] }, cancellationToken);
+		var existingGroup = await dbContext
+			.MediaIds.Include(e => e.Group)
+				.ThenInclude(g => g.MediaIds)
+			.Where(MatchesAnyId(idList))
+			.Select(e => e.Group)
+			.Distinct()
+			.SingleOrDefaultAsync(cancellationToken);
+
+		var group = existingGroup ?? new MediaIdGroup();
+		var mediaIdEntries = idList.Select(id => id.MapEntity() with { Group = group });
+		group.MediaIds = [.. group.MediaIds.UnionBy(mediaIdEntries, e => (e.Source, e.ExternalId))];
+
+		if (existingGroup is null)
+		{
+			await dbContext.MediaIdGroups.AddAsync(group, cancellationToken);
+		}
+
 		await dbContext.SaveChangesAsync(cancellationToken);
 	}
 
@@ -47,5 +69,32 @@ internal class MediaIdMappingMappingStore(SammlarrDbContext dbContext) : IMediaI
 		var source = mediaId.Source;
 		var id = mediaId.ToString()!;
 		return entry => entry.Source == source && entry.ExternalId == id;
+	}
+
+	private static Expression<Func<MediaIdEntry, bool>> MatchesAnyId(IEnumerable<IMediaId> mediaIds)
+	{
+		var mediaIdList = mediaIds.ToList();
+		if (mediaIdList.Count is 0)
+			return _ => false;
+
+		var parameter = Expression.Parameter(typeof(MediaIdEntry), "entry");
+		var sourceProperty = Expression.Property(parameter, nameof(MediaIdEntry.Source));
+		var externalIdProperty = Expression.Property(parameter, nameof(MediaIdEntry.ExternalId));
+
+		Expression? body = null;
+		foreach (var mediaId in mediaIdList)
+		{
+			var source = mediaId.Source;
+			var id = mediaId.ToString()!;
+
+			var andExpr = Expression.AndAlso(
+				Expression.Equal(sourceProperty, Expression.Constant(source)),
+				Expression.Equal(externalIdProperty, Expression.Constant(id))
+			);
+
+			body = body is null ? andExpr : Expression.OrElse(body, andExpr);
+		}
+
+		return Expression.Lambda<Func<MediaIdEntry, bool>>(body!, parameter);
 	}
 }

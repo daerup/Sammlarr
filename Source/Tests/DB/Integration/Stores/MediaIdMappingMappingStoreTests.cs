@@ -76,6 +76,48 @@ public class MediaIdMappingMappingStoreTests(SQLiteFixture fixture) : IAsyncDisp
 	}
 
 	[Test]
+	public async Task CreateOrAppendAsync_WhenNoGroupExists_CreatesSingleGroup()
+	{
+		IMediaId[] ids = [TmdbId.From(135), ImdbId.From("tt0135")];
+
+		await _testee.CreateOrAppendAsync(ids);
+
+		var all = await fixture.Context.MediaIdGroups.Include(g => g.MediaIds).ToListAsync();
+		var group = await fixture.Context.MediaIdGroups.Include(g => g.MediaIds).SingleAsync();
+
+		await Assert.That(group.MediaIds).Count().IsEqualTo(2);
+		await Assert.That(group.MediaIds.Select(i => i.MapValueObject())).IsEquivalentTo(ids);
+	}
+
+	[Test]
+	public async Task CreateOrAppendAsync_WhenGroupExists_AppendsOnlyMissingIds()
+	{
+		IMediaId[] initialIds = [TmdbId.From(136), ImdbId.From("tt0136")];
+		await SetUpGroupAsync(initialIds);
+		fixture.Context.ChangeTracker.Clear();
+
+		IMediaId[] ids = [TmdbId.From(136), PlexId.From("plex-136"), PlexId.From("plex-136")];
+		IMediaId[] expected = [TmdbId.From(136), ImdbId.From("tt0136"), PlexId.From("plex-136")];
+
+		await _testee.CreateOrAppendAsync(ids);
+
+		var group = await fixture.Context.MediaIdGroups.Include(g => g.MediaIds).SingleAsync();
+
+		await Assert.That(group.MediaIds).Count().IsEqualTo(3);
+		await Assert.That(group.MediaIds.Select(i => i.MapValueObject())).IsEquivalentTo(expected);
+	}
+
+	[Test]
+	public async Task CreateOrAppendAsync_WhenIdsMapToDifferentGroups_ThrowsInvalidOperationException()
+	{
+		await SetUpGroupAsync([TmdbId.From(137), ImdbId.From("tt0137")]);
+		await SetUpGroupAsync([TmdbId.From(138), PlexId.From("plex-138")]);
+		fixture.Context.ChangeTracker.Clear();
+
+		await Assert.That(async () => await _testee.CreateOrAppendAsync([TmdbId.From(137), TmdbId.From(138)])).Throws<InvalidOperationException>();
+	}
+
+	[Test]
 	public async Task AppendAsync_WhenExistingGroupFound_AddsOnlyNewDistinctIds()
 	{
 		var existingId = TmdbId.From(141);
