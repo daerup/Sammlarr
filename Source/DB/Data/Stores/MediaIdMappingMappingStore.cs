@@ -9,10 +9,19 @@ internal class MediaIdMappingMappingStore(SammlarrDbContext dbContext) : IMediaI
 {
 	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		return await dbContext
+		var s = await dbContext
 			.MediaIds.Where(e => e.Group.MediaIds.AsQueryable().Any(MatchesId(mediaId)))
 			.Select(e => e.MapValueObject())
 			.ToListAsync(cancellationToken);
+
+		if (s.Any())
+		{
+			return await dbContext
+				.MediaIds.Where(e => e.Group.MediaIds.AsQueryable().Any(MatchesId(mediaId)))
+				.Select(e => e.MapValueObject())
+				.ToListAsync(cancellationToken);
+		}
+		return new List<IMediaId>();
 	}
 
 	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
