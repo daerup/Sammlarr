@@ -10,8 +10,8 @@ using Contracts.Media;
 using Contracts.Media.Search;
 using Imposter.Abstractions;
 using Shared.Options;
+using TUnit.Mocks.Generated.Contracts.Media;
 using ImposterArg = Imposter.Abstractions.Arg;
-using MediaIdMappingStoreMock = TUnit.Mocks.Generated.Contracts.Media.IMediaIdMappingStoreMock;
 using MediaSearchServiceMock = TUnit.Mocks.Generated.Contracts.Media.Search.IMediaSearchServiceMock;
 
 namespace API.Tests.TMDB;
@@ -30,14 +30,14 @@ public class TmdbIdConverterTests
 		.RuleFor(x => x.ReleaseDate, f => f.Date.PastDateOnly())
 		.RuleFor(x => x.Genres, f => [f.Music.Genre(), f.Music.Genre()]);
 
-	private MediaIdMappingStoreMock store = null!;
+	private MediaIdGroupStoreMock store = null!;
 	private MediaSearchServiceMock searchService = null!;
 	private IKeyedServiceIndexImposter<MediaProvider, IMediaSearchService> searchServiceIndex = null!;
 
 	[Before(Test)]
 	public void BeforeTest()
 	{
-		store = IMediaIdMappingStore.Mock();
+		store = IMediaIdGroupStore.Mock();
 		searchService = IMediaSearchService.Mock();
 		var keyedServiceIndex = IKeyedServiceIndex<MediaProvider, IMediaSearchService>.Imposter<MediaProvider, IMediaSearchService>();
 		keyedServiceIndex[ImposterArg.Any].Getter().Returns(searchService);

@@ -1,6 +1,6 @@
 namespace Contracts.Media;
 
-public interface IMediaIdMappingStore
+public interface IMediaIdGroupStore
 {
 	Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 
