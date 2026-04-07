@@ -2,7 +2,7 @@ using Contracts.Media;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(PlexApi plexApi, IMediaIdMappingStore mediaIdMappingStore) : IMediaIdConverter
+internal class PlexIdConverter(PlexApi plexApi, IMediaIdGroupStore mediaIdGroupStore) : IMediaIdConverter
 {
 	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType _)
 	{
@@ -11,7 +11,7 @@ internal class PlexIdConverter(PlexApi plexApi, IMediaIdMappingStore mediaIdMapp
 			return [];
 		}
 
-		var cachedExternalIds = await mediaIdMappingStore.GetByIdAsync(plexId);
+		var cachedExternalIds = await mediaIdGroupStore.GetByIdAsync(plexId);
 		if (cachedExternalIds.Count > 0)
 		{
 			return cachedExternalIds;
@@ -20,7 +20,7 @@ internal class PlexIdConverter(PlexApi plexApi, IMediaIdMappingStore mediaIdMapp
 		var plexMetaData = await plexApi.ByIdAsync(plexId);
 		List<IMediaId> ids = [.. plexMetaData.TmdbId, .. plexMetaData.TvdbId, .. plexMetaData.ImdbId];
 
-		await mediaIdMappingStore.CreateOrAppendAsync(ids.Prepend(plexId));
+		await mediaIdGroupStore.CreateOrAppendAsync(ids.Prepend(plexId));
 		return ids;
 	}
 }

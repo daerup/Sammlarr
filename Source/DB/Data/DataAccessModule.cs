@@ -12,6 +12,6 @@ internal class DataAccessModule : IServiceModule
 	{
 		services.AddScoped<ICredentialStore, CredentialStore>();
 		services.AddScoped<IApiKeyStore, ApiKeyStore>();
-		services.AddScoped<IMediaIdMappingStore, MediaIdMappingMappingStore>();
+		services.AddScoped<IMediaIdGroupStore, MediaIdGroupStore>();
 	}
 }

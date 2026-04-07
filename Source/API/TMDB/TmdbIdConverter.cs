@@ -10,7 +10,7 @@ namespace API.TMDB;
 internal class TmdbIdConverter(
 	TmdbApi tmdbApi,
 	PlexApi plexApi,
-	IMediaIdMappingStore idMappingStore,
+	IMediaIdGroupStore idGroupStore,
 	IKeyedServiceIndex<MediaProvider, IMediaSearchService> searchServiceIndex
 ) : IMediaIdConverter
 {
@@ -21,7 +21,7 @@ internal class TmdbIdConverter(
 			return [];
 		}
 
-		var cachedIds = await idMappingStore.GetByIdAsync(tmdbId);
+		var cachedIds = await idGroupStore.GetByIdAsync(tmdbId);
 		if (cachedIds.OfType<PlexId>().Any())
 		{
 			return cachedIds;
@@ -42,11 +42,11 @@ internal class TmdbIdConverter(
 		List<IMediaId> allIds = [match.PlexId, .. match.TmdbId, .. match.ImdbId, .. match.TvdbId];
 		if (cachedIds.Any())
 		{
-			await idMappingStore.AppendAsync(cachedIds.First(), allIds);
+			await idGroupStore.AppendAsync(cachedIds.First(), allIds);
 		}
 		else
 		{
-			await idMappingStore.CreateAsync(allIds);
+			await idGroupStore.CreateAsync(allIds);
 		}
 		var tmdbIds = allIds.OfType<TmdbId>().Cast<IMediaId>();
 		return allIds.Except(tmdbIds).ToList();

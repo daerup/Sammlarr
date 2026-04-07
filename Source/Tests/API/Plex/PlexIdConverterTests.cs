@@ -25,7 +25,7 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenCacheHasResults_ReturnsCachedIds()
 	{
 		var expectedIds = new List<IMediaId> { TmdbId.From(1), ImdbId.From("tt123") };
-		var store = IMediaIdMappingStore.Mock();
+		var store = IMediaIdGroupStore.Mock();
 		store.GetByIdAsync(Any(), Any()).Returns(expectedIds);
 		var testee = new PlexIdConverter(null!, store);
 
@@ -38,7 +38,7 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenCacheIsEmpty_FetchesExternalIdsFromApi()
 	{
 		var payload = CreatePlexByIdPayload(includeImdbId: true, includeTvdbId: true);
-		var store = IMediaIdMappingStore.Mock();
+		var store = IMediaIdGroupStore.Mock();
 		store.GetByIdAsync(payload.PlexId, Any()).Returns([]);
 		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), store);
 
@@ -54,7 +54,7 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenCacheIsEmpty_StoresMappingsIncludingPlexId()
 	{
 		var payload = CreatePlexByIdPayload(includeImdbId: false, includeTvdbId: false);
-		var store = IMediaIdMappingStore.Mock();
+		var store = IMediaIdGroupStore.Mock();
 		store.GetByIdAsync(payload.PlexId, Any()).Returns([]);
 		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), store);
 

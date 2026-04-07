@@ -7,16 +7,16 @@ using Microsoft.EntityFrameworkCore;
 namespace DB.Tests.Integration.Stores;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class MediaIdMappingMappingStoreTests(SQLiteFixture fixture) : IAsyncDisposable
+public class MediaIdGroupStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IMediaIdMappingStore _testee = null!;
+	private IMediaIdGroupStore _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaIdMappingMappingStore(fixture.Context);
+		_testee = new MediaIdGroupStore(fixture.Context);
 	}
 
 	[Test]
