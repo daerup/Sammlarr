@@ -1,3 +1,4 @@
+using Contracts;
 using DB;
 using DB.Encryption;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ internal static class PerformanceDbContextFactory
 	{
 		var options = new DbContextOptionsBuilder<SammlarrDbContext>().UseSqlite($"Data Source={dbPath}").Options;
 
-		return new SammlarrDbContext(options, new EntityAuditer(), new NoOpDataProtectionService());
+		return new SammlarrDbContext(options, new EntityAuditer(), new NoOpDataProtectionService(), new BenchmarkDateTimeProvider());
 	}
 }
 
@@ -19,4 +20,9 @@ internal class NoOpDataProtectionService : IDataProtectionService
 	public string Encrypt(string plaintext) => plaintext;
 
 	public string Decrypt(string ciphertext) => ciphertext;
+}
+
+internal class BenchmarkDateTimeProvider : IDateTimeProvider
+{
+	public DateTimeOffset Now => DateTimeOffset.UtcNow;
 }

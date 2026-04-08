@@ -1,3 +1,4 @@
+using Contracts;
 using Core.Caching;
 using Core.DI;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,5 +12,6 @@ public class CoreModule : IServiceModule
 	{
 		services.AddModule<CachingModule>();
 		services.AddModule<DiModule>();
+		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
 	}
 }

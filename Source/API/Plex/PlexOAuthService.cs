@@ -1,14 +1,20 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using API.Plex.Types;
+using Contracts;
 using Contracts.Auth;
 using Microsoft.AspNetCore.WebUtilities;
 using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexOAuthService(ICredentialStore credentialStore, IHttpClientFactory httpClientFactory, PlexOptions options, PlexClient plexClient)
-	: IOAuthService
+internal class PlexOAuthService(
+	ICredentialStore credentialStore,
+	IHttpClientFactory httpClientFactory,
+	PlexOptions options,
+	PlexClient plexClient,
+	IDateTimeProvider dateTimeProvider
+) : IOAuthService
 {
 	private const string PlexAuthAppUrl = "https://app.plex.tv/auth";
 	private const string PlexPinEndpoint = "https://plex.tv/api/v2/pins";
@@ -17,7 +23,7 @@ internal class PlexOAuthService(ICredentialStore credentialStore, IHttpClientFac
 	public async Task<string> GetOAuthUrl(string forwardUrl, CancellationToken cancellationToken = default)
 	{
 		var credential = await credentialStore.GetAsync(AuthProvider.Plex, cancellationToken);
-		if (credential is null || credential.ExpiresAt < DateTimeOffset.UtcNow)
+		if (credential is null || credential.ExpiresAt < dateTimeProvider.Now)
 		{
 			return await AuthenticateAsync(forwardUrl, cancellationToken);
 		}

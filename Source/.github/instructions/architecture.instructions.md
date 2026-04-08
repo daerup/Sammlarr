@@ -1,4 +1,4 @@
----
+--
 applyTo: '**'
 description: 'Sammlarr architecture and project-level coding constraints'
 ---
@@ -37,6 +37,8 @@ description: 'Sammlarr architecture and project-level coding constraints'
 ## Composition and DI Patterns (required)
 - Register services using module pattern (`IServiceModule`, `AddModule<TModule>()`).
 - Add new service registrations in the appropriate module (`SharedModule`, `DbModule`, `ApiModule`, `UiModule`).
+ **Default to `AddScoped`** for almost all service registrations. Scoped lifetime aligns with per-request semantics in Blazor Server and EF Core.
+- **Avoid `AddSingleton`** unless there is a clear, justified reason (e.g., truly stateless utilities, caches, or configuration objects that are inherently safe to share across all requests and threads). When using `AddSingleton`, document why scoped is insufficient.
 - Use keyed DI for provider-specific implementations:
   - Register with `AddKeyedScoped(...)`.
   - Consume via `IKeyedServiceIndex<TKey, TService>` or `[FromKeyedServices(...)]`.
