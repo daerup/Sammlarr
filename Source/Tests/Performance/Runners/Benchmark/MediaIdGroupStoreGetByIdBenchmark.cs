@@ -3,25 +3,27 @@ using Contracts.Media;
 using DB;
 using DB.Data;
 using Microsoft.EntityFrameworkCore;
+using Performance.Runners.Benchmark.Old;
 using Shared;
 
 namespace Performance.Runners.Benchmark;
 
 public class MediaIdGroupStoreGetByIdBenchmark()
 {
-	internal static string ConfiguredDbPath { get; set; } = null!;
-	internal static int ConfiguredSeed { get; set; }
+	internal static string? ConfiguredDbPath { get; set; }
+	internal static int? ConfiguredSeed { get; set; }
 
 	private readonly List<IMediaId> _lookupIds = [];
 	private SammlarrDbContext _dbContext = null!;
-	private DB.Data.Stores.MediaIdGroupStore _store = null!;
+	private MediaIdGroupStore _store = null!;
 	private Performance.Runners.Benchmark.Old.MediaIdGroupStore _oldStore = null!;
 
 	[GlobalSetup]
 	public async Task SetupAsync()
 	{
-		_dbContext = PerformanceDbContextFactory.Create(ConfiguredDbPath);
-		var rng = new Random(ConfiguredSeed);
+		var (dbPath, seed) = (@"C:\Repos\Sammlarr\Source\artifacts\perf\performance.db", 1604981);
+		_dbContext = PerformanceDbContextFactory.Create(dbPath);
+		var rng = new Random(seed);
 		var count = await _dbContext.MediaIdGroups.CountAsync();
 		if (count is 0)
 		{
@@ -31,26 +33,22 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 		var randomGroup = await _dbContext.MediaIdGroups.Include(group => group.MediaIds).Skip(skip).FirstAsync();
 		_lookupIds.AddRange(randomGroup.MediaIds.Select(entry => entry.MapValueObject()));
 
-		_store = new DB.Data.Stores.MediaIdGroupStore(_dbContext);
+		_store = new MediaIdGroupStore(_dbContext);
 		_oldStore = new Performance.Runners.Benchmark.Old.MediaIdGroupStore(_dbContext);
 	}
 
-	[Benchmark(Description = "MediaIdGroupStore.GetByIdAsync.Existing")]
+	[Benchmark(Description = "New.GetByIdAsync")]
 	public async Task GetByIdExistingAsync()
 	{
 		await RunExistingBenchmarkAsync(_store);
+		await RunNonExistingBenchmarkAsync(_store);
 	}
 
-	// [Benchmark(Description = "MediaIdGroupStore.GetByIdAsync.Missing")]
-	// public async Task GetByIdMissingAsync()
-	// {
-	// 	await RunNonExistingBenchmarkAsync(_store);
-	// }
-
-	[Benchmark(Description = "Old.GetByIdAsync.Existing", Baseline = true)]
+	[Benchmark(Description = "Old.GetByIdAsync", Baseline = true)]
 	public async Task GetByIdExistingOldAsync()
 	{
-		await RunExistingBenchmarkAsync(_store);
+		await RunExistingBenchmarkAsync(_oldStore);
+		await RunNonExistingBenchmarkAsync(_oldStore);
 	}
 
 	private async Task RunExistingBenchmarkAsync<TStore>(TStore store)

@@ -9,19 +9,8 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 {
 	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		var s = await dbContext
-			.MediaIds.Where(e => e.Group.MediaIds.AsQueryable().Any(MatchesId(mediaId)))
-			.Select(e => e.MapValueObject())
-			.ToListAsync(cancellationToken);
-
-		if (s.Any())
-		{
-			return await dbContext
-				.MediaIds.Where(e => e.Group.MediaIds.AsQueryable().Any(MatchesId(mediaId)))
-				.Select(e => e.MapValueObject())
-				.ToListAsync(cancellationToken);
-		}
-		return new List<IMediaId>();
+		var foundGroup = await dbContext.MediaIds.AsNoTracking().Where(MatchesId(mediaId)).Select(e => e.Group).SingleAsync(cancellationToken);
+		return foundGroup.MediaIds.Select(i => i.MapValueObject()).ToList();
 	}
 
 	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)

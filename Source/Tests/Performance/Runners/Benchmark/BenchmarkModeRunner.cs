@@ -4,7 +4,6 @@ using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Toolchains.InProcess.Emit;
 using Performance.Options;
 
 namespace Performance.Runners.Benchmark;
@@ -22,7 +21,7 @@ internal class BenchmarkModeRunner(BenchmarkModeOptions options) : IPerformanceR
 			.AddColumnProvider(DefaultColumnProviders.Instance)
 			.AddLogger(ConsoleLogger.Default)
 			.AddDiagnoser(MemoryDiagnoser.Default)
-			.AddJob(Job.Default.WithToolchain(InProcessEmitToolchain.Instance));
+			.AddJob(Job.Default.WithIterationCount(1000));
 		config.ArtifactsPath = Path.GetDirectoryName(fullPath)!;
 		BenchmarkRunner.Run<MediaIdGroupStoreGetByIdBenchmark>(config);
 		return Task.CompletedTask;
