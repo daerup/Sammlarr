@@ -27,7 +27,7 @@ public class SQLiteFixture : IAsyncDisposable
 
 	private SammlarrDbContext CreateDbContext()
 	{
-		var ctx = new SammlarrDbContext(BuildOptions(), _serviceProvider.GetRequiredService<IDataProtectionService>());
+		var ctx = new SammlarrDbContext(BuildOptions(), new EntityAuditer(), _serviceProvider.GetRequiredService<IDataProtectionService>());
 		ctx.Database.EnsureCreated();
 		return ctx;
 	}

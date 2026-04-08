@@ -13,8 +13,6 @@ public record MediaIdEntry : Entity<Guid>
 	[MaxLength(64)]
 	public required string ExternalId { get; set; }
 
-	public Guid GroupId { get; set; }
-
 	[Required]
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 	public MediaIdGroup Group { get; set; }

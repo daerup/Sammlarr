@@ -13,7 +13,7 @@ public class DbModule : IServiceModule
 	{
 		services.AddModule<EncryptionModule>();
 		services.AddModule<DataAccessModule>();
-
+		services.AddScoped<EntityAuditer>();
 		services.AddDbContext<SammlarrDbContext>(
 			(sp, options) =>
 			{
