@@ -219,9 +219,13 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	private static bool IsBase64OrEmpty(string? value)
 	{
 		if (value is null)
+		{
 			return false;
+		}
 		if (string.IsNullOrEmpty(value))
+		{
 			return true;
+		}
 
 		Span<byte> buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);

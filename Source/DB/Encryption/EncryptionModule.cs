@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -9,5 +10,6 @@ public class EncryptionModule : IServiceModule
 	{
 		services.AddDataProtection();
 		services.AddScoped<IDataProtectionService, DataProtectionService>();
+		services.AddScoped<IPropertyAddedConvention, EncryptedPropertyConvention>();
 	}
 }

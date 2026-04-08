@@ -7,6 +7,8 @@ internal class ProfileDropdownService
 	public async Task RequestOpenAsync()
 	{
 		if (OnOpenRequested is not null)
+		{
 			await OnOpenRequested.Invoke();
+		}
 	}
 }

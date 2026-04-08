@@ -108,12 +108,16 @@
             case MovieSearchResult movieResult:
                 var runtime = GetRuntimeLabel(movieResult.Runtime);
                 if (!string.IsNullOrWhiteSpace(runtime))
+                {
                     facts.Add(runtime);
+                }
                 break;
             default:
                 var fallbackRuntime = GetRuntimeLabel(result.Runtime);
                 if (!string.IsNullOrWhiteSpace(fallbackRuntime))
+                {
                     facts.Add(fallbackRuntime);
+                }
                 break;
         }
 
@@ -123,7 +127,9 @@
     private static void AddCountFact(ICollection<string> facts, int count, string singularLabel)
     {
         if (count <= 0)
+        {
             return;
+        }
 
         var suffix = count == 1 ? string.Empty : "s";
         facts.Add($"{count} {singularLabel}{suffix}");
@@ -132,11 +138,15 @@
     private static string? GetRuntimeLabel(TimeSpan? runtime)
     {
         if (runtime is null || runtime <= TimeSpan.Zero)
+        {
             return null;
+        }
 
         var totalMinutes = (int)Math.Round(runtime.Value.TotalMinutes, MidpointRounding.AwayFromZero);
         if (totalMinutes <= 0)
+        {
             return null;
+        }
 
         var hours = totalMinutes / 60;
         var minutes = totalMinutes % 60;
