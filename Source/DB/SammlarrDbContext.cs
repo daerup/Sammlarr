@@ -8,17 +8,13 @@ namespace DB;
 internal sealed class SammlarrDbContext : DbContext
 {
 	private readonly IDataProtectionService? _dataProtectionService;
+	private readonly EntityAuditer _entityAuditer;
 
-	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options)
+	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options, EntityAuditer entityAuditer, IDataProtectionService dataProtectionService)
 		: base(options)
 	{
-		Database.EnsureCreated();
-	}
-
-	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options, IDataProtectionService dataProtectionService)
-		: base(options)
-	{
-		_dataProtectionService = dataProtectionService ?? throw new ArgumentNullException(nameof(dataProtectionService));
+		_dataProtectionService = dataProtectionService;
+		_entityAuditer = entityAuditer;
 		Database.EnsureCreated();
 	}
 
@@ -39,7 +35,7 @@ internal sealed class SammlarrDbContext : DbContext
 		modelBuilder.Entity<Credential>().HasIndex(c => c.AuthProvider).IsUnique();
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
 		modelBuilder.Entity<MediaIdEntry>().HasKey(e => new { e.Source, e.ExternalId });
-		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).HasForeignKey(e => e.GroupId).OnDelete(DeleteBehavior.Cascade);
+		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).OnDelete(DeleteBehavior.Cascade);
 
 		if (_dataProtectionService is not null)
 		{
@@ -82,31 +78,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	private void ApplyAuditTimestamps()
 	{
-		var now = DateTime.UtcNow;
-
-		foreach (var entry in ChangeTracker.Entries<IAuditable>())
-		{
-			entry.Property(a => a.CreatedAt).IsModified = false;
-			entry.Property(a => a.UpdatedAt).IsModified = false;
-
-			var (setCreatedAt, setUpdatedAt) = entry.State switch
-			{
-				EntityState.Added => (true, true),
-				EntityState.Modified => (false, true),
-				_ => (false, false),
-			};
-
-			if (setCreatedAt)
-			{
-				entry.Entity.CreatedAt = now;
-				entry.Property(a => a.CreatedAt).IsModified = true;
-			}
-
-			if (setUpdatedAt)
-			{
-				entry.Entity.UpdatedAt = now;
-				entry.Property(a => a.UpdatedAt).IsModified = true;
-			}
-		}
+		var now = DateTimeOffset.UtcNow;
+		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => _entityAuditer.UpdateTimestamps(entry, now));
 	}
 }
