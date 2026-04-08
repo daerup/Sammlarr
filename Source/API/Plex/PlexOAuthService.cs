@@ -77,12 +77,16 @@ internal class PlexOAuthService(
 	{
 		var response = await plexClient.SendAsync(HttpMethod.Get, PlexUserEndpoint);
 		if (!response.IsSuccessStatusCode)
+		{
 			return null;
+		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync();
 		var user = await JsonSerializer.DeserializeAsync<PlexTypes.User.Root>(stream);
 		if (user is null)
+		{
 			return null;
+		}
 
 		return new AuthUserInfo(string.IsNullOrWhiteSpace(user.Title) ? user.Username : user.Title, user.Thumb);
 	}

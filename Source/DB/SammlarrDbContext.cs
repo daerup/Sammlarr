@@ -1,8 +1,7 @@
 using Contracts;
 using DB.Data.Entities;
-using DB.Encryption;
-using DB.ModelBuilders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DB;
@@ -10,18 +9,18 @@ namespace DB;
 internal sealed class SammlarrDbContext : DbContext
 {
 	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly IDataProtectionService _dataProtectionService;
+	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
 	private readonly EntityAuditer _entityAuditer;
 
 	public SammlarrDbContext(
 		DbContextOptions<SammlarrDbContext> options,
 		EntityAuditer entityAuditer,
-		IDataProtectionService dataProtectionService,
+		IEnumerable<IPropertyAddedConvention> propertyConventions,
 		IDateTimeProvider dateTimeProvider
 	)
 		: base(options)
 	{
-		_dataProtectionService = dataProtectionService;
+		_propertyConventions = propertyConventions;
 		_entityAuditer = entityAuditer;
 		_dateTimeProvider = dateTimeProvider;
 		Database.EnsureCreated();
@@ -39,9 +38,9 @@ internal sealed class SammlarrDbContext : DbContext
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
-		configurationBuilder.Conventions.Add(_ => new EncryptedPropertyConvention(_dataProtectionService));
+		_propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));
 
-		if (Database.ProviderName == SQLiteModelBuilder.Fullname)
+		if (Database.IsSqlite())
 		{
 			configurationBuilder.Properties<DateTimeOffset>().HaveConversion<DateTimeOffsetToBinaryConverter>();
 			configurationBuilder.Properties<DateTimeOffset?>().HaveConversion<DateTimeOffsetToBinaryConverter>();

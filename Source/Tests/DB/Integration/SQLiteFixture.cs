@@ -1,8 +1,9 @@
 using Contracts;
-using DB.Encryption;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.DI;
 
 namespace DB.Tests.Integration;
 
@@ -17,8 +18,7 @@ public class SQLiteFixture : IAsyncDisposable
 	public SQLiteFixture()
 	{
 		var services = new ServiceCollection();
-		services.AddDataProtection();
-		services.AddScoped<IDataProtectionService, DataProtectionService>();
+		services.AddModule<DbModule>();
 		_serviceProvider = services.BuildServiceProvider();
 		_connection = new SqliteConnection("DataSource=:memory:");
 		_connection.Open();
@@ -30,9 +30,12 @@ public class SQLiteFixture : IAsyncDisposable
 	{
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Getter.Returns(DateTimeOffset.UtcNow);
-		var ctx = new SammlarrDbContext(BuildOptions(), new EntityAuditer(), _serviceProvider.GetRequiredService<IDataProtectionService>(), dateTimeProvider);
-		ctx.Database.EnsureCreated();
-		return ctx;
+		return new SammlarrDbContext(
+			BuildOptions(),
+			new EntityAuditer(),
+			_serviceProvider.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
+			dateTimeProvider
+		);
 	}
 
 	public async ValueTask DisposeAsync()

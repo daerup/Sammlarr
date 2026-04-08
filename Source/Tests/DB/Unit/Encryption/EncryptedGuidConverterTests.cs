@@ -73,7 +73,9 @@ public class EncryptedGuidConverterTests
 	private static bool IsBase64String(string value)
 	{
 		if (string.IsNullOrEmpty(value))
+		{
 			return true;
+		}
 
 		Span<byte> buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);

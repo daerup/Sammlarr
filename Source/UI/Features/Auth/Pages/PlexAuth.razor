@@ -51,7 +51,9 @@
             _isHandlingCallback = false;
 
             if (_errorMessage is null)
+            {
                 NavigationManager.NavigateTo(_returnUrl, replace: true);
+            }
         }
         else
         {
@@ -90,9 +92,13 @@
         {
             var pinStatus = await OAuthService.CallbackAsync(pinId, clientId);
             if (pinStatus.AuthToken is not null)
+            {
                 await CredentialStore.StoreAsync(AuthProvider.Plex, pinStatus.AuthToken, pinStatus.ExpiresAt, clientId);
+            }
             else
+            {
                 _errorMessage = "Authentication was not completed. Please try again.";
+            }
         }
         catch (Exception ex)
         {

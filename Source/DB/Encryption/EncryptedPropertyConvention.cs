@@ -1,6 +1,8 @@
 using System.Reflection;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DB.Encryption;
 
@@ -8,23 +10,26 @@ internal sealed class EncryptedPropertyConvention(IDataProtectionService dataPro
 {
 	public void ProcessPropertyAdded(IConventionPropertyBuilder propertyBuilder, IConventionContext<IConventionPropertyBuilder> context)
 	{
-		var property = propertyBuilder.Metadata;
-		var memberInfo = property.PropertyInfo ?? (MemberInfo?)property.FieldInfo;
-
+		var memberInfo = propertyBuilder.Metadata.PropertyInfo ?? (MemberInfo?)propertyBuilder.Metadata.FieldInfo;
 		if (memberInfo?.GetCustomAttribute<EncryptedAttribute>() is null)
 		{
 			return;
 		}
 
-		var clrType = property.ClrType;
+		var converter = GetConverter(propertyBuilder.Metadata.ClrType);
+		if (converter is not null)
+		{
+			propertyBuilder.HasConversion(converter);
+		}
+	}
 
-		if (clrType == typeof(string))
+	private ValueConverter? GetConverter(Type clrType)
+	{
+		return clrType switch
 		{
-			propertyBuilder.HasConversion(new EncryptedStringConverter(dataProtectionService));
-		}
-		else if (clrType == typeof(Guid))
-		{
-			propertyBuilder.HasConversion(new EncryptedGuidConverter(dataProtectionService));
-		}
+			_ when clrType == typeof(string) => new EncryptedStringConverter(dataProtectionService),
+			_ when clrType == typeof(Guid) => new EncryptedGuidConverter(dataProtectionService),
+			_ => null,
+		};
 	}
 }

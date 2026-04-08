@@ -55,7 +55,9 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 		)?.Group;
 
 		if (group is null)
+		{
 			throw new InvalidOperationException("No group found for the provided ID");
+		}
 
 		var toAdd = newIds.Except(group.MediaIds.Select(e => e.MapValueObject())).Distinct().Select(id => id.MapEntity() with { Group = group });
 		await dbContext.MediaIds.AddRangeAsync(toAdd, cancellationToken);
@@ -73,7 +75,9 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 	{
 		var mediaIdList = mediaIds.ToList();
 		if (mediaIdList.Count is 0)
+		{
 			return _ => false;
+		}
 
 		var parameter = Expression.Parameter(typeof(MediaIdEntry), "entry");
 		var sourceProperty = Expression.Property(parameter, nameof(MediaIdEntry.Source));

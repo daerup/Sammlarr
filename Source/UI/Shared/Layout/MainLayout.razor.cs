@@ -88,7 +88,9 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		_username = userInfo?.Username;
 
 		if (userInfo is null)
+		{
 			await credentialStore.ClearAsync(AuthProvider.Plex, cancellationToken);
+		}
 	}
 
 	private async Task InitiateAuthAsync()
