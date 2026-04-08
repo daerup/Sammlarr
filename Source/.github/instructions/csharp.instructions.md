@@ -15,6 +15,7 @@ applyTo: '**/*.cs'
 ## General Instructions
 - Make only high confidence suggestions when reviewing code changes.
 - **Do NOT create comments unless explicitly requested by the user.** Write clean, self-documenting code with clear naming conventions.
+- **Do NOT create XML summary docs (`<summary>`, `<param>`, `<returns>`, etc.) on any type, method, or member.** Rely on clear naming instead.
 - Handle edge cases and write clear exception handling.
 - When explicitly requested, add comments explaining design decisions or complex logic.
 
@@ -32,7 +33,7 @@ applyTo: '**/*.cs'
 - Ensure that the final return statement of a method is on its own line.
 - Use pattern matching and switch expressions wherever possible.
 - Use `nameof` instead of string literals when referring to member names.
-- Ensure that XML doc comments are created for any public APIs. When applicable, include `<example>` and `<code>` documentation in the comments.
+- **Do NOT generate XML doc comments** (`<summary>`, `<remarks>`, `<example>`, etc.). Code should be self-documenting through clear naming.
 
 ## Project Setup and Structure
 
@@ -92,7 +93,7 @@ applyTo: '**/*.cs'
 
 - Always include test cases for critical paths of the application.
 - Guide users through creating unit tests.
-- Use "Act", "Arrange" or "Assert" comments.
+- **Do NOT add `// Arrange`, `// Act`, `// Assert` comments in tests.** Let the code structure speak for itself.
 - Copy existing style in nearby files for test method names and capitalization.
 - Explain integration testing approaches for API endpoints.
 - Demonstrate how to mock dependencies for effective testing.

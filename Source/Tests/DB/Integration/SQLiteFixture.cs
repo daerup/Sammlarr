@@ -1,3 +1,4 @@
+using Contracts;
 using DB.Encryption;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,9 @@ public class SQLiteFixture : IAsyncDisposable
 
 	private SammlarrDbContext CreateDbContext()
 	{
-		var ctx = new SammlarrDbContext(BuildOptions(), new EntityAuditer(), _serviceProvider.GetRequiredService<IDataProtectionService>());
+		var dateTimeProvider = IDateTimeProvider.Mock();
+		dateTimeProvider.Now.Getter.Returns(DateTimeOffset.UtcNow);
+		var ctx = new SammlarrDbContext(BuildOptions(), new EntityAuditer(), _serviceProvider.GetRequiredService<IDataProtectionService>(), dateTimeProvider);
 		ctx.Database.EnsureCreated();
 		return ctx;
 	}

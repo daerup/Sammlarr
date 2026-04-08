@@ -1,3 +1,4 @@
+using Contracts;
 using DB.Data.Entities;
 using DB.Encryption;
 using DB.ModelBuilders;
@@ -7,14 +8,21 @@ namespace DB;
 
 internal sealed class SammlarrDbContext : DbContext
 {
+	private readonly IDateTimeProvider _dateTimeProvider;
 	private readonly IDataProtectionService? _dataProtectionService;
 	private readonly EntityAuditer _entityAuditer;
 
-	public SammlarrDbContext(DbContextOptions<SammlarrDbContext> options, EntityAuditer entityAuditer, IDataProtectionService dataProtectionService)
+	public SammlarrDbContext(
+		DbContextOptions<SammlarrDbContext> options,
+		EntityAuditer entityAuditer,
+		IDataProtectionService dataProtectionService,
+		IDateTimeProvider dateTimeProvider
+	)
 		: base(options)
 	{
 		_dataProtectionService = dataProtectionService;
 		_entityAuditer = entityAuditer;
+		_dateTimeProvider = dateTimeProvider;
 		Database.EnsureCreated();
 	}
 
@@ -78,7 +86,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	private void ApplyAuditTimestamps()
 	{
-		var now = DateTimeOffset.UtcNow;
+		var now = _dateTimeProvider.Now;
 		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => _entityAuditer.UpdateTimestamps(entry, now));
 	}
 }
