@@ -3,13 +3,14 @@ using DB.Data.Entities;
 using DB.Encryption;
 using DB.ModelBuilders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DB;
 
 internal sealed class SammlarrDbContext : DbContext
 {
 	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly IDataProtectionService? _dataProtectionService;
+	private readonly IDataProtectionService _dataProtectionService;
 	private readonly EntityAuditer _entityAuditer;
 
 	public SammlarrDbContext(
@@ -36,6 +37,17 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ApiKeySetting> ApiKeySettings => Set<ApiKeySetting>();
 
+	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+	{
+		configurationBuilder.Conventions.Add(_ => new EncryptedPropertyConvention(_dataProtectionService));
+
+		if (Database.ProviderName == SQLiteModelBuilder.Fullname)
+		{
+			configurationBuilder.Properties<DateTimeOffset>().HaveConversion<DateTimeOffsetToBinaryConverter>();
+			configurationBuilder.Properties<DateTimeOffset?>().HaveConversion<DateTimeOffsetToBinaryConverter>();
+		}
+	}
+
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
@@ -44,20 +56,6 @@ internal sealed class SammlarrDbContext : DbContext
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
 		modelBuilder.Entity<MediaIdEntry>().HasKey(e => new { e.Source, e.ExternalId });
 		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).OnDelete(DeleteBehavior.Cascade);
-
-		if (_dataProtectionService is not null)
-		{
-			var encryptedStringConverter = new EncryptedStringConverter(_dataProtectionService);
-			var encryptedGuidConverter = new EncryptedGuidConverter(_dataProtectionService);
-			modelBuilder.Entity<Credential>().Property(c => c.AccessToken).HasConversion(encryptedStringConverter);
-			modelBuilder.Entity<Credential>().Property(c => c.ClientId).HasConversion(encryptedGuidConverter);
-			modelBuilder.Entity<ApiKeySetting>().Property(a => a.ApiKey).HasConversion(encryptedStringConverter);
-		}
-
-		if (Database.ProviderName == SQLiteModelBuilder.Fullname)
-		{
-			SQLiteModelBuilder.OnModelCreating(modelBuilder);
-		}
 	}
 
 	public override int SaveChanges()
