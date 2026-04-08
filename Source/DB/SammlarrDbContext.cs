@@ -39,7 +39,7 @@ internal sealed class SammlarrDbContext : DbContext
 		modelBuilder.Entity<Credential>().HasIndex(c => c.AuthProvider).IsUnique();
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
 		modelBuilder.Entity<MediaIdEntry>().HasKey(e => new { e.Source, e.ExternalId });
-		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).OnDelete(DeleteBehavior.Cascade);
+		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).HasForeignKey(e => e.GroupId).OnDelete(DeleteBehavior.Cascade);
 
 		if (_dataProtectionService is not null)
 		{

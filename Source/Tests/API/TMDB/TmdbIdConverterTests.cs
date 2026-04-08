@@ -30,7 +30,7 @@ public class TmdbIdConverterTests
 		.RuleFor(x => x.ReleaseDate, f => f.Date.PastDateOnly())
 		.RuleFor(x => x.Genres, f => [f.Music.Genre(), f.Music.Genre()]);
 
-	private MediaIdGroupStoreMock store = null!;
+	private IMediaIdGroupStoreMock store = null!;
 	private MediaSearchServiceMock searchService = null!;
 	private IKeyedServiceIndexImposter<MediaProvider, IMediaSearchService> searchServiceIndex = null!;
 
