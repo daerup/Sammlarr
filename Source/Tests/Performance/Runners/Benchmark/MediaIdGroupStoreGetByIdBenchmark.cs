@@ -35,6 +35,7 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 
 		_store = new MediaIdGroupStore(_dbContext);
 		_oldStore = new Performance.Runners.Benchmark.Old.MediaIdGroupStore(_dbContext);
+		_dbContext.ChangeTracker.Clear();
 	}
 
 	[Benchmark(Description = "New.GetByIdAsync")]

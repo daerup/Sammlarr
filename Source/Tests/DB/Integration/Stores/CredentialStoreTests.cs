@@ -214,6 +214,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 			}
 		);
 		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
 	}
 
 	private static bool IsBase64OrEmpty(string? value)

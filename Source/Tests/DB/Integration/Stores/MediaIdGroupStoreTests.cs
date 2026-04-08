@@ -71,8 +71,7 @@ public class MediaIdGroupStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async Task CreateAsync_WhenAnyIdAlreadyMapped_ThrowsInvalidOperationException()
 	{
 		await SetUpGroupAsync([TmdbId.From(131), ImdbId.From("tt0131")]);
-
-		await Assert.That(async () => await _testee.CreateAsync([TmdbId.From(131), PlexId.From("plex-131")])).Throws<InvalidOperationException>();
+		await Assert.That(async () => await _testee.CreateAsync([TmdbId.From(131), PlexId.From("plex-131")])).Throws<DbUpdateException>();
 	}
 
 	[Test]
@@ -169,5 +168,6 @@ public class MediaIdGroupStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 			})
 		);
 		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
 	}
 }
