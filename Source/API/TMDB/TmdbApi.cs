@@ -54,6 +54,8 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 		{
 			return null!;
 		}
+
+		var releaseDate = string.IsNullOrEmpty(response.AvailableDate) ? "1900-01-01T00:00:00Z" : response.AvailableDate;
 		return new TmdbTrendingMedia
 		{
 			SourceId = response.TmdbId,
@@ -65,7 +67,7 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 			PosterUrl = options.ImageBaseUrl + response.PosterPath,
 			BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
 			Rating = (float)response.VoteAverage,
-			ReleaseDate = DateTimeOffset.Parse(response.AvailableDate ?? "1900-01-01T00:00:00Z"),
+			ReleaseDate = DateTimeOffset.Parse(releaseDate),
 		};
 	}
 }

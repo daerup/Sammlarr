@@ -157,6 +157,7 @@ public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeySetting { Provider = provider, ApiKey = apiKey });
 		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
 	}
 
 	private static bool IsBase64OrEmpty(string? value)

@@ -21,7 +21,7 @@ internal class BenchmarkModeRunner(BenchmarkModeOptions options) : IPerformanceR
 			.AddColumnProvider(DefaultColumnProviders.Instance)
 			.AddLogger(ConsoleLogger.Default)
 			.AddDiagnoser(MemoryDiagnoser.Default)
-			.AddJob(Job.Default.WithIterationCount(1000));
+			.AddJob(Job.Default.WithIterationCount(100));
 		config.ArtifactsPath = Path.GetDirectoryName(fullPath)!;
 		BenchmarkRunner.Run<MediaIdGroupStoreGetByIdBenchmark>(config);
 		return Task.CompletedTask;
