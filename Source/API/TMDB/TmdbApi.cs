@@ -49,7 +49,7 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 			return null;
 		}
 
-		var externalId = await converterIndex[MediaProvider.Tmdb].ConvertToOrDefaultAsync<PlexId>(response.TmdbId, response.MediaType.Value);
+		var externalId = await converterIndex[MediaProvider.Tmdb].ConvertToOrDefaultAsync<PlexId>(response.TmdbId);
 		if (externalId is null)
 		{
 			return null!;
