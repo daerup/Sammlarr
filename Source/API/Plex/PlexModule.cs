@@ -17,7 +17,7 @@ internal class PlexModule : IServiceModule
 		services.AddKeyedScoped<IMediaSearchService>(MediaProvider.Plex, (sp, _) => sp.GetRequiredService<PlexApi>());
 		services.AddKeyedScoped<IOAuthService, PlexOAuthService>(AuthProvider.Plex);
 		services.AddKeyedScoped<IWatchlistService, PlexWatchListService>(AuthProvider.Plex);
-		services.AddKeyedScoped<IMediaIdConverter, PlexIdConverter>(MediaProvider.Plex);
+		services.AddScoped<PlexIdConverter>();
 
 		services.AddHttpClient<PlexClient>(ConfigurePlexClient);
 		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient);

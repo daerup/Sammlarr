@@ -3,7 +3,7 @@ namespace Contracts.Media.Trending;
 public interface ITrendingMedia
 {
 	IMediaId SourceId { get; }
-	IMediaId ExternalId { get; }
+	IMediaId WatchlistProviderId { get; }
 	MediaProvider Provider { get; }
 	MediaType MediaType { get; }
 	string Title { get; }
