@@ -4,7 +4,7 @@ namespace API.Plex;
 
 internal class PlexIdConverter(PlexApi plexApi, IMediaIdGroupStore mediaIdGroupStore) : IMediaIdConverter
 {
-	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType _)
+	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId)
 	{
 		if (mediaId is not PlexId plexId)
 		{

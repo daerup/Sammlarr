@@ -14,7 +14,7 @@ internal class TmdbIdConverter(
 	IKeyedServiceIndex<MediaProvider, IMediaSearchService> searchServiceIndex
 ) : IMediaIdConverter
 {
-	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType mediaType)
+	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId)
 	{
 		if (mediaId is not TmdbId tmdbId)
 		{
@@ -26,8 +26,8 @@ internal class TmdbIdConverter(
 		{
 			return cachedIds;
 		}
-		var details = await tmdbApi.GetDetailAsync(tmdbId, mediaType);
-		var searchResults = await searchServiceIndex[MediaProvider.Plex].SearchAsync(details.DisplayOriginalTitle, [mediaType]);
+		var details = await tmdbApi.GetDetailAsync(tmdbId, tmdbId.Type);
+		var searchResults = await searchServiceIndex[MediaProvider.Plex].SearchAsync(details.DisplayOriginalTitle, [tmdbId.Type]);
 		var match = await searchResults
 			.Select(s => s.SourceId)
 			.OfType<PlexId>()
