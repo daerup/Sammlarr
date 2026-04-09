@@ -16,7 +16,7 @@ public class PlexIdConverterTests
 	{
 		var testee = new PlexIdConverter(null!, null!);
 
-		var result = await testee.ConvertAsync(TmdbId.From(1), MediaType.Movie);
+		var result = await testee.ConvertAsync(TmdbId.From("1", MediaType.Movie), MediaType.Movie);
 
 		await Assert.That(result).IsEmpty();
 	}
@@ -24,12 +24,12 @@ public class PlexIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenCacheHasResults_ReturnsCachedIds()
 	{
-		var expectedIds = new List<IMediaId> { TmdbId.From(1), ImdbId.From("tt123") };
+		var expectedIds = new List<IMediaId> { TmdbId.From("1", MediaType.Movie), ImdbId.From("tt123", MediaType.Movie) };
 		var store = IMediaIdGroupStore.Mock();
 		store.GetByIdAsync(Any(), Any()).Returns(expectedIds);
 		var testee = new PlexIdConverter(null!, store);
 
-		var result = await testee.ConvertAsync(PlexId.From("plex-1"), MediaType.Movie);
+		var result = await testee.ConvertAsync(PlexId.From("plex-1", MediaType.Movie), MediaType.Movie);
 
 		await Assert.That(result).IsEquivalentTo(expectedIds);
 	}
@@ -67,19 +67,19 @@ public class PlexIdConverterTests
 	{
 		var faker = new Faker();
 		var plexValue = $"plex-{faker.Random.AlphaNumeric(10)}";
-		var tmdbId = TmdbId.From(faker.Random.Int(1, 1_000_000));
-		ImdbId? imdbId = includeImdbId ? ImdbId.From($"tt{faker.Random.Int(100_000, 999_999)}") : null;
-		TvdbId? tvdbId = includeTvdbId ? TvdbId.From(faker.Random.Int(1, 1_000_000)) : null;
+		var tmdbId = TmdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie);
+		ImdbId? imdbId = includeImdbId ? ImdbId.From($"tt{faker.Random.Int(100_000, 999_999)}", MediaType.Movie) : null;
+		TvdbId? tvdbId = includeTvdbId ? TvdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie) : null;
 
-		List<PlexTypes.ById.Guid> guids = [new($"tmdb://{tmdbId}")];
+		List<PlexTypes.ById.Guid> guids = [new($"tmdb://{tmdbId.Value}")];
 		if (imdbId is not null)
 		{
-			guids.Add(new($"imdb://{imdbId.Value}"));
+			guids.Add(new($"imdb://{imdbId.Value.Value}"));
 		}
 
 		if (tvdbId is not null)
 		{
-			guids.Add(new($"tvdb://{tvdbId.Value}"));
+			guids.Add(new($"tvdb://{tvdbId.Value.Value}"));
 		}
 
 		var metadata = new PlexTypes.ById.Metadata(
@@ -98,7 +98,7 @@ public class PlexIdConverterTests
 		);
 		var root = new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata]));
 
-		return new PlexByIdPayload(JsonSerializer.Serialize(root), PlexId.From(plexValue), tmdbId, imdbId, tvdbId);
+		return new PlexByIdPayload(JsonSerializer.Serialize(root), PlexId.From(plexValue, MediaType.Movie), tmdbId, imdbId, tvdbId);
 	}
 
 	private static PlexApi CreatePlexApi(string json)

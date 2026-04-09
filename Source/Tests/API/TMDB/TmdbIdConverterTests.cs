@@ -49,7 +49,7 @@ public class TmdbIdConverterTests
 	{
 		var testee = new TmdbIdConverter(null!, null!, null!, null!);
 
-		var result = await testee.ConvertAsync(PlexId.From("plex-1"), MediaType.Movie);
+		var result = await testee.ConvertAsync(PlexId.From("plex-1", MediaType.Movie), MediaType.Movie);
 
 		await Assert.That(result).IsEmpty();
 	}
@@ -57,14 +57,14 @@ public class TmdbIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenCacheHasPlexId_ReturnsCachedIds()
 	{
-		var cachedIds = new List<IMediaId> { TmdbId.From(100), PlexId.From("plex-1") };
-		store.GetByIdAsync(TmdbId.From(100), CancellationToken.None).Returns(cachedIds);
+		var cachedIds = new List<IMediaId> { TmdbId.From("100", MediaType.Movie), PlexId.From("plex-1", MediaType.Movie) };
+		store.GetByIdAsync(TmdbId.From("100", MediaType.Movie), CancellationToken.None).Returns(cachedIds);
 		var testee = new TmdbIdConverter(null!, null!, store, null!);
 
-		var result = await testee.ConvertAsync(TmdbId.From(100), MediaType.Movie);
+		var result = await testee.ConvertAsync(TmdbId.From("100", MediaType.Movie), MediaType.Movie);
 
 		await Assert.That(result).IsEquivalentTo(cachedIds);
-		store.GetByIdAsync(TmdbId.From(100), CancellationToken.None).WasCalled(Times.Once);
+		store.GetByIdAsync(TmdbId.From("100", MediaType.Movie), CancellationToken.None).WasCalled(Times.Once);
 		store.VerifyNoOtherCalls();
 	}
 
@@ -160,16 +160,17 @@ public class TmdbIdConverterTests
 	private static (string Json, TmdbId TmdbId, string OriginalTitle) CreateTmdbDetailsPayload()
 	{
 		var faker = new Faker();
-		var tmdbId = TmdbId.From(faker.Random.Int(1, 1_000_000));
+		var tmdbId = TmdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie);
 		var title = faker.Lorem.Sentence(2);
 		var details = new TmdbTypes.Details(
-			Id: tmdbId.Value,
+			Id: int.Parse(tmdbId.Value),
 			OriginalTitle: title,
 			OriginalName: null,
 			ReleaseDate: faker.Date.PastDateOnly().ToString("yyyy-MM-dd"),
 			FirstAirDate: null,
 			Title: title,
-			Name: null
+			Name: null,
+			Type: "movie"
 		);
 
 		return (JsonSerializer.Serialize(details), tmdbId, title);
@@ -178,14 +179,14 @@ public class TmdbIdConverterTests
 	private static (string Json, PlexId PlexId, ImdbId ImdbId, TvdbId? TvdbId) CreatePlexByIdPayload(TmdbId tmdbId, bool includeTvdbId)
 	{
 		var faker = new Faker();
-		var plexId = PlexId.From($"plex-{faker.Random.AlphaNumeric(10)}");
-		var imdbId = ImdbId.From($"tt{faker.Random.Int(100_000, 999_999)}");
-		TvdbId? tvdbId = includeTvdbId ? TvdbId.From(faker.Random.Int(1, 1_000_000)) : null;
+		var plexId = PlexId.From($"plex-{faker.Random.AlphaNumeric(10)}", MediaType.Movie);
+		var imdbId = ImdbId.From($"tt{faker.Random.Int(100_000, 999_999)}", MediaType.Movie);
+		TvdbId? tvdbId = includeTvdbId ? TvdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie) : null;
 
-		List<PlexTypes.ById.Guid> guids = [new($"tmdb://{tmdbId}"), new($"imdb://{imdbId}")];
+		List<PlexTypes.ById.Guid> guids = [new($"tmdb://{tmdbId.Value}"), new($"imdb://{imdbId.Value}")];
 		if (tvdbId is not null)
 		{
-			guids.Add(new($"tvdb://{tvdbId.Value}"));
+			guids.Add(new($"tvdb://{tvdbId.Value.Value}"));
 		}
 
 		var metadata = new PlexTypes.ById.Metadata(

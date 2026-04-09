@@ -29,7 +29,8 @@ internal static class PlexTypes
 			[property: JsonPropertyName("year")] int Year
 		)
 		{
-			public PlexId PlexId => PlexId.From(RatingKey);
+			public MediaType MediaType => MediaType.Parse(Type);
+			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 		}
 
 		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
@@ -62,10 +63,11 @@ internal static class PlexTypes
 			[property: JsonPropertyName("Guid")] IReadOnlyList<Guid> Guid
 		)
 		{
-			public PlexId PlexId => PlexId.From(RatingKey);
-			public TmdbId[] TmdbId => GetId("tmdb://", Contracts.Media.TmdbId.Parse);
-			public ImdbId[] ImdbId => GetId("imdb://", Contracts.Media.ImdbId.From);
-			public TvdbId[] TvdbId => GetId("tvdb://", Contracts.Media.TvdbId.Parse);
+			public MediaType MediaType => MediaType.Parse(Type);
+			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
+			public TmdbId[] TmdbId => GetId("tmdb://", i => Contracts.Media.TmdbId.From(i, MediaType));
+			public ImdbId[] ImdbId => GetId("imdb://", i => Contracts.Media.ImdbId.From(i, MediaType));
+			public TvdbId[] TvdbId => GetId("tvdb://", i => Contracts.Media.TvdbId.From(i, MediaType));
 
 			private T[] GetId<T>(string prefix, Func<string, T> convert) =>
 				Guid.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
@@ -97,7 +99,8 @@ internal static class PlexTypes
 			[property: JsonPropertyName("leafCount")] int? EpisodeCount
 		)
 		{
-			public PlexId PlexId => PlexId.From(RatingKey);
+			public MediaType MediaType => MediaType.Parse(Type);
+			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
 		};
 
 		public record Genre([property: JsonPropertyName("tag")] string Tag);

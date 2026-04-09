@@ -30,8 +30,8 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 			throw new InvalidOperationException("Benchmark database does not contain media ID groups.");
 		}
 		var skip = rng.Next(count);
-		var randomGroup = await _dbContext.MediaIdGroups.Include(group => group.MediaIds).Skip(skip).FirstAsync();
-		_lookupIds.AddRange(randomGroup.MediaIds.Select(entry => entry.MapValueObject()));
+		var randomGroup = await _dbContext.MediaIdGroups.Include(group => group.MediaIdEntries).Skip(skip).FirstAsync();
+		_lookupIds.AddRange(randomGroup.MediaIdEntries.Select(entry => entry.Identifier.ToMediaId()));
 
 		_store = new MediaIdGroupStore(_dbContext);
 		_oldStore = new Performance.Runners.Benchmark.Old.MediaIdGroupStore(_dbContext);
@@ -65,7 +65,7 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 	private async Task RunNonExistingBenchmarkAsync<TStore>(TStore store)
 		where TStore : IMediaIdGroupStore
 	{
-		var lookupId = ImdbId.From("ttsome nonexistent id");
+		var lookupId = ImdbId.From("ttsome nonexistent id", MediaType.Movie);
 		var result = await store.GetByIdAsync(lookupId);
 		if (result.Count is not 0)
 		{

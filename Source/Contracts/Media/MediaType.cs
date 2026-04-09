@@ -9,4 +9,7 @@ public enum MediaType
 
 	[Description("Show")]
 	Show,
+
+	[Description("Unknown")]
+	Unknown,
 }

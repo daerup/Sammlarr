@@ -25,7 +25,7 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 
 	public async Task<TmdbTypes.Details> GetDetailAsync(TmdbId id, MediaType mediaType, CancellationToken cancellationToken = default)
 	{
-		var endpoint = $"{ToTmdbMediaType(mediaType)}/{id}";
+		var endpoint = $"{ToTmdbMediaType(mediaType)}/{id.Value}";
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Details>(stream);
@@ -44,12 +44,12 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 
 	private async ValueTask<TmdbTrendingMedia?> BuildTrendingMediaAsync(TmdbTypes.Trending.Result response)
 	{
-		if (!MediaType.TryParse(response.MediaType, out var mediaType))
+		if (response.MediaType is null)
 		{
 			return null;
 		}
 
-		var externalId = await converterIndex[MediaProvider.Tmdb].ConvertToOrDefaultAsync<PlexId>(response.TmdbId, mediaType);
+		var externalId = await converterIndex[MediaProvider.Tmdb].ConvertToOrDefaultAsync<PlexId>(response.TmdbId, response.MediaType.Value);
 		if (externalId is null)
 		{
 			return null!;
@@ -61,7 +61,7 @@ internal class TmdbApi(TmdbClient tmdbClient, TmdbOptions options, IKeyedService
 			SourceId = response.TmdbId,
 			ExternalId = externalId,
 			Provider = MediaProvider.Tmdb,
-			MediaType = mediaType,
+			MediaType = response.MediaType.Value,
 			Title = response.DisplayTitle,
 			Description = response.Overview,
 			PosterUrl = options.ImageBaseUrl + response.PosterPath,

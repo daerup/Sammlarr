@@ -78,7 +78,7 @@ public class PlexWatchListServiceTests
 	{
 		var testee = CreateWatchListService(statusCode: HttpStatusCode.OK);
 
-		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1"));
+		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
 		await Assert.That(result).IsTrue();
 	}
@@ -88,7 +88,7 @@ public class PlexWatchListServiceTests
 	{
 		var testee = CreateWatchListService(statusCode: HttpStatusCode.Unauthorized);
 
-		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1"));
+		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
 		await Assert.That(result).IsFalse();
 	}
@@ -98,7 +98,7 @@ public class PlexWatchListServiceTests
 	{
 		var testee = CreateWatchListService(statusCode: HttpStatusCode.OK);
 
-		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1"));
+		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
 		await Assert.That(result).IsTrue();
 	}
@@ -108,7 +108,7 @@ public class PlexWatchListServiceTests
 	{
 		var testee = CreateWatchListService(statusCode: HttpStatusCode.Unauthorized);
 
-		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1"));
+		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
 		await Assert.That(result).IsFalse();
 	}

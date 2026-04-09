@@ -41,7 +41,7 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		await dbContext.Database.EnsureCreatedAsync();
 		Console.WriteLine("[Generate] Database is ready.");
 
-		var pendingGroups = new List<MediaIdGroup>(options.BatchSize);
+		var pendingGroups = new List<MediaIdentifierGroup>(options.BatchSize);
 		var savedGroups = 0;
 
 		foreach (var _ in Enumerable.Range(0, options.EntryCount))
@@ -64,9 +64,9 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		Console.WriteLine($"[Generate] Completed. Saved {savedGroups} groups in {duration.TotalSeconds:F1}s.");
 	}
 
-	private MediaIdGroup CreateGroup(GroupType groupType)
+	private MediaIdentifierGroup CreateGroup(GroupType groupType)
 	{
-		var group = new MediaIdGroup();
+		var group = new MediaIdentifierGroup();
 		var ids = groupType switch
 		{
 			GroupType.Complete => GenerateCompleteGroup(),
@@ -75,7 +75,7 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 			GroupType.MissingDuplicates => GenerateMissingDuplicatesGroup(),
 		};
 
-		group.MediaIds = [.. ids.Select(id => id.MapEntity() with { Group = group })];
+		group.MediaIdEntries = [.. ids.Select(id => new MediaIdentifierEntry { Identifier = MediaIdentifier.From(id), MediaIdGroup = group })];
 		return group;
 	}
 
@@ -143,13 +143,13 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 			_ => throw new ArgumentOutOfRangeException(nameof(source), source, null),
 		};
 
-	private TmdbId CreateTmdbId() => TmdbId.From(NextValue(ref _nextTmdbId));
+	private TmdbId CreateTmdbId() => TmdbId.From(NextValue(ref _nextTmdbId).ToString(), MediaType.Movie);
 
-	private TvdbId CreateTvdbId() => TvdbId.From(NextValue(ref _nextTvdbId));
+	private TvdbId CreateTvdbId() => TvdbId.From(NextValue(ref _nextTvdbId).ToString(), MediaType.Movie);
 
-	private ImdbId CreateImdbId() => ImdbId.From($"tt{NextValue(ref _nextImdbId).ToString($"D{ImdbIdNumericPaddingWidth}")}");
+	private ImdbId CreateImdbId() => ImdbId.From($"tt{NextValue(ref _nextImdbId).ToString($"D{ImdbIdNumericPaddingWidth}")}", MediaType.Movie);
 
-	private PlexId CreatePlexId() => PlexId.From($"plex-{NextValue(ref _nextPlexId).ToString($"D{PlexIdNumericPaddingWidth}")}");
+	private PlexId CreatePlexId() => PlexId.From($"plex-{NextValue(ref _nextPlexId).ToString($"D{PlexIdNumericPaddingWidth}")}", MediaType.Movie);
 
 	private static int NextValue(ref int counter)
 	{
@@ -157,7 +157,7 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		return counter;
 	}
 
-	private static async Task<int> SaveBatchAsync(SammlarrDbContext dbContext, List<MediaIdGroup> pendingGroups)
+	private static async Task<int> SaveBatchAsync(SammlarrDbContext dbContext, List<MediaIdentifierGroup> pendingGroups)
 	{
 		var saved = pendingGroups.Count;
 		await dbContext.MediaIdGroups.AddRangeAsync(pendingGroups);
