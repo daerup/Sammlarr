@@ -1,5 +1,4 @@
 using Contracts.Media;
-using DB.Data;
 using DB.Data.Entities;
 
 namespace DB.Tests.Unit.Data;
@@ -11,15 +10,16 @@ public class MediaIdConversionExtensionsTests
 	[Arguments(MediaProvider.Imdb, "tt1234567")]
 	[Arguments(MediaProvider.Tvdb, "98765")]
 	[Arguments(MediaProvider.Plex, "plex-123")]
-	public async Task MapEntity_WhenMediaIdProvided_MapsSourceAndExternalId(MediaProvider source, string externalId)
+	public async Task MediaIdentifierFrom_WhenMediaIdProvided_MapsIdentifier(MediaProvider source, string externalId)
 	{
 		var testee = CreateMediaId(source, externalId);
 
-		var entry = testee.MapEntity();
+		var identifier = MediaIdentifier.From(testee);
 
-		await Assert.That(entry.Source).IsEqualTo(source);
-		await Assert.That(entry.ExternalId).IsEqualTo(externalId);
-		await Assert.That(entry.MapValueObject()).IsEqualTo(testee);
+		await Assert.That(identifier.Source).IsEqualTo(source);
+		await Assert.That(identifier.ExternalId).IsEqualTo(externalId);
+		await Assert.That(identifier.MediaType).IsEqualTo(MediaType.Movie);
+		await Assert.That(identifier.ToMediaId()).IsEqualTo(testee);
 	}
 
 	[Test]
@@ -27,15 +27,15 @@ public class MediaIdConversionExtensionsTests
 	[Arguments(MediaProvider.Imdb, "tt1234567")]
 	[Arguments(MediaProvider.Tvdb, "98765")]
 	[Arguments(MediaProvider.Plex, "plex-123")]
-	public async Task MapValueObject_WhenEntryProvided_MapsBackToSameValueObject(MediaProvider source, string externalId)
+	public async Task ToMediaId_WhenIdentifierProvided_MapsBackToSameValueObject(MediaProvider source, string externalId)
 	{
-		var testee = new MediaIdEntry { Source = source, ExternalId = externalId };
+		var testee = new MediaIdentifier(source, externalId, MediaType.Movie);
 		var expected = CreateMediaId(source, externalId);
 
-		var mediaId = testee.MapValueObject();
+		var mediaId = testee.ToMediaId();
 
 		await Assert.That(mediaId.Source).IsEqualTo(source);
-		await Assert.That(mediaId.ToString()).IsEqualTo(externalId);
+		await Assert.That(mediaId.Value).IsEqualTo(externalId);
 		await Assert.That(mediaId).IsEqualTo(expected);
 	}
 
@@ -43,10 +43,10 @@ public class MediaIdConversionExtensionsTests
 	{
 		return source switch
 		{
-			MediaProvider.Tmdb => TmdbId.Parse(externalId),
-			MediaProvider.Imdb => ImdbId.From(externalId),
-			MediaProvider.Tvdb => TvdbId.Parse(externalId),
-			MediaProvider.Plex => PlexId.From(externalId),
+			MediaProvider.Tmdb => TmdbId.From(externalId, MediaType.Movie),
+			MediaProvider.Imdb => ImdbId.From(externalId, MediaType.Movie),
+			MediaProvider.Tvdb => TvdbId.From(externalId, MediaType.Movie),
+			MediaProvider.Plex => PlexId.From(externalId, MediaType.Movie),
 		};
 	}
 }

@@ -1,36 +1,15 @@
-using Contracts.Media;
+using System.Collections.ObjectModel;
 using DB.Data.Entities;
 
 namespace DB.Data;
 
 internal static class MediaIdConversionExtensions
 {
-	extension(IMediaId id)
+	extension(IEnumerable<MediaIdentifier> source)
 	{
-		public MediaIdEntry MapEntity()
+		public Collection<MediaIdentifierEntry> ToIdentifierEntries(MediaIdentifierGroup group)
 		{
-			var value = id.Source switch
-			{
-				MediaProvider.Tmdb => id.ToString(),
-				MediaProvider.Imdb => id.ToString(),
-				MediaProvider.Tvdb => id.ToString(),
-				MediaProvider.Plex => id.ToString(),
-			};
-			return new MediaIdEntry { Source = id.Source, ExternalId = value! };
-		}
-	}
-
-	extension(MediaIdEntry id)
-	{
-		public IMediaId MapValueObject()
-		{
-			return id.Source switch
-			{
-				MediaProvider.Tmdb => TmdbId.Parse(id.ExternalId),
-				MediaProvider.Imdb => ImdbId.From(id.ExternalId),
-				MediaProvider.Tvdb => TvdbId.Parse(id.ExternalId),
-				MediaProvider.Plex => PlexId.From(id.ExternalId),
-			};
+			return [.. source.Select(identifier => new MediaIdentifierEntry { Identifier = identifier, MediaIdGroup = group })];
 		}
 	}
 }

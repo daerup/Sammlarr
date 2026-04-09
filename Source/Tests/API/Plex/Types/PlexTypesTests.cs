@@ -27,9 +27,9 @@ public class PlexTypesTests
 	[Test]
 	public async Task ByIdMetadata_WhenGuidsContainKnownPrefixes_ParsesExternalIds()
 	{
-		var tmdbId = _faker.Random.Number(1, 999_999);
+		var tmdbId = _faker.Random.Number(1, 999_999).ToString();
 		var imdbId = $"tt{_faker.Random.Number(1_000_000, 9_999_999)}";
-		var tvdbId = _faker.Random.Number(1, 999_999);
+		var tvdbId = _faker.Random.Number(1, 999_999).ToString();
 
 		var testee = CreateMetadata(
 			new PlexTypes.ById.Guid($"tmdb://{tmdbId}"),
@@ -38,26 +38,26 @@ public class PlexTypesTests
 			new PlexTypes.ById.Guid($"other://{_faker.Lorem.Word()}")
 		);
 
-		await Assert.That(testee.PlexId).IsEqualTo(PlexId.From(testee.RatingKey));
+		await Assert.That(testee.PlexId).IsEqualTo(PlexId.From(testee.RatingKey, MediaType.Movie));
 		await Assert.That(testee.TmdbId).Count().IsEqualTo(1);
-		await Assert.That(testee.TmdbId.Single()).IsEqualTo(TmdbId.From(tmdbId));
+		await Assert.That(testee.TmdbId.Single()).IsEqualTo(TmdbId.From(tmdbId, MediaType.Movie));
 		await Assert.That(testee.ImdbId).Count().IsEqualTo(1);
-		await Assert.That(testee.ImdbId.Single()).IsEqualTo(ImdbId.From(imdbId));
+		await Assert.That(testee.ImdbId.Single()).IsEqualTo(ImdbId.From(imdbId, MediaType.Movie));
 		await Assert.That(testee.TvdbId).Count().IsEqualTo(1);
-		await Assert.That(testee.TvdbId.Single()).IsEqualTo(TvdbId.From(tvdbId));
+		await Assert.That(testee.TvdbId.Single()).IsEqualTo(TvdbId.From(tvdbId, MediaType.Movie));
 	}
 
 	[Test]
 	public async Task ByIdMetadata_WhenGuidsContainDuplicatePrefix_ReturnsAllMatchingIds()
 	{
-		var tmdbId1 = _faker.Random.Number(1, 499_999);
-		var tmdbId2 = _faker.Random.Number(500_000, 999_999);
+		var tmdbId1 = _faker.Random.Number(1, 499_999).ToString();
+		var tmdbId2 = _faker.Random.Number(500_000, 999_999).ToString();
 
 		var testee = CreateMetadata(new PlexTypes.ById.Guid($"tmdb://{tmdbId1}"), new PlexTypes.ById.Guid($"tmdb://{tmdbId2}"));
 
 		await Assert.That(testee.TmdbId).Count().IsEqualTo(2);
-		await Assert.That(testee.TmdbId).Contains(TmdbId.From(tmdbId1));
-		await Assert.That(testee.TmdbId).Contains(TmdbId.From(tmdbId2));
+		await Assert.That(testee.TmdbId).Contains(TmdbId.From(tmdbId1, MediaType.Movie));
+		await Assert.That(testee.TmdbId).Contains(TmdbId.From(tmdbId2, MediaType.Movie));
 	}
 
 	[Test]
@@ -89,6 +89,6 @@ public class PlexTypesTests
 			Year: 2021
 		);
 
-		await Assert.That(testee.PlexId).IsEqualTo(PlexId.From(ratingKey));
+		await Assert.That(testee.PlexId).IsEqualTo(PlexId.From(ratingKey, MediaType.Movie));
 	}
 }

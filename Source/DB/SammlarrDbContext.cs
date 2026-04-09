@@ -1,4 +1,5 @@
 using Contracts;
+using DB.Data;
 using DB.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -30,9 +31,9 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<Credential> Credentials => Set<Credential>();
 
-	public DbSet<MediaIdGroup> MediaIdGroups => Set<MediaIdGroup>();
+	public DbSet<MediaIdentifierGroup> MediaIdGroups => Set<MediaIdentifierGroup>();
 
-	public DbSet<MediaIdEntry> MediaIds => Set<MediaIdEntry>();
+	public DbSet<MediaIdentifierEntry> MediaIdEntries => Set<MediaIdentifierEntry>();
 
 	public DbSet<ApiKeySetting> ApiKeySettings => Set<ApiKeySetting>();
 
@@ -53,8 +54,9 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<Credential>().HasIndex(c => c.AuthProvider).IsUnique();
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
-		modelBuilder.Entity<MediaIdEntry>().HasKey(e => new { e.Source, e.ExternalId });
-		modelBuilder.Entity<MediaIdGroup>().HasMany(m => m.MediaIds).WithOne(e => e.Group).OnDelete(DeleteBehavior.Cascade);
+		modelBuilder.Entity<MediaIdentifierEntry>().Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
+		modelBuilder.Entity<MediaIdentifierEntry>().HasKey(e => e.Identifier);
+		modelBuilder.Entity<MediaIdentifierGroup>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroup).OnDelete(DeleteBehavior.Cascade);
 	}
 
 	public override int SaveChanges()
