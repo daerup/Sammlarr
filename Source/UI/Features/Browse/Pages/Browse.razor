@@ -276,7 +276,7 @@
 
     private bool IsInWatchlist(ITrendingMedia media)
     {
-        return media.ExternalId is PlexId plexId && _watchlistedPlexIds.Contains(plexId.Value);
+        return media.WatchlistProviderId is PlexId plexId && _watchlistedPlexIds.Contains(plexId.Value);
     }
 
     private bool IsInWatchlist(PlexId plexId)
@@ -350,7 +350,7 @@
 
     private async Task ToggleWatchlistAsync()
     {
-        if (_selectedMedia?.ExternalId is not PlexId plexId)
+        if (_selectedMedia?.WatchlistProviderId is not PlexId plexId)
         {
             return;
         }

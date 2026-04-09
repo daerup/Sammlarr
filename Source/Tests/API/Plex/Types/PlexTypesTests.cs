@@ -39,12 +39,12 @@ public class PlexTypesTests
 		);
 
 		await Assert.That(testee.PlexId).IsEqualTo(PlexId.From(testee.RatingKey, MediaType.Movie));
-		await Assert.That(testee.TmdbId).Count().IsEqualTo(1);
-		await Assert.That(testee.TmdbId.Single()).IsEqualTo(TmdbId.From(tmdbId, MediaType.Movie));
-		await Assert.That(testee.ImdbId).Count().IsEqualTo(1);
-		await Assert.That(testee.ImdbId.Single()).IsEqualTo(ImdbId.From(imdbId, MediaType.Movie));
-		await Assert.That(testee.TvdbId).Count().IsEqualTo(1);
-		await Assert.That(testee.TvdbId.Single()).IsEqualTo(TvdbId.From(tvdbId, MediaType.Movie));
+		await Assert.That(testee.TmdbIds).Count().IsEqualTo(1);
+		await Assert.That(testee.TmdbIds.Single()).IsEqualTo(TmdbId.From(tmdbId, MediaType.Movie));
+		await Assert.That(testee.ImdbIds).Count().IsEqualTo(1);
+		await Assert.That(testee.ImdbIds.Single()).IsEqualTo(ImdbId.From(imdbId, MediaType.Movie));
+		await Assert.That(testee.TvdbIds).Count().IsEqualTo(1);
+		await Assert.That(testee.TvdbIds.Single()).IsEqualTo(TvdbId.From(tvdbId, MediaType.Movie));
 	}
 
 	[Test]
@@ -55,9 +55,9 @@ public class PlexTypesTests
 
 		var testee = CreateMetadata(new PlexTypes.ById.Guid($"tmdb://{tmdbId1}"), new PlexTypes.ById.Guid($"tmdb://{tmdbId2}"));
 
-		await Assert.That(testee.TmdbId).Count().IsEqualTo(2);
-		await Assert.That(testee.TmdbId).Contains(TmdbId.From(tmdbId1, MediaType.Movie));
-		await Assert.That(testee.TmdbId).Contains(TmdbId.From(tmdbId2, MediaType.Movie));
+		await Assert.That(testee.TmdbIds).Count().IsEqualTo(2);
+		await Assert.That(testee.TmdbIds).Contains(TmdbId.From(tmdbId1, MediaType.Movie));
+		await Assert.That(testee.TmdbIds).Contains(TmdbId.From(tmdbId2, MediaType.Movie));
 	}
 
 	[Test]
@@ -68,7 +68,7 @@ public class PlexTypesTests
 			new PlexTypes.ById.Guid($"tvdb://{_faker.Random.Number(1, 999_999)}")
 		);
 
-		await Assert.That(testee.ImdbId).IsEmpty();
+		await Assert.That(testee.ImdbIds).IsEmpty();
 	}
 
 	[Test]

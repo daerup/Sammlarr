@@ -1,59 +1,33 @@
 using API.Plex;
-using API.Plex.Types;
-using Contracts.DI;
 using Contracts.Media;
-using Contracts.Media.Search;
-using Shared;
+using Contracts.Media.Convertions;
 
 namespace API.TMDB;
 
-internal class TmdbIdConverter(
-	TmdbApi tmdbApi,
-	PlexApi plexApi,
-	IMediaIdGroupStore idGroupStore,
-	IKeyedServiceIndex<MediaProvider, IMediaSearchService> searchServiceIndex
-) : IMediaIdConverter
+internal class TmdbIdConverter(PlexApi plexApi)
 {
-	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId)
+	public async Task<ResolvedId> ConvertAsync(IMediaId mediaId)
 	{
-		if (mediaId is not TmdbId tmdbId)
+		return mediaId switch
 		{
-			return [];
-		}
-
-		var cachedIds = await idGroupStore.GetByIdAsync(tmdbId);
-		if (cachedIds.OfType<PlexId>().Any())
-		{
-			return cachedIds;
-		}
-		var details = await tmdbApi.GetDetailAsync(tmdbId, tmdbId.Type);
-		var searchResults = await searchServiceIndex[MediaProvider.Plex].SearchAsync(details.DisplayOriginalTitle, [tmdbId.Type]);
-		var match = await searchResults
-			.Select(s => s.SourceId)
-			.OfType<PlexId>()
-			.ToAsyncEnumerable()
-			.SelectAwait(LoadPlexDetailsAsync)
-			.FirstOrDefaultAsync(d => d.TmdbId.Contains(tmdbId));
-		if (match is null)
-		{
-			return [];
-		}
-
-		List<IMediaId> allIds = [match.PlexId, .. match.TmdbId, .. match.ImdbId, .. match.TvdbId];
-		if (cachedIds.Any())
-		{
-			await idGroupStore.AppendAsync(cachedIds.First(), allIds);
-		}
-		else
-		{
-			await idGroupStore.CreateAsync(allIds);
-		}
-		var tmdbIds = allIds.OfType<TmdbId>().Cast<IMediaId>();
-		return allIds.Except(tmdbIds).ToList();
+			PlexId plexId => await ResolveById(plexId),
+			TmdbId tmdbId => new ResolvedId(tmdbId, []),
+			ImdbId imdbId => throw new NotSupportedException(),
+			TvdbId tvdbId => throw new NotSupportedException(),
+		};
 	}
 
-	private async ValueTask<PlexTypes.ById.Metadata> LoadPlexDetailsAsync(PlexId plexId)
+	private async Task<ResolvedId> ResolveById(PlexId plexId)
 	{
-		return await plexApi.ByIdAsync(plexId);
+		var plexResult = await plexApi.ByIdAsync(plexId);
+		IMediaId[] otherIds = [plexResult.PlexId, .. plexResult.ImdbIds, .. plexResult.TvdbIds];
+		if (plexResult.TmdbIds.Any())
+		{
+			var tmdbId = plexResult.TmdbIds.First();
+			var remainingIds = plexResult.TmdbIds.Skip(1).Cast<IMediaId>();
+			return new ResolvedId(tmdbId, remainingIds.Concat(otherIds));
+		}
+
+		return ResolvedId.Unresolved(otherIds);
 	}
 }

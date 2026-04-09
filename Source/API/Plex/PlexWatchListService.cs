@@ -1,13 +1,14 @@
 using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 using Contracts.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
 
 namespace API.Plex;
 
-internal class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(MediaProvider.Plex)] IMediaIdConverter plexIdConverter) : IWatchlistService
+internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver mediaIdResolver) : IWatchlistService
 {
 	private const string AddToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/addToWatchlist?ratingKey={0}";
 	private const string RemoveToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/removeFromWatchlist?ratingKey={0}";
@@ -55,7 +56,9 @@ internal class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(Me
 
 	private async ValueTask<PlexWatchlistItem> BuildWatchlistItemAsync(PlexTypes.Watchlist.Metadata parsed)
 	{
-		var externalIds = await plexIdConverter.ConvertAsync(parsed.PlexId);
+		var tmdb = await ResolvePlexIdAsList<TmdbId>(parsed.PlexId, MediaProvider.Tmdb);
+		var tvdb = await ResolvePlexIdAsList<TvdbId>(parsed.PlexId, MediaProvider.Tvdb);
+		var imdb = await ResolvePlexIdAsList<ImdbId>(parsed.PlexId, MediaProvider.Imdb);
 		return new PlexWatchlistItem
 		{
 			Title = parsed.Title,
@@ -66,9 +69,21 @@ internal class PlexWatchListService(PlexClient plexClient, [FromKeyedServices(Me
 			AddedDate = DateTimeOffset.FromUnixTimeSeconds(parsed.AddedAt),
 			ReleaseDate = DateTimeOffset.Parse(parsed.OriginallyAvailableAt),
 			RatingKey = parsed.PlexId,
-			TmdbId = externalIds.OfType<TmdbId>().ToArray(),
-			TvdbId = externalIds.OfType<TvdbId>().ToArray(),
-			ImdbId = externalIds.OfType<ImdbId>().ToArray(),
+			TmdbId = tmdb.ToArray(),
+			TvdbId = tvdb.ToArray(),
+			ImdbId = imdb.ToArray(),
 		};
+	}
+
+	private async Task<IEnumerable<TMediaId>> ResolvePlexIdAsList<TMediaId>(PlexId plexId, MediaProvider provider)
+		where TMediaId : IMediaId
+	{
+		var result = await mediaIdResolver.ResolveAsync(plexId, provider);
+		if (result.Successful)
+		{
+			IMediaId[] ids = [result.Id];
+			return ids.Cast<TMediaId>();
+		}
+		return [];
 	}
 }

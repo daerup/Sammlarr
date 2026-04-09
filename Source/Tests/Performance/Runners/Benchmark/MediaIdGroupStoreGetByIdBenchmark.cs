@@ -1,7 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using Contracts.Media;
 using DB;
-using DB.Data;
 using Microsoft.EntityFrameworkCore;
 using Performance.Runners.Benchmark.Old;
 using Shared;

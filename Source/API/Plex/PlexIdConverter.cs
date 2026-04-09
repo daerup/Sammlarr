@@ -1,26 +1,47 @@
+using API.TMDB;
 using Contracts.Media;
+using Contracts.Media.Convertions;
+using Contracts.Media.Search;
+using Microsoft.Extensions.DependencyInjection;
+using Shared;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(PlexApi plexApi, IMediaIdGroupStore mediaIdGroupStore) : IMediaIdConverter
+internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaProvider.Plex)] IMediaSearchService searchService)
 {
-	public async Task<List<IMediaId>> ConvertAsync(IMediaId mediaId)
+	public async Task<ResolvedId> ConvertAsync(IMediaId mediaId)
 	{
-		if (mediaId is not PlexId plexId)
+		return mediaId switch
 		{
-			return [];
-		}
+			PlexId plexId => new ResolvedId(plexId, await GetAdditionalIds(plexId)),
+			TmdbId tmdbId => await FuzzySearch(tmdbId),
+			ImdbId imdbId => throw new NotSupportedException(),
+			TvdbId tvdbId => throw new NotSupportedException(),
+		};
+	}
 
-		var cachedExternalIds = await mediaIdGroupStore.GetByIdAsync(plexId);
-		if (cachedExternalIds.Count > 0)
+	private async Task<IEnumerable<IMediaId>> GetAdditionalIds(PlexId plexId)
+	{
+		var details = await plexApi.ByIdAsync(plexId);
+		return [.. details.TmdbIds, .. details.TvdbIds, .. details.ImdbIds];
+	}
+
+	private async ValueTask<ResolvedId> FuzzySearch(TmdbId tmdbId)
+	{
+		var details = await tmdbApi.GetDetailAsync(tmdbId);
+		var searchResults = await searchService.SearchAsync(details.DisplayOriginalTitle, [tmdbId.Type]);
+		var match = await searchResults
+			.Select(s => s.SourceId)
+			.OfType<PlexId>()
+			.ToAsyncEnumerable()
+			.SelectAwait(async id => await plexApi.ByIdAsync(id))
+			.FirstOrDefaultAsync(d => d.TmdbIds.Contains(tmdbId));
+
+		if (match is null)
 		{
-			return cachedExternalIds;
+			return ResolvedId.Failed;
 		}
-
-		var plexMetaData = await plexApi.ByIdAsync(plexId);
-		List<IMediaId> ids = [.. plexMetaData.TmdbId, .. plexMetaData.TvdbId, .. plexMetaData.ImdbId];
-
-		await mediaIdGroupStore.CreateOrAppendAsync(ids.Prepend(plexId));
-		return ids;
+		List<IMediaId> otherIds = [.. match.TmdbIds, .. match.ImdbIds, .. match.TvdbIds];
+		return new ResolvedId(match.PlexId, otherIds);
 	}
 }

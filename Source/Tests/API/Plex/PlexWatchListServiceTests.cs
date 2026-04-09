@@ -4,6 +4,7 @@ using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 
 namespace API.Tests.Plex;
 
@@ -115,14 +116,14 @@ public class PlexWatchListServiceTests
 
 	private static PlexWatchListService CreateWatchListService(string json)
 	{
-		var converter = new TestMediaIdConverter();
-		return new PlexWatchListService(CreatePlexClient(json), converter);
+		var resolver = new TestMediaIdResolver();
+		return new PlexWatchListService(CreatePlexClient(json), resolver);
 	}
 
 	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode)
 	{
-		var converter = new TestMediaIdConverter();
-		return new PlexWatchListService(CreatePlexClient(statusCode), converter);
+		var resolver = new TestMediaIdResolver();
+		return new PlexWatchListService(CreatePlexClient(statusCode), resolver);
 	}
 
 	private static PlexClient CreatePlexClient(string json)
@@ -181,11 +182,12 @@ public class PlexWatchListServiceTests
 		};
 	}
 
-	private sealed class TestMediaIdConverter : IMediaIdConverter
+	private class TestMediaIdResolver : IMediaIdResolver
 	{
-		public Task<List<IMediaId>> ConvertAsync(IMediaId mediaId, MediaType mediaType)
+		public Task<ResolvedId> ResolveAsync<TMediaId>(TMediaId sourceId, MediaProvider target)
+			where TMediaId : struct, IMediaId
 		{
-			return Task.FromResult(new List<IMediaId>());
+			return Task.FromResult(ResolvedId.Failed);
 		}
 	}
 }
