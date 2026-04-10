@@ -7,7 +7,7 @@
 @using Contracts.Media.Trending
 @using Contracts.Watchlist
 @inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
-@inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistServiceIndex
+@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
@@ -16,9 +16,7 @@
 
 <PageTitle>Browse Movies</PageTitle>
 
-<OauthGuard Provider="AuthProvider.Plex"
-            AccessChanged="HandleOAuthAccessChanged"/>
-
+<OauthGuard Provider="WatchlistProvider.Plex"AccessChanged="HandleOAuthAccessChanged"/>
 <ApiKeyGuard Provider="MediaProvider.Tmdb" AccessChanged="HandleTmdbAccessChanged"/>
 
 <div class="px-6 py-10">
@@ -43,7 +41,7 @@
 
     <div class="mt-6">
         <ProtectedSection GuardState="HasOAuthAccess"
-                          AuthProvider="AuthProvider.Plex"
+                          AuthProvider="WatchlistProvider.Plex"
                           DeniedActionDescription="browsing trending media"
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
             <ProtectedSection GuardState="HasTmdbAccess"
@@ -119,7 +117,7 @@
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
     private const string BrowseSearchShortcutId = "browse-search-shortcut";
-    private const AuthProvider AuthProvider = Contracts.Auth.AuthProvider.Plex;
+    private const WatchlistProvider AuthProvider = Contracts.Auth.WatchlistProvider.Plex;
     private bool HasOAuthAccess() => _isAuthenticated;
     private bool HasTmdbAccess() => _hasTmdbKey;
 

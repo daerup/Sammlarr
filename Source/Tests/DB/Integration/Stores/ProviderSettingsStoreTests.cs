@@ -31,7 +31,7 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 		var providerSettings = await _testee.GetAsync();
 
 		await Assert.That(providerSettings).IsNotNull();
-		await Assert.That(providerSettings!.WatchlistProvider).IsEqualTo(AuthProvider.Plex);
+		await Assert.That(providerSettings!.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
 		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(MediaProvider.Tmdb);
 		await Assert.That(providerSettings.SearchProvider).IsEqualTo(MediaProvider.Plex);
 		_cache.TryGetValue(Any()).WasCalled(Times.Once);
@@ -40,7 +40,7 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 	[Test]
 	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
 	{
-		var expected = CreateProviderSettings(AuthProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb);
+		var expected = CreateProviderSettings(WatchlistProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb);
 
 		await _testee.StoreAsync(expected);
 
@@ -55,8 +55,8 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 	[Test]
 	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
 	{
-		var initial = CreateProviderSettings(AuthProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb);
-		var updated = CreateProviderSettings(AuthProvider.Plex, MediaProvider.Imdb, MediaProvider.Tmdb);
+		var initial = CreateProviderSettings(WatchlistProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb);
+		var updated = CreateProviderSettings(WatchlistProvider.Plex, MediaProvider.Imdb, MediaProvider.Tmdb);
 
 		await _testee.StoreAsync(initial);
 		await _testee.StoreAsync(updated);
@@ -69,7 +69,11 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 		await Assert.That(entities.Single().SearchProvider).IsEqualTo(updated.SearchProvider);
 	}
 
-	private static ProviderSettingsContract CreateProviderSettings(AuthProvider watchlistProvider, MediaProvider trendingProvider, MediaProvider searchProvider)
+	private static ProviderSettingsContract CreateProviderSettings(
+		WatchlistProvider watchlistProvider,
+		MediaProvider trendingProvider,
+		MediaProvider searchProvider
+	)
 	{
 		return new ProviderSettingsContract
 		{

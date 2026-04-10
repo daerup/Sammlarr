@@ -1,3 +1,3 @@
 namespace Contracts.Auth;
 
-public record StoredCredential(AuthProvider AuthProvider, Guid ClientId, string AccessToken, DateTimeOffset ExpiresAt);
+public record StoredCredential(WatchlistProvider WatchlistProvider, Guid ClientId, string AccessToken, DateTimeOffset ExpiresAt);

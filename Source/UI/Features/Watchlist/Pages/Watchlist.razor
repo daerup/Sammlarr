@@ -4,13 +4,13 @@
 @using Contracts.DI
 @using Contracts.Media
 @using Contracts.Watchlist
-@inject IKeyedServiceIndex<AuthProvider, IWatchlistService> WatchlistStoreIndex
+@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistStoreIndex
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 
 <PageTitle>Plex Watchlist</PageTitle>
 
-<OauthGuard Provider="AuthProvider.Plex"
+<OauthGuard Provider="WatchlistProvider.Plex"
             AccessChanged="HandleAccessChanged"/>
 
 <div class="px-6 py-10">
@@ -39,7 +39,7 @@
 
     <div class="mt-6">
         <ProtectedSection GuardState="IsOAuthAllowed"
-                          AuthProvider="AuthProvider.Plex"
+                          AuthProvider="WatchlistProvider.Plex"
                           DeniedActionDescription="viewing your watchlist"
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
             @if (_isLoading)
@@ -111,7 +111,7 @@
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private int _totalPages;
 
-    private IWatchlistService WatchlistService => WatchlistStoreIndex[AuthProvider.Plex];
+    private IWatchlistService WatchlistService => WatchlistStoreIndex[WatchlistProvider.Plex];
     private bool IsOAuthAllowed() => _hasOAuthAccess;
 
     private async Task HandleAccessChanged(bool hasAccess)

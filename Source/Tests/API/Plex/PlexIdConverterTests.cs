@@ -150,9 +150,9 @@ public class PlexIdConverterTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
 		var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credential = new StoredCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
 		return new PlexApi(plexClient);
 	}

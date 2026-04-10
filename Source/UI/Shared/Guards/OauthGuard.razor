@@ -3,7 +3,7 @@
 @inject ICredentialStore CredentialStore
 
 @code {
-    [Parameter, EditorRequired] public AuthProvider Provider { get; set; }
+    [Parameter, EditorRequired] public WatchlistProvider Provider { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }
 
     private bool _hasAccess;

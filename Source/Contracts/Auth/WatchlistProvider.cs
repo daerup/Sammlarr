@@ -1,6 +1,6 @@
 namespace Contracts.Auth;
 
-public enum AuthProvider
+public enum WatchlistProvider
 {
 	Plex = 0,
 }

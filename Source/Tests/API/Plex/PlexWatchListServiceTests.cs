@@ -131,9 +131,9 @@ public class PlexWatchListServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
 		var client = handler.CreateClient(PlexBaseUrl);
-		var credential = new StoredCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		return new PlexClient(client, credentialStore);
 	}
 
@@ -141,9 +141,9 @@ public class PlexWatchListServiceTests
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(statusCode);
 		var client = handler.CreateClient(PlexBaseUrl);
-		var credential = new StoredCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		return new PlexClient(client, credentialStore);
 	}
 

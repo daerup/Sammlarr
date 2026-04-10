@@ -5,7 +5,7 @@ namespace Contracts.Settings;
 
 public record ProviderSettings
 {
-	public required AuthProvider WatchlistProvider { get; init; }
+	public required WatchlistProvider WatchlistProvider { get; init; }
 
 	public required MediaProvider TrendingProvider { get; init; }
 
