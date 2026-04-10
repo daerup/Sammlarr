@@ -9,7 +9,7 @@ namespace DB.Data.Entities;
 public record Credential : Entity<Guid>
 {
 	[Required]
-	public required AuthProvider AuthProvider { get; set; }
+	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]
 	[Encrypted]

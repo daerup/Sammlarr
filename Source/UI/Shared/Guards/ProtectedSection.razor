@@ -26,7 +26,7 @@ else if (ShowFallback)
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
     [Parameter] public bool ShowFallback { get; set; } = true;
 
-    [Parameter] public AuthProvider? AuthProvider { get; set; }
+    [Parameter] public WatchlistProvider? AuthProvider { get; set; }
     [Parameter] public MediaProvider? MediaProvider { get; set; }
     [Parameter] public string DeniedActionDescription { get; set; } = "access this section";
     [Parameter] public EventCallback FallbackAction { get; set; }

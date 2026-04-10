@@ -34,7 +34,7 @@ internal class PlexClient(HttpClient client, ICredentialStore credentialStore)
 			return;
 		}
 
-		var credential = await credentialStore.GetAsync(AuthProvider.Plex, cancellationToken);
+		var credential = await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken);
 		if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
 		{
 			throw new InvalidOperationException("No Plex credentials are stored. Use Plex auth to sign in first.");

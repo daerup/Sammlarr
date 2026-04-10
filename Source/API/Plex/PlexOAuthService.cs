@@ -22,7 +22,7 @@ internal class PlexOAuthService(
 
 	public async Task<string> GetOAuthUrl(string forwardUrl, CancellationToken cancellationToken = default)
 	{
-		var credential = await credentialStore.GetAsync(AuthProvider.Plex, cancellationToken);
+		var credential = await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken);
 		if (credential is null || credential.ExpiresAt < dateTimeProvider.Now)
 		{
 			return await AuthenticateAsync(forwardUrl, cancellationToken);

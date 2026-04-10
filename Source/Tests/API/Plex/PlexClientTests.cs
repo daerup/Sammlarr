@@ -30,7 +30,7 @@ public class PlexClientTests
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await testee.SendAsync(HttpMethod.Get, PlexBaseUrl, customHeaders: [("X-Custom", "abc")]);
@@ -44,7 +44,7 @@ public class PlexClientTests
 					.Header("X-Custom", "abc"),
 			Times.Once
 		);
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Once);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -54,18 +54,18 @@ public class PlexClientTests
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/one");
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/two");
 
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Once);
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).WasCalled(Times.Once);
 		await Assert.That(handler.Requests.Count).IsEqualTo(2);
 	}
 
 	private static readonly Faker<StoredCredential> credentialFaker = new Faker<StoredCredential>().CustomInstantiator(f => new StoredCredential(
-		AuthProvider.Plex,
+		WatchlistProvider.Plex,
 		f.Random.Guid(),
 		f.Random.AlphaNumeric(32),
 		f.Date.FutureOffset()

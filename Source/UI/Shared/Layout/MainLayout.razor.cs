@@ -70,10 +70,10 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 	{
 		await using var scope = ScopeFactory.CreateAsyncScope();
 		var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
-		var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<AuthProvider, IOAuthService>>();
-		var oauthService = oauthServiceIndex[AuthProvider.Plex];
+		var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
+		var oauthService = oauthServiceIndex[WatchlistProvider.Plex];
 
-		var credential = await credentialStore.GetAsync(AuthProvider.Plex, cancellationToken);
+		var credential = await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken);
 		if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
 		{
 			_isAuthenticated = false;
@@ -89,7 +89,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
 		if (userInfo is null)
 		{
-			await credentialStore.ClearAsync(AuthProvider.Plex, cancellationToken);
+			await credentialStore.ClearAsync(WatchlistProvider.Plex, cancellationToken);
 		}
 	}
 
@@ -99,8 +99,8 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		try
 		{
 			await using var scope = ScopeFactory.CreateAsyncScope();
-			var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<AuthProvider, IOAuthService>>();
-			var oauthService = oauthServiceIndex[AuthProvider.Plex];
+			var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
+			var oauthService = oauthServiceIndex[WatchlistProvider.Plex];
 
 			var returnUrl = GetReturnUrlForOAuth();
 			var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
@@ -134,7 +134,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 	{
 		await using var scope = ScopeFactory.CreateAsyncScope();
 		var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
-		await credentialStore.ClearAsync(AuthProvider.Plex, _disposeCts.Token);
+		await credentialStore.ClearAsync(WatchlistProvider.Plex, _disposeCts.Token);
 		NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
 	}
 

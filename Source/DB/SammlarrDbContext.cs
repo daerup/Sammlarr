@@ -55,7 +55,7 @@ internal sealed class SammlarrDbContext : DbContext
 	{
 		base.OnModelCreating(modelBuilder);
 
-		modelBuilder.Entity<Credential>().HasIndex(c => c.AuthProvider).IsUnique();
+		modelBuilder.Entity<Credential>().HasIndex(c => c.WatchlistProvider).IsUnique();
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
 		modelBuilder
 			.Entity<ProviderSettingsEntity>()

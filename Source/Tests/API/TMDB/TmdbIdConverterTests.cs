@@ -112,9 +112,9 @@ public class TmdbIdConverterTests
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
-		var credential = new StoredCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialStore.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, CancellationToken.None).Returns(credential);
+		credentialStore.GetAsync(WatchlistProvider.Plex, CancellationToken.None).Returns(credential);
 		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore);
 		return new PlexApi(plexClient);
 	}

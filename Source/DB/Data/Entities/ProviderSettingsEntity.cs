@@ -14,7 +14,7 @@ public record ProviderSettingsEntity
 		new()
 		{
 			Id = SingletonId,
-			WatchlistProvider = AuthProvider.Plex,
+			WatchlistProvider = Contracts.Auth.WatchlistProvider.Plex,
 			TrendingProvider = MediaProvider.Tmdb,
 			SearchProvider = MediaProvider.Plex,
 		};
@@ -24,7 +24,7 @@ public record ProviderSettingsEntity
 	public Guid Id { get; set; } = SingletonId;
 
 	[Required]
-	public required AuthProvider WatchlistProvider { get; set; }
+	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]
 	public required MediaProvider TrendingProvider { get; set; }

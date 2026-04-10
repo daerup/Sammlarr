@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager NavigationManager
 @inject ICredentialStore CredentialStore
-@inject IKeyedServiceIndex<AuthProvider, IOAuthService> OAuthServiceIndex
+@inject IKeyedServiceIndex<WatchlistProvider, IOAuthService> OAuthServiceIndex
 
 <PageTitle>Connecting to Plex…</PageTitle>
 
@@ -34,7 +34,7 @@
     private bool _isHandlingCallback;
     private string _returnUrl = "/";
 
-    private IOAuthService OAuthService => OAuthServiceIndex[AuthProvider.Plex];
+    private IOAuthService OAuthService => OAuthServiceIndex[WatchlistProvider.Plex];
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,7 +93,7 @@
             var pinStatus = await OAuthService.CallbackAsync(pinId, clientId);
             if (pinStatus.AuthToken is not null)
             {
-                await CredentialStore.StoreAsync(AuthProvider.Plex, pinStatus.AuthToken, pinStatus.ExpiresAt, clientId);
+                await CredentialStore.StoreAsync(WatchlistProvider.Plex, pinStatus.AuthToken, pinStatus.ExpiresAt, clientId);
             }
             else
             {

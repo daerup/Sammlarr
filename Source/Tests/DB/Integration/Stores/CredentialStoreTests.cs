@@ -10,21 +10,21 @@ namespace DB.Tests.Integration.Stores;
 public class CredentialStoreTests(SQLiteFixture fixture)
 {
 	private ICredentialStore _testee = null!;
-	private Mock<ITypedMemoryCache<AuthProvider, Credential>> _cache = null!;
+	private Mock<ITypedMemoryCache<WatchlistProvider, Credential>> _cache = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<AuthProvider, Credential>.Mock();
+		_cache = ITypedMemoryCache<WatchlistProvider, Credential>.Mock();
 		_testee = new CredentialStore(fixture.Context, _cache.Object);
 	}
 
 	[Test]
 	public async Task GetCredential_WhenNotStored_ReturnsNull()
 	{
-		var credential = await _testee.GetAsync(AuthProvider.Plex);
+		var credential = await _testee.GetAsync(WatchlistProvider.Plex);
 
 		await Assert.That(credential).IsNull();
 	}
@@ -32,7 +32,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Test]
 	public async Task StoreCredential_StoresAndRetrievesSuccessfully()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var accessToken = "test-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -42,7 +42,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 		var credential = await fixture.Context.Credentials.SingleAsync();
 
 		await Assert.That(credential).IsNotNull();
-		await Assert.That(credential.AuthProvider).IsEqualTo(authProvider);
+		await Assert.That(credential.WatchlistProvider).IsEqualTo(authProvider);
 		await Assert.That(credential.AccessToken).IsEqualTo(accessToken);
 		await Assert.That(credential.ExpiresAt).IsEqualTo(expiresAt);
 		await Assert.That(credential.ClientId).IsEqualTo(clientId);
@@ -51,7 +51,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Test]
 	public async Task StoreCredential_WithEncryption_StoresEncryptedInDatabase()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var plainToken = "secret-access-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -67,7 +67,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Test]
 	public async Task StoreCredential_WithClientIdEncryption_StoresEncryptedClientIdInDatabase()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -83,7 +83,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Test]
 	public async Task StoreCredential_WithClientIdEncryption_RetrievesDecryptedGuid()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -105,7 +105,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Arguments("")]
 	public async Task StoreCredential_WithVariousTokens_PreservesPlaintext(string token)
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
@@ -115,13 +115,13 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 
 		await Assert.That(credential).IsNotNull();
 		await Assert.That(credential.AccessToken).IsEqualTo(token);
-		await Assert.That(credential.AuthProvider).IsEqualTo(authProvider);
+		await Assert.That(credential.WatchlistProvider).IsEqualTo(authProvider);
 	}
 
 	[Test]
 	public async Task UpdateCredential_WithNewToken_UpdatesValue()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId1 = Guid.NewGuid();
 		var clientId2 = Guid.NewGuid();
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -137,14 +137,14 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 		await Assert
 			.That(storedKeys.Single())
 			.Satisfies(c =>
-				c is not null && c.AuthProvider == authProvider && c.AccessToken == newToken && c.ClientId == clientId2 && c.ExpiresAt == expiresAt
+				c is not null && c.WatchlistProvider == authProvider && c.AccessToken == newToken && c.ClientId == clientId2 && c.ExpiresAt == expiresAt
 			);
 	}
 
 	[Test]
 	public async Task ClearCredential_RemovesStoredData()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -160,7 +160,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Test]
 	public async Task GetAsync_ReadsFromCache()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 
 		await _testee.GetAsync(authProvider);
 
@@ -170,7 +170,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	[Test]
 	public async Task StoreAsync_AddsToCache()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -182,13 +182,13 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 		return;
 
 		bool MatchCredential(Credential? c) =>
-			c is not null && c.AuthProvider == authProvider && c.AccessToken == token && c.ClientId == clientId && c.ExpiresAt == expiresAt;
+			c is not null && c.WatchlistProvider == authProvider && c.AccessToken == token && c.ClientId == clientId && c.ExpiresAt == expiresAt;
 	}
 
 	[Test]
 	public async Task ClearAsync_RemovesFromCache()
 	{
-		var authProvider = AuthProvider.Plex;
+		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
@@ -202,12 +202,12 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 		_cache.VerifyNoOtherCalls();
 	}
 
-	private async Task SetUpCredentialAsync(AuthProvider authProvider, string accessToken, DateTimeOffset expiresAt, Guid clientId)
+	private async Task SetUpCredentialAsync(WatchlistProvider watchlistProvider, string accessToken, DateTimeOffset expiresAt, Guid clientId)
 	{
 		await fixture.Context.Credentials.AddAsync(
 			new Credential
 			{
-				AuthProvider = authProvider,
+				WatchlistProvider = watchlistProvider,
 				AccessToken = accessToken,
 				ExpiresAt = expiresAt,
 				ClientId = clientId,
