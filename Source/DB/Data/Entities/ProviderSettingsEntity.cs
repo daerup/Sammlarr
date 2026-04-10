@@ -1,0 +1,34 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Contracts.Auth;
+using Contracts.Media;
+
+namespace DB.Data.Entities;
+
+[Table("ProviderSettings")]
+public record ProviderSettingsEntity
+{
+	public static readonly Guid SingletonId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+	public static ProviderSettingsEntity Default =>
+		new()
+		{
+			Id = SingletonId,
+			WatchlistProvider = AuthProvider.Plex,
+			TrendingProvider = MediaProvider.Tmdb,
+			SearchProvider = MediaProvider.Plex,
+		};
+
+	[Key]
+	[DatabaseGenerated(DatabaseGeneratedOption.None)]
+	public Guid Id { get; set; } = SingletonId;
+
+	[Required]
+	public required AuthProvider WatchlistProvider { get; set; }
+
+	[Required]
+	public required MediaProvider TrendingProvider { get; set; }
+
+	[Required]
+	public required MediaProvider SearchProvider { get; set; }
+}

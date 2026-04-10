@@ -25,6 +25,7 @@ internal sealed class SammlarrDbContext : DbContext
 		_entityAuditer = entityAuditer;
 		_dateTimeProvider = dateTimeProvider;
 		Database.EnsureCreated();
+		SeedProviderSettings();
 	}
 
 	public DbSet<CollectionItem> CollectionItems => Set<CollectionItem>();
@@ -36,6 +37,8 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<MediaIdentifierEntry> MediaIdEntries => Set<MediaIdentifierEntry>();
 
 	public DbSet<ApiKeySetting> ApiKeySettings => Set<ApiKeySetting>();
+
+	public DbSet<ProviderSettingsEntity> ProviderSettings => Set<ProviderSettingsEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
@@ -54,6 +57,15 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<Credential>().HasIndex(c => c.AuthProvider).IsUnique();
 		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
+		modelBuilder
+			.Entity<ProviderSettingsEntity>()
+			.ToTable(
+				"ProviderSettings",
+				tableBuilder =>
+				{
+					tableBuilder.HasCheckConstraint("CK_ProviderSettings_Singleton", "Id = '00000000-0000-0000-0000-000000000001'");
+				}
+			);
 		modelBuilder.Entity<MediaIdentifierEntry>().Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
 		modelBuilder.Entity<MediaIdentifierEntry>().HasKey(e => e.Identifier);
 		modelBuilder.Entity<MediaIdentifierGroup>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroup).OnDelete(DeleteBehavior.Cascade);
@@ -87,5 +99,16 @@ internal sealed class SammlarrDbContext : DbContext
 	{
 		var now = _dateTimeProvider.Now;
 		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => _entityAuditer.UpdateTimestamps(entry, now));
+	}
+
+	private void SeedProviderSettings()
+	{
+		if (ProviderSettings.Any())
+		{
+			return;
+		}
+
+		ProviderSettings.Add(DB.Data.Entities.ProviderSettingsEntity.Default);
+		base.SaveChanges();
 	}
 }
