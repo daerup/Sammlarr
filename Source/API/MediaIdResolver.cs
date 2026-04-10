@@ -10,8 +10,7 @@ namespace API;
 internal class MediaIdResolver(IMediaIdGroupStore mediaIdGroupStore, TmdbIdConverter tmdb, PlexIdConverter plex, ImdbIdConverter imdb, TvdbIdConverter tvdb)
 	: IMediaIdResolver
 {
-	public async Task<ResolvedId> ResolveAsync<TMediaId>(TMediaId sourceId, MediaProvider target)
-		where TMediaId : struct, IMediaId
+	public async Task<ResolvedId> ResolveAsync(IMediaId sourceId, MediaProvider target)
 	{
 		var cachedIds = await mediaIdGroupStore.GetByIdAsync(sourceId);
 		var cachedIdWithRequestedTarget = cachedIds.FirstOrDefault(id => id.Source == target);

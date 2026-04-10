@@ -4,7 +4,6 @@ public interface ITrendingMedia
 {
 	IMediaId SourceId { get; }
 	IMediaId WatchlistProviderId { get; }
-	MediaProvider Provider { get; }
 	MediaType MediaType { get; }
 	string Title { get; }
 	string Description { get; }

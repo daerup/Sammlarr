@@ -5,6 +5,7 @@
 @using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Trending
+@using Contracts.Settings
 @using Contracts.Watchlist
 @inject IKeyedServiceIndex<MediaProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
@@ -12,12 +13,13 @@
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
 @inject ScrollService ScrollService
+@inject IProviderSettingsStore ProviderSettingsStore
 @inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
 
-<OauthGuard Provider="WatchlistProvider.Plex"AccessChanged="HandleOAuthAccessChanged"/>
-<ApiKeyGuard Provider="MediaProvider.Tmdb" AccessChanged="HandleTmdbAccessChanged"/>
+<OauthGuard Provider="@_providerSettings.WatchlistProvider" AccessChanged="HandleOAuthAccessChanged"/>
+<ApiKeyGuard Provider="@_providerSettings.TrendingProvider" AccessChanged="HandleTrendingProviderAccessChanged"/>
 
 <div class="px-6 py-10">
     <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -41,11 +43,11 @@
 
     <div class="mt-6">
         <ProtectedSection GuardState="HasOAuthAccess"
-                          AuthProvider="WatchlistProvider.Plex"
+                          AuthProvider="@_providerSettings.WatchlistProvider"
                           DeniedActionDescription="browsing trending media"
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
-            <ProtectedSection GuardState="HasTmdbAccess"
-                              MediaProvider="MediaProvider.Tmdb"
+            <ProtectedSection GuardState="HasTrendingProviderAccess"
+                              MediaProvider="@_providerSettings.TrendingProvider"
                               DeniedActionDescription="browse trending media"
                               FallbackAction="@(() => NavigationManager.NavigateTo("/settings"))">
                 @if (_isLoading)
@@ -64,7 +66,7 @@
                                            Title="@media.Title"
                                            OnClick="() => SelectMedia(media)"
                                            ShowBookmark="true"
-                                           IsInWatchlist="@IsInWatchlist(media)"
+                                           IsInWatchlist="IsInWatchlist(media)"
                                            Rating="@media.Rating"
                                            Date="@media.ReleaseDate"/>
                         }
@@ -80,10 +82,10 @@
 
         <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
             <SearchModal @bind-IsOpen="_isSearchModalOpen"
-                         SearchProvider="MediaProvider.Plex"
-                         IsInWatchlist="id => IsInWatchlist((PlexId)id)"
-                         AddToWatchlistAsync="(id, title) => AddFromSearchAsync((PlexId)id, title)"
-                         RemoveFromWatchlistAsync="(id, title) =>  RemoveFromSearchAsync((PlexId)id, title)"/>
+                         SearchProvider="@_providerSettings.SearchProvider"
+                         IsInWatchlist="IsInWatchlist"
+                         AddToWatchlistAsync="AddFromSearchAsync"
+                         RemoveFromWatchlistAsync="RemoveFromSearchAsync"/>
         </ProtectedSection>
     </div>
 </div>
@@ -109,17 +111,23 @@
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
     private bool _isAuthenticated;
-    private bool _hasTmdbKey;
-    private HashSet<string> _watchlistedPlexIds = [];
+    private bool _hasTrendingProviderApiKey;
+    private HashSet<string> _watchlistedIds = [];
+    private ProviderSettings _providerSettings = null!;
     private int _currentPage = 1;
     private int _totalPages = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
     private const string BrowseSearchShortcutId = "browse-search-shortcut";
-    private const WatchlistProvider AuthProvider = Contracts.Auth.WatchlistProvider.Plex;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _providerSettings = await ProviderSettingsStore.GetAsync();
+    }
+
     private bool HasOAuthAccess() => _isAuthenticated;
-    private bool HasTmdbAccess() => _hasTmdbKey;
+    private bool HasTrendingProviderAccess() => _hasTrendingProviderApiKey;
 
     private async Task HandleOAuthAccessChanged(bool isAuthenticated)
     {
@@ -127,8 +135,8 @@
 
         if (!_isAuthenticated)
         {
-            _hasTmdbKey = false;
-            _watchlistedPlexIds.Clear();
+            _hasTrendingProviderApiKey = false;
+            _watchlistedIds.Clear();
             _trendingMedia = null;
             CloseSelectedMedia();
             _isSearchModalOpen = false;
@@ -144,11 +152,11 @@
         _isSheetOpen = false;
     }
 
-    private async Task HandleTmdbAccessChanged(bool hasTmdbKey)
+    private async Task HandleTrendingProviderAccessChanged(bool hasAccess)
     {
-        _hasTmdbKey = hasTmdbKey;
+        _hasTrendingProviderApiKey = hasAccess;
 
-        if (!_hasTmdbKey)
+        if (!_hasTrendingProviderApiKey)
         {
             _trendingMedia = null;
             CloseSelectedMedia();
@@ -200,7 +208,6 @@
         _shortcutRegistration?.Dispose();
         _shortcutRegistration = null;
 
-        // Keep explicit ID-based cleanup so stale registrations cannot survive circuit reconnections.
         KeyboardShortcutService.Unregister(BrowseSearchShortcutId);
         _isShortcutRegistered = false;
         return ValueTask.CompletedTask;
@@ -208,14 +215,14 @@
 
     private async Task LoadWatchlistIdsAsync()
     {
-        var watchlistService = WatchlistServiceIndex[AuthProvider];
+        var watchlistService = WatchlistServiceIndex[_providerSettings.WatchlistProvider];
         var watchlistPage = await watchlistService.GetWatchlistAsync(1, _cancellationTokenSource.Token);
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             return;
         }
 
-        _watchlistedPlexIds = watchlistPage.Items.Select(item => item.SourceId).OfType<PlexId>().Select(id => id.Value).ToHashSet();
+        _watchlistedIds = watchlistPage.Items.Select(item => item.SourceId.Value).ToHashSet();
     }
 
     private async Task LoadPageAsync()
@@ -225,7 +232,7 @@
         await TryStateHasChangedAsync();
         try
         {
-            var recommendationService = RecommendationServiceIndex[MediaProvider.Tmdb];
+            var recommendationService = RecommendationServiceIndex[_providerSettings.TrendingProvider];
             (_trendingMedia, _totalPages) = await recommendationService.GetTrendingAsync(_currentPage, _cancellationTokenSource.Token);
         }
         finally
@@ -274,12 +281,16 @@
 
     private bool IsInWatchlist(ITrendingMedia media)
     {
-        return media.WatchlistProviderId is PlexId plexId && _watchlistedPlexIds.Contains(plexId.Value);
+        return IsInWatchlist(media.WatchlistProviderId);
     }
 
-    private bool IsInWatchlist(PlexId plexId)
+    private bool IsInWatchlist(IMediaId mediaId)
     {
-        return _watchlistedPlexIds.Contains(plexId.Value);
+        if (mediaId.Source == _providerSettings.WatchlistProvider.AsMediaProvider())
+        {
+            return _watchlistedIds.Contains(mediaId.Value);
+        }
+        return false;
     }
 
     private void OpenSearchModal()
@@ -287,37 +298,38 @@
         _isSearchModalOpen = true;
     }
 
-    private async Task<bool> AddFromSearchAsync(PlexId plexId, string title)
+    private async Task<bool> AddFromSearchAsync(IMediaId id, string title)
     {
-        if (IsInWatchlist(plexId))
+
+        if (IsInWatchlist(id))
         {
             ToastService.Warning($"'{title}' is already in your watchlist.");
             return false;
         }
 
-        var watchlistService = WatchlistServiceIndex[AuthProvider];
-        var removed = await watchlistService.AddToWatchlistAsync(plexId, _cancellationTokenSource.Token);
+        var watchlistService = WatchlistServiceIndex[_providerSettings.WatchlistProvider];
+        var removed = await watchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
         if (!removed)
         {
             ToastService.Warning("Failed to add item to watchlist. Please try again.");
             return false;
         }
 
-        _watchlistedPlexIds.Add(plexId.Value);
+        _watchlistedIds.Add(id.Value);
         ToastService.Success($"'{title}' has been added to your watchlist.");
         return true;
     }
 
-    private async Task<bool> RemoveFromSearchAsync(PlexId plexId, string title)
+    private async Task<bool> RemoveFromSearchAsync(IMediaId id, string title)
     {
-        if (!IsInWatchlist(plexId))
+        if (!IsInWatchlist(id))
         {
             ToastService.Warning($"'{title}' is not in your watchlist.");
             return false;
         }
 
-        var watchlistService = WatchlistServiceIndex[AuthProvider];
-        var added = await watchlistService.RemoveFromWatchlistAsync(plexId, _cancellationTokenSource.Token);
+        var watchlistService = WatchlistServiceIndex[_providerSettings.WatchlistProvider];
+        var added = await watchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
 
         if (!added)
         {
@@ -325,7 +337,7 @@
             return false;
         }
 
-        _watchlistedPlexIds.Remove(plexId.Value);
+        _watchlistedIds.Remove(id.Value);
         ToastService.Success($"'{title}' has been removed from your watchlist.");
         return true;
     }
@@ -348,30 +360,29 @@
 
     private async Task ToggleWatchlistAsync()
     {
-        if (_selectedMedia?.WatchlistProviderId is not PlexId plexId)
+        if (_selectedMedia?.WatchlistProviderId.Source != _providerSettings.WatchlistProvider.AsMediaProvider())
         {
             return;
         }
 
-        var watchlistService = WatchlistServiceIndex[AuthProvider];
-        var isCurrentlyInWatchlist = _watchlistedPlexIds.Contains(plexId.Value);
+        var watchlistService = WatchlistServiceIndex[_providerSettings.WatchlistProvider];
         bool success;
 
-        if (isCurrentlyInWatchlist)
+        if (IsInWatchlist(_selectedMedia))
         {
-            success = await watchlistService.RemoveFromWatchlistAsync(plexId);
+            success = await watchlistService.RemoveFromWatchlistAsync(_selectedMedia.WatchlistProviderId);
             if (success)
             {
-                _watchlistedPlexIds.Remove(plexId.Value);
+                _watchlistedIds.Remove(_selectedMedia.WatchlistProviderId.Value);
                 _isSheetOpen = false;
             }
         }
         else
         {
-            success = await watchlistService.AddToWatchlistAsync(plexId);
+            success = await watchlistService.AddToWatchlistAsync(_selectedMedia.WatchlistProviderId);
             if (success)
             {
-                _watchlistedPlexIds.Add(plexId.Value);
+                _watchlistedIds.Add(_selectedMedia.WatchlistProviderId.Value);
                 _isSheetOpen = false;
             }
         }
