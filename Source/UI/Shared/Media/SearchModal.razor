@@ -81,7 +81,7 @@
                                              IsActiveToggle="_isAdding && Equals(_activeToggledSourceId, result.SourceId)"
                                              IsFocused="_focusedResult == result"
                                              OnFocusIn="() => _focusedResult = result"
-                                             OnToggleWatchlist="r => ToggleWatchlistAsync(r)"/>
+                                             OnToggleWatchlist="ToggleWatchlistAsync"/>
                         }
                     </div>
                     <BbSeparator/>
@@ -106,7 +106,7 @@
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
     [Parameter, EditorRequired] public MediaProvider SearchProvider { get; set; }
-    [Parameter] public Func<IMediaId, bool>? IsInWatchlist { get; set; }
+    [Parameter, EditorRequired] public Func<IMediaId, bool> IsInWatchlist { get; set; }
     [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> AddToWatchlistAsync { get; set; }
     [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> RemoveFromWatchlistAsync { get; set; }
 
@@ -151,14 +151,10 @@
         await _searchInputRef.FocusAsync();
     }
 
-    private bool InWatchlist(IMediaId mediaId)
-    {
-        return IsInWatchlist?.Invoke(mediaId) == true;
-    }
 
     private bool IsSearchResultInWatchlist(IMediaSearchResult result)
     {
-        return InWatchlist(result.SourceId);
+        return IsInWatchlist.Invoke(result.SourceId);
     }
 
     private async Task CloseAsync()

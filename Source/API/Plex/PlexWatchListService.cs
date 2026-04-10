@@ -40,14 +40,14 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 		return arg.Year == 0 || string.IsNullOrEmpty(arg.OriginallyAvailableAt) || string.IsNullOrEmpty(arg.Title);
 	}
 
-	public async Task<bool> AddToWatchlistAsync(PlexId ratingKey, CancellationToken cancellationToken = default)
+	public async Task<bool> AddToWatchlistAsync(IMediaId ratingKey, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(AddToWatchlistEndpoint, Uri.EscapeDataString(ratingKey.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, cancellationToken, new StringContent(string.Empty));
 		return response.IsSuccessStatusCode;
 	}
 
-	public async Task<bool> RemoveFromWatchlistAsync(PlexId ratingKey, CancellationToken cancellationToken = default)
+	public async Task<bool> RemoveFromWatchlistAsync(IMediaId ratingKey, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(RemoveToWatchlistEndpoint, Uri.EscapeDataString(ratingKey.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, cancellationToken, new StringContent(string.Empty));
