@@ -17,7 +17,7 @@ public class TmdbClientTests
 		var options = CreateOptions();
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(options.BaseUrl);
-		var apiKeyStore = IApiKeyStore.Mock();
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		var testee = new TmdbClient(httpClient, options, apiKeyStore);
 
 		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, "configuration")).Throws<InvalidOperationException>();
@@ -29,7 +29,7 @@ public class TmdbClientTests
 		var options = CreateOptions();
 		var apiKey = GetApiKey();
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
-		var apiKeyStore = IApiKeyStore.Mock();
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		apiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, Any()).Returns(apiKey);
 		using var httpClient = handler.CreateClient(options.BaseUrl);
 		var testee = new TmdbClient(httpClient, options, apiKeyStore);
@@ -45,7 +45,7 @@ public class TmdbClientTests
 		var apiKey = GetApiKey();
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.Accepted);
-		var apiKeyStore = IApiKeyStore.Mock();
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		using var httpClient = handler.CreateClient(options.BaseUrl);
 		var testee = new TmdbClient(httpClient, options, apiKeyStore);
 
@@ -63,7 +63,7 @@ public class TmdbClientTests
 		var apiKey = GetApiKey();
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Throws(new HttpRequestException("network"));
-		var apiKeyStore = IApiKeyStore.Mock();
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		using var httpClient = handler.CreateClient(options.BaseUrl);
 		var testee = new TmdbClient(httpClient, options, apiKeyStore);
 

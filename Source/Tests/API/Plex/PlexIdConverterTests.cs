@@ -100,7 +100,7 @@ public class PlexIdConverterTests
 		);
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(JsonSerializer.Serialize(details));
-		var apiKeyStore = IApiKeyStore.Mock();
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		apiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, Any()).Returns("test-api-key");
 		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
 		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore);

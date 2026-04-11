@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace DB.Tests.Integration.Stores;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
+public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IApiKeyStore _testee = null!;
+	private IApiKeyConfigRepository _testee = null!;
 	private Mock<ITypedMemoryCache<MediaProvider, string>> _cache = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
@@ -18,7 +18,7 @@ public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 	public void Setup()
 	{
 		_cache = ITypedMemoryCache<MediaProvider, string>.Mock();
-		_testee = new ApiKeyStore(fixture.Context, _cache.Object);
+		_testee = new ApiKeyConfigRepository(fixture.Context, _cache.Object);
 	}
 
 	[Test]
@@ -50,7 +50,7 @@ public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.SetApiKeyAsync(provider, plainKey);
 
-		var encrypted = (await fixture.RawContext.Table<ApiKeySetting>().QueryAsync(x => x.ApiKey)).Single();
+		var encrypted = (await fixture.RawContext.Table<ApiKeyConfigEntity>().QueryAsync(x => x.ApiKey)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainKey);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -111,7 +111,7 @@ public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 		var provider = MediaProvider.Tmdb;
 		await SetUpApiKeyAsync(provider, "secret-api-key");
 
-		await _testee.ClearApiKeyAsync(provider);
+		await _testee.RemoveApiKeyAsync(provider);
 		var exists = await fixture.Context.ApiKeySettings.AnyAsync(s => s.Provider == provider);
 
 		await Assert.That(exists).IsFalse();
@@ -146,7 +146,7 @@ public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 		await SetUpApiKeyAsync(provider, "secret-api-key");
 		_cache.Reset();
 
-		await _testee.ClearApiKeyAsync(provider);
+		await _testee.RemoveApiKeyAsync(provider);
 
 		_cache.Remove(provider).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
@@ -154,7 +154,7 @@ public class ApiKeyStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task SetUpApiKeyAsync(MediaProvider provider, string apiKey)
 	{
-		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeySetting { Provider = provider, ApiKey = apiKey });
+		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeyConfigEntity { Provider = provider, ApiKey = apiKey });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 	}

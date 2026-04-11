@@ -3,7 +3,7 @@
 @using Contracts.Media
 @using UI.Shared.Services.Branding
 
-@inject IApiKeyStore ApiKeyStore
+@inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
@@ -133,7 +133,7 @@
             return;
         }
 
-        var key = await ApiKeyStore.GetApiKeyAsync(Provider);
+        var key = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
         _savedApiKey = key ?? string.Empty;
         _apiKeyInput = _savedApiKey;
         _state = State.Idle;
@@ -170,7 +170,7 @@
 
         var trimmedApiKey = _apiKeyInput.Trim();
 
-        await ApiKeyStore.SetApiKeyAsync(Provider, trimmedApiKey);
+        await ApiKeyConfigRepository.SetApiKeyAsync(Provider, trimmedApiKey);
         _savedApiKey = trimmedApiKey;
 
         _state = State.Saved;

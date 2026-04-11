@@ -5,7 +5,7 @@
 @using Contracts.Settings
 @using UI.Shared.Services.Branding
 
-@inject IProviderSettingsStore ProviderSettingsStore
+@inject IProviderSettingsRepository ProviderSettingsRepository
 @inject ToastService ToastService
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
@@ -22,7 +22,7 @@ else
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Watchlist Provider"
                              Description="Choose which provider powers the watchlist and OAuth flow."
-                             Selected="@_providerSettings.WatchlistProvider"
+                             Selected="@_providerConfig.WatchlistProvider"
                              OnChange="@SetWatchlistProviderAsync"
                              IsDisabled="@_isSaving"/>
 
@@ -30,7 +30,7 @@ else
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Recommendation Provider"
                              Description="Choose which media provider supplies recommendations."
-                             Selected="@_providerSettings.TrendingProvider"
+                             Selected="@_providerConfig.TrendingProvider"
                              OnChange="@SetTrendingProviderAsync"
                              IsDisabled="@_isSaving"/>
 
@@ -38,7 +38,7 @@ else
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Search Provider"
                              Description="Choose which provider powers search inside the watchlist flow."
-                             Selected="@_providerSettings.SearchProvider"
+                             Selected="@_providerConfig.SearchProvider"
                              OnChange="@SetSearchProviderAsync"
                              IsDisabled="@_isSaving"/>
     </div>
@@ -46,13 +46,13 @@ else
 
 
 @code {
-    private ProviderSettings _providerSettings = null!;
+    private ProviderConfig _providerConfig = null!;
     private bool _isLoaded;
     private bool _isSaving;
 
     protected override async Task OnInitializedAsync()
     {
-        _providerSettings = await ProviderSettingsStore.GetAsync();
+        _providerConfig = await ProviderSettingsRepository.GetAsync();
         _isLoaded = true;
     }
 
@@ -62,25 +62,25 @@ else
 
     private Task SetSearchProviderAsync(MediaSearchProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
 
-    private async Task UpdateAsync(Func<ProviderSettings, ProviderSettings> update)
+    private async Task UpdateAsync(Func<ProviderConfig, ProviderConfig> update)
     {
         if (_isSaving || !_isLoaded)
         {
             return;
         }
 
-        var previous = _providerSettings;
-        _providerSettings = update(_providerSettings);
+        var previous = _providerConfig;
+        _providerConfig = update(_providerConfig);
         _isSaving = true;
 
         try
         {
-            await ProviderSettingsStore.StoreAsync(_providerSettings);
+            await ProviderSettingsRepository.StoreAsync(_providerConfig);
             ToastService.Success("Provider settings saved.");
         }
         catch (Exception ex)
         {
-            _providerSettings = previous;
+            _providerConfig = previous;
             ToastService.Error($"Failed to save provider settings: {ex.Message}");
         }
         finally

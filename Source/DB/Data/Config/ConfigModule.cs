@@ -8,6 +8,6 @@ internal class ConfigModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<IProviderSettingsStore, ProviderSettingsStore>();
+		services.AddScoped<IProviderSettingsRepository, ProviderConfigRepository>();
 	}
 }

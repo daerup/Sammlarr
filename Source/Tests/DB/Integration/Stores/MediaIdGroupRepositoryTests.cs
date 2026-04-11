@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 namespace DB.Tests.Integration.Stores;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class MediaIdGroupStoreTests(SQLiteFixture fixture) : IAsyncDisposable
+public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IMediaIdGroupStore _testee = null!;
+	private IMediaIdGroupRepository _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaIdGroupStore(fixture.Context);
+		_testee = new MediaIdGroupRepository(fixture.Context);
 	}
 
 	[Test]
@@ -218,9 +218,9 @@ public class MediaIdGroupStoreTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task SetUpGroupAsync(IEnumerable<IMediaId> ids)
 	{
-		var group = new MediaIdentifierGroup();
+		var group = new MediaIdentifierGroupEntity();
 		await fixture.Context.MediaIdEntries.AddRangeAsync(
-			ids.Select(id => new MediaIdentifierEntry { Identifier = MediaIdentifier.From(id), MediaIdGroup = group })
+			ids.Select(id => new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(id), MediaIdGroupEntity = group })
 		);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();

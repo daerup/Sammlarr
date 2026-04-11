@@ -6,8 +6,8 @@ using DB.Conversion.Enums;
 
 namespace DB.Data.Access;
 
-[Table("ApiKeySettings")]
-internal record ApiKeySetting : Entity<Guid>
+[Table("ApiKeyConfigs")]
+internal record ApiKeyConfigEntity : Entity<Guid>
 {
 	[Required]
 	[EnumAsString]

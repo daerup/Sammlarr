@@ -8,7 +8,7 @@ internal class AccessModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<ICredentialStore, CredentialStore>();
-		services.AddScoped<IApiKeyStore, ApiKeyStore>();
+		services.AddScoped<ICredentialStore, CredentialRepository>();
+		services.AddScoped<IApiKeyConfigRepository, ApiKeyConfigRepository>();
 	}
 }

@@ -6,18 +6,18 @@ using Microsoft.EntityFrameworkCore;
 namespace DB.Tests.Integration.Stores;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class CredentialStoreTests(SQLiteFixture fixture)
+public class CredentialRepositoryTests(SQLiteFixture fixture)
 {
 	private ICredentialStore _testee = null!;
-	private Mock<ITypedMemoryCache<WatchlistProvider, Credential>> _cache = null!;
+	private Mock<ITypedMemoryCache<WatchlistProvider, CredentialEntity>> _cache = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<WatchlistProvider, Credential>.Mock();
-		_testee = new CredentialStore(fixture.Context, _cache.Object);
+		_cache = ITypedMemoryCache<WatchlistProvider, CredentialEntity>.Mock();
+		_testee = new CredentialRepository(fixture.Context, _cache.Object);
 	}
 
 	[Test]
@@ -57,7 +57,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, plainToken, expiresAt, clientId);
 
-		var encrypted = (await fixture.RawContext.Table<Credential>().QueryAsync(x => x.AccessToken)).Single();
+		var encrypted = (await fixture.RawContext.Table<CredentialEntity>().QueryAsync(x => x.AccessToken)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainToken);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -73,7 +73,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		var encryptedClientId = (await fixture.RawContext.Table<Credential>().QueryAsync<string>(nameof(Credential.ClientId))).Single();
+		var encryptedClientId = (await fixture.RawContext.Table<CredentialEntity>().QueryAsync<string>(nameof(CredentialEntity.ClientId))).Single();
 
 		await Assert.That(encryptedClientId).IsNotEqualTo(clientId.ToString());
 		await Assert.That(encryptedClientId).Satisfies(IsBase64OrEmpty);
@@ -176,11 +176,11 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		_cache.Set(authProvider, Is<Credential>(MatchCredential)).WasCalled(Times.Once);
+		_cache.Set(authProvider, Is<CredentialEntity>(MatchCredential)).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
 		return;
 
-		bool MatchCredential(Credential? c) =>
+		bool MatchCredential(CredentialEntity? c) =>
 			c is not null && c.WatchlistProvider == authProvider && c.AccessToken == token && c.ClientId == clientId && c.ExpiresAt == expiresAt;
 	}
 
@@ -204,7 +204,7 @@ public class CredentialStoreTests(SQLiteFixture fixture)
 	private async Task SetUpCredentialAsync(WatchlistProvider watchlistProvider, string accessToken, DateTimeOffset expiresAt, Guid clientId)
 	{
 		await fixture.Context.Credentials.AddAsync(
-			new Credential
+			new CredentialEntity
 			{
 				WatchlistProvider = watchlistProvider,
 				AccessToken = accessToken,

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class CredentialStore(SammlarrDbContext context, ITypedMemoryCache<WatchlistProvider, Credential> cache) : ICredentialStore
+internal class CredentialRepository(SammlarrDbContext context, ITypedMemoryCache<WatchlistProvider, CredentialEntity> cache) : ICredentialStore
 {
 	public async ValueTask<StoredCredential?> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
@@ -32,7 +32,7 @@ internal class CredentialStore(SammlarrDbContext context, ITypedMemoryCache<Watc
 		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
 		if (credential is null)
 		{
-			credential = new Credential
+			credential = new CredentialEntity
 			{
 				WatchlistProvider = watchlistProvider,
 				AccessToken = accessToken,

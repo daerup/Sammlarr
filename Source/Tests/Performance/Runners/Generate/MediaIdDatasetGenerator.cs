@@ -40,7 +40,7 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		await dbContext.Database.EnsureCreatedAsync();
 		Console.WriteLine("[Generate] Database is ready.");
 
-		var pendingGroups = new List<MediaIdentifierGroup>(options.BatchSize);
+		var pendingGroups = new List<MediaIdentifierGroupEntity>(options.BatchSize);
 		var savedGroups = 0;
 
 		foreach (var _ in Enumerable.Range(0, options.EntryCount))
@@ -63,9 +63,9 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		Console.WriteLine($"[Generate] Completed. Saved {savedGroups} groups in {duration.TotalSeconds:F1}s.");
 	}
 
-	private MediaIdentifierGroup CreateGroup(GroupType groupType)
+	private MediaIdentifierGroupEntity CreateGroup(GroupType groupType)
 	{
-		var group = new MediaIdentifierGroup();
+		var group = new MediaIdentifierGroupEntity();
 		var ids = groupType switch
 		{
 			GroupType.Complete => GenerateCompleteGroup(),
@@ -74,7 +74,7 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 			GroupType.MissingDuplicates => GenerateMissingDuplicatesGroup(),
 		};
 
-		group.MediaIdEntries = [.. ids.Select(id => new MediaIdentifierEntry { Identifier = MediaIdentifier.From(id), MediaIdGroup = group })];
+		group.MediaIdEntries = [.. ids.Select(id => new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(id), MediaIdGroupEntity = group })];
 		return group;
 	}
 
@@ -156,7 +156,7 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		return counter;
 	}
 
-	private static async Task<int> SaveBatchAsync(SammlarrDbContext dbContext, List<MediaIdentifierGroup> pendingGroups)
+	private static async Task<int> SaveBatchAsync(SammlarrDbContext dbContext, List<MediaIdentifierGroupEntity> pendingGroups)
 	{
 		var saved = pendingGroups.Count;
 		await dbContext.MediaIdGroups.AddRangeAsync(pendingGroups);

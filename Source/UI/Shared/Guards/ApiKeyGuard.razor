@@ -2,7 +2,7 @@
 @using Contracts.DI
 @using Contracts.Media
 
-@inject IApiKeyStore ApiKeyStore
+@inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 
 @code {
@@ -17,7 +17,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var apiKey = await ApiKeyStore.GetApiKeyAsync(Provider);
+        var apiKey = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
         _hasAccess = await ValidateApiKeyAsync(apiKey);
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
