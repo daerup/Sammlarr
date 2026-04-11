@@ -30,7 +30,7 @@ else
 
         <ProviderSettingCard TEnum="MediaRecommendationProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
-                             Title="Trending Provider"
+                             Title="Recommendation Provider"
                              Description="Choose which media provider supplies recommendations."
                              Selected="@_providerSettings.TrendingProvider"
                              OnChange="@SetTrendingProviderAsync"

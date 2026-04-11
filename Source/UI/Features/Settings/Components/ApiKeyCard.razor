@@ -1,56 +1,39 @@
 @using Contracts.Auth
 @using Contracts.DI
 @using Contracts.Media
+@using UI.Shared.Services.Branding
 
 @inject IApiKeyStore ApiKeyStore
 @inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
+@inject MediaProviderBrandingService MediaProviderBrandingService
+
+@{
+    var providerBranding = MediaProviderBrandingService.GetBrandingInfo(Provider);
+}
 
 <div class="w-full max-w-lg">
     <div class="rounded-lg border">
-        <div class="flex items-center gap-3 px-6 py-4 border-b">
-            <LucideIcon Name="key" Size="16" Class="text-muted-foreground"/>
-            <h3 class="text-sm font-semibold">@Title</h3>
+        <div class="flex items-center gap-3 px-6 py-4 border-b bg-accent">
+            @providerBranding.Icon
+            <h3 class="text-sm font-semibold">@providerBranding.DisplayName</h3>
         </div>
 
-        <div class="px-6 py-3 space-y-6">
-            <div class="space-y-3">
-                <div>
-                    <div class="mb-1 flex items-center gap-1.5">
-                        <label class="text-sm font-medium block" for="@InputId">API Key</label>
-                    </div>
-                    <p class="text-xs text-muted-foreground leading-relaxed">
-                        @Description
-                    </p>
-                </div>
-                <BbField>
-                    <BbFieldContent>
-                        <div class="relative">
-                            <BbInput Id="@InputId"
-                                     @bind-Value="ApiKey"
-                                     UpdateTiming="UpdateTiming.Immediate"
-                                     Class="pr-10"
-                                     Placeholder="Enter API key"/>
-                            @if (_state is State.Success or State.Saving or State.Saved)
-                            {
-                                <span class="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center">
-                                    <LucideIcon Name="check" Size="12" Class="text-success"/>
-                                </span>
-                            }
-                            else if (_state == State.Failed)
-                            {
-                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-help" title="@InvalidApiKeyMessage">
-                                    <LucideIcon Name="x-circle" Size="12" Class="text-destructive"/>
-                                </span>
-                            }
-                        </div>
-                    </BbFieldContent>
-                </BbField>
-            </div>
+        <div class="px-6 py-6 space-y-6">
+            <BbField>
+                <BbFieldContent>
+                    <BbInput
+                        Placeholder="Enter API key"
+                        @bind-Value="ApiKey"
+                        Class="bg-accent"
+                        UpdateTiming="UpdateTiming.Immediate"/>
+                    <BbFieldDescription> @Description</BbFieldDescription>
+                </BbFieldContent>
+            </BbField>
 
             <div class="flex items-center gap-3">
                 @if (_state == State.Idle)
                 {
-                    <BbButton Variant="ButtonVariant.Default" OnClick="HandleButtonClickAsync">
+                    <BbButton Variant="ButtonVariant.Default" OnClick="HandleButtonClickAsync" Disabled="string.IsNullOrWhiteSpace(_apiKeyInput)">
                         <LucideIcon Name="zap" Size="14" Class="mr-2"/>
                         <span>Test</span>
                     </BbButton>
@@ -114,10 +97,8 @@
 </div>
 
 @code {
-    private enum State { Idle, Testing, Success, Saving, Saved, Failed }
 
-    [Parameter, EditorRequired]
-    public required string Title { get; set; }
+    private enum State { Idle, Testing, Success, Saving, Saved, Failed, }
 
     [Parameter, EditorRequired]
     public required MediaProvider Provider { get; set; }
@@ -145,10 +126,6 @@
         }
     }
 
-    private string InputId => $"{Provider.ToString().ToLowerInvariant()}-api-key";
-
-    private string InvalidApiKeyMessage => $"Invalid {Title} API key";
-
     protected override async Task OnParametersSetAsync()
     {
         if (_loadedProvider == Provider)
@@ -161,6 +138,13 @@
         _apiKeyInput = _savedApiKey;
         _state = State.Idle;
         _loadedProvider = Provider;
+
+        if (string.IsNullOrEmpty(_savedApiKey))
+        {
+            return;
+        }
+        var isValid = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_savedApiKey);
+        _state = isValid ? State.Saved : State.Failed;
     }
 
     private Task HandleButtonClickAsync() => _state == State.Success ? SaveAsync() : TestAsync();
