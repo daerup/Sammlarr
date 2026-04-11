@@ -15,7 +15,7 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 	private readonly List<IMediaId> _lookupIds = [];
 	private SammlarrDbContext _dbContext = null!;
 	private MediaIdGroupStore _store = null!;
-	private Performance.Runners.Benchmark.Old.MediaIdGroupStore _oldStore = null!;
+	private MediaIdGroupStore _oldStore = null!;
 
 	[GlobalSetup]
 	public async Task SetupAsync()
@@ -33,7 +33,7 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 		_lookupIds.AddRange(randomGroup.MediaIdEntries.Select(entry => entry.Identifier.ToMediaId()));
 
 		_store = new MediaIdGroupStore(_dbContext);
-		_oldStore = new Performance.Runners.Benchmark.Old.MediaIdGroupStore(_dbContext);
+		_oldStore = new MediaIdGroupStore(_dbContext);
 		_dbContext.ChangeTracker.Clear();
 	}
 

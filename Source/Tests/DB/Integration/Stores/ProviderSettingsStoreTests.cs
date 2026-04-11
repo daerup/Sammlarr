@@ -1,13 +1,11 @@
 using Contracts.Auth;
 using Contracts.Caching;
-using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using DB.Data.Entities;
 using DB.Data.Stores;
 using Microsoft.EntityFrameworkCore;
-using TUnit.Mocks.Generated.Contracts.Caching;
 using ProviderSettingsContract = Contracts.Settings.ProviderSettings;
 
 namespace DB.Tests.Integration.Stores;

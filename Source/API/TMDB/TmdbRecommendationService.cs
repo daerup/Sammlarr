@@ -1,7 +1,6 @@
 using System.Text.Json;
 using API.TMDB.Types;
 using Contracts;
-using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Media.Trending;

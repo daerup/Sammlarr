@@ -108,7 +108,7 @@ internal sealed class SammlarrDbContext : DbContext
 			return;
 		}
 
-		ProviderSettings.Add(DB.Data.Entities.ProviderSettingsEntity.Default);
+		ProviderSettings.Add(ProviderSettingsEntity.Default);
 		base.SaveChanges();
 	}
 }

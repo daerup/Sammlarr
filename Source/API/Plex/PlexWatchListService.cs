@@ -3,7 +3,6 @@ using API.Plex.Types;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Watchlist;
-using Microsoft.Extensions.DependencyInjection;
 using Shared;
 
 namespace API.Plex;

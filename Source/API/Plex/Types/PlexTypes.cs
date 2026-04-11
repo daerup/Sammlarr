@@ -65,9 +65,9 @@ internal static class PlexTypes
 		{
 			public MediaType MediaType => MediaType.Parse(Type);
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
-			public TmdbId[] TmdbIds => GetId("tmdb://", i => Contracts.Media.TmdbId.From(i, MediaType));
-			public ImdbId[] ImdbIds => GetId("imdb://", i => Contracts.Media.ImdbId.From(i, MediaType));
-			public TvdbId[] TvdbIds => GetId("tvdb://", i => Contracts.Media.TvdbId.From(i, MediaType));
+			public TmdbId[] TmdbIds => GetId("tmdb://", i => TmdbId.From(i, MediaType));
+			public ImdbId[] ImdbIds => GetId("imdb://", i => ImdbId.From(i, MediaType));
+			public TvdbId[] TvdbIds => GetId("tvdb://", i => TvdbId.From(i, MediaType));
 
 			private T[] GetId<T>(string prefix, Func<string, T> convert) =>
 				Guid.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
