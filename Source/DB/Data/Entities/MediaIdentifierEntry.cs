@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DB.Data.Entities;
 
-public record MediaIdentifierEntry : Entity<Guid>
+public record MediaIdentifierEntry
 {
 	[Required]
 	public required MediaIdentifier Identifier { get; set; }
