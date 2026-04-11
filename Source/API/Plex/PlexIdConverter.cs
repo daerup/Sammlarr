@@ -7,7 +7,7 @@ using Shared;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaProvider.Plex)] IMediaSearchService searchService)
+internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaSearchProvider.Plex)] IMediaSearchService searchService)
 {
 	public async Task<ResolvedId> ConvertAsync(IMediaId mediaId)
 	{

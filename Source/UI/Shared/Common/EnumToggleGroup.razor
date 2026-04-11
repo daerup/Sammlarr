@@ -8,14 +8,12 @@
 @{
     var selectedBranding = BrandingProvider(Value);
 }
-@* <div class="absolute"> *@
-@*     @selectedBranding.Icon *@
-@* </div> *@
+
 <div class="flex flex-wrap gap-2" role="group" aria-label="Enum selection">
 	@foreach (var option in All)
 	{
 		var isSelected = EqualityComparer<TEnum>.Default.Equals(option, Value);
-		var isOptionDisabled = Disabled || !Selectable.Contains(option);
+		var isOptionDisabled = Disabled;
 		var branding = BrandingProvider(option);
 
 		<BbButton
