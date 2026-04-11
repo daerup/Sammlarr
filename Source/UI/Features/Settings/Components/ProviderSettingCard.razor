@@ -27,7 +27,6 @@
                 <EnumToggleGroup TEnum="TEnum"
                                  Value="@Selected"
                                  OnChange="@OnChange"
-                                 Selectable="@Selectable"
                                  BrandingProvider="@BrandingProvider"
                                  Disabled="@IsDisabled"/>
             </div>
@@ -44,8 +43,6 @@
     [Parameter, EditorRequired] public required string Title { get; set; }
 
     [Parameter, EditorRequired] public required string Description { get; set; }
-
-    [Parameter, EditorRequired] public required IReadOnlyList<TEnum> Selectable { get; set; }
 
     [Parameter, EditorRequired] public required TEnum Selected { get; set; }
 

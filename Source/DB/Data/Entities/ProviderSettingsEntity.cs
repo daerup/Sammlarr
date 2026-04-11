@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Contracts.Auth;
 using Contracts.Media;
+using Contracts.Media.Search;
+using Contracts.Media.Trending;
 
 namespace DB.Data.Entities;
 
@@ -14,9 +16,9 @@ public record ProviderSettingsEntity
 		new()
 		{
 			Id = SingletonId,
-			WatchlistProvider = Contracts.Auth.WatchlistProvider.Plex,
-			TrendingProvider = MediaProvider.Tmdb,
-			SearchProvider = MediaProvider.Plex,
+			WatchlistProvider = WatchlistProvider.Plex,
+			TrendingProvider = MediaRecommendationProvider.Tmdb,
+			SearchProvider = MediaSearchProvider.Plex,
 		};
 
 	[Key]
@@ -27,8 +29,8 @@ public record ProviderSettingsEntity
 	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]
-	public required MediaProvider TrendingProvider { get; set; }
+	public required MediaRecommendationProvider TrendingProvider { get; set; }
 
 	[Required]
-	public required MediaProvider SearchProvider { get; set; }
+	public required MediaSearchProvider SearchProvider { get; set; }
 }

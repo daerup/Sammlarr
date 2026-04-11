@@ -2,7 +2,7 @@
 @using Contracts.Media
 @using Contracts.Media.Search
 @using global::Shared
-@inject IKeyedServiceIndex<MediaProvider, IMediaSearchService> SearchServiceIndex
+@inject IKeyedServiceIndex<MediaSearchProvider, IMediaSearchService> SearchServiceIndex
 @if (IsOpen)
 {
     <div class="search-modal"
@@ -105,7 +105,7 @@
 
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
-    [Parameter, EditorRequired] public MediaProvider SearchProvider { get; set; }
+    [Parameter, EditorRequired] public MediaSearchProvider SearchProvider { get; set; }
     [Parameter, EditorRequired] public Func<IMediaId, bool> IsInWatchlist { get; set; }
     [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> AddToWatchlistAsync { get; set; }
     [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> RemoveFromWatchlistAsync { get; set; }

@@ -12,7 +12,7 @@ internal class TmdbModule : IServiceModule
 	{
 		services.AddScoped<TmdbApi>();
 		services.AddHttpClient<TmdbClient>();
-		services.AddKeyedScoped<IMediaRecommendationService, TmdbRecommendationService>(MediaProvider.Tmdb);
+		services.AddKeyedScoped<IMediaRecommendationService, TmdbRecommendationService>(MediaRecommendationProvider.Tmdb);
 		services.AddScoped<TmdbIdConverter>();
 		services.AddKeyedScoped<IApiKeyValidator, TmdbClient>(MediaProvider.Tmdb);
 	}

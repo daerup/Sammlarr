@@ -1,5 +1,8 @@
+@using Contracts
 @using Contracts.Auth
 @using Contracts.Media
+@using Contracts.Media.Search
+@using Contracts.Media.Trending
 @using Contracts.Settings
 @using UI.Shared.Services.Branding
 @using Shared
@@ -21,25 +24,22 @@ else
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Watchlist Provider"
                              Description="Choose which provider powers the watchlist and OAuth flow."
-                             Selectable="@WatchlistProviderOptions"
                              Selected="@_providerSettings.WatchlistProvider"
                              OnChange="@SetWatchlistProviderAsync"
                              IsDisabled="@_isSaving"/>
 
-        <ProviderSettingCard TEnum="MediaProvider"
-                             BrandingProvider="MediaProviderBrandingService.GetBrandingInfo"
+        <ProviderSettingCard TEnum="MediaRecommendationProvider"
+                             BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Trending Provider"
                              Description="Choose which media provider supplies recommendations."
-                             Selectable="@MediaProviderOptions"
                              Selected="@_providerSettings.TrendingProvider"
                              OnChange="@SetTrendingProviderAsync"
                              IsDisabled="@_isSaving"/>
 
-        <ProviderSettingCard TEnum="MediaProvider"
-                             BrandingProvider="MediaProviderBrandingService.GetBrandingInfo"
+        <ProviderSettingCard TEnum="MediaSearchProvider"
+                             BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Search Provider"
                              Description="Choose which provider powers search inside the watchlist flow."
-                             Selectable="@AllowedMediaSearchProviderOptions"
                              Selected="@_providerSettings.SearchProvider"
                              OnChange="@SetSearchProviderAsync"
                              IsDisabled="@_isSaving"/>
@@ -48,10 +48,6 @@ else
 
 
 @code {
-    private static readonly IReadOnlyList<WatchlistProvider> WatchlistProviderOptions = [WatchlistProvider.Plex];
-    private static readonly IReadOnlyList<MediaProvider> AllowedMediaSearchProviderOptions = [MediaProvider.Plex];
-    private static readonly IReadOnlyList<MediaProvider> MediaProviderOptions = [MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb, MediaProvider.Plex];
-
     private ProviderSettings _providerSettings = null!;
     private bool _isLoaded;
     private bool _isSaving;
@@ -64,9 +60,9 @@ else
 
     private Task SetWatchlistProviderAsync(WatchlistProvider provider) => UpdateAsync(settings => settings with { WatchlistProvider = provider });
 
-    private Task SetTrendingProviderAsync(MediaProvider provider) => UpdateAsync(settings => settings with { TrendingProvider = provider });
+    private Task SetTrendingProviderAsync(MediaRecommendationProvider provider) => UpdateAsync(settings => settings with { TrendingProvider = provider });
 
-    private Task SetSearchProviderAsync(MediaProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
+    private Task SetSearchProviderAsync(MediaSearchProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
 
     private async Task UpdateAsync(Func<ProviderSettings, ProviderSettings> update)
     {

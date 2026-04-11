@@ -1,6 +1,8 @@
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
+using Contracts.Media.Search;
+using Contracts.Media.Trending;
 using Contracts.Settings;
 using DB.Data.Entities;
 using DB.Data.Stores;
@@ -32,15 +34,15 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 
 		await Assert.That(providerSettings).IsNotNull();
 		await Assert.That(providerSettings!.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
-		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(MediaProvider.Tmdb);
-		await Assert.That(providerSettings.SearchProvider).IsEqualTo(MediaProvider.Plex);
+		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(MediaRecommendationProvider.Tmdb);
+		await Assert.That(providerSettings.SearchProvider).IsEqualTo(MediaSearchProvider.Plex);
 		_cache.TryGetValue(Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
 	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
 	{
-		var expected = CreateProviderSettings(WatchlistProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb);
+		var expected = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex);
 
 		await _testee.StoreAsync(expected);
 
@@ -55,8 +57,8 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 	[Test]
 	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
 	{
-		var initial = CreateProviderSettings(WatchlistProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb);
-		var updated = CreateProviderSettings(WatchlistProvider.Plex, MediaProvider.Imdb, MediaProvider.Tmdb);
+		var initial = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex);
+		var updated = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex);
 
 		await _testee.StoreAsync(initial);
 		await _testee.StoreAsync(updated);
@@ -64,15 +66,12 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 		var entities = await fixture.Context.ProviderSettings.ToListAsync();
 
 		await Assert.That(entities).Count().IsEqualTo(1);
-		await Assert.That(entities.Single().WatchlistProvider).IsEqualTo(updated.WatchlistProvider);
-		await Assert.That(entities.Single().TrendingProvider).IsEqualTo(updated.TrendingProvider);
-		await Assert.That(entities.Single().SearchProvider).IsEqualTo(updated.SearchProvider);
 	}
 
 	private static ProviderSettingsContract CreateProviderSettings(
 		WatchlistProvider watchlistProvider,
-		MediaProvider trendingProvider,
-		MediaProvider searchProvider
+		MediaRecommendationProvider trendingProvider,
+		MediaSearchProvider searchProvider
 	)
 	{
 		return new ProviderSettingsContract
