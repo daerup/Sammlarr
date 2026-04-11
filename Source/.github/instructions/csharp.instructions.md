@@ -1,118 +1,36 @@
 ---
-description: 'Guidelines for building C# applications'
+description: 'Guidelines for writing C# code in this repository'
 applyTo: '**/*.cs'
 ---
 
 # C# Development
 
-## C# Instructions
-- Always use the latest version C#, currently C# 14 features.
-- Use the most restrictive access modifier possible (private by default, only widening when necessary).
-- Avoid sealed unless there is a specific, justified reason (e.g., preventing unintended inheritance in a security-sensitive or performance-critical context); do not use it as a default.
-- Prefer record and record struct types for immutable data carriers, DTOs, and value objects.
-- For simple records with few fields, use primary constructor syntax. For larger records with many fields, use explicit properties for clarity and maintainability.
+## Principles and concise guidance
 
-## General Instructions
-- Make only high confidence suggestions when reviewing code changes.
-- **Do NOT create comments unless explicitly requested by the user.** Write clean, self-documenting code with clear naming conventions.
-- **Do NOT create XML summary docs (`<summary>`, `<param>`, `<returns>`, etc.) on any type, method, or member.** Rely on clear naming instead.
-- Handle edge cases and write clear exception handling.
-- When explicitly requested, add comments explaining design decisions or complex logic.
+- Use the SDK and language level supported by the repository's `global.json` (the repository currently targets .NET SDK 10.0.103). Prefer language features that are stable in that SDK.
+- Prefer the most restrictive access modifier that fits the design; widen visibility only when necessary for composition or testing.
+- Prefer records/record structs for immutable value carriers and DTOs where appropriate. Use explicit properties for complex types for clarity.
+- Follow naming conventions: PascalCase for public types/members, camelCase for private fields and locals, prefix interfaces with `I`.
+- Follow formatting rules in `.editorconfig`.
 
-## Naming Conventions
+## Comments, docs and inline guidance
 
-- Follow PascalCase for component names, method names, and public members.
-- Use camelCase for private fields and local variables.
-- Prefix interface names with "I" (e.g., IUserService).
+- Write clear, self-documenting code. Add comments to explain non-obvious design decisions or complex logic.
+- Use XML documentation (`///`) for public APIs and libraries intended for external consumption; for internal types prefer concise naming and minimal XML docs unless the API benefits from generated documentation.
 
-## Formatting
+## Nullable reference types
 
-- Apply code-formatting style defined in `.editorconfig`.
-- Prefer file-scoped namespace declarations and single-line using directives.
-- Insert a newline before the opening curly brace of any code block (e.g., after `if`, `for`, `while`, `foreach`, `using`, `try`, etc.).
-- Ensure that the final return statement of a method is on its own line.
-- Use pattern matching and switch expressions wherever possible.
-- Use `nameof` instead of string literals when referring to member names.
-- **Do NOT generate XML doc comments** (`<summary>`, `<remarks>`, `<example>`, etc.). Code should be self-documenting through clear naming.
+- Enable and respect nullable annotations. Use `is null`/`is not null` patterns where appropriate and validate inputs at public API boundaries.
 
-## Project Setup and Structure
+## Data access and EF Core
 
-- Guide users through creating a new .NET project with the appropriate templates.
-- Explain the purpose of each generated file and folder to build understanding of the project structure.
-- Demonstrate how to organize code using feature folders or domain-driven design principles.
-- Show proper separation of concerns with models, services, and data access layers.
-- Explain the Program.cs and configuration system in ASP.NET Core 10 including environment-specific settings.
-
-## Nullable Reference Types
-
-- Declare variables non-nullable, and check for `null` at entry points.
-- Always use `is null` or `is not null` instead of `== null` or `!= null`.
-- Trust the C# null annotations and don't add null checks when the type system says a value cannot be null.
-
-## Data Access Patterns
-
-- Guide the implementation of a data access layer using Entity Framework Core.
-- Explain different options (SQL Server, SQLite, In-Memory) for development and production.
-- Demonstrate repository pattern implementation and when it's beneficial.
-- Show how to implement database migrations and data seeding.
-- Explain efficient query patterns to avoid common performance issues.
-
-## Authentication and Authorization
-
-- Guide users through implementing authentication using JWT Bearer tokens.
-- Explain OAuth 2.0 and OpenID Connect concepts as they relate to ASP.NET Core.
-- Show how to implement role-based and policy-based authorization.
-- Demonstrate integration with Microsoft Entra ID (formerly Azure AD).
-- Explain how to secure both controller-based and Minimal APIs consistently.
-
-## Validation and Error Handling
-
-- Guide the implementation of model validation using data annotations and FluentValidation.
-- Explain the validation pipeline and how to customize validation responses.
-- Demonstrate a global exception handling strategy using middleware.
-- Show how to create consistent error responses across the API.
-- Explain problem details (RFC 9457) implementation for standardized error responses.
-
-## API Versioning and Documentation
-
-- Guide users through implementing and explaining API versioning strategies.
-- Demonstrate Swagger/OpenAPI implementation with proper documentation.
-- Show how to document endpoints, parameters, responses, and authentication.
-- Explain versioning in both controller-based and Minimal APIs.
-- Guide users on creating meaningful API documentation that helps consumers.
-
-## Logging and Monitoring
-
-- Guide the implementation of structured logging using Serilog or other providers.
-- Explain the logging levels and when to use each.
-- Demonstrate integration with Application Insights for telemetry collection.
-- Show how to implement custom telemetry and correlation IDs for request tracking.
-- Explain how to monitor API performance, errors, and usage patterns.
+- Prefer async EF Core APIs and propagate CancellationToken. Keep EF logic inside `DB` project stores/repositories.
 
 ## Testing
 
-- Always include test cases for critical paths of the application.
-- Guide users through creating unit tests.
-- **Do NOT add `// Arrange`, `// Act`, `// Assert` comments in tests.** Let the code structure speak for itself.
-- Copy existing style in nearby files for test method names and capitalization.
-- Explain integration testing approaches for API endpoints.
-- Demonstrate how to mock dependencies for effective testing.
-- Show how to test authentication and authorization logic.
-- Explain test-driven development principles as applied to API development.
+- Use the test framework used by the existing `Tests` projects. Keep test style consistent with surrounding tests and avoid unnecessary inline comments in tests.
 
-## Performance Optimization
+## Tooling and project setup
 
-- Guide users on implementing caching strategies (in-memory, distributed, response caching).
-- Explain asynchronous programming patterns and why they matter for API performance.
-- Demonstrate pagination, filtering, and sorting for large data sets.
-- Show how to implement compression and other performance optimizations.
-- Explain how to measure and benchmark API performance.
+- Follow existing project templates and structure. When creating new projects follow the solution's layering and module registration patterns.
 
-## Deployment and DevOps
-
-- Guide users through containerizing their API using .NET's built-in container support (`dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer`).
-- Explain the differences between manual Dockerfile creation and .NET's container publishing features.
-- Explain CI/CD pipelines for NET applications.
-- Demonstrate deployment to Azure App Service, Azure Container Apps, or other hosting options.
-- Show how to implement health checks and readiness probes.
-- Explain environment-specific configurations for different deployment stages.
