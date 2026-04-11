@@ -37,6 +37,7 @@
     private readonly List<SettingsSection> _sections =
     [
         new("API Keys", "key", typeof(ApiKeysSection)),
+        new("Provider Settings", "sliders-horizontal", typeof(ProviderSettingsSection)),
     ];
 
     private SettingsSection _activeSection = null!;
