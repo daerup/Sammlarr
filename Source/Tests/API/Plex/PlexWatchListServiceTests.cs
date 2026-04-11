@@ -184,10 +184,6 @@ public class PlexWatchListServiceTests
 
 	private class TestMediaIdResolver : IMediaIdResolver
 	{
-		public Task<ResolvedId> ResolveAsync<TMediaId>(TMediaId sourceId, MediaProvider target)
-			where TMediaId : struct, IMediaId
-		{
-			return Task.FromResult(ResolvedId.Failed);
-		}
+		public Task<ResolvedId> ResolveAsync(IMediaId sourceId, MediaProvider target) => Task.FromResult(ResolvedId.Failed);
 	}
 }

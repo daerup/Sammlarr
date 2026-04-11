@@ -14,6 +14,7 @@
 		<PackageReference Include="BlazorBlueprint.Components" />
 		<PackageReference Include="BlazorBlueprint.Primitives" />
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
+		<PackageReference Include="timewarp-simple-icons" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Update="Shared\PaginationControls.razor.css">
@@ -21,6 +22,9 @@
 		</Content>
 		<Content Remove="Shared\Media\SearchTile\Skeleton.razor" />
 		<Content Update="Shared\Media\MediaDetailSheet.razor.css">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+		<Content Update="Features\Settings\Components\ProviderSettingCard.razor.css">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
 	</ItemGroup>

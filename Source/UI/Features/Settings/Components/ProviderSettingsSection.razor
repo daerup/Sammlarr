@@ -1,0 +1,98 @@
+@using Contracts.Auth
+@using Contracts.Media
+@using Contracts.Settings
+@using UI.Shared.Services.Branding
+@using Shared
+
+@inject IProviderSettingsStore ProviderSettingsStore
+@inject ToastService ToastService
+@inject MediaProviderBrandingService MediaProviderBrandingService
+
+@if (!_isLoaded)
+{
+    <div class="w-full max-w-4xl rounded-lg border px-6 py-8 text-sm text-muted-foreground">
+        Loading provider settings…
+    </div>
+}
+else
+{
+    <div class="flex gap-8 w-full max-w-7xl">
+        <ProviderSettingCard TEnum="WatchlistProvider"
+                             BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
+                             Title="Watchlist Provider"
+                             Description="Choose which provider powers the watchlist and OAuth flow."
+                             Selectable="@WatchlistProviderOptions"
+                             Selected="@_providerSettings.WatchlistProvider"
+                             OnChange="@SetWatchlistProviderAsync"
+                             IsDisabled="@_isSaving"/>
+
+        <ProviderSettingCard TEnum="MediaProvider"
+                             BrandingProvider="MediaProviderBrandingService.GetBrandingInfo"
+                             Title="Trending Provider"
+                             Description="Choose which media provider supplies recommendations."
+                             Selectable="@MediaProviderOptions"
+                             Selected="@_providerSettings.TrendingProvider"
+                             OnChange="@SetTrendingProviderAsync"
+                             IsDisabled="@_isSaving"/>
+
+        <ProviderSettingCard TEnum="MediaProvider"
+                             BrandingProvider="MediaProviderBrandingService.GetBrandingInfo"
+                             Title="Search Provider"
+                             Description="Choose which provider powers search inside the watchlist flow."
+                             Selectable="@AllowedMediaSearchProviderOptions"
+                             Selected="@_providerSettings.SearchProvider"
+                             OnChange="@SetSearchProviderAsync"
+                             IsDisabled="@_isSaving"/>
+    </div>
+}
+
+
+@code {
+    private static readonly IReadOnlyList<WatchlistProvider> WatchlistProviderOptions = [WatchlistProvider.Plex];
+    private static readonly IReadOnlyList<MediaProvider> AllowedMediaSearchProviderOptions = [MediaProvider.Plex];
+    private static readonly IReadOnlyList<MediaProvider> MediaProviderOptions = [MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb, MediaProvider.Plex];
+
+    private ProviderSettings _providerSettings = null!;
+    private bool _isLoaded;
+    private bool _isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _providerSettings = await ProviderSettingsStore.GetAsync();
+        _isLoaded = true;
+    }
+
+    private Task SetWatchlistProviderAsync(WatchlistProvider provider) => UpdateAsync(settings => settings with { WatchlistProvider = provider });
+
+    private Task SetTrendingProviderAsync(MediaProvider provider) => UpdateAsync(settings => settings with { TrendingProvider = provider });
+
+    private Task SetSearchProviderAsync(MediaProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
+
+    private async Task UpdateAsync(Func<ProviderSettings, ProviderSettings> update)
+    {
+        if (_isSaving || !_isLoaded)
+        {
+            return;
+        }
+
+        var previous = _providerSettings;
+        _providerSettings = update(_providerSettings);
+        _isSaving = true;
+
+        try
+        {
+            await ProviderSettingsStore.StoreAsync(_providerSettings);
+            ToastService.Success("Provider settings saved.");
+        }
+        catch (Exception ex)
+        {
+            _providerSettings = previous;
+            ToastService.Error($"Failed to save provider settings: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+}
+
