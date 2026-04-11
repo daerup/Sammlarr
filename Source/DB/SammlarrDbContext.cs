@@ -63,9 +63,10 @@ internal sealed class SammlarrDbContext : DbContext
 				"ProviderSettings",
 				tableBuilder =>
 				{
-					tableBuilder.HasCheckConstraint("CK_ProviderSettings_Singleton", "Id = '00000000-0000-0000-0000-000000000001'");
+					tableBuilder.HasCheckConstraint("CK_ProviderSettings_Singleton", $"Id = '{ProviderSettingsEntity.SingletonId}'");
 				}
 			);
+
 		modelBuilder.Entity<MediaIdentifierEntry>().Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
 		modelBuilder.Entity<MediaIdentifierEntry>().HasKey(e => e.Identifier);
 		modelBuilder.Entity<MediaIdentifierGroup>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroup).OnDelete(DeleteBehavior.Cascade);

@@ -93,7 +93,7 @@ public class EncryptedGuidConverterTests
 		var encrypted1 = testee1.ConvertToProvider(guidValue);
 		var encrypted2 = testee2.ConvertToProvider(guidValue);
 
-		await Assert.That(encrypted1).IsNotEqualTo(encrypted2);
+		await Assert.That(encrypted1)!.IsNotEqualTo(encrypted2!);
 	}
 
 	[Test]

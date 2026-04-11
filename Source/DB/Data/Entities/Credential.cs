@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Contracts.Auth;
+using DB.Conventions;
 using DB.Encryption;
 
 namespace DB.Data.Entities;
@@ -9,6 +10,7 @@ namespace DB.Data.Entities;
 public record Credential : Entity<Guid>
 {
 	[Required]
+	[EnumAsString]
 	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]

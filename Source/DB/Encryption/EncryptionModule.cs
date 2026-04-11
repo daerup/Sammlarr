@@ -1,3 +1,4 @@
+using DB.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
