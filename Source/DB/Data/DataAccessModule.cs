@@ -13,7 +13,7 @@ internal class DataAccessModule : IServiceModule
 	{
 		services.AddScoped<ICredentialStore, CredentialStore>();
 		services.AddScoped<IApiKeyStore, ApiKeyStore>();
-		services.AddScoped<IProviderSettingsStore, DB.Data.Stores.ProviderSettingsStore>();
+		services.AddScoped<IProviderSettingsStore, ProviderSettingsStore>();
 		services.AddScoped<IMediaIdGroupStore, MediaIdGroupStore>();
 	}
 }

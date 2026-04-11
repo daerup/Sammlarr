@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Contracts.Auth;
-using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 
