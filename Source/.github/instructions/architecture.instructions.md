@@ -1,84 +1,55 @@
---
+
+---
 applyTo: '**'
-description: 'Sammlarr architecture and project-level coding constraints'
+description: 'Sammlarr architecture and project-level coding guidance'
 ---
 
 # Sammlarr Architecture Instructions
 
-## Solution Architecture (authoritative)
-- `UI`: Blazor Server presentation/composition root. App startup in `UI/Program.cs`.
-- `API`: external-provider integrations (Plex/TMDB), HTTP clients, provider service implementations.
-- `DB`: EF Core SQLite persistence, stores/repositories, DbContext + model configuration.
-- `Contracts`: provider-agnostic interfaces and domain types (IDs, service contracts, enums).
-- `Shared`: cross-cutting helpers (DI abstractions, options module, extensions).
-- `Shared.Options.Generator`: Roslyn source generator for options registration.
+This document provides authoritative guidance for repository structure, dependency boundaries, and composition patterns. It is intended to help contributors place code in the correct project and follow established DI and persistence conventions.
 
-## Dependency Boundaries
-- Keep `Contracts` dependency-light and framework-agnostic.
-- `Shared` contains reusable cross-cutting code only; do not put feature logic here.
-- `DB` owns persistence concerns; do not embed EF logic in `UI` or `API`.
-- `API` can depend on `DB` + `Shared` and must expose behavior through contracts.
-- `UI` composes modules/services and should not implement provider protocol logic directly.
+## Solution structure (summary)
+- `UI` — Blazor composition root and app startup (UI/Program.cs).
+- `API` — External provider integrations, HTTP clients and provider services (Plex, TMDB, etc.).
+- `DB` — EF Core persistence (SammlarrDbContext), repositories/stores and migrations.
+- `Contracts` — Cross-layer DTOs, domain interfaces, IDs and enums.
+- `Shared` — Cross-cutting utilities, DI helpers and options support.
+- `Shared.Options.Generator` — Source generator for options registration.
 
-## Onion Architecture (how to apply in this solution)
-- Treat `Contracts` as the core ring (domain contracts and value objects) that everything else depends on.
-- Treat `API` and `DB` as outer infrastructure rings that implement behaviors defined by `Contracts`.
-- Treat `UI` as the outermost composition ring (entrypoint) that wires modules and orchestrates flows.
-- Dependency direction must point inward: outer rings can depend on inner rings; inner rings must not depend on outer rings.
-- `Shared` is cross-cutting support for DI/options/utilities; keep it free of feature-specific business behavior.
+## Dependency and placement rules
+- Keep `Contracts` framework-agnostic and dependency-light; domain concepts belong here.
+- Implement persistence only in `DB` (DbContext, queries, migrations) and avoid spreading EF concerns into `UI`/`API`.
+- Provider protocol and HTTP client code belong in `API`.
+- `UI` composes services and orchestrates flows; it should not implement provider protocol logic or EF queries.
 
-### Onion placement rules
-- Add or change domain concepts first in `Contracts` (interfaces, enums, IDs, result records).
-- Implement provider protocols and external HTTP concerns in `API` only.
-- Implement persistence details and EF queries in `DB` only (via stores/repositories).
-- Use `UI` only to compose and orchestrate use cases via injected abstractions.
-- Never call EF or provider HTTP clients directly from Razor pages/components.
+## Composition & DI (recommended patterns)
+- Use the established module registration pattern (e.g., modules that register services via extension methods).
+- Prefer scoped lifetimes (`AddScoped`) for request-scoped services. Use singletons only when thread-safety and lifetime semantics are well understood and documented.
+- For provider-specific implementations, prefer keyed registrations and explicit resolution via keyed service abstractions.
 
-## Composition and DI Patterns (required)
-- Register services using module pattern (`IServiceModule`, `AddModule<TModule>()`).
-- Add new service registrations in the appropriate module (`SharedModule`, `DbModule`, `ApiModule`, `UiModule`).
- **Default to `AddScoped`** for almost all service registrations. Scoped lifetime aligns with per-request semantics in Blazor Server and EF Core.
-- **Avoid `AddSingleton`** unless there is a clear, justified reason (e.g., truly stateless utilities, caches, or configuration objects that are inherently safe to share across all requests and threads). When using `AddSingleton`, document why scoped is insufficient.
-- Use keyed DI for provider-specific implementations:
-  - Register with `AddKeyedScoped(...)`.
-  - Consume via `IKeyedServiceIndex<TKey, TService>` or `[FromKeyedServices(...)]`.
-- Avoid ad-hoc service locator patterns outside existing keyed abstractions.
+## Options & configuration
+- Bind configuration via options types and the generator-backed helpers provided in the repository (avoid duplicating boilerplate).
 
-## Provider Strategy
-- Provider routing uses enums (`AuthProvider`, `MediaProvider`) + keyed services.
-- For a new provider, update:
-  1. Provider enum in `Contracts`.
-  2. Provider contracts/implementations in `API`.
-  3. Keyed DI registrations in the provider module.
-  4. UI/service consumers that resolve provider-indexed services.
+## Data access
+- Prefer asynchronous EF Core APIs and propagate CancellationToken.
+- Keep persistence logic in repository/store classes under `DB` and avoid direct DbContext access in UI components.
 
-## Options and Configuration
-- Configuration comes from `UI/appsettings.json` sections (`Sammlarr`, `Plex`, `TMDB`, connection strings).
-- Define options as records implementing `IOptionsSection`.
-- Do not manually duplicate options binding boilerplate; use generated `AddGeneratedOptions()` via `OptionsModule`.
+## Testing
+- Use the testing framework already used in the repository's `Tests` projects. Run tests with `dotnet test`.
 
-## Data Access and Persistence
-- Use `SammlarrDbContext` + store/repository classes in `DB/Data/Stores`.
-- Prefer async EF APIs and pass `CancellationToken`.
-- Keep audit timestamp behavior in `SammlarrDbContext` intact when modifying save pipelines.
-- Persist provider credentials/API keys through stores (`ICredentialStore`, `IApiKeyStore`), not direct table access from UI.
+## Documentation and contributor guidance
+- Use Markdown files for necessary documentation. Keep content concise and maintain links from `.github/README.md` for onboarding.
 
-## UI and External API Responsibilities
-- UI components orchestrate via injected services; avoid direct HTTP calls from Razor pages.
-- External API protocol concerns stay in typed clients/services (`PlexClient`, `TmdbClient`, `PlexOAuthService`, etc.).
-- Keep cancellation/disposal patterns in long-running pages (`CancellationTokenSource`, dispose cleanup).
+## Conventions
+- Follow `.editorconfig` and existing project idioms for naming, formatting and nullability.
 
-## Testing Framework and Tools
-- **Test Framework**: TUnit (modern, next-gen testing framework for .NET)
-- Use these consistently across all test projects for unit, integration, and E2E testing.
-- Write tests that are clear, maintainable, and follow existing test patterns.
-
-## Documentation Policy
-- **Do NOT create Markdown files** unless explicitly requested by the user.
-- Focus on code implementation and inline documentation instead.
-- If documentation is essential, confirm with user before creating any `.md` files.
-
-## Coding Conventions to Preserve
-- Follow `.editorconfig` formatting and naming.
-- Use file-scoped namespaces, async/await, and nullability-aware patterns.
-- Prefer existing project idioms (records, value objects via Vogen, extension members) over introducing divergent styles.
+# Installed libraries (packages present in this repository)
+- Microsoft.Extensions.* (DependencyInjection, Caching.Memory, Options.ConfigurationExtensions) — core extension libraries for DI, options and caching.
+- Microsoft.EntityFrameworkCore.Sqlite / InMemory (EF Core) — used for persistence and testing; EF tooling packages are available for migrations.
+- Microsoft.AspNetCore.DataProtection — used for protecting sensitive data and keys.
+- Vogen — value object generator used for strongly-typed IDs and value objects in Contracts/Shared.
+- BlazorBlueprint.* and `timewarp-simple-icons` — UI component and icon packages used by the `UI` project.
+- TUnit (TUnit.Core, TUnit.Assertions, TUnit.Mocks, TUnit.Mocks.Http) — test framework used across the Tests projects.
+- Bogus and Imposter — test data generation and HTTP stubbing utilities used in tests.
+- Dapper — lightweight data access helper used by some test projects.
+- Microsoft.CodeAnalysis.* — Roslyn packages used by the `Shared.Options.Generator` source generator.
