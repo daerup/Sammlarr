@@ -7,7 +7,6 @@ using UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddModule<CoreModule>();
 builder.Services.AddModule<SharedModule>();
 builder.Services.AddModule<DbModule>();
@@ -16,7 +15,6 @@ builder.Services.AddModule<UiModule>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error");
