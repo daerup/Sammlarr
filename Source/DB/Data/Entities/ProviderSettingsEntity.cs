@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Contracts.Auth;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
+using DB.Conventions;
 
 namespace DB.Data.Entities;
 
@@ -25,11 +26,14 @@ public record ProviderSettingsEntity
 	public Guid Id { get; set; } = SingletonId;
 
 	[Required]
+	[EnumAsString]
 	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]
+	[EnumAsString]
 	public required MediaRecommendationProvider TrendingProvider { get; set; }
 
 	[Required]
+	[EnumAsString]
 	public required MediaSearchProvider SearchProvider { get; set; }
 }
