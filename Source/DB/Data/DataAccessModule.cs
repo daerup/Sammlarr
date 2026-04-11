@@ -1,7 +1,7 @@
-using Contracts.Auth;
-using Contracts.Media;
-using Contracts.Settings;
-using DB.Data.Stores;
+using DB.Data.Access;
+using DB.Data.Config;
+using DB.Data.List;
+using DB.Data.MediaGroup;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -11,9 +11,9 @@ internal class DataAccessModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<ICredentialStore, CredentialStore>();
-		services.AddScoped<IApiKeyStore, ApiKeyStore>();
-		services.AddScoped<IProviderSettingsStore, ProviderSettingsStore>();
-		services.AddScoped<IMediaIdGroupStore, MediaIdGroupStore>();
+		services.AddModule<AccessModule>();
+		services.AddModule<ConfigModule>();
+		services.AddModule<ListModule>();
+		services.AddModule<MediaGroupModule>();
 	}
 }

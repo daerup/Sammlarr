@@ -1,9 +1,0 @@
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
-namespace DB.Encryption;
-
-internal class EncryptedStringConverter(IDataProtectionService dataProtectionService)
-	: ValueConverter<string, string>(
-		v => string.IsNullOrEmpty(v) ? v : dataProtectionService.Encrypt(v),
-		v => string.IsNullOrEmpty(v) ? v : dataProtectionService.Decrypt(v)
-	);

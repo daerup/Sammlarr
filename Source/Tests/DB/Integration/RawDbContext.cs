@@ -1,7 +1,7 @@
 using System.Data.Common;
 using System.Linq.Expressions;
 using Dapper;
-using DB.Data.Entities;
+using DB.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration;

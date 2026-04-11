@@ -1,8 +1,8 @@
-using DB.Conventions;
+using DB.Conversion;
+using DB.Conversion.Encryption;
+using DB.Conversion.Enums;
 using DB.Data;
-using DB.Encryption;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 using Shared.Options;
@@ -13,10 +13,9 @@ public class DbModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddModule<EncryptionModule>();
+		services.AddModule<ConversionModule>();
 		services.AddModule<DataAccessModule>();
 		services.AddScoped<EntityAuditer>();
-		services.AddScoped<IPropertyAddedConvention, EnumAsStringPropertyConvention>();
 		services.AddDbContext<SammlarrDbContext>(
 			(sp, options) =>
 			{

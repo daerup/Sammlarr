@@ -1,8 +1,7 @@
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
-using DB.Data.Entities;
-using DB.Data.Stores;
+using DB.Data.Access;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Stores;
