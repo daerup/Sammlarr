@@ -1,6 +1,9 @@
 using Contracts;
 using DB.Data;
-using DB.Data.Entities;
+using DB.Data.Access;
+using DB.Data.Config;
+using DB.Data.MediaGroup;
+using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

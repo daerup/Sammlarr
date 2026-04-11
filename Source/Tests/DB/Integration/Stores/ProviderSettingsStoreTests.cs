@@ -3,8 +3,7 @@ using Contracts.Caching;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
-using DB.Data.Entities;
-using DB.Data.Stores;
+using DB.Data.Config;
 using Microsoft.EntityFrameworkCore;
 using ProviderSettingsContract = Contracts.Settings.ProviderSettings;
 

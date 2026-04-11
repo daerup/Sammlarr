@@ -1,6 +1,6 @@
 using Contracts.Media;
 using DB;
-using DB.Data.Entities;
+using DB.Data.MediaGroup;
 using Performance.Options;
 
 namespace Performance.Runners.Generate;

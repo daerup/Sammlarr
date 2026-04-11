@@ -1,4 +1,4 @@
-using DB.Data.Entities;
+using DB.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 

@@ -1,6 +1,5 @@
 using Contracts.Media;
-using DB.Data.Entities;
-using DB.Data.Stores;
+using DB.Data.MediaGroup;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Stores;
