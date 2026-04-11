@@ -28,7 +28,7 @@
 </div>
 
 @code {
-    private List<TEnum> All => Enum.GetValues<TEnum>().OrderByDescending(Selectable.Contains).ToList();
+    private List<TEnum> All => Enum.GetValues<TEnum>().ToList();
 
     [Parameter, EditorRequired] public required Func<TEnum, BrandingInfo> BrandingProvider { get; set; }
 
@@ -36,7 +36,6 @@
 
 	[Parameter, EditorRequired] public required EventCallback<TEnum> OnChange { get; set; }
 
-	[Parameter, EditorRequired] public required IReadOnlyList<TEnum> Selectable { get; set; }
 
 	[Parameter] public bool Disabled { get; set; }
 
