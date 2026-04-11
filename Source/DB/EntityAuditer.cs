@@ -8,26 +8,22 @@ internal class EntityAuditer
 {
 	public void UpdateTimestamps(EntityEntry<IAuditable> entry, DateTimeOffset timestamp)
 	{
-		entry.Property(a => a.CreatedAt).IsModified = false;
-		entry.Property(a => a.UpdatedAt).IsModified = false;
-
-		var (setCreatedAt, setUpdatedAt) = entry.State switch
-		{
-			EntityState.Added => (true, true),
-			EntityState.Modified => (false, true),
-			_ => (false, false),
-		};
-
-		if (setCreatedAt)
+		if (entry.State is EntityState.Added)
 		{
 			entry.Entity.CreatedAt = timestamp;
-			entry.Property(a => a.CreatedAt).IsModified = true;
+		}
+		else
+		{
+			entry.Property(a => a.CreatedAt).IsModified = false;
 		}
 
-		if (setUpdatedAt)
+		if (entry.State is EntityState.Added or EntityState.Modified)
 		{
 			entry.Entity.UpdatedAt = timestamp;
-			entry.Property(a => a.UpdatedAt).IsModified = true;
+		}
+		else
+		{
+			entry.Property(a => a.UpdatedAt).IsModified = false;
 		}
 	}
 }

@@ -50,15 +50,16 @@ public class EntityAuditerTests(SQLiteFixture fixture)
 
 	private EntityEntry<IAuditable> GetAuditableEntry(EntityState state)
 	{
-		var entity = new MediaIdentifierEntry
+		var entity = new MediaIdentifierGroup
 		{
-			Identifier = new MediaIdentifier(MediaProvider.Tmdb, "12345", MediaType.Movie),
+			Id = Guid.NewGuid(),
 			UpdatedAt = _then,
 			CreatedAt = _then,
-			MediaIdGroup = new MediaIdentifierGroup(),
 		};
-		fixture.Context.Add(entity);
+		var identifier = new MediaIdentifier(MediaProvider.Tmdb, "12345", MediaType.Movie);
+		entity.MediaIdEntries.Add(new MediaIdentifierEntry() { Identifier = identifier, MediaIdGroup = entity });
 
+		fixture.Context.Add(entity);
 		var entry = fixture.Context.Entry<IAuditable>(entity);
 		entry.State = state;
 
