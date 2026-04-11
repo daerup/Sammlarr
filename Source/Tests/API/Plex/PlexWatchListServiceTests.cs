@@ -116,13 +116,15 @@ public class PlexWatchListServiceTests
 
 	private static PlexWatchListService CreateWatchListService(string json)
 	{
-		var resolver = new TestMediaIdResolver();
+		var resolver = IMediaIdResolver.Mock();
+		resolver.ResolveAsync(Any(), Any()).Returns(ResolvedId.Failed);
 		return new PlexWatchListService(CreatePlexClient(json), resolver);
 	}
 
 	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode)
 	{
-		var resolver = new TestMediaIdResolver();
+		var resolver = IMediaIdResolver.Mock();
+		resolver.ResolveAsync(Any(), Any()).Returns(ResolvedId.Failed);
 		return new PlexWatchListService(CreatePlexClient(statusCode), resolver);
 	}
 
@@ -180,10 +182,5 @@ public class PlexWatchListServiceTests
 			title,
 			year,
 		};
-	}
-
-	private class TestMediaIdResolver : IMediaIdResolver
-	{
-		public Task<ResolvedId> ResolveAsync(IMediaId sourceId, MediaProvider target) => Task.FromResult(ResolvedId.Failed);
 	}
 }
