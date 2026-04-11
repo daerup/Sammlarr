@@ -8,6 +8,6 @@ internal class MediaGroupModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<IMediaIdGroupStore, MediaIdGroupStore>();
+		services.AddScoped<IMediaIdGroupRepository, MediaIdGroupRepository>();
 	}
 }

@@ -31,17 +31,17 @@ internal sealed class SammlarrDbContext : DbContext
 		SeedProviderSettings();
 	}
 
-	public DbSet<CollectionItem> CollectionItems => Set<CollectionItem>();
+	public DbSet<CollectionItemEntity> CollectionItems => Set<CollectionItemEntity>();
 
-	public DbSet<Credential> Credentials => Set<Credential>();
+	public DbSet<CredentialEntity> Credentials => Set<CredentialEntity>();
 
-	public DbSet<MediaIdentifierGroup> MediaIdGroups => Set<MediaIdentifierGroup>();
+	public DbSet<MediaIdentifierGroupEntity> MediaIdGroups => Set<MediaIdentifierGroupEntity>();
 
-	public DbSet<MediaIdentifierEntry> MediaIdEntries => Set<MediaIdentifierEntry>();
+	public DbSet<MediaIdentifierGroupEntry> MediaIdEntries => Set<MediaIdentifierGroupEntry>();
 
-	public DbSet<ApiKeySetting> ApiKeySettings => Set<ApiKeySetting>();
+	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
 
-	public DbSet<ProviderSettingsEntity> ProviderSettings => Set<ProviderSettingsEntity>();
+	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
@@ -58,21 +58,21 @@ internal sealed class SammlarrDbContext : DbContext
 	{
 		base.OnModelCreating(modelBuilder);
 
-		modelBuilder.Entity<Credential>().HasIndex(c => c.WatchlistProvider).IsUnique();
-		modelBuilder.Entity<ApiKeySetting>().HasIndex(s => s.Provider).IsUnique();
+		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
+		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
 		modelBuilder
-			.Entity<ProviderSettingsEntity>()
+			.Entity<ProviderConfigEntity>()
 			.ToTable(
 				"ProviderSettings",
 				tableBuilder =>
 				{
-					tableBuilder.HasCheckConstraint("CK_ProviderSettings_Singleton", $"Id = '{ProviderSettingsEntity.SingletonId}'");
+					tableBuilder.HasCheckConstraint("CK_ProviderSettings_Singleton", $"Id = '{ProviderConfigEntity.SingletonId}'");
 				}
 			);
 
-		modelBuilder.Entity<MediaIdentifierEntry>().Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
-		modelBuilder.Entity<MediaIdentifierEntry>().HasKey(e => e.Identifier);
-		modelBuilder.Entity<MediaIdentifierGroup>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroup).OnDelete(DeleteBehavior.Cascade);
+		modelBuilder.Entity<MediaIdentifierGroupEntry>().Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
+		modelBuilder.Entity<MediaIdentifierGroupEntry>().HasKey(e => e.Identifier);
+		modelBuilder.Entity<MediaIdentifierGroupEntity>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroupEntity).OnDelete(DeleteBehavior.Cascade);
 	}
 
 	public override int SaveChanges()
@@ -112,7 +112,7 @@ internal sealed class SammlarrDbContext : DbContext
 			return;
 		}
 
-		ProviderSettings.Add(ProviderSettingsEntity.Default);
+		ProviderSettings.Add(ProviderConfigEntity.Default);
 		base.SaveChanges();
 	}
 }

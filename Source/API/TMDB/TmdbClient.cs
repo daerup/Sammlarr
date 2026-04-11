@@ -5,7 +5,7 @@ using Shared.Options;
 
 namespace API.TMDB;
 
-internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyStore apiKeyStore) : IApiKeyValidator
+internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
 {
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
@@ -15,7 +15,7 @@ internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyStore a
 	)
 	{
 		var apiKey =
-			await apiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, cancellationToken)
+			await apiKeyConfigRepository.GetApiKeyAsync(MediaProvider.Tmdb, cancellationToken)
 			?? throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
 
 		return await SendWithKeyAsync(method, endpoint, apiKey, content, cancellationToken);

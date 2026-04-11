@@ -9,7 +9,7 @@
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistStoreIndex
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
-@inject IProviderSettingsStore ProviderSettingsStore
+@inject IProviderSettingsRepository ProviderSettingsRepository
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -124,7 +124,7 @@ else
     private int _currentPage = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private int _totalPages;
-    private ProviderSettings? _providerSettings;
+    private ProviderConfig? _providerSettings;
 
     private string PageTitleText => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
@@ -135,7 +135,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _providerSettings = await ProviderSettingsStore.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+        _providerSettings = await ProviderSettingsRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
     }
 
     private async Task HandleAccessChanged(bool hasAccess)

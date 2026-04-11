@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DB.Data.Watchlist;
 
-internal record CollectionItem : Entity<Guid>
+internal record CollectionItemEntity : Entity<Guid>
 {
 	[Required]
 	[MaxLength(200)]

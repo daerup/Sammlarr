@@ -5,23 +5,22 @@ using Contracts.Media.Trending;
 using Contracts.Settings;
 using DB.Data.Config;
 using Microsoft.EntityFrameworkCore;
-using ProviderSettingsContract = Contracts.Settings.ProviderSettings;
 
 namespace DB.Tests.Integration.Stores;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposable
+public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IProviderSettingsStore _testee = null!;
-	private Mock<ITypedMemoryCache<string, ProviderSettings>> _cache = null!;
+	private IProviderSettingsRepository _testee = null!;
+	private Mock<ITypedMemoryCache<string, ProviderConfig>> _cache = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<string, ProviderSettings>.Mock();
-		_testee = new ProviderSettingsStore(fixture.Context, _cache.Object);
+		_cache = ITypedMemoryCache<string, ProviderConfig>.Mock();
+		_testee = new ProviderConfigRepository(fixture.Context, _cache.Object);
 	}
 
 	[Test]
@@ -45,7 +44,7 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 
 		var entity = await fixture.Context.ProviderSettings.SingleAsync();
 
-		await Assert.That(entity.Id).IsEqualTo(ProviderSettingsEntity.SingletonId);
+		await Assert.That(entity.Id).IsEqualTo(ProviderConfigEntity.SingletonId);
 		await Assert.That(entity.WatchlistProvider).IsEqualTo(expected.WatchlistProvider);
 		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
 		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
@@ -65,13 +64,13 @@ public class ProviderSettingsStoreTests(SQLiteFixture fixture) : IAsyncDisposabl
 		await Assert.That(entities).Count().IsEqualTo(1);
 	}
 
-	private static ProviderSettingsContract CreateProviderSettings(
+	private static ProviderConfig CreateProviderSettings(
 		WatchlistProvider watchlistProvider,
 		MediaRecommendationProvider trendingProvider,
 		MediaSearchProvider searchProvider
 	)
 	{
-		return new ProviderSettingsContract
+		return new ProviderConfig
 		{
 			WatchlistProvider = watchlistProvider,
 			TrendingProvider = trendingProvider,

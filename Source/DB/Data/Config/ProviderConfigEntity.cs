@@ -7,12 +7,12 @@ using DB.Conversion.Enums;
 
 namespace DB.Data.Config;
 
-[Table("ProviderSettings")]
-internal record ProviderSettingsEntity
+[Table("ProviderConfig")]
+internal record ProviderConfigEntity
 {
 	public static readonly Guid SingletonId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
-	public static ProviderSettingsEntity Default =>
+	public static ProviderConfigEntity Default =>
 		new()
 		{
 			Id = SingletonId,

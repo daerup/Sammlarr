@@ -4,7 +4,7 @@ using Contracts.Media.Trending;
 
 namespace Contracts.Settings;
 
-public record ProviderSettings
+public record ProviderConfig
 {
 	public required WatchlistProvider WatchlistProvider { get; init; }
 

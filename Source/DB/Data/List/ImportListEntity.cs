@@ -6,7 +6,7 @@ using DB.Conversion.Enums;
 
 namespace DB.Data.List;
 
-internal record ImportList : Entity<Guid>
+internal record ImportListEntity : Entity<Guid>
 {
 	[Required]
 	public bool Enabled { get; set; }

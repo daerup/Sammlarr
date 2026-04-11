@@ -13,7 +13,7 @@ internal class TmdbRecommendationService(
 	TmdbClient tmdbClient,
 	TmdbOptions options,
 	IMediaIdResolver mediaIdResolver,
-	IProviderSettingsStore providerSettingsStore
+	IProviderSettingsRepository providerSettingsRepository
 ) : IMediaRecommendationService
 {
 	public async Task<TrendingPageResult> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
@@ -23,7 +23,7 @@ internal class TmdbRecommendationService(
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
-		var settings = await providerSettingsStore.GetAsync(cancellationToken);
+		var settings = await providerSettingsRepository.GetAsync(cancellationToken);
 		var watchlistProvider = settings.WatchlistProvider.AsMediaProvider();
 		var tasks = result.Results.Select(r => BuildTrendingMediaAsync(r, watchlistProvider).AsTask());
 		var awaited = await Task.WhenAll(tasks);

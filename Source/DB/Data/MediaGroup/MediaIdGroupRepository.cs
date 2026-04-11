@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.MediaGroup;
 
-internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupStore
+internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGroupRepository
 {
 	private const string MixedMediaTypesMessage = "All IDs must be of the same media type.";
 
@@ -12,7 +12,7 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 	{
 		return await dbContext
 			.MediaIdEntries.Where(MatchesId(mediaId))
-			.Select(entry => entry.MediaIdGroup.MediaIdEntries)
+			.Select(entry => entry.MediaIdGroupEntity.MediaIdEntries)
 			.SelectMany(ids => ids)
 			.Select(entry => entry.Identifier.ToMediaId())
 			.ToListAsync(cancellationToken);
@@ -28,7 +28,7 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 
 		ValidateSingleMediaType(identifiers);
 
-		var mediaIdGroup = new MediaIdentifierGroup();
+		var mediaIdGroup = new MediaIdentifierGroupEntity();
 		mediaIdGroup.MediaIdEntries = identifiers.ToIdentifierEntries(mediaIdGroup);
 
 		await dbContext.MediaIdGroups.AddAsync(mediaIdGroup, cancellationToken);
@@ -46,14 +46,14 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 		ValidateSingleMediaType(identifiers);
 
 		var existingGroup = await dbContext
-			.MediaIdEntries.Include(entry => entry.MediaIdGroup)
+			.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
 				.ThenInclude(group => group.MediaIdEntries)
 			.Where(MatchesAnyIdentifier(identifiers))
-			.Select(entry => entry.MediaIdGroup)
+			.Select(entry => entry.MediaIdGroupEntity)
 			.Distinct()
 			.SingleOrDefaultAsync(cancellationToken);
 
-		var mediaIdGroup = existingGroup ?? new MediaIdentifierGroup();
+		var mediaIdGroup = existingGroup ?? new MediaIdentifierGroupEntity();
 		var mergedIdentifiers = mediaIdGroup.MediaIdEntries.Select(entry => entry.Identifier).Union(identifiers).ToList();
 		mediaIdGroup.MediaIdEntries = mergedIdentifiers.ToIdentifierEntries(mediaIdGroup);
 
@@ -71,10 +71,10 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 	{
 		var mediaIdGroup = (
 			await dbContext
-				.MediaIdEntries.Include(entry => entry.MediaIdGroup)
+				.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
 					.ThenInclude(group => group.MediaIdEntries)
 				.SingleAsync(MatchesId(existingId), cancellationToken)
-		).MediaIdGroup;
+		).MediaIdGroupEntity;
 
 		var storedIdentifiers = mediaIdGroup.MediaIdEntries.Select(x => x.Identifier).ToList();
 		var appendCandidates = newIds.Select(MediaIdentifier.From).Except(storedIdentifiers).ToList();
@@ -98,13 +98,13 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 		}
 	}
 
-	private static Expression<Func<MediaIdentifierEntry, bool>> MatchesId(IMediaId mediaId)
+	private static Expression<Func<MediaIdentifierGroupEntry, bool>> MatchesId(IMediaId mediaId)
 	{
 		var identifier = MediaIdentifier.From(mediaId);
 		return entry => entry.Identifier == identifier;
 	}
 
-	private static Expression<Func<MediaIdentifierEntry, bool>> MatchesAnyIdentifier(IEnumerable<MediaIdentifier> identifiers)
+	private static Expression<Func<MediaIdentifierGroupEntry, bool>> MatchesAnyIdentifier(IEnumerable<MediaIdentifier> identifiers)
 	{
 		var identifierList = identifiers.ToList();
 		if (identifierList.Count is 0)
@@ -112,8 +112,8 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 			return _ => false;
 		}
 
-		var parameter = Expression.Parameter(typeof(MediaIdentifierEntry), "entry");
-		var identifierProperty = Expression.Property(parameter, nameof(MediaIdentifierEntry.Identifier));
+		var parameter = Expression.Parameter(typeof(MediaIdentifierGroupEntry), "entry");
+		var identifierProperty = Expression.Property(parameter, nameof(MediaIdentifierGroupEntry.Identifier));
 
 		Expression? body = null;
 		foreach (var identifier in identifierList)
@@ -122,6 +122,6 @@ internal class MediaIdGroupStore(SammlarrDbContext dbContext) : IMediaIdGroupSto
 			body = body is null ? equalsExpr : Expression.OrElse(body, equalsExpr);
 		}
 
-		return Expression.Lambda<Func<MediaIdentifierEntry, bool>>(body!, parameter);
+		return Expression.Lambda<Func<MediaIdentifierGroupEntry, bool>>(body!, parameter);
 	}
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class ApiKeyStore(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache) : IApiKeyStore
+internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache) : IApiKeyConfigRepository
 {
 	public async ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
@@ -27,7 +27,7 @@ internal class ApiKeyStore(SammlarrDbContext context, ITypedMemoryCache<MediaPro
 		var setting = await context.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
 		if (setting is null)
 		{
-			context.ApiKeySettings.Add(new ApiKeySetting { Provider = provider, ApiKey = apiKey });
+			context.ApiKeySettings.Add(new ApiKeyConfigEntity { Provider = provider, ApiKey = apiKey });
 		}
 		else
 		{
@@ -38,7 +38,7 @@ internal class ApiKeyStore(SammlarrDbContext context, ITypedMemoryCache<MediaPro
 		cache.Set(provider, apiKey);
 	}
 
-	public async Task ClearApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
+	public async Task RemoveApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
 		var setting = await context.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
 		if (setting is null)

@@ -7,12 +7,17 @@ using Contracts.Media.Convertions;
 
 namespace API;
 
-internal class MediaIdResolver(IMediaIdGroupStore mediaIdGroupStore, TmdbIdConverter tmdb, PlexIdConverter plex, ImdbIdConverter imdb, TvdbIdConverter tvdb)
-	: IMediaIdResolver
+internal class MediaIdResolver(
+	IMediaIdGroupRepository mediaIdGroupRepository,
+	TmdbIdConverter tmdb,
+	PlexIdConverter plex,
+	ImdbIdConverter imdb,
+	TvdbIdConverter tvdb
+) : IMediaIdResolver
 {
 	public async Task<ResolvedId> ResolveAsync(IMediaId sourceId, MediaProvider target)
 	{
-		var cachedIds = await mediaIdGroupStore.GetByIdAsync(sourceId);
+		var cachedIds = await mediaIdGroupRepository.GetByIdAsync(sourceId);
 		var cachedIdWithRequestedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
 		if (cachedIdWithRequestedTarget is not null)
 		{
@@ -28,7 +33,7 @@ internal class MediaIdResolver(IMediaIdGroupStore mediaIdGroupStore, TmdbIdConve
 
 		if (resolved.AllIds.Any())
 		{
-			await mediaIdGroupStore.CreateOrAppendAsync(resolved.AllIds);
+			await mediaIdGroupRepository.CreateOrAppendAsync(resolved.AllIds);
 		}
 
 		return resolved;

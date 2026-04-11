@@ -14,8 +14,8 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 
 	private readonly List<IMediaId> _lookupIds = [];
 	private SammlarrDbContext _dbContext = null!;
-	private MediaIdGroupStore _store = null!;
-	private MediaIdGroupStore _oldStore = null!;
+	private MediaIdGroupRepository _repository = null!;
+	private MediaIdGroupRepository _oldRepository = null!;
 
 	[GlobalSetup]
 	public async Task SetupAsync()
@@ -32,27 +32,27 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 		var randomGroup = await _dbContext.MediaIdGroups.Include(group => group.MediaIdEntries).Skip(skip).FirstAsync();
 		_lookupIds.AddRange(randomGroup.MediaIdEntries.Select(entry => entry.Identifier.ToMediaId()));
 
-		_store = new MediaIdGroupStore(_dbContext);
-		_oldStore = new MediaIdGroupStore(_dbContext);
+		_repository = new MediaIdGroupRepository(_dbContext);
+		_oldRepository = new MediaIdGroupRepository(_dbContext);
 		_dbContext.ChangeTracker.Clear();
 	}
 
 	[Benchmark(Description = "New.GetByIdAsync")]
 	public async Task GetByIdExistingAsync()
 	{
-		await RunExistingBenchmarkAsync(_store);
-		await RunNonExistingBenchmarkAsync(_store);
+		await RunExistingBenchmarkAsync(_repository);
+		await RunNonExistingBenchmarkAsync(_repository);
 	}
 
 	[Benchmark(Description = "Old.GetByIdAsync", Baseline = true)]
 	public async Task GetByIdExistingOldAsync()
 	{
-		await RunExistingBenchmarkAsync(_oldStore);
-		await RunNonExistingBenchmarkAsync(_oldStore);
+		await RunExistingBenchmarkAsync(_oldRepository);
+		await RunNonExistingBenchmarkAsync(_oldRepository);
 	}
 
 	private async Task RunExistingBenchmarkAsync<TStore>(TStore store)
-		where TStore : IMediaIdGroupStore
+		where TStore : IMediaIdGroupRepository
 	{
 		var result = await _lookupIds.ToAsyncEnumerable().SelectAwait(async lookupId => await store.GetByIdAsync(lookupId)).ToListAsync();
 		if (result.Count == 0)
@@ -62,7 +62,7 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 	}
 
 	private async Task RunNonExistingBenchmarkAsync<TStore>(TStore store)
-		where TStore : IMediaIdGroupStore
+		where TStore : IMediaIdGroupRepository
 	{
 		var lookupId = ImdbId.From("ttsome nonexistent id", MediaType.Movie);
 		var result = await store.GetByIdAsync(lookupId);

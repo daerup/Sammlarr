@@ -5,7 +5,7 @@ using Shared.Options;
 
 namespace API.Mdblist;
 
-internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyStore apiKeyStore) : IApiKeyValidator
+internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
 {
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
@@ -15,7 +15,7 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyS
 	)
 	{
 		var apiKey =
-			await apiKeyStore.GetApiKeyAsync(MediaProvider.Mdblist, cancellationToken)
+			await apiKeyConfigRepository.GetApiKeyAsync(MediaProvider.Mdblist, cancellationToken)
 			?? throw new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys.");
 
 		return await SendWithKeyAsync(method, endpoint, apiKey, content, cancellationToken);

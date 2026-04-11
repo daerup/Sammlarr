@@ -7,7 +7,7 @@ using DB.Conversion.Enums;
 namespace DB.Data.Access;
 
 [Table("Credentials")]
-internal record Credential : Entity<Guid>
+internal record CredentialEntity : Entity<Guid>
 {
 	[Required]
 	[EnumAsString]
