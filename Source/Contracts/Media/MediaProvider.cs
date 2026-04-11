@@ -15,4 +15,7 @@ public enum MediaProvider
 
 	[Description("Plex")]
 	Plex,
+
+	[Description("Mdblist")]
+	Mdblist,
 }

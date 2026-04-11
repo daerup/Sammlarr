@@ -14,6 +14,6 @@ internal class TmdbModule : IServiceModule
 		services.AddHttpClient<TmdbClient>();
 		services.AddKeyedScoped<IMediaRecommendationService, TmdbRecommendationService>(MediaProvider.Tmdb);
 		services.AddScoped<TmdbIdConverter>();
-		services.AddKeyedScoped<IApiKeyValidator>(MediaProvider.Tmdb, (sp, _) => sp.GetRequiredService<TmdbClient>());
+		services.AddKeyedScoped<IApiKeyValidator, TmdbClient>(MediaProvider.Tmdb);
 	}
 }
