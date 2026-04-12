@@ -215,7 +215,7 @@
                                 </BbTooltipProvider>
                             </BbFieldLabel>
                             <BbFieldContent>
-                                <BbSwitch @bind-Checked="_sortingEnabled"  />
+                                <BbSwitch @bind-Checked="_sortingEnabled"/>
                             </BbFieldContent>
                         </BbField>
 
@@ -239,7 +239,8 @@
                                                               Variant="ButtonVariant.Outline"
                                                               OnClick="@(() => OnSortDirectionChanged(_sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending))"
                                                               AriaLabel="@(_sortDirection == SortDirection.Ascending ? "Ascending" : "Descending")">
-                                                        <LucideIcon Name="arrow-up" Size="14" Class="@($"transition-transform duration-200{(_sortDirection == SortDirection.Descending ? " rotate-180" : string.Empty)}")"/>
+                                                        <LucideIcon Name="arrow-up" Size="14"
+                                                                    Class="@($"transition-transform duration-200{(_sortDirection == SortDirection.Descending ? " rotate-180" : string.Empty)}")"/>
                                                     </BbButton>
                                                 </BbTooltipTrigger>
                                                 <BbTooltipContent>@(_sortDirection == SortDirection.Ascending ? "Ascending — low to high" : "Descending — high to low")</BbTooltipContent>
@@ -463,11 +464,11 @@
 
     private static readonly IReadOnlyList<SelectOption<string>> _sortFieldOptions =
     [
-        new("title",       "Title"),
+        new("title", "Title"),
         new("releaseDate", "Release Date"),
-        new("rating",      "Rating"),
-        new("runtime",     "Runtime"),
-        new("popularity",  "Popularity"),
+        new("rating", "Rating"),
+        new("runtime", "Runtime"),
+        new("popularity", "Popularity"),
     ];
 
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : (int?)null;
@@ -503,9 +504,9 @@
     private BrandingInfo GetRunModeBranding(RunMode mode) =>
         mode switch
         {
-            RunMode.Manual    => BrandingInfoBuilder.Lucide("Manual",    mode.ToString(), "hand",     "#000000"),
+            RunMode.Manual => BrandingInfoBuilder.Lucide("Manual", mode.ToString(), "hand", "#000000"),
             RunMode.Scheduled => BrandingInfoBuilder.Lucide("Scheduled", mode.ToString(), "calendar", "#000000"),
-            _                 => BrandingInfoBuilder.Lucide(mode.ToString(), mode.ToString(), "clock", "#000000"),
+            _ => BrandingInfoBuilder.Lucide(mode.ToString(), mode.ToString(), "clock", "#000000"),
         };
 
     private Task OnStrategyChanged(MediaListAddStrategy strategy)
