@@ -71,6 +71,36 @@
                         <LucideIcon Name="check" Size="14" Class="mr-2"/>
                         <span>Saved</span>
                     </BbButton>
+
+                    <BbAlertDialog>
+                        <BbAlertDialogTrigger>
+                            <BbButton Variant="ButtonVariant.Outline"
+                                      Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
+                                <LucideIcon Name="trash-2" Size="14" Class="mr-2"/>
+                                <span>Delete key</span>
+                            </BbButton>
+                        </BbAlertDialogTrigger>
+                        <BbAlertDialogContent>
+                            <BbAlertDialogHeader>
+                                <BbAlertDialogTitle>Delete API key?</BbAlertDialogTitle>
+                                <BbAlertDialogDescription>
+                                    This will permanently remove the saved API key for @providerBranding.DisplayName.
+                                    You will need to re-enter it to use this provider again.
+                                </BbAlertDialogDescription>
+                            </BbAlertDialogHeader>
+                            <BbAlertDialogFooter>
+                                <BbAlertDialogCancel>
+                                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                </BbAlertDialogCancel>
+                                <BbAlertDialogAction>
+                                    <BbButton Variant="ButtonVariant.Destructive" OnClick="DeleteAsync">
+                                        <LucideIcon Name="trash-2" Size="14" Class="mr-2"/>
+                                        <span>Delete key</span>
+                                    </BbButton>
+                                </BbAlertDialogAction>
+                            </BbAlertDialogFooter>
+                        </BbAlertDialogContent>
+                    </BbAlertDialog>
                 }
                 else if (_state == State.Failed)
                 {
@@ -155,7 +185,7 @@
 
         try
         {
-            var ok = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_apiKeyInput.Trim());
+            var ok = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_apiKeyInput);
             _state = ok ? State.Success : State.Failed;
         }
         catch (Exception)
@@ -168,12 +198,18 @@
     {
         _state = State.Saving;
 
-        var trimmedApiKey = _apiKeyInput.Trim();
-
-        await ApiKeyConfigRepository.SetApiKeyAsync(Provider, trimmedApiKey);
-        _savedApiKey = trimmedApiKey;
+        await ApiKeyConfigRepository.SetApiKeyAsync(Provider, _apiKeyInput);
+        _savedApiKey = _apiKeyInput;
 
         _state = State.Saved;
+    }
+
+    private async Task DeleteAsync()
+    {
+        await ApiKeyConfigRepository.RemoveApiKeyAsync(Provider);
+        _savedApiKey = string.Empty;
+        _apiKeyInput = string.Empty;
+        _state = State.Idle;
     }
 
     private Task CancelAsync()
@@ -183,4 +219,3 @@
         return Task.CompletedTask;
     }
 }
-

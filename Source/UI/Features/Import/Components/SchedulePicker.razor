@@ -1,0 +1,299 @@
+@using CronExpressionDescriptor
+
+<div class="space-y-3">
+    <BbSelect TValue="ScheduleMode"
+              Value="_scheduleMode"
+              ValueChanged="OnScheduleModeChanged"
+              Options="ScheduleModeOptions"/>
+
+    @if (_scheduleMode == ScheduleMode.Daily)
+    {
+        <div class="flex flex-wrap items-center gap-3">
+            <BbTimePicker Value="_dailyTime"
+                          ValueChanged="OnDailyTimeChanged"
+                          Format="TimeFormat.Hour24"
+                          MinuteStep="5"
+                          Placeholder="Select time"/>
+            @if (_dailyTime.HasValue)
+            {
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+                        <LucideIcon Name="clock" Size="12"/>@ComputedExpression
+                    </span>
+                    @if (ExpressionDescription is not null)
+                    {
+                        <span class="text-xs text-muted-foreground italic">@ExpressionDescription</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (_scheduleMode == ScheduleMode.Weekly)
+    {
+        <div class="flex flex-wrap items-center gap-3">
+            <BbTimePicker Value="_weeklyTime"
+                          ValueChanged="OnWeeklyTimeChanged"
+                          Format="TimeFormat.Hour24"
+                          MinuteStep="5"
+                          Placeholder="Select time"/>
+            <BbSelect TValue="DayOfWeek"
+                      Value="_weeklyDayOfWeek"
+                      ValueChanged="OnWeeklyDayChanged"
+                      Options="DayOfWeekOptions"/>
+            @if (_weeklyTime.HasValue)
+            {
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+                        <LucideIcon Name="clock" Size="12"/>@ComputedExpression
+                    </span>
+                    @if (ExpressionDescription is not null)
+                    {
+                        <span class="text-xs text-muted-foreground italic">@ExpressionDescription</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (_scheduleMode == ScheduleMode.Expression)
+    {
+        <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-col items-center gap-0.5">
+                <BbInput Value="@_cronSecond"
+                         ValueChanged="@((string? v) => { _cronSecond = v ?? string.Empty; NotifyChanged(); })"
+                         Class="w-16 text-center font-mono px-1  bg-accent"
+                         Placeholder="*"
+                         AriaLabel="Second — any integer 0–59, or * for every second"
+                         AriaInvalid="@(!IsCronSecondValid)"
+                         UpdateTiming="UpdateTiming.OnChange"/>
+                <span class="text-xs text-muted-foreground select-none">Second</span>
+                <span class="text-[10px] @(IsCronSecondValid ? "invisible" : "text-destructive") select-none">0–59</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+                <BbInput Value="@_cronMinute"
+                         ValueChanged="@((string? v) => { _cronMinute = v ?? string.Empty; NotifyChanged(); })"
+                         Class="w-16 text-center font-mono px-1  bg-accent"
+                         Placeholder="*"
+                         AriaLabel="Minute — any integer 0–59, or * for every minute"
+                         AriaInvalid="@(!IsCronMinuteValid)"
+                         UpdateTiming="UpdateTiming.OnChange"/>
+                <span class="text-xs text-muted-foreground select-none">Minute</span>
+                <span class="text-[10px] @(IsCronMinuteValid ? "invisible" : "text-destructive") select-none">0–59</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+                <BbInput Value="@_cronHour"
+                         ValueChanged="@((string? v) => { _cronHour = v ?? string.Empty; NotifyChanged(); })"
+                         Class="w-16 text-center font-mono px-1  bg-accent"
+                         Placeholder="*"
+                         AriaLabel="Hour — any integer 0–23, or * for every hour"
+                         AriaInvalid="@(!IsCronHourValid)"
+                         UpdateTiming="UpdateTiming.OnChange"/>
+                <span class="text-xs text-muted-foreground select-none">Hour</span>
+                <span class="text-[10px] @(IsCronHourValid ? "invisible" : "text-destructive") select-none">0–23</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+                <BbInput Value="@_cronDayOfMonth"
+                         ValueChanged="@((string? v) => { _cronDayOfMonth = v ?? string.Empty; NotifyChanged(); })"
+                         Class="w-16 text-center font-mono px-1  bg-accent"
+                         Placeholder="*"
+                         AriaLabel="Day of month — any integer 1–31, or * for every day"
+                         AriaInvalid="@(!IsCronDayOfMonthValid)"
+                         UpdateTiming="UpdateTiming.OnChange"/>
+                <span class="text-xs text-muted-foreground select-none">Day of Month</span>
+                <span class="text-[10px] @(IsCronDayOfMonthValid ? "invisible" : "text-destructive") select-none">1–31</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+                <BbInput Value="@_cronMonth"
+                         ValueChanged="@((string? v) => { _cronMonth = v ?? string.Empty; NotifyChanged(); })"
+                         Class="w-16 text-center font-mono px-1 bg-accent"
+                         Placeholder="*"
+                         AriaLabel="Month — any integer 1–12, or * for every month"
+                         AriaInvalid="@(!IsCronMonthValid)"
+                         UpdateTiming="UpdateTiming.OnChange"/>
+                <span class="text-xs text-muted-foreground select-none">Month</span>
+                <span class="text-[10px] @(IsCronMonthValid ? "invisible" : "text-destructive") select-none">1–12</span>
+            </div>
+            <div class="flex flex-col items-center gap-0.5">
+                <BbInput Value="@_cronDayOfWeek"
+                         ValueChanged="@((string? v) => { _cronDayOfWeek = v ?? string.Empty; NotifyChanged(); })"
+                         Class="w-16 text-center font-mono px-1  bg-accent"
+                         Placeholder="*"
+                         AriaLabel="Day of week — 0 (Sunday) through 7 (Sunday), or * for every day"
+                         AriaInvalid="@(!IsCronDayOfWeekValid)"
+                         UpdateTiming="UpdateTiming.OnChange"/>
+                <span class="text-xs text-muted-foreground select-none">Day of Week</span>
+                <span class="text-[10px] @(IsCronDayOfWeekValid ? "invisible" : "text-destructive") select-none">0–7</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ComputedExpression))
+            {
+                <div class="flex flex-col gap-0.5 h-16">
+                    <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+                        <LucideIcon Name="clock" Size="12"/>@ComputedExpression
+                    </span>
+                    @if (ExpressionDescription is not null)
+                    {
+                        <span class="text-xs text-muted-foreground italic">@ExpressionDescription</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+
+    private enum ScheduleMode { Daily, Weekly, Expression }
+
+    [Parameter] public string? CronExpression { get; set; }
+    [Parameter] public EventCallback<string?> CronExpressionChanged { get; set; }
+
+    private ScheduleMode _scheduleMode = ScheduleMode.Daily;
+    private TimeSpan?    _dailyTime;
+    private TimeSpan?    _weeklyTime;
+    private DayOfWeek    _weeklyDayOfWeek = DayOfWeek.Monday;
+    private string _cronSecond     = "*";
+    private string _cronMinute     = "*";
+    private string _cronHour       = "*";
+    private string _cronDayOfMonth = "*";
+    private string _cronMonth      = "*";
+    private string _cronDayOfWeek  = "*";
+
+    private bool IsCronSecondValid     => IsCronPartValid(_cronSecond,     0, 59);
+    private bool IsCronMinuteValid     => IsCronPartValid(_cronMinute,     0, 59);
+    private bool IsCronHourValid       => IsCronPartValid(_cronHour,       0, 23);
+    private bool IsCronDayOfMonthValid => IsCronPartValid(_cronDayOfMonth, 1, 31);
+    private bool IsCronMonthValid      => IsCronPartValid(_cronMonth,      1, 12);
+    private bool IsCronDayOfWeekValid  => IsCronPartValid(_cronDayOfWeek,  0,  7);
+    private bool IsCronValid => IsCronSecondValid && IsCronMinuteValid && IsCronHourValid
+                                && IsCronDayOfMonthValid && IsCronMonthValid && IsCronDayOfWeekValid;
+
+    private string? ComputedExpression => _scheduleMode switch
+    {
+        ScheduleMode.Daily  when _dailyTime.HasValue  => $"0 {_dailyTime.Value.Minutes} {_dailyTime.Value.Hours} * * *",
+        ScheduleMode.Weekly when _weeklyTime.HasValue => $"0 {_weeklyTime.Value.Minutes} {_weeklyTime.Value.Hours} * * {(int)_weeklyDayOfWeek}",
+        ScheduleMode.Expression when IsCronValid      => $"{Normalize(_cronSecond)} {Normalize(_cronMinute)} {Normalize(_cronHour)} {Normalize(_cronDayOfMonth)} {Normalize(_cronMonth)} {Normalize(_cronDayOfWeek)}",
+        _                                             => null,
+    };
+
+    private string? ExpressionDescription
+    {
+        get
+        {
+            var expression = ComputedExpression;
+            if (string.IsNullOrEmpty(expression)) return null;
+            try { return ExpressionDescriptor.GetDescription(expression, new Options { Use24HourTimeFormat = true}); }
+            catch { return null; }
+        }
+    }
+
+    private static readonly IReadOnlyList<SelectOption<ScheduleMode>> ScheduleModeOptions =
+    [
+        new(ScheduleMode.Daily,      "Daily"),
+        new(ScheduleMode.Weekly,  "Weekly"),
+        new(ScheduleMode.Expression, "Expression"),
+    ];
+
+    private static readonly IReadOnlyList<SelectOption<DayOfWeek>> DayOfWeekOptions =
+    [
+        new(DayOfWeek.Sunday,    "Sunday"),
+        new(DayOfWeek.Monday,    "Monday"),
+        new(DayOfWeek.Tuesday,   "Tuesday"),
+        new(DayOfWeek.Wednesday, "Wednesday"),
+        new(DayOfWeek.Thursday,  "Thursday"),
+        new(DayOfWeek.Friday,    "Friday"),
+        new(DayOfWeek.Saturday,  "Saturday"),
+    ];
+
+    private void OnScheduleModeChanged(ScheduleMode newMode)
+    {
+        TransferScheduleConfig(_scheduleMode, newMode);
+        _scheduleMode = newMode;
+        NotifyChanged();
+    }
+
+    private void OnDailyTimeChanged(TimeSpan? time)  { _dailyTime       = time; NotifyChanged(); }
+    private void OnWeeklyTimeChanged(TimeSpan? time) { _weeklyTime      = time; NotifyChanged(); }
+    private void OnWeeklyDayChanged(DayOfWeek day)   { _weeklyDayOfWeek = day;  NotifyChanged(); }
+
+    private void TransferScheduleConfig(ScheduleMode from, ScheduleMode to)
+    {
+        switch (from, to)
+        {
+            case (ScheduleMode.Daily, ScheduleMode.Weekly):
+                _weeklyTime = _dailyTime;
+                break;
+
+            case (ScheduleMode.Weekly, ScheduleMode.Daily):
+                _dailyTime = _weeklyTime;
+                break;
+
+            case (ScheduleMode.Daily, ScheduleMode.Expression) when _dailyTime.HasValue:
+                _cronSecond     = "0";
+                _cronMinute     = _dailyTime.Value.Minutes.ToString();
+                _cronHour       = _dailyTime.Value.Hours.ToString();
+                _cronDayOfMonth = "*";
+                _cronMonth      = "*";
+                _cronDayOfWeek  = "*";
+                break;
+
+            case (ScheduleMode.Weekly, ScheduleMode.Expression) when _weeklyTime.HasValue:
+                _cronSecond     = "0";
+                _cronMinute     = _weeklyTime.Value.Minutes.ToString();
+                _cronHour       = _weeklyTime.Value.Hours.ToString();
+                _cronDayOfMonth = "*";
+                _cronMonth      = "*";
+                _cronDayOfWeek  = ((int)_weeklyDayOfWeek).ToString();
+                break;
+
+            case (ScheduleMode.Expression, ScheduleMode.Daily):
+                if (int.TryParse(_cronHour, out var dailyHour) && int.TryParse(_cronMinute, out var dailyMinute))
+                    _dailyTime = new TimeSpan(dailyHour, dailyMinute, 0);
+                break;
+
+            case (ScheduleMode.Expression, ScheduleMode.Weekly):
+                if (int.TryParse(_cronHour, out var weeklyHour) && int.TryParse(_cronMinute, out var weeklyMinute))
+                    _weeklyTime = new TimeSpan(weeklyHour, weeklyMinute, 0);
+                if (int.TryParse(_cronDayOfWeek, out var dow) && Enum.IsDefined(typeof(DayOfWeek), dow))
+                    _weeklyDayOfWeek = (DayOfWeek)dow;
+                break;
+        }
+    }
+
+    private void NotifyChanged() => _ = CronExpressionChanged.InvokeAsync(ComputedExpression);
+
+    private static string Normalize(string value) =>
+        string.IsNullOrWhiteSpace(value) ? "*" : value;
+
+    private static bool IsCronPartValid(string value, int minimum, int maximum)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value == "*") return true;
+
+        var stepParts = value.Split('/');
+        if (stepParts.Length > 2) return false;
+        if (stepParts.Length == 2 && (!int.TryParse(stepParts[1], out var stepValue) || stepValue <= 0)) return false;
+
+        var rangePart = stepParts[0];
+        if (rangePart == "*") return true;
+
+        foreach (var segment in rangePart.Split(','))
+        {
+            var dashParts = segment.Trim().Split('-');
+            if (dashParts.Length == 1)
+            {
+                if (!int.TryParse(dashParts[0], out var number) || number < minimum || number > maximum) return false;
+            }
+            else if (dashParts.Length == 2)
+            {
+                if (!int.TryParse(dashParts[0], out var rangeStart) || rangeStart < minimum || rangeStart > maximum) return false;
+                if (!int.TryParse(dashParts[1], out var rangeEnd)   || rangeEnd   < minimum || rangeEnd   > maximum) return false;
+                if (rangeStart > rangeEnd) return false;
+            }
+            else return false;
+        }
+
+        return true;
+    }
+}
+
