@@ -42,3 +42,12 @@ public readonly record struct TvdbId : IMediaId
 
 	public static TvdbId From(string id, MediaType type) => new() { Value = id, Type = type };
 }
+
+public readonly record struct MdblistId : IMediaId
+{
+	public MediaProvider Source => MediaProvider.Mdblist;
+	public string Value { get; private init; }
+	public MediaType Type { get; private init; }
+
+	public static MdblistId From(string id, MediaType type) => new() { Value = id, Type = type };
+}

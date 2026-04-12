@@ -1,6 +1,6 @@
 namespace Contracts.Settings;
 
-public interface IProviderSettingsRepository
+public interface IProviderConfigRepository
 {
 	ValueTask<ProviderConfig> GetAsync(CancellationToken cancellationToken = default);
 

@@ -117,11 +117,11 @@
     private string? _searchStatusMessage;
     private bool _isSearchStatusError;
     private IMediaId? _activeToggledSourceId;
-    private List<IMediaSearchResult> _searchResults = [];
+    private List<IMediaDetailResult> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
-    private IMediaSearchResult? _focusedResult;
+    private IMediaDetailResult? _focusedResult;
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => $"Search {SearchProviderName}";
@@ -152,7 +152,7 @@
     }
 
 
-    private bool IsSearchResultInWatchlist(IMediaSearchResult result)
+    private bool IsSearchResultInWatchlist(IMediaDetailResult result)
     {
         return IsInWatchlist.Invoke(result.SourceId);
     }
@@ -219,7 +219,7 @@
         }
     }
 
-    private async Task ToggleWatchlistAsync(IMediaSearchResult result)
+    private async Task ToggleWatchlistAsync(IMediaDetailResult result)
     {
         if (_isAdding)
         {

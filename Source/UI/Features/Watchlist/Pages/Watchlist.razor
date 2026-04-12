@@ -9,7 +9,7 @@
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistStoreIndex
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
-@inject IProviderSettingsRepository ProviderSettingsRepository
+@inject IProviderConfigRepository ProviderConfigRepository
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -135,7 +135,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _providerSettings = await ProviderSettingsRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+        _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
     }
 
     private async Task HandleAccessChanged(bool hasAccess)

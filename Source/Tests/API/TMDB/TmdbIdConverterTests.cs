@@ -101,7 +101,11 @@ public class TmdbIdConverterTests
 			Poster: faker.System.FilePath(),
 			Title: faker.Lorem.Sentence(2),
 			Year: faker.Date.Past().Year,
-			Guid: guids
+			Duration: faker.Random.Int(1, 300) * 60 * 1000,
+			SeasonCount: null,
+			EpisodeCount: null,
+			Guid: guids,
+			Genre: [new PlexTypes.ById.Genre(faker.Lorem.Word())]
 		);
 		var root = new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata]));
 

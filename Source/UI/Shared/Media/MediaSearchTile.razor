@@ -77,12 +77,12 @@
 
 @code {
 
-    [Parameter, EditorRequired] public required IMediaSearchResult Result { get; set; }
+    [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
     [Parameter] public bool IsInWatchlist { get; set; }
     [Parameter] public bool IsActiveToggle { get; set; }
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
-    [Parameter] public EventCallback<IMediaSearchResult> OnToggleWatchlist { get; set; }
+    [Parameter] public EventCallback<IMediaDetailResult> OnToggleWatchlist { get; set; }
 
     private string _backgroundStyle = string.Empty;
     private string _bookmarkIconClass = string.Empty;
@@ -95,17 +95,17 @@
         _displayFacts = GetDisplayFacts(Result);
     }
 
-    private static IReadOnlyList<string> GetDisplayFacts(IMediaSearchResult result)
+    private static IReadOnlyList<string> GetDisplayFacts(IMediaDetailResult result)
     {
         var facts = new List<string>();
 
         switch (result)
         {
-            case ShowSearchResult showResult:
+            case ShowDetailResult showResult:
                 AddCountFact(facts, showResult.Seasons, "season");
                 AddCountFact(facts, showResult.Episodes, "episode");
                 break;
-            case MovieSearchResult movieResult:
+            case MovieDetailResult movieResult:
                 var runtime = GetRuntimeLabel(movieResult.Runtime);
                 if (!string.IsNullOrWhiteSpace(runtime))
                 {

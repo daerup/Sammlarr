@@ -14,7 +14,7 @@
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
 @inject ScrollService ScrollService
-@inject IProviderSettingsRepository ProviderSettingsRepository
+@inject IProviderConfigRepository ProviderConfigRepository
 @inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
@@ -124,7 +124,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _providerConfig = await ProviderSettingsRepository.GetAsync();
+        _providerConfig = await ProviderConfigRepository.GetAsync();
     }
 
     private bool HasOAuthAccess() => _isAuthenticated;

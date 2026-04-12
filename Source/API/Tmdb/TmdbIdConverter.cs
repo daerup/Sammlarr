@@ -20,11 +20,12 @@ internal class TmdbIdConverter(PlexApi plexApi)
 	private async Task<ResolvedId> ResolveById(PlexId plexId)
 	{
 		var plexResult = await plexApi.ByIdAsync(plexId);
-		IMediaId[] otherIds = [plexResult.PlexId, .. plexResult.ImdbIds, .. plexResult.TvdbIds];
-		if (plexResult.TmdbIds.Any())
+		var tmdbIds = plexResult.AdditionalIds.OfType<TmdbId>().Cast<IMediaId>().ToList();
+		var otherIds = plexResult.AdditionalIds.Except(tmdbIds).Append(plexResult.SourceId);
+		if (tmdbIds.Any())
 		{
-			var tmdbId = plexResult.TmdbIds.First();
-			var remainingIds = plexResult.TmdbIds.Skip(1).Cast<IMediaId>();
+			var tmdbId = tmdbIds.First();
+			var remainingIds = tmdbIds.Skip(1);
 			return new ResolvedId(tmdbId, remainingIds.Concat(otherIds));
 		}
 
