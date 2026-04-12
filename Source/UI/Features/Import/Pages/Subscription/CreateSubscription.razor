@@ -340,84 +340,39 @@
             </BbCollapsible>
 
             <div class="px-6 py-4 border-t flex items-center justify-end gap-2">
-                @if (_state == State.Idle)
+                @if (_state == State.Testing)
                 {
-                    <BbTooltipProvider>
-                        <BbTooltip>
-                            <BbTooltipTrigger>
-                                <BbButton Size="ButtonSize.Icon"
-                                          Variant="ButtonVariant.Default"
-                                          OnClick="HandleTestOrSaveAsync"
-                                          Disabled="!CanTest"
-                                          AriaLabel="Test">
-                                    <LucideIcon Name="zap" Size="16"/>
-                                </BbButton>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Test subscription</BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
-                }
-                else if (_state == State.Testing)
-                {
-                    <BbTooltipProvider>
-                        <BbTooltip>
-                            <BbTooltipTrigger>
-                                <BbButton Size="ButtonSize.Icon" Variant="ButtonVariant.Default" Disabled="true" AriaLabel="Testing">
-                                    <BbSpinner Size="SpinnerSize.Small"/>
-                                </BbButton>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Testing…</BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
+                    <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Testing…</span>
+                    </BbButton>
                 }
                 else if (_state == State.Success)
                 {
-                    <BbTooltipProvider>
-                        <BbTooltip>
-                            <BbTooltipTrigger>
-                                <BbButton Size="ButtonSize.Icon"
-                                          Variant="ButtonVariant.Outline"
-                                          Class="text-success border-success hover:bg-success"
-                                          OnClick="HandleTestOrSaveAsync"
-                                          AriaLabel="Save">
-                                    <LucideIcon Name="save" Size="16"/>
-                                </BbButton>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Save subscription</BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-success border-success hover:bg-success"
+                              OnClick="HandleSaveAsync"
+                              Disabled="!CanSave">
+                        <LucideIcon Name="save" Size="14" Class="mr-2"/>
+                        <span>Save</span>
+                    </BbButton>
                 }
-                else if (_state == State.Failed)
+                else
                 {
-                    <BbTooltipProvider>
-                        <BbTooltip>
-                            <BbTooltipTrigger>
-                                <BbButton Size="ButtonSize.Icon"
-                                          Variant="ButtonVariant.Outline"
-                                          Class="text-destructive border-destructive"
-                                          Disabled="true"
-                                          AriaLabel="Failed">
-                                    <LucideIcon Name="x" Size="16"/>
-                                </BbButton>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Test failed, check credentials and identifier</BbTooltipContent>
-                        </BbTooltip>
-                    </BbTooltipProvider>
+                    <BbButton Variant="ButtonVariant.Default"
+                              OnClick="HandleTestAsync"
+                              Disabled="!CanTest || LimitIsInvalid">
+                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                        <span>Test</span>
+                    </BbButton>
                 }
 
-                <BbTooltipProvider>
-                    <BbTooltip>
-                        <BbTooltipTrigger>
-                            <BbButton Size="ButtonSize.Icon"
-                                      Variant="ButtonVariant.Ghost"
-                                      OnClick="ReturnAsync"
-                                      AriaLabel="Cancel">
-                                <LucideIcon Name="x-circle" Size="16"/>
-                            </BbButton>
-                        </BbTooltipTrigger>
-                        <BbTooltipContent>Cancel</BbTooltipContent>
-                    </BbTooltip>
-                </BbTooltipProvider>
+                <BbButton Variant="ButtonVariant.Outline"
+                          Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                          OnClick="ReturnAsync"
+                          Disabled="@(_state is State.Testing or State.Saving)">
+                    Cancel
+                </BbButton>
             </div>
 
         </div>
@@ -440,6 +395,8 @@
 
     private State _state = State.Idle;
     private IReadOnlyList<IMediaDetailResult> _previewResults = [];
+    private MediaListProvider? _testedProvider;
+    private string _testedListIdentifier = string.Empty;
 
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _showValidation;
@@ -453,6 +410,12 @@
     private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
 
     private bool CanTest => !string.IsNullOrWhiteSpace(_listIdentifier) && _provider is not null;
+    private bool CanSave =>
+        _state == State.Success &&
+        _provider == _testedProvider &&
+        string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal) &&
+        !string.IsNullOrWhiteSpace(_name) &&
+        !LimitIsInvalid;
 
     private bool _filtersEnabled;
     private FilterDefinition _filter = new();
@@ -574,15 +537,29 @@
 
     private void HandleFilterChanged(FilterDefinition filter) {}
 
-    private Task HandleTestOrSaveAsync()
+    private Task HandleTestAsync()
     {
         _showValidation = true;
-        return _state == State.Success ? SaveAsync() : TestAsync();
+        return TestAsync();
+    }
+
+    private Task HandleSaveAsync()
+    {
+        _showValidation = true;
+        if (!CanSave)
+        {
+            return Task.CompletedTask;
+        }
+
+        return SaveAsync();
     }
 
     private async Task TestAsync()
     {
-        if (!CanTest) return;
+        if (!CanTest || LimitIsInvalid)
+        {
+            return;
+        }
 
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
@@ -590,6 +567,8 @@
         var cancellationToken = _cancellationTokenSource.Token;
 
         _state = State.Testing;
+        _testedProvider = null;
+        _testedListIdentifier = string.Empty;
 
         try
         {
@@ -598,15 +577,25 @@
 
             _previewResults = results;
             _state = _previewResults.Count > 0 ? State.Success : State.Failed;
+
+            if (_state == State.Success)
+            {
+                _testedProvider = _provider;
+                _testedListIdentifier = _listIdentifier.Trim();
+            }
         }
         catch (OperationCanceledException)
         {
             _state = State.Idle;
+            _testedProvider = null;
+            _testedListIdentifier = string.Empty;
         }
         catch (Exception)
         {
             _state = State.Failed;
             _previewResults = [];
+            _testedProvider = null;
+            _testedListIdentifier = string.Empty;
         }
     }
 
