@@ -21,7 +21,11 @@ public class PlexTypesTests
 			Poster: _faker.Internet.Url(),
 			Title: _faker.Lorem.Sentence(3),
 			Year: _faker.Random.Number(1980, 2025),
-			Guid: guids
+			Duration: _faker.Random.Number(60, 240) * 60_000,
+			SeasonCount: null,
+			EpisodeCount: null,
+			Guid: guids,
+			Genre: [new PlexTypes.ById.Genre(_faker.Lorem.Word())]
 		);
 
 	[Test]

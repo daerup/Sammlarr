@@ -23,7 +23,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 	private async Task<IEnumerable<IMediaId>> GetAdditionalIds(PlexId plexId)
 	{
 		var details = await plexApi.ByIdAsync(plexId);
-		return [.. details.TmdbIds, .. details.TvdbIds, .. details.ImdbIds];
+		return details.AdditionalIds;
 	}
 
 	private async ValueTask<ResolvedId> FuzzySearch(TmdbId tmdbId)
@@ -35,13 +35,12 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 			.OfType<PlexId>()
 			.ToAsyncEnumerable()
 			.SelectAwait(async id => await plexApi.ByIdAsync(id))
-			.FirstOrDefaultAsync(d => d.TmdbIds.Contains(tmdbId));
+			.FirstOrDefaultAsync(d => d.AdditionalIds.OfType<TmdbId>().Contains(tmdbId));
 
 		if (match is null)
 		{
 			return ResolvedId.Failed;
 		}
-		List<IMediaId> otherIds = [.. match.TmdbIds, .. match.ImdbIds, .. match.TvdbIds];
-		return new ResolvedId(match.PlexId, otherIds);
+		return new ResolvedId(match.SourceId, match.AdditionalIds);
 	}
 }

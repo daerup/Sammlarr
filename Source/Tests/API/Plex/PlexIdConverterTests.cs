@@ -44,9 +44,9 @@ public class PlexIdConverterTests
 	{
 		var payload = CreatePlexByIdPayload(includeImdbId: true, includeTvdbId: true);
 		var searchService = IMediaSearchService.Mock();
-		List<IMediaSearchResult> searchResults =
+		List<IMediaDetailResult> searchResults =
 		[
-			new MovieSearchResult
+			new MovieDetailResult
 			{
 				SourceId = payload.PlexId,
 				Title = "match",
@@ -56,6 +56,7 @@ public class PlexIdConverterTests
 				Runtime = null,
 				ReleaseDate = null,
 				Genres = [],
+				AdditionalIds = [],
 			},
 		];
 		searchService.SearchAsync(Any(), Any(), Any()).Returns(searchResults);
@@ -76,7 +77,7 @@ public class PlexIdConverterTests
 	{
 		var payload = CreatePlexByIdPayload(includeImdbId: false, includeTvdbId: false);
 		var searchService = IMediaSearchService.Mock();
-		searchService.SearchAsync(Any(), Any(), Any()).Returns(new List<IMediaSearchResult>());
+		searchService.SearchAsync(Any(), Any(), Any()).Returns(new List<IMediaDetailResult>());
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json), searchService);
 
@@ -138,7 +139,11 @@ public class PlexIdConverterTests
 			Poster: faker.System.FilePath(),
 			Title: faker.Lorem.Sentence(2),
 			Year: faker.Date.Past().Year,
-			Guid: guids
+			Duration: faker.Random.Int(1, 300) * 60 * 1000,
+			SeasonCount: null,
+			EpisodeCount: null,
+			Guid: guids,
+			Genre: [new PlexTypes.ById.Genre(faker.Lorem.Word())]
 		);
 		var root = new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata]));
 

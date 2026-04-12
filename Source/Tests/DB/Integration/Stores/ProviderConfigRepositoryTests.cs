@@ -11,7 +11,7 @@ namespace DB.Tests.Integration.Stores;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IProviderSettingsRepository _testee = null!;
+	private IProviderConfigRepository _testee = null!;
 	private Mock<ITypedMemoryCache<string, ProviderConfig>> _cache = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();

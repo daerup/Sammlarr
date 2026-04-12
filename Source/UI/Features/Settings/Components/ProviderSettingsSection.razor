@@ -5,7 +5,7 @@
 @using Contracts.Settings
 @using UI.Shared.Services.Branding
 
-@inject IProviderSettingsRepository ProviderSettingsRepository
+@inject IProviderConfigRepository ProviderConfigRepository
 @inject ToastService ToastService
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
@@ -52,7 +52,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _providerConfig = await ProviderSettingsRepository.GetAsync();
+        _providerConfig = await ProviderConfigRepository.GetAsync();
         _isLoaded = true;
     }
 
@@ -75,7 +75,7 @@ else
 
         try
         {
-            await ProviderSettingsRepository.StoreAsync(_providerConfig);
+            await ProviderConfigRepository.StoreAsync(_providerConfig);
             ToastService.Success("Provider settings saved.");
         }
         catch (Exception ex)

@@ -2,5 +2,5 @@ namespace Contracts.Media.Search;
 
 public interface IMediaSearchService
 {
-	Task<IReadOnlyList<IMediaSearchResult>> SearchAsync(string query, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<IMediaDetailResult>> SearchAsync(string query, IReadOnlyCollection<MediaType> mediaTypes, CancellationToken cancellationToken = default);
 }

@@ -13,16 +13,16 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 	private const string SerachMetadataEndpoint =
 		"https://discover.provider.plex.tv/library/search?searchTypes={0}&searchProviders=discover&includeMetadata=1&query={1}";
 
-	public async Task<PlexTypes.ById.Metadata> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	public async Task<IMediaDetailResult> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(RatingKeyMetadataEndpoint, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
-		return result!.MediaContainer.Metadata[0];
+		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
 	}
 
-	public async Task<IReadOnlyList<IMediaSearchResult>> SearchAsync(
+	public async Task<IReadOnlyList<IMediaDetailResult>> SearchAsync(
 		string title,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -40,12 +40,25 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 
 		return result
 			.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
-			.Select(s => MapSearchResult(s.Metadata))
+			.Select(s => s.Metadata.ToMediaDetailResult())
 			.DistinctBy(result => result.SourceId)
 			.ToList();
 	}
 
-	private static IMediaSearchResult MapSearchResult(PlexTypes.Search.Metadata result)
+	private static string ToPlexMediaType(MediaType mediaType)
+	{
+		return mediaType switch
+		{
+			MediaType.Movie => "movies",
+			MediaType.Show => "tv",
+			_ => throw new ArgumentOutOfRangeException(nameof(mediaType), $"Unsupported media type: {mediaType}"),
+		};
+	}
+}
+
+file static class PlexMetadataMappingExtensions
+{
+	public static IMediaDetailResult ToMediaDetailResult(this PlexTypes.Search.Metadata result)
 	{
 		var mediatype = ParseMediaType(result.Type);
 		return mediatype switch
@@ -55,12 +68,65 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		};
 	}
 
-	private static MovieSearchResult MapMovieResult(PlexTypes.Search.Metadata result)
+	public static IMediaDetailResult ToMediaDetailResult(this PlexTypes.ById.Metadata result)
 	{
-		return new MovieSearchResult
+		var mediatype = ParseMediaType(result.Type);
+		return mediatype switch
+		{
+			MediaType.Movie => MapMovieResult(result),
+			MediaType.Show => MapShowResult(result),
+		};
+	}
+
+	private static MovieDetailResult MapMovieResult(PlexTypes.ById.Metadata result)
+	{
+		return new MovieDetailResult
 		{
 			Title = result.Title,
 			SourceId = result.PlexId,
+			AdditionalIds = [.. result.TmdbIds, .. result.ImdbIds, .. result.TvdbIds],
+			Year = result.Year > 0 ? result.Year : null,
+			PosterUrl = NormalizePlexImageUrl(result.Poster),
+			BackdropUrl = NormalizePlexImageUrl(result.Art),
+			Runtime = TimeSpan.FromMilliseconds(result.Duration),
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			Genres = (result.Genre ?? [])
+				.Select(genre => genre.Tag)
+				.Where(tag => !string.IsNullOrWhiteSpace(tag))
+				.Distinct(StringComparer.OrdinalIgnoreCase)
+				.ToList(),
+		};
+	}
+
+	private static ShowDetailResult MapShowResult(PlexTypes.ById.Metadata result)
+	{
+		return new ShowDetailResult
+		{
+			Title = result.Title,
+			SourceId = result.PlexId,
+			AdditionalIds = [.. result.TmdbIds, .. result.ImdbIds, .. result.TvdbIds],
+			Seasons = result.SeasonCount ?? 0,
+			Episodes = result.EpisodeCount ?? 0,
+			Year = result.Year > 0 ? result.Year : null,
+			PosterUrl = NormalizePlexImageUrl(result.Poster),
+			BackdropUrl = NormalizePlexImageUrl(result.Art),
+			Runtime = TimeSpan.FromMilliseconds(result.Duration),
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			Genres = (result.Genre ?? [])
+				.Select(genre => genre.Tag)
+				.Where(tag => !string.IsNullOrWhiteSpace(tag))
+				.Distinct(StringComparer.OrdinalIgnoreCase)
+				.ToList(),
+		};
+	}
+
+	private static MovieDetailResult MapMovieResult(PlexTypes.Search.Metadata result)
+	{
+		return new MovieDetailResult
+		{
+			Title = result.Title,
+			SourceId = result.PlexId,
+			AdditionalIds = [],
 			Year = result.Year > 0 ? result.Year : null,
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
@@ -74,12 +140,13 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		};
 	}
 
-	private static ShowSearchResult MapShowResult(PlexTypes.Search.Metadata result)
+	private static ShowDetailResult MapShowResult(PlexTypes.Search.Metadata result)
 	{
-		return new ShowSearchResult
+		return new ShowDetailResult
 		{
 			Title = result.Title,
 			SourceId = result.PlexId,
+			AdditionalIds = [],
 			Seasons = result.SeasonCount ?? 0,
 			Episodes = result.EpisodeCount ?? 0,
 			Year = result.Year > 0 ? result.Year : null,
@@ -122,15 +189,5 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		}
 
 		return $"https://metadata.provider.plex.tv{url}";
-	}
-
-	private static string ToPlexMediaType(MediaType mediaType)
-	{
-		return mediaType switch
-		{
-			MediaType.Movie => "movies",
-			MediaType.Show => "tv",
-			_ => throw new ArgumentOutOfRangeException(nameof(mediaType), $"Unsupported media type: {mediaType}"),
-		};
 	}
 }

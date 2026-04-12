@@ -1,8 +1,9 @@
 namespace Contracts.Media.Search;
 
-public interface IMediaSearchResult
+public interface IMediaDetailResult
 {
 	public IMediaId SourceId { get; }
+	public IMediaId[] AdditionalIds { get; }
 	public MediaType MediaType { get; }
 
 	public string? PosterUrl { get; }

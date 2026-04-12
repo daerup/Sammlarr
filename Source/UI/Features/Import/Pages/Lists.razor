@@ -1,15 +1,13 @@
 @page "/lists"
 @using Contracts.Auth
 @using Contracts.DI
-@using Contracts.Media
 @using Contracts.Media.List
 @using Contracts.Settings
 @using Contracts.Watchlist
-@using global::Shared
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistStoreIndex
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
-@inject IProviderSettingsRepository ProviderSettingsRepository
+@inject IProviderConfigRepository ProviderConfigRepository
 @inject IImportListRepository ImportListRepository
 
 <PageTitle>Lists</PageTitle>

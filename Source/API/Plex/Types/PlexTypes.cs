@@ -60,7 +60,11 @@ internal static class PlexTypes
 			[property: JsonPropertyName("thumb")] string Poster,
 			[property: JsonPropertyName("title")] string Title,
 			[property: JsonPropertyName("year")] int Year,
-			[property: JsonPropertyName("Guid")] IReadOnlyList<Guid> Guid
+			[property: JsonPropertyName("duration")] int Duration,
+			[property: JsonPropertyName("childCount")] int? SeasonCount,
+			[property: JsonPropertyName("leafCount")] int? EpisodeCount,
+			[property: JsonPropertyName("Guid")] IReadOnlyList<Guid> Guid,
+			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre> Genre
 		)
 		{
 			public MediaType MediaType => MediaType.Parse(Type);
@@ -72,6 +76,8 @@ internal static class PlexTypes
 			private T[] GetId<T>(string prefix, Func<string, T> convert) =>
 				Guid.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
 		};
+
+		public record Genre([property: JsonPropertyName("tag")] string Tag);
 
 		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 	}
