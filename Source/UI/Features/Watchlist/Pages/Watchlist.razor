@@ -35,7 +35,7 @@ else
 
             <ProtectedSection GuardState="IsOAuthAllowed" ShowFallback="false">
                 <div class="flex items-center gap-2">
-                    <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
+                    <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
                         @if (_isLoading)
                         {
                             <span>Refreshing...</span>
@@ -65,7 +65,7 @@ else
                 {
                     <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
                         <p class="text-sm text-destructive font-medium">@_errorMessage</p>
-                        <BbButton Variant="ButtonVariant.Outline" @onclick="LoadWatchlistAsync">
+                        <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync">
                             <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
                             Retry
                         </BbButton>

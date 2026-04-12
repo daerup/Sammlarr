@@ -1,5 +1,3 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media.List;
 using DB.Conversion.Enums;
@@ -9,7 +7,10 @@ namespace DB.Data.List;
 internal record ImportListEntity : Entity<Guid>
 {
 	[Required]
-	public bool Enabled { get; set; }
+	public bool IsEnabled { get; set; }
+
+	[Required]
+	public string Name { get; set; }
 
 	[Required]
 	[EnumAsString]

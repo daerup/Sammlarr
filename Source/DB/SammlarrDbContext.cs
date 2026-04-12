@@ -2,6 +2,7 @@ using Contracts;
 using DB.Data;
 using DB.Data.Access;
 using DB.Data.Config;
+using DB.Data.List;
 using DB.Data.MediaGroup;
 using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
+	public DbSet<ImportListEntity> Lists => Set<ImportListEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
@@ -60,19 +62,26 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
 		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
-		modelBuilder
-			.Entity<ProviderConfigEntity>()
-			.ToTable(
-				"ProviderSettings",
-				tableBuilder =>
+
+		modelBuilder.Entity<MediaIdentifierGroupEntry>(builder =>
+		{
+			builder.Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
+			builder.HasKey(e => e.Identifier);
+		});
+		modelBuilder.Entity<MediaIdentifierGroupEntity>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroupEntity).OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<ImportListEntity>(builder =>
+		{
+			builder.OwnsOne(
+				x => x.Filter,
+				filter =>
 				{
-					tableBuilder.HasCheckConstraint("CK_ProviderSettings_Singleton", $"Id = '{ProviderConfigEntity.SingletonId}'");
+					filter.ToJson();
+					filter.OwnsMany(f => f.Groups, group => group.OwnsMany(g => g.Groups));
 				}
 			);
-
-		modelBuilder.Entity<MediaIdentifierGroupEntry>().Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
-		modelBuilder.Entity<MediaIdentifierGroupEntry>().HasKey(e => e.Identifier);
-		modelBuilder.Entity<MediaIdentifierGroupEntity>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroupEntity).OnDelete(DeleteBehavior.Cascade);
+			builder.OwnsOne(x => x.Sort, sort => sort.ToJson());
+		});
 	}
 
 	public override int SaveChanges()
