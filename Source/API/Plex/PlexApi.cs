@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 using Contracts.Media.Search;
 
 namespace API.Plex;
@@ -20,6 +21,22 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
 		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
+	}
+
+	internal async Task<ResolvedId> ResolveById<TMediaId>(PlexId plexId)
+		where TMediaId : IMediaId
+	{
+		var plexResult = await ByIdAsync(plexId);
+		var mediaIds = plexResult.AdditionalIds.OfType<TMediaId>().Cast<IMediaId>().ToList();
+		var otherIds = plexResult.AdditionalIds.Except(mediaIds).Append(plexResult.SourceId);
+		if (mediaIds.Any())
+		{
+			var id = mediaIds.First();
+			var remainingIds = mediaIds.Skip(1);
+			return new ResolvedId(id, remainingIds.Concat(otherIds));
+		}
+
+		return ResolvedId.Unresolved(otherIds);
 	}
 
 	public async Task<IReadOnlyList<IMediaDetailResult>> SearchAsync(
