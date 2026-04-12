@@ -45,6 +45,7 @@ public static class ProviderExtensions
 			return provider switch
 			{
 				MediaListProvider.Mdblist => MediaProvider.Mdblist,
+				MediaListProvider.Tmdb => MediaProvider.Tmdb,
 			};
 		}
 	}

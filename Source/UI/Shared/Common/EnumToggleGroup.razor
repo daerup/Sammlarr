@@ -2,26 +2,35 @@
 @using UI.Shared.Services.Branding
 
 @typeparam TEnum where TEnum : struct, Enum
-@{
-    var selectedBranding = BrandingProvider(Value);
-}
 
 <div class="flex flex-wrap gap-2" role="group" aria-label="Enum selection">
-	@foreach (var option in All)
-	{
-		var isSelected = EqualityComparer<TEnum>.Default.Equals(option, Value);
-		var isOptionDisabled = Disabled;
-		var branding = BrandingProvider(option);
+    @foreach (var option in All)
+    {
+        var isSelected = Value.HasValue && EqualityComparer<TEnum>.Default.Equals(option, Value.Value);
+        var isOptionDisabled = Disabled || DisabledValues.Contains(option);
+        RenderFragment button =
+            @<BbButton Variant="@(isSelected ? ButtonVariant.Default : ButtonVariant.Outline)"
+                       Disabled="@isOptionDisabled"
+                       Class="min-w-24 justify-center flex items-center gap-2"
+                       aria-pressed="@isSelected"
+                       @onclick="() => SelectAsync(option)">
+                @option.GetDescription()
+            </BbButton>;
 
-		<BbButton
-				  Variant="@(isSelected ? ButtonVariant.Secondary : ButtonVariant.Outline)"
-				  Disabled="@isOptionDisabled"
-				  Class="min-w-24 justify-center flex items-center gap-2"
-				  aria-pressed="@isSelected"
-				  @onclick="() => SelectAsync(option)">
-			@option.GetDescription()
-		</BbButton>
-	}
+        @if (TooltipProvider is null)
+        {
+            @button
+        }
+        else
+        {
+            <BbTooltipProvider>
+                <BbTooltip>
+                    <BbTooltipTrigger>@button</BbTooltipTrigger>
+                    <BbTooltipContent>@TooltipProvider?.Invoke(option)</BbTooltipContent>
+                </BbTooltip>
+            </BbTooltipProvider>
+        }
+    }
 </div>
 
 @code {
@@ -29,22 +38,26 @@
 
     [Parameter, EditorRequired] public required Func<TEnum, BrandingInfo> BrandingProvider { get; set; }
 
-    [Parameter, EditorRequired] public TEnum Value { get; set; }
+    [Parameter] public required Func<TEnum, string>? TooltipProvider { get; set; }
 
-	[Parameter, EditorRequired] public required EventCallback<TEnum> OnChange { get; set; }
+    [Parameter, EditorRequired] public TEnum? Value { get; set; }
 
-	[Parameter] public bool Disabled { get; set; }
+    [Parameter, EditorRequired] public required EventCallback<TEnum> OnChange { get; set; }
 
-	[Parameter] public IReadOnlyList<TEnum>? AllValues { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public IReadOnlyCollection<TEnum> DisabledValues { get; set; } = [];
+
+    [Parameter] public IReadOnlyList<TEnum>? AllValues { get; set; }
 
 
-	private async Task SelectAsync(TEnum value)
-	{
-		if (Disabled || EqualityComparer<TEnum>.Default.Equals(value, Value))
-		{
-			return;
-		}
+    private async Task SelectAsync(TEnum value)
+    {
+        if (Disabled || DisabledValues.Contains(value))
+        {
+            return;
+        }
 
         await OnChange.InvokeAsync(value);
-	}
+    }
 }

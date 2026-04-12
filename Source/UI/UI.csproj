@@ -14,6 +14,7 @@
 		<PackageReference Include="BlazorBlueprint.Components" />
 		<PackageReference Include="BlazorBlueprint.Primitives" />
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
+		<PackageReference Include="CronExpressionDescriptor" />
 		<PackageReference Include="timewarp-simple-icons" />
 	</ItemGroup>
 	<ItemGroup>
@@ -27,8 +28,5 @@
 		<Content Update="Features\Settings\Components\ProviderSettingCard.razor.css">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Features\Import\Components\" />
 	</ItemGroup>
 </Project>

@@ -15,12 +15,3 @@ public class MdblistModule : IServiceModule
 		services.AddKeyedScoped<IImportListService, MdblistService>(MediaListProvider.Mdblist);
 	}
 }
-
-internal class MdblistService : IImportListService
-{
-	public Task<IReadOnlyList<ImportListItem>> GetAllImportListItemsAsync(ImportList list, CancellationToken cancellationToken = default) =>
-		throw new NotImplementedException();
-
-	public Task<IReadOnlyList<ImportListItem>> GetDistilledImportListItemsAsync(ImportList list, CancellationToken cancellationToken = default) =>
-		throw new NotImplementedException();
-}

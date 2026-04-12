@@ -1,0 +1,648 @@
+@page "/subscription/create"
+@implements IDisposable
+@using BlazorBlueprint.Primitives.Filtering
+@using Contracts
+@using global::Shared
+@using Contracts.Media.List
+@using Contracts.Media.Search
+@using Contracts.DI
+@using Contracts.Auth
+@using UI.Features.Import.Components
+@using UI.Shared.Services.Branding
+@inject IImportListRepository ImportListRepository
+@inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
+@inject IApiKeyConfigRepository ApiKeyConfigRepository
+@inject MediaProviderBrandingService MediaProviderBrandingService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create subscription</PageTitle>
+
+<div class="px-6 py-10">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold tracking-wide antialiased">Create subscription</h1>
+        <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Import a list from an external provider and subscribe to it.</p>
+    </div>
+
+    <div class="w-full max-w-2xl">
+        <div class="rounded-lg border">
+
+            <div class="px-6 py-6 space-y-6">
+
+                <BbField>
+                    <BbFieldLabel Class="flex items-center leading-none">
+                        Enabled
+                        <BbTooltipProvider>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                    <LucideIcon Name="info" Size="14"/>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Toggle to enable or disable this import.</BbTooltipContent>
+                            </BbTooltip>
+                        </BbTooltipProvider>
+                    </BbFieldLabel>
+                    <BbFieldContent>
+                        <BbSwitch @bind-Checked="_isEnabled"/>
+                    </BbFieldContent>
+                </BbField>
+
+                <BbField IsInvalid="NameIsInvalid">
+                    <BbFieldLabel For="name" Class="flex items-center leading-none">
+                        Name <span class="text-destructive ml-0.5">*</span>
+                        <BbTooltipProvider>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                    <LucideIcon Name="info" Size="14"/>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>A friendly label to identify this subscription across your lists.</BbTooltipContent>
+                            </BbTooltip>
+                        </BbTooltipProvider>
+                    </BbFieldLabel>
+                    <BbFieldContent>
+                        <BbInput id="name" Placeholder="e.g. My Top Movies" @bind-Value="_name" Class="bg-accent" Required="true" AriaInvalid="@NameIsInvalid"
+                                 UpdateTiming="UpdateTiming.Immediate"/>
+                    </BbFieldContent>
+                    @if (NameIsInvalid)
+                    {
+                        <BbFieldError>Name is required.</BbFieldError>
+                    }
+                </BbField>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <BbField>
+                        <BbFieldLabel Class="flex items-center leading-none">
+                            Provider
+                            @if (_disabledProviders.Count > 0)
+                            {
+                                var allDisabled = _disabledProviders.Count == Enum.GetValues<MediaListProvider>().Length;
+                                <BbPopover>
+                                    <BbPopoverTrigger AsChild="false"
+                                                      Class="@($"ml-1 inline-flex items-center cursor-pointer {(allDisabled ? "text-destructive" : "text-amber-500")}")">
+                                        <LucideIcon Name="triangle-alert" Size="14"/>
+                                    </BbPopoverTrigger>
+                                    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72">
+                                        <div class="space-y-2">
+                                            <p class="text-sm font-semibold">API key required</p>
+                                            <p class="text-sm text-muted-foreground">
+                                                The following providers are unavailable because no API key is configured:
+                                                <span class="font-medium">@string.Join(", ", _disabledProviders)</span>.
+                                            </p>
+                                            <BbButton Variant="ButtonVariant.Link" Href="/settings?section=api-keys" Class="h-auto p-0 text-sm">
+                                                Go to Settings →
+                                            </BbButton>
+                                        </div>
+                                    </BbPopoverContent>
+                                </BbPopover>
+                            }
+                            <BbTooltipProvider>
+                                <BbTooltip DelayDuration="0">
+                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                        <LucideIcon Name="info" Size="14"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>The external service that hosts the list you want to import.
+                                    </BbTooltipContent>
+                                </BbTooltip>
+                            </BbTooltipProvider>
+                        </BbFieldLabel>
+                        <BbFieldContent>
+                            <EnumToggleGroup TEnum="MediaListProvider"
+                                             Value="_provider"
+                                             OnChange="@OnProviderChanged"
+                                             BrandingProvider="GetProviderBranding"
+                                             DisabledValues="_disabledProviders"/>
+                        </BbFieldContent>
+                    </BbField>
+
+                    <BbField>
+                        <BbFieldLabel Class="flex leading-none">
+                            Strategy
+                            <BbTooltipProvider>
+                                <BbTooltip>
+                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                        <LucideIcon Name="info" Size="14"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>Only relevant when a subscription runs more than once. Controls whether repeated syncs add to or replace
+                                        your existing collection.
+                                    </BbTooltipContent>
+                                </BbTooltip>
+                            </BbTooltipProvider>
+                        </BbFieldLabel>
+                        <BbFieldContent>
+                            <EnumToggleGroup TEnum="MediaListAddStrategy"
+                                             Value="_strategy"
+                                             OnChange="@OnStrategyChanged"
+                                             TooltipProvider="GetStrategyTooltip"
+                                             BrandingProvider="GetStrategyBranding"/>
+                        </BbFieldContent>
+                    </BbField>
+                </div>
+
+                <BbField IsInvalid="ListIdentifierIsInvalid">
+                    <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
+                        List identifier <span class="text-destructive ml-0.5">*</span>
+                        <BbTooltipProvider>
+                            <BbTooltip>
+                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                    <LucideIcon Name="info" Size="14"/>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>The unique string that locates your list within the selected provider. The exact format varies by provider;
+                                    check the list's URL or the provider's documentation.
+                                </BbTooltipContent>
+                            </BbTooltip>
+                        </BbTooltipProvider>
+                    </BbFieldLabel>
+                    <BbFieldContent>
+                        <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)" @bind-Value="_listIdentifier" Class="bg-accent"
+                                 Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate"/>
+                    </BbFieldContent>
+                    <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
+                    @if (ListIdentifierIsInvalid)
+                    {
+                        <BbFieldError>List identifier is required.</BbFieldError>
+                    }
+                </BbField>
+
+            </div>
+
+            <BbCollapsible>
+                <BbCollapsibleTrigger AsChild="false"
+                                      Class="group w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
+                    <span class="flex items-center gap-2">
+                        <LucideIcon Name="sliders-horizontal" Size="14"/>
+                        Filters, Sorting & Limits
+                        <span class="text-xs font-normal opacity-50">optional</span>
+                    </span>
+                    <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
+                </BbCollapsibleTrigger>
+                <BbCollapsibleContent>
+                    <div class="px-6 pb-8 pt-4 space-y-6 p-4">
+
+                        <BbField>
+                            <BbFieldLabel Class="flex items-center leading-none">
+                                Enable filters
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Limit which imported items are added to your collection. Filter by genre, rating, release year, and
+                                            more.
+                                        </BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <BbSwitch @bind-Checked="_filtersEnabled"/>
+                            </BbFieldContent>
+                        </BbField>
+
+                        @if (_filtersEnabled)
+                        {
+                            <BbFilterBuilder @bind-Filter="_filter"
+                                             Fields="_fields"
+                                             OnFilterChanged="HandleFilterChanged"/>
+                        }
+
+                        <BbField>
+                            <BbFieldLabel Class="flex items-center leading-none">
+                                Enable custom sorting
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Sort imported items by a specific field before applying the limit.</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <BbSwitch @bind-Checked="_sortingEnabled"  />
+                            </BbFieldContent>
+                        </BbField>
+
+                        @if (_sortingEnabled)
+                        {
+                            <BbField>
+                                <BbFieldLabel Class="flex items-center leading-none">
+                                    Sort by
+                                </BbFieldLabel>
+                                <BbFieldContent>
+                                    <div class="flex items-center gap-3">
+                                        <BbSelect TValue="string"
+                                                  Value="_sortField"
+                                                  Class="w-40"
+                                                  ValueChanged="@((v) => _sortField = v ?? _sortField)"
+                                                  Options="_sortFieldOptions"/>
+                                        <BbTooltipProvider>
+                                            <BbTooltip DelayDuration="0">
+                                                <BbTooltipTrigger AsChild="false" Class="p-0">
+                                                    <BbButton Size="ButtonSize.Icon"
+                                                              Variant="ButtonVariant.Outline"
+                                                              OnClick="@(() => OnSortDirectionChanged(_sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending))"
+                                                              AriaLabel="@(_sortDirection == SortDirection.Ascending ? "Ascending" : "Descending")">
+                                                        <LucideIcon Name="arrow-up" Size="14" Class="@($"transition-transform duration-200{(_sortDirection == SortDirection.Descending ? " rotate-180" : string.Empty)}")"/>
+                                                    </BbButton>
+                                                </BbTooltipTrigger>
+                                                <BbTooltipContent>@(_sortDirection == SortDirection.Ascending ? "Ascending — low to high" : "Descending — high to low")</BbTooltipContent>
+                                            </BbTooltip>
+                                        </BbTooltipProvider>
+                                    </div>
+                                </BbFieldContent>
+                            </BbField>
+                        }
+
+                        <BbField IsInvalid="LimitIsInvalid">
+                            <BbFieldLabel For="limit" Class="flex items-center leading-none">
+                                Limit
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Maximum number of items to import from the list. Leave empty to import all available items.
+                                        </BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <BbInput id="limit"
+                                         Placeholder="e.g. 100"
+                                         @bind-Value="_limitRaw"
+                                         Class="bg-accent w-40"
+                                         AriaInvalid="@LimitIsInvalid"
+                                         UpdateTiming="UpdateTiming.Immediate"/>
+                            </BbFieldContent>
+                            @if (LimitIsInvalid)
+                            {
+                                <BbFieldError>Limit must be a positive whole number.</BbFieldError>
+                            }
+                        </BbField>
+                    </div>
+                </BbCollapsibleContent>
+            </BbCollapsible>
+
+            <BbCollapsible>
+                <BbCollapsibleTrigger AsChild="false"
+                                      Class="group w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
+                    <span class="flex items-center gap-2">
+                        <LucideIcon Name="clock" Size="14"/>
+                        Sync Frequency
+                        <span class="text-xs font-normal opacity-50">optional</span>
+                    </span>
+                    <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
+                </BbCollapsibleTrigger>
+                <BbCollapsibleContent>
+                    <div class="px-6 pb-8 pt-4 space-y-6 p-4">
+
+                        <BbField>
+                            <BbFieldLabel Class="flex items-center leading-none">
+                                Trigger
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>When to sync this subscription, on demand or on a recurring schedule.</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <EnumToggleGroup TEnum="RunMode"
+                                                 Value="_runMode"
+                                                 OnChange="@OnRunModeChanged"
+                                                 BrandingProvider="GetRunModeBranding"/>
+                            </BbFieldContent>
+                        </BbField>
+
+                        @if (_runMode == RunMode.Scheduled)
+                        {
+                            <BbField>
+                                <BbFieldLabel Class="flex items-center leading-none">
+                                    Schedule
+                                    <BbTooltipProvider>
+                                        <BbTooltip DelayDuration="0">
+                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                                <LucideIcon Name="info" Size="14"/>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>Define a CRON schedule for automatic runs.</BbTooltipContent>
+                                        </BbTooltip>
+                                    </BbTooltipProvider>
+                                </BbFieldLabel>
+                                <BbFieldContent>
+                                    <SchedulePicker CronExpression="@_scheduleCronExpression"
+                                                    CronExpressionChanged="@((value) => _scheduleCronExpression = value)"/>
+                                </BbFieldContent>
+                            </BbField>
+                        }
+
+                    </div>
+                </BbCollapsibleContent>
+            </BbCollapsible>
+
+            <div class="px-6 py-4 border-t flex items-center justify-end gap-2">
+                @if (_state == State.Idle)
+                {
+                    <BbTooltipProvider>
+                        <BbTooltip>
+                            <BbTooltipTrigger>
+                                <BbButton Size="ButtonSize.Icon"
+                                          Variant="ButtonVariant.Default"
+                                          OnClick="HandleTestOrSaveAsync"
+                                          Disabled="!CanTest"
+                                          AriaLabel="Test">
+                                    <LucideIcon Name="zap" Size="16"/>
+                                </BbButton>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Test subscription</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                }
+                else if (_state == State.Testing)
+                {
+                    <BbTooltipProvider>
+                        <BbTooltip>
+                            <BbTooltipTrigger>
+                                <BbButton Size="ButtonSize.Icon" Variant="ButtonVariant.Default" Disabled="true" AriaLabel="Testing">
+                                    <BbSpinner Size="SpinnerSize.Small"/>
+                                </BbButton>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Testing…</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                }
+                else if (_state == State.Success)
+                {
+                    <BbTooltipProvider>
+                        <BbTooltip>
+                            <BbTooltipTrigger>
+                                <BbButton Size="ButtonSize.Icon"
+                                          Variant="ButtonVariant.Outline"
+                                          Class="text-success border-success hover:bg-success"
+                                          OnClick="HandleTestOrSaveAsync"
+                                          AriaLabel="Save">
+                                    <LucideIcon Name="save" Size="16"/>
+                                </BbButton>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Save subscription</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                }
+                else if (_state == State.Failed)
+                {
+                    <BbTooltipProvider>
+                        <BbTooltip>
+                            <BbTooltipTrigger>
+                                <BbButton Size="ButtonSize.Icon"
+                                          Variant="ButtonVariant.Outline"
+                                          Class="text-destructive border-destructive"
+                                          Disabled="true"
+                                          AriaLabel="Failed">
+                                    <LucideIcon Name="x" Size="16"/>
+                                </BbButton>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Test failed, check credentials and identifier</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                }
+
+                <BbTooltipProvider>
+                    <BbTooltip>
+                        <BbTooltipTrigger>
+                            <BbButton Size="ButtonSize.Icon"
+                                      Variant="ButtonVariant.Ghost"
+                                      OnClick="ReturnAsync"
+                                      AriaLabel="Cancel">
+                                <LucideIcon Name="x-circle" Size="16"/>
+                            </BbButton>
+                        </BbTooltipTrigger>
+                        <BbTooltipContent>Cancel</BbTooltipContent>
+                    </BbTooltip>
+                </BbTooltipProvider>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private enum State { Idle, Testing, Success, Saving, Saved, Failed }
+
+    private enum SortDirection { Ascending, Descending }
+
+    private enum RunMode { Manual, Scheduled }
+
+    private string _name = string.Empty;
+    private string _listIdentifier = string.Empty;
+    private bool _isEnabled = true;
+    private MediaListProvider? _provider = MediaListProvider.Mdblist;
+    private MediaListAddStrategy _strategy = MediaListAddStrategy.Append;
+
+    private State _state = State.Idle;
+    private IReadOnlyList<IMediaSearchResult> _previewResults = [];
+
+    private CancellationTokenSource? _cancellationTokenSource;
+    private bool _showValidation;
+
+    private string? _scheduleCronExpression = string.Empty;
+    private RunMode _runMode = RunMode.Manual;
+
+    private readonly HashSet<MediaListProvider> _disabledProviders = [];
+
+    private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
+    private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
+
+    private bool CanTest => !string.IsNullOrWhiteSpace(_listIdentifier) && _provider is not null;
+
+    private bool _filtersEnabled;
+    private FilterDefinition _filter = new();
+
+    private bool _sortingEnabled;
+    private SortDirection _sortDirection = SortDirection.Descending;
+    private string _sortField = "title";
+    private string _limitRaw = string.Empty;
+
+    private static readonly IReadOnlyList<SelectOption<string>> _sortFieldOptions =
+    [
+        new("title",       "Title"),
+        new("releaseDate", "Release Date"),
+        new("rating",      "Rating"),
+        new("runtime",     "Runtime"),
+        new("popularity",  "Popularity"),
+    ];
+
+    private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : (int?)null;
+    private bool LimitIsInvalid => !string.IsNullOrWhiteSpace(_limitRaw) && ParsedLimit is null;
+
+    private void OnSortDirectionChanged(SortDirection direction) => _sortDirection = direction;
+
+    private IEnumerable<FilterField> _fields =
+    [
+        new FilterField { Name = "name", Label = "Name", Type = FilterFieldType.Text },
+        new FilterField { Name = "age", Label = "Age", Type = FilterFieldType.Number },
+        new FilterField { Name = "joinedAt", Label = "Joined", Type = FilterFieldType.Date },
+        new FilterField { Name = "active", Label = "Active", Type = FilterFieldType.Boolean },
+        new FilterField
+        {
+            Name = "role", Label = "Role", Type = FilterFieldType.Enum,
+            Options =
+            [
+                new SelectOption<string>("admin", "Admin"),
+                new SelectOption<string>("editor", "Editor"),
+                new SelectOption<string>("viewer", "Viewer"),
+            ]
+        },
+    ];
+
+    private Task OnRunModeChanged(RunMode mode)
+    {
+        _runMode = mode;
+        _scheduleCronExpression = mode == RunMode.Manual ? string.Empty : null;
+        return Task.CompletedTask;
+    }
+
+    private BrandingInfo GetRunModeBranding(RunMode mode) =>
+        mode switch
+        {
+            RunMode.Manual    => BrandingInfoBuilder.Lucide("Manual",    mode.ToString(), "hand",     "#000000"),
+            RunMode.Scheduled => BrandingInfoBuilder.Lucide("Scheduled", mode.ToString(), "calendar", "#000000"),
+            _                 => BrandingInfoBuilder.Lucide(mode.ToString(), mode.ToString(), "clock", "#000000"),
+        };
+
+    private Task OnStrategyChanged(MediaListAddStrategy strategy)
+    {
+        _strategy = strategy;
+        return Task.CompletedTask;
+    }
+
+    private BrandingInfo GetProviderBranding(MediaListProvider provider) =>
+        MediaProviderBrandingService.GetBrandingInfo(provider.AsMediaProvider());
+
+    private BrandingInfo GetStrategyBranding(MediaListAddStrategy strategy) =>
+        BrandingInfoBuilder.Lucide(strategy.GetDescription(), strategy.ToString(), "shield-check", "#000000");
+
+    protected override async Task OnInitializedAsync()
+    {
+        foreach (var provider in Enum.GetValues<MediaListProvider>())
+        {
+            var apiKey = await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsMediaProvider());
+            if (string.IsNullOrEmpty(apiKey))
+                _disabledProviders.Add(provider);
+        }
+
+        if (_disabledProviders.Contains(_provider ?? default))
+            _provider = Enum.GetValues<MediaListProvider>().Cast<MediaListProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
+    }
+
+    private string GetListIdentifierPlaceholder(MediaListProvider? provider) =>
+        provider switch
+        {
+            MediaListProvider.Mdblist => "e.g. top-250-movies or 12345",
+            null => "Select a provider first",
+            _ => "Provider-specific list identifier",
+        };
+
+    private MarkupString RenderListIdentifierDescription() => _provider switch
+    {
+        MediaListProvider.Mdblist => new MarkupString(
+        "Slug or numeric ID from the list URL, e.g. <code>top-250-movies</code> or <code>12345</code>. " +
+        "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
+        "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
+        null => new MarkupString("No provider is available. Configure an API key in Settings."),
+        _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
+    };
+
+    private string GetStrategyTooltip(MediaListAddStrategy strategy) =>
+        strategy switch
+        {
+            MediaListAddStrategy.Append => "Each sync adds only new items. Items already in your collection are kept.",
+            MediaListAddStrategy.Replace => "Each sync removes items that were added by this subscription and are no longer on the list. Items added by other subscriptions are unaffected, even if they appear on this list.",
+        };
+
+
+    private Task OnProviderChanged(MediaListProvider provider)
+    {
+        _provider = provider;
+        return Task.CompletedTask;
+    }
+
+    private Task ReturnAsync()
+    {
+        NavigationManager.NavigateTo("/lists");
+        return Task.CompletedTask;
+    }
+
+    private void HandleFilterChanged(FilterDefinition filter) {}
+
+    private Task HandleTestOrSaveAsync()
+    {
+        _showValidation = true;
+        return _state == State.Success ? SaveAsync() : TestAsync();
+    }
+
+    private async Task TestAsync()
+    {
+        if (!CanTest) return;
+
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = new CancellationTokenSource();
+        var cancellationToken = _cancellationTokenSource.Token;
+
+        _state = State.Testing;
+
+        try
+        {
+            var importListService = ImportListServiceIndex[_provider!.Value];
+            var results = (await importListService.GetEnrichedImportListItemsAsync(_listIdentifier.Trim(), cancellationToken)).ToList();
+
+            _previewResults = results;
+            _state = _previewResults.Count > 0 ? State.Success : State.Failed;
+        }
+        catch (OperationCanceledException)
+        {
+            _state = State.Idle;
+        }
+        catch (Exception)
+        {
+            _state = State.Failed;
+            _previewResults = [];
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _state = State.Saving;
+
+        var createData = new ImportListCreateData
+        {
+            IsEnabled = _isEnabled,
+            Provider = _provider!.Value,
+            Strategy = _strategy,
+            ListIdentifier = _listIdentifier.Trim(),
+        };
+
+        try
+        {
+            var cancellationToken = _cancellationTokenSource?.Token ?? CancellationToken.None;
+            await ImportListRepository.CreateImportListsAsync(_name.Trim(), createData, cancellationToken);
+            _state = State.Saved;
+            NavigationManager.NavigateTo("/lists");
+        }
+        catch (OperationCanceledException)
+        {
+            _state = State.Idle;
+        }
+        catch (Exception)
+        {
+            _state = State.Failed;
+        }
+    }
+
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource = null;
+    }
+}
