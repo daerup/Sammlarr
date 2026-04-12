@@ -166,7 +166,7 @@ csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
 # License header
-file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.
+file_header_template = unset
 
 # xUnit1051: recommends TestContext.Current.CancellationToken (v3 pattern) which
 # is not yet adopted; suppress until a full v3 migration is performed.
