@@ -47,7 +47,7 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 
 		var existingGroup = await dbContext
 			.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
-				.ThenInclude(group => group.MediaIdEntries)
+			.ThenInclude(group => group.MediaIdEntries)
 			.Where(MatchesAnyIdentifier(identifiers))
 			.Select(entry => entry.MediaIdGroupEntity)
 			.Distinct()
@@ -72,7 +72,7 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 		var mediaIdGroup = (
 			await dbContext
 				.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
-					.ThenInclude(group => group.MediaIdEntries)
+				.ThenInclude(group => group.MediaIdEntries)
 				.SingleAsync(MatchesId(existingId), cancellationToken)
 		).MediaIdGroupEntity;
 
