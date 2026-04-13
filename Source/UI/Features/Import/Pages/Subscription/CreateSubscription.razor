@@ -151,7 +151,10 @@
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)" @bind-Value="_listIdentifier" Class="bg-accent"
+                        <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)"
+                                 @bind-Value="_listIdentifier"
+                                 @bind-Value:after="OnListIdentifierChanged"
+                                 Class="bg-accent"
                                  Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate"/>
                     </BbFieldContent>
                     <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
@@ -198,7 +201,7 @@
                         @if (_filtersEnabled)
                         {
                             <BbFilterBuilder @bind-Filter="_filter"
-                                             Fields="_fields"
+                                             Fields="FilterFields"
                                              OnFilterChanged="HandleFilterChanged"/>
                         }
 
@@ -231,19 +234,19 @@
                                                   Value="_sortField"
                                                   Class="w-40"
                                                   ValueChanged="@((v) => _sortField = v ?? _sortField)"
-                                                  Options="_sortFieldOptions"/>
+                                                  Options="SortFieldOptions"/>
                                         <BbTooltipProvider>
                                             <BbTooltip DelayDuration="0">
                                                 <BbTooltipTrigger AsChild="false" Class="p-0">
                                                     <BbButton Size="ButtonSize.Icon"
                                                               Variant="ButtonVariant.Outline"
-                                                              OnClick="@(() => OnSortDirectionChanged(_sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending))"
-                                                              AriaLabel="@(_sortDirection == SortDirection.Ascending ? "Ascending" : "Descending")">
+                                                              OnClick="@ToggleSortDirection"
+                                                              AriaLabel="@GetSortLabel()">
                                                         <LucideIcon Name="arrow-up" Size="14"
-                                                                    Class="@($"transition-transform duration-200{(_sortDirection == SortDirection.Descending ? " rotate-180" : string.Empty)}")"/>
+                                                                    Class="@GetSortIconClass()"/>
                                                     </BbButton>
                                                 </BbTooltipTrigger>
-                                                <BbTooltipContent>@(_sortDirection == SortDirection.Ascending ? "Ascending — low to high" : "Descending — high to low")</BbTooltipContent>
+                                                <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     </div>
@@ -347,30 +350,40 @@
                         <span>Testing…</span>
                     </BbButton>
                 }
-                else if (_state == State.Success)
+                else if (ShowSaveButton)
                 {
                     <BbButton Variant="ButtonVariant.Outline"
                               Class="text-success border-success hover:bg-success"
                               OnClick="HandleSaveAsync"
                               Disabled="!CanSave">
                         <LucideIcon Name="save" Size="14" Class="mr-2"/>
-                        <span>Save</span>
+                        Save
                     </BbButton>
                 }
-                else
+                else if (_state == State.Failed)
+                {
+                    <BbButton Variant="ButtonVariant.Outline"
+                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                              OnClick="HandleTestAsync"
+                              Disabled="!CanTest || LimitIsInvalid">
+                        <LucideIcon Name="x" Size="14" Class="mr-2"/>
+                        Failed
+                    </BbButton>
+                }
+                else if (ShowTestButton)
                 {
                     <BbButton Variant="ButtonVariant.Default"
                               OnClick="HandleTestAsync"
                               Disabled="!CanTest || LimitIsInvalid">
                         <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                        <span>Test</span>
+                        Test
                     </BbButton>
                 }
 
                 <BbButton Variant="ButtonVariant.Outline"
                           Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
                           OnClick="ReturnAsync"
-                          Disabled="@(_state is State.Testing or State.Saving)">
+                          Disabled="@IsProcessing">
                     Cancel
                 </BbButton>
             </div>
@@ -382,50 +395,46 @@
 @code {
 
     private enum State { Idle, Testing, Success, Saving, Saved, Failed }
-
     private enum SortDirection { Ascending, Descending }
-
     private enum RunMode { Manual, Scheduled }
 
+    #region Form State
     private string _name = string.Empty;
     private string _listIdentifier = string.Empty;
     private bool _isEnabled = true;
     private MediaListProvider? _provider = MediaListProvider.Mdblist;
     private MediaListAddStrategy _strategy = MediaListAddStrategy.Append;
+    #endregion
 
+    #region Test/Save State
     private State _state = State.Idle;
-    private IReadOnlyList<IMediaDetailResult> _previewResults = [];
+    private bool _showValidation;
     private MediaListProvider? _testedProvider;
     private string _testedListIdentifier = string.Empty;
-
+    private IReadOnlyList<IMediaDetailResult> _previewResults = [];
     private CancellationTokenSource? _cancellationTokenSource;
-    private bool _showValidation;
+    #endregion
 
-    private string? _scheduleCronExpression = string.Empty;
+    #region Sync Schedule State
     private RunMode _runMode = RunMode.Manual;
+    private string? _scheduleCronExpression = string.Empty;
+    #endregion
 
-    private readonly HashSet<MediaListProvider> _disabledProviders = [];
-
-    private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
-    private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
-
-    private bool CanTest => !string.IsNullOrWhiteSpace(_listIdentifier) && _provider is not null;
-    private bool CanSave =>
-        _state == State.Success &&
-        _provider == _testedProvider &&
-        string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal) &&
-        !string.IsNullOrWhiteSpace(_name) &&
-        !LimitIsInvalid;
-
+    #region Filters, Sorting & Limits State
     private bool _filtersEnabled;
     private FilterDefinition _filter = new();
-
     private bool _sortingEnabled;
     private SortDirection _sortDirection = SortDirection.Descending;
     private string _sortField = "title";
     private string _limitRaw = string.Empty;
+    #endregion
 
-    private static readonly IReadOnlyList<SelectOption<string>> _sortFieldOptions =
+    #region Disabled Providers
+    private readonly HashSet<MediaListProvider> _disabledProviders = [];
+    #endregion
+
+    #region Constants
+    private static readonly IReadOnlyList<SelectOption<string>> SortFieldOptions =
     [
         new("title", "Title"),
         new("releaseDate", "Release Date"),
@@ -434,12 +443,7 @@
         new("popularity", "Popularity"),
     ];
 
-    private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : (int?)null;
-    private bool LimitIsInvalid => !string.IsNullOrWhiteSpace(_limitRaw) && ParsedLimit is null;
-
-    private void OnSortDirectionChanged(SortDirection direction) => _sortDirection = direction;
-
-    private IEnumerable<FilterField> _fields =
+    private static readonly IReadOnlyList<FilterField> FilterFields =
     [
         new FilterField { Name = "name", Label = "Name", Type = FilterFieldType.Text },
         new FilterField { Name = "age", Label = "Age", Type = FilterFieldType.Number },
@@ -456,6 +460,28 @@
             ]
         },
     ];
+    #endregion
+
+    #region Validation & Computed State
+    private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
+    private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
+    private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
+    private bool LimitIsInvalid => !string.IsNullOrWhiteSpace(_limitRaw) && ParsedLimit is null;
+
+    private bool CanTest => !string.IsNullOrWhiteSpace(_listIdentifier) && _provider is not null;
+    private bool CanSave =>
+        _state == State.Success &&
+        _provider is not null &&
+        _provider == _testedProvider &&
+        !string.IsNullOrWhiteSpace(_listIdentifier) &&
+        string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal) &&
+        !string.IsNullOrWhiteSpace(_name) &&
+        !LimitIsInvalid;
+
+    private bool IsProcessing => _state is State.Testing or State.Saving;
+    private bool ShowTestButton => _state is State.Idle or State.Failed;
+    private bool ShowSaveButton => _state == State.Success;
+    #endregion
 
     private Task OnRunModeChanged(RunMode mode)
     {
@@ -522,7 +548,6 @@
             MediaListAddStrategy.Replace => "Each sync removes items that were added by this subscription and are no longer on the list. Items added by other subscriptions are unaffected, even if they appear on this list.",
         };
 
-
     private Task OnProviderChanged(MediaListProvider provider)
     {
         _provider = provider;
@@ -535,23 +560,41 @@
         return Task.CompletedTask;
     }
 
+    private void OnListIdentifierChanged()
+    {
+        // If identifier changed after a successful test, reset to Idle to force re-test
+        if (_state is State.Success or State.Failed &&
+            !string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal))
+        {
+            _state = State.Idle;
+            _testedProvider = null;
+            _testedListIdentifier = string.Empty;
+        }
+    }
+
     private void HandleFilterChanged(FilterDefinition filter) {}
 
-    private Task HandleTestAsync()
-    {
-        return TestAsync();
-    }
+    private Task HandleTestAsync() => TestAsync();
 
     private Task HandleSaveAsync()
     {
         _showValidation = true;
-        if (!CanSave)
-        {
-            return Task.CompletedTask;
-        }
-
-        return SaveAsync();
+        return CanSave ? SaveAsync() : Task.CompletedTask;
     }
+
+    #region Sort Direction Helpers
+    private void ToggleSortDirection() =>
+        _sortDirection = _sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
+
+    private string GetSortLabel() =>
+        _sortDirection == SortDirection.Ascending ? "Ascending" : "Descending";
+
+    private string GetSortTooltip() =>
+        _sortDirection == SortDirection.Ascending ? "Ascending — low to high" : "Descending — high to low";
+
+    private string GetSortIconClass() =>
+        _sortDirection == SortDirection.Descending ? "transition-transform duration-200 rotate-180" : "transition-transform duration-200";
+    #endregion
 
     private async Task TestAsync()
     {
