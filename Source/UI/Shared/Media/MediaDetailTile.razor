@@ -51,18 +51,20 @@
             </div>
         </div>
         <button type="button"
-                class="search-result-toggle-btn @(IsInWatchlist ? "in-watchlist" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
+                class="search-result-toggle-btn @(IsMarked ? "is-marked" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
+                style="@_toggleButtonStyle"
                 @onclick="() => OnToggleWatchlist.InvokeAsync(Result)">
             <span class="relative inline-flex items-center justify-center w-6 h-6">
-                @if (IsInWatchlist)
+                @if (IsMarked)
                 {
-                    <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange"
-                                Class="@_bookmarkIconClass"/>
+                    <LucideIcon Name="@ToggleIcon(true)" Size="24"
+                                Fill="@ToggleActiveColor" Color="@ToggleActiveColor"
+                                Class="@_toggleIconClass"/>
                 }
                 else
                 {
-                    <LucideIcon Name="bookmark" Size="24"
-                                Class="@_bookmarkIconClass"/>
+                    <LucideIcon Name="@ToggleIcon(false)" Size="24"
+                                Class="@_toggleIconClass"/>
                 }
                 @if (IsActiveToggle)
                 {
@@ -78,20 +80,34 @@
 @code {
 
     [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
-    [Parameter] public bool IsInWatchlist { get; set; }
+    [Parameter] public bool IsMarked { get; set; }
     [Parameter] public bool IsActiveToggle { get; set; }
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback<IMediaDetailResult> OnToggleWatchlist { get; set; }
 
+    /// <summary>
+    /// Returns the icon name for the toggle button given the current active marked state.
+    /// Defaults to the bookmark icon.
+    /// </summary>
+    [Parameter] public Func<bool, string> ToggleIcon { get; set; } = _ => "bookmark";
+
+    /// <summary>
+    /// CSS color value applied to the toggle button when it is in the active marked state.
+    /// Defaults to orange.
+    /// </summary>
+    [Parameter] public string ToggleActiveColor { get; set; } = "orange";
+
     private string _backgroundStyle = string.Empty;
-    private string _bookmarkIconClass = string.Empty;
+    private string _toggleButtonStyle = string.Empty;
+    private string _toggleIconClass = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
 
     protected override void OnParametersSet()
     {
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl ?? "" : Result.BackdropUrl)}')";
-        _bookmarkIconClass = $"transition-opacity duration-150 {(IsActiveToggle ? "opacity-0" : string.Empty)}";
+        _toggleButtonStyle = $"--toggle-active-color: {ToggleActiveColor}";
+        _toggleIconClass = $"transition-opacity duration-150 {(IsActiveToggle ? "opacity-0" : string.Empty)}";
         _displayFacts = GetDisplayFacts(Result);
     }
 
@@ -155,5 +171,3 @@
     }
 
 }
-
-

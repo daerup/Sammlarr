@@ -36,3 +36,7 @@
     padding: 0.05rem;
 }
 
+.preview-result-blacklisted {
+    opacity: 0.55;
+    filter: grayscale(1);
+}
