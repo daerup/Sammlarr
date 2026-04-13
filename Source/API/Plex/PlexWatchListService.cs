@@ -1,5 +1,6 @@
 using System.Text.Json;
 using API.Plex.Types;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Watchlist;
@@ -55,9 +56,17 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 
 	private async ValueTask<PlexWatchlistItem> BuildWatchlistItemAsync(PlexTypes.Watchlist.Metadata parsed)
 	{
-		var tmdb = await ResolvePlexIdAsList<TmdbId>(parsed.PlexId, MediaProvider.Tmdb);
-		var tvdb = await ResolvePlexIdAsList<TvdbId>(parsed.PlexId, MediaProvider.Tvdb);
-		var imdb = await ResolvePlexIdAsList<ImdbId>(parsed.PlexId, MediaProvider.Imdb);
+		var hints = new Some<ResolutionHints>(
+			new ResolutionHints
+			{
+				Title = parsed.Title,
+				Year = parsed.Year,
+				MediaType = parsed.MediaType,
+			}
+		);
+		var tmdb = await ResolvePlexIdAsList<TmdbId>(parsed.PlexId, MediaProvider.Tmdb, hints);
+		var tvdb = await ResolvePlexIdAsList<TvdbId>(parsed.PlexId, MediaProvider.Tvdb, hints);
+		var imdb = await ResolvePlexIdAsList<ImdbId>(parsed.PlexId, MediaProvider.Imdb, hints);
 		return new PlexWatchlistItem
 		{
 			Title = parsed.Title,
@@ -74,15 +83,14 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 		};
 	}
 
-	private async Task<IEnumerable<TMediaId>> ResolvePlexIdAsList<TMediaId>(PlexId plexId, MediaProvider provider)
+	private async Task<IEnumerable<TMediaId>> ResolvePlexIdAsList<TMediaId>(PlexId plexId, MediaProvider provider, Option<ResolutionHints> hints)
 		where TMediaId : IMediaId
 	{
-		var result = await mediaIdResolver.ResolveAsync(plexId, provider);
-		if (result.Successful)
+		var result = await mediaIdResolver.ResolveAsync([plexId], provider, hints);
+		return result switch
 		{
-			IMediaId[] ids = [result.Id];
-			return ids.Cast<TMediaId>();
-		}
-		return [];
+			Resolved resolved => ((IEnumerable<IMediaId>)[resolved.Id]).Cast<TMediaId>(),
+			Unresolved => [],
+		};
 	}
 }

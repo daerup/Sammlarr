@@ -1,6 +1,8 @@
+using Contracts;
+
 namespace Contracts.Media.Convertions;
 
 public interface IMediaIdResolver
 {
-	Task<ResolvedId> ResolveAsync(IMediaId sourceId, MediaProvider target);
+	Task<ConversionResult> ResolveAsync(IReadOnlyCollection<IMediaId> candidates, MediaProvider target, Option<ResolutionHints> hints);
 }

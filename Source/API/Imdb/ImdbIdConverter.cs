@@ -1,4 +1,5 @@
 using API.Plex;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 
@@ -6,14 +7,25 @@ namespace API.IMDB;
 
 internal class ImdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ResolvedId> ConvertAsync(IMediaId mediaId)
+	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Option<ResolutionHints> hints)
 	{
-		return mediaId switch
+		foreach (var id in candidates)
 		{
-			PlexId plexId => await plexApi.ResolveById<ImdbId>(plexId),
-			TmdbId tmdbId => throw new NotSupportedException(),
-			ImdbId imdbId => new ResolvedId(imdbId, []),
-			TvdbId tvdbId => throw new NotSupportedException(),
-		};
+			var result = await TryConvertAsync(id);
+			if (result is Resolved)
+				return result;
+		}
+
+		return new Unresolved();
 	}
+
+	private Task<ConversionResult> TryConvertAsync(IMediaId id) =>
+		id switch
+		{
+			ImdbId imdbId => Task.FromResult<ConversionResult>(new Resolved(imdbId, [])),
+			PlexId plexId => ResolveFromPlexAsync(plexId),
+			_ => Task.FromResult<ConversionResult>(new Unresolved()),
+		};
+
+	private Task<ConversionResult> ResolveFromPlexAsync(PlexId plexId) => plexApi.ResolveById<ImdbId>(plexId);
 }

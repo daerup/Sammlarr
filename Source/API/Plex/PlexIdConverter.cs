@@ -1,46 +1,66 @@
 using API.TMDB;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Media.Search;
 using Microsoft.Extensions.DependencyInjection;
-using Shared;
 
 namespace API.Plex;
 
 internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaSearchProvider.Plex)] IMediaSearchService searchService)
 {
-	public async Task<ResolvedId> ConvertAsync(IMediaId mediaId)
+	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Option<ResolutionHints> hints)
 	{
-		return mediaId switch
+		foreach (var plexId in candidates.OfType<PlexId>())
+			return await ConvertFromPlexIdAsync(plexId);
+
+		if (hints is Some<ResolutionHints>(var h))
 		{
-			PlexId plexId => new ResolvedId(plexId, await GetAdditionalIds(plexId)),
-			TmdbId tmdbId => await FuzzySearch(tmdbId),
-			ImdbId imdbId => throw new NotSupportedException(),
-			TvdbId tvdbId => throw new NotSupportedException(),
-		};
+			var result = await ResolveFromTitleSearchAsync(h.Title, h.MediaType, candidates);
+			if (result is Resolved)
+				return result;
+		}
+
+		return await TryResolveFromApiTitleSearchAsync(candidates);
 	}
 
-	private async Task<IEnumerable<IMediaId>> GetAdditionalIds(PlexId plexId)
+	private async Task<ConversionResult> ResolveFromTitleSearchAsync(string title, MediaType mediaType, IReadOnlyCollection<IMediaId> candidates)
+	{
+		var searchResults = await searchService.SearchAsync(title, [mediaType]);
+
+		foreach (var plexId in searchResults.Select(result => result.SourceId).OfType<PlexId>())
+		{
+			var details = await plexApi.ByIdAsync(plexId);
+			if (ContainsAnyCandidate(details.AdditionalIds, candidates))
+				return new Resolved(details.SourceId, details.AdditionalIds);
+		}
+
+		return new Unresolved();
+	}
+
+	private async Task<ConversionResult> ConvertFromPlexIdAsync(PlexId plexId)
 	{
 		var details = await plexApi.ByIdAsync(plexId);
-		return details.AdditionalIds;
+		return new Resolved(plexId, details.AdditionalIds);
 	}
 
-	private async ValueTask<ResolvedId> FuzzySearch(TmdbId tmdbId)
+	private async Task<ConversionResult> TryResolveFromApiTitleSearchAsync(IReadOnlyCollection<IMediaId> candidates)
 	{
-		var details = await tmdbApi.GetDetailAsync(tmdbId);
-		var searchResults = await searchService.SearchAsync(details.DisplayOriginalTitle, [tmdbId.Type]);
-		var match = await searchResults
-			.Select(s => s.SourceId)
-			.OfType<PlexId>()
-			.ToAsyncEnumerable()
-			.SelectAwait(async id => await plexApi.ByIdAsync(id))
-			.FirstOrDefaultAsync(d => d.AdditionalIds.OfType<TmdbId>().Contains(tmdbId));
-
-		if (match is null)
+		foreach (var candidate in candidates)
 		{
-			return ResolvedId.Failed;
+			if (candidate is TmdbId tmdbId)
+			{
+				var details = await tmdbApi.GetDetailAsync(tmdbId);
+				return await ResolveFromTitleSearchAsync(details.DisplayOriginalTitle, tmdbId.Type, candidates);
+			}
 		}
-		return new ResolvedId(match.SourceId, match.AdditionalIds);
+
+		return new Unresolved();
+	}
+
+	private static bool ContainsAnyCandidate(IEnumerable<IMediaId> additionalIds, IReadOnlyCollection<IMediaId> candidates)
+	{
+		var additional = additionalIds.ToList();
+		return candidates.Any(additional.Contains);
 	}
 }
