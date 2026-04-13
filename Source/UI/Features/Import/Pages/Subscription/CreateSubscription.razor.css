@@ -1,0 +1,38 @@
+.preview-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(20px) saturate(150%);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.preview-modal-content {
+    position: relative;
+    z-index: 1;
+    width: min(1400px, 96vw);
+    max-height: 90vh;
+    overflow: hidden;
+    background: var(--background);
+    padding: 30px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-modal-results {
+    flex: 1;
+    min-height: 0;
+    max-height: 65vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.05rem;
+}
+

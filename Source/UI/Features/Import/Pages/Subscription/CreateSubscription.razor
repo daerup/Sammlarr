@@ -246,12 +246,12 @@
                                                                     Class="@GetSortIconClass()"/>
                                                     </BbButton>
                                                 </BbTooltipTrigger>
-                                                <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
+                                        <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     </div>
-                                </BbFieldContent>
-                            </BbField>
+                                    </BbFieldContent>
+                                </BbField>
                         }
 
                         <BbField IsInvalid="LimitIsInvalid">
@@ -359,6 +359,11 @@
                         <LucideIcon Name="save" Size="14" Class="mr-2"/>
                         Save
                     </BbButton>
+                    <BbButton Variant="ButtonVariant.Outline"
+                              OnClick="HandleViewPreviewAsync">
+                        <LucideIcon Name="eye" Size="14" Class="mr-2"/>
+                        View
+                    </BbButton>
                 }
                 else if (_state == State.Failed)
                 {
@@ -392,6 +397,73 @@
     </div>
 </div>
 
+@if (_showPreviewModal)
+{
+    <div class="preview-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-label="Import Preview"
+         @onkeydown="HandlePreviewKeyDown">
+        <div class="preview-modal-backdrop" @onclick="ClosePreviewModal"></div>
+
+        <div class="preview-modal-content">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold tracking-wide">Import Preview</h2>
+                    <p class="text-sm text-muted-foreground">
+                        @_previewResults.Count item@(_previewResults.Count == 1 ? "" : "s") found in <span class="font-medium">@_testedListIdentifier</span>
+                    </p>
+                </div>
+                <BbButton Variant="ButtonVariant.Ghost" OnClick="ClosePreviewModal">
+                    <LucideIcon Name="x" Size="18"/>
+                </BbButton>
+            </div>
+
+            <div class="mb-4">
+                <input type="search"
+                       class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                       placeholder="Filter by title…"
+                       @bind="_previewFilterQuery"
+                       @bind:event="oninput"
+                       aria-label="Filter preview results by title"/>
+            </div>
+
+            <div class="preview-modal-results space-y-2 pr-1">
+                @{
+                    var filtered = FilteredPreviewResults.ToList();
+                }
+                @if (filtered.Count > 0)
+                {
+                    @foreach (var result in filtered)
+                    {
+                        <MediaSearchTile @key="result"
+                                         Result="result"
+                                         IsInWatchlist="false"
+                                         IsActiveToggle="false"
+                                         IsFocused="false"
+                                         OnFocusIn="() => {}"
+                                         OnToggleWatchlist="_ => Task.CompletedTask"/>
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(_previewFilterQuery))
+                {
+                    <div class="rounded-lg bg-surface p-6 text-center space-y-2">
+                        <LucideIcon Name="search-x" Size="28" Class="mx-auto text-muted-foreground"/>
+                        <p class="text-sm text-muted-foreground">No items match <span class="font-medium">"@_previewFilterQuery"</span>.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="rounded-lg bg-surface p-6 text-center space-y-2">
+                        <LucideIcon Name="search-x" Size="28" Class="mx-auto text-muted-foreground"/>
+                        <p class="text-sm text-muted-foreground">No items found.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
 @code {
 
     private enum State { Idle, Testing, Success, Saving, Saved, Failed }
@@ -413,6 +485,8 @@
     private string _testedListIdentifier = string.Empty;
     private IReadOnlyList<IMediaDetailResult> _previewResults = [];
     private CancellationTokenSource? _cancellationTokenSource;
+    private bool _showPreviewModal;
+    private string _previewFilterQuery = string.Empty;
     #endregion
 
     #region Sync Schedule State
@@ -574,6 +648,13 @@
 
     private void HandleFilterChanged(FilterDefinition filter) {}
 
+    private void HandlePreviewKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key is "Escape")
+            ClosePreviewModal();
+    }
+
+
     private Task HandleTestAsync() => TestAsync();
 
     private Task HandleSaveAsync()
@@ -581,6 +662,24 @@
         _showValidation = true;
         return CanSave ? SaveAsync() : Task.CompletedTask;
     }
+
+    private Task HandleViewPreviewAsync()
+    {
+        _previewFilterQuery = string.Empty;
+        _showPreviewModal = true;
+        return Task.CompletedTask;
+    }
+
+    private void ClosePreviewModal()
+    {
+        _showPreviewModal = false;
+        _previewFilterQuery = string.Empty;
+    }
+
+    private IEnumerable<IMediaDetailResult> FilteredPreviewResults =>
+        string.IsNullOrWhiteSpace(_previewFilterQuery)
+            ? _previewResults
+            : _previewResults.Where(r => r.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase));
 
     #region Sort Direction Helpers
     private void ToggleSortDirection() =>
