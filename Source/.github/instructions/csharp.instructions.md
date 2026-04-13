@@ -16,7 +16,7 @@ applyTo: '**/*.cs'
 ## Comments, docs and inline guidance
 
 - Write clear, self-documenting code. Add comments to explain non-obvious design decisions or complex logic.
-- Use XML documentation (`///`) for public APIs and libraries intended for external consumption; for internal types prefer concise naming and minimal XML docs unless the API benefits from generated documentation.
+- Never create XML documentation comments or tags such as `/// <summary>` / `</summary>` in this repository. Prefer self-documenting code and, when necessary, short non-XML comments that explain intent or constraints.
 
 ## Nullable reference types
 

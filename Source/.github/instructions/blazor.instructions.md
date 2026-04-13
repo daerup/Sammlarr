@@ -66,7 +66,7 @@ applyTo: '**/*.razor, **/*.razor.cs, **/*.razor.css'
 
 ## Documentation
 
-- Add XML docs for public models and API surface types when they improve generated documentation (e.g., Swagger) or consumer understanding.
-- Keep component and page README or doc comments concise — prefer small, focused docs over large duplicative files.
+- Never create XML documentation comments or tags such as `/// <summary>` / `</summary>` in Razor components, code-behind files, or related Blazor code.
+- Keep component and page README or doc comments concise — prefer small, focused non-XML documentation over large duplicative files.
 
 <!-- End of file -->
