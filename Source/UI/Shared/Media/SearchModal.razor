@@ -67,7 +67,7 @@
                 @if (_isSearching)
                 {
                     <div class="search-modal-results space-y-2 pr-1" aria-hidden="true" tabindex="-1">
-                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaSearchTile" Count="4"/>
+                        <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="4"/>
                     </div>
                 }
                 else if (_searchResults.Count > 0)
@@ -75,9 +75,9 @@
                     <div class="search-modal-results space-y-2 pr-1" tabindex="-1">
                         @foreach (var result in _searchResults)
                         {
-                            <MediaSearchTile @key="result"
+                            <MediaDetailTile @key="result"
                                              Result="result"
-                                             IsInWatchlist="IsSearchResultInWatchlist(result)"
+                                             IsMarked="IsSearchResultInWatchlist(result)"
                                              IsActiveToggle="_isAdding && Equals(_activeToggledSourceId, result.SourceId)"
                                              IsFocused="_focusedResult == result"
                                              OnFocusIn="() => _focusedResult = result"
@@ -245,4 +245,3 @@
 
 
 }
-

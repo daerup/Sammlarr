@@ -48,9 +48,9 @@
     outline-offset: 2px;
 }
 
-.search-result-toggle-btn.in-watchlist {
-    background: rgba(255, 165, 0, 0.1);
-    color: orange;
+.search-result-toggle-btn.is-marked {
+    background: color-mix(in srgb, var(--toggle-active-color, orange) 10%, transparent);
+    color: var(--toggle-active-color, orange);
 }
 
 .search-result-row {
@@ -87,17 +87,15 @@
     transform: scale(1.06);
 }
 
-.search-result-row.row-focused .search-result-toggle-btn.in-watchlist:not(:disabled),
-.search-result-toggle-btn.in-watchlist:hover:not(:disabled) {
+.search-result-row.row-focused .search-result-toggle-btn.is-marked:not(:disabled),
+.search-result-toggle-btn.is-marked:hover:not(:disabled) {
     opacity: 1;
     background: none;
 }
 
-.search-result-row.row-focused .search-result-toggle-btn:not(.in-watchlist):not(:disabled) ::deep svg,
-.search-result-toggle-btn:not(.in-watchlist):hover:not(:disabled) ::deep svg {
-    stroke: orange;
-    fill: rgba(255, 165, 0, 0.15);
+.search-result-row.row-focused .search-result-toggle-btn:not(.is-marked):not(:disabled) ::deep svg,
+.search-result-toggle-btn:not(.is-marked):hover:not(:disabled) ::deep svg {
+    stroke: var(--toggle-active-color, orange);
+    fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
     transition: stroke 0.15s ease, fill 0.15s ease;
 }
-
-

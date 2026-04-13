@@ -369,8 +369,7 @@
                 {
                     <BbButton Variant="ButtonVariant.Outline"
                               Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                              OnClick="HandleTestAsync"
-                              Disabled="!CanTest || LimitIsInvalid">
+                              Disabled="true">
                         <LucideIcon Name="x" Size="14" Class="mr-2"/>
                         Failed
                     </BbButton>
@@ -425,6 +424,7 @@
                        placeholder="Filter by title…"
                        @bind="_previewFilterQuery"
                        @bind:event="oninput"
+                       @onfocus="() => _focusedPreviewResult = null"
                        aria-label="Filter preview results by title"/>
             </div>
 
@@ -436,13 +436,18 @@
                 {
                     @foreach (var result in filtered)
                     {
-                        <MediaSearchTile @key="result"
-                                         Result="result"
-                                         IsInWatchlist="false"
-                                         IsActiveToggle="false"
-                                         IsFocused="false"
-                                         OnFocusIn="() => {}"
-                                         OnToggleWatchlist="_ => Task.CompletedTask"/>
+                        var isBlacklisted = IsPreviewBlacklisted(result);
+                        <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
+                            <MediaDetailTile @key="result"
+                                             Result="result"
+                                             IsMarked="isBlacklisted"
+                                             IsActiveToggle="false"
+                                             IsFocused="_focusedPreviewResult == result"
+                                             OnFocusIn="() => _focusedPreviewResult = result"
+                                             OnToggleWatchlist="TogglePreviewBlacklistAsync"
+                                             ToggleIcon="GetPreviewBlacklistIcon"
+                                             ToggleActiveColor="#9ca3af"/>
+                        </div>
                     }
                 }
                 else if (!string.IsNullOrWhiteSpace(_previewFilterQuery))
@@ -487,6 +492,8 @@
     private CancellationTokenSource? _cancellationTokenSource;
     private bool _showPreviewModal;
     private string _previewFilterQuery = string.Empty;
+    private readonly HashSet<string> _previewBlacklistedSourceIds = [];
+    private IMediaDetailResult? _focusedPreviewResult;
     #endregion
 
     #region Sync Schedule State
@@ -654,6 +661,22 @@
             ClosePreviewModal();
     }
 
+    private static string GetPreviewSourceKey(IMediaDetailResult result) => result.SourceId.ToString() ?? string.Empty;
+
+    private bool IsPreviewBlacklisted(IMediaDetailResult result) =>
+        _previewBlacklistedSourceIds.Contains(GetPreviewSourceKey(result));
+
+    private Task TogglePreviewBlacklistAsync(IMediaDetailResult result)
+    {
+        var sourceKey = GetPreviewSourceKey(result);
+        if (!_previewBlacklistedSourceIds.Add(sourceKey))
+            _previewBlacklistedSourceIds.Remove(sourceKey);
+
+        return Task.CompletedTask;
+    }
+
+    private static string GetPreviewBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "x" : "circle";
+
 
     private Task HandleTestAsync() => TestAsync();
 
@@ -666,6 +689,8 @@
     private Task HandleViewPreviewAsync()
     {
         _previewFilterQuery = string.Empty;
+        _previewBlacklistedSourceIds.Clear();
+        _focusedPreviewResult = null;
         _showPreviewModal = true;
         return Task.CompletedTask;
     }
@@ -674,6 +699,8 @@
     {
         _showPreviewModal = false;
         _previewFilterQuery = string.Empty;
+        _previewBlacklistedSourceIds.Clear();
+        _focusedPreviewResult = null;
     }
 
     private IEnumerable<IMediaDetailResult> FilteredPreviewResults =>
@@ -717,6 +744,8 @@
             var results = (await importListService.GetEnrichedImportListItemsAsync(_listIdentifier.Trim(), cancellationToken)).ToList();
 
             _previewResults = results;
+            _previewBlacklistedSourceIds.Clear();
+            _focusedPreviewResult = null;
             _state = _previewResults.Count > 0 ? State.Success : State.Failed;
 
             if (_state == State.Success)
@@ -728,6 +757,8 @@
         catch (OperationCanceledException)
         {
             _state = State.Idle;
+            _previewBlacklistedSourceIds.Clear();
+            _focusedPreviewResult = null;
             _testedProvider = null;
             _testedListIdentifier = string.Empty;
         }
@@ -735,6 +766,8 @@
         {
             _state = State.Failed;
             _previewResults = [];
+            _previewBlacklistedSourceIds.Clear();
+            _focusedPreviewResult = null;
             _testedProvider = null;
             _testedListIdentifier = string.Empty;
         }
