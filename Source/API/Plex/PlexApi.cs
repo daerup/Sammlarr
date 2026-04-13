@@ -23,20 +23,19 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
 	}
 
-	internal async Task<ResolvedId> ResolveById<TMediaId>(PlexId plexId)
+	internal async Task<ConversionResult> ResolveById<TMediaId>(PlexId plexId)
 		where TMediaId : IMediaId
 	{
 		var plexResult = await ByIdAsync(plexId);
 		var mediaIds = plexResult.AdditionalIds.OfType<TMediaId>().Cast<IMediaId>().ToList();
-		var otherIds = plexResult.AdditionalIds.Except(mediaIds).Append(plexResult.SourceId);
 		if (mediaIds.Any())
 		{
 			var id = mediaIds.First();
-			var remainingIds = mediaIds.Skip(1);
-			return new ResolvedId(id, remainingIds.Concat(otherIds));
+			var otherIds = plexResult.AdditionalIds.Except(mediaIds).Append(plexResult.SourceId);
+			return new Resolved(id, mediaIds.Skip(1).Concat(otherIds));
 		}
 
-		return ResolvedId.Unresolved(otherIds);
+		return new Unresolved();
 	}
 
 	public async Task<IReadOnlyList<IMediaDetailResult>> SearchAsync(

@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using API.Plex;
 using Bogus;
+using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Convertions;
@@ -117,14 +118,14 @@ public class PlexWatchListServiceTests
 	private static PlexWatchListService CreateWatchListService(string json)
 	{
 		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any(), Any()).Returns(ResolvedId.Failed);
+		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Option<ResolutionHints>>()).Returns(new Unresolved());
 		return new PlexWatchListService(CreatePlexClient(json), resolver);
 	}
 
 	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode)
 	{
 		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any(), Any()).Returns(ResolvedId.Failed);
+		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Option<ResolutionHints>>()).Returns(new Unresolved());
 		return new PlexWatchListService(CreatePlexClient(statusCode), resolver);
 	}
 

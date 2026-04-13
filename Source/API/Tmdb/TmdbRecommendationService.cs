@@ -37,17 +37,26 @@ internal class TmdbRecommendationService(
 		{
 			return null;
 		}
-		var resovledId = await mediaIdResolver.ResolveAsync(response.TmdbId, watchlistMediaProvider);
-		if (!resovledId.Successful)
-		{
-			return null!;
-		}
+		var resolvedResult = await mediaIdResolver.ResolveAsync(
+			[response.TmdbId],
+			watchlistMediaProvider,
+			new Some<ResolutionHints>(
+				new ResolutionHints
+				{
+					Title = response.DisplayTitle,
+					Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
+					MediaType = response.MediaType.Value,
+				}
+			)
+		);
+		if (resolvedResult is not Resolved resolvedId)
+			return null;
 
 		var releaseDate = string.IsNullOrEmpty(response.AvailableDate) ? "1900-01-01T00:00:00Z" : response.AvailableDate;
 		return new TmdbTrendingMedia
 		{
 			SourceId = response.TmdbId,
-			WatchlistProviderId = resovledId.Id,
+			WatchlistProviderId = resolvedId.Id,
 			MediaType = response.MediaType.Value,
 			Title = response.DisplayTitle,
 			Description = response.Overview,

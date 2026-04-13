@@ -2,6 +2,7 @@ using API.IMDB;
 using API.Plex;
 using API.TMDB;
 using API.TvDB;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 
@@ -15,27 +16,35 @@ internal class MediaIdResolver(
 	TvdbIdConverter tvdb
 ) : IMediaIdResolver
 {
-	public async Task<ResolvedId> ResolveAsync(IMediaId sourceId, MediaProvider target)
+	public async Task<ConversionResult> ResolveAsync(IReadOnlyCollection<IMediaId> candidates, MediaProvider target, Option<ResolutionHints> hints)
 	{
-		var cachedIds = await mediaIdGroupRepository.GetByIdAsync(sourceId);
-		var cachedIdWithRequestedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
-		if (cachedIdWithRequestedTarget is not null)
+		foreach (var candidate in candidates)
 		{
-			return new ResolvedId(cachedIdWithRequestedTarget, cachedIds.Where(id => id.Source != target));
+			var cachedIds = await mediaIdGroupRepository.GetByIdAsync(candidate);
+			var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
+			if (cachedTarget is not null)
+				return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
 		}
-		var resolved = target switch
+
+		ConversionResult conversionResult = target switch
 		{
-			MediaProvider.Plex => await plex.ConvertAsync(sourceId),
-			MediaProvider.Tmdb => await tmdb.ConvertAsync(sourceId),
-			MediaProvider.Imdb => await imdb.ConvertAsync(sourceId),
-			MediaProvider.Tvdb => await tvdb.ConvertAsync(sourceId),
+			MediaProvider.Plex => await plex.ConvertAsync(candidates, hints),
+			MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints),
+			MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints),
+			MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints),
+			MediaProvider.Mdblist => new Unresolved(), // Mdblist is a list source, not a resolution target
 		};
 
-		if (resolved.AllIds.Any())
+		return conversionResult switch
 		{
-			await mediaIdGroupRepository.CreateOrAppendAsync(resolved.AllIds);
-		}
+			Resolved resolved => await PersistAndReturnAsync(resolved),
+			Unresolved unresolved => unresolved,
+		};
+	}
 
+	private async Task<Resolved> PersistAndReturnAsync(Resolved resolved)
+	{
+		await mediaIdGroupRepository.CreateOrAppendAsync(resolved.AllIds);
 		return resolved;
 	}
 }
