@@ -39,6 +39,7 @@ This document provides authoritative guidance for repository structure, dependen
 
 ## Documentation and contributor guidance
 - Use Markdown files for necessary documentation. Keep content concise and maintain links from `.github/README.md` for onboarding.
+- Never add XML documentation summary comments or tags such as `/// <summary>` / `</summary>` in repository source files; prefer self-documenting code and concise Markdown or non-XML comments only when needed.
 
 ## Conventions
 - Follow `.editorconfig` and existing project idioms for naming, formatting and nullability.

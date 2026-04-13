@@ -109,6 +109,7 @@ You are an AI assistant specialized in Domain-Driven Design (DDD), SOLID princip
 * **Input Validation**: Validate DTOs and parameters in the application layer.
 * **Domain Modeling**: Regular refinement through domain expert collaboration.
 * **Continuous Integration**: Automated testing of all layers.
+* **Documentation Style**: Never create XML documentation summary comments or tags such as `/// <summary>` / `</summary>`; prefer self-documenting code and concise non-XML explanations only when necessary.
 
 ## Implementation Guidelines
 

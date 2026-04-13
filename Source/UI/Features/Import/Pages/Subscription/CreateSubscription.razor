@@ -446,7 +446,7 @@
                                              OnFocusIn="() => _focusedPreviewResult = result"
                                              OnToggleWatchlist="TogglePreviewBlacklistAsync"
                                              ToggleIcon="GetPreviewBlacklistIcon"
-                                             ToggleActiveColor="#9ca3af"/>
+                                             ToggleActiveColor="hsl(var(--destructive))"/>
                         </div>
                     }
                 }
@@ -675,7 +675,7 @@
         return Task.CompletedTask;
     }
 
-    private static string GetPreviewBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "x" : "circle";
+    private static string GetPreviewBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "list-x" : "list-minus";
 
 
     private Task HandleTestAsync() => TestAsync();

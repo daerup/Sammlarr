@@ -86,16 +86,8 @@
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback<IMediaDetailResult> OnToggleWatchlist { get; set; }
 
-    /// <summary>
-    /// Returns the icon name for the toggle button given the current active marked state.
-    /// Defaults to the bookmark icon.
-    /// </summary>
     [Parameter] public Func<bool, string> ToggleIcon { get; set; } = _ => "bookmark";
 
-    /// <summary>
-    /// CSS color value applied to the toggle button when it is in the active marked state.
-    /// Defaults to orange.
-    /// </summary>
     [Parameter] public string ToggleActiveColor { get; set; } = "orange";
 
     private string _backgroundStyle = string.Empty;
