@@ -17,459 +17,460 @@
 
 <PageTitle>Create subscription</PageTitle>
 
-<div class="px-6 py-10">
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold tracking-wide antialiased">Create subscription</h1>
-        <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Import a list from an external provider and subscribe to it.</p>
+<!-- Full-height page: fills the space between the app header and footer (each h-14 = 3.5rem) -->
+<div class="flex flex-col h-[calc(100vh-7rem)] overflow-hidden">
+
+    <!-- Page Header: fixed, never scrolls -->
+    <div class="shrink-0 px-6 py-4 border-b">
+        <h1 class="text-2xl font-bold tracking-wide antialiased">Create subscription</h1>
+        <p class="text-sm text-muted-foreground mt-0.5 font-normal">Import a list from an external provider and subscribe to it.</p>
     </div>
 
-    <div class="w-full max-w-2xl">
-        <div class="rounded-lg border">
+    <!-- Content Area: two independent scrolling panels -->
+    <div class="flex-1 min-h-0 flex flex-row gap-4 p-4 overflow-hidden">
 
-            <div class="px-6 py-6 space-y-6">
+        <!-- Left Panel: Form inputs and controls -->
+        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden">
+            <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6 space-y-6">
 
                 <BbField>
+                <BbFieldLabel Class="flex items-center leading-none">
+                    Enabled
+                    <BbTooltipProvider>
+                        <BbTooltip DelayDuration="0">
+                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                <LucideIcon Name="info" Size="14"/>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Toggle to enable or disable this import.</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                </BbFieldLabel>
+                <BbFieldContent>
+                    <BbSwitch @bind-Checked="_isEnabled"/>
+                </BbFieldContent>
+            </BbField>
+
+            <BbField IsInvalid="NameIsInvalid">
+                <BbFieldLabel For="name" Class="flex items-center leading-none">
+                    Name <span class="text-destructive ml-0.5">*</span>
+                    <BbTooltipProvider>
+                        <BbTooltip DelayDuration="0">
+                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                <LucideIcon Name="info" Size="14"/>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>A friendly label to identify this subscription across your lists.</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                </BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput id="name" Placeholder="e.g. My Top Movies" @bind-Value="_name" Class="bg-accent" Required="true" AriaInvalid="@NameIsInvalid"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </BbFieldContent>
+                @if (NameIsInvalid)
+                {
+                    <BbFieldError>Name is required.</BbFieldError>
+                }
+            </BbField>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BbField>
                     <BbFieldLabel Class="flex items-center leading-none">
-                        Enabled
+                        Provider
+                        @if (_disabledProviders.Count > 0)
+                        {
+                            var allDisabled = _disabledProviders.Count == Enum.GetValues<MediaListProvider>().Length;
+                            <BbPopover>
+                                <BbPopoverTrigger AsChild="false"
+                                                  Class="@($"ml-1 inline-flex items-center cursor-pointer {(allDisabled ? "text-destructive" : "text-amber-500")}")">
+                                    <LucideIcon Name="triangle-alert" Size="14"/>
+                                </BbPopoverTrigger>
+                                <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72">
+                                    <div class="space-y-2">
+                                        <p class="text-sm font-semibold">API key required</p>
+                                        <p class="text-sm text-muted-foreground">
+                                            The following providers are unavailable because no API key is configured:
+                                            <span class="font-medium">@string.Join(", ", _disabledProviders)</span>.
+                                        </p>
+                                        <BbButton Variant="ButtonVariant.Link" Href="/settings?section=api-keys" Class="h-auto p-0 text-sm">
+                                            Go to Settings →
+                                        </BbButton>
+                                    </div>
+                                </BbPopoverContent>
+                            </BbPopover>
+                        }
                         <BbTooltipProvider>
                             <BbTooltip DelayDuration="0">
                                 <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                     <LucideIcon Name="info" Size="14"/>
                                 </BbTooltipTrigger>
-                                <BbTooltipContent>Toggle to enable or disable this import.</BbTooltipContent>
-                            </BbTooltip>
-                        </BbTooltipProvider>
-                    </BbFieldLabel>
-                    <BbFieldContent>
-                        <BbSwitch @bind-Checked="_isEnabled"/>
-                    </BbFieldContent>
-                </BbField>
-
-                <BbField IsInvalid="NameIsInvalid">
-                    <BbFieldLabel For="name" Class="flex items-center leading-none">
-                        Name <span class="text-destructive ml-0.5">*</span>
-                        <BbTooltipProvider>
-                            <BbTooltip DelayDuration="0">
-                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                    <LucideIcon Name="info" Size="14"/>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>A friendly label to identify this subscription across your lists.</BbTooltipContent>
-                            </BbTooltip>
-                        </BbTooltipProvider>
-                    </BbFieldLabel>
-                    <BbFieldContent>
-                        <BbInput id="name" Placeholder="e.g. My Top Movies" @bind-Value="_name" Class="bg-accent" Required="true" AriaInvalid="@NameIsInvalid"
-                                 UpdateTiming="UpdateTiming.Immediate"/>
-                    </BbFieldContent>
-                    @if (NameIsInvalid)
-                    {
-                        <BbFieldError>Name is required.</BbFieldError>
-                    }
-                </BbField>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <BbField>
-                        <BbFieldLabel Class="flex items-center leading-none">
-                            Provider
-                            @if (_disabledProviders.Count > 0)
-                            {
-                                var allDisabled = _disabledProviders.Count == Enum.GetValues<MediaListProvider>().Length;
-                                <BbPopover>
-                                    <BbPopoverTrigger AsChild="false"
-                                                      Class="@($"ml-1 inline-flex items-center cursor-pointer {(allDisabled ? "text-destructive" : "text-amber-500")}")">
-                                        <LucideIcon Name="triangle-alert" Size="14"/>
-                                    </BbPopoverTrigger>
-                                    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72">
-                                        <div class="space-y-2">
-                                            <p class="text-sm font-semibold">API key required</p>
-                                            <p class="text-sm text-muted-foreground">
-                                                The following providers are unavailable because no API key is configured:
-                                                <span class="font-medium">@string.Join(", ", _disabledProviders)</span>.
-                                            </p>
-                                            <BbButton Variant="ButtonVariant.Link" Href="/settings?section=api-keys" Class="h-auto p-0 text-sm">
-                                                Go to Settings →
-                                            </BbButton>
-                                        </div>
-                                    </BbPopoverContent>
-                                </BbPopover>
-                            }
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>The external service that hosts the list you want to import.
-                                    </BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
-                        </BbFieldLabel>
-                        <BbFieldContent>
-                            <EnumToggleGroup TEnum="MediaListProvider"
-                                             Value="_provider"
-                                             OnChange="@OnProviderChanged"
-                                             BrandingProvider="GetProviderBranding"
-                                             DisabledValues="_disabledProviders"/>
-                        </BbFieldContent>
-                    </BbField>
-
-                    <BbField>
-                        <BbFieldLabel Class="flex leading-none">
-                            Strategy
-                            <BbTooltipProvider>
-                                <BbTooltip>
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>Only relevant when a subscription runs more than once. Controls whether repeated syncs add to or replace
-                                        your existing collection.
-                                    </BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
-                        </BbFieldLabel>
-                        <BbFieldContent>
-                            <EnumToggleGroup TEnum="MediaListAddStrategy"
-                                             Value="_strategy"
-                                             OnChange="@OnStrategyChanged"
-                                             TooltipProvider="GetStrategyTooltip"
-                                             BrandingProvider="GetStrategyBranding"/>
-                        </BbFieldContent>
-                    </BbField>
-                </div>
-
-                <BbField IsInvalid="ListIdentifierIsInvalid">
-                    <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
-                        List identifier <span class="text-destructive ml-0.5">*</span>
-                        <BbTooltipProvider>
-                            <BbTooltip>
-                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                    <LucideIcon Name="info" Size="14"/>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>The unique string that locates your list within the selected provider. The exact format varies by provider;
-                                    check the list's URL or the provider's documentation.
+                                <BbTooltipContent>The external service that hosts the list you want to import.
                                 </BbTooltipContent>
                             </BbTooltip>
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)"
-                                 @bind-Value="_listIdentifier"
-                                 @bind-Value:after="OnListIdentifierChanged"
-                                 Class="bg-accent"
-                                 Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate"/>
+                        <EnumToggleGroup TEnum="MediaListProvider"
+                                         Value="_provider"
+                                         OnChange="@OnProviderChanged"
+                                         BrandingProvider="GetProviderBranding"
+                                         DisabledValues="_disabledProviders"/>
                     </BbFieldContent>
-                    <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
-                    @if (ListIdentifierIsInvalid)
-                    {
-                        <BbFieldError>List identifier is required.</BbFieldError>
-                    }
                 </BbField>
 
+                <BbField>
+                    <BbFieldLabel Class="flex leading-none">
+                        Strategy
+                        <BbTooltipProvider>
+                            <BbTooltip>
+                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                    <LucideIcon Name="info" Size="14"/>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Only relevant when a subscription runs more than once. Controls whether repeated syncs add to or replace
+                                    your existing collection.
+                                </BbTooltipContent>
+                            </BbTooltip>
+                        </BbTooltipProvider>
+                    </BbFieldLabel>
+                    <BbFieldContent>
+                        <EnumToggleGroup TEnum="MediaListAddStrategy"
+                                         Value="_strategy"
+                                         OnChange="@OnStrategyChanged"
+                                         TooltipProvider="GetStrategyTooltip"
+                                         BrandingProvider="GetStrategyBranding"/>
+                    </BbFieldContent>
+                </BbField>
             </div>
 
-            <BbCollapsible>
-                <BbCollapsibleTrigger AsChild="false"
-                                      Class="group w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
-                    <span class="flex items-center gap-2">
-                        <LucideIcon Name="sliders-horizontal" Size="14"/>
-                        Filters, Sorting & Limits
-                        <span class="text-xs font-normal opacity-50">optional</span>
-                    </span>
-                    <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
-                </BbCollapsibleTrigger>
-                <BbCollapsibleContent>
-                    <div class="px-6 pb-8 pt-4 space-y-6 p-4">
+            <BbField IsInvalid="ListIdentifierIsInvalid">
+                <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
+                    List identifier <span class="text-destructive ml-0.5">*</span>
+                    <BbTooltipProvider>
+                        <BbTooltip>
+                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                <LucideIcon Name="info" Size="14"/>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>The unique string that locates your list within the selected provider. The exact format varies by provider;
+                                check the list's URL or the provider's documentation.
+                            </BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                </BbFieldLabel>
+                <BbFieldContent>
+                    <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)"
+                             @bind-Value="_listIdentifier"
+                             @bind-Value:after="OnListIdentifierChanged"
+                             Class="bg-accent"
+                             Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate"/>
+                </BbFieldContent>
+                <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
+                @if (ListIdentifierIsInvalid)
+                {
+                    <BbFieldError>List identifier is required.</BbFieldError>
+                }
+            </BbField>
 
+        <BbCollapsible>
+            <BbCollapsibleTrigger AsChild="false"
+                                  Class="group w-full flex items-center justify-between -mx-6 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
+                <span class="flex items-center gap-2">
+                    <LucideIcon Name="sliders-horizontal" Size="14"/>
+                    Filters, Sorting & Limits
+                    <span class="text-xs font-normal opacity-50">optional</span>
+                </span>
+                <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
+            </BbCollapsibleTrigger>
+            <BbCollapsibleContent>
+                <div class="pt-4 pb-6 space-y-6">
+
+                    <BbField>
+                        <BbFieldLabel Class="flex items-center leading-none">
+                            Enable filters
+                            <BbTooltipProvider>
+                                <BbTooltip DelayDuration="0">
+                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                        <LucideIcon Name="info" Size="14"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>Limit which imported items are added to your collection. Filter by genre, rating, release year, and
+                                        more.
+                                    </BbTooltipContent>
+                                </BbTooltip>
+                            </BbTooltipProvider>
+                        </BbFieldLabel>
+                        <BbFieldContent>
+                            <BbSwitch @bind-Checked="_filtersEnabled"/>
+                        </BbFieldContent>
+                    </BbField>
+
+                    @if (_filtersEnabled)
+                    {
+                        <BbFilterBuilder @bind-Filter="_filter"
+                                         Fields="FilterFields"
+                                         OnFilterChanged="HandleFilterChanged"/>
+                    }
+
+                    <BbField>
+                        <BbFieldLabel Class="flex items-center leading-none">
+                            Enable custom sorting
+                            <BbTooltipProvider>
+                                <BbTooltip DelayDuration="0">
+                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                        <LucideIcon Name="info" Size="14"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>Sort imported items by a specific field before applying the limit.</BbTooltipContent>
+                                </BbTooltip>
+                            </BbTooltipProvider>
+                        </BbFieldLabel>
+                        <BbFieldContent>
+                            <BbSwitch @bind-Checked="_sortingEnabled"/>
+                        </BbFieldContent>
+                    </BbField>
+
+                    @if (_sortingEnabled)
+                    {
                         <BbField>
                             <BbFieldLabel Class="flex items-center leading-none">
-                                Enable filters
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Limit which imported items are added to your collection. Filter by genre, rating, release year, and
-                                            more.
-                                        </BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
+                                Sort by
                             </BbFieldLabel>
                             <BbFieldContent>
-                                <BbSwitch @bind-Checked="_filtersEnabled"/>
-                            </BbFieldContent>
-                        </BbField>
-
-                        @if (_filtersEnabled)
-                        {
-                            <BbFilterBuilder @bind-Filter="_filter"
-                                             Fields="FilterFields"
-                                             OnFilterChanged="HandleFilterChanged"/>
-                        }
-
-                        <BbField>
-                            <BbFieldLabel Class="flex items-center leading-none">
-                                Enable custom sorting
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Sort imported items by a specific field before applying the limit.</BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
-                            </BbFieldLabel>
-                            <BbFieldContent>
-                                <BbSwitch @bind-Checked="_sortingEnabled"/>
-                            </BbFieldContent>
-                        </BbField>
-
-                        @if (_sortingEnabled)
-                        {
-                            <BbField>
-                                <BbFieldLabel Class="flex items-center leading-none">
-                                    Sort by
-                                </BbFieldLabel>
-                                <BbFieldContent>
-                                    <div class="flex items-center gap-3">
-                                        <BbSelect TValue="string"
-                                                  Value="_sortField"
-                                                  Class="w-40"
-                                                  ValueChanged="@((v) => _sortField = v ?? _sortField)"
-                                                  Options="SortFieldOptions"/>
-                                        <BbTooltipProvider>
-                                            <BbTooltip DelayDuration="0">
-                                                <BbTooltipTrigger AsChild="false" Class="p-0">
-                                                    <BbButton Size="ButtonSize.Icon"
-                                                              Variant="ButtonVariant.Outline"
-                                                              OnClick="@ToggleSortDirection"
-                                                              AriaLabel="@GetSortLabel()">
-                                                        <LucideIcon Name="arrow-up" Size="14"
-                                                                    Class="@GetSortIconClass()"/>
-                                                    </BbButton>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    </div>
-                                </BbFieldContent>
-                            </BbField>
-                        }
-
-                        <BbField IsInvalid="LimitIsInvalid">
-                            <BbFieldLabel For="limit" Class="flex items-center leading-none">
-                                Limit
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Maximum number of items to import from the list. Leave empty to import all available items.
-                                        </BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
-                            </BbFieldLabel>
-                            <BbFieldContent>
-                                <BbInput id="limit"
-                                         Placeholder="e.g. 100"
-                                         @bind-Value="_limitRaw"
-                                         Class="bg-accent w-40"
-                                         AriaInvalid="@LimitIsInvalid"
-                                         UpdateTiming="UpdateTiming.Immediate"/>
-                            </BbFieldContent>
-                            @if (LimitIsInvalid)
-                            {
-                                <BbFieldError>Limit must be a positive whole number.</BbFieldError>
-                            }
-                        </BbField>
-                    </div>
-                </BbCollapsibleContent>
-            </BbCollapsible>
-
-            <BbCollapsible>
-                <BbCollapsibleTrigger AsChild="false"
-                                      Class="group w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
-                    <span class="flex items-center gap-2">
-                        <LucideIcon Name="clock" Size="14"/>
-                        Sync Frequency
-                        <span class="text-xs font-normal opacity-50">optional</span>
-                    </span>
-                    <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
-                </BbCollapsibleTrigger>
-                <BbCollapsibleContent>
-                    <div class="px-6 pb-8 pt-4 space-y-6 p-4">
-
-                        <BbField>
-                            <BbFieldLabel Class="flex items-center leading-none">
-                                Trigger
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>When to sync this subscription, on demand or on a recurring schedule.</BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
-                            </BbFieldLabel>
-                            <BbFieldContent>
-                                <EnumToggleGroup TEnum="RunMode"
-                                                 Value="_runMode"
-                                                 OnChange="@OnRunModeChanged"
-                                                 BrandingProvider="GetRunModeBranding"/>
-                            </BbFieldContent>
-                        </BbField>
-
-                        @if (_runMode == RunMode.Scheduled)
-                        {
-                            <BbField>
-                                <BbFieldLabel Class="flex items-center leading-none">
-                                    Schedule
+                                <div class="flex items-center gap-3">
+                                    <BbSelect TValue="string"
+                                              Value="_sortField"
+                                              Class="w-40"
+                                              ValueChanged="@((v) => _sortField = v ?? _sortField)"
+                                              Options="SortFieldOptions"/>
                                     <BbTooltipProvider>
                                         <BbTooltip DelayDuration="0">
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
+                                            <BbTooltipTrigger AsChild="false" Class="p-0">
+                                                <BbButton Size="ButtonSize.Icon"
+                                                          Variant="ButtonVariant.Outline"
+                                                          OnClick="@ToggleSortDirection"
+                                                          AriaLabel="@GetSortLabel()">
+                                                    <LucideIcon Name="arrow-up" Size="14"
+                                                                Class="@GetSortIconClass()"/>
+                                                </BbButton>
                                             </BbTooltipTrigger>
-                                            <BbTooltipContent>Define a CRON schedule for automatic runs.</BbTooltipContent>
+                                            <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
-                                </BbFieldLabel>
-                                <BbFieldContent>
-                                    <SchedulePicker CronExpression="@_scheduleCronExpression"
-                                                    CronExpressionChanged="@((value) => _scheduleCronExpression = value)"/>
-                                </BbFieldContent>
-                            </BbField>
+                                </div>
+                            </BbFieldContent>
+                        </BbField>
+                    }
+
+                    <BbField IsInvalid="LimitIsInvalid">
+                        <BbFieldLabel For="limit" Class="flex items-center leading-none">
+                            Limit
+                            <BbTooltipProvider>
+                                <BbTooltip DelayDuration="0">
+                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                        <LucideIcon Name="info" Size="14"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>Maximum number of items to import from the list. Leave empty to import all available items.
+                                    </BbTooltipContent>
+                                </BbTooltip>
+                            </BbTooltipProvider>
+                        </BbFieldLabel>
+                        <BbFieldContent>
+                            <BbInput id="limit"
+                                     Placeholder="e.g. 100"
+                                     @bind-Value="_limitRaw"
+                                     Class="bg-accent w-40"
+                                     AriaInvalid="@LimitIsInvalid"
+                                     UpdateTiming="UpdateTiming.Immediate"/>
+                        </BbFieldContent>
+                        @if (LimitIsInvalid)
+                        {
+                            <BbFieldError>Limit must be a positive whole number.</BbFieldError>
                         }
+                    </BbField>
+                </div>
+            </BbCollapsibleContent>
+        </BbCollapsible>
 
+        <BbCollapsible>
+            <BbCollapsibleTrigger AsChild="false"
+                                  Class="group w-full flex items-center justify-between -mx-6 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
+                <span class="flex items-center gap-2">
+                    <LucideIcon Name="clock" Size="14"/>
+                    Sync Frequency
+                    <span class="text-xs font-normal opacity-50">optional</span>
+                </span>
+                <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
+            </BbCollapsibleTrigger>
+            <BbCollapsibleContent>
+                <div class="pt-4 pb-6 space-y-6">
+
+                    <BbField>
+                        <BbFieldLabel Class="flex items-center leading-none">
+                            Trigger
+                            <BbTooltipProvider>
+                                <BbTooltip DelayDuration="0">
+                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                        <LucideIcon Name="info" Size="14"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>When to sync this subscription, on demand or on a recurring schedule.</BbTooltipContent>
+                                </BbTooltip>
+                            </BbTooltipProvider>
+                        </BbFieldLabel>
+                        <BbFieldContent>
+                            <EnumToggleGroup TEnum="RunMode"
+                                             Value="_runMode"
+                                             OnChange="@OnRunModeChanged"
+                                             BrandingProvider="GetRunModeBranding"/>
+                        </BbFieldContent>
+                    </BbField>
+
+                    @if (_runMode == RunMode.Scheduled)
+                    {
+                        <BbField>
+                            <BbFieldLabel Class="flex items-center leading-none">
+                                Schedule
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Define a CRON schedule for automatic runs.</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <SchedulePicker CronExpression="@_scheduleCronExpression"
+                                                CronExpressionChanged="@((value) => _scheduleCronExpression = value)"/>
+                            </BbFieldContent>
+                        </BbField>
+                    }
+
+                </div>
+            </BbCollapsibleContent>
+        </BbCollapsible>
+
+            </div>
+        </BbCard>
+
+        <!-- Right Panel: media results; architected for future filter/sort controls -->
+        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden">
+            <!-- Panel controls: search bar; filter/sort controls can be added here in the future -->
+            <div class="shrink-0 px-6 pt-6 pb-4 border-b flex items-center gap-2">
+                <BbInput Placeholder="Search media..."
+                         Class="w-full"
+                         @bind-Value="_previewFilterQuery"
+                         UpdateTiming="UpdateTiming.Immediate"/>
+                <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
+            </div>
+            <!-- Scrollable results area -->
+            <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-6 pt-4 flex flex-col">
+                @if (_state == State.Success && FilteredPreviewResults.Any())
+                {
+                    <div class="mb-4 shrink-0">
+                        <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
+                        <p class="text-sm text-muted-foreground">
+                            @FilteredPreviewResults.Count() item@(FilteredPreviewResults.Count() == 1 ? "" : "s") found in <span class="font-medium">@_testedListIdentifier</span>
+                        </p>
                     </div>
-                </BbCollapsibleContent>
-            </BbCollapsible>
-
-            <div class="px-6 py-4 border-t flex items-center justify-end gap-2">
-                @if (_state == State.Testing)
-                {
-                    <BbButton Variant="ButtonVariant.Default" Disabled="true">
-                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                        <span>Testing…</span>
-                    </BbButton>
+                    <div class="space-y-2">
+                        @foreach (var result in FilteredPreviewResults)
+                        {
+                            var isBlacklisted = IsPreviewBlacklisted(result);
+                            <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
+                                <MediaDetailTile @key="result"
+                                                 Result="result"
+                                                 IsMarked="isBlacklisted"
+                                                 IsActiveToggle="false"
+                                                 IsFocused="_focusedPreviewResult == result"
+                                                 OnFocusIn="() => _focusedPreviewResult = result"
+                                                 OnFocusOut="() => ClearFocusedPreviewResult(result)"
+                                                 OnToggleWatchlist="TogglePreviewBlacklistAsync"
+                                                 ToggleIcon="GetToggleBlacklistIcon"
+                                                 ToggleIconColor="GetToggleBlacklistIconColor"/>
+                            </div>
+                        }
+                    </div>
                 }
-                else if (ShowSaveButton)
+                else if (_state == State.Success)
                 {
-                    <BbButton Variant="ButtonVariant.Outline"
-                              Class="text-success border-success hover:bg-success"
-                              OnClick="HandleSaveAsync"
-                              Disabled="!CanSave">
-                        <LucideIcon Name="save" Size="14" Class="mr-2"/>
-                        Save
-                    </BbButton>
-                    <BbButton Variant="ButtonVariant.Outline"
-                              OnClick="HandleViewPreviewAsync">
-                        <LucideIcon Name="eye" Size="14" Class="mr-2"/>
-                        View
-                    </BbButton>
+                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                        <LucideIcon Name="search-x" Size="48" Class="text-muted-foreground mb-4"/>
+                        <p class="text-lg font-semibold">No results match your search</p>
+                        <p class="text-muted-foreground text-sm mt-2">Try adjusting or clearing the search filter.</p>
+                    </div>
+                }
+                else if (_state == State.Testing)
+                {
+                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                        <BbSpinner Size="SpinnerSize.Large" Class="mb-4"/>
+                        <p class="text-lg font-semibold">Testing list…</p>
+                        <p class="text-muted-foreground text-sm mt-2">Fetching media from the provider. This may take a few seconds.</p>
+                    </div>
                 }
                 else if (_state == State.Failed)
                 {
-                    <BbButton Variant="ButtonVariant.Outline"
-                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                              Disabled="true">
-                        <LucideIcon Name="x" Size="14" Class="mr-2"/>
-                        Failed
-                    </BbButton>
-                }
-                else if (ShowTestButton)
-                {
-                    <BbButton Variant="ButtonVariant.Default"
-                              OnClick="HandleTestAsync"
-                              Disabled="!CanTest || LimitIsInvalid">
-                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                        Test
-                    </BbButton>
-                }
-
-                <BbButton Variant="ButtonVariant.Outline"
-                          Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                          OnClick="ReturnAsync"
-                          Disabled="@IsProcessing">
-                    Cancel
-                </BbButton>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-@if (_showPreviewModal)
-{
-    <div class="preview-modal"
-         role="dialog"
-         aria-modal="true"
-         aria-label="Import Preview"
-         @onkeydown="HandlePreviewKeyDown">
-        <div class="preview-modal-backdrop" @onclick="ClosePreviewModal"></div>
-
-        <div class="preview-modal-content">
-            <div class="flex items-start justify-between gap-4 mb-4">
-                <div>
-                    <h2 class="text-lg font-bold tracking-wide">Import Preview</h2>
-                    <p class="text-sm text-muted-foreground">
-                        @_previewResults.Count item@(_previewResults.Count == 1 ? "" : "s") found in <span class="font-medium">@_testedListIdentifier</span>
-                    </p>
-                </div>
-                <BbButton Variant="ButtonVariant.Ghost" OnClick="ClosePreviewModal">
-                    <LucideIcon Name="x" Size="18"/>
-                </BbButton>
-            </div>
-
-            <div class="mb-4">
-                <input type="search"
-                       class="w-full border-input bg-secondary file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 flex h-9 min-w-0 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                       placeholder="Filter by title…"
-                       @bind="_previewFilterQuery"
-                       @bind:event="oninput"
-                       @onfocus="() => _focusedPreviewResult = null"
-                       aria-label="Filter preview results by title"/>
-            </div>
-
-            <div class="preview-modal-results space-y-2 pr-1">
-                @{
-                    var filtered = FilteredPreviewResults.ToList();
-                }
-                @if (filtered.Count > 0)
-                {
-                    @foreach (var result in filtered)
-                    {
-                        var isBlacklisted = IsPreviewBlacklisted(result);
-                        <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
-                            <MediaDetailTile @key="result"
-                                             Result="result"
-                                             IsMarked="isBlacklisted"
-                                             IsActiveToggle="false"
-                                             IsFocused="_focusedPreviewResult == result"
-                                             OnFocusIn="() => _focusedPreviewResult = result"
-                                             OnFocusOut="() => ClearFocusedPreviewResult(result)"
-                                             OnToggleWatchlist="TogglePreviewBlacklistAsync"
-                                             ToggleIcon="GetToggleBlacklistIcon"
-                                             ToggleIconColor="GetToggleBlacklistIconColor"
-                            />
-                        </div>
-                    }
-                }
-                else if (!string.IsNullOrWhiteSpace(_previewFilterQuery))
-                {
-                    <div class="rounded-lg bg-surface p-6 text-center space-y-2">
-                        <LucideIcon Name="search-x" Size="28" Class="mx-auto text-muted-foreground"/>
-                        <p class="text-sm text-muted-foreground">No items match <span class="font-medium">"@_previewFilterQuery"</span>.</p>
+                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                        <LucideIcon Name="x-circle" Size="48" Class="text-destructive mb-4"/>
+                        <p class="text-lg font-semibold text-destructive">Test failed</p>
+                        <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
                     </div>
                 }
                 else
                 {
-                    <div class="rounded-lg bg-surface p-6 text-center space-y-2">
-                        <LucideIcon Name="search-x" Size="28" Class="mx-auto text-muted-foreground"/>
-                        <p class="text-sm text-muted-foreground">No items found.</p>
+                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                        <LucideIcon Name="list-music" Size="48" Class="text-muted-foreground mb-4"/>
+                        <p class="text-lg font-semibold">Media results will appear here</p>
+                        <p class="text-muted-foreground text-sm mt-2">Run a test to preview the media items from your list.</p>
                     </div>
                 }
             </div>
-        </div>
+        </BbCard>
+
     </div>
-}
+
+    <!-- Page Footer: action buttons, fixed, never scrolls -->
+    <div class="shrink-0 flex items-center justify-end gap-2 px-6 py-3 border-t">
+        @if (_state == State.Testing)
+        {
+            <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                <span>Testing…</span>
+            </BbButton>
+        }
+        else if (ShowSaveButton)
+        {
+            <BbButton Variant="ButtonVariant.Outline"
+                      Class="text-success border-success hover:bg-success"
+                      OnClick="HandleSaveAsync"
+                      Disabled="!CanSave">
+                <LucideIcon Name="save" Size="14" Class="mr-2"/>
+                Save
+            </BbButton>
+        }
+        else if (_state == State.Failed)
+        {
+            <BbButton Variant="ButtonVariant.Outline"
+                      Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                      Disabled="true">
+                <LucideIcon Name="x" Size="14" Class="mr-2"/>
+                Failed
+            </BbButton>
+        }
+        else if (ShowTestButton)
+        {
+            <BbButton Variant="ButtonVariant.Default"
+                      OnClick="HandleTestAsync"
+                      Disabled="!CanTest || LimitIsInvalid">
+                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                Test
+            </BbButton>
+        }
+
+        <BbButton Variant="ButtonVariant.Outline"
+                  Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                  OnClick="ReturnAsync"
+                  Disabled="@IsProcessing">
+            Cancel
+        </BbButton>
+    </div>
+
+</div>
 
 @code {
 
@@ -497,7 +498,6 @@
     private string _testedListIdentifier = string.Empty;
     private IReadOnlyList<IMediaDetailResult> _previewResults = [];
     private CancellationTokenSource? _cancellationTokenSource;
-    private bool _showPreviewModal;
     private string _previewFilterQuery = string.Empty;
     private readonly HashSet<string> _previewBlacklistedSourceIds = [];
     private IMediaDetailResult? _focusedPreviewResult;
@@ -673,12 +673,6 @@
 
     private void HandleFilterChanged(FilterDefinition filter) {}
 
-    private void HandlePreviewKeyDown(KeyboardEventArgs args)
-    {
-        if (args.Key is "Escape")
-            ClosePreviewModal();
-    }
-
     private static string GetPreviewSourceKey(IMediaDetailResult result) => result.SourceId.ToString() ?? string.Empty;
 
     private bool IsPreviewBlacklisted(IMediaDetailResult result) =>
@@ -711,22 +705,6 @@
         return CanSave ? SaveAsync() : Task.CompletedTask;
     }
 
-    private Task HandleViewPreviewAsync()
-    {
-        _previewFilterQuery = string.Empty;
-        _previewBlacklistedSourceIds.Clear();
-        _focusedPreviewResult = null;
-        _showPreviewModal = true;
-        return Task.CompletedTask;
-    }
-
-    private void ClosePreviewModal()
-    {
-        _showPreviewModal = false;
-        _previewFilterQuery = string.Empty;
-        _previewBlacklistedSourceIds.Clear();
-        _focusedPreviewResult = null;
-    }
 
     private IEnumerable<IMediaDetailResult> FilteredPreviewResults =>
         string.IsNullOrWhiteSpace(_previewFilterQuery) ? _previewResults : _previewResults.Where(r => r.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase));
