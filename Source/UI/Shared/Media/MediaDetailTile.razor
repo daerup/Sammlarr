@@ -3,7 +3,8 @@
 
 <div class="search-result-row rounded-lg bg-black hover-bg @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
-     @onfocusin="OnFocusIn">
+     @onfocusin="OnFocusIn"
+     @onfocusout="OnFocusOut">
     <div class="flex items-start justify-between gap-3">
         <div class="flex items-start">
             <div class="search-result-poster">
@@ -53,7 +54,7 @@
         <button type="button"
                 class="search-result-toggle-btn @(IsMarked ? "is-marked" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
                 style="@ToggleButtonStyle(IsMarked)"
-                @onclick="() => OnToggleWatchlist.InvokeAsync(Result)">
+                @onclick="HandleToggleAsync">
             <span class="relative inline-flex items-center justify-center w-6 h-6">
                 @if (IsMarked)
                 {
@@ -61,14 +62,7 @@
                 }
                 else
                 {
-                    @if (@ToggleIconColor(false) is not null)
-                    {
-                        <LucideIcon Name="@ToggleIcon(false)" Size="24" Color="@ToggleIconColor(false)" Class="@_toggleIconClass"/>
-                    }
-                    else
-                    {
-                        <LucideIcon Name="@ToggleIcon(false)" Size="24" Class="@_toggleIconClass"/>
-                    }
+                    <LucideIcon Name="@ToggleIcon(false)" Size="24" Class="@_toggleIconClass"/>
                 }
                 @if (IsActiveToggle)
                 {
@@ -88,6 +82,7 @@
     [Parameter] public bool IsActiveToggle { get; set; }
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
+    [Parameter] public EventCallback OnFocusOut { get; set; }
     [Parameter] public EventCallback<IMediaDetailResult> OnToggleWatchlist { get; set; }
 
     [Parameter, EditorRequired] public Func<bool, string> ToggleIcon { get; set; }
@@ -104,6 +99,16 @@
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl ?? "" : Result.BackdropUrl)}')";
         _toggleIconClass = $"transition-opacity duration-150 {(IsActiveToggle ? "opacity-0" : string.Empty)}";
         _displayFacts = GetDisplayFacts(Result);
+    }
+
+    private async Task HandleToggleAsync()
+    {
+        await OnToggleWatchlist.InvokeAsync(Result);
+
+        if (OnFocusOut.HasDelegate)
+        {
+            await OnFocusOut.InvokeAsync();
+        }
     }
 
     private static IReadOnlyList<string> GetDisplayFacts(IMediaDetailResult result)
