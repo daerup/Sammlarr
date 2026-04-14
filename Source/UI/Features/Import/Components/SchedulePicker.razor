@@ -37,10 +37,13 @@
                           Format="TimeFormat.Hour24"
                           MinuteStep="5"
                           Placeholder="Select time"/>
-            <BbSelect TValue="DayOfWeek"
-                      Value="_weeklyDayOfWeek"
-                      ValueChanged="OnWeeklyDayChanged"
-                      Options="DayOfWeekOptions"/>
+            <BbMultiSelect TValue="DayOfWeek"
+                           Values="_weeklyDaysOfWeek"
+                           ValuesChanged="OnWeeklyDaysChanged"
+                           Options="DayOfWeekOptions"
+                           MaxDisplayTags="2"
+                           Placeholder="Select day(s)"
+                           Class="min-w-56"/>
             @if (_weeklyTime.HasValue)
             {
                 <div class="flex flex-col gap-0.5">
@@ -152,7 +155,7 @@
     private ScheduleMode _scheduleMode = ScheduleMode.Daily;
     private TimeSpan?    _dailyTime;
     private TimeSpan?    _weeklyTime;
-    private DayOfWeek    _weeklyDayOfWeek = DayOfWeek.Monday;
+    private List<DayOfWeek> _weeklyDaysOfWeek = [DayOfWeek.Monday];
     private string _cronSecond     = "*";
     private string _cronMinute     = "*";
     private string _cronHour       = "*";
@@ -172,7 +175,8 @@
     private string? ComputedExpression => _scheduleMode switch
     {
         ScheduleMode.Daily  when _dailyTime.HasValue  => $"0 {_dailyTime.Value.Minutes} {_dailyTime.Value.Hours} * * *",
-        ScheduleMode.Weekly when _weeklyTime.HasValue => $"0 {_weeklyTime.Value.Minutes} {_weeklyTime.Value.Hours} * * {(int)_weeklyDayOfWeek}",
+        ScheduleMode.Weekly when _weeklyTime.HasValue && _weeklyDaysOfWeek.Count > 0
+            => $"0 {_weeklyTime.Value.Minutes} {_weeklyTime.Value.Hours} * * {ToCronDayOfWeekSegment(_weeklyDaysOfWeek)}",
         ScheduleMode.Expression when IsCronValid      => $"{Normalize(_cronSecond)} {Normalize(_cronMinute)} {Normalize(_cronHour)} {Normalize(_cronDayOfMonth)} {Normalize(_cronMonth)} {Normalize(_cronDayOfWeek)}",
         _                                             => null,
     };
@@ -215,7 +219,15 @@
 
     private void OnDailyTimeChanged(TimeSpan? time)  { _dailyTime       = time; NotifyChanged(); }
     private void OnWeeklyTimeChanged(TimeSpan? time) { _weeklyTime      = time; NotifyChanged(); }
-    private void OnWeeklyDayChanged(DayOfWeek day)   { _weeklyDayOfWeek = day;  NotifyChanged(); }
+    private void OnWeeklyDaysChanged(IEnumerable<DayOfWeek>? days)
+    {
+        _weeklyDaysOfWeek = days?
+            .Distinct()
+            .OrderBy(static day => (int)day)
+            .ToList()
+            ?? [];
+        NotifyChanged();
+    }
 
     private void TransferScheduleConfig(ScheduleMode from, ScheduleMode to)
     {
@@ -223,6 +235,10 @@
         {
             case (ScheduleMode.Daily, ScheduleMode.Weekly):
                 _weeklyTime = _dailyTime;
+                if (_weeklyDaysOfWeek.Count == 0)
+                {
+                    _weeklyDaysOfWeek = [DayOfWeek.Monday];
+                }
                 break;
 
             case (ScheduleMode.Weekly, ScheduleMode.Daily):
@@ -244,7 +260,9 @@
                 _cronHour       = _weeklyTime.Value.Hours.ToString();
                 _cronDayOfMonth = "*";
                 _cronMonth      = "*";
-                _cronDayOfWeek  = ((int)_weeklyDayOfWeek).ToString();
+                _cronDayOfWeek  = _weeklyDaysOfWeek.Count > 0
+                    ? ToCronDayOfWeekSegment(_weeklyDaysOfWeek)
+                    : "*";
                 break;
 
             case (ScheduleMode.Expression, ScheduleMode.Daily):
@@ -255,8 +273,7 @@
             case (ScheduleMode.Expression, ScheduleMode.Weekly):
                 if (int.TryParse(_cronHour, out var weeklyHour) && int.TryParse(_cronMinute, out var weeklyMinute))
                     _weeklyTime = new TimeSpan(weeklyHour, weeklyMinute, 0);
-                if (int.TryParse(_cronDayOfWeek, out var dow) && Enum.IsDefined(typeof(DayOfWeek), dow))
-                    _weeklyDayOfWeek = (DayOfWeek)dow;
+                _weeklyDaysOfWeek = ParseWeeklyDays(_cronDayOfWeek);
                 break;
         }
     }
@@ -294,6 +311,109 @@
         }
 
         return true;
+    }
+
+    private static string ToCronDayOfWeekSegment(IEnumerable<DayOfWeek> days)
+    {
+        var normalizedDays = days
+            .Distinct()
+            .OrderBy(static day => (int)day)
+            .ToList();
+
+        if (normalizedDays.Count == 7)
+        {
+            return "*";
+        }
+
+        return string.Join(',', normalizedDays.Select(static day => day == DayOfWeek.Sunday ? 0 : (int)day));
+    }
+
+    private static List<DayOfWeek> ParseWeeklyDays(string value)
+    {
+        var normalized = Normalize(value);
+        if (normalized == "*")
+        {
+            return
+            [
+                DayOfWeek.Sunday,
+                DayOfWeek.Monday,
+                DayOfWeek.Tuesday,
+                DayOfWeek.Wednesday,
+                DayOfWeek.Thursday,
+                DayOfWeek.Friday,
+                DayOfWeek.Saturday,
+            ];
+        }
+
+        var parsedDays = new SortedSet<int>();
+        foreach (var segment in normalized.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            foreach (var expandedValue in ExpandDayOfWeekSegment(segment))
+            {
+                parsedDays.Add(expandedValue == 7 ? 0 : expandedValue);
+            }
+        }
+
+        return parsedDays.Select(static day => (DayOfWeek)day).ToList();
+    }
+
+    private static IEnumerable<int> ExpandDayOfWeekSegment(string segment)
+    {
+        var stepParts = segment.Split('/');
+        if (stepParts.Length > 2)
+        {
+            yield break;
+        }
+
+        var step = 1;
+        if (stepParts.Length == 2 && (!int.TryParse(stepParts[1], out step) || step <= 0))
+        {
+            yield break;
+        }
+
+        var rangePart = stepParts[0];
+        if (rangePart == "*")
+        {
+            for (var day = 0; day <= 7; day += step)
+            {
+                yield return day;
+            }
+
+            yield break;
+        }
+
+        var rangeParts = rangePart.Split('-');
+        if (rangeParts.Length == 1)
+        {
+            if (!int.TryParse(rangeParts[0], out var day) || day < 0 || day > 7)
+            {
+                yield break;
+            }
+
+            for (var expandedDay = day; expandedDay <= 7; expandedDay += step)
+            {
+                yield return expandedDay;
+            }
+
+            yield break;
+        }
+
+        if (rangeParts.Length != 2
+            || !int.TryParse(rangeParts[0], out var rangeStart)
+            || !int.TryParse(rangeParts[1], out var rangeEnd)
+            || rangeStart < 0
+            || rangeStart > 7
+            || rangeEnd < 0
+            || rangeEnd > 7
+            || rangeStart > rangeEnd)
+        {
+            yield break;
+        }
+
+        for (var day = rangeStart; day <= rangeEnd; day += step)
+        {
+            yield return day;
+        }
     }
 }
 
