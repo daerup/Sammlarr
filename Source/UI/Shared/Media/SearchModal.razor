@@ -81,6 +81,7 @@
                                              IsActiveToggle="_isAdding && Equals(_activeToggledSourceId, result.SourceId)"
                                              IsFocused="_focusedResult == result"
                                              OnFocusIn="() => _focusedResult = result"
+                                             OnFocusOut="() => ClearFocusedResult(result)"
                                              OnToggleWatchlist="ToggleWatchlistAsync"
                                              ToggleIcon="@(_ => "bookmark")"
                                              ToggleIconColor="@(inWatchlist => inWatchlist ? "Orange" : "var(--accent-foreground)")"
@@ -244,6 +245,13 @@
         }
         _isAdding = false;
         _activeToggledSourceId = null;
+        _focusedResult = null;
+    }
+
+    private void ClearFocusedResult(IMediaDetailResult result)
+    {
+        if (ReferenceEquals(_focusedResult, result))
+            _focusedResult = null;
     }
 
 

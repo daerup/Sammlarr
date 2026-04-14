@@ -444,6 +444,7 @@
                                              IsActiveToggle="false"
                                              IsFocused="_focusedPreviewResult == result"
                                              OnFocusIn="() => _focusedPreviewResult = result"
+                                             OnFocusOut="() => ClearFocusedPreviewResult(result)"
                                              OnToggleWatchlist="TogglePreviewBlacklistAsync"
                                              ToggleIcon="GetToggleBlacklistIcon"
                                              ToggleIconColor="GetToggleBlacklistIconColor"
@@ -689,11 +690,18 @@
         if (!_previewBlacklistedSourceIds.Add(sourceKey))
             _previewBlacklistedSourceIds.Remove(sourceKey);
 
+        _focusedPreviewResult = null;
         return Task.CompletedTask;
     }
 
-    private static string GetToggleBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "x" : "ban";
-    private static string GetToggleBlacklistIconColor(bool isBlacklisted) => isBlacklisted ? "white" : "red";
+    private void ClearFocusedPreviewResult(IMediaDetailResult result)
+    {
+        if (ReferenceEquals(_focusedPreviewResult, result))
+            _focusedPreviewResult = null;
+    }
+
+    private static string GetToggleBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "eye-off" : "eye";
+    private static string GetToggleBlacklistIconColor(bool isBlacklisted) => isBlacklisted ? "var(--destructive)" : "var(--accent-foreground)";
 
     private Task HandleTestAsync() => TestAsync();
 
