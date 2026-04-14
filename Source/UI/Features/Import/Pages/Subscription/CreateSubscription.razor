@@ -246,12 +246,12 @@
                                                                     Class="@GetSortIconClass()"/>
                                                     </BbButton>
                                                 </BbTooltipTrigger>
-                                        <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
+                                                <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     </div>
-                                    </BbFieldContent>
-                                </BbField>
+                                </BbFieldContent>
+                            </BbField>
                         }
 
                         <BbField IsInvalid="LimitIsInvalid">
@@ -445,8 +445,9 @@
                                              IsFocused="_focusedPreviewResult == result"
                                              OnFocusIn="() => _focusedPreviewResult = result"
                                              OnToggleWatchlist="TogglePreviewBlacklistAsync"
-                                             ToggleIcon="GetPreviewBlacklistIcon"
-                                             ToggleActiveColor="hsl(var(--destructive))"/>
+                                             ToggleIcon="GetToggleBlacklistIcon"
+                                             ToggleIconColor="GetToggleBlacklistIconColor"
+                            />
                         </div>
                     }
                 }
@@ -472,18 +473,23 @@
 @code {
 
     private enum State { Idle, Testing, Success, Saving, Saved, Failed }
+
     private enum SortDirection { Ascending, Descending }
+
     private enum RunMode { Manual, Scheduled }
 
     #region Form State
+
     private string _name = string.Empty;
     private string _listIdentifier = string.Empty;
     private bool _isEnabled = true;
     private MediaListProvider? _provider = MediaListProvider.Mdblist;
     private MediaListAddStrategy _strategy = MediaListAddStrategy.Append;
+
     #endregion
 
     #region Test/Save State
+
     private State _state = State.Idle;
     private bool _showValidation;
     private MediaListProvider? _testedProvider;
@@ -494,27 +500,35 @@
     private string _previewFilterQuery = string.Empty;
     private readonly HashSet<string> _previewBlacklistedSourceIds = [];
     private IMediaDetailResult? _focusedPreviewResult;
+
     #endregion
 
     #region Sync Schedule State
+
     private RunMode _runMode = RunMode.Manual;
     private string? _scheduleCronExpression = string.Empty;
+
     #endregion
 
     #region Filters, Sorting & Limits State
+
     private bool _filtersEnabled;
     private FilterDefinition _filter = new();
     private bool _sortingEnabled;
     private SortDirection _sortDirection = SortDirection.Descending;
     private string _sortField = "title";
     private string _limitRaw = string.Empty;
+
     #endregion
 
     #region Disabled Providers
+
     private readonly HashSet<MediaListProvider> _disabledProviders = [];
+
     #endregion
 
     #region Constants
+
     private static readonly IReadOnlyList<SelectOption<string>> SortFieldOptions =
     [
         new("title", "Title"),
@@ -541,9 +555,11 @@
             ]
         },
     ];
+
     #endregion
 
     #region Validation & Computed State
+
     private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
     private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
@@ -562,6 +578,7 @@
     private bool IsProcessing => _state is State.Testing or State.Saving;
     private bool ShowTestButton => _state is State.Idle or State.Failed;
     private bool ShowSaveButton => _state == State.Success;
+
     #endregion
 
     private Task OnRunModeChanged(RunMode mode)
@@ -675,8 +692,8 @@
         return Task.CompletedTask;
     }
 
-    private static string GetPreviewBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "list-x" : "list-minus";
-
+    private static string GetToggleBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "x" : "ban";
+    private static string GetToggleBlacklistIconColor(bool isBlacklisted) => isBlacklisted ? "white" : "red";
 
     private Task HandleTestAsync() => TestAsync();
 
@@ -704,11 +721,10 @@
     }
 
     private IEnumerable<IMediaDetailResult> FilteredPreviewResults =>
-        string.IsNullOrWhiteSpace(_previewFilterQuery)
-            ? _previewResults
-            : _previewResults.Where(r => r.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase));
+        string.IsNullOrWhiteSpace(_previewFilterQuery) ? _previewResults : _previewResults.Where(r => r.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase));
 
     #region Sort Direction Helpers
+
     private void ToggleSortDirection() =>
         _sortDirection = _sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
 
@@ -720,6 +736,7 @@
 
     private string GetSortIconClass() =>
         _sortDirection == SortDirection.Descending ? "transition-transform duration-200 rotate-180" : "transition-transform duration-200";
+
     #endregion
 
     private async Task TestAsync()
