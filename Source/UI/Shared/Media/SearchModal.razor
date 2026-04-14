@@ -81,7 +81,10 @@
                                              IsActiveToggle="_isAdding && Equals(_activeToggledSourceId, result.SourceId)"
                                              IsFocused="_focusedResult == result"
                                              OnFocusIn="() => _focusedResult = result"
-                                             OnToggleWatchlist="ToggleWatchlistAsync"/>
+                                             OnToggleWatchlist="ToggleWatchlistAsync"
+                                             ToggleIcon="@(_ => "bookmark")"
+                                             ToggleIconColor="@(inWatchlist => inWatchlist ? "Orange" : "var(--accent-foreground)")"
+                            />
                         }
                     </div>
                     <BbSeparator/>

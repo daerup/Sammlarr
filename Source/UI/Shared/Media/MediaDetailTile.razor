@@ -52,19 +52,23 @@
         </div>
         <button type="button"
                 class="search-result-toggle-btn @(IsMarked ? "is-marked" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
-                style="@_toggleButtonStyle"
+                style="@ToggleButtonStyle(IsMarked)"
                 @onclick="() => OnToggleWatchlist.InvokeAsync(Result)">
             <span class="relative inline-flex items-center justify-center w-6 h-6">
                 @if (IsMarked)
                 {
-                    <LucideIcon Name="@ToggleIcon(true)" Size="24"
-                                Fill="@ToggleActiveColor" Color="@ToggleActiveColor"
-                                Class="@_toggleIconClass"/>
+                    <LucideIcon Name="@ToggleIcon(true)" Size="24" Fill="@ToggleIconColor(true)" Color="@ToggleIconColor(true)" Class="@_toggleIconClass"/>
                 }
                 else
                 {
-                    <LucideIcon Name="@ToggleIcon(false)" Size="24"
-                                Class="@_toggleIconClass"/>
+                    @if (@ToggleIconColor(false) is not null)
+                    {
+                        <LucideIcon Name="@ToggleIcon(false)" Size="24" Color="@ToggleIconColor(false)" Class="@_toggleIconClass"/>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="@ToggleIcon(false)" Size="24" Class="@_toggleIconClass"/>
+                    }
                 }
                 @if (IsActiveToggle)
                 {
@@ -86,19 +90,18 @@
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback<IMediaDetailResult> OnToggleWatchlist { get; set; }
 
-    [Parameter] public Func<bool, string> ToggleIcon { get; set; } = _ => "bookmark";
+    [Parameter, EditorRequired] public Func<bool, string> ToggleIcon { get; set; }
 
-    [Parameter] public string ToggleActiveColor { get; set; } = "orange";
+    [Parameter, EditorRequired] public Func<bool, string> ToggleIconColor { get; set; }
 
     private string _backgroundStyle = string.Empty;
-    private string _toggleButtonStyle = string.Empty;
+    private Func<bool, string> ToggleButtonStyle => toggled => $"--toggle-active-color: {ToggleIconColor(toggled)}";
     private string _toggleIconClass = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
 
     protected override void OnParametersSet()
     {
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl ?? "" : Result.BackdropUrl)}')";
-        _toggleButtonStyle = $"--toggle-active-color: {ToggleActiveColor}";
         _toggleIconClass = $"transition-opacity duration-150 {(IsActiveToggle ? "opacity-0" : string.Empty)}";
         _displayFacts = GetDisplayFacts(Result);
     }
