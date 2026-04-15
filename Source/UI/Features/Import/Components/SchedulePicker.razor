@@ -16,7 +16,7 @@
                           Placeholder="Select time"/>
             @if (_dailyTime.HasValue)
             {
-                <div class="flex flex-col gap-0.5">
+                <div class="flex flex-col gap-0.5 w-full">
                     <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                         <LucideIcon Name="clock" Size="12"/>@ComputedExpression
                     </span>
@@ -46,7 +46,7 @@
                            Class="min-w-56"/>
             @if (_weeklyTime.HasValue)
             {
-                <div class="flex flex-col gap-0.5">
+                <div class="flex flex-col gap-0.5 w-full">
                     <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                         <LucideIcon Name="clock" Size="12"/>@ComputedExpression
                     </span>
@@ -131,7 +131,7 @@
 
             @if (!string.IsNullOrEmpty(ComputedExpression))
             {
-                <div class="flex flex-col gap-0.5 h-16">
+                <div class="flex flex-col gap-0.5 h-16 w-full">
                     <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                         <LucideIcon Name="clock" Size="12"/>@ComputedExpression
                     </span>
