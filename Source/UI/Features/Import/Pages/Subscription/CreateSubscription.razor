@@ -14,23 +14,67 @@
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject NavigationManager NavigationManager
+@inject IKeyboardShortcutService KeyboardShortcutService
 
 <PageTitle>Create subscription</PageTitle>
 
-<!-- Full-height page: fills the space between the app header and footer (each h-14 = 3.5rem) -->
 <div class="flex flex-col h-[calc(100vh-7rem)] overflow-hidden">
 
-    <!-- Page Header: fixed, never scrolls -->
-    <div class="shrink-0 px-6 py-4 border-b">
-        <h1 class="text-2xl font-bold tracking-wide antialiased">Create subscription</h1>
-        <p class="text-sm text-muted-foreground mt-0.5 font-normal">Import a list from an external provider and subscribe to it.</p>
+    <div class="shrink-0 px-6 py-4 border-b flex items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-wide antialiased">Create subscription</h1>
+            <p class="text-sm text-muted-foreground mt-0.5 font-normal">Import a list from an external provider and subscribe to it.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            @if (_state == State.Testing)
+            {
+                <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                    <span>Testing…</span>
+                </BbButton>
+            }
+            else if (ShowSaveButton)
+            {
+                <BbButton Variant="ButtonVariant.Outline"
+                          Class="text-success border-success hover:bg-success"
+                          OnClick="HandleSaveAsync"
+                          Disabled="!CanSave">
+                    <LucideIcon Name="save" Size="14" Class="mr-2"/>
+                    Save
+                </BbButton>
+            }
+            else if (_state == State.Failed)
+            {
+                <BbButton Variant="ButtonVariant.Outline"
+                          Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                          Disabled="true">
+                    <LucideIcon Name="x" Size="14" Class="mr-2"/>
+                    Failed
+                </BbButton>
+            }
+            else if (ShowTestButton)
+            {
+                <BbButton Variant="ButtonVariant.Default"
+                          OnClick="HandleTestAsync"
+                          Disabled="!CanTest || LimitIsInvalid">
+                    <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                    Test
+                </BbButton>
+            }
+
+            <BbButton Variant="ButtonVariant.Outline"
+                      Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                      OnClick="ReturnAsync"
+                      Disabled="@IsProcessing">
+                Cancel
+            </BbButton>
+        </div>
     </div>
 
-    <!-- Content Area: two independent scrolling panels -->
     <div class="flex-1 min-h-0 flex flex-row gap-4 p-4 overflow-hidden">
 
-        <!-- Left Panel: Form inputs and controls -->
-        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
             <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6 space-y-6">
 
                 <BbField>
@@ -64,7 +108,7 @@
                 </BbFieldLabel>
                 <BbFieldContent>
                     <BbInput id="name" Placeholder="e.g. My Top Movies" @bind-Value="_name" Class="bg-accent" Required="true" AriaInvalid="@NameIsInvalid"
-                             UpdateTiming="UpdateTiming.Immediate"/>
+                             UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
                 </BbFieldContent>
                 @if (NameIsInvalid)
                 {
@@ -160,7 +204,7 @@
                              @bind-Value="_listIdentifier"
                              @bind-Value:after="OnListIdentifierChanged"
                              Class="bg-accent"
-                             Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate"/>
+                             Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
                 </BbFieldContent>
                 <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
                 @if (ListIdentifierIsInvalid)
@@ -276,7 +320,7 @@
                                      @bind-Value="_limitRaw"
                                      Class="bg-accent w-40"
                                      AriaInvalid="@LimitIsInvalid"
-                                     UpdateTiming="UpdateTiming.Immediate"/>
+                                     UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
                         </BbFieldContent>
                         @if (LimitIsInvalid)
                         {
@@ -348,17 +392,14 @@
             </div>
         </BbCard>
 
-        <!-- Right Panel: media results; architected for future filter/sort controls -->
-        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden">
-            <!-- Panel controls: search bar; filter/sort controls can be added here in the future -->
-            <div class="shrink-0 px-6 pt-6 pb-4 border-b flex items-center gap-2">
+        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
+            <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
                 <BbInput Placeholder="Search media..."
                          Class="w-full"
                          @bind-Value="_previewFilterQuery"
-                         UpdateTiming="UpdateTiming.Immediate"/>
+                         UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
                 <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
             </div>
-            <!-- Scrollable results area -->
             <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-6 pt-4 flex flex-col">
                 @if (_state == State.Success && FilteredPreviewResults.Any())
                 {
@@ -424,52 +465,6 @@
 
     </div>
 
-    <!-- Page Footer: action buttons, fixed, never scrolls -->
-    <div class="shrink-0 flex items-center justify-end gap-2 px-6 py-3 border-t">
-        @if (_state == State.Testing)
-        {
-            <BbButton Variant="ButtonVariant.Default" Disabled="true">
-                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                <span>Testing…</span>
-            </BbButton>
-        }
-        else if (ShowSaveButton)
-        {
-            <BbButton Variant="ButtonVariant.Outline"
-                      Class="text-success border-success hover:bg-success"
-                      OnClick="HandleSaveAsync"
-                      Disabled="!CanSave">
-                <LucideIcon Name="save" Size="14" Class="mr-2"/>
-                Save
-            </BbButton>
-        }
-        else if (_state == State.Failed)
-        {
-            <BbButton Variant="ButtonVariant.Outline"
-                      Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                      Disabled="true">
-                <LucideIcon Name="x" Size="14" Class="mr-2"/>
-                Failed
-            </BbButton>
-        }
-        else if (ShowTestButton)
-        {
-            <BbButton Variant="ButtonVariant.Default"
-                      OnClick="HandleTestAsync"
-                      Disabled="!CanTest || LimitIsInvalid">
-                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                Test
-            </BbButton>
-        }
-
-        <BbButton Variant="ButtonVariant.Outline"
-                  Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                  OnClick="ReturnAsync"
-                  Disabled="@IsProcessing">
-            Cancel
-        </BbButton>
-    </div>
-
 </div>
 
 @code {
@@ -501,6 +496,10 @@
     private string _previewFilterQuery = string.Empty;
     private readonly HashSet<string> _previewBlacklistedSourceIds = [];
     private IMediaDetailResult? _focusedPreviewResult;
+
+    private IDisposable? _shortcutRegistration;
+    private bool _isShortcutRegistered;
+    private const string SubscriptionShortcutId = "subscription-ctrl-enter";
 
     #endregion
 
@@ -622,6 +621,15 @@
             _provider = Enum.GetValues<MediaListProvider>().Cast<MediaListProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_isShortcutRegistered)
+        {
+            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+Enter", OnShortcutActivatedAsync, SubscriptionShortcutId);
+            _isShortcutRegistered = true;
+        }
+    }
+
     private string GetListIdentifierPlaceholder(MediaListProvider? provider) =>
         provider switch
         {
@@ -645,7 +653,37 @@
         {
             MediaListAddStrategy.Append => "Each sync adds only new items. Items already in your collection are kept.",
             MediaListAddStrategy.Replace => "Each sync removes items that were added by this subscription and are no longer on the list. Items added by other subscriptions are unaffected, even if they appear on this list.",
+            _ => string.Empty,
         };
+
+    private async Task OnShortcutActivatedAsync()
+    {
+        // Avoid running actions while a test/save is already in progress
+        if (IsProcessing)
+            return;
+
+        // Prefer Save when the form is ready to save; otherwise run Test when possible
+        if (ShowSaveButton && CanSave)
+        {
+            await HandleSaveAsync();
+        }
+        else if (ShowTestButton && CanTest && !LimitIsInvalid)
+        {
+            await HandleTestAsync();
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // Unregister performed synchronously in Dispose
+
+    private async Task HandleInputKeyDown(KeyboardEventArgs e)
+    {
+        if ((e.CtrlKey || e.MetaKey) && string.Equals(e.Key, "Enter", StringComparison.OrdinalIgnoreCase))
+        {
+            await OnShortcutActivatedAsync();
+        }
+    }
 
     private Task OnProviderChanged(MediaListProvider provider)
     {
@@ -661,7 +699,6 @@
 
     private void OnListIdentifierChanged()
     {
-        // If identifier changed after a successful test, reset to Idle to force re-test
         if (_state is State.Success or State.Failed &&
             !string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal))
         {
@@ -811,5 +848,14 @@
         _cancellationTokenSource?.Cancel();
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
+
+        // Unregister keyboard shortcut synchronously
+        if (_isShortcutRegistered)
+        {
+            _shortcutRegistration?.Dispose();
+            _shortcutRegistration = null;
+            KeyboardShortcutService.Unregister(SubscriptionShortcutId);
+            _isShortcutRegistered = false;
+        }
     }
 }
