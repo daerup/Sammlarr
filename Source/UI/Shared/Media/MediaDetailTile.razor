@@ -1,7 +1,7 @@
 @using Contracts.Media
 @using Contracts.Media.Search
 
-<div class="search-result-row rounded-lg bg-black hover-bg @(IsFocused ? "row-focused" : "")"
+<div class="search-result-row rounded-sm bg-black hover-bg @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
@@ -10,7 +10,7 @@
             <div class="search-result-poster">
                 @if (!string.IsNullOrWhiteSpace(Result.PosterUrl))
                 {
-                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-lg"/>
+                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-sm"/>
                 }
                 else
                 {
