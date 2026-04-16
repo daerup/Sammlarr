@@ -128,7 +128,7 @@
                     <CellTemplate Context="list">
                         <BbTooltip>
                             <BbTooltipTrigger>
-                                <span class="text-sm text-muted-foreground tabular-nums">@list.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</span>
+                                <span class="text-sm text-muted-foreground tabular-nums">@list.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</span>
                             </BbTooltipTrigger>
                             <BbTooltipContent>@list.CreatedAt.ToLocalTime().ToString("f")</BbTooltipContent>
                         </BbTooltip>
@@ -142,11 +142,19 @@
                         <div class="flex items-center gap-1">
                             <BbTooltip>
                                 <BbTooltipTrigger>
-                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit" Href="@($"/lists/{list.Id}/edit")">
+                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit" Href="@($"/subscription/{list.Id}/edit")">
                                         <LucideIcon Name="pencil" Size="15"/>
                                     </BbButton>
                                 </BbTooltipTrigger>
                                 <BbTooltipContent>Edit</BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip>
+                                <BbTooltipTrigger>
+                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate" Href="@($"/subscription/{list.Id}/clone")">
+                                        <LucideIcon Name="copy" Size="15"/>
+                                    </BbButton>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Duplicate</BbTooltipContent>
                             </BbTooltip>
                             <BbAlertDialog>
                                 <BbAlertDialogTrigger>
@@ -234,6 +242,7 @@
             MediaListProvider.Tmdb    => $"https://www.themoviedb.org/list/{listIdentifier}",
             _                         => null,
         };
+
 
     private async Task HandlePageChangedAsync(int newPage)
     {

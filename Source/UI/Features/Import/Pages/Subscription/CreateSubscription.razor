@@ -1,4 +1,6 @@
 @page "/subscription/create"
+@page "/subscription/{ImportListId:guid}/edit"
+@page "/subscription/{CloneSourceImportListId:guid}/clone"
 @implements IDisposable
 @using BlazorBlueprint.Primitives.Filtering
 @using Contracts
@@ -16,14 +18,14 @@
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
 
-<PageTitle>Create subscription</PageTitle>
+<PageTitle>@PageTitleText</PageTitle>
 
 <div class="flex flex-col h-[calc(100vh-7rem)] overflow-hidden">
 
     <div class="shrink-0 px-6 py-4 border-b flex items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold tracking-wide antialiased">Create subscription</h1>
-            <p class="text-sm text-muted-foreground mt-0.5 font-normal">Import a list from an external provider and subscribe to it.</p>
+            <h1 class="text-2xl font-bold tracking-wide antialiased">@PageHeadingText</h1>
+            <p class="text-sm text-muted-foreground mt-0.5 font-normal">@PageDescriptionText</p>
         </div>
 
         <div class="flex items-center gap-2">
@@ -469,11 +471,29 @@
 
 @code {
 
+    [Parameter]
+    public Guid? ImportListId { get; set; }
+
+    [Parameter]
+    public Guid? CloneSourceImportListId { get; set; }
+
     private enum State { Idle, Testing, Success, Saving, Saved, Failed }
 
     private enum SortDirection { Ascending, Descending }
 
     private enum RunMode { Manual, Scheduled }
+
+    private bool IsEditMode => ImportListId.HasValue;
+    private bool IsCloneMode => CloneSourceImportListId.HasValue;
+
+    private string PageTitleText => IsEditMode ? "Edit subscription" : IsCloneMode ? "Clone subscription" : "Create subscription";
+    private string PageHeadingText => PageTitleText;
+    private string PageDescriptionText =>
+        IsEditMode
+            ? "Update an existing subscription and keep your import settings in sync."
+            : IsCloneMode
+                ? "Create a new subscription using values copied from an existing one."
+                : "Import a list from an external provider and subscribe to it.";
 
     #region Form State
 
@@ -482,6 +502,12 @@
     private bool _isEnabled = true;
     private MediaListProvider? _provider = MediaListProvider.Mdblist;
     private MediaListAddStrategy _strategy = MediaListAddStrategy.Append;
+
+    private string _initialName = string.Empty;
+    private string _initialListIdentifier = string.Empty;
+    private bool _initialIsEnabled = true;
+    private MediaListProvider? _initialProvider;
+    private MediaListAddStrategy _initialStrategy = MediaListAddStrategy.Append;
 
     #endregion
 
@@ -573,7 +599,15 @@
         !string.IsNullOrWhiteSpace(_listIdentifier) &&
         string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal) &&
         !string.IsNullOrWhiteSpace(_name) &&
-        !LimitIsInvalid;
+        !LimitIsInvalid &&
+        (!IsEditMode || HasEditChanges);
+
+    private bool HasEditChanges =>
+        !string.Equals(_name.Trim(), _initialName, StringComparison.Ordinal) ||
+        !string.Equals(_listIdentifier.Trim(), _initialListIdentifier, StringComparison.Ordinal) ||
+        _isEnabled != _initialIsEnabled ||
+        _provider != _initialProvider ||
+        _strategy != _initialStrategy;
 
     private bool IsProcessing => _state is State.Testing or State.Saving;
     private bool ShowTestButton => _state is State.Idle or State.Failed;
@@ -617,7 +651,42 @@
                 _disabledProviders.Add(provider);
         }
 
-        if (_disabledProviders.Contains(_provider ?? default))
+        if (IsEditMode || IsCloneMode)
+        {
+            var sourceImportListId = IsEditMode ? ImportListId!.Value : CloneSourceImportListId!.Value;
+            var importList = (await ImportListRepository.GetImportListsAsync())
+                .FirstOrDefault(list => list.Id == sourceImportListId);
+
+            if (importList is null)
+            {
+                NavigationManager.NavigateTo("/lists");
+                return;
+            }
+
+            _name = importList.Name;
+            _isEnabled = importList.Enabled;
+            _provider = importList.Provider;
+            _strategy = importList.Strategy;
+            _listIdentifier = importList.ListIdentifier;
+
+            _disabledProviders.Remove(importList.Provider);
+
+            if (IsEditMode)
+            {
+                _initialName = importList.Name.Trim();
+                _initialIsEnabled = importList.Enabled;
+                _initialProvider = importList.Provider;
+                _initialStrategy = importList.Strategy;
+                _initialListIdentifier = importList.ListIdentifier.Trim();
+
+                // In edit mode, treat persisted values as already tested until provider or identifier changes.
+                _state = State.Success;
+                _testedProvider = importList.Provider;
+                _testedListIdentifier = importList.ListIdentifier;
+            }
+        }
+
+        if (!IsEditMode && _disabledProviders.Contains(_provider ?? default))
             _provider = Enum.GetValues<MediaListProvider>().Cast<MediaListProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
     }
 
@@ -688,6 +757,7 @@
     private Task OnProviderChanged(MediaListProvider provider)
     {
         _provider = provider;
+        InvalidateTestStateIfSourceChanged();
         return Task.CompletedTask;
     }
 
@@ -699,7 +769,15 @@
 
     private void OnListIdentifierChanged()
     {
-        if (_state is State.Success or State.Failed &&
+        InvalidateTestStateIfSourceChanged();
+    }
+
+    private void InvalidateTestStateIfSourceChanged()
+    {
+        if (_state is not (State.Success or State.Failed))
+            return;
+
+        if (_provider != _testedProvider ||
             !string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal))
         {
             _state = State.Idle;
@@ -817,18 +895,36 @@
     {
         _state = State.Saving;
 
-        var createData = new ImportListCreateData
-        {
-            IsEnabled = _isEnabled,
-            Provider = _provider!.Value,
-            Strategy = _strategy,
-            ListIdentifier = _listIdentifier.Trim(),
-        };
-
         try
         {
             var cancellationToken = _cancellationTokenSource?.Token ?? CancellationToken.None;
-            await ImportListRepository.CreateImportListsAsync(_name.Trim(), createData, cancellationToken);
+
+            if (IsEditMode)
+            {
+                var updateData = new ImportListUpdateData
+                {
+                    Name = _name.Trim(),
+                    IsEnabled = _isEnabled,
+                    Provider = _provider!.Value,
+                    Strategy = _strategy,
+                    ListIdentifier = _listIdentifier.Trim(),
+                };
+
+                await ImportListRepository.CreateImportListsAsync(ImportListId!.Value, updateData, cancellationToken);
+            }
+            else
+            {
+                var createData = new ImportListCreateData
+                {
+                    IsEnabled = _isEnabled,
+                    Provider = _provider!.Value,
+                    Strategy = _strategy,
+                    ListIdentifier = _listIdentifier.Trim(),
+                };
+
+                await ImportListRepository.CreateImportListsAsync(_name.Trim(), createData, cancellationToken);
+            }
+
             _state = State.Saved;
             NavigationManager.NavigateTo("/lists");
         }
