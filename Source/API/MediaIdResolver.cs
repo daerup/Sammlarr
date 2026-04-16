@@ -2,7 +2,6 @@ using API.IMDB;
 using API.Plex;
 using API.TMDB;
 using API.TvDB;
-using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 

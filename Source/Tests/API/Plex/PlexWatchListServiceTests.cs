@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using API.Plex;
 using Bogus;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Convertions;

@@ -1,5 +1,3 @@
-using Contracts;
-
 namespace Contracts.Media.Convertions;
 
 public interface IMediaIdResolver

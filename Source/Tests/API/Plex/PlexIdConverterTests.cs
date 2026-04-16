@@ -3,10 +3,13 @@ using API.Plex;
 using API.Plex.Types;
 using API.TMDB;
 using Bogus;
+using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 using Contracts.Media.Search;
 using Shared.Options;
+using Test.Shared;
 
 namespace API.Tests.Plex;
 
@@ -15,28 +18,24 @@ public class PlexIdConverterTests
 	private const string PlexBaseUrl = "https://plex.tv";
 
 	[Test]
-	public async Task ConvertAsync_WhenMediaIdIsImdb_ThrowsNotSupportedException()
-	{
-		var searchService = IMediaSearchService.Mock();
-		var testee = new PlexIdConverter(null!, null!, searchService);
-
-		await Assert.That(async () => await testee.ConvertAsync(ImdbId.From("tt123", MediaType.Movie))).Throws<NotSupportedException>();
-	}
-
-	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsPlexId_ReturnsPlexIdWithAdditionalIds()
 	{
 		var payload = CreatePlexByIdPayload(includeImdbId: true, includeTvdbId: true);
 		var searchService = IMediaSearchService.Mock();
 		var testee = new PlexIdConverter(null!, CreatePlexApi(payload.Json), searchService);
 
-		var result = await testee.ConvertAsync(payload.PlexId);
+		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		await Assert.That(result.Successful).IsTrue();
-		await Assert.That(result.Id).IsEqualTo(payload.PlexId);
-		await Assert.That(result.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbId);
-		await Assert.That(result.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId.GetValueOrDefault());
-		await Assert.That(result.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId.GetValueOrDefault());
+		await Assert
+			.That(result)
+			.IsOfUnionType<ConversionResult, Resolved>()
+			.And.Multiple(async resolved =>
+			{
+				await Assert.That(resolved.Id).IsEqualTo(payload.PlexId);
+				await Assert.That(resolved.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbId);
+				await Assert.That(resolved.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId.GetValueOrDefault());
+				await Assert.That(resolved.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId.GetValueOrDefault());
+			});
 	}
 
 	[Test]
@@ -63,13 +62,18 @@ public class PlexIdConverterTests
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json), searchService);
 
-		var result = await testee.ConvertAsync(payload.TmdbId);
+		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 
-		await Assert.That(result.Successful).IsTrue();
-		await Assert.That(result.Id).IsEqualTo(payload.PlexId);
-		await Assert.That(result.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbId);
-		await Assert.That(result.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId.GetValueOrDefault());
-		await Assert.That(result.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId.GetValueOrDefault());
+		await Assert
+			.That(result)
+			.IsOfUnionType<ConversionResult, Resolved>()
+			.And.Multiple(async resolved =>
+			{
+				await Assert.That(resolved.Id).IsEqualTo(payload.PlexId);
+				await Assert.That(resolved.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbId);
+				await Assert.That(resolved.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId!.Value);
+				await Assert.That(resolved.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId!.Value);
+			});
 	}
 
 	[Test]
@@ -81,10 +85,8 @@ public class PlexIdConverterTests
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json), searchService);
 
-		var result = await testee.ConvertAsync(payload.TmdbId);
-
-		await Assert.That(result.Successful).IsFalse();
-		await Assert.That(result.AllIds).IsEmpty();
+		var result = await testee.ConvertAsync([payload.TmdbId], new None());
+		await Assert.That(result).IsOfUnionType<ConversionResult, Unresolved>();
 	}
 
 	private static TmdbApi CreateTmdbApi(TmdbId tmdbId, string originalTitle)

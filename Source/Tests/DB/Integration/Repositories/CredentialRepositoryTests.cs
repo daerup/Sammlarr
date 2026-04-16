@@ -3,7 +3,7 @@ using Contracts.Caching;
 using DB.Data.Access;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Tests.Integration.Stores;
+namespace DB.Tests.Integration.Repositories;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class CredentialRepositoryTests(SQLiteFixture fixture)
