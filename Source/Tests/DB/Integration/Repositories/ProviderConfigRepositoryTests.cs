@@ -6,7 +6,7 @@ using Contracts.Settings;
 using DB.Data.Config;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Tests.Integration.Stores;
+namespace DB.Tests.Integration.Repositories;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable

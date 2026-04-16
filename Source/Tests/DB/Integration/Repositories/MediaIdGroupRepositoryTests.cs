@@ -2,7 +2,7 @@ using Contracts.Media;
 using DB.Data.MediaGroup;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Tests.Integration.Stores;
+namespace DB.Tests.Integration.Repositories;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
