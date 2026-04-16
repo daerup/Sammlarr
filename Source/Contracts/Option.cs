@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Contracts;
 
 public readonly record struct None;
@@ -11,6 +13,5 @@ public static class Some
 {
 	public static Some<T> Of<T>(T value) where T : notnull => new(value);
 }
-
-public union Option<T>(None, Some<T>) where T : notnull;
+public union Optional<T>(None, Some<T>) where T : notnull;
 

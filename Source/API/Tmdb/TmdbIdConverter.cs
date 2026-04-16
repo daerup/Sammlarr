@@ -1,4 +1,5 @@
 using API.Plex;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 
@@ -6,7 +7,7 @@ namespace API.TMDB;
 
 internal class TmdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Option<ResolutionHints> hints)
+	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
 	{
 		foreach (var id in candidates)
 		{

@@ -83,7 +83,7 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 		};
 	}
 
-	private async Task<IEnumerable<TMediaId>> ResolvePlexIdAsList<TMediaId>(PlexId plexId, MediaProvider provider, Option<ResolutionHints> hints)
+	private async Task<IEnumerable<TMediaId>> ResolvePlexIdAsList<TMediaId>(PlexId plexId, MediaProvider provider, Optional<ResolutionHints> hints)
 		where TMediaId : IMediaId
 	{
 		var result = await mediaIdResolver.ResolveAsync([plexId], provider, hints);

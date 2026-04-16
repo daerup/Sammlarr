@@ -2,6 +2,7 @@ using API.IMDB;
 using API.Plex;
 using API.TMDB;
 using API.TvDB;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 
@@ -15,7 +16,7 @@ internal class MediaIdResolver(
 	TvdbIdConverter tvdb
 ) : IMediaIdResolver
 {
-	public async Task<ConversionResult> ResolveAsync(IReadOnlyCollection<IMediaId> candidates, MediaProvider target, Option<ResolutionHints> hints)
+	public async Task<ConversionResult> ResolveAsync(IReadOnlyCollection<IMediaId> candidates, MediaProvider target, Optional<ResolutionHints> hints)
 	{
 		foreach (var candidate in candidates)
 		{
