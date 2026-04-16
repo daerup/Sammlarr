@@ -8,4 +8,5 @@ public record ImportList
 	public required MediaListProvider Provider { get; init; }
 	public required MediaListAddStrategy Strategy { get; init; }
 	public required string ListIdentifier { get; init; }
+	public required DateTimeOffset CreatedAt { get; init; }
 }
