@@ -9,7 +9,7 @@ namespace API.Plex;
 
 internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaSearchProvider.Plex)] IMediaSearchService searchService)
 {
-	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Option<ResolutionHints> hints)
+	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
 	{
 		foreach (var plexId in candidates.OfType<PlexId>())
 			return await ConvertFromPlexIdAsync(plexId);
