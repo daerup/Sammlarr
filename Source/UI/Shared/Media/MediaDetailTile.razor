@@ -1,7 +1,7 @@
 @using Contracts.Media
 @using Contracts.Media.Search
 
-<div class="search-result-row rounded-sm bg-black hover-bg @(IsFocused ? "row-focused" : "")"
+<div class="search-result-row rounded-sm bg-black @(Status == QueryResultStatus.Active ? "hover-bg" : "result-dimmed") @(IsFocused && Status == QueryResultStatus.Active ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
@@ -51,33 +51,54 @@
                 }
             </div>
         </div>
-        <button type="button"
-                class="search-result-toggle-btn @(IsMarked ? "is-marked" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
-                style="@ToggleButtonStyle(IsMarked)"
-                @onclick="HandleToggleAsync">
-            <span class="relative inline-flex items-center justify-center w-6 h-6">
-                @if (IsMarked)
-                {
-                    <LucideIcon Name="@ToggleIcon(true)" Size="24" Fill="@ToggleIconColor(true)" Color="@ToggleIconColor(true)" Class="@_toggleIconClass"/>
-                }
-                else
-                {
-                    <LucideIcon Name="@ToggleIcon(false)" Size="24" Class="@_toggleIconClass"/>
-                }
-                @if (IsActiveToggle)
-                {
-                    <span class="absolute inset-0 flex items-center justify-center">
-                        <BbSpinner Size="SpinnerSize.Small"/>
-                    </span>
-                }
-            </span>
-        </button>
+        @if (Status == QueryResultStatus.Active)
+        {
+            <button type="button"
+                    class="search-result-toggle-btn @(IsMarked ? "is-marked" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
+                    style="@ToggleButtonStyle(IsMarked)"
+                    @onclick="HandleToggleAsync">
+                <span class="relative inline-flex items-center justify-center w-6 h-6">
+                    @if (IsMarked)
+                    {
+                        <LucideIcon Name="@ToggleIcon(true)" Size="24" Fill="@ToggleIconColor(true)" Color="@ToggleIconColor(true)" Class="@_toggleIconClass"/>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="@ToggleIcon(false)" Size="24" Class="@_toggleIconClass"/>
+                    }
+                    @if (IsActiveToggle)
+                    {
+                        <span class="absolute inset-0 flex items-center justify-center">
+                            <BbSpinner Size="SpinnerSize.Small"/>
+                        </span>
+                    }
+                </span>
+            </button>
+        }
+        else
+        {
+            <BbTooltipProvider>
+                <BbTooltip DelayDuration="300">
+                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                        <div class="search-result-status-indicator @(Status == QueryResultStatus.Filtered ? "text-amber-500/60" : "text-muted-foreground/50")">
+                            <LucideIcon Name="@(Status == QueryResultStatus.Filtered ? "filter-x" : "scissors")" Size="16"/>
+                        </div>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>
+                        @(Status == QueryResultStatus.Filtered
+                            ? "Filtered out by your active filter rules."
+                            : "Excluded — exceeds the configured item limit.")
+                    </BbTooltipContent>
+                </BbTooltip>
+            </BbTooltipProvider>
+        }
     </div>
 </div>
 
 @code {
 
     [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
+    [Parameter] public QueryResultStatus Status { get; set; } = QueryResultStatus.Active;
     [Parameter] public bool IsMarked { get; set; }
     [Parameter] public bool IsActiveToggle { get; set; }
     [Parameter] public bool IsFocused { get; set; }
