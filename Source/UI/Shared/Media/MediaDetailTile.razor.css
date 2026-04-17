@@ -53,6 +53,19 @@
     color: var(--toggle-active-color, orange);
 }
 
+.search-result-row.result-dimmed {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.search-result-status-indicator {
+    flex-shrink: 0;
+    padding: 0.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .search-result-row {
     position: relative;
     overflow: hidden;

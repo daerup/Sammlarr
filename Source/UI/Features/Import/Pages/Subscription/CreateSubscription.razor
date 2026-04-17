@@ -9,6 +9,8 @@
 @using Contracts.Media.Search
 @using Contracts.DI
 @using Contracts.Auth
+@using Contracts.Processing
+@using System.ComponentModel
 @using UI.Features.Import.Components
 @using UI.Shared.Services.Branding
 @inject IImportListRepository ImportListRepository
@@ -17,6 +19,7 @@
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
+@inject IQueryProcessor<IMediaDetailResult> QueryProcessor
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -329,6 +332,19 @@
                             <BbFieldError>Limit must be a positive whole number.</BbFieldError>
                         }
                     </BbField>
+
+                    @if (HasPendingQueryChanges)
+                    {
+                        <div class="flex items-center justify-end pt-2 border-t">
+                            <BbButton Variant="ButtonVariant.Default"
+                                      OnClick="ApplyQuerySettings"
+                                      Disabled="LimitIsInvalid"
+                                      Class="h-8 text-xs px-3 gap-1.5">
+                                <LucideIcon Name="check" Size="13"/>
+                                Apply
+                            </BbButton>
+                        </div>
+                    }
                 </div>
             </BbCollapsibleContent>
         </BbCollapsible>
@@ -408,25 +424,53 @@
                     <div class="mb-4 shrink-0">
                         <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
                         <p class="text-sm text-muted-foreground">
-                            @FilteredPreviewResults.Count() item@(FilteredPreviewResults.Count() == 1 ? "" : "s") found in <span class="font-medium">@_testedListIdentifier</span>
+                            @ActivePreviewCount item@(ActivePreviewCount == 1 ? "" : "s") found in <span class="font-medium">@_testedListIdentifier</span>
                         </p>
+                        @if (FilteredPreviewCount > 0 || SkippedPreviewCount > 0)
+                        {
+                            <p class="text-xs text-muted-foreground mt-0.5">
+                                @if (FilteredPreviewCount > 0)
+                                {
+                                    <span class="text-amber-500/80">@FilteredPreviewCount filtered</span>
+                                }
+                                @if (FilteredPreviewCount > 0 && SkippedPreviewCount > 0)
+                                {
+                                    <span> · </span>
+                                }
+                                @if (SkippedPreviewCount > 0)
+                                {
+                                    <span>@SkippedPreviewCount beyond limit</span>
+                                }
+                            </p>
+                        }
                     </div>
                     <div class="space-y-2">
                         @foreach (var result in FilteredPreviewResults)
                         {
-                            var isBlacklisted = IsPreviewBlacklisted(result);
-                            <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
-                                <MediaDetailTile @key="result"
-                                                 Result="result"
-                                                 IsMarked="isBlacklisted"
-                                                 IsActiveToggle="false"
-                                                 IsFocused="_focusedPreviewResult == result"
-                                                 OnFocusIn="() => _focusedPreviewResult = result"
-                                                 OnFocusOut="() => ClearFocusedPreviewResult(result)"
-                                                 OnToggleWatchlist="TogglePreviewBlacklistAsync"
-                                                 ToggleIcon="GetToggleBlacklistIcon"
-                                                 ToggleIconColor="GetToggleBlacklistIconColor"/>
-                            </div>
+                            var item = GetItemFromResult(result);
+                            if (item is not null)
+                            {
+                                var status = result.Value switch
+                                {
+                                    Skipped<IMediaDetailResult> => QueryResultStatus.Skipped,
+                                    Filtered<IMediaDetailResult> => QueryResultStatus.Filtered,
+                                    _ => QueryResultStatus.Active,
+                                };
+                                var isBlacklisted = status == QueryResultStatus.Active && IsPreviewBlacklisted(item);
+                                <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
+                                    <MediaDetailTile @key="item"
+                                                     Result="item"
+                                                     Status="status"
+                                                     IsMarked="isBlacklisted"
+                                                     IsActiveToggle="false"
+                                                     IsFocused="_focusedPreviewResult == item"
+                                                     OnFocusIn="() => _focusedPreviewResult = item"
+                                                     OnFocusOut="() => ClearFocusedPreviewResult(item)"
+                                                     OnToggleWatchlist="TogglePreviewBlacklistAsync"
+                                                     ToggleIcon="GetToggleBlacklistIcon"
+                                                     ToggleIconColor="GetToggleBlacklistIconColor"/>
+                                </div>
+                            }
                         }
                     </div>
                 }
@@ -517,7 +561,8 @@
     private bool _showValidation;
     private MediaListProvider? _testedProvider;
     private string _testedListIdentifier = string.Empty;
-    private IReadOnlyList<IMediaDetailResult> _previewResults = [];
+    private IReadOnlyList<IMediaDetailResult> _rawResults = [];
+    private IReadOnlyList<QueryResult<IMediaDetailResult>> _processedResults = [];
     private CancellationTokenSource? _cancellationTokenSource;
     private string _previewFilterQuery = string.Empty;
     private readonly HashSet<string> _previewBlacklistedSourceIds = [];
@@ -545,6 +590,14 @@
     private string _sortField = "title";
     private string _limitRaw = string.Empty;
 
+    // Snapshot of the last applied query settings — used to detect pending changes
+    private bool _appliedFiltersEnabled;
+    private int _appliedFilterVersion;
+    private bool _appliedSortingEnabled;
+    private SortDirection _appliedSortDirection = SortDirection.Descending;
+    private string _appliedSortField = "title";
+    private string _appliedLimitRaw = string.Empty;
+
     #endregion
 
     #region Disabled Providers
@@ -566,21 +619,16 @@
 
     private static readonly IReadOnlyList<FilterField> FilterFields =
     [
-        new FilterField { Name = "name", Label = "Name", Type = FilterFieldType.Text },
-        new FilterField { Name = "age", Label = "Age", Type = FilterFieldType.Number },
-        new FilterField { Name = "joinedAt", Label = "Joined", Type = FilterFieldType.Date },
-        new FilterField { Name = "active", Label = "Active", Type = FilterFieldType.Boolean },
-        new FilterField
-        {
-            Name = "role", Label = "Role", Type = FilterFieldType.Enum,
-            Options =
-            [
-                new SelectOption<string>("admin", "Admin"),
-                new SelectOption<string>("editor", "Editor"),
-                new SelectOption<string>("viewer", "Viewer"),
-            ]
-        },
+        new FilterField { Name = nameof(IMediaDetailResult.Title), Label = "Title", Type = FilterFieldType.Text },
+        new FilterField { Name = nameof(IMediaDetailResult.ReleaseDate), Label = "Release Date", Type = FilterFieldType.Date },
     ];
+
+    private static readonly IReadOnlyDictionary<string, string> SortFieldToProperty = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["title"] = nameof(IMediaDetailResult.Title),
+        ["releaseDate"] = nameof(IMediaDetailResult.ReleaseDate),
+        ["runtime"] = nameof(IMediaDetailResult.Runtime),
+    };
 
     #endregion
 
@@ -610,8 +658,21 @@
         _strategy != _initialStrategy;
 
     private bool IsProcessing => _state is State.Testing or State.Saving;
-    private bool ShowTestButton => _state is State.Idle or State.Failed;
-    private bool ShowSaveButton => _state == State.Success;
+    private bool ShowTestButton => _state is State.Idle or State.Failed || _rawResults.Count == 0;
+    private bool ShowSaveButton => _state == State.Success && _rawResults.Count > 0;
+
+    private bool HasPendingQueryChanges =>
+        _rawResults.Count > 0 && (
+            _filtersEnabled != _appliedFiltersEnabled ||
+            (_filtersEnabled && _filter.Version != _appliedFilterVersion) ||
+            _sortingEnabled != _appliedSortingEnabled ||
+            (_sortingEnabled && (_sortField != _appliedSortField || _sortDirection != _appliedSortDirection)) ||
+            _limitRaw != _appliedLimitRaw
+        );
+
+    private int ActivePreviewCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
+    private int FilteredPreviewCount => _processedResults.Count(r => r.Value is Filtered<IMediaDetailResult>);
+    private int SkippedPreviewCount => _processedResults.Count(r => r.Value is Skipped<IMediaDetailResult>);
 
     #endregion
 
@@ -786,7 +847,7 @@
         }
     }
 
-    private void HandleFilterChanged(FilterDefinition filter) {}
+    private void HandleFilterChanged(FilterDefinition filter) { /* pending — user must click Apply */ }
 
     private static string GetPreviewSourceKey(IMediaDetailResult result) => result.SourceId.ToString() ?? string.Empty;
 
@@ -812,6 +873,15 @@
     private static string GetToggleBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "eye-off" : "eye";
     private static string GetToggleBlacklistIconColor(bool isBlacklisted) => isBlacklisted ? "var(--destructive)" : "var(--accent-foreground)";
 
+    private static IMediaDetailResult? GetItemFromResult(QueryResult<IMediaDetailResult> result) =>
+        result.Value switch
+        {
+            IMediaDetailResult item => item,
+            Skipped<IMediaDetailResult> s => s.Item,
+            Filtered<IMediaDetailResult> f => f.Item,
+            _ => null,
+        };
+
     private Task HandleTestAsync() => TestAsync();
 
     private Task HandleSaveAsync()
@@ -821,8 +891,46 @@
     }
 
 
-    private IEnumerable<IMediaDetailResult> FilteredPreviewResults =>
-        string.IsNullOrWhiteSpace(_previewFilterQuery) ? _previewResults : _previewResults.Where(r => r.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase));
+    private IEnumerable<QueryResult<IMediaDetailResult>> FilteredPreviewResults =>
+        string.IsNullOrWhiteSpace(_previewFilterQuery)
+            ? _processedResults
+            : _processedResults.Where(r => GetItemFromResult(r)?.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase) == true);
+
+    private void ReprocessResults()
+    {
+        if (_rawResults.Count == 0)
+        {
+            _processedResults = [];
+            return;
+        }
+
+        QuerySort? sortOptions = null;
+        if (_sortingEnabled && SortFieldToProperty.TryGetValue(_sortField, out var propName))
+        {
+            sortOptions = new QuerySort
+            {
+                Property = propName,
+                Direction = _sortDirection == SortDirection.Ascending
+                    ? ListSortDirection.Ascending
+                    : ListSortDirection.Descending,
+            };
+        }
+
+        var queryFilter = _filtersEnabled ? FilterDefinitionConverter.ToQueryFilter(_filter) : null;
+        var options = new QueryOptions { Sort = sortOptions, Limit = ParsedLimit, Filter = queryFilter };
+        _processedResults = QueryProcessor.Execute(_rawResults, options).ToList();
+    }
+
+    private void ApplyQuerySettings()
+    {
+        _appliedFiltersEnabled = _filtersEnabled;
+        _appliedFilterVersion = _filter.Version;
+        _appliedSortingEnabled = _sortingEnabled;
+        _appliedSortField = _sortField;
+        _appliedSortDirection = _sortDirection;
+        _appliedLimitRaw = _limitRaw;
+        ReprocessResults();
+    }
 
     #region Sort Direction Helpers
 
@@ -861,20 +969,23 @@
             var importListService = ImportListServiceIndex[_provider!.Value];
             var results = (await importListService.GetEnrichedImportListItemsAsync(_listIdentifier.Trim(), cancellationToken)).ToList();
 
-            _previewResults = results;
+            _rawResults = results;
             _previewBlacklistedSourceIds.Clear();
             _focusedPreviewResult = null;
-            _state = _previewResults.Count > 0 ? State.Success : State.Failed;
+            _state = _rawResults.Count > 0 ? State.Success : State.Failed;
 
             if (_state == State.Success)
             {
                 _testedProvider = _provider;
                 _testedListIdentifier = _listIdentifier.Trim();
+                ApplyQuerySettings();
             }
         }
         catch (OperationCanceledException)
         {
             _state = State.Idle;
+            _rawResults = [];
+            _processedResults = [];
             _previewBlacklistedSourceIds.Clear();
             _focusedPreviewResult = null;
             _testedProvider = null;
@@ -883,7 +994,8 @@
         catch (Exception)
         {
             _state = State.Failed;
-            _previewResults = [];
+            _rawResults = [];
+            _processedResults = [];
             _previewBlacklistedSourceIds.Clear();
             _focusedPreviewResult = null;
             _testedProvider = null;
