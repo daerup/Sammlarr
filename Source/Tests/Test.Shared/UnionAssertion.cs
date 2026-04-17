@@ -1,6 +1,9 @@
+using System.Collections;
 using System.Runtime.CompilerServices;
+using Contracts.Processing;
 using Shared;
 using TUnit.Assertions.Core;
+using TUnit.Assertions.Sources;
 
 namespace Test.Shared;
 
@@ -31,4 +34,62 @@ public static class UnionAssertionExtensions
 			return new UnionAssertion<TOuter, TInner>(source.Context);
 		}
 	}
+
+	extension<TCollection, TItem>(IAssertionSource<TCollection> source)
+		where TCollection : IEnumerable<TItem>
+		where TItem : IUnion
+	{
+		public UnionCollectionAssertion<TCollection, TItem> AreOfUnionType(params IEnumerable<Type> expectedTypes)
+		{
+			using var _ = Assert.Multiple();
+			return new UnionCollectionAssertion<TCollection, TItem>(source.Context, expectedTypes);
+		}
+	}
+}
+
+public class UnionCollectionAssertion<TCollection, TItem>(AssertionContext<TCollection> context, IEnumerable<Type> expectedTypes)
+	: CollectionAssertionBase<TCollection, TItem>(context)
+	where TCollection : IEnumerable<TItem>
+	where TItem : IUnion
+{
+	protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
+	{
+		await Task.CompletedTask;
+		if (metadata.Exception is not null)
+		{
+			return AssertionResult.Failed(metadata.Exception.Message);
+		}
+		var value = metadata.Value;
+		if (value is null)
+		{
+			return AssertionResult.Failed("value was null");
+		}
+
+		if (value.Count() != expectedTypes.Count())
+		{
+			return AssertionResult.Failed($"expected collection to have {expectedTypes.Count()} items but found {value.Count()}");
+		}
+
+		var zipped = value.Zip(expectedTypes, (item, expectedType) => (item, expectedType));
+		foreach (var (index, item) in zipped.Index())
+		{
+			(TItem actual, Type expected) = item;
+			if (actual is IUnion union)
+			{
+				if (union.Value!.GetType() == expected)
+				{
+					continue;
+				}
+
+				return AssertionResult.Failed(
+					$"at index {index} found '{union.Value.GetType().GetGenericName()}' instead of expected type '{expected.GetGenericName()}'"
+				);
+			}
+			return AssertionResult.Failed($"actual should be union of type {expected.GetGenericName()}");
+		}
+
+		return AssertionResult.Passed;
+	}
+
+	protected override string GetExpectation() => "unions " + TypeExtensions.GetGenericName<TItem>() + " to all be of expected type";
 }

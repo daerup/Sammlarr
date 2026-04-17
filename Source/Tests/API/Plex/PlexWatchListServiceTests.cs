@@ -117,14 +117,14 @@ public class PlexWatchListServiceTests
 	private static PlexWatchListService CreateWatchListService(string json)
 	{
 		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>()).Returns(new Unresolved());
+		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any()).Returns(new Unresolved());
 		return new PlexWatchListService(CreatePlexClient(json), resolver);
 	}
 
 	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode)
 	{
 		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>()).Returns(new Unresolved());
+		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any()).Returns(new Unresolved());
 		return new PlexWatchListService(CreatePlexClient(statusCode), resolver);
 	}
 

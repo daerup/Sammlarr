@@ -4,6 +4,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsTestProject>true</IsTestProject>
+		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Dapper" />
@@ -15,6 +16,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Core\Core.csproj" />
+		<ProjectReference Include="..\Test.Shared\Test.Shared.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Remove="Integration\**\*.cs" />
