@@ -6,24 +6,26 @@ internal static class FilterEvaluator
 {
 	public static string Build(QueryFilter filter)
 	{
-		return filter.Groups.Count == 0 ? string.Empty : Combine(filter.Groups.Select(BuildGroup), filter.Operator);
+		var parts = filter.Groups.Select(BuildGroup).ToList();
+		return Join(filter.Operator, parts);
 	}
 
 	private static string BuildGroup(FilterGroup group)
 	{
-		var parts = group.Predicates.Concat(group.Groups.Select(BuildGroup)).ToList();
-		return Combine(parts, group.Operator);
+		var predicateParts = group.Predicates.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => $"({p})");
+		var nestedParts = group.Groups.Select(BuildGroup);
+		var allParts = predicateParts.Concat(nestedParts).ToList();
+
+		return Join(group.Operator, allParts);
 	}
 
-	private static string Combine(IEnumerable<string> parts, FilterOperator @operator)
+	private static string Join(FilterOperator @operator, List<string> parts)
 	{
-		var list = parts.ToList();
-		var operatorString = $" {@operator.ToString().ToLower()} ";
-		return list.Count switch
+		return parts.Count switch
 		{
 			0 => string.Empty,
-			1 => list[0],
-			_ => $"({string.Join(operatorString, list)})",
+			1 => parts[0],
+			_ => $"({string.Join($" {@operator.ToString().ToLower()} ", parts)})",
 		};
 	}
 }
