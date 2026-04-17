@@ -6,9 +6,32 @@ namespace Core.Tests.Unit.Processing;
 public class FilterEvaluatorTests
 {
 	[Test]
-	public async Task Build_WhenNoGroups_ReturnsNull()
+	public async Task Build_WhenNoGroups_ReturnsEmpty()
 	{
 		var result = FilterEvaluator.Build(new QueryFilter { Operator = FilterOperator.And, Groups = [] });
+		await Assert.That(result).IsEmpty();
+	}
+
+	[Test]
+	[Arguments("")]
+	[Arguments(" ")]
+	[Arguments(null)]
+	public async Task Build_WhenEmptyStringPredicate_ReturnsEmpty(string? predicate)
+	{
+		var filter = new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [predicate] }] };
+
+		var result = FilterEvaluator.Build(filter);
+
+		await Assert.That(result).IsEmpty();
+	}
+
+	[Test]
+	public async Task Build_WhenPredicate_ReturnsEmpty()
+	{
+		var filter = new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [] }] };
+
+		var result = FilterEvaluator.Build(filter);
+
 		await Assert.That(result).IsEmpty();
 	}
 
@@ -23,7 +46,7 @@ public class FilterEvaluatorTests
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("Year >= 2020");
+		await Assert.That(result).IsEqualTo("(Year >= 2020)");
 	}
 
 	[Test]
@@ -37,7 +60,7 @@ public class FilterEvaluatorTests
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("(Year >= 2020 and Genre == \"Action\")");
+		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre == \"Action\"))");
 	}
 
 	[Test]
@@ -51,11 +74,11 @@ public class FilterEvaluatorTests
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("(Genre == \"Action\" or Genre == \"Comedy\")");
+		await Assert.That(result).IsEqualTo("((Genre == \"Action\") or (Genre == \"Comedy\"))");
 	}
 
 	[Test]
-	public async Task Build_WhenEmptyGroup_ReturnsNull()
+	public async Task Build_WhenEmptyGroup_ReturnsEmpty()
 	{
 		var filter = new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [] }] };
 
@@ -79,7 +102,7 @@ public class FilterEvaluatorTests
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("(Year >= 2020 and Genre == \"Action\")");
+		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre == \"Action\"))");
 	}
 
 	[Test]
@@ -97,7 +120,7 @@ public class FilterEvaluatorTests
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("(Year >= 2020 or Genre == \"Action\")");
+		await Assert.That(result).IsEqualTo("((Year >= 2020) or (Genre == \"Action\"))");
 	}
 
 	[Test]
@@ -119,11 +142,11 @@ public class FilterEvaluatorTests
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("(Year >= 2020 and (Genre == \"Action\" or Genre == \"Comedy\"))");
+		await Assert.That(result).IsEqualTo("((Year >= 2020) and ((Genre == \"Action\") or (Genre == \"Comedy\")))");
 	}
 
 	[Test]
-	public async Task Build_WhenGroupContainsOnlyEmptyNestedGroups_ReturnsNull()
+	public async Task Build_WhenGroupContainsOnlyEmptyNestedGroups_ReturnsEmpty()
 	{
 		var filter = new QueryFilter
 		{
