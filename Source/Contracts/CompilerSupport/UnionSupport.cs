@@ -5,5 +5,5 @@ public sealed class UnionAttribute : Attribute;
 
 public interface IUnion
 {
-	object? Value { get; }
+	object Value { get; }
 }

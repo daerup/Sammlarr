@@ -1,3 +1,4 @@
+using Contracts.Processing;
 using DB.Conversion.Enums;
 
 namespace DB.Data.List;
@@ -8,5 +9,5 @@ internal record FilterGroup
 	public List<FilterGroup> Groups { get; init; } = [];
 
 	[EnumAsString]
-	public ListFilterLogic Logic { get; init; }
+	public FilterOperator Operator { get; init; }
 }
