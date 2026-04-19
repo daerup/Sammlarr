@@ -4,11 +4,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="TUnit.Assertions" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\..\Contracts\Contracts.csproj" />
 		<ProjectReference Include="..\..\Shared\Shared.csproj" />

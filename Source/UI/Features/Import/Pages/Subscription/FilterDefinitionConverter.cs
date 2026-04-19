@@ -44,7 +44,6 @@ internal static class FilterDefinitionConverter
 		if (string.IsNullOrWhiteSpace(condition.Field))
 			return null;
 
-		// Valueless operators don't need a value check
 		var valueless = condition.Operator is BBFilterOp.IsEmpty or BBFilterOp.IsNotEmpty or BBFilterOp.IsTrue or BBFilterOp.IsFalse;
 
 		if (!valueless && condition.Value is null)
@@ -71,7 +70,7 @@ internal static class FilterDefinitionConverter
 			BBFilterOp.Between => v2 is null ? null : FormatBetween(f, v!, v2),
 			BBFilterOp.IsTrue => $"{f} == true",
 			BBFilterOp.IsFalse => $"{f} == false",
-			_ => null, // InLast, InNext, In, NotIn, DateIs, DateIsNot — not supported via Dynamic LINQ inline predicates
+			_ => null,
 		};
 	}
 
