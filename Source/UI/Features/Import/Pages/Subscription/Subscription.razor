@@ -363,49 +363,51 @@
                                     }
                                 </BbField>
 
-                                <BbField>
-                                    <BbFieldLabel Class="flex items-center leading-none">
-                                        Watchlist limit behavior
-                                        <BbTooltipProvider>
-                                            <BbTooltip>
-                                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
-                                                    <LucideIcon Name="info" Size="14"/>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these items
-                                                    can't be imported.
-                                                </BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    </BbFieldLabel>
-                                    <BbFieldContent>
-                                        <EnumToggleGroup TEnum="LimitBehavior"
-                                                         Value="_watchlistedLimitBehavior"
-                                                         OnChange="@OnWatchlistedLimitBehaviorChanged"
-                                                         TooltipProvider="GetLimitBehaviorTooltip"/>
-                                    </BbFieldContent>
-                                </BbField>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <BbField>
+                                        <BbFieldLabel Class="flex items-center leading-none">
+                                            Watchlist limit behavior
+                                            <BbTooltipProvider>
+                                                <BbTooltip>
+                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                                        <LucideIcon Name="info" Size="14"/>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these items
+                                                        can't be imported.
+                                                    </BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbTooltipProvider>
+                                        </BbFieldLabel>
+                                        <BbFieldContent>
+                                            <EnumToggleGroup TEnum="LimitBehavior"
+                                                             Value="_watchlistedLimitBehavior"
+                                                             OnChange="@OnWatchlistedLimitBehaviorChanged"
+                                                             TooltipProvider="GetLimitBehaviorTooltip"/>
+                                        </BbFieldContent>
+                                    </BbField>
 
-                                <BbField>
-                                    <BbFieldLabel Class="flex items-center leading-none">
-                                        Blocklist limit behavior
-                                        <BbTooltipProvider>
-                                            <BbTooltip>
-                                                <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
-                                                    <LucideIcon Name="info" Size="14"/>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't be
-                                                    imported.
-                                                </BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    </BbFieldLabel>
-                                    <BbFieldContent>
-                                        <EnumToggleGroup TEnum="LimitBehavior"
-                                                         Value="_blacklistedLimitBehavior"
-                                                         OnChange="@OnBlacklistedLimitBehaviorChanged"
-                                                         TooltipProvider="GetLimitBehaviorTooltip"/>
-                                    </BbFieldContent>
-                                </BbField>
+                                    <BbField>
+                                        <BbFieldLabel Class="flex items-center leading-none">
+                                            Blocklist limit behavior
+                                            <BbTooltipProvider>
+                                                <BbTooltip>
+                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                                        <LucideIcon Name="info" Size="14"/>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't be
+                                                        imported.
+                                                    </BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbTooltipProvider>
+                                        </BbFieldLabel>
+                                        <BbFieldContent>
+                                            <EnumToggleGroup TEnum="LimitBehavior"
+                                                             Value="_blacklistedLimitBehavior"
+                                                             OnChange="@OnBlacklistedLimitBehaviorChanged"
+                                                             TooltipProvider="GetLimitBehaviorTooltip"/>
+                                        </BbFieldContent>
+                                    </BbField>
+                                </div>
                             }
 
                         </div>
@@ -635,8 +637,6 @@
         : IsCloneMode ? "Create a new subscription using values copied from an existing one."
         : "Import a list from an external provider and subscribe to it.";
 
-    #region Form State
-
     private string _name = string.Empty;
     private string _listIdentifier = string.Empty;
     private bool _isEnabled = true;
@@ -648,10 +648,6 @@
     private bool _initialIsEnabled = true;
     private MediaListProvider? _initialProvider;
     private MediaListAddStrategy _initialStrategy = MediaListAddStrategy.Append;
-
-    #endregion
-
-    #region Test/Save State
 
     private State _state = State.Idle;
     private bool _showValidation;
@@ -671,16 +667,8 @@
     private bool _isShortcutRegistered;
     private const string SubscriptionShortcutId = "subscription-ctrl-enter";
 
-    #endregion
-
-    #region Sync Schedule State
-
     private RunMode _runMode = RunMode.Manual;
     private string? _scheduleCronExpression = string.Empty;
-
-    #endregion
-
-    #region Filters, Sorting & Limits State
 
     private bool _filtersEnabled;
     private FilterDefinition _filter = new();
@@ -692,7 +680,6 @@
     private LimitBehavior _watchlistedLimitBehavior = LimitBehavior.Included;
     private LimitBehavior _blacklistedLimitBehavior = LimitBehavior.Included;
 
-    // Snapshot of the last applied query settings — used to detect pending changes
     private bool _appliedFiltersEnabled;
     private int _appliedFilterVersion;
     private bool _appliedSortingEnabled;
@@ -703,15 +690,7 @@
     private LimitBehavior _appliedWatchlistedLimitBehavior = LimitBehavior.Included;
     private LimitBehavior _appliedBlacklistedLimitBehavior = LimitBehavior.Included;
 
-    #endregion
-
-    #region Disabled Providers
-
     private readonly HashSet<MediaListProvider> _disabledProviders = [];
-
-    #endregion
-
-    #region Constants
 
     private static readonly IReadOnlyList<SelectOption<string>> SortFieldOptions =
     [
@@ -734,10 +713,6 @@
         ["releaseDate"] = nameof(IMediaDetailResult.ReleaseDate),
         ["runtime"] = nameof(IMediaDetailResult.Runtime),
     };
-
-    #endregion
-
-    #region Validation & Computed State
 
     private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
     private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
@@ -788,8 +763,6 @@
     private int BlacklistedIncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult item && IsPreviewBlacklisted(item));
     private int BlacklistedTotalCount => _processedResults.Count(r => GetItemFromResult(r) is {} item && IsPreviewBlacklisted(item));
 
-    #endregion
-
     private Task OnRunModeChanged(RunMode mode)
     {
         _runMode = mode;
@@ -822,7 +795,7 @@
         behavior switch
         {
             LimitBehavior.Included => "Counts against your import limit, taking up a slot that could be used by another item.",
-            LimitBehavior.Exempt => "Does not count against your import limit — the slot is preserved for the next eligible item.",
+            LimitBehavior.Exempt => "Does not count against your import limit, preserving the slot for the next eligible item.",
         };
 
     protected override async Task OnInitializedAsync()
@@ -907,11 +880,9 @@
 
     private async Task OnShortcutActivatedAsync()
     {
-        // Avoid running actions while a test/save is already in progress
         if (IsProcessing)
             return;
 
-        // Prefer Save when the form is ready to save; otherwise Apply when there are pending query changes; otherwise Test
         if (ShowSaveButton && CanSave)
         {
             await HandleSaveAsync();
@@ -927,8 +898,6 @@
 
         await InvokeAsync(StateHasChanged);
     }
-
-    // Unregister performed synchronously in Dispose
 
     private async Task HandleInputKeyDown(KeyboardEventArgs e)
     {
@@ -972,7 +941,6 @@
 
     private void HandleFilterChanged(FilterDefinition filter)
     {
-        /* pending — user must click Apply */
     }
 
     private static string GetPreviewSourceKey(IMediaDetailResult result) => result.SourceId.ToString() ?? string.Empty;
@@ -1107,8 +1075,6 @@
         ReprocessResults();
     }
 
-    #region Sort Direction Helpers
-
     private void ToggleSortDirection() =>
         _sortDirection = _sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
 
@@ -1116,12 +1082,11 @@
         _sortDirection == SortDirection.Ascending ? "Ascending" : "Descending";
 
     private string GetSortTooltip() =>
-        _sortDirection == SortDirection.Ascending ? "Ascending — low to high" : "Descending — high to low";
+        _sortDirection == SortDirection.Ascending ? "Ascending (low to high)" : "Descending (high to low)";
 
     private string GetSortIconClass() =>
         _sortDirection == SortDirection.Descending ? "transition-transform duration-200 rotate-180" : "transition-transform duration-200";
 
-    #endregion
 
     private async Task TestAsync()
     {
@@ -1300,7 +1265,6 @@
         _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
 
-        // Unregister keyboard shortcut synchronously
         if (_isShortcutRegistered)
         {
             _shortcutRegistration?.Dispose();
