@@ -1,7 +1,7 @@
 @using Contracts.Media
 @using Contracts.Media.Search
 
-<div class="search-result-row rounded-sm bg-black @(Status == QueryResultStatus.Active ? "hover-bg" : "result-dimmed") @(IsFocused && Status == QueryResultStatus.Active ? "row-focused" : "")"
+<div class="search-result-row rounded-sm bg-black @Class @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
@@ -51,31 +51,11 @@
                 }
             </div>
         </div>
-        @if (Status == QueryResultStatus.Active)
+        @if (Icons != null)
         {
-            @if (Icons != null)
-            {
-                <div class="flex items-center gap-1">
-                    @Icons
-                </div>
-            }
-        }
-        else
-        {
-            <BbTooltipProvider>
-                <BbTooltip DelayDuration="300">
-                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                        <div class="search-result-status-indicator @(Status == QueryResultStatus.Filtered ? "text-amber-500" : "text-muted-foreground")">
-                            <LucideIcon Name="@(Status == QueryResultStatus.Filtered ? "filter-x" : "scissors")" Size="16"/>
-                        </div>
-                    </BbTooltipTrigger>
-                    <BbTooltipContent>
-                        @(Status == QueryResultStatus.Filtered
-                            ? "Filtered out by your active filter rules."
-                            : "Excluded by the specified limit.")
-                    </BbTooltipContent>
-                </BbTooltip>
-            </BbTooltipProvider>
+            <div class="flex items-center gap-1">
+                @Icons
+            </div>
         }
     </div>
 </div>
@@ -83,7 +63,7 @@
 @code {
 
     [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
-    [Parameter] public QueryResultStatus Status { get; set; } = QueryResultStatus.Active;
+    [Parameter] public string Class { get; set; } = "hover-bg";
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
@@ -97,7 +77,6 @@
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl ?? "" : Result.BackdropUrl)}')";
         _displayFacts = GetDisplayFacts(Result);
     }
-
 
     private static IReadOnlyList<string> GetDisplayFacts(IMediaDetailResult result)
     {
