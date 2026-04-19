@@ -6,7 +6,7 @@
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
     <div class="flex items-start justify-between gap-3">
-        <div class="flex items-start">
+        <div class="search-result-main-content flex items-start">
             <div class="search-result-poster">
                 @if (!string.IsNullOrWhiteSpace(Result.PosterUrl))
                 {
@@ -80,7 +80,7 @@
             <BbTooltipProvider>
                 <BbTooltip DelayDuration="300">
                     <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                        <div class="search-result-status-indicator @(Status == QueryResultStatus.Filtered ? "text-amber-500/60" : "text-muted-foreground/50")">
+                        <div class="search-result-status-indicator @(Status == QueryResultStatus.Filtered ? "text-amber-500" : "text-muted-foreground")">
                             <LucideIcon Name="@(Status == QueryResultStatus.Filtered ? "filter-x" : "scissors")" Size="16"/>
                         </div>
                     </BbTooltipTrigger>
