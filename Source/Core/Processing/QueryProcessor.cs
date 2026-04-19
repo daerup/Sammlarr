@@ -20,8 +20,8 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 
 		var filtered = options?.Filter is { } filter ? all.Where(FilterEvaluator.Build(filter)) : all;
 		var removed = all.Except(filtered);
-		var takeUntilIndex = options?.Limit is { } limit ? limit - 1 : int.MaxValue;
 
+		var takeUntilIndex = options?.Limit is { } totalLimit ? totalLimit.Count - 1 : int.MaxValue;
 		foreach (var (index, item) in all.Index())
 		{
 			if (index > takeUntilIndex)

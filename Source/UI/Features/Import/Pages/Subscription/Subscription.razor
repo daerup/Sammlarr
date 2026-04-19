@@ -322,32 +322,85 @@
                         </BbField>
                     }
 
-                    <BbField IsInvalid="LimitIsInvalid">
-                        <BbFieldLabel For="limit" Class="flex items-center leading-none">
-                            Limit
+                    <BbField>
+                        <BbFieldLabel Class="flex items-center leading-none">
+                            Enable limit
                             <BbTooltipProvider>
                                 <BbTooltip DelayDuration="0">
                                     <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                         <LucideIcon Name="info" Size="14"/>
                                     </BbTooltipTrigger>
-                                    <BbTooltipContent>Maximum number of items to import from the list. Leave empty to import all available items.
-                                    </BbTooltipContent>
+                                    <BbTooltipContent>Cap the number of imported items.</BbTooltipContent>
                                 </BbTooltip>
                             </BbTooltipProvider>
                         </BbFieldLabel>
                         <BbFieldContent>
-                            <BbInput id="limit"
-                                     Placeholder="e.g. 100"
-                                     @bind-Value="_limitRaw"
-                                     Class="bg-accent w-40"
-                                     AriaInvalid="@LimitIsInvalid"
-                                     UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
+                            <BbSwitch @bind-Checked="_limitEnabled"/>
                         </BbFieldContent>
-                        @if (LimitIsInvalid)
-                        {
-                            <BbFieldError>Limit must be a positive whole number.</BbFieldError>
-                        }
                     </BbField>
+
+                    @if (_limitEnabled)
+                    {
+                        <BbField IsInvalid="LimitIsInvalid">
+                            <BbFieldLabel For="limit" Class="flex items-center leading-none">
+                                Maximum items
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <BbInput id="limit"
+                                         Placeholder="e.g. 100"
+                                         @bind-Value="_limitRaw"
+                                         Class="bg-accent w-40"
+                                         AriaInvalid="@LimitIsInvalid"
+                                         UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
+                            </BbFieldContent>
+                            @if (LimitIsInvalid)
+                            {
+                                <BbFieldError>Limit must be a positive whole number.</BbFieldError>
+                            }
+                        </BbField>
+
+                        <BbField>
+                            <BbFieldLabel Class="flex items-center leading-none">
+                                Watchlist limit behavior
+                                <BbTooltipProvider>
+                                    <BbTooltip>
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these items can't be imported.</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <EnumToggleGroup TEnum="LimitBehavior"
+                                                 Value="_watchlistedLimitBehavior"
+                                                 OnChange="@OnWatchlistedLimitBehaviorChanged"
+                                                 BrandingProvider="GetLimitBehaviorBranding"
+                                                 TooltipProvider="GetLimitBehaviorTooltip"/>
+                            </BbFieldContent>
+                        </BbField>
+
+                        <BbField>
+                            <BbFieldLabel Class="flex items-center leading-none">
+                                Blocklist limit behavior
+                                <BbTooltipProvider>
+                                    <BbTooltip>
+                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                            <LucideIcon Name="info" Size="14"/>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't be imported.</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            </BbFieldLabel>
+                            <BbFieldContent>
+                                <EnumToggleGroup TEnum="LimitBehavior"
+                                                 Value="_blacklistedLimitBehavior"
+                                                 OnChange="@OnBlacklistedLimitBehaviorChanged"
+                                                 BrandingProvider="GetLimitBehaviorBranding"
+                                                 TooltipProvider="GetLimitBehaviorTooltip"/>
+                            </BbFieldContent>
+                        </BbField>
+                    }
 
                 </div>
             </BbCollapsibleContent>
@@ -629,7 +682,10 @@
     private bool _sortingEnabled;
     private SortDirection _sortDirection = SortDirection.Descending;
     private string _sortField = "title";
+    private bool _limitEnabled;
     private string _limitRaw = string.Empty;
+    private LimitBehavior _watchlistedLimitBehavior = LimitBehavior.Included;
+    private LimitBehavior _blacklistedLimitBehavior = LimitBehavior.Included;
 
     // Snapshot of the last applied query settings — used to detect pending changes
     private bool _appliedFiltersEnabled;
@@ -637,7 +693,10 @@
     private bool _appliedSortingEnabled;
     private SortDirection _appliedSortDirection = SortDirection.Descending;
     private string _appliedSortField = "title";
+    private bool _appliedLimitEnabled;
     private string _appliedLimitRaw = string.Empty;
+    private LimitBehavior _appliedWatchlistedLimitBehavior = LimitBehavior.Included;
+    private LimitBehavior _appliedBlacklistedLimitBehavior = LimitBehavior.Included;
 
     #endregion
 
@@ -678,7 +737,7 @@
     private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
     private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
-    private bool LimitIsInvalid => !string.IsNullOrWhiteSpace(_limitRaw) && ParsedLimit is null;
+    private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
 
     private bool CanTest => !string.IsNullOrWhiteSpace(_listIdentifier) && _provider is not null;
     private bool CanSave =>
@@ -709,7 +768,11 @@
             (_filtersEnabled && _filter.Version != _appliedFilterVersion) ||
             _sortingEnabled != _appliedSortingEnabled ||
             (_sortingEnabled && (_sortField != _appliedSortField || _sortDirection != _appliedSortDirection)) ||
-            _limitRaw != _appliedLimitRaw
+            _limitEnabled != _appliedLimitEnabled ||
+            (_limitEnabled && (
+                _limitRaw != _appliedLimitRaw ||
+                _watchlistedLimitBehavior != _appliedWatchlistedLimitBehavior ||
+                _blacklistedLimitBehavior != _appliedBlacklistedLimitBehavior))
         );
 
     private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
@@ -748,6 +811,33 @@
 
     private BrandingInfo GetStrategyBranding(MediaListAddStrategy strategy) =>
         BrandingInfoBuilder.Lucide(strategy.GetDescription(), strategy.ToString(), "shield-check", "#000000");
+
+    private Task OnWatchlistedLimitBehaviorChanged(LimitBehavior behavior)
+    {
+        _watchlistedLimitBehavior = behavior;
+        return Task.CompletedTask;
+    }
+
+    private Task OnBlacklistedLimitBehaviorChanged(LimitBehavior behavior)
+    {
+        _blacklistedLimitBehavior = behavior;
+        return Task.CompletedTask;
+    }
+
+    private BrandingInfo GetLimitBehaviorBranding(LimitBehavior behavior) =>
+        behavior switch
+        {
+            LimitBehavior.Included => BrandingInfoBuilder.Lucide("Included", behavior.ToString(), "check", "#000000"),
+            LimitBehavior.Exempt => BrandingInfoBuilder.Lucide("Exempt", behavior.ToString(), "shield-off", "#000000"),
+            _ => BrandingInfoBuilder.Lucide(behavior.ToString(), behavior.ToString(), "help-circle", "#000000"),
+        };
+
+    private string GetLimitBehaviorTooltip(LimitBehavior behavior) =>
+        behavior switch
+        {
+            LimitBehavior.Included => "Counts against your import limit, taking up a slot that could be used by another item.",
+            LimitBehavior.Exempt => "Does not count against your import limit — the slot is preserved for the next eligible item.",
+        };
 
     protected override async Task OnInitializedAsync()
     {
@@ -1013,7 +1103,10 @@
         }
 
         var queryFilter = _filtersEnabled ? FilterDefinitionConverter.ToQueryFilter(_filter) : null;
-        var options = new QueryOptions { Sort = sortOptions, Limit = ParsedLimit, Filter = queryFilter };
+        var queryLimit = _limitEnabled && ParsedLimit is { } n
+            ? new QueryLimit { Count = n, Watchlisted = _watchlistedLimitBehavior, Blacklisted = _blacklistedLimitBehavior }
+            : null;
+        var options = new QueryOptions { Sort = sortOptions, Limit = queryLimit, Filter = queryFilter };
         _processedResults = QueryProcessor.Execute(_rawResults, options).ToList();
     }
 
@@ -1024,7 +1117,10 @@
         _appliedSortingEnabled = _sortingEnabled;
         _appliedSortField = _sortField;
         _appliedSortDirection = _sortDirection;
+        _appliedLimitEnabled = _limitEnabled;
         _appliedLimitRaw = _limitRaw;
+        _appliedWatchlistedLimitBehavior = _watchlistedLimitBehavior;
+        _appliedBlacklistedLimitBehavior = _blacklistedLimitBehavior;
         ReprocessResults();
     }
 
