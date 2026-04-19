@@ -14,15 +14,6 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 	private const string SerachMetadataEndpoint =
 		"https://discover.provider.plex.tv/library/search?searchTypes={0}&searchProviders=discover&includeMetadata=1&query={1}";
 
-	public async Task<IMediaDetailResult> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
-	{
-		var endpoint = string.Format(RatingKeyMetadataEndpoint, Uri.EscapeDataString(plexId.Value));
-		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
-		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
-		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
-	}
-
 	internal async Task<ConversionResult> ResolveById<TMediaId>(PlexId plexId)
 		where TMediaId : IMediaId
 	{
@@ -36,6 +27,16 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		}
 
 		return new Unresolved();
+	}
+
+	public Task<IMediaDetailResult> LookUpAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	{
+		if (mediaId is not PlexId plexId)
+		{
+			throw new ArgumentException($"PlexApi only supports {nameof(PlexId)} lookups.", nameof(mediaId));
+		}
+
+		return ByIdAsync(plexId, cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<IMediaDetailResult>> SearchAsync(
@@ -59,6 +60,15 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 			.Select(s => s.Metadata.ToMediaDetailResult())
 			.DistinctBy(result => result.SourceId)
 			.ToList();
+	}
+
+	private async Task<IMediaDetailResult> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	{
+		var endpoint = string.Format(RatingKeyMetadataEndpoint, Uri.EscapeDataString(plexId.Value));
+		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
+		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
 	}
 
 	private static string ToPlexMediaType(MediaType mediaType)

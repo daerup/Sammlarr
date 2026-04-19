@@ -1,6 +1,7 @@
 using Contracts;
 using DB.Data;
 using DB.Data.Access;
+using DB.Data.Blacklist;
 using DB.Data.Config;
 using DB.Data.List;
 using DB.Data.MediaGroup;
@@ -44,6 +45,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
 	public DbSet<ImportListEntity> Lists => Set<ImportListEntity>();
+	public DbSet<BlacklistEntryEntity> BlacklistEntries => Set<BlacklistEntryEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
@@ -62,6 +64,8 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
 		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
+		modelBuilder.Entity<BlacklistEntryEntity>().HasOne(x => x.Media).WithMany().HasForeignKey("MediaId");
+		modelBuilder.Entity<BlacklistEntryEntity>().HasIndex("MediaId").IsUnique();
 
 		modelBuilder.Entity<MediaIdentifierGroupEntry>(builder =>
 		{

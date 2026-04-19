@@ -30,7 +30,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 
 		foreach (var plexId in searchResults.Select(result => result.SourceId).OfType<PlexId>())
 		{
-			var details = await plexApi.ByIdAsync(plexId);
+			var details = await plexApi.LookUpAsync(plexId);
 			if (ContainsAnyCandidate(details.AdditionalIds, candidates))
 				return new Resolved(details.SourceId, details.AdditionalIds);
 		}
@@ -40,7 +40,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 
 	private async Task<ConversionResult> ConvertFromPlexIdAsync(PlexId plexId)
 	{
-		var details = await plexApi.ByIdAsync(plexId);
+		var details = await plexApi.LookUpAsync(plexId);
 		return new Resolved(plexId, details.AdditionalIds);
 	}
 
