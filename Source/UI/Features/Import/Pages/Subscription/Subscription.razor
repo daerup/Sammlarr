@@ -2,6 +2,7 @@
 @page "/subscription/{ImportListId:guid}/edit"
 @page "/subscription/{CloneSourceImportListId:guid}/clone"
 @implements IDisposable
+@using UI.Features.Import.Components
 @using BlazorBlueprint.Primitives.Filtering
 @using Contracts
 @using global::Shared
@@ -10,6 +11,8 @@
 @using Contracts.DI
 @using Contracts.Auth
 @using Contracts.Processing
+@using Contracts.Settings
+@using Contracts.Watchlist
 @using System.ComponentModel
 @using UI.Features.Import.Components
 @using UI.Shared.Services.Branding
@@ -20,6 +23,8 @@
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject IQueryProcessor<IMediaDetailResult> QueryProcessor
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -37,6 +42,15 @@
                 <BbButton Variant="ButtonVariant.Default" Disabled="true">
                     <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
                     <span>Testing…</span>
+                </BbButton>
+            }
+            else if (ShowApplyButton)
+            {
+                <BbButton Variant="ButtonVariant.Default"
+                          OnClick="ApplyQuerySettings"
+                          Disabled="LimitIsInvalid">
+                    <LucideIcon Name="check" Size="14" Class="mr-2"/>
+                    Apply
                 </BbButton>
             }
             else if (ShowSaveButton)
@@ -333,18 +347,6 @@
                         }
                     </BbField>
 
-                    @if (HasPendingQueryChanges)
-                    {
-                        <div class="flex items-center justify-end pt-2 border-t">
-                            <BbButton Variant="ButtonVariant.Default"
-                                      OnClick="ApplyQuerySettings"
-                                      Disabled="LimitIsInvalid"
-                                      Class="h-8 text-xs px-3 gap-1.5">
-                                <LucideIcon Name="check" Size="13"/>
-                                Apply
-                            </BbButton>
-                        </div>
-                    }
                 </div>
             </BbCollapsibleContent>
         </BbCollapsible>
@@ -422,27 +424,58 @@
                 @if (_state == State.Success && FilteredPreviewResults.Any())
                 {
                     <div class="mb-4 shrink-0">
-                        <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
-                        <p class="text-sm text-muted-foreground">
-                            @ActivePreviewCount item@(ActivePreviewCount == 1 ? "" : "s") found in <span class="font-medium">@_testedListIdentifier</span>
+                        <div class="flex items-center justify-between gap-3">
+                            <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
+                            <BbTooltipProvider>
+                                <div class="flex items-center gap-3 text-xs font-medium">
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-muted-foreground">
+                                            <LucideIcon Name="list" Size="12" Class="shrink-0"/>
+                                            <span>@_rawResults.Count</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Total items from the source list</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-foreground">
+                                            <LucideIcon Name="check" Size="12" Class="shrink-0"/>
+                                            <span>@IncludedCount</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Items included in this preview</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-amber-500">
+                                            <LucideIcon Name="filter-x" Size="12" Class="shrink-0"/>
+                                            <span>@FilteredPreviewCount</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Items filtered out by filter rules</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-amber-500">
+                                            <LucideIcon Name="scissors" Size="12" Class="shrink-0"/>
+                                            <span>@SkippedPreviewCount</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Items excluded because of the limit</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-blue-400">
+                                            <LucideIcon Name="bookmark" Size="12" Class="shrink-0"/>
+                                            <span>@WatchlistTotalCount</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Included: @WatchlistIncludedCount · Total: @WatchlistTotalCount</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbTooltip DelayDuration="0">
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-destructive">
+                                            <LucideIcon Name="eye-off" Size="12" Class="shrink-0"/>
+                                            <span>@BlacklistedTotalCount</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Included: @BlacklistedIncludedCount · Total: @BlacklistedTotalCount</BbTooltipContent>
+                                    </BbTooltip>
+                                </div>
+                            </BbTooltipProvider>
+                        </div>
+                        <p class="text-sm text-muted-foreground mt-0.5">
+                            <ProviderListLink ListIdentifier="@_testedListIdentifier" Provider="@_testedProvider!.Value"/>
                         </p>
-                        @if (FilteredPreviewCount > 0 || SkippedPreviewCount > 0)
-                        {
-                            <p class="text-xs text-muted-foreground mt-0.5">
-                                @if (FilteredPreviewCount > 0)
-                                {
-                                    <span class="text-amber-500/80">@FilteredPreviewCount filtered</span>
-                                }
-                                @if (FilteredPreviewCount > 0 && SkippedPreviewCount > 0)
-                                {
-                                    <span> · </span>
-                                }
-                                @if (SkippedPreviewCount > 0)
-                                {
-                                    <span>@SkippedPreviewCount beyond limit</span>
-                                }
-                            </p>
-                        }
                     </div>
                     <div class="space-y-2">
                         @foreach (var result in FilteredPreviewResults)
@@ -566,6 +599,7 @@
     private CancellationTokenSource? _cancellationTokenSource;
     private string _previewFilterQuery = string.Empty;
     private readonly HashSet<string> _previewBlacklistedSourceIds = [];
+    private readonly HashSet<string> _watchlistSourceIds = new(StringComparer.Ordinal);
     private IMediaDetailResult? _focusedPreviewResult;
 
     private IDisposable? _shortcutRegistration;
@@ -659,7 +693,8 @@
 
     private bool IsProcessing => _state is State.Testing or State.Saving;
     private bool ShowTestButton => _state is State.Idle or State.Failed || _rawResults.Count == 0;
-    private bool ShowSaveButton => _state == State.Success && _rawResults.Count > 0;
+    private bool ShowApplyButton => _state == State.Success && _rawResults.Count > 0 && HasPendingQueryChanges;
+    private bool ShowSaveButton => _state == State.Success && _rawResults.Count > 0 && !HasPendingQueryChanges;
 
     private bool HasPendingQueryChanges =>
         _rawResults.Count > 0 && (
@@ -670,9 +705,13 @@
             _limitRaw != _appliedLimitRaw
         );
 
-    private int ActivePreviewCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
+    private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
     private int FilteredPreviewCount => _processedResults.Count(r => r.Value is Filtered<IMediaDetailResult>);
     private int SkippedPreviewCount => _processedResults.Count(r => r.Value is Skipped<IMediaDetailResult>);
+    private int WatchlistIncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult item && IsInWatchlist(item));
+    private int WatchlistTotalCount => _processedResults.Count(r => GetItemFromResult(r) is { } item && IsInWatchlist(item));
+    private int BlacklistedIncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult item && IsPreviewBlacklisted(item));
+    private int BlacklistedTotalCount => _processedResults.Count(r => GetItemFromResult(r) is { } item && IsPreviewBlacklisted(item));
 
     #endregion
 
@@ -792,10 +831,14 @@
         if (IsProcessing)
             return;
 
-        // Prefer Save when the form is ready to save; otherwise run Test when possible
+        // Prefer Save when the form is ready to save; otherwise Apply when there are pending query changes; otherwise Test
         if (ShowSaveButton && CanSave)
         {
             await HandleSaveAsync();
+        }
+        else if (ShowApplyButton && !LimitIsInvalid)
+        {
+            ApplyQuerySettings();
         }
         else if (ShowTestButton && CanTest && !LimitIsInvalid)
         {
@@ -853,6 +896,9 @@
 
     private bool IsPreviewBlacklisted(IMediaDetailResult result) =>
         _previewBlacklistedSourceIds.Contains(GetPreviewSourceKey(result));
+
+    private bool IsInWatchlist(IMediaDetailResult result) =>
+        _watchlistSourceIds.Contains(GetPreviewSourceKey(result));
 
     private Task TogglePreviewBlacklistAsync(IMediaDetailResult result)
     {
@@ -968,9 +1014,12 @@
         {
             var importListService = ImportListServiceIndex[_provider!.Value];
             var results = (await importListService.GetEnrichedImportListItemsAsync(_listIdentifier.Trim(), cancellationToken)).ToList();
+            var watchlistSourceIds = await GetWatchlistSourceIdsAsync(cancellationToken);
 
             _rawResults = results;
             _previewBlacklistedSourceIds.Clear();
+            _watchlistSourceIds.Clear();
+            _watchlistSourceIds.UnionWith(watchlistSourceIds);
             _focusedPreviewResult = null;
             _state = _rawResults.Count > 0 ? State.Success : State.Failed;
 
@@ -987,6 +1036,7 @@
             _rawResults = [];
             _processedResults = [];
             _previewBlacklistedSourceIds.Clear();
+            _watchlistSourceIds.Clear();
             _focusedPreviewResult = null;
             _testedProvider = null;
             _testedListIdentifier = string.Empty;
@@ -997,9 +1047,47 @@
             _rawResults = [];
             _processedResults = [];
             _previewBlacklistedSourceIds.Clear();
+            _watchlistSourceIds.Clear();
             _focusedPreviewResult = null;
             _testedProvider = null;
             _testedListIdentifier = string.Empty;
+        }
+    }
+
+    private async Task<HashSet<string>> GetWatchlistSourceIdsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var providerConfig = await ProviderConfigRepository.GetAsync(cancellationToken);
+            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
+            var sourceIds = new HashSet<string>(StringComparer.Ordinal);
+
+            var firstPage = await watchlistService.GetWatchlistAsync(1, cancellationToken);
+            AddWatchlistSourceIds(sourceIds, firstPage.Items);
+
+            for (var page = 2; page <= firstPage.TotalPages; page++)
+            {
+                var nextPage = await watchlistService.GetWatchlistAsync(page, cancellationToken);
+                AddWatchlistSourceIds(sourceIds, nextPage.Items);
+            }
+
+            return sourceIds;
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static void AddWatchlistSourceIds(HashSet<string> sourceIds, IEnumerable<IWatchlistItem> items)
+    {
+        foreach (var item in items)
+        {
+            var sourceKey = item.SourceId.ToString();
+            if (!string.IsNullOrWhiteSpace(sourceKey))
+            {
+                sourceIds.Add(sourceKey);
+            }
         }
     }
 

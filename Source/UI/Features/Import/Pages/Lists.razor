@@ -1,6 +1,7 @@
 @page "/lists"
 @using Contracts
 @using Contracts.Media.List
+@using UI.Features.Import.Components
 @using UI.Shared.Services.Branding
 @inject IImportListRepository ImportListRepository
 @inject NavigationManager NavigationManager
@@ -86,21 +87,7 @@
                                    Property="@(l => l.ListIdentifier)"
                                    Filterable="true">
                     <CellTemplate Context="list">
-                        @{
-                            var url = GetProviderUrl(list.ListIdentifier, list.Provider);
-                        }
-                        @if (url is not null)
-                        {
-                            <a href="@url" target="_blank" rel="noopener noreferrer"
-                               class="inline-flex items-center gap-1 font-mono text-sm text-primary underline-offset-4 hover:underline">
-                                @list.ListIdentifier
-                                <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="font-mono text-sm">@list.ListIdentifier</span>
-                        }
+                        <ProviderListLink ListIdentifier="@list.ListIdentifier" Provider="@list.Provider"/>
                     </CellTemplate>
                 </BbDataTableColumn>
 
@@ -235,13 +222,6 @@
         UpdatePagedLists();
     }
 
-    private static string? GetProviderUrl(string listIdentifier, MediaListProvider provider) =>
-        provider switch
-        {
-            MediaListProvider.Mdblist => $"https://mdblist.com/lists/{listIdentifier}",
-            MediaListProvider.Tmdb    => $"https://www.themoviedb.org/list/{listIdentifier}",
-            _                         => null,
-        };
 
 
     private async Task HandlePageChangedAsync(int newPage)

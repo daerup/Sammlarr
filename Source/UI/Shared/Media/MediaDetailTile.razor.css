@@ -54,8 +54,11 @@
 }
 
 .search-result-row.result-dimmed {
+    pointer-events: auto;
+}
+
+.search-result-row.result-dimmed .search-result-main-content {
     opacity: 0.25;
-    pointer-events: none;
 }
 
 .search-result-status-indicator {
