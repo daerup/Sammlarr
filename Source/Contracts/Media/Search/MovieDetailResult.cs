@@ -7,6 +7,7 @@ public record MovieDetailResult : IMediaDetailResult
 	public required IMediaId[] AdditionalIds { get; init; }
 	public required int? Year { get; init; }
 	public required string Title { get; init; }
+	public required string Summary { get; init; }
 	public required string? PosterUrl { get; init; }
 	public required string? BackdropUrl { get; init; }
 	public required TimeSpan? Runtime { get; init; }

@@ -87,7 +87,7 @@ else
                                            ImageUrl="@item.ArtUrl"
                                            Title="@item.Title"
                                            OnClick="() => SelectItem(item)"
-                                           Description="@GetDescription(item)"/>
+                                           Tagline="@GetDescription(item)"/>
                         }
                     </div>
 
@@ -191,7 +191,7 @@ else
         }
     }
 
-    private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Description) ? "No overview available." : item.Description;
+    private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Tagline) ? "No overview available." : item.Tagline;
 
     private static string GetRemoveButtonText() => "Remove from Watchlist";
 

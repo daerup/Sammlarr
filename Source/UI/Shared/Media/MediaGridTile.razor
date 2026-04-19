@@ -29,9 +29,9 @@
                 }
             </div>
 
-            @if (!string.IsNullOrWhiteSpace(Description))
+            @if (!string.IsNullOrWhiteSpace(Tagline))
             {
-                <p class="text-white text-xs line-clamp-2">@Description</p>
+                <p class="text-white text-xs line-clamp-2">@Tagline</p>
             }
         </div>
 
@@ -47,7 +47,7 @@
     [Parameter] public bool IsInWatchlist { get; set; }
     [Parameter] public float? Rating { get; set; }
     [Parameter] public DateTimeOffset? Date { get; set; }
-    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Tagline { get; set; }
 }
 
 

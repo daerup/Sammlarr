@@ -56,6 +56,7 @@ public class PlexIdConverterTests
 				ReleaseDate = null,
 				Genres = [],
 				AdditionalIds = [],
+				Summary = string.Empty,
 			},
 		];
 		searchService.SearchAsync(Any(), Any(), Any()).Returns(searchResults);
