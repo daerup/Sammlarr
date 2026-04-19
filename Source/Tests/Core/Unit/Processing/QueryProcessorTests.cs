@@ -26,7 +26,7 @@ public class QueryProcessorTests
 	public async Task Execute_WhenLimitProvided_ReturnsWithSkippedUnion()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
-		var options = new QueryOptions { Limit = 1 };
+		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
 		var results = _testee.Execute(items, options).ToList();
 
@@ -53,7 +53,7 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions
 		{
-			Limit = 2,
+			Limit = new QueryLimit { Count = 2 },
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Ascending },
 		};
 
