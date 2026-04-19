@@ -10,7 +10,7 @@ public interface IMediaDetailResult
 	public string? BackdropUrl { get; }
 
 	public string Title { get; }
-
+	public string Summary { get; }
 	public TimeSpan? Runtime { get; }
 
 	public DateOnly? ReleaseDate { get; }

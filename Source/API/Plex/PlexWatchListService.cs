@@ -71,7 +71,7 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 		{
 			Title = parsed.Title,
 			MediaType = MediaType.Parse(parsed.Type),
-			Description = parsed.Tagline ?? string.Empty,
+			Tagline = parsed.Tagline ?? string.Empty,
 			ArtUrl = parsed.Art,
 			PosterUrl = parsed.Thumb,
 			AddedDate = DateTimeOffset.FromUnixTimeSeconds(parsed.AddedAt),

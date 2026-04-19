@@ -7,7 +7,7 @@ public interface IWatchlistItem
 	IMediaId SourceId { get; }
 	string Title { get; }
 	MediaType MediaType { get; }
-	string Description { get; }
+	string Tagline { get; }
 	TmdbId[] TmdbId { get; }
 	ImdbId[] ImdbId { get; }
 	TvdbId[] TvdbId { get; }

@@ -109,6 +109,7 @@ file static class PlexMetadataMappingExtensions
 		return new MovieDetailResult
 		{
 			Title = result.Title,
+			Summary = result.Summary,
 			SourceId = result.PlexId,
 			AdditionalIds = [.. result.TmdbIds, .. result.ImdbIds, .. result.TvdbIds],
 			Year = result.Year > 0 ? result.Year : null,
@@ -129,6 +130,7 @@ file static class PlexMetadataMappingExtensions
 		return new ShowDetailResult
 		{
 			Title = result.Title,
+			Summary = result.Summary,
 			SourceId = result.PlexId,
 			AdditionalIds = [.. result.TmdbIds, .. result.ImdbIds, .. result.TvdbIds],
 			Seasons = result.SeasonCount ?? 0,
@@ -151,6 +153,7 @@ file static class PlexMetadataMappingExtensions
 		return new MovieDetailResult
 		{
 			Title = result.Title,
+			Summary = string.Empty,
 			SourceId = result.PlexId,
 			AdditionalIds = [],
 			Year = result.Year > 0 ? result.Year : null,
@@ -171,6 +174,7 @@ file static class PlexMetadataMappingExtensions
 		return new ShowDetailResult
 		{
 			Title = result.Title,
+			Summary = string.Empty,
 			SourceId = result.PlexId,
 			AdditionalIds = [],
 			Seasons = result.SeasonCount ?? 0,
