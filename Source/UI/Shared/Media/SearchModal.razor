@@ -77,14 +77,10 @@
                         {
                             <MediaDetailTile @key="result"
                                              Result="result"
-                                             IsMarked="IsSearchResultInWatchlist(result)"
-                                             IsActiveToggle="_isAdding && Equals(_activeToggledSourceId, result.SourceId)"
                                              IsFocused="_focusedResult == result"
                                              OnFocusIn="() => _focusedResult = result"
                                              OnFocusOut="() => ClearFocusedResult(result)"
-                                             OnToggleWatchlist="ToggleWatchlistAsync"
-                                             ToggleIcon="@(_ => "bookmark")"
-                                             ToggleIconColor="@(inWatchlist => inWatchlist ? "Orange" : "var(--accent-foreground)")"
+                                             Icons="TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.SourceId), EventCallback.Factory.Create<IMediaDetailResult>(this, ToggleAsync)))"
                             />
                         }
                     </div>
@@ -110,10 +106,11 @@
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
     [Parameter, EditorRequired] public MediaSearchProvider SearchProvider { get; set; }
-    [Parameter, EditorRequired] public Func<IMediaId, bool> IsInWatchlist { get; set; }
-    [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> AddToWatchlistAsync { get; set; }
-    [Parameter, EditorRequired] public required Func<IMediaId, string, Task<bool>> RemoveFromWatchlistAsync { get; set; }
-
+    [Parameter, EditorRequired] public required Func<IMediaId, bool> IsInWatchlist { get; set; }
+    [Parameter, EditorRequired] public required Func<IMediaId, string, bool, Task<bool>> OnToggle { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment<TileIconContext>? TileIcons { get; set; }
     private bool _isSearching;
     private bool _hasSearched;
     private bool _isAdding;
@@ -128,8 +125,8 @@
     private IMediaDetailResult? _focusedResult;
 
     private string SearchProviderName => SearchProvider.GetDescription();
-    private string SearchModalTitle => $"Search {SearchProviderName}";
-    private string SearchModalDescription => $"Find a movie or show from {SearchProviderName} and add it to your watchlist.";
+    private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
+    private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your watchlist.";
 
     protected override void OnParametersSet()
     {
@@ -156,7 +153,7 @@
     }
 
 
-    private bool IsSearchResultInWatchlist(IMediaDetailResult result)
+    private bool IsSearchResultMarked(IMediaDetailResult result)
     {
         return IsInWatchlist.Invoke(result.SourceId);
     }
@@ -223,7 +220,7 @@
         }
     }
 
-    private async Task ToggleWatchlistAsync(IMediaDetailResult result)
+    private async Task ToggleAsync(IMediaDetailResult result)
     {
         if (_isAdding)
         {
@@ -235,14 +232,9 @@
         _searchStatusMessage = null;
         _isSearchStatusError = false;
 
-        if (IsSearchResultInWatchlist(result))
-        {
-            await RemoveFromWatchlistAsync(_activeToggledSourceId, result.Title);
-        }
-        else
-        {
-            await AddToWatchlistAsync(_activeToggledSourceId, result.Title);
-        }
+        var isMarked = IsSearchResultMarked(result);
+        await OnToggle(result.SourceId, result.Title, isMarked);
+
         _isAdding = false;
         _activeToggledSourceId = null;
         _focusedResult = null;

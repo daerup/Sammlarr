@@ -13,6 +13,7 @@
 @using Contracts.Processing
 @using Contracts.Settings
 @using Contracts.Watchlist
+@using Contracts.Media.Blacklist
 @using System.ComponentModel
 @using UI.Features.Import.Components
 @using UI.Shared.Services.Branding
@@ -25,6 +26,7 @@
 @inject IQueryProcessor<IMediaDetailResult> QueryProcessor
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
+@inject IBlacklistService BlacklistService
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -490,18 +492,21 @@
                                     _ => QueryResultStatus.Active,
                                 };
                                 var isBlacklisted = status == QueryResultStatus.Active && IsPreviewBlacklisted(item);
+                                var isInWatchlist = IsInWatchlist(item);
+                                var isTogglingWatchlist = _togglingWatchlistItem == item;
+                                var isTogglingBlacklist = _togglingBlacklistItem == item;
                                 <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
                                     <MediaDetailTile @key="item"
                                                      Result="item"
                                                      Status="status"
-                                                     IsMarked="isBlacklisted"
-                                                     IsActiveToggle="false"
                                                      IsFocused="_focusedPreviewResult == item"
                                                      OnFocusIn="() => _focusedPreviewResult = item"
-                                                     OnFocusOut="() => ClearFocusedPreviewResult(item)"
-                                                     OnToggleWatchlist="TogglePreviewBlacklistAsync"
-                                                     ToggleIcon="GetToggleBlacklistIcon"
-                                                     ToggleIconColor="GetToggleBlacklistIconColor"/>
+                                                     OnFocusOut="() => ClearFocusedPreviewResult(item)">
+                                        <Icons>
+                                            <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist" OnToggle="TogglePreviewWatchlistAsync"/>
+                                            <PreviewBlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist" OnToggle="TogglePreviewBlacklistAsync"/>
+                                        </Icons>
+                                    </MediaDetailTile>
                                 </div>
                             }
                         }
@@ -519,7 +524,7 @@
                 {
                     <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
                         <BbSpinner Size="SpinnerSize.Large" Class="mb-4"/>
-                        <p class="text-lg font-semibold">Testing list…</p>
+                        <p class="text-lg font-semibold">Loading…</p>
                         <p class="text-muted-foreground text-sm mt-2">Fetching media from the provider. This may take a few seconds.</p>
                     </div>
                 }
@@ -601,6 +606,8 @@
     private readonly HashSet<string> _previewBlacklistedSourceIds = [];
     private readonly HashSet<string> _watchlistSourceIds = new(StringComparer.Ordinal);
     private IMediaDetailResult? _focusedPreviewResult;
+    private IMediaDetailResult? _togglingWatchlistItem;
+    private IMediaDetailResult? _togglingBlacklistItem;
 
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
@@ -778,12 +785,9 @@
                 _initialProvider = importList.Provider;
                 _initialStrategy = importList.Strategy;
                 _initialListIdentifier = importList.ListIdentifier.Trim();
-
-                // In edit mode, treat persisted values as already tested until provider or identifier changes.
-                _state = State.Success;
-                _testedProvider = importList.Provider;
-                _testedListIdentifier = importList.ListIdentifier;
             }
+
+            await TestAsync();
         }
 
         if (!IsEditMode && _disabledProviders.Contains(_provider ?? default))
@@ -900,14 +904,62 @@
     private bool IsInWatchlist(IMediaDetailResult result) =>
         _watchlistSourceIds.Contains(GetPreviewSourceKey(result));
 
-    private Task TogglePreviewBlacklistAsync(IMediaDetailResult result)
+    private async Task TogglePreviewBlacklistAsync(IMediaDetailResult result)
     {
-        var sourceKey = GetPreviewSourceKey(result);
-        if (!_previewBlacklistedSourceIds.Add(sourceKey))
-            _previewBlacklistedSourceIds.Remove(sourceKey);
+        if (_togglingBlacklistItem is not null)
+            return;
 
-        _focusedPreviewResult = null;
-        return Task.CompletedTask;
+        _togglingBlacklistItem = result;
+        try
+        {
+            var sourceKey = GetPreviewSourceKey(result);
+
+            if (_previewBlacklistedSourceIds.Contains(sourceKey))
+            {
+                await BlacklistService.RemoveFromBacklistAsync(result.SourceId);
+                _previewBlacklistedSourceIds.Remove(sourceKey);
+            }
+            else
+            {
+                await BlacklistService.AddToBacklistAsync(result.SourceId);
+                _previewBlacklistedSourceIds.Add(sourceKey);
+            }
+        }
+        finally
+        {
+            _togglingBlacklistItem = null;
+            _focusedPreviewResult = null;
+        }
+    }
+
+    private async Task TogglePreviewWatchlistAsync(IMediaDetailResult result)
+    {
+        if (_togglingWatchlistItem is not null)
+            return;
+
+        _togglingWatchlistItem = result;
+        try
+        {
+            var providerConfig = await ProviderConfigRepository.GetAsync();
+            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
+            var sourceKey = GetPreviewSourceKey(result);
+
+            if (_watchlistSourceIds.Contains(sourceKey))
+            {
+                if (await watchlistService.RemoveFromWatchlistAsync(result.SourceId))
+                    _watchlistSourceIds.Remove(sourceKey);
+            }
+            else
+            {
+                if (await watchlistService.AddToWatchlistAsync(result.SourceId))
+                    _watchlistSourceIds.Add(sourceKey);
+            }
+        }
+        finally
+        {
+            _togglingWatchlistItem = null;
+            _focusedPreviewResult = null;
+        }
     }
 
     private void ClearFocusedPreviewResult(IMediaDetailResult result)
@@ -916,8 +968,6 @@
             _focusedPreviewResult = null;
     }
 
-    private static string GetToggleBlacklistIcon(bool isBlacklisted) => isBlacklisted ? "eye-off" : "eye";
-    private static string GetToggleBlacklistIconColor(bool isBlacklisted) => isBlacklisted ? "var(--destructive)" : "var(--accent-foreground)";
 
     private static IMediaDetailResult? GetItemFromResult(QueryResult<IMediaDetailResult> result) =>
         result.Value switch
@@ -1015,9 +1065,11 @@
             var importListService = ImportListServiceIndex[_provider!.Value];
             var results = (await importListService.GetEnrichedImportListItemsAsync(_listIdentifier.Trim(), cancellationToken)).ToList();
             var watchlistSourceIds = await GetWatchlistSourceIdsAsync(cancellationToken);
+            var blacklistSourceIds = await GetBlacklistSourceIdsAsync(cancellationToken);
 
             _rawResults = results;
             _previewBlacklistedSourceIds.Clear();
+            _previewBlacklistedSourceIds.UnionWith(blacklistSourceIds);
             _watchlistSourceIds.Clear();
             _watchlistSourceIds.UnionWith(watchlistSourceIds);
             _focusedPreviewResult = null;
@@ -1088,6 +1140,30 @@
             {
                 sourceIds.Add(sourceKey);
             }
+        }
+    }
+
+    private async Task<HashSet<string>> GetBlacklistSourceIdsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var providerConfig = await ProviderConfigRepository.GetAsync(cancellationToken);
+            var mediaProvider = providerConfig.WatchlistProvider.AsMediaProvider();
+            var items = await BlacklistService.GetBlacklistItems(mediaProvider, cancellationToken);
+            var sourceIds = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var item in items)
+            {
+                var sourceKey = item.SourceId.ToString();
+                if (!string.IsNullOrWhiteSpace(sourceKey))
+                    sourceIds.Add(sourceKey);
+            }
+
+            return sourceIds;
+        }
+        catch
+        {
+            return [];
         }
     }
 

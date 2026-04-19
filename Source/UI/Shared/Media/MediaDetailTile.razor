@@ -53,27 +53,12 @@
         </div>
         @if (Status == QueryResultStatus.Active)
         {
-            <button type="button"
-                    class="search-result-toggle-btn @(IsMarked ? "is-marked" : "") @(IsActiveToggle ? "pointer-events-none" : "")"
-                    style="@ToggleButtonStyle(IsMarked)"
-                    @onclick="HandleToggleAsync">
-                <span class="relative inline-flex items-center justify-center w-6 h-6">
-                    @if (IsMarked)
-                    {
-                        <LucideIcon Name="@ToggleIcon(true)" Size="24" Fill="@ToggleIconColor(true)" Color="@ToggleIconColor(true)" Class="@_toggleIconClass"/>
-                    }
-                    else
-                    {
-                        <LucideIcon Name="@ToggleIcon(false)" Size="24" Class="@_toggleIconClass"/>
-                    }
-                    @if (IsActiveToggle)
-                    {
-                        <span class="absolute inset-0 flex items-center justify-center">
-                            <BbSpinner Size="SpinnerSize.Small"/>
-                        </span>
-                    }
-                </span>
-            </button>
+            @if (Icons != null)
+            {
+                <div class="flex items-center gap-1">
+                    @Icons
+                </div>
+            }
         }
         else
         {
@@ -99,38 +84,20 @@
 
     [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
     [Parameter] public QueryResultStatus Status { get; set; } = QueryResultStatus.Active;
-    [Parameter] public bool IsMarked { get; set; }
-    [Parameter] public bool IsActiveToggle { get; set; }
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
-    [Parameter] public EventCallback<IMediaDetailResult> OnToggleWatchlist { get; set; }
-
-    [Parameter, EditorRequired] public Func<bool, string> ToggleIcon { get; set; }
-
-    [Parameter, EditorRequired] public Func<bool, string> ToggleIconColor { get; set; }
+    [Parameter] public RenderFragment? Icons { get; set; }
 
     private string _backgroundStyle = string.Empty;
-    private Func<bool, string> ToggleButtonStyle => toggled => $"--toggle-active-color: {ToggleIconColor(toggled)}";
-    private string _toggleIconClass = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
 
     protected override void OnParametersSet()
     {
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl ?? "" : Result.BackdropUrl)}')";
-        _toggleIconClass = $"transition-opacity duration-150 {(IsActiveToggle ? "opacity-0" : string.Empty)}";
         _displayFacts = GetDisplayFacts(Result);
     }
 
-    private async Task HandleToggleAsync()
-    {
-        await OnToggleWatchlist.InvokeAsync(Result);
-
-        if (OnFocusOut.HasDelegate)
-        {
-            await OnFocusOut.InvokeAsync();
-        }
-    }
 
     private static IReadOnlyList<string> GetDisplayFacts(IMediaDetailResult result)
     {

@@ -1,0 +1,290 @@
+@page "/blacklist"
+@implements IDisposable
+@using Contracts.Auth
+@using Contracts.DI
+@using Contracts.Media
+@using Contracts.Media.Blacklist
+@using Contracts.Settings
+@using global::Shared
+@inject IBlacklistService BlacklistService
+@inject ScrollService ScrollService
+@inject ProfileDropdownService ProfileDropdownService
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject ToastService ToastService
+
+<PageTitle>@PageTitleText</PageTitle>
+
+@if (_providerSettings is null)
+{
+    <div class="px-6 py-10">
+        <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+            <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
+        </div>
+    </div>
+}
+else
+{
+    <div class="px-6 py-10">
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="text-3xl font-bold tracking-wide antialiased">@PageHeading</h1>
+                <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">@PageDescription</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadBlacklistAsync" Disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <span>Refreshing...</span>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="refresh-cw" Size="16" class="mr-2"/>
+                        <span>Refresh</span>
+                    }
+                </BbButton>
+                <BbButton Variant="ButtonVariant.Secondary" @onclick="OpenSearchModal">
+                    <LucideIcon Name="search" Size="16" class="mr-2"/>
+                    <span>Add to Blacklist</span>
+                </BbButton>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            @if (_isLoading)
+            {
+                <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                    <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
+                    <p class="text-sm text-destructive font-medium">@_errorMessage</p>
+                    <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadBlacklistAsync">
+                        <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+                        Retry
+                    </BbButton>
+                </div>
+            }
+            else if (_items is not null && _items.Count == 0)
+            {
+                <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
+                    <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
+                    <p class="text-muted-foreground">@EmptyStateMessage</p>
+                </div>
+            }
+            else if (_items is not null)
+            {
+                <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+                    @foreach (var item in _items)
+                    {
+                        <MediaGridTile @key="item"
+                                       ImageUrl="@item.ArtUrl"
+                                       Title="@item.Title"
+                                       OnClick="() => SelectItem(item)"
+                                       Description="@GetDescription(item)"/>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<MediaDetailSheet Open="_isSheetOpen"
+                  OnOpenChanged="DetailsOpenChangedAsync"
+                  ShowContent="@(_selectedItem is not null)"
+                  Title="@(_selectedItem?.Title ?? string.Empty)"
+                  MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
+                  ReleaseDate="@(_selectedItem?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                  ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
+                  ShowMetadataRow="false"
+                  ButtonAction="RemoveSelectedFromBlacklistAsync"
+                  ButtonText="GetRemoveButtonText"
+                  ButtonIcon="GetRemoveButtonIcon"/>
+
+<SearchModal @bind-IsOpen="_isSearchModalOpen"
+             SearchProvider="@_providerSettings.SearchProvider"
+             IsInWatchlist="IsBlacklisted"
+             OnToggle="ToggleFromSearchAsync"
+             Title="Search & Add to Blacklist"
+             Description="Find a movie or show and add it to your blacklist.">
+    <TileIcons Context="ctx">
+        <BlacklistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
+    </TileIcons>
+</SearchModal>
+
+@code {
+    private IReadOnlyList<IBlacklistItem>? _items;
+    private IBlacklistItem? _selectedItem;
+    private bool _isLoading;
+    private bool _isRemoving;
+    private bool _isSheetOpen;
+    private bool _isSearchModalOpen;
+    private string? _errorMessage;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private ProviderConfig? _providerSettings;
+
+    private string PageTitleText => "Blacklist";
+    private string PageHeading => "Blacklist";
+    private string PageDescription => "Your blacklisted movies and shows.";
+    private string EmptyStateMessage => "Your blacklist is empty.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+        await LoadBlacklistAsync();
+    }
+
+    private async Task LoadBlacklistAsync()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            _items = await BlacklistService.GetBlacklistItems(MediaProvider.Plex, _cancellationTokenSource.Token);
+
+            if (_selectedItem is not null)
+            {
+                _selectedItem = _items.FirstOrDefault(item => item.SourceId.Equals(_selectedItem.SourceId));
+                if (_selectedItem is null)
+                {
+                    _isSheetOpen = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to load blacklist: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private static string GetDescription(IBlacklistItem item) => string.IsNullOrWhiteSpace(item.Description) ? "No overview available." : item.Description;
+
+    private static string GetRemoveButtonText() => "Remove from Blacklist";
+
+    private static string GetRemoveButtonIcon() => "x";
+
+    private void SelectItem(IBlacklistItem item)
+    {
+        _selectedItem = item;
+        _isSheetOpen = true;
+    }
+
+    private async Task RemoveSelectedFromBlacklistAsync()
+    {
+        if (_isRemoving)
+        {
+            return;
+        }
+
+        if (_selectedItem?.SourceId is null)
+        {
+            return;
+        }
+
+        _isRemoving = true;
+
+        try
+        {
+            await BlacklistService.RemoveFromBacklistAsync(_selectedItem.SourceId, _cancellationTokenSource.Token);
+            CloseSelectedMedia();
+            await LoadBlacklistAsync();
+        }
+        finally
+        {
+            _isRemoving = false;
+        }
+    }
+
+    private void CloseSelectedMedia()
+    {
+        _isSheetOpen = false;
+        _selectedItem = null;
+    }
+
+    private Task DetailsOpenChangedAsync(bool isOpen)
+    {
+        if (!isOpen)
+        {
+            CloseSelectedMedia();
+        }
+        return Task.CompletedTask;
+    }
+
+    private bool IsBlacklisted(IMediaId mediaId)
+    {
+        if (_items is null)
+        {
+            return false;
+        }
+
+        return _items.Any(item => item.SourceId.Equals(mediaId));
+    }
+
+    private void OpenSearchModal()
+    {
+        _isSearchModalOpen = true;
+    }
+
+    private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
+    {
+        if (isMarked)
+        {
+            if (!IsBlacklisted(id))
+            {
+                ToastService.Warning($"'{title}' is not in your blacklist.");
+                return false;
+            }
+
+            try
+            {
+                await BlacklistService.RemoveFromBacklistAsync(id, _cancellationTokenSource.Token);
+                ToastService.Success($"'{title}' has been removed from your blacklist.");
+                await LoadBlacklistAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ToastService.Warning($"Failed to remove item from blacklist: {ex.Message}");
+                return false;
+            }
+        }
+
+        if (IsBlacklisted(id))
+        {
+            ToastService.Warning($"'{title}' is already in your blacklist.");
+            return false;
+        }
+
+        try
+        {
+            await BlacklistService.AddToBacklistAsync(id, _cancellationTokenSource.Token);
+            ToastService.Success($"'{title}' has been added to your blacklist.");
+            await LoadBlacklistAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ToastService.Warning($"Failed to add item to blacklist: {ex.Message}");
+            return false;
+        }
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+    }
+}
+
+
+
+

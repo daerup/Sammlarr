@@ -1,0 +1,43 @@
+@using Contracts.Media.Search
+
+<button type="button"
+        class="search-result-toggle-btn @(IsToggled ? "is-marked" : "") @(IsToggling ? "pointer-events-none" : "")"
+        style="--toggle-active-color: Red"
+        @onclick="HandleToggleAsync">
+    <span class="relative inline-flex items-center justify-center w-6 h-6">
+        @if (IsToggled)
+        {
+            <LucideIcon Name="ban" Size="24" Fill="Red" Color="Red" Class="@_iconClass"/>
+        }
+        else
+        {
+            <LucideIcon Name="ban" Size="24" Class="@_iconClass"/>
+        }
+        @if (IsToggling)
+        {
+            <span class="absolute inset-0 flex items-center justify-center">
+                <BbSpinner Size="SpinnerSize.Small"/>
+            </span>
+        }
+    </span>
+</button>
+
+@code {
+    [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
+    [Parameter] public bool IsToggled { get; set; }
+    [Parameter] public bool IsToggling { get; set; }
+    [Parameter] public EventCallback<IMediaDetailResult> OnToggle { get; set; }
+
+    private string _iconClass = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        _iconClass = $"transition-opacity duration-150 {(IsToggling ? "opacity-0" : string.Empty)}";
+    }
+
+    private async Task HandleToggleAsync()
+    {
+        await OnToggle.InvokeAsync(Result);
+    }
+}
+
