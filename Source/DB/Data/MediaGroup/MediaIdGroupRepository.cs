@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Contracts.Media;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +10,7 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		return await dbContext
-			.MediaIdEntries.Where(MatchesId(mediaId))
+			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesId(mediaId))
 			.Select(entry => entry.MediaIdGroupEntity.MediaIdEntries)
 			.SelectMany(ids => ids)
 			.Select(entry => entry.Identifier.ToMediaId())
@@ -47,8 +46,8 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 
 		var existingGroup = await dbContext
 			.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
-			.ThenInclude(group => group.MediaIdEntries)
-			.Where(MatchesAnyIdentifier(identifiers))
+				.ThenInclude(group => group.MediaIdEntries)
+			.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(identifiers))
 			.Select(entry => entry.MediaIdGroupEntity)
 			.Distinct()
 			.SingleOrDefaultAsync(cancellationToken);
@@ -72,8 +71,8 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 		var mediaIdGroup = (
 			await dbContext
 				.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
-				.ThenInclude(group => group.MediaIdEntries)
-				.SingleAsync(MatchesId(existingId), cancellationToken)
+					.ThenInclude(group => group.MediaIdEntries)
+				.SingleAsync(MediaIdentifierGroupEntryExpressions.MatchesId(existingId), cancellationToken)
 		).MediaIdGroupEntity;
 
 		var storedIdentifiers = mediaIdGroup.MediaIdEntries.Select(x => x.Identifier).ToList();
@@ -96,32 +95,5 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 		{
 			throw new ArgumentException(MixedMediaTypesMessage);
 		}
-	}
-
-	private static Expression<Func<MediaIdentifierGroupEntry, bool>> MatchesId(IMediaId mediaId)
-	{
-		var identifier = MediaIdentifier.From(mediaId);
-		return entry => entry.Identifier == identifier;
-	}
-
-	private static Expression<Func<MediaIdentifierGroupEntry, bool>> MatchesAnyIdentifier(IEnumerable<MediaIdentifier> identifiers)
-	{
-		var identifierList = identifiers.ToList();
-		if (identifierList.Count is 0)
-		{
-			return _ => false;
-		}
-
-		var parameter = Expression.Parameter(typeof(MediaIdentifierGroupEntry), "entry");
-		var identifierProperty = Expression.Property(parameter, nameof(MediaIdentifierGroupEntry.Identifier));
-
-		Expression? body = null;
-		foreach (var identifier in identifierList)
-		{
-			var equalsExpr = Expression.Equal(identifierProperty, Expression.Constant(identifier));
-			body = body is null ? equalsExpr : Expression.OrElse(body, equalsExpr);
-		}
-
-		return Expression.Lambda<Func<MediaIdentifierGroupEntry, bool>>(body!, parameter);
 	}
 }

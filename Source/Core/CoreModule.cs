@@ -1,5 +1,7 @@
 using Contracts;
+using Contracts.Media.Blacklist;
 using Contracts.Processing;
+using Core.Blacklist;
 using Core.Caching;
 using Core.DI;
 using Core.Processing;
@@ -16,5 +18,6 @@ public class CoreModule : IServiceModule
 		services.AddModule<DiModule>();
 		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
 		services.AddTransient(typeof(IQueryProcessor<>), typeof(QueryProcessor<>));
+		services.AddScoped<IBlacklistService, BlacklistService>();
 	}
 }
