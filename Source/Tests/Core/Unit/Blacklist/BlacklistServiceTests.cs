@@ -6,7 +6,7 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Blacklist;
-using Microsoft.Extensions.DependencyInjection;
+using Test.Shared;
 
 namespace Core.Tests.Unit.Blacklist;
 
@@ -118,11 +118,9 @@ public class BlacklistServiceTests
 			);
 
 		var search = (searchService ?? IMediaSearchService.Mock()).Object;
-		var services = new ServiceCollection();
-		services.AddKeyedSingleton<IMediaSearchService>(MediaSearchProvider.Plex, (_, _) => search);
-		var serviceProvider = services.BuildServiceProvider();
+		var searchServiceIndex = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchService>().Register(MediaSearchProvider.Plex, search);
 
-		return new BlacklistService(repo.Object, providerConfigRepository.Object, serviceProvider);
+		return new BlacklistService(repo.Object, providerConfigRepository.Object, searchServiceIndex);
 	}
 
 	private IMediaId CreateMediaId() => PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie);

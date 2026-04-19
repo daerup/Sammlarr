@@ -85,8 +85,11 @@
             <SearchModal @bind-IsOpen="_isSearchModalOpen"
                          SearchProvider="@_providerConfig.SearchProvider"
                          IsInWatchlist="IsInWatchlist"
-                         AddToWatchlistAsync="AddFromSearchAsync"
-                         RemoveFromWatchlistAsync="RemoveFromSearchAsync"/>
+                         OnToggle="ToggleFromSearchAsync">
+                <TileIcons Context="ctx">
+                    <WatchlistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
+                </TileIcons>
+            </SearchModal>
         </ProtectedSection>
     </div>
 </div>
@@ -299,8 +302,29 @@
         _isSearchModalOpen = true;
     }
 
-    private async Task<bool> AddFromSearchAsync(IMediaId id, string title)
+    private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
     {
+        var watchlistService = WatchlistServiceIndex[_providerConfig.WatchlistProvider];
+
+        if (isMarked)
+        {
+            if (!IsInWatchlist(id))
+            {
+                ToastService.Warning($"'{title}' is not in your watchlist.");
+                return false;
+            }
+
+            var removed = await watchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
+            if (!removed)
+            {
+                ToastService.Warning("Failed to remove item from watchlist. Please try again.");
+                return false;
+            }
+
+            _watchlistedIds.Remove(id.Value);
+            ToastService.Success($"'{title}' has been removed from your watchlist.");
+            return true;
+        }
 
         if (IsInWatchlist(id))
         {
@@ -308,9 +332,8 @@
             return false;
         }
 
-        var watchlistService = WatchlistServiceIndex[_providerConfig.WatchlistProvider];
-        var removed = await watchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
-        if (!removed)
+        var added = await watchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
+        if (!added)
         {
             ToastService.Warning("Failed to add item to watchlist. Please try again.");
             return false;
@@ -318,28 +341,6 @@
 
         _watchlistedIds.Add(id.Value);
         ToastService.Success($"'{title}' has been added to your watchlist.");
-        return true;
-    }
-
-    private async Task<bool> RemoveFromSearchAsync(IMediaId id, string title)
-    {
-        if (!IsInWatchlist(id))
-        {
-            ToastService.Warning($"'{title}' is not in your watchlist.");
-            return false;
-        }
-
-        var watchlistService = WatchlistServiceIndex[_providerConfig.WatchlistProvider];
-        var added = await watchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
-
-        if (!added)
-        {
-            ToastService.Warning("Failed to remove item from watchlist. Please try again.");
-            return false;
-        }
-
-        _watchlistedIds.Remove(id.Value);
-        ToastService.Success($"'{title}' has been removed from your watchlist.");
         return true;
     }
 
