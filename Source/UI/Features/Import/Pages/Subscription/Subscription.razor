@@ -157,7 +157,7 @@
                                                     <span class="font-medium">@string.Join(", ", _disabledProviders)</span>.
                                                 </p>
                                                 <BbButton Variant="ButtonVariant.Link" Href="/settings?section=api-keys" Class="h-auto p-0 text-sm">
-                                                    Go to Settings →
+                                                    Go to Settings
                                                 </BbButton>
                                             </div>
                                         </BbPopoverContent>
@@ -491,48 +491,56 @@
                         <div class="flex items-center justify-between gap-3">
                             <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
                             <BbTooltipProvider>
-                                <div class="flex items-center gap-3 text-xs font-medium">
+                                <div class="flex items-center gap-1.5 text-xs font-medium">
                                     <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-muted-foreground">
-                                            <LucideIcon Name="list" Size="12" Class="shrink-0"/>
+                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-muted-foreground bg-muted/40">
+                                            <LucideIcon Name="list" Size="11"/>
                                             <span>@_rawResults.Count</span>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Total items from the source list</BbTooltipContent>
+                                        <BbTooltipContent>Total items fetched from the source list</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-foreground">
-                                            <LucideIcon Name="check" Size="12" Class="shrink-0"/>
+                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-emerald-600 bg-emerald-500/10">
+                                            <LucideIcon Name="check" Size="11"/>
                                             <span>@IncludedCount</span>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Items included in this preview</BbTooltipContent>
+                                        <BbTooltipContent>Items that will be imported</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-amber-500">
-                                            <LucideIcon Name="filter-x" Size="12" Class="shrink-0"/>
+                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
+                                            <LucideIcon Name="filter-x" Size="11"/>
                                             <span>@FilteredPreviewCount</span>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Items filtered out by filter rules</BbTooltipContent>
+                                        <BbTooltipContent>Items removed by your filter rules</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-amber-500">
-                                            <LucideIcon Name="scissors" Size="12" Class="shrink-0"/>
+                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
+                                            <LucideIcon Name="scissors" Size="11"/>
                                             <span>@SkippedPreviewCount</span>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Items excluded because of the limit</BbTooltipContent>
+                                        <BbTooltipContent>Items cut off by the import limit</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-blue-400">
-                                            <LucideIcon Name="bookmark" Size="12" Class="shrink-0"/>
+                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-blue-500 bg-blue-500/10">
+                                            <LucideIcon Name="bookmark" Size="11"/>
                                             <span>@WatchlistTotalCount</span>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Included: @WatchlistIncludedCount · Total: @WatchlistTotalCount</BbTooltipContent>
+                                        <BbTooltipContent>
+                                            <p class="font-medium mb-0.5">Watchlist</p>
+                                            <p>@WatchlistTotalCount items across this list are already in your watchlist.</p>
+                                            <p class="opacity-70 mt-0.5">These will not be imported as they are already tracked.</p>
+                                        </BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-destructive">
-                                            <LucideIcon Name="shield-off" Size="12" Class="shrink-0"/>
+                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-orange-500 bg-orange-500/10">
+                                            <LucideIcon Name="shield-off" Size="11"/>
                                             <span>@BlacklistedTotalCount</span>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Included: @BlacklistedIncludedCount · Total: @BlacklistedTotalCount</BbTooltipContent>
+                                        <BbTooltipContent>
+                                            <p class="font-medium mb-0.5">Blacklist</p>
+                                            <p>@BlacklistedTotalCount items across this list are blacklisted.</p>
+                                            <p class="opacity-70 mt-0.5">These are shown in the preview but will never be imported.</p>
+                                        </BbTooltipContent>
                                     </BbTooltip>
                                 </div>
                             </BbTooltipProvider>
@@ -557,21 +565,19 @@
                                 var isInWatchlist = IsInWatchlist(item);
                                 var isTogglingWatchlist = _togglingWatchlistItem == item;
                                 var isTogglingBlacklist = _togglingBlacklistItem == item;
-                                <div class="@(isBlacklisted ? "preview-result-blacklisted" : string.Empty)">
-                                    <MediaDetailTile @key="item"
-                                                     Result="item"
-                                                     Status="status"
-                                                     IsFocused="_focusedPreviewResult == item"
-                                                     OnFocusIn="() => _focusedPreviewResult = item"
-                                                     OnFocusOut="() => ClearFocusedPreviewResult(item)">
-                                        <Icons>
-                                            <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
-                                                                 OnToggle="TogglePreviewWatchlistAsync"/>
-                                            <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
-                                                                 OnToggle="TogglePreviewBlacklistAsync"/>
-                                        </Icons>
-                                    </MediaDetailTile>
-                                </div>
+                                <MediaDetailTile @key="item"
+                                                 Result="item"
+                                                 Status="status"
+                                                 IsFocused="_focusedPreviewResult == item"
+                                                 OnFocusIn="() => _focusedPreviewResult = item"
+                                                 OnFocusOut="() => ClearFocusedPreviewResult(item)">
+                                    <Icons>
+                                        <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
+                                                             OnToggle="TogglePreviewWatchlistAsync"/>
+                                        <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
+                                                             OnToggle="TogglePreviewBlacklistAsync"/>
+                                    </Icons>
+                                </MediaDetailTile>
                             }
                         }
                     </div>
