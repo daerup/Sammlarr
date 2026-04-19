@@ -5,7 +5,6 @@
 @using UI.Features.Import.Components
 @using BlazorBlueprint.Primitives.Filtering
 @using Contracts
-@using global::Shared
 @using Contracts.Media.List
 @using Contracts.Media.Search
 @using Contracts.DI
@@ -15,7 +14,6 @@
 @using Contracts.Watchlist
 @using Contracts.Media.Blacklist
 @using System.ComponentModel
-@using UI.Features.Import.Components
 @inject IImportListRepository ImportListRepository
 @inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
@@ -494,35 +492,35 @@
                                 <div class="flex items-center gap-1.5 text-xs font-medium">
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-muted-foreground bg-muted/40">
-                                            <LucideIcon Name="list" Size="11"/>
+                                            <LucideIcon Name="list" Size="14"/>
                                             <span>@_rawResults.Count</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>Total items fetched from the source list</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-emerald-600 bg-emerald-500/10">
-                                            <LucideIcon Name="check" Size="11"/>
+                                            <LucideIcon Name="check" Size="14"/>
                                             <span>@IncludedCount</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>Items that will be imported</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
-                                            <LucideIcon Name="filter-x" Size="11"/>
+                                            <LucideIcon Name="filter-x" Size="14"/>
                                             <span>@FilteredPreviewCount</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>Items removed by your filter rules</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
-                                            <LucideIcon Name="scissors" Size="11"/>
+                                            <LucideIcon Name="scissors" Size="14"/>
                                             <span>@SkippedPreviewCount</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>Items cut off by the import limit</BbTooltipContent>
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-blue-500 bg-blue-500/10">
-                                            <LucideIcon Name="bookmark" Size="11"/>
+                                            <LucideIcon Name="bookmark" Size="14"/>
                                             <span>@WatchlistTotalCount</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>
@@ -533,7 +531,7 @@
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-orange-500 bg-orange-500/10">
-                                            <LucideIcon Name="shield-off" Size="11"/>
+                                            <LucideIcon Name="shield-off" Size="14"/>
                                             <span>@BlacklistedTotalCount</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>
@@ -555,27 +553,39 @@
                             var item = GetItemFromResult(result);
                             if (item is not null)
                             {
-                                var status = result.Value switch
-                                {
-                                    Skipped<IMediaDetailResult> => QueryResultStatus.Skipped,
-                                    Filtered<IMediaDetailResult> => QueryResultStatus.Filtered,
-                                    _ => QueryResultStatus.Active,
-                                };
-                                var isBlacklisted = status == QueryResultStatus.Active && IsPreviewBlacklisted(item);
+                                var isFiltered = result.Value is Filtered<IMediaDetailResult>;
+                                var isSkipped = result.Value is Skipped<IMediaDetailResult>;
+                                var isDimmed = isFiltered || isSkipped;
+                                var isBlacklisted = IsPreviewBlacklisted(item);
                                 var isInWatchlist = IsInWatchlist(item);
                                 var isTogglingWatchlist = _togglingWatchlistItem == item;
                                 var isTogglingBlacklist = _togglingBlacklistItem == item;
                                 <MediaDetailTile @key="item"
                                                  Result="item"
-                                                 Status="status"
+                                                 Class="@(isDimmed ? "result-dimmed" : "hover-bg")"
                                                  IsFocused="_focusedPreviewResult == item"
                                                  OnFocusIn="() => _focusedPreviewResult = item"
                                                  OnFocusOut="() => ClearFocusedPreviewResult(item)">
                                     <Icons>
-                                        <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
-                                                             OnToggle="TogglePreviewWatchlistAsync"/>
-                                        <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
-                                                             OnToggle="TogglePreviewBlacklistAsync"/>
+                                        @if (isDimmed)
+                                        {
+                                            <BbTooltipProvider>
+                                                <BbTooltip DelayDuration="300">
+                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                        <div class="search-result-status-indicator">
+                                                            <LucideIcon Name="@(isFiltered ? "filter-x" : "scissors")" Size="24"/>
+                                                        </div>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>
+                                                        @(isFiltered ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
+                                                    </BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbTooltipProvider>
+                                        }
+                                            <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
+                                                                 OnToggle="TogglePreviewWatchlistAsync"/>
+                                            <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
+                                                                 OnToggle="TogglePreviewBlacklistAsync"/>
                                     </Icons>
                                 </MediaDetailTile>
                             }
@@ -738,7 +748,10 @@
         !string.Equals(_listIdentifier.Trim(), _initialListIdentifier, StringComparison.Ordinal) ||
         _isEnabled != _initialIsEnabled ||
         _provider != _initialProvider ||
-        _strategy != _initialStrategy;
+        _strategy != _initialStrategy ||
+        _appliedFiltersEnabled ||
+        _appliedSortingEnabled ||
+        _appliedLimitEnabled;
 
     private bool IsProcessing => _state is State.Testing or State.Saving;
     private bool ShowTestButton => _state is State.Idle or State.Failed || _rawResults.Count == 0;
@@ -761,9 +774,7 @@
     private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
     private int FilteredPreviewCount => _processedResults.Count(r => r.Value is Filtered<IMediaDetailResult>);
     private int SkippedPreviewCount => _processedResults.Count(r => r.Value is Skipped<IMediaDetailResult>);
-    private int WatchlistIncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult item && IsInWatchlist(item));
     private int WatchlistTotalCount => _processedResults.Count(r => GetItemFromResult(r) is {} item && IsInWatchlist(item));
-    private int BlacklistedIncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult item && IsPreviewBlacklisted(item));
     private int BlacklistedTotalCount => _processedResults.Count(r => GetItemFromResult(r) is {} item && IsPreviewBlacklisted(item));
 
     private Task OnRunModeChanged(RunMode mode)
