@@ -306,7 +306,7 @@
                                                       Value="_sortField"
                                                       Class="w-40"
                                                       ValueChanged="@((v) => _sortField = v ?? _sortField)"
-                                                      Options="SortFieldOptions"/>
+                                                      Options="SortFields"/>
                                             <BbTooltipProvider>
                                                 <BbTooltip DelayDuration="0">
                                                     <BbTooltipTrigger AsChild="false" Class="p-0">
@@ -372,7 +372,8 @@
                                                     <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
                                                         <LucideIcon Name="info" Size="14"/>
                                                     </BbTooltipTrigger>
-                                                    <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these items
+                                                    <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these
+                                                        items
                                                         can't be imported.
                                                     </BbTooltipContent>
                                                 </BbTooltip>
@@ -394,7 +395,8 @@
                                                     <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
                                                         <LucideIcon Name="info" Size="14"/>
                                                     </BbTooltipTrigger>
-                                                    <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't be
+                                                    <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't
+                                                        be
                                                         imported.
                                                     </BbTooltipContent>
                                                 </BbTooltip>
@@ -674,7 +676,7 @@
     private FilterDefinition _filter = new();
     private bool _sortingEnabled;
     private SortDirection _sortDirection = SortDirection.Descending;
-    private string _sortField = "title";
+    private string _sortField = nameof(IMediaDetailResult.Title);
     private bool _limitEnabled;
     private string _limitRaw = string.Empty;
     private LimitBehavior _watchlistedLimitBehavior = LimitBehavior.Included;
@@ -684,7 +686,7 @@
     private int _appliedFilterVersion;
     private bool _appliedSortingEnabled;
     private SortDirection _appliedSortDirection = SortDirection.Descending;
-    private string _appliedSortField = "title";
+    private string _appliedSortField = nameof(IMediaDetailResult.Title);
     private bool _appliedLimitEnabled;
     private string _appliedLimitRaw = string.Empty;
     private LimitBehavior _appliedWatchlistedLimitBehavior = LimitBehavior.Included;
@@ -692,27 +694,22 @@
 
     private readonly HashSet<MediaListProvider> _disabledProviders = [];
 
-    private static readonly IReadOnlyList<SelectOption<string>> SortFieldOptions =
+    private record FieldDefinition(string Property, string Label, FilterFieldType FilterType);
+
+    private static readonly IReadOnlyList<FieldDefinition> FieldDefinitions =
     [
-        new("title", "Title"),
-        new("releaseDate", "Release Date"),
-        new("rating", "Rating"),
-        new("runtime", "Runtime"),
-        new("popularity", "Popularity"),
+        new(nameof(IMediaDetailResult.Title), "Title", FilterFieldType.Text),
+        new(nameof(IMediaDetailResult.ReleaseDate), "Release Date", FilterFieldType.Date),
+        new(nameof(IMediaDetailResult.Runtime), "Runtime", FilterFieldType.Number),
     ];
+
+    private static readonly IReadOnlyList<SelectOption<string>> SortFields =
+        FieldDefinitions.Select(f => new SelectOption<string>(f.Property, f.Label)).ToList();
 
     private static readonly IReadOnlyList<FilterField> FilterFields =
-    [
-        new FilterField { Name = nameof(IMediaDetailResult.Title), Label = "Title", Type = FilterFieldType.Text },
-        new FilterField { Name = nameof(IMediaDetailResult.ReleaseDate), Label = "Release Date", Type = FilterFieldType.Date },
-    ];
-
-    private static readonly IReadOnlyDictionary<string, string> SortFieldToProperty = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-    {
-        ["title"] = nameof(IMediaDetailResult.Title),
-        ["releaseDate"] = nameof(IMediaDetailResult.ReleaseDate),
-        ["runtime"] = nameof(IMediaDetailResult.Runtime),
-    };
+        FieldDefinitions
+            .Select(f => new FilterField { Name = f.Property, Label = f.Label, Type = f.FilterType })
+            .ToList();
 
     private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
     private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
@@ -939,9 +936,7 @@
         }
     }
 
-    private void HandleFilterChanged(FilterDefinition filter)
-    {
-    }
+    private void HandleFilterChanged(FilterDefinition filter) {}
 
     private static string GetPreviewSourceKey(IMediaDetailResult result) => result.SourceId.ToString() ?? string.Empty;
 
@@ -1046,11 +1041,11 @@
         }
 
         QuerySort? sortOptions = null;
-        if (_sortingEnabled && SortFieldToProperty.TryGetValue(_sortField, out var propName))
+        if (_sortingEnabled)
         {
             sortOptions = new QuerySort
             {
-                Property = propName,
+                Property = _sortField,
                 Direction = _sortDirection == SortDirection.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending,
             };
         }
