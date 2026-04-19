@@ -1,5 +1,4 @@
 @using global::Shared
-@using UI.Shared.Services.Branding
 
 @typeparam TEnum where TEnum : struct, Enum
 
@@ -36,7 +35,6 @@
 @code {
     private List<TEnum> All => Enum.GetValues<TEnum>().ToList();
 
-    [Parameter, EditorRequired] public required Func<TEnum, BrandingInfo> BrandingProvider { get; set; }
 
     [Parameter] public required Func<TEnum, string>? TooltipProvider { get; set; }
 
