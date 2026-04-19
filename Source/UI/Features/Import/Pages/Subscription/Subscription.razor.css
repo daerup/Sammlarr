@@ -1,9 +1,3 @@
-.preview-result-blacklisted ::deep .search-result-poster,
-.preview-result-blacklisted ::deep .search-result-content,
-.preview-result-blacklisted ::deep .search-result-row::before {
-    filter: grayscale(1) opacity(0.75);
-}
-
 .scrollbar-thin {
     scrollbar-width: thin;
 }
@@ -16,4 +10,21 @@
 .scrollbar-thin::-webkit-scrollbar-thumb {
     background: rgba(120, 120, 120, 0.2);
     border-radius: 4px;
+}
+
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.stat-badge svg {
+    display: block;
+    flex-shrink: 0;
+    width: 11px;
+    height: 11px;
 }
