@@ -369,7 +369,7 @@
                                             Watchlist limit behavior
                                             <BbTooltipProvider>
                                                 <BbTooltip>
-                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                                         <LucideIcon Name="info" Size="14"/>
                                                     </BbTooltipTrigger>
                                                     <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these
@@ -392,7 +392,7 @@
                                             Blacklist limit behavior
                                             <BbTooltipProvider>
                                                 <BbTooltip>
-                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
+                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                                         <LucideIcon Name="info" Size="14"/>
                                                     </BbTooltipTrigger>
                                                     <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't
@@ -529,7 +529,7 @@
                                     </BbTooltip>
                                     <BbTooltip DelayDuration="0">
                                         <BbTooltipTrigger AsChild="false" Class="inline-flex items-center gap-1 cursor-default text-destructive">
-                                            <LucideIcon Name="eye-off" Size="12" Class="shrink-0"/>
+                                            <LucideIcon Name="shield-off" Size="12" Class="shrink-0"/>
                                             <span>@BlacklistedTotalCount</span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>Included: @BlacklistedIncludedCount · Total: @BlacklistedTotalCount</BbTooltipContent>
@@ -567,8 +567,8 @@
                                         <Icons>
                                             <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
                                                                  OnToggle="TogglePreviewWatchlistAsync"/>
-                                            <PreviewBlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
-                                                                        OnToggle="TogglePreviewBlacklistAsync"/>
+                                            <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
+                                                                 OnToggle="TogglePreviewBlacklistAsync"/>
                                         </Icons>
                                     </MediaDetailTile>
                                 </div>

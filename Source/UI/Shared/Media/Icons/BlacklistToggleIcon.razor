@@ -2,16 +2,16 @@
 
 <button type="button"
         class="search-result-toggle-btn @(IsToggled ? "is-marked" : "") @(IsToggling ? "pointer-events-none" : "")"
-        style="--toggle-active-color: Red"
+        style="--toggle-active-color: var(--destructive)"
         @onclick="HandleToggleAsync">
     <span class="relative inline-flex items-center justify-center w-6 h-6">
         @if (IsToggled)
         {
-            <LucideIcon Name="ban" Size="24" Fill="Red" Color="Red" Class="@_iconClass"/>
+            <LucideIcon Name="shield-off" Size="24" Color="var(--destructive)" Class="@_iconClass"/>
         }
         else
         {
-            <LucideIcon Name="ban" Size="24" Class="@_iconClass"/>
+            <LucideIcon Name="shield" Size="24" Class="@_iconClass"/>
         }
         @if (IsToggling)
         {
@@ -40,4 +40,3 @@
         await OnToggle.InvokeAsync(Result);
     }
 }
-
