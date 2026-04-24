@@ -130,6 +130,7 @@ public class BlacklistServiceTests
 		{
 			SourceId = sourceId,
 			Title = _faker.Lorem.Sentence(2),
+			Summary = _faker.Lorem.Paragraph(),
 			AdditionalIds = [],
 			Year = _faker.Date.Past().Year,
 			PosterUrl = _faker.Internet.Url(),

@@ -19,6 +19,9 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 				Strategy = l.Strategy,
 				ListIdentifier = l.Identifier,
 				CreatedAt = l.CreatedAt,
+				Filter = l.Filter,
+				Sort = l.Sort,
+				Limit = l.Limit,
 			})
 			.ToListAsync(cancellationToken);
 	}
@@ -32,6 +35,9 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 			Provider = createData.Provider,
 			Strategy = createData.Strategy,
 			Identifier = createData.ListIdentifier,
+			Filter = createData.Filter,
+			Sort = createData.Sort,
+			Limit = createData.Limit,
 		};
 
 		context.Lists.Add(entity);
@@ -43,11 +49,16 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 		var entity = await context.Lists.FindAsync([id], cancellationToken: cancellationToken);
 		if (entity == null)
 			throw new InvalidOperationException($"Import list with id {id} not found.");
+
+		entity.Name = updateData.Name;
 		entity.IsEnabled = updateData.IsEnabled;
 		entity.Provider = updateData.Provider;
 		entity.Strategy = updateData.Strategy;
 		entity.Identifier = updateData.ListIdentifier;
-		entity.Name = updateData.Name;
+		entity.Filter = updateData.Filter;
+		entity.Sort = updateData.Sort;
+		entity.Limit = updateData.Limit;
+
 		await context.SaveChangesAsync(cancellationToken);
 	}
 

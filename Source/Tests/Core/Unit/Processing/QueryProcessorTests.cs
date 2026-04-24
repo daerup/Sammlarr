@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Contracts.Processing;
 using Core.Processing;
 using Shared;
@@ -72,7 +73,23 @@ public class QueryProcessorTests
 			Filter = new QueryFilter
 			{
 				Operator = FilterOperator.And,
-				Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = ["Genre == \"Drama\""] }],
+				Groups =
+				[
+					new FilterGroup
+					{
+						Operator = FilterOperator.And,
+						Predicates =
+						[
+							new FilterPredicate
+							{
+								Field = "Genre",
+								Operator = FilterPredicateOperator.Equals,
+								ValueKind = FilterValueKind.String,
+								Value = JsonSerializer.Serialize("Drama"),
+							},
+						],
+					},
+				],
 			},
 		};
 
@@ -91,8 +108,34 @@ public class QueryProcessorTests
 				Operator = FilterOperator.Or,
 				Groups =
 				[
-					new FilterGroup { Operator = FilterOperator.And, Predicates = ["Genre == \"Drama\""] },
-					new FilterGroup { Operator = FilterOperator.And, Predicates = ["Year <= 2019"] },
+					new FilterGroup
+					{
+						Operator = FilterOperator.And,
+						Predicates =
+						[
+							new FilterPredicate
+							{
+								Field = "Genre",
+								Operator = FilterPredicateOperator.Equals,
+								ValueKind = FilterValueKind.String,
+								Value = JsonSerializer.Serialize("Drama"),
+							},
+						],
+					},
+					new FilterGroup
+					{
+						Operator = FilterOperator.And,
+						Predicates =
+						[
+							new FilterPredicate
+							{
+								Field = "Year",
+								Operator = FilterPredicateOperator.LessOrEqual,
+								ValueKind = FilterValueKind.Number,
+								Value = JsonSerializer.Serialize(2019),
+							},
+						],
+					},
 				],
 			},
 		};
