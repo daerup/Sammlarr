@@ -58,3 +58,6 @@ nunit-*.xml
 *.sln.DotSettings.user
 Results/
 **/Benchmark/Old/
+
+# We vibin
+/Source/.claude
