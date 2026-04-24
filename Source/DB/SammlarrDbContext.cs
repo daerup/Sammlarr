@@ -1,4 +1,7 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Contracts;
+using Contracts.Processing;
 using DB.Data;
 using DB.Data.Access;
 using DB.Data.Blacklist;
@@ -14,6 +17,8 @@ namespace DB;
 
 internal sealed class SammlarrDbContext : DbContext
 {
+	private static readonly JsonSerializerOptions JsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
+
 	private readonly IDateTimeProvider _dateTimeProvider;
 	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
 	private readonly EntityAuditer _entityAuditer;
@@ -76,15 +81,9 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<ImportListEntity>(builder =>
 		{
-			builder.OwnsOne(
-				x => x.Filter,
-				filter =>
-				{
-					filter.ToJson();
-					filter.OwnsMany(f => f.Groups, group => group.OwnsMany(g => g.Groups));
-				}
-			);
-			builder.OwnsOne(x => x.Sort, sort => sort.ToJson());
+			builder.Property(x => x.Filter).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);
+			builder.Property(x => x.Sort).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QuerySort>(v, JsonOptions)!);
+			builder.Property(x => x.Limit).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
 		});
 	}
 

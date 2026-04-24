@@ -690,23 +690,54 @@
 
     private bool _filtersEnabled;
     private FilterDefinition _filter = new();
-    private bool _sortingEnabled;
-    private SortDirection _sortDirection = SortDirection.Descending;
-    private string _sortField = nameof(IMediaDetailResult.Title);
-    private bool _limitEnabled;
+    private QuerySort? _sort;
+    private QueryLimit? _limit;
     private string _limitRaw = string.Empty;
-    private LimitBehavior _watchlistedLimitBehavior = LimitBehavior.Included;
-    private LimitBehavior _blacklistedLimitBehavior = LimitBehavior.Included;
 
     private bool _appliedFiltersEnabled;
     private int _appliedFilterVersion;
-    private bool _appliedSortingEnabled;
-    private SortDirection _appliedSortDirection = SortDirection.Descending;
-    private string _appliedSortField = nameof(IMediaDetailResult.Title);
-    private bool _appliedLimitEnabled;
+    private QuerySort? _appliedSort;
+    private QueryLimit? _appliedLimit;
     private string _appliedLimitRaw = string.Empty;
-    private LimitBehavior _appliedWatchlistedLimitBehavior = LimitBehavior.Included;
-    private LimitBehavior _appliedBlacklistedLimitBehavior = LimitBehavior.Included;
+
+    private static readonly QuerySort DefaultSort = new() { Property = nameof(IMediaDetailResult.Title), Direction = ListSortDirection.Descending };
+    private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = LimitBehavior.Included, Blacklisted = LimitBehavior.Included };
+
+    private bool _sortingEnabled
+    {
+        get => _sort is not null;
+        set => _sort = value ? DefaultSort : null;
+    }
+
+    private string _sortField
+    {
+        get => _sort!.Property;
+        set => _sort = _sort! with { Property = value };
+    }
+
+    private SortDirection _sortDirection
+    {
+        get => _sort!.Direction == ListSortDirection.Ascending ? SortDirection.Ascending : SortDirection.Descending;
+        set => _sort = _sort! with { Direction = value == SortDirection.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending };
+    }
+
+    private bool _limitEnabled
+    {
+        get => _limit is not null;
+        set => _limit = value ? DefaultLimit : null;
+    }
+
+    private LimitBehavior _watchlistedLimitBehavior
+    {
+        get => _limit!.Watchlisted;
+        set => _limit = _limit! with { Watchlisted = value };
+    }
+
+    private LimitBehavior _blacklistedLimitBehavior
+    {
+        get => _limit!.Blacklisted;
+        set => _limit = _limit! with { Blacklisted = value };
+    }
 
     private readonly HashSet<MediaListProvider> _disabledProviders = [];
 
@@ -750,8 +781,8 @@
         _provider != _initialProvider ||
         _strategy != _initialStrategy ||
         _appliedFiltersEnabled ||
-        _appliedSortingEnabled ||
-        _appliedLimitEnabled;
+        _appliedSort is not null ||
+        _appliedLimit is not null;
 
     private bool IsProcessing => _state is State.Testing or State.Saving;
     private bool ShowTestButton => _state is State.Idle or State.Failed || _rawResults.Count == 0;
@@ -762,13 +793,9 @@
         _rawResults.Count > 0 && (
         _filtersEnabled != _appliedFiltersEnabled ||
         (_filtersEnabled && _filter.Version != _appliedFilterVersion) ||
-        _sortingEnabled != _appliedSortingEnabled ||
-        (_sortingEnabled && (_sortField != _appliedSortField || _sortDirection != _appliedSortDirection)) ||
-        _limitEnabled != _appliedLimitEnabled ||
-        (_limitEnabled && (
-        _limitRaw != _appliedLimitRaw ||
-        _watchlistedLimitBehavior != _appliedWatchlistedLimitBehavior ||
-        _blacklistedLimitBehavior != _appliedBlacklistedLimitBehavior))
+        _sort != _appliedSort ||
+        _limit != _appliedLimit ||
+        (_limit is not null && _limitRaw != _appliedLimitRaw)
         );
 
     private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
@@ -838,6 +865,20 @@
             _provider = importList.Provider;
             _strategy = importList.Strategy;
             _listIdentifier = importList.ListIdentifier;
+
+            if (importList.Filter is { } existingFilter)
+            {
+                _filter = FilterDefinitionConverter.FromQueryFilter(existingFilter);
+                _filtersEnabled = !_filter.IsEmpty;
+            }
+
+            _sort = importList.Sort;
+
+            if (importList.Limit is { } limit)
+            {
+                _limit = limit;
+                _limitRaw = limit.Count.ToString();
+            }
 
             _disabledProviders.Remove(importList.Provider);
 
@@ -1057,33 +1098,21 @@
             return;
         }
 
-        QuerySort? sortOptions = null;
-        if (_sortingEnabled)
-        {
-            sortOptions = new QuerySort
-            {
-                Property = _sortField,
-                Direction = _sortDirection == SortDirection.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending,
-            };
-        }
-
-        var queryFilter = _filtersEnabled ? FilterDefinitionConverter.ToQueryFilter(_filter) : null;
-        var queryLimit = _limitEnabled && ParsedLimit is {} n ? new QueryLimit { Count = n, Watchlisted = _watchlistedLimitBehavior, Blacklisted = _blacklistedLimitBehavior } : null;
-        var options = new QueryOptions { Sort = sortOptions, Limit = queryLimit, Filter = queryFilter };
+        var options = new QueryOptions { Sort = _sort, Limit = GetEffectiveQueryLimit(), Filter = GetEffectiveQueryFilter() };
         _processedResults = QueryProcessor.Execute(_rawResults, options).ToList();
     }
+
+    private QueryLimit? GetEffectiveQueryLimit() => _limit is { } l && ParsedLimit is { } n ? l with { Count = n } : null;
+
+    private QueryFilter? GetEffectiveQueryFilter() => _filtersEnabled ? FilterDefinitionConverter.ToQueryFilter(_filter) : null;
 
     private void ApplyQuerySettings()
     {
         _appliedFiltersEnabled = _filtersEnabled;
         _appliedFilterVersion = _filter.Version;
-        _appliedSortingEnabled = _sortingEnabled;
-        _appliedSortField = _sortField;
-        _appliedSortDirection = _sortDirection;
-        _appliedLimitEnabled = _limitEnabled;
+        _appliedSort = _sort;
+        _appliedLimit = _limit;
         _appliedLimitRaw = _limitRaw;
-        _appliedWatchlistedLimitBehavior = _watchlistedLimitBehavior;
-        _appliedBlacklistedLimitBehavior = _blacklistedLimitBehavior;
         ReprocessResults();
     }
 
@@ -1240,6 +1269,9 @@
                     Provider = _provider!.Value,
                     Strategy = _strategy,
                     ListIdentifier = _listIdentifier.Trim(),
+                    Filter = GetEffectiveQueryFilter(),
+                    Sort = _appliedSort,
+                    Limit = _appliedLimit is { } appliedLimit && ParsedLimit is { } appliedLimitCount ? appliedLimit with { Count = appliedLimitCount } : null,
                 };
 
                 await ImportListRepository.CreateImportListsAsync(ImportListId!.Value, updateData, cancellationToken);
@@ -1252,6 +1284,9 @@
                     Provider = _provider!.Value,
                     Strategy = _strategy,
                     ListIdentifier = _listIdentifier.Trim(),
+                    Filter = GetEffectiveQueryFilter(),
+                    Sort = _appliedSort,
+                    Limit = _appliedLimit is { } appliedLimit && ParsedLimit is { } appliedLimitCount ? appliedLimit with { Count = appliedLimitCount } : null,
                 };
 
                 await ImportListRepository.CreateImportListsAsync(_name.Trim(), createData, cancellationToken);

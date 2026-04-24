@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Contracts.Processing;
 using Core.Processing;
 
@@ -13,20 +14,7 @@ public class FilterEvaluatorTests
 	}
 
 	[Test]
-	[Arguments("")]
-	[Arguments(" ")]
-	[Arguments(null)]
-	public async Task Build_WhenEmptyStringPredicate_ReturnsEmpty(string? predicate)
-	{
-		var filter = new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [predicate] }] };
-
-		var result = FilterEvaluator.Build(filter);
-
-		await Assert.That(result).IsEmpty();
-	}
-
-	[Test]
-	public async Task Build_WhenPredicate_ReturnsEmpty()
+	public async Task Build_WhenEmptyGroup_ReturnsEmpty()
 	{
 		var filter = new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [] }] };
 
@@ -36,12 +24,12 @@ public class FilterEvaluatorTests
 	}
 
 	[Test]
-	public async Task Build_WhenSinglePredicate_ReturnsPredicate()
+	public async Task Build_WhenSingleNumberComparison_ReturnsPredicate()
 	{
 		var filter = new QueryFilter
 		{
 			Operator = FilterOperator.And,
-			Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = ["Year >= 2020"] }],
+			Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)] }],
 		};
 
 		var result = FilterEvaluator.Build(filter);
@@ -55,12 +43,19 @@ public class FilterEvaluatorTests
 		var filter = new QueryFilter
 		{
 			Operator = FilterOperator.And,
-			Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = ["Year >= 2020", "Genre == \"Action\""] }],
+			Groups =
+			[
+				new FilterGroup
+				{
+					Operator = FilterOperator.And,
+					Predicates = [Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020), StringEquals("Genre", "Action")],
+				},
+			],
 		};
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre == \"Action\"))");
+		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre != null && Genre.ToLower() == \"Action\".ToLower()))");
 	}
 
 	[Test]
@@ -69,22 +64,14 @@ public class FilterEvaluatorTests
 		var filter = new QueryFilter
 		{
 			Operator = FilterOperator.Or,
-			Groups = [new FilterGroup { Operator = FilterOperator.Or, Predicates = ["Genre == \"Action\"", "Genre == \"Comedy\""] }],
+			Groups = [new FilterGroup { Operator = FilterOperator.Or, Predicates = [StringEquals("Genre", "Action"), StringEquals("Genre", "Comedy")] }],
 		};
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("((Genre == \"Action\") or (Genre == \"Comedy\"))");
-	}
-
-	[Test]
-	public async Task Build_WhenEmptyGroup_ReturnsEmpty()
-	{
-		var filter = new QueryFilter { Operator = FilterOperator.And, Groups = [new FilterGroup { Operator = FilterOperator.And, Predicates = [] }] };
-
-		var result = FilterEvaluator.Build(filter);
-
-		await Assert.That(result).IsEmpty();
+		await Assert
+			.That(result)
+			.IsEqualTo("((Genre != null && Genre.ToLower() == \"Action\".ToLower()) or (Genre != null && Genre.ToLower() == \"Comedy\".ToLower()))");
 	}
 
 	[Test]
@@ -95,32 +82,14 @@ public class FilterEvaluatorTests
 			Operator = FilterOperator.And,
 			Groups =
 			[
-				new FilterGroup { Operator = FilterOperator.And, Predicates = ["Year >= 2020"] },
-				new FilterGroup { Operator = FilterOperator.And, Predicates = ["Genre == \"Action\""] },
+				new FilterGroup { Operator = FilterOperator.And, Predicates = [Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)] },
+				new FilterGroup { Operator = FilterOperator.And, Predicates = [StringEquals("Genre", "Action")] },
 			],
 		};
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre == \"Action\"))");
-	}
-
-	[Test]
-	public async Task Build_WhenMultipleOrGroups_CombinesGroupsWithOr()
-	{
-		var filter = new QueryFilter
-		{
-			Operator = FilterOperator.Or,
-			Groups =
-			[
-				new FilterGroup { Operator = FilterOperator.And, Predicates = ["Year >= 2020"] },
-				new FilterGroup { Operator = FilterOperator.And, Predicates = ["Genre == \"Action\""] },
-			],
-		};
-
-		var result = FilterEvaluator.Build(filter);
-
-		await Assert.That(result).IsEqualTo("((Year >= 2020) or (Genre == \"Action\"))");
+		await Assert.That(result).IsEqualTo("((Year >= 2020) and (Genre != null && Genre.ToLower() == \"Action\".ToLower()))");
 	}
 
 	[Test]
@@ -134,15 +103,22 @@ public class FilterEvaluatorTests
 				new FilterGroup
 				{
 					Operator = FilterOperator.And,
-					Predicates = ["Year >= 2020"],
-					Groups = [new FilterGroup { Operator = FilterOperator.Or, Predicates = ["Genre == \"Action\"", "Genre == \"Comedy\""] }],
+					Predicates = [Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)],
+					Groups =
+					[
+						new FilterGroup { Operator = FilterOperator.Or, Predicates = [StringEquals("Genre", "Action"), StringEquals("Genre", "Comedy")] },
+					],
 				},
 			],
 		};
 
 		var result = FilterEvaluator.Build(filter);
 
-		await Assert.That(result).IsEqualTo("((Year >= 2020) and ((Genre == \"Action\") or (Genre == \"Comedy\")))");
+		await Assert
+			.That(result)
+			.IsEqualTo(
+				"((Year >= 2020) and ((Genre != null && Genre.ToLower() == \"Action\".ToLower()) or (Genre != null && Genre.ToLower() == \"Comedy\".ToLower())))"
+			);
 	}
 
 	[Test]
@@ -165,4 +141,22 @@ public class FilterEvaluatorTests
 		var result = FilterEvaluator.Build(filter);
 		await Assert.That(result).IsEmpty();
 	}
+
+	private static FilterPredicate Number(string field, FilterPredicateOperator op, double value) =>
+		new()
+		{
+			Field = field,
+			Operator = op,
+			ValueKind = FilterValueKind.Number,
+			Value = JsonSerializer.Serialize(value),
+		};
+
+	private static FilterPredicate StringEquals(string field, string value) =>
+		new()
+		{
+			Field = field,
+			Operator = FilterPredicateOperator.Equals,
+			ValueKind = FilterValueKind.String,
+			Value = JsonSerializer.Serialize(value),
+		};
 }

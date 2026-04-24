@@ -1,3 +1,4 @@
+using System.Text.Json;
 using BlazorBlueprint.Primitives.Filtering;
 using Contracts.Processing;
 using BBFilterOp = BlazorBlueprint.Primitives.Filtering.FilterOperator;
@@ -17,13 +18,29 @@ internal static class FilterDefinitionConverter
 		if (group is null)
 			return null;
 
-		return new QueryFilter { Operator = MapLogicalOperator(filter.Operator), Groups = [group] };
+		return new QueryFilter { Operator = ToContractsOperator(filter.Operator), Groups = [group] };
+	}
+
+	public static FilterDefinition FromQueryFilter(QueryFilter filter)
+	{
+		var definition = new FilterDefinition { Operator = ToBbOperator(filter.Operator) };
+
+		if (filter.Groups.Count == 1)
+		{
+			PopulateDefinition(definition, filter.Groups[0]);
+		}
+		else
+		{
+			foreach (var group in filter.Groups)
+				definition.Groups.Add(ToDefinition(group));
+		}
+
+		return definition;
 	}
 
 	private static FilterGroup? ToFilterGroup(FilterDefinition filterDef)
 	{
-		var predicates = filterDef.Conditions.Select(BuildPredicate).Where(p => p is not null).Select(p => p!).ToList();
-
+		var predicates = filterDef.Conditions.Select(ToPredicate).Where(p => p is not null).Select(p => p!).ToList();
 		var nestedGroups = filterDef.Groups.Select(ToFilterGroup).Where(g => g is not null).Select(g => g!).ToList();
 
 		if (predicates.Count == 0 && nestedGroups.Count == 0)
@@ -31,84 +48,140 @@ internal static class FilterDefinitionConverter
 
 		return new FilterGroup
 		{
-			Operator = MapLogicalOperator(filterDef.Operator),
+			Operator = ToContractsOperator(filterDef.Operator),
 			Predicates = predicates,
 			Groups = nestedGroups,
 		};
 	}
 
-	private static ContractsFilterOp MapLogicalOperator(BBLogicalOp op) => op == BBLogicalOp.Or ? ContractsFilterOp.Or : ContractsFilterOp.And;
+	private static FilterDefinition ToDefinition(FilterGroup group)
+	{
+		var definition = new FilterDefinition { Operator = ToBbOperator(group.Operator) };
+		PopulateDefinition(definition, group);
+		return definition;
+	}
 
-	private static string? BuildPredicate(FilterCondition condition)
+	private static void PopulateDefinition(FilterDefinition definition, FilterGroup group)
+	{
+		foreach (var predicate in group.Predicates)
+			definition.Conditions.Add(ToCondition(predicate));
+
+		foreach (var nested in group.Groups)
+			definition.Groups.Add(ToDefinition(nested));
+	}
+
+	private static FilterPredicate? ToPredicate(FilterCondition condition)
 	{
 		if (string.IsNullOrWhiteSpace(condition.Field))
 			return null;
 
 		var valueless = condition.Operator is BBFilterOp.IsEmpty or BBFilterOp.IsNotEmpty or BBFilterOp.IsTrue or BBFilterOp.IsFalse;
-
 		if (!valueless && condition.Value is null)
 			return null;
 
-		var f = condition.Field;
-		var v = condition.Value;
-		var v2 = condition.ValueEnd;
-
-		return condition.Operator switch
+		return new FilterPredicate
 		{
-			BBFilterOp.Equals => FormatEquals(f, v!),
-			BBFilterOp.NotEquals => FormatNotEquals(f, v!),
-			BBFilterOp.Contains => $"{f} != null && {f}.Contains(\"{Escape(v!)}\")",
-			BBFilterOp.NotContains => $"{f} == null || !{f}.Contains(\"{Escape(v!)}\")",
-			BBFilterOp.StartsWith => $"{f} != null && {f}.StartsWith(\"{Escape(v!)}\")",
-			BBFilterOp.EndsWith => $"{f} != null && {f}.EndsWith(\"{Escape(v!)}\")",
-			BBFilterOp.IsEmpty => $"{f} == null || {f} == \"\"",
-			BBFilterOp.IsNotEmpty => $"{f} != null && {f} != \"\"",
-			BBFilterOp.GreaterThan => FormatComparison(f, ">", v!),
-			BBFilterOp.LessThan => FormatComparison(f, "<", v!),
-			BBFilterOp.GreaterOrEqual => FormatComparison(f, ">=", v!),
-			BBFilterOp.LessOrEqual => FormatComparison(f, "<=", v!),
-			BBFilterOp.Between => v2 is null ? null : FormatBetween(f, v!, v2),
-			BBFilterOp.IsTrue => $"{f} == true",
-			BBFilterOp.IsFalse => $"{f} == false",
-			_ => null,
+			Field = condition.Field,
+			Operator = ToPredicateOperator(condition.Operator),
+			ValueKind = DetectKind(condition.Value ?? condition.ValueEnd),
+			Value = Serialize(condition.Value),
+			ValueEnd = Serialize(condition.ValueEnd),
 		};
 	}
 
-	private static string FormatEquals(string field, object value) =>
-		value is string s ? $"{field} != null && {field}.ToLower() == \"{Escape(s).ToLower()}\""
-		: IsDate(value) ? $"{field}.HasValue && {field}.Value.DayNumber == {ToDayNumber(value)}"
-		: $"{field} == {FormatValue(value)}";
-
-	private static string FormatNotEquals(string field, object value) =>
-		value is string s ? $"({field} == null || {field}.ToLower() != \"{Escape(s).ToLower()}\")"
-		: IsDate(value) ? $"(!{field}.HasValue || {field}.Value.DayNumber != {ToDayNumber(value)})"
-		: $"{field} != {FormatValue(value)}";
-
-	private static string FormatComparison(string field, string op, object value) =>
-		IsDate(value) ? $"{field}.HasValue && {field}.Value.DayNumber {op} {ToDayNumber(value)}" : $"{field} {op} {FormatValue(value)}";
-
-	private static string FormatBetween(string field, object min, object max) =>
-		IsDate(min)
-			? $"{field}.HasValue && {field}.Value.DayNumber >= {ToDayNumber(min)} && {field}.Value.DayNumber <= {ToDayNumber(max)}"
-			: $"{field} >= {FormatValue(min)} && {field} <= {FormatValue(max)}";
-
-	private static bool IsDate(object value) => value is DateOnly or DateTime;
-
-	private static int ToDayNumber(object value) =>
-		value switch
+	private static FilterCondition ToCondition(FilterPredicate predicate) =>
+		new()
 		{
-			DateOnly d => d.DayNumber,
-			DateTime dt => DateOnly.FromDateTime(dt).DayNumber,
-			_ => 0,
+			Field = predicate.Field,
+			Operator = ToBbPredicateOperator(predicate.Operator),
+			Value = Deserialize(predicate.Value, predicate.ValueKind),
+			ValueEnd = Deserialize(predicate.ValueEnd, predicate.ValueKind),
 		};
 
-	private static string FormatValue(object value) =>
-		value switch
+	private static ContractsFilterOp ToContractsOperator(BBLogicalOp op) => op == BBLogicalOp.Or ? ContractsFilterOp.Or : ContractsFilterOp.And;
+
+	private static BBLogicalOp ToBbOperator(ContractsFilterOp op) => op == ContractsFilterOp.Or ? BBLogicalOp.Or : BBLogicalOp.And;
+
+	private static FilterPredicateOperator ToPredicateOperator(BBFilterOp op) =>
+		op switch
 		{
-			string s => $"\"{Escape(s)}\"",
-			bool b => b.ToString().ToLower(),
-			_ => value.ToString()!,
+			BBFilterOp.Equals => FilterPredicateOperator.Equals,
+			BBFilterOp.NotEquals => FilterPredicateOperator.NotEquals,
+			BBFilterOp.Contains => FilterPredicateOperator.Contains,
+			BBFilterOp.NotContains => FilterPredicateOperator.NotContains,
+			BBFilterOp.StartsWith => FilterPredicateOperator.StartsWith,
+			BBFilterOp.EndsWith => FilterPredicateOperator.EndsWith,
+			BBFilterOp.IsEmpty => FilterPredicateOperator.IsEmpty,
+			BBFilterOp.IsNotEmpty => FilterPredicateOperator.IsNotEmpty,
+			BBFilterOp.GreaterThan => FilterPredicateOperator.GreaterThan,
+			BBFilterOp.LessThan => FilterPredicateOperator.LessThan,
+			BBFilterOp.GreaterOrEqual => FilterPredicateOperator.GreaterOrEqual,
+			BBFilterOp.LessOrEqual => FilterPredicateOperator.LessOrEqual,
+			BBFilterOp.Between => FilterPredicateOperator.Between,
+			BBFilterOp.IsTrue => FilterPredicateOperator.IsTrue,
+			BBFilterOp.IsFalse => FilterPredicateOperator.IsFalse,
+			_ => FilterPredicateOperator.Equals,
 		};
 
-	private static string Escape(object value) => value.ToString()?.Replace("\\", "\\\\").Replace("\"", "\\\"") ?? string.Empty;
+	private static BBFilterOp ToBbPredicateOperator(FilterPredicateOperator op) =>
+		op switch
+		{
+			FilterPredicateOperator.Equals => BBFilterOp.Equals,
+			FilterPredicateOperator.NotEquals => BBFilterOp.NotEquals,
+			FilterPredicateOperator.Contains => BBFilterOp.Contains,
+			FilterPredicateOperator.NotContains => BBFilterOp.NotContains,
+			FilterPredicateOperator.StartsWith => BBFilterOp.StartsWith,
+			FilterPredicateOperator.EndsWith => BBFilterOp.EndsWith,
+			FilterPredicateOperator.IsEmpty => BBFilterOp.IsEmpty,
+			FilterPredicateOperator.IsNotEmpty => BBFilterOp.IsNotEmpty,
+			FilterPredicateOperator.GreaterThan => BBFilterOp.GreaterThan,
+			FilterPredicateOperator.LessThan => BBFilterOp.LessThan,
+			FilterPredicateOperator.GreaterOrEqual => BBFilterOp.GreaterOrEqual,
+			FilterPredicateOperator.LessOrEqual => BBFilterOp.LessOrEqual,
+			FilterPredicateOperator.Between => BBFilterOp.Between,
+			FilterPredicateOperator.IsTrue => BBFilterOp.IsTrue,
+			FilterPredicateOperator.IsFalse => BBFilterOp.IsFalse,
+			_ => BBFilterOp.Equals,
+		};
+
+	private static FilterValueKind DetectKind(object? value) =>
+		value switch
+		{
+			null => FilterValueKind.String,
+			DateOnly or DateTime or DateTimeOffset => FilterValueKind.Date,
+			bool => FilterValueKind.Boolean,
+			IConvertible c
+				when c.GetTypeCode()
+					is TypeCode.Byte
+						or TypeCode.SByte
+						or TypeCode.Int16
+						or TypeCode.UInt16
+						or TypeCode.Int32
+						or TypeCode.UInt32
+						or TypeCode.Int64
+						or TypeCode.UInt64
+						or TypeCode.Single
+						or TypeCode.Double
+						or TypeCode.Decimal => FilterValueKind.Number,
+			_ => FilterValueKind.String,
+		};
+
+	private static string? Serialize(object? value) =>
+		value switch
+		{
+			null => null,
+			DateOnly d => JsonSerializer.Serialize(d.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)),
+			_ => JsonSerializer.Serialize(value),
+		};
+
+	private static object? Deserialize(string? value, FilterValueKind kind) =>
+		value is null
+			? null
+			: kind switch
+			{
+				FilterValueKind.Number => JsonSerializer.Deserialize<double>(value),
+				FilterValueKind.Boolean => JsonSerializer.Deserialize<bool>(value),
+				FilterValueKind.Date => JsonSerializer.Deserialize<DateTime>(value),
+				_ => JsonSerializer.Deserialize<string>(value),
+			};
 }

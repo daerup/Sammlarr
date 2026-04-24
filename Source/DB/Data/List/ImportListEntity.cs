@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media.List;
+using Contracts.Processing;
 using DB.Conversion.Enums;
 
 namespace DB.Data.List;
@@ -23,7 +24,7 @@ internal record ImportListEntity : Entity<Guid>
 	[Required]
 	public string Identifier { get; set; } = string.Empty;
 
-	public ListFilter? Filter { get; set; }
-	public ListSort? Sort { get; set; }
-	public int? Take { get; set; }
+	public QueryFilter? Filter { get; set; }
+	public QuerySort? Sort { get; set; }
+	public QueryLimit? Limit { get; set; }
 }
