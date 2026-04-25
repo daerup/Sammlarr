@@ -235,7 +235,7 @@
 
                 </div>
 
-                <BbCollapsible>
+                <BbCollapsible @bind-Open="_filtersSectionOpen">
                     <BbCollapsibleTrigger AsChild="false"
                                           Class="group w-full flex items-center justify-between -mx-6 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
                 <span class="flex items-center gap-2">
@@ -666,6 +666,11 @@
     private bool _initialIsEnabled = true;
     private MediaListProvider? _initialProvider;
     private MediaListAddStrategy _initialStrategy = MediaListAddStrategy.Append;
+    private bool _initialFiltersEnabled;
+    private int _initialFilterVersion;
+    private QuerySort? _initialSort;
+    private QueryLimit? _initialLimit;
+    private string _initialLimitRaw = string.Empty;
 
     private State _state = State.Idle;
     private bool _showValidation;
@@ -693,6 +698,7 @@
     private QuerySort? _sort;
     private QueryLimit? _limit;
     private string _limitRaw = string.Empty;
+    private bool _filtersSectionOpen;
 
     private bool _appliedFiltersEnabled;
     private int _appliedFilterVersion;
@@ -780,9 +786,11 @@
         _isEnabled != _initialIsEnabled ||
         _provider != _initialProvider ||
         _strategy != _initialStrategy ||
-        _appliedFiltersEnabled ||
-        _appliedSort is not null ||
-        _appliedLimit is not null;
+        _appliedFiltersEnabled != _initialFiltersEnabled ||
+        (_appliedFiltersEnabled && _appliedFilterVersion != _initialFilterVersion) ||
+        _appliedSort != _initialSort ||
+        _appliedLimit != _initialLimit ||
+        (_appliedLimit is not null && _appliedLimitRaw != _initialLimitRaw);
 
     private bool IsProcessing => _state is State.Testing or State.Saving;
     private bool ShowTestButton => _state is State.Idle or State.Failed || _rawResults.Count == 0;
@@ -880,6 +888,8 @@
                 _limitRaw = limit.Count.ToString();
             }
 
+            _filtersSectionOpen = _filtersEnabled || _sort is not null || _limit is not null;
+
             _disabledProviders.Remove(importList.Provider);
 
             if (IsEditMode)
@@ -889,6 +899,11 @@
                 _initialProvider = importList.Provider;
                 _initialStrategy = importList.Strategy;
                 _initialListIdentifier = importList.ListIdentifier.Trim();
+                _initialFiltersEnabled = _filtersEnabled;
+                _initialFilterVersion = _filter.Version;
+                _initialSort = _sort;
+                _initialLimit = _limit;
+                _initialLimitRaw = _limitRaw;
             }
 
             await TestAsync();
