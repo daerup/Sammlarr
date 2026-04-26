@@ -1,195 +1,213 @@
 @page "/lists"
 @using Contracts
+@using Contracts.Auth
 @using Contracts.Media.List
+@using Contracts.Settings
 @using global::Shared
 @using UI.Features.Import.Components
 @using UI.Shared.Services.Branding
 @inject IImportListRepository ImportListRepository
 @inject NavigationManager NavigationManager
 @inject MediaProviderBrandingService MediaProviderBrandingService
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject ProfileDropdownService ProfileDropdownService
 
 <PageTitle>Lists</PageTitle>
 
-<div class="px-6 py-10">
-    <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-            <h1 class="text-3xl font-bold tracking-wide antialiased">@PageHeading</h1>
-            <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">@PageDescription</p>
-        </div>
+<OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
+<ProtectedSection GuardState="IsOAuthAllowed"
+                  AuthProvider="@_providerConfig?.WatchlistProvider"
+                  DeniedActionDescription="managing your import lists"
+                  FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+    <div class="px-6 py-10">
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="text-3xl font-bold tracking-wide antialiased">@PageHeading</h1>
+                <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">@PageDescription</p>
+            </div>
 
-        <div class="flex items-center gap-2">
-            <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/subscription/create"))">
-                <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
-                Add New
-            </BbButton>
-        </div>
-    </div>
-
-    <div class="mt-6">
-        @if (!_isLoading && _lists.Count == 0)
-        {
-            <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
-                <LucideIcon Name="list-plus" Size="40" Class="mx-auto text-muted-foreground"/>
-                <p class="text-muted-foreground">Import lists let you sync titles from providers like MDBList or TMDb into your Sammlarr library automatically.</p>
-                <BbButton Variant="ButtonVariant.Outline" OnClick="NavigateToCreateSubscription">
-                    <LucideIcon Name="plus" Size="15" Class="mr-2 shrink-0"/>
-                    Add
+            <div class="flex items-center gap-2">
+                <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/subscription/create"))">
+                    <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
+                    Add New
                 </BbButton>
             </div>
-        }
-        else
-        {
-        <BbDataTable TData="ImportList"
-                     Data="@_pagedLists"
-                     IsLoading="@_isLoading"
-                     ShowToolbar="true"
-                     ShowPagination="false"
-                     AriaLabel="Import lists">
-            <Columns>
-                <BbDataTableColumn TData="ImportList" TValue="string"
-                                   Header="Name"
-                                   Property="@(l => l.Name)"
-                                   Sortable="true"
-                                   Filterable="true" />
+        </div>
 
-                <BbDataTableColumn TData="ImportList" TValue="MediaListProvider"
-                                   Header="Provider"
-                                   Property="@(l => l.Provider)"
-                                   Sortable="true">
-                    <CellTemplate Context="list">
-                        @{
-                            var branding = MediaProviderBrandingService.GetBrandingInfo(list.Provider.AsMediaProvider());
-                        }
-                        <span class="inline-flex items-center gap-1.5 text-sm font-medium">
+        <div class="mt-6">
+            @if (!_isLoading && _lists.Count == 0)
+            {
+                <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+                    <LucideIcon Name="list-plus" Size="40" Class="mx-auto text-muted-foreground"/>
+                    <p class="text-muted-foreground">Import lists let you sync titles from providers like MDBList or TMDb into your Sammlarr library
+                        automatically.</p>
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="NavigateToCreateSubscription">
+                        <LucideIcon Name="plus" Size="15" Class="mr-2 shrink-0"/>
+                        Add
+                    </BbButton>
+                </div>
+            }
+            else
+            {
+                <BbDataTable TData="ImportList"
+                             Data="@_pagedLists"
+                             IsLoading="@_isLoading"
+                             ShowToolbar="true"
+                             ShowPagination="false"
+                             AriaLabel="Import lists">
+                    <Columns>
+                        <BbDataTableColumn TData="ImportList" TValue="string"
+                                           Header="Name"
+                                           Property="@(l => l.Name)"
+                                           Sortable="true"
+                                           Filterable="true"/>
+
+                        <BbDataTableColumn TData="ImportList" TValue="MediaListProvider"
+                                           Header="Provider"
+                                           Property="@(l => l.Provider)"
+                                           Sortable="true">
+                            <CellTemplate Context="list">
+                                @{
+                                    var branding = MediaProviderBrandingService.GetBrandingInfo(list.Provider.AsMediaProvider());
+                                }
+                                <span class="inline-flex items-center gap-1.5 text-sm font-medium">
                             <span class="shrink-0 flex items-center">@branding.Icon</span>
-                            @branding.NickName
+                                    @branding.NickName
                         </span>
-                    </CellTemplate>
-                </BbDataTableColumn>
+                            </CellTemplate>
+                        </BbDataTableColumn>
 
-                <BbDataTableColumn TData="ImportList" TValue="MediaListAddStrategy"
-                                   Header="Strategy"
-                                   Property="@(l => l.Strategy)"
-                                   Sortable="true">
-                    <CellTemplate Context="list">
-                        @if (list.Strategy == MediaListAddStrategy.Replace)
-                        {
-                            <BbBadge Variant="BadgeVariant.Secondary">Replace</BbBadge>
-                        }
-                        else
-                        {
-                            <BbBadge Variant="BadgeVariant.Secondary">Append</BbBadge>
-                        }
-                    </CellTemplate>
-                </BbDataTableColumn>
+                        <BbDataTableColumn TData="ImportList" TValue="MediaListAddStrategy"
+                                           Header="Strategy"
+                                           Property="@(l => l.Strategy)"
+                                           Sortable="true">
+                            <CellTemplate Context="list">
+                                @if (list.Strategy == MediaListAddStrategy.Replace)
+                                {
+                                    <BbBadge Variant="BadgeVariant.Secondary">Replace</BbBadge>
+                                }
+                                else
+                                {
+                                    <BbBadge Variant="BadgeVariant.Secondary">Append</BbBadge>
+                                }
+                            </CellTemplate>
+                        </BbDataTableColumn>
 
-                <BbDataTableColumn TData="ImportList" TValue="string"
-                                   Header="List ID"
-                                   Property="@(l => l.ListIdentifier)"
-                                   Filterable="true">
-                    <CellTemplate Context="list">
-                        <ProviderListLink ListIdentifier="@list.ListIdentifier" Provider="@list.Provider"/>
-                    </CellTemplate>
-                </BbDataTableColumn>
+                        <BbDataTableColumn TData="ImportList" TValue="string"
+                                           Header="List ID"
+                                           Property="@(l => l.ListIdentifier)"
+                                           Filterable="true">
+                            <CellTemplate Context="list">
+                                <ProviderListLink ListIdentifier="@list.ListIdentifier" Provider="@list.Provider"/>
+                            </CellTemplate>
+                        </BbDataTableColumn>
 
-                <BbDataTableColumn TData="ImportList" TValue="bool"
-                                   Header="Status"
-                                   Property="@(l => l.Enabled)"
-                                   Sortable="true">
-                    <CellTemplate Context="list">
-                        @if (list.Enabled)
-                        {
+                        <BbDataTableColumn TData="ImportList" TValue="bool"
+                                           Header="Status"
+                                           Property="@(l => l.Enabled)"
+                                           Sortable="true">
+                            <CellTemplate Context="list">
+                                @if (list.Enabled)
+                                {
 
-                            <BbBadge Class="bg-success">Enabled</BbBadge>
-                        }
-                        else
-                        {
-                            <BbBadge Variant="BadgeVariant.Destructive">Disabled</BbBadge>
-                        }
-                    </CellTemplate>
-                </BbDataTableColumn>
+                                    <BbBadge Class="bg-success">Enabled</BbBadge>
+                                }
+                                else
+                                {
+                                    <BbBadge Variant="BadgeVariant.Destructive">Disabled</BbBadge>
+                                }
+                            </CellTemplate>
+                        </BbDataTableColumn>
 
-                <BbDataTableColumn TData="ImportList" TValue="DateTimeOffset"
-                                   Header="Added"
-                                   Property="@(l => l.CreatedAt)"
-                                   Sortable="true">
-                    <CellTemplate Context="list">
-                        <BbTooltip>
-                            <BbTooltipTrigger>
-                                <span class="text-sm text-muted-foreground tabular-nums">@list.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>@list.CreatedAt.ToLocalTime().ToString("f")</BbTooltipContent>
-                        </BbTooltip>
-                    </CellTemplate>
-                </BbDataTableColumn>
+                        <BbDataTableColumn TData="ImportList" TValue="DateTimeOffset"
+                                           Header="Added"
+                                           Property="@(l => l.CreatedAt)"
+                                           Sortable="true">
+                            <CellTemplate Context="list">
+                                <BbTooltip>
+                                    <BbTooltipTrigger>
+                                        <span
+                                            class="text-sm text-muted-foreground tabular-nums">@list.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</span>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>@list.CreatedAt.ToLocalTime().ToString("f")</BbTooltipContent>
+                                </BbTooltip>
+                            </CellTemplate>
+                        </BbDataTableColumn>
 
-                <BbDataTableColumn TData="ImportList" TValue="string"
-                                   Header=""
-                                   Width="80px">
-                    <CellTemplate Context="list">
-                        <div class="flex items-center gap-1">
-                            <BbTooltip>
-                                <BbTooltipTrigger>
-                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit" Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/edit")">
-                                        <LucideIcon Name="pencil" Size="15"/>
-                                    </BbButton>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>Edit</BbTooltipContent>
-                            </BbTooltip>
-                            <BbTooltip>
-                                <BbTooltipTrigger>
-                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate" Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/clone")">
-                                        <LucideIcon Name="copy" Size="15"/>
-                                    </BbButton>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>Duplicate</BbTooltipContent>
-                            </BbTooltip>
-                            <BbAlertDialog>
-                                <BbAlertDialogTrigger>
+                        <BbDataTableColumn TData="ImportList" TValue="string"
+                                           Header=""
+                                           Width="80px">
+                            <CellTemplate Context="list">
+                                <div class="flex items-center gap-1">
                                     <BbTooltip>
                                         <BbTooltipTrigger>
-                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Delete" Class="text-destructive hover:text-destructive">
-                                                <LucideIcon Name="trash-2" Size="15"/>
+                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit"
+                                                      Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/edit")">
+                                                <LucideIcon Name="pencil" Size="15"/>
                                             </BbButton>
                                         </BbTooltipTrigger>
-                                        <BbTooltipContent>Delete</BbTooltipContent>
+                                        <BbTooltipContent>Edit</BbTooltipContent>
                                     </BbTooltip>
-                                </BbAlertDialogTrigger>
-                                <BbAlertDialogContent>
-                                    <BbAlertDialogHeader>
-                                        <BbAlertDialogTitle>Delete "@list.Name"?</BbAlertDialogTitle>
-                                        <BbAlertDialogDescription>
-                                            This will permanently remove the list. This action cannot be undone.
-                                        </BbAlertDialogDescription>
-                                    </BbAlertDialogHeader>
-                                    <BbAlertDialogFooter>
-                                        <BbAlertDialogCancel>
-                                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                                        </BbAlertDialogCancel>
-                                        <BbAlertDialogAction>
-                                            <BbButton Variant="ButtonVariant.Destructive" OnClick="@(() => DeleteListAsync(list.Id))">Delete</BbButton>
-                                        </BbAlertDialogAction>
-                                    </BbAlertDialogFooter>
-                                </BbAlertDialogContent>
-                            </BbAlertDialog>
-                        </div>
-                    </CellTemplate>
-                </BbDataTableColumn>
-            </Columns>
-        </BbDataTable>
+                                    <BbTooltip>
+                                        <BbTooltipTrigger>
+                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate"
+                                                      Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/clone")">
+                                                <LucideIcon Name="copy" Size="15"/>
+                                            </BbButton>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Duplicate</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbAlertDialog>
+                                        <BbAlertDialogTrigger>
+                                            <BbTooltip>
+                                                <BbTooltipTrigger>
+                                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Delete"
+                                                              Class="text-destructive hover:text-destructive">
+                                                        <LucideIcon Name="trash-2" Size="15"/>
+                                                    </BbButton>
+                                                </BbTooltipTrigger>
+                                                <BbTooltipContent>Delete</BbTooltipContent>
+                                            </BbTooltip>
+                                        </BbAlertDialogTrigger>
+                                        <BbAlertDialogContent>
+                                            <BbAlertDialogHeader>
+                                                <BbAlertDialogTitle>Delete "@list.Name"?</BbAlertDialogTitle>
+                                                <BbAlertDialogDescription>
+                                                    This will permanently remove the list. This action cannot be undone.
+                                                </BbAlertDialogDescription>
+                                            </BbAlertDialogHeader>
+                                            <BbAlertDialogFooter>
+                                                <BbAlertDialogCancel>
+                                                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                                </BbAlertDialogCancel>
+                                                <BbAlertDialogAction>
+                                                    <BbButton Variant="ButtonVariant.Destructive" OnClick="@(() => DeleteListAsync(list.Id))">Delete</BbButton>
+                                                </BbAlertDialogAction>
+                                            </BbAlertDialogFooter>
+                                        </BbAlertDialogContent>
+                                    </BbAlertDialog>
+                                </div>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+                    </Columns>
+                </BbDataTable>
 
-        <PaginationControls CurrentPage="_currentPage"
-                            TotalPages="_totalPages"
-                            IsDisabled="_isLoading"
-                            PageChanged="HandlePageChangedAsync"/>
-        }
+                <PaginationControls CurrentPage="_currentPage"
+                                    TotalPages="_totalPages"
+                                    IsDisabled="_isLoading"
+                                    PageChanged="HandlePageChangedAsync"/>
+            }
+        </div>
     </div>
-</div>
-
+</ProtectedSection>
 
 @code {
     private string PageHeading => "Lists";
     private string PageDescription => "Import your media lists from supported providers to get started.";
+
+    private ProviderConfig _providerConfig = null!;
+    private bool _hasOAuthAccess;
+    private bool IsOAuthAllowed() => _hasOAuthAccess;
 
     private IReadOnlyList<ImportList> _lists = [];
     private IReadOnlyList<ImportList> _pagedLists = [];
@@ -199,9 +217,16 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _providerConfig = await ProviderConfigRepository.GetAsync();
         _lists = await ImportListRepository.GetImportListsAsync();
         UpdatePagedLists();
         _isLoading = false;
+    }
+
+    private Task HandleAccessChangedAsync(bool hasAccess)
+    {
+        _hasOAuthAccess = hasAccess;
+        return Task.CompletedTask;
     }
 
     private void NavigateToCreateSubscription()
@@ -222,7 +247,6 @@
         _lists = await ImportListRepository.GetImportListsAsync();
         UpdatePagedLists();
     }
-
 
 
     private async Task HandlePageChangedAsync(int newPage)
