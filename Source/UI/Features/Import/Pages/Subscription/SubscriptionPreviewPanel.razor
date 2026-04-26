@@ -1,0 +1,426 @@
+@implements IDisposable
+@using UI.Features.Import.Components
+@using BlazorBlueprint.Primitives.Filtering
+@using Contracts
+@using Contracts.Auth
+@using Contracts.DI
+@using Contracts.Media.Blacklist
+@using Contracts.Media.List
+@using Contracts.Media.Search
+@using Contracts.Processing
+@using Contracts.Settings
+@using Contracts.Watchlist
+@using UI.Shared.Media
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
+@inject IBlacklistService BlacklistService
+@inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
+@inject IQueryProcessor<IMediaDetailResult> QueryProcessor
+
+<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
+    <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
+        <BbInput Placeholder="Search media..."
+                 Class="w-full"
+                 @bind-Value="_searchQuery"
+                 UpdateTiming="UpdateTiming.Immediate"/>
+        <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
+    </div>
+    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col">
+        @if (HasResults && FilteredResults.Any())
+        {
+            <div class="mb-4 shrink-0">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
+                    <BbTooltipProvider>
+                        <div class="flex items-center gap-1.5 text-xs font-medium">
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-muted-foreground bg-muted/40">
+                                    <LucideIcon Name="list" Size="14"/>
+                                    <span>@_rawResults.Count</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Total items fetched from the source list</BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-emerald-600 bg-emerald-500/10">
+                                    <LucideIcon Name="check" Size="14"/>
+                                    <span>@IncludedCount</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Items that will be imported</BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
+                                    <LucideIcon Name="filter-x" Size="14"/>
+                                    <span>@FilteredCount</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Items removed by your filter rules</BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
+                                    <LucideIcon Name="scissors" Size="14"/>
+                                    <span>@SkippedCount</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>Items cut off by the import limit</BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-blue-500 bg-blue-500/10">
+                                    <LucideIcon Name="bookmark" Size="14"/>
+                                    <span>@WatchlistCount</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>
+                                    <p class="font-medium mb-0.5">Watchlist</p>
+                                    <p>@WatchlistCount items across this list are already in your watchlist.</p>
+                                    <p class="opacity-70 mt-0.5">These will not be imported as they are already tracked.</p>
+                                </BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-orange-500 bg-orange-500/10">
+                                    <LucideIcon Name="shield-off" Size="14"/>
+                                    <span>@BlacklistCount</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>
+                                    <p class="font-medium mb-0.5">Blacklist</p>
+                                    <p>@BlacklistCount items across this list are blacklisted.</p>
+                                    <p class="opacity-70 mt-0.5">These are shown in the preview but will never be imported.</p>
+                                </BbTooltipContent>
+                            </BbTooltip>
+                        </div>
+                    </BbTooltipProvider>
+                </div>
+                <p class="text-sm text-muted-foreground mt-0.5">
+                    <ProviderListLink ListIdentifier="@_testedConfig!.ListIdentifier" Provider="@_testedConfig!.Provider!.Value"/>
+                </p>
+            </div>
+            <div class="space-y-2">
+                @foreach (var result in FilteredResults)
+                {
+                    var item = GetItem(result);
+                    var isFiltered = result.Value is Filtered<IMediaDetailResult>;
+                    var isSkipped = result.Value is Skipped<IMediaDetailResult>;
+                    var isDimmed = isFiltered || isSkipped;
+                    var isBlacklisted = IsBlacklisted(item);
+                    var isInWatchlist = IsWatchlisted(item);
+                    var isTogglingWatchlist = _togglingWatchlistItem == item;
+                    var isTogglingBlacklist = _togglingBlacklistItem == item;
+                    <MediaDetailTile @key="item"
+                                     Result="item"
+                                     Class="@(isDimmed ? "result-dimmed" : "hover-bg")"
+                                     IsFocused="_focusedResult == item"
+                                     OnFocusIn="() => _focusedResult = item"
+                                     OnFocusOut="() => ClearFocus(item)">
+                        <Icons>
+                            @if (isDimmed)
+                            {
+                                <BbTooltipProvider>
+                                    <BbTooltip DelayDuration="300">
+                                        <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                            <div class="search-result-status-indicator">
+                                                <LucideIcon Name="@(isFiltered ? "filter-x" : "scissors")" Size="24"/>
+                                            </div>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>
+                                            @(isFiltered ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
+                                        </BbTooltipContent>
+                                    </BbTooltip>
+                                </BbTooltipProvider>
+                            }
+                            <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
+                                                 OnToggle="ToggleWatchlistAsync"/>
+                            <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
+                                                 OnToggle="ToggleBlacklistAsync"/>
+                        </Icons>
+                    </MediaDetailTile>
+                }
+            </div>
+        }
+        else if (HasResults)
+        {
+            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                <LucideIcon Name="search-x" Size="48" Class="text-muted-foreground mb-4"/>
+                <p class="text-lg font-semibold">No results match your search</p>
+                <p class="text-muted-foreground text-sm mt-2">Try adjusting or clearing the search filter.</p>
+            </div>
+        }
+        else if (IsLoading)
+        {
+            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                <BbSpinner Size="SpinnerSize.Large" Class="mb-4"/>
+                <p class="text-lg font-semibold">Loading…</p>
+                <p class="text-muted-foreground text-sm mt-2">Fetching media from the provider. This may take a few seconds.</p>
+            </div>
+        }
+        else if (HasFailed)
+        {
+            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                <LucideIcon Name="x-circle" Size="48" Class="text-destructive mb-4"/>
+                <p class="text-lg font-semibold text-destructive">Test failed</p>
+                <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
+            </div>
+        }
+        else
+        {
+            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                <LucideIcon Name="list-music" Size="48" Class="text-muted-foreground mb-4"/>
+                <p class="text-lg font-semibold">Media results will appear here</p>
+                <p class="text-muted-foreground text-sm mt-2">Run a test to preview the media items from your list.</p>
+            </div>
+        }
+    </div>
+</BbCard>
+
+@code {
+
+    [Parameter] public required SubscriptionConfig Config { get; set; }
+    [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
+
+    private enum FetchState { Idle, Loading, Success, Failed }
+
+    private FetchState _fetchState = FetchState.Idle;
+    private IReadOnlyList<IMediaDetailResult> _rawResults = [];
+    private IReadOnlyList<QueryResult<IMediaDetailResult>> _processedResults = [];
+    private SubscriptionConfig? _testedConfig;
+    private CancellationTokenSource? _cts;
+    private PreviewStatus _lastEmittedStatus = new();
+
+    private string _searchQuery = string.Empty;
+    private IMediaDetailResult? _focusedResult;
+    private IMediaDetailResult? _togglingWatchlistItem;
+    private IMediaDetailResult? _togglingBlacklistItem;
+    private readonly HashSet<string> _watchlistIds = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _blacklistIds = new(StringComparer.Ordinal);
+
+    private bool IsLoading => _fetchState == FetchState.Loading;
+    private bool HasResults => _fetchState == FetchState.Success && _rawResults.Count > 0;
+    private bool HasFailed => _fetchState == FetchState.Failed;
+
+    protected override void OnParametersSet()
+    {
+        if ((_fetchState is FetchState.Success or FetchState.Failed) &&
+            (Config.Provider != _testedConfig?.Provider ||
+             !string.Equals(Config.ListIdentifier?.Trim(), _testedConfig?.ListIdentifier?.Trim(), StringComparison.Ordinal)))
+        {
+            _fetchState = FetchState.Idle;
+            _rawResults = [];
+            _processedResults = [];
+            _testedConfig = null;
+        }
+
+        _ = EmitStatusIfChangedAsync();
+    }
+
+    public async Task ApplyAsync()
+    {
+        if (_fetchState == FetchState.Loading) return;
+
+        var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
+                         Config.Provider != _testedConfig?.Provider ||
+                         !string.Equals(Config.ListIdentifier?.Trim(), _testedConfig?.ListIdentifier?.Trim(), StringComparison.Ordinal);
+
+        if (needsFetch)
+        {
+            _fetchState = FetchState.Loading;
+            _rawResults = [];
+            _processedResults = [];
+            await EmitStatusIfChangedAsync();
+            await InvokeAsync(StateHasChanged);
+            await FetchAsync();
+        }
+        else
+        {
+            Reprocess();
+        }
+
+        await EmitStatusIfChangedAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task FetchAsync()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+        var ct = _cts.Token;
+
+        try
+        {
+            var service = ImportListServiceIndex[Config.Provider!.Value];
+            var results = (await service.GetEnrichedImportListItemsAsync(Config.ListIdentifier.Trim(), ct)).ToList();
+
+            if (results.Count == 0)
+            {
+                _fetchState = FetchState.Failed;
+                return;
+            }
+
+            _rawResults = results;
+            _fetchState = FetchState.Success;
+            _testedConfig = Config;
+            Reprocess();
+            _watchlistIds.Clear();
+            _blacklistIds.Clear();
+            await LoadWatchlistAndBlacklistAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            _rawResults = [];
+            _processedResults = [];
+            _fetchState = FetchState.Idle;
+        }
+        catch
+        {
+            _rawResults = [];
+            _processedResults = [];
+            _fetchState = FetchState.Failed;
+        }
+    }
+
+    private void Reprocess()
+    {
+        if (_rawResults.Count == 0)
+        {
+            _processedResults = [];
+            return;
+        }
+
+        var options = new QueryOptions
+        {
+            Sort = Config.Sort,
+            Limit = Config.Limit,
+            Filter = FilterDefinitionConverter.ToQueryFilter(Config.Filter),
+        };
+        _processedResults = QueryProcessor.Execute(_rawResults, options).ToList();
+    }
+
+    private Task EmitStatusIfChangedAsync()
+    {
+        var status = BuildStatus();
+        if (status == _lastEmittedStatus) return Task.CompletedTask;
+        _lastEmittedStatus = status;
+        return OnStatusChanged.InvokeAsync(status);
+    }
+
+    private PreviewStatus BuildStatus() => new()
+    {
+        IsLoading = _fetchState == FetchState.Loading,
+        HasResults = _fetchState == FetchState.Success && _rawResults.Count > 0,
+        HasFailed = _fetchState == FetchState.Failed,
+    };
+
+    public void Dispose()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+
+    private async Task LoadWatchlistAndBlacklistAsync()
+    {
+        try
+        {
+            var providerConfig = await ProviderConfigRepository.GetAsync();
+            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
+
+            var firstPage = await watchlistService.GetWatchlistAsync(1, CancellationToken.None);
+            AddSourceIds(_watchlistIds, firstPage.Items.Select(i => i.SourceId.ToString()));
+            for (var page = 2; page <= firstPage.TotalPages; page++)
+            {
+                var nextPage = await watchlistService.GetWatchlistAsync(page, CancellationToken.None);
+                AddSourceIds(_watchlistIds, nextPage.Items.Select(i => i.SourceId.ToString()));
+            }
+
+            var mediaProvider = providerConfig.WatchlistProvider.AsMediaProvider();
+            var blacklistItems = await BlacklistService.GetBlacklistItems(mediaProvider, CancellationToken.None);
+            AddSourceIds(_blacklistIds, blacklistItems.Select(i => i.SourceId.ToString()));
+        }
+        catch {}
+    }
+
+    private static void AddSourceIds(HashSet<string> set, IEnumerable<string?> ids)
+    {
+        foreach (var id in ids)
+            if (!string.IsNullOrWhiteSpace(id))
+                set.Add(id);
+    }
+
+    private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
+    private int FilteredCount => _processedResults.Count(r => r.Value is Filtered<IMediaDetailResult>);
+    private int SkippedCount => _processedResults.Count(r => r.Value is Skipped<IMediaDetailResult>);
+    private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && _watchlistIds.Contains(GetKey(item)));
+    private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && _blacklistIds.Contains(GetKey(item)));
+
+    private IEnumerable<QueryResult<IMediaDetailResult>> FilteredResults =>
+        string.IsNullOrWhiteSpace(_searchQuery) ? _processedResults : _processedResults.Where(r => GetItem(r)?.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) == true);
+
+    private bool IsBlacklisted(IMediaDetailResult item) => _blacklistIds.Contains(GetKey(item));
+    private bool IsWatchlisted(IMediaDetailResult item) => _watchlistIds.Contains(GetKey(item));
+
+    private static string GetKey(IMediaDetailResult item) => item.SourceId.ToString() ?? string.Empty;
+
+    private static IMediaDetailResult GetItem(QueryResult<IMediaDetailResult> result) =>
+        result.Value switch
+        {
+            IMediaDetailResult item => item,
+            Skipped<IMediaDetailResult> s => s.Item,
+            Filtered<IMediaDetailResult> f => f.Item,
+        };
+
+    private void ClearFocus(IMediaDetailResult item)
+    {
+        if (ReferenceEquals(_focusedResult, item))
+            _focusedResult = null;
+    }
+
+    private async Task ToggleBlacklistAsync(IMediaDetailResult item)
+    {
+        if (_togglingBlacklistItem is not null)
+            return;
+
+        _togglingBlacklistItem = item;
+        try
+        {
+            var key = GetKey(item);
+            if (_blacklistIds.Contains(key))
+            {
+                await BlacklistService.RemoveFromBacklistAsync(item.SourceId);
+                _blacklistIds.Remove(key);
+            }
+            else
+            {
+                await BlacklistService.AddToBacklistAsync(item.SourceId);
+                _blacklistIds.Add(key);
+            }
+        }
+        finally
+        {
+            _togglingBlacklistItem = null;
+            _focusedResult = null;
+        }
+    }
+
+    private async Task ToggleWatchlistAsync(IMediaDetailResult item)
+    {
+        if (_togglingWatchlistItem is not null)
+            return;
+
+        _togglingWatchlistItem = item;
+        try
+        {
+            var providerConfig = await ProviderConfigRepository.GetAsync();
+            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
+            var key = GetKey(item);
+            if (_watchlistIds.Contains(key))
+            {
+                if (await watchlistService.RemoveFromWatchlistAsync(item.SourceId))
+                    _watchlistIds.Remove(key);
+            }
+            else
+            {
+                if (await watchlistService.AddToWatchlistAsync(item.SourceId))
+                    _watchlistIds.Add(key);
+            }
+        }
+        finally
+        {
+            _togglingWatchlistItem = null;
+            _focusedResult = null;
+        }
+    }
+}

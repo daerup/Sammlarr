@@ -9,9 +9,9 @@ namespace UI.Features.Import.Pages.Subscription;
 
 internal static class FilterDefinitionConverter
 {
-	public static QueryFilter? ToQueryFilter(FilterDefinition filter)
+	public static QueryFilter? ToQueryFilter(FilterDefinition? filter)
 	{
-		if (filter.IsEmpty)
+		if (filter is null || filter.IsEmpty)
 			return null;
 
 		var group = ToFilterGroup(filter);
@@ -21,8 +21,11 @@ internal static class FilterDefinitionConverter
 		return new QueryFilter { Operator = ToContractsOperator(filter.Operator), Groups = [group] };
 	}
 
-	public static FilterDefinition FromQueryFilter(QueryFilter filter)
+	public static FilterDefinition? FromQueryFilter(QueryFilter? filter)
 	{
+		if (filter is null)
+			return null;
+
 		var definition = new FilterDefinition { Operator = ToBbOperator(filter.Operator) };
 
 		if (filter.Groups.Count == 1)
@@ -35,7 +38,7 @@ internal static class FilterDefinitionConverter
 				definition.Groups.Add(ToDefinition(group));
 		}
 
-		return definition;
+		return definition.IsEmpty ? null : definition;
 	}
 
 	private static FilterGroup? ToFilterGroup(FilterDefinition filterDef)

@@ -1,28 +1,15 @@
 @page "/subscription/create"
-@page "/subscription/{ImportListId:guid}/edit"
-@page "/subscription/{CloneSourceImportListId:guid}/clone"
+@page "/subscription/{EditImportListId}/edit"
+@page "/subscription/{CloneImportListId}/clone"
 @implements IDisposable
-@using UI.Features.Import.Components
 @using BlazorBlueprint.Primitives.Filtering
 @using Contracts
 @using Contracts.Media.List
-@using Contracts.Media.Search
-@using Contracts.DI
-@using Contracts.Auth
 @using Contracts.Processing
-@using Contracts.Settings
-@using Contracts.Watchlist
-@using Contracts.Media.Blacklist
-@using System.ComponentModel
+@using global::Shared
 @inject IImportListRepository ImportListRepository
-@inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
-@inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
-@inject IQueryProcessor<IMediaDetailResult> QueryProcessor
-@inject IProviderConfigRepository ProviderConfigRepository
-@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
-@inject IBlacklistService BlacklistService
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -35,7 +22,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-            @if (_state == State.Testing)
+            @if (_previewStatus.IsLoading)
             {
                 <BbButton Variant="ButtonVariant.Default" Disabled="true">
                     <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -45,8 +32,8 @@
             else if (ShowApplyButton)
             {
                 <BbButton Variant="ButtonVariant.Default"
-                          OnClick="ApplyQuerySettings"
-                          Disabled="LimitIsInvalid">
+                          OnClick="HandleApplyAsync"
+                          Disabled="!_config.IsValid">
                     <LucideIcon Name="check" Size="14" Class="mr-2"/>
                     Apply
                 </BbButton>
@@ -61,7 +48,7 @@
                     Save
                 </BbButton>
             }
-            else if (_state == State.Failed)
+            else if (_previewStatus.HasFailed)
             {
                 <BbButton Variant="ButtonVariant.Outline"
                           Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -73,8 +60,8 @@
             else if (ShowTestButton)
             {
                 <BbButton Variant="ButtonVariant.Default"
-                          OnClick="HandleTestAsync"
-                          Disabled="!CanTest || LimitIsInvalid">
+                          OnClick="HandleApplyAsync"
+                          Disabled="!_config.IsValid">
                     <LucideIcon Name="zap" Size="14" Class="mr-2"/>
                     Test
                 </BbButton>
@@ -83,7 +70,7 @@
             <BbButton Variant="ButtonVariant.Outline"
                       Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
                       OnClick="ReturnAsync"
-                      Disabled="@IsProcessing">
+                      Disabled="@(_previewStatus.IsLoading || _isSaving)">
                 Cancel
             </BbButton>
         </div>
@@ -91,541 +78,14 @@
 
     <div class="flex-1 min-h-0 flex flex-row gap-4 p-4 overflow-hidden">
 
-        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
-            <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6">
-                <div class="space-y-6 pb-4">
+        <SubscriptionConfigPanel @key="_configKey"
+            Value="@_config"
+            ShowValidation="@_showValidation"
+            OnChange="@OnConfigChanged"/>
 
-                    <BbField>
-                        <BbFieldLabel Class="flex items-center leading-none">
-                            Enabled
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>Toggle to enable or disable this import.</BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
-                        </BbFieldLabel>
-                        <BbFieldContent>
-                            <BbSwitch @bind-Checked="_isEnabled"/>
-                        </BbFieldContent>
-                    </BbField>
-
-                    <BbField IsInvalid="NameIsInvalid">
-                        <BbFieldLabel For="name" Class="flex items-center leading-none">
-                            Name <span class="text-destructive ml-0.5">*</span>
-                            <BbTooltipProvider>
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>A friendly label to identify this subscription across your lists.</BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
-                        </BbFieldLabel>
-                        <BbFieldContent>
-                            <BbInput id="name" Placeholder="e.g. My Top Movies" @bind-Value="_name" Class="bg-accent" Required="true"
-                                     AriaInvalid="@NameIsInvalid"
-                                     UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
-                        </BbFieldContent>
-                        @if (NameIsInvalid)
-                        {
-                            <BbFieldError>Name is required.</BbFieldError>
-                        }
-                    </BbField>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <BbField>
-                            <BbFieldLabel Class="flex items-center leading-none">
-                                Provider
-                                @if (_disabledProviders.Count > 0)
-                                {
-                                    var allDisabled = _disabledProviders.Count == Enum.GetValues<MediaListProvider>().Length;
-                                    <BbPopover>
-                                        <BbPopoverTrigger AsChild="false"
-                                                          Class="@($"ml-1 inline-flex items-center cursor-pointer {(allDisabled ? "text-destructive" : "text-amber-500")}")">
-                                            <LucideIcon Name="triangle-alert" Size="14"/>
-                                        </BbPopoverTrigger>
-                                        <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72">
-                                            <div class="space-y-2">
-                                                <p class="text-sm font-semibold">API key required</p>
-                                                <p class="text-sm text-muted-foreground">
-                                                    The following providers are unavailable because no API key is configured:
-                                                    <span class="font-medium">@string.Join(", ", _disabledProviders)</span>.
-                                                </p>
-                                                <BbButton Variant="ButtonVariant.Link" Href="/settings?section=api-keys" Class="h-auto p-0 text-sm">
-                                                    Go to Settings
-                                                </BbButton>
-                                            </div>
-                                        </BbPopoverContent>
-                                    </BbPopover>
-                                }
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>The external service that hosts the list you want to import.
-                                        </BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
-                            </BbFieldLabel>
-                            <BbFieldContent>
-                                <EnumToggleGroup TEnum="MediaListProvider"
-                                                 Value="_provider"
-                                                 OnChange="@OnProviderChanged"
-                                                 DisabledValues="_disabledProviders"/>
-                            </BbFieldContent>
-                        </BbField>
-
-                        <BbField>
-                            <BbFieldLabel Class="flex leading-none">
-                                Strategy
-                                <BbTooltipProvider>
-                                    <BbTooltip>
-                                        <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
-                                            <LucideIcon Name="info" Size="14"/>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Only relevant when a subscription runs more than once. Controls whether repeated syncs add to or
-                                            replace
-                                            your existing collection.
-                                        </BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
-                            </BbFieldLabel>
-                            <BbFieldContent>
-                                <EnumToggleGroup TEnum="MediaListAddStrategy"
-                                                 Value="_strategy"
-                                                 OnChange="@OnStrategyChanged"
-                                                 TooltipProvider="GetStrategyTooltip"/>
-                            </BbFieldContent>
-                        </BbField>
-                    </div>
-
-                    <BbField IsInvalid="ListIdentifierIsInvalid">
-                        <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
-                            List identifier <span class="text-destructive ml-0.5">*</span>
-                            <BbTooltipProvider>
-                                <BbTooltip>
-                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                        <LucideIcon Name="info" Size="14"/>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>The unique string that locates your list within the selected provider. The exact format varies by
-                                        provider;
-                                        check the list's URL or the provider's documentation.
-                                    </BbTooltipContent>
-                                </BbTooltip>
-                            </BbTooltipProvider>
-                        </BbFieldLabel>
-                        <BbFieldContent>
-                            <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)"
-                                     @bind-Value="_listIdentifier"
-                                     @bind-Value:after="OnListIdentifierChanged"
-                                     Class="bg-accent"
-                                     Required="true" AriaInvalid="@ListIdentifierIsInvalid" UpdateTiming="UpdateTiming.Immediate"
-                                     @onkeydown="HandleInputKeyDown"/>
-                        </BbFieldContent>
-                        <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
-                        @if (ListIdentifierIsInvalid)
-                        {
-                            <BbFieldError>List identifier is required.</BbFieldError>
-                        }
-                    </BbField>
-
-                </div>
-
-                <BbCollapsible @bind-Open="_filtersSectionOpen">
-                    <BbCollapsibleTrigger AsChild="false"
-                                          Class="group w-full flex items-center justify-between -mx-6 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
-                <span class="flex items-center gap-2">
-                    <LucideIcon Name="sliders-horizontal" Size="14"/>
-                    Filters, Sorting & Limits
-                    <span class="text-xs font-normal opacity-50">optional</span>
-                </span>
-                        <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
-                    </BbCollapsibleTrigger>
-                    <BbCollapsibleContent>
-                        <div class="pt-4 pb-4 space-y-6">
-
-                            <BbField>
-                                <BbFieldLabel Class="flex items-center leading-none">
-                                    Enable filters
-                                    <BbTooltipProvider>
-                                        <BbTooltip DelayDuration="0">
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>Limit which imported items are added to your collection. Filter by genre, rating, release year,
-                                                and
-                                                more.
-                                            </BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
-                                </BbFieldLabel>
-                                <BbFieldContent>
-                                    <BbSwitch @bind-Checked="_filtersEnabled"/>
-                                </BbFieldContent>
-                            </BbField>
-
-                            @if (_filtersEnabled)
-                            {
-                                <BbFilterBuilder @bind-Filter="_filter"
-                                                 Fields="FilterFields"
-                                                 OnFilterChanged="HandleFilterChanged"/>
-                            }
-
-                            <BbField>
-                                <BbFieldLabel Class="flex items-center leading-none">
-                                    Enable custom sorting
-                                    <BbTooltipProvider>
-                                        <BbTooltip DelayDuration="0">
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>Sort imported items by a specific field before applying the limit.</BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
-                                </BbFieldLabel>
-                                <BbFieldContent>
-                                    <BbSwitch @bind-Checked="_sortingEnabled"/>
-                                </BbFieldContent>
-                            </BbField>
-
-                            @if (_sortingEnabled)
-                            {
-                                <BbField>
-                                    <BbFieldLabel Class="flex items-center leading-none">
-                                        Sort by
-                                    </BbFieldLabel>
-                                    <BbFieldContent>
-                                        <div class="flex items-center gap-3">
-                                            <BbSelect TValue="string"
-                                                      Value="_sortField"
-                                                      Class="w-40"
-                                                      ValueChanged="@((v) => _sortField = v ?? _sortField)"
-                                                      Options="SortFields"/>
-                                            <BbTooltipProvider>
-                                                <BbTooltip DelayDuration="0">
-                                                    <BbTooltipTrigger AsChild="false" Class="p-0">
-                                                        <BbButton Size="ButtonSize.Icon"
-                                                                  Variant="ButtonVariant.Outline"
-                                                                  OnClick="@ToggleSortDirection"
-                                                                  AriaLabel="@GetSortLabel()">
-                                                            <LucideIcon Name="arrow-up" Size="14"
-                                                                        Class="@GetSortIconClass()"/>
-                                                        </BbButton>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>@GetSortTooltip()</BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
-                                        </div>
-                                    </BbFieldContent>
-                                </BbField>
-                            }
-
-                            <BbField>
-                                <BbFieldLabel Class="flex items-center leading-none">
-                                    Enable limit
-                                    <BbTooltipProvider>
-                                        <BbTooltip DelayDuration="0">
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>Cap the number of imported items.</BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
-                                </BbFieldLabel>
-                                <BbFieldContent>
-                                    <BbSwitch @bind-Checked="_limitEnabled"/>
-                                </BbFieldContent>
-                            </BbField>
-
-                            @if (_limitEnabled)
-                            {
-                                <BbField IsInvalid="LimitIsInvalid">
-                                    <BbFieldLabel For="limit" Class="flex items-center leading-none">
-                                        Maximum items
-                                    </BbFieldLabel>
-                                    <BbFieldContent>
-                                        <BbInput id="limit"
-                                                 Placeholder="e.g. 100"
-                                                 @bind-Value="_limitRaw"
-                                                 Class="bg-accent w-40"
-                                                 AriaInvalid="@LimitIsInvalid"
-                                                 UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
-                                    </BbFieldContent>
-                                    @if (LimitIsInvalid)
-                                    {
-                                        <BbFieldError>Limit must be a positive whole number.</BbFieldError>
-                                    }
-                                </BbField>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <BbField>
-                                        <BbFieldLabel Class="flex items-center leading-none">
-                                            Watchlist limit behavior
-                                            <BbTooltipProvider>
-                                                <BbTooltip>
-                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                        <LucideIcon Name="info" Size="14"/>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these
-                                                        items
-                                                        can't be imported.
-                                                    </BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
-                                        </BbFieldLabel>
-                                        <BbFieldContent>
-                                            <EnumToggleGroup TEnum="LimitBehavior"
-                                                             Value="_watchlistedLimitBehavior"
-                                                             OnChange="@OnWatchlistedLimitBehaviorChanged"
-                                                             TooltipProvider="GetLimitBehaviorTooltip"/>
-                                        </BbFieldContent>
-                                    </BbField>
-
-                                    <BbField>
-                                        <BbFieldLabel Class="flex items-center leading-none">
-                                            Blacklist limit behavior
-                                            <BbTooltipProvider>
-                                                <BbTooltip>
-                                                    <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                        <LucideIcon Name="info" Size="14"/>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't
-                                                        be
-                                                        imported.
-                                                    </BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
-                                        </BbFieldLabel>
-                                        <BbFieldContent>
-                                            <EnumToggleGroup TEnum="LimitBehavior"
-                                                             Value="_blacklistedLimitBehavior"
-                                                             OnChange="@OnBlacklistedLimitBehaviorChanged"
-                                                             TooltipProvider="GetLimitBehaviorTooltip"/>
-                                        </BbFieldContent>
-                                    </BbField>
-                                </div>
-                            }
-
-                        </div>
-                    </BbCollapsibleContent>
-                </BbCollapsible>
-
-                <BbCollapsible>
-                    <BbCollapsibleTrigger AsChild="false"
-                                          Class="group w-full flex items-center justify-between -mx-6 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
-                <span class="flex items-center gap-2">
-                    <LucideIcon Name="clock" Size="14"/>
-                    Sync Frequency
-                    <span class="text-xs font-normal opacity-50">optional</span>
-                </span>
-                        <LucideIcon Name="chevron-down" Size="14" Class="transition-transform duration-200 group-data-[state=open]:rotate-180"/>
-                    </BbCollapsibleTrigger>
-                    <BbCollapsibleContent>
-                        <div class="pt-4 pb-4 space-y-6">
-                            <BbField>
-                                <BbFieldLabel Class="flex items-center leading-none">
-                                    Trigger
-                                    <BbTooltipProvider>
-                                        <BbTooltip DelayDuration="0">
-                                            <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                <LucideIcon Name="info" Size="14"/>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>When to sync this subscription, on demand or on a recurring schedule.</BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
-                                </BbFieldLabel>
-                                <BbFieldContent>
-                                    <EnumToggleGroup TEnum="RunMode"
-                                                     Value="_runMode"
-                                                     OnChange="@OnRunModeChanged"/>
-                                </BbFieldContent>
-                            </BbField>
-
-                            @if (_runMode == RunMode.Scheduled)
-                            {
-                                <BbField>
-                                    <BbFieldLabel Class="flex items-center leading-none">
-                                        Schedule
-                                        <BbTooltipProvider>
-                                            <BbTooltip DelayDuration="0">
-                                                <BbTooltipTrigger AsChild="false"
-                                                                  Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
-                                                    <LucideIcon Name="info" Size="14"/>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>Define a CRON schedule for automatic runs.</BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbTooltipProvider>
-                                    </BbFieldLabel>
-                                    <BbFieldContent>
-                                        <SchedulePicker CronExpression="@_scheduleCronExpression"
-                                                        CronExpressionChanged="@((value) => _scheduleCronExpression = value)"/>
-                                    </BbFieldContent>
-                                </BbField>
-                            }
-
-                        </div>
-                    </BbCollapsibleContent>
-                </BbCollapsible>
-
-            </div>
-        </BbCard>
-
-        <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
-            <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
-                <BbInput Placeholder="Search media..."
-                         Class="w-full"
-                         @bind-Value="_previewFilterQuery"
-                         UpdateTiming="UpdateTiming.Immediate" @onkeydown="HandleInputKeyDown"/>
-                <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
-            </div>
-            <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col">
-                @if (_state == State.Success && FilteredPreviewResults.Any())
-                {
-                    <div class="mb-4 shrink-0">
-                        <div class="flex items-center justify-between gap-3">
-                            <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
-                            <BbTooltipProvider>
-                                <div class="flex items-center gap-1.5 text-xs font-medium">
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-muted-foreground bg-muted/40">
-                                            <LucideIcon Name="list" Size="14"/>
-                                            <span>@_rawResults.Count</span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Total items fetched from the source list</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-emerald-600 bg-emerald-500/10">
-                                            <LucideIcon Name="check" Size="14"/>
-                                            <span>@IncludedCount</span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Items that will be imported</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
-                                            <LucideIcon Name="filter-x" Size="14"/>
-                                            <span>@FilteredPreviewCount</span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Items removed by your filter rules</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
-                                            <LucideIcon Name="scissors" Size="14"/>
-                                            <span>@SkippedPreviewCount</span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Items cut off by the import limit</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-blue-500 bg-blue-500/10">
-                                            <LucideIcon Name="bookmark" Size="14"/>
-                                            <span>@WatchlistTotalCount</span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>
-                                            <p class="font-medium mb-0.5">Watchlist</p>
-                                            <p>@WatchlistTotalCount items across this list are already in your watchlist.</p>
-                                            <p class="opacity-70 mt-0.5">These will not be imported as they are already tracked.</p>
-                                        </BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip DelayDuration="0">
-                                        <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-orange-500 bg-orange-500/10">
-                                            <LucideIcon Name="shield-off" Size="14"/>
-                                            <span>@BlacklistedTotalCount</span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>
-                                            <p class="font-medium mb-0.5">Blacklist</p>
-                                            <p>@BlacklistedTotalCount items across this list are blacklisted.</p>
-                                            <p class="opacity-70 mt-0.5">These are shown in the preview but will never be imported.</p>
-                                        </BbTooltipContent>
-                                    </BbTooltip>
-                                </div>
-                            </BbTooltipProvider>
-                        </div>
-                        <p class="text-sm text-muted-foreground mt-0.5">
-                            <ProviderListLink ListIdentifier="@_testedListIdentifier" Provider="@_testedProvider!.Value"/>
-                        </p>
-                    </div>
-                    <div class="space-y-2">
-                        @foreach (var result in FilteredPreviewResults)
-                        {
-                            var item = GetItemFromResult(result);
-                            if (item is not null)
-                            {
-                                var isFiltered = result.Value is Filtered<IMediaDetailResult>;
-                                var isSkipped = result.Value is Skipped<IMediaDetailResult>;
-                                var isDimmed = isFiltered || isSkipped;
-                                var isBlacklisted = IsPreviewBlacklisted(item);
-                                var isInWatchlist = IsInWatchlist(item);
-                                var isTogglingWatchlist = _togglingWatchlistItem == item;
-                                var isTogglingBlacklist = _togglingBlacklistItem == item;
-                                <MediaDetailTile @key="item"
-                                                 Result="item"
-                                                 Class="@(isDimmed ? "result-dimmed" : "hover-bg")"
-                                                 IsFocused="_focusedPreviewResult == item"
-                                                 OnFocusIn="() => _focusedPreviewResult = item"
-                                                 OnFocusOut="() => ClearFocusedPreviewResult(item)">
-                                    <Icons>
-                                        @if (isDimmed)
-                                        {
-                                            <BbTooltipProvider>
-                                                <BbTooltip DelayDuration="300">
-                                                    <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                        <div class="search-result-status-indicator">
-                                                            <LucideIcon Name="@(isFiltered ? "filter-x" : "scissors")" Size="24"/>
-                                                        </div>
-                                                    </BbTooltipTrigger>
-                                                    <BbTooltipContent>
-                                                        @(isFiltered ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
-                                                    </BbTooltipContent>
-                                                </BbTooltip>
-                                            </BbTooltipProvider>
-                                        }
-                                            <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
-                                                                 OnToggle="TogglePreviewWatchlistAsync"/>
-                                            <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
-                                                                 OnToggle="TogglePreviewBlacklistAsync"/>
-                                    </Icons>
-                                </MediaDetailTile>
-                            }
-                        }
-                    </div>
-                }
-                else if (_state == State.Success)
-                {
-                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                        <LucideIcon Name="search-x" Size="48" Class="text-muted-foreground mb-4"/>
-                        <p class="text-lg font-semibold">No results match your search</p>
-                        <p class="text-muted-foreground text-sm mt-2">Try adjusting or clearing the search filter.</p>
-                    </div>
-                }
-                else if (_state == State.Testing)
-                {
-                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                        <BbSpinner Size="SpinnerSize.Large" Class="mb-4"/>
-                        <p class="text-lg font-semibold">Loading…</p>
-                        <p class="text-muted-foreground text-sm mt-2">Fetching media from the provider. This may take a few seconds.</p>
-                    </div>
-                }
-                else if (_state == State.Failed)
-                {
-                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                        <LucideIcon Name="x-circle" Size="48" Class="text-destructive mb-4"/>
-                        <p class="text-lg font-semibold text-destructive">Test failed</p>
-                        <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                        <LucideIcon Name="list-music" Size="48" Class="text-muted-foreground mb-4"/>
-                        <p class="text-lg font-semibold">Media results will appear here</p>
-                        <p class="text-muted-foreground text-sm mt-2">Run a test to preview the media items from your list.</p>
-                    </div>
-                }
-            </div>
-        </BbCard>
+        <SubscriptionPreviewPanel @ref="_previewPanel"
+            Config="@_config"
+            OnStatusChanged="@OnPreviewStatusChanged"/>
 
     </div>
 
@@ -633,288 +93,89 @@
 
 @code {
 
-    [Parameter]
-    public Guid? ImportListId { get; set; }
+    [Parameter] public string? EditImportListId { get; set; }
+    [Parameter] public string? CloneImportListId { get; set; }
 
-    [Parameter]
-    public Guid? CloneSourceImportListId { get; set; }
-
-    private enum State { Idle, Testing, Success, Saving, Saved, Failed }
-
-    private enum SortDirection { Ascending, Descending }
-
-    private enum RunMode { Manual, Scheduled }
-
-    private bool IsEditMode => ImportListId.HasValue;
-    private bool IsCloneMode => CloneSourceImportListId.HasValue;
-
-    private string PageTitleText => IsEditMode ? "Edit subscription" : IsCloneMode ? "Clone subscription" : "Create subscription";
+    private string PageTitleText =>
+        EditImportListId is not null ? "Edit subscription"
+        : CloneImportListId is not null ? "Clone subscription"
+        : "Create subscription";
     private string PageHeadingText => PageTitleText;
     private string PageDescriptionText =>
-        IsEditMode ? "Update an existing subscription and keep your import settings in sync."
-        : IsCloneMode ? "Create a new subscription using values copied from an existing one."
+        EditImportListId is not null ? "Update an existing subscription and keep your import settings in sync."
+        : CloneImportListId is not null ? "Create a new subscription using values copied from an existing one."
         : "Import a list from an external provider and subscribe to it.";
 
-    private string _name = string.Empty;
-    private string _listIdentifier = string.Empty;
-    private bool _isEnabled = true;
-    private MediaListProvider? _provider = MediaListProvider.Mdblist;
-    private MediaListAddStrategy _strategy = MediaListAddStrategy.Append;
+    private SubscriptionConfig _config = new();
+    private int? _storedHash;
+    private int _appliedHash;
 
-    private string _initialName = string.Empty;
-    private string _initialListIdentifier = string.Empty;
-    private bool _initialIsEnabled = true;
-    private MediaListProvider? _initialProvider;
-    private MediaListAddStrategy _initialStrategy = MediaListAddStrategy.Append;
-    private bool _initialFiltersEnabled;
-    private int _initialFilterVersion;
-    private QuerySort? _initialSort;
-    private QueryLimit? _initialLimit;
-    private string _initialLimitRaw = string.Empty;
-
-    private State _state = State.Idle;
     private bool _showValidation;
-    private MediaListProvider? _testedProvider;
-    private string _testedListIdentifier = string.Empty;
-    private IReadOnlyList<IMediaDetailResult> _rawResults = [];
-    private IReadOnlyList<QueryResult<IMediaDetailResult>> _processedResults = [];
-    private CancellationTokenSource? _cancellationTokenSource;
-    private string _previewFilterQuery = string.Empty;
-    private readonly HashSet<string> _previewBlacklistedSourceIds = [];
-    private readonly HashSet<string> _watchlistSourceIds = new(StringComparer.Ordinal);
-    private IMediaDetailResult? _focusedPreviewResult;
-    private IMediaDetailResult? _togglingWatchlistItem;
-    private IMediaDetailResult? _togglingBlacklistItem;
+    private bool _isSaving;
+    private bool _pendingAutoApply;
+    private PreviewStatus _previewStatus = new();
+    private SubscriptionPreviewPanel _previewPanel = null!;
 
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
     private const string SubscriptionShortcutId = "subscription-ctrl-enter";
 
-    private RunMode _runMode = RunMode.Manual;
-    private string? _scheduleCronExpression = string.Empty;
+    private int _configKey;
 
-    private bool _filtersEnabled;
-    private FilterDefinition _filter = new();
-    private QuerySort? _sort;
-    private QueryLimit? _limit;
-    private string _limitRaw = string.Empty;
-    private bool _filtersSectionOpen;
+    private bool HasChanged => _storedHash is null || _config.GetSaveHash() != _storedHash;
+    private bool HasPendingChanges => _config.GetPreviewHash() != _appliedHash;
 
-    private bool _appliedFiltersEnabled;
-    private int _appliedFilterVersion;
-    private QuerySort? _appliedSort;
-    private QueryLimit? _appliedLimit;
-    private string _appliedLimitRaw = string.Empty;
+    private bool CanTest => !string.IsNullOrWhiteSpace(_config.ListIdentifier) && _config.Provider is not null;
+    private bool CanSave => _config.IsValid && _previewStatus.HasResults && HasChanged;
 
-    private static readonly QuerySort DefaultSort = new() { Property = nameof(IMediaDetailResult.Title), Direction = ListSortDirection.Descending };
-    private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = LimitBehavior.Included, Blacklisted = LimitBehavior.Included };
+    private bool ShowTestButton => !_previewStatus.HasResults && !_previewStatus.IsLoading && !_isSaving;
+    private bool ShowApplyButton => _previewStatus.HasResults && HasPendingChanges && !_isSaving;
+    private bool ShowSaveButton => _previewStatus.HasResults && !HasPendingChanges && !_isSaving;
 
-    private bool _sortingEnabled
+    private void OnPreviewStatusChanged(PreviewStatus status) => _previewStatus = status;
+    private void OnConfigChanged(SubscriptionConfig config)
     {
-        get => _sort is not null;
-        set => _sort = value ? DefaultSort : null;
+        _config = config;
+        StateHasChanged();
     }
-
-    private string _sortField
-    {
-        get => _sort!.Property;
-        set => _sort = _sort! with { Property = value };
-    }
-
-    private SortDirection _sortDirection
-    {
-        get => _sort!.Direction == ListSortDirection.Ascending ? SortDirection.Ascending : SortDirection.Descending;
-        set => _sort = _sort! with { Direction = value == SortDirection.Ascending ? ListSortDirection.Ascending : ListSortDirection.Descending };
-    }
-
-    private bool _limitEnabled
-    {
-        get => _limit is not null;
-        set => _limit = value ? DefaultLimit : null;
-    }
-
-    private LimitBehavior _watchlistedLimitBehavior
-    {
-        get => _limit!.Watchlisted;
-        set => _limit = _limit! with { Watchlisted = value };
-    }
-
-    private LimitBehavior _blacklistedLimitBehavior
-    {
-        get => _limit!.Blacklisted;
-        set => _limit = _limit! with { Blacklisted = value };
-    }
-
-    private readonly HashSet<MediaListProvider> _disabledProviders = [];
-
-    private record FieldDefinition(string Property, string Label, FilterFieldType FilterType);
-
-    private static readonly IReadOnlyList<FieldDefinition> FieldDefinitions =
-    [
-        new(nameof(IMediaDetailResult.Title), "Title", FilterFieldType.Text),
-        new(nameof(IMediaDetailResult.ReleaseDate), "Release Date", FilterFieldType.Date),
-        new(nameof(IMediaDetailResult.Runtime), "Runtime", FilterFieldType.Number),
-    ];
-
-    private static readonly IReadOnlyList<SelectOption<string>> SortFields =
-        FieldDefinitions.Select(f => new SelectOption<string>(f.Property, f.Label)).ToList();
-
-    private static readonly IReadOnlyList<FilterField> FilterFields =
-        FieldDefinitions
-            .Select(f => new FilterField { Name = f.Property, Label = f.Label, Type = f.FilterType })
-            .ToList();
-
-    private bool NameIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_name);
-    private bool ListIdentifierIsInvalid => _showValidation && string.IsNullOrWhiteSpace(_listIdentifier);
-    private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
-    private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
-
-    private bool CanTest => !string.IsNullOrWhiteSpace(_listIdentifier) && _provider is not null;
-    private bool CanSave =>
-        _state == State.Success &&
-        _provider is not null &&
-        _provider == _testedProvider &&
-        !string.IsNullOrWhiteSpace(_listIdentifier) &&
-        string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal) &&
-        !string.IsNullOrWhiteSpace(_name) &&
-        !LimitIsInvalid &&
-        (!IsEditMode || HasEditChanges);
-
-    private bool HasEditChanges =>
-        !string.Equals(_name.Trim(), _initialName, StringComparison.Ordinal) ||
-        !string.Equals(_listIdentifier.Trim(), _initialListIdentifier, StringComparison.Ordinal) ||
-        _isEnabled != _initialIsEnabled ||
-        _provider != _initialProvider ||
-        _strategy != _initialStrategy ||
-        _appliedFiltersEnabled != _initialFiltersEnabled ||
-        (_appliedFiltersEnabled && _appliedFilterVersion != _initialFilterVersion) ||
-        _appliedSort != _initialSort ||
-        _appliedLimit != _initialLimit ||
-        (_appliedLimit is not null && _appliedLimitRaw != _initialLimitRaw);
-
-    private bool IsProcessing => _state is State.Testing or State.Saving;
-    private bool ShowTestButton => _state is State.Idle or State.Failed || _rawResults.Count == 0;
-    private bool ShowApplyButton => _state == State.Success && _rawResults.Count > 0 && HasPendingQueryChanges;
-    private bool ShowSaveButton => _state == State.Success && _rawResults.Count > 0 && !HasPendingQueryChanges;
-
-    private bool HasPendingQueryChanges =>
-        _rawResults.Count > 0 && (
-        _filtersEnabled != _appliedFiltersEnabled ||
-        (_filtersEnabled && _filter.Version != _appliedFilterVersion) ||
-        _sort != _appliedSort ||
-        _limit != _appliedLimit ||
-        (_limit is not null && _limitRaw != _appliedLimitRaw)
-        );
-
-    private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
-    private int FilteredPreviewCount => _processedResults.Count(r => r.Value is Filtered<IMediaDetailResult>);
-    private int SkippedPreviewCount => _processedResults.Count(r => r.Value is Skipped<IMediaDetailResult>);
-    private int WatchlistTotalCount => _processedResults.Count(r => GetItemFromResult(r) is {} item && IsInWatchlist(item));
-    private int BlacklistedTotalCount => _processedResults.Count(r => GetItemFromResult(r) is {} item && IsPreviewBlacklisted(item));
-
-    private Task OnRunModeChanged(RunMode mode)
-    {
-        _runMode = mode;
-        _scheduleCronExpression = mode == RunMode.Manual ? string.Empty : null;
-        return Task.CompletedTask;
-    }
-
-
-    private Task OnStrategyChanged(MediaListAddStrategy strategy)
-    {
-        _strategy = strategy;
-        return Task.CompletedTask;
-    }
-
-
-    private Task OnWatchlistedLimitBehaviorChanged(LimitBehavior behavior)
-    {
-        _watchlistedLimitBehavior = behavior;
-        return Task.CompletedTask;
-    }
-
-    private Task OnBlacklistedLimitBehaviorChanged(LimitBehavior behavior)
-    {
-        _blacklistedLimitBehavior = behavior;
-        return Task.CompletedTask;
-    }
-
-
-    private string GetLimitBehaviorTooltip(LimitBehavior behavior) =>
-        behavior switch
-        {
-            LimitBehavior.Included => "Counts against your import limit, taking up a slot that could be used by another item.",
-            LimitBehavior.Exempt => "Does not count against your import limit, preserving the slot for the next eligible item.",
-        };
 
     protected override async Task OnInitializedAsync()
     {
-        foreach (var provider in Enum.GetValues<MediaListProvider>())
+        var sourceId = UrlGuid.Decode(EditImportListId ?? CloneImportListId);
+        if (sourceId is null) return;
+
+        var importList = await ImportListRepository.GetImportListByIdAsync(sourceId.Value);
+
+        if (importList is null)
         {
-            var apiKey = await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsMediaProvider());
-            if (string.IsNullOrEmpty(apiKey))
-                _disabledProviders.Add(provider);
+            NavigationManager.NavigateTo("/lists");
+            return;
         }
 
-        if (IsEditMode || IsCloneMode)
+        _config = new SubscriptionConfig
         {
-            var sourceImportListId = IsEditMode ? ImportListId!.Value : CloneSourceImportListId!.Value;
-            var importList = (await ImportListRepository.GetImportListsAsync())
-                .FirstOrDefault(list => list.Id == sourceImportListId);
-
-            if (importList is null)
-            {
-                NavigationManager.NavigateTo("/lists");
-                return;
-            }
-
-            _name = importList.Name;
-            _isEnabled = importList.Enabled;
-            _provider = importList.Provider;
-            _strategy = importList.Strategy;
-            _listIdentifier = importList.ListIdentifier;
-
-            if (importList.Filter is { } existingFilter)
-            {
-                _filter = FilterDefinitionConverter.FromQueryFilter(existingFilter);
-                _filtersEnabled = !_filter.IsEmpty;
-            }
-
-            _sort = importList.Sort;
-
-            if (importList.Limit is { } limit)
-            {
-                _limit = limit;
-                _limitRaw = limit.Count.ToString();
-            }
-
-            _filtersSectionOpen = _filtersEnabled || _sort is not null || _limit is not null;
-
-            _disabledProviders.Remove(importList.Provider);
-
-            if (IsEditMode)
-            {
-                _initialName = importList.Name.Trim();
-                _initialIsEnabled = importList.Enabled;
-                _initialProvider = importList.Provider;
-                _initialStrategy = importList.Strategy;
-                _initialListIdentifier = importList.ListIdentifier.Trim();
-                _initialFiltersEnabled = _filtersEnabled;
-                _initialFilterVersion = _filter.Version;
-                _initialSort = _sort;
-                _initialLimit = _limit;
-                _initialLimitRaw = _limitRaw;
-            }
-
-            await TestAsync();
-        }
-
-        if (!IsEditMode && _disabledProviders.Contains(_provider ?? default))
-            _provider = Enum.GetValues<MediaListProvider>().Cast<MediaListProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
+            Name = importList.Name.Trim(),
+            IsEnabled = importList.Enabled,
+            Provider = importList.Provider,
+            Strategy = importList.Strategy,
+            ListIdentifier = importList.ListIdentifier.Trim(),
+            Filter = FilterDefinitionConverter.FromQueryFilter(importList.Filter),
+            Sort = importList.Sort,
+            Limit = importList.Limit,
+        };
+        _storedHash = _config.GetSaveHash();
+        _configKey++;
+        _pendingAutoApply = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_pendingAutoApply)
+        {
+            _pendingAutoApply = false;
+            await ApplyAsync();
+        }
+
         if (!_isShortcutRegistered)
         {
             _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+Enter", OnShortcutActivatedAsync, SubscriptionShortcutId);
@@ -922,66 +183,28 @@
         }
     }
 
-    private string GetListIdentifierPlaceholder(MediaListProvider? provider) =>
-        provider switch
-        {
-            MediaListProvider.Mdblist => "e.g. top-250-movies or 12345",
-            null => "Select a provider first",
-            _ => "Provider-specific list identifier",
-        };
-
-    private MarkupString RenderListIdentifierDescription() => _provider switch
-    {
-        MediaListProvider.Mdblist => new MarkupString(
-        "Slug or numeric ID from the list URL, e.g. <code>top-250-movies</code> or <code>12345</code>. " +
-        "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
-        "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
-        null => new MarkupString("No provider is available. Configure an API key in Settings."),
-        _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
-    };
-
-    private string GetStrategyTooltip(MediaListAddStrategy strategy) =>
-        strategy switch
-        {
-            MediaListAddStrategy.Append => "Each sync adds only new items. Items already in your collection are kept.",
-            MediaListAddStrategy.Replace => "Each sync removes items that were added by this subscription and are no longer on the list. Items added by other subscriptions are unaffected, even if they appear on this list.",
-            _ => string.Empty,
-        };
-
     private async Task OnShortcutActivatedAsync()
     {
-        if (IsProcessing)
+        if (_previewStatus.IsLoading || _isSaving)
             return;
 
         if (ShowSaveButton && CanSave)
-        {
             await HandleSaveAsync();
-        }
-        else if (ShowApplyButton && !LimitIsInvalid)
-        {
-            ApplyQuerySettings();
-        }
-        else if (ShowTestButton && CanTest && !LimitIsInvalid)
-        {
-            await HandleTestAsync();
-        }
+        else if (ShowApplyButton && _config.IsValid)
+            await HandleApplyAsync();
+        else if (ShowTestButton && _config.IsValid)
+            await HandleApplyAsync();
 
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task HandleInputKeyDown(KeyboardEventArgs e)
-    {
-        if ((e.CtrlKey || e.MetaKey) && string.Equals(e.Key, "Enter", StringComparison.OrdinalIgnoreCase))
-        {
-            await OnShortcutActivatedAsync();
-        }
-    }
+    private Task HandleApplyAsync() => ApplyAsync();
 
-    private Task OnProviderChanged(MediaListProvider provider)
+    private async Task ApplyAsync()
     {
-        _provider = provider;
-        InvalidateTestStateIfSourceChanged();
-        return Task.CompletedTask;
+        await _previewPanel.ApplyAsync();
+        _appliedHash = _config.GetPreviewHash();
+        StateHasChanged();
     }
 
     private Task ReturnAsync()
@@ -990,343 +213,61 @@
         return Task.CompletedTask;
     }
 
-    private void OnListIdentifierChanged()
-    {
-        InvalidateTestStateIfSourceChanged();
-    }
-
-    private void InvalidateTestStateIfSourceChanged()
-    {
-        if (_state is not (State.Success or State.Failed))
-            return;
-
-        if (_provider != _testedProvider ||
-            !string.Equals(_listIdentifier.Trim(), _testedListIdentifier, StringComparison.Ordinal))
-        {
-            _state = State.Idle;
-            _testedProvider = null;
-            _testedListIdentifier = string.Empty;
-        }
-    }
-
-    private void HandleFilterChanged(FilterDefinition filter) {}
-
-    private static string GetPreviewSourceKey(IMediaDetailResult result) => result.SourceId.ToString() ?? string.Empty;
-
-    private bool IsPreviewBlacklisted(IMediaDetailResult result) =>
-        _previewBlacklistedSourceIds.Contains(GetPreviewSourceKey(result));
-
-    private bool IsInWatchlist(IMediaDetailResult result) =>
-        _watchlistSourceIds.Contains(GetPreviewSourceKey(result));
-
-    private async Task TogglePreviewBlacklistAsync(IMediaDetailResult result)
-    {
-        if (_togglingBlacklistItem is not null)
-            return;
-
-        _togglingBlacklistItem = result;
-        try
-        {
-            var sourceKey = GetPreviewSourceKey(result);
-
-            if (_previewBlacklistedSourceIds.Contains(sourceKey))
-            {
-                await BlacklistService.RemoveFromBacklistAsync(result.SourceId);
-                _previewBlacklistedSourceIds.Remove(sourceKey);
-            }
-            else
-            {
-                await BlacklistService.AddToBacklistAsync(result.SourceId);
-                _previewBlacklistedSourceIds.Add(sourceKey);
-            }
-        }
-        finally
-        {
-            _togglingBlacklistItem = null;
-            _focusedPreviewResult = null;
-        }
-    }
-
-    private async Task TogglePreviewWatchlistAsync(IMediaDetailResult result)
-    {
-        if (_togglingWatchlistItem is not null)
-            return;
-
-        _togglingWatchlistItem = result;
-        try
-        {
-            var providerConfig = await ProviderConfigRepository.GetAsync();
-            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
-            var sourceKey = GetPreviewSourceKey(result);
-
-            if (_watchlistSourceIds.Contains(sourceKey))
-            {
-                if (await watchlistService.RemoveFromWatchlistAsync(result.SourceId))
-                    _watchlistSourceIds.Remove(sourceKey);
-            }
-            else
-            {
-                if (await watchlistService.AddToWatchlistAsync(result.SourceId))
-                    _watchlistSourceIds.Add(sourceKey);
-            }
-        }
-        finally
-        {
-            _togglingWatchlistItem = null;
-            _focusedPreviewResult = null;
-        }
-    }
-
-    private void ClearFocusedPreviewResult(IMediaDetailResult result)
-    {
-        if (ReferenceEquals(_focusedPreviewResult, result))
-            _focusedPreviewResult = null;
-    }
-
-
-    private static IMediaDetailResult? GetItemFromResult(QueryResult<IMediaDetailResult> result) =>
-        result.Value switch
-        {
-            IMediaDetailResult item => item,
-            Skipped<IMediaDetailResult> s => s.Item,
-            Filtered<IMediaDetailResult> f => f.Item,
-            _ => null,
-        };
-
-    private Task HandleTestAsync() => TestAsync();
-
     private Task HandleSaveAsync()
     {
         _showValidation = true;
         return CanSave ? SaveAsync() : Task.CompletedTask;
     }
 
-
-    private IEnumerable<QueryResult<IMediaDetailResult>> FilteredPreviewResults =>
-        string.IsNullOrWhiteSpace(_previewFilterQuery) ? _processedResults : _processedResults.Where(r => GetItemFromResult(r)?.Title.Contains(_previewFilterQuery, StringComparison.OrdinalIgnoreCase) == true);
-
-    private void ReprocessResults()
-    {
-        if (_rawResults.Count == 0)
-        {
-            _processedResults = [];
-            return;
-        }
-
-        var options = new QueryOptions { Sort = _sort, Limit = GetEffectiveQueryLimit(), Filter = GetEffectiveQueryFilter() };
-        _processedResults = QueryProcessor.Execute(_rawResults, options).ToList();
-    }
-
-    private QueryLimit? GetEffectiveQueryLimit() => _limit is { } l && ParsedLimit is { } n ? l with { Count = n } : null;
-
-    private QueryFilter? GetEffectiveQueryFilter() => _filtersEnabled ? FilterDefinitionConverter.ToQueryFilter(_filter) : null;
-
-    private void ApplyQuerySettings()
-    {
-        _appliedFiltersEnabled = _filtersEnabled;
-        _appliedFilterVersion = _filter.Version;
-        _appliedSort = _sort;
-        _appliedLimit = _limit;
-        _appliedLimitRaw = _limitRaw;
-        ReprocessResults();
-    }
-
-    private void ToggleSortDirection() =>
-        _sortDirection = _sortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
-
-    private string GetSortLabel() =>
-        _sortDirection == SortDirection.Ascending ? "Ascending" : "Descending";
-
-    private string GetSortTooltip() =>
-        _sortDirection == SortDirection.Ascending ? "Ascending (low to high)" : "Descending (high to low)";
-
-    private string GetSortIconClass() =>
-        _sortDirection == SortDirection.Descending ? "transition-transform duration-200 rotate-180" : "transition-transform duration-200";
-
-
-    private async Task TestAsync()
-    {
-        if (!CanTest || LimitIsInvalid)
-        {
-            return;
-        }
-
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = _cancellationTokenSource.Token;
-
-        _state = State.Testing;
-        _testedProvider = null;
-        _testedListIdentifier = string.Empty;
-
-        try
-        {
-            var importListService = ImportListServiceIndex[_provider!.Value];
-            var results = (await importListService.GetEnrichedImportListItemsAsync(_listIdentifier.Trim(), cancellationToken)).ToList();
-            var watchlistSourceIds = await GetWatchlistSourceIdsAsync(cancellationToken);
-            var blacklistSourceIds = await GetBlacklistSourceIdsAsync(cancellationToken);
-
-            _rawResults = results;
-            _previewBlacklistedSourceIds.Clear();
-            _previewBlacklistedSourceIds.UnionWith(blacklistSourceIds);
-            _watchlistSourceIds.Clear();
-            _watchlistSourceIds.UnionWith(watchlistSourceIds);
-            _focusedPreviewResult = null;
-            _state = _rawResults.Count > 0 ? State.Success : State.Failed;
-
-            if (_state == State.Success)
-            {
-                _testedProvider = _provider;
-                _testedListIdentifier = _listIdentifier.Trim();
-                ApplyQuerySettings();
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            _state = State.Idle;
-            _rawResults = [];
-            _processedResults = [];
-            _previewBlacklistedSourceIds.Clear();
-            _watchlistSourceIds.Clear();
-            _focusedPreviewResult = null;
-            _testedProvider = null;
-            _testedListIdentifier = string.Empty;
-        }
-        catch (Exception)
-        {
-            _state = State.Failed;
-            _rawResults = [];
-            _processedResults = [];
-            _previewBlacklistedSourceIds.Clear();
-            _watchlistSourceIds.Clear();
-            _focusedPreviewResult = null;
-            _testedProvider = null;
-            _testedListIdentifier = string.Empty;
-        }
-    }
-
-    private async Task<HashSet<string>> GetWatchlistSourceIdsAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var providerConfig = await ProviderConfigRepository.GetAsync(cancellationToken);
-            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
-            var sourceIds = new HashSet<string>(StringComparer.Ordinal);
-
-            var firstPage = await watchlistService.GetWatchlistAsync(1, cancellationToken);
-            AddWatchlistSourceIds(sourceIds, firstPage.Items);
-
-            for (var page = 2; page <= firstPage.TotalPages; page++)
-            {
-                var nextPage = await watchlistService.GetWatchlistAsync(page, cancellationToken);
-                AddWatchlistSourceIds(sourceIds, nextPage.Items);
-            }
-
-            return sourceIds;
-        }
-        catch
-        {
-            return [];
-        }
-    }
-
-    private static void AddWatchlistSourceIds(HashSet<string> sourceIds, IEnumerable<IWatchlistItem> items)
-    {
-        foreach (var item in items)
-        {
-            var sourceKey = item.SourceId.ToString();
-            if (!string.IsNullOrWhiteSpace(sourceKey))
-            {
-                sourceIds.Add(sourceKey);
-            }
-        }
-    }
-
-    private async Task<HashSet<string>> GetBlacklistSourceIdsAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var providerConfig = await ProviderConfigRepository.GetAsync(cancellationToken);
-            var mediaProvider = providerConfig.WatchlistProvider.AsMediaProvider();
-            var items = await BlacklistService.GetBlacklistItems(mediaProvider, cancellationToken);
-            var sourceIds = new HashSet<string>(StringComparer.Ordinal);
-
-            foreach (var item in items)
-            {
-                var sourceKey = item.SourceId.ToString();
-                if (!string.IsNullOrWhiteSpace(sourceKey))
-                    sourceIds.Add(sourceKey);
-            }
-
-            return sourceIds;
-        }
-        catch
-        {
-            return [];
-        }
-    }
-
     private async Task SaveAsync()
     {
-        _state = State.Saving;
+        _isSaving = true;
 
         try
         {
-            var cancellationToken = _cancellationTokenSource?.Token ?? CancellationToken.None;
-
-            if (IsEditMode)
+            if (UrlGuid.Decode(EditImportListId) is { } editId)
             {
                 var updateData = new ImportListUpdateData
                 {
-                    Name = _name.Trim(),
-                    IsEnabled = _isEnabled,
-                    Provider = _provider!.Value,
-                    Strategy = _strategy,
-                    ListIdentifier = _listIdentifier.Trim(),
-                    Filter = GetEffectiveQueryFilter(),
-                    Sort = _appliedSort,
-                    Limit = _appliedLimit is { } appliedLimit && ParsedLimit is { } appliedLimitCount ? appliedLimit with { Count = appliedLimitCount } : null,
+                    Name = _config.Name.Trim(),
+                    IsEnabled = _config.IsEnabled,
+                    Provider = _config.Provider!.Value,
+                    Strategy = _config.Strategy,
+                    ListIdentifier = _config.ListIdentifier.Trim(),
+                    Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
+                    Sort = _config.Sort,
+                    Limit = _config.Limit,
                 };
 
-                await ImportListRepository.CreateImportListsAsync(ImportListId!.Value, updateData, cancellationToken);
+                await ImportListRepository.UpdateImportListsAsync(editId, updateData, CancellationToken.None);
             }
             else
             {
                 var createData = new ImportListCreateData
                 {
-                    IsEnabled = _isEnabled,
-                    Provider = _provider!.Value,
-                    Strategy = _strategy,
-                    ListIdentifier = _listIdentifier.Trim(),
-                    Filter = GetEffectiveQueryFilter(),
-                    Sort = _appliedSort,
-                    Limit = _appliedLimit is { } appliedLimit && ParsedLimit is { } appliedLimitCount ? appliedLimit with { Count = appliedLimitCount } : null,
+                    IsEnabled = _config.IsEnabled,
+                    Provider = _config.Provider!.Value,
+                    Strategy = _config.Strategy,
+                    ListIdentifier = _config.ListIdentifier.Trim(),
+                    Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
+                    Sort = _config.Sort,
+                    Limit = _config.Limit,
                 };
 
-                await ImportListRepository.CreateImportListsAsync(_name.Trim(), createData, cancellationToken);
+                await ImportListRepository.CreateImportListsAsync(_config.Name.Trim(), createData, CancellationToken.None);
             }
 
-            _state = State.Saved;
             NavigationManager.NavigateTo("/lists");
         }
-        catch (OperationCanceledException)
-        {
-            _state = State.Idle;
-        }
+        catch (OperationCanceledException) { }
         catch (Exception)
         {
-            _state = State.Failed;
+            _isSaving = false;
         }
     }
 
-
     public void Dispose()
     {
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
-
         if (_isShortcutRegistered)
         {
             _shortcutRegistration?.Dispose();
