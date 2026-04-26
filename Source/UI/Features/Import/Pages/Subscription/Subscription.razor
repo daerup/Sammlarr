@@ -76,7 +76,7 @@
                           AuthProvider="@_providerConfig.WatchlistProvider"
                           DeniedActionDescription="managing subscriptions"
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
-            <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden">
+            <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" @onkeydown="HandleContainerKeyDownAsync">
 
                 <SubscriptionConfigPanel @key="_configKey"
                                          Value="@_config"
@@ -286,6 +286,11 @@
         {
             _isSaving = false;
         }
+    }
+
+    private Task HandleContainerKeyDownAsync(KeyboardEventArgs args)
+    {
+        return args is { CtrlKey: true, Key: "Enter" } ? OnShortcutActivatedAsync() : Task.CompletedTask;
     }
 
     public void Dispose()
