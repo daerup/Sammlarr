@@ -1,5 +1,4 @@
 @using Contracts.Media.List
-
 @{
     var url = GetProviderUrl(ListIdentifier, Provider);
 }
@@ -18,17 +17,17 @@ else
 }
 
 @code {
-    [Parameter, EditorRequired]
+    [Parameter] [EditorRequired]
     public string ListIdentifier { get; set; } = string.Empty;
 
-    [Parameter, EditorRequired]
+    [Parameter] [EditorRequired]
     public MediaListProvider Provider { get; set; }
 
     private static string GetProviderUrl(string listIdentifier, MediaListProvider provider) =>
         provider switch
         {
             MediaListProvider.Mdblist => $"https://mdblist.com/lists/{listIdentifier}",
-            MediaListProvider.Tmdb    => $"https://www.themoviedb.org/list/{listIdentifier}",
+            MediaListProvider.Tmdb => $"https://www.themoviedb.org/list/{listIdentifier}",
         };
 }
 

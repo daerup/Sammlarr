@@ -12,7 +12,9 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
 	{
 		foreach (var plexId in candidates.OfType<PlexId>())
+		{
 			return await ConvertFromPlexIdAsync(plexId);
+		}
 
 		if (hints is Some<ResolutionHints>(var h))
 		{

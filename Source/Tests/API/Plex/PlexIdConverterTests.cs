@@ -2,6 +2,7 @@ using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
 using API.TMDB;
+using API.TMDB.Types;
 using Bogus;
 using Contracts;
 using Contracts.Auth;
@@ -20,7 +21,7 @@ public class PlexIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsPlexId_ReturnsPlexIdWithAdditionalIds()
 	{
-		var payload = CreatePlexByIdPayload(includeImdbId: true, includeTvdbId: true);
+		var payload = CreatePlexByIdPayload(true, true);
 		var searchService = IMediaSearchService.Mock();
 		var testee = new PlexIdConverter(null!, CreatePlexApi(payload.Json), searchService);
 
@@ -41,7 +42,7 @@ public class PlexIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsTmdbAndSearchMatches_ReturnsResolvedPlexId()
 	{
-		var payload = CreatePlexByIdPayload(includeImdbId: true, includeTvdbId: true);
+		var payload = CreatePlexByIdPayload(true, true);
 		var searchService = IMediaSearchService.Mock();
 		List<IMediaDetailResult> searchResults =
 		[
@@ -80,7 +81,7 @@ public class PlexIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsTmdbAndSearchHasNoMatch_ReturnsFailed()
 	{
-		var payload = CreatePlexByIdPayload(includeImdbId: false, includeTvdbId: false);
+		var payload = CreatePlexByIdPayload(false, false);
 		var searchService = IMediaSearchService.Mock();
 		searchService.SearchAsync(Any(), Any(), Any()).Returns(new List<IMediaDetailResult>());
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
@@ -92,16 +93,7 @@ public class PlexIdConverterTests
 
 	private static TmdbApi CreateTmdbApi(TmdbId tmdbId, string originalTitle)
 	{
-		var details = new API.TMDB.Types.TmdbTypes.Details(
-			Id: int.Parse(tmdbId.Value),
-			OriginalTitle: originalTitle,
-			OriginalName: null,
-			ReleaseDate: "2021-01-01",
-			FirstAirDate: null,
-			Title: originalTitle,
-			Name: null,
-			Type: "movie"
-		);
+		var details = new TmdbTypes.Details(int.Parse(tmdbId.Value), originalTitle, null, "2021-01-01", null, originalTitle, null, "movie");
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(JsonSerializer.Serialize(details));
 		var apiKeyStore = IApiKeyConfigRepository.Mock();
@@ -122,31 +114,31 @@ public class PlexIdConverterTests
 		List<PlexTypes.ById.Guid> guids = [new($"tmdb://{tmdbId.Value}")];
 		if (imdbId is not null)
 		{
-			guids.Add(new($"imdb://{imdbId.Value.Value}"));
+			guids.Add(new PlexTypes.ById.Guid($"imdb://{imdbId.Value.Value}"));
 		}
 
 		if (tvdbId is not null)
 		{
-			guids.Add(new($"tvdb://{tvdbId.Value.Value}"));
+			guids.Add(new PlexTypes.ById.Guid($"tvdb://{tvdbId.Value.Value}"));
 		}
 
 		var metadata = new PlexTypes.ById.Metadata(
-			Art: faker.System.FilePath(),
-			RatingKey: plexValue,
-			Summary: faker.Lorem.Sentence(),
-			Tagline: faker.Company.CatchPhrase(),
-			Type: "movie",
-			AddedAt: faker.Date.PastOffset().ToUnixTimeSeconds(),
-			AudienceRating: faker.Random.Double(0.0, 10.0),
-			OriginallyAvailableAt: faker.Date.PastDateOnly().ToString("yyyy-MM-dd"),
-			Poster: faker.System.FilePath(),
-			Title: faker.Lorem.Sentence(2),
-			Year: faker.Date.Past().Year,
-			Duration: faker.Random.Int(1, 300) * 60 * 1000,
-			SeasonCount: null,
-			EpisodeCount: null,
-			Guid: guids,
-			Genre: [new PlexTypes.ById.Genre(faker.Lorem.Word())]
+			faker.System.FilePath(),
+			plexValue,
+			faker.Lorem.Sentence(),
+			faker.Company.CatchPhrase(),
+			"movie",
+			faker.Date.PastOffset().ToUnixTimeSeconds(),
+			faker.Random.Double(0.0, 10.0),
+			faker.Date.PastDateOnly().ToString("yyyy-MM-dd"),
+			faker.System.FilePath(),
+			faker.Lorem.Sentence(2),
+			faker.Date.Past().Year,
+			faker.Random.Int(1, 300) * 60 * 1000,
+			null,
+			null,
+			guids,
+			[new PlexTypes.ById.Genre(faker.Lorem.Word())]
 		);
 		var root = new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata]));
 

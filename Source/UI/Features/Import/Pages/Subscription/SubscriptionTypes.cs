@@ -30,14 +30,16 @@ public record SubscriptionConfig
 	public RunMode SyncMode { get; init; } = RunMode.Manual;
 	public string? ScheduleCronExpression { get; init; } = string.Empty;
 
-	public bool IsValid => Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && !string.IsNullOrWhiteSpace(Name) && (Limit is null || Limit.Count > 0);
+	public bool IsValid =>
+		Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && !string.IsNullOrWhiteSpace(Name) && (Limit is null || Limit.Count > 0);
 
-	public int GetPreviewHash() => HashCode.Combine(
-		HashCode.Combine(Provider, ListIdentifier, Filter is not null, Filter?.Version),
-		HashCode.Combine(Sort, Limit));
+	public int GetPreviewHash() =>
+		HashCode.Combine(HashCode.Combine(Provider, ListIdentifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));
 
-	public int GetSaveHash() => HashCode.Combine(
-		HashCode.Combine(IsEnabled, Name, Provider, Strategy, ListIdentifier),
-		HashCode.Combine(Filter is not null, Filter?.Version, Sort, Limit),
-		HashCode.Combine(SyncMode, ScheduleCronExpression));
+	public int GetSaveHash() =>
+		HashCode.Combine(
+			HashCode.Combine(IsEnabled, Name, Provider, Strategy, ListIdentifier),
+			HashCode.Combine(Filter is not null, Filter?.Version, Sort, Limit),
+			HashCode.Combine(SyncMode, ScheduleCronExpression)
+		);
 }

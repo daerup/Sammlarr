@@ -105,9 +105,9 @@
 
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
-    [Parameter, EditorRequired] public MediaSearchProvider SearchProvider { get; set; }
-    [Parameter, EditorRequired] public required Func<IMediaId, bool> IsInWatchlist { get; set; }
-    [Parameter, EditorRequired] public required Func<IMediaId, string, bool, Task<bool>> OnToggle { get; set; }
+    [Parameter] [EditorRequired] public MediaSearchProvider SearchProvider { get; set; }
+    [Parameter] [EditorRequired] public required Func<IMediaId, bool> IsInWatchlist { get; set; }
+    [Parameter] [EditorRequired] public required Func<IMediaId, string, bool, Task<bool>> OnToggle { get; set; }
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Description { get; set; }
     [Parameter] public RenderFragment<TileIconContext>? TileIcons { get; set; }
@@ -153,10 +153,7 @@
     }
 
 
-    private bool IsSearchResultMarked(IMediaDetailResult result)
-    {
-        return IsInWatchlist.Invoke(result.SourceId);
-    }
+    private bool IsSearchResultMarked(IMediaDetailResult result) => IsInWatchlist.Invoke(result.SourceId);
 
     private async Task CloseAsync()
     {

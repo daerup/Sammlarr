@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Contracts.Media.List;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,17 +6,7 @@ namespace DB.Data.List;
 
 internal class ImportListRepository(SammlarrDbContext context) : IImportListRepository
 {
-	public async Task<IReadOnlyList<ImportList>> GetImportListsAsync(CancellationToken cancellationToken = default)
-	{
-		return await context.Lists.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
-	}
-
-	public async Task<ImportList?> GetImportListByIdAsync(Guid id, CancellationToken cancellationToken = default)
-	{
-		return await context.Lists.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);
-	}
-
-	private static readonly System.Linq.Expressions.Expression<Func<ImportListEntity, ImportList>> project = projection => new ImportList
+	private static readonly Expression<Func<ImportListEntity, ImportList>> project = projection => new ImportList
 	{
 		Id = projection.Id,
 		Name = projection.Name,
@@ -28,6 +19,12 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 		Sort = projection.Sort,
 		Limit = projection.Limit,
 	};
+
+	public async Task<IReadOnlyList<ImportList>> GetImportListsAsync(CancellationToken cancellationToken = default) =>
+		await context.Lists.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
+
+	public async Task<ImportList?> GetImportListByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+		await context.Lists.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);
 
 	public async Task CreateImportListsAsync(string name, ImportListCreateData createData, CancellationToken cancellationToken = default)
 	{
@@ -49,7 +46,7 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 
 	public async Task UpdateImportListsAsync(Guid id, ImportListUpdateData updateData, CancellationToken cancellationToken = default)
 	{
-		var entity = await context.Lists.FindAsync([id], cancellationToken: cancellationToken);
+		var entity = await context.Lists.FindAsync([id], cancellationToken);
 		if (entity == null)
 		{
 			throw new InvalidOperationException($"Import list with id {id} not found.");
@@ -69,7 +66,7 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 
 	public async Task DeleteImportListAsync(Guid id, CancellationToken cancellationToken = default)
 	{
-		var entity = await context.Lists.FindAsync([id], cancellationToken: cancellationToken);
+		var entity = await context.Lists.FindAsync([id], cancellationToken);
 		if (entity == null)
 		{
 			return;

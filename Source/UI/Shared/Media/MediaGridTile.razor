@@ -35,13 +35,14 @@
             }
         </div>
 
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </div>
 </div>
 
 @code {
-    [Parameter, EditorRequired] public required string ImageUrl { get; set; }
-    [Parameter, EditorRequired] public required string Title { get; set; }
+    [Parameter] [EditorRequired] public required string ImageUrl { get; set; }
+    [Parameter] [EditorRequired] public required string Title { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public bool ShowBookmark { get; set; }
     [Parameter] public bool IsInWatchlist { get; set; }

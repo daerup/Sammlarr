@@ -9,6 +9,13 @@ public class PlexClientTests
 {
 	private const string PlexBaseUrl = "https://plex.tv";
 
+	private static readonly Faker<StoredCredential> credentialFaker = new Faker<StoredCredential>().CustomInstantiator(f => new StoredCredential(
+		WatchlistProvider.Plex,
+		f.Random.Guid(),
+		f.Random.AlphaNumeric(32),
+		f.Date.FutureOffset()
+	));
+
 	[Test]
 	public async Task SendAsync_WhenCredentialMissing_ThrowsInvalidOperationException()
 	{
@@ -63,11 +70,4 @@ public class PlexClientTests
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).WasCalled(Times.Once);
 		await Assert.That(handler.Requests.Count).IsEqualTo(2);
 	}
-
-	private static readonly Faker<StoredCredential> credentialFaker = new Faker<StoredCredential>().CustomInstantiator(f => new StoredCredential(
-		WatchlistProvider.Plex,
-		f.Random.Guid(),
-		f.Random.AlphaNumeric(32),
-		f.Date.FutureOffset()
-	));
 }

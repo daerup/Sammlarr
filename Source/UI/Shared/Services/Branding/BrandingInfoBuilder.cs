@@ -1,13 +1,13 @@
 using TimeWarp.Simple.Icons;
+using LucideIcon = BlazorBlueprint.Icons.Lucide.Components.LucideIcon;
 
 namespace UI.Shared.Services.Branding;
 
 public static class BrandingInfoBuilder
 {
 	public static BrandingInfo SimpleIcon<TIcon>(string displayName, string nickName, string brandColor)
-		where TIcon : SimpleIconBase
-	{
-		return new BrandingInfo(
+		where TIcon : SimpleIconBase =>
+		new(
 			displayName,
 			nickName,
 			brandColor,
@@ -20,17 +20,15 @@ public static class BrandingInfoBuilder
 				builder.CloseComponent();
 			}
 		);
-	}
 
-	public static BrandingInfo Lucide(string displayName, string nickName, string iconName, string brandColor)
-	{
-		return new BrandingInfo(
+	public static BrandingInfo Lucide(string displayName, string nickName, string iconName, string brandColor) =>
+		new(
 			displayName,
 			nickName,
 			brandColor,
 			builder =>
 			{
-				builder.OpenComponent(0, typeof(BlazorBlueprint.Icons.Lucide.Components.LucideIcon));
+				builder.OpenComponent(0, typeof(LucideIcon));
 				builder.AddAttribute(1, "Color", brandColor);
 				builder.AddAttribute(2, "Size", 32);
 				builder.AddAttribute(3, "class", "w-9 h-9");
@@ -38,7 +36,6 @@ public static class BrandingInfoBuilder
 				builder.CloseComponent();
 			}
 		);
-	}
 
 	public static BrandingInfo Asset(string displayName, string nickName, string brandColor, string svgPath, string webRoot)
 	{

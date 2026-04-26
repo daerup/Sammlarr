@@ -7,9 +7,6 @@ public static class ServiceCollectionExtensions
 	extension(IServiceCollection services)
 	{
 		public void AddModule<TModule>()
-			where TModule : IServiceModule, new()
-		{
-			new TModule().RegisterServices(services);
-		}
+			where TModule : IServiceModule, new() => new TModule().RegisterServices(services);
 	}
 }

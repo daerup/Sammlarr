@@ -20,15 +20,13 @@ internal static class FilterEvaluator
 		return Join(group.Operator, allParts);
 	}
 
-	private static string Join(FilterOperator @operator, List<string> parts)
-	{
-		return parts.Count switch
+	private static string Join(FilterOperator @operator, List<string> parts) =>
+		parts.Count switch
 		{
 			0 => string.Empty,
 			1 => parts[0],
 			_ => $"({string.Join($" {@operator.ToString().ToLower()} ", parts)})",
 		};
-	}
 
 	private static string Compile(FilterPredicate p)
 	{

@@ -37,6 +37,6 @@ public class GeneratedOptionsRegistrationIntegrationTests
 		services.AddSingleton<IConfiguration>(config);
 		services.AddGeneratedOptions();
 
-		return (services.BuildServiceProvider());
+		return services.BuildServiceProvider();
 	}
 }

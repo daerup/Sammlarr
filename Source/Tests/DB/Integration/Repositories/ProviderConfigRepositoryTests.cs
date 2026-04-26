@@ -11,8 +11,8 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IProviderConfigRepository _testee = null!;
 	private Mock<ITypedMemoryCache<string, ProviderConfig>> _cache = null!;
+	private IProviderConfigRepository _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
@@ -68,13 +68,11 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 		WatchlistProvider watchlistProvider,
 		MediaRecommendationProvider trendingProvider,
 		MediaSearchProvider searchProvider
-	)
-	{
-		return new ProviderConfig
+	) =>
+		new()
 		{
 			WatchlistProvider = watchlistProvider,
 			TrendingProvider = trendingProvider,
 			SearchProvider = searchProvider,
 		};
-	}
 }

@@ -5,8 +5,8 @@ namespace API.Plex;
 
 internal class PlexWatchlistItem : IWatchlistItem
 {
-	public IMediaId SourceId => RatingKey;
 	public required PlexId RatingKey { get; set; }
+	public IMediaId SourceId => RatingKey;
 	public required string Title { get; init; }
 
 	public required MediaType MediaType { get; init; }

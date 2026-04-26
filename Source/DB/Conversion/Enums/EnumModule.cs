@@ -6,8 +6,5 @@ namespace DB.Conversion.Enums;
 
 internal class EnumModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services)
-	{
-		services.AddScoped<IPropertyAddedConvention, EnumAsStringConvention>();
-	}
+	public void RegisterServices(IServiceCollection services) => services.AddScoped<IPropertyAddedConvention, EnumAsStringConvention>();
 }

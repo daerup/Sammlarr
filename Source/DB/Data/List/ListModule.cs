@@ -6,8 +6,5 @@ namespace DB.Data.List;
 
 internal class ListModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services)
-	{
-		services.AddScoped<IImportListRepository, ImportListRepository>();
-	}
+	public void RegisterServices(IServiceCollection services) => services.AddScoped<IImportListRepository, ImportListRepository>();
 }

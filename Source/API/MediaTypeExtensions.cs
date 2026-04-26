@@ -8,7 +8,7 @@ internal static class MediaTypeExtensions
 	{
 		public static MediaType Parse(string mediaType)
 		{
-			MediaType.TryParse(mediaType, out var result);
+			MediaType.TryParse(mediaType, out MediaType result);
 			return result;
 		}
 

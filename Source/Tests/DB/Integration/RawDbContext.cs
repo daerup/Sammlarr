@@ -9,10 +9,7 @@ namespace DB.Tests.Integration;
 internal class RawDbContext(SammlarrDbContext context)
 {
 	public RawDbContext<TTable> Table<TTable>()
-		where TTable : IIdentifiable<Guid>
-	{
-		return new RawDbContext<TTable>(context);
-	}
+		where TTable : IIdentifiable<Guid> => new(context);
 }
 
 internal class RawDbContext<TTable>
@@ -20,10 +17,7 @@ internal class RawDbContext<TTable>
 {
 	private readonly SammlarrDbContext _context;
 
-	internal RawDbContext(SammlarrDbContext context)
-	{
-		_context = context;
-	}
+	internal RawDbContext(SammlarrDbContext context) => _context = context;
 
 	public async Task<TColumn> QueryByIdAsync<TColumn>(Guid id, Expression<Func<TTable, TColumn>> propertySelector)
 	{

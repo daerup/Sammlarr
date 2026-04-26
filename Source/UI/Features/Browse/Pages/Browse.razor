@@ -1,6 +1,5 @@
 @page "/browse"
 @implements IDisposable
-@implements IAsyncDisposable
 @using Contracts
 @using Contracts.Auth
 @using Contracts.DI
@@ -8,6 +7,7 @@
 @using Contracts.Media.Trending
 @using Contracts.Settings
 @using Contracts.Watchlist
+@implements IAsyncDisposable
 @inject IKeyedServiceIndex<MediaRecommendationProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
 @inject IKeyboardShortcutService KeyboardShortcutService
@@ -281,10 +281,7 @@
         Dispose();
     }
 
-    private bool IsInWatchlist(ITrendingMedia media)
-    {
-        return IsInWatchlist(media.WatchlistProviderId);
-    }
+    private bool IsInWatchlist(ITrendingMedia media) => IsInWatchlist(media.WatchlistProviderId);
 
     private bool IsInWatchlist(IMediaId mediaId)
     {
@@ -348,15 +345,9 @@
         _isSheetOpen = true;
     }
 
-    private string GetSideMenuButtonText()
-    {
-        return _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "Remove from Watchlist" : "Add to Watchlist";
-    }
+    private string GetSideMenuButtonText() => _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "Remove from Watchlist" : "Add to Watchlist";
 
-    private string GetSideMenuButtonIcon()
-    {
-        return _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "x" : "plus";
-    }
+    private string GetSideMenuButtonIcon() => _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "x" : "plus";
 
     private async Task ToggleWatchlistAsync()
     {

@@ -20,8 +20,8 @@ internal sealed class SammlarrDbContext : DbContext
 	private static readonly JsonSerializerOptions JsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
 
 	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
 	private readonly EntityAuditer _entityAuditer;
+	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
 
 	public SammlarrDbContext(
 		DbContextOptions<SammlarrDbContext> options,
@@ -81,9 +81,15 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<ImportListEntity>(builder =>
 		{
-			builder.Property(x => x.Filter).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);
-			builder.Property(x => x.Sort).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QuerySort>(v, JsonOptions)!);
-			builder.Property(x => x.Limit).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
+			builder
+				.Property(x => x.Filter)
+				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);
+			builder
+				.Property(x => x.Sort)
+				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QuerySort>(v, JsonOptions)!);
+			builder
+				.Property(x => x.Limit)
+				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
 		});
 	}
 

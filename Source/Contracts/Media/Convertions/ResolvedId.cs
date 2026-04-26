@@ -2,7 +2,7 @@ namespace Contracts.Media.Convertions;
 
 public record Resolved(IMediaId Id, IEnumerable<IMediaId> AdditionalIds)
 {
-	public IEnumerable<IMediaId> AllIds => AdditionalIds.Prepend(Id);
+    public IEnumerable<IMediaId> AllIds => AdditionalIds.Prepend(Id);
 }
 
 public readonly record struct Unresolved;

@@ -2,20 +2,19 @@ using BenchmarkDotNet.Attributes;
 using Contracts.Media;
 using DB;
 using Microsoft.EntityFrameworkCore;
-using Performance.Runners.Benchmark.Old;
 using Shared;
+using MediaIdGroupRepository = Performance.Runners.Benchmark.Old.MediaIdGroupRepository;
 
 namespace Performance.Runners.Benchmark;
 
-public class MediaIdGroupStoreGetByIdBenchmark()
+public class MediaIdGroupStoreGetByIdBenchmark
 {
-	internal static string? ConfiguredDbPath { get; set; }
-	internal static int? ConfiguredSeed { get; set; }
-
 	private readonly List<IMediaId> _lookupIds = [];
 	private SammlarrDbContext _dbContext = null!;
-	private MediaIdGroupRepository _repository = null!;
 	private MediaIdGroupRepository _oldRepository = null!;
+	private MediaIdGroupRepository _repository = null!;
+	internal static string? ConfiguredDbPath { get; set; }
+	internal static int? ConfiguredSeed { get; set; }
 
 	[GlobalSetup]
 	public async Task SetupAsync()
@@ -73,8 +72,5 @@ public class MediaIdGroupStoreGetByIdBenchmark()
 	}
 
 	[GlobalCleanup]
-	public async Task CleanupAsync()
-	{
-		await _dbContext.DisposeAsync();
-	}
+	public async Task CleanupAsync() => await _dbContext.DisposeAsync();
 }

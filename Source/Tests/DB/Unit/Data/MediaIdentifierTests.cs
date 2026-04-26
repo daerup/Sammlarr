@@ -39,14 +39,12 @@ public class MediaIdentifierTests
 		await Assert.That(mediaId).IsEqualTo(expected);
 	}
 
-	private static IMediaId CreateMediaId(MediaProvider source, string externalId)
-	{
-		return source switch
+	private static IMediaId CreateMediaId(MediaProvider source, string externalId) =>
+		source switch
 		{
 			MediaProvider.Tmdb => TmdbId.From(externalId, MediaType.Movie),
 			MediaProvider.Imdb => ImdbId.From(externalId, MediaType.Movie),
 			MediaProvider.Tvdb => TvdbId.From(externalId, MediaType.Movie),
 			MediaProvider.Plex => PlexId.From(externalId, MediaType.Movie),
 		};
-	}
 }

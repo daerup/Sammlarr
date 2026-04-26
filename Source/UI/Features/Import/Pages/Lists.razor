@@ -1,6 +1,5 @@
 @page "/lists"
 @using Contracts
-@using Contracts.Auth
 @using Contracts.Media.List
 @using Contracts.Settings
 @using global::Shared
@@ -231,7 +230,7 @@
     {
         const int pageSize = 20;
         _totalPages = (int)Math.Ceiling((double)_lists.Count / pageSize);
-        _pagedLists = _lists.Skip(((_currentPage - 1) * pageSize)).Take(pageSize).ToList();
+        _pagedLists = _lists.Skip((_currentPage - 1) * pageSize).Take(pageSize).ToList();
     }
 
     private async Task DeleteListAsync(Guid id)

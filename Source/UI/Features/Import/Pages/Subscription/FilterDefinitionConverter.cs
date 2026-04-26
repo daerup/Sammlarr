@@ -41,7 +41,9 @@ internal static class FilterDefinitionConverter
 		else
 		{
 			foreach (var group in filter.Groups)
+			{
 				definition.Groups.Add(ToDefinition(group));
+			}
 		}
 
 		return definition.IsEmpty ? null : definition;
@@ -75,10 +77,14 @@ internal static class FilterDefinitionConverter
 	private static void PopulateDefinition(FilterDefinition definition, FilterGroup group)
 	{
 		foreach (var predicate in group.Predicates)
+		{
 			definition.Conditions.Add(ToCondition(predicate));
+		}
 
 		foreach (var nested in group.Groups)
+		{
 			definition.Groups.Add(ToDefinition(nested));
+		}
 	}
 
 	private static FilterPredicate? ToPredicate(FilterCondition condition)

@@ -75,7 +75,7 @@ internal static class PlexTypes
 
 			private T[] GetId<T>(string prefix, Func<string, T> convert) =>
 				Guid.Where(g => g.Id.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).Select(g => convert(g.Id[prefix.Length..])).ToArray();
-		};
+		}
 
 		public record Genre([property: JsonPropertyName("tag")] string Tag);
 
@@ -107,7 +107,7 @@ internal static class PlexTypes
 		{
 			public MediaType MediaType => MediaType.Parse(Type);
 			public PlexId PlexId => PlexId.From(RatingKey, MediaType);
-		};
+		}
 
 		public record Genre([property: JsonPropertyName("tag")] string Tag);
 

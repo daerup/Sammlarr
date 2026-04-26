@@ -2,6 +2,8 @@ namespace Shared;
 
 public static class TypeExtensions
 {
+	public static string GetGenericName<T>() => typeof(T).GetGenericName();
+
 	extension(Type? type)
 	{
 		public string GetGenericName()
@@ -20,6 +22,4 @@ public static class TypeExtensions
 			return $"{name}<{args}>";
 		}
 	}
-
-	public static string GetGenericName<T>() => typeof(T).GetGenericName();
 }

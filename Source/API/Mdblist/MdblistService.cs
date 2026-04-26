@@ -36,6 +36,9 @@ internal class MdblistService(PlexApi plexApi, MdblistClient client, IMediaIdRes
 		return [.. shows, .. movies];
 	}
 
+	public Task<IReadOnlyList<ImportListItem>> GetDistilledImportListItemsAsync(ImportList list, CancellationToken cancellationToken = default) =>
+		throw new NotImplementedException();
+
 	private async Task<IMediaDetailResult> MapMediaItemAsync(MdblistTypes.ListItems.IListItem item, MediaType mediaType, ProviderConfig providerConfig)
 	{
 		var resolvedResult = await ResolveIdsAsync(item.ids, mediaType, providerConfig.WatchlistProvider.AsMediaProvider(), item.title, item.release_year);
@@ -77,7 +80,4 @@ internal class MdblistService(PlexApi plexApi, MdblistClient client, IMediaIdRes
 		TvdbId? tvdbId = ids.tvdb != 0 ? TvdbId.From(ids.tvdb.ToString(), mediaType) : null;
 		return (mdblistId, tmdbId, imdbId, tvdbId);
 	}
-
-	public Task<IReadOnlyList<ImportListItem>> GetDistilledImportListItemsAsync(ImportList list, CancellationToken cancellationToken = default) =>
-		throw new NotImplementedException();
 }

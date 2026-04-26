@@ -36,7 +36,7 @@ public class TmdbIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenPlexMetadataContainsTmdbIds_ReturnsFirstTmdbAndOtherIds()
 	{
-		var payload = CreatePlexByIdPayload(includeTmdbId: true, includeExtraTmdbId: true, includeTvdbId: true);
+		var payload = CreatePlexByIdPayload(true, true, true);
 		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json));
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
@@ -57,7 +57,7 @@ public class TmdbIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenPlexMetadataHasNoTmdbIds_ReturnsUnresolvedWithOtherIds()
 	{
-		var payload = CreatePlexByIdPayload(includeTmdbId: false, includeExtraTmdbId: false, includeTvdbId: false);
+		var payload = CreatePlexByIdPayload(false, false, false);
 		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json));
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
@@ -84,30 +84,30 @@ public class TmdbIdConverterTests
 		List<PlexTypes.ById.Guid> guids = [new($"imdb://{imdbId.Value}")];
 		foreach (var tmdbId in tmdbIds)
 		{
-			guids.Add(new($"tmdb://{tmdbId.Value}"));
+			guids.Add(new PlexTypes.ById.Guid($"tmdb://{tmdbId.Value}"));
 		}
 		if (tvdbId is not null)
 		{
-			guids.Add(new($"tvdb://{tvdbId.Value.Value}"));
+			guids.Add(new PlexTypes.ById.Guid($"tvdb://{tvdbId.Value.Value}"));
 		}
 
 		var metadata = new PlexTypes.ById.Metadata(
-			Art: faker.System.FilePath(),
-			RatingKey: plexValue,
-			Summary: faker.Lorem.Sentence(),
-			Tagline: faker.Company.CatchPhrase(),
-			Type: "movie",
-			AddedAt: faker.Date.PastOffset().ToUnixTimeSeconds(),
-			AudienceRating: faker.Random.Double(0.0, 10.0),
-			OriginallyAvailableAt: faker.Date.PastDateOnly().ToString("yyyy-MM-dd"),
-			Poster: faker.System.FilePath(),
-			Title: faker.Lorem.Sentence(2),
-			Year: faker.Date.Past().Year,
-			Duration: faker.Random.Int(1, 300) * 60 * 1000,
-			SeasonCount: null,
-			EpisodeCount: null,
-			Guid: guids,
-			Genre: [new PlexTypes.ById.Genre(faker.Lorem.Word())]
+			faker.System.FilePath(),
+			plexValue,
+			faker.Lorem.Sentence(),
+			faker.Company.CatchPhrase(),
+			"movie",
+			faker.Date.PastOffset().ToUnixTimeSeconds(),
+			faker.Random.Double(0.0, 10.0),
+			faker.Date.PastDateOnly().ToString("yyyy-MM-dd"),
+			faker.System.FilePath(),
+			faker.Lorem.Sentence(2),
+			faker.Date.Past().Year,
+			faker.Random.Int(1, 300) * 60 * 1000,
+			null,
+			null,
+			guids,
+			[new PlexTypes.ById.Genre(faker.Lorem.Word())]
 		);
 		var root = new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata]));
 
