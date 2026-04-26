@@ -326,8 +326,7 @@
                 AddSourceIds(_watchlistIds, nextPage.Items.Select(i => i.SourceId.ToString()));
             }
 
-            var mediaProvider = providerConfig.WatchlistProvider.AsMediaProvider();
-            var blacklistItems = await BlacklistService.GetBlacklistItems(mediaProvider, CancellationToken.None);
+            var blacklistItems = await BlacklistService.GetBlacklistItems(CancellationToken.None);
             AddSourceIds(_blacklistIds, blacklistItems.Select(i => i.SourceId.ToString()));
         }
         catch {}

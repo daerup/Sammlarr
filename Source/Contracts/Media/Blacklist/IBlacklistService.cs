@@ -2,7 +2,7 @@ namespace Contracts.Media.Blacklist;
 
 public interface IBlacklistService
 {
-	Task<IReadOnlyList<IBlacklistItem>> GetBlacklistItems(MediaProvider mediaProvider, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<IBlacklistItem>> GetBlacklistItems(CancellationToken cancellationToken = default);
 
 	Task<bool> IsBlacklistedAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 
