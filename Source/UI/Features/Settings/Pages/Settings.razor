@@ -51,7 +51,9 @@
     {
         var resolved = ResolveSection();
         if (resolved is not null)
+        {
             _activeSection = resolved;
+        }
     }
 
     private SettingsSection? ResolveSection() =>

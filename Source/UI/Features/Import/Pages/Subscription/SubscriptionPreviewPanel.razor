@@ -209,7 +209,10 @@
 
     public async Task ApplyAsync()
     {
-        if (_fetchState == FetchState.Loading) return;
+        if (_fetchState == FetchState.Loading)
+        {
+            return;
+        }
 
         var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
                          Config.Provider != _testedConfig?.Provider ||
@@ -293,7 +296,10 @@
     private Task EmitStatusIfChangedAsync()
     {
         var status = BuildStatus();
-        if (status == _lastEmittedStatus) return Task.CompletedTask;
+        if (status == _lastEmittedStatus)
+        {
+            return Task.CompletedTask;
+        }
         _lastEmittedStatus = status;
         return OnStatusChanged.InvokeAsync(status);
     }
@@ -336,7 +342,9 @@
     {
         foreach (var id in ids)
             if (!string.IsNullOrWhiteSpace(id))
+            {
                 set.Add(id);
+            }
     }
 
     private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
@@ -364,13 +372,17 @@
     private void ClearFocus(IMediaDetailResult item)
     {
         if (ReferenceEquals(_focusedResult, item))
+        {
             _focusedResult = null;
+        }
     }
 
     private async Task ToggleBlacklistAsync(IMediaDetailResult item)
     {
         if (_togglingBlacklistItem is not null)
+        {
             return;
+        }
 
         _togglingBlacklistItem = item;
         try
@@ -397,7 +409,9 @@
     private async Task ToggleWatchlistAsync(IMediaDetailResult item)
     {
         if (_togglingWatchlistItem is not null)
+        {
             return;
+        }
 
         _togglingWatchlistItem = item;
         try
@@ -408,12 +422,16 @@
             if (_watchlistIds.Contains(key))
             {
                 if (await watchlistService.RemoveFromWatchlistAsync(item.SourceId))
+                {
                     _watchlistIds.Remove(key);
+                }
             }
             else
             {
                 if (await watchlistService.AddToWatchlistAsync(item.SourceId))
+                {
                     _watchlistIds.Add(key);
+                }
             }
         }
         finally

@@ -13,7 +13,9 @@ internal class TvdbIdConverter(PlexApi plexApi)
 		{
 			var result = await TryConvertAsync(id);
 			if (result is Resolved)
+			{
 				return result;
+			}
 		}
 
 		return new Unresolved();

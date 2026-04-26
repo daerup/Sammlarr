@@ -447,7 +447,9 @@
         {
             var apiKey = await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsMediaProvider());
             if (string.IsNullOrEmpty(apiKey))
+            {
                 _disabledProviders.Add(provider);
+            }
         }
 
         if (_provider is not null && _disabledProviders.Contains(_provider.Value))
@@ -482,7 +484,9 @@
     {
         _limitRaw = v;
         if (int.TryParse(v, out var n) && n > 0)
+        {
             _limit = _limit with { Count = n };
+        }
         NotifyChange();
     }
     private void ChangeSchedule(string? v) { _scheduleCronExpression = v; NotifyChange(); }

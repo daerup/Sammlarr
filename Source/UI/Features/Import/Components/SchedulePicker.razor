@@ -186,7 +186,10 @@
         get
         {
             var expression = ComputedExpression;
-            if (string.IsNullOrEmpty(expression)) return null;
+            if (string.IsNullOrEmpty(expression))
+            {
+                return null;
+            }
             try { return ExpressionDescriptor.GetDescription(expression, new Options { Use24HourTimeFormat = true}); }
             catch { return null; }
         }
@@ -267,12 +270,16 @@
 
             case (ScheduleMode.Expression, ScheduleMode.Daily):
                 if (int.TryParse(_cronHour, out var dailyHour) && int.TryParse(_cronMinute, out var dailyMinute))
+                {
                     _dailyTime = new TimeSpan(dailyHour, dailyMinute, 0);
+                }
                 break;
 
             case (ScheduleMode.Expression, ScheduleMode.Weekly):
                 if (int.TryParse(_cronHour, out var weeklyHour) && int.TryParse(_cronMinute, out var weeklyMinute))
+                {
                     _weeklyTime = new TimeSpan(weeklyHour, weeklyMinute, 0);
+                }
                 _weeklyDaysOfWeek = ParseWeeklyDays(_cronDayOfWeek);
                 break;
         }
@@ -285,29 +292,56 @@
 
     private static bool IsCronPartValid(string value, int minimum, int maximum)
     {
-        if (string.IsNullOrWhiteSpace(value) || value == "*") return true;
+        if (string.IsNullOrWhiteSpace(value) || value == "*")
+        {
+            return true;
+        }
 
         var stepParts = value.Split('/');
-        if (stepParts.Length > 2) return false;
-        if (stepParts.Length == 2 && (!int.TryParse(stepParts[1], out var stepValue) || stepValue <= 0)) return false;
+        if (stepParts.Length > 2)
+        {
+            return false;
+        }
+        if (stepParts.Length == 2 && (!int.TryParse(stepParts[1], out var stepValue) || stepValue <= 0))
+        {
+            return false;
+        }
 
         var rangePart = stepParts[0];
-        if (rangePart == "*") return true;
+        if (rangePart == "*")
+        {
+            return true;
+        }
 
         foreach (var segment in rangePart.Split(','))
         {
             var dashParts = segment.Trim().Split('-');
             if (dashParts.Length == 1)
             {
-                if (!int.TryParse(dashParts[0], out var number) || number < minimum || number > maximum) return false;
+                if (!int.TryParse(dashParts[0], out var number) || number < minimum || number > maximum)
+                {
+                    return false;
+                }
             }
             else if (dashParts.Length == 2)
             {
-                if (!int.TryParse(dashParts[0], out var rangeStart) || rangeStart < minimum || rangeStart > maximum) return false;
-                if (!int.TryParse(dashParts[1], out var rangeEnd)   || rangeEnd   < minimum || rangeEnd   > maximum) return false;
-                if (rangeStart > rangeEnd) return false;
+                if (!int.TryParse(dashParts[0], out var rangeStart) || rangeStart < minimum || rangeStart > maximum)
+                {
+                    return false;
+                }
+                if (!int.TryParse(dashParts[1], out var rangeEnd)   || rangeEnd   < minimum || rangeEnd   > maximum)
+                {
+                    return false;
+                }
+                if (rangeStart > rangeEnd)
+                {
+                    return false;
+                }
             }
-            else return false;
+            else
+            {
+                return false;
+            }
         }
 
         return true;

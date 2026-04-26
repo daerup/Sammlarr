@@ -23,7 +23,9 @@ internal class MediaIdResolver(
 			var cachedIds = await mediaIdGroupRepository.GetByIdAsync(candidate);
 			var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
 			if (cachedTarget is not null)
+			{
 				return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
+			}
 		}
 
 		ConversionResult conversionResult = target switch

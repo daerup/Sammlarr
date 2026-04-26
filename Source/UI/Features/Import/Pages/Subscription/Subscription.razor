@@ -142,7 +142,10 @@
     protected override async Task OnInitializedAsync()
     {
         var sourceId = UrlGuid.Decode(EditImportListId ?? CloneImportListId);
-        if (sourceId is null) return;
+        if (sourceId is null)
+        {
+            return;
+        }
 
         var importList = await ImportListRepository.GetImportListByIdAsync(sourceId.Value);
 
@@ -186,14 +189,22 @@
     private async Task OnShortcutActivatedAsync()
     {
         if (_previewStatus.IsLoading || _isSaving)
+        {
             return;
+        }
 
         if (ShowSaveButton && CanSave)
+        {
             await HandleSaveAsync();
+        }
         else if (ShowApplyButton && _config.IsValid)
+        {
             await HandleApplyAsync();
+        }
         else if (ShowTestButton && _config.IsValid)
+        {
             await HandleApplyAsync();
+        }
 
         await InvokeAsync(StateHasChanged);
     }

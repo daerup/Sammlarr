@@ -18,7 +18,9 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 		{
 			var result = await ResolveFromTitleSearchAsync(h.Title, h.MediaType, candidates);
 			if (result is Resolved)
+			{
 				return result;
+			}
 		}
 
 		return await TryResolveFromApiTitleSearchAsync(candidates);
@@ -32,7 +34,9 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 		{
 			var details = await plexApi.LookUpAsync(plexId);
 			if (ContainsAnyCandidate(details.AdditionalIds, candidates))
+			{
 				return new Resolved(details.SourceId, details.AdditionalIds);
+			}
 		}
 
 		return new Unresolved();
