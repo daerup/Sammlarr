@@ -7,24 +7,27 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 {
 	public async Task<IReadOnlyList<ImportList>> GetImportListsAsync(CancellationToken cancellationToken = default)
 	{
-		return await context
-			.Lists.AsNoTracking()
-			.OrderByDescending(l => l.CreatedAt)
-			.Select(l => new ImportList
-			{
-				Id = l.Id,
-				Name = l.Name,
-				Enabled = l.IsEnabled,
-				Provider = l.Provider,
-				Strategy = l.Strategy,
-				ListIdentifier = l.Identifier,
-				CreatedAt = l.CreatedAt,
-				Filter = l.Filter,
-				Sort = l.Sort,
-				Limit = l.Limit,
-			})
-			.ToListAsync(cancellationToken);
+		return await context.Lists.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
 	}
+
+	public async Task<ImportList?> GetImportListByIdAsync(Guid id, CancellationToken cancellationToken = default)
+	{
+		return await context.Lists.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);
+	}
+
+	private static readonly System.Linq.Expressions.Expression<Func<ImportListEntity, ImportList>> project = projection => new ImportList
+	{
+		Id = projection.Id,
+		Name = projection.Name,
+		Enabled = projection.IsEnabled,
+		Provider = projection.Provider,
+		Strategy = projection.Strategy,
+		ListIdentifier = projection.Identifier,
+		CreatedAt = projection.CreatedAt,
+		Filter = projection.Filter,
+		Sort = projection.Sort,
+		Limit = projection.Limit,
+	};
 
 	public async Task CreateImportListsAsync(string name, ImportListCreateData createData, CancellationToken cancellationToken = default)
 	{
@@ -44,7 +47,7 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 		await context.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task CreateImportListsAsync(Guid id, ImportListUpdateData updateData, CancellationToken cancellationToken = default)
+	public async Task UpdateImportListsAsync(Guid id, ImportListUpdateData updateData, CancellationToken cancellationToken = default)
 	{
 		var entity = await context.Lists.FindAsync([id], cancellationToken: cancellationToken);
 		if (entity == null)

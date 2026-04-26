@@ -1,6 +1,7 @@
 @page "/lists"
 @using Contracts
 @using Contracts.Media.List
+@using global::Shared
 @using UI.Features.Import.Components
 @using UI.Shared.Services.Branding
 @inject IImportListRepository ImportListRepository
@@ -129,7 +130,7 @@
                         <div class="flex items-center gap-1">
                             <BbTooltip>
                                 <BbTooltipTrigger>
-                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit" Href="@($"/subscription/{list.Id}/edit")">
+                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit" Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/edit")">
                                         <LucideIcon Name="pencil" Size="15"/>
                                     </BbButton>
                                 </BbTooltipTrigger>
@@ -137,7 +138,7 @@
                             </BbTooltip>
                             <BbTooltip>
                                 <BbTooltipTrigger>
-                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate" Href="@($"/subscription/{list.Id}/clone")">
+                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate" Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/clone")">
                                         <LucideIcon Name="copy" Size="15"/>
                                     </BbButton>
                                 </BbTooltipTrigger>
