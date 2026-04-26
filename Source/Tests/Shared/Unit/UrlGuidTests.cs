@@ -26,30 +26,21 @@ public class UrlGuidTests
 	}
 
 	[Test]
-	public async Task Decode_ReturnsNull_WhenNull()
-	{
-		var result = UrlGuid.Decode(null);
-
-		await Assert.That(result).IsNull();
-	}
-
-	[Test]
+	[Arguments(null)]
 	[Arguments("")]
 	[Arguments("tooshort")]
 	[Arguments("waytoolongtobeavalidshortid123456")]
-	public async Task Decode_ReturnsNull_WhenWrongLength(string input)
+	public async Task Decode_Throws_WhenWrongLength(string? input)
 	{
-		var result = UrlGuid.Decode(input);
-
-		await Assert.That(result).IsNull();
+		Action act = () => UrlGuid.Decode(input);
+		await Assert.That(act).Throws<ArgumentException>();
 	}
 
 	[Test]
-	public async Task Decode_ReturnsNull_WhenInvalidBase64()
+	public async Task Decode_Throws_WhenInvalidBase64()
 	{
-		var result = UrlGuid.Decode("!!!!!!!!!!!!!!!!!!!!!!"); // 22 chars but invalid
-
-		await Assert.That(result).IsNull();
+		Action act = () => UrlGuid.Decode("!!!!!!!!!!!!!!!!!!!!!!");
+		await Assert.That(act).Throws<ArgumentException>();
 	}
 
 	[Test]
