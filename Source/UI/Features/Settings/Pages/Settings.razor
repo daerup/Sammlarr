@@ -2,11 +2,7 @@
 
 <PageTitle>Settings</PageTitle>
 
-<div class="px-8 py-10">
-    <div class="pb-6 mb-8">
-        <h1 class="text-3xl font-semibold">Settings</h1>
-    </div>
-
+<PageContainer Heading="Settings">
     <div class="flex items-start gap-6">
         <nav class="w-44 shrink-0 flex flex-col gap-1 mt-2">
             @foreach (var item in _sections)
@@ -26,7 +22,7 @@
             <DynamicComponent Type="_activeSection.ComponentType"/>
         </div>
     </div>
-</div>
+</PageContainer>
 
 @code {
     private record SettingsSection(string Label, string Icon, Type ComponentType);

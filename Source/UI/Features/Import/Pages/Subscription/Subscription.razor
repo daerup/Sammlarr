@@ -18,88 +18,83 @@
 <PageTitle>@PageTitleText</PageTitle>
 
 <OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
-<div class="flex flex-col h-[calc(100vh-7rem)] overflow-hidden">
 
-    <div class="shrink-0 px-6 py-4 border-b flex items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold tracking-wide antialiased">@PageHeadingText</h1>
-            <p class="text-sm text-muted-foreground mt-0.5 font-normal">@PageDescriptionText</p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            @if (_previewStatus.IsLoading)
-            {
-                <BbButton Variant="ButtonVariant.Default" Disabled="true">
-                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                    <span>Testing…</span>
-                </BbButton>
-            }
-            else if (ShowApplyButton)
-            {
-                <BbButton Variant="ButtonVariant.Default"
-                          OnClick="HandleApplyAsync"
-                          Disabled="!_config.IsValid">
-                    <LucideIcon Name="check" Size="14" Class="mr-2"/>
-                    Apply
-                </BbButton>
-            }
-            else if (ShowSaveButton)
-            {
-                <BbButton Variant="ButtonVariant.Outline"
-                          Class="text-success border-success hover:bg-success"
-                          OnClick="HandleSaveAsync"
-                          Disabled="!CanSave">
-                    <LucideIcon Name="save" Size="14" Class="mr-2"/>
-                    Save
-                </BbButton>
-            }
-            else if (_previewStatus.HasFailed)
-            {
-                <BbButton Variant="ButtonVariant.Outline"
-                          Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                          Disabled="true">
-                    <LucideIcon Name="x" Size="14" Class="mr-2"/>
-                    Failed
-                </BbButton>
-            }
-            else if (ShowTestButton)
-            {
-                <BbButton Variant="ButtonVariant.Default"
-                          OnClick="HandleApplyAsync"
-                          Disabled="!_config.IsValid">
-                    <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                    Test
-                </BbButton>
-            }
-
+<PageContainer Heading="@PageHeadingText"
+               Description="@PageDescriptionText"
+               HeaderClass="@(IsOAuthAllowed() ? "border-b" : "")">
+    <HeaderActions>
+        @if (_previewStatus.IsLoading)
+        {
+            <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                <span>Testing…</span>
+            </BbButton>
+        }
+        else if (ShowApplyButton)
+        {
+            <BbButton Variant="ButtonVariant.Default"
+                      OnClick="HandleApplyAsync"
+                      Disabled="!_config.IsValid">
+                <LucideIcon Name="check" Size="14" Class="mr-2"/>
+                Apply
+            </BbButton>
+        }
+        else if (ShowSaveButton)
+        {
+            <BbButton Variant="ButtonVariant.Outline"
+                      Class="text-success border-success hover:bg-success"
+                      OnClick="HandleSaveAsync"
+                      Disabled="!CanSave">
+                <LucideIcon Name="save" Size="14" Class="mr-2"/>
+                Save
+            </BbButton>
+        }
+        else if (_previewStatus.HasFailed)
+        {
             <BbButton Variant="ButtonVariant.Outline"
                       Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                      OnClick="ReturnAsync"
-                      Disabled="@(_previewStatus.IsLoading || _isSaving)">
-                Cancel
+                      Disabled="true">
+                <LucideIcon Name="x" Size="14" Class="mr-2"/>
+                Failed
             </BbButton>
-        </div>
-    </div>
+        }
+        else if (ShowTestButton)
+        {
+            <BbButton Variant="ButtonVariant.Default"
+                      OnClick="HandleApplyAsync"
+                      Disabled="!_config.IsValid">
+                <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                Test
+            </BbButton>
+        }
 
-    <ProtectedSection GuardState="IsOAuthAllowed"
-                      AuthProvider="@_providerConfig.WatchlistProvider"
-                      DeniedActionDescription="managing subscriptions"
-                      FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
-        <div class="flex-1 min-h-0 flex flex-row gap-4 p-4 overflow-hidden">
+        <BbButton Variant="ButtonVariant.Outline"
+                  Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
+                  OnClick="ReturnAsync"
+                  Disabled="@(_previewStatus.IsLoading || _isSaving)">
+            Cancel
+        </BbButton>
+    </HeaderActions>
+    <ChildContent>
+        <ProtectedSection GuardState="IsOAuthAllowed"
+                          AuthProvider="@_providerConfig.WatchlistProvider"
+                          DeniedActionDescription="managing subscriptions"
+                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+            <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden">
 
-            <SubscriptionConfigPanel @key="_configKey"
-                                     Value="@_config"
-                                     ShowValidation="@_showValidation"
-                                     OnChange="@OnConfigChanged"/>
+                <SubscriptionConfigPanel @key="_configKey"
+                                         Value="@_config"
+                                         ShowValidation="@_showValidation"
+                                         OnChange="@OnConfigChanged"/>
 
-            <SubscriptionPreviewPanel @ref="_previewPanel"
-                                      Config="@_config"
-                                      OnStatusChanged="@OnPreviewStatusChanged"/>
+                <SubscriptionPreviewPanel @ref="_previewPanel"
+                                          Config="@_config"
+                                          OnStatusChanged="@OnPreviewStatusChanged"/>
 
-        </div>
-    </ProtectedSection>
-
-</div>
+            </div>
+        </ProtectedSection>
+    </ChildContent>
+</PageContainer>
 
 @code {
 

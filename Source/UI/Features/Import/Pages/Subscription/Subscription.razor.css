@@ -28,8 +28,3 @@
     display: flex;
     align-items: center;
 }
-    display: block;
-    flex-shrink: 0;
-    width: 14px;
-    height: 14px;
-}
