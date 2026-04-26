@@ -77,6 +77,7 @@ else
                         {
                             <MediaGridTile @key="item"
                                            ImageUrl="@item.ArtUrl"
+                                           Poster="@item.PosterUrl"
                                            Title="@item.Title"
                                            OnClick="() => SelectItem(item)"
                                            Tagline="@GetDescription(item)"/>
