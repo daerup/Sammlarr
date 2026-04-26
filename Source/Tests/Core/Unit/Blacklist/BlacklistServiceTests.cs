@@ -80,7 +80,7 @@ public class BlacklistServiceTests
 
 		var testee = CreateTestee(repository: repository, searchService: searchService);
 
-		var result = await testee.GetBlacklistItems(MediaProvider.Plex);
+		var result = await testee.GetBlacklistItems();
 
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
@@ -97,7 +97,7 @@ public class BlacklistServiceTests
 
 		var testee = CreateTestee(repository: repository);
 
-		var result = await testee.GetBlacklistItems(MediaProvider.Plex);
+		var result = await testee.GetBlacklistItems();
 
 		await Assert.That(result).IsEmpty();
 	}

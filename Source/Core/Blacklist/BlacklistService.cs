@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Blacklist;
@@ -14,12 +15,12 @@ internal class BlacklistService(
 	IKeyedServiceIndex<MediaSearchProvider, IMediaSearchService> searchServiceIndex
 ) : IBlacklistService
 {
-	public async Task<IReadOnlyList<IBlacklistItem>> GetBlacklistItems(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<IBlacklistItem>> GetBlacklistItems(CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
 		var searchService = searchServiceIndex[config.SearchProvider];
 
-		var entries = await repository.GetBlacklistedEntriesAsync(mediaProvider, cancellationToken);
+		var entries = await repository.GetBlacklistedEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
 		return await entries
 			.ToAsyncEnumerable()
 			.SelectAwait(async e => BlacklistItem.From(await searchService.LookUpAsync(e.Id, cancellationToken), e.AddedDate))
