@@ -16,11 +16,11 @@ internal static class MdblistTypes
 		}
 
 		public record Ids(
-			[property: JsonPropertyName("imdb")] string imdb,
-			[property: JsonPropertyName("tmdb")] int tmdb,
-			[property: JsonPropertyName("tvdb")] int tvdb,
-			[property: JsonPropertyName("mdblist")] string mdblist,
-			[property: JsonPropertyName("mal")] string mal
+			[property: JsonPropertyName("imdb")] string? imdb,
+			[property: JsonPropertyName("tmdb")] int? tmdb,
+			[property: JsonPropertyName("tvdb")] int? tvdb,
+			[property: JsonPropertyName("mdblist")] string? mdblist,
+			[property: JsonPropertyName("mal")] string? mal
 		);
 
 		public record Movie(
