@@ -21,33 +21,25 @@
 
 @if (_providerSettings is null)
 {
-    <div class="px-6 py-10">
+    <PageContainer>
         <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
             <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
         </div>
-    </div>
+    </PageContainer>
 }
 else
 {
-    <div class="px-6 py-10">
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <h1 class="text-3xl font-bold tracking-wide antialiased">@PageHeading</h1>
-                <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">@PageDescription</p>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <BbCommand Class="border">
-                    <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                        <LucideIcon Name="search" Class="mr-2"/>
-                        Add from Search
-                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                    </BbCommandItem>
-                </BbCommand>
-            </div>
-        </div>
-
-        <div class="mt-6">
+    <PageContainer Heading="@PageHeading" Description="@PageDescription">
+        <HeaderActions>
+            <BbCommand Class="border">
+                <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
+                    <LucideIcon Name="search" Class="mr-2"/>
+                    Add from Search
+                    <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
+                </BbCommandItem>
+            </BbCommand>
+        </HeaderActions>
+        <ChildContent>
             @if (_isLoading)
             {
                 <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
@@ -83,8 +75,8 @@ else
                     }
                 </div>
             }
-        </div>
-    </div>
+        </ChildContent>
+    </PageContainer>
 }
 
 <MediaDetailSheet Open="_isSheetOpen"

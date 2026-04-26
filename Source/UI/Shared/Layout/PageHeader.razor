@@ -1,0 +1,23 @@
+<div class="flex flex-wrap items-start justify-between gap-3 @Class">
+    <div>
+        @if (Heading is not null)
+        {
+            <h1 class="text-3xl font-bold tracking-wide antialiased">@Heading</h1>
+        }
+        @if (Description is not null)
+        {
+            <p class="text-muted-foreground mt-1 font-normal tracking-wide">@Description</p>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="flex items-center gap-2">@Actions</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Heading { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public string? Class { get; set; }
+}

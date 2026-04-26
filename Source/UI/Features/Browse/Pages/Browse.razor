@@ -22,27 +22,19 @@
 <OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleOAuthAccessChanged"/>
 <ApiKeyGuard Provider="@_providerConfig.TrendingProvider.AsMediaProvider()" AccessChanged="HandleTrendingProviderAccessChanged"/>
 
-<div class="px-6 py-10">
-    <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-            <h1 class="text-3xl font-bold tracking-wide antialiased">Trending Movies & Shows</h1>
-            <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">Discover what's popular this week</p>
-        </div>
-
+<PageContainer Heading="Trending Movies & Shows" Description="Discover what's popular this week">
+    <HeaderActions>
         <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
-            <div class="flex items-center gap-2">
-                <BbCommand Class="border">
-                    <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                        <LucideIcon Name="search" Class="mr-2"/>
-                        Add from Search
-                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                    </BbCommandItem>
-                </BbCommand>
-            </div>
+            <BbCommand Class="border">
+                <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
+                    <LucideIcon Name="search" Class="mr-2"/>
+                    Add from Search
+                    <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
+                </BbCommandItem>
+            </BbCommand>
         </ProtectedSection>
-    </div>
-
-    <div class="mt-6">
+    </HeaderActions>
+    <ChildContent>
         <ProtectedSection GuardState="HasOAuthAccess"
                           AuthProvider="@_providerConfig.WatchlistProvider"
                           DeniedActionDescription="browsing trending media"
@@ -91,8 +83,8 @@
                 </TileIcons>
             </SearchModal>
         </ProtectedSection>
-    </div>
-</div>
+    </ChildContent>
+</PageContainer>
 
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"

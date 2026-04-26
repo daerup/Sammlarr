@@ -15,26 +15,19 @@
 <PageTitle>Lists</PageTitle>
 
 <OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
-<ProtectedSection GuardState="IsOAuthAllowed"
-                  AuthProvider="@_providerConfig?.WatchlistProvider"
-                  DeniedActionDescription="managing your import lists"
-                  FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
-    <div class="px-6 py-10">
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <h1 class="text-3xl font-bold tracking-wide antialiased">@PageHeading</h1>
-                <p class="text-muted-foreground mt-1 font-normal tracking-wide pb-4">@PageDescription</p>
-            </div>
 
-            <div class="flex items-center gap-2">
-                <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/subscription/create"))">
-                    <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
-                    Add New
-                </BbButton>
-            </div>
-        </div>
-
-        <div class="mt-6">
+<PageContainer Heading="@PageHeading" Description="@PageDescription">
+    <HeaderActions>
+        <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/subscription/create"))">
+            <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
+            Add New
+        </BbButton>
+    </HeaderActions>
+    <ChildContent>
+        <ProtectedSection GuardState="IsOAuthAllowed"
+                          AuthProvider="@_providerConfig?.WatchlistProvider"
+                          DeniedActionDescription="managing your import lists"
+                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
             @if (!_isLoading && _lists.Count == 0)
             {
                 <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
@@ -71,9 +64,9 @@
                                     var branding = MediaProviderBrandingService.GetBrandingInfo(list.Provider.AsMediaProvider());
                                 }
                                 <span class="inline-flex items-center gap-1.5 text-sm font-medium">
-                            <span class="shrink-0 flex items-center">@branding.Icon</span>
+                                    <span class="shrink-0 flex items-center">@branding.Icon</span>
                                     @branding.NickName
-                        </span>
+                                </span>
                             </CellTemplate>
                         </BbDataTableColumn>
 
@@ -197,9 +190,9 @@
                                     IsDisabled="_isLoading"
                                     PageChanged="HandlePageChangedAsync"/>
             }
-        </div>
-    </div>
-</ProtectedSection>
+        </ProtectedSection>
+    </ChildContent>
+</PageContainer>
 
 @code {
     private string PageHeading => "Lists";
