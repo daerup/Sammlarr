@@ -29,8 +29,8 @@
         else if (ShowApplyButton)
         {
             <BbButton Variant="ButtonVariant.Default"
-                      OnClick="HandleApplyAsync"
-                      Disabled="!_config.IsValid">
+                      OnClick="() => ApplyAsync()"
+                      Disabled="!_config.IsTestable">
                 <LucideIcon Name="check" Size="14" Class="mr-2"/>
                 Apply
             </BbButton>
@@ -57,8 +57,8 @@
         else if (ShowTestButton)
         {
             <BbButton Variant="ButtonVariant.Default"
-                      OnClick="HandleApplyAsync"
-                      Disabled="!_config.IsValid">
+                      OnClick="() => ApplyAsync()"
+                      Disabled="!_config.IsTestable">
                 <LucideIcon Name="zap" Size="14" Class="mr-2"/>
                 Test
             </BbButton>
@@ -209,19 +209,17 @@
         {
             await HandleSaveAsync();
         }
-        else if (ShowApplyButton && _config.IsValid)
+        else if (ShowApplyButton && _config.IsTestable)
         {
-            await HandleApplyAsync();
+            await ApplyAsync();
         }
-        else if (ShowTestButton && _config.IsValid)
+        else if (ShowTestButton && _config.IsTestable)
         {
-            await HandleApplyAsync();
+            await ApplyAsync();
         }
 
         await InvokeAsync(StateHasChanged);
     }
-
-    private Task HandleApplyAsync() => ApplyAsync();
 
     private async Task ApplyAsync()
     {

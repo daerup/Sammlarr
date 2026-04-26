@@ -12,7 +12,7 @@
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject IMediaIdResolver MediaIdResolver
-@inject ToastService ToastService
+@inject Notifier Notifier
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -262,27 +262,27 @@ else
         {
             if (!IsBlacklisted(id))
             {
-                ToastService.Warning($"'{title}' is not in your blacklist.");
+                Notifier.Warning($"'{title}' is not in your blacklist.");
                 return false;
             }
 
             try
             {
                 await BlacklistService.RemoveFromBacklistAsync(id, _cancellationTokenSource.Token);
-                ToastService.Success($"'{title}' has been removed from your blacklist.");
+                Notifier.Success($"'{title}' has been removed from your blacklist.");
                 await LoadBlacklistAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                ToastService.Warning($"Failed to remove item from blacklist: {ex.Message}");
+                Notifier.Error(ex, "Failed to remove from blacklist");
                 return false;
             }
         }
 
         if (IsBlacklisted(id))
         {
-            ToastService.Warning($"'{title}' is already in your blacklist.");
+            Notifier.Warning($"'{title}' is already in your blacklist.");
             return false;
         }
 
@@ -296,13 +296,13 @@ else
             };
 
             await BlacklistService.AddToBacklistAsync(result, _cancellationTokenSource.Token);
-            ToastService.Success($"'{title}' has been added to your blacklist.");
+            Notifier.Success($"'{title}' has been added to your blacklist.");
             await LoadBlacklistAsync();
             return true;
         }
         catch (Exception ex)
         {
-            ToastService.Warning($"Failed to add item to blacklist: {ex.Message}");
+            Notifier.Error(ex, "Failed to add to blacklist");
             return false;
         }
     }

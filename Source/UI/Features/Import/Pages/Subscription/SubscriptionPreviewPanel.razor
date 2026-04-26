@@ -13,6 +13,7 @@
 @inject IBlacklistService BlacklistService
 @inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
 @inject IQueryProcessor<IMediaDetailResult> QueryProcessor
+@inject Notifier Notifier
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
@@ -148,8 +149,8 @@
         else if (HasFailed)
         {
             <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                <LucideIcon Name="x-circle" Size="48" Class="text-destructive mb-4"/>
-                <p class="text-lg font-semibold text-destructive">Test failed</p>
+                <LucideIcon Name="zap-off" Size="48" Class="mb-4"/>
+                <p class="text-lg font-semibold">Test failed</p>
                 <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
             </div>
         }
@@ -248,12 +249,12 @@
             if (results.Count == 0)
             {
                 _fetchState = FetchState.Failed;
+                _testedConfig = Config;
                 return;
             }
 
             _rawResults = results;
             _fetchState = FetchState.Success;
-            _testedConfig = Config;
             Reprocess();
             _watchlistIds.Clear();
             _blacklistIds.Clear();
@@ -265,11 +266,16 @@
             _processedResults = [];
             _fetchState = FetchState.Idle;
         }
-        catch
+        catch (Exception ex)
         {
             _rawResults = [];
             _processedResults = [];
             _fetchState = FetchState.Failed;
+            Notifier.Error(ex, "Failed to fetch media");
+        }
+        finally
+        {
+            _testedConfig = Config;
         }
     }
 
@@ -332,16 +338,15 @@
             var blacklistItems = await BlacklistService.GetBlacklistItems(CancellationToken.None);
             AddSourceIds(_blacklistIds, blacklistItems.Select(i => i.SourceId.ToString()));
         }
-        catch {}
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to fetch media");
+        }
     }
 
     private static void AddSourceIds(HashSet<string> set, IEnumerable<string?> ids)
     {
-        foreach (var id in ids)
-            if (!string.IsNullOrWhiteSpace(id))
-            {
-                set.Add(id);
-            }
+        ids.Where(id => !string.IsNullOrWhiteSpace(id)).ToList().ForEach(id => set.Add(id!));
     }
 
     private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);

@@ -1,0 +1,69 @@
+@inject IJSRuntime JSRuntime
+@inject DialogService DialogService
+
+<div class="error-dialog flex flex-col gap-3 min-w-0 h-[85vh]">
+    <div class="flex-1 flex flex-col gap-3 overflow-y-auto pr-1 min-h-0">
+        <div class="space-y-1 min-w-0">
+            <p class="text-xs font-medium text-muted-foreground">Type</p>
+            <p class="text-sm font-mono break-all">@Exception.GetType().FullName</p>
+        </div>
+        <div class="space-y-1 min-w-0">
+            <p class="text-xs font-medium text-muted-foreground">Message</p>
+            <p class="text-sm break-words">@Exception.Message</p>
+        </div>
+        <div class="space-y-2 min-w-0 flex-1 flex flex-col">
+            <p class="text-xs font-medium text-muted-foreground">Stack Trace</p>
+            <div class="rounded-md bg-muted overflow-auto flex-1">
+                <pre class="px-3 py-2 text-xs font-mono whitespace-pre">@(Exception.StackTrace ?? "(no stack trace)")</pre>
+            </div>
+        </div>
+        @if (Exception.InnerException is not null)
+        {
+            <div class="shrink-0">
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="OpenInnerAsync">
+                    <LucideIcon Name="chevron-right" Size="14" Class="mr-1.5"/>
+                    View inner exception
+                </BbButton>
+            </div>
+        }
+    </div>
+    <div class="flex justify-end gap-2 pt-3 border-t shrink-0">
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CopyAsync">
+            <LucideIcon Name="@(_copied ? "check" : "clipboard")" Size="14" Class="mr-1.5"/>
+            @(_copied ? "Copied!" : "Copy to clipboard")
+        </BbButton>
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => DialogRef.CancelAsync()">
+            Close
+        </BbButton>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Exception Exception { get; set; } = null!;
+    [CascadingParameter] private IDialogReference DialogRef { get; set; } = null!;
+
+    private bool _copied;
+
+    private async Task CopyAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Exception.ToString());
+        _copied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        _copied = false;
+        StateHasChanged();
+    }
+
+    private async Task OpenInnerAsync()
+    {
+        if (Exception.InnerException is null)
+        {
+            return;
+        }
+
+        await DialogService.OpenAsync<ExceptionDetailDialog>(
+            new Dictionary<string, object?> { { "Exception", Exception.InnerException } },
+            new DialogOpenOptions { Title = "Exception Details", Size = DialogSize.ExtraLarge }
+        );
+    }
+}

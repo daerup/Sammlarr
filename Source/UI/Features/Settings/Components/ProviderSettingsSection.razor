@@ -5,7 +5,7 @@
 @using Contracts.Settings
 @using UI.Shared.Services.Branding
 @inject IProviderConfigRepository ProviderConfigRepository
-@inject ToastService ToastService
+@inject Notifier Notifier
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
 @if (!_isLoaded)
@@ -75,12 +75,12 @@ else
         try
         {
             await ProviderConfigRepository.StoreAsync(_providerConfig);
-            ToastService.Success("Provider settings saved.");
+            Notifier.Success("Provider settings saved.");
         }
         catch (Exception ex)
         {
             _providerConfig = previous;
-            ToastService.Error($"Failed to save provider settings: {ex.Message}");
+            Notifier.Error(ex, "Failed to save provider settings");
         }
         finally
         {
