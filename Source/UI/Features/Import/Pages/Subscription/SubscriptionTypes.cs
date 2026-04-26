@@ -30,8 +30,9 @@ public record SubscriptionConfig
 	public RunMode SyncMode { get; init; } = RunMode.Manual;
 	public string? ScheduleCronExpression { get; init; } = string.Empty;
 
-	public bool IsValid =>
-		Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && !string.IsNullOrWhiteSpace(Name) && (Limit is null || Limit.Count > 0);
+	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && (Limit is null || Limit.Count > 0);
+
+	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name);
 
 	public int GetPreviewHash() =>
 		HashCode.Combine(HashCode.Combine(Provider, ListIdentifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));

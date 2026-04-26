@@ -169,3 +169,9 @@
 .subscription-pane {
     height: 82vh;
 }
+
+/* Blur the page behind dialog overlays only while the .error-dialog component is mounted */
+body:has(.error-dialog) .fixed.inset-0.z-50.bg-black\/80 {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
