@@ -9,8 +9,8 @@ namespace DB.Tests.Integration;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class EntityAuditerTests(SQLiteFixture fixture)
 {
-	private readonly EntityAuditer _testee = new();
 	private readonly DateTimeOffset _now = DateTimeOffset.Now;
+	private readonly EntityAuditer _testee = new();
 	private readonly DateTimeOffset _then = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(10));
 
 	[Test]
@@ -58,7 +58,7 @@ public class EntityAuditerTests(SQLiteFixture fixture)
 			CreatedAt = _then,
 		};
 		var identifier = new MediaIdentifier(MediaProvider.Tmdb, "12345", MediaType.Movie);
-		entity.MediaIdEntries.Add(new MediaIdentifierGroupEntry() { Identifier = identifier, MediaIdGroupEntity = entity });
+		entity.MediaIdEntries.Add(new MediaIdentifierGroupEntry { Identifier = identifier, MediaIdGroupEntity = entity });
 
 		fixture.Context.Add(entity);
 		var entry = fixture.Context.Entry<IAuditable>(entity);

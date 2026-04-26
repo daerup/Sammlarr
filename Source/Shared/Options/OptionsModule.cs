@@ -5,8 +5,5 @@ namespace Shared.Options;
 
 internal record OptionsModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services)
-	{
-		services.AddGeneratedOptions();
-	}
+	public void RegisterServices(IServiceCollection services) => services.AddGeneratedOptions();
 }

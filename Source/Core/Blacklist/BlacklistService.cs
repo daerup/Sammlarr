@@ -4,7 +4,6 @@ using Contracts.Media;
 using Contracts.Media.Blacklist;
 using Contracts.Media.Search;
 using Contracts.Settings;
-using Microsoft.Extensions.DependencyInjection;
 using Shared;
 
 namespace Core.Blacklist;
@@ -24,21 +23,13 @@ internal class BlacklistService(
 		return await entries
 			.ToAsyncEnumerable()
 			.SelectAwait(async e => BlacklistItem.From(await searchService.LookUpAsync(e.Id, cancellationToken), e.AddedDate))
-			.ToListAsync(cancellationToken: cancellationToken);
+			.ToListAsync(cancellationToken);
 	}
 
-	public Task<bool> IsBlacklistedAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		return repository.IsBlacklistedAsync(mediaId, cancellationToken);
-	}
+	public Task<bool> IsBlacklistedAsync(IMediaId mediaId, CancellationToken cancellationToken = default) =>
+		repository.IsBlacklistedAsync(mediaId, cancellationToken);
 
-	public Task AddToBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		return repository.AddAsync(mediaId, cancellationToken);
-	}
+	public Task AddToBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.AddAsync(mediaId, cancellationToken);
 
-	public Task RemoveFromBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		return repository.RemoveAsync(mediaId, cancellationToken);
-	}
+	public Task RemoveFromBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.RemoveAsync(mediaId, cancellationToken);
 }

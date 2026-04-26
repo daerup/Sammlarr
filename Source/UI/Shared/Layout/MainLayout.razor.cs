@@ -9,6 +9,14 @@ namespace UI.Shared.Layout;
 
 public partial class MainLayout : LayoutComponentBase, IDisposable
 {
+	private readonly CancellationTokenSource _disposeCts = new();
+	private string? _avatarUrl;
+
+	private bool _isAuthenticated;
+	private bool _isDisposed;
+	private bool _isProcessing;
+	private string? _username;
+
 	[Inject]
 	private IServiceScopeFactory ScopeFactory { get; set; } = null!;
 
@@ -21,17 +29,21 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 	[Inject]
 	private ProfileDropdownService ProfileDropdownService { get; set; } = null!;
 
-	private bool _isAuthenticated;
-	private bool _isProcessing;
-	private string? _avatarUrl;
-	private string? _username;
-	private readonly CancellationTokenSource _disposeCts = new();
-	private bool _isDisposed;
-
-	protected override async Task OnInitializedAsync()
+	public void Dispose()
 	{
-		await RefreshAuthStatusAsync();
+		if (_isDisposed)
+		{
+			return;
+		}
+
+		_isDisposed = true;
+		_disposeCts.Cancel();
+		_disposeCts.Dispose();
+		NavigationManager.LocationChanged -= HandleLocationChanged;
+		ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
 	}
+
+	protected override async Task OnInitializedAsync() => await RefreshAuthStatusAsync();
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -44,10 +56,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		}
 	}
 
-	private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
-	{
-		_ = HandleLocationChangedAsync();
-	}
+	private void HandleLocationChanged(object? sender, LocationChangedEventArgs e) => _ = HandleLocationChangedAsync();
 
 	private async Task HandleLocationChangedAsync()
 	{
@@ -106,7 +115,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 			var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
 			var forwardUrl = NavigationManager.ToAbsoluteUri($"/plex-auth?pinId={{0}}&clientId={{1}}&returnUrl={escapedReturnUrl}").ToString();
 			var authUrl = await oauthService.GetOAuthUrl(forwardUrl, _disposeCts.Token);
-			NavigationManager.NavigateTo(authUrl, forceLoad: true);
+			NavigationManager.NavigateTo(authUrl, true);
 		}
 		catch
 		{
@@ -135,26 +144,12 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 		await using var scope = ScopeFactory.CreateAsyncScope();
 		var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
 		await credentialStore.ClearAsync(WatchlistProvider.Plex, _disposeCts.Token);
-		NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+		NavigationManager.NavigateTo(NavigationManager.Uri, true);
 	}
 
 	private async Task HandleProfileDropdownOpenRequestedAsync()
 	{
 		_isProfileDropdownOpen = true;
 		await InvokeAsync(StateHasChanged);
-	}
-
-	public void Dispose()
-	{
-		if (_isDisposed)
-		{
-			return;
-		}
-
-		_isDisposed = true;
-		_disposeCts.Cancel();
-		_disposeCts.Dispose();
-		NavigationManager.LocationChanged -= HandleLocationChanged;
-		ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
 	}
 }

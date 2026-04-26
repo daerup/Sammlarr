@@ -35,11 +35,6 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 		return new WatchlistPageResult(items, totalPages);
 	}
 
-	private static bool IsIncomplete(PlexTypes.Watchlist.Metadata arg)
-	{
-		return arg.Year == 0 || string.IsNullOrEmpty(arg.OriginallyAvailableAt) || string.IsNullOrEmpty(arg.Title);
-	}
-
 	public async Task<bool> AddToWatchlistAsync(IMediaId ratingKey, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(AddToWatchlistEndpoint, Uri.EscapeDataString(ratingKey.Value));
@@ -53,6 +48,9 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 		using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, cancellationToken, new StringContent(string.Empty));
 		return response.IsSuccessStatusCode;
 	}
+
+	private static bool IsIncomplete(PlexTypes.Watchlist.Metadata arg) =>
+		arg.Year == 0 || string.IsNullOrEmpty(arg.OriginallyAvailableAt) || string.IsNullOrEmpty(arg.Title);
 
 	private async ValueTask<PlexWatchlistItem> BuildWatchlistItemAsync(PlexTypes.Watchlist.Metadata parsed)
 	{

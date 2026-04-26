@@ -12,10 +12,7 @@ public class ImportListRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup()
-	{
-		_testee = new ImportListRepository(fixture.Context);
-	}
+	public void Setup() => _testee = new ImportListRepository(fixture.Context);
 
 	[Test]
 	public async Task GetImportListsAsync_WhenListsExist_ReturnsNewestFirst()

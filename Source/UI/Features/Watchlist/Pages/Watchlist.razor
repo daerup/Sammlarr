@@ -1,11 +1,11 @@
 @page "/watchlist"
-@implements IDisposable
 @using Contracts.Auth
 @using Contracts.DI
 @using Contracts.Media
 @using Contracts.Settings
 @using Contracts.Watchlist
 @using global::Shared
+@implements IDisposable
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistStoreIndex
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService

@@ -14,21 +14,6 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 	private const string SerachMetadataEndpoint =
 		"https://discover.provider.plex.tv/library/search?searchTypes={0}&searchProviders=discover&includeMetadata=1&query={1}";
 
-	internal async Task<ConversionResult> ResolveById<TMediaId>(PlexId plexId)
-		where TMediaId : IMediaId
-	{
-		var plexResult = await ByIdAsync(plexId);
-		var mediaIds = plexResult.AdditionalIds.OfType<TMediaId>().Cast<IMediaId>().ToList();
-		if (mediaIds.Any())
-		{
-			var id = mediaIds.First();
-			var otherIds = plexResult.AdditionalIds.Except(mediaIds).Append(plexResult.SourceId);
-			return new Resolved(id, mediaIds.Skip(1).Concat(otherIds));
-		}
-
-		return new Unresolved();
-	}
-
 	public Task<IMediaDetailResult> LookUpAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		if (mediaId is not PlexId plexId)
@@ -62,6 +47,21 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 			.ToList();
 	}
 
+	internal async Task<ConversionResult> ResolveById<TMediaId>(PlexId plexId)
+		where TMediaId : IMediaId
+	{
+		var plexResult = await ByIdAsync(plexId);
+		var mediaIds = plexResult.AdditionalIds.OfType<TMediaId>().Cast<IMediaId>().ToList();
+		if (mediaIds.Any())
+		{
+			var id = mediaIds.First();
+			var otherIds = plexResult.AdditionalIds.Except(mediaIds).Append(plexResult.SourceId);
+			return new Resolved(id, mediaIds.Skip(1).Concat(otherIds));
+		}
+
+		return new Unresolved();
+	}
+
 	private async Task<IMediaDetailResult> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(RatingKeyMetadataEndpoint, Uri.EscapeDataString(plexId.Value));
@@ -71,15 +71,13 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchService
 		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
 	}
 
-	private static string ToPlexMediaType(MediaType mediaType)
-	{
-		return mediaType switch
+	private static string ToPlexMediaType(MediaType mediaType) =>
+		mediaType switch
 		{
 			MediaType.Movie => "movies",
 			MediaType.Show => "tv",
 			_ => throw new ArgumentOutOfRangeException(nameof(mediaType), $"Unsupported media type: {mediaType}"),
 		};
-	}
 }
 
 file static class PlexMetadataMappingExtensions
@@ -104,9 +102,8 @@ file static class PlexMetadataMappingExtensions
 		};
 	}
 
-	private static MovieDetailResult MapMovieResult(PlexTypes.ById.Metadata result)
-	{
-		return new MovieDetailResult
+	private static MovieDetailResult MapMovieResult(PlexTypes.ById.Metadata result) =>
+		new()
 		{
 			Title = result.Title,
 			Summary = result.Summary,
@@ -123,11 +120,9 @@ file static class PlexMetadataMappingExtensions
 				.Distinct(StringComparer.OrdinalIgnoreCase)
 				.ToList(),
 		};
-	}
 
-	private static ShowDetailResult MapShowResult(PlexTypes.ById.Metadata result)
-	{
-		return new ShowDetailResult
+	private static ShowDetailResult MapShowResult(PlexTypes.ById.Metadata result) =>
+		new()
 		{
 			Title = result.Title,
 			Summary = result.Summary,
@@ -146,11 +141,9 @@ file static class PlexMetadataMappingExtensions
 				.Distinct(StringComparer.OrdinalIgnoreCase)
 				.ToList(),
 		};
-	}
 
-	private static MovieDetailResult MapMovieResult(PlexTypes.Search.Metadata result)
-	{
-		return new MovieDetailResult
+	private static MovieDetailResult MapMovieResult(PlexTypes.Search.Metadata result) =>
+		new()
 		{
 			Title = result.Title,
 			Summary = string.Empty,
@@ -167,11 +160,9 @@ file static class PlexMetadataMappingExtensions
 				.Distinct(StringComparer.OrdinalIgnoreCase)
 				.ToList(),
 		};
-	}
 
-	private static ShowDetailResult MapShowResult(PlexTypes.Search.Metadata result)
-	{
-		return new ShowDetailResult
+	private static ShowDetailResult MapShowResult(PlexTypes.Search.Metadata result) =>
+		new()
 		{
 			Title = result.Title,
 			Summary = string.Empty,
@@ -190,21 +181,16 @@ file static class PlexMetadataMappingExtensions
 				.Distinct(StringComparer.OrdinalIgnoreCase)
 				.ToList(),
 		};
-	}
 
-	private static MediaType ParseMediaType(string value)
-	{
-		return value.ToLowerInvariant() switch
+	private static MediaType ParseMediaType(string value) =>
+		value.ToLowerInvariant() switch
 		{
 			"movie" => MediaType.Movie,
 			"show" => MediaType.Show,
 		};
-	}
 
-	private static DateOnly? ParseReleaseDate(string? value)
-	{
-		return DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
-	}
+	private static DateOnly? ParseReleaseDate(string? value) =>
+		DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 
 	private static string? NormalizePlexImageUrl(string? url)
 	{

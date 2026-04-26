@@ -1,5 +1,4 @@
 @using Contracts.Media.Search
-
 <button type="button"
         class="search-result-toggle-btn @(IsToggled ? "is-marked" : "") @(IsToggling ? "pointer-events-none" : "")"
         style="--toggle-active-color: var(--destructive)"
@@ -23,7 +22,7 @@
 </button>
 
 @code {
-    [Parameter, EditorRequired] public required IMediaDetailResult Result { get; set; }
+    [Parameter] [EditorRequired] public required IMediaDetailResult Result { get; set; }
     [Parameter] public bool IsToggled { get; set; }
     [Parameter] public bool IsToggling { get; set; }
     [Parameter] public EventCallback<IMediaDetailResult> OnToggle { get; set; }

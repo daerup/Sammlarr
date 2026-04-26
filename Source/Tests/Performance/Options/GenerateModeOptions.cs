@@ -5,8 +5,6 @@ namespace Performance.Options;
 
 internal class GenerateModeOptions : IOptionsSection
 {
-	public static string SectionName => "Generate";
-
 	public string DbPath { get; set; } = null!;
 
 	[Range(1, int.MaxValue)]
@@ -16,4 +14,5 @@ internal class GenerateModeOptions : IOptionsSection
 	public int Seed { get; set; }
 
 	public bool Overwrite { get; set; }
+	public static string SectionName => "Generate";
 }

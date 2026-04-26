@@ -1,7 +1,3 @@
-@implements IDisposable
-@using UI.Features.Import.Components
-@using BlazorBlueprint.Primitives.Filtering
-@using Contracts
 @using Contracts.Auth
 @using Contracts.DI
 @using Contracts.Media.Blacklist
@@ -10,7 +6,8 @@
 @using Contracts.Processing
 @using Contracts.Settings
 @using Contracts.Watchlist
-@using UI.Shared.Media
+@using UI.Features.Import.Components
+@implements IDisposable
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
 @inject IBlacklistService BlacklistService
@@ -194,7 +191,7 @@
 
     protected override void OnParametersSet()
     {
-        if ((_fetchState is FetchState.Success or FetchState.Failed) &&
+        if (_fetchState is FetchState.Success or FetchState.Failed &&
             (Config.Provider != _testedConfig?.Provider ||
              !string.Equals(Config.ListIdentifier?.Trim(), _testedConfig?.ListIdentifier?.Trim(), StringComparison.Ordinal)))
         {

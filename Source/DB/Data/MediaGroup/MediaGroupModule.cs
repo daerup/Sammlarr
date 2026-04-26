@@ -6,8 +6,5 @@ namespace DB.Data.MediaGroup;
 
 internal class MediaGroupModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services)
-	{
-		services.AddScoped<IMediaIdGroupRepository, MediaIdGroupRepository>();
-	}
+	public void RegisterServices(IServiceCollection services) => services.AddScoped<IMediaIdGroupRepository, MediaIdGroupRepository>();
 }

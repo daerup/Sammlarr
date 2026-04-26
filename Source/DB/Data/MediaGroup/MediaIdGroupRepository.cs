@@ -7,15 +7,13 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 {
 	private const string MixedMediaTypesMessage = "All IDs must be of the same media type.";
 
-	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		return await dbContext
+	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default) =>
+		await dbContext
 			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesId(mediaId))
 			.Select(entry => entry.MediaIdGroupEntity.MediaIdEntries)
 			.SelectMany(ids => ids)
 			.Select(entry => entry.Identifier.ToMediaId())
 			.ToListAsync(cancellationToken);
-	}
 
 	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
 	{

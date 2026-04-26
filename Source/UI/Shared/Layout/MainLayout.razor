@@ -5,7 +5,7 @@
         <div class="flex h-14 items-center px-6">
             <div class="mr-4 flex">
                 <a href="/" class="mr-6 flex items-center space-x-2">
-                    <LucideIcon Name="box" Size="24" class="text-primary" />
+                    <LucideIcon Name="box" Size="24" class="text-primary"/>
                     <span class="font-bold">UI</span>
                 </a>
             </div>
@@ -27,15 +27,15 @@
                 </NavLink>
             </nav>
             <div class="flex flex-1 items-center justify-end space-x-2">
-                <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" />
+                <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"/>
 
                 <BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
                     <BbDropdownMenuTrigger>
                         <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0">
                             <BbAvatar Size="AvatarSize.Small" ShowDot="@_isAuthenticated" DotClass="bg-green-500">
-                                <BbAvatarImage Source="@_avatarUrl" Alt="@_username" />
+                                <BbAvatarImage Source="@_avatarUrl" Alt="@_username"/>
                                 <BbAvatarFallback>
-                                    <LucideIcon Name="user" Size="16" />
+                                    <LucideIcon Name="user" Size="16"/>
                                 </BbAvatarFallback>
                             </BbAvatar>
                         </BbButton>
@@ -49,23 +49,23 @@
                         {
                             <BbDropdownMenuLabel>Plex Account</BbDropdownMenuLabel>
                         }
-                        <BbDropdownMenuSeparator />
+                        <BbDropdownMenuSeparator/>
                         <BbDropdownMenuItem OnClick='() => NavigationManager.NavigateTo("/settings")'>
-                            <LucideIcon Name="settings" Size="16" Class="mr-2" />
+                            <LucideIcon Name="settings" Size="16" Class="mr-2"/>
                             Settings
                         </BbDropdownMenuItem>
-                        <BbDropdownMenuSeparator />
+                        <BbDropdownMenuSeparator/>
                         @if (_isAuthenticated)
                         {
                             <BbDropdownMenuItem OnClick="DisconnectAsync" Class="text-destructive focus:text-destructive">
-                                <LucideIcon Name="log-out" Size="16" Class="mr-2" />
+                                <LucideIcon Name="log-out" Size="16" Class="mr-2"/>
                                 Disconnect
                             </BbDropdownMenuItem>
                         }
                         else
                         {
                             <BbDropdownMenuItem OnClick="InitiateAuthAsync" Disabled="@_isProcessing">
-                                <LucideIcon Name="log-in" Size="16" Class="mr-2" />
+                                <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
                                 @(_isProcessing ? "Connecting…" : "Sign in with Plex")
                             </BbDropdownMenuItem>
                         }
@@ -88,9 +88,9 @@
     </footer>
 </div>
 
-<BbToastProvider Position="ToastPosition.BottomRight" />
-<BbDialogProvider />
-<BbPortalHost />
+<BbToastProvider Position="ToastPosition.BottomRight"/>
+<BbDialogProvider/>
+<BbPortalHost/>
 
 @code {
     private bool _isProfileDropdownOpen;

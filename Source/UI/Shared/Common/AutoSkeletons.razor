@@ -35,7 +35,7 @@
 }
 
 @code {
-    [Parameter, EditorRequired] public AutoSkeletonPreset Preset { get; set; }
+    [Parameter] [EditorRequired] public AutoSkeletonPreset Preset { get; set; }
     [Parameter] public int Count { get; set; } = 1;
 
     private int SkeletonCount => Math.Max(Count, 0);

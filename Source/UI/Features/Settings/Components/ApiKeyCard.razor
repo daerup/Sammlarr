@@ -2,7 +2,6 @@
 @using Contracts.DI
 @using Contracts.Media
 @using UI.Shared.Services.Branding
-
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 @inject MediaProviderBrandingService MediaProviderBrandingService
@@ -128,12 +127,12 @@
 
 @code {
 
-    private enum State { Idle, Testing, Success, Saving, Saved, Failed, }
+    private enum State { Idle, Testing, Success, Saving, Saved, Failed }
 
-    [Parameter, EditorRequired]
+    [Parameter] [EditorRequired]
     public required MediaProvider Provider { get; set; }
 
-    [Parameter, EditorRequired]
+    [Parameter] [EditorRequired]
     public required RenderFragment Description { get; set; }
 
     private string _apiKeyInput = string.Empty;

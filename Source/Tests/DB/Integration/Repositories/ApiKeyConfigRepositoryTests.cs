@@ -9,8 +9,8 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private IApiKeyConfigRepository _testee = null!;
 	private Mock<ITypedMemoryCache<MediaProvider, string>> _cache = null!;
+	private IApiKeyConfigRepository _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
@@ -170,7 +170,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 			return true;
 		}
 
-		Span<byte> buffer = new Span<byte>(new byte[value.Length]);
+		var buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);
 	}
 }

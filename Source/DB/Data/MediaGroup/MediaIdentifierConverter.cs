@@ -19,12 +19,12 @@ internal class MediaIdentifierConverter()
 		var mediaTypeText = value[(firstSeparator + 1)..secondSeparator];
 		var externalId = value[(secondSeparator + 1)..];
 
-		if (!Enum.TryParse<MediaProvider>(sourceText, out var source))
+		if (!Enum.TryParse(sourceText, out MediaProvider source))
 		{
 			throw new InvalidOperationException($"Unsupported media provider '{sourceText}'.");
 		}
 
-		if (!Enum.TryParse<MediaType>(mediaTypeText, out var mediaType))
+		if (!Enum.TryParse(mediaTypeText, out MediaType mediaType))
 		{
 			throw new InvalidOperationException($"Unsupported media type '{mediaTypeText}'.");
 		}

@@ -21,10 +21,10 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 	private const int PlexIdNumericPaddingWidth = 9;
 
 	private readonly Random _random = new(options.Seed);
-	private int _nextTmdbId;
-	private int _nextTvdbId;
 	private int _nextImdbId;
 	private int _nextPlexId;
+	private int _nextTmdbId;
+	private int _nextTvdbId;
 
 	public async Task GenerateAsync()
 	{
@@ -78,16 +78,14 @@ internal sealed class MediaIdDatasetGenerator(GenerateModeOptions options)
 		return group;
 	}
 
-	private GroupType SelectGroupType()
-	{
-		return _random.NextDouble() switch
+	private GroupType SelectGroupType() =>
+		_random.NextDouble() switch
 		{
 			< CompleteGroupProbability => GroupType.Complete,
 			< CompleteGroupProbability + MissingGroupProbability => GroupType.Missing,
 			< CompleteGroupProbability + MissingGroupProbability + MissingDuplicatesGroupProbability => GroupType.MissingDuplicates,
 			_ => GroupType.Duplicates,
 		};
-	}
 
 	private IMediaId[] GenerateCompleteGroup() => [CreateTmdbId(), CreateImdbId(), CreateTvdbId(), CreatePlexId()];
 

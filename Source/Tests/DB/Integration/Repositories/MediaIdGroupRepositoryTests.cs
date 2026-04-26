@@ -12,10 +12,7 @@ public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup()
-	{
-		_testee = new MediaIdGroupRepository(fixture.Context);
-	}
+	public void Setup() => _testee = new MediaIdGroupRepository(fixture.Context);
 
 	[Test]
 	public async Task GetByIdAsync_WhenGroupExists_ReturnsAllMappedIds()

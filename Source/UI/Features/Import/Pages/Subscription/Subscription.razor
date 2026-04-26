@@ -1,14 +1,10 @@
 @page "/subscription/create"
 @page "/subscription/{EditImportListId}/edit"
 @page "/subscription/{CloneImportListId}/clone"
-@implements IDisposable
-@using BlazorBlueprint.Primitives.Filtering
-@using Contracts
-@using Contracts.Auth
 @using Contracts.Media.List
-@using Contracts.Processing
 @using Contracts.Settings
 @using global::Shared
+@implements IDisposable
 @inject IImportListRepository ImportListRepository
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService

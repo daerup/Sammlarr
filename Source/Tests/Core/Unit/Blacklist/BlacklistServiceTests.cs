@@ -20,7 +20,7 @@ public class BlacklistServiceTests
 		var mediaId = CreateMediaId();
 		var repository = IBlacklistRepository.Mock();
 		repository.IsBlacklistedAsync(Any(), Any()).Returns(true);
-		var testee = CreateTestee(repository: repository);
+		var testee = CreateTestee(repository);
 
 		var result = await testee.IsBlacklistedAsync(mediaId);
 
@@ -33,7 +33,7 @@ public class BlacklistServiceTests
 		var mediaId = CreateMediaId();
 		var repository = IBlacklistRepository.Mock();
 		repository.IsBlacklistedAsync(Any(), Any()).Returns(false);
-		var testee = CreateTestee(repository: repository);
+		var testee = CreateTestee(repository);
 
 		var result = await testee.IsBlacklistedAsync(mediaId);
 
@@ -45,7 +45,7 @@ public class BlacklistServiceTests
 	{
 		var mediaId = CreateMediaId();
 		var repository = IBlacklistRepository.Mock();
-		var testee = CreateTestee(repository: repository);
+		var testee = CreateTestee(repository);
 
 		await testee.AddToBacklistAsync(mediaId);
 
@@ -57,7 +57,7 @@ public class BlacklistServiceTests
 	{
 		var mediaId = CreateMediaId();
 		var repository = IBlacklistRepository.Mock();
-		var testee = CreateTestee(repository: repository);
+		var testee = CreateTestee(repository);
 
 		await testee.RemoveFromBacklistAsync(mediaId);
 
@@ -78,7 +78,7 @@ public class BlacklistServiceTests
 		var searchService = IMediaSearchService.Mock();
 		searchService.LookUpAsync(Any(), Any()).Returns(detailResult);
 
-		var testee = CreateTestee(repository: repository, searchService: searchService);
+		var testee = CreateTestee(repository, searchService);
 
 		var result = await testee.GetBlacklistItems();
 
@@ -95,7 +95,7 @@ public class BlacklistServiceTests
 		var repository = IBlacklistRepository.Mock();
 		repository.GetBlacklistedEntriesAsync(Any(), Any()).Returns(new List<BlacklistEntry>());
 
-		var testee = CreateTestee(repository: repository);
+		var testee = CreateTestee(repository);
 
 		var result = await testee.GetBlacklistItems();
 

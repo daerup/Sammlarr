@@ -27,7 +27,7 @@ static Dictionary<string, string> ParseArguments(string[] args) =>
 
 static RunningMode ExtractMode(Dictionary<string, string> arguments)
 {
-	if (arguments.TryGetValue("mode", out var raw) && Enum.TryParse<RunningMode>(raw, ignoreCase: true, out var mode))
+	if (arguments.TryGetValue("mode", out var raw) && Enum.TryParse(raw, true, out RunningMode mode))
 	{
 		return mode;
 	}

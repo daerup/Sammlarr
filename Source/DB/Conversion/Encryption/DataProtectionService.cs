@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.DataProtection;
 
 namespace DB.Conversion.Encryption;
@@ -13,7 +14,7 @@ internal class DataProtectionService(IDataProtectionProvider dataProtectionProvi
 			return plaintext;
 		}
 
-		var plaintextBytes = System.Text.Encoding.UTF8.GetBytes(plaintext);
+		var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
 		var ciphertextBytes = _protector.Protect(plaintextBytes);
 		return Convert.ToBase64String(ciphertextBytes);
 	}
@@ -29,7 +30,7 @@ internal class DataProtectionService(IDataProtectionProvider dataProtectionProvi
 		{
 			var ciphertextBytes = Convert.FromBase64String(ciphertext);
 			var plaintextBytes = _protector.Unprotect(ciphertextBytes);
-			return System.Text.Encoding.UTF8.GetString(plaintextBytes);
+			return Encoding.UTF8.GetString(plaintextBytes);
 		}
 		catch (Exception ex)
 		{

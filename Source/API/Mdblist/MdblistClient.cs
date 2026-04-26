@@ -7,6 +7,19 @@ namespace API.Mdblist;
 
 internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
 {
+	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			var response = await SendWithKeyAsync(HttpMethod.Get, "user", apiKey, null, cancellationToken);
+			return response.IsSuccessStatusCode;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
 		string endpoint,
@@ -19,19 +32,6 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyC
 			?? throw new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys.");
 
 		return await SendWithKeyAsync(method, endpoint, apiKey, content, cancellationToken);
-	}
-
-	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			var response = await SendWithKeyAsync(HttpMethod.Get, "user", apiKey, null, cancellationToken);
-			return response.IsSuccessStatusCode;
-		}
-		catch
-		{
-			return false;
-		}
 	}
 
 	private Task<HttpResponseMessage> SendWithKeyAsync(

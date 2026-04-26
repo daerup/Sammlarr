@@ -1,14 +1,11 @@
 @page "/blacklist"
 @implements IDisposable
-@implements IAsyncDisposable
 @using Contracts
-@using Contracts.Auth
-@using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Blacklist
 @using Contracts.Media.Convertions
 @using Contracts.Settings
-@using global::Shared
+@implements IAsyncDisposable
 @inject IBlacklistService BlacklistService
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject ScrollService ScrollService
@@ -295,7 +292,7 @@ else
             var result = conversion switch
             {
                 Resolved resolved => resolved.Id,
-                Unresolved _ => throw new ArgumentException($"Failed to resolve media ID"),
+                Unresolved _ => throw new ArgumentException("Failed to resolve media ID"),
             };
 
             await BlacklistService.AddToBacklistAsync(result, _cancellationTokenSource.Token);

@@ -10,22 +10,22 @@ public class PlexTypesTests
 
 	private static PlexTypes.ById.Metadata CreateMetadata(params PlexTypes.ById.Guid[] guids) =>
 		new(
-			Art: _faker.Internet.Url(),
-			RatingKey: _faker.Random.Number(1, 999_999).ToString(),
-			Summary: _faker.Lorem.Sentence(8),
-			Tagline: _faker.Lorem.Sentence(4),
-			Type: "movie",
-			AddedAt: _faker.Date.RecentOffset().ToUnixTimeSeconds(),
-			AudienceRating: _faker.Random.Double(1, 10),
-			OriginallyAvailableAt: _faker.Date.Past().ToString("yyyy-MM-dd"),
-			Poster: _faker.Internet.Url(),
-			Title: _faker.Lorem.Sentence(3),
-			Year: _faker.Random.Number(1980, 2025),
-			Duration: _faker.Random.Number(60, 240) * 60_000,
-			SeasonCount: null,
-			EpisodeCount: null,
-			Guid: guids,
-			Genre: [new PlexTypes.ById.Genre(_faker.Lorem.Word())]
+			_faker.Internet.Url(),
+			_faker.Random.Number(1, 999_999).ToString(),
+			_faker.Lorem.Sentence(8),
+			_faker.Lorem.Sentence(4),
+			"movie",
+			_faker.Date.RecentOffset().ToUnixTimeSeconds(),
+			_faker.Random.Double(1, 10),
+			_faker.Date.Past().ToString("yyyy-MM-dd"),
+			_faker.Internet.Url(),
+			_faker.Lorem.Sentence(3),
+			_faker.Random.Number(1980, 2025),
+			_faker.Random.Number(60, 240) * 60_000,
+			null,
+			null,
+			guids,
+			[new PlexTypes.ById.Genre(_faker.Lorem.Word())]
 		);
 
 	[Test]
@@ -80,17 +80,17 @@ public class PlexTypesTests
 	{
 		var ratingKey = _faker.Random.Number(1, 999_999).ToString();
 		var testee = new PlexTypes.Watchlist.Metadata(
-			Art: _faker.Internet.Url(),
-			Rating: 8.5,
-			RatingKey: ratingKey,
-			Tagline: null,
-			Type: "movie",
-			AddedAt: (int)_faker.Date.RecentOffset().ToUnixTimeSeconds(),
-			IsContinuingSeries: false,
-			OriginallyAvailableAt: "2021-01-01",
-			Thumb: _faker.Internet.Url(),
-			Title: _faker.Lorem.Sentence(3),
-			Year: 2021
+			_faker.Internet.Url(),
+			8.5,
+			ratingKey,
+			null,
+			"movie",
+			(int)_faker.Date.RecentOffset().ToUnixTimeSeconds(),
+			false,
+			"2021-01-01",
+			_faker.Internet.Url(),
+			_faker.Lorem.Sentence(3),
+			2021
 		);
 
 		await Assert.That(testee.PlexId).IsEqualTo(PlexId.From(ratingKey, MediaType.Movie));

@@ -1,7 +1,6 @@
 @using Contracts.Auth
 @using Contracts.Media
 @using global::Shared
-
 @if (GuardState())
 {
     @ChildContent
@@ -22,8 +21,8 @@ else if (ShowFallback)
 }
 
 @code {
-    [Parameter, EditorRequired] public Func<bool> GuardState { get; set; } = () => true;
-    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+    [Parameter] [EditorRequired] public Func<bool> GuardState { get; set; } = () => true;
+    [Parameter] [EditorRequired] public RenderFragment? ChildContent { get; set; }
     [Parameter] public bool ShowFallback { get; set; } = true;
 
     [Parameter] public WatchlistProvider? AuthProvider { get; set; }
@@ -63,9 +62,6 @@ else if (ShowFallback)
         return "Continue";
     }
 
-    private Task InvokeFallbackActionAsync()
-    {
-        return FallbackAction.InvokeAsync();
-    }
+    private Task InvokeFallbackActionAsync() => FallbackAction.InvokeAsync();
 }
 

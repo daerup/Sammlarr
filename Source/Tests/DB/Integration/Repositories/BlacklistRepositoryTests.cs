@@ -14,10 +14,7 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup()
-	{
-		_testee = new BlacklistRepository(fixture.Context);
-	}
+	public void Setup() => _testee = new BlacklistRepository(fixture.Context);
 
 	[Test]
 	public async Task AddAsync_WhenGroupIsNotBlacklisted_PersistsEntry()

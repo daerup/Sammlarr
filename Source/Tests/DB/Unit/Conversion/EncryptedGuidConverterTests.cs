@@ -64,7 +64,7 @@ public class EncryptedGuidConverterTests
 		var guidValue = Guid.NewGuid();
 
 		var encrypted = testee.ConvertToProvider(guidValue);
-		var encryptedString = (encrypted as string) ?? string.Empty;
+		var encryptedString = encrypted as string ?? string.Empty;
 
 		var isBase64 = IsBase64String(encryptedString);
 		await Assert.That(isBase64).IsTrue();
@@ -77,7 +77,7 @@ public class EncryptedGuidConverterTests
 			return true;
 		}
 
-		Span<byte> buffer = new Span<byte>(new byte[value.Length]);
+		var buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);
 	}
 

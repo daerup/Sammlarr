@@ -7,6 +7,19 @@ namespace API.TMDB;
 
 internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
 {
+	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			var response = await SendWithKeyAsync(HttpMethod.Get, "configuration", apiKey, null, cancellationToken);
+			return response.IsSuccessStatusCode;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
 	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
 		string endpoint,
@@ -19,19 +32,6 @@ internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigR
 			?? throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
 
 		return await SendWithKeyAsync(method, endpoint, apiKey, content, cancellationToken);
-	}
-
-	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			var response = await SendWithKeyAsync(HttpMethod.Get, "configuration", apiKey, null, cancellationToken);
-			return response.IsSuccessStatusCode;
-		}
-		catch
-		{
-			return false;
-		}
 	}
 
 	private Task<HttpResponseMessage> SendWithKeyAsync(

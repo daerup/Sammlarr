@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Contracts.Processing;
 using Core.Processing;
@@ -148,10 +147,8 @@ internal record Item(string Name, int Year, string Genre = "Unknown");
 
 file static class Extension
 {
-	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<Item>> source)
-	{
-		return Shared.EnumerableExtensions.OfUnionType<QueryResult<Item>, TOut>(source);
-	}
+	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<Item>> source) =>
+		EnumerableExtensions.OfUnionType<QueryResult<Item>, TOut>(source);
 
 	public static UnionCollectionAssertion<TCollection, QueryResult<Item>> AreOfUnionType<TCollection>(
 		this IAssertionSource<TCollection> source,

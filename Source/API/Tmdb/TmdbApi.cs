@@ -15,13 +15,11 @@ internal class TmdbApi(TmdbClient tmdbClient)
 		return result!;
 	}
 
-	private static string ToTmdbMediaType(MediaType mediaType)
-	{
-		return mediaType switch
+	private static string ToTmdbMediaType(MediaType mediaType) =>
+		mediaType switch
 		{
 			MediaType.Movie => "movie",
 			MediaType.Show => "tv",
 			_ => throw new ArgumentOutOfRangeException(nameof(mediaType), $"Unsupported media type: {mediaType}"),
 		};
-	}
 }

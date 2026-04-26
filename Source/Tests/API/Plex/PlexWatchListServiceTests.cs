@@ -16,7 +16,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task GetWatchlistAsync_WhenItemHasZeroYear_FiltersItem()
 	{
-		var json = BuildWatchlistJson(totalSize: 0, CreateMetadata(year: 0));
+		var json = BuildWatchlistJson(0, CreateMetadata(0));
 		var testee = CreateWatchListService(json);
 
 		var result = await testee.GetWatchlistAsync(1);
@@ -27,7 +27,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task GetWatchlistAsync_WhenItemHasMissingDate_FiltersItem()
 	{
-		var json = BuildWatchlistJson(totalSize: 0, CreateMetadata(originallyAvailableAt: string.Empty));
+		var json = BuildWatchlistJson(0, CreateMetadata(originallyAvailableAt: string.Empty));
 		var testee = CreateWatchListService(json);
 
 		var result = await testee.GetWatchlistAsync(1);
@@ -38,7 +38,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task GetWatchlistAsync_WhenItemHasMissingTitle_FiltersItem()
 	{
-		var json = BuildWatchlistJson(totalSize: 0, CreateMetadata(title: string.Empty));
+		var json = BuildWatchlistJson(0, CreateMetadata(title: string.Empty));
 		var testee = CreateWatchListService(json);
 
 		var result = await testee.GetWatchlistAsync(1);
@@ -49,7 +49,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task GetWatchlistAsync_WhenItemIsComplete_ReturnsItem()
 	{
-		var json = BuildWatchlistJson(totalSize: 1, CreateMetadata(title: "Movie 1"));
+		var json = BuildWatchlistJson(1, CreateMetadata(title: "Movie 1"));
 		var testee = CreateWatchListService(json);
 
 		var result = await testee.GetWatchlistAsync(1);
@@ -77,7 +77,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task AddToWatchlistAsync_WhenRequestSucceeds_ReturnsTrue()
 	{
-		var testee = CreateWatchListService(statusCode: HttpStatusCode.OK);
+		var testee = CreateWatchListService(HttpStatusCode.OK);
 
 		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
@@ -87,7 +87,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task AddToWatchlistAsync_WhenRequestFails_ReturnsFalse()
 	{
-		var testee = CreateWatchListService(statusCode: HttpStatusCode.Unauthorized);
+		var testee = CreateWatchListService(HttpStatusCode.Unauthorized);
 
 		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
@@ -97,7 +97,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task RemoveFromWatchlistAsync_WhenRequestSucceeds_ReturnsTrue()
 	{
-		var testee = CreateWatchListService(statusCode: HttpStatusCode.OK);
+		var testee = CreateWatchListService(HttpStatusCode.OK);
 
 		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
@@ -107,7 +107,7 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task RemoveFromWatchlistAsync_WhenRequestFails_ReturnsFalse()
 	{
-		var testee = CreateWatchListService(statusCode: HttpStatusCode.Unauthorized);
+		var testee = CreateWatchListService(HttpStatusCode.Unauthorized);
 
 		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
 
@@ -166,9 +166,8 @@ public class PlexWatchListServiceTests
 		return JsonSerializer.Serialize(payload);
 	}
 
-	private static object CreateMetadata(int year = 2021, string? originallyAvailableAt = "2021-01-01", string title = "Movie 1")
-	{
-		return new
+	private static object CreateMetadata(int year = 2021, string? originallyAvailableAt = "2021-01-01", string title = "Movie 1") =>
+		new
 		{
 			art = $"/art/{Faker.Random.Int(1, 1000)}",
 			rating = Faker.Random.Double(1, 10),
@@ -182,5 +181,4 @@ public class PlexWatchListServiceTests
 			title,
 			year,
 		};
-	}
 }

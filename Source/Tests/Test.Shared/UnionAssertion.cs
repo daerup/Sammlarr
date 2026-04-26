@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Runtime.CompilerServices;
-using Contracts.Processing;
 using Shared;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
@@ -10,15 +8,11 @@ namespace Test.Shared;
 public class UnionAssertion<TOuter, TInner>(AssertionContext<TOuter> context) : Assertion<TInner>(context.Map(MapToInner()))
 	where TOuter : IUnion
 {
-	private static Func<TOuter?, TInner?> MapToInner()
-	{
-		return x => x?.Value is TInner inner ? inner : throw new InvalidCastException($"found {(x?.Value?.GetType()).GetGenericName()}");
-	}
+	private static Func<TOuter?, TInner?> MapToInner() =>
+		x => x?.Value is TInner inner ? inner : throw new InvalidCastException($"found {(x?.Value?.GetType()).GetGenericName()}");
 
-	protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TInner> metadata)
-	{
-		return Task.FromResult(metadata.Exception != null ? AssertionResult.Failed(metadata.Exception.Message) : AssertionResult.Passed);
-	}
+	protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TInner> metadata) =>
+		Task.FromResult(metadata.Exception != null ? AssertionResult.Failed(metadata.Exception.Message) : AssertionResult.Passed);
 
 	protected override string GetExpectation() =>
 		"union " + TypeExtensions.GetGenericName<TOuter>() + " to be of type " + TypeExtensions.GetGenericName<TInner>();
@@ -29,10 +23,7 @@ public static class UnionAssertionExtensions
 	extension<TOuter>(IAssertionSource<TOuter> source)
 		where TOuter : IUnion
 	{
-		public UnionAssertion<TOuter, TInner> IsOfUnionType<TInner>()
-		{
-			return new UnionAssertion<TOuter, TInner>(source.Context);
-		}
+		public UnionAssertion<TOuter, TInner> IsOfUnionType<TInner>() => new(source.Context);
 	}
 
 	extension<TCollection, TItem>(IAssertionSource<TCollection> source)
@@ -73,7 +64,7 @@ public class UnionCollectionAssertion<TCollection, TItem>(AssertionContext<TColl
 		var zipped = value.Zip(expectedTypes, (item, expectedType) => (item, expectedType));
 		foreach (var (index, item) in zipped.Index())
 		{
-			(TItem actual, Type expected) = item;
+			var (actual, expected) = item;
 			if (actual is IUnion union)
 			{
 				if (union.Value!.GetType() == expected)

@@ -72,8 +72,5 @@ public class TmdbClientTests
 		await Assert.That(result).IsFalse();
 	}
 
-	private string GetApiKey()
-	{
-		return new Faker().Random.AlphaNumeric(32);
-	}
+	private string GetApiKey() => new Faker().Random.AlphaNumeric(32);
 }

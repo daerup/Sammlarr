@@ -5,8 +5,5 @@ namespace API.IMDB;
 
 internal class ImdbModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services)
-	{
-		services.AddScoped<ImdbIdConverter>();
-	}
+	public void RegisterServices(IServiceCollection services) => services.AddScoped<ImdbIdConverter>();
 }

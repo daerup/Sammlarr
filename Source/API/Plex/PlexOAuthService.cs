@@ -31,30 +31,6 @@ internal class PlexOAuthService(
 		return string.Empty;
 	}
 
-	private async Task<string> AuthenticateAsync(string forwardUrl, CancellationToken cancellationToken = default)
-	{
-		var clientId = Guid.NewGuid();
-		using var request = new HttpRequestMessage(HttpMethod.Post, PlexPinEndpoint);
-		request.Headers.AddClientId(clientId);
-		request.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["strong"] = "true" });
-		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
-		response.EnsureSuccessStatusCode();
-
-		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Auth.Root>(stream, cancellationToken: cancellationToken))!;
-
-		var formattedForwardUrl = string.Format(forwardUrl, result.PinId, clientId);
-		var queryParams = new Dictionary<string, string?>
-		{
-			["clientID"] = clientId.ToString(),
-			["code"] = result.Code,
-			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
-			["forwardUrl"] = formattedForwardUrl,
-		};
-		var authUrl = QueryHelpers.AddQueryString(PlexAuthAppUrl, queryParams).Replace("?", "#?");
-		return authUrl;
-	}
-
 	public async Task<AuthPinResponse> CallbackAsync(int pinId, Guid clientId, CancellationToken cancellationToken = default)
 	{
 		using var request = new HttpRequestMessage(HttpMethod.Get, $"{PlexPinEndpoint}/{pinId}");
@@ -90,15 +66,36 @@ internal class PlexOAuthService(
 
 		return new AuthUserInfo(string.IsNullOrWhiteSpace(user.Title) ? user.Username : user.Title, user.Thumb);
 	}
+
+	private async Task<string> AuthenticateAsync(string forwardUrl, CancellationToken cancellationToken = default)
+	{
+		var clientId = Guid.NewGuid();
+		using var request = new HttpRequestMessage(HttpMethod.Post, PlexPinEndpoint);
+		request.Headers.AddClientId(clientId);
+		request.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["strong"] = "true" });
+		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
+		response.EnsureSuccessStatusCode();
+
+		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Auth.Root>(stream, cancellationToken: cancellationToken))!;
+
+		var formattedForwardUrl = string.Format(forwardUrl, result.PinId, clientId);
+		var queryParams = new Dictionary<string, string?>
+		{
+			["clientID"] = clientId.ToString(),
+			["code"] = result.Code,
+			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
+			["forwardUrl"] = formattedForwardUrl,
+		};
+		var authUrl = QueryHelpers.AddQueryString(PlexAuthAppUrl, queryParams).Replace("?", "#?");
+		return authUrl;
+	}
 }
 
 file static class PlexHttpRequestHeadersExtensions
 {
 	extension(HttpRequestHeaders headers)
 	{
-		public void AddClientId(Guid clientId)
-		{
-			headers.Add("X-Plex-Client-Identifier", clientId.ToString());
-		}
+		public void AddClientId(Guid clientId) => headers.Add("X-Plex-Client-Identifier", clientId.ToString());
 	}
 }

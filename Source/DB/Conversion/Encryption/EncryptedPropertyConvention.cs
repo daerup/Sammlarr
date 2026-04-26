@@ -22,13 +22,11 @@ internal sealed class EncryptedPropertyConvention(IDataProtectionService dataPro
 		}
 	}
 
-	private ValueConverter? GetConverter(Type clrType)
-	{
-		return clrType switch
+	private ValueConverter? GetConverter(Type clrType) =>
+		clrType switch
 		{
 			_ when clrType == typeof(string) => new EncryptedStringConverter(dataProtectionService),
 			_ when clrType == typeof(Guid) => new EncryptedGuidConverter(dataProtectionService),
 			_ => null,
 		};
-	}
 }

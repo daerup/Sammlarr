@@ -25,6 +25,7 @@
 </PageContainer>
 
 @code {
+
     private record SettingsSection(string Label, string Icon, Type ComponentType);
 
     private readonly List<SettingsSection> _sections =
@@ -53,9 +54,9 @@
     }
 
     private SettingsSection? ResolveSection() =>
-        string.IsNullOrEmpty(Section)
-            ? null
-            : _sections.FirstOrDefault(s =>
+        string.IsNullOrEmpty(Section) ?
+            null :
+            _sections.FirstOrDefault(s =>
                 Slug(s.Label).Equals(Section, StringComparison.OrdinalIgnoreCase));
 
     private static string Slug(string label) =>

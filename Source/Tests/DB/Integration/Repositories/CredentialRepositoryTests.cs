@@ -8,8 +8,8 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class CredentialRepositoryTests(SQLiteFixture fixture)
 {
-	private ICredentialStore _testee = null!;
 	private Mock<ITypedMemoryCache<WatchlistProvider, CredentialEntity>> _cache = null!;
+	private ICredentialStore _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
@@ -227,7 +227,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 			return true;
 		}
 
-		Span<byte> buffer = new Span<byte>(new byte[value.Length]);
+		var buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);
 	}
 }

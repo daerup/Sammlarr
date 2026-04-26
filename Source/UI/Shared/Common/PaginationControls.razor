@@ -27,7 +27,7 @@
                 </div>
                 <span>of @TotalPages</span>
             </div>
-        </BbPaginationItem >
+        </BbPaginationItem>
         <BbPaginationItem Class="pagnation-control">
             <div style="@GetDisabledCursorStyle(IsNextOrLastDisabled)">
                 <BbPaginationNext Disabled="@IsNextOrLastDisabled"
@@ -69,10 +69,7 @@
         _jumpPageValue = CurrentPage;
     }
 
-    private Task HandleCurrentPageChangedAsync(int newPage)
-    {
-        return ChangePageAsync(newPage);
-    }
+    private Task HandleCurrentPageChangedAsync(int newPage) => ChangePageAsync(newPage);
 
     private async Task ChangePageAsync(int newPage)
     {

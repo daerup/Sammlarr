@@ -8,8 +8,8 @@ public class TmdbTypesTests
 	[Test]
 	public async Task TrendingResult_DisplayTitle_UsesTitleThenName()
 	{
-		var withTitle = CreateTrendingResult(title: "Title", name: "Name");
-		var withName = CreateTrendingResult(title: null, name: "Name");
+		var withTitle = CreateTrendingResult();
+		var withName = CreateTrendingResult(null);
 
 		await Assert.That(withTitle.DisplayTitle).IsEqualTo("Title");
 		await Assert.That(withName.DisplayTitle).IsEqualTo("Name");
@@ -18,7 +18,7 @@ public class TmdbTypesTests
 	[Test]
 	public async Task TrendingResult_DisplayTitle_WhenMissingValues_ThrowsInvalidOperationException()
 	{
-		var testee = CreateTrendingResult(title: null, name: null);
+		var testee = CreateTrendingResult(null, null);
 
 		await Assert.That(() => testee.DisplayTitle).Throws<InvalidOperationException>();
 	}
@@ -122,27 +122,25 @@ public class TmdbTypesTests
 		string? originalName = "Original Name",
 		string? releaseDate = "2019-01-01",
 		string? firstAirDate = "2020-01-01"
-	)
-	{
-		return new TmdbTypes.Trending.Result(
-			Adult: false,
-			BackdropPath: "/backdrop.jpg",
-			Id: 10,
-			Title: title,
-			Name: name,
-			OriginalTitle: originalTitle,
-			OriginalName: originalName,
-			Overview: "overview",
-			PosterPath: "/poster.jpg",
-			Type: "movie",
-			OriginalLanguage: "en",
-			GenreIds: [1, 2],
-			Popularity: 1.0,
-			ReleaseDate: releaseDate,
-			FirstAirDate: firstAirDate,
-			Video: false,
-			VoteAverage: 8.4,
-			VoteCount: 100
+	) =>
+		new(
+			false,
+			"/backdrop.jpg",
+			10,
+			title,
+			name,
+			originalTitle,
+			originalName,
+			"overview",
+			"/poster.jpg",
+			"movie",
+			"en",
+			[1, 2],
+			1.0,
+			releaseDate,
+			firstAirDate,
+			false,
+			8.4,
+			100
 		);
-	}
 }
