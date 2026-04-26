@@ -114,8 +114,9 @@
     private bool _isLoading;
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
-    private bool _isAuthenticated;
+    private bool _isOAuthenticated;
     private bool _hasTrendingProviderApiKey;
+    private bool HasAccess => _isOAuthenticated && _hasTrendingProviderApiKey;
     private HashSet<string> _watchlistedIds = [];
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
@@ -130,14 +131,14 @@
         _providerConfig = await ProviderConfigRepository.GetAsync();
     }
 
-    private bool HasOAuthAccess() => _isAuthenticated;
+    private bool HasOAuthAccess() => _isOAuthenticated;
     private bool HasTrendingProviderAccess() => _hasTrendingProviderApiKey;
 
     private async Task HandleOAuthAccessChanged(bool isAuthenticated)
     {
-        _isAuthenticated = isAuthenticated;
+        _isOAuthenticated = isAuthenticated;
 
-        if (!_isAuthenticated)
+        if (!_isOAuthenticated)
         {
             _hasTrendingProviderApiKey = false;
             _watchlistedIds.Clear();
@@ -150,6 +151,7 @@
 
         await LoadWatchlistIdsAsync();
     }
+
     private void CloseSelectedMedia()
     {
         _selectedMedia = null;
@@ -180,12 +182,12 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (_isAuthenticated && !_isShortcutRegistered)
+        if (_isOAuthenticated && !_isShortcutRegistered)
         {
             _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+K", OpenSearchFromShortcutAsync, BrowseSearchShortcutId);
             _isShortcutRegistered = true;
         }
-        else if (!_isAuthenticated && _isShortcutRegistered)
+        else if (!_isOAuthenticated && _isShortcutRegistered)
         {
             await UnregisterShortcutAsync();
         }
@@ -193,7 +195,7 @@
 
     private async Task OpenSearchFromShortcutAsync()
     {
-        if (!_isAuthenticated || _isSearchModalOpen)
+        if (!_isOAuthenticated || _isSearchModalOpen)
         {
             return;
         }
@@ -231,6 +233,10 @@
 
     private async Task LoadPageAsync()
     {
+        if (!HasAccess)
+        {
+            return;
+        }
         _isLoading = true;
 
         await TryStateHasChangedAsync();

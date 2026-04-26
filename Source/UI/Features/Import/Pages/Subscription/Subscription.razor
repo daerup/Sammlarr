@@ -4,15 +4,20 @@
 @implements IDisposable
 @using BlazorBlueprint.Primitives.Filtering
 @using Contracts
+@using Contracts.Auth
 @using Contracts.Media.List
 @using Contracts.Processing
+@using Contracts.Settings
 @using global::Shared
 @inject IImportListRepository ImportListRepository
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject ProfileDropdownService ProfileDropdownService
 
 <PageTitle>@PageTitleText</PageTitle>
 
+<OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
 <div class="flex flex-col h-[calc(100vh-7rem)] overflow-hidden">
 
     <div class="shrink-0 px-6 py-4 border-b flex items-center justify-between gap-4">
@@ -76,18 +81,23 @@
         </div>
     </div>
 
-    <div class="flex-1 min-h-0 flex flex-row gap-4 p-4 overflow-hidden">
+    <ProtectedSection GuardState="IsOAuthAllowed"
+                      AuthProvider="@_providerConfig.WatchlistProvider"
+                      DeniedActionDescription="managing subscriptions"
+                      FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+        <div class="flex-1 min-h-0 flex flex-row gap-4 p-4 overflow-hidden">
 
-        <SubscriptionConfigPanel @key="_configKey"
-            Value="@_config"
-            ShowValidation="@_showValidation"
-            OnChange="@OnConfigChanged"/>
+            <SubscriptionConfigPanel @key="_configKey"
+                                     Value="@_config"
+                                     ShowValidation="@_showValidation"
+                                     OnChange="@OnConfigChanged"/>
 
-        <SubscriptionPreviewPanel @ref="_previewPanel"
-            Config="@_config"
-            OnStatusChanged="@OnPreviewStatusChanged"/>
+            <SubscriptionPreviewPanel @ref="_previewPanel"
+                                      Config="@_config"
+                                      OnStatusChanged="@OnPreviewStatusChanged"/>
 
-    </div>
+        </div>
+    </ProtectedSection>
 
 </div>
 
@@ -95,6 +105,7 @@
 
     [Parameter] public string? EditImportListId { get; set; }
     [Parameter] public string? CloneImportListId { get; set; }
+    private bool IsEditOrClone => EditImportListId is not null || CloneImportListId is not null;
 
     private string PageTitleText =>
         EditImportListId is not null ? "Edit subscription"
@@ -105,6 +116,10 @@
         EditImportListId is not null ? "Update an existing subscription and keep your import settings in sync."
         : CloneImportListId is not null ? "Create a new subscription using values copied from an existing one."
         : "Import a list from an external provider and subscribe to it.";
+
+    private ProviderConfig _providerConfig = null!;
+    private bool _hasOAuthAccess;
+    private bool IsOAuthAllowed() => _hasOAuthAccess;
 
     private SubscriptionConfig _config = new();
     private int? _storedHash;
@@ -125,7 +140,6 @@
     private bool HasChanged => _storedHash is null || _config.GetSaveHash() != _storedHash;
     private bool HasPendingChanges => _config.GetPreviewHash() != _appliedHash;
 
-    private bool CanTest => !string.IsNullOrWhiteSpace(_config.ListIdentifier) && _config.Provider is not null;
     private bool CanSave => _config.IsValid && _previewStatus.HasResults && HasChanged;
 
     private bool ShowTestButton => !_previewStatus.HasResults && !_previewStatus.IsLoading && !_isSaving;
@@ -139,15 +153,22 @@
         StateHasChanged();
     }
 
+    private Task HandleAccessChangedAsync(bool hasAccess)
+    {
+        _hasOAuthAccess = hasAccess;
+        return Task.CompletedTask;
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        var sourceId = UrlGuid.Decode(EditImportListId ?? CloneImportListId);
-        if (sourceId is null)
+        _providerConfig = await ProviderConfigRepository.GetAsync();
+        if (!IsEditOrClone)
         {
             return;
         }
 
-        var importList = await ImportListRepository.GetImportListByIdAsync(sourceId.Value);
+        var sourceId = UrlGuid.Decode(EditImportListId ?? CloneImportListId);
+        var importList = await ImportListRepository.GetImportListByIdAsync(sourceId);
 
         if (importList is null)
         {
@@ -236,8 +257,9 @@
 
         try
         {
-            if (UrlGuid.Decode(EditImportListId) is { } editId)
+            if (EditImportListId is not null)
             {
+                var editId = UrlGuid.Decode(EditImportListId);
                 var updateData = new ImportListUpdateData
                 {
                     Name = _config.Name.Trim(),
@@ -270,7 +292,7 @@
 
             NavigationManager.NavigateTo("/lists");
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException) {}
         catch (Exception)
         {
             _isSaving = false;
