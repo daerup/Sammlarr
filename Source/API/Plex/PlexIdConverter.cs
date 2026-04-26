@@ -54,15 +54,27 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 	{
 		foreach (var candidate in candidates)
 		{
-			if (candidate is TmdbId tmdbId)
+			var title = await GetOriginalTitleAsync(candidate);
+			if (title is null)
 			{
-				var details = await tmdbApi.GetDetailAsync(tmdbId);
-				return await ResolveFromTitleSearchAsync(details.DisplayOriginalTitle, tmdbId.Type, candidates);
+				continue;
+			}
+			if (await ResolveFromTitleSearchAsync(title, candidate.Type, candidates) is Resolved resolved)
+			{
+				return resolved;
 			}
 		}
 
 		return new Unresolved();
 	}
+
+	private async Task<string?> GetOriginalTitleAsync(IMediaId candidate) =>
+		candidate switch
+		{
+			TmdbId tmdbId => (await tmdbApi.GetDetailAsync(tmdbId))?.DisplayOriginalTitle,
+			ImdbId imdbId => (await tmdbApi.FindByImdbIdAsync(imdbId))?.DisplayOriginalTitle,
+			_ => null,
+		};
 
 	private static bool ContainsAnyCandidate(IEnumerable<IMediaId> additionalIds, IReadOnlyCollection<IMediaId> candidates)
 	{

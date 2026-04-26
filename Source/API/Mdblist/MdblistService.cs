@@ -44,9 +44,23 @@ internal class MdblistService(PlexApi plexApi, MdblistClient client, IMediaIdRes
 		var resolvedResult = await ResolveIdsAsync(item.ids, mediaType, providerConfig.WatchlistProvider.AsMediaProvider(), item.title, item.release_year);
 		if (resolvedResult is not Resolved resolvedId)
 		{
-			throw new InvalidOperationException($"Tried to map a {mediaType} from MDBList, but no watchlist provider ID could be resolved");
+			return BuildUnresolved(item, mediaType);
 		}
 		return await plexApi.LookUpAsync(resolvedId.Id);
+	}
+
+	private UnresolvedMediaResult BuildUnresolved(MdblistTypes.ListItems.IListItem item, MediaType mediaType)
+	{
+		var (mdblistId, tmdbId, imdbId, tvdbId) = ExtractIds(item.ids, mediaType);
+		var ids = new IMediaId?[] { imdbId, tmdbId, mdblistId, tvdbId }.OfType<IMediaId>().ToArray();
+		return new UnresolvedMediaResult
+		{
+			SourceId = ids[0],
+			AdditionalIds = ids[1..],
+			MediaType = mediaType,
+			Title = item.title,
+			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
+		};
 	}
 
 	private Task<ConversionResult> ResolveIdsAsync(
@@ -75,9 +89,9 @@ internal class MdblistService(PlexApi plexApi, MdblistClient client, IMediaIdRes
 	private (MdblistId?, TmdbId?, ImdbId?, TvdbId?) ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
 	{
 		MdblistId? mdblistId = !string.IsNullOrEmpty(ids.mdblist) ? MdblistId.From(ids.mdblist, mediaType) : null;
-		TmdbId? tmdbId = ids.tmdb != 0 ? TmdbId.From(ids.tmdb.ToString(), mediaType) : null;
+		TmdbId? tmdbId = ids.tmdb.HasValue ? TmdbId.From(ids.tmdb.Value.ToString(), mediaType) : null;
 		ImdbId? imdbId = !string.IsNullOrEmpty(ids.imdb) ? ImdbId.From(ids.imdb, mediaType) : null;
-		TvdbId? tvdbId = ids.tvdb != 0 ? TvdbId.From(ids.tvdb.ToString(), mediaType) : null;
+		TvdbId? tvdbId = ids.tvdb.HasValue ? TvdbId.From(ids.tvdb.Value.ToString(), mediaType) : null;
 		return (mdblistId, tmdbId, imdbId, tvdbId);
 	}
 }

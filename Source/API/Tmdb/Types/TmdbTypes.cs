@@ -58,10 +58,31 @@ internal static class TmdbTypes
 	{
 		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
 		public string DisplayOriginalTitle =>
-			OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
+			OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null for Id: " + Id);
 		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
 
 		public MediaType MediaType => MediaType.Parse(Type);
 		public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
+	}
+
+	public record Find(
+		[property: JsonPropertyName("movie_results")] IReadOnlyList<FindItem> MovieResults,
+		[property: JsonPropertyName("tv_results")] IReadOnlyList<FindItem> TvResults
+	);
+
+	public record FindItem(
+		[property: JsonPropertyName("id")] int Id,
+		[property: JsonPropertyName("original_title")] string? OriginalTitle,
+		[property: JsonPropertyName("original_name")] string? OriginalName,
+		[property: JsonPropertyName("release_date")] string? ReleaseDate,
+		[property: JsonPropertyName("first_air_date")] string? FirstAirDate,
+		[property: JsonPropertyName("title")] string? Title,
+		[property: JsonPropertyName("name")] string? Name
+	)
+	{
+		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
+		public string DisplayOriginalTitle =>
+			OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
+		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
 	}
 }
