@@ -40,7 +40,9 @@ internal class MdblistService(PlexApi plexApi, MdblistClient client, IMediaIdRes
 	{
 		var resolvedResult = await ResolveIdsAsync(item.ids, mediaType, providerConfig.WatchlistProvider.AsMediaProvider(), item.title, item.release_year);
 		if (resolvedResult is not Resolved resolvedId)
+		{
 			throw new InvalidOperationException($"Tried to map a {mediaType} from MDBList, but no watchlist provider ID could be resolved");
+		}
 		return await plexApi.LookUpAsync(resolvedId.Id);
 	}
 

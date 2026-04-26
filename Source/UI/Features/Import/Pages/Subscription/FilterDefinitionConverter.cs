@@ -12,11 +12,15 @@ internal static class FilterDefinitionConverter
 	public static QueryFilter? ToQueryFilter(FilterDefinition? filter)
 	{
 		if (filter is null || filter.IsEmpty)
+		{
 			return null;
+		}
 
 		var group = ToFilterGroup(filter);
 		if (group is null)
+		{
 			return null;
+		}
 
 		return new QueryFilter { Operator = ToContractsOperator(filter.Operator), Groups = [group] };
 	}
@@ -24,7 +28,9 @@ internal static class FilterDefinitionConverter
 	public static FilterDefinition? FromQueryFilter(QueryFilter? filter)
 	{
 		if (filter is null)
+		{
 			return null;
+		}
 
 		var definition = new FilterDefinition { Operator = ToBbOperator(filter.Operator) };
 
@@ -47,7 +53,9 @@ internal static class FilterDefinitionConverter
 		var nestedGroups = filterDef.Groups.Select(ToFilterGroup).Where(g => g is not null).Select(g => g!).ToList();
 
 		if (predicates.Count == 0 && nestedGroups.Count == 0)
+		{
 			return null;
+		}
 
 		return new FilterGroup
 		{
@@ -76,11 +84,15 @@ internal static class FilterDefinitionConverter
 	private static FilterPredicate? ToPredicate(FilterCondition condition)
 	{
 		if (string.IsNullOrWhiteSpace(condition.Field))
+		{
 			return null;
+		}
 
 		var valueless = condition.Operator is BBFilterOp.IsEmpty or BBFilterOp.IsNotEmpty or BBFilterOp.IsTrue or BBFilterOp.IsFalse;
 		if (!valueless && condition.Value is null)
+		{
 			return null;
+		}
 
 		return new FilterPredicate
 		{

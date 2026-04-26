@@ -50,7 +50,9 @@ internal class TmdbRecommendationService(
 			)
 		);
 		if (resolvedResult is not Resolved resolvedId)
+		{
 			return null;
+		}
 
 		var releaseDate = string.IsNullOrEmpty(response.AvailableDate) ? "1900-01-01T00:00:00Z" : response.AvailableDate;
 		return new TmdbTrendingMedia

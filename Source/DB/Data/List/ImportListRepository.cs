@@ -51,7 +51,9 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 	{
 		var entity = await context.Lists.FindAsync([id], cancellationToken: cancellationToken);
 		if (entity == null)
+		{
 			throw new InvalidOperationException($"Import list with id {id} not found.");
+		}
 
 		entity.Name = updateData.Name;
 		entity.IsEnabled = updateData.IsEnabled;
@@ -69,7 +71,9 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 	{
 		var entity = await context.Lists.FindAsync([id], cancellationToken: cancellationToken);
 		if (entity == null)
+		{
 			return;
+		}
 		context.Lists.Remove(entity);
 		await context.SaveChangesAsync(cancellationToken);
 	}

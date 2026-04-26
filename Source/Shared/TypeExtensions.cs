@@ -7,9 +7,13 @@ public static class TypeExtensions
 		public string GetGenericName()
 		{
 			if (type is null)
+			{
 				return "null";
+			}
 			if (!type.IsGenericType)
+			{
 				return type.Name;
+			}
 
 			var name = type.Name[..type.Name.IndexOf('`')];
 			var args = string.Join(", ", type.GetGenericArguments().Select(GetGenericName));
