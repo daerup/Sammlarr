@@ -2,35 +2,47 @@ namespace Shared;
 
 public static class UrlGuid
 {
-	public static string Encode(Guid id)
+	public static string Encode(Guid guid)
 	{
-		Span<byte> bytes = stackalloc byte[16];
-		Span<char> chars = stackalloc char[24];
-		id.TryWriteBytes(bytes);
-		Convert.TryToBase64Chars(bytes, chars, out _);
+		Span<byte> guidBytes = stackalloc byte[16];
+		Span<char> base64Chars = stackalloc char[24];
+		guid.TryWriteBytes(guidBytes);
+		Convert.TryToBase64Chars(guidBytes, base64Chars, out _);
 		for (var i = 0; i < 22; i++)
 		{
-			if (chars[i] == '+') chars[i] = '-';
-			else if (chars[i] == '/') chars[i] = '_';
+			base64Chars[i] = base64Chars[i] switch
+			{
+				'+' => '-',
+				'/' => '_',
+				_ => base64Chars[i],
+			};
 		}
-		return new string(chars[..22]);
+		return new string(base64Chars[..22]);
 	}
 
-	public static Guid? Decode(string? s)
+	public static Guid Decode(ReadOnlySpan<char> encoded)
 	{
-		if (s is not { Length: 22 }) return null;
-		Span<char> chars = stackalloc char[24];
-		s.AsSpan().CopyTo(chars);
-		chars[22] = '=';
-		chars[23] = '=';
+		if (encoded is not { Length: 22 })
+		{
+			throw new ArgumentException("provided value has invalid length", nameof(encoded));
+		}
+
+		Span<char> base64Chars = stackalloc char[24];
+		encoded.CopyTo(base64Chars);
 		for (var i = 0; i < 22; i++)
 		{
-			if (chars[i] == '-') chars[i] = '+';
-			else if (chars[i] == '_') chars[i] = '/';
+			base64Chars[i] = base64Chars[i] switch
+			{
+				'-' => '+',
+				'_' => '/',
+				_ => base64Chars[i],
+			};
 		}
-		Span<byte> bytes = stackalloc byte[16];
-		if (!Convert.TryFromBase64Chars(chars, bytes, out var written) || written != 16)
-			return null;
-		return new Guid(bytes);
+		base64Chars[22] = '=';
+		base64Chars[23] = '=';
+		Span<byte> guidBytes = stackalloc byte[16];
+		return Convert.TryFromBase64Chars(base64Chars, guidBytes, out _)
+			? new Guid(guidBytes)
+			: throw new ArgumentException("provided value could not be decoded", nameof(encoded));
 	}
 }
