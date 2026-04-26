@@ -21,19 +21,20 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 		var filtered = options?.Filter is { } filter ? all.Where(FilterEvaluator.Build(filter)) : all;
 		var removed = all.Except(filtered);
 
-		var takeUntilIndex = options?.Limit is { } totalLimit ? totalLimit.Count - 1 : int.MaxValue;
-		foreach (var (index, item) in all.Index())
+		var taken = 0;
+		foreach (var item in all)
 		{
-			if (index > takeUntilIndex)
-			{
-				yield return new Skipped<T>(item);
-			}
-			else if (removed.Contains(item))
+			if (removed.Contains(item))
 			{
 				yield return new Filtered<T>(item);
 			}
+			else if (options?.Limit is { Count: var limit } && taken >= limit)
+			{
+				yield return new Skipped<T>(item);
+			}
 			else
 			{
+				taken++;
 				yield return item;
 			}
 		}

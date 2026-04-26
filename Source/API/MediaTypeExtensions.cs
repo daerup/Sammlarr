@@ -8,21 +8,20 @@ internal static class MediaTypeExtensions
 	{
 		public static MediaType Parse(string mediaType)
 		{
-			MediaType.TryParse(mediaType, out MediaType result);
+			TryParse(mediaType, out MediaType result);
 			return result;
 		}
 
 		public static bool TryParse(string mediaType, out MediaType result)
 		{
-			MediaType? parsed = mediaType.ToLowerInvariant() switch
+			result = mediaType.ToLowerInvariant() switch
 			{
 				"movie" or "movies" => MediaType.Movie,
 				"show" or "series" or "tv" => MediaType.Show,
-				_ => null,
+				_ => MediaType.Unknown,
 			};
 
-			result = parsed ?? default;
-			return parsed is not null;
+			return result is not MediaType.Unknown;
 		}
 	}
 }

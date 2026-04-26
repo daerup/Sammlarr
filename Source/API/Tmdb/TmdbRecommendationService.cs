@@ -33,7 +33,7 @@ internal class TmdbRecommendationService(
 
 	private async ValueTask<TmdbTrendingMedia?> BuildTrendingMediaAsync(TmdbTypes.Trending.Result response, MediaProvider watchlistMediaProvider)
 	{
-		if (response.MediaType is null)
+		if (response.MediaType is MediaType.Unknown)
 		{
 			return null;
 		}
@@ -45,7 +45,7 @@ internal class TmdbRecommendationService(
 				{
 					Title = response.DisplayTitle,
 					Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
-					MediaType = response.MediaType.Value,
+					MediaType = response.MediaType,
 				}
 			)
 		);
@@ -59,7 +59,7 @@ internal class TmdbRecommendationService(
 		{
 			SourceId = response.TmdbId,
 			WatchlistProviderId = resolvedId.Id,
-			MediaType = response.MediaType.Value,
+			MediaType = response.MediaType,
 			Title = response.DisplayTitle,
 			Description = response.Overview,
 			PosterUrl = options.ImageBaseUrl + response.PosterPath,

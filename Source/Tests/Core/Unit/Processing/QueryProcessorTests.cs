@@ -1,11 +1,11 @@
 using System.ComponentModel;
-using System.Text.Json;
 using Contracts.Processing;
 using Core.Processing;
 using Shared;
 using Test.Shared;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
+using static Test.Shared.QueryFilterFactory;
 
 namespace Core.Tests.Unit.Processing;
 
@@ -67,33 +67,35 @@ public class QueryProcessorTests
 	public async Task Execute_WhenFilterProvided_ReturnsOnlyMatchingFilter()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
-		var options = new QueryOptions
-		{
-			Filter = new QueryFilter
-			{
-				Operator = FilterOperator.And,
-				Groups =
-				[
-					new FilterGroup
-					{
-						Operator = FilterOperator.And,
-						Predicates =
-						[
-							new FilterPredicate
-							{
-								Field = "Genre",
-								Operator = FilterPredicateOperator.Equals,
-								ValueKind = FilterValueKind.String,
-								Value = JsonSerializer.Serialize("Drama"),
-							},
-						],
-					},
-				],
-			},
-		};
+		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
 
 		var results = _testee.Execute(items, options).ToList();
 		await Assert.That(results).AreOfUnionType(typeof(Filtered<Item>), typeof(Item), typeof(Filtered<Item>));
+	}
+
+	[Test]
+	public async Task Execute_WhenFilterAndLimitProvided_ReturnsOnlyMatchingFilterAndLimit()
+	{
+		var items = new[]
+		{
+			new Item("A", 2021, "Action"),
+			new Item("B", 2020, "Drama"),
+			new Item("C", 2019, "Comedy"),
+			new Item("D", 2014, "Horror"),
+			new Item("E", 2016, "Anime"),
+		};
+		var options = new QueryOptions
+		{
+			Filter = Filter(
+				FilterOperator.Or,
+				Group(String("Genre", FilterPredicateOperator.Equals, "Drama")),
+				Group(Number("Year", FilterPredicateOperator.LessThan, 2017))
+			),
+			Limit = new QueryLimit { Count = 2 },
+		};
+
+		var results = _testee.Execute(items, options).ToList();
+		await Assert.That(results).AreOfUnionType(typeof(Filtered<Item>), typeof(Item), typeof(Filtered<Item>), typeof(Item), typeof(Skipped<Item>));
 	}
 
 	[Test]
@@ -102,41 +104,11 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions
 		{
-			Filter = new QueryFilter
-			{
-				Operator = FilterOperator.Or,
-				Groups =
-				[
-					new FilterGroup
-					{
-						Operator = FilterOperator.And,
-						Predicates =
-						[
-							new FilterPredicate
-							{
-								Field = "Genre",
-								Operator = FilterPredicateOperator.Equals,
-								ValueKind = FilterValueKind.String,
-								Value = JsonSerializer.Serialize("Drama"),
-							},
-						],
-					},
-					new FilterGroup
-					{
-						Operator = FilterOperator.And,
-						Predicates =
-						[
-							new FilterPredicate
-							{
-								Field = "Year",
-								Operator = FilterPredicateOperator.LessOrEqual,
-								ValueKind = FilterValueKind.Number,
-								Value = JsonSerializer.Serialize(2019),
-							},
-						],
-					},
-				],
-			},
+			Filter = Filter(
+				FilterOperator.Or,
+				Group(String("Genre", FilterPredicateOperator.Equals, "Drama")),
+				Group(Number("Year", FilterPredicateOperator.LessOrEqual, 2019))
+			),
 		};
 		var results = _testee.Execute(items, options).ToList();
 		await Assert.That(results).AreOfUnionType(typeof(Filtered<Item>), typeof(Item), typeof(Item));

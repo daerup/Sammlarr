@@ -12,7 +12,7 @@ public class MediaTypeExtensionsTests
 	[Arguments("tv", MediaType.Show)]
 	public async Task TryParse_WhenKnownValue_ReturnsTrueAndExpectedType(string value, MediaType expected)
 	{
-		var success = MediaType.TryParse(value, out MediaType parsed);
+		var success = MediaType.TryParse(value, out var parsed);
 		await Assert.That(success).IsTrue();
 		await Assert.That(parsed).IsEqualTo(expected);
 	}
@@ -20,10 +20,10 @@ public class MediaTypeExtensionsTests
 	[Test]
 	public async Task TryParse_WhenUnknownValue_ReturnsFalse()
 	{
-		var success = MediaType.TryParse("documentary", out MediaType parsed);
+		var success = MediaType.TryParse("documentary", out var parsed);
 
 		await Assert.That(success).IsFalse();
-		await Assert.That(parsed).IsEqualTo(default);
+		await Assert.That(parsed).IsEqualTo(MediaType.Unknown);
 	}
 
 	[Test]

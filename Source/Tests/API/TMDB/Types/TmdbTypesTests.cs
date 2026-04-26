@@ -58,7 +58,7 @@ public class TmdbTypesTests
 	{
 		var testee = new TmdbTypes.Details(42, "Original", "Original Name", "2020-01-01", null, "Title", "Name", "unknown");
 
-		await Assert.That(testee.TmdbId).IsEqualTo(TmdbId.From("42", MediaType.Movie));
+		await Assert.That(testee.TmdbId).IsEqualTo(TmdbId.From("42", MediaType.Unknown));
 	}
 
 	[Test]
@@ -124,23 +124,23 @@ public class TmdbTypesTests
 		string? firstAirDate = "2020-01-01"
 	) =>
 		new(
-			false,
-			"/backdrop.jpg",
-			10,
-			title,
-			name,
-			originalTitle,
-			originalName,
-			"overview",
-			"/poster.jpg",
-			"movie",
-			"en",
-			[1, 2],
-			1.0,
-			releaseDate,
-			firstAirDate,
-			false,
-			8.4,
-			100
+			Adult: false,
+			BackdropPath: "/backdrop.jpg",
+			Id: 10,
+			Title: title,
+			Name: name,
+			OriginalTitle: originalTitle,
+			OriginalName: originalName,
+			Overview: "overview",
+			PosterPath: "/poster.jpg",
+			Type: "movie",
+			OriginalLanguage: "en",
+			GenreIds: [1, 2],
+			Popularity: 1.0,
+			ReleaseDate: releaseDate,
+			FirstAirDate: firstAirDate,
+			Video: false,
+			VoteAverage: 8.4,
+			VoteCount: 100
 		);
 }
