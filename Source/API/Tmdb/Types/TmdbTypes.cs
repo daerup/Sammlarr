@@ -28,8 +28,8 @@ internal static class TmdbTypes
 			[property: JsonPropertyName("vote_count")] int VoteCount
 		)
 		{
-			public MediaType? MediaType => Enum.TryParse(Type, out MediaType mediaType) ? mediaType : null;
-			public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType ?? Contracts.Media.MediaType.Unknown);
+			public MediaType MediaType => MediaType.Parse(Type);
+			public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
 
 			public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
 			public string DisplayOriginalTitle =>
