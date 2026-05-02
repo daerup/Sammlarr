@@ -18,7 +18,7 @@ public class QueryProcessorTests
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 
-		var results = _testee.Execute(items, new QueryOptions()).ToList();
+		var results = _testee.Execute(items, new QueryOptions(), _ => false, _ => false).ToList();
 		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item));
 	}
 
@@ -28,9 +28,9 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
-		var results = _testee.Execute(items, options).ToList();
+		var results = _testee.Execute(items, options, _ => false, _ => false).ToList();
 
-		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Skipped<Item>));
+		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Truncated<Item>));
 	}
 
 	[Test]
@@ -42,7 +42,7 @@ public class QueryProcessorTests
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Descending },
 		};
 
-		var results = _testee.Execute(items, options).ToList();
+		var results = _testee.Execute(items, options, _ => false, _ => false).ToList();
 		await Assert.That(results).AreOfUnionType<IList<QueryResult<Item>>, QueryResult<Item>>(typeof(Item), typeof(Item));
 		await Assert.That(results.OfUnionType<Item>()).IsEquivalentTo([items[1], items[0]], CollectionOrdering.Matching);
 	}
@@ -57,10 +57,10 @@ public class QueryProcessorTests
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Ascending },
 		};
 
-		var results = _testee.Execute(items, options).ToList();
-		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item), typeof(Skipped<Item>));
+		var results = _testee.Execute(items, options, _ => false, _ => false).ToList();
+		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item), typeof(Truncated<Item>));
 		await Assert.That(results.OfUnionType<Item>()).IsEquivalentTo([items[2], items[0]], CollectionOrdering.Matching);
-		await Assert.That(results.OfUnionType<Skipped<Item>>().Select(i => i.Item)).IsEquivalentTo([items[1]]);
+		await Assert.That(results.OfUnionType<Truncated<Item>>().Select(i => i.Item)).IsEquivalentTo([items[1]]);
 	}
 
 	[Test]
@@ -69,8 +69,8 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
 
-		var results = _testee.Execute(items, options).ToList();
-		await Assert.That(results).AreOfUnionType(typeof(Filtered<Item>), typeof(Item), typeof(Filtered<Item>));
+		var results = _testee.Execute(items, options, _ => false, _ => false).ToList();
+		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Culled<Item>));
 	}
 
 	[Test]
@@ -94,8 +94,8 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 2 },
 		};
 
-		var results = _testee.Execute(items, options).ToList();
-		await Assert.That(results).AreOfUnionType(typeof(Filtered<Item>), typeof(Item), typeof(Filtered<Item>), typeof(Item), typeof(Skipped<Item>));
+		var results = _testee.Execute(items, options, _ => false, _ => false).ToList();
+		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Culled<Item>), typeof(Item), typeof(Truncated<Item>));
 	}
 
 	[Test]
@@ -110,8 +110,143 @@ public class QueryProcessorTests
 				Group(Number("Year", FilterPredicateOperator.LessOrEqual, 2019))
 			),
 		};
-		var results = _testee.Execute(items, options).ToList();
-		await Assert.That(results).AreOfUnionType(typeof(Filtered<Item>), typeof(Item), typeof(Item));
+		var results = _testee.Execute(items, options, _ => false, _ => false).ToList();
+		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Item));
+	}
+
+	[Test]
+	public async Task Execute_WhenWatchlistedIsExemptAndItemIsWatchlisted_ItemIsIncludedAndDoesNotCountTowardLimit()
+	{
+		var watchlisted = new Item("Watchlisted", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+		};
+
+		var results = _testee.Execute([watchlisted, normal], options, i => i == watchlisted, _ => false).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
+	}
+
+	[Test]
+	public async Task Execute_WhenBlacklistedIsExemptAndItemIsBlacklisted_ItemIsIncludedAndDoesNotCountTowardLimit()
+	{
+		var blacklisted = new Item("Blacklisted", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit { Count = 1, Blacklisted = SlotPolicy.Preserved },
+		};
+
+		var results = _testee.Execute([blacklisted, normal], options, _ => false, i => i == blacklisted).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
+		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().Source).IsEqualTo(BypassReason.Blacklisted);
+	}
+
+	[Test]
+	public async Task Execute_WhenExemptItemsAreMixedWithNonExempt_OnlyNonExemptCountTowardLimit()
+	{
+		var watchlisted = new Item("Watchlisted", 2019, "Action");
+		var normal1 = new Item("Normal1", 2020, "Drama");
+		var normal2 = new Item("Normal2", 2021, "Comedy");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+		};
+
+		var results = _testee.Execute([watchlisted, normal1, normal2], options, i => i == watchlisted, _ => false).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item), typeof(Truncated<Item>));
+	}
+
+	[Test]
+	public async Task Execute_WhenLimitIsReached_ExemptItemsAreStillIncluded()
+	{
+		var normal1 = new Item("Normal1", 2019, "Action");
+		var watchlisted = new Item("Watchlisted", 2020, "Drama");
+		var normal2 = new Item("Normal2", 2021, "Comedy");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+		};
+
+		var results = _testee.Execute([normal1, watchlisted, normal2], options, i => i == watchlisted, _ => false).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Truncated<Item>), typeof(Truncated<Item>));
+	}
+
+	[Test]
+	public async Task Execute_WhenWatchlistedIsIncluded_MatchedItemEmitsExemptWithCountsTowardLimitTrue()
+	{
+		var watchlisted = new Item("Watchlisted", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions { Limit = new QueryLimit { Count = 2 } };
+
+		var results = _testee.Execute([watchlisted, normal], options, i => i == watchlisted, _ => false).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
+		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().Source).IsEqualTo(BypassReason.Watchlisted);
+		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().CountsTowardLimit).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_WatchlistTakesPrecedenceOverSlotPolicy()
+	{
+		var both = new Item("Both", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit
+			{
+				Count = 1,
+				Watchlisted = SlotPolicy.Preserved,
+				Blacklisted = SlotPolicy.Consumed,
+			},
+		};
+
+		var results = _testee.Execute([both, normal], options, i => i == both, i => i == both).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
+		var bypassed = results.OfUnionType<Bypassed<Item>>().Single();
+		await Assert.That(bypassed.Source).IsEqualTo(BypassReason.Watchlisted);
+		await Assert.That(bypassed.CountsTowardLimit).IsFalse();
+	}
+
+	[Test]
+	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_WatchlistTakesPrecedenceOverSlotPolicy2()
+	{
+		var both = new Item("Both", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit
+			{
+				Count = 1,
+				Watchlisted = SlotPolicy.Consumed,
+				Blacklisted = SlotPolicy.Preserved,
+			},
+		};
+
+		var results = _testee.Execute([both, normal], options, i => i == both, i => i == both).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Truncated<Item>));
+		var bypassed = results.OfUnionType<Bypassed<Item>>().Single();
+		await Assert.That(bypassed.Source).IsEqualTo(BypassReason.Watchlisted);
+		await Assert.That(bypassed.CountsTowardLimit).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenWatchlistedIsIncludedAndConsumesOnlySlot_NextItemIsSkipped()
+	{
+		var watchlisted = new Item("Watchlisted", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
+
+		var results = _testee.Execute([watchlisted, normal], options, i => i == watchlisted, _ => false).ToList();
+
+		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Truncated<Item>));
 	}
 }
 

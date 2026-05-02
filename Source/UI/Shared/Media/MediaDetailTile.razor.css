@@ -65,6 +65,15 @@
     opacity: 0.25;
 }
 
+.search-result-row.result-grey .search-result-main-content {
+    filter: grayscale(0.75) brightness(70%);
+}
+
+.search-result-row.result-grey:hover::before,
+.search-result-row.result-grey.row-focused::before {
+    filter: brightness(100%);
+    transform: scale(1.06);
+}
 .search-result-status-indicator {
     flex-shrink: 0;
     padding: 0.3rem;

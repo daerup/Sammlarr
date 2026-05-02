@@ -15,6 +15,7 @@ public record PreviewStatus
 	public bool IsLoading { get; init; }
 	public bool HasResults { get; init; }
 	public bool HasFailed { get; init; }
+	public bool HasEnrollmentChanges { get; init; }
 }
 
 public record SubscriptionConfig
