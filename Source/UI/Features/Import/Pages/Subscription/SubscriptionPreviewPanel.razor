@@ -46,51 +46,37 @@
                                 <BbTooltipContent>Items that will be imported</BbTooltipContent>
                             </BbTooltip>
                             <BbTooltip DelayDuration="0">
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-zinc-400 bg-zinc-500/10">
+                                    <LucideIcon Name="redo-dot" Size="14"/>
+                                    <span>@EnrolledCount</span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>
+                                    <p class="font-medium mb-0.5">Tracked in your library</p>
+                                    <p>@WatchlistCount on your watchlist · @BlacklistCount on your blacklist</p>
+                                    <p class="opacity-70 mt-0.5">These will not be imported.</p>
+                                </BbTooltipContent>
+                            </BbTooltip>
+                            <BbTooltip DelayDuration="0">
                                 <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
                                     <LucideIcon Name="filter-x" Size="14"/>
                                     <span>@FilteredCount</span>
                                 </BbTooltipTrigger>
-                                <BbTooltipContent>Items removed by your filter rules</BbTooltipContent>
+                                <BbTooltipContent>Items excluded by your filter rules</BbTooltipContent>
                             </BbTooltip>
                             <BbTooltip DelayDuration="0">
                                 <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-amber-600 bg-amber-500/10">
                                     <LucideIcon Name="scissors" Size="14"/>
                                     <span>@SkippedCount</span>
                                 </BbTooltipTrigger>
-                                <BbTooltipContent>Items cut off by the import limit</BbTooltipContent>
+                                <BbTooltipContent>Items excluded by the import limit</BbTooltipContent>
                             </BbTooltip>
                             <BbTooltip DelayDuration="0">
-                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-blue-500 bg-blue-500/10">
-                                    <LucideIcon Name="bookmark" Size="14"/>
-                                    <span>@WatchlistCount</span>
+                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-rose-500 bg-rose-500/10">
+                                    <LucideIcon Name="circle-alert" Size="14"/>
+                                    <span>@UnresolvedCount</span>
                                 </BbTooltipTrigger>
-                                <BbTooltipContent>
-                                    <p class="font-medium mb-0.5">Watchlist</p>
-                                    <p>@WatchlistCount items across this list are already in your watchlist.</p>
-                                    <p class="opacity-70 mt-0.5">These will not be imported as they are already tracked.</p>
-                                </BbTooltipContent>
+                                <BbTooltipContent>Items that could not be matched in your media provider</BbTooltipContent>
                             </BbTooltip>
-                            <BbTooltip DelayDuration="0">
-                                <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-orange-500 bg-orange-500/10">
-                                    <LucideIcon Name="shield-off" Size="14"/>
-                                    <span>@BlacklistCount</span>
-                                </BbTooltipTrigger>
-                                <BbTooltipContent>
-                                    <p class="font-medium mb-0.5">Blacklist</p>
-                                    <p>@BlacklistCount items across this list are blacklisted.</p>
-                                    <p class="opacity-70 mt-0.5">These are shown in the preview but will never be imported.</p>
-                                </BbTooltipContent>
-                            </BbTooltip>
-                            @if (UnresolvedCount > 0)
-                            {
-                                <BbTooltip DelayDuration="0">
-                                    <BbTooltipTrigger AsChild="false" Class="stat-badge cursor-default text-rose-500 bg-rose-500/10">
-                                        <LucideIcon Name="circle-alert" Size="14"/>
-                                        <span>@UnresolvedCount</span>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>Items that could not be matched in your media provider</BbTooltipContent>
-                                </BbTooltip>
-                            }
                         </div>
                     </BbTooltipProvider>
                 </div>
@@ -104,16 +90,24 @@
                     @foreach (var result in FilteredBySearchResults)
                     {
                         var item = GetItem(result);
-                        var isFiltered = result.Value is Filtered<IMediaDetailResult>;
-                        var isSkipped = result.Value is Skipped<IMediaDetailResult>;
-                        var isDimmed = isFiltered || isSkipped;
+                        var isCulled = result.Value is Culled<IMediaDetailResult>;
+                        var isTruncated = result.Value is Truncated<IMediaDetailResult>;
+                        var isDimmed = isCulled || isTruncated;
+                        var isGreyedOut = result.Value is Bypassed<IMediaDetailResult>;
                         var isBlacklisted = IsBlacklisted(item);
                         var isInWatchlist = IsWatchlisted(item);
                         var isTogglingWatchlist = _togglingWatchlistItem == item;
                         var isTogglingBlacklist = _togglingBlacklistItem == item;
+
+                        var hoverStyle = (isDimmed, isGreyedOut) switch
+                        {
+                            (true, _) => "result-dimmed",
+                            (false, true) => "result-grey",
+                            _ => "hover-bg"
+                        };
                         <MediaDetailTile @key="item"
                                          Result="item"
-                                         Class="@(isDimmed ? "result-dimmed" : "hover-bg")"
+                                         Class="@(hoverStyle)"
                                          IsFocused="_focusedResult == item"
                                          OnFocusIn="() => _focusedResult = item"
                                          OnFocusOut="() => ClearFocus(item)">
@@ -124,19 +118,30 @@
                                         <BbTooltip DelayDuration="300">
                                             <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
                                                 <div class="search-result-status-indicator">
-                                                    <LucideIcon Name="@(isFiltered ? "filter-x" : "scissors")" Size="24"/>
+                                                    <LucideIcon Name="@(isCulled ? "filter-x" : "scissors")" Size="24"/>
                                                 </div>
                                             </BbTooltipTrigger>
                                             <BbTooltipContent>
-                                                @(isFiltered ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
+                                                @(isCulled ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
                                             </BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
                                 }
-                                <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist"
-                                                     OnToggle="ToggleWatchlistAsync"/>
-                                <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist"
-                                                     OnToggle="ToggleBlacklistAsync"/>
+                                else if (isGreyedOut)
+                                {
+                                    <BbTooltipProvider>
+                                        <BbTooltip DelayDuration="300">
+                                            <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                <div class="search-result-status-indicator">
+                                                    <LucideIcon Name="redo-dot" Size="24"/>
+                                                </div>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>@EnrolledTooltip((Bypassed<IMediaDetailResult>)result.Value)</BbTooltipContent>
+                                        </BbTooltip>
+                                    </BbTooltipProvider>
+                                }
+                                <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist" OnToggle="ToggleWatchlistAsync"/>
+                                <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist" OnToggle="ToggleBlacklistAsync"/>
                             </Icons>
                         </MediaDetailTile>
                     }
@@ -226,6 +231,7 @@
     private IMediaDetailResult? _togglingBlacklistItem;
     private readonly HashSet<string> _watchlistIds = new(StringComparer.Ordinal);
     private readonly HashSet<string> _blacklistIds = new(StringComparer.Ordinal);
+    private bool _hasEnrollmentChanges;
 
     private bool IsLoading => _fetchState == FetchState.Loading;
     private bool HasResults => _fetchState == FetchState.Success && _rawResults.Count > 0;
@@ -298,10 +304,10 @@
 
             _rawResults = results;
             _fetchState = FetchState.Success;
-            Reprocess();
             _watchlistIds.Clear();
             _blacklistIds.Clear();
             await LoadWatchlistAndBlacklistAsync();
+            Reprocess();
         }
         catch (OperationCanceledException)
         {
@@ -326,6 +332,8 @@
 
     private void Reprocess()
     {
+        _hasEnrollmentChanges = false;
+
         if (_rawResults.Count == 0)
         {
             _unresolvedResults = [];
@@ -342,7 +350,7 @@
             Limit = Config.Limit,
             Filter = FilterDefinitionConverter.ToQueryFilter(Config.Filter),
         };
-        _processedResults = resolvedItems.Count > 0 ? QueryProcessor.Execute(resolvedItems, options).ToList() : [];
+        _processedResults = resolvedItems.Count > 0 ? QueryProcessor.Execute(resolvedItems, options, IsWatchlisted, IsBlacklisted).ToList() : [];
     }
 
     private Task EmitStatusIfChangedAsync()
@@ -361,6 +369,7 @@
         IsLoading = _fetchState == FetchState.Loading,
         HasResults = _fetchState == FetchState.Success && _rawResults.Count > 0,
         HasFailed = _fetchState == FetchState.Failed,
+        HasEnrollmentChanges = _hasEnrollmentChanges,
     };
 
     public void Dispose()
@@ -399,8 +408,9 @@
     }
 
     private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
-    private int FilteredCount => _processedResults.Count(r => r.Value is Filtered<IMediaDetailResult>);
-    private int SkippedCount => _processedResults.Count(r => r.Value is Skipped<IMediaDetailResult>);
+    private int EnrolledCount => _processedResults.Count(r => r.Value is Bypassed<IMediaDetailResult>);
+    private int FilteredCount => _processedResults.Count(r => r.Value is Culled<IMediaDetailResult>);
+    private int SkippedCount => _processedResults.Count(r => r.Value is Truncated<IMediaDetailResult>);
     private int UnresolvedCount => _unresolvedResults.Count;
     private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && _watchlistIds.Contains(GetKey(item)));
     private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && _blacklistIds.Contains(GetKey(item)));
@@ -416,12 +426,27 @@
 
     private static string GetKey(IMediaDetailResult item) => item.SourceId.ToString() ?? string.Empty;
 
+    private string EnrolledTooltip(Bypassed<IMediaDetailResult> bypassed)
+    {
+        var source = bypassed.Source switch
+        {
+            BypassReason.Watchlisted => "On your watchlist",
+            BypassReason.Blacklisted => "On your blacklist",
+        };
+        if (Config.Limit is null)
+            return $"{source}, will not be imported.";
+        return bypassed.CountsTowardLimit
+            ? $"{source}, skipped but counts toward your import limit."
+            : $"{source}, skipped and does not count toward your import limit.";
+    }
+
     private static IMediaDetailResult GetItem(QueryResult<IMediaDetailResult> result) =>
         result.Value switch
         {
             IMediaDetailResult item => item,
-            Skipped<IMediaDetailResult> s => s.Item,
-            Filtered<IMediaDetailResult> f => f.Item,
+            Bypassed<IMediaDetailResult> e => e.Item,
+            Truncated<IMediaDetailResult> s => s.Item,
+            Culled<IMediaDetailResult> f => f.Item,
         };
 
     private void ClearFocus(IMediaDetailResult item)
@@ -458,6 +483,9 @@
         {
             _togglingBlacklistItem = null;
             _focusedResult = null;
+            _hasEnrollmentChanges = true;
+            await EmitStatusIfChangedAsync();
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -493,6 +521,9 @@
         {
             _togglingWatchlistItem = null;
             _focusedResult = null;
+            _hasEnrollmentChanges = true;
+            await EmitStatusIfChangedAsync();
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

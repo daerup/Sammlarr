@@ -281,16 +281,16 @@
                                                 <LucideIcon Name="info" Size="14"/>
                                             </BbTooltipTrigger>
                                             <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these items can't
-                                                be imported.
+                                                be imported. If an item is watchlisted and blacklisted, the watchlist behavior takes precedence.
                                             </BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
                                 </BbFieldLabel>
                                 <BbFieldContent>
-                                    <EnumToggleGroup TEnum="LimitBehavior"
+                                    <EnumToggleGroup TEnum="SlotPolicy"
                                                      Value="@WatchlistedBehavior"
                                                      OnChange="@ChangeWatchlistedBehavior"
-                                                     TooltipProvider="@GetLimitBehaviorTooltip"/>
+                                                     TooltipProvider="@GetSlotPolicyTooltip"/>
                                 </BbFieldContent>
                             </BbField>
 
@@ -309,10 +309,10 @@
                                     </BbTooltipProvider>
                                 </BbFieldLabel>
                                 <BbFieldContent>
-                                    <EnumToggleGroup TEnum="LimitBehavior"
+                                    <EnumToggleGroup TEnum="SlotPolicy"
                                                      Value="@BlacklistedBehavior"
                                                      OnChange="@ChangeBlacklistedBehavior"
-                                                     TooltipProvider="@GetLimitBehaviorTooltip"/>
+                                                     TooltipProvider="@GetSlotPolicyTooltip"/>
                                 </BbFieldContent>
                             </BbField>
                         </div>
@@ -390,7 +390,7 @@
     private readonly HashSet<MediaListProvider> _disabledProviders = [];
 
     private static readonly QuerySort DefaultSort = new() { Property = nameof(IMediaDetailResult.Title), Direction = ListSortDirection.Descending };
-    private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = LimitBehavior.Included, Blacklisted = LimitBehavior.Included };
+    private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = SlotPolicy.Consumed, Blacklisted = SlotPolicy.Consumed };
 
     private bool _isEnabled;
     private string _name = string.Empty;
@@ -415,8 +415,8 @@
 
     private string SortField => _sort.Property;
     private ListSortDirection SortDir => _sort.Direction;
-    private LimitBehavior WatchlistedBehavior => _limit.Watchlisted;
-    private LimitBehavior BlacklistedBehavior => _limit.Blacklisted;
+    private SlotPolicy WatchlistedBehavior => _limit.Watchlisted;
+    private SlotPolicy BlacklistedBehavior => _limit.Blacklisted;
 
     private record FieldDefinition(string Property, string Label, FilterFieldType FilterType);
 
@@ -547,13 +547,13 @@
         NotifyChange();
     }
 
-    private void ChangeWatchlistedBehavior(LimitBehavior v)
+    private void ChangeWatchlistedBehavior(SlotPolicy v)
     {
         _limit = _limit with { Watchlisted = v };
         NotifyChange();
     }
 
-    private void ChangeBlacklistedBehavior(LimitBehavior v)
+    private void ChangeBlacklistedBehavior(SlotPolicy v)
     {
         _limit = _limit with { Blacklisted = v };
         NotifyChange();
@@ -585,11 +585,11 @@
             _ => string.Empty,
         };
 
-    private static string GetLimitBehaviorTooltip(LimitBehavior behavior) =>
+    private static string GetSlotPolicyTooltip(SlotPolicy behavior) =>
         behavior switch
         {
-            LimitBehavior.Included => "Counts against your import limit, taking up a slot that could be used by another item.",
-            LimitBehavior.Exempt => "Does not count against your import limit, preserving the slot for the next eligible item.",
+            SlotPolicy.Consumed => "Counts against your import limit, taking up a slot that could be used by another item.",
+            SlotPolicy.Preserved => "Does not count against your import limit, preserving the slot for the next eligible item.",
             _ => string.Empty,
         };
 

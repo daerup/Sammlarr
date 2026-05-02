@@ -1,7 +1,15 @@
 namespace Contracts.Processing;
 
-public readonly record struct Skipped<T>(T Item);
+public enum BypassReason
+{
+	Watchlisted,
+	Blacklisted,
+}
 
-public readonly record struct Filtered<T>(T Item);
+public readonly record struct Bypassed<T>(T Item, BypassReason Source, bool CountsTowardLimit);
 
-public union QueryResult<T>(T Item, Skipped<T> skipped, Filtered<T> filtered);
+public readonly record struct Truncated<T>(T Item);
+
+public readonly record struct Culled<T>(T Item);
+
+public union QueryResult<T>(T Item, Bypassed<T> bypassed, Truncated<T> truncated, Culled<T> culled);
