@@ -177,6 +177,7 @@
             Filter = FilterDefinitionConverter.FromQueryFilter(importList.Filter),
             Sort = importList.Sort,
             Limit = importList.Limit,
+            Schedule = importList.Schedule,
         };
         _storedHash = _config.GetSaveHash();
         _configKey++;
@@ -259,6 +260,7 @@
                     Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
                     Sort = _config.Sort,
                     Limit = _config.Limit,
+                    Schedule = _config.Schedule,
                 };
 
                 await ImportListRepository.UpdateImportListsAsync(editId, updateData, CancellationToken.None);
@@ -274,6 +276,7 @@
                     Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
                     Sort = _config.Sort,
                     Limit = _config.Limit,
+                    Schedule = _config.Schedule,
                 };
 
                 await ImportListRepository.CreateImportListsAsync(_config.Name.Trim(), createData, CancellationToken.None);

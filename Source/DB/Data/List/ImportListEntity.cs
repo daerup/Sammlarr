@@ -27,4 +27,5 @@ internal record ImportListEntity : Entity<Guid>
 	public QueryFilter? Filter { get; set; }
 	public QuerySort? Sort { get; set; }
 	public QueryLimit? Limit { get; set; }
+	public SyncMode SyncMode { get; set; }
 }

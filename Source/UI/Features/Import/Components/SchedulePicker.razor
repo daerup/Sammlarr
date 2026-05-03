@@ -230,6 +230,26 @@
         new(DayOfWeek.Saturday, "Saturday"),
     ];
 
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(CronExpression))
+        {
+            LoadFromExpression(CronExpression);
+        }
+    }
+
+    private void LoadFromExpression(string expression)
+    {
+        var parts = expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        _scheduleMode = ScheduleMode.Expression;
+        if (parts.Length != 6)
+        {
+            return;
+        }
+
+        (_cronSecond, _cronMinute, _cronHour, _cronDayOfMonth, _cronMonth, _cronDayOfWeek) = (parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+    }
+
     private void OnScheduleModeChanged(ScheduleMode newMode)
     {
         TransferScheduleConfig(_scheduleMode, newMode);

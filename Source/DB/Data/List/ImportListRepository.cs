@@ -18,6 +18,7 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 		Filter = projection.Filter,
 		Sort = projection.Sort,
 		Limit = projection.Limit,
+		Schedule = projection.SyncMode,
 	};
 
 	public async Task<IReadOnlyList<ImportList>> GetImportListsAsync(CancellationToken cancellationToken = default) =>
@@ -38,6 +39,7 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 			Filter = createData.Filter,
 			Sort = createData.Sort,
 			Limit = createData.Limit,
+			SyncMode = createData.Schedule,
 		};
 
 		context.Lists.Add(entity);
@@ -60,6 +62,7 @@ internal class ImportListRepository(SammlarrDbContext context) : IImportListRepo
 		entity.Filter = updateData.Filter;
 		entity.Sort = updateData.Sort;
 		entity.Limit = updateData.Limit;
+		entity.SyncMode = updateData.Schedule;
 
 		await context.SaveChangesAsync(cancellationToken);
 	}
