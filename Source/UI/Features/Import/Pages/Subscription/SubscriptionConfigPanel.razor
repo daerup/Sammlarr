@@ -5,6 +5,7 @@
 @using Contracts.Media.List
 @using Contracts.Media.Search
 @using Contracts.Processing
+@using DB.Data.List
 @using UI.Features.Import.Components
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
 
@@ -322,7 +323,7 @@
             </BbCollapsibleContent>
         </BbCollapsible>
 
-        <BbCollapsible>
+        <BbCollapsible Open="@_syncFrequencySectionOpen" OpenChanged="@(v => _syncFrequencySectionOpen = v)">
             <BbCollapsibleTrigger AsChild="false"
                                   Class="group w-full flex items-center justify-between -mx-6 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors border-t">
                 <span class="flex items-center gap-2">
@@ -347,13 +348,13 @@
                             </BbTooltipProvider>
                         </BbFieldLabel>
                         <BbFieldContent>
-                            <EnumToggleGroup TEnum="RunMode"
-                                             Value="@_syncMode"
-                                             OnChange="@OnSyncModeChanged"/>
+                            <EnumToggleGroup TEnum="ScheduleMode"
+                                             Value="@_scheduleMode"
+                                             OnChange="@OnScheduleModeChanged"/>
                         </BbFieldContent>
                     </BbField>
 
-                    @if (_syncMode == RunMode.Scheduled)
+                    @if (_scheduleMode == ScheduleMode.Scheduled)
                     {
                         <BbField>
                             <BbFieldLabel Class="flex items-center leading-none">
@@ -405,7 +406,8 @@
     private bool _limitEnabled;
     private QueryLimit _limit = DefaultLimit;
     private string _limitRaw = string.Empty;
-    private RunMode _syncMode;
+    private bool _syncFrequencySectionOpen;
+    private ScheduleMode _scheduleMode;
     private string? _scheduleCronExpression;
 
     private bool NameIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_name);
@@ -450,8 +452,9 @@
         _limitEnabled = Value.Limit is not null;
         _limit = Value.Limit ?? DefaultLimit;
         _limitRaw = Value.Limit?.Count.ToString() ?? string.Empty;
-        _syncMode = Value.SyncMode;
-        _scheduleCronExpression = Value.ScheduleCronExpression;
+        _scheduleMode = Value.Schedule.Value is Scheduled ? ScheduleMode.Scheduled : ScheduleMode.Manual;
+        _scheduleCronExpression = (Value.Schedule.Value as Scheduled?)?.CronExpression.ToString();
+        _syncFrequencySectionOpen = _scheduleMode == ScheduleMode.Scheduled;
 
         foreach (var provider in AllProviders)
         {
@@ -481,8 +484,9 @@
         Filter = _filterEnabled ? _filter : null,
         Sort = _sortEnabled ? _sort : null,
         Limit = _limitEnabled ? _limit : null,
-        SyncMode = _syncMode,
-        ScheduleCronExpression = _scheduleCronExpression,
+        Schedule = _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is not null
+            ? new SyncMode(new Scheduled(_scheduleCronExpression))
+            : new SyncMode(new Manual()),
     };
 
     private void ChangeName(string v)
@@ -519,18 +523,22 @@
         }
         NotifyChange();
     }
+    private void OnScheduleModeChanged(ScheduleMode v)
+    {
+        _scheduleMode = v;
+        if (v == ScheduleMode.Scheduled)
+        {
+            _syncFrequencySectionOpen = true;
+        }
+        NotifyChange();
+    }
+
     private void ChangeSchedule(string? v)
     {
         _scheduleCronExpression = v;
         NotifyChange();
     }
 
-    private void OnSyncModeChanged(RunMode mode)
-    {
-        _syncMode = mode;
-        _scheduleCronExpression = mode == RunMode.Manual ? string.Empty : null;
-        NotifyChange();
-    }
 
     private void ToggleSortDirection()
     {

@@ -5,4 +5,7 @@
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Cronos" />
+	</ItemGroup>
 </Project>

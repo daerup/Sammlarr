@@ -14,4 +14,5 @@ public record ImportList
 	public QueryFilter? Filter { get; init; }
 	public QuerySort? Sort { get; init; }
 	public QueryLimit? Limit { get; init; }
+	public required SyncMode Schedule { get; init; }
 }

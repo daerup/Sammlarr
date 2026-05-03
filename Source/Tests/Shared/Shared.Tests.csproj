@@ -6,11 +6,13 @@
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="Bogus" />
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Assertions" />
 		<PackageReference Include="TUnit.Core" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Shared\Shared.csproj" />
+		<ProjectReference Include="..\Test.Shared\Test.Shared.csproj" />
 	</ItemGroup>
 </Project>

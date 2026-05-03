@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Contracts;
+using Contracts.Media.List;
 using Contracts.Processing;
 using DB.Data;
 using DB.Data.Access;
@@ -90,6 +91,7 @@ internal sealed class SammlarrDbContext : DbContext
 			builder
 				.Property(x => x.Limit)
 				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
+			builder.Property(x => x.SyncMode).HasConversion(v => v.ToString(), v => SyncMode.From(v));
 		});
 	}
 

@@ -4,7 +4,7 @@ using Contracts.Processing;
 
 namespace UI.Features.Import.Pages.Subscription;
 
-public enum RunMode
+public enum ScheduleMode
 {
 	Manual,
 	Scheduled,
@@ -28,8 +28,7 @@ public record SubscriptionConfig
 	public FilterDefinition? Filter { get; init; }
 	public QuerySort? Sort { get; init; }
 	public QueryLimit? Limit { get; init; }
-	public RunMode SyncMode { get; init; } = RunMode.Manual;
-	public string? ScheduleCronExpression { get; init; } = string.Empty;
+	public SyncMode Schedule { get; init; } = new SyncMode(new Manual());
 
 	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && (Limit is null || Limit.Count > 0);
 
@@ -42,6 +41,6 @@ public record SubscriptionConfig
 		HashCode.Combine(
 			HashCode.Combine(IsEnabled, Name, Provider, Strategy, ListIdentifier),
 			HashCode.Combine(Filter is not null, Filter?.Version, Sort, Limit),
-			HashCode.Combine(SyncMode, ScheduleCronExpression)
+			Schedule
 		);
 }
