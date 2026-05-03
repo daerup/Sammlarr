@@ -1,4 +1,6 @@
 @using CronExpressionDescriptor
+@using System.Linq.Expressions
+@using System.Reflection
 <div class="space-y-3">
     <BbSelect TValue="ScheduleMode"
               Value="_scheduleMode"
@@ -62,93 +64,87 @@
     {
         <div class="flex flex-wrap items-center gap-2">
             <div class="flex flex-col items-center gap-0.5">
-                <BbInput Value="@_cronSecond"
-                         ValueChanged="@(v => {
-                                           _cronSecond = v ?? string.Empty;
-                                           NotifyChanged();
-                                       })"
-                         Class="w-16 text-center font-mono px-1  bg-accent"
-                         Placeholder="*"
-                         AriaLabel="Second — any integer 0–59, or * for every second"
-                         AriaInvalid="@(!IsCronSecondValid)"
-                         UpdateTiming="UpdateTiming.OnChange"/>
+                <div style="@CronFieldStyle(_cronSecond)">
+                    <BbInput Value="@_cronSecond"
+                             ValueChanged="@(v => SetCronField(v, () => _cronSecond))"
+                             Class="w-full text-center font-mono px-1 bg-accent"
+                             Placeholder="*"
+                             AriaLabel="Second — any integer 0–59, or * for every second"
+                             AriaInvalid="@(!IsCronSecondValid)"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </div>
                 <span class="text-xs text-muted-foreground select-none">Second</span>
                 <span class="text-[10px] @(IsCronSecondValid ? "invisible" : "text-destructive") select-none">0–59</span>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-                <BbInput Value="@_cronMinute"
-                         ValueChanged="@(v => {
-                                           _cronMinute = v ?? string.Empty;
-                                           NotifyChanged();
-                                       })"
-                         Class="w-16 text-center font-mono px-1  bg-accent"
-                         Placeholder="*"
-                         AriaLabel="Minute — any integer 0–59, or * for every minute"
-                         AriaInvalid="@(!IsCronMinuteValid)"
-                         UpdateTiming="UpdateTiming.OnChange"/>
+                <div style="@CronFieldStyle(_cronMinute)">
+                    <BbInput Value="@_cronMinute"
+                             ValueChanged="@(v => SetCronField(v, () => _cronMinute))"
+                             Class="w-full text-center font-mono px-1 bg-accent"
+                             Placeholder="*"
+                             AriaLabel="Minute — any integer 0–59, or * for every minute"
+                             AriaInvalid="@(!IsCronMinuteValid)"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </div>
                 <span class="text-xs text-muted-foreground select-none">Minute</span>
                 <span class="text-[10px] @(IsCronMinuteValid ? "invisible" : "text-destructive") select-none">0–59</span>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-                <BbInput Value="@_cronHour"
-                         ValueChanged="@(v => {
-                                           _cronHour = v ?? string.Empty;
-                                           NotifyChanged();
-                                       })"
-                         Class="w-16 text-center font-mono px-1  bg-accent"
-                         Placeholder="*"
-                         AriaLabel="Hour — any integer 0–23, or * for every hour"
-                         AriaInvalid="@(!IsCronHourValid)"
-                         UpdateTiming="UpdateTiming.OnChange"/>
+                <div style="@CronFieldStyle(_cronHour)">
+                    <BbInput Value="@_cronHour"
+                             ValueChanged="@(v => SetCronField(v, () => _cronHour))"
+                             Class="w-full text-center font-mono px-1 bg-accent"
+                             Placeholder="*"
+                             AriaLabel="Hour — any integer 0–23, or * for every hour"
+                             AriaInvalid="@(!IsCronHourValid)"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </div>
                 <span class="text-xs text-muted-foreground select-none">Hour</span>
                 <span class="text-[10px] @(IsCronHourValid ? "invisible" : "text-destructive") select-none">0–23</span>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-                <BbInput Value="@_cronDayOfMonth"
-                         ValueChanged="@(v => {
-                                           _cronDayOfMonth = v ?? string.Empty;
-                                           NotifyChanged();
-                                       })"
-                         Class="w-16 text-center font-mono px-1  bg-accent"
-                         Placeholder="*"
-                         AriaLabel="Day of month — any integer 1–31, or * for every day"
-                         AriaInvalid="@(!IsCronDayOfMonthValid)"
-                         UpdateTiming="UpdateTiming.OnChange"/>
+                <div style="@CronFieldStyle(_cronDayOfMonth)">
+                    <BbInput Value="@_cronDayOfMonth"
+                             ValueChanged="@(v => SetCronField(v, () => _cronDayOfMonth))"
+                             Class="w-full text-center font-mono px-1 bg-accent"
+                             Placeholder="*"
+                             AriaLabel="Day of month — any integer 1–31, or * for every day"
+                             AriaInvalid="@(!IsCronDayOfMonthValid)"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </div>
                 <span class="text-xs text-muted-foreground select-none">Day of Month</span>
                 <span class="text-[10px] @(IsCronDayOfMonthValid ? "invisible" : "text-destructive") select-none">1–31</span>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-                <BbInput Value="@_cronMonth"
-                         ValueChanged="@(v => {
-                                           _cronMonth = v ?? string.Empty;
-                                           NotifyChanged();
-                                       })"
-                         Class="w-16 text-center font-mono px-1 bg-accent"
-                         Placeholder="*"
-                         AriaLabel="Month — any integer 1–12, or * for every month"
-                         AriaInvalid="@(!IsCronMonthValid)"
-                         UpdateTiming="UpdateTiming.OnChange"/>
+                <div style="@CronFieldStyle(_cronMonth)">
+                    <BbInput Value="@_cronMonth"
+                             ValueChanged="@(v => SetCronField(v, () => _cronMonth))"
+                             Class="w-full text-center font-mono px-1 bg-accent"
+                             Placeholder="*"
+                             AriaLabel="Month — any integer 1–12, or * for every month"
+                             AriaInvalid="@(!IsCronMonthValid)"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </div>
                 <span class="text-xs text-muted-foreground select-none">Month</span>
                 <span class="text-[10px] @(IsCronMonthValid ? "invisible" : "text-destructive") select-none">1–12</span>
             </div>
             <div class="flex flex-col items-center gap-0.5">
-                <BbInput Value="@_cronDayOfWeek"
-                         ValueChanged="@(v => {
-                                           _cronDayOfWeek = v ?? string.Empty;
-                                           NotifyChanged();
-                                       })"
-                         Class="w-16 text-center font-mono px-1  bg-accent"
-                         Placeholder="*"
-                         AriaLabel="Day of week — 0 (Sunday) through 7 (Sunday), or * for every day"
-                         AriaInvalid="@(!IsCronDayOfWeekValid)"
-                         UpdateTiming="UpdateTiming.OnChange"/>
+                <div style="@CronFieldStyle(_cronDayOfWeek)">
+                    <BbInput Value="@_cronDayOfWeek"
+                             ValueChanged="@(v => SetCronField(v, () => _cronDayOfWeek))"
+                             Class="w-full text-center font-mono px-1 bg-accent"
+                             Placeholder="*"
+                             AriaLabel="Day of week — 0 (Sunday) through 7 (Sunday), or * for every day"
+                             AriaInvalid="@(!IsCronDayOfWeekValid)"
+                             UpdateTiming="UpdateTiming.Immediate"/>
+                </div>
                 <span class="text-xs text-muted-foreground select-none">Day of Week</span>
                 <span class="text-[10px] @(IsCronDayOfWeekValid ? "invisible" : "text-destructive") select-none">0–7</span>
             </div>
 
             @if (!string.IsNullOrEmpty(ComputedExpression))
             {
-                <div class="flex flex-col gap-0.5 h-16 w-full">
+                <div class="flex flex-col gap-0.5 w-full">
                     <span class="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
                         <LucideIcon Name="clock" Size="12"/>@ComputedExpression
                     </span>
@@ -166,19 +162,29 @@
 
     private enum ScheduleMode { Daily, Weekly, Expression }
 
+    private sealed class DayOfWeekComparer : IComparer<DayOfWeek>
+    {
+        public static readonly DayOfWeekComparer Instance = new();
+
+        public int Compare(DayOfWeek x, DayOfWeek y) => SortKey(x).CompareTo(SortKey(y));
+
+        private static int SortKey(DayOfWeek day) => day == DayOfWeek.Sunday ? 7 : (int)day;
+    }
+
     [Parameter] public string? CronExpression { get; set; }
     [Parameter] public EventCallback<string?> CronExpressionChanged { get; set; }
 
     private ScheduleMode _scheduleMode = ScheduleMode.Daily;
     private TimeSpan? _dailyTime;
     private TimeSpan? _weeklyTime;
-    private List<DayOfWeek> _weeklyDaysOfWeek = [DayOfWeek.Monday];
+    private List<DayOfWeek> _weeklyDaysOfWeek = [];
     private string _cronSecond = "*";
     private string _cronMinute = "*";
     private string _cronHour = "*";
     private string _cronDayOfMonth = "*";
     private string _cronMonth = "*";
     private string _cronDayOfWeek = "*";
+    private bool _expressionConfigured;
 
     private bool IsCronSecondValid => IsCronPartValid(_cronSecond, 0, 59);
     private bool IsCronMinuteValid => IsCronPartValid(_cronMinute, 0, 59);
@@ -194,7 +200,7 @@
         ScheduleMode.Daily when _dailyTime.HasValue => $"0 {_dailyTime.Value.Minutes} {_dailyTime.Value.Hours} * * *",
         ScheduleMode.Weekly when _weeklyTime.HasValue && _weeklyDaysOfWeek.Count > 0
             => $"0 {_weeklyTime.Value.Minutes} {_weeklyTime.Value.Hours} * * {ToCronDayOfWeekSegment(_weeklyDaysOfWeek)}",
-        ScheduleMode.Expression when IsCronValid => $"{Normalize(_cronSecond)} {Normalize(_cronMinute)} {Normalize(_cronHour)} {Normalize(_cronDayOfMonth)} {Normalize(_cronMonth)} {Normalize(_cronDayOfWeek)}",
+        ScheduleMode.Expression when IsCronValid && _expressionConfigured => $"{Normalize(_cronSecond)} {Normalize(_cronMinute)} {Normalize(_cronHour)} {Normalize(_cronDayOfMonth)} {Normalize(_cronMonth)} {Normalize(_cronDayOfWeek)}",
         _ => null,
     };
 
@@ -221,13 +227,13 @@
 
     private static readonly IReadOnlyList<SelectOption<DayOfWeek>> DayOfWeekOptions =
     [
-        new(DayOfWeek.Sunday, "Sunday"),
         new(DayOfWeek.Monday, "Monday"),
         new(DayOfWeek.Tuesday, "Tuesday"),
         new(DayOfWeek.Wednesday, "Wednesday"),
         new(DayOfWeek.Thursday, "Thursday"),
         new(DayOfWeek.Friday, "Friday"),
         new(DayOfWeek.Saturday, "Saturday"),
+        new(DayOfWeek.Sunday, "Sunday"),
     ];
 
     protected override void OnInitialized()
@@ -241,13 +247,33 @@
     private void LoadFromExpression(string expression)
     {
         var parts = expression.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        _scheduleMode = ScheduleMode.Expression;
         if (parts.Length != 6)
         {
+            _scheduleMode = ScheduleMode.Expression;
             return;
         }
 
         (_cronSecond, _cronMinute, _cronHour, _cronDayOfMonth, _cronMonth, _cronDayOfWeek) = (parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+
+        if (parts[0] == "0" && parts[3] == "*" && parts[4] == "*" && parts[5] == "*"
+            && int.TryParse(parts[1], out var dailyMinute) && int.TryParse(parts[2], out var dailyHour))
+        {
+            _scheduleMode = ScheduleMode.Daily;
+            _dailyTime = new TimeSpan(dailyHour, dailyMinute, 0);
+            return;
+        }
+
+        if (parts[0] == "0" && parts[3] == "*" && parts[4] == "*" && parts[5] != "*"
+            && int.TryParse(parts[1], out var weeklyMinute) && int.TryParse(parts[2], out var weeklyHour))
+        {
+            _scheduleMode = ScheduleMode.Weekly;
+            _weeklyTime = new TimeSpan(weeklyHour, weeklyMinute, 0);
+            _weeklyDaysOfWeek = ParseWeeklyDays(parts[5]);
+            return;
+        }
+
+        _scheduleMode = ScheduleMode.Expression;
+        _expressionConfigured = true;
     }
 
     private void OnScheduleModeChanged(ScheduleMode newMode)
@@ -271,7 +297,7 @@
     {
         _weeklyDaysOfWeek = days?
                                 .Distinct()
-                                .OrderBy(static day => (int)day)
+                                .Order(DayOfWeekComparer.Instance)
                                 .ToList()
                             ?? [];
         NotifyChanged();
@@ -285,7 +311,7 @@
                 _weeklyTime = _dailyTime;
                 if (_weeklyDaysOfWeek.Count == 0)
                 {
-                    _weeklyDaysOfWeek = [DayOfWeek.Monday];
+                    _weeklyDaysOfWeek = Enum.GetValues<DayOfWeek>().Order(DayOfWeekComparer.Instance).ToList();
                 }
                 break;
 
@@ -300,6 +326,7 @@
                 _cronDayOfMonth = "*";
                 _cronMonth = "*";
                 _cronDayOfWeek = "*";
+                _expressionConfigured = true;
                 break;
 
             case (ScheduleMode.Weekly, ScheduleMode.Expression) when _weeklyTime.HasValue:
@@ -309,6 +336,7 @@
                 _cronDayOfMonth = "*";
                 _cronMonth = "*";
                 _cronDayOfWeek = _weeklyDaysOfWeek.Count > 0 ? ToCronDayOfWeekSegment(_weeklyDaysOfWeek) : "*";
+                _expressionConfigured = true;
                 break;
 
             case (ScheduleMode.Expression, ScheduleMode.Daily):
@@ -328,7 +356,17 @@
         }
     }
 
+    private static string CronFieldStyle(string value) => $"width: calc({Math.Max(4, value.Length)} * 9px + 28px);";
+
     private void NotifyChanged() => _ = CronExpressionChanged.InvokeAsync(ComputedExpression);
+
+    private void SetCronField(string? value, Expression<Func<string>> selector)
+    {
+        var field = (FieldInfo)((MemberExpression)selector.Body).Member;
+        field.SetValue(this, value ?? string.Empty);
+        _expressionConfigured = true;
+        NotifyChanged();
+    }
 
     private static string Normalize(string value) =>
         string.IsNullOrWhiteSpace(value) ? "*" : value;
@@ -419,6 +457,7 @@
                 DayOfWeek.Thursday,
                 DayOfWeek.Friday,
                 DayOfWeek.Saturday,
+                DayOfWeek.Sunday,
             ];
         }
 
@@ -431,7 +470,10 @@
             }
         }
 
-        return parsedDays.Select(static day => (DayOfWeek)day).ToList();
+        return parsedDays
+            .Select(static day => (DayOfWeek)day)
+            .Order(DayOfWeekComparer.Instance)
+            .ToList();
     }
 
     private static IEnumerable<int> ExpandDayOfWeekSegment(string segment)
@@ -467,9 +509,16 @@
                 yield break;
             }
 
-            for (var expandedDay = day; expandedDay <= 7; expandedDay += step)
+            if (stepParts.Length == 2)
             {
-                yield return expandedDay;
+                for (var expandedDay = day; expandedDay <= 7; expandedDay += step)
+                {
+                    yield return expandedDay;
+                }
+            }
+            else
+            {
+                yield return day;
             }
 
             yield break;

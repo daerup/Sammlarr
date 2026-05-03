@@ -30,9 +30,11 @@ public record SubscriptionConfig
 	public QueryLimit? Limit { get; init; }
 	public SyncMode Schedule { get; init; } = new SyncMode(new Manual());
 
+	public bool IsScheduleValid { get; init; } = true;
+
 	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && (Limit is null || Limit.Count > 0);
 
-	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name);
+	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid;
 
 	public int GetPreviewHash() =>
 		HashCode.Combine(HashCode.Combine(Provider, ListIdentifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));
