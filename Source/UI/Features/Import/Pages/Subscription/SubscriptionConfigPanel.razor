@@ -356,7 +356,7 @@
 
                     @if (_scheduleMode == ScheduleMode.Scheduled)
                     {
-                        <BbField>
+                        <BbField IsInvalid="@(ShowValidation && ScheduleIsInvalid)">
                             <BbFieldLabel Class="flex items-center leading-none">
                                 Schedule
                                 <BbTooltipProvider>
@@ -372,6 +372,10 @@
                                 <SchedulePicker CronExpression="@_scheduleCronExpression"
                                                 CronExpressionChanged="@ChangeSchedule"/>
                             </BbFieldContent>
+                            @if (ShowValidation && ScheduleIsInvalid)
+                            {
+                                <BbFieldError>A valid schedule is required.</BbFieldError>
+                            }
                         </BbField>
                     }
                 </div>
@@ -412,6 +416,7 @@
 
     private bool NameIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_name);
     private bool ListIdentifierIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_listIdentifier);
+    private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
 
@@ -453,7 +458,7 @@
         _limit = Value.Limit ?? DefaultLimit;
         _limitRaw = Value.Limit?.Count.ToString() ?? string.Empty;
         _scheduleMode = Value.Schedule.Value is Scheduled ? ScheduleMode.Scheduled : ScheduleMode.Manual;
-        _scheduleCronExpression = (Value.Schedule.Value as Scheduled?)?.CronExpression.ToString();
+        _scheduleCronExpression = (Value.Schedule.Value as Scheduled?)?.ToString();
         _syncFrequencySectionOpen = _scheduleMode == ScheduleMode.Scheduled;
 
         foreach (var provider in AllProviders)
@@ -484,6 +489,7 @@
         Filter = _filterEnabled ? _filter : null,
         Sort = _sortEnabled ? _sort : null,
         Limit = _limitEnabled ? _limit : null,
+        IsScheduleValid = !ScheduleIsInvalid,
         Schedule = _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is not null
             ? new SyncMode(new Scheduled(_scheduleCronExpression))
             : new SyncMode(new Manual()),
