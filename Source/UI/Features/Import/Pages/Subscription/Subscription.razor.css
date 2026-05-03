@@ -3,28 +3,9 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
     background: transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
     background: rgba(120, 120, 120, 0.2);
-    border-radius: 4px;
-}
-
-.stat-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 9999px;
-    line-height: 1;
-    font-size: 0.8rem;
-    white-space: nowrap;
-}
-
-.stat-badge span {
-    line-height: 1;
-    display: flex;
-    align-items: center;
 }
