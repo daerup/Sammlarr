@@ -1,3 +1,5 @@
+using Contracts.Media.Metadata;
+
 namespace Contracts.Media.Search;
 
 public interface IMediaDetailResult
@@ -16,4 +18,8 @@ public interface IMediaDetailResult
 	public DateOnly ReleaseDate { get; }
 
 	public IReadOnlyList<string> Genres { get; }
+
+	public IReadOnlyList<MediaRating> Ratings { get; }
+
+	public float? Rating => Ratings.Count > 0 ? Ratings[0].NormalizedValue : null;
 }

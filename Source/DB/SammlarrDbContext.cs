@@ -51,6 +51,8 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<MediaMetadataEntity> MediaMetadata => Set<MediaMetadataEntity>();
 
+	public DbSet<MediaRatingEntity> MediaRatings => Set<MediaRatingEntity>();
+
 	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
@@ -88,6 +90,13 @@ internal sealed class SammlarrDbContext : DbContext
 		{
 			builder.HasOne(m => m.MediaIdGroup).WithOne().HasForeignKey<MediaMetadataEntity>(m => m.MediaIdGroupId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieMetadataEntity>(MediaType.Movie).HasValue<ShowMetadataEntity>(MediaType.Show);
+		});
+
+		modelBuilder.Entity<MediaRatingEntity>(builder =>
+		{
+			builder.Property<Guid>("MediaIdGroupId");
+			builder.HasKey("MediaIdGroupId", nameof(MediaRatingEntity.Source));
+			builder.HasOne(r => r.Metadata).WithMany(m => m.Ratings).HasForeignKey("MediaIdGroupId").OnDelete(DeleteBehavior.Cascade);
 		});
 
 		modelBuilder.Entity<ImportListEntity>(builder =>

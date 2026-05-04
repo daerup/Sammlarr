@@ -1,5 +1,6 @@
 @using Contracts
 @using Contracts.Auth
+@using Contracts.Media.Metadata
 @using Contracts.Media.Search
 @using Contracts.Media.Trending
 @using Contracts.Settings
@@ -40,6 +41,14 @@ else
                              Selected="@_providerConfig.SearchProvider"
                              OnChange="@SetSearchProviderAsync"
                              IsDisabled="@_isSaving"/>
+
+        <ProviderSettingCard TEnum="RatingProvider"
+                             BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
+                             Title="Rating Provider"
+                             Description="Choose which provider supplies ratings used for display, filtering, and sorting."
+                             Selected="@_providerConfig.RatingProvider"
+                             OnChange="@SetRatingProviderAsync"
+                             IsDisabled="@_isSaving"/>
     </div>
 }
 
@@ -60,6 +69,8 @@ else
     private Task SetTrendingProviderAsync(MediaRecommendationProvider provider) => UpdateAsync(settings => settings with { TrendingProvider = provider });
 
     private Task SetSearchProviderAsync(MediaSearchProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
+
+    private Task SetRatingProviderAsync(RatingProvider provider) => UpdateAsync(settings => settings with { RatingProvider = provider });
 
     private async Task UpdateAsync(Func<ProviderConfig, ProviderConfig> update)
     {

@@ -1,4 +1,5 @@
 .search-result-poster {
+    flex-shrink: 0;
     width: clamp(10rem, 20vw, 12rem);
     height: clamp(15rem, 30vw, 18rem);
     overflow: hidden;

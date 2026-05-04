@@ -12,6 +12,14 @@ public static class MetadataMerger
 			_ => primary,
 		};
 
+	public static IMediaDetailResult WithRatings(IMediaDetailResult details, IReadOnlyList<MediaRating> ratings) =>
+		details switch
+		{
+			MovieDetailResult movie => movie with { Ratings = MergeRatings(movie.Ratings, ratings) },
+			ShowDetailResult show => show with { Ratings = MergeRatings(show.Ratings, ratings) },
+			_ => details,
+		};
+
 	private static MovieDetailResult MergeMovie(MovieDetailResult primary, MovieDetailResult secondary) =>
 		primary with
 		{
@@ -23,6 +31,7 @@ public static class MetadataMerger
 			ReleaseDate = primary.ReleaseDate > DateOnly.MinValue ? primary.ReleaseDate : secondary.ReleaseDate,
 			Genres = primary.Genres.Count > 0 ? primary.Genres : secondary.Genres,
 			Runtime = primary.Runtime > TimeSpan.Zero ? primary.Runtime : secondary.Runtime,
+			Ratings = MergeRatings(primary.Ratings, secondary.Ratings),
 		};
 
 	private static ShowDetailResult MergeShow(ShowDetailResult primary, ShowDetailResult secondary) =>
@@ -38,5 +47,25 @@ public static class MetadataMerger
 			Seasons = primary.Seasons > 0 ? primary.Seasons : secondary.Seasons,
 			Episodes = primary.Episodes > 0 ? primary.Episodes : secondary.Episodes,
 			RuntimePerEpisode = primary.RuntimePerEpisode > TimeSpan.Zero ? primary.RuntimePerEpisode : secondary.RuntimePerEpisode,
+			Ratings = MergeRatings(primary.Ratings, secondary.Ratings),
 		};
+
+	private static IReadOnlyList<MediaRating> MergeRatings(IReadOnlyList<MediaRating> primary, IReadOnlyList<MediaRating> secondary)
+	{
+		if (secondary.Count == 0)
+		{
+			return primary;
+		}
+		if (primary.Count == 0)
+		{
+			return secondary;
+		}
+
+		var bySource = primary.ToDictionary(rating => rating.Source);
+		foreach (var rating in secondary)
+		{
+			bySource.TryAdd(rating.Source, rating);
+		}
+		return [.. bySource.Values];
+	}
 }

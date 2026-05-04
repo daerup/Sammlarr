@@ -88,6 +88,7 @@ public class BlacklistServiceTests
 					WatchlistProvider = WatchlistProvider.Plex,
 					TrendingProvider = MediaRecommendationProvider.Tmdb,
 					SearchProvider = MediaSearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
 

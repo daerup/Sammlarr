@@ -42,6 +42,8 @@ internal abstract record MediaMetadataEntity : IAuditable
 	[Required]
 	[EnumAsString]
 	public MediaType MediaType { get; init; }
+
+	public List<MediaRatingEntity> Ratings { get; set; } = [];
 }
 
 internal record MovieMetadataEntity : MediaMetadataEntity
