@@ -49,9 +49,10 @@
         {
             <BbButton Variant="ButtonVariant.Outline"
                       Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                      Disabled="true">
-                <LucideIcon Name="x" Size="14" Class="mr-2"/>
-                Failed
+                      OnClick="() => ApplyAsync()"
+                      Disabled="!_config.IsTestable">
+                <LucideIcon Name="rotate-cw" Size="14" Class="mr-2"/>
+                Retry
             </BbButton>
         }
         else if (ShowTestButton)
