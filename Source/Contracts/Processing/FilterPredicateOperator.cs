@@ -17,4 +17,6 @@ public enum FilterPredicateOperator
 	Between,
 	IsTrue,
 	IsFalse,
+	In,
+	NotIn,
 }

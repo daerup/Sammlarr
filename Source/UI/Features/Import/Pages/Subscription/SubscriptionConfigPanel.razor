@@ -2,6 +2,7 @@
 @using BlazorBlueprint.Primitives.Filtering
 @using Contracts
 @using Contracts.Auth
+@using Contracts.Media
 @using Contracts.Media.List
 @using Contracts.Media.Search
 @using Contracts.Processing
@@ -425,13 +426,25 @@
     private SlotPolicy WatchlistedBehavior => _limit.Watchlisted;
     private SlotPolicy BlacklistedBehavior => _limit.Blacklisted;
 
-    private record FieldDefinition(string Property, string Label, FilterFieldType FilterType);
+    private record FieldDefinition(string Property, string Label, FilterFieldType FilterType, IReadOnlyList<SelectOption<string>>? Options = null);
 
     private static readonly IReadOnlyList<FieldDefinition> FieldDefinitions =
     [
         new(nameof(IMediaDetailResult.Title), "Title", FilterFieldType.Text),
+        new(nameof(IMediaDetailResult.Tagline), "Tagline", FilterFieldType.Text),
+        new(nameof(IMediaDetailResult.Summary), "Summary", FilterFieldType.Text),
+        new(nameof(IMediaDetailResult.Genres), "Genres", FilterFieldType.Text),
+        new(
+            nameof(IMediaDetailResult.MediaTypeText),
+            "Media Type",
+            FilterFieldType.Enum,
+            [new SelectOption<string>(nameof(MediaType.Movie), "Movie"), new SelectOption<string>(nameof(MediaType.Show), "Show")]
+        ),
         new(nameof(IMediaDetailResult.ReleaseDate), "Release Date", FilterFieldType.Date),
         new(nameof(IMediaDetailResult.Rating), "Rating", FilterFieldType.Number),
+        new(nameof(IMediaDetailResult.RuntimeMinutes), "Runtime (min)", FilterFieldType.Number),
+        new(nameof(IMediaDetailResult.SeasonCount), "Seasons", FilterFieldType.Number),
+        new(nameof(IMediaDetailResult.EpisodeCount), "Episodes", FilterFieldType.Number),
     ];
 
     private static readonly IReadOnlyList<SelectOption<string>> SortFields =
@@ -439,7 +452,13 @@
 
     private static readonly IReadOnlyList<FilterField> FilterFields =
         FieldDefinitions
-            .Select(f => new FilterField { Name = f.Property, Label = f.Label, Type = f.FilterType })
+            .Select(f => new FilterField
+            {
+                Name = f.Property,
+                Label = f.Label,
+                Type = f.FilterType,
+                Options = f.Options ?? [],
+            })
             .ToList();
 
     protected override async Task OnInitializedAsync()

@@ -17,4 +17,6 @@ public record MovieDetailResult : IMediaDetailResult
 	public required IReadOnlyList<string> Genres { get; init; }
 	public IReadOnlyList<MediaRating> Ratings { get; init; } = [];
 	public float? Rating => Ratings.Count > 0 ? Ratings[0].NormalizedValue : null;
+	public string MediaTypeText => MediaType.ToString();
+	public int? RuntimeMinutes => Runtime.TotalMinutes > 0 ? (int)Runtime.TotalMinutes : null;
 }

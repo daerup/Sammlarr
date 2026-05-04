@@ -40,6 +40,24 @@ public static class QueryFilterFactory
 			Value = JsonSerializer.Serialize(value),
 		};
 
+	public static FilterPredicate In(string field, params string[] values) =>
+		new()
+		{
+			Field = field,
+			Operator = FilterPredicateOperator.In,
+			ValueKind = FilterValueKind.String,
+			Value = JsonSerializer.Serialize(values),
+		};
+
+	public static FilterPredicate NotIn(string field, params string[] values) =>
+		new()
+		{
+			Field = field,
+			Operator = FilterPredicateOperator.NotIn,
+			ValueKind = FilterValueKind.String,
+			Value = JsonSerializer.Serialize(values),
+		};
+
 	public static FilterGroup Group(params FilterPredicate[] predicates) => new() { Operator = FilterOperator.And, Predicates = [.. predicates] };
 
 	public static FilterGroup Group(FilterOperator op, params FilterPredicate[] predicates) => new() { Operator = op, Predicates = [.. predicates] };
