@@ -195,4 +195,85 @@ public class MetadataMergerTests
 
 		await Assert.That(result.Tagline).IsEqualTo("Secondary Tagline");
 	}
+
+	[Test]
+	public async Task WithRatings_WhenDetailsHasNoRatings_ReplacesWithProvidedRatings()
+	{
+		var details = MovieWithRatings([]);
+		var ratings = new[] { new MediaRating(RatingSource.Tmdb, 7.5f, 1234) };
+
+		var result = (MovieDetailResult)MetadataMerger.WithRatings(details, ratings);
+
+		await Assert.That(result.Ratings).IsEquivalentTo(ratings);
+	}
+
+	[Test]
+	public async Task WithRatings_WhenSameSourcePresent_KeepsExistingRating()
+	{
+		var existing = new MediaRating(RatingSource.Tmdb, 8.0f, 5000);
+		var details = MovieWithRatings([existing]);
+
+		var result = (MovieDetailResult)MetadataMerger.WithRatings(details, [new MediaRating(RatingSource.Tmdb, 6.0f, 10)]);
+
+		await Assert.That(result.Ratings).IsEquivalentTo(new[] { existing });
+	}
+
+	[Test]
+	public async Task FillMissing_WhenSecondaryAddsNewRatingSource_MergesIntoMovie()
+	{
+		var primary = MovieWithRatings([new MediaRating(RatingSource.Tmdb, 7.0f, 100)]);
+		var secondary = MovieWithRatings([new MediaRating(RatingSource.Tmdb, 9.9f, 999_999)]);
+
+		var result = (MovieDetailResult)MetadataMerger.FillMissing(primary, secondary);
+
+		await Assert.That(result.Ratings.Count).IsEqualTo(1);
+		await Assert.That(result.Ratings[0].NormalizedValue).IsEqualTo(7.0f);
+	}
+
+	[Test]
+	public async Task FillMissing_WhenPrimaryHasNoRatings_TakesSecondaryRatingsForShow()
+	{
+		var primary = ShowWithRatings([]);
+		var secondary = ShowWithRatings([new MediaRating(RatingSource.Tmdb, 8.4f, 42)]);
+
+		var result = (ShowDetailResult)MetadataMerger.FillMissing(primary, secondary);
+
+		await Assert.That(result.Ratings.Count).IsEqualTo(1);
+		await Assert.That(result.Ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(result.Ratings[0].NormalizedValue).IsEqualTo(8.4f);
+	}
+
+	private static MovieDetailResult MovieWithRatings(IReadOnlyList<MediaRating> ratings) =>
+		new()
+		{
+			SourceId = TmdbId.From("1", MediaType.Movie),
+			AdditionalIds = [],
+			Title = "Title",
+			Tagline = "Tagline",
+			Summary = "Summary",
+			PosterUrl = "poster",
+			BackdropUrl = "backdrop",
+			ReleaseDate = new DateOnly(2024, 1, 1),
+			Genres = ["Action"],
+			Runtime = TimeSpan.FromMinutes(120),
+			Ratings = ratings,
+		};
+
+	private static ShowDetailResult ShowWithRatings(IReadOnlyList<MediaRating> ratings) =>
+		new()
+		{
+			SourceId = TmdbId.From("1", MediaType.Show),
+			AdditionalIds = [],
+			Title = "Show",
+			Tagline = "Tagline",
+			Summary = "Summary",
+			PosterUrl = "poster",
+			BackdropUrl = "backdrop",
+			ReleaseDate = new DateOnly(2024, 1, 1),
+			Genres = ["Drama"],
+			Seasons = 1,
+			Episodes = 10,
+			RuntimePerEpisode = TimeSpan.FromMinutes(45),
+			Ratings = ratings,
+		};
 }

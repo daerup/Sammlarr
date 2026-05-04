@@ -431,6 +431,7 @@
     [
         new(nameof(IMediaDetailResult.Title), "Title", FilterFieldType.Text),
         new(nameof(IMediaDetailResult.ReleaseDate), "Release Date", FilterFieldType.Date),
+        new(nameof(IMediaDetailResult.Rating), "Rating", FilterFieldType.Number),
     ];
 
     private static readonly IReadOnlyList<SelectOption<string>> SortFields =

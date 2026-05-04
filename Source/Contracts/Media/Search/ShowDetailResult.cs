@@ -1,3 +1,5 @@
+using Contracts.Media.Metadata;
+
 namespace Contracts.Media.Search;
 
 public record ShowDetailResult : IMediaDetailResult
@@ -15,4 +17,6 @@ public record ShowDetailResult : IMediaDetailResult
 	public required TimeSpan RuntimePerEpisode { get; init; }
 	public required DateOnly ReleaseDate { get; init; }
 	public required IReadOnlyList<string> Genres { get; init; }
+	public IReadOnlyList<MediaRating> Ratings { get; init; } = [];
+	public float? Rating => Ratings.Count > 0 ? Ratings[0].NormalizedValue : null;
 }

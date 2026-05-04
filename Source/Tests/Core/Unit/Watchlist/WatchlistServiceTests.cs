@@ -122,6 +122,7 @@ public class WatchlistServiceTests
 					WatchlistProvider = WatchlistProvider.Plex,
 					TrendingProvider = MediaRecommendationProvider.Tmdb,
 					SearchProvider = MediaSearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
 		return new WatchlistService(index, configRepository.Object, (metadataProvider ?? IMediaMetadataProvider.Mock()).Object);

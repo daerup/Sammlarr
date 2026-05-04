@@ -1,3 +1,5 @@
+using Contracts.Media.Metadata;
+
 namespace Contracts.Media.Search;
 
 public record UnresolvedMediaResult : IMediaDetailResult
@@ -12,4 +14,6 @@ public record UnresolvedMediaResult : IMediaDetailResult
 	public string Summary => string.Empty;
 	public required DateOnly ReleaseDate { get; init; }
 	public IReadOnlyList<string> Genres => [];
+	public IReadOnlyList<MediaRating> Ratings => [];
+	public float? Rating => null;
 }

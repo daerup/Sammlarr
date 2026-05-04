@@ -39,8 +39,21 @@
                         <span aria-hidden="true">•</span>
                         <span>@string.Join(" • ", _displayFacts)</span>
                     }
+                    @if (Result.Rating is { } rating)
+                    {
+                        <span aria-hidden="true">•</span>
+                        <span class="inline-flex items-center gap-1 text-yellow-400">
+                            <LucideIcon Name="star" Size="12" Fill="currentColor"/>
+                            <span class="font-medium">@rating.ToString("F1")</span>
+                        </span>
+                    }
                 </p>
                 <p class="font-bold truncate text-xl pt-2">@Result.Title</p>
+
+                @if (!string.IsNullOrWhiteSpace(Result.Tagline))
+                {
+                    <p class="text-xs italic text-muted-foreground line-clamp-1 pt-1">@Result.Tagline</p>
+                }
 
                 @if (Result.Genres.Count > 0)
                 {
@@ -50,6 +63,11 @@
                             <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@genre</BbBadge>
                         }
                     </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Result.Summary))
+                {
+                    <p class="text-sm text-white line-clamp-2 pt-2">@Result.Summary</p>
                 }
             </div>
         </div>

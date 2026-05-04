@@ -1,11 +1,14 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
+using Contracts.Media.Metadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache) : IApiKeyConfigRepository
+internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache, IMediaMetadataRepository metadataRepository)
+	: IApiKeyConfigRepository
 {
 	public async ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
@@ -50,5 +53,10 @@ internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCac
 		await context.SaveChangesAsync(cancellationToken);
 
 		cache.Remove(provider);
+
+		if (provider.AsRatingSource() is { } ratingSource)
+		{
+			await metadataRepository.RemoveRatingsBySourceAsync(ratingSource, cancellationToken);
+		}
 	}
 }

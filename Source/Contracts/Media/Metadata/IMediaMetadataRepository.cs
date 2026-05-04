@@ -9,6 +9,8 @@ public interface IMediaMetadataRepository
 	Task UpsertAsync(IMediaId anchor, IMediaDetailResult details, CancellationToken cancellationToken = default);
 
 	Task RemoveAsync(IMediaId anchor, CancellationToken cancellationToken = default);
+
+	Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default);
 }
 
 public record CachedMediaMetadata(IMediaDetailResult Details, DateTimeOffset FetchedAt);

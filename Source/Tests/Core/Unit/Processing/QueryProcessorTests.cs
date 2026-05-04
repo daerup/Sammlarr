@@ -1,4 +1,7 @@
 using System.ComponentModel;
+using Contracts.Media;
+using Contracts.Media.Metadata;
+using Contracts.Media.Search;
 using Contracts.Processing;
 using Core.Processing;
 using Shared;
@@ -250,12 +253,69 @@ public class QueryProcessorTests
 	}
 }
 
+public class QueryProcessorRatingTests
+{
+	private readonly QueryProcessor<IMediaDetailResult> _testee = new();
+
+	[Test]
+	public async Task Execute_WhenSortedByRatingDescending_ItemsWithoutRatingComeLast()
+	{
+		var rated = MovieWithRating(2020, 8.5f);
+		var lowRated = MovieWithRating(2021, 5.0f);
+		var unrated = MovieWithRating(2022, null);
+		var options = new QueryOptions
+		{
+			Sort = new QuerySort { Property = nameof(IMediaDetailResult.Rating), Direction = ListSortDirection.Descending },
+		};
+
+		var results = _testee.Execute([lowRated, unrated, rated], options, _ => false, _ => false).ToList();
+		var ordered = results.OfUnionType<IMediaDetailResult>().ToList();
+
+		await Assert.That(ordered[0]).IsSameReferenceAs(rated);
+		await Assert.That(ordered[1]).IsSameReferenceAs(lowRated);
+		await Assert.That(ordered[2]).IsSameReferenceAs(unrated);
+	}
+
+	[Test]
+	public async Task Execute_WhenFilterRatingGreaterOrEqual_ExcludesLowerAndUnrated()
+	{
+		var high = MovieWithRating(2020, 9.0f);
+		var low = MovieWithRating(2021, 6.0f);
+		var unrated = MovieWithRating(2022, null);
+		var options = new QueryOptions { Filter = Filter(Group(Number(nameof(IMediaDetailResult.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0))) };
+
+		var results = _testee.Execute([high, low, unrated], options, _ => false, _ => false).ToList();
+
+		await Assert.That(results.OfUnionType<IMediaDetailResult>()).IsEquivalentTo([(IMediaDetailResult)high]);
+		await Assert.That(results.OfUnionType<Culled<IMediaDetailResult>>().Select(c => c.Item)).IsEquivalentTo(new IMediaDetailResult[] { low, unrated });
+	}
+
+	private static MovieDetailResult MovieWithRating(int year, float? rating) =>
+		new()
+		{
+			SourceId = TmdbId.From(year.ToString(), MediaType.Movie),
+			AdditionalIds = [],
+			Title = $"Movie {year}",
+			Tagline = string.Empty,
+			Summary = string.Empty,
+			PosterUrl = string.Empty,
+			BackdropUrl = string.Empty,
+			ReleaseDate = new DateOnly(year, 1, 1),
+			Genres = [],
+			Runtime = TimeSpan.FromMinutes(90),
+			Ratings = rating is { } value ? [new MediaRating(RatingSource.Tmdb, value, 1)] : [],
+		};
+}
+
 internal record Item(string Name, int Year, string Genre = "Unknown");
 
 file static class Extension
 {
 	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<Item>> source) =>
 		EnumerableExtensions.OfUnionType<QueryResult<Item>, TOut>(source);
+
+	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<IMediaDetailResult>> source) =>
+		EnumerableExtensions.OfUnionType<QueryResult<IMediaDetailResult>, TOut>(source);
 
 	public static UnionCollectionAssertion<TCollection, QueryResult<Item>> AreOfUnionType<TCollection>(
 		this IAssertionSource<TCollection> source,

@@ -1,4 +1,5 @@
 using Contracts.Media;
+using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using DB.Data.MediaGroup;
 using DB.Data.Metadata;
@@ -149,6 +150,53 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	public async Task RemoveAsync_WhenNoEntryExists_DoesNotThrow()
 	{
 		await Assert.That(async () => await _testee.RemoveAsync(TmdbId.From("0", MediaType.Movie))).ThrowsNothing();
+	}
+
+	[Test]
+	public async Task UpsertAsync_WhenDetailsHasRatings_PersistsRatings()
+	{
+		var anchor = TmdbId.From("400", MediaType.Movie);
+		var details = CreateMovieDetails(anchor, []) with { Ratings = [new MediaRating(RatingSource.Tmdb, 8.4f, 1234)] };
+
+		await _testee.UpsertAsync(anchor, details);
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = await fixture.Context.MediaRatings.AsNoTracking().SingleAsync();
+		using var _ = Assert.Multiple();
+		await Assert.That(stored.Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(stored.NormalizedValue).IsEqualTo(8.4f);
+		await Assert.That(stored.VoteCount).IsEqualTo(1234);
+	}
+
+	[Test]
+	public async Task GetByMediaIdAsync_WhenRatingsPersisted_ReturnsRatingsInDetails()
+	{
+		var anchor = TmdbId.From("410", MediaType.Movie);
+		var ratings = new[] { new MediaRating(RatingSource.Tmdb, 7.2f, 500) };
+		await _testee.UpsertAsync(anchor, CreateMovieDetails(anchor, []) with { Ratings = ratings });
+		fixture.Context.ChangeTracker.Clear();
+
+		var cached = await _testee.GetByMediaIdAsync(anchor);
+
+		await Assert.That(cached).IsNotNull();
+		await Assert.That(cached!.Details.Ratings).IsEquivalentTo(ratings);
+	}
+
+	[Test]
+	public async Task UpsertAsync_WhenReplacingEntryWithNewRatings_RemovesOldRatings()
+	{
+		var anchor = TmdbId.From("420", MediaType.Movie);
+		var first = CreateMovieDetails(anchor, []) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] };
+		var second = CreateMovieDetails(anchor, []) with { Ratings = [new MediaRating(RatingSource.Tmdb, 9.0f, 9999)] };
+
+		await _testee.UpsertAsync(anchor, first);
+		fixture.Context.ChangeTracker.Clear();
+		await _testee.UpsertAsync(anchor, second);
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = await fixture.Context.MediaRatings.AsNoTracking().SingleAsync();
+		await Assert.That(stored.NormalizedValue).IsEqualTo(9.0f);
+		await Assert.That(stored.VoteCount).IsEqualTo(9999);
 	}
 
 	private static MovieDetailResult CreateMovieDetails(IMediaId sourceId, IMediaId[] additionalIds) =>

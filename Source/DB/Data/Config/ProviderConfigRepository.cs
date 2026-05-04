@@ -20,6 +20,7 @@ internal class ProviderConfigRepository(SammlarrDbContext context, ITypedMemoryC
 			WatchlistProvider = settings.WatchlistProvider,
 			TrendingProvider = settings.TrendingProvider,
 			SearchProvider = settings.SearchProvider,
+			RatingProvider = settings.RatingProvider,
 		};
 		cache.Set(CacheKey, dto);
 		return dto;
@@ -31,6 +32,7 @@ internal class ProviderConfigRepository(SammlarrDbContext context, ITypedMemoryC
 		settings.WatchlistProvider = providerConfig.WatchlistProvider;
 		settings.TrendingProvider = providerConfig.TrendingProvider;
 		settings.SearchProvider = providerConfig.SearchProvider;
+		settings.RatingProvider = providerConfig.RatingProvider;
 		await context.SaveChangesAsync(cancellationToken);
 		cache.Set(CacheKey, providerConfig);
 	}
