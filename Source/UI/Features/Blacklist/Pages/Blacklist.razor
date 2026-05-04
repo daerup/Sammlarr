@@ -4,9 +4,12 @@
 @using Contracts.Media
 @using Contracts.Media.Blacklist
 @using Contracts.Media.Convertions
+@using Contracts.Media.Metadata
+@using Contracts.Media.Search
 @using Contracts.Settings
 @implements IAsyncDisposable
 @inject IBlacklistService BlacklistService
+@inject IMediaMetadataProvider MetadataProvider
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
@@ -63,13 +66,15 @@ else
             else if (_items is not null)
             {
                 <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-                    @foreach (var item in _items)
+                    @foreach (var (detail, _) in _items)
                     {
-                        <MediaGridTile @key="item"
-                                       ImageUrl="@item.ArtUrl"
-                                       Poster="@item.PosterUrl"
-                                       Title="@item.Title"
-                                       OnClick="() => SelectItem(item)"/>
+                        <MediaGridTile @key="detail"
+                                       ImageUrl="@detail.BackdropUrl"
+                                       Poster="@detail.PosterUrl"
+                                       Title="@detail.Title"
+                                       Tagline="@detail.Tagline"
+                                       OnClick="() => SelectItem(detail)"
+                                       OnImageBroken="() => ReportBrokenImageAsync(detail.SourceId)"/>
                     }
                 </div>
             }
@@ -81,11 +86,12 @@ else
                   OnOpenChanged="DetailsOpenChangedAsync"
                   ShowContent="@(_selectedItem is not null)"
                   Title="@(_selectedItem?.Title ?? string.Empty)"
-                  Description="@(_selectedItem?.Description ?? string.Empty)"
+                  Description="@(_selectedItem?.Summary ?? string.Empty)"
                   MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
-                  ReleaseDate="@(_selectedItem?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                  ReleaseDate="@SelectedReleaseDate"
                   ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
+                  OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromBlacklistAsync"
                   ButtonText="GetRemoveButtonText"
                   ButtonIcon="GetRemoveButtonIcon"/>
@@ -102,14 +108,15 @@ else
 </SearchModal>
 
 @code {
-    private IReadOnlyList<IBlacklistItem>? _items;
-    private IBlacklistItem? _selectedItem;
+    private IReadOnlyList<BlacklistedItem>? _items;
+    private IMediaDetailResult? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
     private string? _errorMessage;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly HashSet<IMediaId> _reportedBrokenImages = [];
     private ProviderConfig? _providerSettings;
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
@@ -119,6 +126,7 @@ else
     private string PageHeading => "Blacklist";
     private string PageDescription => "Your blacklisted movies and shows.";
     private string EmptyStateMessage => "Your blacklist is empty.";
+    private DateTimeOffset SelectedReleaseDate => _selectedItem is { } item ? new DateTimeOffset(item.ReleaseDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero) : DateTimeOffset.MinValue;
 
     protected override async Task OnInitializedAsync()
     {
@@ -147,7 +155,7 @@ else
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(item => item.SourceId.Equals(_selectedItem.SourceId));
+                _selectedItem = _items.FirstOrDefault(i => i.Detail.SourceId.Equals(_selectedItem.SourceId))?.Detail;
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -165,13 +173,31 @@ else
         }
     }
 
+    private async Task ReportBrokenImageAsync(IMediaId sourceId)
+    {
+        if (!_reportedBrokenImages.Add(sourceId))
+        {
+            return;
+        }
+        await MetadataProvider.ReportStaleAsync(sourceId, _cancellationTokenSource.Token);
+    }
+
+    private async Task ReportSelectedImageBrokenAsync()
+    {
+        if (_selectedItem is null)
+        {
+            return;
+        }
+        await ReportBrokenImageAsync(_selectedItem.SourceId);
+    }
+
     private static string GetRemoveButtonText() => "Remove from Blacklist";
 
     private static string GetRemoveButtonIcon() => "x";
 
-    private void SelectItem(IBlacklistItem item)
+    private void SelectItem(IMediaDetailResult detail)
     {
-        _selectedItem = item;
+        _selectedItem = detail;
         _isSheetOpen = true;
     }
 
@@ -223,7 +249,7 @@ else
             return false;
         }
 
-        return _items.Any(item => item.SourceId.Equals(mediaId));
+        return _items.Any(item => item.Detail.SourceId.Equals(mediaId));
     }
 
     private void OpenSearchModal()

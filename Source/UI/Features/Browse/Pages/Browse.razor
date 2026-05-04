@@ -9,7 +9,7 @@
 @using Contracts.Watchlist
 @implements IAsyncDisposable
 @inject IKeyedServiceIndex<MediaRecommendationProvider, IMediaRecommendationService> RecommendationServiceIndex
-@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
+@inject IWatchlistService WatchlistService
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
@@ -213,14 +213,18 @@
 
     private async Task LoadWatchlistIdsAsync()
     {
-        var watchlistService = WatchlistServiceIndex[_providerConfig.WatchlistProvider];
-        var watchlistPage = await watchlistService.GetWatchlistAsync(1, _cancellationTokenSource.Token);
+        var ids = new HashSet<string>();
+        await foreach (var item in WatchlistService.GetWatchlistPagedAsync(_cancellationTokenSource.Token))
+        {
+            ids.Add(item.SourceId.Value);
+        }
+
         if (_cancellationTokenSource.IsCancellationRequested)
         {
             return;
         }
 
-        _watchlistedIds = watchlistPage.Items.Select(item => item.SourceId.Value).ToHashSet();
+        _watchlistedIds = ids;
     }
 
     private async Task LoadPageAsync()
@@ -299,8 +303,6 @@
 
     private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
     {
-        var watchlistService = WatchlistServiceIndex[_providerConfig.WatchlistProvider];
-
         if (isMarked)
         {
             if (!IsInWatchlist(id))
@@ -309,7 +311,7 @@
                 return false;
             }
 
-            var removed = await watchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
+            var removed = await WatchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
             if (!removed)
             {
                 ToastService.Warning("Failed to remove item from watchlist. Please try again.");
@@ -327,7 +329,7 @@
             return false;
         }
 
-        var added = await watchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
+        var added = await WatchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
         if (!added)
         {
             ToastService.Warning("Failed to add item to watchlist. Please try again.");
@@ -356,12 +358,11 @@
             return;
         }
 
-        var watchlistService = WatchlistServiceIndex[_providerConfig.WatchlistProvider];
         bool success;
 
         if (IsInWatchlist(_selectedMedia))
         {
-            success = await watchlistService.RemoveFromWatchlistAsync(_selectedMedia.WatchlistProviderId);
+            success = await WatchlistService.RemoveFromWatchlistAsync(_selectedMedia.WatchlistProviderId);
             if (success)
             {
                 _watchlistedIds.Remove(_selectedMedia.WatchlistProviderId.Value);
@@ -370,7 +371,7 @@
         }
         else
         {
-            success = await watchlistService.AddToWatchlistAsync(_selectedMedia.WatchlistProviderId);
+            success = await WatchlistService.AddToWatchlistAsync(_selectedMedia.WatchlistProviderId);
             if (success)
             {
                 _watchlistedIds.Add(_selectedMedia.WatchlistProviderId.Value);

@@ -4,7 +4,6 @@ using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Convertions;
 
 namespace API.Tests.Plex;
 
@@ -49,14 +48,14 @@ public class PlexWatchListServiceTests
 	[Test]
 	public async Task GetWatchlistAsync_WhenItemIsComplete_ReturnsItem()
 	{
-		var json = BuildWatchlistJson(1, CreateMetadata(title: "Movie 1"));
+		var json = BuildWatchlistJson(1, CreateMetadata(ratingKey: "plex-42"));
 		var testee = CreateWatchListService(json);
 
 		var result = await testee.GetWatchlistAsync(1);
 
 		await Assert.That(result.Items).Count().IsEqualTo(1);
-		await Assert.That(result.Items[0].Title).IsEqualTo("Movie 1");
-		await Assert.That(result.Items[0].MediaType).IsEqualTo(MediaType.Movie);
+		await Assert.That(result.Items[0].Value).IsEqualTo("plex-42");
+		await Assert.That(result.Items[0].Type).IsEqualTo(MediaType.Movie);
 	}
 
 	[Test]
@@ -114,19 +113,9 @@ public class PlexWatchListServiceTests
 		await Assert.That(result).IsFalse();
 	}
 
-	private static PlexWatchListService CreateWatchListService(string json)
-	{
-		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any()).Returns(new Unresolved());
-		return new PlexWatchListService(CreatePlexClient(json), resolver);
-	}
+	private static PlexWatchListService CreateWatchListService(string json) => new(CreatePlexClient(json));
 
-	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode)
-	{
-		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any()).Returns(new Unresolved());
-		return new PlexWatchListService(CreatePlexClient(statusCode), resolver);
-	}
+	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode) => new(CreatePlexClient(statusCode));
 
 	private static PlexClient CreatePlexClient(string json)
 	{
@@ -166,12 +155,12 @@ public class PlexWatchListServiceTests
 		return JsonSerializer.Serialize(payload);
 	}
 
-	private static object CreateMetadata(int year = 2021, string? originallyAvailableAt = "2021-01-01", string title = "Movie 1") =>
+	private static object CreateMetadata(int year = 2021, string? originallyAvailableAt = "2021-01-01", string title = "Movie 1", string? ratingKey = null) =>
 		new
 		{
 			art = $"/art/{Faker.Random.Int(1, 1000)}",
 			rating = Faker.Random.Double(1, 10),
-			ratingKey = $"plex-{Faker.Random.Int(1, 1000)}",
+			ratingKey = ratingKey ?? $"plex-{Faker.Random.Int(1, 1000)}",
 			tagline = Faker.Lorem.Sentence(3),
 			type = "movie",
 			addedAt = (int)Faker.Date.RecentOffset().ToUnixTimeSeconds(),

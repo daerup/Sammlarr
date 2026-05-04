@@ -1,3 +1,5 @@
+using Contracts.Media.Search;
+
 namespace Contracts.Watchlist;
 
-public record WatchlistPageResult(IReadOnlyList<IWatchlistItem> Items, int TotalPages);
+public record WatchlistPageResult(IReadOnlyList<IMediaDetailResult> Items, int TotalPages);

@@ -1,5 +1,6 @@
 using Contracts.Auth;
 using Contracts.Media;
+using Contracts.Media.Metadata;
 using Contracts.Media.Trending;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -13,6 +14,7 @@ internal class TmdbModule : IServiceModule
 		services.AddScoped<TmdbApi>();
 		services.AddHttpClient<TmdbClient>();
 		services.AddKeyedScoped<IMediaRecommendationService, TmdbRecommendationService>(MediaRecommendationProvider.Tmdb);
+		services.AddKeyedScoped<IMetadataEnricher, TmdbMetadataEnricher>(MediaProvider.Tmdb);
 		services.AddScoped<TmdbIdConverter>();
 		services.AddKeyedScoped<IApiKeyValidator, TmdbClient>(MediaProvider.Tmdb);
 	}

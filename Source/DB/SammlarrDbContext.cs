@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Contracts;
+using Contracts.Media;
 using Contracts.Media.List;
 using Contracts.Processing;
 using DB.Data;
@@ -9,6 +10,7 @@ using DB.Data.Blacklist;
 using DB.Data.Config;
 using DB.Data.List;
 using DB.Data.MediaGroup;
+using DB.Data.Metadata;
 using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -47,6 +49,8 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<MediaIdentifierGroupEntry> MediaIdEntries => Set<MediaIdentifierGroupEntry>();
 
+	public DbSet<MediaMetadataEntity> MediaMetadata => Set<MediaMetadataEntity>();
+
 	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
@@ -79,6 +83,12 @@ internal sealed class SammlarrDbContext : DbContext
 			builder.HasKey(e => e.Identifier);
 		});
 		modelBuilder.Entity<MediaIdentifierGroupEntity>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroupEntity).OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder.Entity<MediaMetadataEntity>(builder =>
+		{
+			builder.HasOne(m => m.MediaIdGroup).WithOne().HasForeignKey<MediaMetadataEntity>(m => m.MediaIdGroupId).OnDelete(DeleteBehavior.Cascade);
+			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieMetadataEntity>(MediaType.Movie).HasValue<ShowMetadataEntity>(MediaType.Show);
+		});
 
 		modelBuilder.Entity<ImportListEntity>(builder =>
 		{

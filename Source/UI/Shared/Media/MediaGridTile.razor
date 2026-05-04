@@ -1,9 +1,15 @@
 <div class="cursor-pointer group" @onclick="OnClick">
     <div class="relative overflow-hidden rounded-lg media-card-backdrop">
-        @if (_isShowingPoster)
+        @if (_failed)
+        {
+            <div class="w-full aspect-video bg-muted flex items-center justify-center">
+                <LucideIcon Name="image-off" Size="48" Class="text-muted-foreground"/>
+            </div>
+        }
+        else if (_isShowingPoster)
         {
             <div class="poster-bg" style="background-image: url('@Poster')"></div>
-            <img class="poster-img" src="@Poster" alt="@Title"/>
+            <img class="poster-img" src="@Poster" alt="@Title" @onerror="OnImageError"/>
         }
         else
         {
@@ -58,10 +64,12 @@
     [Parameter] public float? Rating { get; set; }
     [Parameter] public DateTimeOffset? Date { get; set; }
     [Parameter] public string? Tagline { get; set; }
+    [Parameter] public EventCallback OnImageBroken { get; set; }
 
     private string _src = string.Empty;
     private string? _lastImageUrl;
     private bool _isShowingPoster;
+    private bool _failed;
 
     protected override void OnParametersSet()
     {
@@ -70,12 +78,18 @@
             _lastImageUrl = ImageUrl;
             _src = ImageUrl;
             _isShowingPoster = false;
+            _failed = false;
         }
     }
 
-    private void OnImageError()
+    private async Task OnImageError()
     {
-        if (Poster is not null)
-            _isShowingPoster = true;
+        if (_isShowingPoster || string.IsNullOrWhiteSpace(Poster))
+        {
+            _failed = true;
+            await OnImageBroken.InvokeAsync();
+            return;
+        }
+        _isShowingPoster = true;
     }
 }

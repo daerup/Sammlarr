@@ -4,6 +4,7 @@ using API.Plex;
 using API.TMDB;
 using API.TvDB;
 using Contracts.Media.Convertions;
+using Contracts.Media.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -19,5 +20,6 @@ public class ApiModule : IServiceModule
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
 		services.AddScoped<IMediaIdResolver, MediaIdResolver>();
+		services.AddScoped<IMediaMetadataProvider, MediaMetadataProvider>();
 	}
 }

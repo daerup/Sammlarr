@@ -1,12 +1,14 @@
 @page "/watchlist"
 @using Contracts.Auth
-@using Contracts.DI
 @using Contracts.Media
+@using Contracts.Media.Metadata
+@using Contracts.Media.Search
 @using Contracts.Settings
 @using Contracts.Watchlist
 @using global::Shared
 @implements IDisposable
-@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistStoreIndex
+@inject IWatchlistService WatchlistService
+@inject IMediaMetadataProvider MetadataProvider
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
@@ -76,11 +78,12 @@ else
                         @foreach (var item in _items)
                         {
                             <MediaGridTile @key="item"
-                                           ImageUrl="@item.ArtUrl"
+                                           ImageUrl="@item.BackdropUrl"
                                            Poster="@item.PosterUrl"
                                            Title="@item.Title"
                                            OnClick="() => SelectItem(item)"
-                                           Tagline="@GetDescription(item)"/>
+                                           Tagline="@item.Tagline"
+                                           OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)"/>
                         }
                     </div>
 
@@ -99,16 +102,18 @@ else
                   ShowContent="@(_selectedItem is not null)"
                   Title="@(_selectedItem?.Title ?? string.Empty)"
                   MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
-                  ReleaseDate="@(_selectedItem?.ReleaseDate ?? DateTimeOffset.MinValue)"
+                  ReleaseDate="@SelectedReleaseDate"
                   ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
+                  Description="@(_selectedItem?.Summary ?? string.Empty)"
+                  OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromWatchlistAsync"
                   ButtonText="GetRemoveButtonText"
                   ButtonIcon="GetRemoveButtonIcon"/>
 
 @code {
-    private IReadOnlyList<IWatchlistItem>? _items;
-    private IWatchlistItem? _selectedItem;
+    private IReadOnlyList<IMediaDetailResult>? _items;
+    private IMediaDetailResult? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
@@ -116,6 +121,7 @@ else
     private string? _errorMessage;
     private int _currentPage = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly HashSet<IMediaId> _reportedBrokenImages = [];
     private int _totalPages;
     private ProviderConfig? _providerSettings;
 
@@ -123,8 +129,8 @@ else
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageDescription => _providerSettings is null ? "Your saved movies and shows." : $"Your saved movies and shows from {_providerSettings.WatchlistProvider.GetDescription()}";
     private string EmptyStateMessage => _providerSettings is null ? "Your watchlist is empty." : $"Your {_providerSettings.WatchlistProvider.GetDescription()} watchlist is empty.";
-    private IWatchlistService WatchlistService => WatchlistStoreIndex[_providerSettings?.WatchlistProvider ?? throw new InvalidOperationException("Provider settings are not loaded.")];
     private bool IsOAuthAllowed() => _hasOAuthAccess;
+    private DateTimeOffset SelectedReleaseDate => _selectedItem is { } item ? new DateTimeOffset(item.ReleaseDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero) : DateTimeOffset.MinValue;
 
     protected override async Task OnInitializedAsync()
     {
@@ -184,13 +190,29 @@ else
         }
     }
 
-    private static string GetDescription(IWatchlistItem item) => string.IsNullOrWhiteSpace(item.Tagline) ? "No overview available." : item.Tagline;
+    private async Task ReportBrokenImageAsync(IMediaId sourceId)
+    {
+        if (!_reportedBrokenImages.Add(sourceId))
+        {
+            return;
+        }
+        await MetadataProvider.ReportStaleAsync(sourceId, _cancellationTokenSource.Token);
+    }
+
+    private async Task ReportSelectedImageBrokenAsync()
+    {
+        if (_selectedItem is null)
+        {
+            return;
+        }
+        await ReportBrokenImageAsync(_selectedItem.SourceId);
+    }
 
     private static string GetRemoveButtonText() => "Remove from Watchlist";
 
     private static string GetRemoveButtonIcon() => "x";
 
-    private void SelectItem(IWatchlistItem item)
+    private void SelectItem(IMediaDetailResult item)
     {
         _selectedItem = item;
         _isSheetOpen = true;
