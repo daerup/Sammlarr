@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Mdblist.Types;
 using Contracts;
@@ -20,7 +21,10 @@ internal class MdblistService(
 {
 	private const string ListItemsEndpoint = "lists/{0}/items";
 
-	public async Task<IReadOnlyList<IMediaDetailResult>> GetEnrichedImportListItemsAsync(string listIdentifier, CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<IMediaDetailResult> GetImportListItemsAsync(
+		string listIdentifier,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
 	{
 		var endpoint = string.Format(ListItemsEndpoint, listIdentifier);
 		var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
@@ -29,19 +33,16 @@ internal class MdblistService(
 		var result = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(stream)!;
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
 
-		var movies = await result
-			.movies.ToAsyncEnumerable()
-			.SelectAwait(async m => await MapMediaItemAsync(m, MediaType.Movie, providerConfig, cancellationToken))
-			.ToListAsync(cancellationToken);
-		var shows = await result
-			.shows.ToAsyncEnumerable()
-			.SelectAwait(async s => await MapMediaItemAsync(s, MediaType.Show, providerConfig, cancellationToken))
-			.ToListAsync(cancellationToken);
-		return [.. shows, .. movies];
-	}
+		foreach (var show in result.shows)
+		{
+			yield return await MapMediaItemAsync(show, MediaType.Show, providerConfig, cancellationToken);
+		}
 
-	public Task<IReadOnlyList<ImportListItem>> GetDistilledImportListItemsAsync(ImportList list, CancellationToken cancellationToken = default) =>
-		throw new NotImplementedException();
+		foreach (var movie in result.movies)
+		{
+			yield return await MapMediaItemAsync(movie, MediaType.Movie, providerConfig, cancellationToken);
+		}
+	}
 
 	private async Task<IMediaDetailResult> MapMediaItemAsync(
 		MdblistTypes.ListItems.IListItem item,
