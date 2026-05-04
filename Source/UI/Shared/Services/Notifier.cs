@@ -20,7 +20,7 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 				Title = title,
 				Description = $"Exception occured in {exception.Source}",
 				Variant = ToastVariant.Destructive,
-				Duration = 0,
+				Duration = 15000,
 				ActionText = "Details",
 				Class = "flex-col! items-stretch! space-x-0! gap-2",
 				OnAction = () =>
