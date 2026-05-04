@@ -1,33 +1,24 @@
 using Contracts;
-using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Blacklist;
-using Contracts.Media.Search;
+using Contracts.Media.Metadata;
 using Contracts.Settings;
 using Shared;
 
 namespace Core.Blacklist;
 
-internal class BlacklistService(
-	IBlacklistRepository repository,
-	IProviderConfigRepository providerConfigRepository,
-	IKeyedServiceIndex<MediaSearchProvider, IMediaSearchService> searchServiceIndex
-) : IBlacklistService
+internal class BlacklistService(IBlacklistRepository repository, IProviderConfigRepository providerConfigRepository, IMediaMetadataProvider metadataProvider)
+	: IBlacklistService
 {
-	public async Task<IReadOnlyList<IBlacklistItem>> GetBlacklistItems(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<BlacklistedItem>> GetBlacklistItems(CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
-		var searchService = searchServiceIndex[config.SearchProvider];
-
 		var entries = await repository.GetBlacklistedEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
 		return await entries
 			.ToAsyncEnumerable()
-			.SelectAwait(async e => BlacklistItem.From(await searchService.LookUpAsync(e.Id, cancellationToken), e.AddedDate))
+			.SelectAwait(async e => new BlacklistedItem(await metadataProvider.GetAsync(e.Id, cancellationToken), e.AddedDate))
 			.ToListAsync(cancellationToken);
 	}
-
-	public Task<bool> IsBlacklistedAsync(IMediaId mediaId, CancellationToken cancellationToken = default) =>
-		repository.IsBlacklistedAsync(mediaId, cancellationToken);
 
 	public Task AddToBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.AddAsync(mediaId, cancellationToken);
 

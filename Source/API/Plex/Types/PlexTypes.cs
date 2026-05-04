@@ -52,7 +52,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("art")] string Art,
 			[property: JsonPropertyName("ratingKey")] string RatingKey,
 			[property: JsonPropertyName("summary")] string Summary,
-			[property: JsonPropertyName("tagline")] string Tagline,
+			[property: JsonPropertyName("tagline")] string? Tagline,
 			[property: JsonPropertyName("type")] string Type,
 			[property: JsonPropertyName("addedAt")] long AddedAt,
 			[property: JsonPropertyName("audienceRating")] double AudienceRating,

@@ -3,6 +3,7 @@ using DB.Data.Blacklist;
 using DB.Data.Config;
 using DB.Data.List;
 using DB.Data.MediaGroup;
+using DB.Data.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -17,5 +18,6 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<ConfigModule>();
 		services.AddModule<ListModule>();
 		services.AddModule<MediaGroupModule>();
+		services.AddModule<MetadataModule>();
 	}
 }

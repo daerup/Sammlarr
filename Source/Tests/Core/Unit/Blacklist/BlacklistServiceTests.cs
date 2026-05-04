@@ -2,43 +2,17 @@ using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Blacklist;
+using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Blacklist;
-using Test.Shared;
 
 namespace Core.Tests.Unit.Blacklist;
 
 public class BlacklistServiceTests
 {
 	private readonly Faker _faker = new();
-
-	[Test]
-	public async Task IsBlacklistedAsync_WhenMediaIdIsBlacklisted_ReturnsTrue()
-	{
-		var mediaId = CreateMediaId();
-		var repository = IBlacklistRepository.Mock();
-		repository.IsBlacklistedAsync(Any(), Any()).Returns(true);
-		var testee = CreateTestee(repository);
-
-		var result = await testee.IsBlacklistedAsync(mediaId);
-
-		await Assert.That(result).IsTrue();
-	}
-
-	[Test]
-	public async Task IsBlacklistedAsync_WhenMediaIdIsNotBlacklisted_ReturnsFalse()
-	{
-		var mediaId = CreateMediaId();
-		var repository = IBlacklistRepository.Mock();
-		repository.IsBlacklistedAsync(Any(), Any()).Returns(false);
-		var testee = CreateTestee(repository);
-
-		var result = await testee.IsBlacklistedAsync(mediaId);
-
-		await Assert.That(result).IsFalse();
-	}
 
 	[Test]
 	public async Task AddToBacklistAsync_WhenCalled_DelegatesToRepository()
@@ -65,7 +39,7 @@ public class BlacklistServiceTests
 	}
 
 	[Test]
-	public async Task GetBlacklistItems_WhenEntriesExist_ReturnsItemsMappedFromSearchService()
+	public async Task GetBlacklistItems_WhenEntriesExist_ReturnsItemsMappedFromMetadataProvider()
 	{
 		var addedDate = _faker.Date.PastOffset();
 		var mediaId = CreateMediaId();
@@ -75,18 +49,18 @@ public class BlacklistServiceTests
 		var repository = IBlacklistRepository.Mock();
 		repository.GetBlacklistedEntriesAsync(Any(), Any()).Returns([entry]);
 
-		var searchService = IMediaSearchService.Mock();
-		searchService.LookUpAsync(Any(), Any()).Returns(detailResult);
+		var metadataProvider = IMediaMetadataProvider.Mock();
+		metadataProvider.GetAsync(Any(), Any()).Returns(detailResult);
 
-		var testee = CreateTestee(repository, searchService);
+		var testee = CreateTestee(repository, metadataProvider);
 
 		var result = await testee.GetBlacklistItems();
 
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
-		await Assert.That(item.SourceId).IsEqualTo(mediaId);
-		await Assert.That(item.Title).IsEqualTo(detailResult.Title);
-		await Assert.That(item.BlacklistDate).IsEqualTo(addedDate);
+		await Assert.That(item.Detail.SourceId).IsEqualTo(mediaId);
+		await Assert.That(item.Detail.Title).IsEqualTo(detailResult.Title);
+		await Assert.That(item.AddedDate).IsEqualTo(addedDate);
 	}
 
 	[Test]
@@ -102,7 +76,7 @@ public class BlacklistServiceTests
 		await Assert.That(result).IsEmpty();
 	}
 
-	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, Mock<IMediaSearchService>? searchService = null)
+	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, Mock<IMediaMetadataProvider>? metadataProvider = null)
 	{
 		var repo = repository ?? IBlacklistRepository.Mock();
 		var providerConfigRepository = IProviderConfigRepository.Mock();
@@ -117,10 +91,9 @@ public class BlacklistServiceTests
 				}
 			);
 
-		var search = (searchService ?? IMediaSearchService.Mock()).Object;
-		var searchServiceIndex = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchService>().Register(MediaSearchProvider.Plex, search);
+		var provider = (metadataProvider ?? IMediaMetadataProvider.Mock()).Object;
 
-		return new BlacklistService(repo.Object, providerConfigRepository.Object, searchServiceIndex);
+		return new BlacklistService(repo.Object, providerConfigRepository.Object, provider);
 	}
 
 	private IMediaId CreateMediaId() => PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie);
@@ -130,9 +103,9 @@ public class BlacklistServiceTests
 		{
 			SourceId = sourceId,
 			Title = _faker.Lorem.Sentence(2),
+			Tagline = _faker.Company.CatchPhrase(),
 			Summary = _faker.Lorem.Paragraph(),
 			AdditionalIds = [],
-			Year = _faker.Date.Past().Year,
 			PosterUrl = _faker.Internet.Url(),
 			BackdropUrl = _faker.Internet.Url(),
 			Runtime = TimeSpan.FromMinutes(_faker.Random.Int(60, 180)),

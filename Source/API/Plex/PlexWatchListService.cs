@@ -1,20 +1,17 @@
 using System.Text.Json;
 using API.Plex.Types;
-using Contracts;
 using Contracts.Media;
-using Contracts.Media.Convertions;
 using Contracts.Watchlist;
-using Shared;
 
 namespace API.Plex;
 
-internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver mediaIdResolver) : IWatchlistService
+internal class PlexWatchListService(PlexClient plexClient) : IWatchlistProvider
 {
 	private const string AddToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/addToWatchlist?ratingKey={0}";
 	private const string RemoveToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/removeFromWatchlist?ratingKey={0}";
 	private const string WatchlistEndpoint = "https://discover.provider.plex.tv/library/sections/watchlist/all";
 
-	public async Task<WatchlistPageResult> GetWatchlistAsync(int page, CancellationToken cancellationToken = default)
+	public async Task<WatchlistProviderPage> GetWatchlistAsync(int page, CancellationToken cancellationToken = default)
 	{
 		const string containerStartHeader = "X-Plex-Container-Start";
 		var offset = (page - 1) * PlexClient.ContainerSize;
@@ -24,15 +21,11 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("Plex watchlist response was empty.");
 
-		var items = await result
-			.MediaContainer.Metadata.Where(m => !IsIncomplete(m))
-			.ToAsyncEnumerable()
-			.SelectAwait(BuildWatchlistItemAsync)
-			.ToListAsync(cancellationToken);
+		var items = result.MediaContainer.Metadata.Where(m => !IsIncomplete(m)).Select(m => m.PlexId).Cast<IMediaId>().ToList();
 
 		var totalPages = result.MediaContainer.TotalSize <= 0 ? 1 : (int)Math.Ceiling(result.MediaContainer.TotalSize / (double)PlexClient.ContainerSize);
 
-		return new WatchlistPageResult(items, totalPages);
+		return new WatchlistProviderPage(items, totalPages);
 	}
 
 	public async Task<bool> AddToWatchlistAsync(IMediaId ratingKey, CancellationToken cancellationToken = default)
@@ -51,44 +44,4 @@ internal class PlexWatchListService(PlexClient plexClient, IMediaIdResolver medi
 
 	private static bool IsIncomplete(PlexTypes.Watchlist.Metadata arg) =>
 		arg.Year == 0 || string.IsNullOrEmpty(arg.OriginallyAvailableAt) || string.IsNullOrEmpty(arg.Title);
-
-	private async ValueTask<PlexWatchlistItem> BuildWatchlistItemAsync(PlexTypes.Watchlist.Metadata parsed)
-	{
-		var hints = new Some<ResolutionHints>(
-			new ResolutionHints
-			{
-				Title = parsed.Title,
-				Year = parsed.Year,
-				MediaType = parsed.MediaType,
-			}
-		);
-		var tmdb = await ResolvePlexIdAsList<TmdbId>(parsed.PlexId, MediaProvider.Tmdb, hints);
-		var tvdb = await ResolvePlexIdAsList<TvdbId>(parsed.PlexId, MediaProvider.Tvdb, hints);
-		var imdb = await ResolvePlexIdAsList<ImdbId>(parsed.PlexId, MediaProvider.Imdb, hints);
-		return new PlexWatchlistItem
-		{
-			Title = parsed.Title,
-			MediaType = MediaType.Parse(parsed.Type),
-			Tagline = parsed.Tagline ?? string.Empty,
-			ArtUrl = parsed.Art,
-			PosterUrl = parsed.Thumb,
-			AddedDate = DateTimeOffset.FromUnixTimeSeconds(parsed.AddedAt),
-			ReleaseDate = DateTimeOffset.Parse(parsed.OriginallyAvailableAt),
-			RatingKey = parsed.PlexId,
-			TmdbId = tmdb.ToArray(),
-			TvdbId = tvdb.ToArray(),
-			ImdbId = imdb.ToArray(),
-		};
-	}
-
-	private async Task<IEnumerable<TMediaId>> ResolvePlexIdAsList<TMediaId>(PlexId plexId, MediaProvider provider, Optional<ResolutionHints> hints)
-		where TMediaId : IMediaId
-	{
-		var result = await mediaIdResolver.ResolveAsync([plexId], provider, hints);
-		return result switch
-		{
-			Resolved resolved => ((IEnumerable<IMediaId>)[resolved.Id]).Cast<TMediaId>(),
-			Unresolved => [],
-		};
-	}
 }

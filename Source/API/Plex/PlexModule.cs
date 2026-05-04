@@ -1,5 +1,7 @@
 using System.Net.Http.Headers;
 using Contracts.Auth;
+using Contracts.Media;
+using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +16,9 @@ internal class PlexModule : IServiceModule
 	{
 		services.AddScoped<PlexApi>();
 		services.AddKeyedScoped<IMediaSearchService, PlexApi>(MediaSearchProvider.Plex);
+		services.AddKeyedScoped<IMetadataEnricher, PlexMetadataEnricher>(MediaProvider.Plex);
 		services.AddKeyedScoped<IOAuthService, PlexOAuthService>(WatchlistProvider.Plex);
-		services.AddKeyedScoped<IWatchlistService, PlexWatchListService>(WatchlistProvider.Plex);
+		services.AddKeyedScoped<IWatchlistProvider, PlexWatchListService>(WatchlistProvider.Plex);
 		services.AddScoped<PlexIdConverter>();
 
 		services.AddHttpClient<PlexClient>(ConfigurePlexClient);

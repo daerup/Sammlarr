@@ -7,9 +7,9 @@
     <div class="flex items-start justify-between gap-3">
         <div class="search-result-main-content flex items-start">
             <div class="search-result-poster">
-                @if (!string.IsNullOrWhiteSpace(Result.PosterUrl))
+                @if (!_failed && !string.IsNullOrWhiteSpace(Result.PosterUrl))
                 {
-                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-sm"/>
+                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-sm" @onerror="OnPosterError"/>
                 }
                 else
                 {
@@ -30,7 +30,10 @@
                     {
                         <LucideIcon Name="circle-help" Size="13"/>
                     }
-                    <span>@Result.ReleaseDate?.Year</span>
+                    @if (Result.ReleaseDate > DateOnly.MinValue)
+                    {
+                        <span>@Result.ReleaseDate.Year</span>
+                    }
                     @if (_displayFacts.Count > 0)
                     {
                         <span aria-hidden="true">•</span>
@@ -67,14 +70,28 @@
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
     [Parameter] public RenderFragment? Icons { get; set; }
+    [Parameter] public EventCallback OnImageBroken { get; set; }
 
     private string _backgroundStyle = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
+    private bool _failed;
+    private IMediaDetailResult? _lastResult;
 
     protected override void OnParametersSet()
     {
-        _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl ?? "" : Result.BackdropUrl)}')";
+        if (!ReferenceEquals(_lastResult, Result))
+        {
+            _lastResult = Result;
+            _failed = false;
+        }
+        _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl : Result.BackdropUrl)}')";
         _displayFacts = GetDisplayFacts(Result);
+    }
+
+    private async Task OnPosterError()
+    {
+        _failed = true;
+        await OnImageBroken.InvokeAsync();
     }
 
     private static IReadOnlyList<string> GetDisplayFacts(IMediaDetailResult result)
@@ -94,13 +111,6 @@
                     facts.Add(runtime);
                 }
                 break;
-            default:
-                var fallbackRuntime = GetRuntimeLabel(result.Runtime);
-                if (!string.IsNullOrWhiteSpace(fallbackRuntime))
-                {
-                    facts.Add(fallbackRuntime);
-                }
-                break;
         }
 
         return facts;
@@ -117,14 +127,9 @@
         facts.Add($"{count} {singularLabel}{suffix}");
     }
 
-    private static string? GetRuntimeLabel(TimeSpan? runtime)
+    private static string? GetRuntimeLabel(TimeSpan runtime)
     {
-        if (runtime is null || runtime <= TimeSpan.Zero)
-        {
-            return null;
-        }
-
-        var totalMinutes = (int)Math.Round(runtime.Value.TotalMinutes, MidpointRounding.AwayFromZero);
+        var totalMinutes = (int)Math.Round(runtime.TotalMinutes, MidpointRounding.AwayFromZero);
         if (totalMinutes <= 0)
         {
             return null;

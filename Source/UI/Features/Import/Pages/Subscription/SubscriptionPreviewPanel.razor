@@ -1,16 +1,16 @@
-@using Contracts.Auth
 @using Contracts.DI
+@using Contracts.Media
 @using Contracts.Media.Blacklist
 @using Contracts.Media.List
+@using Contracts.Media.Metadata
 @using Contracts.Media.Search
 @using Contracts.Processing
-@using Contracts.Settings
 @using Contracts.Watchlist
 @using UI.Features.Import.Components
 @implements IDisposable
-@inject IProviderConfigRepository ProviderConfigRepository
-@inject IKeyedServiceIndex<WatchlistProvider, IWatchlistService> WatchlistServiceIndex
+@inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
+@inject IMediaMetadataProvider MetadataProvider
 @inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
 @inject IQueryProcessor<IMediaDetailResult> QueryProcessor
 @inject Notifier Notifier
@@ -122,7 +122,8 @@
                                          Class="@(hoverStyle)"
                                          IsFocused="_focusedResult == item"
                                          OnFocusIn="() => _focusedResult = item"
-                                         OnFocusOut="() => ClearFocus(item)">
+                                         OnFocusOut="() => ClearFocus(item)"
+                                         OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
                             <Icons>
                                 @if (isDimmed)
                                 {
@@ -169,7 +170,8 @@
                                          Result="item"
                                          IsFocused="_focusedResult == item"
                                          OnFocusIn="() => _focusedResult = item"
-                                         OnFocusOut="() => ClearFocus(item)">
+                                         OnFocusOut="() => ClearFocus(item)"
+                                         OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
                             <Icons>
                                 <BbTooltipProvider>
                                     <BbTooltip DelayDuration="300">
@@ -243,6 +245,7 @@
     private IMediaDetailResult? _togglingBlacklistItem;
     private readonly HashSet<string> _watchlistIds = new(StringComparer.Ordinal);
     private readonly HashSet<string> _blacklistIds = new(StringComparer.Ordinal);
+    private readonly HashSet<IMediaId> _reportedBrokenImages = [];
     private bool _hasEnrollmentChanges;
 
     private bool IsLoading => _fetchState == FetchState.Loading;
@@ -394,19 +397,13 @@
     {
         try
         {
-            var providerConfig = await ProviderConfigRepository.GetAsync();
-            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
-
-            var firstPage = await watchlistService.GetWatchlistAsync(1, CancellationToken.None);
-            AddSourceIds(_watchlistIds, firstPage.Items.Select(i => i.SourceId.ToString()));
-            for (var page = 2; page <= firstPage.TotalPages; page++)
+            await foreach (var item in WatchlistService.GetWatchlistPagedAsync(CancellationToken.None))
             {
-                var nextPage = await watchlistService.GetWatchlistAsync(page, CancellationToken.None);
-                AddSourceIds(_watchlistIds, nextPage.Items.Select(i => i.SourceId.ToString()));
+                _watchlistIds.Add(item.SourceId.ToString());
             }
 
             var blacklistItems = await BlacklistService.GetBlacklistItems(CancellationToken.None);
-            AddSourceIds(_blacklistIds, blacklistItems.Select(i => i.SourceId.ToString()));
+            AddSourceIds(_blacklistIds, blacklistItems.Select(i => i.Detail.SourceId.ToString()));
         }
         catch (Exception ex)
         {
@@ -450,6 +447,15 @@
         return bypassed.CountsTowardLimit
             ? $"{source}, skipped but counts toward your import limit."
             : $"{source}, skipped and does not count toward your import limit.";
+    }
+
+    private async Task ReportBrokenImageAsync(IMediaId sourceId)
+    {
+        if (!_reportedBrokenImages.Add(sourceId))
+        {
+            return;
+        }
+        await MetadataProvider.ReportStaleAsync(sourceId);
     }
 
     private static IMediaDetailResult GetItem(QueryResult<IMediaDetailResult> result) =>
@@ -511,19 +517,17 @@
         _togglingWatchlistItem = item;
         try
         {
-            var providerConfig = await ProviderConfigRepository.GetAsync();
-            var watchlistService = WatchlistServiceIndex[providerConfig.WatchlistProvider];
             var key = GetKey(item);
             if (_watchlistIds.Contains(key))
             {
-                if (await watchlistService.RemoveFromWatchlistAsync(item.SourceId))
+                if (await WatchlistService.RemoveFromWatchlistAsync(item.SourceId))
                 {
                     _watchlistIds.Remove(key);
                 }
             }
             else
             {
-                if (await watchlistService.AddToWatchlistAsync(item.SourceId))
+                if (await WatchlistService.AddToWatchlistAsync(item.SourceId))
                 {
                     _watchlistIds.Add(key);
                 }

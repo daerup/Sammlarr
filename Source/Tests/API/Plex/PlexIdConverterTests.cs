@@ -50,13 +50,13 @@ public class PlexIdConverterTests
 			{
 				SourceId = payload.PlexId,
 				Title = "match",
-				Year = 2024,
-				PosterUrl = null,
-				BackdropUrl = null,
-				Runtime = null,
-				ReleaseDate = null,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				Runtime = TimeSpan.Zero,
+				ReleaseDate = DateOnly.MinValue,
 				Genres = [],
 				AdditionalIds = [],
+				Tagline = string.Empty,
 				Summary = string.Empty,
 			},
 		];

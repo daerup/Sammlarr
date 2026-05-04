@@ -106,10 +106,10 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Title = result.Title,
+			Tagline = result.Tagline ?? string.Empty,
 			Summary = result.Summary,
 			SourceId = result.PlexId,
 			AdditionalIds = [.. result.TmdbIds, .. result.ImdbIds, .. result.TvdbIds],
-			Year = result.Year > 0 ? result.Year : null,
 			PosterUrl = NormalizePlexImageUrl(result.Poster),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			Runtime = TimeSpan.FromMilliseconds(result.Duration),
@@ -125,15 +125,15 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Title = result.Title,
+			Tagline = result.Tagline ?? string.Empty,
 			Summary = result.Summary,
 			SourceId = result.PlexId,
 			AdditionalIds = [.. result.TmdbIds, .. result.ImdbIds, .. result.TvdbIds],
 			Seasons = result.SeasonCount ?? 0,
 			Episodes = result.EpisodeCount ?? 0,
-			Year = result.Year > 0 ? result.Year : null,
 			PosterUrl = NormalizePlexImageUrl(result.Poster),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			Runtime = TimeSpan.FromMilliseconds(result.Duration),
+			RuntimePerEpisode = TimeSpan.FromMilliseconds(result.Duration),
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = (result.Genre ?? [])
 				.Select(genre => genre.Tag)
@@ -146,13 +146,13 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Title = result.Title,
+			Tagline = string.Empty,
 			Summary = string.Empty,
 			SourceId = result.PlexId,
 			AdditionalIds = [],
-			Year = result.Year > 0 ? result.Year : null,
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
+			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : TimeSpan.Zero,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = (result.Genre ?? [])
 				.Select(genre => genre.Tag)
@@ -165,15 +165,15 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Title = result.Title,
+			Tagline = string.Empty,
 			Summary = string.Empty,
 			SourceId = result.PlexId,
 			AdditionalIds = [],
 			Seasons = result.SeasonCount ?? 0,
 			Episodes = result.EpisodeCount ?? 0,
-			Year = result.Year > 0 ? result.Year : null,
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
+			RuntimePerEpisode = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : TimeSpan.Zero,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = (result.Genre ?? [])
 				.Select(genre => genre.Tag)
@@ -189,14 +189,14 @@ file static class PlexMetadataMappingExtensions
 			"show" => MediaType.Show,
 		};
 
-	private static DateOnly? ParseReleaseDate(string? value) =>
-		DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
+	private static DateOnly ParseReleaseDate(string? value) =>
+		DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : DateOnly.MinValue;
 
-	private static string? NormalizePlexImageUrl(string? url)
+	private static string NormalizePlexImageUrl(string? url)
 	{
 		if (string.IsNullOrWhiteSpace(url))
 		{
-			return null;
+			return string.Empty;
 		}
 
 		if (Uri.TryCreate(url, UriKind.Absolute, out _))

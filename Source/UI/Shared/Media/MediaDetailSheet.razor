@@ -28,9 +28,19 @@
             <div class="space-y-6 py-6">
                 <div class="flex justify-center">
                     <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[260px]">
-                        <img src="@ImageUrl"
-                             alt="@Title"
-                             class="w-full aspect-[2/3] object-cover"/>
+                        @if (_failed)
+                        {
+                            <div class="w-full aspect-[2/3] bg-muted flex items-center justify-center">
+                                <LucideIcon Name="@(MediaType is MediaType.Movie ? "film" : "tv")" Size="48" Class="text-muted-foreground"/>
+                            </div>
+                        }
+                        else
+                        {
+                            <img src="@ImageUrl"
+                                 alt="@Title"
+                                 class="w-full aspect-[2/3] object-cover"
+                                 @onerror="OnImageError"/>
+                        }
                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                     </div>
                 </div>
@@ -135,8 +145,28 @@
     [Parameter]
     public bool IsStatusError { get; set; }
 
+    [Parameter]
+    public EventCallback OnImageBroken { get; set; }
+
     private bool _isButtonBusy;
+    private bool _failed;
+    private string? _lastImageUrl;
     private string ResolvedButtonIcon => ButtonIcon.Invoke();
+
+    protected override void OnParametersSet()
+    {
+        if (_lastImageUrl != ImageUrl)
+        {
+            _lastImageUrl = ImageUrl;
+            _failed = false;
+        }
+    }
+
+    private async Task OnImageError()
+    {
+        _failed = true;
+        await OnImageBroken.InvokeAsync();
+    }
 
     private async Task HandleSheetOpenChangedAsync(bool isOpen)
     {

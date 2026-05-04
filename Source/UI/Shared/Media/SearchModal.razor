@@ -79,9 +79,11 @@
                                              Result="result"
                                              IsFocused="_focusedResult == result"
                                              OnFocusIn="() => _focusedResult = result"
-                                             OnFocusOut="() => ClearFocusedResult(result)"
-                                             Icons="TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.SourceId), EventCallback.Factory.Create<IMediaDetailResult>(this, ToggleAsync)))"
-                            />
+                                             OnFocusOut="() => ClearFocusedResult(result)">
+                                <Icons>
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.SourceId), EventCallback.Factory.Create<IMediaDetailResult>(this, ToggleAsync)))
+                                </Icons>
+                            </MediaDetailTile>
                         }
                     </div>
                     <BbSeparator/>
