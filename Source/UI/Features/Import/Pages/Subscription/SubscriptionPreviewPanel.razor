@@ -1,3 +1,4 @@
+@using System.Diagnostics
 @using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Blacklist
@@ -24,13 +25,19 @@
         <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col">
-        @if (HasResults && (FilteredBySearchResults.Any() || FilteredBySearchUnresolvedResults.Any()))
+        @if (HasItems && (FilteredBySearchResults.Any() || FilteredBySearchUnresolvedResults.Any()))
         {
             <div class="mb-4 shrink-0 flex items-start justify-between gap-3">
                 <div>
-                    <h2 class="text-base font-semibold tracking-wide">Media Results</h2>
+                    <h2 class="text-base font-semibold tracking-wide flex items-center gap-2">
+                        <span>Media Results</span>
+                        @if (IsLoading)
+                        {
+                            <BbSpinner Size="SpinnerSize.Small"/>
+                        }
+                    </h2>
                     <p class="text-sm text-muted-foreground mt-0.5">
-                        <ProviderListLink ListIdentifier="@_testedConfig!.ListIdentifier" Provider="@_testedConfig!.Provider!.Value"/>
+                        <ProviderListLink ListIdentifier="@(_testedConfig?.ListIdentifier ?? Config.ListIdentifier)" Provider="@(_testedConfig?.Provider ?? Config.Provider!.Value)"/>
                     </p>
                 </div>
                 <BbTooltipProvider>
@@ -189,7 +196,7 @@
                 </div>
             }
         }
-        else if (HasResults)
+        else if (HasItems)
         {
             <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
                 <LucideIcon Name="search-x" Size="48" Class="text-muted-foreground mb-4"/>
@@ -232,7 +239,7 @@
     private enum FetchState { Idle, Loading, Success, Failed }
 
     private FetchState _fetchState = FetchState.Idle;
-    private IReadOnlyList<IMediaDetailResult> _rawResults = [];
+    private List<IMediaDetailResult> _rawResults = [];
     private IReadOnlyList<IMediaDetailResult> _unresolvedResults = [];
     private IReadOnlyList<QueryResult<IMediaDetailResult>> _processedResults = [];
     private SubscriptionConfig? _testedConfig;
@@ -249,6 +256,7 @@
     private bool _hasEnrollmentChanges;
 
     private bool IsLoading => _fetchState == FetchState.Loading;
+    private bool HasItems => _rawResults.Count > 0;
     private bool HasResults => _fetchState == FetchState.Success && _rawResults.Count > 0;
     private bool HasFailed => _fetchState == FetchState.Failed;
 
@@ -305,23 +313,36 @@
         _cts = new CancellationTokenSource();
         var ct = _cts.Token;
 
+        _rawResults = [];
+        _unresolvedResults = [];
+        _processedResults = [];
+
         try
         {
-            var service = ImportListServiceIndex[Config.Provider!.Value];
-            var results = (await service.GetEnrichedImportListItemsAsync(Config.ListIdentifier.Trim(), ct)).ToList();
-
-            if (results.Count == 0)
-            {
-                _fetchState = FetchState.Failed;
-                _testedConfig = Config;
-                return;
-            }
-
-            _rawResults = results;
-            _fetchState = FetchState.Success;
             _watchlistIds.Clear();
             _blacklistIds.Clear();
             await LoadWatchlistAndBlacklistAsync();
+
+            var service = ImportListServiceIndex[Config.Provider!.Value];
+            var sw = Stopwatch.StartNew();
+            await foreach (var item in service.GetImportListItemsAsync(Config.ListIdentifier.Trim(), ct).WithCancellation(ct))
+            {
+                _rawResults.Add(item);
+                if (sw.ElapsedMilliseconds >= 150)
+                {
+                    Reprocess();
+                    await InvokeAsync(StateHasChanged);
+                    sw.Restart();
+                }
+            }
+
+            if (_rawResults.Count == 0)
+            {
+                _fetchState = FetchState.Failed;
+                return;
+            }
+
+            _fetchState = FetchState.Success;
             Reprocess();
         }
         catch (OperationCanceledException)
@@ -381,9 +402,9 @@
 
     private PreviewStatus BuildStatus() => new()
     {
-        IsLoading = _fetchState == FetchState.Loading,
-        HasResults = _fetchState == FetchState.Success && _rawResults.Count > 0,
-        HasFailed = _fetchState == FetchState.Failed,
+        IsLoading = IsLoading,
+        HasResults = HasResults,
+        HasFailed = HasFailed,
         HasEnrollmentChanges = _hasEnrollmentChanges,
     };
 
