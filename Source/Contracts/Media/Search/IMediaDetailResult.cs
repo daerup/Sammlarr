@@ -22,4 +22,12 @@ public interface IMediaDetailResult
 	public IReadOnlyList<MediaRating> Ratings { get; }
 
 	public float? Rating => Ratings.Count > 0 ? Ratings[0].NormalizedValue : null;
+
+	public string MediaTypeText => MediaType.ToString();
+
+	public int? RuntimeMinutes => null;
+
+	public int? SeasonCount => null;
+
+	public int? EpisodeCount => null;
 }

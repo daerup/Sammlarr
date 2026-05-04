@@ -19,4 +19,8 @@ public record ShowDetailResult : IMediaDetailResult
 	public required IReadOnlyList<string> Genres { get; init; }
 	public IReadOnlyList<MediaRating> Ratings { get; init; } = [];
 	public float? Rating => Ratings.Count > 0 ? Ratings[0].NormalizedValue : null;
+	public string MediaTypeText => MediaType.ToString();
+	public int? RuntimeMinutes => RuntimePerEpisode.TotalMinutes > 0 ? (int)RuntimePerEpisode.TotalMinutes : null;
+	public int? SeasonCount => Seasons;
+	public int? EpisodeCount => Episodes;
 }

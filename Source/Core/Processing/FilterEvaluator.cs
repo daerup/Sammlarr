@@ -5,6 +5,8 @@ namespace Core.Processing;
 
 internal static class FilterEvaluator
 {
+	private static readonly HashSet<string> CollectionStringFields = new(StringComparer.Ordinal) { "Genres" };
+
 	public static string Build(QueryFilter filter)
 	{
 		var parts = filter.Groups.Select(BuildGroup).ToList();
@@ -30,17 +32,22 @@ internal static class FilterEvaluator
 
 	private static string Compile(FilterPredicate p)
 	{
+		if (CollectionStringFields.Contains(p.Field))
+		{
+			return CompileCollection(p);
+		}
+
 		var f = p.Field;
 		var v = p.Value;
 
 		return p.Operator switch
 		{
-			FilterPredicateOperator.Contains => $"{f} != null && {f}.Contains({v})",
-			FilterPredicateOperator.NotContains => $"{f} == null || !{f}.Contains({v})",
-			FilterPredicateOperator.StartsWith => $"{f} != null && {f}.StartsWith({v})",
-			FilterPredicateOperator.EndsWith => $"{f} != null && {f}.EndsWith({v})",
-			FilterPredicateOperator.IsEmpty => $"{f} == null || {f} == \"\"",
-			FilterPredicateOperator.IsNotEmpty => $"{f} != null && {f} != \"\"",
+			FilterPredicateOperator.Contains => $"{f} != null && {f}.ToLower().Contains({v}.ToLower())",
+			FilterPredicateOperator.NotContains => $"{f} == null || !{f}.ToLower().Contains({v}.ToLower())",
+			FilterPredicateOperator.StartsWith => $"{f} != null && {f}.ToLower().StartsWith({v}.ToLower())",
+			FilterPredicateOperator.EndsWith => $"{f} != null && {f}.ToLower().EndsWith({v}.ToLower())",
+			FilterPredicateOperator.IsEmpty => FormatIsEmpty(f, p.ValueKind),
+			FilterPredicateOperator.IsNotEmpty => FormatIsNotEmpty(f, p.ValueKind),
 			FilterPredicateOperator.IsTrue => $"{f} == true",
 			FilterPredicateOperator.IsFalse => $"{f} == false",
 			FilterPredicateOperator.Equals => FormatEquals(f, v, p.ValueKind),
@@ -50,9 +57,51 @@ internal static class FilterEvaluator
 			FilterPredicateOperator.GreaterOrEqual => FormatComparison(f, ">=", v, p.ValueKind),
 			FilterPredicateOperator.LessOrEqual => FormatComparison(f, "<=", v, p.ValueKind),
 			FilterPredicateOperator.Between => p.ValueEnd is null ? string.Empty : FormatBetween(f, v, p.ValueEnd, p.ValueKind),
+			FilterPredicateOperator.In => FormatIn(f, v),
+			FilterPredicateOperator.NotIn => FormatIn(f, v) is { Length: > 0 } expr ? $"!({expr})" : string.Empty,
 			_ => string.Empty,
 		};
 	}
+
+	private static string CompileCollection(FilterPredicate p)
+	{
+		var f = p.Field;
+		var v = p.Value;
+
+		return p.Operator switch
+		{
+			FilterPredicateOperator.Contains => $"{f}.Any(g => g.ToLower().Contains({v}.ToLower()))",
+			FilterPredicateOperator.NotContains => $"!{f}.Any(g => g.ToLower().Contains({v}.ToLower()))",
+			FilterPredicateOperator.StartsWith => $"{f}.Any(g => g.ToLower().StartsWith({v}.ToLower()))",
+			FilterPredicateOperator.EndsWith => $"{f}.Any(g => g.ToLower().EndsWith({v}.ToLower()))",
+			FilterPredicateOperator.Equals => $"{f}.Any(g => g.ToLower() == {v}.ToLower())",
+			FilterPredicateOperator.NotEquals => $"!{f}.Any(g => g.ToLower() == {v}.ToLower())",
+			FilterPredicateOperator.IsEmpty => $"{f} == null || {f}.Count == 0",
+			FilterPredicateOperator.IsNotEmpty => $"{f} != null && {f}.Count > 0",
+			_ => string.Empty,
+		};
+	}
+
+	private static string FormatIn(string field, string? jsonArray)
+	{
+		if (string.IsNullOrEmpty(jsonArray))
+		{
+			return string.Empty;
+		}
+		using var doc = JsonDocument.Parse(jsonArray);
+		if (doc.RootElement.ValueKind != JsonValueKind.Array || doc.RootElement.GetArrayLength() == 0)
+		{
+			return string.Empty;
+		}
+		var literals = doc.RootElement.EnumerateArray().Select(v => v.GetRawText());
+		return $"{field} in ({string.Join(", ", literals)})";
+	}
+
+	private static string FormatIsEmpty(string field, FilterValueKind kind) =>
+		kind == FilterValueKind.String ? $"{field} == null || {field} == \"\"" : $"{field} == null";
+
+	private static string FormatIsNotEmpty(string field, FilterValueKind kind) =>
+		kind == FilterValueKind.String ? $"{field} != null && {field} != \"\"" : $"{field} != null";
 
 	private static string FormatEquals(string field, string? value, FilterValueKind kind) =>
 		kind switch

@@ -115,9 +115,16 @@ internal static class FilterDefinitionConverter
 		{
 			Field = predicate.Field,
 			Operator = ToBbPredicateOperator(predicate.Operator),
-			Value = Deserialize(predicate.Value, predicate.ValueKind),
+			Value = DeserializeValue(predicate.Value, predicate.ValueKind, predicate.Operator),
 			ValueEnd = Deserialize(predicate.ValueEnd, predicate.ValueKind),
 		};
+
+	private static object? DeserializeValue(string? value, FilterValueKind kind, FilterPredicateOperator op) =>
+		op is FilterPredicateOperator.In or FilterPredicateOperator.NotIn
+			? value is null
+				? null
+				: JsonSerializer.Deserialize<string[]>(value)
+			: Deserialize(value, kind);
 
 	private static ContractsFilterOp ToContractsOperator(BBLogicalOp op) => op == BBLogicalOp.Or ? ContractsFilterOp.Or : ContractsFilterOp.And;
 
@@ -141,7 +148,12 @@ internal static class FilterDefinitionConverter
 			BBFilterOp.Between => FilterPredicateOperator.Between,
 			BBFilterOp.IsTrue => FilterPredicateOperator.IsTrue,
 			BBFilterOp.IsFalse => FilterPredicateOperator.IsFalse,
-			_ => FilterPredicateOperator.Equals,
+			BBFilterOp.In => FilterPredicateOperator.In,
+			BBFilterOp.NotIn => FilterPredicateOperator.NotIn,
+			BBFilterOp.DateIs => FilterPredicateOperator.Equals,
+			BBFilterOp.DateIsNot => FilterPredicateOperator.NotEquals,
+			BBFilterOp.InLast => FilterPredicateOperator.GreaterOrEqual,
+			BBFilterOp.InNext => FilterPredicateOperator.LessOrEqual,
 		};
 
 	private static BBFilterOp ToBbPredicateOperator(FilterPredicateOperator op) =>
@@ -162,7 +174,8 @@ internal static class FilterDefinitionConverter
 			FilterPredicateOperator.Between => BBFilterOp.Between,
 			FilterPredicateOperator.IsTrue => BBFilterOp.IsTrue,
 			FilterPredicateOperator.IsFalse => BBFilterOp.IsFalse,
-			_ => BBFilterOp.Equals,
+			FilterPredicateOperator.In => BBFilterOp.In,
+			FilterPredicateOperator.NotIn => BBFilterOp.NotIn,
 		};
 
 	private static FilterValueKind DetectKind(object? value) =>
