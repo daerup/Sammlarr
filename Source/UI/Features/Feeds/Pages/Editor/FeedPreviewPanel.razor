@@ -225,6 +225,12 @@
                     }
                 </div>
             }
+            @if (IsLoading)
+            {
+                <div class="mt-2 space-y-2">
+                    <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="3"/>
+                </div>
+            }
         }
         else if (HasItems)
         {
@@ -387,6 +393,7 @@
             await LoadWatchlistAndBlacklistAsync();
 
             var service = FeedServiceIndex[Config.Provider!.Value];
+            var totalSw = Stopwatch.StartNew();
             var sw = Stopwatch.StartNew();
             await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), ct).WithCancellation(ct))
             {
@@ -398,6 +405,7 @@
                     sw.Restart();
                 }
             }
+            totalSw.Stop();
 
             if (_rawResults.Count == 0)
             {
@@ -407,6 +415,7 @@
 
             _fetchState = FetchState.Success;
             Reprocess();
+            Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(totalSw.Elapsed)}.");
         }
         catch (OperationCanceledException)
         {
@@ -482,6 +491,9 @@
         _cts?.Cancel();
         _cts?.Dispose();
     }
+
+    private static string FormatElapsed(TimeSpan elapsed) =>
+        elapsed.TotalSeconds < 1 ? $"{elapsed.TotalMilliseconds:0} ms" : $"{elapsed.TotalSeconds:0.0} s";
 
     private async Task LoadWatchlistAndBlacklistAsync()
     {

@@ -14,95 +14,72 @@ public class MediaMetadataProviderTests
 	private static readonly DateTimeOffset _now = new(2026, 5, 6, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task GetAsync_WhenCachedAndCompleteWithin7Days_ReturnsCachedWithoutRefetch()
+	public async Task GetAsync_Batch_StreamsResultsAndDefersDbWritesUntilAfterParallelFetch()
 	{
-		var mediaId = TmdbId.From("100", MediaType.Movie);
-		var cached = CompleteMovie(mediaId);
-		var (testee, deps) = CreateTestee(cachedAt: _now.AddDays(-6), cached: cached);
+		var cachedId = TmdbId.From("400", MediaType.Movie);
+		var missingId = TmdbId.From("401", MediaType.Movie);
+		var cachedDetails = CompleteMovie(cachedId);
+		var freshDetails = CompleteMovie(missingId);
 
-		var result = await testee.GetAsync(mediaId);
+		var repository = IMediaMetadataRepository.Mock();
+		repository.GetByMediaIdAsync(cachedId, Any()).Returns(new CachedMediaMetadata(cachedDetails, _now.AddDays(-1)));
+		repository.GetByMediaIdAsync(missingId, Any()).Returns((CachedMediaMetadata?)null);
 
-		await Assert.That(result).IsSameReferenceAs(cached);
-		deps.Search.LookUpAsync(mediaId, Any()).WasCalled(Times.Never);
-		deps.Repository.UpsertAsync(mediaId, Any(), Any()).WasCalled(Times.Never);
+		var search = IMediaSearchService.Mock();
+		search.LookUpAsync(missingId, Any()).Returns(freshDetails);
+
+		var enricher = IMetadataEnricher.Mock();
+		var rating = IMediaRatingService.Mock();
+		var dateTimeProvider = IDateTimeProvider.Mock();
+		dateTimeProvider.Now.Returns(_now);
+
+		var configRepository = IProviderConfigRepository.Mock();
+		configRepository
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					WatchlistProvider = WatchlistProvider.Plex,
+					TrendingProvider = MediaRecommendationProvider.Tmdb,
+					SearchProvider = MediaSearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
+				}
+			);
+
+		var searchIndex = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchService>().Register(MediaSearchProvider.Plex, search.Object);
+		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
+			.Register(MediaProvider.Plex, enricher.Object)
+			.Register(MediaProvider.Tmdb, enricher.Object);
+		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
+
+		var testee = new MediaMetadataProvider(repository.Object, searchIndex, enricherIndex, ratingIndex, configRepository.Object, dateTimeProvider.Object);
+
+		var collected = new List<IMediaDetailResult>();
+		await foreach (var detail in testee.GetAsync(new IMediaId[] { cachedId, missingId }))
+		{
+			collected.Add(detail);
+		}
+
+		await Assert.That(collected).Count().IsEqualTo(2);
+		await Assert.That(collected).Contains(cachedDetails);
+		await Assert.That(collected).Contains(freshDetails);
+		search.LookUpAsync(cachedId, Any()).WasCalled(Times.Never);
+		search.LookUpAsync(missingId, Any()).WasCalled(Times.Once);
+		repository.UpsertManyAsync(Any<IReadOnlyList<MediaMetadataUpsert>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task GetAsync_WhenCachedAndIncompleteWithinHydrationCooldown_ReturnsCachedWithoutHydrating()
+	public async Task GetAsync_Batch_WhenEmpty_YieldsNothing()
 	{
-		var mediaId = TmdbId.From("110", MediaType.Movie);
-		var cached = IncompleteMovie(mediaId);
-		var (testee, deps) = CreateTestee(cachedAt: _now.AddMinutes(-30), cached: cached);
+		var (testee, _) = CreateTestee(cached: null);
 
-		var result = await testee.GetAsync(mediaId);
+		var collected = new List<IMediaDetailResult>();
+		await foreach (var detail in testee.GetAsync(Array.Empty<IMediaId>()))
+		{
+			collected.Add(detail);
+		}
 
-		await Assert.That(result).IsSameReferenceAs(cached);
-		deps.Search.LookUpAsync(mediaId, Any()).WasCalled(Times.Never);
-		deps.Enricher.LookUpAsync(Any(), Any()).WasCalled(Times.Never);
-		deps.Rating.GetRatingsAsync(Any(), Any()).WasCalled(Times.Never);
-		deps.Repository.UpsertAsync(mediaId, Any(), Any()).WasCalled(Times.Never);
-	}
-
-	[Test]
-	public async Task GetAsync_WhenCachedAndIncompletePastHydrationCooldown_HydratesWithoutRefetchingSearch()
-	{
-		var mediaId = TmdbId.From("120", MediaType.Movie);
-		var cached = IncompleteMovie(mediaId);
-		var enrichment = CompleteMovie(mediaId);
-		var (testee, deps) = CreateTestee(cachedAt: _now.AddHours(-2), cached: cached);
-		deps.Enricher.LookUpAsync(Any(), Any()).Returns(enrichment);
-
-		var result = await testee.GetAsync(mediaId);
-
-		deps.Search.LookUpAsync(mediaId, Any()).WasCalled(Times.Never);
-		deps.Enricher.LookUpAsync(Any(), Any()).WasCalled(Times.AtLeastOnce);
-		deps.Repository.UpsertAsync(mediaId, Any(), Any()).WasCalled(Times.Once);
-		await Assert.That(result.Tagline).IsEqualTo(enrichment.Tagline);
-	}
-
-	[Test]
-	public async Task GetAsync_WhenCachedAndIncompleteOlderThanStaleness_RefetchesViaSearch()
-	{
-		var mediaId = TmdbId.From("140", MediaType.Movie);
-		var cached = IncompleteMovie(mediaId);
-		var fresh = CompleteMovie(mediaId);
-		var (testee, deps) = CreateTestee(cachedAt: _now.AddDays(-8), cached: cached);
-		deps.Search.LookUpAsync(mediaId, Any()).Returns(fresh);
-
-		var result = await testee.GetAsync(mediaId);
-
-		await Assert.That(result).IsSameReferenceAs(fresh);
-		deps.Repository.UpsertAsync(mediaId, fresh, Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task GetAsync_WhenCachedAndCompleteOlderThan7Days_Refetches()
-	{
-		var mediaId = TmdbId.From("130", MediaType.Movie);
-		var cached = CompleteMovie(mediaId);
-		var fresh = CompleteMovie(mediaId) with { Title = "Refreshed" };
-		var (testee, deps) = CreateTestee(cachedAt: _now.AddDays(-8), cached: cached);
-		deps.Search.LookUpAsync(mediaId, Any()).Returns(fresh);
-
-		var result = await testee.GetAsync(mediaId);
-
-		await Assert.That(result).IsSameReferenceAs(fresh);
-		deps.Repository.UpsertAsync(mediaId, fresh, Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task GetAsync_WhenCacheMiss_RunsFullFetchPipelineAndUpserts()
-	{
-		var mediaId = PlexId.From("plex-1", MediaType.Movie);
-		var fresh = CompleteMovie(mediaId);
-		var (testee, deps) = CreateTestee(cached: null);
-		deps.Search.LookUpAsync(mediaId, Any()).Returns(fresh);
-
-		var result = await testee.GetAsync(mediaId);
-
-		await Assert.That(result).IsSameReferenceAs(fresh);
-		deps.Search.LookUpAsync(mediaId, Any()).WasCalled(Times.Once);
-		deps.Repository.UpsertAsync(mediaId, fresh, Any()).WasCalled(Times.Once);
+		await Assert.That(collected).IsEmpty();
 	}
 
 	[Test]

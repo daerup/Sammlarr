@@ -24,8 +24,7 @@ public class WatchlistServiceTests
 		provider.GetWatchlistAsync(1, Any()).Returns(new WatchlistProviderPage([firstId, secondId], 7));
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(firstId, Any()).Returns(firstDetail);
-		metadataProvider.GetAsync(secondId, Any()).Returns(secondDetail);
+		metadataProvider.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any()).Returns(AsAsync(firstDetail, secondDetail));
 
 		var testee = CreateTestee(provider, metadataProvider);
 
@@ -33,8 +32,8 @@ public class WatchlistServiceTests
 
 		await Assert.That(result.TotalPages).IsEqualTo(7);
 		await Assert.That(result.Items).Count().IsEqualTo(2);
-		await Assert.That(result.Items[0]).IsSameReferenceAs(firstDetail);
-		await Assert.That(result.Items[1]).IsSameReferenceAs(secondDetail);
+		await Assert.That(result.Items).Contains(firstDetail);
+		await Assert.That(result.Items).Contains(secondDetail);
 	}
 
 	[Test]
@@ -64,8 +63,9 @@ public class WatchlistServiceTests
 		provider.GetWatchlistAsync(2, Any()).Returns(new WatchlistProviderPage([page2Id], 2));
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(page1Id, Any()).Returns(detail1);
-		metadataProvider.GetAsync(page2Id, Any()).Returns(detail2);
+		metadataProvider
+			.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any())
+			.Returns((IReadOnlyList<IMediaId> ids, CancellationToken _) => ids.Contains(page1Id) ? AsAsync(detail1) : AsAsync(detail2));
 
 		var testee = CreateTestee(provider, metadataProvider);
 
@@ -125,7 +125,27 @@ public class WatchlistServiceTests
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		return new WatchlistService(index, configRepository.Object, (metadataProvider ?? IMediaMetadataProvider.Mock()).Object);
+		Mock<IMediaMetadataProvider> resolvedMetadataProvider;
+		if (metadataProvider is null)
+		{
+			resolvedMetadataProvider = IMediaMetadataProvider.Mock();
+			resolvedMetadataProvider.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any()).Returns(AsAsync());
+		}
+		else
+		{
+			resolvedMetadataProvider = metadataProvider;
+		}
+
+		return new WatchlistService(index, configRepository.Object, resolvedMetadataProvider.Object);
+	}
+
+	private static async IAsyncEnumerable<IMediaDetailResult> AsAsync(params IMediaDetailResult[] items)
+	{
+		foreach (var item in items)
+		{
+			yield return item;
+		}
+		await Task.CompletedTask;
 	}
 
 	private static MovieDetailResult CreateMovieDetail(IMediaId sourceId) =>
