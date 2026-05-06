@@ -9,7 +9,7 @@
             <div class="search-result-poster">
                 @if (!_failed && !string.IsNullOrWhiteSpace(Result.PosterUrl))
                 {
-                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-sm" @onerror="OnPosterError"/>
+                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
                 }
                 else
                 {
