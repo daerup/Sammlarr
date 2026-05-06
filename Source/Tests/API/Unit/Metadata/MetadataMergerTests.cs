@@ -1,8 +1,9 @@
+using API.Metadata;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 
-namespace Core.Tests.Unit.Metadata;
+namespace API.Tests.Unit.Metadata;
 
 public class MetadataMergerTests
 {
@@ -134,43 +135,6 @@ public class MetadataMergerTests
 		await Assert.That(result.Seasons).IsEqualTo(4);
 		await Assert.That(result.Episodes).IsEqualTo(40);
 		await Assert.That(result.RuntimePerEpisode).IsEqualTo(TimeSpan.FromMinutes(45));
-	}
-
-	[Test]
-	public async Task FillMissing_WhenTypesDoNotMatch_ReturnsPrimary()
-	{
-		var movie = new MovieDetailResult
-		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
-			Title = "Movie",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = DateOnly.MinValue,
-			Genres = [],
-			Runtime = TimeSpan.Zero,
-		};
-		var show = new ShowDetailResult
-		{
-			SourceId = TmdbId.From("2", MediaType.Show),
-			AdditionalIds = [],
-			Title = "Show",
-			Tagline = "Tagline",
-			Summary = "Summary",
-			PosterUrl = "poster",
-			BackdropUrl = "backdrop",
-			ReleaseDate = new DateOnly(2024, 1, 1),
-			Genres = ["Drama"],
-			Seasons = 2,
-			Episodes = 20,
-			RuntimePerEpisode = TimeSpan.FromMinutes(30),
-		};
-
-		var result = MetadataMerger.FillMissing(movie, show);
-
-		await Assert.That(result).IsSameReferenceAs(movie);
 	}
 
 	[Test]

@@ -4,7 +4,7 @@ namespace Contracts.Media.Metadata;
 
 public interface IMediaMetadataProvider
 {
-	Task<IMediaDetailResult> GetAsync(IMediaId anchor, CancellationToken cancellationToken = default);
+	Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 
-	Task ReportStaleAsync(IMediaId anchor, CancellationToken cancellationToken = default);
+	Task ReportStaleAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 }

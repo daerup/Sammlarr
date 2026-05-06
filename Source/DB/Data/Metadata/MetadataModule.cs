@@ -6,5 +6,9 @@ namespace DB.Data.Metadata;
 
 internal class MetadataModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services) => services.AddScoped<IMediaMetadataRepository, MediaMetadataRepository>();
+	public void RegisterServices(IServiceCollection services)
+	{
+		services.AddScoped<IMediaMetadataRepository, MediaMetadataRepository>();
+		services.AddScoped<MediaMetadataFactory>();
+	}
 }
