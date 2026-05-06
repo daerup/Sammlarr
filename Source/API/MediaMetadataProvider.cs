@@ -43,7 +43,7 @@ internal class MediaMetadataProvider(
 		return await HydrateAsync(mediaId, cached.Details, cancellationToken);
 	}
 
-	public async Task InvalidateAsync(IReadOnlyList<IMediaId> mediaIds, CancellationToken cancellationToken = default)
+	public async Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
 	{
 		foreach (var mediaId in mediaIds)
 		{
