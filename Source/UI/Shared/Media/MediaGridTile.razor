@@ -9,11 +9,11 @@
         else if (_isShowingPoster)
         {
             <div class="poster-bg" style="background-image: url('@Poster')"></div>
-            <img class="poster-img" src="@Poster" alt="@Title" @onerror="OnImageError"/>
+            <img class="poster-img" src="@Poster" alt="@Title" loading="lazy" decoding="async" @onerror="OnImageError"/>
         }
         else
         {
-            <img src="@_src" alt="@Title" @onerror="OnImageError"/>
+            <img src="@_src" alt="@Title" loading="lazy" decoding="async" @onerror="OnImageError"/>
         }
 
         @if (ShowBookmark)
