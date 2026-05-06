@@ -23,6 +23,35 @@
                  @bind-Value="_searchQuery"
                  UpdateTiming="UpdateTiming.Immediate"/>
         <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
+        @if (HasResults)
+        {
+            <BbAlertDialog @bind-Open="_refreshDialogOpen">
+                <BbAlertDialogTrigger>
+                    <BbTooltip>
+                        <BbTooltipTrigger>
+                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Refresh assets">
+                                <LucideIcon Name="refresh-cw" Size="16"/>
+                            </BbButton>
+                        </BbTooltipTrigger>
+                        <BbTooltipContent>Refresh assets</BbTooltipContent>
+                    </BbTooltip>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Refresh assets?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This drops the cached metadata for every item shown and re-fetches it from your providers. It may take a while for large lists.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbButton Variant="ButtonVariant.Default" OnClick="OnRefreshConfirmedAsync">Refresh</BbButton>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
+        }
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col">
         @if (HasItems && (FilteredBySearchResults.Any() || FilteredBySearchUnresolvedResults.Any()))
@@ -37,7 +66,8 @@
                         }
                     </h2>
                     <p class="text-sm text-muted-foreground mt-0.5">
-                        <FeedSourceLink Identifier="@(_testedConfig?.Identifier ?? Config.Identifier)" Provider="@(_testedConfig?.Provider ?? Config.Provider!.Value)"/>
+                        <FeedSourceLink Identifier="@(_testedConfig?.Identifier ?? Config.Identifier)"
+                                        Provider="@(_testedConfig?.Provider ?? Config.Provider!.Value)"/>
                     </p>
                 </div>
                 <BbTooltipProvider>
@@ -206,10 +236,8 @@
         }
         else if (IsLoading)
         {
-            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                <BbSpinner Size="SpinnerSize.Large" Class="mb-4"/>
-                <p class="text-lg font-semibold">Loading…</p>
-                <p class="text-muted-foreground text-sm mt-2">Fetching media from the provider. This may take a few seconds.</p>
+            <div class="space-y-2">
+                <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="8"/>
             </div>
         }
         else if (HasFailed)
@@ -254,6 +282,7 @@
     private readonly HashSet<string> _blacklistIds = new(StringComparer.Ordinal);
     private readonly HashSet<IMediaId> _reportedBrokenImages = [];
     private bool _hasEnrollmentChanges;
+    private bool _refreshDialogOpen;
 
     private bool IsLoading => _fetchState == FetchState.Loading;
     private bool HasItems => _rawResults.Count > 0;
@@ -306,6 +335,42 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private async Task OnRefreshConfirmedAsync()
+    {
+        if (_fetchState == FetchState.Loading || _rawResults.Count == 0)
+        {
+            return;
+        }
+
+        var staleIds = _rawResults.Select(r => r.SourceId).ToList();
+        _refreshDialogOpen = false;
+        _fetchState = FetchState.Loading;
+        ClearResults();
+        await RunRefreshAsync(staleIds);
+    }
+
+    private async Task RunRefreshAsync(IEnumerable<IMediaId> staleIds)
+    {
+        await Task.Yield();
+
+        try
+        {
+
+            await EmitStatusIfChangedAsync();
+            await InvokeAsync(StateHasChanged);
+
+            await MetadataProvider.InvalidateAsync(staleIds);
+            _reportedBrokenImages.Clear();
+
+            await FetchAsync();
+            await EmitStatusIfChangedAsync();
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
     private async Task FetchAsync()
     {
         _cts?.Cancel();
@@ -313,9 +378,7 @@
         _cts = new CancellationTokenSource();
         var ct = _cts.Token;
 
-        _rawResults = [];
-        _unresolvedResults = [];
-        _processedResults = [];
+        ClearResults();
 
         try
         {
@@ -364,6 +427,12 @@
         {
             _testedConfig = Config;
         }
+    }
+    private void ClearResults()
+    {
+        _rawResults = [];
+        _unresolvedResults = [];
+        _processedResults = [];
     }
 
     private void Reprocess()
@@ -465,9 +534,7 @@
         };
         if (Config.Limit is null)
             return $"{source}, will not be imported.";
-        return bypassed.CountsTowardLimit
-            ? $"{source}, skipped but counts toward your import limit."
-            : $"{source}, skipped and does not count toward your import limit.";
+        return bypassed.CountsTowardLimit ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }
 
     private async Task ReportBrokenImageAsync(IMediaId sourceId)
@@ -476,7 +543,7 @@
         {
             return;
         }
-        await MetadataProvider.ReportStaleAsync(sourceId);
+        await MetadataProvider.InvalidateAsync([sourceId]);
     }
 
     private static IMediaDetailResult GetItem(QueryResult<IMediaDetailResult> result) =>

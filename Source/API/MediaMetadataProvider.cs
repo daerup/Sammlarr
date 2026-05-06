@@ -43,7 +43,13 @@ internal class MediaMetadataProvider(
 		return await HydrateAsync(mediaId, cached.Details, cancellationToken);
 	}
 
-	public Task ReportStaleAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.RemoveAsync(mediaId, cancellationToken);
+	public async Task InvalidateAsync(IReadOnlyList<IMediaId> mediaIds, CancellationToken cancellationToken = default)
+	{
+		foreach (var mediaId in mediaIds)
+		{
+			await repository.RemoveAsync(mediaId, cancellationToken);
+		}
+	}
 
 	private async Task<IMediaDetailResult> FetchFreshAsync(IMediaId mediaId, CancellationToken cancellationToken)
 	{
