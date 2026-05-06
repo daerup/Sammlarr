@@ -4,4 +4,5 @@ public enum AutoSkeletonPreset
 {
 	MediaGridTile,
 	MediaDetailTile,
+	MediaResultsHeader,
 }
