@@ -1,3 +1,4 @@
+using API.Metadata;
 using Contracts;
 using Contracts.DI;
 using Contracts.Media;
@@ -17,54 +18,49 @@ internal class MediaMetadataProvider(
 ) : IMediaMetadataProvider
 {
 	private static readonly TimeSpan StaleAfter = TimeSpan.FromDays(7);
+	private static readonly TimeSpan HydrationCooldown = TimeSpan.FromHours(1);
 	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
 
-	public async Task<IMediaDetailResult> GetAsync(IMediaId anchor, CancellationToken cancellationToken = default)
+	public async Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	{
+		var cached = await repository.GetByMediaIdAsync(mediaId, cancellationToken);
+		if (cached is null)
+		{
+			return await FetchFreshAsync(mediaId, cancellationToken);
+		}
+
+		var sinceFetched = dateTimeProvider.Now - cached.FetchedAt;
+		if (sinceFetched >= StaleAfter)
+		{
+			return await FetchFreshAsync(mediaId, cancellationToken);
+		}
+
+		if (MetadataCompleteness.IsComplete(cached.Details) || sinceFetched < HydrationCooldown)
+		{
+			return cached.Details;
+		}
+
+		return await HydrateAsync(mediaId, cached.Details, cancellationToken);
+	}
+
+	public Task ReportStaleAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.RemoveAsync(mediaId, cancellationToken);
+
+	private async Task<IMediaDetailResult> FetchFreshAsync(IMediaId mediaId, CancellationToken cancellationToken)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
-		var cached = await repository.GetByMediaIdAsync(anchor, cancellationToken);
-
-		if (cached is not null && IsFresh(cached.FetchedAt))
-		{
-			return await BackfillRatingsIfMissingAsync(anchor, cached.Details, config.RatingProvider, cancellationToken);
-		}
-
-		return await FetchFreshAsync(anchor, config, cancellationToken);
-	}
-
-	public Task ReportStaleAsync(IMediaId anchor, CancellationToken cancellationToken = default) => repository.RemoveAsync(anchor, cancellationToken);
-
-	private bool IsFresh(DateTimeOffset fetchedAt) => dateTimeProvider.Now - fetchedAt < StaleAfter;
-
-	private async Task<IMediaDetailResult> BackfillRatingsIfMissingAsync(
-		IMediaId anchor,
-		IMediaDetailResult details,
-		RatingProvider ratingProvider,
-		CancellationToken cancellationToken
-	)
-	{
-		var configuredSource = ratingProvider.AsRatingSource();
-		if (details.Ratings.Any(rating => rating.Source == configuredSource))
-		{
-			return details;
-		}
-
-		var withRatings = await ApplyRatingsAsync(details, ratingProvider, cancellationToken);
-		if (ReferenceEquals(withRatings, details))
-		{
-			return details;
-		}
-
-		await repository.UpsertAsync(anchor, withRatings, cancellationToken);
-		return withRatings;
-	}
-
-	private async Task<IMediaDetailResult> FetchFreshAsync(IMediaId anchor, ProviderConfig config, CancellationToken cancellationToken)
-	{
-		var details = await searchIndex[config.SearchProvider].LookUpAsync(anchor, cancellationToken);
-		details = await EnrichAsync(details, config.SearchProvider.AsMediaProvider(), cancellationToken);
+		var details = await searchIndex[config.SearchProvider].LookUpAsync(mediaId, cancellationToken);
+		details = await EnrichAsync(details, config.SearchProvider, cancellationToken);
 		details = await ApplyRatingsAsync(details, config.RatingProvider, cancellationToken);
-		await repository.UpsertAsync(anchor, details, cancellationToken);
+		await repository.UpsertAsync(mediaId, details, cancellationToken);
+		return details;
+	}
+
+	private async Task<IMediaDetailResult> HydrateAsync(IMediaId mediaId, IMediaDetailResult details, CancellationToken cancellationToken)
+	{
+		var config = await configRepository.GetAsync(cancellationToken);
+		details = await EnrichAsync(details, config.SearchProvider, cancellationToken);
+		details = await ApplyRatingsAsync(details, config.RatingProvider, cancellationToken);
+		await repository.UpsertAsync(mediaId, details, cancellationToken);
 		return details;
 	}
 
@@ -80,26 +76,23 @@ internal class MediaMetadataProvider(
 		return ratings.Count == 0 ? details : MetadataMerger.WithRatings(details, ratings);
 	}
 
-	private async Task<IMediaDetailResult> EnrichAsync(IMediaDetailResult details, MediaProvider primaryProvider, CancellationToken cancellationToken)
+	private async Task<IMediaDetailResult> EnrichAsync(IMediaDetailResult details, MediaSearchProvider searchProvider, CancellationToken cancellationToken)
 	{
-		foreach (var provider in EnricherChain)
+		var primaryProvider = searchProvider.AsMediaProvider();
+		foreach (var provider in EnricherChain.Where(p => p != primaryProvider))
 		{
-			if (provider == primaryProvider)
-			{
-				continue;
-			}
 			if (MetadataCompleteness.IsComplete(details))
 			{
 				break;
 			}
 
-			var idForProvider = details.AdditionalIds.FirstOrDefault(id => id.Source == provider);
-			if (idForProvider is null)
+			var providerId = FindId(details, provider);
+			if (providerId is null)
 			{
 				continue;
 			}
 
-			var enrichment = await enricherIndex[provider].LookUpAsync(idForProvider, cancellationToken);
+			var enrichment = await enricherIndex[provider].LookUpAsync(providerId, cancellationToken);
 			if (enrichment is not null)
 			{
 				details = MetadataMerger.FillMissing(details, enrichment);

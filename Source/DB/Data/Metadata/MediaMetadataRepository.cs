@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
@@ -7,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Metadata;
 
-internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGroupRepository mediaIdGroupRepository) : IMediaMetadataRepository
+internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGroupRepository mediaIdGroupRepository, MediaMetadataFactory metadataFactory)
+	: IMediaMetadataRepository
 {
 	public async Task<CachedMediaMetadata?> GetByMediaIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
@@ -28,34 +28,37 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 			.Where(id => !MediaIdentifier.From(id).Equals(identifier))
 			.ToArray();
 
-		return new CachedMediaMetadata(ToDetailResult(entity, mediaId, additionalIds), entity.UpdatedAt);
+		return new CachedMediaMetadata(metadataFactory.ToDetailResult(entity, mediaId, additionalIds), entity.UpdatedAt);
 	}
 
-	public async Task UpsertAsync(IMediaId anchor, IMediaDetailResult details, CancellationToken cancellationToken = default)
+	public async Task UpsertAsync(IMediaId mediaId, IMediaDetailResult details, CancellationToken cancellationToken = default)
 	{
 		await mediaIdGroupRepository.CreateOrAppendAsync(details.AdditionalIds.Prepend(details.SourceId), cancellationToken);
 
-		var anchorIdentifier = MediaIdentifier.From(anchor);
+		var identifier = MediaIdentifier.From(mediaId);
 		var group = await dbContext
 			.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
-			.Where(entry => entry.Identifier == anchorIdentifier)
+			.Where(entry => entry.Identifier == identifier)
 			.Select(entry => entry.MediaIdGroupEntity)
 			.SingleAsync(cancellationToken);
 
 		var existing = await dbContext.MediaMetadata.Include(m => m.Ratings).SingleOrDefaultAsync(m => m.MediaIdGroupId == group.Id, cancellationToken);
-		if (existing is not null)
+
+		if (existing is null)
 		{
-			dbContext.MediaMetadata.Remove(existing);
-			await dbContext.SaveChangesAsync(cancellationToken);
+			dbContext.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(details, group.Id));
+		}
+		else
+		{
+			metadataFactory.Update(existing, details);
 		}
 
-		dbContext.MediaMetadata.Add(BuildEntity(details, group.Id));
 		await dbContext.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task RemoveAsync(IMediaId anchor, CancellationToken cancellationToken = default)
+	public async Task RemoveAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		var identifier = MediaIdentifier.From(anchor);
+		var identifier = MediaIdentifier.From(mediaId);
 		var entity = await dbContext
 			.MediaMetadata.Include(m => m.MediaIdGroup)
 				.ThenInclude(g => g.MediaIdEntries)
@@ -72,87 +75,4 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 
 	public Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default) =>
 		dbContext.MediaRatings.Where(r => r.Source == source).ExecuteDeleteAsync(cancellationToken);
-
-	private static MediaMetadataEntity BuildEntity(IMediaDetailResult details, Guid groupId) =>
-		details switch
-		{
-			MovieDetailResult movie => new MovieMetadataEntity
-			{
-				MediaIdGroupId = groupId,
-				Title = movie.Title,
-				Tagline = movie.Tagline,
-				Summary = movie.Summary,
-				PosterUrl = movie.PosterUrl,
-				BackdropUrl = movie.BackdropUrl,
-				ReleaseDate = movie.ReleaseDate,
-				Runtime = movie.Runtime,
-				Genres = [.. movie.Genres],
-				Ratings = BuildRatings(movie.Ratings),
-			},
-			ShowDetailResult show => new ShowMetadataEntity
-			{
-				MediaIdGroupId = groupId,
-				Title = show.Title,
-				Tagline = show.Tagline,
-				Summary = show.Summary,
-				PosterUrl = show.PosterUrl,
-				BackdropUrl = show.BackdropUrl,
-				ReleaseDate = show.ReleaseDate,
-				RuntimePerEpisode = show.RuntimePerEpisode,
-				Seasons = show.Seasons,
-				Episodes = show.Episodes,
-				Genres = [.. show.Genres],
-				Ratings = BuildRatings(show.Ratings),
-			},
-			_ => throw new InvalidOperationException($"Unsupported media detail result type '{details.GetType().Name}'."),
-		};
-
-	private static List<MediaRatingEntity> BuildRatings(IReadOnlyList<MediaRating> ratings) =>
-		[
-			.. ratings.Select(rating => new MediaRatingEntity
-			{
-				Source = rating.Source,
-				NormalizedValue = rating.NormalizedValue,
-				VoteCount = rating.VoteCount,
-			}),
-		];
-
-	private static IMediaDetailResult ToDetailResult(MediaMetadataEntity entity, IMediaId sourceId, IMediaId[] additionalIds) =>
-		entity switch
-		{
-			MovieMetadataEntity movie => new MovieDetailResult
-			{
-				SourceId = sourceId,
-				AdditionalIds = additionalIds,
-				Title = movie.Title,
-				Tagline = movie.Tagline,
-				Summary = movie.Summary,
-				PosterUrl = movie.PosterUrl,
-				BackdropUrl = movie.BackdropUrl,
-				Runtime = movie.Runtime,
-				ReleaseDate = movie.ReleaseDate,
-				Genres = movie.Genres,
-				Ratings = ToRatings(movie.Ratings),
-			},
-			ShowMetadataEntity show => new ShowDetailResult
-			{
-				SourceId = sourceId,
-				AdditionalIds = additionalIds,
-				Title = show.Title,
-				Tagline = show.Tagline,
-				Summary = show.Summary,
-				PosterUrl = show.PosterUrl,
-				BackdropUrl = show.BackdropUrl,
-				RuntimePerEpisode = show.RuntimePerEpisode,
-				ReleaseDate = show.ReleaseDate,
-				Genres = show.Genres,
-				Seasons = show.Seasons,
-				Episodes = show.Episodes,
-				Ratings = ToRatings(show.Ratings),
-			},
-			_ => throw new InvalidOperationException($"Unsupported metadata entity type '{entity.GetType().Name}'."),
-		};
-
-	private static IReadOnlyList<MediaRating> ToRatings(IEnumerable<MediaRatingEntity> ratings) =>
-		[.. ratings.Select(rating => new MediaRating(rating.Source, rating.NormalizedValue, rating.VoteCount))];
 }

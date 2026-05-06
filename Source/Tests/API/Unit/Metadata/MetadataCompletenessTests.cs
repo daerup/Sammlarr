@@ -1,8 +1,8 @@
+using API.Metadata;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 
-namespace Core.Tests.Unit.Metadata;
+namespace API.Tests.Unit.Metadata;
 
 public class MetadataCompletenessTests
 {

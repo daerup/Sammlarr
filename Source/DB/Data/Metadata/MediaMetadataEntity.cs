@@ -11,7 +11,7 @@ internal abstract record MediaMetadataEntity : IAuditable
 	public DateTimeOffset UpdatedAt { get; set; }
 
 	[Key]
-	public required Guid MediaIdGroupId { get; set; }
+	public Guid MediaIdGroupId { get; set; }
 
 #pragma warning disable CS8618
 	public MediaIdentifierGroupEntity MediaIdGroup { get; set; }
@@ -19,25 +19,25 @@ internal abstract record MediaMetadataEntity : IAuditable
 
 	[Required]
 	[MaxLength(500)]
-	public required string Title { get; set; }
+	public string Title { get; set; } = string.Empty;
 
 	[Required]
-	public required string Tagline { get; set; }
+	public string Tagline { get; set; } = string.Empty;
 
 	[Required]
-	public required string Summary { get; set; }
+	public string Summary { get; set; } = string.Empty;
 
 	[Required]
-	public required string PosterUrl { get; set; }
+	public string PosterUrl { get; set; } = string.Empty;
 
 	[Required]
-	public required string BackdropUrl { get; set; }
+	public string BackdropUrl { get; set; } = string.Empty;
 
 	[Required]
-	public required DateOnly ReleaseDate { get; set; }
+	public DateOnly ReleaseDate { get; set; }
 
 	[Required]
-	public required List<string> Genres { get; set; }
+	public List<string> Genres { get; set; } = [];
 
 	[Required]
 	[EnumAsString]
