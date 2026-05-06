@@ -197,7 +197,7 @@ else
         {
             return;
         }
-        await MetadataProvider.ReportStaleAsync(sourceId, _cancellationTokenSource.Token);
+        await MetadataProvider.InvalidateAsync([sourceId], _cancellationTokenSource.Token);
     }
 
     private async Task ReportSelectedImageBrokenAsync()

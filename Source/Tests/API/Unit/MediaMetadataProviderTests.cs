@@ -106,14 +106,16 @@ public class MediaMetadataProviderTests
 	}
 
 	[Test]
-	public async Task ReportStaleAsync_DelegatesToRepositoryRemove()
+	public async Task InvalidateAsync_DelegatesToRepositoryRemoveForEachId()
 	{
-		var mediaId = TmdbId.From("200", MediaType.Movie);
+		var first = TmdbId.From("200", MediaType.Movie);
+		var second = TmdbId.From("201", MediaType.Movie);
 		var (testee, deps) = CreateTestee(cached: null);
 
-		await testee.ReportStaleAsync(mediaId);
+		await testee.InvalidateAsync([first, second]);
 
-		deps.Repository.RemoveAsync(mediaId, Any()).WasCalled(Times.Once);
+		deps.Repository.RemoveAsync(first, Any()).WasCalled(Times.Once);
+		deps.Repository.RemoveAsync(second, Any()).WasCalled(Times.Once);
 	}
 
 	private static (MediaMetadataProvider Testee, Dependencies Deps) CreateTestee(IMediaDetailResult? cached, DateTimeOffset cachedAt = default)
