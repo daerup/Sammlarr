@@ -1,0 +1,32 @@
+@using Contracts.Media.Feed
+@{
+    var url = GetProviderUrl(Identifier, Provider);
+}
+
+@if (url is not null)
+{
+    <a href="@url" target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center gap-1 font-mono text-sm text-primary underline-offset-4 hover:underline">
+        @Identifier
+        <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
+    </a>
+}
+else
+{
+    <span class="font-mono text-sm">@Identifier</span>
+}
+
+@code {
+    [Parameter] [EditorRequired]
+    public string Identifier { get; set; } = string.Empty;
+
+    [Parameter] [EditorRequired]
+    public FeedProvider Provider { get; set; }
+
+    private static string GetProviderUrl(string identifier, FeedProvider provider) =>
+        provider switch
+        {
+            FeedProvider.Mdblist => $"https://mdblist.com/lists/{identifier}",
+            FeedProvider.Tmdb => $"https://www.themoviedb.org/list/{identifier}",
+        };
+}

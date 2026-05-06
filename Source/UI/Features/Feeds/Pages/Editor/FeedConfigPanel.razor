@@ -3,14 +3,14 @@
 @using Contracts
 @using Contracts.Auth
 @using Contracts.Media
-@using Contracts.Media.List
+@using Contracts.Media.Feed
 @using Contracts.Media.Search
 @using Contracts.Processing
-@using DB.Data.List
-@using UI.Features.Import.Components
+@using DB.Data.Feed
+@using UI.Features.Feeds.Components
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
 
-<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
+<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6">
         <div class="space-y-8 pb-4">
 
@@ -22,7 +22,7 @@
                             <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                 <LucideIcon Name="info" Size="14"/>
                             </BbTooltipTrigger>
-                            <BbTooltipContent>Toggle to enable or disable this import.</BbTooltipContent>
+                            <BbTooltipContent>Toggle to enable or disable this feed.</BbTooltipContent>
                         </BbTooltip>
                     </BbTooltipProvider>
                 </BbFieldLabel>
@@ -39,7 +39,7 @@
                             <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                 <LucideIcon Name="info" Size="14"/>
                             </BbTooltipTrigger>
-                            <BbTooltipContent>A friendly label to identify this subscription across your lists.</BbTooltipContent>
+                            <BbTooltipContent>A friendly label to identify this feed across your collection.</BbTooltipContent>
                         </BbTooltip>
                     </BbTooltipProvider>
                 </BbFieldLabel>
@@ -91,7 +91,7 @@
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <EnumToggleGroup TEnum="MediaListProvider"
+                        <EnumToggleGroup TEnum="FeedProvider"
                                          Value="@_provider"
                                          OnChange="@ChangeProvider"
                                          DisabledValues="@_disabledProviders"/>
@@ -106,14 +106,14 @@
                                 <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
                                     <LucideIcon Name="info" Size="14"/>
                                 </BbTooltipTrigger>
-                                <BbTooltipContent>Only relevant when a subscription runs more than once. Controls whether repeated syncs add to or replace your
+                                <BbTooltipContent>Only relevant when a feed runs more than once. Controls whether repeated syncs add to or replace your
                                     existing collection.
                                 </BbTooltipContent>
                             </BbTooltip>
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <EnumToggleGroup TEnum="MediaListAddStrategy"
+                        <EnumToggleGroup TEnum="FeedAddStrategy"
                                          Value="@_strategy"
                                          OnChange="@ChangeStrategy"
                                          TooltipProvider="@GetStrategyTooltip"/>
@@ -121,7 +121,7 @@
                 </BbField>
             </div>
 
-            <BbField IsInvalid="@ListIdentifierIsInvalid">
+            <BbField IsInvalid="@IdentifierIsInvalid">
                 <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
                     List identifier <span class="text-destructive ml-0.5">*</span>
                     <BbTooltipProvider>
@@ -136,14 +136,14 @@
                     </BbTooltipProvider>
                 </BbFieldLabel>
                 <BbFieldContent>
-                    <BbInput id="list-identifier" Placeholder="@GetListIdentifierPlaceholder(_provider)"
-                             Value="@_listIdentifier" ValueChanged="@ChangeListIdentifier"
+                    <BbInput id="list-identifier" Placeholder="@GetIdentifierPlaceholder(_provider)"
+                             Value="@_identifier" ValueChanged="@ChangeIdentifier"
                              Class="bg-accent" Required="true"
-                             AriaInvalid="@ListIdentifierIsInvalid"
+                             AriaInvalid="@IdentifierIsInvalid"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </BbFieldContent>
-                <BbFieldDescription>@RenderListIdentifierDescription()</BbFieldDescription>
-                @if (ListIdentifierIsInvalid)
+                <BbFieldDescription>@RenderIdentifierDescription()</BbFieldDescription>
+                @if (IdentifierIsInvalid)
                 {
                     <BbFieldError>List identifier is required.</BbFieldError>
                 }
@@ -344,7 +344,7 @@
                                     <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                         <LucideIcon Name="info" Size="14"/>
                                     </BbTooltipTrigger>
-                                    <BbTooltipContent>When to sync this subscription, on demand or on a recurring schedule.</BbTooltipContent>
+                                    <BbTooltipContent>When to sync this feed, on demand or on a recurring schedule.</BbTooltipContent>
                                 </BbTooltip>
                             </BbTooltipProvider>
                         </BbFieldLabel>
@@ -388,21 +388,21 @@
 
 @code {
 
-    [Parameter] public required SubscriptionConfig Value { get; set; }
+    [Parameter] public required FeedConfig Value { get; set; }
     [Parameter] public required bool ShowValidation { get; set; }
-    [Parameter] public EventCallback<SubscriptionConfig> OnChange { get; set; }
+    [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
 
-    private static readonly MediaListProvider[] AllProviders = Enum.GetValues<MediaListProvider>();
-    private readonly HashSet<MediaListProvider> _disabledProviders = [];
+    private static readonly FeedProvider[] AllProviders = Enum.GetValues<FeedProvider>();
+    private readonly HashSet<FeedProvider> _disabledProviders = [];
 
     private static readonly QuerySort DefaultSort = new() { Property = nameof(IMediaDetailResult.Title), Direction = ListSortDirection.Descending };
     private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = SlotPolicy.Consumed, Blacklisted = SlotPolicy.Consumed };
 
     private bool _isEnabled;
     private string _name = string.Empty;
-    private MediaListProvider? _provider;
-    private MediaListAddStrategy _strategy;
-    private string _listIdentifier = string.Empty;
+    private FeedProvider? _provider;
+    private FeedAddStrategy _strategy;
+    private string _identifier = string.Empty;
     private bool _filtersSectionOpen;
     private bool _filterEnabled;
     private FilterDefinition _filter = new();
@@ -416,7 +416,7 @@
     private string? _scheduleCronExpression;
 
     private bool NameIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_name);
-    private bool ListIdentifierIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_listIdentifier);
+    private bool IdentifierIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_identifier);
     private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
@@ -467,7 +467,7 @@
         _name = Value.Name;
         _provider = Value.Provider;
         _strategy = Value.Strategy;
-        _listIdentifier = Value.ListIdentifier;
+        _identifier = Value.Identifier;
         _filterEnabled = Value.Filter is not null;
         _filter = Value.Filter ?? new FilterDefinition();
         _filtersSectionOpen = Value.Filter is not null || Value.Sort is not null || Value.Limit is not null;
@@ -491,20 +491,20 @@
 
         if (_provider is not null && _disabledProviders.Contains(_provider.Value))
         {
-            _provider = AllProviders.Cast<MediaListProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
+            _provider = AllProviders.Cast<FeedProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
             _ = OnChange.InvokeAsync(BuildConfig());
         }
     }
 
     private void NotifyChange() => _ = OnChange.InvokeAsync(BuildConfig());
 
-    private SubscriptionConfig BuildConfig() => new()
+    private FeedConfig BuildConfig() => new()
     {
         IsEnabled = _isEnabled,
         Name = _name,
         Provider = _provider,
         Strategy = _strategy,
-        ListIdentifier = _listIdentifier,
+        Identifier = _identifier,
         Filter = _filterEnabled ? _filter : null,
         Sort = _sortEnabled ? _sort : null,
         Limit = _limitEnabled ? _limit : null,
@@ -519,19 +519,19 @@
         _name = v;
         NotifyChange();
     }
-    private void ChangeProvider(MediaListProvider v)
+    private void ChangeProvider(FeedProvider v)
     {
         _provider = v;
         NotifyChange();
     }
-    private void ChangeStrategy(MediaListAddStrategy v)
+    private void ChangeStrategy(FeedAddStrategy v)
     {
         _strategy = v;
         NotifyChange();
     }
-    private void ChangeListIdentifier(string v)
+    private void ChangeIdentifier(string v)
     {
-        _listIdentifier = v;
+        _identifier = v;
         NotifyChange();
     }
     private void ChangeFilter(FilterDefinition f)
@@ -592,17 +592,17 @@
         NotifyChange();
     }
 
-    private string GetListIdentifierPlaceholder(MediaListProvider? provider) =>
+    private string GetIdentifierPlaceholder(FeedProvider? provider) =>
         provider switch
         {
-            MediaListProvider.Mdblist => "e.g. top-250-movies or 12345",
+            FeedProvider.Mdblist => "e.g. top-250-movies or 12345",
             null => "Select a provider first",
             _ => "Provider-specific list identifier",
         };
 
-    private MarkupString RenderListIdentifierDescription() => _provider switch
+    private MarkupString RenderIdentifierDescription() => _provider switch
     {
-        MediaListProvider.Mdblist => new MarkupString(
+        FeedProvider.Mdblist => new MarkupString(
         "Slug or numeric ID from the list URL, e.g. <code>top-250-movies</code> or <code>12345</code>. " +
         "<a href=\"https://mdblist.com/toplists/\" target=\"_blank\" " +
         "class=\"underline underline-offset-2 hover:text-foreground transition-colors\">Browse lists on MDBList</a>"),
@@ -610,11 +610,11 @@
         _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
     };
 
-    private static string GetStrategyTooltip(MediaListAddStrategy strategy) =>
+    private static string GetStrategyTooltip(FeedAddStrategy strategy) =>
         strategy switch
         {
-            MediaListAddStrategy.Append => "Each sync adds only new items. Items already in your collection are kept.",
-            MediaListAddStrategy.Replace => "Each sync removes items that were added by this subscription and are no longer on the list. Items added by other subscriptions are unaffected, even if they appear on this list.",
+            FeedAddStrategy.Append => "Each sync adds only new items. Items already in your collection are kept.",
+            FeedAddStrategy.Replace => "Each sync removes items that were added by this feed and are no longer on the list. Items added by other feeds are unaffected, even if they appear on this list.",
             _ => string.Empty,
         };
 

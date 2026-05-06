@@ -1,8 +1,8 @@
 using BlazorBlueprint.Primitives.Filtering;
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Contracts.Processing;
 
-namespace UI.Features.Import.Pages.Subscription;
+namespace UI.Features.Feeds.Pages.Editor;
 
 public enum ScheduleMode
 {
@@ -18,13 +18,13 @@ public record PreviewStatus
 	public bool HasEnrollmentChanges { get; init; }
 }
 
-public record SubscriptionConfig
+public record FeedConfig
 {
 	public bool IsEnabled { get; init; } = true;
 	public string Name { get; init; } = string.Empty;
-	public MediaListProvider? Provider { get; init; } = MediaListProvider.Mdblist;
-	public MediaListAddStrategy Strategy { get; init; } = MediaListAddStrategy.Append;
-	public string ListIdentifier { get; init; } = string.Empty;
+	public FeedProvider? Provider { get; init; } = FeedProvider.Mdblist;
+	public FeedAddStrategy Strategy { get; init; } = FeedAddStrategy.Append;
+	public string Identifier { get; init; } = string.Empty;
 	public FilterDefinition? Filter { get; init; }
 	public QuerySort? Sort { get; init; }
 	public QueryLimit? Limit { get; init; }
@@ -32,16 +32,15 @@ public record SubscriptionConfig
 
 	public bool IsScheduleValid { get; init; } = true;
 
-	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(ListIdentifier) && (Limit is null || Limit.Count > 0);
+	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
 
 	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid;
 
-	public int GetPreviewHash() =>
-		HashCode.Combine(HashCode.Combine(Provider, ListIdentifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));
+	public int GetPreviewHash() => HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));
 
 	public int GetSaveHash() =>
 		HashCode.Combine(
-			HashCode.Combine(IsEnabled, Name, Provider, Strategy, ListIdentifier),
+			HashCode.Combine(IsEnabled, Name, Provider, Strategy, Identifier),
 			HashCode.Combine(Filter is not null, Filter?.Version, Sort, Limit),
 			Schedule
 		);

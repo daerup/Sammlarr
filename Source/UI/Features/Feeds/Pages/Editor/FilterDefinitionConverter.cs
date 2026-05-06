@@ -5,7 +5,7 @@ using BBFilterOp = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 using BBLogicalOp = BlazorBlueprint.Primitives.Filtering.LogicalOperator;
 using ContractsFilterOp = Contracts.Processing.FilterOperator;
 
-namespace UI.Features.Import.Pages.Subscription;
+namespace UI.Features.Feeds.Pages.Editor;
 
 internal static class FilterDefinitionConverter
 {

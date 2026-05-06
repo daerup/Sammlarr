@@ -1,11 +1,11 @@
-@page "/subscription/create"
-@page "/subscription/{EditImportListId}/edit"
-@page "/subscription/{CloneImportListId}/clone"
-@using Contracts.Media.List
+@page "/feed/create"
+@page "/feed/edit/{EditFeedId}"
+@page "/feed/clone/{CloneFeedId}"
+@using Contracts.Media.Feed
 @using Contracts.Settings
 @using global::Shared
 @implements IDisposable
-@inject IImportListRepository ImportListRepository
+@inject IFeedRepository FeedRepository
 @inject NavigationManager NavigationManager
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject IProviderConfigRepository ProviderConfigRepository
@@ -75,18 +75,18 @@
     <ChildContent>
         <ProtectedSection GuardState="IsOAuthAllowed"
                           AuthProvider="@_providerConfig.WatchlistProvider"
-                          DeniedActionDescription="managing subscriptions"
+                          DeniedActionDescription="managing feeds"
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
             <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" @onkeydown="HandleContainerKeyDownAsync">
 
-                <SubscriptionConfigPanel @key="_configKey"
-                                         Value="@_config"
-                                         ShowValidation="@_showValidation"
-                                         OnChange="@OnConfigChanged"/>
+                <FeedConfigPanel @key="_configKey"
+                                 Value="@_config"
+                                 ShowValidation="@_showValidation"
+                                 OnChange="@OnConfigChanged"/>
 
-                <SubscriptionPreviewPanel @ref="_previewPanel"
-                                          Config="@_config"
-                                          OnStatusChanged="@OnPreviewStatusChanged"/>
+                <FeedPreviewPanel @ref="_previewPanel"
+                                  Config="@_config"
+                                  OnStatusChanged="@OnPreviewStatusChanged"/>
 
             </div>
         </ProtectedSection>
@@ -95,25 +95,25 @@
 
 @code {
 
-    [Parameter] public string? EditImportListId { get; set; }
-    [Parameter] public string? CloneImportListId { get; set; }
-    private bool IsEditOrClone => EditImportListId is not null || CloneImportListId is not null;
+    [Parameter] public string? EditFeedId { get; set; }
+    [Parameter] public string? CloneFeedId { get; set; }
+    private bool IsEditOrClone => EditFeedId is not null || CloneFeedId is not null;
 
     private string PageTitleText =>
-        EditImportListId is not null ? "Edit subscription"
-        : CloneImportListId is not null ? "Clone subscription"
-        : "Create subscription";
+        EditFeedId is not null ? "Edit feed"
+        : CloneFeedId is not null ? "Clone feed"
+        : "Create feed";
     private string PageHeadingText => PageTitleText;
     private string PageDescriptionText =>
-        EditImportListId is not null ? "Update an existing subscription and keep your import settings in sync."
-        : CloneImportListId is not null ? "Create a new subscription using values copied from an existing one."
-        : "Import a list from an external provider and subscribe to it.";
+        EditFeedId is not null ? "Update an existing feed and keep your sync settings in sync."
+        : CloneFeedId is not null ? "Create a new feed using values copied from an existing one."
+        : "Subscribe to a list from an external provider as a feed.";
 
     private ProviderConfig _providerConfig = null!;
     private bool _hasOAuthAccess;
     private bool IsOAuthAllowed() => _hasOAuthAccess;
 
-    private SubscriptionConfig _config = new();
+    private FeedConfig _config = new();
     private int? _storedHash;
     private int _appliedHash;
 
@@ -121,11 +121,11 @@
     private bool _isSaving;
     private bool _pendingAutoApply;
     private PreviewStatus _previewStatus = new();
-    private SubscriptionPreviewPanel _previewPanel = null!;
+    private FeedPreviewPanel _previewPanel = null!;
 
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
-    private const string SubscriptionShortcutId = "subscription-ctrl-enter";
+    private const string FeedShortcutId = "feed-ctrl-enter";
 
     private int _configKey;
 
@@ -139,7 +139,7 @@
     private bool ShowSaveButton => _previewStatus.HasResults && !HasPendingChanges && !_previewStatus.HasEnrollmentChanges && !_isSaving;
 
     private void OnPreviewStatusChanged(PreviewStatus status) => _previewStatus = status;
-    private void OnConfigChanged(SubscriptionConfig config)
+    private void OnConfigChanged(FeedConfig config)
     {
         _config = config;
         StateHasChanged();
@@ -159,26 +159,26 @@
             return;
         }
 
-        var sourceId = UrlGuid.Decode(EditImportListId ?? CloneImportListId);
-        var importList = await ImportListRepository.GetImportListByIdAsync(sourceId);
+        var sourceId = UrlGuid.Decode(EditFeedId ?? CloneFeedId);
+        var feed = await FeedRepository.GetFeedByIdAsync(sourceId);
 
-        if (importList is null)
+        if (feed is null)
         {
-            NavigationManager.NavigateTo("/lists");
+            NavigationManager.NavigateTo("/feeds");
             return;
         }
 
-        _config = new SubscriptionConfig
+        _config = new FeedConfig
         {
-            Name = importList.Name.Trim(),
-            IsEnabled = importList.Enabled,
-            Provider = importList.Provider,
-            Strategy = importList.Strategy,
-            ListIdentifier = importList.ListIdentifier.Trim(),
-            Filter = FilterDefinitionConverter.FromQueryFilter(importList.Filter),
-            Sort = importList.Sort,
-            Limit = importList.Limit,
-            Schedule = importList.Schedule,
+            Name = feed.Name.Trim(),
+            IsEnabled = feed.Enabled,
+            Provider = feed.Provider,
+            Strategy = feed.Strategy,
+            Identifier = feed.Identifier.Trim(),
+            Filter = FilterDefinitionConverter.FromQueryFilter(feed.Filter),
+            Sort = feed.Sort,
+            Limit = feed.Limit,
+            Schedule = feed.Schedule,
         };
         _storedHash = _config.GetSaveHash();
         _configKey++;
@@ -195,7 +195,7 @@
 
         if (!_isShortcutRegistered)
         {
-            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+Enter", OnShortcutActivatedAsync, SubscriptionShortcutId);
+            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+Enter", OnShortcutActivatedAsync, FeedShortcutId);
             _isShortcutRegistered = true;
         }
     }
@@ -232,7 +232,7 @@
 
     private Task ReturnAsync()
     {
-        NavigationManager.NavigateTo("/lists");
+        NavigationManager.NavigateTo("/feeds");
         return Task.CompletedTask;
     }
 
@@ -248,42 +248,42 @@
 
         try
         {
-            if (EditImportListId is not null)
+            if (EditFeedId is not null)
             {
-                var editId = UrlGuid.Decode(EditImportListId);
-                var updateData = new ImportListUpdateData
+                var editId = UrlGuid.Decode(EditFeedId);
+                var updateData = new FeedUpdateData
                 {
                     Name = _config.Name.Trim(),
                     IsEnabled = _config.IsEnabled,
                     Provider = _config.Provider!.Value,
                     Strategy = _config.Strategy,
-                    ListIdentifier = _config.ListIdentifier.Trim(),
+                    Identifier = _config.Identifier.Trim(),
                     Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
                     Sort = _config.Sort,
                     Limit = _config.Limit,
                     Schedule = _config.Schedule,
                 };
 
-                await ImportListRepository.UpdateImportListsAsync(editId, updateData, CancellationToken.None);
+                await FeedRepository.UpdateFeedAsync(editId, updateData, CancellationToken.None);
             }
             else
             {
-                var createData = new ImportListCreateData
+                var createData = new FeedCreateData
                 {
                     IsEnabled = _config.IsEnabled,
                     Provider = _config.Provider!.Value,
                     Strategy = _config.Strategy,
-                    ListIdentifier = _config.ListIdentifier.Trim(),
+                    Identifier = _config.Identifier.Trim(),
                     Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
                     Sort = _config.Sort,
                     Limit = _config.Limit,
                     Schedule = _config.Schedule,
                 };
 
-                await ImportListRepository.CreateImportListsAsync(_config.Name.Trim(), createData, CancellationToken.None);
+                await FeedRepository.CreateFeedAsync(_config.Name.Trim(), createData, CancellationToken.None);
             }
 
-            NavigationManager.NavigateTo("/lists");
+            NavigationManager.NavigateTo("/feeds");
         }
         catch (OperationCanceledException) {}
         catch (Exception)
@@ -303,7 +303,7 @@
         {
             _shortcutRegistration?.Dispose();
             _shortcutRegistration = null;
-            KeyboardShortcutService.Unregister(SubscriptionShortcutId);
+            KeyboardShortcutService.Unregister(FeedShortcutId);
             _isShortcutRegistered = false;
         }
     }

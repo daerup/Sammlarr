@@ -1,23 +1,23 @@
-@page "/lists"
+@page "/feeds"
 @using Contracts
-@using Contracts.Media.List
+@using Contracts.Media.Feed
 @using Contracts.Settings
 @using global::Shared
-@using UI.Features.Import.Components
+@using UI.Features.Feeds.Components
 @using UI.Shared.Services.Branding
-@inject IImportListRepository ImportListRepository
+@inject IFeedRepository FeedRepository
 @inject NavigationManager NavigationManager
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject ProfileDropdownService ProfileDropdownService
 
-<PageTitle>Lists</PageTitle>
+<PageTitle>Feeds</PageTitle>
 
 <OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
 
 <PageContainer Heading="@PageHeading" Description="@PageDescription">
     <HeaderActions>
-        <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/subscription/create"))">
+        <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feed/create"))">
             <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
             Add New
         </BbButton>
@@ -25,15 +25,15 @@
     <ChildContent>
         <ProtectedSection GuardState="IsOAuthAllowed"
                           AuthProvider="@_providerConfig?.WatchlistProvider"
-                          DeniedActionDescription="managing your import lists"
+                          DeniedActionDescription="managing your feeds"
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
-            @if (!_isLoading && _lists.Count == 0)
+            @if (!_isLoading && _feeds.Count == 0)
             {
                 <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
                     <LucideIcon Name="list-plus" Size="40" Class="mx-auto text-muted-foreground"/>
-                    <p class="text-muted-foreground">Import lists let you sync titles from providers like MDBList or TMDb into your Sammlarr library
+                    <p class="text-muted-foreground">Feeds let you sync titles from providers like MDBList or TMDb into your Sammlarr library
                         automatically.</p>
-                    <BbButton Variant="ButtonVariant.Outline" OnClick="NavigateToCreateSubscription">
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="NavigateToCreateFeed">
                         <LucideIcon Name="plus" Size="15" Class="mr-2 shrink-0"/>
                         Add
                     </BbButton>
@@ -41,26 +41,26 @@
             }
             else
             {
-                <BbDataTable TData="ImportList"
-                             Data="@_pagedLists"
+                <BbDataTable TData="Feed"
+                             Data="@_pagedFeeds"
                              IsLoading="@_isLoading"
                              ShowToolbar="true"
                              ShowPagination="false"
-                             AriaLabel="Import lists">
+                             AriaLabel="Feeds">
                     <Columns>
-                        <BbDataTableColumn TData="ImportList" TValue="string"
+                        <BbDataTableColumn TData="Feed" TValue="string"
                                            Header="Name"
                                            Property="@(l => l.Name)"
                                            Sortable="true"
                                            Filterable="true"/>
 
-                        <BbDataTableColumn TData="ImportList" TValue="MediaListProvider"
+                        <BbDataTableColumn TData="Feed" TValue="FeedProvider"
                                            Header="Provider"
                                            Property="@(l => l.Provider)"
                                            Sortable="true">
-                            <CellTemplate Context="list">
+                            <CellTemplate Context="feed">
                                 @{
-                                    var branding = MediaProviderBrandingService.GetBrandingInfo(list.Provider.AsMediaProvider());
+                                    var branding = MediaProviderBrandingService.GetBrandingInfo(feed.Provider.AsMediaProvider());
                                 }
                                 <span class="inline-flex items-center gap-1.5 text-sm font-medium">
                                     <span class="shrink-0 flex items-center">@branding.Icon</span>
@@ -69,12 +69,12 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="ImportList" TValue="MediaListAddStrategy"
+                        <BbDataTableColumn TData="Feed" TValue="FeedAddStrategy"
                                            Header="Strategy"
                                            Property="@(l => l.Strategy)"
                                            Sortable="true">
-                            <CellTemplate Context="list">
-                                @if (list.Strategy == MediaListAddStrategy.Replace)
+                            <CellTemplate Context="feed">
+                                @if (feed.Strategy == FeedAddStrategy.Replace)
                                 {
                                     <BbBadge Variant="BadgeVariant.Secondary">Replace</BbBadge>
                                 }
@@ -85,21 +85,21 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="ImportList" TValue="string"
+                        <BbDataTableColumn TData="Feed" TValue="string"
                                            Header="List ID"
-                                           Property="@(l => l.ListIdentifier)"
+                                           Property="@(l => l.Identifier)"
                                            Filterable="true">
-                            <CellTemplate Context="list">
-                                <ProviderListLink ListIdentifier="@list.ListIdentifier" Provider="@list.Provider"/>
+                            <CellTemplate Context="feed">
+                                <FeedSourceLink Identifier="@feed.Identifier" Provider="@feed.Provider"/>
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="ImportList" TValue="bool"
+                        <BbDataTableColumn TData="Feed" TValue="bool"
                                            Header="Status"
                                            Property="@(l => l.Enabled)"
                                            Sortable="true">
-                            <CellTemplate Context="list">
-                                @if (list.Enabled)
+                            <CellTemplate Context="feed">
+                                @if (feed.Enabled)
                                 {
 
                                     <BbBadge Class="bg-success">Enabled</BbBadge>
@@ -111,30 +111,30 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="ImportList" TValue="DateTimeOffset"
+                        <BbDataTableColumn TData="Feed" TValue="DateTimeOffset"
                                            Header="Added"
                                            Property="@(l => l.CreatedAt)"
                                            Sortable="true">
-                            <CellTemplate Context="list">
+                            <CellTemplate Context="feed">
                                 <BbTooltip>
                                     <BbTooltipTrigger>
                                         <span
-                                            class="text-sm text-muted-foreground tabular-nums">@list.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</span>
+                                            class="text-sm text-muted-foreground tabular-nums">@feed.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</span>
                                     </BbTooltipTrigger>
-                                    <BbTooltipContent>@list.CreatedAt.ToLocalTime().ToString("f")</BbTooltipContent>
+                                    <BbTooltipContent>@feed.CreatedAt.ToLocalTime().ToString("f")</BbTooltipContent>
                                 </BbTooltip>
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="ImportList" TValue="string"
+                        <BbDataTableColumn TData="Feed" TValue="string"
                                            Header=""
                                            Width="80px">
-                            <CellTemplate Context="list">
+                            <CellTemplate Context="feed">
                                 <div class="flex items-center gap-1">
                                     <BbTooltip>
                                         <BbTooltipTrigger>
                                             <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit"
-                                                      Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/edit")">
+                                                      Href="@($"/feed/edit/{UrlGuid.Encode(feed.Id)}")">
                                                 <LucideIcon Name="pencil" Size="15"/>
                                             </BbButton>
                                         </BbTooltipTrigger>
@@ -143,7 +143,7 @@
                                     <BbTooltip>
                                         <BbTooltipTrigger>
                                             <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate"
-                                                      Href="@($"/subscription/{UrlGuid.Encode(list.Id)}/clone")">
+                                                      Href="@($"/feed/clone/{UrlGuid.Encode(feed.Id)}")">
                                                 <LucideIcon Name="copy" Size="15"/>
                                             </BbButton>
                                         </BbTooltipTrigger>
@@ -163,9 +163,9 @@
                                         </BbAlertDialogTrigger>
                                         <BbAlertDialogContent>
                                             <BbAlertDialogHeader>
-                                                <BbAlertDialogTitle>Delete "@list.Name"?</BbAlertDialogTitle>
+                                                <BbAlertDialogTitle>Delete "@feed.Name"?</BbAlertDialogTitle>
                                                 <BbAlertDialogDescription>
-                                                    This will permanently remove the list. This action cannot be undone.
+                                                    This will permanently remove the feed. This action cannot be undone.
                                                 </BbAlertDialogDescription>
                                             </BbAlertDialogHeader>
                                             <BbAlertDialogFooter>
@@ -173,7 +173,7 @@
                                                     <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
                                                 </BbAlertDialogCancel>
                                                 <BbAlertDialogAction>
-                                                    <BbButton Variant="ButtonVariant.Destructive" OnClick="@(() => DeleteListAsync(list.Id))">Delete</BbButton>
+                                                    <BbButton Variant="ButtonVariant.Destructive" OnClick="@(() => DeleteFeedAsync(feed.Id))">Delete</BbButton>
                                                 </BbAlertDialogAction>
                                             </BbAlertDialogFooter>
                                         </BbAlertDialogContent>
@@ -194,15 +194,15 @@
 </PageContainer>
 
 @code {
-    private string PageHeading => "Lists";
-    private string PageDescription => "Import your media lists from supported providers to get started.";
+    private string PageHeading => "Feeds";
+    private string PageDescription => "Subscribe to media lists from supported providers to get started.";
 
     private ProviderConfig _providerConfig = null!;
     private bool _hasOAuthAccess;
     private bool IsOAuthAllowed() => _hasOAuthAccess;
 
-    private IReadOnlyList<ImportList> _lists = [];
-    private IReadOnlyList<ImportList> _pagedLists = [];
+    private IReadOnlyList<Feed> _feeds = [];
+    private IReadOnlyList<Feed> _pagedFeeds = [];
     private bool _isLoading = true;
     private int _currentPage = 1;
     private int _totalPages = 1;
@@ -210,8 +210,8 @@
     protected override async Task OnInitializedAsync()
     {
         _providerConfig = await ProviderConfigRepository.GetAsync();
-        _lists = await ImportListRepository.GetImportListsAsync();
-        UpdatePagedLists();
+        _feeds = await FeedRepository.GetFeedsAsync();
+        UpdatePagedFeeds();
         _isLoading = false;
     }
 
@@ -221,30 +221,30 @@
         return Task.CompletedTask;
     }
 
-    private void NavigateToCreateSubscription()
+    private void NavigateToCreateFeed()
     {
-        NavigationManager.NavigateTo("/subscription/create");
+        NavigationManager.NavigateTo("/feed/create");
     }
 
-    private void UpdatePagedLists()
+    private void UpdatePagedFeeds()
     {
         const int pageSize = 20;
-        _totalPages = (int)Math.Ceiling((double)_lists.Count / pageSize);
-        _pagedLists = _lists.Skip((_currentPage - 1) * pageSize).Take(pageSize).ToList();
+        _totalPages = (int)Math.Ceiling((double)_feeds.Count / pageSize);
+        _pagedFeeds = _feeds.Skip((_currentPage - 1) * pageSize).Take(pageSize).ToList();
     }
 
-    private async Task DeleteListAsync(Guid id)
+    private async Task DeleteFeedAsync(Guid id)
     {
-        await ImportListRepository.DeleteImportListAsync(id);
-        _lists = await ImportListRepository.GetImportListsAsync();
-        UpdatePagedLists();
+        await FeedRepository.DeleteFeedAsync(id);
+        _feeds = await FeedRepository.GetFeedsAsync();
+        UpdatePagedFeeds();
     }
 
 
     private async Task HandlePageChangedAsync(int newPage)
     {
         _currentPage = newPage;
-        UpdatePagedLists();
+        UpdatePagedFeeds();
         await Task.CompletedTask;
     }
 }

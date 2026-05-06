@@ -1,6 +1,6 @@
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
@@ -36,13 +36,13 @@ public static class ProviderExtensions
 			};
 	}
 
-	extension(MediaListProvider provider)
+	extension(FeedProvider provider)
 	{
 		public MediaProvider AsMediaProvider() =>
 			provider switch
 			{
-				MediaListProvider.Mdblist => MediaProvider.Mdblist,
-				MediaListProvider.Tmdb => MediaProvider.Tmdb,
+				FeedProvider.Mdblist => MediaProvider.Mdblist,
+				FeedProvider.Tmdb => MediaProvider.Tmdb,
 			};
 	}
 
