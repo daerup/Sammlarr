@@ -50,7 +50,7 @@ public class BlacklistServiceTests
 		repository.GetBlacklistedEntriesAsync(Any(), Any()).Returns([entry]);
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(Any(), Any()).Returns(detailResult);
+		metadataProvider.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any()).Returns(AsAsync(detailResult));
 
 		var testee = CreateTestee(repository, metadataProvider);
 
@@ -92,9 +92,27 @@ public class BlacklistServiceTests
 				}
 			);
 
-		var provider = (metadataProvider ?? IMediaMetadataProvider.Mock()).Object;
+		Mock<IMediaMetadataProvider> provider;
+		if (metadataProvider is null)
+		{
+			provider = IMediaMetadataProvider.Mock();
+			provider.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any()).Returns(AsAsync());
+		}
+		else
+		{
+			provider = metadataProvider;
+		}
 
-		return new BlacklistService(repo.Object, providerConfigRepository.Object, provider);
+		return new BlacklistService(repo.Object, providerConfigRepository.Object, provider.Object);
+	}
+
+	private static async IAsyncEnumerable<IMediaDetailResult> AsAsync(params IMediaDetailResult[] items)
+	{
+		foreach (var item in items)
+		{
+			yield return item;
+		}
+		await Task.CompletedTask;
 	}
 
 	private IMediaId CreateMediaId() => PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie);

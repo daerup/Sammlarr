@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using API.Metadata;
 using Contracts;
 using Contracts.DI;
@@ -5,6 +6,7 @@ using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
+using Shared;
 
 namespace API;
 
@@ -20,27 +22,50 @@ internal class MediaMetadataProvider(
 	private static readonly TimeSpan StaleAfter = TimeSpan.FromDays(7);
 	private static readonly TimeSpan HydrationCooldown = TimeSpan.FromHours(1);
 	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
+	private const int MaxFetchConcurrency = 10;
 
-	public async Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<IMediaDetailResult> GetAsync(
+		IReadOnlyList<IMediaId> mediaIds,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
 	{
-		var cached = await repository.GetByMediaIdAsync(mediaId, cancellationToken);
-		if (cached is null)
+		if (mediaIds.Count == 0)
 		{
-			return await FetchFreshAsync(mediaId, cancellationToken);
+			yield break;
 		}
 
-		var sinceFetched = dateTimeProvider.Now - cached.FetchedAt;
-		if (sinceFetched >= StaleAfter)
+		var config = await configRepository.GetAsync(cancellationToken);
+
+		var resolutions = await mediaIds
+			.ToAsyncEnumerable()
+			.SelectAwait(async id => Classify(id, await repository.GetByMediaIdAsync(id, cancellationToken)))
+			.ToListAsync(cancellationToken);
+
+		foreach (var resolution in resolutions.Where(r => r.State == ResolutionState.ReturnCached))
 		{
-			return await FetchFreshAsync(mediaId, cancellationToken);
+			yield return resolution.Details!;
 		}
 
-		if (MetadataCompleteness.IsComplete(cached.Details) || sinceFetched < HydrationCooldown)
+		var pending = resolutions.Where(r => r.State != ResolutionState.ReturnCached).ToList();
+		var completed = new List<Resolution>(pending.Count);
+
+		if (pending.Count > 0)
 		{
-			return cached.Details;
+			using var gate = new SemaphoreSlim(MaxFetchConcurrency);
+			var tasks = pending.Select(r => RunWithGateAsync(r, config, gate, cancellationToken)).ToList();
+
+			await foreach (var task in Task.WhenEach(tasks).WithCancellation(cancellationToken))
+			{
+				var resolution = await task;
+				completed.Add(resolution);
+				yield return resolution.Details!;
+			}
 		}
 
-		return await HydrateAsync(mediaId, cached.Details, cancellationToken);
+		if (completed.Count > 0)
+		{
+			await repository.UpsertManyAsync(completed.Select(r => new MediaMetadataUpsert(r.Id, r.Details!)).ToList(), cancellationToken);
+		}
 	}
 
 	public async Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
@@ -51,23 +76,62 @@ internal class MediaMetadataProvider(
 		}
 	}
 
-	private async Task<IMediaDetailResult> FetchFreshAsync(IMediaId mediaId, CancellationToken cancellationToken)
+	private Resolution Classify(IMediaId mediaId, CachedMediaMetadata? cached)
 	{
-		var config = await configRepository.GetAsync(cancellationToken);
-		var details = await searchIndex[config.SearchProvider].LookUpAsync(mediaId, cancellationToken);
-		details = await EnrichAsync(details, config.SearchProvider, cancellationToken);
-		details = await ApplyRatingsAsync(details, config.RatingProvider, cancellationToken);
-		await repository.UpsertAsync(mediaId, details, cancellationToken);
-		return details;
+		if (cached is null)
+		{
+			return new Resolution { Id = mediaId, State = ResolutionState.FetchFresh };
+		}
+
+		var sinceFetched = dateTimeProvider.Now - cached.FetchedAt;
+		if (sinceFetched >= StaleAfter)
+		{
+			return new Resolution { Id = mediaId, State = ResolutionState.FetchFresh };
+		}
+
+		if (MetadataCompleteness.IsComplete(cached.Details) || sinceFetched < HydrationCooldown)
+		{
+			return new Resolution
+			{
+				Id = mediaId,
+				State = ResolutionState.ReturnCached,
+				Details = cached.Details,
+			};
+		}
+
+		return new Resolution
+		{
+			Id = mediaId,
+			State = ResolutionState.Hydrate,
+			Details = cached.Details,
+		};
 	}
 
-	private async Task<IMediaDetailResult> HydrateAsync(IMediaId mediaId, IMediaDetailResult details, CancellationToken cancellationToken)
+	private async Task<Resolution> RunWithGateAsync(Resolution resolution, ProviderConfig config, SemaphoreSlim gate, CancellationToken cancellationToken)
 	{
-		var config = await configRepository.GetAsync(cancellationToken);
-		details = await EnrichAsync(details, config.SearchProvider, cancellationToken);
-		details = await ApplyRatingsAsync(details, config.RatingProvider, cancellationToken);
-		await repository.UpsertAsync(mediaId, details, cancellationToken);
-		return details;
+		await gate.WaitAsync(cancellationToken);
+		try
+		{
+			resolution.Details = await ExecuteFetchAsync(resolution, config, cancellationToken);
+			return resolution;
+		}
+		finally
+		{
+			gate.Release();
+		}
+	}
+
+	private async Task<IMediaDetailResult> ExecuteFetchAsync(Resolution resolution, ProviderConfig config, CancellationToken cancellationToken)
+	{
+		var baseDetail = resolution.State switch
+		{
+			ResolutionState.FetchFresh => await searchIndex[config.SearchProvider].LookUpAsync(resolution.Id, cancellationToken),
+			ResolutionState.Hydrate => resolution.Details!,
+		};
+
+		baseDetail = await EnrichAsync(baseDetail, config.SearchProvider, cancellationToken);
+		baseDetail = await ApplyRatingsAsync(baseDetail, config.RatingProvider, cancellationToken);
+		return baseDetail;
 	}
 
 	private async Task<IMediaDetailResult> ApplyRatingsAsync(IMediaDetailResult details, RatingProvider ratingProvider, CancellationToken cancellationToken)
@@ -110,4 +174,18 @@ internal class MediaMetadataProvider(
 
 	private static IMediaId? FindId(IMediaDetailResult details, MediaProvider provider) =>
 		details.SourceId.Source == provider ? details.SourceId : details.AdditionalIds.FirstOrDefault(id => id.Source == provider);
+
+	private enum ResolutionState
+	{
+		ReturnCached,
+		FetchFresh,
+		Hydrate,
+	}
+
+	private sealed record Resolution
+	{
+		public required IMediaId Id { get; init; }
+		public required ResolutionState State { get; init; }
+		public IMediaDetailResult? Details { get; set; }
+	}
 }

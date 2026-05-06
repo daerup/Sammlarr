@@ -21,9 +21,9 @@ internal class WatchlistService(
 		var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 
 		var enriched = new List<IMediaDetailResult>(providerPage.Items.Count);
-		foreach (var id in providerPage.Items)
+		await foreach (var detail in metadataProvider.GetAsync(providerPage.Items, cancellationToken))
 		{
-			enriched.Add(await metadataProvider.GetAsync(id, cancellationToken));
+			enriched.Add(detail);
 		}
 
 		return new WatchlistPageResult(enriched, providerPage.TotalPages);
@@ -38,9 +38,9 @@ internal class WatchlistService(
 		{
 			var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 			totalPages = providerPage.TotalPages;
-			foreach (var id in providerPage.Items)
+			await foreach (var detail in metadataProvider.GetAsync(providerPage.Items, cancellationToken))
 			{
-				yield return await metadataProvider.GetAsync(id, cancellationToken);
+				yield return detail;
 			}
 			page++;
 		} while (page <= totalPages);

@@ -32,31 +32,35 @@ internal class MdblistService(
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(stream)!;
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
+		var watchlistProvider = providerConfig.WatchlistProvider.AsMediaProvider();
 
-		foreach (var show in result.shows)
+		var resolvedIds = new List<IMediaId>();
+		var unresolved = new List<IMediaDetailResult>();
+
+		var shows = result.shows.Select(s => ((MdblistTypes.ListItems.IListItem)s, MediaType.Show));
+		var movies = result.movies.Select(m => ((MdblistTypes.ListItems.IListItem)m, MediaType.Movie));
+
+		foreach (var (item, mediaType) in shows.Concat(movies))
 		{
-			yield return await MapMediaItemAsync(show, MediaType.Show, providerConfig, cancellationToken);
+			if (await ResolveIdsAsync(item.ids, mediaType, watchlistProvider, item.title, item.release_year) is Resolved resolved)
+			{
+				resolvedIds.Add(resolved.Id);
+			}
+			else
+			{
+				unresolved.Add(BuildUnresolved(item, mediaType));
+			}
 		}
 
-		foreach (var movie in result.movies)
+		await foreach (var detail in metadataProvider.GetAsync(resolvedIds, cancellationToken))
 		{
-			yield return await MapMediaItemAsync(movie, MediaType.Movie, providerConfig, cancellationToken);
+			yield return detail;
 		}
-	}
 
-	private async Task<IMediaDetailResult> MapMediaItemAsync(
-		MdblistTypes.ListItems.IListItem item,
-		MediaType mediaType,
-		ProviderConfig providerConfig,
-		CancellationToken cancellationToken
-	)
-	{
-		var resolvedResult = await ResolveIdsAsync(item.ids, mediaType, providerConfig.WatchlistProvider.AsMediaProvider(), item.title, item.release_year);
-		if (resolvedResult is not Resolved resolvedId)
+		foreach (var item in unresolved)
 		{
-			return BuildUnresolved(item, mediaType);
+			yield return item;
 		}
-		return await metadataProvider.GetAsync(resolvedId.Id, cancellationToken);
 	}
 
 	private UnresolvedMediaResult BuildUnresolved(MdblistTypes.ListItems.IListItem item, MediaType mediaType)
