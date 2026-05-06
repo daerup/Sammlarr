@@ -2,21 +2,21 @@
 @using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Blacklist
-@using Contracts.Media.List
+@using Contracts.Media.Feed
 @using Contracts.Media.Metadata
 @using Contracts.Media.Search
 @using Contracts.Processing
 @using Contracts.Watchlist
-@using UI.Features.Import.Components
+@using UI.Features.Feeds.Components
 @implements IDisposable
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
 @inject IMediaMetadataProvider MetadataProvider
-@inject IKeyedServiceIndex<MediaListProvider, IImportListService> ImportListServiceIndex
+@inject IKeyedServiceIndex<FeedProvider, IFeedService> FeedServiceIndex
 @inject IQueryProcessor<IMediaDetailResult> QueryProcessor
 @inject Notifier Notifier
 
-<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden subscription-pane rounded-lg bg-card border border-border shadow-sm">
+<BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
         <BbInput Placeholder="Search media..."
                  Class="w-full"
@@ -37,7 +37,7 @@
                         }
                     </h2>
                     <p class="text-sm text-muted-foreground mt-0.5">
-                        <ProviderListLink ListIdentifier="@(_testedConfig?.ListIdentifier ?? Config.ListIdentifier)" Provider="@(_testedConfig?.Provider ?? Config.Provider!.Value)"/>
+                        <FeedSourceLink Identifier="@(_testedConfig?.Identifier ?? Config.Identifier)" Provider="@(_testedConfig?.Provider ?? Config.Provider!.Value)"/>
                     </p>
                 </div>
                 <BbTooltipProvider>
@@ -233,7 +233,7 @@
 
 @code {
 
-    [Parameter] public required SubscriptionConfig Config { get; set; }
+    [Parameter] public required FeedConfig Config { get; set; }
     [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
 
     private enum FetchState { Idle, Loading, Success, Failed }
@@ -242,7 +242,7 @@
     private List<IMediaDetailResult> _rawResults = [];
     private IReadOnlyList<IMediaDetailResult> _unresolvedResults = [];
     private IReadOnlyList<QueryResult<IMediaDetailResult>> _processedResults = [];
-    private SubscriptionConfig? _testedConfig;
+    private FeedConfig? _testedConfig;
     private CancellationTokenSource? _cts;
     private PreviewStatus _lastEmittedStatus = new();
 
@@ -264,7 +264,7 @@
     {
         if (_fetchState is FetchState.Success or FetchState.Failed &&
             (Config.Provider != _testedConfig?.Provider ||
-             !string.Equals(Config.ListIdentifier?.Trim(), _testedConfig?.ListIdentifier?.Trim(), StringComparison.Ordinal)))
+             !string.Equals(Config.Identifier?.Trim(), _testedConfig?.Identifier?.Trim(), StringComparison.Ordinal)))
         {
             _fetchState = FetchState.Idle;
             _rawResults = [];
@@ -285,7 +285,7 @@
 
         var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
                          Config.Provider != _testedConfig?.Provider ||
-                         !string.Equals(Config.ListIdentifier?.Trim(), _testedConfig?.ListIdentifier?.Trim(), StringComparison.Ordinal);
+                         !string.Equals(Config.Identifier?.Trim(), _testedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
 
         if (needsFetch)
         {
@@ -323,9 +323,9 @@
             _blacklistIds.Clear();
             await LoadWatchlistAndBlacklistAsync();
 
-            var service = ImportListServiceIndex[Config.Provider!.Value];
+            var service = FeedServiceIndex[Config.Provider!.Value];
             var sw = Stopwatch.StartNew();
-            await foreach (var item in service.GetImportListItemsAsync(Config.ListIdentifier.Trim(), ct).WithCancellation(ct))
+            await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), ct).WithCancellation(ct))
             {
                 _rawResults.Add(item);
                 if (sw.ElapsedMilliseconds >= 150)

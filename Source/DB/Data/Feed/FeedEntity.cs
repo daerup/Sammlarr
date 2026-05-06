@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Contracts.Processing;
 using DB.Conversion.Enums;
 
-namespace DB.Data.List;
+namespace DB.Data.Feed;
 
-internal record ImportListEntity : Entity<Guid>
+internal record FeedEntity : Entity<Guid>
 {
 	[Required]
 	public bool IsEnabled { get; set; }
@@ -15,11 +15,11 @@ internal record ImportListEntity : Entity<Guid>
 
 	[Required]
 	[EnumAsString]
-	public MediaListProvider Provider { get; set; }
+	public FeedProvider Provider { get; set; }
 
 	[Required]
 	[EnumAsString]
-	public MediaListAddStrategy Strategy { get; set; }
+	public FeedAddStrategy Strategy { get; set; }
 
 	[Required]
 	public string Identifier { get; set; } = string.Empty;

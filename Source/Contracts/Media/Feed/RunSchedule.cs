@@ -1,6 +1,6 @@
 using Cronos;
 
-namespace Contracts.Media.List;
+namespace Contracts.Media.Feed;
 
 public readonly record struct Manual;
 

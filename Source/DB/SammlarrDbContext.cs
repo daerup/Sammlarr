@@ -2,13 +2,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Contracts;
 using Contracts.Media;
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Contracts.Processing;
 using DB.Data;
 using DB.Data.Access;
 using DB.Data.Blacklist;
 using DB.Data.Config;
-using DB.Data.List;
+using DB.Data.Feed;
 using DB.Data.MediaGroup;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
@@ -56,7 +56,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
-	public DbSet<ImportListEntity> Lists => Set<ImportListEntity>();
+	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();
 	public DbSet<BlacklistEntryEntity> BlacklistEntries => Set<BlacklistEntryEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -99,7 +99,7 @@ internal sealed class SammlarrDbContext : DbContext
 			builder.HasOne(r => r.Metadata).WithMany(m => m.Ratings).HasForeignKey("MediaIdGroupId").OnDelete(DeleteBehavior.Cascade);
 		});
 
-		modelBuilder.Entity<ImportListEntity>(builder =>
+		modelBuilder.Entity<FeedEntity>(builder =>
 		{
 			builder
 				.Property(x => x.Filter)

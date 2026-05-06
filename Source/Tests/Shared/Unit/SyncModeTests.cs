@@ -1,4 +1,4 @@
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Test.Shared;
 
 namespace Shared.Tests.Unit;

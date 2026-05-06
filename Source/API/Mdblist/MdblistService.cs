@@ -4,7 +4,7 @@ using API.Mdblist.Types;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
@@ -17,16 +17,16 @@ internal class MdblistService(
 	IMediaIdResolver mediaIdResolver,
 	IMediaMetadataProvider metadataProvider,
 	IProviderConfigRepository configRepository
-) : IImportListService
+) : IFeedService
 {
 	private const string ListItemsEndpoint = "lists/{0}/items";
 
-	public async IAsyncEnumerable<IMediaDetailResult> GetImportListItemsAsync(
-		string listIdentifier,
+	public async IAsyncEnumerable<IMediaDetailResult> GetFeedItemsAsync(
+		string identifier,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var endpoint = string.Format(ListItemsEndpoint, listIdentifier);
+		var endpoint = string.Format(ListItemsEndpoint, identifier);
 		var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

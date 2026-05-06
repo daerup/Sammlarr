@@ -1,7 +1,7 @@
 using DB.Data.Access;
 using DB.Data.Blacklist;
 using DB.Data.Config;
-using DB.Data.List;
+using DB.Data.Feed;
 using DB.Data.MediaGroup;
 using DB.Data.Metadata;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<AccessModule>();
 		services.AddModule<BlacklistModule>();
 		services.AddModule<ConfigModule>();
-		services.AddModule<ListModule>();
+		services.AddModule<FeedModule>();
 		services.AddModule<MediaGroupModule>();
 		services.AddModule<MetadataModule>();
 	}

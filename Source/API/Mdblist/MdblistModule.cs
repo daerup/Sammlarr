@@ -1,6 +1,6 @@
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.List;
+using Contracts.Media.Feed;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -12,6 +12,6 @@ public class MdblistModule : IServiceModule
 	{
 		services.AddHttpClient<MdblistClient>();
 		services.AddKeyedScoped<IApiKeyValidator, MdblistClient>(MediaProvider.Mdblist);
-		services.AddKeyedScoped<IImportListService, MdblistService>(MediaListProvider.Mdblist);
+		services.AddKeyedScoped<IFeedService, MdblistService>(FeedProvider.Mdblist);
 	}
 }
