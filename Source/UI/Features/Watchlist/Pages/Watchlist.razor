@@ -107,6 +107,7 @@ else
                   ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
                   Description="@(_selectedItem?.Summary ?? string.Empty)"
+                  Ids="@(_selectedItem is null ? null : [_selectedItem.SourceId, .._selectedItem.AdditionalIds])"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromWatchlistAsync"
                   ButtonText="GetRemoveButtonText"
