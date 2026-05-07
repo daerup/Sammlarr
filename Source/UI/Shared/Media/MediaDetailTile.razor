@@ -17,7 +17,7 @@
                 }
             </div>
             <div class="search-result-content min-w-0">
-                <p class="text-xs text-muted-foreground flex items-center gap-1.5">
+                <div class="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1">
                     @if (Result.MediaType is MediaType.Movie)
                     {
                         <LucideIcon Name="film" Size="13"/>
@@ -47,8 +47,11 @@
                             <span class="font-medium">@rating.ToString("F1")</span>
                         </span>
                     }
-                </p>
-                <p class="font-bold truncate text-xl pt-2">@Result.Title</p>
+                </div>
+                <div class="flex items-center gap-2 pt-2 min-w-0">
+                    <p class="font-bold truncate text-xl">@Result.Title</p>
+                    <MediaIdLinks Ids="@_ids" IconSize="20" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                </div>
 
                 @if (!string.IsNullOrWhiteSpace(Result.Tagline))
                 {
@@ -92,6 +95,7 @@
 
     private string _backgroundStyle = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
+    private IReadOnlyList<IMediaId> _ids = [];
     private bool _failed;
     private IMediaDetailResult? _lastResult;
 
@@ -104,6 +108,7 @@
         }
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl : Result.BackdropUrl)}')";
         _displayFacts = GetDisplayFacts(Result);
+        _ids = [Result.SourceId, ..Result.AdditionalIds];
     }
 
     private async Task OnPosterError()

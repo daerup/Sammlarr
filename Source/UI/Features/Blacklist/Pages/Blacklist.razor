@@ -92,6 +92,7 @@ else
                   ReleaseDate="@SelectedReleaseDate"
                   ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
+                  Ids="@(_selectedItem is null ? null : [_selectedItem.SourceId, .._selectedItem.AdditionalIds])"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromBlacklistAsync"
                   ButtonText="GetRemoveButtonText"

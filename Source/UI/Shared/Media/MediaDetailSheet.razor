@@ -1,5 +1,6 @@
 @using Contracts.Media
 @using global::Shared
+@using UI.Shared.Services.Branding
 @if (Open)
 {
     <div class="sheet-modal-backdrop"></div>
@@ -9,9 +10,17 @@
         @if (ShowContent)
         {
             <BbSheetHeader>
-                <BbSheetTitle Class="font-bold tracking-wide">@Title</BbSheetTitle>
+                <BbSheetTitle Class="font-bold tracking-wide">
+                    @Title
+                    @if (Ids is { Count: > 0 })
+                    {
+                        <span class="ml-2 inline-block align-middle">
+                            <MediaIdLinks Ids="@Ids" IconSize="20" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                        </span>
+                    }
+                </BbSheetTitle>
                 <BbSheetDescription Class="font-normal tracking-wide">
-                    <span class="flex items-center justify-center gap-1.5">
+                    <span class="inline-flex items-center justify-center gap-1.5">
                         @if (MediaType is MediaType.Movie)
                         {
                             <LucideIcon Name="film" Size="16"/>
@@ -147,6 +156,9 @@
 
     [Parameter]
     public EventCallback OnImageBroken { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<IMediaId>? Ids { get; set; }
 
     private bool _isButtonBusy;
     private bool _failed;

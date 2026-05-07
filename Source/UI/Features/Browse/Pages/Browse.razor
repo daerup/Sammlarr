@@ -96,6 +96,7 @@
                   Rating="@(_selectedMedia?.Rating)"
                   ShowMetadataRow="true"
                   Description="@_selectedMedia?.Description"
+                  Ids="@(_selectedMedia is null ? null : [_selectedMedia.SourceId])"
                   ButtonAction="ToggleWatchlistAsync"
                   ButtonText="GetSideMenuButtonText"
                   ButtonIcon="GetSideMenuButtonIcon"/>

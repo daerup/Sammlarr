@@ -1,0 +1,56 @@
+@using Contracts.Media
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+@if (Ids.Count > 0)
+{
+	<BbPopover>
+		<BbPopoverTrigger AsChild="false" class="id-links-trigger" aria-label="View external IDs">
+			<LucideIcon Name="external-link" Size="@IconSize"/>
+		</BbPopoverTrigger>
+		<BbPopoverContent Side="@Side" Align="@Align" Class="id-links-popover w-auto p-0 overflow-hidden">
+			<div class="id-links-popover-header">
+				<LucideIcon Name="external-link" Size="12"/>
+				<span>External IDs</span>
+			</div>
+			<div class="id-links-popover-grid">
+				@foreach (var id in Ids)
+				{
+					var url = MediaIdUrlResolver.Resolve(id);
+					var branding = Branding.GetBrandingInfo(id.Source);
+					var brandStyle = $"--brand: {branding.BrandColor}";
+					var ariaLabel = url is not null
+						? $"View {id.Value} on {branding.DisplayName} (opens in new tab)"
+						: $"{branding.DisplayName} ID {id.Value}";
+
+					if (url is not null)
+					{
+						<a href="@url"
+						   target="_blank"
+						   rel="noopener noreferrer"
+						   aria-label="@ariaLabel"
+						   style="@brandStyle"
+						   class="chip chip-link">
+							@branding.IconWithClass("w-6 h-6")
+						</a>
+					}
+					else
+					{
+						<span aria-label="@ariaLabel"
+						      style="@brandStyle"
+						      class="chip chip-readonly">
+							@branding.IconWithClass("w-6 h-6")
+						</span>
+					}
+				}
+			</div>
+		</BbPopoverContent>
+	</BbPopover>
+}
+
+@code {
+	[Parameter] [EditorRequired] public required IReadOnlyList<IMediaId> Ids { get; set; }
+	[Parameter] public int IconSize { get; set; } = 18;
+	[Parameter] [EditorRequired] public required PopoverSide Side { get; set; }
+	[Parameter] [EditorRequired] public required PopoverAlign Align { get; set; }
+}
