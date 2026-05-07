@@ -17,7 +17,7 @@
                 }
             </div>
             <div class="search-result-content min-w-0">
-                <div class="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                <div class="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 space-x-1">
                     @if (Result.MediaType is MediaType.Movie)
                     {
                         <LucideIcon Name="film" Size="13"/>
@@ -34,10 +34,10 @@
                     {
                         <span>@Result.ReleaseDate.Year</span>
                     }
-                    @if (_displayFacts.Count > 0)
+                    @foreach (var fact in _displayFacts)
                     {
                         <span aria-hidden="true">•</span>
-                        <span>@string.Join(" • ", _displayFacts)</span>
+                        <span>@fact</span>
                     }
                     @if (Result.Rating is { } rating)
                     {
