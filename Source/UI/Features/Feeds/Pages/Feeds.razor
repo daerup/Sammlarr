@@ -17,7 +17,7 @@
 
 <PageContainer Heading="@PageHeading" Description="@PageDescription">
     <HeaderActions>
-        <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feed/create"))">
+        <BbButton Variant="ButtonVariant.Secondary" OnClick="@(() => NavigationManager.NavigateTo("/feeds/create"))">
             <LucideIcon Name="plus" Size="15" Class="mr-2.5 shrink-0"/>
             Add New
         </BbButton>
@@ -134,7 +134,7 @@
                                     <BbTooltip>
                                         <BbTooltipTrigger>
                                             <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit"
-                                                      Href="@($"/feed/edit/{UrlGuid.Encode(feed.Id)}")">
+                                                      Href="@($"/feeds/edit/{UrlGuid.Encode(feed.Id)}")">
                                                 <LucideIcon Name="pencil" Size="15"/>
                                             </BbButton>
                                         </BbTooltipTrigger>
@@ -143,7 +143,7 @@
                                     <BbTooltip>
                                         <BbTooltipTrigger>
                                             <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate"
-                                                      Href="@($"/feed/clone/{UrlGuid.Encode(feed.Id)}")">
+                                                      Href="@($"/feeds/clone/{UrlGuid.Encode(feed.Id)}")">
                                                 <LucideIcon Name="copy" Size="15"/>
                                             </BbButton>
                                         </BbTooltipTrigger>
@@ -223,7 +223,7 @@
 
     private void NavigateToCreateFeed()
     {
-        NavigationManager.NavigateTo("/feed/create");
+        NavigationManager.NavigateTo("/feeds/create");
     }
 
     private void UpdatePagedFeeds()

@@ -1,0 +1,19 @@
+header ::deep .nav-link {
+    color: color-mix(in oklab, var(--foreground) 60%, transparent);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+header ::deep .nav-link:hover {
+    color: color-mix(in oklab, var(--foreground) 80%, transparent);
+}
+
+header ::deep .nav-link[aria-current="page"],
+header ::deep .nav-link[aria-current="page"]:hover {
+    color: var(--foreground);
+    background-color: transparent;
+    text-decoration: underline;
+    text-decoration-color: var(--primary);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 1.25rem;
+}

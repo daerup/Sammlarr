@@ -9,23 +9,25 @@
                     <span class="font-bold">UI</span>
                 </a>
             </div>
-            <nav class="flex items-center space-x-6 text-sm font-medium">
-                <NavLink href="/" Match="NavLinkMatch.All" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
-                    Home
-                </NavLink>
-                <NavLink href="/feeds" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
-                    Feeds
-                </NavLink>
-                <NavLink href="/browse" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
-                    Browse
-                </NavLink>
-                <NavLink href="/watchlist" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
-                    Watchlist
-                </NavLink>
-                <NavLink href="/blacklist" class="transition-colors hover:text-foreground/80 text-foreground/60" ActiveClass="text-foreground">
-                    Blacklist
-                </NavLink>
-            </nav>
+            <BbNavigationMenu Class="text-sm font-medium">
+                <BbNavigationMenuList>
+                    <BbNavigationMenuItem>
+                        <BbNavigationMenuLink Href="/" Match="NavLinkMatch.All" Class="nav-link">Home</BbNavigationMenuLink>
+                    </BbNavigationMenuItem>
+                    <BbNavigationMenuItem>
+                        <BbNavigationMenuLink Href="/feeds" Class="nav-link">Feeds</BbNavigationMenuLink>
+                    </BbNavigationMenuItem>
+                    <BbNavigationMenuItem>
+                        <BbNavigationMenuLink Href="/browse" Class="nav-link">Browse</BbNavigationMenuLink>
+                    </BbNavigationMenuItem>
+                    <BbNavigationMenuItem>
+                        <BbNavigationMenuLink Href="/watchlist" Class="nav-link">Watchlist</BbNavigationMenuLink>
+                    </BbNavigationMenuItem>
+                    <BbNavigationMenuItem>
+                        <BbNavigationMenuLink Href="/blacklist" Class="nav-link">Blacklist</BbNavigationMenuLink>
+                    </BbNavigationMenuItem>
+                </BbNavigationMenuList>
+            </BbNavigationMenu>
             <div class="flex flex-1 items-center justify-end space-x-2">
                 <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"/>
 
