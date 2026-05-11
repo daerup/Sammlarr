@@ -1,19 +1,38 @@
 header ::deep .nav-link {
-    color: color-mix(in oklab, var(--foreground) 60%, transparent);
-    text-decoration: none;
-    transition: color 0.15s ease;
+	color: color-mix(in oklab, var(--foreground) 60%, transparent);
+	text-decoration: none;
+	transition: color 0.15s ease;
 }
 
 header ::deep .nav-link:hover {
-    color: color-mix(in oklab, var(--foreground) 80%, transparent);
+	color: color-mix(in oklab, var(--foreground) 80%, transparent);
 }
 
 header ::deep .nav-link[aria-current="page"],
 header ::deep .nav-link[aria-current="page"]:hover {
-    color: var(--foreground);
-    background-color: transparent;
-    text-decoration: underline;
-    text-decoration-color: var(--primary);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 1.25rem;
+	color: var(--foreground);
+	background-color: transparent;
+	text-decoration: none;
+}
+
+header ::deep nav > ul {
+	position: relative;
+}
+
+header ::deep nav > ul::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: -0.5rem;
+	height: 2px;
+	width: var(--underline-width, 0);
+	background-color: var(--primary);
+	transform: translateX(var(--underline-left, 0));
+	transition: transform 250ms ease, width 250ms ease, opacity 150ms ease;
+	pointer-events: none;
+	opacity: 0;
+}
+
+header ::deep nav > ul[data-underline-ready="true"]::after {
+	opacity: 1;
 }
