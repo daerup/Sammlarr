@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+	<configuration default="false" name="AppHost" type="DotNetProject" factoryName=".NET Project">
+		<option name="ProjectFilePath" value="$PROJECT_DIR$/Sammlarr.AppHost/Sammlarr.AppHost.csproj" />
+		<option name="WorkingDirectory" value="$PROJECT_DIR$/Sammlarr.AppHost" />
+		<option name="LaunchProfileName" value="https" />
+		<option name="UseLaunchProfile" value="true" />
+		<option name="UseExternalConsole" value="false" />
+		<method v="2" />
+	</configuration>
+</component>
