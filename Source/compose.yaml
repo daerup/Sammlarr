@@ -4,4 +4,18 @@
     build:
       context: .
       dockerfile: UI/Dockerfile
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      Sammlarr__Telemetry__Verbosity: Verbose
+    depends_on:
+      - aspire-dashboard
+
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    container_name: sammlarr-aspire-dashboard
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      - "18888:18888" # web UI (HTTP)
+      - "18889:18889" # OTLP gRPC ingestion (HTTP)
 

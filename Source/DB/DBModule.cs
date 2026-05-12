@@ -1,5 +1,6 @@
 using DB.Conversion;
 using DB.Data;
+using DB.Telemetry;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -13,6 +14,7 @@ public class DbModule : IServiceModule
 	{
 		services.AddModule<ConversionModule>();
 		services.AddModule<DataAccessModule>();
+		services.AddModule<TelemetryModule>();
 		services.AddScoped<EntityAuditer>();
 		services.AddDbContext<SammlarrDbContext>(
 			(sp, options) =>

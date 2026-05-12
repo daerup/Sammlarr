@@ -4,6 +4,7 @@ using Contracts.Media.Blacklist;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
 using Shared;
+using Shared.Telemetry;
 
 namespace Core.Blacklist;
 
@@ -13,6 +14,7 @@ internal class BlacklistService(IBlacklistRepository repository, IProviderConfig
 	public async Task<IReadOnlyList<BlacklistedItem>> GetBlacklistItems(CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
+		using var activity = SammlarrTelemetry.StartBlacklistLoad(config.WatchlistProvider);
 		var entries = await repository.GetBlacklistedEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
 		var addedDateById = entries.ToDictionary(e => e.Id, e => e.AddedDate);
 		var ids = entries.Select(e => e.Id).ToList();

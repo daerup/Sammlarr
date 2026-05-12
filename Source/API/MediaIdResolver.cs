@@ -5,6 +5,7 @@ using API.TvDB;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
+using Shared.Telemetry;
 
 namespace API;
 
@@ -18,12 +19,15 @@ internal class MediaIdResolver(
 {
 	public async Task<ConversionResult> ResolveAsync(IReadOnlyCollection<IMediaId> candidates, MediaProvider target, Optional<ResolutionHints> hints)
 	{
+		var title = hints is Some<ResolutionHints> some ? some.Value.Title : null;
+		using var activity = SammlarrTelemetry.StartIdResolution(target, candidates, title);
 		foreach (var candidate in candidates)
 		{
 			var cachedIds = await mediaIdGroupRepository.GetByIdAsync(candidate);
 			var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
 			if (cachedTarget is not null)
 			{
+				SammlarrTelemetry.RecordIdResolutionOutcome(target, "cache_hit");
 				return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
 			}
 		}
@@ -39,14 +43,21 @@ internal class MediaIdResolver(
 
 		return conversionResult switch
 		{
-			Resolved resolved => await PersistAndReturnAsync(resolved),
-			Unresolved unresolved => unresolved,
+			Resolved resolved => await PersistAndReturnAsync(resolved, target),
+			Unresolved unresolved => RecordAndReturn(unresolved, target),
 		};
 	}
 
-	private async Task<Resolved> PersistAndReturnAsync(Resolved resolved)
+	private async Task<Resolved> PersistAndReturnAsync(Resolved resolved, MediaProvider target)
 	{
 		await mediaIdGroupRepository.CreateOrAppendAsync(resolved.AllIds);
+		SammlarrTelemetry.RecordIdResolutionOutcome(target, "resolved");
 		return resolved;
+	}
+
+	private static Unresolved RecordAndReturn(Unresolved unresolved, MediaProvider target)
+	{
+		SammlarrTelemetry.RecordIdResolutionOutcome(target, "unresolved");
+		return unresolved;
 	}
 }

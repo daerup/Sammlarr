@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using API.Metadata;
 using Contracts;
@@ -7,6 +8,7 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Shared;
+using Shared.Telemetry;
 
 namespace API;
 
@@ -34,12 +36,37 @@ internal class MediaMetadataProvider(
 			yield break;
 		}
 
+		using var activity = SammlarrTelemetry.StartMetadataBatch(mediaIds.Count);
+		var batchContext = activity?.Context ?? default;
 		var config = await configRepository.GetAsync(cancellationToken);
 
 		var resolutions = await mediaIds
 			.ToAsyncEnumerable()
 			.SelectAwait(async id => Classify(id, await repository.GetByMediaIdAsync(id, cancellationToken)))
 			.ToListAsync(cancellationToken);
+
+		var hits = 0;
+		var misses = 0;
+		var stale = 0;
+		foreach (var resolution in resolutions)
+		{
+			switch (resolution.State)
+			{
+				case ResolutionState.ReturnCached:
+					SammlarrTelemetry.RecordCacheHit(resolution.Id.Type);
+					hits++;
+					break;
+				case ResolutionState.FetchFresh:
+					SammlarrTelemetry.RecordCacheMiss(resolution.Id.Type);
+					misses++;
+					break;
+				case ResolutionState.Hydrate:
+					SammlarrTelemetry.RecordCacheStale(resolution.Id.Type);
+					stale++;
+					break;
+			}
+		}
+		SammlarrTelemetry.SetBatchCacheBreakdown(activity, hits, misses, stale);
 
 		foreach (var resolution in resolutions.Where(r => r.State == ResolutionState.ReturnCached))
 		{
@@ -52,7 +79,7 @@ internal class MediaMetadataProvider(
 		if (pending.Count > 0)
 		{
 			using var gate = new SemaphoreSlim(MaxFetchConcurrency);
-			var tasks = pending.Select(r => RunWithGateAsync(r, config, gate, cancellationToken)).ToList();
+			var tasks = pending.Select(r => RunWithGateAsync(r, config, gate, batchContext, cancellationToken)).ToList();
 
 			await foreach (var task in Task.WhenEach(tasks).WithCancellation(cancellationToken))
 			{
@@ -64,8 +91,17 @@ internal class MediaMetadataProvider(
 
 		if (completed.Count > 0)
 		{
-			await repository.UpsertManyAsync(completed.Select(r => new MediaMetadataUpsert(r.Id, r.Details!)).ToList(), cancellationToken);
+			await UpsertCompletedAsync(completed, batchContext, cancellationToken);
 		}
+	}
+
+	// Async iterators drift Activity.Current across many yield/MoveNextAsync round-trips: the iterator-scoped using-var span
+	// stays alive (Dispose hasn't run), but post-yield code resumes with the consumer's ambient activity instead of ours.
+	// Explicit parent context anchors the upsert under the batch regardless of Activity.Current.
+	private async Task UpsertCompletedAsync(List<Resolution> completed, ActivityContext batchContext, CancellationToken cancellationToken)
+	{
+		using var activity = SammlarrTelemetry.StartMetadataUpsert(completed.Count, batchContext);
+		await repository.UpsertManyAsync(completed.Select(r => new MediaMetadataUpsert(r.Id, r.Details!)).ToList(), cancellationToken);
 	}
 
 	public async Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
@@ -89,7 +125,7 @@ internal class MediaMetadataProvider(
 			return new Resolution { Id = mediaId, State = ResolutionState.FetchFresh };
 		}
 
-		if (MetadataCompleteness.IsComplete(cached.Details) || sinceFetched < HydrationCooldown)
+		if (MetadataCompleteness.GetMissingFields(cached.Details).Count == 0 || sinceFetched < HydrationCooldown)
 		{
 			return new Resolution
 			{
@@ -107,12 +143,21 @@ internal class MediaMetadataProvider(
 		};
 	}
 
-	private async Task<Resolution> RunWithGateAsync(Resolution resolution, ProviderConfig config, SemaphoreSlim gate, CancellationToken cancellationToken)
+	private async Task<Resolution> RunWithGateAsync(
+		Resolution resolution,
+		ProviderConfig config,
+		SemaphoreSlim gate,
+		ActivityContext parentContext,
+		CancellationToken cancellationToken
+	)
 	{
+		using var activity = SammlarrTelemetry.StartMetadataItem(resolution.Id, resolution.State.ToString(), parentContext);
+
 		await gate.WaitAsync(cancellationToken);
 		try
 		{
 			resolution.Details = await ExecuteFetchAsync(resolution, config, cancellationToken);
+			SammlarrTelemetry.TagItemSuccess(activity, resolution.Details is not null);
 			return resolution;
 		}
 		finally
@@ -125,13 +170,19 @@ internal class MediaMetadataProvider(
 	{
 		var baseDetail = resolution.State switch
 		{
-			ResolutionState.FetchFresh => await searchIndex[config.SearchProvider].LookUpAsync(resolution.Id, cancellationToken),
+			ResolutionState.FetchFresh => await LookUpAsync(resolution.Id, config.SearchProvider, cancellationToken),
 			ResolutionState.Hydrate => resolution.Details!,
 		};
 
 		baseDetail = await EnrichAsync(baseDetail, config.SearchProvider, cancellationToken);
 		baseDetail = await ApplyRatingsAsync(baseDetail, config.RatingProvider, cancellationToken);
 		return baseDetail;
+	}
+
+	private async Task<IMediaDetailResult> LookUpAsync(IMediaId id, MediaSearchProvider provider, CancellationToken cancellationToken)
+	{
+		using var activity = SammlarrTelemetry.StartMetadataLookup(provider, id);
+		return await searchIndex[provider].LookUpAsync(id, cancellationToken);
 	}
 
 	private async Task<IMediaDetailResult> ApplyRatingsAsync(IMediaDetailResult details, RatingProvider ratingProvider, CancellationToken cancellationToken)
@@ -142,6 +193,7 @@ internal class MediaMetadataProvider(
 			return details;
 		}
 
+		using var activity = SammlarrTelemetry.StartMetadataRatings(ratingProvider);
 		var ratings = await ratingIndex[ratingProvider].GetRatingsAsync(ratingId, cancellationToken);
 		return ratings.Count == 0 ? details : MetadataMerger.WithRatings(details, ratings);
 	}
@@ -151,7 +203,8 @@ internal class MediaMetadataProvider(
 		var primaryProvider = searchProvider.AsMediaProvider();
 		foreach (var provider in EnricherChain.Where(p => p != primaryProvider))
 		{
-			if (MetadataCompleteness.IsComplete(details))
+			var missing = MetadataCompleteness.GetMissingFields(details);
+			if (missing.Count == 0)
 			{
 				break;
 			}
@@ -162,6 +215,7 @@ internal class MediaMetadataProvider(
 				continue;
 			}
 
+			using var activity = SammlarrTelemetry.StartMetadataEnrich(providerId, missing);
 			var enrichment = await enricherIndex[provider].LookUpAsync(providerId, cancellationToken);
 			if (enrichment is not null)
 			{

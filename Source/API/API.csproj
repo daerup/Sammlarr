@@ -12,4 +12,7 @@
 		<ProjectReference Include="..\Shared\Shared.csproj" />
 		<ProjectReference Include="..\Contracts\Contracts.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+	</ItemGroup>
 </Project>

@@ -7,6 +7,11 @@ public interface IMediaId
 	string Value { get; }
 }
 
+file static class MediaIdExtensions
+{
+	public static string ToString(this IMediaId id) => $"{id.Source}:{id.Type}:{id.Value}";
+}
+
 public readonly record struct TmdbId : IMediaId
 {
 	public MediaProvider Source => MediaProvider.Tmdb;
@@ -14,6 +19,8 @@ public readonly record struct TmdbId : IMediaId
 	public MediaType Type { get; private init; }
 
 	public static TmdbId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => MediaIdExtensions.ToString(this);
 }
 
 public readonly record struct PlexId : IMediaId
@@ -23,6 +30,8 @@ public readonly record struct PlexId : IMediaId
 	public MediaType Type { get; private init; }
 
 	public static PlexId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => MediaIdExtensions.ToString(this);
 }
 
 public readonly record struct ImdbId : IMediaId
@@ -32,6 +41,8 @@ public readonly record struct ImdbId : IMediaId
 	public MediaType Type { get; private init; }
 
 	public static ImdbId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => MediaIdExtensions.ToString(this);
 }
 
 public readonly record struct TvdbId : IMediaId
@@ -41,6 +52,8 @@ public readonly record struct TvdbId : IMediaId
 	public MediaType Type { get; private init; }
 
 	public static TvdbId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => MediaIdExtensions.ToString(this);
 }
 
 public readonly record struct MdblistId : IMediaId
@@ -50,4 +63,6 @@ public readonly record struct MdblistId : IMediaId
 	public MediaType Type { get; private init; }
 
 	public static MdblistId From(string id, MediaType type) => new() { Value = id, Type = type };
+
+	public override string ToString() => MediaIdExtensions.ToString(this);
 }

@@ -6,6 +6,7 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
+using Shared.Telemetry;
 
 namespace Core.Watchlist;
 
@@ -17,7 +18,8 @@ internal class WatchlistService(
 {
 	public async Task<WatchlistPageResult> GetWatchlistAsync(int page, CancellationToken cancellationToken = default)
 	{
-		var provider = await ResolveProviderAsync(cancellationToken);
+		var (providerKey, provider) = await ResolveProviderAsync(cancellationToken);
+		using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
 		var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 
 		var enriched = new List<IMediaDetailResult>(providerPage.Items.Count);
@@ -31,11 +33,12 @@ internal class WatchlistService(
 
 	public async IAsyncEnumerable<IMediaDetailResult> GetWatchlistPagedAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var provider = await ResolveProviderAsync(cancellationToken);
+		var (providerKey, provider) = await ResolveProviderAsync(cancellationToken);
 		var page = 1;
 		int totalPages;
 		do
 		{
+			using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
 			var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 			totalPages = providerPage.TotalPages;
 			await foreach (var detail in metadataProvider.GetAsync(providerPage.Items, cancellationToken))
@@ -48,19 +51,19 @@ internal class WatchlistService(
 
 	public async Task<bool> AddToWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		var provider = await ResolveProviderAsync(cancellationToken);
+		var (_, provider) = await ResolveProviderAsync(cancellationToken);
 		return await provider.AddToWatchlistAsync(mediaId, cancellationToken);
 	}
 
 	public async Task<bool> RemoveFromWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		var provider = await ResolveProviderAsync(cancellationToken);
+		var (_, provider) = await ResolveProviderAsync(cancellationToken);
 		return await provider.RemoveFromWatchlistAsync(mediaId, cancellationToken);
 	}
 
-	private async Task<IWatchlistProvider> ResolveProviderAsync(CancellationToken cancellationToken)
+	private async Task<(WatchlistProvider Key, IWatchlistProvider Provider)> ResolveProviderAsync(CancellationToken cancellationToken)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
-		return providerIndex[config.WatchlistProvider];
+		return (config.WatchlistProvider, providerIndex[config.WatchlistProvider]);
 	}
 }

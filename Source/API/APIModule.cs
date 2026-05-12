@@ -1,6 +1,7 @@
 using API.IMDB;
 using API.Mdblist;
 using API.Plex;
+using API.Telemetry;
 using API.TMDB;
 using API.TvDB;
 using Contracts.Media.Convertions;
@@ -19,6 +20,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<PlexModule>();
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
+		services.AddModule<TelemetryModule>();
 		services.AddScoped<IMediaIdResolver, MediaIdResolver>();
 		services.AddScoped<IMediaMetadataProvider, MediaMetadataProvider>();
 	}

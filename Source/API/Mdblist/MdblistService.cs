@@ -9,6 +9,7 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Shared;
+using Shared.Telemetry;
 
 namespace API.Mdblist;
 
@@ -26,6 +27,7 @@ internal class MdblistService(
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
+		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
 		var endpoint = string.Format(ListItemsEndpoint, identifier);
 		var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
 

@@ -7,83 +7,98 @@ namespace API.Tests.Unit.Metadata;
 public class MetadataCompletenessTests
 {
 	[Test]
-	public async Task IsComplete_WhenMovieHasAllFieldsPopulated_ReturnsTrue()
+	public async Task GetMissingFields_WhenMovieHasAllFieldsPopulated_ReturnsEmpty()
 	{
 		var movie = CreateCompleteMovie();
 
-		var result = MetadataCompleteness.IsComplete(movie);
+		var missing = MetadataCompleteness.GetMissingFields(movie);
 
-		await Assert.That(result).IsTrue();
+		await Assert.That(missing).IsEmpty();
 	}
 
 	[Test]
-	public async Task IsComplete_WhenShowHasAllFieldsPopulated_ReturnsTrue()
+	public async Task GetMissingFields_WhenShowHasAllFieldsPopulated_ReturnsEmpty()
 	{
 		var show = CreateCompleteShow();
 
-		var result = MetadataCompleteness.IsComplete(show);
+		var missing = MetadataCompleteness.GetMissingFields(show);
 
-		await Assert.That(result).IsTrue();
+		await Assert.That(missing).IsEmpty();
 	}
 
 	[Test]
-	[Arguments("title")]
-	[Arguments("tagline")]
-	[Arguments("summary")]
-	[Arguments("poster")]
-	[Arguments("backdrop")]
-	[Arguments("releaseDate")]
-	[Arguments("genres")]
-	[Arguments("runtime")]
-	public async Task IsComplete_WhenMovieFieldIsMissing_ReturnsFalse(string missingField)
+	[Arguments(nameof(MovieDetailResult.Title))]
+	[Arguments(nameof(MovieDetailResult.Tagline))]
+	[Arguments(nameof(MovieDetailResult.Summary))]
+	[Arguments(nameof(MovieDetailResult.PosterUrl))]
+	[Arguments(nameof(MovieDetailResult.BackdropUrl))]
+	[Arguments(nameof(MovieDetailResult.ReleaseDate))]
+	[Arguments(nameof(MovieDetailResult.Genres))]
+	[Arguments(nameof(MovieDetailResult.Runtime))]
+	public async Task GetMissingFields_WhenMovieFieldIsMissing_ReturnsThatField(string missingField)
 	{
 		var movie = CreateCompleteMovie() with
 		{
-			Title = missingField == "title" ? string.Empty : "Title",
-			Tagline = missingField == "tagline" ? string.Empty : "Tagline",
-			Summary = missingField == "summary" ? string.Empty : "Summary",
-			PosterUrl = missingField == "poster" ? string.Empty : "https://example.com/poster.jpg",
-			BackdropUrl = missingField == "backdrop" ? string.Empty : "https://example.com/backdrop.jpg",
-			ReleaseDate = missingField == "releaseDate" ? DateOnly.MinValue : new DateOnly(2024, 1, 1),
-			Genres = missingField == "genres" ? [] : ["Action"],
-			Runtime = missingField == "runtime" ? TimeSpan.Zero : TimeSpan.FromMinutes(120),
+			Title = missingField == nameof(MovieDetailResult.Title) ? string.Empty : "Title",
+			Tagline = missingField == nameof(MovieDetailResult.Tagline) ? string.Empty : "Tagline",
+			Summary = missingField == nameof(MovieDetailResult.Summary) ? string.Empty : "Summary",
+			PosterUrl = missingField == nameof(MovieDetailResult.PosterUrl) ? string.Empty : "https://example.com/poster.jpg",
+			BackdropUrl = missingField == nameof(MovieDetailResult.BackdropUrl) ? string.Empty : "https://example.com/backdrop.jpg",
+			ReleaseDate = missingField == nameof(MovieDetailResult.ReleaseDate) ? DateOnly.MinValue : new DateOnly(2024, 1, 1),
+			Genres = missingField == nameof(MovieDetailResult.Genres) ? [] : ["Action"],
+			Runtime = missingField == nameof(MovieDetailResult.Runtime) ? TimeSpan.Zero : TimeSpan.FromMinutes(120),
 		};
 
-		var result = MetadataCompleteness.IsComplete(movie);
+		var missing = MetadataCompleteness.GetMissingFields(movie);
 
-		await Assert.That(result).IsFalse();
+		await Assert.That(missing).IsEquivalentTo(new[] { missingField });
 	}
 
 	[Test]
-	[Arguments("seasons")]
-	[Arguments("episodes")]
-	[Arguments("runtimePerEpisode")]
-	public async Task IsComplete_WhenShowSpecificFieldIsMissing_ReturnsFalse(string missingField)
+	[Arguments(nameof(ShowDetailResult.Seasons))]
+	[Arguments(nameof(ShowDetailResult.Episodes))]
+	[Arguments(nameof(ShowDetailResult.RuntimePerEpisode))]
+	public async Task GetMissingFields_WhenShowSpecificFieldIsMissing_ReturnsThatField(string missingField)
 	{
 		var show = CreateCompleteShow() with
 		{
-			Seasons = missingField == "seasons" ? 0 : 3,
-			Episodes = missingField == "episodes" ? 0 : 30,
-			RuntimePerEpisode = missingField == "runtimePerEpisode" ? TimeSpan.Zero : TimeSpan.FromMinutes(45),
+			Seasons = missingField == nameof(ShowDetailResult.Seasons) ? 0 : 3,
+			Episodes = missingField == nameof(ShowDetailResult.Episodes) ? 0 : 30,
+			RuntimePerEpisode = missingField == nameof(ShowDetailResult.RuntimePerEpisode) ? TimeSpan.Zero : TimeSpan.FromMinutes(45),
 		};
 
-		var result = MetadataCompleteness.IsComplete(show);
+		var missing = MetadataCompleteness.GetMissingFields(show);
 
-		await Assert.That(result).IsFalse();
+		await Assert.That(missing).IsEquivalentTo(new[] { missingField });
 	}
 
 	[Test]
-	public async Task IsComplete_WhenWhitespaceOnlyTitle_ReturnsFalse()
+	public async Task GetMissingFields_WhenMultipleFieldsMissing_ReturnsAll()
+	{
+		var movie = CreateCompleteMovie() with
+		{
+			Title = string.Empty,
+			Summary = string.Empty,
+			Runtime = TimeSpan.Zero,
+		};
+
+		var missing = MetadataCompleteness.GetMissingFields(movie);
+
+		await Assert.That(missing).IsEquivalentTo(new[] { nameof(MovieDetailResult.Title), nameof(MovieDetailResult.Summary), nameof(MovieDetailResult.Runtime) });
+	}
+
+	[Test]
+	public async Task GetMissingFields_WhenWhitespaceOnlyTitle_ReturnsTitle()
 	{
 		var movie = CreateCompleteMovie() with { Title = "   " };
 
-		var result = MetadataCompleteness.IsComplete(movie);
+		var missing = MetadataCompleteness.GetMissingFields(movie);
 
-		await Assert.That(result).IsFalse();
+		await Assert.That(missing).Contains(nameof(MovieDetailResult.Title));
 	}
 
 	[Test]
-	public async Task IsComplete_WhenUnknownDetailType_ReturnsFalse()
+	public async Task GetMissingFields_WhenUnknownDetailType_ReturnsUnknownMarker()
 	{
 		var unknown = new UnresolvedMediaResult
 		{
@@ -94,9 +109,9 @@ public class MetadataCompletenessTests
 			ReleaseDate = new DateOnly(2024, 1, 1),
 		};
 
-		var result = MetadataCompleteness.IsComplete(unknown);
+		var missing = MetadataCompleteness.GetMissingFields(unknown);
 
-		await Assert.That(result).IsFalse();
+		await Assert.That(missing).IsEquivalentTo(new[] { "UnknownDetailType" });
 	}
 
 	private static MovieDetailResult CreateCompleteMovie() =>
