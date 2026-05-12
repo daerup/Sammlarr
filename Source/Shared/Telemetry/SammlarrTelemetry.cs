@@ -131,21 +131,22 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
-	public static void RecordCacheHit(MediaType mediaType) => CacheHits.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
-	public static void RecordCacheMiss(MediaType mediaType) => CacheMisses.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
-	public static void RecordCacheStale(MediaType mediaType) => CacheStale.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
 	public static void RecordIdResolutionOutcome(MediaProvider target, string outcome) =>
 		IdResolutionOutcomes.Add(1, new KeyValuePair<string, object?>("target", target.ToString()), new KeyValuePair<string, object?>("outcome", outcome));
 
-	public static void SetBatchCacheBreakdown(Activity? activity, int hits, int misses, int stale)
+	public static void RecordBatchCacheBreakdown(Activity? activity, int hits, int misses, int stale)
 	{
+		CacheHits.Add(hits);
+		CacheMisses.Add(misses);
+		CacheStale.Add(stale);
+
 		if (activity is null)
 		{
 			return;
 		}
+		activity.SetTag("cache.hits", hits);
+		activity.SetTag("cache.misses", misses);
+		activity.SetTag("cache.stale", stale);
 		activity.DisplayName = $"METADATA BATCH {hits + misses + stale} items ({hits} cached, {misses} fresh, {stale} stale)";
 	}
 
