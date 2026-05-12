@@ -24,5 +24,6 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
 	</ItemGroup>
 </Project>

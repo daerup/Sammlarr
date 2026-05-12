@@ -1,0 +1,29 @@
+using DB.Telemetry;
+
+namespace DB.Tests.Unit.Telemetry;
+
+public class SqlSummaryTests
+{
+	[Test]
+	[Arguments("""SELECT "m"."Id", "m"."Name" FROM "MediaIdentifierGroups" AS "m" WHERE "m"."Id" = @id""", "SELECT", "MediaIdentifierGroups")]
+	[Arguments("""INSERT INTO "MediaIdentifierGroupEntries" ("Id", "GroupId") VALUES (@p0, @p1)""", "INSERT", "MediaIdentifierGroupEntries")]
+	[Arguments("""UPDATE "Watchlists" SET "UpdatedAt" = @p0 WHERE "Id" = @id""", "UPDATE", "Watchlists")]
+	[Arguments("""DELETE FROM "Blacklist" WHERE "Id" = @id""", "DELETE", "Blacklist")]
+	[Arguments("select id from Configs where Key = @key", "SELECT", "Configs")]
+	public async Task Parse_ExtractsOperationAndTable(string sql, string expectedOperation, string expectedTable)
+	{
+		var (operation, table) = SqlSummary.Parse(sql);
+
+		await Assert.That(operation).IsEqualTo(expectedOperation);
+		await Assert.That(table).IsEqualTo(expectedTable);
+	}
+
+	[Test]
+	public async Task Parse_UnknownCommand_ReturnsNulls()
+	{
+		var (operation, table) = SqlSummary.Parse("PRAGMA journal_mode=WAL;");
+
+		await Assert.That(operation).IsNull();
+		await Assert.That(table).IsNull();
+	}
+}

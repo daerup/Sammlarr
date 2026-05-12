@@ -16,6 +16,7 @@
 		<PackageReference Include="BlazorBlueprint.Primitives" />
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
 		<PackageReference Include="CronExpressionDescriptor" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
 		<PackageReference Include="timewarp-simple-icons" />
 	</ItemGroup>
 	<ItemGroup>
