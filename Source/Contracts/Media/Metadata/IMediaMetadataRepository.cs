@@ -12,6 +12,8 @@ public interface IMediaMetadataRepository
 
 	Task RemoveAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 
+	Task PurgeAllAsync(CancellationToken cancellationToken = default);
+
 	Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default);
 }
 

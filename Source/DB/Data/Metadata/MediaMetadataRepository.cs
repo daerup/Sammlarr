@@ -106,6 +106,14 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 		await dbContext.SaveChangesAsync(cancellationToken);
 	}
 
+	public async Task PurgeAllAsync(CancellationToken cancellationToken = default)
+	{
+		await dbContext.MediaRatings.ExecuteDeleteAsync(cancellationToken);
+		await dbContext.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
+		await dbContext.MediaIdEntries.ExecuteDeleteAsync(cancellationToken);
+		await dbContext.MediaIdGroups.ExecuteDeleteAsync(cancellationToken);
+	}
+
 	public Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default) =>
 		dbContext.MediaRatings.Where(r => r.Source == source).ExecuteDeleteAsync(cancellationToken);
 }
