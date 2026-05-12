@@ -1,0 +1,69 @@
+@using Contracts.Media.Metadata
+@inject IMediaMetadataProvider MetadataProvider
+@inject Notifier Notifier
+
+<div class="w-full max-w-3xl space-y-6">
+    <div class="rounded-lg border bg-card p-6">
+        <h2 class="text-lg font-semibold tracking-wide">Purge media cache</h2>
+        <p class="text-muted-foreground mt-1 text-sm">
+            Removes every cached media identifier group, metadata entry, and rating from the local database. The next fetch will repopulate the cache from the configured providers.
+        </p>
+
+        <div class="mt-5">
+            <BbAlertDialog>
+                <BbAlertDialogTrigger>
+                    <BbButton Variant="ButtonVariant.Destructive" IsDisabled="@_isPurging">
+                        <LucideIcon Name="trash-2" Size="15" Class="mr-2"/>
+                        @(_isPurging ? "Purging…" : "Purge cache")
+                    </BbButton>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Purge the media cache?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This permanently deletes all media identifier groups, identifier entries, metadata records, and ratings.
+                            The next time the app needs an item it will refetch from the providers. This cannot be undone.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbAlertDialogAction>
+                            <BbButton Variant="ButtonVariant.Destructive" OnClick="PurgeAsync">
+                                Yes, purge everything
+                            </BbButton>
+                        </BbAlertDialogAction>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _isPurging;
+
+    private async Task PurgeAsync()
+    {
+        if (_isPurging)
+        {
+            return;
+        }
+
+        _isPurging = true;
+        try
+        {
+            await MetadataProvider.PurgeAllAsync();
+            Notifier.Success("Media cache purged.");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to purge media cache");
+        }
+        finally
+        {
+            _isPurging = false;
+        }
+    }
+}

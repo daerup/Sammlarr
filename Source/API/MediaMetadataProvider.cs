@@ -101,6 +101,8 @@ internal class MediaMetadataProvider(
 		}
 	}
 
+	public Task PurgeAllAsync(CancellationToken cancellationToken = default) => repository.PurgeAllAsync(cancellationToken);
+
 	private (ResolutionState State, Resolution Resolution) Classify(IMediaId mediaId, CachedMediaMetadata? cached)
 	{
 		if (cached is null)
