@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Mdblist.Types;
@@ -28,6 +29,7 @@ internal class MdblistService(
 	)
 	{
 		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
+		var feedContext = activity?.Context ?? default;
 		var endpoint = string.Format(ListItemsEndpoint, identifier);
 		var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
 
@@ -36,33 +38,40 @@ internal class MdblistService(
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
 		var watchlistProvider = providerConfig.WatchlistProvider.AsMediaProvider();
 
-		var resolvedIds = new List<IMediaId>();
-		var unresolved = new List<IMediaDetailResult>();
+		var shows = result.shows.Select(FeedItemResolution.Show);
+		var movies = result.movies.Select(FeedItemResolution.Movie);
 
-		var shows = result.shows.Select(s => ((MdblistTypes.ListItems.IListItem)s, MediaType.Show));
-		var movies = result.movies.Select(m => ((MdblistTypes.ListItems.IListItem)m, MediaType.Movie));
+		var pipeline = shows
+			.Concat(movies)
+			.ToAsyncEnumerable()
+			.SelectAwait(
+				async pair => pair with { ConversionResult = await ResolveIdsAsync(pair, watchlistProvider) },
+				IMediaIdResolver.RecommendedConcurrency,
+				cancellationToken
+			)
+			.SelectAwait(
+				async feedItemResolution => await BuildMediaDetail(feedItemResolution, cancellationToken, feedContext),
+				IMediaMetadataProvider.RecommendedConcurrency,
+				cancellationToken
+			);
 
-		foreach (var (item, mediaType) in shows.Concat(movies))
-		{
-			if (await ResolveIdsAsync(item.ids, mediaType, watchlistProvider, item.title, item.release_year) is Resolved resolved)
-			{
-				resolvedIds.Add(resolved.Id);
-			}
-			else
-			{
-				unresolved.Add(BuildUnresolved(item, mediaType));
-			}
-		}
-
-		await foreach (var detail in metadataProvider.GetAsync(resolvedIds, cancellationToken))
-		{
-			yield return detail;
-		}
-
-		foreach (var item in unresolved)
+		await foreach (var item in pipeline)
 		{
 			yield return item;
 		}
+	}
+
+	private async ValueTask<IMediaDetailResult> BuildMediaDetail(
+		FeedItemResolution feedItemResolution,
+		CancellationToken cancellationToken,
+		ActivityContext feedContext
+	)
+	{
+		if (feedItemResolution.ConversionResult is Resolved resolved)
+		{
+			return await metadataProvider.GetAsync(resolved.Id, cancellationToken, feedContext);
+		}
+		return BuildUnresolved(feedItemResolution.ListItem, feedItemResolution.MediaType);
 	}
 
 	private UnresolvedMediaResult BuildUnresolved(MdblistTypes.ListItems.IListItem item, MediaType mediaType)
@@ -81,24 +90,18 @@ internal class MdblistService(
 		};
 	}
 
-	private Task<ConversionResult> ResolveIdsAsync(
-		MdblistTypes.ListItems.Ids mdbdlistIds,
-		MediaType mediaType,
-		MediaProvider watchlistProvider,
-		string title,
-		int year
-	)
+	private Task<ConversionResult> ResolveIdsAsync(FeedItemResolution feedItemResolution, MediaProvider watchlistProvider)
 	{
-		var (mdblistId, tmdbId, imdbId, tvdbId) = ExtractIds(mdbdlistIds, mediaType);
+		var (mdblistId, tmdbId, imdbId, tvdbId) = ExtractIds(feedItemResolution.ListItem.ids, feedItemResolution.MediaType);
 		var candidates = new IMediaId?[] { mdblistId, tmdbId, imdbId, tvdbId }
 			.OfType<IMediaId>()
 			.ToList();
 		var hints = Some.Of(
 			new ResolutionHints
 			{
-				Title = title,
-				Year = year,
-				MediaType = mediaType,
+				Title = feedItemResolution.ListItem.title,
+				Year = feedItemResolution.ListItem.release_year,
+				MediaType = feedItemResolution.MediaType,
 			}
 		);
 		return mediaIdResolver.ResolveAsync(candidates, watchlistProvider, hints);
@@ -111,5 +114,16 @@ internal class MdblistService(
 		ImdbId? imdbId = !string.IsNullOrEmpty(ids.imdb) ? ImdbId.From(ids.imdb, mediaType) : null;
 		TvdbId? tvdbId = ids.tvdb.HasValue ? TvdbId.From(ids.tvdb.Value.ToString(), mediaType) : null;
 		return (mdblistId, tmdbId, imdbId, tvdbId);
+	}
+
+	private record struct FeedItemResolution
+	{
+		public MdblistTypes.ListItems.IListItem ListItem { get; init; }
+		public MediaType MediaType { get; private init; }
+		public ConversionResult ConversionResult { get; init; }
+
+		public static FeedItemResolution Show(MdblistTypes.ListItems.IListItem item) => new() { ListItem = item, MediaType = MediaType.Show };
+
+		public static FeedItemResolution Movie(MdblistTypes.ListItems.IListItem item) => new() { ListItem = item, MediaType = MediaType.Movie };
 	}
 }

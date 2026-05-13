@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Blacklist;
@@ -11,20 +12,25 @@ namespace Core.Blacklist;
 internal class BlacklistService(IBlacklistRepository repository, IProviderConfigRepository providerConfigRepository, IMediaMetadataProvider metadataProvider)
 	: IBlacklistService
 {
-	public async Task<IReadOnlyList<BlacklistedItem>> GetBlacklistItems(CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<BlacklistedItem> GetBlacklistItems([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
 		using var activity = SammlarrTelemetry.StartBlacklistLoad(config.WatchlistProvider);
 		var entries = await repository.GetBlacklistedEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
 		var addedDateById = entries.ToDictionary(e => e.Id, e => e.AddedDate);
-		var ids = entries.Select(e => e.Id).ToList();
 
-		var items = new List<BlacklistedItem>(ids.Count);
-		await foreach (var detail in metadataProvider.GetAsync(ids, cancellationToken))
+		var pipeline = entries
+			.ToAsyncEnumerable()
+			.SelectAwait(
+				async entry => await metadataProvider.GetAsync(entry.Id, cancellationToken),
+				IMediaMetadataProvider.RecommendedConcurrency,
+				cancellationToken
+			);
+
+		await foreach (var detail in pipeline)
 		{
-			items.Add(new BlacklistedItem(detail, addedDateById[detail.SourceId]));
+			yield return new BlacklistedItem(detail, addedDateById[detail.SourceId]);
 		}
-		return items;
 	}
 
 	public Task AddToBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.AddAsync(mediaId, cancellationToken);

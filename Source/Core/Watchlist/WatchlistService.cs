@@ -6,6 +6,7 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
+using Shared;
 using Shared.Telemetry;
 
 namespace Core.Watchlist;
@@ -23,15 +24,22 @@ internal class WatchlistService(
 		var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 
 		var enriched = new List<IMediaDetailResult>(providerPage.Items.Count);
-		await foreach (var detail in metadataProvider.GetAsync(providerPage.Items, cancellationToken))
+		await foreach (
+			var detail in providerPage
+				.Items.ToAsyncEnumerable()
+				.SelectAwait(
+					async id => await metadataProvider.GetAsync(id, cancellationToken),
+					IMediaMetadataProvider.RecommendedConcurrency,
+					cancellationToken
+				)
+		)
 		{
 			enriched.Add(detail);
 		}
-
 		return new WatchlistPageResult(enriched, providerPage.TotalPages);
 	}
 
-	public async IAsyncEnumerable<IMediaDetailResult> GetWatchlistPagedAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<IMediaDetailResult> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var (providerKey, provider) = await ResolveProviderAsync(cancellationToken);
 		var page = 1;
@@ -39,9 +47,18 @@ internal class WatchlistService(
 		do
 		{
 			using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
+			var watchlistContext = activity?.Context ?? default;
 			var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 			totalPages = providerPage.TotalPages;
-			await foreach (var detail in metadataProvider.GetAsync(providerPage.Items, cancellationToken))
+			var pipeline = providerPage
+				.Items.ToAsyncEnumerable()
+				.SelectAwait(
+					async id => await metadataProvider.GetAsync(id, cancellationToken, watchlistContext),
+					IMediaMetadataProvider.RecommendedConcurrency,
+					cancellationToken
+				);
+
+			await foreach (var detail in pipeline)
 			{
 				yield return detail;
 			}

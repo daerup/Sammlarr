@@ -7,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCache<MediaProvider, string> cache, IMediaMetadataRepository metadataRepository)
-	: IApiKeyConfigRepository
+internal class ApiKeyConfigRepository(
+	IDbContextFactory<SammlarrDbContext> dbContextFactory,
+	ITypedMemoryCache<MediaProvider, string> cache,
+	IMediaMetadataRepository metadataRepository
+) : IApiKeyConfigRepository
 {
 	public async ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
@@ -17,7 +20,8 @@ internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCac
 			return cached;
 		}
 
-		var apiKey = await context.ApiKeySettings.Where(s => s.Provider == provider).Select(s => (string?)s.ApiKey).FirstOrDefaultAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var apiKey = await ctx.ApiKeySettings.Where(s => s.Provider == provider).Select(s => (string?)s.ApiKey).FirstOrDefaultAsync(cancellationToken);
 		if (apiKey is not null)
 		{
 			cache.Set(provider, apiKey);
@@ -27,30 +31,32 @@ internal class ApiKeyConfigRepository(SammlarrDbContext context, ITypedMemoryCac
 
 	public async Task SetApiKeyAsync(MediaProvider provider, string apiKey, CancellationToken cancellationToken = default)
 	{
-		var setting = await context.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
 		if (setting is null)
 		{
-			context.ApiKeySettings.Add(new ApiKeyConfigEntity { Provider = provider, ApiKey = apiKey });
+			ctx.ApiKeySettings.Add(new ApiKeyConfigEntity { Provider = provider, ApiKey = apiKey });
 		}
 		else
 		{
 			setting.ApiKey = apiKey;
 		}
 
-		await context.SaveChangesAsync(cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 		cache.Set(provider, apiKey);
 	}
 
 	public async Task RemoveApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
-		var setting = await context.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
 		if (setting is null)
 		{
 			return;
 		}
 
-		context.ApiKeySettings.Remove(setting);
-		await context.SaveChangesAsync(cancellationToken);
+		ctx.ApiKeySettings.Remove(setting);
+		await ctx.SaveChangesAsync(cancellationToken);
 
 		cache.Remove(provider);
 

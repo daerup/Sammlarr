@@ -10,7 +10,7 @@ public interface IMediaMetadataRepository
 
 	Task UpsertManyAsync(IReadOnlyList<MediaMetadataUpsert> items, CancellationToken cancellationToken = default);
 
-	Task RemoveAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
+	Task RemoveManyAsync(IReadOnlyList<IMediaId> mediaIds, CancellationToken cancellationToken = default);
 
 	Task PurgeAllAsync(CancellationToken cancellationToken = default);
 

@@ -500,13 +500,8 @@
     {
         try
         {
-            await foreach (var item in WatchlistService.GetWatchlistPagedAsync(CancellationToken.None))
-            {
-                _watchlistIds.Add(item.SourceId.ToString());
-            }
-
-            var blacklistItems = await BlacklistService.GetBlacklistItems(CancellationToken.None);
-            AddSourceIds(_blacklistIds, blacklistItems.Select(i => i.Detail.SourceId.ToString()));
+            (await WatchlistService.GetWatchlistAsync(CancellationToken.None).ToListAsync()).ForEach(item => _watchlistIds.Add(item.SourceId.ToString()!));
+            (await BlacklistService.GetBlacklistItems(CancellationToken.None).ToListAsync()).ForEach(item => _blacklistIds.Add(item.Detail.SourceId.ToString()!));
         }
         catch (Exception ex)
         {
@@ -514,12 +509,7 @@
         }
     }
 
-    private static void AddSourceIds(HashSet<string> set, IEnumerable<string?> ids)
-    {
-        ids.Where(id => !string.IsNullOrWhiteSpace(id)).ToList().ForEach(id => set.Add(id!));
-    }
-
-    private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
+private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
     private int BypassedCount => _processedResults.Count(r => r.Value is Bypassed<IMediaDetailResult>);
     private int FilteredCount => _processedResults.Count(r => r.Value is Culled<IMediaDetailResult>);
     private int SkippedCount => _processedResults.Count(r => r.Value is Truncated<IMediaDetailResult>);

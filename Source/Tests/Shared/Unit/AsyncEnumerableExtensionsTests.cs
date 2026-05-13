@@ -42,6 +42,77 @@ public class AsyncEnumerableExtensionsTests
 	}
 
 	[Test]
+	public async Task SelectAwait_Concurrent_RunsItemsUpToConcurrencyLimitInParallel()
+	{
+		var entered = Enumerable.Range(0, 4).Select(_ => new TaskCompletionSource()).ToList();
+		var release = new TaskCompletionSource();
+
+		async ValueTask<int> Predicate(int value)
+		{
+			entered[value - 1].SetResult();
+			await release.Task;
+			return value * 10;
+		}
+
+		var source = CreateAsyncEnumerable(1, 2, 3, 4);
+		var task = source.SelectAwait(Predicate, maxConcurrency: 4).ToListAsync().AsTask();
+
+		await Task.WhenAll(entered.Select(t => t.Task)).WaitAsync(TimeSpan.FromSeconds(5));
+		release.SetResult();
+
+		var results = await task;
+		await Assert.That(results.Count).IsEqualTo(4);
+	}
+
+	[Test]
+	public async Task SelectAwait_Concurrent_PreservesSourceOrderEvenWhenLaterItemsCompleteFirst()
+	{
+		var source = CreateAsyncEnumerable(1, 2, 3, 4, 5);
+
+		var testee = source.SelectAwait(
+			async value =>
+			{
+				await Task.Delay((6 - value) * 20);
+				return value * 10;
+			},
+			maxConcurrency: 5
+		);
+
+		var results = await testee.ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(5);
+		await Assert.That(results[0]).IsEqualTo(10);
+		await Assert.That(results[1]).IsEqualTo(20);
+		await Assert.That(results[2]).IsEqualTo(30);
+		await Assert.That(results[3]).IsEqualTo(40);
+		await Assert.That(results[4]).IsEqualTo(50);
+	}
+
+	[Test]
+	public async Task SelectAwait_Concurrent_YieldsInSourceOrderBeyondConcurrencyLimit()
+	{
+		var source = CreateAsyncEnumerable(1, 2, 3, 4, 5);
+
+		var testee = source.SelectAwait(
+			async value =>
+			{
+				await Task.Delay(value % 2 == 0 ? 1 : 30);
+				return value * 10;
+			},
+			maxConcurrency: 2
+		);
+
+		var results = await testee.ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(5);
+		await Assert.That(results[0]).IsEqualTo(10);
+		await Assert.That(results[1]).IsEqualTo(20);
+		await Assert.That(results[2]).IsEqualTo(30);
+		await Assert.That(results[3]).IsEqualTo(40);
+		await Assert.That(results[4]).IsEqualTo(50);
+	}
+
+	[Test]
 	public async Task SelectAwait_WhenProjectionThrows_PropagatesException()
 	{
 		var source = CreateAsyncEnumerable(() => 1, () => 2, () => throw new InvalidOperationException());

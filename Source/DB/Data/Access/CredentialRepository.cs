@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class CredentialRepository(SammlarrDbContext context, ITypedMemoryCache<WatchlistProvider, CredentialEntity> cache) : ICredentialStore
+internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<WatchlistProvider, CredentialEntity> cache)
+	: ICredentialStore
 {
 	public async ValueTask<StoredCredential?> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
@@ -13,7 +14,8 @@ internal class CredentialRepository(SammlarrDbContext context, ITypedMemoryCache
 			return new StoredCredential(cached!.WatchlistProvider, cached.ClientId, cached.AccessToken, cached.ExpiresAt);
 		}
 
-		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var credential = await ctx.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
 		if (credential is null)
 		{
 			return null;
@@ -29,7 +31,8 @@ internal class CredentialRepository(SammlarrDbContext context, ITypedMemoryCache
 		CancellationToken cancellationToken = default
 	)
 	{
-		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var credential = await ctx.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
 		if (credential is null)
 		{
 			credential = new CredentialEntity
@@ -39,7 +42,7 @@ internal class CredentialRepository(SammlarrDbContext context, ITypedMemoryCache
 				ExpiresAt = accessTokenExpiresAt,
 				ClientId = clientId,
 			};
-			context.Credentials.Add(credential);
+			ctx.Credentials.Add(credential);
 		}
 		else
 		{
@@ -48,20 +51,21 @@ internal class CredentialRepository(SammlarrDbContext context, ITypedMemoryCache
 			credential.ClientId = clientId;
 		}
 
-		await context.SaveChangesAsync(cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 		cache.Set(watchlistProvider, credential);
 	}
 
 	public async Task ClearAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
-		var credential = await context.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var credential = await ctx.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
 		if (credential is null)
 		{
 			return;
 		}
 
-		context.Credentials.Remove(credential);
-		await context.SaveChangesAsync(cancellationToken);
+		ctx.Credentials.Remove(credential);
+		await ctx.SaveChangesAsync(cancellationToken);
 		cache.Remove(watchlistProvider);
 	}
 }

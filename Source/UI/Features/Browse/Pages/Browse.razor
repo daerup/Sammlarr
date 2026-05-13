@@ -214,18 +214,10 @@
 
     private async Task LoadWatchlistIdsAsync()
     {
-        var ids = new HashSet<string>();
-        await foreach (var item in WatchlistService.GetWatchlistPagedAsync(_cancellationTokenSource.Token))
-        {
-            ids.Add(item.SourceId.Value);
-        }
-
-        if (_cancellationTokenSource.IsCancellationRequested)
-        {
-            return;
-        }
-
-        _watchlistedIds = ids;
+        _watchlistedIds = await WatchlistService
+            .GetWatchlistAsync(_cancellationTokenSource.Token)
+            .Select(w => w.SourceId.Value)
+            .ToHashSetAsync(cancellationToken: _cancellationTokenSource.Token);
     }
 
     private async Task LoadPageAsync()

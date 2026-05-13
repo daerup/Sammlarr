@@ -9,6 +9,7 @@ internal abstract record MediaMetadataEntity : IAuditable
 {
 	public DateTimeOffset CreatedAt { get; set; }
 	public DateTimeOffset UpdatedAt { get; set; }
+	public DateTimeOffset LastFetchedAt { get; set; }
 
 	[Key]
 	public Guid MediaIdGroupId { get; set; }

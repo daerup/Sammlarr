@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
@@ -11,12 +12,22 @@ namespace DB.Tests.Integration.Repositories;
 public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private MediaMetadataRepository _testee = null!;
+	private Mock<IDateTimeProvider> _dateTimeProvider = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup() =>
-		_testee = new MediaMetadataRepository(fixture.Context, new MediaIdGroupRepository(fixture.Context), new MediaMetadataFactory(fixture.Context));
+	public void Setup()
+	{
+		_dateTimeProvider = IDateTimeProvider.Mock();
+		_dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
+		_testee = new MediaMetadataRepository(
+			fixture.Context,
+			fixture.ContextFactory,
+			new MediaIdGroupRepository(fixture.Context),
+			new MediaMetadataFactory(fixture.Context, _dateTimeProvider.Object)
+		);
+	}
 
 	[Test]
 	public async Task GetByMediaIdAsync_WhenAnchorMatches_ReturnsCachedDetails()
@@ -73,6 +84,25 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	public async Task RemoveAsync_WhenNoEntryExists_DoesNotThrow()
 	{
 		await Assert.That(async () => await _testee.RemoveAsync(TmdbId.From("0", MediaType.Movie))).ThrowsNothing();
+	}
+
+	[Test]
+	public async Task UpsertAsync_AdvancesLastFetchedAtEvenWhenPayloadIsIdentical()
+	{
+		var mediaId = TmdbId.From("700", MediaType.Movie);
+		var firstFetch = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+		var secondFetch = firstFetch.AddHours(2);
+
+		_dateTimeProvider.Now.Returns(firstFetch);
+		await _testee.UpsertAsync(mediaId, CreateMovieDetails(mediaId, []));
+		fixture.Context.ChangeTracker.Clear();
+
+		_dateTimeProvider.Now.Returns(secondFetch);
+		await _testee.UpsertAsync(mediaId, CreateMovieDetails(mediaId, []));
+		fixture.Context.ChangeTracker.Clear();
+
+		var cached = await _testee.GetByMediaIdAsync(mediaId);
+		await Assert.That(cached!.FetchedAt).IsEqualTo(secondFetch);
 	}
 
 	[Test]

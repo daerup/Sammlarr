@@ -3,17 +3,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.MediaGroup;
 
-internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGroupRepository
+internal class MediaIdGroupRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IMediaIdGroupRepository
 {
 	private const string MixedMediaTypesMessage = "All IDs must be of the same media type.";
 
-	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default) =>
-		await dbContext
+	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx
 			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesId(mediaId))
 			.Select(entry => entry.MediaIdGroupEntity.MediaIdEntries)
 			.SelectMany(ids => ids)
 			.Select(entry => entry.Identifier.ToMediaId())
 			.ToListAsync(cancellationToken);
+	}
 
 	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
 	{
@@ -28,8 +31,9 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 		var mediaIdGroup = new MediaIdentifierGroupEntity();
 		mediaIdGroup.MediaIdEntries = identifiers.ToIdentifierEntries(mediaIdGroup);
 
-		await dbContext.MediaIdGroups.AddAsync(mediaIdGroup, cancellationToken);
-		await dbContext.SaveChangesAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx.MediaIdGroups.AddAsync(mediaIdGroup, cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	public async Task CreateOrAppendAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
@@ -42,7 +46,8 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 
 		ValidateSingleMediaType(identifiers);
 
-		var existingGroup = await dbContext
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var existingGroup = await ctx
 			.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
 				.ThenInclude(group => group.MediaIdEntries)
 			.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(identifiers))
@@ -58,16 +63,17 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 
 		if (existingGroup is null)
 		{
-			await dbContext.MediaIdGroups.AddAsync(mediaIdGroup, cancellationToken);
+			await ctx.MediaIdGroups.AddAsync(mediaIdGroup, cancellationToken);
 		}
 
-		await dbContext.SaveChangesAsync(cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	public async Task AppendAsync(IMediaId existingId, IEnumerable<IMediaId> newIds, CancellationToken cancellationToken = default)
 	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var mediaIdGroup = (
-			await dbContext
+			await ctx
 				.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
 					.ThenInclude(group => group.MediaIdEntries)
 				.SingleAsync(MediaIdentifierGroupEntryExpressions.MatchesId(existingId), cancellationToken)
@@ -83,8 +89,8 @@ internal class MediaIdGroupRepository(SammlarrDbContext dbContext) : IMediaIdGro
 		ValidateSingleMediaType(appendCandidates.Concat(storedIdentifiers));
 
 		var toAdd = appendCandidates.ToIdentifierEntries(mediaIdGroup);
-		await dbContext.MediaIdEntries.AddRangeAsync(toAdd, cancellationToken);
-		await dbContext.SaveChangesAsync(cancellationToken);
+		await ctx.MediaIdEntries.AddRangeAsync(toAdd, cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	private static void ValidateSingleMediaType(IEnumerable<MediaIdentifier> identifiers)
