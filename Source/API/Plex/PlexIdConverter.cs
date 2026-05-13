@@ -83,7 +83,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 			_ => null,
 		};
 
-	private static bool ContainsAnyCandidate(IEnumerable<IMediaId> additionalIds, IReadOnlyCollection<IMediaId> candidates)
+	private static bool ContainsAnyCandidate(IEnumerable<IMediaId> additionalIds, IEnumerable<IMediaId> candidates)
 	{
 		var additional = additionalIds.ToList();
 		return candidates.Any(additional.Contains);

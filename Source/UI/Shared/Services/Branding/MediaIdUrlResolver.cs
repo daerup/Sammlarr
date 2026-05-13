@@ -21,6 +21,11 @@ public static class MediaIdUrlResolver
 				_ => null,
 			},
 			MediaProvider.Plex => $"https://app.plex.tv/desktop/#!/provider/tv.plex.provider.discover/details?key=%2Flibrary%2Fmetadata%2F{id.Value}",
-			_ => null,
+			MediaProvider.Mdblist => id.Type switch
+			{
+				MediaType.Movie => $"https://mdblist.com/movie/{id.Value}",
+				MediaType.Show => $"https://mdblist.com/show/{id.Value}",
+				_ => null,
+			},
 		};
 }

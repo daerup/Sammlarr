@@ -56,7 +56,7 @@ internal class MediaIdResolver(
 
 		if (conversionResult is Resolved resolved)
 		{
-			await mediaIdGroupRepository.UpsertAsync(resolved.AllIds, cancellationToken);
+			await mediaIdGroupRepository.UpsertAsync(resolved.AllIds.Concat(candidates), cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, target);
 			return resolved;
 		}
@@ -66,9 +66,9 @@ internal class MediaIdResolver(
 		return conversionResult;
 	}
 
-	private static string BuildUnresolvedKey(IReadOnlyCollection<IMediaId> candidates, MediaProvider target)
+	private static string BuildUnresolvedKey(IEnumerable<IMediaId> candidates, MediaProvider target)
 	{
-		var sortedIds = candidates.Select(id => $"{id.Source}:{id.Type}:{id.Value}").OrderBy(id => id, StringComparer.Ordinal);
+		var sortedIds = candidates.Select(id => id.ToString()).OrderBy(id => id, StringComparer.Ordinal);
 		return $"{target}|{string.Join(",", sortedIds)}";
 	}
 }

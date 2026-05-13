@@ -13,5 +13,6 @@ public readonly record struct MediaIdentifier(MediaProvider Source, string Exter
 			MediaProvider.Imdb => ImdbId.From(ExternalId, MediaType),
 			MediaProvider.Tvdb => TvdbId.From(ExternalId, MediaType),
 			MediaProvider.Plex => PlexId.From(ExternalId, MediaType),
+			MediaProvider.Mdblist => MdblistId.From(ExternalId, MediaType),
 		};
 }
