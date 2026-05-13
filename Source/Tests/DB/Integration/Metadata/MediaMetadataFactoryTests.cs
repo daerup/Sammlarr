@@ -21,8 +21,8 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
-		_testee = new MediaMetadataFactory(fixture.Context, dateTimeProvider.Object);
-		_groupRepo = new MediaIdGroupRepository(fixture.Context);
+		_testee = new MediaMetadataFactory(dateTimeProvider.Object);
+		_groupRepo = new MediaIdGroupRepository(fixture.ContextFactory);
 	}
 
 	[Test]
@@ -88,14 +88,15 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var mediaId = TmdbId.From("310", MediaType.Movie);
 		var existing = await PersistAsync(CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] });
 
-		_testee.Update(existing, CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Imdb, 9.0f, 9999)] });
+		_testee.Update(existing, CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 9.0f, 9999)] });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaRatings.AsNoTracking().SingleAsync();
 		using var _ = Assert.Multiple();
-		await Assert.That(stored.Source).IsEqualTo(RatingSource.Imdb);
+		await Assert.That(stored.Source).IsEqualTo(RatingSource.Tmdb);
 		await Assert.That(stored.NormalizedValue).IsEqualTo(9.0f);
+		await Assert.That(stored.VoteCount).IsEqualTo(9999);
 	}
 
 	[Test]

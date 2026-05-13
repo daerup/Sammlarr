@@ -8,7 +8,7 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class CredentialRepositoryTests(SQLiteFixture fixture)
 {
-	private Mock<ITypedMemoryCache<WatchlistProvider, CredentialEntity>> _cache = null!;
+	private Mock<ITypedMemoryCache<WatchlistProvider, StoredCredential>> _cache = null!;
 	private ICredentialStore _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
@@ -16,8 +16,8 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<WatchlistProvider, CredentialEntity>.Mock();
-		_testee = new CredentialRepository(fixture.Context, _cache.Object);
+		_cache = ITypedMemoryCache<WatchlistProvider, StoredCredential>.Mock();
+		_testee = new CredentialRepository(fixture.ContextFactory, _cache.Object);
 	}
 
 	[Test]
@@ -34,7 +34,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
 		var accessToken = "test-token";
-		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
+		var expiresAt = new DateTimeOffset(2026, 5, 20, 15, 0, 0, TimeSpan.Zero);
 
 		await _testee.StoreAsync(authProvider, accessToken, expiresAt, clientId);
 
@@ -123,7 +123,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 		var authProvider = WatchlistProvider.Plex;
 		var clientId1 = Guid.NewGuid();
 		var clientId2 = Guid.NewGuid();
-		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
+		var expiresAt = new DateTimeOffset(2026, 5, 20, 15, 0, 0, TimeSpan.Zero);
 		var newToken = "new-token";
 
 		await SetUpCredentialAsync(authProvider, "old-token", expiresAt, clientId1);
@@ -176,12 +176,8 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		_cache.Set(authProvider, Is<CredentialEntity>(MatchCredential)).WasCalled(Times.Once);
+		_cache.Set(authProvider, new StoredCredential(authProvider, clientId, token, expiresAt)).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
-		return;
-
-		bool MatchCredential(CredentialEntity? c) =>
-			c is not null && c.WatchlistProvider == authProvider && c.AccessToken == token && c.ClientId == clientId && c.ExpiresAt == expiresAt;
 	}
 
 	[Test]

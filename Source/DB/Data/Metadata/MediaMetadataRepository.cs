@@ -1,6 +1,8 @@
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Contracts.Settings;
 using DB.Data.MediaGroup;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +11,8 @@ namespace DB.Data.Metadata;
 internal class MediaMetadataRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	IMediaIdGroupRepository mediaIdGroupRepository,
-	MediaMetadataFactory metadataFactory
+	MediaMetadataFactory metadataFactory,
+	IProviderConfigRepository providerConfigRepository
 ) : IMediaMetadataRepository
 {
 	public async Task<CachedMediaMetadata?> GetByMediaIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
@@ -35,9 +38,6 @@ internal class MediaMetadataRepository(
 
 		return new CachedMediaMetadata(metadataFactory.ToDetailResult(entity, mediaId, additionalIds), entity.LastFetchedAt);
 	}
-
-	public Task UpsertAsync(IMediaId mediaId, IMediaDetailResult details, CancellationToken cancellationToken = default) =>
-		UpsertManyAsync([new MediaMetadataUpsert(mediaId, details)], cancellationToken);
 
 	public async Task UpsertManyAsync(IReadOnlyList<MediaMetadataUpsert> items, CancellationToken cancellationToken = default)
 	{
@@ -84,7 +84,7 @@ internal class MediaMetadataRepository(
 
 			if (existingByGroupId.TryGetValue(groupId, out var existing))
 			{
-				metadataFactory.Update(ctx, existing, item.Details);
+				metadataFactory.Update(existing, item.Details);
 			}
 			else
 			{
@@ -112,10 +112,17 @@ internal class MediaMetadataRepository(
 	public async Task PurgeAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.MediaRatings.ExecuteDeleteAsync(cancellationToken);
+		var config = await providerConfigRepository.GetAsync(cancellationToken);
+		var anchor = config.WatchlistProvider.AsMediaProvider();
+
+		var protectedGroupIds = await ctx.BlacklistEntries.Select(b => b.Media.Id).ToListAsync(cancellationToken);
+
 		await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
-		await ctx.MediaIdEntries.ExecuteDeleteAsync(cancellationToken);
-		await ctx.MediaIdGroups.ExecuteDeleteAsync(cancellationToken);
+		await ctx.MediaIdGroups.Where(g => !protectedGroupIds.Contains(g.Id)).ExecuteDeleteAsync(cancellationToken);
+
+		var protectedEntries = await ctx.MediaIdEntries.Where(e => protectedGroupIds.Contains(e.MediaIdGroupEntity.Id)).ToListAsync(cancellationToken);
+		var nonAnchorIdentifiers = protectedEntries.Where(e => e.Identifier.Source != anchor).Select(e => e.Identifier).ToList();
+		await ctx.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(nonAnchorIdentifiers)).ExecuteDeleteAsync(cancellationToken);
 	}
 
 	public async Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default)

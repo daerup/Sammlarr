@@ -27,21 +27,21 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		return (TEntity)entity;
 	}
 
-	public void Update(SammlarrDbContext ctx, MediaMetadataEntity existing, IMediaDetailResult details)
+	public void Update(MediaMetadataEntity existing, IMediaDetailResult details)
 	{
 		switch (existing, details)
 		{
 			case (MovieMetadataEntity movie, MovieDetailResult movieDetails):
 				ApplyCommonFields(movie, movieDetails, movie.MediaIdGroupId);
 				movie.Runtime = movieDetails.Runtime;
-				ReplaceRatings(ctx, movie, movieDetails.Ratings);
+				ReplaceRatings(movie, movieDetails.Ratings);
 				break;
 			case (ShowMetadataEntity show, ShowDetailResult showDetails):
 				ApplyCommonFields(show, showDetails, show.MediaIdGroupId);
 				show.Seasons = showDetails.Seasons;
 				show.Episodes = showDetails.Episodes;
 				show.RuntimePerEpisode = showDetails.RuntimePerEpisode;
-				ReplaceRatings(ctx, show, showDetails.Ratings);
+				ReplaceRatings(show, showDetails.Ratings);
 				break;
 			default:
 				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name} with {details.GetType().Name}.");
@@ -85,9 +85,8 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => throw new InvalidOperationException($"Unsupported metadata entity type '{entity.GetType().Name}'."),
 		};
 
-	private static void ReplaceRatings(SammlarrDbContext ctx, MediaMetadataEntity entity, IReadOnlyList<MediaRating> ratings)
+	private static void ReplaceRatings(MediaMetadataEntity entity, IReadOnlyList<MediaRating> ratings)
 	{
-		ctx.MediaRatings.RemoveRange(entity.Ratings);
 		entity.Ratings.Clear();
 		foreach (var rating in ratings)
 		{

@@ -14,7 +14,7 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup() => _testee = new BlacklistRepository(fixture.Context);
+	public void Setup() => _testee = new BlacklistRepository(fixture.ContextFactory);
 
 	[Test]
 	public async Task AddAsync_WhenGroupIsNotBlacklisted_PersistsEntry()
@@ -97,7 +97,7 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.RemoveAsync(missingId);
 
-		var entries = await fixture.Context.BlacklistEntries.AsNoTracking().ToListAsync();
+		var entries = await fixture.Context.BlacklistEntries.AsNoTracking().Include(b => b.Media).ToListAsync();
 		await Assert.That(entries).Count().IsEqualTo(1);
 		await Assert.That(entries[0].Media.Id).IsEqualTo(mediaGroupId);
 	}

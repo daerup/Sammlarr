@@ -80,7 +80,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
 		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
-		modelBuilder.Entity<BlacklistEntryEntity>().HasOne(x => x.Media).WithMany().HasForeignKey("MediaId");
+		modelBuilder.Entity<BlacklistEntryEntity>().HasOne(x => x.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
 		modelBuilder.Entity<BlacklistEntryEntity>().HasIndex("MediaId").IsUnique();
 
 		modelBuilder.Entity<MediaIdentifierGroupEntry>(builder =>

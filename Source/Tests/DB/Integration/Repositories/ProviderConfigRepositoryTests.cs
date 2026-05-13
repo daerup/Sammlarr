@@ -1,5 +1,6 @@
 using Contracts.Auth;
 using Contracts.Caching;
+using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
@@ -20,7 +21,7 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 	public void Setup()
 	{
 		_cache = ITypedMemoryCache<string, ProviderConfig>.Mock();
-		_testee = new ProviderConfigRepository(fixture.Context, _cache.Object);
+		_testee = new ProviderConfigRepository(fixture.ContextFactory, _cache.Object);
 	}
 
 	[Test]
@@ -38,7 +39,7 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 	[Test]
 	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
 	{
-		var expected = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex);
+		var expected = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex, RatingProvider.Tmdb);
 
 		await _testee.StoreAsync(expected);
 
@@ -48,13 +49,14 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 		await Assert.That(entity.WatchlistProvider).IsEqualTo(expected.WatchlistProvider);
 		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
 		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
+		await Assert.That(entity.RatingProvider).IsEqualTo(expected.RatingProvider);
 	}
 
 	[Test]
 	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
 	{
-		var initial = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex);
-		var updated = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex);
+		var initial = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex, RatingProvider.Tmdb);
+		var updated = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex, RatingProvider.Tmdb);
 
 		await _testee.StoreAsync(initial);
 		await _testee.StoreAsync(updated);
@@ -67,12 +69,14 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 	private static ProviderConfig CreateProviderSettings(
 		WatchlistProvider watchlistProvider,
 		MediaRecommendationProvider trendingProvider,
-		MediaSearchProvider searchProvider
+		MediaSearchProvider searchProvider,
+		RatingProvider ratingProvider
 	) =>
 		new()
 		{
 			WatchlistProvider = watchlistProvider,
 			TrendingProvider = trendingProvider,
 			SearchProvider = searchProvider,
+			RatingProvider = ratingProvider,
 		};
 }
