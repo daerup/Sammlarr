@@ -20,11 +20,21 @@
         <div class="px-6 py-6 space-y-6">
             <BbField>
                 <BbFieldContent>
-                    <BbInput
-                        Placeholder="Enter API key"
-                        @bind-Value="ApiKey"
-                        Class="bg-accent"
-                        UpdateTiming="UpdateTiming.Immediate"/>
+                    <div class="relative">
+                        <BbInput
+                            Placeholder="Enter API key"
+                            @bind-Value="ApiKey"
+                            Type="@(_showApiKey ? InputType.Text : InputType.Password)"
+                            Class="bg-accent pr-10"
+                            UpdateTiming="UpdateTiming.Immediate"/>
+                        <BbButton Variant="ButtonVariant.Ghost"
+                                  Size="ButtonSize.IconSmall"
+                                  AriaLabel="@(_showApiKey ? "Hide API key" : "Show API key")"
+                                  Class="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                                  OnClick="ToggleApiKeyVisibility">
+                            <LucideIcon Name="@(_showApiKey ? "eye-off" : "eye")" Size="16"/>
+                        </BbButton>
+                    </div>
                     <BbFieldDescription> @Description</BbFieldDescription>
                 </BbFieldContent>
             </BbField>
@@ -139,6 +149,9 @@
     private string _savedApiKey = string.Empty;
     private MediaProvider? _loadedProvider;
     private State _state = State.Idle;
+    private bool _showApiKey;
+
+    private void ToggleApiKeyVisibility() => _showApiKey = !_showApiKey;
 
     private string ApiKey
     {
