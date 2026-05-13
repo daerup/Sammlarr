@@ -3,7 +3,7 @@ namespace Shared.Options;
 public enum TelemetryVerbosity
 {
 	Quiet,
-	Normal,
+	Standard,
 	Verbose,
 }
 

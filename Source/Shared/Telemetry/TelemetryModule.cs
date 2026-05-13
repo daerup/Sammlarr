@@ -50,7 +50,6 @@ public class TelemetryModule : IServiceModule
 			.WithTracing(tracing =>
 			{
 				tracing.AddSource(SammlarrTelemetry.ServiceName);
-				tracing.AddProcessor(new LayerTaggingProcessor());
 				if (otlpEnabled)
 				{
 					tracing.AddOtlpExporter(opts =>
@@ -110,7 +109,7 @@ public class TelemetryModule : IServiceModule
 		verbosity switch
 		{
 			TelemetryVerbosity.Verbose => LogLevel.Debug,
-			TelemetryVerbosity.Normal => LogLevel.Information,
+			TelemetryVerbosity.Standard => LogLevel.Information,
 			_ => LogLevel.Warning,
 		};
 
