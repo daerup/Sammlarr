@@ -7,6 +7,4 @@ public interface IMediaMetadataProvider
 	Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 
 	Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default);
-
-	Task PurgeAllAsync(CancellationToken cancellationToken = default);
 }

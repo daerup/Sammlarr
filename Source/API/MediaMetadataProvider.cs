@@ -51,8 +51,6 @@ internal class MediaMetadataProvider(
 	public Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default) =>
 		repository.RemoveManyAsync([.. mediaIds], cancellationToken);
 
-	public Task PurgeAllAsync(CancellationToken cancellationToken = default) => repository.PurgeAllAsync(cancellationToken);
-
 	private (MetadataItemOutcome Outcome, IMediaDetailResult? Cached) Classify(CachedMediaMetadata? cached)
 	{
 		if (cached is null)

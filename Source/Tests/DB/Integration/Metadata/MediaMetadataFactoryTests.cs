@@ -100,6 +100,19 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task Update_WhenNewRatingsAreEmpty_RemovesExistingRatings()
+	{
+		var mediaId = TmdbId.From("315", MediaType.Movie);
+		var existing = await PersistAsync(CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] });
+
+		_testee.Update(existing, CreateMovieDetails(mediaId) with { Ratings = [] });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		await Assert.That(await fixture.Context.MediaRatings.AsNoTracking().AnyAsync()).IsFalse();
+	}
+
+	[Test]
 	public async Task Update_WhenTypeMismatch_Throws()
 	{
 		var mediaId = TmdbId.From("320", MediaType.Movie);
