@@ -14,7 +14,7 @@ public class ActivityFactoryTests
 		_listener = new ActivityListener
 		{
 			ShouldListenTo = source => source.Name == SammlarrTelemetry.ServiceName,
-			Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+			Sample = (ref _) => ActivitySamplingResult.AllDataAndRecorded,
 		};
 		ActivitySource.AddActivityListener(_listener);
 	}
@@ -33,33 +33,40 @@ public class ActivityFactoryTests
 	}
 
 	[Test]
-	public async Task IdResolution_WithCandidates_IncludesCandidatesInDisplayName()
+	public async Task IdResolution_WithCandidates_TagsCandidatesAndOmitsThemFromDisplayName()
 	{
-		using var activity = SammlarrTelemetry.StartIdResolution(MediaProvider.Tmdb, (IReadOnlyCollection<IMediaId>)[PlexId.From("abc", MediaType.Movie)]);
+		using var activity = SammlarrTelemetry.StartIdResolution(MediaProvider.Tmdb, [PlexId.From("abc", MediaType.Movie)]);
 
-		await Assert.That(activity!.DisplayName).Contains("Plex:Movie:abc");
+		await Assert.That(activity!.DisplayName).DoesNotContain("Plex:Movie:abc");
+		await Assert.That(activity.GetTagItem("id_resolution.candidates")).IsEquivalentTo(new[] { "Plex:Movie:abc" });
 	}
 
 	[Test]
-	public async Task MetadataItem_WithExplicitParentContext_AnchorsToProvidedParent()
+	public async Task TagIdResolutionOutcome_AppendsUppercaseSuffixAndTagsOutcome()
 	{
-		using var parent = new ActivitySource(SammlarrTelemetry.ServiceName).StartActivity("test.parent");
-		using var item = SammlarrTelemetry.StartMetadataItem(TmdbId.From("1", MediaType.Movie), parent!.Context);
+		using var activity = SammlarrTelemetry.StartIdResolution(MediaProvider.Tmdb, [PlexId.From("abc", MediaType.Movie)]);
+		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Hit, MediaProvider.Tmdb);
 
-		await Assert.That(item).IsNotNull();
-		await Assert.That(item!.ParentSpanId).IsEqualTo(parent.SpanId);
-		await Assert.That(item.TraceId).IsEqualTo(parent.TraceId);
+		await Assert.That(activity!.DisplayName).EndsWith(" [HIT]");
+		await Assert.That(activity.GetTagItem("id_resolution.outcome")).IsEqualTo("hit");
 	}
 
 	[Test]
-	public async Task IdResolution_WithTitle_IncludesTitleInDisplayName()
+	public async Task TagItemOutcome_AppendsUppercaseSuffixAndTagsOutcome()
 	{
-		using var activity = SammlarrTelemetry.StartIdResolution(
-			MediaProvider.Plex,
-			(IReadOnlyCollection<IMediaId>)[TmdbId.From("1", MediaType.Movie)],
-			"Inception"
-		);
+		using var activity = SammlarrTelemetry.StartMetadataItem(TmdbId.From("1", MediaType.Movie));
+		SammlarrTelemetry.TagItemOutcome(activity, MetadataItemOutcome.Stale, MediaType.Movie);
 
-		await Assert.That(activity!.DisplayName).Contains("Inception");
+		await Assert.That(activity!.DisplayName).EndsWith(" [STALE]");
+		await Assert.That(activity.GetTagItem("metadata.outcome")).IsEqualTo("stale");
+	}
+
+	[Test]
+	public async Task IdResolution_WithTitle_TagsTitleAndOmitsItFromDisplayName()
+	{
+		using var activity = SammlarrTelemetry.StartIdResolution(MediaProvider.Plex, [TmdbId.From("1", MediaType.Movie)], "Inception");
+
+		await Assert.That(activity!.DisplayName).DoesNotContain("Inception");
+		await Assert.That(activity.GetTagItem("id_resolution.title")).IsEqualTo("Inception");
 	}
 }

@@ -21,15 +21,12 @@ internal class MediaIdResolver(
 	{
 		var title = hints is Some<ResolutionHints> some ? some.Value.Title : null;
 		using var activity = SammlarrTelemetry.StartIdResolution(target, candidates, title);
-		foreach (var candidate in candidates)
+		var cachedIds = await mediaIdGroupRepository.GetByIdsAsync(candidates);
+		var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
+		if (cachedTarget is not null)
 		{
-			var cachedIds = await mediaIdGroupRepository.GetByIdAsync(candidate);
-			var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
-			if (cachedTarget is not null)
-			{
-				SammlarrTelemetry.RecordIdResolutionOutcome(target, "cache_hit");
-				return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
-			}
+			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Hit, target);
+			return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
 		}
 
 		ConversionResult conversionResult = target switch
@@ -38,26 +35,17 @@ internal class MediaIdResolver(
 			MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints),
 			MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints),
 			MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints),
-			MediaProvider.Mdblist => new Unresolved(), // Mdblist is a list source, not a resolution target
+			MediaProvider.Mdblist => new Unresolved(),
 		};
 
-		return conversionResult switch
+		if (conversionResult is Resolved resolved)
 		{
-			Resolved resolved => await PersistAndReturnAsync(resolved, target),
-			Unresolved unresolved => RecordAndReturn(unresolved, target),
-		};
-	}
+			await mediaIdGroupRepository.UpsertAsync(resolved.AllIds);
+			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, target);
+			return resolved;
+		}
 
-	private async Task<Resolved> PersistAndReturnAsync(Resolved resolved, MediaProvider target)
-	{
-		await mediaIdGroupRepository.CreateOrAppendAsync(resolved.AllIds);
-		SammlarrTelemetry.RecordIdResolutionOutcome(target, "resolved");
-		return resolved;
-	}
-
-	private static Unresolved RecordAndReturn(Unresolved unresolved, MediaProvider target)
-	{
-		SammlarrTelemetry.RecordIdResolutionOutcome(target, "unresolved");
-		return unresolved;
+		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
+		return conversionResult;
 	}
 }

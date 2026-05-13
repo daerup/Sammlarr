@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
@@ -51,7 +50,7 @@ public class BlacklistServiceTests
 		repository.GetBlacklistedEntriesAsync(Any(), Any()).Returns([entry]);
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(Any<IMediaId>(), Any(), Any<ActivityContext>()).Returns(detailResult);
+		metadataProvider.GetAsync(Any<IMediaId>(), Any()).Returns(detailResult);
 
 		var testee = CreateTestee(repository, metadataProvider);
 

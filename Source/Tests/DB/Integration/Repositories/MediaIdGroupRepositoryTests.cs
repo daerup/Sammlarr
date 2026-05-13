@@ -15,23 +15,46 @@ public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	public void Setup() => _testee = new MediaIdGroupRepository(fixture.Context);
 
 	[Test]
-	public async Task GetByIdAsync_WhenGroupExists_ReturnsAllMappedIds()
+	public async Task GetByIdsAsync_WhenGroupExists_ReturnsAllMappedIds()
 	{
 		var imdbId = ImdbId.From("tt0101", MediaType.Movie);
 		IMediaId[] expectedIds = [TmdbId.From("101", MediaType.Movie), imdbId, TvdbId.From("201", MediaType.Movie)];
 
 		await SetUpGroupAsync(expectedIds);
 
-		var mappedIds = await _testee.GetByIdAsync(imdbId);
+		var mappedIds = await _testee.GetByIdsAsync([imdbId]);
 
 		await Assert.That(mappedIds).Count().IsEqualTo(expectedIds.Length);
 		await AssertContainsIds(mappedIds, expectedIds);
 	}
 
 	[Test]
-	public async Task GetByIdAsync_WhenIdDoesNotExist_ReturnsEmptyList()
+	public async Task GetByIdsAsync_WhenMultipleCandidatesShareGroup_ReturnsGroupIdsWithoutDuplicates()
 	{
-		var mappedIds = await _testee.GetByIdAsync(ImdbId.From("tt-not-found", MediaType.Movie));
+		var imdbId = ImdbId.From("tt0102", MediaType.Movie);
+		var tmdbId = TmdbId.From("102", MediaType.Movie);
+		IMediaId[] expectedIds = [tmdbId, imdbId, TvdbId.From("202", MediaType.Movie)];
+
+		await SetUpGroupAsync(expectedIds);
+
+		var mappedIds = await _testee.GetByIdsAsync([imdbId, tmdbId]);
+
+		await Assert.That(mappedIds).Count().IsEqualTo(expectedIds.Length);
+		await AssertContainsIds(mappedIds, expectedIds);
+	}
+
+	[Test]
+	public async Task GetByIdsAsync_WhenNoIdsMatch_ReturnsEmptyList()
+	{
+		var mappedIds = await _testee.GetByIdsAsync([ImdbId.From("tt-not-found", MediaType.Movie)]);
+
+		await Assert.That(mappedIds.Count).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task GetByIdsAsync_WhenEmptyInput_ReturnsEmptyList()
+	{
+		var mappedIds = await _testee.GetByIdsAsync([]);
 
 		await Assert.That(mappedIds.Count).IsEqualTo(0);
 	}
@@ -100,7 +123,7 @@ public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	{
 		IMediaId[] ids = [TmdbId.From("135", MediaType.Movie), ImdbId.From("tt0135", MediaType.Movie)];
 
-		await _testee.CreateOrAppendAsync(ids);
+		await _testee.UpsertAsync(ids);
 
 		var group = await fixture.Context.MediaIdGroups.Include(g => g.MediaIdEntries).SingleAsync();
 		var persistedIds = group.MediaIdEntries.Select(i => i.Identifier.ToMediaId());
@@ -119,7 +142,7 @@ public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 		IMediaId[] ids = [TmdbId.From("136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie)];
 		IMediaId[] expected = [TmdbId.From("136", MediaType.Movie), ImdbId.From("tt0136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie)];
 
-		await _testee.CreateOrAppendAsync(ids);
+		await _testee.UpsertAsync(ids);
 
 		var group = await fixture.Context.MediaIdGroups.Include(g => g.MediaIdEntries).SingleAsync();
 		var persistedIds = group.MediaIdEntries.Select(i => i.Identifier.ToMediaId());
@@ -133,7 +156,7 @@ public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	{
 		IMediaId[] ids = [TmdbId.From("136", MediaType.Movie), PlexId.From("plex-136", MediaType.Show)];
 
-		await Assert.That(async () => await _testee.CreateOrAppendAsync(ids)).Throws<ArgumentException>();
+		await Assert.That(async () => await _testee.UpsertAsync(ids)).Throws<ArgumentException>();
 	}
 
 	[Test]
@@ -144,7 +167,7 @@ public class MediaIdGroupRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 		fixture.Context.ChangeTracker.Clear();
 
 		await Assert
-			.That(async () => await _testee.CreateOrAppendAsync([TmdbId.From("137", MediaType.Movie), TmdbId.From("138", MediaType.Movie)]))
+			.That(async () => await _testee.UpsertAsync([TmdbId.From("137", MediaType.Movie), TmdbId.From("138", MediaType.Movie)]))
 			.Throws<InvalidOperationException>();
 	}
 

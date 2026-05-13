@@ -23,47 +23,43 @@ internal class WatchlistService(
 		using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
 		var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
 
-		var enriched = new List<IMediaDetailResult>(providerPage.Items.Count);
-		await foreach (
-			var detail in providerPage
-				.Items.ToAsyncEnumerable()
-				.SelectAwait(
-					async id => await metadataProvider.GetAsync(id, cancellationToken),
-					IMediaMetadataProvider.RecommendedConcurrency,
-					cancellationToken
-				)
-		)
-		{
-			enriched.Add(detail);
-		}
+		var enriched = await providerPage
+			.Items.ToAsyncEnumerable()
+			.SelectAwait(async id => await metadataProvider.GetAsync(id, cancellationToken), IMediaMetadataProvider.RecommendedConcurrency, cancellationToken)
+			.ToListAsync(cancellationToken);
 		return new WatchlistPageResult(enriched, providerPage.TotalPages);
 	}
 
 	public async IAsyncEnumerable<IMediaDetailResult> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var (providerKey, provider) = await ResolveProviderAsync(cancellationToken);
-		var page = 1;
-		int totalPages;
-		do
+		using var loadActivity = SammlarrTelemetry.StartWatchlistLoad(providerKey);
+
+		async ValueTask<WatchlistProviderPage> LoadPage(int page)
 		{
 			using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
-			var watchlistContext = activity?.Context ?? default;
-			var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
-			totalPages = providerPage.TotalPages;
-			var pipeline = providerPage
-				.Items.ToAsyncEnumerable()
-				.SelectAwait(
-					async id => await metadataProvider.GetAsync(id, cancellationToken, watchlistContext),
-					IMediaMetadataProvider.RecommendedConcurrency,
-					cancellationToken
-				);
+			return await provider.GetWatchlistAsync(page, cancellationToken);
+		}
 
-			await foreach (var detail in pipeline)
-			{
-				yield return detail;
-			}
-			page++;
-		} while (page <= totalPages);
+		var firstPage = await LoadPage(1);
+		var remainingPages = Enumerable
+			.Range(2, Math.Max(0, firstPage.TotalPages - 1))
+			.ToAsyncEnumerable()
+			.SelectAwait(LoadPage, IWatchlistService.RecommendedConcurrency, cancellationToken)
+			.SelectMany(p => p.Items.ToAsyncEnumerable());
+
+		var ids = firstPage.Items.ToAsyncEnumerable().Concat(remainingPages);
+
+		var pipeline = ids.SelectAwait(
+			async id => await metadataProvider.GetAsync(id, cancellationToken),
+			IMediaMetadataProvider.RecommendedConcurrency,
+			cancellationToken
+		);
+
+		await foreach (var detail in pipeline)
+		{
+			yield return detail;
+		}
 	}
 
 	public async Task<bool> AddToWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)

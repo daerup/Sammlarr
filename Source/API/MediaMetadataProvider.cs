@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using API.Metadata;
 using Contracts;
 using Contracts.DI;
@@ -24,25 +23,17 @@ internal class MediaMetadataProvider(
 	private static readonly TimeSpan HydrationCooldown = TimeSpan.FromHours(1);
 	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
 
-	public async Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default, ActivityContext parent = default)
+	public async Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		using var activity = SammlarrTelemetry.StartMetadataItem(mediaId, parent);
+		using var activity = SammlarrTelemetry.StartMetadataItem(mediaId);
 
 		var cached = await repository.GetByMediaIdAsync(mediaId, cancellationToken);
-		var (state, cachedDetails) = Classify(cached);
-		SammlarrTelemetry.TagItemState(activity, state.ToString());
+		var (outcome, cachedDetails) = Classify(cached);
+		SammlarrTelemetry.TagItemOutcome(activity, outcome, mediaId.Type);
 
-		switch (state)
+		if (outcome is MetadataItemOutcome.Hit)
 		{
-			case ResolutionState.ReturnCached:
-				SammlarrTelemetry.RecordCacheHit(mediaId.Type);
-				return cachedDetails!;
-			case ResolutionState.FetchFresh:
-				SammlarrTelemetry.RecordCacheMiss(mediaId.Type);
-				break;
-			case ResolutionState.Hydrate:
-				SammlarrTelemetry.RecordCacheStale(mediaId.Type);
-				break;
+			return cachedDetails!;
 		}
 
 		var config = await configRepository.GetAsync(cancellationToken);
@@ -62,25 +53,25 @@ internal class MediaMetadataProvider(
 
 	public Task PurgeAllAsync(CancellationToken cancellationToken = default) => repository.PurgeAllAsync(cancellationToken);
 
-	private (ResolutionState State, IMediaDetailResult? Cached) Classify(CachedMediaMetadata? cached)
+	private (MetadataItemOutcome Outcome, IMediaDetailResult? Cached) Classify(CachedMediaMetadata? cached)
 	{
 		if (cached is null)
 		{
-			return (ResolutionState.FetchFresh, null);
+			return (MetadataItemOutcome.Miss, null);
 		}
 
 		var sinceFetched = dateTimeProvider.Now - cached.FetchedAt;
 		if (sinceFetched >= StaleAfter)
 		{
-			return (ResolutionState.FetchFresh, null);
+			return (MetadataItemOutcome.Stale, null);
 		}
 
 		if (MetadataCompleteness.GetMissingFields(cached.Details).Count == 0 || sinceFetched < HydrationCooldown)
 		{
-			return (ResolutionState.ReturnCached, cached.Details);
+			return (MetadataItemOutcome.Hit, cached.Details);
 		}
 
-		return (ResolutionState.Hydrate, cached.Details);
+		return (MetadataItemOutcome.Partial, cached.Details);
 	}
 
 	private async Task<IMediaDetailResult> LookUpAsync(IMediaId id, MediaSearchProvider provider, CancellationToken cancellationToken)
@@ -131,11 +122,4 @@ internal class MediaMetadataProvider(
 
 	private static IMediaId? FindId(IMediaDetailResult details, MediaProvider provider) =>
 		details.SourceId.Source == provider ? details.SourceId : details.AdditionalIds.FirstOrDefault(id => id.Source == provider);
-
-	private enum ResolutionState
-	{
-		ReturnCached,
-		FetchFresh,
-		Hydrate,
-	}
 }

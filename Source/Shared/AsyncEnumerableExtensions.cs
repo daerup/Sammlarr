@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Contracts.Media.Convertions;
 using Contracts.Media.Metadata;
+using Contracts.Watchlist;
 
 namespace Shared;
 
@@ -17,11 +19,13 @@ public static class AsyncEnumerableExtensions
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)
 		{
+			var anchor = Activity.Current;
 			var window = new Queue<Task<TOut>>(maxConcurrency);
 			await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
 
 			while (window.Count < maxConcurrency && await enumerator.MoveNextAsync())
 			{
+				Activity.Current = anchor;
 				window.Enqueue(predicate(enumerator.Current).AsTask());
 			}
 
@@ -30,6 +34,7 @@ public static class AsyncEnumerableExtensions
 				yield return await window.Dequeue();
 				if (await enumerator.MoveNextAsync())
 				{
+					Activity.Current = anchor;
 					window.Enqueue(predicate(enumerator.Current).AsTask());
 				}
 			}
@@ -50,5 +55,13 @@ public static class MediaIdResolverExtensions
 	extension(IMediaIdResolver)
 	{
 		public static int RecommendedConcurrency => 50;
+	}
+}
+
+public static class WatchlistServiceExtensions
+{
+	extension(IWatchlistService)
+	{
+		public static int RecommendedConcurrency => 10;
 	}
 }

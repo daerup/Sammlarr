@@ -7,15 +7,22 @@ internal class MediaIdGroupRepository(IDbContextFactory<SammlarrDbContext> dbCon
 {
 	private const string MixedMediaTypesMessage = "All IDs must be of the same media type.";
 
-	public async Task<List<IMediaId>> GetByIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<List<IMediaId>> GetByIdsAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
 	{
+		var identifiers = mediaIds.Select(MediaIdentifier.From).Distinct().ToList();
+		if (identifiers.Count is 0)
+		{
+			return [];
+		}
+
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx
-			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesId(mediaId))
-			.Select(entry => entry.MediaIdGroupEntity.MediaIdEntries)
-			.SelectMany(ids => ids)
-			.Select(entry => entry.Identifier.ToMediaId())
+		var matched = await ctx
+			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(identifiers))
+			.SelectMany(entry => entry.MediaIdGroupEntity.MediaIdEntries)
+			.Select(entry => entry.Identifier)
+			.Distinct()
 			.ToListAsync(cancellationToken);
+		return matched.Select(identifier => identifier.ToMediaId()).ToList();
 	}
 
 	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
@@ -36,7 +43,7 @@ internal class MediaIdGroupRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task CreateOrAppendAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
+	public async Task UpsertAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
 	{
 		var identifiers = ids.Select(MediaIdentifier.From).Distinct().ToList();
 		if (identifiers.Count is 0)

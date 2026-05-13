@@ -40,7 +40,14 @@ public class TelemetryModule : IServiceModule
 				tracing.AddProcessor(new LayerTaggingProcessor());
 				if (otlpEnabled)
 				{
-					tracing.AddOtlpExporter();
+					tracing.AddOtlpExporter(opts =>
+						opts.BatchExportProcessorOptions = new BatchExportActivityProcessorOptions
+						{
+							MaxQueueSize = 32768,
+							MaxExportBatchSize = 4096,
+							ScheduledDelayMilliseconds = 1000,
+						}
+					);
 				}
 				else
 				{
