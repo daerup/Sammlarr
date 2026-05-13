@@ -7,5 +7,7 @@ public interface ITypedMemoryCache<in TKey, TValue>
 
 	void Set(TKey key, TValue value);
 
+	void Set(TKey key, TValue value, TimeSpan absoluteExpirationRelativeToNow);
+
 	void Remove(TKey key);
 }

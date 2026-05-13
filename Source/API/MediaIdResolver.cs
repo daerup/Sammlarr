@@ -3,6 +3,7 @@ using API.Plex;
 using API.TMDB;
 using API.TvDB;
 using Contracts;
+using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Shared.Telemetry;
@@ -14,14 +15,22 @@ internal class MediaIdResolver(
 	TmdbIdConverter tmdb,
 	PlexIdConverter plex,
 	ImdbIdConverter imdb,
-	TvdbIdConverter tvdb
+	TvdbIdConverter tvdb,
+	ITypedMemoryCache<string, bool> unresolvedCache
 ) : IMediaIdResolver
 {
-	public async Task<ConversionResult> ResolveAsync(IReadOnlyCollection<IMediaId> candidates, MediaProvider target, Optional<ResolutionHints> hints)
+	private static readonly TimeSpan UnresolvedTtl = TimeSpan.FromHours(1);
+
+	public async Task<ConversionResult> ResolveAsync(
+		IReadOnlyCollection<IMediaId> candidates,
+		MediaProvider target,
+		Optional<ResolutionHints> hints,
+		CancellationToken cancellationToken = default
+	)
 	{
 		var title = hints is Some<ResolutionHints> some ? some.Value.Title : null;
 		using var activity = SammlarrTelemetry.StartIdResolution(target, candidates, title);
-		var cachedIds = await mediaIdGroupRepository.GetByIdsAsync(candidates);
+		var cachedIds = await mediaIdGroupRepository.GetByIdsAsync(candidates, cancellationToken);
 		var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
 		if (cachedTarget is not null)
 		{
@@ -29,23 +38,37 @@ internal class MediaIdResolver(
 			return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
 		}
 
+		var unresolvedKey = BuildUnresolvedKey(candidates, target);
+		if (unresolvedCache.TryGetValue(unresolvedKey, out _))
+		{
+			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
+			return new Unresolved();
+		}
+
 		ConversionResult conversionResult = target switch
 		{
-			MediaProvider.Plex => await plex.ConvertAsync(candidates, hints),
-			MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints),
-			MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints),
-			MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints),
+			MediaProvider.Plex => await plex.ConvertAsync(candidates, hints, cancellationToken),
+			MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints, cancellationToken),
+			MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints, cancellationToken),
+			MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints, cancellationToken),
 			MediaProvider.Mdblist => new Unresolved(),
 		};
 
 		if (conversionResult is Resolved resolved)
 		{
-			await mediaIdGroupRepository.UpsertAsync(resolved.AllIds);
+			await mediaIdGroupRepository.UpsertAsync(resolved.AllIds, cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, target);
 			return resolved;
 		}
 
+		unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
 		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
 		return conversionResult;
+	}
+
+	private static string BuildUnresolvedKey(IReadOnlyCollection<IMediaId> candidates, MediaProvider target)
+	{
+		var sortedIds = candidates.Select(id => $"{id.Source}:{id.Type}:{id.Value}").OrderBy(id => id, StringComparer.Ordinal);
+		return $"{target}|{string.Join(",", sortedIds)}";
 	}
 }

@@ -7,7 +7,11 @@ namespace API.TvDB;
 
 internal class TvdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
+	public async Task<ConversionResult> ConvertAsync(
+		IReadOnlyCollection<IMediaId> candidates,
+		Optional<ResolutionHints> hints,
+		CancellationToken cancellationToken = default
+	)
 	{
 		foreach (var id in candidates)
 		{
@@ -25,9 +29,7 @@ internal class TvdbIdConverter(PlexApi plexApi)
 		id switch
 		{
 			TvdbId tvdbId => Task.FromResult<ConversionResult>(new Resolved(tvdbId, [])),
-			PlexId plexId => ResolveFromPlexAsync(plexId),
+			PlexId plexId => plexApi.ResolveById<TvdbId>(plexId),
 			_ => Task.FromResult<ConversionResult>(new Unresolved()),
 		};
-
-	private Task<ConversionResult> ResolveFromPlexAsync(PlexId plexId) => plexApi.ResolveById<TvdbId>(plexId);
 }
