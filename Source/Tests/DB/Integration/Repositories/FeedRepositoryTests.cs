@@ -12,7 +12,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup() => _testee = new FeedRepository(fixture.Context);
+	public void Setup() => _testee = new FeedRepository(fixture.ContextFactory);
 
 	[Test]
 	public async Task GetFeedsAsync_WhenFeedsExist_ReturnsNewestFirst()
@@ -76,6 +76,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		fixture.Context.Feeds.Add(entity);
 		await fixture.Context.SaveChangesAsync();
+		await fixture.Context.Feeds.Where(f => f.Id == entity.Id).ExecuteUpdateAsync(s => s.SetProperty(f => f.CreatedAt, createdAt));
 		fixture.Context.ChangeTracker.Clear();
 		return entity.Id;
 	}

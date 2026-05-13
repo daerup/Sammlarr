@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<WatchlistProvider, CredentialEntity> cache)
+internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<WatchlistProvider, StoredCredential> cache)
 	: ICredentialStore
 {
 	public async ValueTask<StoredCredential?> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
 		if (cache.TryGetValue(watchlistProvider, out var cached))
 		{
-			return new StoredCredential(cached!.WatchlistProvider, cached.ClientId, cached.AccessToken, cached.ExpiresAt);
+			return cached;
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -52,7 +52,7 @@ internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
-		cache.Set(watchlistProvider, credential);
+		cache.Set(watchlistProvider, new StoredCredential(watchlistProvider, clientId, accessToken, accessTokenExpiresAt));
 	}
 
 	public async Task ClearAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)

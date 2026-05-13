@@ -1,6 +1,7 @@
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
+using Contracts.Media.Metadata;
 using DB.Data.Access;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace DB.Tests.Integration.Repositories;
 public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private Mock<ITypedMemoryCache<MediaProvider, string>> _cache = null!;
+	private Mock<IMediaMetadataRepository> _metadataRepository = null!;
 	private IApiKeyConfigRepository _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
@@ -18,7 +20,8 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	public void Setup()
 	{
 		_cache = ITypedMemoryCache<MediaProvider, string>.Mock();
-		_testee = new ApiKeyConfigRepository(fixture.Context, _cache.Object);
+		_metadataRepository = IMediaMetadataRepository.Mock();
+		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _metadataRepository.Object);
 	}
 
 	[Test]
