@@ -60,6 +60,7 @@
                                            OnClick="() => SelectMedia(media)"
                                            ShowBookmark="true"
                                            IsInWatchlist="IsInWatchlist(media)"
+                                           IsUnresolved="@(media is UnresolvedTrendingMedia)"
                                            Rating="@media.Rating"
                                            Date="@media.ReleaseDate"/>
                         }
@@ -99,7 +100,8 @@
                   Ids="@(_selectedMedia is null ? null : [_selectedMedia.SourceId])"
                   ButtonAction="ToggleWatchlistAsync"
                   ButtonText="GetSideMenuButtonText"
-                  ButtonIcon="GetSideMenuButtonIcon"/>
+                  ButtonIcon="GetSideMenuButtonIcon"
+                  ButtonDisabled="@(_selectedMedia is UnresolvedTrendingMedia or null)"/>
 
 @code {
     private IReadOnlyList<ITrendingMedia>? _trendingMedia;
@@ -278,7 +280,7 @@
         Dispose();
     }
 
-    private bool IsInWatchlist(ITrendingMedia media) => IsInWatchlist(media.WatchlistProviderId);
+    private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && IsInWatchlist(resolved.WatchlistProviderId);
 
     private bool IsInWatchlist(IMediaId mediaId)
     {
@@ -340,34 +342,49 @@
         _isSheetOpen = true;
     }
 
-    private string GetSideMenuButtonText() => _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "Remove from Watchlist" : "Add to Watchlist";
+    private string GetSideMenuButtonText()
+    {
+        if (_selectedMedia is UnresolvedTrendingMedia or null)
+        {
+            return "Could not be matched";
+        }
+        return IsInWatchlist(_selectedMedia) ? "Remove from Watchlist" : "Add to Watchlist";
+    }
 
-    private string GetSideMenuButtonIcon() => _selectedMedia != null && IsInWatchlist(_selectedMedia) ? "x" : "plus";
+    private string GetSideMenuButtonIcon()
+    {
+        if (_selectedMedia is UnresolvedTrendingMedia or null)
+        {
+            return "circle-alert";
+        }
+        return IsInWatchlist(_selectedMedia) ? "x" : "plus";
+    }
 
     private async Task ToggleWatchlistAsync()
     {
-        if (_selectedMedia?.WatchlistProviderId.Source != _providerConfig.WatchlistProvider.AsMediaProvider())
+        if (_selectedMedia is not TrendingMedia resolved ||
+            resolved.WatchlistProviderId.Source != _providerConfig.WatchlistProvider.AsMediaProvider())
         {
             return;
         }
 
         bool success;
 
-        if (IsInWatchlist(_selectedMedia))
+        if (IsInWatchlist(resolved))
         {
-            success = await WatchlistService.RemoveFromWatchlistAsync(_selectedMedia.WatchlistProviderId);
+            success = await WatchlistService.RemoveFromWatchlistAsync(resolved.WatchlistProviderId);
             if (success)
             {
-                _watchlistedIds.Remove(_selectedMedia.WatchlistProviderId.Value);
+                _watchlistedIds.Remove(resolved.WatchlistProviderId.Value);
                 _isSheetOpen = false;
             }
         }
         else
         {
-            success = await WatchlistService.AddToWatchlistAsync(_selectedMedia.WatchlistProviderId);
+            success = await WatchlistService.AddToWatchlistAsync(resolved.WatchlistProviderId);
             if (success)
             {
-                _watchlistedIds.Add(_selectedMedia.WatchlistProviderId.Value);
+                _watchlistedIds.Add(resolved.WatchlistProviderId.Value);
                 _isSheetOpen = false;
             }
         }

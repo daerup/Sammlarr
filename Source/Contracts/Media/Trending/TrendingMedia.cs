@@ -1,9 +1,6 @@
-using Contracts.Media;
-using Contracts.Media.Trending;
+namespace Contracts.Media.Trending;
 
-namespace API.TMDB;
-
-internal record TmdbTrendingMedia : ITrendingMedia
+public record TrendingMedia : ITrendingMedia
 {
 	public required IMediaId SourceId { get; init; }
 	public required IMediaId WatchlistProviderId { get; init; }

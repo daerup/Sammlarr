@@ -29,11 +29,11 @@ internal class TmdbRecommendationService(
 		var watchlistProvider = settings.WatchlistProvider.AsMediaProvider();
 		var tasks = result.Results.Select(r => BuildTrendingMediaAsync(r, watchlistProvider, cancellationToken).AsTask());
 		var awaited = await Task.WhenAll(tasks);
-		var items = awaited.Where(m => m is not null).Cast<TmdbTrendingMedia>().ToList();
+		var items = awaited.Where(m => m is not null).Cast<ITrendingMedia>().ToList();
 		return new TrendingPageResult(items, result.TotalPages);
 	}
 
-	private async ValueTask<TmdbTrendingMedia?> BuildTrendingMediaAsync(
+	private async ValueTask<ITrendingMedia?> BuildTrendingMediaAsync(
 		TmdbTypes.Trending.Result response,
 		MediaProvider watchlistMediaProvider,
 		CancellationToken cancellationToken
@@ -56,23 +56,38 @@ internal class TmdbRecommendationService(
 			),
 			cancellationToken
 		);
-		if (resolvedResult is not Resolved resolvedId)
-		{
-			return null;
-		}
 
 		var releaseDate = string.IsNullOrEmpty(response.AvailableDate) ? "1900-01-01T00:00:00Z" : response.AvailableDate;
-		return new TmdbTrendingMedia
+		var parsedReleaseDate = DateTimeOffset.Parse(releaseDate);
+		var posterUrl = options.ImageBaseUrl + response.PosterPath;
+		var backdropUrl = options.ImageBaseUrl + response.BackdropPath;
+
+		if (resolvedResult is not Resolved resolved)
+		{
+			return new UnresolvedTrendingMedia
+			{
+				SourceId = response.TmdbId,
+				MediaType = response.MediaType,
+				Title = response.DisplayTitle,
+				Description = response.Overview,
+				PosterUrl = posterUrl,
+				BackdropUrl = backdropUrl,
+				Rating = (float)response.VoteAverage,
+				ReleaseDate = parsedReleaseDate,
+			};
+		}
+
+		return new TrendingMedia
 		{
 			SourceId = response.TmdbId,
-			WatchlistProviderId = resolvedId.Id,
+			WatchlistProviderId = resolved.Id,
 			MediaType = response.MediaType,
 			Title = response.DisplayTitle,
 			Description = response.Overview,
-			PosterUrl = options.ImageBaseUrl + response.PosterPath,
-			BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+			PosterUrl = posterUrl,
+			BackdropUrl = backdropUrl,
 			Rating = (float)response.VoteAverage,
-			ReleaseDate = DateTimeOffset.Parse(releaseDate),
+			ReleaseDate = parsedReleaseDate,
 		};
 	}
 }

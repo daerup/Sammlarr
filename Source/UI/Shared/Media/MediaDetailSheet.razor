@@ -86,7 +86,7 @@
                 <div class="flex gap-2">
                     <BbButton Class="flex-1"
                               OnClick="HandleButtonClickedAsync"
-                              Disabled="@_isButtonBusy">
+                              Disabled="@(_isButtonBusy || ButtonDisabled)">
                         @if (_isButtonBusy)
                         {
                             <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -147,6 +147,9 @@
 
     [Parameter]
     public required Func<string> ButtonIcon { get; init; }
+
+    [Parameter]
+    public bool ButtonDisabled { get; set; }
 
     [Parameter]
     public string? StatusMessage { get; set; }

@@ -52,5 +52,14 @@
     );
 }
 
+.tile-unresolved .media-card-backdrop img,
+.tile-unresolved .media-card-backdrop .poster-bg {
+    filter: grayscale(0.85) brightness(60%);
+}
 
-
+.tile-unresolved-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--destructive));
+}
