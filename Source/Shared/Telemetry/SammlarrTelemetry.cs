@@ -19,6 +19,7 @@ public static class SammlarrTelemetry
 	private static readonly Counter<long> CacheHits = Meter.CreateCounter<long>("sammlarr.metadata.cache.hits");
 	private static readonly Counter<long> CacheMisses = Meter.CreateCounter<long>("sammlarr.metadata.cache.misses");
 	private static readonly Counter<long> CacheStale = Meter.CreateCounter<long>("sammlarr.metadata.cache.stale");
+	private static readonly Counter<long> CachePartial = Meter.CreateCounter<long>("sammlarr.metadata.cache.partial");
 	private static readonly Counter<long> IdResolutionOutcomes = Meter.CreateCounter<long>("sammlarr.id_resolution.outcomes");
 	private static readonly Counter<long> FeedLoads = Meter.CreateCounter<long>("sammlarr.feed.load");
 	private static readonly Counter<long> WatchlistLoads = Meter.CreateCounter<long>("sammlarr.watchlist.load");
@@ -27,21 +28,46 @@ public static class SammlarrTelemetry
 
 	private static readonly HashSet<string> ExcludedBlazorHubMethods = ["OnRenderCompleted", "EndInvokeJSFromDotNet"];
 
-	public static Activity? StartMetadataItem(IMediaId mediaId, ActivityContext parent = default)
+	public static Activity? StartMetadataItem(IMediaId mediaId)
 	{
-		var activity = Source.StartActivity("metadata.item", ActivityKind.Internal, parent);
+		var activity = Source.StartActivity("metadata.item");
 		activity?.DisplayName = $"FETCH {mediaId}";
 		return activity;
 	}
 
-	public static void TagItemState(Activity? activity, string state)
+	public static void TagItemOutcome(Activity? activity, MetadataItemOutcome outcome, MediaType mediaType)
 	{
+		var counter = outcome switch
+		{
+			MetadataItemOutcome.Hit => CacheHits,
+			MetadataItemOutcome.Miss => CacheMisses,
+			MetadataItemOutcome.Stale => CacheStale,
+			MetadataItemOutcome.Partial => CachePartial,
+		};
+		counter.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
+
 		if (activity is null)
 		{
 			return;
 		}
-		activity.SetTag("metadata.state", state);
-		activity.DisplayName += $" [{state}]";
+		activity.SetTag("metadata.outcome", outcome.ToString().ToLowerInvariant());
+		activity.DisplayName += $" [{outcome.ToString().ToUpperInvariant()}]";
+	}
+
+	public static void TagIdResolutionOutcome(Activity? activity, IdResolutionOutcome outcome, MediaProvider target)
+	{
+		IdResolutionOutcomes.Add(
+			1,
+			new KeyValuePair<string, object?>("target", target.ToString()),
+			new KeyValuePair<string, object?>("outcome", outcome.ToString().ToLowerInvariant())
+		);
+
+		if (activity is null)
+		{
+			return;
+		}
+		activity.SetTag("id_resolution.outcome", outcome.ToString().ToLowerInvariant());
+		activity.DisplayName += $" [{outcome.ToString().ToUpperInvariant()}]";
 	}
 
 	public static Activity? StartMetadataLookup(MediaSearchProvider provider, IMediaId id)
@@ -79,8 +105,7 @@ public static class SammlarrTelemetry
 		var candidateLabels = candidates.Select(c => c.ToString()).ToArray();
 		activity.SetTag($"{idResolution}.candidates", candidateLabels);
 		activity.SetTag($"{idResolution}.title", title);
-		var candidatesPart = candidateLabels.Length > 0 ? $" ← {string.Join(", ", candidateLabels)}" : string.Empty;
-		activity.DisplayName = $"RESOLVE → {target} ({title}){candidatesPart}";
+		activity.DisplayName = $"RESOLVE → {target}";
 		return activity;
 	}
 
@@ -92,11 +117,19 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
+	public static Activity? StartWatchlistLoad(WatchlistProvider provider)
+	{
+		var activity = Source.StartActivity("watchlist.load");
+		activity?.DisplayName = $"WATCHLIST FULL {provider}";
+		return activity;
+	}
+
 	public static Activity? StartWatchlistLoad(WatchlistProvider provider, int page)
 	{
 		WatchlistLoads.Add(1, new KeyValuePair<string, object?>("provider", provider.ToString()));
 		var activity = Source.StartActivity("watchlist.load");
-		activity?.DisplayName = $"WATCHLIST {provider} p{page}";
+		activity?.DisplayName = $"WATCHLIST PAGED {provider}";
+		activity?.SetTag("watchlist.page", page);
 		return activity;
 	}
 
@@ -108,11 +141,26 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
+	public static Activity? StartFeedItem(string? title, int year, IEnumerable<IMediaId> ids)
+	{
+		var activity = Source.StartActivity("feed.item");
+		if (activity is null)
+		{
+			return null;
+		}
+		activity.SetTag("feed.item.title", title);
+		activity.SetTag("feed.item.year", year);
+		activity.SetTag("feed.item.ids", ids.Select(id => id.ToString()).ToArray());
+		activity.DisplayName = year > 0 ? $"ITEM {title} ({year})" : $"ITEM {title}";
+		return activity;
+	}
+
 	public static Activity? StartTrendingLoad(int page)
 	{
 		TrendingLoads.Add(1);
 		var activity = Source.StartActivity("trending.load");
-		activity?.DisplayName = $"TRENDING p{page}";
+		activity?.DisplayName = $"TRENDING [{page}]";
+		activity?.SetTag("trending.page", page);
 		return activity;
 	}
 
@@ -127,16 +175,22 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
-	public static void RecordIdResolutionOutcome(MediaProvider target, string outcome) =>
-		IdResolutionOutcomes.Add(1, new KeyValuePair<string, object?>("target", target.ToString()), new KeyValuePair<string, object?>("outcome", outcome));
-
-	public static void RecordCacheHit(MediaType mediaType) => CacheHits.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
-	public static void RecordCacheMiss(MediaType mediaType) => CacheMisses.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
-	public static void RecordCacheStale(MediaType mediaType) => CacheStale.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
 	public static void TagItemSuccess(Activity? activity, bool success) => activity?.SetTag("success", success);
 
 	public static void TagCircuitId(Activity? activity, string? circuitId) => activity?.SetTag("circuit.id", circuitId);
+}
+
+public enum MetadataItemOutcome
+{
+	Hit,
+	Miss,
+	Stale,
+	Partial,
+}
+
+public enum IdResolutionOutcome
+{
+	Hit,
+	Resolved,
+	Unresolved,
 }

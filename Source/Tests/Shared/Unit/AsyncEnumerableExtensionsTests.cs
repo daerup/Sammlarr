@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Shared.Tests.Unit;
 
 public class AsyncEnumerableExtensionsTests
@@ -127,6 +129,47 @@ public class AsyncEnumerableExtensionsTests
 		await Assert.That(projectedValues.Count).IsEqualTo(2);
 		await Assert.That(projectedValues[0]).IsEqualTo(1);
 		await Assert.That(projectedValues[1]).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task SelectAwait_Concurrent_PreservesAnchorActivityAcrossYieldsRegardlessOfConsumerContext()
+	{
+		using var source = new ActivitySource("Shared.Tests.AsyncEnumerable");
+		using var listener = new ActivityListener
+		{
+			ShouldListenTo = s => s.Name == "Shared.Tests.AsyncEnumerable",
+			Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData,
+			SampleUsingParentId = (ref ActivityCreationOptions<string> _) => ActivitySamplingResult.AllData,
+		};
+		ActivitySource.AddActivityListener(listener);
+
+		using var anchor = source.StartActivity("anchor")!;
+		var observedParentIds = new List<string?>();
+
+		var pipeline = CreateAsyncEnumerable(1, 2, 3, 4, 5)
+			.SelectAwait(
+				async value =>
+				{
+					await Task.Yield();
+					using var child = source.StartActivity($"child-{value}");
+					observedParentIds.Add(child?.ParentSpanId.ToString());
+					return value;
+				},
+				maxConcurrency: 2
+			);
+
+		await foreach (var _ in pipeline)
+		{
+			using var consumerNoise = source.StartActivity("consumer-noise");
+			await Task.Yield();
+		}
+
+		var expectedParent = anchor.SpanId.ToString();
+		await Assert.That(observedParentIds.Count).IsEqualTo(5);
+		foreach (var observed in observedParentIds)
+		{
+			await Assert.That(observed).IsEqualTo(expectedParent);
+		}
 	}
 
 	private static async IAsyncEnumerable<int> CreateAsyncEnumerable(params int[] values)

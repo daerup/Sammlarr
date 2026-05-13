@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
@@ -25,8 +24,8 @@ public class WatchlistServiceTests
 		provider.GetWatchlistAsync(1, Any()).Returns(new WatchlistProviderPage([firstId, secondId], 7));
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(firstId, Any(), Any<ActivityContext>()).Returns(firstDetail);
-		metadataProvider.GetAsync(secondId, Any(), Any<ActivityContext>()).Returns(secondDetail);
+		metadataProvider.GetAsync(firstId, Any()).Returns(firstDetail);
+		metadataProvider.GetAsync(secondId, Any()).Returns(secondDetail);
 
 		var testee = CreateTestee(provider, metadataProvider);
 
@@ -65,8 +64,8 @@ public class WatchlistServiceTests
 		provider.GetWatchlistAsync(2, Any()).Returns(new WatchlistProviderPage([page2Id], 2));
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(page1Id, Any(), Any<ActivityContext>()).Returns(detail1);
-		metadataProvider.GetAsync(page2Id, Any(), Any<ActivityContext>()).Returns(detail2);
+		metadataProvider.GetAsync(page1Id, Any()).Returns(detail1);
+		metadataProvider.GetAsync(page2Id, Any()).Returns(detail2);
 
 		var testee = CreateTestee(provider, metadataProvider);
 

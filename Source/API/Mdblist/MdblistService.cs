@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Mdblist.Types;
@@ -29,7 +28,6 @@ internal class MdblistService(
 	)
 	{
 		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
-		var feedContext = activity?.Context ?? default;
 		var endpoint = string.Format(ListItemsEndpoint, identifier);
 		var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
 
@@ -45,12 +43,7 @@ internal class MdblistService(
 			.Concat(movies)
 			.ToAsyncEnumerable()
 			.SelectAwait(
-				async pair => pair with { ConversionResult = await ResolveIdsAsync(pair, watchlistProvider) },
-				IMediaIdResolver.RecommendedConcurrency,
-				cancellationToken
-			)
-			.SelectAwait(
-				async feedItemResolution => await BuildMediaDetail(feedItemResolution, cancellationToken, feedContext),
+				async pair => await ResolveAndFetchAsync(pair, watchlistProvider, cancellationToken),
 				IMediaMetadataProvider.RecommendedConcurrency,
 				cancellationToken
 			);
@@ -61,25 +54,35 @@ internal class MdblistService(
 		}
 	}
 
-	private async ValueTask<IMediaDetailResult> BuildMediaDetail(
-		FeedItemResolution feedItemResolution,
-		CancellationToken cancellationToken,
-		ActivityContext feedContext
+	private async ValueTask<IMediaDetailResult> ResolveAndFetchAsync(
+		FeedItemResolution pair,
+		MediaProvider watchlistProvider,
+		CancellationToken cancellationToken
 	)
 	{
-		if (feedItemResolution.ConversionResult is Resolved resolved)
+		var candidates = ExtractIds(pair.ListItem.ids, pair.MediaType);
+		using var activity = SammlarrTelemetry.StartFeedItem(pair.ListItem.title, pair.ListItem.release_year, candidates);
+		var conversion = await mediaIdResolver.ResolveAsync(candidates, watchlistProvider, BuildHints(pair));
+		if (conversion is Resolved resolved)
 		{
-			return await metadataProvider.GetAsync(resolved.Id, cancellationToken, feedContext);
+			return await metadataProvider.GetAsync(resolved.Id, cancellationToken);
 		}
-		return BuildUnresolved(feedItemResolution.ListItem, feedItemResolution.MediaType);
+		return BuildUnresolved(pair.ListItem, pair.MediaType);
 	}
+
+	private static Some<ResolutionHints> BuildHints(FeedItemResolution pair) =>
+		Some.Of(
+			new ResolutionHints
+			{
+				Title = pair.ListItem.title,
+				Year = pair.ListItem.release_year,
+				MediaType = pair.MediaType,
+			}
+		);
 
 	private UnresolvedMediaResult BuildUnresolved(MdblistTypes.ListItems.IListItem item, MediaType mediaType)
 	{
-		var (mdblistId, tmdbId, imdbId, tvdbId) = ExtractIds(item.ids, mediaType);
-		var ids = new IMediaId?[] { imdbId, tmdbId, mdblistId, tvdbId }
-			.OfType<IMediaId>()
-			.ToArray();
+		var ids = ExtractIds(item.ids, mediaType);
 		return new UnresolvedMediaResult
 		{
 			SourceId = ids[0],
@@ -90,37 +93,20 @@ internal class MdblistService(
 		};
 	}
 
-	private Task<ConversionResult> ResolveIdsAsync(FeedItemResolution feedItemResolution, MediaProvider watchlistProvider)
-	{
-		var (mdblistId, tmdbId, imdbId, tvdbId) = ExtractIds(feedItemResolution.ListItem.ids, feedItemResolution.MediaType);
-		var candidates = new IMediaId?[] { mdblistId, tmdbId, imdbId, tvdbId }
-			.OfType<IMediaId>()
-			.ToList();
-		var hints = Some.Of(
-			new ResolutionHints
-			{
-				Title = feedItemResolution.ListItem.title,
-				Year = feedItemResolution.ListItem.release_year,
-				MediaType = feedItemResolution.MediaType,
-			}
-		);
-		return mediaIdResolver.ResolveAsync(candidates, watchlistProvider, hints);
-	}
-
-	private (MdblistId?, TmdbId?, ImdbId?, TvdbId?) ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
+	private IMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
 	{
 		MdblistId? mdblistId = !string.IsNullOrEmpty(ids.mdblist) ? MdblistId.From(ids.mdblist, mediaType) : null;
 		TmdbId? tmdbId = ids.tmdb.HasValue ? TmdbId.From(ids.tmdb.Value.ToString(), mediaType) : null;
 		ImdbId? imdbId = !string.IsNullOrEmpty(ids.imdb) ? ImdbId.From(ids.imdb, mediaType) : null;
 		TvdbId? tvdbId = ids.tvdb.HasValue ? TvdbId.From(ids.tvdb.Value.ToString(), mediaType) : null;
-		return (mdblistId, tmdbId, imdbId, tvdbId);
+
+		return [.. new IMediaId?[] { mdblistId, tmdbId, imdbId, tvdbId }.OfType<IMediaId>()];
 	}
 
-	private record struct FeedItemResolution
+	private readonly record struct FeedItemResolution
 	{
-		public MdblistTypes.ListItems.IListItem ListItem { get; init; }
+		public MdblistTypes.ListItems.IListItem ListItem { get; private init; }
 		public MediaType MediaType { get; private init; }
-		public ConversionResult ConversionResult { get; init; }
 
 		public static FeedItemResolution Show(MdblistTypes.ListItems.IListItem item) => new() { ListItem = item, MediaType = MediaType.Show };
 

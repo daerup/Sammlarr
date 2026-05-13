@@ -48,7 +48,7 @@ internal class MediaMetadataRepository(
 
 		foreach (var item in items)
 		{
-			await mediaIdGroupRepository.CreateOrAppendAsync(item.Details.AdditionalIds.Prepend(item.Details.SourceId), cancellationToken);
+			await mediaIdGroupRepository.UpsertAsync(item.Details.AdditionalIds.Prepend(item.Details.SourceId), cancellationToken);
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);

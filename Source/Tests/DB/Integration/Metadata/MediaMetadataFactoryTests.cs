@@ -153,7 +153,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task<MediaMetadataEntity> PersistAsync(IMediaDetailResult details)
 	{
-		await _groupRepo.CreateOrAppendAsync(details.AdditionalIds.Prepend(details.SourceId));
+		await _groupRepo.UpsertAsync(details.AdditionalIds.Prepend(details.SourceId));
 		var identifier = MediaIdentifier.From(details.SourceId);
 		var group = await fixture
 			.Context.MediaIdEntries.Include(e => e.MediaIdGroupEntity)

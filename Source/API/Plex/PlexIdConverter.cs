@@ -4,6 +4,7 @@ using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Media.Search;
 using Microsoft.Extensions.DependencyInjection;
+using Shared;
 
 namespace API.Plex;
 
@@ -31,17 +32,12 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 	private async Task<ConversionResult> ResolveFromTitleSearchAsync(string title, MediaType mediaType, IReadOnlyCollection<IMediaId> candidates)
 	{
 		var searchResults = await searchService.SearchAsync(title, [mediaType]);
+		var result = await searchResults
+			.ToAsyncEnumerable()
+			.SelectAwait(async result => await plexApi.LookUpAsync(result.SourceId))
+			.FirstOrDefaultAsync(details => ContainsAnyCandidate(details.AdditionalIds, candidates));
 
-		foreach (var plexId in searchResults.Select(result => result.SourceId).OfType<PlexId>())
-		{
-			var details = await plexApi.LookUpAsync(plexId);
-			if (ContainsAnyCandidate(details.AdditionalIds, candidates))
-			{
-				return new Resolved(details.SourceId, details.AdditionalIds);
-			}
-		}
-
-		return new Unresolved();
+		return result is not null ? new Resolved(result.SourceId, result.AdditionalIds) : new Unresolved();
 	}
 
 	private async Task<ConversionResult> ConvertFromPlexIdAsync(PlexId plexId)
