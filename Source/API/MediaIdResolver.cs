@@ -45,14 +45,22 @@ internal class MediaIdResolver(
 			return new Unresolved();
 		}
 
-		ConversionResult conversionResult = target switch
+		ConversionResult conversionResult = new Unresolved();
+		try
 		{
-			MediaProvider.Plex => await plex.ConvertAsync(candidates, hints, cancellationToken),
-			MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints, cancellationToken),
-			MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints, cancellationToken),
-			MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints, cancellationToken),
-			MediaProvider.Mdblist => new Unresolved(),
-		};
+			conversionResult = target switch
+			{
+				MediaProvider.Plex => await plex.ConvertAsync(candidates, hints, cancellationToken),
+				MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints, cancellationToken),
+				MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints, cancellationToken),
+				MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints, cancellationToken),
+				MediaProvider.Mdblist => new Unresolved(),
+			};
+		}
+		catch (Exception ex)
+		{
+			activity?.AddException(ex);
+		}
 
 		if (conversionResult is Resolved resolved)
 		{
