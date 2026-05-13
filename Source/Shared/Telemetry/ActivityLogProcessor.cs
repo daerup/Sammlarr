@@ -16,6 +16,10 @@ internal sealed class ActivityLogProcessor : BaseProcessor<Activity>
 		{
 			return;
 		}
+		if (data.OperationName.StartsWith("blazor.", StringComparison.Ordinal))
+		{
+			return;
+		}
 		_logger.LogInformation("{Display} [{Duration:N0}ms]", data.DisplayName, data.Duration.TotalMilliseconds);
 	}
 }

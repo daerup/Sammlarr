@@ -12,6 +12,9 @@
 		<ProjectReference Include="..\API\API.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<InternalsVisibleTo Include="UI.Tests" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="BlazorBlueprint.Components" />
 		<PackageReference Include="BlazorBlueprint.Primitives" />
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />

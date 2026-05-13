@@ -4,6 +4,7 @@ using DB;
 using Shared;
 using Shared.DI;
 using UI;
+using UI.Telemetry.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,5 +27,15 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
+app.MapGet(
+	"/diagnostics/export",
+	(LogCaptureService capture) =>
+	{
+		var stream = capture.ExportZip();
+		var fileName = $"diagnostics-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.zip";
+		return Results.File(stream, "application/zip", fileName);
+	}
+);
 
 app.Run();

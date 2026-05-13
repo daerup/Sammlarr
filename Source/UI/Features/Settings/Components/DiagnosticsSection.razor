@@ -1,0 +1,384 @@
+@using BlazorBlueprint.Components
+@using Microsoft.Extensions.Logging
+@using Microsoft.JSInterop
+@using global::Shared.Options
+@using UI.Telemetry.Diagnostics
+@implements IAsyncDisposable
+@inject LogCaptureService Capture
+@inject IJSRuntime JS
+
+<div class="w-full flex flex-col gap-2" style="height: calc(100vh - 220px); min-height: 480px;">
+    <div>
+        <h2 class="text-lg font-semibold tracking-wide">Live log stream</h2>
+        <p class="text-muted-foreground mt-2 text-sm leading-relaxed">
+            In-memory capture that runs independently of the configured logging pipeline. Mirrors the format used by the console exporter.
+        </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+        <div class="w-36">
+            <BbSelect TValue="TelemetryVerbosity"
+                      Value="_verbosity"
+                      ValueChanged="HandleVerbosityChanged"
+                      Options="VerbosityOptions"/>
+        </div>
+
+        <div class="w-28">
+            <BbSelect TValue="int"
+                      Value="_bufferSize"
+                      ValueChanged="HandleBufferSizeChanged"
+                      Options="BufferSizeOptions"/>
+        </div>
+
+        @if (!Capture.IsCapturing)
+        {
+            <BbButton Variant="ButtonVariant.Default" OnClick="HandleStart">
+                <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
+                Start
+            </BbButton>
+        }
+        else
+        {
+            <BbButton Variant="ButtonVariant.Destructive" OnClick="HandleStop">
+                <LucideIcon Name="square" Size="14" Class="mr-1.5"/>
+                Stop
+            </BbButton>
+        }
+
+        @if (Capture.IsCapturing && !Capture.IsPaused)
+        {
+            <BbButton Variant="ButtonVariant.Outline" OnClick="HandlePause">
+                <LucideIcon Name="pause" Size="14" Class="mr-1.5"/>
+                Pause
+            </BbButton>
+        }
+        else if (Capture.IsPaused)
+        {
+            <BbButton Variant="ButtonVariant.Outline" OnClick="HandleResume">
+                <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
+                Resume
+            </BbButton>
+        }
+
+        <BbButton Variant="ButtonVariant.Outline" OnClick="HandleClear" Disabled="@(_stats.LogCount == 0)">
+            <LucideIcon Name="eraser" Size="14" Class="mr-1.5"/>
+            Clear
+        </BbButton>
+
+        <BbButton Variant="ButtonVariant.Secondary" OnClick="HandleExport" Disabled="@(_stats.LogCount == 0 && _stats.SpanCount == 0)">
+            <LucideIcon Name="download" Size="14" Class="mr-1.5"/>
+            Export
+        </BbButton>
+
+        <div class="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+            <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.LogCount.ToString("N0")</span> entries</span>
+            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
+            <span class="tabular-nums"><span class="text-foreground font-semibold">@_stats.SpanCount.ToString("N0")</span> spans</span>
+            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
+            <span class="tabular-nums"><span class="text-foreground font-semibold">@FormatBytes(_stats.EstimatedBytes)</span> memory</span>
+            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
+            <span class="tabular-nums">
+                <span class="text-foreground font-semibold">
+                    @if (_stats is { Oldest: { } oldest, Newest: { } newest })
+                    {
+                        @FormatDuration(newest - oldest)
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </span>
+                window
+            </span>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-4 py-2">
+        <div class="flex-1">
+            <BbInput Value="@_filterText"
+                     ValueChanged="@(v => { _filterText = v ?? string.Empty; ApplyFilter(); })"
+                     Placeholder="Filter by message, category, or trace id…"
+                     UpdateTiming="UpdateTiming.Immediate"/>
+        </div>
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer select-none whitespace-nowrap">
+            <BbSwitch @bind-Checked="_autoscroll" Size="SwitchSize.Small"/>
+            Autoscroll
+        </label>
+    </div>
+
+    <div @ref="_scrollRef" class="flex-1 min-h-0 rounded-md border bg-background overflow-auto">
+        @if (_filteredLogs.Count == 0)
+        {
+            <div class="flex h-full items-center justify-center p-8 text-center text-muted-foreground text-sm">
+                @if (!Capture.IsCapturing)
+                {
+                    <span>Press <span class="font-semibold text-foreground">Start</span> to begin capturing at the selected verbosity.</span>
+                }
+                else if (string.IsNullOrEmpty(_filterText))
+                {
+                    <span class="inline-flex items-center gap-2">
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                        Waiting for log entries…
+                    </span>
+                }
+                else
+                {
+                    <span>No entries match the filter.</span>
+                }
+            </div>
+        }
+        else
+        {
+            <Virtualize Items="_filteredLogs" Context="entry" ItemSize="68" OverscanCount="10">
+                <ItemContent>
+                    <div class="px-5 py-3 border-b border-border/40 hover:bg-accent/40 transition-colors space-y-1.5">
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="text-muted-foreground tabular-nums shrink-0 font-mono">@entry.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</span>
+                            <BbBadge Variant="@LevelVariant(entry.Level)" Class="@($"w-24 justify-center {LevelClass(entry.Level)}")">@entry.Level</BbBadge>
+                            <span class="text-muted-foreground truncate font-mono min-w-0 flex-1" title="@entry.Category">@entry.Category</span>
+                            @if (entry.TraceId is not null)
+                            {
+                                <span title="@entry.TraceId" class="shrink-0">
+                                    <BbBadge Variant="BadgeVariant.Outline" Class="font-mono text-[10px] tabular-nums">
+                                        <LucideIcon Name="git-branch" Size="10" Class="mr-1 opacity-60"/>
+                                        @entry.TraceId.AsSpan(0, Math.Min(8, entry.TraceId.Length)).ToString()
+                                    </BbBadge>
+                                </span>
+                            }
+                        </div>
+                        <div class="text-sm font-mono break-words text-foreground/90" title="@(entry.Exception ?? entry.Message)">@entry.Message</div>
+                    </div>
+                </ItemContent>
+            </Virtualize>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly TimeSpan RenderInterval = TimeSpan.FromMilliseconds(200);
+
+    private static readonly IReadOnlyList<SelectOption<TelemetryVerbosity>> VerbosityOptions =
+    [
+        new(TelemetryVerbosity.Quiet, "Quiet"),
+        new(TelemetryVerbosity.Standard, "Standard"),
+        new(TelemetryVerbosity.Verbose, "Verbose"),
+    ];
+
+    private static readonly IReadOnlyList<SelectOption<int>> BufferSizeOptions =
+        LogCaptureService.BufferSizeOptions.Select(n => new SelectOption<int>(n, n.ToString("N0"))).ToList();
+
+    private readonly CancellationTokenSource _cts = new();
+
+    private TelemetryVerbosity _verbosity = TelemetryVerbosity.Standard;
+    private int _bufferSize = LogCaptureService.DefaultBufferSize;
+    private string _filterText = string.Empty;
+    private bool _autoscroll = true;
+    private bool _dirty;
+    private bool _scrollPending;
+    private int _lastRenderedCount;
+
+    private DiagnosticsStats _stats = new(0, 0, 0, null, null);
+    private List<DiagnosticsLogEntry> _filteredLogs = [];
+    private ElementReference _scrollRef;
+    private IJSObjectReference? _jsModule;
+    private Task? _renderLoop;
+
+    protected override void OnInitialized()
+    {
+        _verbosity = MapToVerbosity(Capture.CaptureLevel);
+        _bufferSize = Capture.BufferSize;
+        Capture.Changed += HandleCaptureChanged;
+        Refresh();
+        _renderLoop = RenderLoopAsync(_cts.Token);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/diagnostics.js");
+        }
+
+        if (_scrollPending && _autoscroll && _jsModule is not null)
+        {
+            _scrollPending = false;
+            await _jsModule.InvokeVoidAsync("scrollToBottom", _scrollRef);
+        }
+    }
+
+    private void HandleCaptureChanged() => _dirty = true;
+
+    private async Task RenderLoopAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(RenderInterval);
+        while (await timer.WaitForNextTickAsync(token))
+        {
+            if (!_dirty)
+            {
+                continue;
+            }
+            _dirty = false;
+            await InvokeAsync(() =>
+            {
+                Refresh();
+                StateHasChanged();
+            });
+        }
+    }
+
+    private void Refresh()
+    {
+        _stats = Capture.GetStats();
+        ApplyFilter();
+        if (_filteredLogs.Count != _lastRenderedCount)
+        {
+            _lastRenderedCount = _filteredLogs.Count;
+            _scrollPending = true;
+        }
+    }
+
+    private void ApplyFilter()
+    {
+        var logs = Capture.SnapshotLogs();
+        _filteredLogs = string.IsNullOrWhiteSpace(_filterText) ? [.. logs] : [.. logs.Where(log => Matches(log, _filterText.Trim()))];
+    }
+
+    private static bool Matches(DiagnosticsLogEntry entry, string needle) =>
+        entry.Message.Contains(needle, StringComparison.OrdinalIgnoreCase)
+        || entry.Category.Contains(needle, StringComparison.OrdinalIgnoreCase)
+        || (entry.TraceId is not null && entry.TraceId.Contains(needle, StringComparison.OrdinalIgnoreCase))
+        || (entry.SpanId is not null && entry.SpanId.Contains(needle, StringComparison.OrdinalIgnoreCase))
+        || (entry.Exception is not null && entry.Exception.Contains(needle, StringComparison.OrdinalIgnoreCase));
+
+    private void HandleVerbosityChanged(TelemetryVerbosity verbosity)
+    {
+        _verbosity = verbosity;
+        var level = MapToLogLevel(verbosity);
+        if (Capture.IsCapturing)
+        {
+            Capture.UpdateLevel(level);
+        }
+    }
+
+    private void HandleBufferSizeChanged(int size)
+    {
+        _bufferSize = size;
+        Capture.SetBufferSize(size);
+    }
+
+    private void HandleStart()
+    {
+        Capture.Start(MapToLogLevel(_verbosity));
+        _scrollPending = true;
+    }
+
+    private void HandleStop() => Capture.Stop();
+
+    private void HandlePause() => Capture.Pause();
+
+    private void HandleResume() => Capture.Resume();
+
+    private void HandleClear()
+    {
+        Capture.Clear();
+        _lastRenderedCount = 0;
+    }
+
+    private async Task HandleExport()
+    {
+        if (_jsModule is null)
+        {
+            return;
+        }
+        await _jsModule.InvokeVoidAsync("downloadFile", "/diagnostics/export");
+    }
+
+    private static LogLevel MapToLogLevel(TelemetryVerbosity verbosity) =>
+        verbosity switch
+        {
+            TelemetryVerbosity.Verbose => LogLevel.Debug,
+            TelemetryVerbosity.Standard => LogLevel.Information,
+            _ => LogLevel.Warning,
+        };
+
+    private static TelemetryVerbosity MapToVerbosity(LogLevel level) =>
+        level switch
+        {
+            <= LogLevel.Debug => TelemetryVerbosity.Verbose,
+            LogLevel.Information => TelemetryVerbosity.Standard,
+            _ => TelemetryVerbosity.Quiet,
+        };
+
+    private static BadgeVariant LevelVariant(LogLevel level) =>
+        level switch
+        {
+            LogLevel.Trace => BadgeVariant.Outline,
+            LogLevel.Debug => BadgeVariant.Outline,
+            LogLevel.Information => BadgeVariant.Secondary,
+            LogLevel.Warning => BadgeVariant.Default,
+            LogLevel.Error => BadgeVariant.Destructive,
+            LogLevel.Critical => BadgeVariant.Destructive,
+            _ => BadgeVariant.Outline,
+        };
+
+    private static string LevelClass(LogLevel level) =>
+        level switch
+        {
+            LogLevel.Warning => "bg-warning",
+            LogLevel.Critical => "font-bold",
+            _ => string.Empty,
+        };
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024)
+        {
+            return $"{bytes}B";
+        }
+        if (bytes < 1024 * 1024)
+        {
+            return $"{bytes / 1024.0:F1}KB";
+        }
+        return $"{bytes / (1024.0 * 1024.0):F2}MB";
+    }
+
+    private static string FormatDuration(TimeSpan span)
+    {
+        if (span.TotalSeconds < 1)
+        {
+            return $"{span.TotalMilliseconds:F0}ms";
+        }
+        if (span.TotalMinutes < 1)
+        {
+            return $"{span.TotalSeconds:F1}s";
+        }
+        if (span.TotalHours < 1)
+        {
+            return $"{(int)span.TotalMinutes}m{span.Seconds}s";
+        }
+        return $"{(int)span.TotalHours}h{span.Minutes}m";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        Capture.Changed -= HandleCaptureChanged;
+        _cts.Cancel();
+        if (_renderLoop is not null)
+        {
+            try
+            {
+                await _renderLoop;
+            }
+            catch (OperationCanceledException) { }
+        }
+        _cts.Dispose();
+        if (_jsModule is not null)
+        {
+            try
+            {
+                await _jsModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException) { }
+        }
+    }
+}

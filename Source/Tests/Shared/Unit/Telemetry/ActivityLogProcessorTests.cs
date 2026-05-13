@@ -28,6 +28,24 @@ public class ActivityLogProcessorTests
 	}
 
 	[Test]
+	public async Task OnEnd_IgnoresBlazorHubActivities()
+	{
+		var sink = new CapturingLoggerProvider();
+		using var loggerFactory = LoggerFactory.Create(b => b.AddProvider(sink).SetMinimumLevel(LogLevel.Information));
+		var processor = new ActivityLogProcessor(loggerFactory);
+
+		using var listener = AllSourcesListener();
+		ActivitySource.AddActivityListener(listener);
+		using var source = new ActivitySource(SammlarrTelemetry.ServiceName);
+		using var activity = source.StartActivity("blazor.BeginInvokeDotNetFromJS");
+		activity!.Stop();
+
+		processor.OnEnd(activity);
+
+		await Assert.That(sink.Entries).IsEmpty();
+	}
+
+	[Test]
 	public async Task OnEnd_IgnoresActivitiesFromOtherSources()
 	{
 		var sink = new CapturingLoggerProvider();
