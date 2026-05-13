@@ -62,7 +62,7 @@ internal class MdblistService(
 	{
 		var candidates = ExtractIds(pair.ListItem.ids, pair.MediaType);
 		using var activity = SammlarrTelemetry.StartFeedItem(pair.ListItem.title, pair.ListItem.release_year, candidates);
-		var conversion = await mediaIdResolver.ResolveAsync(candidates, watchlistProvider, BuildHints(pair));
+		var conversion = await mediaIdResolver.ResolveAsync(candidates, watchlistProvider, BuildHints(pair), cancellationToken);
 		if (conversion is Resolved resolved)
 		{
 			return await metadataProvider.GetAsync(resolved.Id, cancellationToken);

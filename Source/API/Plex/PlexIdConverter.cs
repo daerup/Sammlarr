@@ -10,52 +10,63 @@ namespace API.Plex;
 
 internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaSearchProvider.Plex)] IMediaSearchService searchService)
 {
-	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
+	private const int LookupConcurrency = 4;
+
+	public async Task<ConversionResult> ConvertAsync(
+		IReadOnlyCollection<IMediaId> candidates,
+		Optional<ResolutionHints> hints,
+		CancellationToken cancellationToken = default
+	)
 	{
 		foreach (var plexId in candidates.OfType<PlexId>())
 		{
-			return await ConvertFromPlexIdAsync(plexId);
+			return await ConvertFromPlexIdAsync(plexId, cancellationToken);
 		}
 
 		if (hints is Some<ResolutionHints>(var h))
 		{
-			var result = await ResolveFromTitleSearchAsync(h.Title, h.MediaType, candidates);
+			var result = await ResolveFromTitleSearchAsync(h.Title, h.MediaType, candidates, cancellationToken);
 			if (result is Resolved)
 			{
 				return result;
 			}
 		}
 
-		return await TryResolveFromApiTitleSearchAsync(candidates);
+		return await TryResolveFromApiTitleSearchAsync(candidates, cancellationToken);
 	}
 
-	private async Task<ConversionResult> ResolveFromTitleSearchAsync(string title, MediaType mediaType, IReadOnlyCollection<IMediaId> candidates)
+	private async Task<ConversionResult> ResolveFromTitleSearchAsync(
+		string title,
+		MediaType mediaType,
+		IReadOnlyCollection<IMediaId> candidates,
+		CancellationToken cancellationToken
+	)
 	{
-		var searchResults = await searchService.SearchAsync(title, [mediaType]);
+		var searchResults = await searchService.SearchAsync(title, [mediaType], cancellationToken);
 		var result = await searchResults
 			.ToAsyncEnumerable()
-			.SelectAwait(async result => await plexApi.LookUpAsync(result.SourceId))
-			.FirstOrDefaultAsync(details => ContainsAnyCandidate(details.AdditionalIds, candidates));
+			.SelectAwait(async r => await plexApi.LookUpAsync(r.SourceId, cancellationToken), LookupConcurrency, cancellationToken)
+			.FirstOrDefaultAsync(details => ContainsAnyCandidate(details.AdditionalIds, candidates), cancellationToken);
 
 		return result is not null ? new Resolved(result.SourceId, result.AdditionalIds) : new Unresolved();
 	}
 
-	private async Task<ConversionResult> ConvertFromPlexIdAsync(PlexId plexId)
+	private async Task<ConversionResult> ConvertFromPlexIdAsync(PlexId plexId, CancellationToken cancellationToken)
 	{
-		var details = await plexApi.LookUpAsync(plexId);
+		var details = await plexApi.LookUpAsync(plexId, cancellationToken);
 		return new Resolved(plexId, details.AdditionalIds);
 	}
 
-	private async Task<ConversionResult> TryResolveFromApiTitleSearchAsync(IReadOnlyCollection<IMediaId> candidates)
+	private async Task<ConversionResult> TryResolveFromApiTitleSearchAsync(IReadOnlyCollection<IMediaId> candidates, CancellationToken cancellationToken)
 	{
 		foreach (var candidate in candidates)
 		{
-			var title = await GetOriginalTitleAsync(candidate);
+			var title = await GetOriginalTitleAsync(candidate, cancellationToken);
 			if (title is null)
 			{
 				continue;
 			}
-			if (await ResolveFromTitleSearchAsync(title, candidate.Type, candidates) is Resolved resolved)
+			if (await ResolveFromTitleSearchAsync(title, candidate.Type, candidates, cancellationToken) is Resolved resolved)
 			{
 				return resolved;
 			}
@@ -64,11 +75,11 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 		return new Unresolved();
 	}
 
-	private async Task<string?> GetOriginalTitleAsync(IMediaId candidate) =>
+	private async Task<string?> GetOriginalTitleAsync(IMediaId candidate, CancellationToken cancellationToken) =>
 		candidate switch
 		{
-			TmdbId tmdbId => (await tmdbApi.GetDetailAsync(tmdbId))?.DisplayOriginalTitle,
-			ImdbId imdbId => (await tmdbApi.FindByImdbIdAsync(imdbId))?.DisplayOriginalTitle,
+			TmdbId tmdbId => (await tmdbApi.GetDetailAsync(tmdbId, cancellationToken))?.DisplayOriginalTitle,
+			ImdbId imdbId => (await tmdbApi.FindByImdbIdAsync(imdbId, cancellationToken))?.DisplayOriginalTitle,
 			_ => null,
 		};
 

@@ -69,4 +69,21 @@ public class TypedMemoryCacheUnitTests
 		await Assert.That(found).IsFalse();
 		await Assert.That(value).IsNull();
 	}
+
+	[Test]
+	public async Task TypedMemoryCache_WhenSetWithTtl_ExpiresAfterDuration()
+	{
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromMilliseconds(1) });
+		var testee = new TypedMemoryCache<string, string>(memoryCache);
+
+		testee.Set("key", "value", TimeSpan.FromMilliseconds(10));
+		var foundImmediately = testee.TryGetValue("key", out var initial);
+		await Task.Delay(100);
+		var foundAfterExpiry = testee.TryGetValue("key", out var expired);
+
+		await Assert.That(foundImmediately).IsTrue();
+		await Assert.That(initial).IsEqualTo("value");
+		await Assert.That(foundAfterExpiry).IsFalse();
+		await Assert.That(expired).IsNull();
+	}
 }

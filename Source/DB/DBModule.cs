@@ -26,6 +26,7 @@ public class DbModule : IServiceModule
 				}
 
 				options.UseSqlite(sammlarOptions.ConnectionString);
+				options.AddInterceptors(new SqlitePragmaInterceptor());
 			},
 			lifetime: ServiceLifetime.Scoped
 		);

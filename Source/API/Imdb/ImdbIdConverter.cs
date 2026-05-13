@@ -7,7 +7,11 @@ namespace API.IMDB;
 
 internal class ImdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
+	public async Task<ConversionResult> ConvertAsync(
+		IReadOnlyCollection<IMediaId> candidates,
+		Optional<ResolutionHints> hints,
+		CancellationToken cancellationToken = default
+	)
 	{
 		foreach (var id in candidates)
 		{

@@ -7,7 +7,11 @@ namespace API.TMDB;
 
 internal class TmdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ConversionResult> ConvertAsync(IReadOnlyCollection<IMediaId> candidates, Optional<ResolutionHints> hints)
+	public async Task<ConversionResult> ConvertAsync(
+		IReadOnlyCollection<IMediaId> candidates,
+		Optional<ResolutionHints> hints,
+		CancellationToken cancellationToken = default
+	)
 	{
 		foreach (var id in candidates)
 		{
@@ -25,9 +29,7 @@ internal class TmdbIdConverter(PlexApi plexApi)
 		id switch
 		{
 			TmdbId tmdbId => Task.FromResult<ConversionResult>(new Resolved(tmdbId, [])),
-			PlexId plexId => ResolveFromPlexAsync(plexId),
+			PlexId plexId => plexApi.ResolveById<TmdbId>(plexId),
 			_ => Task.FromResult<ConversionResult>(new Unresolved()),
 		};
-
-	private Task<ConversionResult> ResolveFromPlexAsync(PlexId plexId) => plexApi.ResolveById<TmdbId>(plexId);
 }

@@ -27,13 +27,17 @@ internal class TmdbRecommendationService(
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 		var settings = await providerConfigRepository.GetAsync(cancellationToken);
 		var watchlistProvider = settings.WatchlistProvider.AsMediaProvider();
-		var tasks = result.Results.Select(r => BuildTrendingMediaAsync(r, watchlistProvider).AsTask());
+		var tasks = result.Results.Select(r => BuildTrendingMediaAsync(r, watchlistProvider, cancellationToken).AsTask());
 		var awaited = await Task.WhenAll(tasks);
 		var items = awaited.Where(m => m is not null).Cast<TmdbTrendingMedia>().ToList();
 		return new TrendingPageResult(items, result.TotalPages);
 	}
 
-	private async ValueTask<TmdbTrendingMedia?> BuildTrendingMediaAsync(TmdbTypes.Trending.Result response, MediaProvider watchlistMediaProvider)
+	private async ValueTask<TmdbTrendingMedia?> BuildTrendingMediaAsync(
+		TmdbTypes.Trending.Result response,
+		MediaProvider watchlistMediaProvider,
+		CancellationToken cancellationToken
+	)
 	{
 		if (response.MediaType is MediaType.Unknown)
 		{
@@ -49,7 +53,8 @@ internal class TmdbRecommendationService(
 					Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
 					MediaType = response.MediaType,
 				}
-			)
+			),
+			cancellationToken
 		);
 		if (resolvedResult is not Resolved resolvedId)
 		{

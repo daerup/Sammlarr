@@ -45,10 +45,9 @@ internal class WatchlistService(
 		var remainingPages = Enumerable
 			.Range(2, Math.Max(0, firstPage.TotalPages - 1))
 			.ToAsyncEnumerable()
-			.SelectAwait(LoadPage, IWatchlistService.RecommendedConcurrency, cancellationToken)
-			.SelectMany(p => p.Items.ToAsyncEnumerable());
+			.SelectAwait(LoadPage, IWatchlistService.RecommendedConcurrency, cancellationToken);
 
-		var ids = firstPage.Items.ToAsyncEnumerable().Concat(remainingPages);
+		var ids = firstPage.Items.ToAsyncEnumerable().Concat(remainingPages.SelectMany(p => p.Items.ToAsyncEnumerable()));
 
 		var pipeline = ids.SelectAwait(
 			async id => await metadataProvider.GetAsync(id, cancellationToken),
