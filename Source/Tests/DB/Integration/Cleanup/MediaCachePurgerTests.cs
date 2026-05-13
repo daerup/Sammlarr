@@ -57,8 +57,20 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var purgedMetadata = BuildMetadata(purgedGroup, "Purged");
 		fixture.Context.MediaMetadata.AddRange(blacklistedMetadata, purgedMetadata);
 		fixture.Context.MediaRatings.AddRange(
-			new MediaRatingEntity { Source = RatingSource.Tmdb, NormalizedValue = 8.0f, VoteCount = 1234, Metadata = blacklistedMetadata },
-			new MediaRatingEntity { Source = RatingSource.Tmdb, NormalizedValue = 7.0f, VoteCount = 567, Metadata = purgedMetadata }
+			new MediaRatingEntity
+			{
+				Source = RatingSource.Tmdb,
+				NormalizedValue = 8.0f,
+				VoteCount = 1234,
+				Metadata = blacklistedMetadata,
+			},
+			new MediaRatingEntity
+			{
+				Source = RatingSource.Tmdb,
+				NormalizedValue = 7.0f,
+				VoteCount = 567,
+				Metadata = purgedMetadata,
+			}
 		);
 		fixture.Context.BlacklistEntries.Add(new BlacklistEntryEntity { Media = blacklistedGroup });
 		await fixture.Context.SaveChangesAsync();
