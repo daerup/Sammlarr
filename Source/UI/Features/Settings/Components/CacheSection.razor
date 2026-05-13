@@ -1,5 +1,5 @@
 @using Contracts.Media.Metadata
-@inject IMediaMetadataProvider MetadataProvider
+@inject IMediaCachePurger CachePurger
 @inject Notifier Notifier
 
 <div class="w-full max-w-3xl space-y-6">
@@ -54,7 +54,7 @@
         _isPurging = true;
         try
         {
-            await MetadataProvider.PurgeAllAsync();
+            await CachePurger.PurgeAsync();
             Notifier.Success("Media cache purged.");
         }
         catch (Exception ex)
