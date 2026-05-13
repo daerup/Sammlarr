@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -17,16 +18,28 @@ public class TelemetryModule : IServiceModule
 
 	public void RegisterServices(IServiceCollection services)
 	{
-		var otlpEnabled = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(OtlpEndpointEnvVar));
+		var telemetryOptions = ResolveTelemetryOptions(services);
+		var otlpEnabled = ShouldUseOtlp(telemetryOptions, Environment.GetEnvironmentVariable(OtlpEndpointEnvVar));
 		var environment =
 			Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
 			?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
 			?? Environments.Development;
 		var version = typeof(TelemetryModule).Assembly.GetName().Version?.ToString() ?? "0.0.0";
 
-		services.AddLogging(b => b.ClearProviders());
+		services.AddLogging(b =>
+		{
+			b.ClearProviders();
+			if (!otlpEnabled)
+			{
+				b.AddConsole(opts => opts.FormatterName = StructuredConsoleFormatter.FormatterName);
+				b.AddConsoleFormatter<StructuredConsoleFormatter, ConsoleFormatterOptions>();
+			}
+		});
 
-		services.AddSingleton<VerbositySampler>();
+		if (!otlpEnabled)
+		{
+			services.AddSingleton<ActivityLogProcessor>();
+		}
 
 		services
 			.AddOpenTelemetry()
@@ -51,9 +64,8 @@ public class TelemetryModule : IServiceModule
 				}
 				else
 				{
-					tracing.AddConsoleExporter();
+					tracing.AddProcessor<ActivityLogProcessor>();
 				}
-				tracing.SetSampler<VerbositySampler>();
 			})
 			.WithMetrics(metrics =>
 			{
@@ -61,10 +73,6 @@ public class TelemetryModule : IServiceModule
 				if (otlpEnabled)
 				{
 					metrics.AddOtlpExporter();
-				}
-				else
-				{
-					metrics.AddConsoleExporter();
 				}
 			})
 			.WithLogging(
@@ -74,10 +82,6 @@ public class TelemetryModule : IServiceModule
 					if (otlpEnabled)
 					{
 						logging.AddOtlpExporter();
-					}
-					else
-					{
-						logging.AddConsoleExporter();
 					}
 				},
 				opts =>
@@ -94,8 +98,9 @@ public class TelemetryModule : IServiceModule
 				{
 					filterOpts.MinLevel = LogLevel.Warning;
 					filterOpts.AddFilter("Sammlarr", MapLogLevel(telemetryOpts.Verbosity));
-					filterOpts.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Information);
-					filterOpts.AddFilter("Microsoft.AspNetCore", LogLevel.Information);
+					var frameworkLevel = telemetryOpts.Verbosity == TelemetryVerbosity.Verbose ? LogLevel.Debug : LogLevel.Warning;
+					filterOpts.AddFilter("Microsoft.EntityFrameworkCore", frameworkLevel);
+					filterOpts.AddFilter("Microsoft.AspNetCore", frameworkLevel);
 					filterOpts.AddFilter("Microsoft.Extensions.Http", LogLevel.Warning);
 				}
 			);
@@ -108,16 +113,13 @@ public class TelemetryModule : IServiceModule
 			TelemetryVerbosity.Normal => LogLevel.Information,
 			_ => LogLevel.Warning,
 		};
-}
 
-internal sealed class VerbositySampler : Sampler
-{
-	private readonly Sampler _inner;
+	internal static bool ShouldUseOtlp(TelemetryOptions options, string? otlpEndpoint) =>
+		options.Exporter == TelemetryExporter.Auto && !string.IsNullOrWhiteSpace(otlpEndpoint);
 
-	public VerbositySampler(TelemetryOptions options)
+	private static TelemetryOptions ResolveTelemetryOptions(IServiceCollection services)
 	{
-		_inner = options.Verbosity == TelemetryVerbosity.Quiet ? new AlwaysOffSampler() : new AlwaysOnSampler();
+		using var sp = services.BuildServiceProvider();
+		return sp.GetRequiredService<TelemetryOptions>();
 	}
-
-	public override SamplingResult ShouldSample(in SamplingParameters samplingParameters) => _inner.ShouldSample(samplingParameters);
 }
