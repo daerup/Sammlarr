@@ -6,13 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Metadata;
 
-internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGroupRepository mediaIdGroupRepository, MediaMetadataFactory metadataFactory)
-	: IMediaMetadataRepository
+internal class MediaMetadataRepository(
+	IDbContextFactory<SammlarrDbContext> dbContextFactory,
+	IMediaIdGroupRepository mediaIdGroupRepository,
+	MediaMetadataFactory metadataFactory
+) : IMediaMetadataRepository
 {
 	public async Task<CachedMediaMetadata?> GetByMediaIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		var identifier = MediaIdentifier.From(mediaId);
-		var entity = await dbContext
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var entity = await ctx
 			.MediaMetadata.AsNoTracking()
 			.Include(m => m.MediaIdGroup)
 				.ThenInclude(g => g.MediaIdEntries)
@@ -29,7 +33,7 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 			.Where(id => !MediaIdentifier.From(id).Equals(identifier))
 			.ToArray();
 
-		return new CachedMediaMetadata(metadataFactory.ToDetailResult(entity, mediaId, additionalIds), entity.UpdatedAt);
+		return new CachedMediaMetadata(metadataFactory.ToDetailResult(entity, mediaId, additionalIds), entity.LastFetchedAt);
 	}
 
 	public Task UpsertAsync(IMediaId mediaId, IMediaDetailResult details, CancellationToken cancellationToken = default) =>
@@ -47,14 +51,16 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 			await mediaIdGroupRepository.CreateOrAppendAsync(item.Details.AdditionalIds.Prepend(item.Details.SourceId), cancellationToken);
 		}
 
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
 		var identifiers = items.Select(item => MediaIdentifier.From(item.MediaId)).ToHashSet();
-		var groupIdByIdentifier = await dbContext
+		var groupIdByIdentifier = await ctx
 			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(identifiers))
 			.Select(entry => new { entry.Identifier, GroupId = entry.MediaIdGroupEntity.Id })
 			.ToDictionaryAsync(x => x.Identifier, x => x.GroupId, cancellationToken);
 
 		var groupIds = groupIdByIdentifier.Values.Distinct().ToList();
-		var existingByGroupId = await dbContext
+		var existingByGroupId = await ctx
 			.MediaMetadata.Include(m => m.Ratings)
 			.Where(m => groupIds.Contains(m.MediaIdGroupId))
 			.ToDictionaryAsync(m => m.MediaIdGroupId, cancellationToken);
@@ -63,7 +69,7 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 		var orphanGroupIds = groupIds.Where(id => !existingByGroupId.ContainsKey(id)).ToList();
 		if (orphanGroupIds.Count > 0)
 		{
-			await dbContext.MediaRatings.Where(r => orphanGroupIds.Contains(EF.Property<Guid>(r, "MediaIdGroupId"))).ExecuteDeleteAsync(cancellationToken);
+			await ctx.MediaRatings.Where(r => orphanGroupIds.Contains(EF.Property<Guid>(r, "MediaIdGroupId"))).ExecuteDeleteAsync(cancellationToken);
 		}
 
 		var processedGroupIds = new HashSet<Guid>();
@@ -78,42 +84,43 @@ internal class MediaMetadataRepository(SammlarrDbContext dbContext, IMediaIdGrou
 
 			if (existingByGroupId.TryGetValue(groupId, out var existing))
 			{
-				metadataFactory.Update(existing, item.Details);
+				metadataFactory.Update(ctx, existing, item.Details);
 			}
 			else
 			{
-				dbContext.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, groupId));
+				ctx.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, groupId));
 			}
 		}
 
-		await dbContext.SaveChangesAsync(cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task RemoveAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task RemoveManyAsync(IReadOnlyList<IMediaId> mediaIds, CancellationToken cancellationToken = default)
 	{
-		var identifier = MediaIdentifier.From(mediaId);
-		var entity = await dbContext
-			.MediaMetadata.Include(m => m.MediaIdGroup)
-				.ThenInclude(g => g.MediaIdEntries)
-			.SingleOrDefaultAsync(m => m.MediaIdGroup.MediaIdEntries.Any(entry => entry.Identifier == identifier), cancellationToken);
-
-		if (entity is null)
+		if (mediaIds.Count == 0)
 		{
 			return;
 		}
 
-		dbContext.MediaMetadata.Remove(entity);
-		await dbContext.SaveChangesAsync(cancellationToken);
+		var identifiers = mediaIds.Select(MediaIdentifier.From).ToHashSet();
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx
+			.MediaMetadata.Where(m => m.MediaIdGroup.MediaIdEntries.Any(entry => identifiers.Contains(entry.Identifier)))
+			.ExecuteDeleteAsync(cancellationToken);
 	}
 
 	public async Task PurgeAllAsync(CancellationToken cancellationToken = default)
 	{
-		await dbContext.MediaRatings.ExecuteDeleteAsync(cancellationToken);
-		await dbContext.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
-		await dbContext.MediaIdEntries.ExecuteDeleteAsync(cancellationToken);
-		await dbContext.MediaIdGroups.ExecuteDeleteAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx.MediaRatings.ExecuteDeleteAsync(cancellationToken);
+		await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
+		await ctx.MediaIdEntries.ExecuteDeleteAsync(cancellationToken);
+		await ctx.MediaIdGroups.ExecuteDeleteAsync(cancellationToken);
 	}
 
-	public Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default) =>
-		dbContext.MediaRatings.Where(r => r.Source == source).ExecuteDeleteAsync(cancellationToken);
+	public async Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await ctx.MediaRatings.Where(r => r.Source == source).ExecuteDeleteAsync(cancellationToken);
+	}
 }

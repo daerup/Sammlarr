@@ -23,6 +23,7 @@ public class SQLiteFixture : IAsyncDisposable
 
 	internal SammlarrDbContext Context => field ??= CreateDbContext();
 	internal RawDbContext RawContext => field ??= new RawDbContext(Context);
+	internal IDbContextFactory<SammlarrDbContext> ContextFactory => field ??= new SharedConnectionFactory(this);
 
 	public async ValueTask DisposeAsync()
 	{
@@ -36,11 +37,18 @@ public class SQLiteFixture : IAsyncDisposable
 	{
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Getter.Returns(DateTimeOffset.UtcNow);
-		return new SammlarrDbContext(
+		var ctx = new SammlarrDbContext(
 			BuildOptions(),
 			new EntityAuditer(),
 			_serviceProvider.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
 			dateTimeProvider
 		);
+		ctx.Initialize();
+		return ctx;
+	}
+
+	private sealed class SharedConnectionFactory(SQLiteFixture fixture) : IDbContextFactory<SammlarrDbContext>
+	{
+		public SammlarrDbContext CreateDbContext() => fixture.CreateDbContext();
 	}
 }

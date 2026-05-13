@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Config;
 
-internal class ProviderConfigRepository(SammlarrDbContext context, ITypedMemoryCache<string, ProviderConfig> cache) : IProviderConfigRepository
+internal class ProviderConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<string, ProviderConfig> cache)
+	: IProviderConfigRepository
 {
 	private const string CacheKey = nameof(ProviderConfigEntity);
 
@@ -14,7 +15,8 @@ internal class ProviderConfigRepository(SammlarrDbContext context, ITypedMemoryC
 		{
 			return cached!;
 		}
-		var settings = await context.ProviderSettings.SingleAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var settings = await ctx.ProviderSettings.SingleAsync(cancellationToken);
 		var dto = new ProviderConfig
 		{
 			WatchlistProvider = settings.WatchlistProvider,
@@ -28,12 +30,13 @@ internal class ProviderConfigRepository(SammlarrDbContext context, ITypedMemoryC
 
 	public async Task StoreAsync(ProviderConfig providerConfig, CancellationToken cancellationToken = default)
 	{
-		var settings = await context.ProviderSettings.SingleAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var settings = await ctx.ProviderSettings.SingleAsync(cancellationToken);
 		settings.WatchlistProvider = providerConfig.WatchlistProvider;
 		settings.TrendingProvider = providerConfig.TrendingProvider;
 		settings.SearchProvider = providerConfig.SearchProvider;
 		settings.RatingProvider = providerConfig.RatingProvider;
-		await context.SaveChangesAsync(cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 		cache.Set(CacheKey, providerConfig);
 	}
 }

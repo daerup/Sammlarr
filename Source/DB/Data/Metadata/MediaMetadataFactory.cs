@@ -1,10 +1,11 @@
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 
 namespace DB.Data.Metadata;
 
-internal class MediaMetadataFactory(SammlarrDbContext dbContext)
+internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 {
 	public TEntity BuildFrom<TEntity>(IMediaDetailResult details, Guid groupId)
 		where TEntity : MediaMetadataEntity
@@ -21,29 +22,31 @@ internal class MediaMetadataFactory(SammlarrDbContext dbContext)
 			_ => throw new InvalidOperationException($"Unsupported media detail result type '{details.GetType().Name}'."),
 		};
 		ApplyCommonFields(entity, details, groupId);
+		entity.LastFetchedAt = dateTimeProvider.Now;
 		entity.Ratings = [.. details.Ratings.Select(rating => BuildRating(rating, entity))];
 		return (TEntity)entity;
 	}
 
-	public void Update(MediaMetadataEntity existing, IMediaDetailResult details)
+	public void Update(SammlarrDbContext ctx, MediaMetadataEntity existing, IMediaDetailResult details)
 	{
 		switch (existing, details)
 		{
 			case (MovieMetadataEntity movie, MovieDetailResult movieDetails):
 				ApplyCommonFields(movie, movieDetails, movie.MediaIdGroupId);
 				movie.Runtime = movieDetails.Runtime;
-				ReplaceRatings(movie, movieDetails.Ratings);
+				ReplaceRatings(ctx, movie, movieDetails.Ratings);
 				break;
 			case (ShowMetadataEntity show, ShowDetailResult showDetails):
 				ApplyCommonFields(show, showDetails, show.MediaIdGroupId);
 				show.Seasons = showDetails.Seasons;
 				show.Episodes = showDetails.Episodes;
 				show.RuntimePerEpisode = showDetails.RuntimePerEpisode;
-				ReplaceRatings(show, showDetails.Ratings);
+				ReplaceRatings(ctx, show, showDetails.Ratings);
 				break;
 			default:
 				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name} with {details.GetType().Name}.");
 		}
+		existing.LastFetchedAt = dateTimeProvider.Now;
 	}
 
 	public IMediaDetailResult ToDetailResult(MediaMetadataEntity entity, IMediaId sourceId, IMediaId[] additionalIds) =>
@@ -82,9 +85,9 @@ internal class MediaMetadataFactory(SammlarrDbContext dbContext)
 			_ => throw new InvalidOperationException($"Unsupported metadata entity type '{entity.GetType().Name}'."),
 		};
 
-	private void ReplaceRatings(MediaMetadataEntity entity, IReadOnlyList<MediaRating> ratings)
+	private static void ReplaceRatings(SammlarrDbContext ctx, MediaMetadataEntity entity, IReadOnlyList<MediaRating> ratings)
 	{
-		dbContext.MediaRatings.RemoveRange(entity.Ratings);
+		ctx.MediaRatings.RemoveRange(entity.Ratings);
 		entity.Ratings.Clear();
 		foreach (var rating in ratings)
 		{

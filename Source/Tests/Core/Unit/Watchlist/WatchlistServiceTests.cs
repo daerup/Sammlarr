@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
@@ -24,7 +25,8 @@ public class WatchlistServiceTests
 		provider.GetWatchlistAsync(1, Any()).Returns(new WatchlistProviderPage([firstId, secondId], 7));
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any()).Returns(AsAsync(firstDetail, secondDetail));
+		metadataProvider.GetAsync(firstId, Any(), Any<ActivityContext>()).Returns(firstDetail);
+		metadataProvider.GetAsync(secondId, Any(), Any<ActivityContext>()).Returns(secondDetail);
 
 		var testee = CreateTestee(provider, metadataProvider);
 
@@ -63,14 +65,13 @@ public class WatchlistServiceTests
 		provider.GetWatchlistAsync(2, Any()).Returns(new WatchlistProviderPage([page2Id], 2));
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider
-			.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any())
-			.Returns((IReadOnlyList<IMediaId> ids, CancellationToken _) => ids.Contains(page1Id) ? AsAsync(detail1) : AsAsync(detail2));
+		metadataProvider.GetAsync(page1Id, Any(), Any<ActivityContext>()).Returns(detail1);
+		metadataProvider.GetAsync(page2Id, Any(), Any<ActivityContext>()).Returns(detail2);
 
 		var testee = CreateTestee(provider, metadataProvider);
 
 		var collected = new List<IMediaDetailResult>();
-		await foreach (var item in testee.GetWatchlistPagedAsync())
+		await foreach (var item in testee.GetWatchlistAsync())
 		{
 			collected.Add(item);
 		}
@@ -125,27 +126,8 @@ public class WatchlistServiceTests
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		Mock<IMediaMetadataProvider> resolvedMetadataProvider;
-		if (metadataProvider is null)
-		{
-			resolvedMetadataProvider = IMediaMetadataProvider.Mock();
-			resolvedMetadataProvider.GetAsync(Any<IReadOnlyList<IMediaId>>(), Any()).Returns(AsAsync());
-		}
-		else
-		{
-			resolvedMetadataProvider = metadataProvider;
-		}
-
+		var resolvedMetadataProvider = metadataProvider ?? IMediaMetadataProvider.Mock();
 		return new WatchlistService(index, configRepository.Object, resolvedMetadataProvider.Object);
-	}
-
-	private static async IAsyncEnumerable<IMediaDetailResult> AsAsync(params IMediaDetailResult[] items)
-	{
-		foreach (var item in items)
-		{
-			yield return item;
-		}
-		await Task.CompletedTask;
 	}
 
 	private static MovieDetailResult CreateMovieDetail(IMediaId sourceId) =>

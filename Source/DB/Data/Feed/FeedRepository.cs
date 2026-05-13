@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
 
-internal class FeedRepository(SammlarrDbContext context) : IFeedRepository
+internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
 {
 	private static readonly Expression<Func<FeedEntity, Contracts.Media.Feed.Feed>> project = projection => new Contracts.Media.Feed.Feed
 	{
@@ -21,11 +21,17 @@ internal class FeedRepository(SammlarrDbContext context) : IFeedRepository
 		Schedule = projection.SyncMode,
 	};
 
-	public async Task<IReadOnlyList<Contracts.Media.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default) =>
-		await context.Feeds.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
+	public async Task<IReadOnlyList<Contracts.Media.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.Feeds.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
+	}
 
-	public async Task<Contracts.Media.Feed.Feed?> GetFeedByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
-		await context.Feeds.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);
+	public async Task<Contracts.Media.Feed.Feed?> GetFeedByIdAsync(Guid id, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.Feeds.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);
+	}
 
 	public async Task CreateFeedAsync(string name, FeedCreateData createData, CancellationToken cancellationToken = default)
 	{
@@ -42,13 +48,15 @@ internal class FeedRepository(SammlarrDbContext context) : IFeedRepository
 			SyncMode = createData.Schedule,
 		};
 
-		context.Feeds.Add(entity);
-		await context.SaveChangesAsync(cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		ctx.Feeds.Add(entity);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	public async Task UpdateFeedAsync(Guid id, FeedUpdateData updateData, CancellationToken cancellationToken = default)
 	{
-		var entity = await context.Feeds.FindAsync([id], cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var entity = await ctx.Feeds.FindAsync([id], cancellationToken);
 		if (entity == null)
 		{
 			throw new InvalidOperationException($"Feed with id {id} not found.");
@@ -64,17 +72,18 @@ internal class FeedRepository(SammlarrDbContext context) : IFeedRepository
 		entity.Limit = updateData.Limit;
 		entity.SyncMode = updateData.Schedule;
 
-		await context.SaveChangesAsync(cancellationToken);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	public async Task DeleteFeedAsync(Guid id, CancellationToken cancellationToken = default)
 	{
-		var entity = await context.Feeds.FindAsync([id], cancellationToken);
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var entity = await ctx.Feeds.FindAsync([id], cancellationToken);
 		if (entity == null)
 		{
 			return;
 		}
-		context.Feeds.Remove(entity);
-		await context.SaveChangesAsync(cancellationToken);
+		ctx.Feeds.Remove(entity);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 }

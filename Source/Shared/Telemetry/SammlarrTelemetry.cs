@@ -27,18 +27,21 @@ public static class SammlarrTelemetry
 
 	private static readonly HashSet<string> ExcludedBlazorHubMethods = ["OnRenderCompleted", "EndInvokeJSFromDotNet"];
 
-	public static Activity? StartMetadataBatch(int mediaCount)
+	public static Activity? StartMetadataItem(IMediaId mediaId, ActivityContext parent = default)
 	{
-		var activity = Source.StartActivity("metadata.batch");
-		activity?.DisplayName = $"METADATA BATCH {mediaCount} items";
+		var activity = Source.StartActivity("metadata.item", ActivityKind.Internal, parent);
+		activity?.DisplayName = $"FETCH {mediaId}";
 		return activity;
 	}
 
-	public static Activity? StartMetadataItem(IMediaId mediaId, string state, ActivityContext parent = default)
+	public static void TagItemState(Activity? activity, string state)
 	{
-		var activity = Source.StartActivity("metadata.item", ActivityKind.Internal, parent);
-		activity?.DisplayName = $"FETCH {mediaId} [{state}]";
-		return activity;
+		if (activity is null)
+		{
+			return;
+		}
+		activity.SetTag("metadata.state", state);
+		activity.DisplayName += $" [{state}]";
 	}
 
 	public static Activity? StartMetadataLookup(MediaSearchProvider provider, IMediaId id)
@@ -65,13 +68,6 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
-	public static Activity? StartMetadataUpsert(int mediaCount, ActivityContext parent = default)
-	{
-		var activity = Source.StartActivity("metadata.upsert", ActivityKind.Internal, parent);
-		activity?.DisplayName = $"METADATA UPSERT {mediaCount} items";
-		return activity;
-	}
-
 	public static Activity? StartIdResolution(MediaProvider target, IEnumerable<IMediaId> candidates, string? title = null)
 	{
 		const string idResolution = "id_resolution";
@@ -84,7 +80,7 @@ public static class SammlarrTelemetry
 		activity.SetTag($"{idResolution}.candidates", candidateLabels);
 		activity.SetTag($"{idResolution}.title", title);
 		var candidatesPart = candidateLabels.Length > 0 ? $" ← {string.Join(", ", candidateLabels)}" : string.Empty;
-		activity.DisplayName = $"RESOLVE → {target}{title}{candidatesPart}";
+		activity.DisplayName = $"RESOLVE → {target} ({title}){candidatesPart}";
 		return activity;
 	}
 
@@ -134,21 +130,11 @@ public static class SammlarrTelemetry
 	public static void RecordIdResolutionOutcome(MediaProvider target, string outcome) =>
 		IdResolutionOutcomes.Add(1, new KeyValuePair<string, object?>("target", target.ToString()), new KeyValuePair<string, object?>("outcome", outcome));
 
-	public static void RecordBatchCacheBreakdown(Activity? activity, int hits, int misses, int stale)
-	{
-		CacheHits.Add(hits);
-		CacheMisses.Add(misses);
-		CacheStale.Add(stale);
+	public static void RecordCacheHit(MediaType mediaType) => CacheHits.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
 
-		if (activity is null)
-		{
-			return;
-		}
-		activity.SetTag("cache.hits", hits);
-		activity.SetTag("cache.misses", misses);
-		activity.SetTag("cache.stale", stale);
-		activity.DisplayName = $"METADATA BATCH {hits + misses + stale} items ({hits} cached, {misses} fresh, {stale} stale)";
-	}
+	public static void RecordCacheMiss(MediaType mediaType) => CacheMisses.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
+
+	public static void RecordCacheStale(MediaType mediaType) => CacheStale.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
 
 	public static void TagItemSuccess(Activity? activity, bool success) => activity?.SetTag("success", success);
 

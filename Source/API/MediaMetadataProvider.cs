@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using API.Metadata;
 using Contracts;
 using Contracts.DI;
@@ -24,136 +23,64 @@ internal class MediaMetadataProvider(
 	private static readonly TimeSpan StaleAfter = TimeSpan.FromDays(7);
 	private static readonly TimeSpan HydrationCooldown = TimeSpan.FromHours(1);
 	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
-	private const int MaxFetchConcurrency = 10;
 
-	public async IAsyncEnumerable<IMediaDetailResult> GetAsync(
-		IReadOnlyList<IMediaId> mediaIds,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default
-	)
+	public async Task<IMediaDetailResult> GetAsync(IMediaId mediaId, CancellationToken cancellationToken = default, ActivityContext parent = default)
 	{
-		if (mediaIds.Count == 0)
+		using var activity = SammlarrTelemetry.StartMetadataItem(mediaId, parent);
+
+		var cached = await repository.GetByMediaIdAsync(mediaId, cancellationToken);
+		var (state, cachedDetails) = Classify(cached);
+		SammlarrTelemetry.TagItemState(activity, state.ToString());
+
+		switch (state)
 		{
-			yield break;
+			case ResolutionState.ReturnCached:
+				SammlarrTelemetry.RecordCacheHit(mediaId.Type);
+				return cachedDetails!;
+			case ResolutionState.FetchFresh:
+				SammlarrTelemetry.RecordCacheMiss(mediaId.Type);
+				break;
+			case ResolutionState.Hydrate:
+				SammlarrTelemetry.RecordCacheStale(mediaId.Type);
+				break;
 		}
 
-		using var activity = SammlarrTelemetry.StartMetadataBatch(mediaIds.Count);
-		var batchContext = activity?.Context ?? default;
 		var config = await configRepository.GetAsync(cancellationToken);
 
-		using var gate = new SemaphoreSlim(MaxFetchConcurrency);
-		var fetchTasks = new List<Task<Resolution>>();
-		var byState = new Dictionary<ResolutionState, List<Resolution>>
-		{
-			[ResolutionState.ReturnCached] = [],
-			[ResolutionState.FetchFresh] = [],
-			[ResolutionState.Hydrate] = [],
-		};
+		var detail = cachedDetails ?? await LookUpAsync(mediaId, config.SearchProvider, cancellationToken);
+		detail = await EnrichAsync(detail, config.SearchProvider, cancellationToken);
+		detail = await ApplyRatingsAsync(detail, config.RatingProvider, cancellationToken);
 
-		foreach (var id in mediaIds)
-		{
-			var (state, resolution) = Classify(id, await repository.GetByMediaIdAsync(id, cancellationToken));
-			byState[state].Add(resolution);
+		await repository.UpsertManyAsync([new MediaMetadataUpsert(mediaId, detail)], cancellationToken);
 
-			if (state == ResolutionState.ReturnCached)
-			{
-				yield return resolution.Details!;
-			}
-			else
-			{
-				fetchTasks.Add(RunWithGateAsync(resolution, config, gate, batchContext, cancellationToken));
-			}
-		}
-
-		SammlarrTelemetry.RecordBatchCacheBreakdown(
-			activity,
-			byState[ResolutionState.ReturnCached].Count,
-			byState[ResolutionState.FetchFresh].Count,
-			byState[ResolutionState.Hydrate].Count
-		);
-
-		if (fetchTasks.Count == 0)
-		{
-			yield break;
-		}
-
-		var completed = new List<Resolution>(fetchTasks.Count);
-		await foreach (var task in Task.WhenEach(fetchTasks).WithCancellation(cancellationToken))
-		{
-			var resolution = await task;
-			completed.Add(resolution);
-			yield return resolution.Details!;
-		}
-
-		await UpsertCompletedAsync(completed, batchContext, cancellationToken);
+		SammlarrTelemetry.TagItemSuccess(activity, true);
+		return detail;
 	}
 
-	private async Task UpsertCompletedAsync(List<Resolution> completed, ActivityContext batchContext, CancellationToken cancellationToken)
-	{
-		using var activity = SammlarrTelemetry.StartMetadataUpsert(completed.Count, batchContext);
-		await repository.UpsertManyAsync(completed.Select(r => new MediaMetadataUpsert(r.Id, r.Details!)).ToList(), cancellationToken);
-	}
-
-	public async Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
-	{
-		foreach (var mediaId in mediaIds)
-		{
-			await repository.RemoveAsync(mediaId, cancellationToken);
-		}
-	}
+	public Task InvalidateAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default) =>
+		repository.RemoveManyAsync([.. mediaIds], cancellationToken);
 
 	public Task PurgeAllAsync(CancellationToken cancellationToken = default) => repository.PurgeAllAsync(cancellationToken);
 
-	private (ResolutionState State, Resolution Resolution) Classify(IMediaId mediaId, CachedMediaMetadata? cached)
+	private (ResolutionState State, IMediaDetailResult? Cached) Classify(CachedMediaMetadata? cached)
 	{
 		if (cached is null)
 		{
-			return (ResolutionState.FetchFresh, new Resolution { Id = mediaId });
+			return (ResolutionState.FetchFresh, null);
 		}
 
 		var sinceFetched = dateTimeProvider.Now - cached.FetchedAt;
 		if (sinceFetched >= StaleAfter)
 		{
-			return (ResolutionState.FetchFresh, new Resolution { Id = mediaId });
+			return (ResolutionState.FetchFresh, null);
 		}
 
 		if (MetadataCompleteness.GetMissingFields(cached.Details).Count == 0 || sinceFetched < HydrationCooldown)
 		{
-			return (ResolutionState.ReturnCached, new Resolution { Id = mediaId, Details = cached.Details });
+			return (ResolutionState.ReturnCached, cached.Details);
 		}
 
-		return (ResolutionState.Hydrate, new Resolution { Id = mediaId, Details = cached.Details });
-	}
-
-	private async Task<Resolution> RunWithGateAsync(
-		Resolution resolution,
-		ProviderConfig config,
-		SemaphoreSlim gate,
-		ActivityContext parentContext,
-		CancellationToken cancellationToken
-	)
-	{
-		var label = resolution.Details is null ? nameof(ResolutionState.FetchFresh) : nameof(ResolutionState.Hydrate);
-		using var activity = SammlarrTelemetry.StartMetadataItem(resolution.Id, label, parentContext);
-
-		await gate.WaitAsync(cancellationToken);
-		try
-		{
-			resolution.Details = await ExecuteFetchAsync(resolution, config, cancellationToken);
-			SammlarrTelemetry.TagItemSuccess(activity, resolution.Details is not null);
-			return resolution;
-		}
-		finally
-		{
-			gate.Release();
-		}
-	}
-
-	private async Task<IMediaDetailResult> ExecuteFetchAsync(Resolution resolution, ProviderConfig config, CancellationToken cancellationToken)
-	{
-		var baseDetail = resolution.Details ?? await LookUpAsync(resolution.Id, config.SearchProvider, cancellationToken);
-		baseDetail = await EnrichAsync(baseDetail, config.SearchProvider, cancellationToken);
-		baseDetail = await ApplyRatingsAsync(baseDetail, config.RatingProvider, cancellationToken);
-		return baseDetail;
+		return (ResolutionState.Hydrate, cached.Details);
 	}
 
 	private async Task<IMediaDetailResult> LookUpAsync(IMediaId id, MediaSearchProvider provider, CancellationToken cancellationToken)
@@ -199,7 +126,6 @@ internal class MediaMetadataProvider(
 				details = MetadataMerger.FillMissing(details, enrichment);
 			}
 		}
-
 		return details;
 	}
 
@@ -211,11 +137,5 @@ internal class MediaMetadataProvider(
 		ReturnCached,
 		FetchFresh,
 		Hydrate,
-	}
-
-	private sealed record Resolution
-	{
-		public required IMediaId Id { get; init; }
-		public IMediaDetailResult? Details { get; set; }
 	}
 }

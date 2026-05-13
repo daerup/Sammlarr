@@ -75,16 +75,13 @@ public class MetadataCompletenessTests
 	[Test]
 	public async Task GetMissingFields_WhenMultipleFieldsMissing_ReturnsAll()
 	{
-		var movie = CreateCompleteMovie() with
-		{
-			Title = string.Empty,
-			Summary = string.Empty,
-			Runtime = TimeSpan.Zero,
-		};
+		var movie = CreateCompleteMovie() with { Title = string.Empty, Summary = string.Empty, Runtime = TimeSpan.Zero };
 
 		var missing = MetadataCompleteness.GetMissingFields(movie);
 
-		await Assert.That(missing).IsEquivalentTo(new[] { nameof(MovieDetailResult.Title), nameof(MovieDetailResult.Summary), nameof(MovieDetailResult.Runtime) });
+		await Assert
+			.That(missing)
+			.IsEquivalentTo(new[] { nameof(MovieDetailResult.Title), nameof(MovieDetailResult.Summary), nameof(MovieDetailResult.Runtime) });
 	}
 
 	[Test]

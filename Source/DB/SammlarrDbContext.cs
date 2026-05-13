@@ -37,6 +37,10 @@ internal sealed class SammlarrDbContext : DbContext
 		_propertyConventions = propertyConventions;
 		_entityAuditer = entityAuditer;
 		_dateTimeProvider = dateTimeProvider;
+	}
+
+	public void Initialize()
+	{
 		Database.EnsureCreated();
 		SeedProviderSettings();
 	}

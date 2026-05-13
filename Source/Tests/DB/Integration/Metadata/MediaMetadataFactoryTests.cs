@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
@@ -18,7 +19,9 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaMetadataFactory(fixture.Context);
+		var dateTimeProvider = IDateTimeProvider.Mock();
+		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
+		_testee = new MediaMetadataFactory(fixture.Context, dateTimeProvider.Object);
 		_groupRepo = new MediaIdGroupRepository(fixture.Context);
 	}
 

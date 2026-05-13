@@ -33,22 +33,22 @@ public class ActivityFactoryTests
 	}
 
 	[Test]
-	public async Task SetBatchCacheBreakdown_RewritesBatchDisplayName()
-	{
-		using var activity = SammlarrTelemetry.StartMetadataBatch(20);
-		var initial = activity!.DisplayName;
-
-		SammlarrTelemetry.SetBatchCacheBreakdown(activity, hits: 12, misses: 5, stale: 3);
-
-		await Assert.That(activity.DisplayName).IsNotEqualTo(initial);
-	}
-
-	[Test]
 	public async Task IdResolution_WithCandidates_IncludesCandidatesInDisplayName()
 	{
 		using var activity = SammlarrTelemetry.StartIdResolution(MediaProvider.Tmdb, (IReadOnlyCollection<IMediaId>)[PlexId.From("abc", MediaType.Movie)]);
 
 		await Assert.That(activity!.DisplayName).Contains("Plex:Movie:abc");
+	}
+
+	[Test]
+	public async Task MetadataItem_WithExplicitParentContext_AnchorsToProvidedParent()
+	{
+		using var parent = new ActivitySource(SammlarrTelemetry.ServiceName).StartActivity("test.parent");
+		using var item = SammlarrTelemetry.StartMetadataItem(TmdbId.From("1", MediaType.Movie), parent!.Context);
+
+		await Assert.That(item).IsNotNull();
+		await Assert.That(item!.ParentSpanId).IsEqualTo(parent.SpanId);
+		await Assert.That(item.TraceId).IsEqualTo(parent.TraceId);
 	}
 
 	[Test]

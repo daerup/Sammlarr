@@ -16,7 +16,7 @@ public class DbModule : IServiceModule
 		services.AddModule<DataAccessModule>();
 		services.AddModule<TelemetryModule>();
 		services.AddScoped<EntityAuditer>();
-		services.AddDbContext<SammlarrDbContext>(
+		services.AddDbContextFactory<SammlarrDbContext>(
 			(sp, options) =>
 			{
 				var sammlarOptions = sp.GetRequiredService<SammlarOptions>();
@@ -26,7 +26,9 @@ public class DbModule : IServiceModule
 				}
 
 				options.UseSqlite(sammlarOptions.ConnectionString);
-			}
+			},
+			lifetime: ServiceLifetime.Scoped
 		);
+		services.AddHostedService<DbInitializer>();
 	}
 }
