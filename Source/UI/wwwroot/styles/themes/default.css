@@ -137,6 +137,16 @@
     border-color: #27bb65;
 }
 
+.bg-warning {
+    background-color: var(--alert-warning);
+    color: var(--alert-warning-foreground);
+}
+
+.bg-info {
+    background-color: var(--alert-info);
+    color: var(--alert-info-foreground);
+}
+
 .search-command-item {
     background: var(--accent);
     width: 40vw;
