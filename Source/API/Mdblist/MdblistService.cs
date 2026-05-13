@@ -20,7 +20,9 @@ internal class MdblistService(
 	IProviderConfigRepository configRepository
 ) : IFeedService
 {
-	private const string ListItemsEndpoint = "lists/{0}/items";
+	private const string ListItemsEndpoint = "lists/{0}/items?limit={1}&offset={2}";
+	private const int PageSize = 1000;
+	private const string HasMoreHeader = "X-Has-More";
 
 	public async IAsyncEnumerable<IMediaDetailResult> GetFeedItemsAsync(
 		string identifier,
@@ -28,30 +30,59 @@ internal class MdblistService(
 	)
 	{
 		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
-		var endpoint = string.Format(ListItemsEndpoint, identifier);
-		var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
-
-		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(stream)!;
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
 		var watchlistProvider = providerConfig.WatchlistProvider.AsMediaProvider();
 
-		var shows = result.shows.Select(FeedItemResolution.Show);
-		var movies = result.movies.Select(FeedItemResolution.Movie);
-
-		var pipeline = shows
-			.Concat(movies)
-			.ToAsyncEnumerable()
-			.SelectAwait(
-				async pair => await ResolveAndFetchAsync(pair, watchlistProvider, cancellationToken),
-				IMediaMetadataProvider.RecommendedConcurrency,
-				cancellationToken
-			);
-
-		await foreach (var item in pipeline)
+		await foreach (var page in FetchPagesAsync(identifier, cancellationToken))
 		{
-			yield return item;
+			var shows = page.shows.Select(FeedItemResolution.Show);
+			var movies = page.movies.Select(FeedItemResolution.Movie);
+
+			var pipeline = shows
+				.Concat(movies)
+				.ToAsyncEnumerable()
+				.SelectAwait(
+					async pair => await ResolveAndFetchAsync(pair, watchlistProvider, cancellationToken),
+					IMediaMetadataProvider.RecommendedConcurrency,
+					cancellationToken
+				);
+
+			await foreach (var item in pipeline)
+			{
+				yield return item;
+			}
+
+			foreach (var unknown in page.unknowns)
+			{
+				yield return BuildUnresolved(unknown);
+			}
 		}
+	}
+
+	private async IAsyncEnumerable<MdblistTypes.ListItems.Root> FetchPagesAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken)
+	{
+		var offset = 0;
+		while (true)
+		{
+			var (page, hasMore) = await FetchPageAsync(identifier, offset, cancellationToken);
+			yield return page;
+			if (!hasMore)
+			{
+				yield break;
+			}
+			offset += PageSize;
+		}
+	}
+
+	private async Task<(MdblistTypes.ListItems.Root Page, bool HasMore)> FetchPageAsync(string identifier, int offset, CancellationToken cancellationToken)
+	{
+		var endpoint = string.Format(ListItemsEndpoint, identifier, PageSize, offset);
+		using var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
+		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+		var page = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(stream)!;
+		var hasMore =
+			response.Headers.TryGetValues(HasMoreHeader, out var values) && values.Any(v => string.Equals(v, "true", StringComparison.OrdinalIgnoreCase));
+		return (page, hasMore);
 	}
 
 	private async ValueTask<IMediaDetailResult> ResolveAndFetchAsync(
@@ -88,6 +119,19 @@ internal class MdblistService(
 			SourceId = ids[0],
 			AdditionalIds = ids[1..],
 			MediaType = mediaType,
+			Title = item.title,
+			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : DateOnly.MinValue,
+		};
+	}
+
+	private UnresolvedMediaResult BuildUnresolved(MdblistTypes.ListItems.UnknownListItem item)
+	{
+		var ids = ExtractIds(item.ids, item.MediaType);
+		return new UnresolvedMediaResult
+		{
+			SourceId = ids[0],
+			AdditionalIds = ids[1..],
+			MediaType = item.MediaType,
 			Title = item.title,
 			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : DateOnly.MinValue,
 		};

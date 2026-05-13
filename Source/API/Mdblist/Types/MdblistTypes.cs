@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Contracts.Media;
 
 namespace API.Mdblist.Types;
 
@@ -6,7 +7,10 @@ internal static class MdblistTypes
 {
 	public static class ListItems
 	{
-		public record Root([property: JsonPropertyName("movies")] IReadOnlyList<Movie> movies, [property: JsonPropertyName("shows")] IReadOnlyList<Show> shows);
+		[JsonConverter(typeof(RootConverter))]
+		public record Root(IReadOnlyList<Movie> movies, IReadOnlyList<Show> shows, IReadOnlyList<UnknownListItem> unknowns);
+
+		public record UnknownListItem(MediaType MediaType, Ids ids, string title, int release_year);
 
 		public interface IListItem
 		{
