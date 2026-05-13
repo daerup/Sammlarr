@@ -1,9 +1,10 @@
 using BlazorBlueprint.Components;
+using Microsoft.Extensions.Logging;
 using UI.Shared.Common;
 
 namespace UI.Shared.Services;
 
-internal sealed class Notifier(ToastService toastService, DialogService dialogService)
+internal sealed class Notifier(ToastService toastService, DialogService dialogService, ILogger<Notifier> logger)
 {
 	public void Success(string description, string? title = null) => toastService.Success(description, title);
 
@@ -13,7 +14,9 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 
 	public void Error(string description, string? title = null) => toastService.Error(description, title);
 
-	public void Error(Exception exception, string? title = null) =>
+	public void Error(Exception exception, string? title = null)
+	{
+		logger.LogError(exception, "{Title}", title ?? "Unhandled exception surfaced to user");
 		toastService.Show(
 			new ToastData
 			{
@@ -32,4 +35,5 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 				},
 			}
 		);
+	}
 }

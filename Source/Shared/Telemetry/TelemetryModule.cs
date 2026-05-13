@@ -70,6 +70,7 @@ public class TelemetryModule : IServiceModule
 			.WithLogging(
 				logging =>
 				{
+					logging.AddProcessor(new LogExceptionToActivityProcessor());
 					if (otlpEnabled)
 					{
 						logging.AddOtlpExporter();
