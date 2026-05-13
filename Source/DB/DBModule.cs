@@ -2,7 +2,9 @@ using DB.Conversion;
 using DB.Data;
 using DB.Telemetry;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shared.DI;
 using Shared.Options;
 
@@ -27,6 +29,7 @@ public class DbModule : IServiceModule
 
 				options.UseSqlite(sammlarOptions.ConnectionString);
 				options.AddInterceptors(new SqlitePragmaInterceptor());
+				options.ConfigureWarnings(w => w.Log((RelationalEventId.CommandExecuted, LogLevel.Debug)));
 			},
 			lifetime: ServiceLifetime.Scoped
 		);

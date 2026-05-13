@@ -8,7 +8,6 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Sammlarr__Telemetry__Verbosity": "Verbose",
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:18889"
       }
     },
@@ -19,7 +18,6 @@
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Sammlarr__Telemetry__Verbosity": "Verbose",
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:18889"
       }
     },
@@ -34,7 +32,6 @@
       "applicationUrl": "https://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Sammlarr__Telemetry__Verbosity": "Verbose",
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:18889"
       }
     }
