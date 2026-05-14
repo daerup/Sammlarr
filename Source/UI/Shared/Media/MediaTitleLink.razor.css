@@ -1,0 +1,115 @@
+::deep .id-links-popover {
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in oklch, var(--popover) 100%, transparent) 0%,
+            color-mix(in oklch, var(--popover) 96%, var(--foreground) 4%) 100%
+        );
+    border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+    box-shadow:
+        0 10px 30px -12px color-mix(in oklch, black 35%, transparent),
+        0 0 0 1px color-mix(in oklch, var(--foreground) 4%, transparent) inset;
+    min-width: 14rem;
+}
+
+.id-links-popover-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    background-color: color-mix(in oklch, var(--foreground) 3%, transparent);
+    border-bottom: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+    width: 100%;
+}
+
+.id-links-popover-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.id-link-card {
+    --brand: var(--muted-foreground);
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    background:
+        linear-gradient(
+            90deg,
+            color-mix(in oklch, var(--brand) 15%, transparent) 0%,
+            color-mix(in oklch, var(--brand) 5%, transparent) 100%
+        );
+    text-decoration: none;
+    transition: background 150ms ease;
+}
+
+.id-link-card + .id-link-card {
+    border-top: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+}
+
+.id-link-card:not(.id-link-readonly):hover {
+    background:
+        linear-gradient(
+            90deg,
+            color-mix(in oklch, var(--brand) 28%, transparent) 0%,
+            color-mix(in oklch, var(--brand) 10%, transparent) 100%
+        );
+}
+
+.id-link-card:focus-visible {
+    outline: none;
+    background:
+        linear-gradient(
+            90deg,
+            color-mix(in oklch, var(--brand) 36%, transparent) 0%,
+            color-mix(in oklch, var(--brand) 14%, transparent) 100%
+        );
+}
+
+.id-link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 0;
+}
+
+.id-link-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    line-height: 1.15;
+}
+
+.id-link-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.id-link-value {
+    font-size: 0.6875rem;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    color: var(--muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.id-link-external {
+    color: var(--muted-foreground);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.id-link-readonly {
+    cursor: default;
+}

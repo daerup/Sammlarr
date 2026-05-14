@@ -1,0 +1,74 @@
+@using Contracts.Media
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+@if (Ids.Count > 0)
+{
+    <span @onfocusin:stopPropagation="true" @onfocusout:stopPropagation="true" @onclick:stopPropagation="true" class="media-title-link-wrap">
+	<BbPopover>
+		<BbPopoverTrigger AsChild="false" aria-label="@($"View external IDs for {Title}")" tabindex="-1" class="media-title-trigger text-left">
+			<span class="@Class media-title-text">@Title</span><LucideIcon Name="external-link" Size="14" Class="media-title-icon"/>
+		</BbPopoverTrigger>
+		<BbPopoverContent Side="@Side" Align="@Align" Class="id-links-popover w-auto p-0 overflow-hidden">
+			<div class="id-links-popover-header">
+				<LucideIcon Name="external-link" Size="12"/>
+				<span>External IDs</span>
+			</div>
+			<div class="id-links-popover-list">
+				@foreach (var id in Ids)
+                {
+                    var url = MediaIdUrlResolver.Resolve(id);
+                    var branding = Branding.GetBrandingInfo(id.Source);
+                    var brandStyle = $"--brand: {branding.BrandColor}";
+                    var ariaLabel = url is not null ? $"View {id.Value} on {branding.DisplayName} (opens in new tab)" : $"{branding.DisplayName} ID {id.Value}";
+
+                    if (url is not null)
+                    {
+                        <a href="@url"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="@ariaLabel"
+                           style="@brandStyle"
+                           class="id-link-card">
+							<span class="id-link-icon">
+								@branding.IconWithClass("w-6 h-6")
+							</span>
+							<span class="id-link-text">
+								<span class="id-link-name">@branding.DisplayName</span>
+								<span class="id-link-value">@id.Value</span>
+							</span>
+							<LucideIcon Name="external-link" Size="14" Class="id-link-external"/>
+						</a>
+                    }
+                    else
+                    {
+                        <span aria-label="@ariaLabel"
+                              style="@brandStyle"
+                              class="id-link-card id-link-readonly">
+							<span class="id-link-icon">
+								@branding.IconWithClass("w-6 h-6")
+							</span>
+							<span class="id-link-text">
+								<span class="id-link-name">@branding.DisplayName</span>
+								<span class="id-link-value">@id.Value</span>
+							</span>
+						</span>
+                    }
+                }
+			</div>
+		</BbPopoverContent>
+	</BbPopover>
+	</span>
+}
+else
+{
+    <span class="@Class">@Title</span>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required IReadOnlyList<IMediaId> Ids { get; set; }
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] [EditorRequired] public required PopoverSide Side { get; set; }
+    [Parameter] [EditorRequired] public required PopoverAlign Align { get; set; }
+}

@@ -117,14 +117,12 @@
     transform: scale(1.06);
 }
 
-.search-result-row.row-focused ::deep .search-result-toggle-btn.is-marked:not(:disabled),
-::deep .search-result-toggle-btn.is-marked:hover:not(:disabled) {
+::deep .search-result-toggle-btn.is-marked:not(:disabled):is(:hover, :focus-visible) {
     opacity: 1;
     background: none;
 }
 
-.search-result-row.row-focused ::deep .search-result-toggle-btn:not(.is-marked):not(:disabled) svg,
-::deep .search-result-toggle-btn:not(.is-marked):hover:not(:disabled) svg {
+::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):is(:hover, :focus-visible) svg {
     stroke: var(--toggle-active-color, orange);
     fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
     transition: stroke 0.15s ease, fill 0.15s ease;
