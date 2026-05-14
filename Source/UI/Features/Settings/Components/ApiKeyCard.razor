@@ -12,9 +12,38 @@
 
 <div class="w-full max-w-lg">
     <div class="rounded-lg border">
-        <div class="flex items-center gap-3 px-6 py-4 border-b bg-accent">
+        <div class="flex items-center gap-3 px-6 py-4 border-b"
+             style="@($"background: color-mix(in oklch, {providerBranding.BrandColor} 12%, transparent);")">
             @providerBranding.Icon
             <h3 class="text-sm font-semibold">@providerBranding.DisplayName</h3>
+            @if (_state == State.Failed || _savedState == State.Failed)
+            {
+                <BbBadge Variant="BadgeVariant.Destructive" Class="ml-auto gap-1.5">
+                    <LucideIcon Name="circle-alert" Size="12"/>
+                    Invalid
+                </BbBadge>
+            }
+            else if (_state == State.Success)
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success/60">
+                    <LucideIcon Name="check" Size="12"/>
+                    Verified
+                </BbBadge>
+            }
+            else if (_savedState == State.Saved)
+            {
+                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success/60">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
+                    Connected
+                </BbBadge>
+            }
+            else
+            {
+                <BbBadge Variant="BadgeVariant.Secondary" Class="ml-auto gap-1.5 text-muted-foreground">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-muted-foreground/60"></span>
+                    Not configured
+                </BbBadge>
+            }
         </div>
 
         <div class="px-6 py-6 space-y-6">
@@ -121,7 +150,7 @@
                     </BbButton>
                 }
 
-                @if (_apiKeyInput != _savedApiKey || _state is State.Failed or State.Success)
+                @if (_apiKeyInput != _savedApiKey || _state != _savedState)
                 {
                     <BbButton Variant="ButtonVariant.Outline"
                               Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -149,6 +178,7 @@
     private string _savedApiKey = string.Empty;
     private MediaProvider? _loadedProvider;
     private State _state = State.Idle;
+    private State _savedState = State.Idle;
     private bool _showApiKey;
 
     private void ToggleApiKeyVisibility() => _showApiKey = !_showApiKey;
@@ -164,7 +194,7 @@
             }
 
             _apiKeyInput = value;
-            _state = State.Idle;
+            _state = value == _savedApiKey ? _savedState : State.Idle;
         }
     }
 
@@ -178,15 +208,17 @@
         var key = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
         _savedApiKey = key ?? string.Empty;
         _apiKeyInput = _savedApiKey;
-        _state = State.Idle;
         _loadedProvider = Provider;
 
         if (string.IsNullOrEmpty(_savedApiKey))
         {
+            _savedState = State.Idle;
+            _state = State.Idle;
             return;
         }
         var isValid = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_savedApiKey);
-        _state = isValid ? State.Saved : State.Failed;
+        _savedState = isValid ? State.Saved : State.Failed;
+        _state = _savedState;
     }
 
     private Task HandleButtonClickAsync() => _state == State.Success ? SaveAsync() : TestAsync();
@@ -212,6 +244,7 @@
 
         await ApiKeyConfigRepository.SetApiKeyAsync(Provider, _apiKeyInput);
         _savedApiKey = _apiKeyInput;
+        _savedState = State.Saved;
 
         _state = State.Saved;
     }
@@ -221,13 +254,14 @@
         await ApiKeyConfigRepository.RemoveApiKeyAsync(Provider);
         _savedApiKey = string.Empty;
         _apiKeyInput = string.Empty;
+        _savedState = State.Idle;
         _state = State.Idle;
     }
 
     private Task CancelAsync()
     {
         _apiKeyInput = _savedApiKey;
-        _state = State.Idle;
+        _state = _savedState;
         return Task.CompletedTask;
     }
 }
