@@ -152,6 +152,46 @@
     width: 40vw;
 }
 
+.media-title-link-wrap {
+    display: contents;
+}
+
+.media-title-trigger {
+    display: inline;
+    cursor: pointer;
+}
+
+.media-title-trigger:hover .media-title-text,
+.media-title-trigger:focus-visible .media-title-text {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.media-title-trigger svg.media-title-icon {
+    display: inline-block;
+    vertical-align: baseline;
+    margin-left: 0.25rem;
+    color: var(--muted-foreground);
+}
+
+.media-title-trigger:has(.truncate) {
+    display: inline-flex;
+    align-items: center;
+    column-gap: 0.25rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.media-title-trigger:has(.truncate) .media-title-text {
+    min-width: 0;
+}
+
+.media-title-trigger:has(.truncate) svg.media-title-icon {
+    margin-left: 0;
+    flex-shrink: 0;
+    transform: none;
+}
+
 .search-command-item-shortcut {
     padding: 2px 6px;
     border-radius: 3px;

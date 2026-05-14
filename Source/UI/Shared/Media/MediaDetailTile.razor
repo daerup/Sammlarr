@@ -49,8 +49,7 @@
                     }
                 </div>
                 <div class="flex items-center gap-2 pt-2 min-w-0">
-                    <p class="font-bold truncate text-xl">@Result.Title</p>
-                    <MediaIdLinks Ids="@_ids" IconSize="20" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                    <MediaTitleLink Title="@Result.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(Result.Tagline))

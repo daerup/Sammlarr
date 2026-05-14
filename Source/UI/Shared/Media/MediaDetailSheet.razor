@@ -11,13 +11,7 @@
         {
             <BbSheetHeader>
                 <BbSheetTitle Class="font-bold tracking-wide">
-                    @Title
-                    @if (Ids is { Count: > 0 })
-                    {
-                        <span class="ml-2 inline-block align-middle">
-                            <MediaIdLinks Ids="@Ids" IconSize="20" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
-                        </span>
-                    }
+                    <MediaTitleLink Title="@Title" Ids="@(Ids ?? [])" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </BbSheetTitle>
                 <BbSheetDescription Class="font-normal tracking-wide">
                     <span class="inline-flex items-center justify-center gap-1.5">
