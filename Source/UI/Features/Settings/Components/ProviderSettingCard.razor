@@ -3,14 +3,21 @@
 
 @{
     var selectedBranding = BrandingProvider(Selected);
+    var brand = selectedBranding.BrandColor;
+    var headerStyle =
+        $"--brand: {brand}; "
+        + $"background: linear-gradient(90deg, color-mix(in oklch, {brand} 26%, transparent) 0%, color-mix(in oklch, {brand} 22%, transparent) 55%, color-mix(in oklch, {brand} 12%, transparent) 100%); "
+        + $"border-bottom: 2px solid {brand};";
 }
 
 <div class="w-full max-w-lg">
-    <div class="rounded-lg border">
-        <div class="flex items-center gap-3 px-6 py-4 border-b"
-             style="@($"background: color-mix(in oklch, {selectedBranding.BrandColor} 12%, transparent);")">
+    <div class="rounded-lg border bg-card overflow-hidden transition-all duration-200 hover:shadow-md motion-safe:hover:-translate-y-0.5">
+        <div class="flex items-center gap-3 px-6 py-4 provider-card-header" style="@headerStyle">
             @selectedBranding.Icon
-            <h3 class="text-sm font-semibold">@Title</h3>
+            <h3 class="text-base font-semibold">@Title</h3>
+            <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 whitespace-nowrap provider-pill">
+                @selectedBranding.DisplayName
+            </BbBadge>
         </div>
         <div class="px-6 py-6 space-y-6">
             <p class="text-xs text-muted-foreground leading-relaxed">
@@ -26,6 +33,7 @@
 
 @code {
     [Parameter] [EditorRequired] public required Func<TEnum, BrandingInfo> BrandingProvider { get; set; }
+
     [Parameter] [EditorRequired] public required string Title { get; set; }
 
     [Parameter] [EditorRequired] public required string Description { get; set; }
