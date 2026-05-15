@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "dotnet-inspect": {
+      "source": "richlander/dotnet-skills",
+      "sourceType": "github",
+      "skillPath": "skills/dotnet-inspect/SKILL.md",
+      "computedHash": "62daf447a4e3a61bdb3ba502e23b123f1ed9d39e38378831b81f160ee49c5d01"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": "skill/SKILL.md",
+      "computedHash": "c8f645c3e9aace8baf528021165168bac77d4f761f0ab7baf45e06e01691500f"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "cc5d9f0cc5760217829fbebfa05a23b4ab475ed34005a9ea44e181b8112409f3"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "1d70f4e82bae766934977ea6fb32623358e2ecb562926f7d2cd8ca6c31024cc5"
+    }
+  }
+}
