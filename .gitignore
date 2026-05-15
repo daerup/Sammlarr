@@ -60,4 +60,11 @@ Results/
 **/Benchmark/Old/
 
 # We vibin
-/Source/.claude
+/Source/.claude/settings.local.json
+
+# Local SQLite databases
+/Source/UI/sammlarr.db
+/Source/UI/sammlarr.db-shm
+/Source/UI/sammlarr.db-wal
+/Source/.playwright-cli/*
+/Source/.playwright-mcp/*
