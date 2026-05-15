@@ -69,7 +69,7 @@
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
 
-    --card: oklch(0.145 0 0);
+    --card: oklch(0.2 0 0);
     --card-foreground: oklch(0.985 0 0);
 
     --popover: oklch(0.145 0 0);
@@ -224,4 +224,23 @@
 body:has(.error-dialog) .fixed.inset-0.z-50.bg-black\/80 {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+}
+
+/* Provider settings pill — BbBadge has no Style param, so use a CSS variable cascade */
+.provider-pill {
+    border-color: color-mix(in oklch, var(--brand) 60%, transparent) !important;
+    color: color-mix(in oklch, var(--brand) 90%, white);
+}
+
+/* MediaTitleLink popover — rendered via BbPopover portal, so cannot live in scoped CSS */
+.id-links-popover {
+    background: var(--card);
+    border: none !important;
+    border-radius: 0.5rem;
+    box-shadow:
+        0 0 28px 2px color-mix(in oklch, black 30%, transparent),
+        0 8px 16px -4px color-mix(in oklch, black 45%, transparent),
+        0 24px 48px -12px color-mix(in oklch, black 65%, transparent),
+        0 48px 96px -24px color-mix(in oklch, black 80%, transparent);
+    min-width: 16rem;
 }

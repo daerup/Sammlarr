@@ -11,9 +11,9 @@
 }
 
 <div class="w-full max-w-lg">
-    <div class="rounded-lg border">
-        <div class="flex items-center gap-3 px-6 py-4 border-b"
-             style="@($"background: color-mix(in oklch, {providerBranding.BrandColor} 12%, transparent);")">
+    <div class="rounded-lg border bg-card overflow-hidden">
+        <div class="flex items-center gap-3 px-6 py-4"
+             style="@($"background: linear-gradient(90deg, color-mix(in oklch, {providerBranding.BrandColor} 26%, transparent) 0%, color-mix(in oklch, {providerBranding.BrandColor} 22%, transparent) 55%, color-mix(in oklch, {providerBranding.BrandColor} 12%, transparent) 100%); border-bottom: 2px solid {providerBranding.BrandColor};")">
             @providerBranding.Icon
             <h3 class="text-sm font-semibold">@providerBranding.DisplayName</h3>
             @if (_state == State.Failed || _savedState == State.Failed)
@@ -25,14 +25,14 @@
             }
             else if (_state == State.Success)
             {
-                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success/60">
+                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success">
                     <LucideIcon Name="check" Size="12"/>
                     Verified
                 </BbBadge>
             }
             else if (_savedState == State.Saved)
             {
-                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success/60">
+                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success">
                     <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
                     Connected
                 </BbBadge>
