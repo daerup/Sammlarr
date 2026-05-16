@@ -2,53 +2,48 @@
 @inject IMediaCachePurger CachePurger
 @inject Notifier Notifier
 
-<div class="w-full max-w-lg">
-    <div class="rounded-lg border bg-card overflow-hidden">
-        <div class="flex items-center gap-3 px-6 py-4"
-             style="background: linear-gradient(90deg, color-mix(in oklch, var(--destructive) 40%, transparent) 0%, color-mix(in oklch, var(--destructive) 32%, transparent) 55%, color-mix(in oklch, var(--destructive) 18%, transparent) 100%); border-bottom: 2px solid var(--destructive);">
-            <div class="w-9 h-9 flex items-center justify-center">
-                <LucideIcon Name="database" Size="22"/>
-            </div>
-            <h3 class="text-sm font-semibold">Media cache</h3>
+<SettingsCard Title="Media cache" Color="var(--destructive)">
+    <Icon>
+        <div class="w-9 h-9 flex items-center justify-center">
+            <LucideIcon Name="database" Size="22"/>
         </div>
+    </Icon>
+    <ChildContent>
+        <p class="text-muted-foreground text-sm leading-relaxed">
+            Sammlarr caches every media identifier group, metadata record, and rating locally. Purging removes all cached data and forces a clean refetch from the configured providers on demand. Existing watchlist entries are preserved.
+        </p>
 
-        <div class="px-6 py-6 space-y-6">
-            <p class="text-muted-foreground text-sm leading-relaxed">
-                Sammlarr caches every media identifier group, metadata record, and rating locally. Purging removes all cached data and forces a clean refetch from the configured providers on demand. Existing watchlist entries are preserved.
-            </p>
-
-            <div class="flex items-center gap-3">
-                <BbAlertDialog>
-                    <BbAlertDialogTrigger>
-                        <HoverButton Preset="HoverButtonPreset.Destructive"
-                                     Icon="trash-2"
-                                     Text="@(_isPurging ? "Purging…" : "Purge cache")"
-                                     Disabled="@_isPurging"/>
-                    </BbAlertDialogTrigger>
-                    <BbAlertDialogContent>
-                        <BbAlertDialogHeader>
-                            <BbAlertDialogTitle>Purge the media cache?</BbAlertDialogTitle>
-                            <BbAlertDialogDescription>
-                                This permanently deletes all media identifier groups, identifier entries, metadata records, and ratings.
-                                The next time the app needs an item it will refetch from the providers. This cannot be undone.
-                            </BbAlertDialogDescription>
-                        </BbAlertDialogHeader>
-                        <BbAlertDialogFooter>
-                            <BbAlertDialogCancel>
-                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                            </BbAlertDialogCancel>
-                            <BbAlertDialogAction>
-                                <HoverButton Preset="HoverButtonPreset.Destructive"
-                                             Text="Yes, purge everything"
-                                             OnClick="PurgeAsync"/>
-                            </BbAlertDialogAction>
-                        </BbAlertDialogFooter>
-                    </BbAlertDialogContent>
-                </BbAlertDialog>
-            </div>
+        <div class="flex items-center gap-3">
+            <BbAlertDialog>
+                <BbAlertDialogTrigger>
+                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                 Icon="trash-2"
+                                 Text="@(_isPurging ? "Purging…" : "Purge cache")"
+                                 Disabled="@_isPurging"/>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Purge the media cache?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This permanently deletes all media identifier groups, identifier entries, metadata records, and ratings.
+                            The next time the app needs an item it will refetch from the providers. This cannot be undone.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbAlertDialogAction>
+                            <HoverButton Preset="HoverButtonPreset.Destructive"
+                                         Text="Yes, purge everything"
+                                         OnClick="PurgeAsync"/>
+                        </BbAlertDialogAction>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
         </div>
-    </div>
-</div>
+    </ChildContent>
+</SettingsCard>
 
 @code {
     private bool _isPurging;

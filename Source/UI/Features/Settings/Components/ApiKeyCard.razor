@@ -7,149 +7,143 @@
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject Notifier Notifier
 
-<div class="w-full max-w-lg">
-    <div class="rounded-lg border bg-card overflow-hidden">
-        <div class="flex items-center gap-3 px-6 py-4"
-             style="@($"background: linear-gradient(90deg, color-mix(in oklch, {Branding.BrandColor} 26%, transparent) 0%, color-mix(in oklch, {Branding.BrandColor} 22%, transparent) 55%, color-mix(in oklch, {Branding.BrandColor} 12%, transparent) 100%); border-bottom: 2px solid {Branding.BrandColor};")">
-            @Branding.Icon
-            <h3 class="text-sm font-semibold">@Branding.DisplayName</h3>
-            @if (_state == State.Failed || _savedState == State.Failed)
+<SettingsCard Title="@Branding.DisplayName" Color="@Branding.BrandColor" Icon="@Branding.Icon">
+    <Badge>
+        @if (_state == State.Failed || _savedState == State.Failed)
+        {
+            <BbBadge Variant="BadgeVariant.Destructive" Class="gap-1.5">
+                <LucideIcon Name="circle-alert" Size="12"/>
+                Invalid
+            </BbBadge>
+        }
+        else if (_state == State.Success)
+        {
+            <BbBadge Variant="BadgeVariant.Outline" Class="gap-1.5 text-success border-success">
+                <LucideIcon Name="check" Size="12"/>
+                Verified
+            </BbBadge>
+        }
+        else if (_savedState == State.Saved)
+        {
+            <BbBadge Variant="BadgeVariant.Outline" Class="gap-1.5 text-success border-success">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
+                Connected
+            </BbBadge>
+        }
+        else
+        {
+            <BbBadge Variant="BadgeVariant.Secondary" Class="gap-1.5 text-muted-foreground">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-muted-foreground/60"></span>
+                Not configured
+            </BbBadge>
+        }
+    </Badge>
+    <ChildContent>
+        <BbField>
+            <BbFieldContent>
+                <div class="relative">
+                    <BbInput
+                        Placeholder="Enter API key"
+                        @bind-Value="ApiKey"
+                        Type="@(_showApiKey ? InputType.Text : InputType.Password)"
+                        Class="bg-accent pr-10"
+                        UpdateTiming="UpdateTiming.Immediate"/>
+                    <BbButton Variant="ButtonVariant.Ghost"
+                              Size="ButtonSize.IconSmall"
+                              AriaLabel="@(_showApiKey ? "Hide API key" : "Show API key")"
+                              Class="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                              OnClick="ToggleApiKeyVisibility">
+                        <LucideIcon Name="@(_showApiKey ? "eye-off" : "eye")" Size="16"/>
+                    </BbButton>
+                </div>
+                <BbFieldDescription> @Description</BbFieldDescription>
+            </BbFieldContent>
+        </BbField>
+
+        <div class="flex items-center gap-3">
+            @if (_state == State.Idle)
             {
-                <BbBadge Variant="BadgeVariant.Destructive" Class="ml-auto gap-1.5">
-                    <LucideIcon Name="circle-alert" Size="12"/>
-                    Invalid
-                </BbBadge>
+                <BbButton Variant="ButtonVariant.Default" OnClick="HandleButtonClickAsync" Disabled="string.IsNullOrWhiteSpace(_apiKeyInput)">
+                    <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                    <span>Test</span>
+                </BbButton>
+            }
+            else if (_state == State.Testing)
+            {
+                <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                    <span>Testing…</span>
+                </BbButton>
             }
             else if (_state == State.Success)
             {
-                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success">
-                    <LucideIcon Name="check" Size="12"/>
-                    Verified
-                </BbBadge>
+                <HoverButton Preset="HoverButtonPreset.Success"
+                             Icon="save"
+                             Text="Save"
+                             OnClick="HandleButtonClickAsync"/>
             }
-            else if (_savedState == State.Saved)
+            else if (_state == State.Saving)
             {
-                <BbBadge Variant="BadgeVariant.Outline" Class="ml-auto gap-1.5 text-success border-success">
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
-                    Connected
-                </BbBadge>
+                <HoverButton Preset="HoverButtonPreset.Success" Disabled="true">
+                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                    <span>Saving…</span>
+                </HoverButton>
             }
-            else
+            else if (_state == State.Saved)
             {
-                <BbBadge Variant="BadgeVariant.Secondary" Class="ml-auto gap-1.5 text-muted-foreground">
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-muted-foreground/60"></span>
-                    Not configured
-                </BbBadge>
+                <BbButton Variant="ButtonVariant.Default"
+                          Class="border-success bg-success text-white"
+                          Disabled="true">
+                    <LucideIcon Name="check" Size="14" Class="mr-2"/>
+                    <span>Saved</span>
+                </BbButton>
+
+                <BbAlertDialog>
+                    <BbAlertDialogTrigger>
+                        <HoverButton Preset="HoverButtonPreset.Destructive"
+                                     Icon="trash-2"
+                                     Text="Delete key"/>
+                    </BbAlertDialogTrigger>
+                    <BbAlertDialogContent>
+                        <BbAlertDialogHeader>
+                            <BbAlertDialogTitle>Delete API key?</BbAlertDialogTitle>
+                            <BbAlertDialogDescription>
+                                This will permanently remove the saved API key for @Branding.DisplayName.
+                                You will need to re-enter it to use this provider again.
+                            </BbAlertDialogDescription>
+                        </BbAlertDialogHeader>
+                        <BbAlertDialogFooter>
+                            <BbAlertDialogCancel>
+                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                            </BbAlertDialogCancel>
+                            <BbAlertDialogAction>
+                                <HoverButton Preset="HoverButtonPreset.Destructive"
+                                             Icon="trash-2"
+                                             Text="Delete key"
+                                             OnClick="DeleteAsync"/>
+                            </BbAlertDialogAction>
+                        </BbAlertDialogFooter>
+                    </BbAlertDialogContent>
+                </BbAlertDialog>
+            }
+            else if (_state == State.Failed)
+            {
+                <HoverButton Preset="HoverButtonPreset.Destructive"
+                             Icon="x"
+                             Text="Failed"
+                             Disabled="true"/>
+            }
+
+            @if (_apiKeyInput != _savedApiKey || _state != _savedState)
+            {
+                <HoverButton Preset="HoverButtonPreset.Destructive"
+                             Text="Cancel"
+                             OnClick="CancelAsync"
+                             Disabled="@(_state is State.Testing or State.Saving)"/>
             }
         </div>
-
-        <div class="px-6 py-6 space-y-6">
-            <BbField>
-                <BbFieldContent>
-                    <div class="relative">
-                        <BbInput
-                            Placeholder="Enter API key"
-                            @bind-Value="ApiKey"
-                            Type="@(_showApiKey ? InputType.Text : InputType.Password)"
-                            Class="bg-accent pr-10"
-                            UpdateTiming="UpdateTiming.Immediate"/>
-                        <BbButton Variant="ButtonVariant.Ghost"
-                                  Size="ButtonSize.IconSmall"
-                                  AriaLabel="@(_showApiKey ? "Hide API key" : "Show API key")"
-                                  Class="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-transparent"
-                                  OnClick="ToggleApiKeyVisibility">
-                            <LucideIcon Name="@(_showApiKey ? "eye-off" : "eye")" Size="16"/>
-                        </BbButton>
-                    </div>
-                    <BbFieldDescription> @Description</BbFieldDescription>
-                </BbFieldContent>
-            </BbField>
-
-            <div class="flex items-center gap-3">
-                @if (_state == State.Idle)
-                {
-                    <BbButton Variant="ButtonVariant.Default" OnClick="HandleButtonClickAsync" Disabled="string.IsNullOrWhiteSpace(_apiKeyInput)">
-                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
-                        <span>Test</span>
-                    </BbButton>
-                }
-                else if (_state == State.Testing)
-                {
-                    <BbButton Variant="ButtonVariant.Default" Disabled="true">
-                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                        <span>Testing…</span>
-                    </BbButton>
-                }
-                else if (_state == State.Success)
-                {
-                    <HoverButton Preset="HoverButtonPreset.Success"
-                                 Icon="save"
-                                 Text="Save"
-                                 OnClick="HandleButtonClickAsync"/>
-                }
-                else if (_state == State.Saving)
-                {
-                    <HoverButton Preset="HoverButtonPreset.Success" Disabled="true">
-                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                        <span>Saving…</span>
-                    </HoverButton>
-                }
-                else if (_state == State.Saved)
-                {
-                    <BbButton Variant="ButtonVariant.Default"
-                              Class="border-success bg-success text-white"
-                              Disabled="true">
-                        <LucideIcon Name="check" Size="14" Class="mr-2"/>
-                        <span>Saved</span>
-                    </BbButton>
-
-                    <BbAlertDialog>
-                        <BbAlertDialogTrigger>
-                            <HoverButton Preset="HoverButtonPreset.Destructive"
-                                         Icon="trash-2"
-                                         Text="Delete key"/>
-                        </BbAlertDialogTrigger>
-                        <BbAlertDialogContent>
-                            <BbAlertDialogHeader>
-                                <BbAlertDialogTitle>Delete API key?</BbAlertDialogTitle>
-                                <BbAlertDialogDescription>
-                                    This will permanently remove the saved API key for @Branding.DisplayName.
-                                    You will need to re-enter it to use this provider again.
-                                </BbAlertDialogDescription>
-                            </BbAlertDialogHeader>
-                            <BbAlertDialogFooter>
-                                <BbAlertDialogCancel>
-                                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                                </BbAlertDialogCancel>
-                                <BbAlertDialogAction>
-                                    <HoverButton Preset="HoverButtonPreset.Destructive"
-                                                 Icon="trash-2"
-                                                 Text="Delete key"
-                                                 OnClick="DeleteAsync"/>
-                                </BbAlertDialogAction>
-                            </BbAlertDialogFooter>
-                        </BbAlertDialogContent>
-                    </BbAlertDialog>
-                }
-                else if (_state == State.Failed)
-                {
-                    <HoverButton Preset="HoverButtonPreset.Destructive"
-                                 Icon="x"
-                                 Text="Failed"
-                                 Disabled="true"/>
-                }
-
-                @if (_apiKeyInput != _savedApiKey || _state != _savedState)
-                {
-                    <HoverButton Preset="HoverButtonPreset.Destructive"
-                                 Text="Cancel"
-                                 OnClick="CancelAsync"
-                                 Disabled="@(_state is State.Testing or State.Saving)"/>
-                }
-            </div>
-        </div>
-    </div>
-</div>
+    </ChildContent>
+</SettingsCard>
 
 @code {
 
