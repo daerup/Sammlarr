@@ -1,10 +1,15 @@
 @inherits LayoutComponentBase
 @implements IDisposable
+@using Contracts
 @using Contracts.Auth
 @using Contracts.DI
+@using Contracts.Settings
+@using UI.Shared.Services.Branding
 @inject IServiceScopeFactory ScopeFactory
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject MediaProviderBrandingService BrandingService
 
 <div class="relative min-h-screen flex flex-col">
     <header class="sticky top-0 z-50 w-full border-b bg-background">
@@ -42,38 +47,100 @@
 
                 <BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
                     <BbDropdownMenuTrigger>
-                        <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0">
-                            <BbAvatar Size="AvatarSize.Small" ShowDot="@_isAuthenticated" DotClass="bg-green-500">
-                                <BbAvatarImage Source="@_avatarUrl" Alt="@_username"/>
+                        <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0" AriaLabel="@(_user is not null ? $"Account menu, signed in as {_user.DisplayName}" : "Account menu, not signed in")">
+                            <BbAvatar Size="AvatarSize.Small" ShowDot="@(_user is not null)" DotClass="bg-green-500">
+                                <BbAvatarImage Source="@_user?.AvatarUrl" Alt="@_user?.DisplayName"/>
                                 <BbAvatarFallback>
                                     <LucideIcon Name="user" Size="16"/>
                                 </BbAvatarFallback>
                             </BbAvatar>
                         </BbButton>
                     </BbDropdownMenuTrigger>
-                    <BbDropdownMenuContent Align="PopoverAlign.End">
-                        @if (_isAuthenticated && _username is not null)
+                    <BbDropdownMenuContent Align="PopoverAlign.End" Class="p-0 overflow-hidden">
+                        @if (_branding is not null)
                         {
-                            <BbDropdownMenuLabel>@_username</BbDropdownMenuLabel>
-                        }
-                        else
-                        {
-                            <BbDropdownMenuLabel>Plex Account</BbDropdownMenuLabel>
-                        }
-                        <BbDropdownMenuSeparator/>
-                        @if (_isAuthenticated)
-                        {
-                            <BbDropdownMenuItem OnClick="DisconnectAsync" Class="text-destructive focus:text-destructive">
-                                <LucideIcon Name="log-out" Size="16" Class="mr-2"/>
-                                Disconnect
-                            </BbDropdownMenuItem>
-                        }
-                        else
-                        {
-                            <BbDropdownMenuItem OnClick="InitiateAuthAsync" Disabled="@_isProcessing">
-                                <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
-                                @(_isProcessing ? "Connecting…" : "Sign in with Plex")
-                            </BbDropdownMenuItem>
+                            var brand = _branding.BrandColor;
+                            var headerStyle = $"background: linear-gradient(180deg, {brand}1F 0%, {brand}08 60%, transparent 100%);";
+                            var brandChipStyle = $"background-color: {brand}24; color: {brand};";
+                            var brandTextStyle = $"color: {brand};";
+                            var brandVar = $"--brand: {brand};";
+                        <div class="relative" style="width: 17rem;">
+                            @if (_user is not null)
+                            {
+                                <div class="absolute top-3 right-3 z-10 inline-flex items-center gap-2">
+                                    <span class="inline-flex items-center leading-none" style="@brandVar">
+                                        <BbBadge Variant="BadgeVariant.Outline" Class="brand-badge text-[10px] leading-none px-1.5 py-0.5">
+                                            @_user.SubscriptionDescription
+                                        </BbBadge>
+                                    </span>
+                                    <a href="@_user.AccountUrl" target="_blank" rel="noopener noreferrer"
+                                       class="text-muted-foreground/60 hover:text-foreground transition-colors"
+                                       aria-label="@($"Open {_branding.NickName} account in new tab")">
+                                        <LucideIcon Name="external-link" Size="14"/>
+                                    </a>
+                                </div>
+                            }
+                        <div class="px-4 py-4 border-b border-border/60" style="@headerStyle">
+                            @if (_user is not null)
+                            {
+                                <div class="flex items-center gap-3">
+                                    <BbAvatar Size="AvatarSize.Large" Class="avatar-rect">
+                                        <BbAvatarImage Source="@_user.AvatarUrl" Alt="@_user.DisplayName"/>
+                                        <BbAvatarFallback>
+                                            <LucideIcon Name="user-round" Size="20"/>
+                                        </BbAvatarFallback>
+                                    </BbAvatar>
+                                    <div class="flex min-w-0 flex-1 flex-col gap-1">
+                                        <span class="text-sm font-semibold truncate">@_user.DisplayName</span>
+                                        <span class="text-xs text-muted-foreground truncate">@_user.Email</span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style="@brandChipStyle">
+                                        <span class="inline-flex size-6 items-center justify-center">@_branding.Icon</span>
+                                    </div>
+                                    <div class="flex min-w-0 flex-1 flex-col gap-1">
+                                        <span class="text-sm font-semibold">Connect your @_branding.NickName Account</span>
+                                        <span class="text-xs text-muted-foreground">Sign in to get started</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="p-2">
+                            @if (_user is not null)
+                            {
+                                <div class="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
+                                    <LucideIcon Name="calendar" Size="12"/>
+                                    <span>Member since @_user.JoinedAt.ToString("MMMM yyyy")</span>
+                                </div>
+                                <BbDropdownMenuSeparator Class="my-1"/>
+                                <BbDropdownMenuItem OnClick="DisconnectAsync" Class="dropdown-item-danger">
+                                    <LucideIcon Name="log-out" Size="16" Class="mr-2"/>
+                                    Sign out
+                                </BbDropdownMenuItem>
+                            }
+                            else
+                            {
+                                <BbDropdownMenuItem OnClick="InitiateAuthAsync" Disabled="@_isProcessing" Class="font-medium">
+                                    <span class="inline-flex items-center" style="@brandTextStyle">
+                                        @if (_isProcessing)
+                                        {
+                                            <LucideIcon Name="loader-circle" Size="16" Class="mr-2 animate-spin"/>
+                                            <span>Connecting…</span>
+                                        }
+                                        else
+                                        {
+                                            <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
+                                            <span>Sign in with @_branding.NickName</span>
+                                        }
+                                    </span>
+                                </BbDropdownMenuItem>
+                            }
+                        </div>
+                        </div>
                         }
                     </BbDropdownMenuContent>
                 </BbDropdownMenu>
@@ -100,13 +167,13 @@
 
 @code {
     private readonly CancellationTokenSource _disposeCts = new();
-    private string? _avatarUrl;
 
-    private bool _isAuthenticated;
+    private AuthUserInfo? _user;
     private bool _isDisposed;
     private bool _isProcessing;
     private bool _isProfileDropdownOpen;
-    private string? _username;
+    private WatchlistProvider _watchlistProvider = WatchlistProvider.Plex;
+    private BrandingInfo? _branding;
 
     public void Dispose()
     {
@@ -156,28 +223,27 @@
 
     private async Task RefreshAuthStatusAsync(CancellationToken cancellationToken = default)
     {
+        var providerConfig = await ProviderConfigRepository.GetAsync(cancellationToken);
+        _watchlistProvider = providerConfig.WatchlistProvider;
+        _branding = BrandingService.GetBrandingInfo(_watchlistProvider.AsMediaProvider());
+
         await using var scope = ScopeFactory.CreateAsyncScope();
         var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
         var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
-        var oauthService = oauthServiceIndex[WatchlistProvider.Plex];
+        var oauthService = oauthServiceIndex[_watchlistProvider];
 
-        var credential = await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken);
+        var credential = await credentialStore.GetAsync(_watchlistProvider, cancellationToken);
         if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
         {
-            _isAuthenticated = false;
-            _avatarUrl = null;
-            _username = null;
+            _user = null;
             return;
         }
 
-        var userInfo = await oauthService.GetLoggedInUser();
-        _isAuthenticated = userInfo is not null;
-        _avatarUrl = userInfo?.AvatarUrl;
-        _username = userInfo?.Username;
+        _user = await oauthService.GetLoggedInUser();
 
-        if (userInfo is null)
+        if (_user is null)
         {
-            await credentialStore.ClearAsync(WatchlistProvider.Plex, cancellationToken);
+            await credentialStore.ClearAsync(_watchlistProvider, cancellationToken);
         }
     }
 
@@ -188,7 +254,7 @@
         {
             await using var scope = ScopeFactory.CreateAsyncScope();
             var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
-            var oauthService = oauthServiceIndex[WatchlistProvider.Plex];
+            var oauthService = oauthServiceIndex[_watchlistProvider];
 
             var returnUrl = GetReturnUrlForOAuth();
             var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
@@ -222,7 +288,7 @@
     {
         await using var scope = ScopeFactory.CreateAsyncScope();
         var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
-        await credentialStore.ClearAsync(WatchlistProvider.Plex, _disposeCts.Token);
+        await credentialStore.ClearAsync(_watchlistProvider, _disposeCts.Token);
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 
