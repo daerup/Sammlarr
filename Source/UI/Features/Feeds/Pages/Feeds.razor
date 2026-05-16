@@ -29,7 +29,7 @@
                           FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
             @if (!_isLoading && _feeds.Count == 0)
             {
-                <div class="rounded-lg border bg-surface p-8 text-center space-y-4">
+                <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-4">
                     <LucideIcon Name="list-plus" Size="40" Class="mx-auto text-muted-foreground"/>
                     <p class="text-muted-foreground">Feeds let you sync titles from providers like MDBList or TMDb into your Sammlarr library
                         automatically.</p>
@@ -153,10 +153,10 @@
                                         <BbAlertDialogTrigger>
                                             <BbTooltip>
                                                 <BbTooltipTrigger>
-                                                    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Delete"
-                                                              Class="text-destructive hover:text-destructive">
-                                                        <LucideIcon Name="trash-2" Size="15"/>
-                                                    </BbButton>
+                                                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                                 Icon="trash-2"
+                                                                 Size="ButtonSize.Icon"
+                                                                 Border="false"/>
                                                 </BbTooltipTrigger>
                                                 <BbTooltipContent>Delete</BbTooltipContent>
                                             </BbTooltip>
@@ -173,7 +173,9 @@
                                                     <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
                                                 </BbAlertDialogCancel>
                                                 <BbAlertDialogAction>
-                                                    <BbButton Variant="ButtonVariant.Destructive" OnClick="@(() => DeleteFeedAsync(feed.Id))">Delete</BbButton>
+                                                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                                 Text="Delete"
+                                                                 OnClick="@(() => DeleteFeedAsync(feed.Id))"/>
                                                 </BbAlertDialogAction>
                                             </BbAlertDialogFooter>
                                         </BbAlertDialogContent>

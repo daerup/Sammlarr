@@ -58,9 +58,10 @@ else
             }
             else if (_items is not null && _items.Count == 0)
             {
-                <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
-                    <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
-                    <p class="text-muted-foreground">@EmptyStateMessage</p>
+                <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                    <LucideIcon Name="shield-off" Size="36" Class="mx-auto text-muted-foreground"/>
+                    <h3 class="text-base font-semibold tracking-tight">Nothing blacklisted.</h3>
+                    <p class="text-sm text-muted-foreground leading-relaxed">Add a title with <span class="font-medium text-foreground">Ctrl+K</span> to keep it out of your Watchlist.</p>
                 </div>
             }
             else if (_items is not null)

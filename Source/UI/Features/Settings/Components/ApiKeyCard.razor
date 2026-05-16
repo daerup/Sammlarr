@@ -85,21 +85,17 @@
                 }
                 else if (_state == State.Success)
                 {
-                    <BbButton Variant="ButtonVariant.Outline"
-                              Class="text-success border-success hover:bg-success"
-                              OnClick="HandleButtonClickAsync">
-                        <LucideIcon Name="save" Size="14" Class="mr-2"/>
-                        <span>Save</span>
-                    </BbButton>
+                    <HoverButton Preset="HoverButtonPreset.Success"
+                                 Icon="save"
+                                 Text="Save"
+                                 OnClick="HandleButtonClickAsync"/>
                 }
                 else if (_state == State.Saving)
                 {
-                    <BbButton Variant="ButtonVariant.Outline"
-                              Class="text-success border-success hover:bg-success"
-                              Disabled="true">
+                    <HoverButton Preset="HoverButtonPreset.Success" Disabled="true">
                         <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
                         <span>Saving…</span>
-                    </BbButton>
+                    </HoverButton>
                 }
                 else if (_state == State.Saved)
                 {
@@ -112,11 +108,9 @@
 
                     <BbAlertDialog>
                         <BbAlertDialogTrigger>
-                            <BbButton Variant="ButtonVariant.Outline"
-                                      Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
-                                <LucideIcon Name="trash-2" Size="14" Class="mr-2"/>
-                                <span>Delete key</span>
-                            </BbButton>
+                            <HoverButton Preset="HoverButtonPreset.Destructive"
+                                         Icon="trash-2"
+                                         Text="Delete key"/>
                         </BbAlertDialogTrigger>
                         <BbAlertDialogContent>
                             <BbAlertDialogHeader>
@@ -131,10 +125,10 @@
                                     <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
                                 </BbAlertDialogCancel>
                                 <BbAlertDialogAction>
-                                    <BbButton Variant="ButtonVariant.Destructive" OnClick="DeleteAsync">
-                                        <LucideIcon Name="trash-2" Size="14" Class="mr-2"/>
-                                        <span>Delete key</span>
-                                    </BbButton>
+                                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                 Icon="trash-2"
+                                                 Text="Delete key"
+                                                 OnClick="DeleteAsync"/>
                                 </BbAlertDialogAction>
                             </BbAlertDialogFooter>
                         </BbAlertDialogContent>
@@ -142,22 +136,18 @@
                 }
                 else if (_state == State.Failed)
                 {
-                    <BbButton Variant="ButtonVariant.Outline"
-                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                              Disabled="true">
-                        <LucideIcon Name="x" Size="14" Class="mr-2"/>
-                        <span>Failed</span>
-                    </BbButton>
+                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                 Icon="x"
+                                 Text="Failed"
+                                 Disabled="true"/>
                 }
 
                 @if (_apiKeyInput != _savedApiKey || _state != _savedState)
                 {
-                    <BbButton Variant="ButtonVariant.Outline"
-                              Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                              OnClick="CancelAsync"
-                              Disabled="@(_state is State.Testing or State.Saving)">
-                        Cancel
-                    </BbButton>
+                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                 Text="Cancel"
+                                 OnClick="CancelAsync"
+                                 Disabled="@(_state is State.Testing or State.Saving)"/>
                 }
             </div>
         </div>

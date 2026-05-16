@@ -1,0 +1,252 @@
+@implements IDisposable
+@using Contracts
+@using Contracts.Auth
+@using Contracts.DI
+@using Contracts.Settings
+@using Microsoft.AspNetCore.Components.Routing
+@using UI.Shared.Services.Branding
+@inject IServiceScopeFactory ScopeFactory
+@inject NavigationManager NavigationManager
+@inject ProfileDropdownService ProfileDropdownService
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject MediaProviderBrandingService BrandingService
+
+<BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
+    <BbDropdownMenuTrigger>
+        <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0"
+                  AriaLabel="@(_user is not null ? $"Account menu, signed in as {_user.DisplayName}" : "Account menu, not signed in")">
+            <BbAvatar Size="AvatarSize.Small" ShowDot="@(_user is not null)" DotClass="bg-green-500">
+                <BbAvatarImage Source="@_user?.AvatarUrl" Alt="@_user?.DisplayName"/>
+                <BbAvatarFallback>
+                    <LucideIcon Name="user" Size="16"/>
+                </BbAvatarFallback>
+            </BbAvatar>
+        </BbButton>
+    </BbDropdownMenuTrigger>
+    <BbDropdownMenuContent Align="PopoverAlign.End" Class="p-0 overflow-hidden">
+        @if (_branding is not null)
+        {
+            var brand = _branding.BrandColor;
+            var headerStyle = $"background: linear-gradient(180deg, {brand}1F 0%, {brand}08 60%, transparent 100%);";
+            var brandChipStyle = $"background-color: {brand}24; color: {brand};";
+            var brandVar = $"--brand: {brand};";
+
+            <div class="relative" style="width: 17rem;">
+                @if (_user is not null)
+                {
+                    <div class="absolute top-3 right-3 z-10 inline-flex items-center gap-2">
+                        @if (!string.IsNullOrWhiteSpace(_user.SubscriptionDescription))
+                        {
+                            <span class="inline-flex items-center leading-none" style="@brandVar">
+                                <BbBadge Variant="BadgeVariant.Outline" Class="brand-badge text-[10px] leading-none px-1.5 py-0.5">
+                                    @_user.SubscriptionDescription
+                                </BbBadge>
+                            </span>
+                        }
+                        <a href="@_user.AccountUrl" target="_blank" rel="noopener noreferrer"
+                           class="text-muted-foreground/60 hover:text-foreground transition-colors"
+                           aria-label="@($"Open {_branding.NickName} account in new tab")">
+                            <LucideIcon Name="external-link" Size="14"/>
+                        </a>
+                    </div>
+                }
+
+                <div class="px-4 py-4 border-b border-border/60" style="@headerStyle">
+                    @if (_user is not null)
+                    {
+                        <div class="flex items-center gap-3">
+                            <BbAvatar Size="AvatarSize.Large" Class="avatar-rect">
+                                <BbAvatarImage Source="@_user.AvatarUrl" Alt="@_user.DisplayName"/>
+                                <BbAvatarFallback>
+                                    <LucideIcon Name="user-round" Size="20"/>
+                                </BbAvatarFallback>
+                            </BbAvatar>
+                            <div class="flex min-w-0 flex-1 flex-col gap-1">
+                                <span class="text-sm font-semibold truncate">@_user.DisplayName</span>
+                                <span class="text-xs text-muted-foreground truncate">@_user.Email</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style="@brandChipStyle">
+                                <span class="inline-flex size-6 items-center justify-center">@_branding.Icon</span>
+                            </div>
+                            <div class="flex min-w-0 flex-1 flex-col gap-1">
+                                <span class="text-sm font-semibold">Connect your @_branding.NickName Account</span>
+                                <span class="text-xs text-muted-foreground">Sign in to get started</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="p-2">
+                    @if (_user is not null)
+                    {
+                        <div class="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
+                            <LucideIcon Name="calendar" Size="12"/>
+                            <span>Member since @_user.JoinedAt.ToString("MMMM yyyy")</span>
+                        </div>
+                        <BbDropdownMenuSeparator Class="my-1"/>
+                        <HoverButton Preset="HoverButtonPreset.Destructive"
+                                     Icon="log-out"
+                                     Text="Sign out"
+                                     OnClick="DisconnectAsync"
+                                     Border="false"
+                                     Class="w-full"/>
+                    }
+                    else
+                    {
+                        <HoverButton OnClick="InitiateAuthAsync" Disabled="@_isProcessing" Color="@brand" Class="font-medium w-full" Border="false">
+                            @if (_isProcessing)
+                            {
+                                <LucideIcon Name="loader-circle" Size="16" Class="mr-2 animate-spin"/>
+                                <span>Connecting…</span>
+                            }
+                            else
+                            {
+                                <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
+                                <span>Sign in with @_branding.NickName</span>
+                            }
+                        </HoverButton>
+                    }
+                </div>
+            </div>
+        }
+    </BbDropdownMenuContent>
+</BbDropdownMenu>
+
+@code {
+    private readonly CancellationTokenSource _disposeCts = new();
+
+    private AuthUserInfo? _user;
+    private bool _isDisposed;
+    private bool _isProcessing;
+    private bool _isProfileDropdownOpen;
+    private WatchlistProvider _watchlistProvider = WatchlistProvider.Plex;
+    private BrandingInfo? _branding;
+
+    public void Dispose()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        _isDisposed = true;
+        _disposeCts.Cancel();
+        _disposeCts.Dispose();
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+        ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
+    }
+
+    protected override async Task OnInitializedAsync() => await RefreshAuthStatusAsync();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            NavigationManager.LocationChanged += HandleLocationChanged;
+            ProfileDropdownService.OnOpenRequested += HandleProfileDropdownOpenRequestedAsync;
+
+            StateHasChanged();
+        }
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e) => _ = HandleLocationChangedAsync();
+
+    private async Task HandleLocationChangedAsync()
+    {
+        if (_isDisposed || _disposeCts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        await RefreshAuthStatusAsync(_disposeCts.Token);
+
+        if (_isDisposed || _disposeCts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RefreshAuthStatusAsync(CancellationToken cancellationToken = default)
+    {
+        var providerConfig = await ProviderConfigRepository.GetAsync(cancellationToken);
+        _watchlistProvider = providerConfig.WatchlistProvider;
+        _branding = BrandingService.GetBrandingInfo(_watchlistProvider.AsMediaProvider());
+
+        await using var scope = ScopeFactory.CreateAsyncScope();
+        var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
+        var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
+        var oauthService = oauthServiceIndex[_watchlistProvider];
+
+        var credential = await credentialStore.GetAsync(_watchlistProvider, cancellationToken);
+        if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
+        {
+            _user = null;
+            return;
+        }
+
+        _user = await oauthService.GetLoggedInUser();
+
+        if (_user is null)
+        {
+            await credentialStore.ClearAsync(_watchlistProvider, cancellationToken);
+        }
+    }
+
+    private async Task InitiateAuthAsync()
+    {
+        _isProcessing = true;
+        try
+        {
+            await using var scope = ScopeFactory.CreateAsyncScope();
+            var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
+            var oauthService = oauthServiceIndex[_watchlistProvider];
+
+            var returnUrl = GetReturnUrlForOAuth();
+            var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
+            var forwardUrl = NavigationManager.ToAbsoluteUri($"/plex-auth?pinId={{0}}&clientId={{1}}&returnUrl={escapedReturnUrl}").ToString();
+            var authUrl = await oauthService.GetOAuthUrl(forwardUrl, _disposeCts.Token);
+            NavigationManager.NavigateTo(authUrl, true);
+        }
+        catch
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private string GetReturnUrlForOAuth()
+    {
+        var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        if (string.IsNullOrWhiteSpace(relative))
+        {
+            return "/";
+        }
+
+        if (relative.StartsWith("plex-auth", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/";
+        }
+
+        return relative.StartsWith('/') ? relative : $"/{relative}";
+    }
+
+    private async Task DisconnectAsync()
+    {
+        await using var scope = ScopeFactory.CreateAsyncScope();
+        var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
+        await credentialStore.ClearAsync(_watchlistProvider, _disposeCts.Token);
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+
+    private async Task HandleProfileDropdownOpenRequestedAsync()
+    {
+        _isProfileDropdownOpen = true;
+        await InvokeAsync(StateHasChanged);
+    }
+}

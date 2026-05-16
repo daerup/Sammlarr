@@ -1,12 +1,18 @@
 .id-links-popover-header {
-    padding: 0.625rem 0.875rem 0.5rem;
+    padding: 0.75rem 0.875rem;
     font-size: 0.625rem;
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted-foreground);
-    opacity: 0.65;
-    border-bottom: 1px solid color-mix(in oklch, var(--border) 40%, transparent);
+    background:
+        linear-gradient(
+            90deg,
+            color-mix(in oklch, var(--foreground) 1%, transparent) 0%,
+            color-mix(in oklch, var(--foreground) 3%, transparent) 70%,
+            color-mix(in oklch, var(--foreground) 7%, transparent) 100%
+        );
+    border-bottom: 2px solid #09090b;
 }
 
 .id-links-popover-list {

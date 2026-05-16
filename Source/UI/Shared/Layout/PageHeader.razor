@@ -1,17 +1,17 @@
-<div class="flex flex-wrap items-start justify-between gap-3 @Class">
-    <div>
+<div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 @Class">
+    <div class="min-w-0">
         @if (Heading is not null)
         {
-            <h1 class="text-3xl font-bold tracking-wide antialiased">@Heading</h1>
+            <h1 class="text-3xl font-bold tracking-tight antialiased leading-none">@Heading</h1>
         }
         @if (Description is not null)
         {
-            <p class="text-muted-foreground mt-1 font-normal tracking-wide">@Description</p>
+            <p class="text-muted-foreground mt-2 text-sm leading-relaxed max-w-2xl">@Description</p>
         }
     </div>
     @if (Actions is not null)
     {
-        <div class="flex items-center gap-2">@Actions</div>
+        <div class="flex items-center gap-2 shrink-0">@Actions</div>
     }
 </div>
 

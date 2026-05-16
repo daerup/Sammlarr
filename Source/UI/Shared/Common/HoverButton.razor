@@ -1,0 +1,62 @@
+@using Microsoft.AspNetCore.Components.Web
+
+<BbButton Variant="ButtonVariant.Outline"
+          Class="@CssClass"
+          style="@(string.IsNullOrEmpty(Color) ? null : $"--tint: {Color};")"
+          OnClick="OnClick"
+          Disabled="@Disabled"
+          Size="@Size">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <LucideIcon Name="@Icon" Size="14" Class="@(HasTrailingContent ? "mr-2" : string.Empty)"/>
+    }
+    @if (!string.IsNullOrEmpty(Text))
+    {
+        <span>@Text</span>
+    }
+    @ChildContent
+</BbButton>
+
+@code {
+    [Parameter] public HoverButtonPreset Preset { get; set; } = HoverButtonPreset.Custom;
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Color { get; set; }
+    [Parameter] public bool Border { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Default;
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool HasTrailingContent => !string.IsNullOrEmpty(Text) || ChildContent is not null;
+
+    private string CssClass
+    {
+        get
+        {
+            var parts = new List<string> { "hover-button" };
+            switch (Preset)
+            {
+                case HoverButtonPreset.Destructive:
+                    parts.Add("hover-button--destructive");
+                    break;
+                case HoverButtonPreset.Success:
+                    parts.Add("hover-button--success");
+                    break;
+                case HoverButtonPreset.Custom:
+                    parts.Add("hover-button--custom");
+                    break;
+            }
+            if (!Border)
+            {
+                parts.Add("hover-button--borderless");
+            }
+            if (!string.IsNullOrEmpty(Class))
+            {
+                parts.Add(Class);
+            }
+            return string.Join(' ', parts);
+        }
+    }
+}

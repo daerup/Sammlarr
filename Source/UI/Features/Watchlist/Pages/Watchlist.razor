@@ -57,19 +57,23 @@ else
                 }
                 else if (!string.IsNullOrEmpty(_errorMessage))
                 {
-                    <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
-                        <p class="text-sm text-destructive font-medium">@_errorMessage</p>
-                        <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync">
-                            <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
-                            Retry
-                        </BbButton>
+                    <div class="rounded-lg border bg-destructive/10 border-destructive/30 p-5 flex items-start gap-3">
+                        <LucideIcon Name="circle-alert" Size="18" Class="text-destructive shrink-0 mt-0.5"/>
+                        <div class="flex-1 space-y-3">
+                            <p class="text-sm text-destructive font-medium">@_errorMessage</p>
+                            <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync">
+                                <LucideIcon Name="refresh-cw" Size="14" Class="mr-2"/>
+                                Retry
+                            </BbButton>
+                        </div>
                     </div>
                 }
                 else if (_items is not null && _items.Count == 0)
                 {
-                    <div class="rounded-lg border bg-surface p-8 text-center space-y-2">
-                        <LucideIcon Name="inbox" Size="40" class="mx-auto text-muted-foreground"/>
-                        <p class="text-muted-foreground">@EmptyStateMessage</p>
+                    <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                        <LucideIcon Name="inbox" Size="36" Class="mx-auto text-muted-foreground"/>
+                        <h3 class="text-base font-semibold tracking-tight">Nothing on your watchlist yet.</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">@EmptyStateMessage Browse trending or add a feed to get started</p>
                     </div>
                 }
                 else if (_items is not null)

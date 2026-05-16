@@ -10,8 +10,8 @@
 @import 'tailwindcss';
 
 /* Scan template files for utility classes */
-@source "../../Pages";
 @source "../../Shared";
+@source "../../Features";
 
 /* Container with responsive max-width */
 .container {

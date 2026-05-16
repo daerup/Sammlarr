@@ -7,10 +7,10 @@
 @inject LogCaptureService Capture
 @inject IJSRuntime JS
 
-<div class="w-full flex flex-col gap-2" style="height: calc(100vh - 220px); min-height: 480px;">
+<div class="w-full flex flex-col gap-3" style="height: calc(100vh - 230px); min-height: 480px;">
     <div>
-        <h2 class="text-lg font-semibold tracking-wide">Live log stream</h2>
-        <p class="text-muted-foreground mt-2 text-sm leading-relaxed">
+        <h2 class="text-lg font-semibold tracking-tight">Live log stream</h2>
+        <p class="text-muted-foreground mt-1 text-sm leading-relaxed max-w-2xl">
             In-memory capture that runs independently of the configured logging pipeline. Mirrors the format used by the console exporter.
         </p>
     </div>
@@ -39,10 +39,10 @@
         }
         else
         {
-            <BbButton Variant="ButtonVariant.Destructive" OnClick="HandleStop">
-                <LucideIcon Name="square" Size="14" Class="mr-1.5"/>
-                Stop
-            </BbButton>
+            <HoverButton Preset="HoverButtonPreset.Destructive"
+                         Icon="square"
+                         Text="Stop"
+                         OnClick="HandleStop"/>
         }
 
         @if (Capture.IsCapturing && !Capture.IsPaused)
