@@ -1,3 +1,3 @@
 namespace Contracts.Auth;
 
-public record AuthUserInfo(string Username, string? AvatarUrl);
+public record AuthUserInfo(string DisplayName, string AvatarUrl, string Email, string SubscriptionDescription, DateTimeOffset JoinedAt, string AccountUrl);

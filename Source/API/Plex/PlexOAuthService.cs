@@ -64,7 +64,21 @@ internal class PlexOAuthService(
 			return null;
 		}
 
-		return new AuthUserInfo(string.IsNullOrWhiteSpace(user.Title) ? user.Username : user.Title, user.Thumb);
+		var displayName =
+			!string.IsNullOrWhiteSpace(user.FriendlyName) ? user.FriendlyName
+			: !string.IsNullOrWhiteSpace(user.Title) ? user.Title
+			: user.Username;
+
+		var joinedAt = user.JoinedAt is { } seconds ? DateTimeOffset.FromUnixTimeSeconds(seconds) : default;
+		var subscriptionDescription = user.Subscription?.Active == true ? user.SubscriptionDescription ?? string.Empty : string.Empty;
+		return new AuthUserInfo(
+			DisplayName: displayName,
+			AvatarUrl: user.Thumb ?? string.Empty,
+			Email: user.Email ?? string.Empty,
+			SubscriptionDescription: subscriptionDescription,
+			JoinedAt: joinedAt,
+			AccountUrl: "https://watch.plex.tv/de/account/profile"
+		);
 	}
 
 	private async Task<string> AuthenticateAsync(string forwardUrl, CancellationToken cancellationToken = default)

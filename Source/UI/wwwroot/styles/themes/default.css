@@ -232,6 +232,30 @@ body:has(.error-dialog) .fixed.inset-0.z-50.bg-black\/80 {
     color: color-mix(in oklch, var(--brand) 90%, white);
 }
 
+/* Brand-filled badge for subscription/status pills inside the profile popover */
+.brand-badge {
+    background-color: color-mix(in oklch, var(--brand) 18%, transparent) !important;
+    border-color: color-mix(in oklch, var(--brand) 55%, transparent) !important;
+    color: var(--brand) !important;
+}
+
+/* Sign-out dropdown item: full destructive bg on hover/focus (BB uses :hover/:focus on menu items) */
+.dropdown-item-danger {
+    color: var(--destructive);
+}
+.dropdown-item-danger:hover,
+.dropdown-item-danger:focus {
+    background-color: var(--destructive) !important;
+    color: var(--destructive-foreground) !important;
+}
+
+/* Rectangular avatar (override BbAvatar's default rounded-full for profile popover) */
+.avatar-rect,
+.avatar-rect img,
+.avatar-rect > span {
+    border-radius: 0.75rem !important;
+}
+
 /* MediaTitleLink popover — rendered via BbPopover portal, so cannot live in scoped CSS */
 .id-links-popover {
     background: var(--card);

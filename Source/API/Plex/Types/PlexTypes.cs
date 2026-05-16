@@ -141,7 +141,18 @@ internal static class PlexTypes
 		public record Root(
 			[property: JsonPropertyName("username")] string Username,
 			[property: JsonPropertyName("title")] string Title,
-			[property: JsonPropertyName("thumb")] string? Thumb
+			[property: JsonPropertyName("thumb")] string? Thumb,
+			[property: JsonPropertyName("email")] string? Email,
+			[property: JsonPropertyName("friendlyName")] string? FriendlyName,
+			[property: JsonPropertyName("subscriptionDescription")] string? SubscriptionDescription,
+			[property: JsonPropertyName("subscription")] Subscription? Subscription,
+			[property: JsonPropertyName("joinedAt")] long? JoinedAt
+		);
+
+		public record Subscription(
+			[property: JsonPropertyName("active")] bool Active,
+			[property: JsonPropertyName("status")] string? Status,
+			[property: JsonPropertyName("plan")] string? Plan
 		);
 	}
 }
