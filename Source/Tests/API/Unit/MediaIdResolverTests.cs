@@ -53,6 +53,40 @@ public class MediaIdResolverTests
 		await Assert.That(deps.Cache.SetWithTtlCalls).IsEqualTo(0);
 	}
 
+	[Test]
+	public async Task ResolveAsync_WhenCacheHitAndCandidatesContainNewIds_AppendsAndIncludesInResponse()
+	{
+		var tmdbId = TmdbId.From("123", MediaType.Movie);
+		var tvdbId = TvdbId.From("999", MediaType.Movie);
+		var newImdbId = ImdbId.From("tt0123", MediaType.Movie);
+		var (testee, deps) = CreateTestee(cachedIds: [tmdbId, tvdbId]);
+
+		var result = await testee.ResolveAsync([tmdbId, newImdbId], MediaProvider.Tvdb, new None());
+
+		await Assert
+			.That(result)
+			.IsOfUnionType<ConversionResult, Resolved>()
+			.And.Multiple(async resolved =>
+			{
+				await Assert.That(resolved.Id).IsEqualTo(tvdbId);
+				await Assert.That(resolved.AdditionalIds).Contains<IMediaId>(newImdbId);
+				await Assert.That(resolved.AdditionalIds).Contains<IMediaId>(tmdbId);
+			});
+		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenCacheHitAndCandidatesAllKnown_DoesNotUpsert()
+	{
+		var tmdbId = TmdbId.From("123", MediaType.Movie);
+		var tvdbId = TvdbId.From("999", MediaType.Movie);
+		var (testee, deps) = CreateTestee(cachedIds: [tmdbId, tvdbId]);
+
+		await testee.ResolveAsync([tmdbId], MediaProvider.Tvdb, new None());
+
+		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Never);
+	}
+
 	private static (MediaIdResolver Testee, Dependencies Deps) CreateTestee(IReadOnlyList<IMediaId>? cachedIds = null)
 	{
 		var repo = IMediaIdGroupRepository.Mock();

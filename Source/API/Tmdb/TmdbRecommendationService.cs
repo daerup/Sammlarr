@@ -66,7 +66,7 @@ internal class TmdbRecommendationService(
 		{
 			return new UnresolvedTrendingMedia
 			{
-				SourceId = response.TmdbId,
+				Ids = [response.TmdbId],
 				MediaType = response.MediaType,
 				Title = response.DisplayTitle,
 				Description = response.Overview,
@@ -79,8 +79,7 @@ internal class TmdbRecommendationService(
 
 		return new TrendingMedia
 		{
-			SourceId = response.TmdbId,
-			WatchlistProviderId = resolved.Id,
+			Ids = resolved.AllIds.ToList(),
 			MediaType = response.MediaType,
 			Title = response.DisplayTitle,
 			Description = response.Overview,

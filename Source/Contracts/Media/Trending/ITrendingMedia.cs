@@ -2,7 +2,7 @@ namespace Contracts.Media.Trending;
 
 public interface ITrendingMedia
 {
-	IMediaId SourceId { get; }
+	IReadOnlyList<IMediaId> Ids { get; }
 	MediaType MediaType { get; }
 	string Title { get; }
 	string Description { get; }

@@ -2,8 +2,7 @@ namespace Contracts.Media.Trending;
 
 public record TrendingMedia : ITrendingMedia
 {
-	public required IMediaId SourceId { get; init; }
-	public required IMediaId WatchlistProviderId { get; init; }
+	public required IReadOnlyList<IMediaId> Ids { get; init; }
 	public required MediaType MediaType { get; init; }
 	public required string Title { get; init; }
 	public required string Description { get; init; }

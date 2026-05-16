@@ -97,7 +97,7 @@
                   Rating="@(_selectedMedia?.Rating)"
                   ShowMetadataRow="true"
                   Description="@_selectedMedia?.Description"
-                  Ids="@(_selectedMedia is null ? null : [_selectedMedia.SourceId])"
+                  Ids="@(_selectedMedia?.Ids)"
                   ButtonAction="ToggleWatchlistAsync"
                   ButtonText="GetSideMenuButtonText"
                   ButtonIcon="GetSideMenuButtonIcon"
@@ -280,7 +280,9 @@
         Dispose();
     }
 
-    private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && IsInWatchlist(resolved.WatchlistProviderId);
+    private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && IsInWatchlist(GetWatchlistProviderId(resolved));
+
+    private IMediaId GetWatchlistProviderId(TrendingMedia media) => media.Ids.Single(id => id.Source == _providerConfig.WatchlistProvider.AsMediaProvider());
 
     private bool IsInWatchlist(IMediaId mediaId)
     {
@@ -362,33 +364,32 @@
 
     private async Task ToggleWatchlistAsync()
     {
-        if (_selectedMedia is not TrendingMedia resolved ||
-            resolved.WatchlistProviderId.Source != _providerConfig.WatchlistProvider.AsMediaProvider())
+        if (_selectedMedia is not TrendingMedia resolved)
         {
             return;
         }
 
+        var watchlistId = GetWatchlistProviderId(resolved);
         bool success;
 
         if (IsInWatchlist(resolved))
         {
-            success = await WatchlistService.RemoveFromWatchlistAsync(resolved.WatchlistProviderId);
+            success = await WatchlistService.RemoveFromWatchlistAsync(watchlistId);
             if (success)
             {
-                _watchlistedIds.Remove(resolved.WatchlistProviderId.Value);
+                _watchlistedIds.Remove(watchlistId.Value);
                 _isSheetOpen = false;
             }
         }
         else
         {
-            success = await WatchlistService.AddToWatchlistAsync(resolved.WatchlistProviderId);
+            success = await WatchlistService.AddToWatchlistAsync(watchlistId);
             if (success)
             {
-                _watchlistedIds.Add(resolved.WatchlistProviderId.Value);
+                _watchlistedIds.Add(watchlistId.Value);
                 _isSheetOpen = false;
             }
         }
-
     }
 
     private Task DetailsOpenChangedAsync(bool isOpen)
