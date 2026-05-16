@@ -5,17 +5,14 @@
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 @inject MediaProviderBrandingService MediaProviderBrandingService
-
-@{
-    var providerBranding = MediaProviderBrandingService.GetBrandingInfo(Provider);
-}
+@inject Notifier Notifier
 
 <div class="w-full max-w-lg">
     <div class="rounded-lg border bg-card overflow-hidden">
         <div class="flex items-center gap-3 px-6 py-4"
-             style="@($"background: linear-gradient(90deg, color-mix(in oklch, {providerBranding.BrandColor} 26%, transparent) 0%, color-mix(in oklch, {providerBranding.BrandColor} 22%, transparent) 55%, color-mix(in oklch, {providerBranding.BrandColor} 12%, transparent) 100%); border-bottom: 2px solid {providerBranding.BrandColor};")">
-            @providerBranding.Icon
-            <h3 class="text-sm font-semibold">@providerBranding.DisplayName</h3>
+             style="@($"background: linear-gradient(90deg, color-mix(in oklch, {Branding.BrandColor} 26%, transparent) 0%, color-mix(in oklch, {Branding.BrandColor} 22%, transparent) 55%, color-mix(in oklch, {Branding.BrandColor} 12%, transparent) 100%); border-bottom: 2px solid {Branding.BrandColor};")">
+            @Branding.Icon
+            <h3 class="text-sm font-semibold">@Branding.DisplayName</h3>
             @if (_state == State.Failed || _savedState == State.Failed)
             {
                 <BbBadge Variant="BadgeVariant.Destructive" Class="ml-auto gap-1.5">
@@ -116,7 +113,7 @@
                             <BbAlertDialogHeader>
                                 <BbAlertDialogTitle>Delete API key?</BbAlertDialogTitle>
                                 <BbAlertDialogDescription>
-                                    This will permanently remove the saved API key for @providerBranding.DisplayName.
+                                    This will permanently remove the saved API key for @Branding.DisplayName.
                                     You will need to re-enter it to use this provider again.
                                 </BbAlertDialogDescription>
                             </BbAlertDialogHeader>
@@ -163,6 +160,8 @@
 
     [Parameter] [EditorRequired]
     public required RenderFragment Description { get; set; }
+
+    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider);
 
     private string _apiKeyInput = string.Empty;
     private string _savedApiKey = string.Empty;
@@ -222,8 +221,9 @@
             var ok = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_apiKeyInput);
             _state = ok ? State.Success : State.Failed;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Notifier.Error(ex, $"Failed to test {Branding.DisplayName} API key");
             _state = State.Failed;
         }
     }

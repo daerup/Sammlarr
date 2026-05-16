@@ -12,6 +12,7 @@
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
+@inject Notifier Notifier
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -187,6 +188,7 @@ else
         }
         catch (Exception ex)
         {
+            Notifier.Error(ex, "Failed to load watchlist");
             _errorMessage = $"Failed to load watchlist: {ex.Message}";
         }
         finally

@@ -10,6 +10,7 @@
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject ProfileDropdownService ProfileDropdownService
+@inject Notifier Notifier
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -280,8 +281,9 @@
             NavigationManager.NavigateTo("/feeds");
         }
         catch (OperationCanceledException) {}
-        catch (Exception)
+        catch (Exception ex)
         {
+            Notifier.Error(ex, "Failed to save feed");
             _isSaving = false;
         }
     }

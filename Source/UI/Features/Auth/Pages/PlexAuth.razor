@@ -5,6 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject ICredentialStore CredentialStore
 @inject IKeyedServiceIndex<WatchlistProvider, IOAuthService> OAuthServiceIndex
+@inject Notifier Notifier
 
 <PageTitle>Connecting to Plex…</PageTitle>
 
@@ -102,6 +103,7 @@
         }
         catch (Exception ex)
         {
+            Notifier.Error(ex, "Failed to complete sign-in");
             _errorMessage = $"Failed to complete sign-in: {ex.Message}";
         }
     }
