@@ -7,6 +7,4 @@ public interface IMediaIdGroupRepository
 	Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default);
 
 	Task UpsertAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default);
-
-	Task AppendAsync(IMediaId existingId, IEnumerable<IMediaId> newIds, CancellationToken cancellationToken = default);
 }

@@ -76,30 +76,6 @@ internal class MediaIdGroupRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task AppendAsync(IMediaId existingId, IEnumerable<IMediaId> newIds, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var mediaIdGroup = (
-			await ctx
-				.MediaIdEntries.Include(entry => entry.MediaIdGroupEntity)
-					.ThenInclude(group => group.MediaIdEntries)
-				.SingleAsync(MediaIdentifierGroupEntryExpressions.MatchesId(existingId), cancellationToken)
-		).MediaIdGroupEntity;
-
-		var storedIdentifiers = mediaIdGroup.MediaIdEntries.Select(x => x.Identifier).ToList();
-		var appendCandidates = newIds.Select(MediaIdentifier.From).Except(storedIdentifiers).ToList();
-		if (appendCandidates.Count is 0)
-		{
-			return;
-		}
-
-		ValidateSingleMediaType(appendCandidates.Concat(storedIdentifiers));
-
-		var toAdd = appendCandidates.ToIdentifierEntries(mediaIdGroup);
-		await ctx.MediaIdEntries.AddRangeAsync(toAdd, cancellationToken);
-		await ctx.SaveChangesAsync(cancellationToken);
-	}
-
 	private static void ValidateSingleMediaType(IEnumerable<MediaIdentifier> identifiers)
 	{
 		if (identifiers.Select(identifier => identifier.MediaType).Distinct().Take(2).Count() > 1)

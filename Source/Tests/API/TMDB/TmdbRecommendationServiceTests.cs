@@ -30,8 +30,43 @@ public class TmdbRecommendationServiceTests
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<TrendingMedia>();
-		await Assert.That(((TrendingMedia)result.Items[0]).WatchlistProviderId).IsEqualTo<IMediaId>(watchlistTargetId);
+		await Assert.That(result.Items[0].Ids).Contains<IMediaId>(watchlistTargetId);
 		await Assert.That(result.Items[0].Title).IsEqualTo("Resolved Movie");
+	}
+
+	[Test]
+	public async Task GetTrendingAsync_WhenItemResolves_IncludesSourceAndResolvedIds()
+	{
+		var sourceTmdbId = TmdbId.From("42", MediaType.Movie);
+		var plexId = PlexId.From("plex-42", MediaType.Movie);
+		var imdbId = ImdbId.From("tt0042", MediaType.Movie);
+		var json = BuildTrendingJson(id: 42, mediaType: "movie", title: "Resolved Movie");
+		var resolver = IMediaIdResolver.Mock();
+		resolver
+			.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
+			.Returns(new Resolved(plexId, [imdbId]));
+		var testee = CreateTestee(json, resolver);
+
+		var result = await testee.GetTrendingAsync(page: 1);
+
+		await Assert.That(result.Items[0].Ids).IsEquivalentTo<IMediaId>([sourceTmdbId, plexId, imdbId]);
+	}
+
+	[Test]
+	public async Task GetTrendingAsync_WhenResolvedAdditionalIdsContainSource_DedupesIds()
+	{
+		var sourceTmdbId = TmdbId.From("42", MediaType.Movie);
+		var plexId = PlexId.From("plex-42", MediaType.Movie);
+		var json = BuildTrendingJson(id: 42, mediaType: "movie", title: "Resolved Movie");
+		var resolver = IMediaIdResolver.Mock();
+		resolver
+			.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
+			.Returns(new Resolved(plexId, [sourceTmdbId]));
+		var testee = CreateTestee(json, resolver);
+
+		var result = await testee.GetTrendingAsync(page: 1);
+
+		await Assert.That(result.Items[0].Ids).IsEquivalentTo<IMediaId>([sourceTmdbId, plexId]);
 	}
 
 	[Test]
@@ -46,7 +81,7 @@ public class TmdbRecommendationServiceTests
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<UnresolvedTrendingMedia>();
-		await Assert.That(result.Items[0].SourceId).IsEqualTo<IMediaId>(TmdbId.From("99", MediaType.Movie));
+		await Assert.That(result.Items[0].Ids).IsEquivalentTo<IMediaId>([TmdbId.From("99", MediaType.Movie)]);
 		await Assert.That(result.Items[0].Title).IsEqualTo("Unmatched Movie");
 	}
 

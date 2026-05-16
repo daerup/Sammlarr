@@ -34,6 +34,7 @@ internal class MediaIdResolver(
 		var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
 		if (cachedTarget is not null)
 		{
+			await MergeNewCandidatesAsync(cachedIds, candidates, cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Hit, target);
 			return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
 		}
@@ -72,6 +73,18 @@ internal class MediaIdResolver(
 		unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
 		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
 		return conversionResult;
+	}
+
+	private async ValueTask MergeNewCandidatesAsync(List<IMediaId> cachedIds, IEnumerable<IMediaId> candidates, CancellationToken cancellationToken)
+	{
+		var missing = candidates.Except(cachedIds).ToList();
+		if (missing.Count == 0)
+		{
+			return;
+		}
+
+		await mediaIdGroupRepository.UpsertAsync(cachedIds.Concat(missing), cancellationToken);
+		cachedIds.AddRange(missing);
 	}
 
 	private static string BuildUnresolvedKey(IEnumerable<IMediaId> candidates, MediaProvider target)
