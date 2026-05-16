@@ -37,23 +37,19 @@
         }
         else if (ShowSaveButton)
         {
-            <BbButton Variant="ButtonVariant.Outline"
-                      Class="text-success border-success hover:bg-success"
-                      OnClick="HandleSaveAsync"
-                      Disabled="!CanSave">
-                <LucideIcon Name="save" Size="14" Class="mr-2"/>
-                Save
-            </BbButton>
+            <HoverButton Preset="HoverButtonPreset.Success"
+                         Icon="save"
+                         Text="Save"
+                         OnClick="HandleSaveAsync"
+                         Disabled="!CanSave"/>
         }
         else if (_previewStatus.HasFailed)
         {
-            <BbButton Variant="ButtonVariant.Outline"
-                      Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                      OnClick="() => ApplyAsync()"
-                      Disabled="!_config.IsTestable">
-                <LucideIcon Name="rotate-cw" Size="14" Class="mr-2"/>
-                Retry
-            </BbButton>
+            <HoverButton Preset="HoverButtonPreset.Destructive"
+                         Icon="rotate-cw"
+                         Text="Retry"
+                         OnClick="() => ApplyAsync()"
+                         Disabled="!_config.IsTestable"/>
         }
         else if (ShowTestButton)
         {
@@ -65,12 +61,10 @@
             </BbButton>
         }
 
-        <BbButton Variant="ButtonVariant.Outline"
-                  Class="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive"
-                  OnClick="ReturnAsync"
-                  Disabled="@(_previewStatus.IsLoading || _isSaving)">
-            Cancel
-        </BbButton>
+        <HoverButton Preset="HoverButtonPreset.Destructive"
+                     Text="Cancel"
+                     OnClick="ReturnAsync"
+                     Disabled="@(_previewStatus.IsLoading || _isSaving)"/>
     </HeaderActions>
     <ChildContent>
         <ProtectedSection GuardState="IsOAuthAllowed"

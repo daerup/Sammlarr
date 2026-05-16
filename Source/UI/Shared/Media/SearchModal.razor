@@ -3,6 +3,7 @@
 @using Contracts.Media.Search
 @using global::Shared
 @inject IKeyedServiceIndex<MediaSearchProvider, IMediaSearchService> SearchServiceIndex
+@inject Notifier Notifier
 @if (IsOpen)
 {
     <div class="search-modal"
@@ -56,11 +57,11 @@
                     </BbButton>
                 </div>
 
-                @if (!string.IsNullOrWhiteSpace(_searchStatusMessage))
+                @if (!string.IsNullOrWhiteSpace(_searchHint))
                 {
-                    <div
-                        class="rounded-lg p-3 text-sm @(_isSearchStatusError ? "text-destructive border-destructive/30 bg-destructive/10" : "text-muted-foreground bg-surface")">
-                        @_searchStatusMessage
+                    <div class="rounded-lg border bg-muted/40 px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground">
+                        <LucideIcon Name="info" Size="16" Class="shrink-0"/>
+                        <span>@_searchHint</span>
                     </div>
                 }
 
@@ -68,6 +69,14 @@
                 {
                     <div class="search-modal-results space-y-2 pr-1" aria-hidden="true" tabindex="-1">
                         <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="4"/>
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(_searchError))
+                {
+                    <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                        <LucideIcon Name="circle-alert" Size="36" Class="mx-auto text-destructive"/>
+                        <h3 class="text-base font-semibold tracking-tight">Search failed.</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed break-words">@_searchError</p>
                     </div>
                 }
                 else if (_searchResults.Count > 0)
@@ -88,11 +97,12 @@
                     </div>
                     <BbSeparator/>
                 }
-                else if (!_isSearching && _hasSearched)
+                else if (_hasSearched)
                 {
-                    <div class="rounded-lg bg-surface p-6 text-center space-y-2">
-                        <LucideIcon Name="search-x" Size="28" Class="mx-auto text-muted-foreground"/>
-                        <p class="text-sm text-muted-foreground">No matches found.</p>
+                    <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                        <LucideIcon Name="search-x" Size="36" Class="mx-auto text-muted-foreground"/>
+                        <h3 class="text-base font-semibold tracking-tight">No matches found.</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Try a different title or check your spelling.</p>
                     </div>
                 }
             </div>
@@ -117,8 +127,8 @@
     private bool _hasSearched;
     private bool _isAdding;
     private string? _searchQuery = string.Empty;
-    private string? _searchStatusMessage;
-    private bool _isSearchStatusError;
+    private string? _searchHint;
+    private string? _searchError;
     private IMediaId? _activeToggledSourceId;
     private List<IMediaDetailResult> _searchResults = [];
     private ElementReference _searchInputRef;
@@ -186,18 +196,18 @@
     private async Task SearchAsync()
     {
         var query = _searchQuery?.Trim();
+        _searchHint = null;
+        _searchError = null;
+
         if (string.IsNullOrWhiteSpace(query))
         {
-            _searchStatusMessage = "Enter a title to search.";
-            _isSearchStatusError = true;
+            _searchHint = "Enter a title to search.";
             _searchResults = [];
             _hasSearched = false;
             return;
         }
 
         _isSearching = true;
-        _searchStatusMessage = null;
-        _isSearchStatusError = false;
 
         try
         {
@@ -208,8 +218,8 @@
         }
         catch (Exception ex)
         {
-            _searchStatusMessage = $"Search failed: {ex.Message}";
-            _isSearchStatusError = true;
+            Notifier.Error(ex, "Search failed");
+            _searchError = ex.Message;
             _searchResults = [];
             _hasSearched = false;
         }
@@ -228,8 +238,8 @@
 
         _isAdding = true;
         _activeToggledSourceId = result.SourceId;
-        _searchStatusMessage = null;
-        _isSearchStatusError = false;
+        _searchHint = null;
+        _searchError = null;
 
         var isMarked = IsSearchResultMarked(result);
         await OnToggle(result.SourceId, result.Title, isMarked);

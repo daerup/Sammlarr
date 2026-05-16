@@ -170,14 +170,14 @@
 .media-title-trigger svg.media-title-icon {
     display: inline-block;
     vertical-align: baseline;
-    margin-left: 0.25rem;
+    margin-left: 0.5rem;
     color: var(--muted-foreground);
 }
 
 .media-title-trigger:has(.truncate) {
     display: inline-flex;
     align-items: center;
-    column-gap: 0.25rem;
+    column-gap: 0.5rem;
     min-width: 0;
     max-width: 100%;
 }
@@ -226,6 +226,11 @@ body:has(.error-dialog) .fixed.inset-0.z-50.bg-black\/80 {
     -webkit-backdrop-filter: blur(4px);
 }
 
+/* When the error dialog is mounted, drop the search modal under BB's dialog overlay (z-50) so the exception details take precedence over a still-open search modal. */
+body:has(.error-dialog) .search-modal {
+    z-index: 40;
+}
+
 /* Provider settings pill — BbBadge has no Style param, so use a CSS variable cascade */
 .provider-pill {
     border-color: color-mix(in oklch, var(--brand) 60%, transparent) !important;
@@ -239,14 +244,40 @@ body:has(.error-dialog) .fixed.inset-0.z-50.bg-black\/80 {
     color: var(--brand) !important;
 }
 
-/* Sign-out dropdown item: full destructive bg on hover/focus (BB uses :hover/:focus on menu items) */
-.dropdown-item-danger {
-    color: var(--destructive);
+/* HoverButton — ghost by default in --tint, fills with --tint on hover/focus. Chroma is reduced ~35% via oklch-from so the tint reads as a tone, not a shout. Pair with a preset modifier (.hover-button--destructive, .hover-button--success) or set --tint inline for the Custom preset. Lives in the global theme (not the component's scoped CSS) because BbButton renders the actual button element, so HoverButton's scope attribute never lands on it. */
+.hover-button {
+    background-color: transparent !important;
+    color: oklch(from var(--tint) l calc(c * 0.65) h) !important;
+    border: 1px solid oklch(from var(--tint) l calc(c * 0.65) h) !important;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
-.dropdown-item-danger:hover,
-.dropdown-item-danger:focus {
-    background-color: var(--destructive) !important;
-    color: var(--destructive-foreground) !important;
+.hover-button:hover,
+.hover-button:focus,
+.hover-button:focus-visible {
+    background-color: oklch(from var(--tint) l calc(c * 0.65) h) !important;
+    color: var(--tint-foreground, white) !important;
+    border-color: oklch(from var(--tint) l calc(c * 0.65) h) !important;
+}
+.hover-button:disabled,
+.hover-button[aria-disabled="true"] {
+    opacity: 0.5;
+}
+.hover-button--destructive {
+    --tint: var(--destructive);
+    --tint-foreground: var(--destructive-foreground);
+}
+.hover-button--success {
+    --tint: var(--alert-success);
+    --tint-foreground: var(--alert-success-foreground);
+}
+/* Custom preset only — auto-pick black/white text based on tint lightness. Caller-supplied --tint-foreground still wins. clamp(...) acts as a step function: l > 0.6 → near-black, l < 0.6 → near-white. If the formula doesn't evaluate in an older engine, this declaration is dropped and the base rule's `var(--tint-foreground, white)` kicks in. */
+.hover-button--custom:hover,
+.hover-button--custom:focus,
+.hover-button--custom:focus-visible {
+    color: var(--tint-foreground, oklch(from var(--tint) calc(0.565 - clamp(-0.415, (l - 0.6) * 1000, 0.415)) 0 h)) !important;
+}
+.hover-button--borderless {
+    border: none !important;
 }
 
 /* Rectangular avatar (override BbAvatar's default rounded-full for profile popover) */
