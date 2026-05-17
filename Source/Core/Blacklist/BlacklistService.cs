@@ -32,8 +32,14 @@ internal class BlacklistService(IBlacklistRepository repository, IProviderConfig
 			yield return new BlacklistedItem(detail, addedDateById[detail.SourceId]);
 		}
 	}
+    public async Task<IReadOnlySet<IMediaId>> GetBlacklistIdsAsync(CancellationToken cancellationToken = default)
+    {
+        var config = await providerConfigRepository.GetAsync(cancellationToken);
+        var entries = await repository.GetBlacklistedEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
+        return entries.Select(e => e.Id).ToHashSet();
+    }
 
-	public Task AddToBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.AddAsync(mediaId, cancellationToken);
+    public Task AddToBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.AddAsync(mediaId, cancellationToken);
 
 	public Task RemoveFromBacklistAsync(IMediaId mediaId, CancellationToken cancellationToken = default) => repository.RemoveAsync(mediaId, cancellationToken);
 }

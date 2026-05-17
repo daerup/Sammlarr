@@ -86,7 +86,7 @@
     private bool _isOAuthenticated;
     private bool _hasTrendingProviderApiKey;
     private bool HasAccess => _isOAuthenticated && _hasTrendingProviderApiKey;
-    private WatchlistedSet _watchlisted = WatchlistedSet.Empty;
+    private IReadOnlySet<IMediaId> _watchlisted = new HashSet<IMediaId>();
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
     private int _totalPages = 1;
@@ -107,7 +107,7 @@
         if (!_isOAuthenticated)
         {
             _hasTrendingProviderApiKey = false;
-            _watchlisted = WatchlistedSet.Empty;
+            _watchlisted = new HashSet<IMediaId>();
             _trendingMedia = null;
             CloseSelectedMedia();
             _isLoading = false;
@@ -147,7 +147,7 @@
 
     private async Task LoadWatchlistIdsAsync()
     {
-        _watchlisted = await WatchlistService.GetWatchlistedAsync(_cancellationTokenSource.Token);
+        _watchlisted = await WatchlistService.GetWatchlistIdsAsync(_cancellationTokenSource.Token);
     }
 
     private async Task LoadPageAsync()
@@ -254,7 +254,7 @@
         }
         else
         {
-            await WatchlistService.AddToWatchlistAsync(watchlistId);
+            await WatchlistService.AddToWatchlistAsync([watchlistId], new ManualOrigin());
         }
 
         await LoadWatchlistIdsAsync();

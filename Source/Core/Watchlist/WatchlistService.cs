@@ -1,81 +1,88 @@
 using System.Runtime.CompilerServices;
-using Contracts.Auth;
-using Contracts.DI;
+using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
+using Contracts.Watchlist.Outbox;
 using Shared;
-using Shared.Telemetry;
 
 namespace Core.Watchlist;
 
 internal class WatchlistService(
-	IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider> providerIndex,
 	IProviderConfigRepository configRepository,
+	IWatchlistRepository repository,
+	IWatchlistOutbox outbox,
 	IMediaMetadataProvider metadataProvider
 ) : IWatchlistService
 {
-	public async Task<WatchlistPageResult> GetWatchlistAsync(int page, CancellationToken cancellationToken = default)
-	{
-		var (providerKey, provider) = await ResolveProviderAsync(cancellationToken);
-		using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
-		var providerPage = await provider.GetWatchlistAsync(page, cancellationToken);
-
-		var enriched = await providerPage
-			.Items.ToAsyncEnumerable()
-			.SelectAwait(async id => await metadataProvider.GetAsync(id, cancellationToken), IMediaMetadataProvider.RecommendedConcurrency, cancellationToken)
-			.ToListAsync(cancellationToken);
-		return new WatchlistPageResult(enriched, providerPage.TotalPages);
-	}
-
-	public async IAsyncEnumerable<IMediaDetailResult> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
-	{
-		var (providerKey, provider) = await ResolveProviderAsync(cancellationToken);
-		using var loadActivity = SammlarrTelemetry.StartWatchlistLoad(providerKey);
-
-		async ValueTask<WatchlistProviderPage> LoadPage(int page)
-		{
-			using var activity = SammlarrTelemetry.StartWatchlistLoad(providerKey, page);
-			return await provider.GetWatchlistAsync(page, cancellationToken);
-		}
-
-		var firstPage = await LoadPage(1);
-		var remainingPages = Enumerable
-			.Range(2, Math.Max(0, firstPage.TotalPages - 1))
-			.ToAsyncEnumerable()
-			.SelectAwait(LoadPage, IWatchlistService.RecommendedConcurrency, cancellationToken);
-
-		var ids = firstPage.Items.ToAsyncEnumerable().Concat(remainingPages.SelectMany(p => p.Items.ToAsyncEnumerable()));
-
-		var pipeline = ids.SelectAwait(
-			async id => await metadataProvider.GetAsync(id, cancellationToken),
-			IMediaMetadataProvider.RecommendedConcurrency,
-			cancellationToken
-		);
-
-		await foreach (var detail in pipeline)
-		{
-			yield return detail;
-		}
-	}
-
-	public async Task<bool> AddToWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		var (_, provider) = await ResolveProviderAsync(cancellationToken);
-		return await provider.AddToWatchlistAsync(mediaId, cancellationToken);
-	}
-
-	public async Task<bool> RemoveFromWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		var (_, provider) = await ResolveProviderAsync(cancellationToken);
-		return await provider.RemoveFromWatchlistAsync(mediaId, cancellationToken);
-	}
-
-	private async Task<(WatchlistProvider Key, IWatchlistProvider Provider)> ResolveProviderAsync(CancellationToken cancellationToken)
+	public async IAsyncEnumerable<WatchlistedItem> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
-		return (config.WatchlistProvider, providerIndex[config.WatchlistProvider]);
+		var mediaProvider = config.WatchlistProvider.AsMediaProvider();
+
+		var entries = await repository.GetEntriesAsync(mediaProvider, cancellationToken);
+		var pipeline = entries
+			.ToAsyncEnumerable()
+			.OrderByDescending(e => e.AddedAt)
+			.SelectAwait(
+				async e => (e, await metadataProvider.GetAsync(e.Id, cancellationToken)),
+				IMediaMetadataProvider.RecommendedConcurrency,
+				cancellationToken
+			);
+
+		await foreach (var (entry, detail) in pipeline)
+		{
+			yield return new WatchlistedItem(detail, entry.AddedAt, entry.Provenance);
+		}
+	}
+
+	public async Task<IReadOnlySet<IMediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default)
+	{
+		var config = await configRepository.GetAsync(cancellationToken);
+		var entries = await repository.GetEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
+		return entries.OrderBy(e => e.AddedAt).Select(e => e.Id).ToHashSet();
+	}
+
+	public async Task AddToWatchlistAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
+	{
+		var ids = mediaIds as IReadOnlyCollection<IMediaId> ?? mediaIds.ToList();
+		if (ids.Count == 0)
+		{
+			return;
+		}
+
+		var config = await configRepository.GetAsync(cancellationToken);
+		var mediaProvider = config.WatchlistProvider.AsMediaProvider();
+
+		var ops = await outbox.GetAsync(mediaProvider, cancellationToken);
+		var pendingRemoves = ops.Where(o => o.Kind == WatchlistOperationKind.Remove).Select(o => o.MediaId).ToHashSet();
+		var existing = (await repository.GetIdsAsync(mediaProvider, cancellationToken)).ToHashSet();
+
+		var uncancel = ids.Where(pendingRemoves.Contains).ToList();
+		var needsPush = ids.Where(id => !existing.Contains(id) && !pendingRemoves.Contains(id)).ToList();
+
+		await outbox.DropAsync(WatchlistOperationKind.Remove, uncancel, cancellationToken);
+		await repository.AddAsync(ids, provenance, cancellationToken);
+		await outbox.EnqueueAsync(WatchlistOperationKind.Add, needsPush, cancellationToken);
+	}
+
+	public async Task RemoveFromWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	{
+		var config = await configRepository.GetAsync(cancellationToken);
+		var mediaProvider = config.WatchlistProvider.AsMediaProvider();
+
+		var ops = await outbox.GetAsync(mediaProvider, cancellationToken);
+		var hadUnpushedAdd = ops.Any(o => o.Kind == WatchlistOperationKind.Add && o.MediaId.Equals(mediaId));
+
+		if (hadUnpushedAdd)
+		{
+			await outbox.DropAsync(WatchlistOperationKind.Add, [mediaId], cancellationToken);
+			await repository.RemoveAsync([mediaId], cancellationToken);
+			return;
+		}
+
+		await outbox.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId], cancellationToken);
+		await repository.RemoveAsync([mediaId], cancellationToken);
 	}
 }

@@ -1,5 +1,9 @@
+using Contracts.Auth;
+using Contracts.Media;
 using Contracts.Media.Feed;
 using DB.Data.Feed;
+using DB.Data.MediaGroup;
+using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
@@ -61,6 +65,32 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var feeds = await fixture.Context.Feeds.AsNoTracking().ToListAsync();
 		await Assert.That(feeds).Count().IsEqualTo(1);
 		await Assert.That(feeds[0].Id).IsEqualTo(id);
+	}
+
+	[Test]
+	public async Task DeleteFeedAsync_OrphansAttachedWatchlistEntries_PopulatesSnapshot()
+	{
+		var feedId = await SeedFeedAsync("My Feed", "my-feed", new DateTimeOffset(2026, 07, 01, 12, 0, 0, TimeSpan.Zero));
+		var mediaId = PlexId.From("plex-feed-1", MediaType.Movie);
+		var group = new MediaIdentifierGroupEntity();
+		fixture.Context.MediaIdEntries.Add(new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(mediaId), MediaIdGroupEntity = group });
+		fixture.Context.WatchlistEntries.Add(
+			new WatchlistEntryEntity
+			{
+				Media = group,
+				Origin = WatchlistEntryOrigin.Feed,
+				SourceFeedId = feedId,
+			}
+		);
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.DeleteFeedAsync(feedId);
+
+		var entry = await fixture.Context.WatchlistEntries.AsNoTracking().SingleAsync();
+		await Assert.That(entry.Origin).IsEqualTo(WatchlistEntryOrigin.Orphaned);
+		await Assert.That(entry.SourceFeedNameSnapshot).IsEqualTo("My Feed");
+		await Assert.That(entry.SourceFeedId).IsNull();
 	}
 
 	private async Task<Guid> SeedFeedAsync(string name, string identifier, DateTimeOffset createdAt)

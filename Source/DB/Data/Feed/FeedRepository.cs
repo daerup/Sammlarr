@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Contracts.Media.Feed;
+using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
@@ -83,6 +84,14 @@ internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFact
 		{
 			return;
 		}
+
+		await ctx
+			.WatchlistEntries.Where(w => w.SourceFeedId == id)
+			.ExecuteUpdateAsync(
+				s => s.SetProperty(w => w.Origin, WatchlistEntryOrigin.Orphaned).SetProperty(w => w.SourceFeedNameSnapshot, entity.Name),
+				cancellationToken
+			);
+
 		ctx.Feeds.Remove(entity);
 		await ctx.SaveChangesAsync(cancellationToken);
 	}

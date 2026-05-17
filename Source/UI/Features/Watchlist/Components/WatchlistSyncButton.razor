@@ -1,0 +1,186 @@
+@using Contracts.Media
+@using Contracts.Media.Metadata
+@using Contracts.Media.Search
+@using Contracts.Watchlist.Outbox
+@using Contracts.Watchlist.Sync
+@implements IDisposable
+@inject IMediaMetadataProvider MetadataProvider
+@inject IWatchlistSyncEngine SyncEngine
+@inject Notifier Notifier
+
+@if (_isSyncing)
+{
+    <BbButton Variant="ButtonVariant.Default" Disabled="true" Class="whitespace-nowrap">
+        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+        <span>Syncing...</span>
+    </BbButton>
+}
+else
+{
+    <BbHoverCard OpenDelay="200" CloseDelay="100" OnOpenChange="OnHoverChanged">
+        <BbHoverCardTrigger AsChild="false">
+            <BbButton Variant="ButtonVariant.Default" @onclick="SyncAsync" Class="relative whitespace-nowrap">
+                <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+                <span>Sync</span>
+                @if (_dryRun is { TotalChanges: > 0 } report)
+                {
+                    <span
+                        class="ml-2 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[10px] font-semibold bg-warning">@report.TotalChanges</span>
+                }
+            </BbButton>
+        </BbHoverCardTrigger>
+        <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="min-w-80 max-w-md p-0">
+            <div class="px-4 py-3 border-b">
+                <p class="text-xs uppercase tracking-wide font-medium text-muted-foreground">Sync preview</p>
+                @if (_dryRunError is not null)
+                {
+                    <div class="flex items-center gap-2 text-sm text-destructive mt-1.5">
+                        <LucideIcon Name="cloud-off" Size="14"/>
+                        <span class="truncate">@_dryRunError</span>
+                    </div>
+                }
+                else if (_dryRun is null)
+                {
+                    <div class="flex items-center gap-2 text-sm text-muted-foreground mt-1.5">
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                        <span>Computing…</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="flex items-baseline gap-3 mt-1.5">
+                        <span class="text-sm font-semibold text-success tabular-nums">+@_dryRun.AddCount</span>
+                        <span class="text-sm font-semibold text-destructive tabular-nums">−@_dryRun.RemoveCount</span>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1.5">@_dryRun.InSync already in sync</p>
+                }
+            </div>
+            @if (_dryRun is not null && _dryRun.TotalChanges > 0)
+            {
+                var window = _dryRun.Changes.Take(DryRunPreviewLimit).ToList();
+                <div class="max-h-64 overflow-y-auto scrollbar-thin py-2">
+                    @foreach (var change in window)
+                    {
+                        var directionIcon = change.Direction == WatchlistSyncDirection.Pull ? "arrow-down-left" : "arrow-up-right";
+                        var directionTooltip = change.Direction == WatchlistSyncDirection.Pull ? "from Plex" : "to Plex";
+                        var kindIcon = change.Kind == WatchlistOperationKind.Add ? "plus" : "minus";
+                        var kindColor = change.Kind == WatchlistOperationKind.Add ? "text-success" : "text-destructive";
+                        var title = _metadata.TryGetValue(change.MediaId, out var detail) ? detail.Title : "…";
+                        <div class="flex items-center gap-2 px-4 py-1.5 text-sm">
+                            <span class="inline-flex h-5 items-center shrink-0 @kindColor">
+                                <LucideIcon Name="@kindIcon" Size="14"/>
+                            </span>
+                            <span class="truncate flex-1" title="@title">@title</span>
+                            <span title="@directionTooltip" class="inline-flex h-5 items-center shrink-0 text-muted-foreground">
+                                <LucideIcon Name="@directionIcon" Size="14"/>
+                            </span>
+                        </div>
+                    }
+                </div>
+                @if (_dryRun.TotalChanges > window.Count)
+                {
+                    var hidden = _dryRun.TotalChanges - window.Count;
+                    <div class="px-4 py-2 border-t text-xs text-muted-foreground">+@hidden more change@(hidden == 1 ? "" : "s")</div>
+                }
+            }
+        </BbHoverCardContent>
+    </BbHoverCard>
+}
+
+@code {
+    private const int DryRunPreviewLimit = 25;
+
+    [Parameter]
+    public EventCallback OnSynced { get; set; }
+
+    private readonly CancellationTokenSource _cts = new();
+    private WatchlistSyncDryRunReport? _dryRun;
+    private string? _dryRunError;
+    private Dictionary<IMediaId, IMediaDetailResult> _metadata = [];
+    private bool _isSyncing;
+    private bool _dryRunRequested;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshAsync();
+    }
+
+    public async Task RefreshAsync()
+    {
+        await LoadDryRunAsync();
+    }
+
+    private async Task OnHoverChanged(bool open)
+    {
+        if (!open || _dryRunRequested)
+        {
+            return;
+        }
+        await LoadDryRunAsync();
+    }
+
+    private async Task LoadDryRunAsync()
+    {
+        _dryRunRequested = true;
+        _dryRun = null;
+        _dryRunError = null;
+        _metadata = [];
+        StateHasChanged();
+
+        var result = await SyncEngine.DryRunAsync(_cts.Token);
+        switch (result.Value)
+        {
+            case WatchlistSyncDryRunReport report:
+                _dryRun = report;
+                _metadata = await LoadMetadataAsync(report);
+                break;
+            case WatchlistSyncDryRunRemoteFailed failed:
+                _dryRunError = $"Dry run unavailable — {failed.Reason}";
+                break;
+        }
+        StateHasChanged();
+    }
+
+    private Task<Dictionary<IMediaId, IMediaDetailResult>> LoadMetadataAsync(WatchlistSyncDryRunReport report) =>
+        DryRunMetadataLoader.LoadAsync(MetadataProvider, report, DryRunPreviewLimit, _cts.Token);
+
+    public async Task SyncAsync()
+    {
+        if (_isSyncing)
+        {
+            return;
+        }
+        _isSyncing = true;
+        StateHasChanged();
+        try
+        {
+            var result = await SyncEngine.SyncAsync(new ManualTrigger(), _cts.Token);
+            var message = result.Value.ToString() ?? string.Empty;
+            Action<string, string?> notify = result.Value switch
+            {
+                WatchlistSyncSuccess => Notifier.Success,
+                WatchlistSyncUnchanged => Notifier.Info,
+                WatchlistSyncAlreadyRunning => Notifier.Info,
+                WatchlistSyncRemoteFailed => Notifier.Warning,
+            };
+
+            notify(message, null);
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Sync failed");
+        }
+        finally
+        {
+            _isSyncing = false;
+            await RefreshAsync();
+            await OnSynced.InvokeAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+}

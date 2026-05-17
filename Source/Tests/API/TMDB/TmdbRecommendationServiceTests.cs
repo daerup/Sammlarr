@@ -30,7 +30,7 @@ public class TmdbRecommendationServiceTests
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<TrendingMedia>();
-		await Assert.That(result.Items[0].Ids).Contains<IMediaId>(watchlistTargetId);
+		await Assert.That(result.Items[0].Ids).Contains((IMediaId)watchlistTargetId);
 		await Assert.That(result.Items[0].Title).IsEqualTo("Resolved Movie");
 	}
 
@@ -49,7 +49,7 @@ public class TmdbRecommendationServiceTests
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
-		await Assert.That(result.Items[0].Ids).IsEquivalentTo<IMediaId>([sourceTmdbId, plexId, imdbId]);
+		await Assert.That(result.Items[0].Ids).IsEquivalentTo(new IMediaId[] { sourceTmdbId, plexId, imdbId });
 	}
 
 	[Test]
@@ -66,7 +66,7 @@ public class TmdbRecommendationServiceTests
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
-		await Assert.That(result.Items[0].Ids).IsEquivalentTo<IMediaId>([sourceTmdbId, plexId]);
+		await Assert.That(result.Items[0].Ids).IsEquivalentTo(new IMediaId[] { sourceTmdbId, plexId });
 	}
 
 	[Test]
@@ -81,7 +81,7 @@ public class TmdbRecommendationServiceTests
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<UnresolvedTrendingMedia>();
-		await Assert.That(result.Items[0].Ids).IsEquivalentTo<IMediaId>([TmdbId.From("99", MediaType.Movie)]);
+		await Assert.That(result.Items[0].Ids).IsEquivalentTo(new IMediaId[] { TmdbId.From("99", MediaType.Movie) });
 		await Assert.That(result.Items[0].Title).IsEqualTo("Unmatched Movie");
 	}
 

@@ -69,8 +69,8 @@ public class MediaIdResolverTests
 			.And.Multiple(async resolved =>
 			{
 				await Assert.That(resolved.Id).IsEqualTo(tvdbId);
-				await Assert.That(resolved.AdditionalIds).Contains<IMediaId>(newImdbId);
-				await Assert.That(resolved.AdditionalIds).Contains<IMediaId>(tmdbId);
+				await Assert.That(resolved.AdditionalIds).Contains((IMediaId)newImdbId);
+				await Assert.That(resolved.AdditionalIds).Contains((IMediaId)tmdbId);
 			});
 		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
 	}

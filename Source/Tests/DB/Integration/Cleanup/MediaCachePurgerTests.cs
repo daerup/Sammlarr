@@ -10,6 +10,7 @@ using DB.Data.Cleanup;
 using DB.Data.Config;
 using DB.Data.MediaGroup;
 using DB.Data.Metadata;
+using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Cleanup;
@@ -86,6 +87,32 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.MediaIdGroups.Select(g => g.Id).SingleAsync()).IsEqualTo(blacklistedGroup.Id);
 		await Assert.That(fixture.Context.MediaIdEntries).IsSingleElement();
 		await Assert.That(fixture.Context.MediaIdEntries.Single().Identifier).IsEqualTo(MediaIdentifier.From(blacklistedId));
+	}
+
+	[Test]
+	public async Task PurgeAsync_WhenGroupIsWatchlisted_KeepsGroupAndOnlyItsAnchorEntry()
+	{
+		var watchlistedId = PlexId.From("3000", MediaType.Movie);
+		var watchlistedImdb = ImdbId.From("tt3000", MediaType.Movie);
+
+		var watchlistedGroup = new MediaIdentifierGroupEntity();
+		fixture.Context.MediaIdEntries.AddRange(
+			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(watchlistedId), MediaIdGroupEntity = watchlistedGroup },
+			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(watchlistedImdb), MediaIdGroupEntity = watchlistedGroup }
+		);
+		var metadata = BuildMetadata(watchlistedGroup, "Watchlisted");
+		fixture.Context.MediaMetadata.Add(metadata);
+		fixture.Context.WatchlistEntries.Add(new WatchlistEntryEntity { Media = watchlistedGroup, Origin = WatchlistEntryOrigin.Manual });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.PurgeAsync();
+
+		using var _ = Assert.Multiple();
+		await Assert.That(await fixture.Context.WatchlistEntries.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.MediaIdGroups.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.MediaIdGroups.Select(g => g.Id).SingleAsync()).IsEqualTo(watchlistedGroup.Id);
+		await Assert.That(fixture.Context.MediaIdEntries.Single().Identifier).IsEqualTo(MediaIdentifier.From(watchlistedId));
 	}
 
 	private static MovieMetadataEntity BuildMetadata(MediaIdentifierGroupEntity group, string title) =>

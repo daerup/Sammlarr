@@ -1,15 +1,14 @@
 using Contracts.Media;
-using Contracts.Media.Search;
 
 namespace Contracts.Watchlist;
 
 public interface IWatchlistService
 {
-	Task<WatchlistPageResult> GetWatchlistAsync(int page, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<WatchlistedItem> GetWatchlistItemsAsync(CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<IMediaDetailResult> GetWatchlistAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlySet<IMediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default);
 
-	Task<bool> AddToWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
+	Task AddToWatchlistAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
 
-	Task<bool> RemoveFromWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
+	Task RemoveFromWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
 }

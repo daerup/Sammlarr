@@ -7,70 +7,55 @@ using Contracts.Media;
 
 namespace API.Tests.Plex;
 
-public class PlexWatchListServiceTests
+public class PlexWatchListProviderTests
 {
 	private const string PlexBaseUrl = "https://plex.tv";
 	private static readonly Faker Faker = new();
 
 	[Test]
-	public async Task GetWatchlistAsync_WhenItemHasZeroYear_FiltersItem()
+	public async Task GetAllAsync_WhenItemHasZeroYear_FiltersItem()
 	{
 		var json = BuildWatchlistJson(0, CreateMetadata(0));
 		var testee = CreateWatchListService(json);
 
-		var result = await testee.GetWatchlistAsync(1);
+		var result = await testee.GetWatchlistAsync().ToListAsync();
 
-		await Assert.That(result.Items).IsEmpty();
+		await Assert.That(result).IsEmpty();
 	}
 
 	[Test]
-	public async Task GetWatchlistAsync_WhenItemHasMissingDate_FiltersItem()
+	public async Task GetAllAsync_WhenItemHasMissingDate_FiltersItem()
 	{
 		var json = BuildWatchlistJson(0, CreateMetadata(originallyAvailableAt: string.Empty));
 		var testee = CreateWatchListService(json);
 
-		var result = await testee.GetWatchlistAsync(1);
+		var result = await testee.GetWatchlistAsync().ToListAsync();
 
-		await Assert.That(result.Items).IsEmpty();
+		await Assert.That(result).IsEmpty();
 	}
 
 	[Test]
-	public async Task GetWatchlistAsync_WhenItemHasMissingTitle_FiltersItem()
+	public async Task GetAllAsync_WhenItemHasMissingTitle_FiltersItem()
 	{
 		var json = BuildWatchlistJson(0, CreateMetadata(title: string.Empty));
 		var testee = CreateWatchListService(json);
 
-		var result = await testee.GetWatchlistAsync(1);
+		var result = await testee.GetWatchlistAsync().ToListAsync();
 
-		await Assert.That(result.Items).IsEmpty();
+		await Assert.That(result).IsEmpty();
 	}
 
 	[Test]
-	public async Task GetWatchlistAsync_WhenItemIsComplete_ReturnsItem()
+	public async Task GetAllAsync_WhenItemIsComplete_ReturnsItem()
 	{
 		var json = BuildWatchlistJson(1, CreateMetadata(ratingKey: "plex-42"));
 		var testee = CreateWatchListService(json);
 
-		var result = await testee.GetWatchlistAsync(1);
+		var result = await testee.GetWatchlistAsync().ToListAsync();
 
-		await Assert.That(result.Items).Count().IsEqualTo(1);
-		await Assert.That(result.Items[0].Value).IsEqualTo("plex-42");
-		await Assert.That(result.Items[0].Type).IsEqualTo(MediaType.Movie);
-	}
-
-	[Test]
-	[Arguments(250, 3)]
-	[Arguments(101, 2)]
-	[Arguments(100, 1)]
-	[Arguments(0, 1)]
-	public async Task GetWatchlistAsync_CalculatesTotalPages(int totalSize, int expectedPages)
-	{
-		var json = BuildWatchlistJson(totalSize, CreateMetadata());
-		var testee = CreateWatchListService(json);
-
-		var result = await testee.GetWatchlistAsync(1);
-
-		await Assert.That(result.TotalPages).IsEqualTo(expectedPages);
+		await Assert.That(result).Count().IsEqualTo(1);
+		await Assert.That(result[0].Value).IsEqualTo("plex-42");
+		await Assert.That(result[0].Type).IsEqualTo(MediaType.Movie);
 	}
 
 	[Test]
@@ -113,9 +98,9 @@ public class PlexWatchListServiceTests
 		await Assert.That(result).IsFalse();
 	}
 
-	private static PlexWatchListService CreateWatchListService(string json) => new(CreatePlexClient(json));
+	private static PlexWatchListProvider CreateWatchListService(string json) => new(CreatePlexClient(json));
 
-	private static PlexWatchListService CreateWatchListService(HttpStatusCode statusCode) => new(CreatePlexClient(statusCode));
+	private static PlexWatchListProvider CreateWatchListService(HttpStatusCode statusCode) => new(CreatePlexClient(statusCode));
 
 	private static PlexClient CreatePlexClient(string json)
 	{

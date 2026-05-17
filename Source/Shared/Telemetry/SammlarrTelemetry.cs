@@ -5,6 +5,8 @@ using Contracts.Media;
 using Contracts.Media.Feed;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Contracts.Watchlist;
+using Contracts.Watchlist.Sync;
 
 namespace Shared.Telemetry;
 
@@ -22,7 +24,9 @@ public static class SammlarrTelemetry
 	private static readonly Counter<long> CachePartial = Meter.CreateCounter<long>("sammlarr.metadata.cache.partial");
 	private static readonly Counter<long> IdResolutionOutcomes = Meter.CreateCounter<long>("sammlarr.id_resolution.outcomes");
 	private static readonly Counter<long> FeedLoads = Meter.CreateCounter<long>("sammlarr.feed.load");
-	private static readonly Counter<long> WatchlistLoads = Meter.CreateCounter<long>("sammlarr.watchlist.load");
+	private static readonly Counter<long> WatchlistSyncs = Meter.CreateCounter<long>("sammlarr.watchlist.sync");
+	private static readonly Counter<long> WatchlistSyncFailures = Meter.CreateCounter<long>("sammlarr.watchlist.sync.failures");
+	private static readonly Counter<long> WatchlistPushFailures = Meter.CreateCounter<long>("sammlarr.watchlist.push.failures");
 	private static readonly Counter<long> BlacklistLoads = Meter.CreateCounter<long>("sammlarr.blacklist.load");
 	private static readonly Counter<long> TrendingLoads = Meter.CreateCounter<long>("sammlarr.trending.load");
 
@@ -117,20 +121,80 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
-	public static Activity? StartWatchlistLoad(WatchlistProvider provider)
+	public static Activity? StartWatchlistSync(WatchlistProvider provider, WatchlistSyncTrigger trigger)
 	{
-		var activity = Source.StartActivity("watchlist.load");
-		activity?.DisplayName = $"WATCHLIST FULL {provider}";
+		var activity = Source.StartActivity("watchlist.sync");
+		activity?.DisplayName = $"WATCHLIST SYNC {provider} ({trigger.Value})";
+		activity?.SetTag("watchlist.provider", provider.ToString());
+		activity?.SetTag("watchlist.trigger", trigger.Value.ToString());
 		return activity;
 	}
 
-	public static Activity? StartWatchlistLoad(WatchlistProvider provider, int page)
+	public static Activity? StartWatchlistRemoteFetch(WatchlistProvider provider)
 	{
-		WatchlistLoads.Add(1, new KeyValuePair<string, object?>("provider", provider.ToString()));
-		var activity = Source.StartActivity("watchlist.load");
-		activity?.DisplayName = $"WATCHLIST PAGED {provider}";
-		activity?.SetTag("watchlist.page", page);
+		var activity = Source.StartActivity("watchlist.remote_fetch");
+		activity?.DisplayName = $"WATCHLIST FETCH {provider}";
+		activity?.SetTag("watchlist.provider", provider.ToString());
 		return activity;
+	}
+
+	public static Activity? StartWatchlistPush(WatchlistProvider provider, string mutation)
+	{
+		var activity = Source.StartActivity("watchlist.push");
+		activity?.DisplayName = $"WATCHLIST PUSH {provider} {mutation}";
+		activity?.SetTag("watchlist.provider", provider.ToString());
+		activity?.SetTag("watchlist.mutation", mutation);
+		return activity;
+	}
+
+	public static void TagWatchlistSyncOutcome(Activity? activity, WatchlistSyncResult result, long durationMs)
+	{
+		var outcome = result.Value switch
+		{
+			WatchlistSyncSuccess => "success",
+			WatchlistSyncUnchanged => "unchanged",
+			WatchlistSyncAlreadyRunning => "already_running",
+			WatchlistSyncRemoteFailed => "remote_failed",
+			_ => "unknown",
+		};
+
+		var success = result.Value is WatchlistSyncSuccess s ? s : default;
+
+		WatchlistSyncs.Add(
+			1,
+			new KeyValuePair<string, object?>("outcome", outcome),
+			new KeyValuePair<string, object?>("inserted", success.Inserted),
+			new KeyValuePair<string, object?>("confirmed", success.Confirmed),
+			new KeyValuePair<string, object?>("hard_deleted", success.HardDeleted),
+			new KeyValuePair<string, object?>("pushed_adds", success.PushedAdds),
+			new KeyValuePair<string, object?>("pushed_removes", success.PushedRemoves),
+			new KeyValuePair<string, object?>("remote_failures", success.RemoteFailures)
+		);
+		if (result.Value is not WatchlistSyncSuccess and not WatchlistSyncUnchanged)
+		{
+			WatchlistSyncFailures.Add(1, new KeyValuePair<string, object?>("outcome", outcome));
+		}
+		if (activity is null)
+		{
+			return;
+		}
+		activity.SetTag("watchlist.outcome", outcome);
+		activity.SetTag("watchlist.inserted", success.Inserted);
+		activity.SetTag("watchlist.confirmed", success.Confirmed);
+		activity.SetTag("watchlist.hard_deleted", success.HardDeleted);
+		activity.SetTag("watchlist.pushed_adds", success.PushedAdds);
+		activity.SetTag("watchlist.pushed_removes", success.PushedRemoves);
+		activity.SetTag("watchlist.remote_failures", success.RemoteFailures);
+		activity.SetTag("watchlist.duration_ms", durationMs);
+	}
+
+	public static void TagWatchlistPushOutcome(Activity? activity, bool success)
+	{
+		if (!success)
+		{
+			WatchlistPushFailures.Add(1);
+		}
+		activity?.SetTag("watchlist.push.success", success);
 	}
 
 	public static Activity? StartFeedLoad(FeedProvider provider, string identifier)
