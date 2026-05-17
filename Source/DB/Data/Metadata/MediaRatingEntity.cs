@@ -1,13 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media.Metadata;
-using DB.Conversion.Enums;
 
 namespace DB.Data.Metadata;
 
 internal record MediaRatingEntity
 {
 	[Required]
-	[EnumAsString]
 	public required RatingSource Source { get; set; }
 
 	[Required]

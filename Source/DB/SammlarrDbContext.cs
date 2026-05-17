@@ -67,6 +67,8 @@ internal sealed class SammlarrDbContext : DbContext
 	{
 		_propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));
 
+		configurationBuilder.Properties<Enum>().HaveConversion<string>();
+
 		if (Database.IsSqlite())
 		{
 			configurationBuilder.Properties<DateTimeOffset>().HaveConversion<DateTimeOffsetToBinaryConverter>();

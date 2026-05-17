@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media;
-using DB.Conversion.Enums;
 using DB.Data.MediaGroup;
 
 namespace DB.Data.Metadata;
@@ -41,7 +40,6 @@ internal abstract record MediaMetadataEntity : IAuditable
 	public List<string> Genres { get; set; } = [];
 
 	[Required]
-	[EnumAsString]
 	public MediaType MediaType { get; init; }
 
 	public List<MediaRatingEntity> Ratings { get; set; } = [];

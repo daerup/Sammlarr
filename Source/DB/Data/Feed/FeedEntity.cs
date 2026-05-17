@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media.Feed;
 using Contracts.Processing;
-using DB.Conversion.Enums;
 
 namespace DB.Data.Feed;
 
@@ -14,11 +13,9 @@ internal record FeedEntity : Entity<Guid>
 	public string Name { get; set; }
 
 	[Required]
-	[EnumAsString]
 	public FeedProvider Provider { get; set; }
 
 	[Required]
-	[EnumAsString]
 	public FeedAddStrategy Strategy { get; set; }
 
 	[Required]
