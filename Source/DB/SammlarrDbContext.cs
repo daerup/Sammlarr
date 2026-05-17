@@ -12,6 +12,7 @@ using DB.Data.Feed;
 using DB.Data.MediaGroup;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
+using DB.Data.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -45,8 +46,6 @@ internal sealed class SammlarrDbContext : DbContext
 		SeedProviderSettings();
 	}
 
-	public DbSet<CollectionItemEntity> CollectionItems => Set<CollectionItemEntity>();
-
 	public DbSet<CredentialEntity> Credentials => Set<CredentialEntity>();
 
 	public DbSet<MediaIdentifierGroupEntity> MediaIdGroups => Set<MediaIdentifierGroupEntity>();
@@ -62,12 +61,12 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
 	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();
 	public DbSet<BlacklistEntryEntity> BlacklistEntries => Set<BlacklistEntryEntity>();
+	public DbSet<WatchlistEntryEntity> WatchlistEntries => Set<WatchlistEntryEntity>();
+	public DbSet<WatchlistOutboxEntity> WatchlistOutbox => Set<WatchlistOutboxEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
 		_propertyConventions.ToList().ForEach(convention => configurationBuilder.Conventions.Add(_ => convention));
-
-		configurationBuilder.Properties<Enum>().HaveConversion<string>();
 
 		if (Database.IsSqlite())
 		{
@@ -103,6 +102,21 @@ internal sealed class SammlarrDbContext : DbContext
 			builder.Property<Guid>("MediaIdGroupId");
 			builder.HasKey("MediaIdGroupId", nameof(MediaRatingEntity.Source));
 			builder.HasOne(r => r.Metadata).WithMany(m => m.Ratings).HasForeignKey("MediaIdGroupId").OnDelete(DeleteBehavior.Cascade);
+		});
+
+		modelBuilder.Entity<WatchlistEntryEntity>(builder =>
+		{
+			builder.HasOne(x => x.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasOne(x => x.SourceFeed).WithMany().HasForeignKey(x => x.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
+			builder.HasIndex("MediaId").IsUnique();
+			builder.HasIndex(x => x.SourceFeedId);
+		});
+
+		modelBuilder.Entity<WatchlistOutboxEntity>(builder =>
+		{
+			builder.HasOne(x => x.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasIndex("MediaId").IsUnique();
+			builder.HasIndex(x => x.Kind);
 		});
 
 		modelBuilder.Entity<FeedEntity>(builder =>

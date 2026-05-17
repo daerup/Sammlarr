@@ -16,6 +16,7 @@
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject IMediaIdResolver MediaIdResolver
 @inject Notifier Notifier
+@inject ToastService ToastService
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -31,13 +32,22 @@ else
 {
     <PageContainer Heading="@PageHeading" Description="@PageDescription">
         <HeaderActions>
-            <BbCommand Class="border">
-                <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                    <LucideIcon Name="search" Class="mr-2"/>
-                    Add from Search
-                    <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                </BbCommandItem>
-            </BbCommand>
+            <div class="flex items-center gap-2">
+                <BbCommand Class="border">
+                    <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
+                        <LucideIcon Name="search" Class="mr-2"/>
+                        Add from Search
+                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
+                    </BbCommandItem>
+                </BbCommand>
+                @if (_items is { Count: > 0 } && !_isEditMode)
+                {
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="EnterEditMode" Class="whitespace-nowrap">
+                        <LucideIcon Name="square-check" Size="16" Class="mr-2"/>
+                        Bulk edit
+                    </BbButton>
+                }
+            </div>
         </HeaderActions>
         <ChildContent>
             @if (_isLoading)
@@ -66,19 +76,16 @@ else
             }
             else if (_items is not null)
             {
-                <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-                    @foreach (var (detail, _) in _items)
-                    {
-                        <MediaGridTile @key="detail"
-                                       ImageUrl="@detail.BackdropUrl"
-                                       Poster="@detail.PosterUrl"
-                                       Title="@detail.Title"
-                                       Tagline="@detail.Tagline"
-                                       Rating="@detail.Rating"
-                                       OnClick="() => SelectItem(detail)"
-                                       OnImageBroken="() => ReportBrokenImageAsync(detail.SourceId)"/>
-                    }
-                </div>
+                <BulkEditableMediaGrid TItem="BlacklistedItem"
+                                       Items="_items"
+                                       Detail="@(i => i.Detail)"
+                                       Key="@(i => i.Detail.SourceId)"
+                                       IsEditMode="_isEditMode"
+                                       IsEditModeChanged="@(v => _isEditMode = v)"
+                                       OnTileClick="@(i => SelectItem(i.Detail))"
+                                       OnBulkRemove="RemoveBulkAsync"
+                                       OnImageBroken="ReportBrokenImageAsync"
+                                       RemoveLabel="Remove from Blacklist"/>
             }
         </ChildContent>
     </PageContainer>
@@ -117,6 +124,7 @@ else
     private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
+    private bool _isEditMode;
     private string? _errorMessage;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly HashSet<IMediaId> _reportedBrokenImages = [];
@@ -203,6 +211,22 @@ else
     {
         _selectedItem = detail;
         _isSheetOpen = true;
+    }
+
+    private void EnterEditMode()
+    {
+        _isEditMode = true;
+        CloseSelectedMedia();
+    }
+
+    private async Task RemoveBulkAsync(IReadOnlyList<BlacklistedItem> toRemove)
+    {
+        foreach (var item in toRemove)
+        {
+            await BlacklistService.RemoveFromBacklistAsync(item.Detail.SourceId, _cancellationTokenSource.Token);
+        }
+        ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blacklist.");
+        await LoadBlacklistAsync();
     }
 
     private async Task RemoveSelectedFromBlacklistAsync()

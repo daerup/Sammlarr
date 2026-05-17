@@ -1,0 +1,184 @@
+@typeparam TItem
+@using Contracts.Media
+@using Contracts.Media.Search
+@using Microsoft.AspNetCore.Components.Web
+
+@if (IsEditMode)
+{
+    <BulkActionBar SelectedCount="_selected.Count"
+                   TotalCount="Items.Count"
+                   RemoveLabel="@RemoveLabel"
+                   IsRemoving="_isRemoving"
+                   OnSelectAll="SelectAll"
+                   OnClearSelection="ClearSelection"
+                   OnCancel="ExitEditModeAsync"
+                   OnRemove="RemoveSelectedAsync"/>
+}
+
+<div class="grid grid-cols-4 md:grid-cols-1 gap-6">
+    @foreach (var item in Items)
+    {
+        var detail = Detail(item);
+        var mediaId = Key(item);
+        var renderKey = mediaId.Value;
+        var isSelected = _selected.Contains(mediaId);
+        <div class="relative @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
+            <MediaGridTile @key="renderKey"
+                           ImageUrl="@detail.BackdropUrl"
+                           Poster="@detail.PosterUrl"
+                           Title="@detail.Title"
+                           Tagline="@detail.Tagline"
+                           Rating="@detail.Rating"
+                           OnClick="@(() => HandleTileClickAsync(item))"
+                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.SourceId))"/>
+            @if (IsEditMode)
+            {
+                <div class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
+                <div class="absolute top-3 right-3 z-20 pointer-events-none">
+                    <div class="@SelectionPillClass(isSelected)">
+                        <LucideIcon Name="@(isSelected ? "check" : "circle")" Size="16"/>
+                    </div>
+                </div>
+            }
+            @Overlay?.Invoke(item)
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
+    [Parameter, EditorRequired] public Func<TItem, IMediaDetailResult> Detail { get; set; } = null!;
+    [Parameter, EditorRequired] public Func<TItem, IMediaId> Key { get; set; } = null!;
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public EventCallback<bool> IsEditModeChanged { get; set; }
+    [Parameter] public EventCallback<TItem> OnTileClick { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<TItem>> OnBulkRemove { get; set; }
+    [Parameter] public EventCallback<IMediaId> OnImageBroken { get; set; }
+    [Parameter] public RenderFragment<TItem>? Overlay { get; set; }
+    [Parameter] public string RemoveLabel { get; set; } = "Remove";
+
+    private readonly HashSet<IMediaId> _selected = new();
+    private IMediaId? _anchor;
+    private bool _anchorSelected;
+    private bool _isRemoving;
+
+    private string SelectionPillClass(bool selected) =>
+        selected
+            ? "flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow"
+            : "flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-muted-foreground border border-border shadow";
+
+    protected override void OnParametersSet()
+    {
+        if (!IsEditMode && _selected.Count > 0)
+        {
+            _selected.Clear();
+            _anchor = null;
+        }
+    }
+
+    private async Task HandleTileClickAsync(TItem item)
+    {
+        if (IsEditMode)
+        {
+            return;
+        }
+        await OnTileClick.InvokeAsync(item);
+    }
+
+    private void HandleSelectionClick(IMediaId mediaId, MouseEventArgs e)
+    {
+        if (e.ShiftKey && _anchor is not null)
+        {
+            ApplyRange(_anchor, mediaId, _anchorSelected);
+            return;
+        }
+        _anchorSelected = ToggleSelection(mediaId);
+        _anchor = mediaId;
+    }
+
+    private bool ToggleSelection(IMediaId mediaId)
+    {
+        if (_selected.Add(mediaId))
+        {
+            return true;
+        }
+        _selected.Remove(mediaId);
+        return false;
+    }
+
+    private void ApplyRange(IMediaId anchor, IMediaId target, bool select)
+    {
+        var anchorIdx = -1;
+        var targetIdx = -1;
+        for (var i = 0; i < Items.Count; i++)
+        {
+            var id = Key(Items[i]);
+            if (id.Equals(anchor))
+            {
+                anchorIdx = i;
+            }
+            if (id.Equals(target))
+            {
+                targetIdx = i;
+            }
+        }
+        if (anchorIdx < 0 || targetIdx < 0)
+        {
+            _anchorSelected = ToggleSelection(target);
+            _anchor = target;
+            return;
+        }
+        var (lo, hi) = anchorIdx <= targetIdx ? (anchorIdx, targetIdx) : (targetIdx, anchorIdx);
+        for (var i = lo; i <= hi; i++)
+        {
+            var id = Key(Items[i]);
+            if (select)
+            {
+                _selected.Add(id);
+            }
+            else
+            {
+                _selected.Remove(id);
+            }
+        }
+    }
+
+    private void SelectAll() => _selected.UnionWith(Items.Select(Key));
+
+    private void ClearSelection()
+    {
+        _selected.Clear();
+        _anchor = null;
+        _anchorSelected = false;
+    }
+
+    private async Task ExitEditModeAsync()
+    {
+        _selected.Clear();
+        _anchor = null;
+        _anchorSelected = false;
+        await IsEditModeChanged.InvokeAsync(false);
+    }
+
+    private async Task RemoveSelectedAsync()
+    {
+        if (_selected.Count == 0 || _isRemoving)
+        {
+            return;
+        }
+        var toRemove = Items.Where(i => _selected.Contains(Key(i))).ToList();
+        _isRemoving = true;
+        try
+        {
+            await OnBulkRemove.InvokeAsync(toRemove);
+            _selected.Clear();
+            _anchor = null;
+            _anchorSelected = false;
+            await IsEditModeChanged.InvokeAsync(false);
+        }
+        finally
+        {
+            _isRemoving = false;
+        }
+    }
+}

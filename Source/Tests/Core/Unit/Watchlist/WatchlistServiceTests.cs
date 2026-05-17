@@ -1,3 +1,4 @@
+using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
@@ -5,6 +6,7 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Contracts.Watchlist;
+using Contracts.Watchlist.Outbox;
 using Core.Watchlist;
 using Test.Shared;
 
@@ -12,107 +14,129 @@ namespace Core.Tests.Unit.Watchlist;
 
 public class WatchlistServiceTests
 {
-	[Test]
-	public async Task GetWatchlistAsync_WhenProviderReturnsItems_EnrichesEachItemWithMetadata()
-	{
-		var firstId = PlexId.From("plex-1", MediaType.Movie);
-		var secondId = PlexId.From("plex-2", MediaType.Show);
-		var firstDetail = CreateMovieDetail(firstId);
-		var secondDetail = CreateShowDetail(secondId);
+	private readonly Faker _faker = new();
 
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(1, Any()).Returns(new WatchlistProviderPage([firstId, secondId], 7));
+	[Test]
+	public async Task GetWatchlistItemsAsync_ReadsLocalRepo_EnrichesWithMetadata()
+	{
+		var mediaId = CreateMediaId();
+		var addedAt = _faker.Date.PastOffset();
+		var entry = new WatchlistEntry(mediaId, addedAt, new WatchlistItemProvenance(new ManualOrigin()));
+		var detail = CreateMovieDetailResult(mediaId);
+
+		var repository = IWatchlistRepository.Mock();
+		repository.GetEntriesAsync(Any(), Any()).Returns([entry]);
 
 		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(firstId, Any()).Returns(firstDetail);
-		metadataProvider.GetAsync(secondId, Any()).Returns(secondDetail);
+		metadataProvider.GetAsync(Any<IMediaId>(), Any()).Returns(detail);
 
-		var testee = CreateTestee(provider, metadataProvider);
+		var testee = CreateTestee(repository: repository, metadataProvider: metadataProvider);
 
-		var result = await testee.GetWatchlistAsync(1);
+		var result = await testee.GetWatchlistItemsAsync().ToListAsync();
 
-		await Assert.That(result.TotalPages).IsEqualTo(7);
-		await Assert.That(result.Items).Count().IsEqualTo(2);
-		await Assert.That(result.Items).Contains(firstDetail);
-		await Assert.That(result.Items).Contains(secondDetail);
+		await Assert.That(result).Count().IsEqualTo(1);
+		await Assert.That(result[0].Detail.SourceId).IsEqualTo(mediaId);
+		await Assert.That(result[0].AddedAt).IsEqualTo(addedAt);
 	}
 
 	[Test]
-	public async Task GetWatchlistAsync_WhenProviderReturnsEmptyPage_ReturnsEmptyResult()
+	public async Task GetWatchlistIdsAsync_ReturnsRepositoryIds()
 	{
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(1, Any()).Returns(new WatchlistProviderPage([], 0));
+		IMediaId first = PlexId.From("plex-1", MediaType.Movie);
+		IMediaId second = PlexId.From("plex-2", MediaType.Movie);
+		IReadOnlySet<IMediaId> ids = new HashSet<IMediaId> { first, second };
+		var repository = IWatchlistRepository.Mock();
+		repository
+			.GetEntriesAsync(Any(), Any())
+			.Returns(ids.Select(id => new WatchlistEntry(id, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin()))).ToList());
 
-		var testee = CreateTestee(provider);
+		var testee = CreateTestee(repository: repository);
 
-		var result = await testee.GetWatchlistAsync(1);
+		var result = await testee.GetWatchlistIdsAsync();
 
-		await Assert.That(result.Items).IsEmpty();
-		await Assert.That(result.TotalPages).IsEqualTo(0);
+		await Assert.That(result.Contains(first)).IsTrue();
+		await Assert.That(result.Contains(PlexId.From("missing", MediaType.Movie))).IsFalse();
 	}
 
 	[Test]
-	public async Task GetWatchlistPagedAsync_WhenMultiplePages_StreamsAllItemsAcrossPages()
+	public async Task AddToWatchlistAsync_BrandNewId_EnqueuesOutboxAdd_DoesNotPush()
 	{
-		var page1Id = PlexId.From("plex-1", MediaType.Movie);
-		var page2Id = PlexId.From("plex-2", MediaType.Movie);
-		var detail1 = CreateMovieDetail(page1Id);
-		var detail2 = CreateMovieDetail(page2Id);
-
+		var mediaId = CreateMediaId();
 		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(1, Any()).Returns(new WatchlistProviderPage([page1Id], 2));
-		provider.GetWatchlistAsync(2, Any()).Returns(new WatchlistProviderPage([page2Id], 2));
+		var repository = IWatchlistRepository.Mock();
+		repository.GetIdsAsync(Any(), Any()).Returns([]);
+		var outbox = IWatchlistOutbox.Mock();
+		outbox.GetAsync(Any(), Any()).Returns([]);
 
-		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(page1Id, Any()).Returns(detail1);
-		metadataProvider.GetAsync(page2Id, Any()).Returns(detail2);
+		var testee = CreateTestee(provider: provider, repository: repository, outbox: outbox);
 
-		var testee = CreateTestee(provider, metadataProvider);
+		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin());
 
-		var collected = new List<IMediaDetailResult>();
-		await foreach (var item in testee.GetWatchlistAsync())
-		{
-			collected.Add(item);
-		}
-
-		await Assert.That(collected).Count().IsEqualTo(2);
-		await Assert.That(collected[0]).IsSameReferenceAs(detail1);
-		await Assert.That(collected[1]).IsSameReferenceAs(detail2);
+		repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
+		outbox.EnqueueAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
-	public async Task AddToWatchlistAsync_DelegatesToResolvedProvider()
+	public async Task AddToWatchlistAsync_WhenPendingRemoveExists_DropsRemove_NoOutboxAdd()
 	{
-		var mediaId = PlexId.From("plex-add", MediaType.Movie);
-		var provider = IWatchlistProvider.Mock();
-		provider.AddToWatchlistAsync(mediaId, Any()).Returns(true);
+		var mediaId = CreateMediaId();
+		var repository = IWatchlistRepository.Mock();
+		repository.GetIdsAsync(Any(), Any()).Returns([]);
+		var outbox = IWatchlistOutbox.Mock();
+		outbox.GetAsync(Any(), Any()).Returns([new WatchlistOperation(mediaId, WatchlistOperationKind.Remove)]);
 
-		var testee = CreateTestee(provider);
+		var testee = CreateTestee(repository: repository, outbox: outbox);
 
-		var result = await testee.AddToWatchlistAsync(mediaId);
+		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin());
 
-		await Assert.That(result).IsTrue();
-		provider.AddToWatchlistAsync(mediaId, Any()).WasCalled(Times.Once);
+		outbox.DropAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		outbox.EnqueueAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task RemoveFromWatchlistAsync_DelegatesToResolvedProvider()
+	public async Task RemoveFromWatchlistAsync_WhenSynced_EnqueuesOutboxRemove()
 	{
-		var mediaId = PlexId.From("plex-remove", MediaType.Movie);
+		var mediaId = CreateMediaId();
 		var provider = IWatchlistProvider.Mock();
-		provider.RemoveFromWatchlistAsync(mediaId, Any()).Returns(false);
+		var repository = IWatchlistRepository.Mock();
+		var outbox = IWatchlistOutbox.Mock();
+		outbox.GetAsync(Any(), Any()).Returns([]);
 
-		var testee = CreateTestee(provider);
+		var testee = CreateTestee(provider: provider, repository: repository, outbox: outbox);
 
-		var result = await testee.RemoveFromWatchlistAsync(mediaId);
+		await testee.RemoveFromWatchlistAsync(mediaId);
 
-		await Assert.That(result).IsFalse();
-		provider.RemoveFromWatchlistAsync(mediaId, Any()).WasCalled(Times.Once);
+		outbox.EnqueueAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
 	}
 
-	private static WatchlistService CreateTestee(Mock<IWatchlistProvider> provider, Mock<IMediaMetadataProvider>? metadataProvider = null)
+	[Test]
+	public async Task RemoveFromWatchlistAsync_WhenUnpushedAdd_DropsOutboxAdd_NoEnqueueRemove()
 	{
-		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
+		var mediaId = CreateMediaId();
+		var repository = IWatchlistRepository.Mock();
+		var outbox = IWatchlistOutbox.Mock();
+		outbox.GetAsync(Any(), Any()).Returns([new WatchlistOperation(mediaId, WatchlistOperationKind.Add)]);
+
+		var testee = CreateTestee(repository: repository, outbox: outbox);
+
+		await testee.RemoveFromWatchlistAsync(mediaId);
+
+		outbox.DropAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		outbox.EnqueueAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
+		repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+	}
+
+	private WatchlistService CreateTestee(
+		Mock<IWatchlistProvider>? provider = null,
+		Mock<IWatchlistRepository>? repository = null,
+		Mock<IWatchlistOutbox>? outbox = null,
+		Mock<IMediaMetadataProvider>? metadataProvider = null
+	)
+	{
 		var configRepository = IProviderConfigRepository.Mock();
 		configRepository
 			.GetAsync(Any())
@@ -125,39 +149,37 @@ public class WatchlistServiceTests
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		var resolvedMetadataProvider = metadataProvider ?? IMediaMetadataProvider.Mock();
-		return new WatchlistService(index, configRepository.Object, resolvedMetadataProvider.Object);
+
+		var repo = repository ?? IWatchlistRepository.Mock();
+		var outboxMock = outbox ?? IWatchlistOutbox.Mock();
+		var metadata = metadataProvider ?? IMediaMetadataProvider.Mock();
+
+		return new WatchlistService(configRepository.Object, repo.Object, outboxMock.Object, metadata.Object);
 	}
 
-	private static MovieDetailResult CreateMovieDetail(IMediaId sourceId) =>
+	private PlexId CreateMediaId() => PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie);
+
+	private MovieDetailResult CreateMovieDetailResult(PlexId sourceId) =>
 		new()
 		{
 			SourceId = sourceId,
+			Title = _faker.Lorem.Sentence(2),
+			Tagline = _faker.Company.CatchPhrase(),
+			Summary = _faker.Lorem.Paragraph(),
 			AdditionalIds = [],
-			Title = "Movie",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = DateOnly.MinValue,
+			PosterUrl = _faker.Internet.Url(),
+			BackdropUrl = _faker.Internet.Url(),
+			Runtime = TimeSpan.FromMinutes(_faker.Random.Int(60, 180)),
+			ReleaseDate = _faker.Date.PastDateOnly(),
 			Genres = [],
-			Runtime = TimeSpan.Zero,
 		};
 
-	private static ShowDetailResult CreateShowDetail(IMediaId sourceId) =>
-		new()
+	private static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(params T[] items)
+	{
+		foreach (var item in items)
 		{
-			SourceId = sourceId,
-			AdditionalIds = [],
-			Title = "Show",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = DateOnly.MinValue,
-			Genres = [],
-			Seasons = 1,
-			Episodes = 10,
-			RuntimePerEpisode = TimeSpan.Zero,
-		};
+			yield return item;
+			await Task.CompletedTask;
+		}
+	}
 }

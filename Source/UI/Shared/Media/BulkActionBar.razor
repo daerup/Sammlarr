@@ -1,0 +1,49 @@
+<div class="sticky top-0 z-30 mb-4 flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm">
+    <span class="text-sm font-medium">@SelectedCount of @TotalCount selected</span>
+    <div class="flex items-center gap-2">
+        @if (SelectedCount == TotalCount && TotalCount > 0)
+        {
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnClearSelection">
+                <LucideIcon Name="square" Size="14" Class="mr-1"/>
+                Clear
+            </BbButton>
+        }
+        else
+        {
+            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnSelectAll" Class="whitespace-nowrap">
+                <LucideIcon Name="square-check" Size="14" Class="mr-1"/>
+                Select all
+            </BbButton>
+        }
+        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnCancel">
+            <LucideIcon Name="x" Size="14" Class="mr-1"/>
+            Cancel
+        </BbButton>
+        <HoverButton Preset="HoverButtonPreset.Destructive"
+                     Size="ButtonSize.Small"
+                     OnClick="OnRemove"
+                     Disabled="@(SelectedCount == 0 || IsRemoving)">
+            @if (IsRemoving)
+            {
+                <BbSpinner Size="SpinnerSize.Small" Class="mr-1"/>
+                <span>Removing...</span>
+            }
+            else
+            {
+                <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
+                <span>@RemoveLabel (@SelectedCount)</span>
+            }
+        </HoverButton>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int SelectedCount { get; set; }
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public string RemoveLabel { get; set; } = "Remove";
+    [Parameter] public bool IsRemoving { get; set; }
+    [Parameter] public EventCallback OnSelectAll { get; set; }
+    [Parameter] public EventCallback OnClearSelection { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnRemove { get; set; }
+}

@@ -5,6 +5,7 @@ using DB.Data.Config;
 using DB.Data.Feed;
 using DB.Data.MediaGroup;
 using DB.Data.Metadata;
+using DB.Data.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -21,5 +22,6 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<FeedModule>();
 		services.AddModule<MediaGroupModule>();
 		services.AddModule<MetadataModule>();
+		services.AddModule<WatchlistModule>();
 	}
 }

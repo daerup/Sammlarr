@@ -285,8 +285,8 @@
     private IMediaDetailResult? _focusedResult;
     private IMediaDetailResult? _togglingWatchlistItem;
     private IMediaDetailResult? _togglingBlacklistItem;
-    private readonly HashSet<string> _watchlistIds = new(StringComparer.Ordinal);
-    private readonly HashSet<string> _blacklistIds = new(StringComparer.Ordinal);
+    private readonly HashSet<IMediaId> _watchlisted = new();
+    private readonly HashSet<IMediaId> _blacklistIds = new();
     private readonly HashSet<IMediaId> _reportedBrokenImages = [];
     private bool _hasEnrollmentChanges;
     private bool _refreshDialogOpen;
@@ -389,7 +389,7 @@
 
         try
         {
-            _watchlistIds.Clear();
+            _watchlisted.Clear();
             _blacklistIds.Clear();
             await LoadWatchlistAndBlacklistAsync();
 
@@ -500,8 +500,8 @@
     {
         try
         {
-            (await WatchlistService.GetWatchlistAsync(CancellationToken.None).ToListAsync()).ForEach(item => _watchlistIds.Add(item.SourceId.ToString()!));
-            (await BlacklistService.GetBlacklistItems(CancellationToken.None).ToListAsync()).ForEach(item => _blacklistIds.Add(item.Detail.SourceId.ToString()!));
+            (await WatchlistService.GetWatchlistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _watchlisted.Add(item));
+            (await BlacklistService.GetBlacklistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _blacklistIds.Add(item));
         }
         catch (Exception ex)
         {
@@ -509,13 +509,13 @@
         }
     }
 
-private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
+    private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetailResult);
     private int BypassedCount => _processedResults.Count(r => r.Value is Bypassed<IMediaDetailResult>);
     private int FilteredCount => _processedResults.Count(r => r.Value is Culled<IMediaDetailResult>);
     private int SkippedCount => _processedResults.Count(r => r.Value is Truncated<IMediaDetailResult>);
     private int UnresolvedCount => _unresolvedResults.Count;
-    private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && _watchlistIds.Contains(GetKey(item)));
-    private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && _blacklistIds.Contains(GetKey(item)));
+    private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && IsWatchlisted(item));
+    private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && IsBlacklisted(item));
 
     private IEnumerable<QueryResult<IMediaDetailResult>> FilteredBySearchResults =>
         string.IsNullOrWhiteSpace(_searchQuery) ? _processedResults : _processedResults.Where(r => GetItem(r).Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
@@ -523,8 +523,8 @@ private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetai
     private IEnumerable<IMediaDetailResult> FilteredBySearchUnresolvedResults =>
         string.IsNullOrWhiteSpace(_searchQuery) ? _unresolvedResults : _unresolvedResults.Where(r => r.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
 
-    private bool IsBlacklisted(IMediaDetailResult item) => _blacklistIds.Contains(GetKey(item));
-    private bool IsWatchlisted(IMediaDetailResult item) => _watchlistIds.Contains(GetKey(item));
+    private bool IsBlacklisted(IMediaDetailResult item) => _blacklistIds.Contains(item.SourceId);
+    private bool IsWatchlisted(IMediaDetailResult item) => _watchlisted.Contains(item.SourceId);
 
     private static string GetKey(IMediaDetailResult item) => item.SourceId.ToString() ?? string.Empty;
 
@@ -576,16 +576,15 @@ private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetai
         _togglingBlacklistItem = item;
         try
         {
-            var key = GetKey(item);
-            if (_blacklistIds.Contains(key))
+            if (_blacklistIds.Contains(item.SourceId))
             {
                 await BlacklistService.RemoveFromBacklistAsync(item.SourceId);
-                _blacklistIds.Remove(key);
+                _blacklistIds.Remove(item.SourceId);
             }
             else
             {
                 await BlacklistService.AddToBacklistAsync(item.SourceId);
-                _blacklistIds.Add(key);
+                _blacklistIds.Add(item.SourceId);
             }
         }
         finally
@@ -608,20 +607,15 @@ private int IncludedCount => _processedResults.Count(r => r.Value is IMediaDetai
         _togglingWatchlistItem = item;
         try
         {
-            var key = GetKey(item);
-            if (_watchlistIds.Contains(key))
+            if (IsWatchlisted(item))
             {
-                if (await WatchlistService.RemoveFromWatchlistAsync(item.SourceId))
-                {
-                    _watchlistIds.Remove(key);
-                }
+                await WatchlistService.RemoveFromWatchlistAsync(item.SourceId);
+                _watchlisted.Remove(item.SourceId);
             }
             else
             {
-                if (await WatchlistService.AddToWatchlistAsync(item.SourceId))
-                {
-                    _watchlistIds.Add(key);
-                }
+                await WatchlistService.AddToWatchlistAsync([item.SourceId], new ManualOrigin());
+                _watchlisted.Add(item.SourceId);
             }
         }
         finally

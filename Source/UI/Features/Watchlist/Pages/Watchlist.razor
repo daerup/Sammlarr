@@ -6,16 +6,15 @@
 @using Contracts.Settings
 @using Contracts.Watchlist
 @using global::Shared
+@using UI.Features.Watchlist.Components
 @implements IDisposable
 @implements IAsyncDisposable
 @inject IWatchlistService WatchlistService
 @inject IMediaMetadataProvider MetadataProvider
 @inject IKeyboardShortcutService KeyboardShortcutService
-@inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject Notifier Notifier
-@inject ToastService ToastService
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -43,17 +42,14 @@ else
                             <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
                         </BbCommandItem>
                     </BbCommand>
-                    <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
-                        @if (_isLoading)
-                        {
-                            <span>Refreshing...</span>
-                        }
-                        else
-                        {
-                            <LucideIcon Name="refresh-cw" Size="16" class="mr-2"/>
-                            <span>Refresh</span>
-                        }
-                    </BbButton>
+                    @if (_items is { Count: > 0 } && !_isEditMode)
+                    {
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="EnterEditMode" Class="whitespace-nowrap">
+                            <LucideIcon Name="square-check" Size="16" Class="mr-2"/>
+                            Bulk edit
+                        </BbButton>
+                    }
+                    <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync"/>
                 </div>
             </ProtectedSection>
         </HeaderActions>
@@ -85,30 +81,44 @@ else
                 {
                     <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
                         <LucideIcon Name="inbox" Size="36" Class="mx-auto text-muted-foreground"/>
-                        <h3 class="text-base font-semibold tracking-tight">Nothing on your watchlist yet.</h3>
-                        <p class="text-sm text-muted-foreground leading-relaxed">@EmptyStateMessage Add a title with <span class="font-medium text-foreground">Ctrl+K</span>.</p>
+                        <h3 class="text-base font-semibold tracking-tight">Your watchlist is empty.</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">Click Sync to load it
+                            from @_providerSettings.WatchlistProvider.GetDescription(), or add a title with <span
+                                class="font-medium text-foreground">Ctrl+K</span>.</p>
+                        <BbButton Variant="ButtonVariant.Default" @onclick="SyncFromEmptyStateAsync">
+                            <LucideIcon Name="refresh-cw" Size="14" Class="mr-2"/>
+                            Sync now
+                        </BbButton>
                     </div>
                 }
                 else if (_items is not null)
                 {
-                    <div class="grid grid-cols-4 md:grid-cols-1 gap-6">
-                        @foreach (var item in _items)
-                        {
-                            <MediaGridTile @key="item"
-                                           ImageUrl="@item.BackdropUrl"
-                                           Poster="@item.PosterUrl"
-                                           Title="@item.Title"
-                                           OnClick="() => SelectItem(item)"
-                                           Tagline="@item.Tagline"
-                                           Rating="@item.Rating"
-                                           OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)"/>
-                        }
-                    </div>
-
-                    <PaginationControls CurrentPage="_currentPage"
-                                        TotalPages="_totalPages"
-                                        IsDisabled="_isLoading"
-                                        PageChanged="HandlePageChangedAsync"/>
+                    <BulkEditableMediaGrid TItem="WatchlistedItem"
+                                           Items="_items"
+                                           Detail="@(i => i.Detail)"
+                                           Key="@(i => i.Detail.SourceId)"
+                                           IsEditMode="_isEditMode"
+                                           IsEditModeChanged="@(v => _isEditMode = v)"
+                                           OnTileClick="SelectItem"
+                                           OnBulkRemove="RemoveBulkAsync"
+                                           OnImageBroken="ReportBrokenImageAsync"
+                                           RemoveLabel="Remove from Watchlist">
+                        <Overlay Context="item">
+                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                                <BbBadge Variant="@ProvenanceBadgeVariant(item.Provenance)">
+                                    <BbTooltip>
+                                        <BbTooltipTrigger AsChild="false" Class="p-0">
+                                            <span class="flex items-center gap-1">
+                                                <LucideIcon Name="@ProvenanceIcon(item.Provenance)" Size="12"/>
+                                                @ProvenanceLabel(item.Provenance)
+                                            </span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>@ProvenanceTooltip(item)</BbTooltipContent>
+                                    </BbTooltip>
+                                </BbBadge>
+                            </div>
+                        </Overlay>
+                    </BulkEditableMediaGrid>
                 }
             </ProtectedSection>
         </ChildContent>
@@ -118,13 +128,13 @@ else
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
                   ShowContent="@(_selectedItem is not null)"
-                  Title="@(_selectedItem?.Title ?? string.Empty)"
-                  MediaType="@(_selectedItem?.MediaType ?? MediaType.Movie)"
+                  Title="@(_selectedItem?.Detail.Title ?? string.Empty)"
+                  MediaType="@(_selectedItem?.Detail.MediaType ?? MediaType.Movie)"
                   ReleaseDate="@SelectedReleaseDate"
-                  ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
+                  ImageUrl="@(_selectedItem?.Detail.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
-                  Description="@(_selectedItem?.Summary ?? string.Empty)"
-                  Ids="@(_selectedItem is null ? null : [_selectedItem.SourceId, .._selectedItem.AdditionalIds])"
+                  Description="@(_selectedItem?.Detail.Summary ?? string.Empty)"
+                  Ids="@(_selectedItem is null ? null : [_selectedItem.Detail.SourceId, .._selectedItem.Detail.AdditionalIds])"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromWatchlistAsync"
                   ButtonText="GetRemoveButtonText"
@@ -145,18 +155,18 @@ else
 @code {
     private const string SearchShortcutId = "watchlist-search-shortcut";
 
-    private IReadOnlyList<IMediaDetailResult>? _items;
-    private IMediaDetailResult? _selectedItem;
+    private List<WatchlistedItem>? _items;
+    private WatchlistedItem? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _hasOAuthAccess;
     private bool _isSearchModalOpen;
+    private bool _isEditMode;
     private string? _errorMessage;
-    private int _currentPage = 1;
+    private WatchlistSyncButton? _syncControl;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly HashSet<IMediaId> _reportedBrokenImages = [];
-    private int _totalPages;
     private ProviderConfig? _providerSettings;
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
@@ -164,9 +174,8 @@ else
     private string PageTitleText => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageDescription => _providerSettings is null ? "Your saved movies and shows." : $"Your saved movies and shows from {_providerSettings.WatchlistProvider.GetDescription()}";
-    private string EmptyStateMessage => _providerSettings is null ? "Your watchlist is empty." : $"Your {_providerSettings.WatchlistProvider.GetDescription()} watchlist is empty.";
     private bool IsOAuthAllowed() => _hasOAuthAccess;
-    private DateTimeOffset SelectedReleaseDate => _selectedItem is { } item ? new DateTimeOffset(item.ReleaseDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero) : DateTimeOffset.MinValue;
+    private DateTimeOffset SelectedReleaseDate => _selectedItem is {} item ? new DateTimeOffset(item.Detail.ReleaseDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero) : DateTimeOffset.MinValue;
 
     protected override async Task OnInitializedAsync()
     {
@@ -195,15 +204,9 @@ else
             _items = null;
             _errorMessage = null;
             _isLoading = false;
-            _currentPage = 1;
-            _totalPages = 0;
+            _isEditMode = false;
             CloseSelectedMedia();
             return;
-        }
-
-        if (_currentPage < 1)
-        {
-            _currentPage = 1;
         }
 
         await LoadWatchlistAsync();
@@ -217,11 +220,11 @@ else
 
         try
         {
-            (_items, _totalPages) = await WatchlistService.GetWatchlistAsync(_currentPage, _cancellationTokenSource.Token);
+            _items = await WatchlistService.GetWatchlistItemsAsync(_cancellationTokenSource.Token).ToListAsync(_cancellationTokenSource.Token);
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(item => item.SourceId.Equals(_selectedItem.SourceId));
+                _selectedItem = _items.FirstOrDefault(item => item.Detail.SourceId.Equals(_selectedItem.Detail.SourceId));
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -240,6 +243,10 @@ else
         }
     }
 
+    private Task SyncFromEmptyStateAsync() => _syncControl?.SyncAsync() ?? Task.CompletedTask;
+
+    private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
+
     private async Task ReportBrokenImageAsync(IMediaId sourceId)
     {
         if (!_reportedBrokenImages.Add(sourceId))
@@ -255,14 +262,14 @@ else
         {
             return;
         }
-        await ReportBrokenImageAsync(_selectedItem.SourceId);
+        await ReportBrokenImageAsync(_selectedItem.Detail.SourceId);
     }
 
     private static string GetRemoveButtonText() => "Remove from Watchlist";
 
     private static string GetRemoveButtonIcon() => "x";
 
-    private void SelectItem(IMediaDetailResult item)
+    private void SelectItem(WatchlistedItem item)
     {
         _selectedItem = item;
         _isSheetOpen = true;
@@ -270,34 +277,18 @@ else
 
     private async Task RemoveSelectedFromWatchlistAsync()
     {
-        if (_isRemoving)
-        {
-            return;
-        }
-
-        if (_selectedItem?.SourceId is null)
+        if (_isRemoving || _selectedItem is null)
         {
             return;
         }
 
         _isRemoving = true;
-
         try
         {
-            var removed = await WatchlistService.RemoveFromWatchlistAsync(_selectedItem.SourceId, _cancellationTokenSource.Token);
-            if (!removed)
-            {
-                return;
-            }
-
-            var removedLastVisibleItem = _items is not null && _items.Count == 1;
-            if (removedLastVisibleItem && _currentPage > 1)
-            {
-                _currentPage--;
-            }
-
+            await WatchlistService.RemoveFromWatchlistAsync(_selectedItem.Detail.SourceId, _cancellationTokenSource.Token);
             CloseSelectedMedia();
             await LoadWatchlistAsync();
+            await RefreshPendingAsync();
         }
         finally
         {
@@ -305,23 +296,27 @@ else
         }
     }
 
+    private void EnterEditMode()
+    {
+        _isEditMode = true;
+        CloseSelectedMedia();
+    }
+
+    private async Task RemoveBulkAsync(IReadOnlyList<WatchlistedItem> toRemove)
+    {
+        foreach (var item in toRemove)
+        {
+            await WatchlistService.RemoveFromWatchlistAsync(item.Detail.SourceId, _cancellationTokenSource.Token);
+        }
+        Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your watchlist.");
+        await LoadWatchlistAsync();
+        await RefreshPendingAsync();
+    }
+
     private void CloseSelectedMedia()
     {
         _isSheetOpen = false;
         _selectedItem = null;
-    }
-
-    private async Task HandlePageChangedAsync(int newPage)
-    {
-        if (newPage == _currentPage)
-        {
-            return;
-        }
-        CloseSelectedMedia();
-
-        _currentPage = newPage;
-
-        await ScrollService.ToTopAfterAsync(LoadWatchlistAsync, _cancellationTokenSource.Token);
     }
 
     private Task DetailsOpenChangedAsync(bool isOpen)
@@ -367,7 +362,7 @@ else
         {
             return false;
         }
-        return _items.Any(i => i.SourceId.Equals(mediaId));
+        return _items.Any(i => i.Detail.SourceId.Equals(mediaId));
     }
 
     private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
@@ -376,37 +371,25 @@ else
         {
             if (!IsInWatchlist(id))
             {
-                ToastService.Warning($"'{title}' is not in your watchlist.");
+                Notifier.Warning($"'{title}' is not in your watchlist.");
                 return false;
             }
-
-            var removed = await WatchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
-            if (!removed)
-            {
-                ToastService.Warning("Failed to remove item from watchlist. Please try again.");
-                return false;
-            }
-
-            ToastService.Success($"'{title}' has been removed from your watchlist.");
+            await WatchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
             await LoadWatchlistAsync();
+            await RefreshPendingAsync();
+            Notifier.Success($"'{title}' has been removed from your watchlist.");
             return true;
         }
 
         if (IsInWatchlist(id))
         {
-            ToastService.Warning($"'{title}' is already in your watchlist.");
+            Notifier.Warning($"'{title}' is already in your watchlist.");
             return false;
         }
-
-        var added = await WatchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
-        if (!added)
-        {
-            ToastService.Warning("Failed to add item to watchlist. Please try again.");
-            return false;
-        }
-
-        ToastService.Success($"'{title}' has been added to your watchlist.");
+        await WatchlistService.AddToWatchlistAsync([id], new ManualOrigin(), _cancellationTokenSource.Token);
         await LoadWatchlistAsync();
+        await RefreshPendingAsync();
+        Notifier.Success($"'{title}' has been added to your watchlist.");
         return true;
     }
 
@@ -420,5 +403,48 @@ else
     {
         await UnregisterShortcutAsync();
         Dispose();
+    }
+
+    private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            RemoteOrigin => BadgeVariant.Secondary,
+            ManualOrigin => BadgeVariant.Default,
+            FeedOrigin => BadgeVariant.Default,
+            OrphanedOrigin => BadgeVariant.Outline,
+            _ => BadgeVariant.Secondary,
+        };
+
+    private static string ProvenanceIcon(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            RemoteOrigin => "cloud",
+            ManualOrigin => "user",
+            FeedOrigin => "rss",
+            OrphanedOrigin => "unlink",
+            _ => "circle",
+        };
+
+    private static string ProvenanceLabel(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            RemoteOrigin => "From Plex",
+            ManualOrigin => "Manual",
+            FeedOrigin feed => feed.FeedName,
+            OrphanedOrigin orphaned => $"{orphaned.FormerFeedName} (deleted)",
+            _ => string.Empty,
+        };
+
+    private static string ProvenanceTooltip(WatchlistedItem item)
+    {
+        var date = item.AddedAt.LocalDateTime.ToString("MMM d, yyyy");
+        return item.Provenance.Value switch
+        {
+            RemoteOrigin => "From Plex",
+            ManualOrigin => $"Added manually on {date}",
+            FeedOrigin feed => $"Added by '{feed.FeedName}' on {date}",
+            OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
+            _ => string.Empty,
+        };
     }
 }

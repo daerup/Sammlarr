@@ -14,7 +14,10 @@ internal class MediaCachePurger(IDbContextFactory<SammlarrDbContext> dbContextFa
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
 		var anchor = config.WatchlistProvider.AsMediaProvider();
 
-		var protectedGroupIds = await ctx.BlacklistEntries.Select(b => b.Media.Id).ToListAsync(cancellationToken);
+		var protectedGroupIds = await ctx
+			.BlacklistEntries.Select(b => b.Media.Id)
+			.Union(ctx.WatchlistEntries.Select(w => w.Media.Id))
+			.ToListAsync(cancellationToken);
 
 		await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
 		await ctx.MediaIdGroups.Where(g => !protectedGroupIds.Contains(g.Id)).ExecuteDeleteAsync(cancellationToken);
