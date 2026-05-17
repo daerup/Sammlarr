@@ -4,7 +4,6 @@ using Contracts.Auth;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
-using DB.Conversion.Enums;
 
 namespace DB.Data.Config;
 
@@ -28,18 +27,14 @@ internal record ProviderConfigEntity
 	public Guid Id { get; set; } = SingletonId;
 
 	[Required]
-	[EnumAsString]
 	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]
-	[EnumAsString]
 	public required MediaRecommendationProvider TrendingProvider { get; set; }
 
 	[Required]
-	[EnumAsString]
 	public required MediaSearchProvider SearchProvider { get; set; }
 
 	[Required]
-	[EnumAsString]
 	public required RatingProvider RatingProvider { get; set; }
 }
