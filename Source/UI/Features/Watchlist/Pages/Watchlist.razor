@@ -7,12 +7,15 @@
 @using Contracts.Watchlist
 @using global::Shared
 @implements IDisposable
+@implements IAsyncDisposable
 @inject IWatchlistService WatchlistService
 @inject IMediaMetadataProvider MetadataProvider
+@inject IKeyboardShortcutService KeyboardShortcutService
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject Notifier Notifier
+@inject ToastService ToastService
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -32,17 +35,26 @@ else
     <PageContainer Heading="@PageHeading" Description="@PageDescription">
         <HeaderActions>
             <ProtectedSection GuardState="IsOAuthAllowed" ShowFallback="false">
-                <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
-                    @if (_isLoading)
-                    {
-                        <span>Refreshing...</span>
-                    }
-                    else
-                    {
-                        <LucideIcon Name="refresh-cw" Size="16" class="mr-2"/>
-                        <span>Refresh</span>
-                    }
-                </BbButton>
+                <div class="flex items-center gap-2">
+                    <BbCommand Class="border">
+                        <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
+                            <LucideIcon Name="search" Class="mr-2"/>
+                            Add from Search
+                            <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
+                        </BbCommandItem>
+                    </BbCommand>
+                    <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadWatchlistAsync" Disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span>Refreshing...</span>
+                        }
+                        else
+                        {
+                            <LucideIcon Name="refresh-cw" Size="16" class="mr-2"/>
+                            <span>Refresh</span>
+                        }
+                    </BbButton>
+                </div>
             </ProtectedSection>
         </HeaderActions>
         <ChildContent>
@@ -74,7 +86,7 @@ else
                     <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
                         <LucideIcon Name="inbox" Size="36" Class="mx-auto text-muted-foreground"/>
                         <h3 class="text-base font-semibold tracking-tight">Nothing on your watchlist yet.</h3>
-                        <p class="text-sm text-muted-foreground leading-relaxed">@EmptyStateMessage Browse trending or add a feed to get started</p>
+                        <p class="text-sm text-muted-foreground leading-relaxed">@EmptyStateMessage Add a title with <span class="font-medium text-foreground">Ctrl+K</span>.</p>
                     </div>
                 }
                 else if (_items is not null)
@@ -118,19 +130,36 @@ else
                   ButtonText="GetRemoveButtonText"
                   ButtonIcon="GetRemoveButtonIcon"/>
 
+@if (_providerSettings is not null)
+{
+    <SearchModal @bind-IsOpen="_isSearchModalOpen"
+                 SearchProvider="@_providerSettings.SearchProvider"
+                 IsInWatchlist="IsInWatchlist"
+                 OnToggle="ToggleFromSearchAsync">
+        <TileIcons Context="ctx">
+            <WatchlistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
+        </TileIcons>
+    </SearchModal>
+}
+
 @code {
+    private const string SearchShortcutId = "watchlist-search-shortcut";
+
     private IReadOnlyList<IMediaDetailResult>? _items;
     private IMediaDetailResult? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _hasOAuthAccess;
+    private bool _isSearchModalOpen;
     private string? _errorMessage;
     private int _currentPage = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly HashSet<IMediaId> _reportedBrokenImages = [];
     private int _totalPages;
     private ProviderConfig? _providerSettings;
+    private IDisposable? _shortcutRegistration;
+    private bool _isShortcutRegistered;
 
     private string PageTitleText => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
@@ -142,6 +171,19 @@ else
     protected override async Task OnInitializedAsync()
     {
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_hasOAuthAccess && !_isShortcutRegistered)
+        {
+            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+K", OpenSearchFromShortcutAsync, SearchShortcutId);
+            _isShortcutRegistered = true;
+        }
+        else if (!_hasOAuthAccess && _isShortcutRegistered)
+        {
+            await UnregisterShortcutAsync();
+        }
     }
 
     private async Task HandleAccessChanged(bool hasAccess)
@@ -291,10 +333,92 @@ else
         return Task.CompletedTask;
     }
 
+    private void OpenSearchModal()
+    {
+        _isSearchModalOpen = true;
+    }
+
+    private async Task OpenSearchFromShortcutAsync()
+    {
+        if (!_hasOAuthAccess || _isSearchModalOpen)
+        {
+            return;
+        }
+        OpenSearchModal();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private ValueTask UnregisterShortcutAsync()
+    {
+        if (!_isShortcutRegistered)
+        {
+            return ValueTask.CompletedTask;
+        }
+        _shortcutRegistration?.Dispose();
+        _shortcutRegistration = null;
+        KeyboardShortcutService.Unregister(SearchShortcutId);
+        _isShortcutRegistered = false;
+        return ValueTask.CompletedTask;
+    }
+
+    private bool IsInWatchlist(IMediaId mediaId)
+    {
+        if (_items is null)
+        {
+            return false;
+        }
+        return _items.Any(i => i.SourceId.Equals(mediaId));
+    }
+
+    private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
+    {
+        if (isMarked)
+        {
+            if (!IsInWatchlist(id))
+            {
+                ToastService.Warning($"'{title}' is not in your watchlist.");
+                return false;
+            }
+
+            var removed = await WatchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
+            if (!removed)
+            {
+                ToastService.Warning("Failed to remove item from watchlist. Please try again.");
+                return false;
+            }
+
+            ToastService.Success($"'{title}' has been removed from your watchlist.");
+            await LoadWatchlistAsync();
+            return true;
+        }
+
+        if (IsInWatchlist(id))
+        {
+            ToastService.Warning($"'{title}' is already in your watchlist.");
+            return false;
+        }
+
+        var added = await WatchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
+        if (!added)
+        {
+            ToastService.Warning("Failed to add item to watchlist. Please try again.");
+            return false;
+        }
+
+        ToastService.Success($"'{title}' has been added to your watchlist.");
+        await LoadWatchlistAsync();
+        return true;
+    }
+
     public void Dispose()
     {
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }
-}
 
+    public async ValueTask DisposeAsync()
+    {
+        await UnregisterShortcutAsync();
+        Dispose();
+    }
+}
