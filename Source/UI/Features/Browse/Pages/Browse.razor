@@ -7,15 +7,12 @@
 @using Contracts.Media.Trending
 @using Contracts.Settings
 @using Contracts.Watchlist
-@implements IAsyncDisposable
 @inject IKeyedServiceIndex<MediaRecommendationProvider, IMediaRecommendationService> RecommendationServiceIndex
 @inject IWatchlistService WatchlistService
-@inject IKeyboardShortcutService KeyboardShortcutService
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
 @inject ScrollService ScrollService
 @inject IProviderConfigRepository ProviderConfigRepository
-@inject ToastService ToastService
 
 <PageTitle>Browse Movies</PageTitle>
 
@@ -23,17 +20,6 @@
 <ApiKeyGuard Provider="@_providerConfig.TrendingProvider.AsMediaProvider()" AccessChanged="HandleTrendingProviderAccessChanged"/>
 
 <PageContainer Heading="Trending Movies & Shows" Description="Discover what's popular this week">
-    <HeaderActions>
-        <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
-            <BbCommand Class="border">
-                <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                    <LucideIcon Name="search" Class="mr-2"/>
-                    Add from Search
-                    <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                </BbCommandItem>
-            </BbCommand>
-        </ProtectedSection>
-    </HeaderActions>
     <ChildContent>
         <ProtectedSection GuardState="HasOAuthAccess"
                           AuthProvider="@_providerConfig.WatchlistProvider"
@@ -73,17 +59,6 @@
                 }
             </ProtectedSection>
         </ProtectedSection>
-
-        <ProtectedSection GuardState="HasOAuthAccess" ShowFallback="false">
-            <SearchModal @bind-IsOpen="_isSearchModalOpen"
-                         SearchProvider="@_providerConfig.SearchProvider"
-                         IsInWatchlist="IsInWatchlist"
-                         OnToggle="ToggleFromSearchAsync">
-                <TileIcons Context="ctx">
-                    <WatchlistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
-                </TileIcons>
-            </SearchModal>
-        </ProtectedSection>
     </ChildContent>
 </PageContainer>
 
@@ -108,18 +83,14 @@
     private ITrendingMedia? _selectedMedia;
     private bool _isLoading;
     private bool _isSheetOpen;
-    private bool _isSearchModalOpen;
     private bool _isOAuthenticated;
     private bool _hasTrendingProviderApiKey;
     private bool HasAccess => _isOAuthenticated && _hasTrendingProviderApiKey;
-    private HashSet<string> _watchlistedIds = [];
+    private WatchlistedSet _watchlisted = WatchlistedSet.Empty;
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
     private int _totalPages = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private IDisposable? _shortcutRegistration;
-    private bool _isShortcutRegistered;
-    private const string BrowseSearchShortcutId = "browse-search-shortcut";
 
     protected override async Task OnInitializedAsync()
     {
@@ -136,10 +107,9 @@
         if (!_isOAuthenticated)
         {
             _hasTrendingProviderApiKey = false;
-            _watchlistedIds.Clear();
+            _watchlisted = WatchlistedSet.Empty;
             _trendingMedia = null;
             CloseSelectedMedia();
-            _isSearchModalOpen = false;
             _isLoading = false;
             return;
         }
@@ -175,51 +145,9 @@
         await LoadPageAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_isOAuthenticated && !_isShortcutRegistered)
-        {
-            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+K", OpenSearchFromShortcutAsync, BrowseSearchShortcutId);
-            _isShortcutRegistered = true;
-        }
-        else if (!_isOAuthenticated && _isShortcutRegistered)
-        {
-            await UnregisterShortcutAsync();
-        }
-    }
-
-    private async Task OpenSearchFromShortcutAsync()
-    {
-        if (!_isOAuthenticated || _isSearchModalOpen)
-        {
-            return;
-        }
-
-        OpenSearchModal();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private ValueTask UnregisterShortcutAsync()
-    {
-        if (!_isShortcutRegistered)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        _shortcutRegistration?.Dispose();
-        _shortcutRegistration = null;
-
-        KeyboardShortcutService.Unregister(BrowseSearchShortcutId);
-        _isShortcutRegistered = false;
-        return ValueTask.CompletedTask;
-    }
-
     private async Task LoadWatchlistIdsAsync()
     {
-        _watchlistedIds = await WatchlistService
-            .GetWatchlistAsync(_cancellationTokenSource.Token)
-            .Select(w => w.SourceId.Value)
-            .ToHashSetAsync(cancellationToken: _cancellationTokenSource.Token);
+        _watchlisted = await WatchlistService.GetWatchlistedAsync(_cancellationTokenSource.Token);
     }
 
     private async Task LoadPageAsync()
@@ -274,12 +202,6 @@
         _cancellationTokenSource.Dispose();
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        await UnregisterShortcutAsync();
-        Dispose();
-    }
-
     private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && IsInWatchlist(GetWatchlistProviderId(resolved));
 
     private IMediaId GetWatchlistProviderId(TrendingMedia media) => media.Ids.Single(id => id.Source == _providerConfig.WatchlistProvider.AsMediaProvider());
@@ -288,54 +210,9 @@
     {
         if (mediaId.Source == _providerConfig.WatchlistProvider.AsMediaProvider())
         {
-            return _watchlistedIds.Contains(mediaId.Value);
+            return _watchlisted.Contains(mediaId);
         }
         return false;
-    }
-
-    private void OpenSearchModal()
-    {
-        _isSearchModalOpen = true;
-    }
-
-    private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
-    {
-        if (isMarked)
-        {
-            if (!IsInWatchlist(id))
-            {
-                ToastService.Warning($"'{title}' is not in your watchlist.");
-                return false;
-            }
-
-            var removed = await WatchlistService.RemoveFromWatchlistAsync(id, _cancellationTokenSource.Token);
-            if (!removed)
-            {
-                ToastService.Warning("Failed to remove item from watchlist. Please try again.");
-                return false;
-            }
-
-            _watchlistedIds.Remove(id.Value);
-            ToastService.Success($"'{title}' has been removed from your watchlist.");
-            return true;
-        }
-
-        if (IsInWatchlist(id))
-        {
-            ToastService.Warning($"'{title}' is already in your watchlist.");
-            return false;
-        }
-
-        var added = await WatchlistService.AddToWatchlistAsync(id, _cancellationTokenSource.Token);
-        if (!added)
-        {
-            ToastService.Warning("Failed to add item to watchlist. Please try again.");
-            return false;
-        }
-
-        _watchlistedIds.Add(id.Value);
-        ToastService.Success($"'{title}' has been added to your watchlist.");
-        return true;
     }
 
     private void SelectMedia(ITrendingMedia media)
@@ -370,26 +247,18 @@
         }
 
         var watchlistId = GetWatchlistProviderId(resolved);
-        bool success;
 
         if (IsInWatchlist(resolved))
         {
-            success = await WatchlistService.RemoveFromWatchlistAsync(watchlistId);
-            if (success)
-            {
-                _watchlistedIds.Remove(watchlistId.Value);
-                _isSheetOpen = false;
-            }
+            await WatchlistService.RemoveFromWatchlistAsync(watchlistId);
         }
         else
         {
-            success = await WatchlistService.AddToWatchlistAsync(watchlistId);
-            if (success)
-            {
-                _watchlistedIds.Add(watchlistId.Value);
-                _isSheetOpen = false;
-            }
+            await WatchlistService.AddToWatchlistAsync(watchlistId);
         }
+
+        await LoadWatchlistIdsAsync();
+        _isSheetOpen = false;
     }
 
     private Task DetailsOpenChangedAsync(bool isOpen)
@@ -401,4 +270,3 @@
         return Task.CompletedTask;
     }
 }
-
