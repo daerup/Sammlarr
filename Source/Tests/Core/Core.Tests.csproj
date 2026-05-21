@@ -5,6 +5,7 @@
 		<Nullable>enable</Nullable>
 		<IsTestProject>true</IsTestProject>
 		<LangVersion>preview</LangVersion>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Dapper" />

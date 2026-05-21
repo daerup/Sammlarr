@@ -181,7 +181,13 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 
 	private static WatchlistSyncResult BuildResult(WatchlistSyncPlan plan, PushOutcome adds, PushOutcome removes)
 	{
-		if (plan.InsertCount == 0 && plan.ConfirmCount == 0 && plan.HardDeleteCount == 0 && adds.Pushed == 0 && removes.Pushed == 0)
+		if (
+			plan is { InsertCount: 0, ConfirmCount: 0, HardDeleteCount: 0 }
+            && adds.Pushed == 0
+            && removes.Pushed == 0
+            && adds.Failed == 0
+            && removes.Failed == 0
+		)
 		{
 			return new WatchlistSyncUnchanged();
 		}
