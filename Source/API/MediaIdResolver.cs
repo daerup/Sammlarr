@@ -65,13 +65,14 @@ internal class MediaIdResolver(
 
 		if (conversionResult is Resolved resolved)
 		{
-			await mediaIdGroupRepository.UpsertAsync(resolved.AllIds.Concat(candidates), cancellationToken);
+			var allIds = resolved.AllIds.Concat(candidates).Distinct().ToList();
+			await mediaIdGroupRepository.UpsertAsync(allIds, cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, target);
-			return resolved;
+			return new Resolved(resolved.Id, allIds.Except([resolved.Id]));
 		}
 
-		unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
-		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
+        unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
+        SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
 		return conversionResult;
 	}
 

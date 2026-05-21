@@ -69,8 +69,8 @@ public class MediaIdResolverTests
 			.And.Multiple(async resolved =>
 			{
 				await Assert.That(resolved.Id).IsEqualTo(tvdbId);
-				await Assert.That(resolved.AdditionalIds).Contains((IMediaId)newImdbId);
-				await Assert.That(resolved.AdditionalIds).Contains((IMediaId)tmdbId);
+				await Assert.That(resolved.AdditionalIds).Contains(newImdbId);
+				await Assert.That(resolved.AdditionalIds).Contains(tmdbId);
 			});
 		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
 	}
@@ -85,6 +85,44 @@ public class MediaIdResolverTests
 		await testee.ResolveAsync([tmdbId], MediaProvider.Tvdb, new None());
 
 		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenConvertedFresh_MergesNonTargetCandidatesIntoAdditionalIds()
+	{
+		var tmdbId = TmdbId.From("42", MediaType.Movie);
+		IMediaId imdbId = ImdbId.From("tt0042", MediaType.Movie);
+		var (testee, _) = CreateTestee();
+
+		var result = await testee.ResolveAsync([imdbId, tmdbId], MediaProvider.Tmdb, new None());
+
+		await Assert
+			.That(result)
+			.IsOfUnionType<ConversionResult, Resolved>()
+			.And.Multiple(async resolved =>
+			{
+				await Assert.That(resolved.Id).IsEqualTo<IMediaId>(tmdbId);
+				await Assert.That(resolved.AdditionalIds).Contains(imdbId);
+				await Assert.That(resolved.AdditionalIds.Count()).IsEqualTo(1);
+			});
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenConvertedFresh_DoesNotDuplicateTargetInAdditionalIds()
+	{
+		var tmdbId = TmdbId.From("42", MediaType.Movie);
+		var (testee, _) = CreateTestee();
+
+		var result = await testee.ResolveAsync([tmdbId], MediaProvider.Tmdb, new None());
+
+		await Assert
+			.That(result)
+			.IsOfUnionType<ConversionResult, Resolved>()
+			.And.Multiple(async resolved =>
+			{
+				await Assert.That(resolved.Id).IsEqualTo<IMediaId>(tmdbId);
+				await Assert.That(resolved.AdditionalIds).IsEmpty();
+			});
 	}
 
 	private static (MediaIdResolver Testee, Dependencies Deps) CreateTestee(IReadOnlyList<IMediaId>? cachedIds = null)

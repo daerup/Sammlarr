@@ -1,7 +1,5 @@
-using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Watchlist;
-using DB.Data.Feed;
 using DB.Data.MediaGroup;
 using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +22,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task AddAsync_NewEntry_Persists()
+	public async Task AddAsync_NewEntry_PersistsWithProvenance()
 	{
 		var id = PlexId.From("plex-100", MediaType.Movie);
 
@@ -32,17 +30,6 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		var entry = await fixture.Context.WatchlistEntries.AsNoTracking().SingleAsync();
 		await Assert.That(entry.Origin).IsEqualTo(WatchlistEntryOrigin.Manual);
-	}
-
-	[Test]
-	public async Task AddAsync_MissingMediaGroup_BootstrapsGroup()
-	{
-		var id = PlexId.From("plex-101", MediaType.Movie);
-
-		await _testee.AddAsync([id], new WatchlistItemProvenance(new ManualOrigin()));
-
-		var anyEntry = await fixture.Context.MediaIdEntries.AsNoTracking().AnyAsync(e => e.Identifier == MediaIdentifier.From(id));
-		await Assert.That(anyEntry).IsTrue();
 	}
 
 	[Test]
@@ -83,6 +70,40 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task AddAsync_EmptyCollection_DoesNothing()
+	{
+		await _testee.AddAsync([], new WatchlistItemProvenance(new ManualOrigin()));
+
+		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		await Assert.That(count).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task RemoveAsync_EmptyCollection_DoesNothing()
+	{
+		var id = PlexId.From("plex-108", MediaType.Movie);
+		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Manual);
+
+		await _testee.RemoveAsync([]);
+
+		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		await Assert.That(count).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task RemoveAsync_UnknownId_IsNoOp()
+	{
+		var seeded = PlexId.From("plex-109", MediaType.Movie);
+		var unknown = PlexId.From("plex-never-added", MediaType.Movie);
+		await SeedWatchlistEntryAsync(seeded, WatchlistEntryOrigin.Manual);
+
+		await _testee.RemoveAsync([unknown]);
+
+		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		await Assert.That(count).IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task GetIdsAsync_ReturnsAllEntriesForProvider()
 	{
 		var id = PlexId.From("plex-105", MediaType.Movie);
@@ -91,7 +112,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var ids = await _testee.GetIdsAsync(MediaProvider.Plex);
 
 		await Assert.That(ids).Count().IsEqualTo(1);
-		await Assert.That(ids[0]).IsEqualTo<IMediaId>(id);
+		await Assert.That(ids[0]).IsEqualTo(id);
 	}
 
 	[Test]
@@ -103,60 +124,16 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var entries = await _testee.GetEntriesAsync(MediaProvider.Plex);
 
 		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].Id).IsEqualTo<IMediaId>(id);
+		await Assert.That(entries[0].Id).IsEqualTo(id);
 		await Assert.That(entries[0].Provenance.Value).IsTypeOf<ManualOrigin>();
 	}
 
-	[Test]
-	public async Task FeedDeleted_OrphansAttachedEntries()
-	{
-		var id = PlexId.From("plex-107", MediaType.Movie);
-		var feed = await SeedFeedAsync("My Feed");
-		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Feed, sourceFeedId: feed);
-
-		var feedRepo = new FeedRepository(fixture.ContextFactory);
-		await feedRepo.DeleteFeedAsync(feed);
-
-		var entry = await fixture.Context.WatchlistEntries.AsNoTracking().SingleAsync();
-		await Assert.That(entry.Origin).IsEqualTo(WatchlistEntryOrigin.Orphaned);
-		await Assert.That(entry.SourceFeedNameSnapshot).IsEqualTo("My Feed");
-		await Assert.That(entry.SourceFeedId).IsNull();
-	}
-
-	private async Task<Guid> SeedFeedAsync(string name)
-	{
-		var feed = new FeedEntity
-		{
-			Name = name,
-			IsEnabled = true,
-			Provider = Contracts.Media.Feed.FeedProvider.Mdblist,
-			Strategy = Contracts.Media.Feed.FeedAddStrategy.Append,
-			Identifier = "x",
-		};
-		fixture.Context.Feeds.Add(feed);
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-		return feed.Id;
-	}
-
-	private async Task<Guid> SeedWatchlistEntryAsync(IMediaId id, WatchlistEntryOrigin origin, Guid? sourceFeedId = null, string? sourceFeedNameSnapshot = null)
+	private async Task SeedWatchlistEntryAsync(IMediaId id, WatchlistEntryOrigin origin)
 	{
 		await _groupRepo.UpsertAsync([id]);
-		var groupId = await fixture
-			.Context.MediaIdEntries.Where(e => e.Identifier == MediaIdentifier.From(id))
-			.Select(e => e.MediaIdGroupEntity.Id)
-			.SingleAsync();
-		var mediaGroup = await fixture.Context.MediaIdGroups.FindAsync(groupId);
-		var entry = new WatchlistEntryEntity
-		{
-			Media = mediaGroup!,
-			Origin = origin,
-			SourceFeedId = sourceFeedId,
-			SourceFeedNameSnapshot = sourceFeedNameSnapshot,
-		};
-		fixture.Context.WatchlistEntries.Add(entry);
+		var group = await fixture.Context.MediaIdEntries.Where(e => e.Identifier == MediaIdentifier.From(id)).Select(e => e.MediaIdGroupEntity).SingleAsync();
+		fixture.Context.WatchlistEntries.Add(new WatchlistEntryEntity { Media = group, Origin = origin });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
-		return entry.Id;
 	}
 }

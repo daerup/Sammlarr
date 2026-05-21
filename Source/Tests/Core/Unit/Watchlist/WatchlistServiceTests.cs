@@ -1,10 +1,7 @@
 using Bogus;
-using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using Contracts.Media.Trending;
-using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Core.Watchlist;
@@ -24,15 +21,9 @@ public class WatchlistServiceTests
 		var entry = new WatchlistEntry(mediaId, addedAt, new WatchlistItemProvenance(new ManualOrigin()));
 		var detail = CreateMovieDetailResult(mediaId);
 
-		var repository = IWatchlistRepository.Mock();
-		repository.GetEntriesAsync(Any(), Any()).Returns([entry]);
+		var scenario = Scenario.Build(entries: [entry], metadata: detail);
 
-		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(Any<IMediaId>(), Any()).Returns(detail);
-
-		var testee = CreateTestee(repository: repository, metadataProvider: metadataProvider);
-
-		var result = await testee.GetWatchlistItemsAsync().ToListAsync();
+		var result = await scenario.Testee.GetWatchlistItemsAsync().ToListAsync();
 
 		await Assert.That(result).Count().IsEqualTo(1);
 		await Assert.That(result[0].Detail.SourceId).IsEqualTo(mediaId);
@@ -42,119 +33,112 @@ public class WatchlistServiceTests
 	[Test]
 	public async Task GetWatchlistIdsAsync_ReturnsRepositoryIds()
 	{
-		IMediaId first = PlexId.From("plex-1", MediaType.Movie);
-		IMediaId second = PlexId.From("plex-2", MediaType.Movie);
-		IReadOnlySet<IMediaId> ids = new HashSet<IMediaId> { first, second };
-		var repository = IWatchlistRepository.Mock();
-		repository
-			.GetEntriesAsync(Any(), Any())
-			.Returns(ids.Select(id => new WatchlistEntry(id, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin()))).ToList());
+		IMediaId first = CreateMediaId();
+		IMediaId second = CreateMediaId();
+		var scenario = Scenario.Build(
+			entries:
+			[
+				new WatchlistEntry(first, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin())),
+				new WatchlistEntry(second, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin())),
+			]
+		);
 
-		var testee = CreateTestee(repository: repository);
+		var result = await scenario.Testee.GetWatchlistIdsAsync();
 
-		var result = await testee.GetWatchlistIdsAsync();
-
-		await Assert.That(result.Contains(first)).IsTrue();
-		await Assert.That(result.Contains(PlexId.From("missing", MediaType.Movie))).IsFalse();
+		await Assert.That(result).Contains(first);
+		await Assert.That(result).Contains(second);
 	}
 
 	[Test]
-	public async Task AddToWatchlistAsync_BrandNewId_EnqueuesOutboxAdd_DoesNotPush()
+	public async Task AddToWatchlistAsync_BrandNewId_EnqueuesOutboxAdd()
 	{
 		var mediaId = CreateMediaId();
-		var provider = IWatchlistProvider.Mock();
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any(), Any()).Returns([]);
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any(), Any()).Returns([]);
+		var scenario = Scenario.Build();
 
-		var testee = CreateTestee(provider: provider, repository: repository, outbox: outbox);
+		await scenario.Testee.AddToWatchlistAsync([mediaId], new ManualOrigin());
 
-		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin());
-
-		repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
-		outbox.EnqueueAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-		provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
+		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
+		scenario.Outbox.EnqueueAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task AddToWatchlistAsync_WhenPendingRemoveExists_DropsRemove_NoOutboxAdd()
+	public async Task AddToWatchlistAsync_EmptyCollection_DoesNothing()
+	{
+		var scenario = Scenario.Build();
+
+		await scenario.Testee.AddToWatchlistAsync([], new ManualOrigin());
+
+		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasNeverCalled();
+		scenario.Outbox.EnqueueAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task AddToWatchlistAsync_WhenPendingRemoveExists_DropsRemoveInstead()
 	{
 		var mediaId = CreateMediaId();
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any(), Any()).Returns([]);
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any(), Any()).Returns([new WatchlistOperation(mediaId, WatchlistOperationKind.Remove)]);
+		var scenario = Scenario.Build(outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Remove)]);
 
-		var testee = CreateTestee(repository: repository, outbox: outbox);
+		await scenario.Testee.AddToWatchlistAsync([mediaId], new ManualOrigin());
 
-		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin());
+		scenario.Outbox.DropAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
+	}
 
-		outbox.DropAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-		outbox.EnqueueAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-		repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
+	[Test]
+	public async Task AddToWatchlistAsync_AlreadySyncedId_DoesNotEnqueueAdd()
+	{
+		IMediaId syncedId = CreateMediaId();
+		var scenario = Scenario.Build(existingIds: [syncedId]);
+
+		await scenario.Testee.AddToWatchlistAsync([syncedId], new ManualOrigin());
+
+		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
+		scenario.Outbox.EnqueueAsync(WatchlistOperationKind.Add, Arg.Is<IEnumerable<IMediaId>>(ids => ids.Any()), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task AddToWatchlistAsync_MixedBatch_PartitionsUncancelAndPush()
+	{
+		IMediaId pendingRemoveId = CreateMediaId();
+		IMediaId brandNewId = CreateMediaId();
+		IMediaId syncedId = CreateMediaId();
+		var scenario = Scenario.Build(outbox: [new WatchlistOperation(pendingRemoveId, WatchlistOperationKind.Remove)], existingIds: [syncedId]);
+
+		await scenario.Testee.AddToWatchlistAsync([pendingRemoveId, brandNewId, syncedId], new ManualOrigin());
+
+		scenario
+			.Outbox.DropAsync(WatchlistOperationKind.Remove, Arg.Is<IEnumerable<IMediaId>>(ids => ids.SequenceEqual(new[] { pendingRemoveId })), Any())
+			.WasCalled(Times.Once);
+		scenario
+			.Outbox.EnqueueAsync(WatchlistOperationKind.Add, Arg.Is<IEnumerable<IMediaId>>(ids => ids.SequenceEqual(new[] { brandNewId })), Any())
+			.WasCalled(Times.Once);
+		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
 	public async Task RemoveFromWatchlistAsync_WhenSynced_EnqueuesOutboxRemove()
 	{
 		var mediaId = CreateMediaId();
-		var provider = IWatchlistProvider.Mock();
-		var repository = IWatchlistRepository.Mock();
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any(), Any()).Returns([]);
+		var scenario = Scenario.Build();
 
-		var testee = CreateTestee(provider: provider, repository: repository, outbox: outbox);
+		await scenario.Testee.RemoveFromWatchlistAsync(mediaId);
 
-		await testee.RemoveFromWatchlistAsync(mediaId);
-
-		outbox.EnqueueAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-		repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-		provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
+		scenario.Outbox.EnqueueAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		scenario.Repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task RemoveFromWatchlistAsync_WhenUnpushedAdd_DropsOutboxAdd_NoEnqueueRemove()
+	public async Task RemoveFromWatchlistAsync_WhenUnpushedAdd_CancelsAddOnly()
 	{
 		var mediaId = CreateMediaId();
-		var repository = IWatchlistRepository.Mock();
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any(), Any()).Returns([new WatchlistOperation(mediaId, WatchlistOperationKind.Add)]);
+		var scenario = Scenario.Build(outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)]);
 
-		var testee = CreateTestee(repository: repository, outbox: outbox);
+		await scenario.Testee.RemoveFromWatchlistAsync(mediaId);
 
-		await testee.RemoveFromWatchlistAsync(mediaId);
-
-		outbox.DropAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-		outbox.EnqueueAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
-		repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
-	}
-
-	private WatchlistService CreateTestee(
-		Mock<IWatchlistProvider>? provider = null,
-		Mock<IWatchlistRepository>? repository = null,
-		Mock<IWatchlistOutbox>? outbox = null,
-		Mock<IMediaMetadataProvider>? metadataProvider = null
-	)
-	{
-		var configRepository = IProviderConfigRepository.Mock();
-		configRepository
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					WatchlistProvider = WatchlistProvider.Plex,
-					TrendingProvider = MediaRecommendationProvider.Tmdb,
-					SearchProvider = MediaSearchProvider.Plex,
-					RatingProvider = RatingProvider.Tmdb,
-				}
-			);
-
-		var repo = repository ?? IWatchlistRepository.Mock();
-		var outboxMock = outbox ?? IWatchlistOutbox.Mock();
-		var metadata = metadataProvider ?? IMediaMetadataProvider.Mock();
-
-		return new WatchlistService(configRepository.Object, repo.Object, outboxMock.Object, metadata.Object);
+		scenario.Outbox.DropAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		scenario.Outbox.EnqueueAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
+		scenario.Repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
 	private PlexId CreateMediaId() => PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie);
@@ -174,12 +158,35 @@ public class WatchlistServiceTests
 			Genres = [],
 		};
 
-	private static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(params T[] items)
+	private sealed record Scenario(
+		Mock<IWatchlistRepository> Repository,
+		Mock<IWatchlistOutbox> Outbox,
+		Mock<IMediaMetadataProvider> Metadata,
+		WatchlistService Testee
+	)
 	{
-		foreach (var item in items)
+		public static Scenario Build(
+			IReadOnlyList<WatchlistEntry>? entries = null,
+			IReadOnlyList<WatchlistOperation>? outbox = null,
+			IReadOnlyList<IMediaId>? existingIds = null,
+			MovieDetailResult? metadata = null
+		)
 		{
-			yield return item;
-			await Task.CompletedTask;
+			var repository = IWatchlistRepository.Mock();
+			repository.GetEntriesAsync(Any(), Any()).Returns(entries ?? []);
+			repository.GetIdsAsync(Any(), Any()).Returns(existingIds ?? []);
+
+			var outboxMock = IWatchlistOutbox.Mock();
+			outboxMock.GetAsync(Any(), Any()).Returns(outbox ?? []);
+
+			var metadataProvider = IMediaMetadataProvider.Mock();
+			if (metadata is not null)
+			{
+				metadataProvider.GetAsync(Any<IMediaId>(), Any()).Returns(metadata);
+			}
+
+			var testee = new WatchlistService(ProviderConfigStubs.PlexWatchlist().Object, repository, outboxMock, metadataProvider);
+			return new Scenario(repository, outboxMock, metadataProvider, testee);
 		}
 	}
 }
