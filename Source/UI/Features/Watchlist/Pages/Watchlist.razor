@@ -1,4 +1,5 @@
 @page "/watchlist"
+@using Contracts
 @using Contracts.Auth
 @using Contracts.Media
 @using Contracts.Media.Metadata
@@ -7,6 +8,7 @@
 @using Contracts.Watchlist
 @using global::Shared
 @using UI.Features.Watchlist.Components
+@using UI.Shared.Services.Branding
 @implements IDisposable
 @implements IAsyncDisposable
 @inject IWatchlistService WatchlistService
@@ -14,6 +16,7 @@
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
+@inject MediaProviderBrandingService BrandingService
 @inject Notifier Notifier
 
 <PageTitle>@PageTitleText</PageTitle>
@@ -49,7 +52,7 @@ else
                             Bulk edit
                         </BbButton>
                     }
-                    <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync"/>
+                    <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
                 </div>
             </ProtectedSection>
         </HeaderActions>
@@ -85,10 +88,9 @@ else
                         <p class="text-sm text-muted-foreground leading-relaxed">Click Sync to load it
                             from @_providerSettings.WatchlistProvider.GetDescription(), or add a title with <span
                                 class="font-medium text-foreground">Ctrl+K</span>.</p>
-                        <BbButton Variant="ButtonVariant.Default" @onclick="SyncFromEmptyStateAsync">
-                            <LucideIcon Name="refresh-cw" Size="14" Class="mr-2"/>
-                            Sync now
-                        </BbButton>
+                        <div class="flex justify-center">
+                            <WatchlistSyncButton OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
+                        </div>
                     </div>
                 }
                 else if (_items is not null)
@@ -174,6 +176,7 @@ else
     private string PageTitleText => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageDescription => _providerSettings is null ? "Your saved movies and shows." : $"Your saved movies and shows from {_providerSettings.WatchlistProvider.GetDescription()}";
+    private string? WatchlistBrandColor => _providerSettings is null ? null : BrandingService.GetBrandingInfo(_providerSettings.WatchlistProvider.AsMediaProvider()).BrandColor;
     private bool IsOAuthAllowed() => _hasOAuthAccess;
     private DateTimeOffset SelectedReleaseDate => _selectedItem is {} item ? new DateTimeOffset(item.Detail.ReleaseDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero) : DateTimeOffset.MinValue;
 
@@ -242,8 +245,6 @@ else
             StateHasChanged();
         }
     }
-
-    private Task SyncFromEmptyStateAsync() => _syncControl?.SyncAsync() ?? Task.CompletedTask;
 
     private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
 
