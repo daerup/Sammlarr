@@ -1,12 +1,19 @@
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
+using System.Runtime.CompilerServices;
 using Contracts.Processing;
 
 namespace Core.Processing;
 
 internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 {
-	public IEnumerable<QueryResult<T>> Execute(IEnumerable<T> source, QueryOptions options, Func<T, bool> isWatchlisted, Func<T, bool> isBlacklisted)
+	public async IAsyncEnumerable<QueryResult<T>> Execute(
+		IEnumerable<T> source,
+		QueryOptions options,
+		Func<T, bool> isWatchlisted,
+		Func<T, bool> isBlacklisted,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
 	{
 		var all = source.AsQueryable();
 
@@ -17,11 +24,18 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 		}
 
 		var filtered = options?.Filter is { } filter ? all.Where(FilterEvaluator.Build(filter)) : all;
-		var removed = all.Except(filtered);
+		var removed = new HashSet<T>(all.Except(filtered));
 
 		var taken = 0;
-		foreach (var item in all)
+        const int cooperativeYieldInterval = 32;
+		foreach (var (i, item) in all.Index())
 		{
+			cancellationToken.ThrowIfCancellationRequested();
+            if (i % cooperativeYieldInterval == 0)
+            {
+				await Task.Yield();
+            }
+
 			if (removed.Contains(item))
 			{
 				yield return new Culled<T>(item);

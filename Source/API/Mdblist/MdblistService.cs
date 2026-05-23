@@ -102,7 +102,14 @@ internal class MdblistService(
 		var conversion = await mediaIdResolver.ResolveAsync(candidates, watchlistProvider, BuildHints(pair), cancellationToken);
 		if (conversion is Resolved resolved)
 		{
-			return await metadataProvider.GetAsync(resolved.Id, cancellationToken);
+            try
+            {
+    			return await metadataProvider.GetAsync(resolved.Id, cancellationToken);
+            }
+            catch (Exception)
+            {
+                return BuildUnresolved(pair.ListItem, pair.MediaType);
+            }
 		}
 		return BuildUnresolved(pair.ListItem, pair.MediaType);
 	}

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using Contracts.Media;
 
 namespace DB.Data.Media;
@@ -28,10 +29,19 @@ internal static class MediaQueries
 			ctx.ExternalMediaIds.WhereMatchingAny(mediaIds).Select(e => e.Media).Distinct();
 	}
 
+	private static readonly MethodInfo ContainsMethod = typeof(Enumerable)
+		.GetMethods()
+		.First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
+		.MakeGenericMethod(typeof(string));
+
 	private static Expression<Func<ExternalMediaIdEntity, bool>> BuildAnyMatchPredicate(IEnumerable<IMediaId> mediaIds)
 	{
-		var distinct = mediaIds.Select(id => (id.Source, id.Type, id.Value)).Distinct().ToList();
-		if (distinct.Count is 0)
+		var groups = mediaIds
+			.GroupBy(id => (id.Source, id.Type))
+			.Select(g => (g.Key.Source, g.Key.Type, Ids: g.Select(id => id.Value).Distinct().ToArray()))
+			.ToList();
+
+		if (groups.Count is 0)
 		{
 			return _ => false;
 		}
@@ -42,13 +52,13 @@ internal static class MediaQueries
 		var id = Expression.Property(parameter, nameof(ExternalMediaIdEntity.Id));
 
 		Expression? body = null;
-		foreach (var (idSource, idType, idValue) in distinct)
+		foreach (var (idSource, idType, idValues) in groups)
 		{
-			var triplet = Expression.AndAlso(
+			var clause = Expression.AndAlso(
 				Expression.AndAlso(Expression.Equal(source, Expression.Constant(idSource)), Expression.Equal(type, Expression.Constant(idType))),
-				Expression.Equal(id, Expression.Constant(idValue))
+				Expression.Call(null, ContainsMethod, Expression.Constant(idValues, typeof(IEnumerable<string>)), id)
 			);
-			body = body is null ? triplet : Expression.OrElse(body, triplet);
+			body = body is null ? clause : Expression.OrElse(body, clause);
 		}
 
 		return Expression.Lambda<Func<ExternalMediaIdEntity, bool>>(body!, parameter);

@@ -66,7 +66,8 @@ public class ExternalMediaIdEntityTests(SQLiteFixture fixture) : IAsyncDisposabl
 	[Test]
 	public async Task WhereMatchingAny_TranslatesAtScale()
 	{
-		var ids = Enumerable.Range(0, 100).Select(i => (IMediaId)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
+		const int count = 2000;
+		var ids = Enumerable.Range(0, count).Select(i => (IMediaId)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
 		var media = new MediaEntity();
 		fixture.Context.ExternalMediaIds.AddRange(ids.Select(id => id.ToExternalId(media)));
 		await fixture.Context.SaveChangesAsync();
@@ -74,6 +75,6 @@ public class ExternalMediaIdEntityTests(SQLiteFixture fixture) : IAsyncDisposabl
 
 		var matched = await fixture.Context.ExternalMediaIds.AsNoTracking().WhereMatchingAny(ids).ToListAsync();
 
-		await Assert.That(matched).Count().IsEqualTo(100);
+		await Assert.That(matched).Count().IsEqualTo(count);
 	}
 }

@@ -20,11 +20,11 @@
                Description="@PageDescriptionText"
                HeaderClass="@(IsOAuthAllowed() ? "border-b" : "")">
     <HeaderActions>
-        @if (_previewStatus.IsLoading)
+        @if (_previewStatus.IsLoading || _isApplying)
         {
             <BbButton Variant="ButtonVariant.Default" Disabled="true">
                 <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                <span>Testing…</span>
+                <span>@(_isApplying && !_previewStatus.IsLoading ? "Applying…" : "Testing…")</span>
             </BbButton>
         }
         else if (ShowApplyButton)
@@ -65,7 +65,7 @@
         <HoverButton Preset="HoverButtonPreset.Destructive"
                      Text="Cancel"
                      OnClick="ReturnAsync"
-                     Disabled="@(_previewStatus.IsLoading || _isSaving)"/>
+                     Disabled="@(_previewStatus.IsLoading || _isSaving || _isApplying)"/>
     </HeaderActions>
     <ChildContent>
         <ProtectedSection GuardState="IsOAuthAllowed"
@@ -114,6 +114,7 @@
 
     private bool _showValidation;
     private bool _isSaving;
+    private bool _isApplying;
     private bool _pendingAutoApply;
     private PreviewStatus _previewStatus = new();
     private FeedPreviewPanel _previewPanel = null!;
@@ -220,9 +221,19 @@
 
     private async Task ApplyAsync()
     {
-        await _previewPanel.ApplyAsync();
-        _appliedHash = _config.GetPreviewHash();
+        _isApplying = true;
         StateHasChanged();
+        try
+        {
+            var applied = _config;
+            await _previewPanel.ApplyAsync();
+            _appliedHash = applied.GetPreviewHash();
+        }
+        finally
+        {
+            _isApplying = false;
+            StateHasChanged();
+        }
     }
 
     private Task ReturnAsync()

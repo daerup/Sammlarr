@@ -106,7 +106,8 @@ internal class MediaMetadataRepository(
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.MediaMetadata.Where(m => ctx.MediaMatchingAny(mediaIds).Any(media => media.Id == m.MediaId)).ExecuteDeleteAsync(cancellationToken);
+		var matchingMediaIds = ctx.MediaMatchingAny(mediaIds).Select(media => media.Id);
+		await ctx.MediaMetadata.Where(m => matchingMediaIds.Contains(m.MediaId)).ExecuteDeleteAsync(cancellationToken);
 	}
 
 	public async Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default)

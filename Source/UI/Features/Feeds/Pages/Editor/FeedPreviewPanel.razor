@@ -20,8 +20,10 @@
     <div class="shrink-0 sticky top-0 z-20 px-6 pt-6 pb-4 border-b flex items-center gap-2 bg-base-100 rounded-t-lg">
         <BbInput Placeholder="Search media..."
                  Class="w-full"
-                 @bind-Value="_searchQuery"
-                 UpdateTiming="UpdateTiming.Immediate"/>
+                 Value="@_searchQuery"
+                 ValueChanged="OnSearchQueryChanged"
+                 UpdateTiming="UpdateTiming.Immediate"
+                 Disabled="IsLoading"/>
         <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
         @if (HasResults)
         {
@@ -54,7 +56,7 @@
         }
     </div>
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col">
-        @if (HasItems && (FilteredBySearchResults.Any() || FilteredBySearchUnresolvedResults.Any()))
+        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0))
         {
             <div class="mb-4 shrink-0 flex items-start justify-between gap-3">
                 <div>
@@ -66,8 +68,8 @@
                         }
                     </h2>
                     <p class="text-sm text-muted-foreground mt-0.5">
-                        <FeedSourceLink Identifier="@(_testedConfig?.Identifier ?? Config.Identifier)"
-                                        Provider="@(_testedConfig?.Provider ?? Config.Provider!.Value)"/>
+                        <FeedSourceLink Identifier="@(_appliedConfig?.Identifier ?? Config.Identifier)"
+                                        Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"/>
                     </p>
                 </div>
                 <BbTooltipProvider>
@@ -133,96 +135,102 @@
                     </div>
                 </BbTooltipProvider>
             </div>
-            @if (FilteredBySearchResults.Any())
+            @if (_filteredResults.Count > 0)
             {
-                <div class="space-y-2">
-                    @foreach (var result in FilteredBySearchResults)
-                    {
-                        var item = GetItem(result);
-                        var isCulled = result.Value is Culled<IMediaDetailResult>;
-                        var isTruncated = result.Value is Truncated<IMediaDetailResult>;
-                        var isDimmed = isCulled || isTruncated;
-                        var isGreyedOut = result.Value is Bypassed<IMediaDetailResult>;
-                        var isBlacklisted = IsBlacklisted(item);
-                        var isInWatchlist = IsWatchlisted(item);
-                        var isTogglingWatchlist = _togglingWatchlistItem == item;
-                        var isTogglingBlacklist = _togglingBlacklistItem == item;
+                <Virtualize TItem="QueryResult<IMediaDetailResult>" Items="_filteredResults" ItemSize="180" OverscanCount="3">
+                    <ItemContent Context="result">
+                        @{
+                            var item = GetItem(result);
+                            var isCulled = result.Value is Culled<IMediaDetailResult>;
+                            var isTruncated = result.Value is Truncated<IMediaDetailResult>;
+                            var isDimmed = isCulled || isTruncated;
+                            var isGreyedOut = result.Value is Bypassed<IMediaDetailResult>;
+                            var isBlacklisted = IsBlacklisted(item);
+                            var isInWatchlist = IsWatchlisted(item);
+                            var isTogglingWatchlist = _togglingWatchlistItem == item;
+                            var isTogglingBlacklist = _togglingBlacklistItem == item;
 
-                        var hoverStyle = (isDimmed, isGreyedOut) switch
-                        {
-                            (true, _) => "result-dimmed",
-                            (false, true) => "result-grey",
-                            _ => "hover-bg"
-                        };
-                        <MediaDetailTile @key="item"
-                                         Result="item"
-                                         Class="@(hoverStyle)"
-                                         IsFocused="_focusedResult == item"
-                                         OnFocusIn="() => _focusedResult = item"
-                                         OnFocusOut="() => ClearFocus(item)"
-                                         OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
-                            <Icons>
-                                @if (isDimmed)
-                                {
-                                    <BbTooltipProvider>
-                                        <BbTooltip DelayDuration="300">
-                                            <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                <div class="search-result-status-indicator">
-                                                    <LucideIcon Name="@(isCulled ? "filter-x" : "scissors")" Size="24"/>
-                                                </div>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>
-                                                @(isCulled ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
-                                            </BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
-                                }
-                                else if (isGreyedOut)
-                                {
-                                    <BbTooltipProvider>
-                                        <BbTooltip DelayDuration="300">
-                                            <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                                <div class="search-result-status-indicator">
-                                                    <LucideIcon Name="redo-dot" Size="24"/>
-                                                </div>
-                                            </BbTooltipTrigger>
-                                            <BbTooltipContent>@BypassedTooltip((Bypassed<IMediaDetailResult>)result.Value)</BbTooltipContent>
-                                        </BbTooltip>
-                                    </BbTooltipProvider>
-                                }
-                                <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist" OnToggle="ToggleWatchlistAsync"/>
-                                <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist" OnToggle="ToggleBlacklistAsync"/>
-                            </Icons>
-                        </MediaDetailTile>
-                    }
-                </div>
+                            var hoverStyle = (isDimmed, isGreyedOut) switch
+                            {
+                                (true, _) => "result-dimmed",
+                                (false, true) => "result-grey",
+                                _ => "hover-bg"
+                            };
+                        }
+                        <div class="pb-2">
+                            <MediaDetailTile @key="item"
+                                             Result="item"
+                                             Class="@(hoverStyle)"
+                                             IsFocused="_focusedResult == item"
+                                             OnFocusIn="() => _focusedResult = item"
+                                             OnFocusOut="() => ClearFocus(item)"
+                                             OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
+                                <Icons>
+                                    @if (isDimmed)
+                                    {
+                                        <BbTooltipProvider>
+                                            <BbTooltip DelayDuration="300">
+                                                <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                    <div class="search-result-status-indicator">
+                                                        <LucideIcon Name="@(isCulled ? "filter-x" : "scissors")" Size="24"/>
+                                                    </div>
+                                                </BbTooltipTrigger>
+                                                <BbTooltipContent>
+                                                    @(isCulled ? "Filtered out by your filter rules." : "Excluded by the specified limit.")
+                                                </BbTooltipContent>
+                                            </BbTooltip>
+                                        </BbTooltipProvider>
+                                    }
+                                    else if (isGreyedOut)
+                                    {
+                                        <BbTooltipProvider>
+                                            <BbTooltip DelayDuration="300">
+                                                <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                    <div class="search-result-status-indicator">
+                                                        <LucideIcon Name="redo-dot" Size="24"/>
+                                                    </div>
+                                                </BbTooltipTrigger>
+                                                <BbTooltipContent>@BypassedTooltip((Bypassed<IMediaDetailResult>)result.Value)</BbTooltipContent>
+                                            </BbTooltip>
+                                        </BbTooltipProvider>
+                                    }
+                                    <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist" OnToggle="ToggleWatchlistAsync"/>
+                                    <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist" OnToggle="ToggleBlacklistAsync"/>
+                                </Icons>
+                            </MediaDetailTile>
+                        </div>
+                    </ItemContent>
+                </Virtualize>
             }
-            @if (FilteredBySearchUnresolvedResults.Any())
+            @if (_filteredUnresolvedResults.Count > 0)
             {
-                <div class="mt-4 space-y-2">
-                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">Not found in provider</p>
-                    @foreach (var item in FilteredBySearchUnresolvedResults)
-                    {
-                        <MediaDetailTile @key="item"
-                                         Result="item"
-                                         IsFocused="_focusedResult == item"
-                                         OnFocusIn="() => _focusedResult = item"
-                                         OnFocusOut="() => ClearFocus(item)"
-                                         OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
-                            <Icons>
-                                <BbTooltipProvider>
-                                    <BbTooltip DelayDuration="300">
-                                        <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                                            <div class="search-result-status-indicator">
-                                                <LucideIcon Name="circle-alert" Size="24"/>
-                                            </div>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
-                                    </BbTooltip>
-                                </BbTooltipProvider>
-                            </Icons>
-                        </MediaDetailTile>
-                    }
+                <div class="mt-4">
+                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
+                    <Virtualize TItem="IMediaDetailResult" Items="_filteredUnresolvedResults" ItemSize="180" OverscanCount="3">
+                        <ItemContent Context="item">
+                            <div class="pb-2">
+                                <MediaDetailTile @key="item"
+                                                 Result="item"
+                                                 IsFocused="_focusedResult == item"
+                                                 OnFocusIn="() => _focusedResult = item"
+                                                 OnFocusOut="() => ClearFocus(item)"
+                                                 OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
+                                    <Icons>
+                                        <BbTooltipProvider>
+                                            <BbTooltip DelayDuration="300">
+                                                <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                                    <div class="search-result-status-indicator">
+                                                        <LucideIcon Name="circle-alert" Size="24"/>
+                                                    </div>
+                                                </BbTooltipTrigger>
+                                                <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
+                                            </BbTooltip>
+                                        </BbTooltipProvider>
+                                    </Icons>
+                                </MediaDetailTile>
+                            </div>
+                        </ItemContent>
+                    </Virtualize>
                 </div>
             }
             @if (IsLoading)
@@ -277,7 +285,9 @@
     private List<IMediaDetailResult> _rawResults = [];
     private IReadOnlyList<IMediaDetailResult> _unresolvedResults = [];
     private IReadOnlyList<QueryResult<IMediaDetailResult>> _processedResults = [];
-    private FeedConfig? _testedConfig;
+    private List<QueryResult<IMediaDetailResult>> _filteredResults = [];
+    private List<IMediaDetailResult> _filteredUnresolvedResults = [];
+    private FeedConfig? _appliedConfig;
     private CancellationTokenSource? _cts;
     private PreviewStatus _lastEmittedStatus = new();
 
@@ -299,14 +309,14 @@
     protected override void OnParametersSet()
     {
         if (_fetchState is FetchState.Success or FetchState.Failed &&
-            (Config.Provider != _testedConfig?.Provider ||
-             !string.Equals(Config.Identifier?.Trim(), _testedConfig?.Identifier?.Trim(), StringComparison.Ordinal)))
+            (Config.Provider != _appliedConfig?.Provider ||
+             !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal)))
         {
             _fetchState = FetchState.Idle;
             _rawResults = [];
             _unresolvedResults = [];
             _processedResults = [];
-            _testedConfig = null;
+            _appliedConfig = null;
         }
 
         _ = EmitStatusIfChangedAsync();
@@ -320,8 +330,10 @@
         }
 
         var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
-                         Config.Provider != _testedConfig?.Provider ||
-                         !string.Equals(Config.Identifier?.Trim(), _testedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
+                         Config.Provider != _appliedConfig?.Provider ||
+                         !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
+
+        _appliedConfig = Config;
 
         if (needsFetch)
         {
@@ -335,7 +347,7 @@
         }
         else
         {
-            Reprocess();
+            await ReprocessAsync(CancellationToken.None);
         }
 
         await EmitStatusIfChangedAsync();
@@ -401,7 +413,7 @@
                 _rawResults.Add(item);
                 if (sw.ElapsedMilliseconds >= 150)
                 {
-                    Reprocess();
+                    await ReprocessAsync(ct);
                     await InvokeAsync(StateHasChanged);
                     sw.Restart();
                 }
@@ -415,7 +427,7 @@
             }
 
             _fetchState = FetchState.Success;
-            Reprocess();
+            await ReprocessAsync(ct);
             Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(totalSw.Elapsed)}.");
         }
         catch (OperationCanceledException)
@@ -441,19 +453,17 @@
             _fetchState = FetchState.Failed;
             Notifier.Error(ex, "Failed to fetch media");
         }
-        finally
-        {
-            _testedConfig = Config;
-        }
     }
     private void ClearResults()
     {
         _rawResults = [];
         _unresolvedResults = [];
         _processedResults = [];
+        _filteredResults = [];
+        _filteredUnresolvedResults = [];
     }
 
-    private void Reprocess()
+    private async Task ReprocessAsync(CancellationToken cancellationToken)
     {
         _hasEnrollmentChanges = false;
 
@@ -461,19 +471,44 @@
         {
             _unresolvedResults = [];
             _processedResults = [];
+        }
+        else
+        {
+            _unresolvedResults = _rawResults.Where(r => r is UnresolvedMediaResult).ToList();
+            var resolvedItems = _rawResults.Where(r => r is not UnresolvedMediaResult).ToList();
+
+            var applied = _appliedConfig ?? Config;
+            var options = new QueryOptions
+            {
+                Sort = applied.Sort,
+                Limit = applied.Limit,
+                Filter = FilterDefinitionConverter.ToQueryFilter(applied.Filter),
+            };
+            _processedResults = resolvedItems.Count > 0
+                ? await QueryProcessor.Execute(resolvedItems, options, IsWatchlisted, IsBlacklisted, cancellationToken).ToListAsync(cancellationToken)
+                : [];
+        }
+
+        RebuildFilteredViews();
+    }
+
+    private void OnSearchQueryChanged(string value)
+    {
+        _searchQuery = value;
+        RebuildFilteredViews();
+    }
+
+    private void RebuildFilteredViews()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            _filteredResults = _processedResults.ToList();
+            _filteredUnresolvedResults = _unresolvedResults.ToList();
             return;
         }
 
-        _unresolvedResults = _rawResults.Where(r => r is UnresolvedMediaResult).ToList();
-        var resolvedItems = _rawResults.Where(r => r is not UnresolvedMediaResult).ToList();
-
-        var options = new QueryOptions
-        {
-            Sort = Config.Sort,
-            Limit = Config.Limit,
-            Filter = FilterDefinitionConverter.ToQueryFilter(Config.Filter),
-        };
-        _processedResults = resolvedItems.Count > 0 ? QueryProcessor.Execute(resolvedItems, options, IsWatchlisted, IsBlacklisted).ToList() : [];
+        _filteredResults = _processedResults.Where(r => GetItem(r).Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+        _filteredUnresolvedResults = _unresolvedResults.Where(r => r.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
     private Task EmitStatusIfChangedAsync()
@@ -525,16 +560,8 @@
     private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && IsWatchlisted(item));
     private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && IsBlacklisted(item));
 
-    private IEnumerable<QueryResult<IMediaDetailResult>> FilteredBySearchResults =>
-        string.IsNullOrWhiteSpace(_searchQuery) ? _processedResults : _processedResults.Where(r => GetItem(r).Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
-
-    private IEnumerable<IMediaDetailResult> FilteredBySearchUnresolvedResults =>
-        string.IsNullOrWhiteSpace(_searchQuery) ? _unresolvedResults : _unresolvedResults.Where(r => r.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
-
     private bool IsBlacklisted(IMediaDetailResult item) => _blacklistIds.Contains(item.SourceId);
     private bool IsWatchlisted(IMediaDetailResult item) => _watchlisted.Contains(item.SourceId);
-
-    private static string GetKey(IMediaDetailResult item) => item.SourceId.ToString() ?? string.Empty;
 
     private string BypassedTooltip(Bypassed<IMediaDetailResult> bypassed)
     {
