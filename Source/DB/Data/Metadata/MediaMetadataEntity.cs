@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 
 namespace DB.Data.Metadata;
 
@@ -11,10 +11,10 @@ internal abstract record MediaMetadataEntity : IAuditable
 	public DateTimeOffset LastFetchedAt { get; set; }
 
 	[Key]
-	public Guid MediaIdGroupId { get; set; }
+	public Guid MediaId { get; set; }
 
 #pragma warning disable CS8618
-	public MediaIdentifierGroupEntity MediaIdGroup { get; set; }
+	public MediaEntity Media { get; set; }
 #pragma warning restore CS8618
 
 	[Required]

@@ -32,12 +32,12 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		switch (existing, details)
 		{
 			case (MovieMetadataEntity movie, MovieDetailResult movieDetails):
-				ApplyCommonFields(movie, movieDetails, movie.MediaIdGroupId);
+				ApplyCommonFields(movie, movieDetails, movie.MediaId);
 				movie.Runtime = movieDetails.Runtime;
 				ReplaceRatings(movie, movieDetails.Ratings);
 				break;
 			case (ShowMetadataEntity show, ShowDetailResult showDetails):
-				ApplyCommonFields(show, showDetails, show.MediaIdGroupId);
+				ApplyCommonFields(show, showDetails, show.MediaId);
 				show.Seasons = showDetails.Seasons;
 				show.Episodes = showDetails.Episodes;
 				show.RuntimePerEpisode = showDetails.RuntimePerEpisode;
@@ -94,9 +94,9 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		}
 	}
 
-	private static void ApplyCommonFields(MediaMetadataEntity entity, IMediaDetailResult source, Guid groupId)
+	private static void ApplyCommonFields(MediaMetadataEntity entity, IMediaDetailResult source, Guid mediaId)
 	{
-		entity.MediaIdGroupId = groupId;
+		entity.MediaId = mediaId;
 		entity.Title = source.Title;
 		entity.Tagline = source.Tagline;
 		entity.Summary = source.Summary;

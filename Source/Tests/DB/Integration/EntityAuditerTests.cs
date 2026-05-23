@@ -1,6 +1,6 @@
 using Contracts.Media;
 using DB.Data;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -51,14 +51,21 @@ public class EntityAuditerTests(SQLiteFixture fixture)
 
 	private EntityEntry<IAuditable> GetAuditableEntry(EntityState state)
 	{
-		var entity = new MediaIdentifierGroupEntity
+		var entity = new MediaEntity
 		{
 			Id = Guid.NewGuid(),
 			UpdatedAt = _then,
 			CreatedAt = _then,
 		};
-		var identifier = new MediaIdentifier(MediaProvider.Tmdb, "12345", MediaType.Movie);
-		entity.MediaIdEntries.Add(new MediaIdentifierGroupEntry { Identifier = identifier, MediaIdGroupEntity = entity });
+		entity.ExternalIds.Add(
+			new ExternalMediaIdEntity
+			{
+				Source = MediaProvider.Tmdb,
+				MediaType = MediaType.Movie,
+				Id = "12345",
+				Media = entity,
+			}
+		);
 
 		fixture.Context.Add(entity);
 		var entry = fixture.Context.Entry<IAuditable>(entity);

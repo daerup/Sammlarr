@@ -2,7 +2,7 @@ using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Metadata;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +12,7 @@ namespace DB.Tests.Integration.Metadata;
 public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private MediaMetadataFactory _testee = null!;
-	private MediaIdGroupRepository _groupRepo = null!;
+	private MediaRepository _mediaRepo = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
@@ -22,7 +22,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
 		_testee = new MediaMetadataFactory(dateTimeProvider.Object);
-		_groupRepo = new MediaIdGroupRepository(fixture.ContextFactory);
+		_mediaRepo = new MediaRepository(fixture.ContextFactory);
 	}
 
 	[Test]
@@ -167,20 +167,15 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task<MediaMetadataEntity> PersistAsync(IMediaDetailResult details)
 	{
-		await _groupRepo.UpsertAsync(details.AdditionalIds.Prepend(details.SourceId));
-		var identifier = MediaIdentifier.From(details.SourceId);
-		var group = await fixture
-			.Context.MediaIdEntries.Include(e => e.MediaIdGroupEntity)
-			.Where(e => e.Identifier == identifier)
-			.Select(e => e.MediaIdGroupEntity)
-			.SingleAsync();
+		await _mediaRepo.UpsertAsync(details.AdditionalIds.Prepend(details.SourceId));
+		var media = await fixture.Context.MediaMatching(details.SourceId).SingleAsync();
 
-		var entity = _testee.BuildFrom<MediaMetadataEntity>(details, group.Id);
+		var entity = _testee.BuildFrom<MediaMetadataEntity>(details, media.Id);
 		fixture.Context.MediaMetadata.Add(entity);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		return await fixture.Context.MediaMetadata.Include(m => m.Ratings).SingleAsync(m => m.MediaIdGroupId == group.Id);
+		return await fixture.Context.MediaMetadata.Include(m => m.Ratings).SingleAsync(m => m.MediaId == media.Id);
 	}
 
 	private static MovieDetailResult CreateMovieDetails(IMediaId sourceId) =>

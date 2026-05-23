@@ -1,28 +1,26 @@
 using Contracts.Media;
 using Contracts.Watchlist.Outbox;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist.Outbox;
 
-internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IMediaIdGroupRepository mediaIdGroupRepository)
-	: IWatchlistOutbox
+internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IMediaRepository mediaRepository) : IWatchlistOutbox
 {
 	public async Task<IReadOnlyList<WatchlistOperation>> GetAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = await ctx.WatchlistOutbox.AsNoTracking().Include(o => o.Media).ThenInclude(m => m.MediaIdEntries).ToListAsync(cancellationToken);
-
-		return rows.Select(row => new WatchlistOperation(
-				row.Media.MediaIdEntries.Single(e => e.Identifier.Source == mediaProvider).Identifier.ToMediaId(),
-				row.Kind
-			))
-			.ToList();
+		var rows = await (
+			from externalId in ctx.ExternalMediaIds.AsNoTracking().WhereSource(mediaProvider)
+			join outboxEntry in ctx.WatchlistOutbox.AsNoTracking() on externalId.Media.Id equals outboxEntry.Media.Id
+			select new { ExternalId = externalId, outboxEntry.Kind }
+		).ToListAsync(cancellationToken);
+		return rows.Select(row => new WatchlistOperation(row.ExternalId.ToMediaId(), row.Kind)).ToList();
 	}
 
 	public async Task EnqueueAsync(WatchlistOperationKind kind, IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds as IReadOnlyCollection<IMediaId> ?? mediaIds.ToList();
+		IReadOnlyList<IMediaId> ids = [.. mediaIds];
 		if (ids.Count == 0)
 		{
 			return;
@@ -30,29 +28,23 @@ internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> db
 
 		foreach (var id in ids)
 		{
-			await mediaIdGroupRepository.UpsertAsync([id], cancellationToken);
+			await mediaRepository.UpsertAsync([id], cancellationToken);
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var identifiers = ids.Select(MediaIdentifier.From).ToList();
-		var groups = await ctx
-			.MediaIdEntries.Where(e => identifiers.Contains(e.Identifier))
-			.Select(e => e.MediaIdGroupEntity)
-			.Distinct()
-			.ToListAsync(cancellationToken);
+		var matchedMedia = await ctx.MediaMatchingAny(ids).ToListAsync(cancellationToken);
+		var mediaIdValues = matchedMedia.Select(m => m.Id).ToList();
+		var existingByMediaId = await ctx.WatchlistOutbox.Where(o => mediaIdValues.Contains(o.Media.Id)).ToDictionaryAsync(o => o.Media.Id, cancellationToken);
 
-		var groupIds = groups.Select(g => g.Id).ToList();
-		var existingByGroupId = await ctx.WatchlistOutbox.Where(o => groupIds.Contains(o.Media.Id)).ToDictionaryAsync(o => o.Media.Id, cancellationToken);
-
-		foreach (var group in groups)
+		foreach (var media in matchedMedia)
 		{
-			if (existingByGroupId.TryGetValue(group.Id, out var existing))
+			if (existingByMediaId.TryGetValue(media.Id, out var existing))
 			{
 				existing.Kind = kind;
 				continue;
 			}
-			ctx.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = group, Kind = kind });
+			ctx.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = media, Kind = kind });
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
@@ -66,15 +58,11 @@ internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> db
 			return;
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var identifiers = ids.Select(MediaIdentifier.From).ToList();
-		var groupIds = await ctx
-			.MediaIdEntries.Where(e => identifiers.Contains(e.Identifier))
-			.Select(e => e.MediaIdGroupEntity.Id)
-			.ToListAsync(cancellationToken);
-		if (groupIds.Count == 0)
+		var mediaIdValues = await ctx.MediaMatchingAny(ids).Select(m => m.Id).ToListAsync(cancellationToken);
+		if (mediaIdValues.Count == 0)
 		{
 			return;
 		}
-		await ctx.WatchlistOutbox.Where(o => groupIds.Contains(o.Media.Id) && o.Kind == kind).ExecuteDeleteAsync(cancellationToken);
+		await ctx.WatchlistOutbox.Where(o => mediaIdValues.Contains(o.Media.Id) && o.Kind == kind).ExecuteDeleteAsync(cancellationToken);
 	}
 }

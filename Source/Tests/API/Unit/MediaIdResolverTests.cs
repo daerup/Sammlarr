@@ -127,7 +127,7 @@ public class MediaIdResolverTests
 
 	private static (MediaIdResolver Testee, Dependencies Deps) CreateTestee(IReadOnlyList<IMediaId>? cachedIds = null)
 	{
-		var repo = IMediaIdGroupRepository.Mock();
+		var repo = IMediaRepository.Mock();
 		repo.GetByIdsAsync(Any(), Any()).Returns([.. cachedIds ?? []]);
 		var cache = new FakeCache();
 		var testee = new MediaIdResolver(
@@ -141,7 +141,7 @@ public class MediaIdResolverTests
 		return (testee, new Dependencies(repo, cache));
 	}
 
-	private sealed record Dependencies(Mock<IMediaIdGroupRepository> Repo, FakeCache Cache);
+	private sealed record Dependencies(Mock<IMediaRepository> Repo, FakeCache Cache);
 
 	private sealed class FakeCache : ITypedMemoryCache<string, bool>
 	{

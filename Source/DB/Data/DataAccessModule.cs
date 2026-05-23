@@ -3,7 +3,7 @@ using DB.Data.Blacklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
 using DB.Data.Feed;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +20,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<CleanupModule>();
 		services.AddModule<ConfigModule>();
 		services.AddModule<FeedModule>();
-		services.AddModule<MediaGroupModule>();
+		services.AddModule<MediaModule>();
 		services.AddModule<MetadataModule>();
 		services.AddModule<WatchlistModule>();
 	}

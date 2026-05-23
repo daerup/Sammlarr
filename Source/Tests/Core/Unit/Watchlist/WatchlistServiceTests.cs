@@ -18,7 +18,7 @@ public class WatchlistServiceTests
 	{
 		var mediaId = CreateMediaId();
 		var addedAt = _faker.Date.PastOffset();
-		var entry = new WatchlistEntry(mediaId, addedAt, new WatchlistItemProvenance(new ManualOrigin()));
+		var entry = new WatchlistedMedia(mediaId, addedAt, new WatchlistItemProvenance(new ManualOrigin()));
 		var detail = CreateMovieDetailResult(mediaId);
 
 		var scenario = Scenario.Build(entries: [entry], metadata: detail);
@@ -38,8 +38,8 @@ public class WatchlistServiceTests
 		var scenario = Scenario.Build(
 			entries:
 			[
-				new WatchlistEntry(first, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin())),
-				new WatchlistEntry(second, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin())),
+				new WatchlistedMedia(first, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin())),
+				new WatchlistedMedia(second, _faker.Date.PastOffset(), new WatchlistItemProvenance(new ManualOrigin())),
 			]
 		);
 
@@ -166,7 +166,7 @@ public class WatchlistServiceTests
 	)
 	{
 		public static Scenario Build(
-			IReadOnlyList<WatchlistEntry>? entries = null,
+			IReadOnlyList<WatchlistedMedia>? entries = null,
 			IReadOnlyList<WatchlistOperation>? outbox = null,
 			IReadOnlyList<IMediaId>? existingIds = null,
 			MovieDetailResult? metadata = null

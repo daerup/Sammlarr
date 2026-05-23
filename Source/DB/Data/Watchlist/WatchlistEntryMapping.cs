@@ -4,7 +4,7 @@ namespace DB.Data.Watchlist;
 
 internal static class WatchlistEntryMapping
 {
-	public static WatchlistItemProvenance ToProvenance(this WatchlistEntryEntity row) =>
+	public static WatchlistItemProvenance ToProvenance(this WatchlistEntity row) =>
 		row.Origin switch
 		{
 			WatchlistEntryOrigin.Remote => new WatchlistItemProvenance(new RemoteOrigin()),
@@ -15,7 +15,7 @@ internal static class WatchlistEntryMapping
 			WatchlistEntryOrigin.Orphaned => new WatchlistItemProvenance(new OrphanedOrigin(row.SourceFeedNameSnapshot ?? string.Empty)),
 		};
 
-	public static void Apply(this WatchlistEntryEntity row, WatchlistItemProvenance provenance)
+	public static void Apply(this WatchlistEntity row, WatchlistItemProvenance provenance)
 	{
 		switch (provenance.Value)
 		{

@@ -1,27 +1,32 @@
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Metadata;
 
 internal class MediaMetadataRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
-	IMediaIdGroupRepository mediaIdGroupRepository,
+	IMediaRepository mediaRepository,
 	MediaMetadataFactory metadataFactory
 ) : IMediaMetadataRepository
 {
 	public async Task<CachedMediaMetadata?> GetByMediaIdAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
 	{
-		var identifier = MediaIdentifier.From(mediaId);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var entity = await ctx
 			.MediaMetadata.AsNoTracking()
-			.Include(m => m.MediaIdGroup)
-				.ThenInclude(g => g.MediaIdEntries)
+			.Include(m => m.Media)
+				.ThenInclude(media => media.ExternalIds)
 			.Include(m => m.Ratings)
-			.SingleOrDefaultAsync(m => m.MediaIdGroup.MediaIdEntries.Any(entry => entry.Identifier == identifier), cancellationToken);
+			.SingleOrDefaultAsync(
+				m =>
+					m.Media.ExternalIds.Any(externalId =>
+						externalId.Source == mediaId.Source && externalId.MediaType == mediaId.Type && externalId.Id == mediaId.Value
+					),
+				cancellationToken
+			);
 
 		if (entity is null)
 		{
@@ -29,8 +34,10 @@ internal class MediaMetadataRepository(
 		}
 
 		var additionalIds = entity
-			.MediaIdGroup.MediaIdEntries.Select(entry => entry.Identifier.ToMediaId())
-			.Where(id => !MediaIdentifier.From(id).Equals(identifier))
+			.Media.ExternalIds.Where(externalId =>
+				externalId.Source != mediaId.Source || externalId.MediaType != mediaId.Type || externalId.Id != mediaId.Value
+			)
+			.Select(externalId => externalId.ToMediaId())
 			.ToArray();
 
 		return new CachedMediaMetadata(metadataFactory.ToDetailResult(entity, mediaId, additionalIds), entity.LastFetchedAt);
@@ -45,40 +52,46 @@ internal class MediaMetadataRepository(
 
 		foreach (var item in items)
 		{
-			await mediaIdGroupRepository.UpsertAsync(item.Details.AdditionalIds.Prepend(item.Details.SourceId), cancellationToken);
+			await mediaRepository.UpsertAsync(item.Details.AdditionalIds.Prepend(item.Details.SourceId), cancellationToken);
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var identifiers = items.Select(item => MediaIdentifier.From(item.MediaId)).ToHashSet();
-		var groupIdByIdentifier = await ctx
-			.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(identifiers))
-			.Select(entry => new { entry.Identifier, GroupId = entry.MediaIdGroupEntity.Id })
-			.ToDictionaryAsync(x => x.Identifier, x => x.GroupId, cancellationToken);
+		var mediaIds = items.Select(item => item.MediaId).ToList();
+		var rows = await ctx
+			.ExternalMediaIds.WhereMatchingAny(mediaIds)
+			.Select(externalId => new
+			{
+				externalId.Source,
+				externalId.MediaType,
+				externalId.Id,
+				MediaId = externalId.Media.Id,
+			})
+			.ToListAsync(cancellationToken);
+		var mediaIdByKey = rows.ToDictionary(r => (r.Source, r.MediaType, r.Id), r => r.MediaId);
 
-		var groupIds = groupIdByIdentifier.Values.Distinct().ToList();
-		var existingByGroupId = await ctx
+		var mediaIdValues = mediaIdByKey.Values.Distinct().ToList();
+		var existingByMediaId = await ctx
 			.MediaMetadata.Include(m => m.Ratings)
-			.Where(m => groupIds.Contains(m.MediaIdGroupId))
-			.ToDictionaryAsync(m => m.MediaIdGroupId, cancellationToken);
+			.Where(m => mediaIdValues.Contains(m.MediaId))
+			.ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
-		var processedGroupIds = new HashSet<Guid>();
+		var processedMediaIds = new HashSet<Guid>();
 		foreach (var item in items)
 		{
-			var identifier = MediaIdentifier.From(item.MediaId);
-			var groupId = groupIdByIdentifier[identifier];
-			if (!processedGroupIds.Add(groupId))
+			var mediaIdValue = mediaIdByKey[(item.MediaId.Source, item.MediaId.Type, item.MediaId.Value)];
+			if (!processedMediaIds.Add(mediaIdValue))
 			{
 				continue;
 			}
 
-			if (existingByGroupId.TryGetValue(groupId, out var existing))
+			if (existingByMediaId.TryGetValue(mediaIdValue, out var existing))
 			{
 				metadataFactory.Update(existing, item.Details);
 			}
 			else
 			{
-				ctx.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, groupId));
+				ctx.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, mediaIdValue));
 			}
 		}
 
@@ -92,11 +105,8 @@ internal class MediaMetadataRepository(
 			return;
 		}
 
-		var identifiers = mediaIds.Select(MediaIdentifier.From).ToHashSet();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx
-			.MediaMetadata.Where(m => m.MediaIdGroup.MediaIdEntries.Any(entry => identifiers.Contains(entry.Identifier)))
-			.ExecuteDeleteAsync(cancellationToken);
+		await ctx.MediaMetadata.Where(m => ctx.MediaMatchingAny(mediaIds).Any(media => media.Id == m.MediaId)).ExecuteDeleteAsync(cancellationToken);
 	}
 
 	public async Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default)

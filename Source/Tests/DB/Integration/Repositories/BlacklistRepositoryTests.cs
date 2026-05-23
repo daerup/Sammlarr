@@ -1,7 +1,7 @@
 using Contracts.Media;
 using Contracts.Media.Blacklist;
 using DB.Data.Blacklist;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
@@ -20,24 +20,24 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async Task AddAsync_WhenGroupIsNotBlacklisted_PersistsEntry()
 	{
 		var seedId = TmdbId.From("1001", MediaType.Movie);
-		var mediaGroupId = await SeedMediaGroupAsync([seedId, ImdbId.From("tt1001", MediaType.Movie)]);
+		var mediaId = await SeedMediaAsync([seedId, ImdbId.From("tt1001", MediaType.Movie)]);
 
 		await _testee.AddAsync(seedId);
 
-		var storedGroupIds = await fixture.Context.BlacklistEntries.AsNoTracking().Select(x => x.Media.Id).ToListAsync();
-		await Assert.That(storedGroupIds).Count().IsEqualTo(1);
-		await Assert.That(storedGroupIds).Contains(mediaGroupId);
+		var storedMediaIds = await fixture.Context.Blacklist.AsNoTracking().Select(b => b.Media.Id).ToListAsync();
+		await Assert.That(storedMediaIds).Count().IsEqualTo(1);
+		await Assert.That(storedMediaIds).Contains(mediaId);
 	}
 
 	[Test]
 	public async Task AddAsync_WhenGroupIsAlreadyBlacklisted_DoesNotDuplicateEntry()
 	{
 		var seedId = TmdbId.From("1002", MediaType.Movie);
-		await SeedBlacklistedGroupAsync([seedId, ImdbId.From("tt1002", MediaType.Movie)]);
+		await SeedBlacklistedMediaAsync([seedId, ImdbId.From("tt1002", MediaType.Movie)]);
 
 		await _testee.AddAsync(seedId);
 
-		var count = await fixture.Context.BlacklistEntries.CountAsync();
+		var count = await fixture.Context.Blacklist.CountAsync();
 		await Assert.That(count).IsEqualTo(1);
 	}
 
@@ -46,21 +46,21 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var tmdbOne = TmdbId.From("1003", MediaType.Movie);
 		var tmdbTwo = TmdbId.From("1004", MediaType.Movie);
-		await SeedBlacklistedGroupAsync([tmdbOne, ImdbId.From("tt1003", MediaType.Movie)]);
-		await SeedBlacklistedGroupAsync([tmdbTwo, PlexId.From("plex-1004", MediaType.Movie)]);
+		await SeedBlacklistedMediaAsync([tmdbOne, ImdbId.From("tt1003", MediaType.Movie)]);
+		await SeedBlacklistedMediaAsync([tmdbTwo, PlexId.From("plex-1004", MediaType.Movie)]);
 
 		var entries = await _testee.GetBlacklistedEntriesAsync(MediaProvider.Tmdb);
 
 		await Assert.That(entries).Count().IsEqualTo(2);
-		await Assert.That(entries.Select(e => e.Id)).Contains(tmdbOne);
-		await Assert.That(entries.Select(e => e.Id)).Contains(tmdbTwo);
+		await Assert.That(entries.Select(e => e.MediaId)).Contains(tmdbOne);
+		await Assert.That(entries.Select(e => e.MediaId)).Contains(tmdbTwo);
 	}
 
 	[Test]
 	public async Task IsBlacklistedAsync_WhenEntryExists_ReturnsTrue()
 	{
 		var seedId = TmdbId.From("1005", MediaType.Movie);
-		await SeedBlacklistedGroupAsync([seedId, ImdbId.From("tt1005", MediaType.Movie)]);
+		await SeedBlacklistedMediaAsync([seedId, ImdbId.From("tt1005", MediaType.Movie)]);
 
 		var isBlacklisted = await _testee.IsBlacklistedAsync(seedId);
 
@@ -79,11 +79,11 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async Task RemoveAsync_WhenEntryExists_RemovesEntry()
 	{
 		var seedId = TmdbId.From("1006", MediaType.Movie);
-		var mediaGroupId = await SeedBlacklistedGroupAsync([seedId, ImdbId.From("tt1006", MediaType.Movie)]);
+		var mediaId = await SeedBlacklistedMediaAsync([seedId, ImdbId.From("tt1006", MediaType.Movie)]);
 
 		await _testee.RemoveAsync(seedId);
 
-		var exists = await fixture.Context.BlacklistEntries.AnyAsync(x => x.Media.Id == mediaGroupId);
+		var exists = await fixture.Context.Blacklist.AnyAsync(b => b.Media.Id == mediaId);
 		await Assert.That(exists).IsFalse();
 	}
 
@@ -91,35 +91,33 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async Task RemoveAsync_WhenEntryDoesNotExist_DoesNotChangeData()
 	{
 		var existingId = TmdbId.From("1007", MediaType.Movie);
-		var mediaGroupId = await SeedBlacklistedGroupAsync([existingId, ImdbId.From("tt1007", MediaType.Movie)]);
+		var mediaId = await SeedBlacklistedMediaAsync([existingId, ImdbId.From("tt1007", MediaType.Movie)]);
 		var missingId = TmdbId.From("2007", MediaType.Movie);
-		await SeedMediaGroupAsync([missingId, ImdbId.From("tt2007", MediaType.Movie)]);
+		await SeedMediaAsync([missingId, ImdbId.From("tt2007", MediaType.Movie)]);
 
 		await _testee.RemoveAsync(missingId);
 
-		var entries = await fixture.Context.BlacklistEntries.AsNoTracking().Include(b => b.Media).ToListAsync();
+		var entries = await fixture.Context.Blacklist.AsNoTracking().Include(b => b.Media).ToListAsync();
 		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].Media.Id).IsEqualTo(mediaGroupId);
+		await Assert.That(entries[0].Media.Id).IsEqualTo(mediaId);
 	}
 
-	private async Task<Guid> SeedBlacklistedGroupAsync(IEnumerable<IMediaId> ids)
+	private async Task<Guid> SeedBlacklistedMediaAsync(IEnumerable<IMediaId> ids)
 	{
-		var mediaGroupId = await SeedMediaGroupAsync(ids);
-		var mediaGroup = await fixture.Context.MediaIdGroups.FindAsync(mediaGroupId);
-		fixture.Context.BlacklistEntries.Add(new BlacklistEntryEntity { Media = mediaGroup! });
+		var mediaId = await SeedMediaAsync(ids);
+		var media = await fixture.Context.Media.FindAsync(mediaId);
+		fixture.Context.Blacklist.Add(new BlacklistEntity { Media = media! });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
-		return mediaGroupId;
+		return mediaId;
 	}
 
-	private async Task<Guid> SeedMediaGroupAsync(IEnumerable<IMediaId> ids)
+	private async Task<Guid> SeedMediaAsync(IEnumerable<IMediaId> ids)
 	{
-		var group = new MediaIdentifierGroupEntity();
-		await fixture.Context.MediaIdEntries.AddRangeAsync(
-			ids.Select(id => new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(id), MediaIdGroupEntity = group })
-		);
+		var media = new MediaEntity();
+		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalId(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
-		return group.Id;
+		return media.Id;
 	}
 }

@@ -1,14 +1,11 @@
-using System.ComponentModel.DataAnnotations;
 using Contracts.Watchlist.Outbox;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 
 namespace DB.Data.Watchlist.Outbox;
 
-internal record WatchlistOutboxEntity : Entity<Guid>
+internal record WatchlistOutboxEntity
 {
-	[Required]
-	public MediaIdentifierGroupEntity Media { get; set; } = null!;
+	public required MediaEntity Media { get; set; }
 
-	[Required]
-	public WatchlistOperationKind Kind { get; set; }
+	public required WatchlistOperationKind Kind { get; set; }
 }

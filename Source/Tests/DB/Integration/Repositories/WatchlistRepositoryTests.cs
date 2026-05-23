@@ -1,6 +1,6 @@
 using Contracts.Media;
 using Contracts.Watchlist;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,15 +10,15 @@ namespace DB.Tests.Integration.Repositories;
 public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private WatchlistRepository _testee = null!;
-	private MediaIdGroupRepository _groupRepo = null!;
+	private MediaRepository _mediaRepo = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_groupRepo = new MediaIdGroupRepository(fixture.ContextFactory);
-		_testee = new WatchlistRepository(fixture.ContextFactory, _groupRepo);
+		_mediaRepo = new MediaRepository(fixture.ContextFactory);
+		_testee = new WatchlistRepository(fixture.ContextFactory, _mediaRepo);
 	}
 
 	[Test]
@@ -28,7 +28,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.AddAsync([id], new WatchlistItemProvenance(new ManualOrigin()));
 
-		var entry = await fixture.Context.WatchlistEntries.AsNoTracking().SingleAsync();
+		var entry = await fixture.Context.Watchlist.AsNoTracking().SingleAsync();
 		await Assert.That(entry.Origin).IsEqualTo(WatchlistEntryOrigin.Manual);
 	}
 
@@ -40,7 +40,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.AddAsync([first, second], new WatchlistItemProvenance(new RemoteOrigin()));
 
-		var entries = await fixture.Context.WatchlistEntries.AsNoTracking().ToListAsync();
+		var entries = await fixture.Context.Watchlist.AsNoTracking().ToListAsync();
 		await Assert.That(entries).Count().IsEqualTo(2);
 	}
 
@@ -52,7 +52,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.AddAsync([id], new WatchlistItemProvenance(new ManualOrigin()));
 
-		var entries = await fixture.Context.WatchlistEntries.AsNoTracking().ToListAsync();
+		var entries = await fixture.Context.Watchlist.AsNoTracking().ToListAsync();
 		await Assert.That(entries).Count().IsEqualTo(1);
 		await Assert.That(entries[0].Origin).IsEqualTo(WatchlistEntryOrigin.Remote);
 	}
@@ -65,7 +65,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.RemoveAsync([id]);
 
-		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		var count = await fixture.Context.Watchlist.CountAsync();
 		await Assert.That(count).IsEqualTo(0);
 	}
 
@@ -74,7 +74,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		await _testee.AddAsync([], new WatchlistItemProvenance(new ManualOrigin()));
 
-		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		var count = await fixture.Context.Watchlist.CountAsync();
 		await Assert.That(count).IsEqualTo(0);
 	}
 
@@ -86,7 +86,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.RemoveAsync([]);
 
-		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		var count = await fixture.Context.Watchlist.CountAsync();
 		await Assert.That(count).IsEqualTo(1);
 	}
 
@@ -99,20 +99,23 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.RemoveAsync([unknown]);
 
-		var count = await fixture.Context.WatchlistEntries.CountAsync();
+		var count = await fixture.Context.Watchlist.CountAsync();
 		await Assert.That(count).IsEqualTo(1);
 	}
 
 	[Test]
 	public async Task GetIdsAsync_ReturnsAllEntriesForProvider()
 	{
-		var id = PlexId.From("plex-105", MediaType.Movie);
-		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Manual);
+		var plexId = PlexId.From("plex-105", MediaType.Movie);
+		var imdbId = ImdbId.From("tt0105", MediaType.Movie);
+		var tmdbId = TmdbId.From("tmdb-105", MediaType.Movie);
+		await SeedWatchlistEntryAsync(plexId, WatchlistEntryOrigin.Manual);
+		await _mediaRepo.UpsertAsync([plexId, imdbId, tmdbId]);
 
 		var ids = await _testee.GetIdsAsync(MediaProvider.Plex);
 
 		await Assert.That(ids).Count().IsEqualTo(1);
-		await Assert.That(ids[0]).IsEqualTo(id);
+		await Assert.That(ids[0]).IsEqualTo(plexId);
 	}
 
 	[Test]
@@ -124,15 +127,15 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var entries = await _testee.GetEntriesAsync(MediaProvider.Plex);
 
 		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].Id).IsEqualTo(id);
+		await Assert.That(entries[0].MediaId).IsEqualTo(id);
 		await Assert.That(entries[0].Provenance.Value).IsTypeOf<ManualOrigin>();
 	}
 
 	private async Task SeedWatchlistEntryAsync(IMediaId id, WatchlistEntryOrigin origin)
 	{
-		await _groupRepo.UpsertAsync([id]);
-		var group = await fixture.Context.MediaIdEntries.Where(e => e.Identifier == MediaIdentifier.From(id)).Select(e => e.MediaIdGroupEntity).SingleAsync();
-		fixture.Context.WatchlistEntries.Add(new WatchlistEntryEntity { Media = group, Origin = origin });
+		await _mediaRepo.UpsertAsync([id]);
+		var media = await fixture.Context.MediaMatching(id).SingleAsync();
+		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = media, Origin = origin });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 	}

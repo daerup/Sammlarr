@@ -1,7 +1,7 @@
 using Contracts;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Cleanup;
@@ -14,16 +14,14 @@ internal class MediaCachePurger(IDbContextFactory<SammlarrDbContext> dbContextFa
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
 		var anchor = config.WatchlistProvider.AsMediaProvider();
 
-		var protectedGroupIds = await ctx
-			.BlacklistEntries.Select(b => b.Media.Id)
-			.Union(ctx.WatchlistEntries.Select(w => w.Media.Id))
+		var protectedMediaIds = await ctx
+			.Blacklist.Select(b => b.Media.Id)
+			.Union(ctx.Watchlist.Select(w => w.Media.Id))
+			.Union(ctx.WatchlistOutbox.Select(o => o.Media.Id))
 			.ToListAsync(cancellationToken);
 
 		await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
-		await ctx.MediaIdGroups.Where(g => !protectedGroupIds.Contains(g.Id)).ExecuteDeleteAsync(cancellationToken);
-
-		var protectedEntries = await ctx.MediaIdEntries.Where(e => protectedGroupIds.Contains(e.MediaIdGroupEntity.Id)).ToListAsync(cancellationToken);
-		var nonAnchorIdentifiers = protectedEntries.Where(e => e.Identifier.Source != anchor).Select(e => e.Identifier).ToList();
-		await ctx.MediaIdEntries.Where(MediaIdentifierGroupEntryExpressions.MatchesAnyIdentifier(nonAnchorIdentifiers)).ExecuteDeleteAsync(cancellationToken);
+		await ctx.Media.Where(m => !protectedMediaIds.Contains(m.Id)).ExecuteDeleteAsync(cancellationToken);
+		await ctx.ExternalMediaIds.Where(e => protectedMediaIds.Contains(e.Media.Id) && e.Source != anchor).ExecuteDeleteAsync(cancellationToken);
 	}
 }
