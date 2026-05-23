@@ -291,6 +291,11 @@ body:has(.error-dialog) .search-modal {
     background-color: oklch(from var(--background) l c h / 0.15) !important;
 }
 
+.watchlist-sync-preview {
+    min-width: 12rem;
+    width: max-content;
+}
+
 /* Rectangular avatar (override BbAvatar's default rounded-full for profile popover) */
 .avatar-rect,
 .avatar-rect img,
