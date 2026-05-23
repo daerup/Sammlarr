@@ -41,9 +41,9 @@ public class BlacklistServiceTests
 	[Test]
 	public async Task GetBlacklistItems_WhenEntriesExist_ReturnsItemsMappedFromMetadataProvider()
 	{
-		var addedDate = _faker.Date.PastOffset();
+		var addedAt = _faker.Date.PastOffset();
 		var mediaId = CreateMediaId();
-		var entry = new BlacklistEntry(mediaId, addedDate);
+		var entry = new BlacklistedMedia(mediaId, addedAt);
 		var detailResult = CreateMovieDetailResult(mediaId);
 
 		var repository = IBlacklistRepository.Mock();
@@ -60,14 +60,14 @@ public class BlacklistServiceTests
 		var item = result[0];
 		await Assert.That(item.Detail.SourceId).IsEqualTo(mediaId);
 		await Assert.That(item.Detail.Title).IsEqualTo(detailResult.Title);
-		await Assert.That(item.AddedDate).IsEqualTo(addedDate);
+		await Assert.That(item.AddedAt).IsEqualTo(addedAt);
 	}
 
 	[Test]
 	public async Task GetBlacklistItems_WhenNoEntriesExist_ReturnsEmptyList()
 	{
 		var repository = IBlacklistRepository.Mock();
-		repository.GetBlacklistedEntriesAsync(Any(), Any()).Returns(new List<BlacklistEntry>());
+		repository.GetBlacklistedEntriesAsync(Any(), Any()).Returns(new List<BlacklistedMedia>());
 
 		var testee = CreateTestee(repository);
 

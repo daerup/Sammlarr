@@ -1,6 +1,6 @@
 using Contracts.Media;
 using Contracts.Watchlist.Outbox;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,15 +10,15 @@ namespace DB.Tests.Integration.Repositories;
 public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private WatchlistOutboxRepository _testee = null!;
-	private MediaIdGroupRepository _groupRepo = null!;
+	private MediaRepository _mediaRepo = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_groupRepo = new MediaIdGroupRepository(fixture.ContextFactory);
-		_testee = new WatchlistOutboxRepository(fixture.ContextFactory, _groupRepo);
+		_mediaRepo = new MediaRepository(fixture.ContextFactory);
+		_testee = new WatchlistOutboxRepository(fixture.ContextFactory, _mediaRepo);
 	}
 
 	[Test]

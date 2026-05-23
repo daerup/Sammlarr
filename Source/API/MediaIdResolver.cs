@@ -11,7 +11,7 @@ using Shared.Telemetry;
 namespace API;
 
 internal class MediaIdResolver(
-	IMediaIdGroupRepository mediaIdGroupRepository,
+	IMediaRepository mediaRepository,
 	TmdbIdConverter tmdb,
 	PlexIdConverter plex,
 	ImdbIdConverter imdb,
@@ -30,7 +30,7 @@ internal class MediaIdResolver(
 	{
 		var title = hints is Some<ResolutionHints> some ? some.Value.Title : null;
 		using var activity = SammlarrTelemetry.StartIdResolution(target, candidates, title);
-		var cachedIds = await mediaIdGroupRepository.GetByIdsAsync(candidates, cancellationToken);
+		var cachedIds = await mediaRepository.GetByIdsAsync(candidates, cancellationToken);
 		var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
 		if (cachedTarget is not null)
 		{
@@ -66,13 +66,13 @@ internal class MediaIdResolver(
 		if (conversionResult is Resolved resolved)
 		{
 			var allIds = resolved.AllIds.Concat(candidates).Distinct().ToList();
-			await mediaIdGroupRepository.UpsertAsync(allIds, cancellationToken);
+			await mediaRepository.UpsertAsync(allIds, cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, target);
 			return new Resolved(resolved.Id, allIds.Except([resolved.Id]));
 		}
 
-        unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
-        SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
+		unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
+		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
 		return conversionResult;
 	}
 
@@ -84,7 +84,7 @@ internal class MediaIdResolver(
 			return;
 		}
 
-		await mediaIdGroupRepository.UpsertAsync(cachedIds.Concat(missing), cancellationToken);
+		await mediaRepository.UpsertAsync(cachedIds.Concat(missing), cancellationToken);
 		cachedIds.AddRange(missing);
 	}
 

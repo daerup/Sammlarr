@@ -9,7 +9,7 @@ using DB.Data.Access;
 using DB.Data.Blacklist;
 using DB.Data.Config;
 using DB.Data.Feed;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
@@ -48,9 +48,9 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<CredentialEntity> Credentials => Set<CredentialEntity>();
 
-	public DbSet<MediaIdentifierGroupEntity> MediaIdGroups => Set<MediaIdentifierGroupEntity>();
+	public DbSet<MediaEntity> Media => Set<MediaEntity>();
 
-	public DbSet<MediaIdentifierGroupEntry> MediaIdEntries => Set<MediaIdentifierGroupEntry>();
+	public DbSet<ExternalMediaIdEntity> ExternalMediaIds => Set<ExternalMediaIdEntity>();
 
 	public DbSet<MediaMetadataEntity> MediaMetadata => Set<MediaMetadataEntity>();
 
@@ -60,8 +60,8 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
 	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();
-	public DbSet<BlacklistEntryEntity> BlacklistEntries => Set<BlacklistEntryEntity>();
-	public DbSet<WatchlistEntryEntity> WatchlistEntries => Set<WatchlistEntryEntity>();
+	public DbSet<BlacklistEntity> Blacklist => Set<BlacklistEntity>();
+	public DbSet<WatchlistEntity> Watchlist => Set<WatchlistEntity>();
 	public DbSet<WatchlistOutboxEntity> WatchlistOutbox => Set<WatchlistOutboxEntity>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -81,42 +81,51 @@ internal sealed class SammlarrDbContext : DbContext
 
 		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
 		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
-		modelBuilder.Entity<BlacklistEntryEntity>().HasOne(x => x.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
-		modelBuilder.Entity<BlacklistEntryEntity>().HasIndex("MediaId").IsUnique();
-
-		modelBuilder.Entity<MediaIdentifierGroupEntry>(builder =>
+		modelBuilder.Entity<BlacklistEntity>(builder =>
 		{
-			builder.Property(e => e.Identifier).HasMaxLength(160).HasConversion<MediaIdentifierConverter>();
-			builder.HasKey(e => e.Identifier);
+			builder.Property<Guid>("MediaId");
+			builder.HasKey("MediaId");
+			builder.HasOne(b => b.Media).WithOne().HasForeignKey<BlacklistEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
 		});
-		modelBuilder.Entity<MediaIdentifierGroupEntity>().HasMany(m => m.MediaIdEntries).WithOne(e => e.MediaIdGroupEntity).OnDelete(DeleteBehavior.Cascade);
+
+		modelBuilder
+			.Entity<ExternalMediaIdEntity>()
+			.HasKey(e => new
+			{
+				e.Source,
+				e.MediaType,
+				e.Id,
+			});
+		modelBuilder.Entity<MediaEntity>().HasMany(m => m.ExternalIds).WithOne(e => e.Media).OnDelete(DeleteBehavior.Cascade);
 
 		modelBuilder.Entity<MediaMetadataEntity>(builder =>
 		{
-			builder.HasOne(m => m.MediaIdGroup).WithOne().HasForeignKey<MediaMetadataEntity>(m => m.MediaIdGroupId).OnDelete(DeleteBehavior.Cascade);
+			builder.HasOne(m => m.Media).WithOne().HasForeignKey<MediaMetadataEntity>(m => m.MediaId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieMetadataEntity>(MediaType.Movie).HasValue<ShowMetadataEntity>(MediaType.Show);
 		});
 
 		modelBuilder.Entity<MediaRatingEntity>(builder =>
 		{
-			builder.Property<Guid>("MediaIdGroupId");
-			builder.HasKey("MediaIdGroupId", nameof(MediaRatingEntity.Source));
-			builder.HasOne(r => r.Metadata).WithMany(m => m.Ratings).HasForeignKey("MediaIdGroupId").OnDelete(DeleteBehavior.Cascade);
+			builder.Property<Guid>("MediaId");
+			builder.HasKey("MediaId", nameof(MediaRatingEntity.Source));
+			builder.HasOne(r => r.Metadata).WithMany(m => m.Ratings).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
 		});
 
-		modelBuilder.Entity<WatchlistEntryEntity>(builder =>
+		modelBuilder.Entity<WatchlistEntity>(builder =>
 		{
-			builder.HasOne(x => x.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
-			builder.HasOne(x => x.SourceFeed).WithMany().HasForeignKey(x => x.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
-			builder.HasIndex("MediaId").IsUnique();
-			builder.HasIndex(x => x.SourceFeedId);
+			builder.Property<Guid>("MediaId");
+			builder.HasKey("MediaId");
+			builder.HasOne(w => w.Media).WithOne().HasForeignKey<WatchlistEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasOne(w => w.SourceFeed).WithMany().HasForeignKey(w => w.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
+			builder.HasIndex(w => w.SourceFeedId);
 		});
 
 		modelBuilder.Entity<WatchlistOutboxEntity>(builder =>
 		{
-			builder.HasOne(x => x.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
-			builder.HasIndex("MediaId").IsUnique();
-			builder.HasIndex(x => x.Kind);
+			builder.Property<Guid>("MediaId");
+			builder.HasKey("MediaId");
+			builder.HasOne(o => o.Media).WithOne().HasForeignKey<WatchlistOutboxEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasIndex(o => o.Kind);
 		});
 
 		modelBuilder.Entity<FeedEntity>(builder =>

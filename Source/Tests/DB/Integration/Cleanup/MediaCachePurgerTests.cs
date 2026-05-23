@@ -5,12 +5,14 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
+using Contracts.Watchlist.Outbox;
 using DB.Data.Blacklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
+using DB.Data.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Cleanup;
@@ -41,21 +43,21 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PurgeAsync_WhenGroupIsBlacklisted_KeepsGroupAndOnlyItsAnchorEntry()
+	public async Task PurgeAsync_WhenMediaIsBlacklisted_KeepsMediaAndOnlyItsAnchorExternalId()
 	{
 		var blacklistedId = PlexId.From("2000", MediaType.Movie);
 		var blacklistedImdb = ImdbId.From("tt2000", MediaType.Movie);
 		var purgedId = TmdbId.From("2001", MediaType.Movie);
 
-		var blacklistedGroup = new MediaIdentifierGroupEntity();
-		var purgedGroup = new MediaIdentifierGroupEntity();
-		fixture.Context.MediaIdEntries.AddRange(
-			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(blacklistedId), MediaIdGroupEntity = blacklistedGroup },
-			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(blacklistedImdb), MediaIdGroupEntity = blacklistedGroup },
-			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(purgedId), MediaIdGroupEntity = purgedGroup }
+		var blacklistedMedia = new MediaEntity();
+		var purgedMedia = new MediaEntity();
+		fixture.Context.ExternalMediaIds.AddRange(
+			blacklistedId.ToExternalId(blacklistedMedia),
+			blacklistedImdb.ToExternalId(blacklistedMedia),
+			purgedId.ToExternalId(purgedMedia)
 		);
-		var blacklistedMetadata = BuildMetadata(blacklistedGroup, "Blacklisted");
-		var purgedMetadata = BuildMetadata(purgedGroup, "Purged");
+		var blacklistedMetadata = BuildMetadata(blacklistedMedia, "Blacklisted");
+		var purgedMetadata = BuildMetadata(purgedMedia, "Purged");
 		fixture.Context.MediaMetadata.AddRange(blacklistedMetadata, purgedMetadata);
 		fixture.Context.MediaRatings.AddRange(
 			new MediaRatingEntity
@@ -73,7 +75,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 				Metadata = purgedMetadata,
 			}
 		);
-		fixture.Context.BlacklistEntries.Add(new BlacklistEntryEntity { Media = blacklistedGroup });
+		fixture.Context.Blacklist.Add(new BlacklistEntity { Media = blacklistedMedia });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -82,43 +84,61 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		using var _ = Assert.Multiple();
 		await Assert.That(await fixture.Context.MediaMetadata.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.MediaRatings.AnyAsync()).IsFalse();
-		await Assert.That(await fixture.Context.BlacklistEntries.CountAsync()).IsEqualTo(1);
-		await Assert.That(await fixture.Context.MediaIdGroups.CountAsync()).IsEqualTo(1);
-		await Assert.That(await fixture.Context.MediaIdGroups.Select(g => g.Id).SingleAsync()).IsEqualTo(blacklistedGroup.Id);
-		await Assert.That(fixture.Context.MediaIdEntries).IsSingleElement();
-		await Assert.That(fixture.Context.MediaIdEntries.Single().Identifier).IsEqualTo(MediaIdentifier.From(blacklistedId));
+		await Assert.That(await fixture.Context.Blacklist.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(blacklistedMedia.Id);
+		await Assert.That(fixture.Context.ExternalMediaIds).IsSingleElement();
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToMediaId()).IsEqualTo<IMediaId>(blacklistedId);
 	}
 
 	[Test]
-	public async Task PurgeAsync_WhenGroupIsWatchlisted_KeepsGroupAndOnlyItsAnchorEntry()
+	public async Task PurgeAsync_WhenMediaIsWatchlisted_KeepsMediaAndOnlyItsAnchorExternalId()
 	{
 		var watchlistedId = PlexId.From("3000", MediaType.Movie);
 		var watchlistedImdb = ImdbId.From("tt3000", MediaType.Movie);
 
-		var watchlistedGroup = new MediaIdentifierGroupEntity();
-		fixture.Context.MediaIdEntries.AddRange(
-			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(watchlistedId), MediaIdGroupEntity = watchlistedGroup },
-			new MediaIdentifierGroupEntry { Identifier = MediaIdentifier.From(watchlistedImdb), MediaIdGroupEntity = watchlistedGroup }
-		);
-		var metadata = BuildMetadata(watchlistedGroup, "Watchlisted");
+		var watchlistedMedia = new MediaEntity();
+		fixture.Context.ExternalMediaIds.AddRange(watchlistedId.ToExternalId(watchlistedMedia), watchlistedImdb.ToExternalId(watchlistedMedia));
+		var metadata = BuildMetadata(watchlistedMedia, "Watchlisted");
 		fixture.Context.MediaMetadata.Add(metadata);
-		fixture.Context.WatchlistEntries.Add(new WatchlistEntryEntity { Media = watchlistedGroup, Origin = WatchlistEntryOrigin.Manual });
+		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = watchlistedMedia, Origin = WatchlistEntryOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		await _testee.PurgeAsync();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(await fixture.Context.WatchlistEntries.CountAsync()).IsEqualTo(1);
-		await Assert.That(await fixture.Context.MediaIdGroups.CountAsync()).IsEqualTo(1);
-		await Assert.That(await fixture.Context.MediaIdGroups.Select(g => g.Id).SingleAsync()).IsEqualTo(watchlistedGroup.Id);
-		await Assert.That(fixture.Context.MediaIdEntries.Single().Identifier).IsEqualTo(MediaIdentifier.From(watchlistedId));
+		await Assert.That(await fixture.Context.Watchlist.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(watchlistedMedia.Id);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToMediaId()).IsEqualTo<IMediaId>(watchlistedId);
 	}
 
-	private static MovieMetadataEntity BuildMetadata(MediaIdentifierGroupEntity group, string title) =>
+	[Test]
+	public async Task PurgeAsync_WhenMediaIsInOutbox_KeepsMediaAndOnlyItsAnchorExternalId()
+	{
+		var queuedId = PlexId.From("4000", MediaType.Movie);
+		var queuedImdb = ImdbId.From("tt4000", MediaType.Movie);
+
+		var queuedMedia = new MediaEntity();
+		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalId(queuedMedia), queuedImdb.ToExternalId(queuedMedia));
+		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = queuedMedia, Kind = WatchlistOperationKind.Add });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.PurgeAsync();
+
+		using var _ = Assert.Multiple();
+		await Assert.That(await fixture.Context.WatchlistOutbox.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(queuedMedia.Id);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToMediaId()).IsEqualTo<IMediaId>(queuedId);
+	}
+
+	private static MovieMetadataEntity BuildMetadata(MediaEntity media, string title) =>
 		new()
 		{
-			MediaIdGroup = group,
+			Media = media,
 			Title = title,
 			Tagline = "Tagline",
 			Summary = "Summary",

@@ -76,7 +76,7 @@ else
             }
             else if (_items is not null)
             {
-                <BulkEditableMediaGrid TItem="BlacklistedItem"
+                <BulkEditableMediaGrid TItem="BlacklistedMediaDetail"
                                        Items="_items"
                                        Detail="@(i => i.Detail)"
                                        Key="@(i => i.Detail.SourceId)"
@@ -118,7 +118,7 @@ else
 </SearchModal>
 
 @code {
-    private IReadOnlyList<BlacklistedItem>? _items;
+    private IReadOnlyList<BlacklistedMediaDetail>? _items;
     private IMediaDetailResult? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
@@ -219,7 +219,7 @@ else
         CloseSelectedMedia();
     }
 
-    private async Task RemoveBulkAsync(IReadOnlyList<BlacklistedItem> toRemove)
+    private async Task RemoveBulkAsync(IReadOnlyList<BlacklistedMediaDetail> toRemove)
     {
         foreach (var item in toRemove)
         {

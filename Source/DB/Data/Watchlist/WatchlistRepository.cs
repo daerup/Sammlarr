@@ -1,36 +1,33 @@
 using Contracts.Media;
 using Contracts.Watchlist;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist;
 
-internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IMediaIdGroupRepository mediaIdGroupRepository) : IWatchlistRepository
+internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IMediaRepository mediaRepository) : IWatchlistRepository
 {
-	public async Task<IReadOnlyList<WatchlistEntry>> GetEntriesAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = await ctx
-			.WatchlistEntries.AsNoTracking()
-			.Include(w => w.Media)
-				.ThenInclude(m => m.MediaIdEntries)
-			.Include(w => w.SourceFeed)
-			.ToListAsync(cancellationToken);
+		var rows = await (
+			from externalId in ctx.ExternalMediaIds.AsNoTracking().WhereSource(mediaProvider)
+			join watchlistEntry in ctx.Watchlist.AsNoTracking().Include(w => w.SourceFeed) on externalId.Media.Id equals watchlistEntry.Media.Id
+			select new { ExternalId = externalId, WatchlistEntry = watchlistEntry }
+		).ToListAsync(cancellationToken);
 
-		return rows.Select(row => new WatchlistEntry(
-				row.Media.MediaIdEntries.Single(e => e.Identifier.Source == mediaProvider).Identifier.ToMediaId(),
-				row.CreatedAt,
-				row.ToProvenance()
-			))
-			.ToList();
+		return [.. rows.Select(row => new WatchlistedMedia(row.ExternalId.ToMediaId(), row.WatchlistEntry.CreatedAt, row.WatchlistEntry.ToProvenance()))];
 	}
 
 	public async Task<IReadOnlyList<IMediaId>> GetIdsAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = await ctx.WatchlistEntries.AsNoTracking().Include(w => w.Media).ThenInclude(m => m.MediaIdEntries).ToListAsync(cancellationToken);
-
-		return rows.Select(w => w.Media.MediaIdEntries.Single(e => e.Identifier.Source == mediaProvider).Identifier.ToMediaId()).ToList();
+		var externalIds = await (
+			from externalId in ctx.ExternalMediaIds.AsNoTracking().WhereSource(mediaProvider)
+			join watchlistEntry in ctx.Watchlist.AsNoTracking() on externalId.Media.Id equals watchlistEntry.Media.Id
+			select externalId
+		).ToListAsync(cancellationToken);
+		return [.. externalIds.Select(e => e.ToMediaId())];
 	}
 
 	public async Task AddAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
@@ -43,26 +40,20 @@ internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 
 		foreach (var id in ids)
 		{
-			await mediaIdGroupRepository.UpsertAsync([id], cancellationToken);
+			await mediaRepository.UpsertAsync([id], cancellationToken);
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var identifiers = ids.Select(MediaIdentifier.From).ToList();
-		var groups = await ctx
-			.MediaIdEntries.Where(e => identifiers.Contains(e.Identifier))
-			.Select(e => e.MediaIdGroupEntity)
-			.Distinct()
-			.ToListAsync(cancellationToken);
+		var matchedMedia = await ctx.MediaMatchingAny(ids).ToListAsync(cancellationToken);
+		var mediaIdValues = matchedMedia.Select(m => m.Id).ToList();
+		var existingMediaIds = await ctx.Watchlist.Where(w => mediaIdValues.Contains(w.Media.Id)).Select(w => w.Media.Id).ToHashSetAsync(cancellationToken);
 
-		var groupIds = groups.Select(g => g.Id).ToList();
-		var existingGroupIds = await ctx.WatchlistEntries.Where(w => groupIds.Contains(w.Media.Id)).Select(w => w.Media.Id).ToHashSetAsync(cancellationToken);
-
-		foreach (var group in groups.Where(g => !existingGroupIds.Contains(g.Id)))
+		foreach (var media in matchedMedia.Where(m => !existingMediaIds.Contains(m.Id)))
 		{
-			var row = new WatchlistEntryEntity { Media = group };
+			var row = new WatchlistEntity { Media = media, Origin = WatchlistEntryOrigin.Manual };
 			row.Apply(provenance);
-			ctx.WatchlistEntries.Add(row);
+			ctx.Watchlist.Add(row);
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
@@ -76,21 +67,11 @@ internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 			return;
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var groupIds = await ResolveGroupIdsAsync(ctx, ids, cancellationToken);
-		if (groupIds.Count == 0)
+		var mediaIdValues = await ctx.MediaMatchingAny(ids).Select(m => m.Id).ToListAsync(cancellationToken);
+		if (mediaIdValues.Count == 0)
 		{
 			return;
 		}
-		await ctx.WatchlistEntries.Where(w => groupIds.Contains(w.Media.Id)).ExecuteDeleteAsync(cancellationToken);
-	}
-
-	private static async Task<IReadOnlyList<Guid>> ResolveGroupIdsAsync(
-		SammlarrDbContext ctx,
-		IReadOnlyCollection<IMediaId> ids,
-		CancellationToken cancellationToken
-	)
-	{
-		var identifiers = ids.Select(MediaIdentifier.From).ToList();
-		return await ctx.MediaIdEntries.Where(e => identifiers.Contains(e.Identifier)).Select(e => e.MediaIdGroupEntity.Id).ToListAsync(cancellationToken);
+		await ctx.Watchlist.Where(w => mediaIdValues.Contains(w.Media.Id)).ExecuteDeleteAsync(cancellationToken);
 	}
 }

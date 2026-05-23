@@ -2,7 +2,7 @@ using Contracts;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using DB.Data.MediaGroup;
+using DB.Data.Media;
 using DB.Data.Metadata;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +24,7 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 
 		_testee = new MediaMetadataRepository(
 			fixture.ContextFactory,
-			new MediaIdGroupRepository(fixture.ContextFactory),
+			new MediaRepository(fixture.ContextFactory),
 			new MediaMetadataFactory(_dateTimeProvider.Object)
 		);
 	}

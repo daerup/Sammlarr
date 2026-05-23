@@ -86,7 +86,7 @@ internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFact
 		}
 
 		await ctx
-			.WatchlistEntries.Where(w => w.SourceFeedId == id)
+			.Watchlist.Where(w => w.SourceFeedId == id)
 			.ExecuteUpdateAsync(
 				s => s.SetProperty(w => w.Origin, WatchlistEntryOrigin.Orphaned).SetProperty(w => w.SourceFeedNameSnapshot, entity.Name),
 				cancellationToken

@@ -16,7 +16,7 @@ internal class WatchlistService(
 	IMediaMetadataProvider metadataProvider
 ) : IWatchlistService
 {
-	public async IAsyncEnumerable<WatchlistedItem> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<WatchlistedMediaDetail> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
 		var mediaProvider = config.WatchlistProvider.AsMediaProvider();
@@ -26,14 +26,14 @@ internal class WatchlistService(
 			.ToAsyncEnumerable()
 			.OrderByDescending(e => e.AddedAt)
 			.SelectAwait(
-				async e => (e, await metadataProvider.GetAsync(e.Id, cancellationToken)),
+				async e => (e, await metadataProvider.GetAsync(e.MediaId, cancellationToken)),
 				IMediaMetadataProvider.RecommendedConcurrency,
 				cancellationToken
 			);
 
 		await foreach (var (entry, detail) in pipeline)
 		{
-			yield return new WatchlistedItem(detail, entry.AddedAt, entry.Provenance);
+			yield return new WatchlistedMediaDetail(detail, entry.AddedAt, entry.Provenance);
 		}
 	}
 
@@ -41,7 +41,7 @@ internal class WatchlistService(
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
 		var entries = await repository.GetEntriesAsync(config.WatchlistProvider.AsMediaProvider(), cancellationToken);
-		return entries.OrderBy(e => e.AddedAt).Select(e => e.Id).ToHashSet();
+		return entries.OrderBy(e => e.AddedAt).Select(e => e.MediaId).ToHashSet();
 	}
 
 	public async Task AddToWatchlistAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
