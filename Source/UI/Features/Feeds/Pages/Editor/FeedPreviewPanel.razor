@@ -425,6 +425,14 @@
             _processedResults = [];
             _fetchState = FetchState.Idle;
         }
+        catch (FeedIdentifierNotFoundException ex)
+        {
+            _rawResults = [];
+            _unresolvedResults = [];
+            _processedResults = [];
+            _fetchState = FetchState.Failed;
+            Notifier.Warning($"No list found with identifier '{ex.Identifier}'.", "List not found");
+        }
         catch (Exception ex)
         {
             _rawResults = [];

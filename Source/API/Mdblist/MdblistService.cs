@@ -1,3 +1,4 @@
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Mdblist.Types;
@@ -78,6 +79,11 @@ internal class MdblistService(
 	{
 		var endpoint = string.Format(ListItemsEndpoint, identifier, PageSize, offset);
 		using var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
+		if (response.StatusCode == HttpStatusCode.NotFound)
+		{
+			throw new FeedIdentifierNotFoundException(identifier);
+		}
+		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var page = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(stream)!;
 		var hasMore =
