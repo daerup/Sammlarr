@@ -41,6 +41,7 @@ public class SQLiteFixture : IAsyncDisposable
 			BuildOptions(),
 			new EntityAuditer(),
 			_serviceProvider.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
+			_serviceProvider.GetRequiredService<IEnumerable<IModelConfiguration>>(),
 			dateTimeProvider
 		);
 		ctx.Initialize();

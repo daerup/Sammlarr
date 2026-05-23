@@ -10,5 +10,6 @@ internal class AccessModule : IServiceModule
 	{
 		services.AddScoped<ICredentialStore, CredentialRepository>();
 		services.AddScoped<IApiKeyConfigRepository, ApiKeyConfigRepository>();
+		services.AddScoped<IModelConfiguration, AccessEntityConfiguration>();
 	}
 }

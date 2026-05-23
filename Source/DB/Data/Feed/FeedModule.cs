@@ -6,5 +6,9 @@ namespace DB.Data.Feed;
 
 internal class FeedModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services) => services.AddScoped<IFeedRepository, FeedRepository>();
+	public void RegisterServices(IServiceCollection services)
+	{
+		services.AddScoped<IFeedRepository, FeedRepository>();
+		services.AddScoped<IModelConfiguration, FeedEntityConfiguration>();
+	}
 }
