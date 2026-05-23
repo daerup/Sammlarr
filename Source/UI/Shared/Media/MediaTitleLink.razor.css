@@ -5,13 +5,7 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted-foreground);
-    background:
-        linear-gradient(
-            90deg,
-            color-mix(in oklch, var(--foreground) 1%, transparent) 0%,
-            color-mix(in oklch, var(--foreground) 3%, transparent) 70%,
-            color-mix(in oklch, var(--foreground) 7%, transparent) 100%
-        );
+    background: oklch(from var(--muted) calc(l - 0.08) c h);
     border-bottom: 2px solid #09090b;
 }
 

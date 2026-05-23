@@ -31,8 +31,8 @@ else
                 }
             </HoverButton>
         </BbHoverCardTrigger>
-        <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="min-w-md w-max p-0">
-            <div class="px-4 py-3 border-b">
+        <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="p-0 watchlist-sync-preview">
+            <div class="px-4 py-3" style="@PreviewHeaderStyle">
                 <p class="text-xs uppercase tracking-wide font-medium text-muted-foreground">Sync preview</p>
                 @if (_dryRunError is not null)
                 {
@@ -72,7 +72,7 @@ else
                             <span class="inline-flex h-5 items-center shrink-0 @kindColor">
                                 <LucideIcon Name="@kindIcon" Size="14"/>
                             </span>
-                            <span class="flex-1 whitespace-nowrap pr-4" title="@title">@title</span>
+                            <span class="flex-1" style="white-space: nowrap; padding-right: 1rem;" title="@title">@title</span>
                             <span title="@directionTooltip" class="inline-flex h-5 items-center shrink-0 text-muted-foreground">
                                 <LucideIcon Name="@directionIcon" Size="14"/>
                             </span>
@@ -97,6 +97,8 @@ else
 
     [Parameter]
     public string? BrandColor { get; set; }
+
+    private const string PreviewHeaderStyle = "background: oklch(from var(--muted) calc(l - 0.08) c h); border-bottom: 2px solid #09090b;";
 
     private readonly CancellationTokenSource _cts = new();
     private WatchlistSyncDryRunReport? _dryRun;
