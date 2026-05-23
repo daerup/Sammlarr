@@ -1,9 +1,4 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Contracts;
-using Contracts.Media;
-using Contracts.Media.Feed;
-using Contracts.Processing;
 using DB.Data;
 using DB.Data.Access;
 using DB.Data.Blacklist;
@@ -21,21 +16,22 @@ namespace DB;
 
 internal sealed class SammlarrDbContext : DbContext
 {
-	private static readonly JsonSerializerOptions JsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
-
 	private readonly IDateTimeProvider _dateTimeProvider;
 	private readonly EntityAuditer _entityAuditer;
 	private readonly IEnumerable<IPropertyAddedConvention> _propertyConventions;
+	private readonly IEnumerable<IModelConfiguration> _modelConfigurations;
 
 	public SammlarrDbContext(
 		DbContextOptions<SammlarrDbContext> options,
 		EntityAuditer entityAuditer,
 		IEnumerable<IPropertyAddedConvention> propertyConventions,
+		IEnumerable<IModelConfiguration> modelConfigurations,
 		IDateTimeProvider dateTimeProvider
 	)
 		: base(options)
 	{
 		_propertyConventions = propertyConventions;
+		_modelConfigurations = modelConfigurations;
 		_entityAuditer = entityAuditer;
 		_dateTimeProvider = dateTimeProvider;
 	}
@@ -78,69 +74,7 @@ internal sealed class SammlarrDbContext : DbContext
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
-
-		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
-		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
-		modelBuilder.Entity<BlacklistEntity>(builder =>
-		{
-			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId");
-			builder.HasOne(b => b.Media).WithOne().HasForeignKey<BlacklistEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
-		});
-
-		modelBuilder
-			.Entity<ExternalMediaIdEntity>()
-			.HasKey(e => new
-			{
-				e.Source,
-				e.MediaType,
-				e.Id,
-			});
-		modelBuilder.Entity<MediaEntity>().HasMany(m => m.ExternalIds).WithOne(e => e.Media).OnDelete(DeleteBehavior.Cascade);
-
-		modelBuilder.Entity<MediaMetadataEntity>(builder =>
-		{
-			builder.HasOne(m => m.Media).WithOne().HasForeignKey<MediaMetadataEntity>(m => m.MediaId).OnDelete(DeleteBehavior.Cascade);
-			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieMetadataEntity>(MediaType.Movie).HasValue<ShowMetadataEntity>(MediaType.Show);
-		});
-
-		modelBuilder.Entity<MediaRatingEntity>(builder =>
-		{
-			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId", nameof(MediaRatingEntity.Source));
-			builder.HasOne(r => r.Metadata).WithMany(m => m.Ratings).HasForeignKey("MediaId").OnDelete(DeleteBehavior.Cascade);
-		});
-
-		modelBuilder.Entity<WatchlistEntity>(builder =>
-		{
-			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId");
-			builder.HasOne(w => w.Media).WithOne().HasForeignKey<WatchlistEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
-			builder.HasOne(w => w.SourceFeed).WithMany().HasForeignKey(w => w.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
-			builder.HasIndex(w => w.SourceFeedId);
-		});
-
-		modelBuilder.Entity<WatchlistOutboxEntity>(builder =>
-		{
-			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId");
-			builder.HasOne(o => o.Media).WithOne().HasForeignKey<WatchlistOutboxEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
-			builder.HasIndex(o => o.Kind);
-		});
-
-		modelBuilder.Entity<FeedEntity>(builder =>
-		{
-			builder
-				.Property(x => x.Filter)
-				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);
-			builder
-				.Property(x => x.Sort)
-				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QuerySort>(v, JsonOptions)!);
-			builder
-				.Property(x => x.Limit)
-				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
-			builder.Property(x => x.SyncMode).HasConversion(v => v.ToString(), v => SyncMode.From(v));
-		});
+        _modelConfigurations.ToList().ForEach(builder => builder.Apply(modelBuilder));
 	}
 
 	public override int SaveChanges()

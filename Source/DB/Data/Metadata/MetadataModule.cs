@@ -10,5 +10,6 @@ internal class MetadataModule : IServiceModule
 	{
 		services.AddScoped<IMediaMetadataRepository, MediaMetadataRepository>();
 		services.AddScoped<MediaMetadataFactory>();
+		services.AddScoped<IModelConfiguration, MediaMetadataEntityConfiguration>();
 	}
 }
