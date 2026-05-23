@@ -10,26 +10,28 @@
 
 @if (_isSyncing)
 {
-    <BbButton Variant="ButtonVariant.Default" Disabled="true" Class="whitespace-nowrap">
+    <HoverButton Disabled="true" Color="@BrandColor" Class="whitespace-nowrap">
         <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
         <span>Syncing...</span>
-    </BbButton>
+    </HoverButton>
 }
 else
 {
     <BbHoverCard OpenDelay="200" CloseDelay="100" OnOpenChange="OnHoverChanged">
         <BbHoverCardTrigger AsChild="false">
-            <BbButton Variant="ButtonVariant.Default" @onclick="SyncAsync" Class="relative whitespace-nowrap">
+            <HoverButton OnClick="SyncAsync" Color="@BrandColor" Class="relative whitespace-nowrap">
                 <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
                 <span>Sync</span>
                 @if (_dryRun is { TotalChanges: > 0 } report)
                 {
-                    <span
-                        class="ml-2 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[10px] font-semibold bg-warning">@report.TotalChanges</span>
+                    <BbBadge Variant="BadgeVariant.Outline"
+                             Class="hover-button-badge ml-2 min-w-5 h-5 px-1.5 rounded-full text-[10px] font-semibold">
+                        @report.TotalChanges
+                    </BbBadge>
                 }
-            </BbButton>
+            </HoverButton>
         </BbHoverCardTrigger>
-        <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="min-w-80 max-w-md p-0">
+        <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="min-w-md w-max p-0">
             <div class="px-4 py-3 border-b">
                 <p class="text-xs uppercase tracking-wide font-medium text-muted-foreground">Sync preview</p>
                 @if (_dryRunError is not null)
@@ -70,7 +72,7 @@ else
                             <span class="inline-flex h-5 items-center shrink-0 @kindColor">
                                 <LucideIcon Name="@kindIcon" Size="14"/>
                             </span>
-                            <span class="truncate flex-1" title="@title">@title</span>
+                            <span class="flex-1 whitespace-nowrap pr-4" title="@title">@title</span>
                             <span title="@directionTooltip" class="inline-flex h-5 items-center shrink-0 text-muted-foreground">
                                 <LucideIcon Name="@directionIcon" Size="14"/>
                             </span>
@@ -92,6 +94,9 @@ else
 
     [Parameter]
     public EventCallback OnSynced { get; set; }
+
+    [Parameter]
+    public string? BrandColor { get; set; }
 
     private readonly CancellationTokenSource _cts = new();
     private WatchlistSyncDryRunReport? _dryRun;

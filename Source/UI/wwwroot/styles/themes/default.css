@@ -280,6 +280,17 @@ body:has(.error-dialog) .search-modal {
     border: none !important;
 }
 
+.hover-button .hover-button-badge {
+    color: inherit !important;
+    border-color: currentColor !important;
+    background-color: oklch(from var(--tint) l c h / 0.12) !important;
+}
+.hover-button:hover .hover-button-badge,
+.hover-button:focus .hover-button-badge,
+.hover-button:focus-visible .hover-button-badge {
+    background-color: oklch(from var(--background) l c h / 0.15) !important;
+}
+
 /* Rectangular avatar (override BbAvatar's default rounded-full for profile popover) */
 .avatar-rect,
 .avatar-rect img,
