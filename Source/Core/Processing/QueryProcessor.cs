@@ -23,7 +23,9 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 			all = all.OrderBy($"{sort.Property} {dir}");
 		}
 
-		var filtered = options?.Filter is { } filter ? all.Where(FilterEvaluator.Build(filter)) : all;
+        var config = ParsingConfig.DefaultEFCore21;
+        config.AllowEqualsAndToStringMethodsOnObject = true;
+		var filtered = options?.Filter is { } filter ? all.Where(config, FilterEvaluator.Build(filter)) : all;
 		var removed = new HashSet<T>(all.Except(filtered));
 
 		var taken = 0;

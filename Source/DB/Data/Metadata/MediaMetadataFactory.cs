@@ -7,13 +7,13 @@ namespace DB.Data.Metadata;
 
 internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 {
-	public TEntity BuildFrom<TEntity>(IMediaDetailResult details, Guid groupId)
+	public TEntity BuildFrom<TEntity>(IMediaDetail details, Guid groupId)
 		where TEntity : MediaMetadataEntity
 	{
 		MediaMetadataEntity entity = details switch
 		{
-			MovieDetailResult movie => new MovieMetadataEntity { Runtime = movie.Runtime },
-			ShowDetailResult show => new ShowMetadataEntity
+			MovieDetail movie => new MovieMetadataEntity { Runtime = movie.Runtime },
+			ShowDetail show => new ShowMetadataEntity
 			{
 				Seasons = show.Seasons,
 				Episodes = show.Episodes,
@@ -27,16 +27,16 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		return (TEntity)entity;
 	}
 
-	public void Update(MediaMetadataEntity existing, IMediaDetailResult details)
+	public void Update(MediaMetadataEntity existing, IMediaDetail details)
 	{
 		switch (existing, details)
 		{
-			case (MovieMetadataEntity movie, MovieDetailResult movieDetails):
+			case (MovieMetadataEntity movie, MovieDetail movieDetails):
 				ApplyCommonFields(movie, movieDetails, movie.MediaId);
 				movie.Runtime = movieDetails.Runtime;
 				ReplaceRatings(movie, movieDetails.Ratings);
 				break;
-			case (ShowMetadataEntity show, ShowDetailResult showDetails):
+			case (ShowMetadataEntity show, ShowDetail showDetails):
 				ApplyCommonFields(show, showDetails, show.MediaId);
 				show.Seasons = showDetails.Seasons;
 				show.Episodes = showDetails.Episodes;
@@ -49,13 +49,12 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		existing.LastFetchedAt = dateTimeProvider.Now;
 	}
 
-	public IMediaDetailResult ToDetailResult(MediaMetadataEntity entity, MediaId id, IReadOnlyList<IExternalMediaId> externals) =>
+	public IMediaDetail ToDetailResult(MediaMetadataEntity entity, MediaIdentity identity) =>
 		entity switch
 		{
-			MovieMetadataEntity movie => new MovieDetailResult
+			MovieMetadataEntity movie => new MovieDetail
 			{
-				Id = id,
-				Externals = externals,
+				Identity = identity,
 				Title = movie.Title,
 				Tagline = movie.Tagline,
 				Summary = movie.Summary,
@@ -66,10 +65,9 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 				Genres = movie.Genres,
 				Ratings = ToRatings(movie.Ratings),
 			},
-			ShowMetadataEntity show => new ShowDetailResult
+			ShowMetadataEntity show => new ShowDetail
 			{
-				Id = id,
-				Externals = externals,
+				Identity = identity,
 				Title = show.Title,
 				Tagline = show.Tagline,
 				Summary = show.Summary,
@@ -94,7 +92,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		}
 	}
 
-	private static void ApplyCommonFields(MediaMetadataEntity entity, IMediaDetailResult source, Guid mediaId)
+	private static void ApplyCommonFields(MediaMetadataEntity entity, IMediaDetail source, Guid mediaId)
 	{
 		entity.MediaId = mediaId;
 		entity.Title = source.Title;

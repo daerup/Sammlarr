@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Contracts;
 using Contracts.Media;
-using Contracts.Media.Metadata;
+using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -12,26 +12,19 @@ namespace Core.Watchlist;
 internal class WatchlistService(
 	IWatchlistRepository repository,
 	IWatchlistOutbox outbox,
-	IMediaMetadataProvider metadataProvider,
+	IMediaService media,
 	IMediaRepository mediaRepository,
 	IProviderConfigRepository configRepository
 ) : IWatchlistService
 {
 	public async IAsyncEnumerable<WatchlistedMediaDetail> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var entries = await repository.GetEntriesAsync(cancellationToken);
-		var pipeline = entries
-			.ToAsyncEnumerable()
-			.OrderByDescending(e => e.AddedAt)
-			.SelectAwait(
-				async e => (Entry: e, Detail: await metadataProvider.GetAsync(e.MediaId, cancellationToken)),
-				IMediaMetadataProvider.RecommendedConcurrency,
-				cancellationToken
-			);
+		var entries = (await repository.GetEntriesAsync(cancellationToken)).OrderByDescending(e => e.AddedAt).ToList();
+		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).Zip(entries, cancellationToken);
 
-		await foreach (var (entry, detail) in pipeline)
+		await foreach (var (result, entry) in pipeline)
 		{
-			if (detail is null)
+			if (result is not IMediaDetail detail)
 			{
 				continue;
 			}

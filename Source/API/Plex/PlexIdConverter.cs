@@ -1,14 +1,12 @@
-using API.TMDB;
+using API.Tmdb;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
-using Contracts.Media.Search;
-using Microsoft.Extensions.DependencyInjection;
 using Shared;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServices(MediaSearchProvider.Plex)] IMediaSearchService searchService)
+internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdConverter
 {
 	private const int LookupConcurrency = 4;
 
@@ -27,7 +25,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 		if (hints is Some<ResolutionHints>(var h))
 		{
 			var result = await ResolveFromTitleSearchAsync(h.Title, h.MediaType, materialized, cancellationToken);
-			if (result.Value is Some<IReadOnlyList<IExternalMediaId>>)
+			if (result is Some<IReadOnlyList<IExternalMediaId>>)
 			{
 				return result;
 			}
@@ -43,13 +41,13 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 		CancellationToken cancellationToken
 	)
 	{
-		var searchResults = await searchService.SearchAsync(title, [mediaType], cancellationToken);
+		var searchResults = await plexApi.SearchAsync(title, [mediaType], cancellationToken);
 		var match = await searchResults
 			.ToAsyncEnumerable()
 			.SelectAwait(
 				async r =>
 				{
-					var plexExternal = r.Externals.OfType<PlexId>().FirstOrDefault();
+					var plexExternal = r.Identity.Externals.OfType<PlexId>().FirstOrDefault();
 					return plexExternal == default ? null : await plexApi.LookUpExternalsAsync(plexExternal, cancellationToken);
 				},
 				LookupConcurrency,
@@ -76,7 +74,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi, [FromKeyedServi
 				continue;
 			}
 			var result = await ResolveFromTitleSearchAsync(title, candidate.Type, candidates, cancellationToken);
-			if (result.Value is Some<IReadOnlyList<IExternalMediaId>>)
+			if (result is Some<IReadOnlyList<IExternalMediaId>>)
 			{
 				return result;
 			}

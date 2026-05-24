@@ -204,23 +204,23 @@ public class FilterEvaluatorTests
 	[Test]
 	public async Task Build_WhenIn_EmitsDynamicLinqInExpression()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(In("MediaTypeText", "Movie", "Show"))));
+		var result = FilterEvaluator.Build(Filter(Group(In("MediaType", "Movie", "Show"))));
 
-		await Assert.That(result).IsEqualTo("(MediaTypeText in (\"Movie\", \"Show\"))");
+		await Assert.That(result).IsEqualTo("(MediaType.ToString() in (\"Movie\", \"Show\"))");
 	}
 
 	[Test]
 	public async Task Build_WhenNotIn_NegatesInExpression()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(NotIn("MediaTypeText", "Movie"))));
+		var result = FilterEvaluator.Build(Filter(Group(NotIn("MediaType", "Movie"))));
 
-		await Assert.That(result).IsEqualTo("(!(MediaTypeText in (\"Movie\")))");
+		await Assert.That(result).IsEqualTo("(!(MediaType.ToString() in (\"Movie\")))");
 	}
 
 	[Test]
 	public async Task Build_WhenInWithEmptyList_ReturnsEmpty()
 	{
-		var result = FilterEvaluator.Build(Filter(Group(In("MediaTypeText"))));
+		var result = FilterEvaluator.Build(Filter(Group(In("MediaType"))));
 
 		await Assert.That(result).IsEmpty();
 	}

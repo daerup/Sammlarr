@@ -29,7 +29,7 @@ public class WatchlistServiceTests
 		var result = await scenario.Testee.GetWatchlistItemsAsync().ToListAsync();
 
 		await Assert.That(result).Count().IsEqualTo(1);
-		await Assert.That(result[0].Detail.Id).IsEqualTo(mediaId);
+		await Assert.That(result[0].Detail.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(result[0].AddedAt).IsEqualTo(addedAt);
 	}
 
@@ -144,11 +144,10 @@ public class WatchlistServiceTests
 		scenario.Repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
-	private MovieDetailResult CreateMovieDetailResult(MediaId mediaId) =>
+	private MovieDetail CreateMovieDetailResult(MediaId mediaId) =>
 		new()
 		{
-			Id = mediaId,
-			Externals = new List<IExternalMediaId> { PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie) },
+			Identity = new MediaIdentity(mediaId, [PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie)]),
 			Title = _faker.Lorem.Sentence(2),
 			Tagline = _faker.Company.CatchPhrase(),
 			Summary = _faker.Lorem.Paragraph(),
@@ -162,7 +161,7 @@ public class WatchlistServiceTests
 	private sealed record Scenario(
 		Mock<IWatchlistRepository> Repository,
 		Mock<IWatchlistOutbox> Outbox,
-		Mock<IMediaMetadataProvider> Metadata,
+		FakeMediaService Media,
 		Mock<IMediaRepository> MediaRepo,
 		Mock<IProviderConfigRepository> Config,
 		WatchlistService Testee
@@ -172,7 +171,7 @@ public class WatchlistServiceTests
 			IReadOnlyList<WatchlistedMedia>? entries = null,
 			IReadOnlyList<WatchlistOperation>? outbox = null,
 			IReadOnlyList<MediaId>? existingIds = null,
-			MovieDetailResult? metadata = null,
+			MovieDetail? metadata = null,
 			IReadOnlyDictionary<MediaId, IExternalMediaId>? watchlistProviderExternals = null
 		)
 		{
@@ -183,10 +182,13 @@ public class WatchlistServiceTests
 			var outboxMock = IWatchlistOutbox.Mock();
 			outboxMock.GetAsync(Any()).Returns(outbox ?? []);
 
-			var metadataProvider = IMediaMetadataProvider.Mock();
+			var media = new FakeMediaService();
 			if (metadata is not null)
 			{
-				metadataProvider.GetAsync(Any<MediaId>(), Any()).Returns(metadata);
+				foreach (var entry in entries ?? [])
+				{
+					media.RegisterMetadata(entry.MediaId, metadata);
+				}
 			}
 
 			var mediaRepo = IMediaRepository.Mock();
@@ -207,8 +209,8 @@ public class WatchlistServiceTests
 					}
 				);
 
-			var testee = new WatchlistService(repository.Object, outboxMock.Object, metadataProvider.Object, mediaRepo.Object, config.Object);
-			return new Scenario(repository, outboxMock, metadataProvider, mediaRepo, config, testee);
+			var testee = new WatchlistService(repository.Object, outboxMock.Object, media, mediaRepo.Object, config.Object);
+			return new Scenario(repository, outboxMock, media, mediaRepo, config, testee);
 		}
 	}
 

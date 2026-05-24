@@ -1,11 +1,14 @@
 using Contracts;
-using Contracts.Media.Blacklist;
+using Contracts.Blacklist;
+using Contracts.Media;
+using Contracts.Media.Search;
 using Contracts.Processing;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Sync;
 using Core.Blacklist;
 using Core.Caching;
 using Core.DI;
+using Core.Media;
 using Core.Processing;
 using Core.Watchlist;
 using Core.Watchlist.Sync;
@@ -25,5 +28,10 @@ public class CoreModule : IServiceModule
 		services.AddScoped<IBlacklistService, BlacklistService>();
 		services.AddScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
+		services.AddScoped<MediaIdResolver>();
+		services.AddScoped<MediaMetadataResolver>();
+		services.AddScoped<MediaIdentityCoordinator>();
+		services.AddScoped<IMediaService, MediaService>();
+		services.AddScoped<IMediaSearchService, MediaSearchService>();
 	}
 }

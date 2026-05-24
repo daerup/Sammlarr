@@ -1,9 +1,11 @@
+using Contracts.Media;
+using Contracts.Media.Convertions;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
-namespace API.IMDB;
+namespace API.Imdb;
 
 internal class ImdbModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services) => services.AddScoped<ImdbIdConverter>();
+	public void RegisterServices(IServiceCollection services) => services.AddKeyedScoped<IExternalIdConverter, ImdbIdConverter>(MediaProvider.Imdb);
 }

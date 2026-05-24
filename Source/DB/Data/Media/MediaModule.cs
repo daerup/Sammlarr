@@ -9,6 +9,7 @@ internal class MediaModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<IMediaRepository, MediaRepository>();
+		services.AddScoped<IMediaQuerySessionFactory, MediaQuerySessionFactory>();
 		services.AddScoped<IModelConfiguration, MediaEntityConfiguration>();
 	}
 }

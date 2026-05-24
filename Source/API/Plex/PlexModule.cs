@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using Contracts.Auth;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist;
@@ -16,11 +17,11 @@ internal class PlexModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<PlexApi>();
-		services.AddKeyedScoped<IMediaSearchService, PlexApi>(MediaSearchProvider.Plex);
+		services.AddKeyedScoped<IMediaSearchProvider, PlexApi>(MediaSearchProvider.Plex);
 		services.AddKeyedScoped<IMetadataEnricher, PlexMetadataEnricher>(MediaProvider.Plex);
 		services.AddKeyedScoped<IOAuthService, PlexOAuthService>(WatchlistProvider.Plex);
 		services.AddKeyedScoped<IWatchlistProvider, PlexWatchListProvider>(WatchlistProvider.Plex);
-		services.AddScoped<PlexIdConverter>();
+		services.AddKeyedScoped<IExternalIdConverter, PlexIdConverter>(MediaProvider.Plex);
 
 		services.AddHttpClient<PlexClient>(ConfigurePlexClient);
 		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient);

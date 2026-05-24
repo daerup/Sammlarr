@@ -1,11 +1,9 @@
-using API.IMDB;
+using API.Imdb;
 using API.Mdblist;
 using API.Plex;
 using API.Telemetry;
-using API.TMDB;
+using API.Tmdb;
 using API.TvDB;
-using Contracts.Media.Convertions;
-using Contracts.Media.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -21,7 +19,5 @@ public class ApiModule : IServiceModule
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
 		services.AddModule<TelemetryModule>();
-		services.AddScoped<IMediaIdResolver, MediaIdResolver>();
-		services.AddScoped<IMediaMetadataProvider, MediaMetadataProvider>();
 	}
 }

@@ -1,20 +1,17 @@
 @page "/blacklist"
 @implements IDisposable
 @using Contracts
+@using Contracts.Blacklist
 @using Contracts.Media
-@using Contracts.Media.Blacklist
-@using Contracts.Media.Convertions
-@using Contracts.Media.Metadata
 @using Contracts.Media.Search
 @using Contracts.Settings
 @implements IAsyncDisposable
 @inject IBlacklistService BlacklistService
-@inject IMediaMetadataProvider MetadataProvider
+@inject IMediaService Media
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
-@inject IMediaIdResolver MediaIdResolver
 @inject Notifier Notifier
 @inject ToastService ToastService
 
@@ -79,7 +76,7 @@ else
                 <BulkEditableMediaGrid TItem="BlacklistedMediaDetail"
                                        Items="_items"
                                        Detail="@(i => i.Detail)"
-                                       Key="@(i => i.Detail.Id)"
+                                       Key="@(i => i.Detail.Identity.Id)"
                                        IsEditMode="_isEditMode"
                                        IsEditModeChanged="@(v => _isEditMode = v)"
                                        OnTileClick="@(i => SelectItem(i.Detail))"
@@ -100,7 +97,7 @@ else
                   ReleaseDate="@SelectedReleaseDate"
                   ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
-                  Ids="@(_selectedItem?.Externals)"
+                  Ids="@(_selectedItem?.Identity.Externals)"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromBlacklistAsync"
                   ButtonText="GetRemoveButtonText"
@@ -119,7 +116,7 @@ else
 
 @code {
     private IReadOnlyList<BlacklistedMediaDetail>? _items;
-    private IMediaDetailResult? _selectedItem;
+    private IMediaDetail? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
@@ -166,7 +163,7 @@ else
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(i => i.Detail.Id == _selectedItem.Id)?.Detail;
+                _selectedItem = _items.FirstOrDefault(i => i.Detail.Identity.Id == _selectedItem.Identity.Id)?.Detail;
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -191,7 +188,7 @@ else
         {
             return;
         }
-        await MetadataProvider.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
+        await Media.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
     }
 
     private async Task ReportSelectedImageBrokenAsync()
@@ -200,14 +197,14 @@ else
         {
             return;
         }
-        await ReportBrokenImageAsync(_selectedItem.Id);
+        await ReportBrokenImageAsync(_selectedItem.Identity.Id);
     }
 
     private static string GetRemoveButtonText() => "Remove from Blacklist";
 
     private static string GetRemoveButtonIcon() => "x";
 
-    private void SelectItem(IMediaDetailResult detail)
+    private void SelectItem(IMediaDetail detail)
     {
         _selectedItem = detail;
         _isSheetOpen = true;
@@ -223,7 +220,7 @@ else
     {
         foreach (var item in toRemove)
         {
-            await BlacklistService.RemoveFromBacklistAsync(item.Detail.Id, _cancellationTokenSource.Token);
+            await BlacklistService.RemoveFromBacklistAsync(item.Detail.Identity.Id, _cancellationTokenSource.Token);
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blacklist.");
         await LoadBlacklistAsync();
@@ -245,7 +242,7 @@ else
 
         try
         {
-            await BlacklistService.RemoveFromBacklistAsync(_selectedItem.Id, _cancellationTokenSource.Token);
+            await BlacklistService.RemoveFromBacklistAsync(_selectedItem.Identity.Id, _cancellationTokenSource.Token);
             CloseSelectedMedia();
             await LoadBlacklistAsync();
         }
@@ -277,7 +274,7 @@ else
             return false;
         }
 
-        return _items.Any(item => item.Detail.Id.Equals(mediaId));
+        return _items.Any(item => item.Detail.Identity.Id.Equals(mediaId));
     }
 
     private void OpenSearchModal()

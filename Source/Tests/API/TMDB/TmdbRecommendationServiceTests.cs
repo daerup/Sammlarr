@@ -1,13 +1,13 @@
-using API.TMDB;
+using API.Tmdb;
 using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Convertions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Shared.Options;
+using Test.Shared;
 
 namespace API.Tests.TMDB;
 
@@ -21,17 +21,14 @@ public class TmdbRecommendationServiceTests
 		var watchlistTargetId = PlexId.From("plex-42", MediaType.Movie);
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var json = BuildTrendingJson(id: 42, mediaType: "movie", title: "Resolved Movie");
-		var resolver = IMediaIdResolver.Mock();
-		resolver
-			.ResolveAsync(Any<IEnumerable<IExternalMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
-			.Returns(new Resolved(mediaId, new List<IExternalMediaId> { watchlistTargetId }, watchlistTargetId));
-		var testee = CreateTestee(json, resolver);
+		var media = new FakeMediaService().RegisterResolution(TmdbId.From("42", MediaType.Movie), mediaId);
+		var testee = CreateTestee(json, media);
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<TrendingMedia>();
-		await Assert.That(result.Items[0].Externals).Contains((IExternalMediaId)watchlistTargetId);
+		await Assert.That(result.Items[0].Externals).Contains((IExternalMediaId)TmdbId.From("42", MediaType.Movie));
 		await Assert.That(result.Items[0].Title).IsEqualTo("Resolved Movie");
 	}
 
@@ -39,9 +36,8 @@ public class TmdbRecommendationServiceTests
 	public async Task GetTrendingAsync_WhenItemUnresolved_ReturnsUnresolvedTrendingMedia()
 	{
 		var json = BuildTrendingJson(id: 99, mediaType: "movie", title: "Unmatched Movie");
-		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any<IEnumerable<IExternalMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any()).Returns(new Unresolved());
-		var testee = CreateTestee(json, resolver);
+		var media = new FakeMediaService();
+		var testee = CreateTestee(json, media);
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
@@ -55,8 +51,8 @@ public class TmdbRecommendationServiceTests
 	public async Task GetTrendingAsync_WhenMediaTypeUnknown_DropsItem()
 	{
 		var json = BuildTrendingJson(id: 7, mediaType: "person", title: "Some Person");
-		var resolver = IMediaIdResolver.Mock();
-		var testee = CreateTestee(json, resolver);
+		var media = new FakeMediaService();
+		var testee = CreateTestee(json, media);
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
@@ -71,19 +67,18 @@ public class TmdbRecommendationServiceTests
 			(id: 2, mediaType: "movie", title: "Second"),
 			(id: 3, mediaType: "movie", title: "Third")
 		);
-		var resolver = IMediaIdResolver.Mock();
-		var plexId = PlexId.From("plex-1", MediaType.Movie);
-		resolver
-			.ResolveAsync(Any<IEnumerable<IExternalMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
-			.Returns(new Resolved(MediaId.From(Guid.NewGuid()), new List<IExternalMediaId> { plexId }, plexId));
-		var testee = CreateTestee(json, resolver);
+		var media = new FakeMediaService()
+			.RegisterResolution(TmdbId.From("1", MediaType.Movie), MediaId.From(Guid.NewGuid()))
+			.RegisterResolution(TmdbId.From("2", MediaType.Movie), MediaId.From(Guid.NewGuid()))
+			.RegisterResolution(TmdbId.From("3", MediaType.Movie), MediaId.From(Guid.NewGuid()));
+		var testee = CreateTestee(json, media);
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
 		await Assert.That(result.Items.Select(i => i.Title).ToList()).IsEquivalentTo(["First", "Second", "Third"]);
 	}
 
-	private static TmdbRecommendationService CreateTestee(string responseJson, Mock<IMediaIdResolver> resolver)
+	private static TmdbRecommendationService CreateTestee(string responseJson, FakeMediaService media)
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(responseJson);
@@ -103,7 +98,7 @@ public class TmdbRecommendationServiceTests
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		return new TmdbRecommendationService(client, options, resolver.Object, providerConfig.Object);
+		return new TmdbRecommendationService(client, options, media, providerConfig.Object);
 	}
 
 	private static string BuildTrendingJson(int id, string mediaType, string title) => BuildTrendingJson((id, mediaType, title));

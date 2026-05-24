@@ -84,7 +84,7 @@
 
 @code {
 
-    [Parameter] [EditorRequired] public required IMediaDetailResult Result { get; set; }
+    [Parameter] [EditorRequired] public required IMediaDetail Result { get; set; }
     [Parameter] public string Class { get; set; } = "hover-bg";
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
@@ -96,7 +96,7 @@
     private IReadOnlyList<string> _displayFacts = [];
     private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
-    private IMediaDetailResult? _lastResult;
+    private IMediaDetail? _lastResult;
 
     protected override void OnParametersSet()
     {
@@ -107,7 +107,7 @@
         }
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl : Result.BackdropUrl)}')";
         _displayFacts = GetDisplayFacts(Result);
-        _ids = Result.Externals;
+        _ids = Result.Identity.Externals;
     }
 
     private async Task OnPosterError()
@@ -116,17 +116,17 @@
         await OnImageBroken.InvokeAsync();
     }
 
-    private static IReadOnlyList<string> GetDisplayFacts(IMediaDetailResult result)
+    private static IReadOnlyList<string> GetDisplayFacts(IMediaDetail result)
     {
         var facts = new List<string>();
 
         switch (result)
         {
-            case ShowDetailResult showResult:
+            case ShowDetail showResult:
                 AddCountFact(facts, showResult.Seasons, "season");
                 AddCountFact(facts, showResult.Episodes, "episode");
                 break;
-            case MovieDetailResult movieResult:
+            case MovieDetail movieResult:
                 var runtime = GetRuntimeLabel(movieResult.Runtime);
                 if (!string.IsNullOrWhiteSpace(runtime))
                 {

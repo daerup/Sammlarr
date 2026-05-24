@@ -6,73 +6,103 @@ namespace DB.Data.Media;
 
 internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IMediaRepository
 {
-	public async Task<MediaIdentity?> FindAsync(IEnumerable<IExternalMediaId> externals, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaIdentity?>> FindManyAsync(
+		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
+		CancellationToken cancellationToken = default
+	)
 	{
-		var materialized = externals.ToList();
-		if (materialized.Count is 0)
+		if (candidateGroups.Count == 0)
 		{
-			return null;
+			return [];
+		}
+
+		var union = candidateGroups.SelectMany(group => group).Distinct().ToList();
+		if (union.Count == 0)
+		{
+			return new MediaIdentity?[candidateGroups.Count];
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var matched = await ctx.MediaMatchingAny(materialized).Include(m => m.ExternalIds).ToListAsync(cancellationToken);
-		return matched.Count switch
+		var matched = await ctx.MediaMatchingAny(union).Include(m => m.ExternalIds).ToListAsync(cancellationToken);
+
+		var identityByExternal = new Dictionary<IExternalMediaId, MediaIdentity>();
+		foreach (var entity in matched)
 		{
-			0 => null,
-			1 => ToIdentity(matched[0]),
-			_ => throw new MediaIdentityConflictException([.. matched.Select(m => MediaId.From(m.Id))], materialized),
-		};
+			var identity = ToIdentity(entity);
+			foreach (var external in identity.Externals)
+			{
+				identityByExternal[external] = identity;
+			}
+		}
+
+		var results = new MediaIdentity?[candidateGroups.Count];
+		for (var i = 0; i < candidateGroups.Count; i++)
+		{
+			var group = candidateGroups[i];
+			var matches = new HashSet<MediaIdentity>();
+			foreach (var candidate in group)
+			{
+				if (identityByExternal.TryGetValue(candidate, out var identity))
+				{
+					matches.Add(identity);
+				}
+			}
+			results[i] = matches.Count switch
+			{
+				0 => null,
+				1 => matches.First(),
+				_ => throw new MediaIdentityConflictException([.. matches.Select(m => m.Id)], [.. group]),
+			};
+		}
+		return results;
 	}
 
-	public async Task<MediaIdentity?> FindAsync(MediaId id, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaIdentity>> UpsertManyAsync(IReadOnlyList<MediaIdentity> identities, CancellationToken cancellationToken = default)
 	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var entity = await ctx.Media.Where(m => m.Id == id.Value).Include(m => m.ExternalIds).SingleOrDefaultAsync(cancellationToken);
-		return entity is null ? null : ToIdentity(entity);
-	}
+		if (identities.Count == 0)
+		{
+			return [];
+		}
 
-	public async Task<MediaIdentity> UpsertAsync(IEnumerable<IExternalMediaId> externals, CancellationToken cancellationToken = default)
-	{
-		var deduped = externals.Distinct().ToList();
-		deduped.EnsureSingleMediaType();
+		var deduped = identities
+			.Select(i =>
+			{
+				var externals = i.Externals.Distinct().ToList();
+				externals.EnsureSingleMediaType();
+				return i with { Externals = externals };
+			})
+			.ToList();
 
+		var rawIds = deduped.Select(i => i.Id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-		var matched = await ctx
-			.ExternalMediaIds.Include(externalId => externalId.Media)
-				.ThenInclude(media => media.ExternalIds)
-			.WhereMatchingAny(deduped)
-			.Select(externalId => externalId.Media)
-			.Distinct()
-			.ToListAsync(cancellationToken);
+		var existing = await ctx.Media.Include(m => m.ExternalIds).Where(m => rawIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
 
-		if (matched.Count > 1)
-		{
-			throw new MediaIdentityConflictException([.. matched.Select(m => MediaId.From(m.Id))], deduped);
-		}
+		var result = deduped.Select(identity => UpsertOne(ctx, identity, existing)).ToList();
 
-		if (matched.Count == 0)
-		{
-			var newMedia = new MediaEntity();
-			newMedia.ExternalIds = deduped.ToExternalIdEntities(newMedia);
-			await ctx.Media.AddAsync(newMedia, cancellationToken);
-			await ctx.SaveChangesAsync(cancellationToken);
-			await transaction.CommitAsync(cancellationToken);
-			return ToIdentity(newMedia);
-		}
-
-		var existing = matched[0];
-		var current = existing.ExternalIds.Select(externalId => externalId.ToExternalMediaId()).ToHashSet();
-		var missing = deduped.Where(id => !current.Contains(id)).ToList();
-		missing.ForEach(id => existing.ExternalIds.Add(id.ToExternalIdEntity(existing)));
-		if (missing.Count > 0)
-		{
-			await ctx.SaveChangesAsync(cancellationToken);
-		}
-
+		await ctx.SaveChangesAsync(cancellationToken);
 		await transaction.CommitAsync(cancellationToken);
-		return ToIdentity(existing);
+		return result;
+	}
+
+	private static MediaIdentity UpsertOne(SammlarrDbContext ctx, MediaIdentity identity, Dictionary<Guid, MediaEntity> existing)
+	{
+		if (existing.TryGetValue(identity.Id.Value, out var entity))
+		{
+			var known = entity.ExternalIds.Select(e => e.ToExternalMediaId()).ToHashSet();
+			foreach (var external in identity.Externals.Where(e => !known.Contains(e)))
+			{
+				entity.ExternalIds.Add(external.ToExternalIdEntity(entity));
+			}
+			return ToIdentity(entity);
+		}
+
+		entity = new MediaEntity { Id = identity.Id.Value };
+		entity.ExternalIds = identity.Externals.ToExternalIdEntities(entity);
+		ctx.Media.Add(entity);
+		existing[identity.Id.Value] = entity;
+		return ToIdentity(entity);
 	}
 
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
@@ -94,6 +124,19 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 			.Select(e => new { MediaId = e.Media.Id, External = e })
 			.ToListAsync(cancellationToken);
 		return rows.ToDictionary(r => MediaId.From(r.MediaId), r => r.External.ToExternalMediaId());
+	}
+
+	public IQueryable<Guid> QueryMediaIds(IMediaQuerySession session, IEnumerable<IExternalMediaId> candidates)
+	{
+		var ctx = ((MediaQuerySession)session).Context;
+		return ctx.ExternalMediaIds.WhereMatchingAny(candidates).Select(e => e.Media.Id).Distinct();
+	}
+
+	public IQueryable<Guid> QueryMediaIds(IMediaQuerySession session, IEnumerable<MediaId> ids)
+	{
+		var ctx = ((MediaQuerySession)session).Context;
+		var rawIds = ids.Select(id => id.Value).ToList();
+		return ctx.Media.Where(m => rawIds.Contains(m.Id)).Select(m => m.Id);
 	}
 
 	private static MediaIdentity ToIdentity(MediaEntity entity) => new(MediaId.From(entity.Id), entity.ExternalIds.Select(e => e.ToExternalMediaId()).ToList());

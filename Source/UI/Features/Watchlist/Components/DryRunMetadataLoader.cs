@@ -1,5 +1,4 @@
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist.Sync;
 using Shared;
@@ -8,30 +7,23 @@ namespace UI.Features.Watchlist.Components;
 
 internal static class DryRunMetadataLoader
 {
-	public static async Task<Dictionary<MediaId, IMediaDetailResult>> LoadAsync(
-		IMediaMetadataProvider metadataProvider,
+	public static async Task<Dictionary<MediaId, IMediaDetail>> LoadAsync(
+		IMediaService media,
 		WatchlistSyncDryRun dryRun,
 		int limit,
 		CancellationToken cancellationToken
 	)
 	{
-		var metadata = new Dictionary<MediaId, IMediaDetailResult>();
-		var pipeline = dryRun
-			.Changes.Take(limit)
-			.ToAsyncEnumerable()
-			.SelectAwait(
-				async change => (change.MediaId, Detail: await metadataProvider.GetAsync(change.MediaId, cancellationToken)),
-				IMediaMetadataProvider.RecommendedConcurrency,
-				cancellationToken
-			);
+		var metadata = new Dictionary<MediaId, IMediaDetail>();
+		var ids = dryRun.Changes.Take(limit).Select(c => c.MediaId);
 
-		await foreach (var (id, detail) in pipeline)
+		await foreach (var result in media.GetDetailsAsync(ids, cancellationToken))
 		{
-			if (detail is null)
+			if (result is not IMediaDetail detail)
 			{
 				continue;
 			}
-			metadata[id] = detail;
+			metadata[detail.Identity.Id] = detail;
 		}
 		return metadata;
 	}

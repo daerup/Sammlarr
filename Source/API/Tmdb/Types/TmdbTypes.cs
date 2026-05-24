@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Contracts.Media;
 
-namespace API.TMDB.Types;
+namespace API.Tmdb.Types;
 
 internal static class TmdbTypes
 {

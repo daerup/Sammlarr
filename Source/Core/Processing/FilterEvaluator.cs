@@ -6,6 +6,7 @@ namespace Core.Processing;
 internal static class FilterEvaluator
 {
 	private static readonly HashSet<string> CollectionStringFields = new(StringComparer.Ordinal) { "Genres" };
+	private static readonly HashSet<string> EnumStringFields = new(StringComparer.Ordinal) { "MediaType" };
 
 	public static string Build(QueryFilter filter)
 	{
@@ -37,7 +38,7 @@ internal static class FilterEvaluator
 			return CompileCollection(p);
 		}
 
-		var f = p.Field;
+		var f = EnumStringFields.Contains(p.Field) ? $"{p.Field}.ToString()" : p.Field;
 		var v = p.Value;
 
 		return p.Operator switch

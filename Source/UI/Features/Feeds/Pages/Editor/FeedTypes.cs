@@ -1,5 +1,5 @@
 using BlazorBlueprint.Primitives.Filtering;
-using Contracts.Media.Feed;
+using Contracts.Feed;
 using Contracts.Processing;
 
 namespace UI.Features.Feeds.Pages.Editor;

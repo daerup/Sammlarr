@@ -1,6 +1,6 @@
 using Contracts.Auth;
+using Contracts.Feed;
 using Contracts.Media;
-using Contracts.Media.Feed;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;

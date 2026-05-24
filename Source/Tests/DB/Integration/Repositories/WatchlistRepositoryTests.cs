@@ -10,21 +10,16 @@ namespace DB.Tests.Integration.Repositories;
 public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private WatchlistRepository _testee = null!;
-	private MediaRepository _mediaRepo = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup()
-	{
-		_mediaRepo = new MediaRepository(fixture.ContextFactory);
-		_testee = new WatchlistRepository(fixture.ContextFactory);
-	}
+	public void Setup() => _testee = new WatchlistRepository(fixture.ContextFactory);
 
 	[Test]
 	public async Task AddAsync_NewEntry_PersistsWithProvenance()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-100", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-100", MediaType.Movie)]);
 
 		await _testee.AddAsync([mediaId], new WatchlistItemProvenance(new ManualOrigin()));
 
@@ -35,8 +30,8 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_BatchOfDistinctMedia_CreatesSeparateEntries()
 	{
-		var first = (await _mediaRepo.UpsertAsync([PlexId.From("plex-200", MediaType.Movie)])).Id;
-		var second = (await _mediaRepo.UpsertAsync([PlexId.From("plex-201", MediaType.Movie)])).Id;
+		var first = await SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
+		var second = await SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
 
 		await _testee.AddAsync([first, second], new WatchlistItemProvenance(new RemoteOrigin()));
 
@@ -122,13 +117,22 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(entries[0].Provenance.Value).IsTypeOf<ManualOrigin>();
 	}
 
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
+	{
+		var media = new MediaEntity();
+		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+		return MediaId.From(media.Id);
+	}
+
 	private async Task<MediaId> SeedWatchlistEntryAsync(IExternalMediaId id, WatchlistEntryOrigin origin)
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([id])).Id;
-		var media = await fixture.Context.Media.SingleAsync(m => m.Id == mediaId.Value);
+		var media = new MediaEntity();
+		await fixture.Context.ExternalMediaIds.AddAsync(id.ToExternalIdEntity(media));
 		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = media, Origin = origin });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
-		return mediaId;
+		return MediaId.From(media.Id);
 	}
 }

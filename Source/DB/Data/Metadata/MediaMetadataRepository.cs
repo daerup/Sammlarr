@@ -8,25 +8,42 @@ namespace DB.Data.Metadata;
 
 internal class MediaMetadataRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaMetadataFactory metadataFactory) : IMediaMetadataRepository
 {
-	public async Task<CachedMediaMetadata?> GetByMediaIdAsync(MediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<CachedMedia>> QueryMediaMetadataAsync(
+		IMediaQuerySession session,
+		IQueryable<Guid> mediaIds,
+		CancellationToken cancellationToken = default
+	)
 	{
-		var raw = mediaId.Value;
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var entity = await ctx
-			.MediaMetadata.AsNoTracking()
-			.Include(m => m.Media)
-				.ThenInclude(media => media.ExternalIds)
-			.Include(m => m.Ratings)
-			.SingleOrDefaultAsync(m => m.MediaId == raw, cancellationToken);
+		var ctx = ((MediaQuerySession)session).Context;
 
-		if (entity is null)
-		{
-			return null;
-		}
+		var query =
+			from m in ctx.Media.AsNoTracking().Include(m => m.ExternalIds)
+			where mediaIds.Contains(m.Id)
+			join md in ctx.MediaMetadata.AsNoTracking().Include(x => x.Ratings) on m.Id equals md.MediaId into joined
+			from md in joined.DefaultIfEmpty()
+			select new { Media = m, Metadata = md };
 
-		var externals = entity.Media.ExternalIds.Select(externalId => externalId.ToExternalMediaId()).ToList();
-		return new CachedMediaMetadata(metadataFactory.ToDetailResult(entity, mediaId, externals), entity.LastFetchedAt);
+		var rows = await query.AsSplitQuery().ToListAsync(cancellationToken);
+		return rows.Select(row =>
+			{
+				var mediaId = MediaId.From(row.Media.Id);
+				var externals = row.Media.ExternalIds.Select(e => e.ToExternalMediaId()).ToList();
+				var identity = new MediaIdentity(mediaId, externals);
+				return row.Metadata is null
+					? new CachedMedia(Unresolved(identity), null)
+					: new CachedMedia(metadataFactory.ToDetailResult(row.Metadata, identity), row.Metadata.LastFetchedAt);
+			})
+			.ToList();
 	}
+
+	private static UnresolvedMedia Unresolved(MediaIdentity identity) =>
+		new()
+		{
+			Identity = identity,
+			MediaType = MediaType.Unknown,
+			Title = string.Empty,
+			ReleaseDate = DateOnly.MinValue,
+		};
 
 	public async Task UpsertManyAsync(IReadOnlyList<MediaMetadataUpsert> items, CancellationToken cancellationToken = default)
 	{
@@ -35,30 +52,24 @@ internal class MediaMetadataRepository(IDbContextFactory<SammlarrDbContext> dbCo
 			return;
 		}
 
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var deduped = items.GroupBy(i => i.MediaId.Value).Select(g => g.Last()).ToList();
 
-		var rawIds = items.Select(item => item.MediaId.Value).Distinct().ToList();
-		var existingByMediaId = await ctx
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var rawIds = deduped.Select(i => i.MediaId.Value).ToList();
+		var existing = await ctx
 			.MediaMetadata.Include(m => m.Ratings)
 			.Where(m => rawIds.Contains(m.MediaId))
 			.ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
-		var processed = new HashSet<Guid>();
-		foreach (var item in items)
+		foreach (var item in deduped)
 		{
-			var raw = item.MediaId.Value;
-			if (!processed.Add(raw))
+			if (existing.TryGetValue(item.MediaId.Value, out var entity))
 			{
-				continue;
-			}
-
-			if (existingByMediaId.TryGetValue(raw, out var existing))
-			{
-				metadataFactory.Update(existing, item.Details);
+				metadataFactory.Update(entity, item.Details);
 			}
 			else
 			{
-				ctx.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, raw));
+				ctx.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, item.MediaId.Value));
 			}
 		}
 

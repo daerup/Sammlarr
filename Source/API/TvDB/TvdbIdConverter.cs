@@ -5,7 +5,7 @@ using Contracts.Media.Convertions;
 
 namespace API.TvDB;
 
-internal class TvdbIdConverter(PlexApi plexApi)
+internal class TvdbIdConverter(PlexApi plexApi) : IExternalIdConverter
 {
 	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
 		IEnumerable<IExternalMediaId> candidates,
@@ -16,7 +16,7 @@ internal class TvdbIdConverter(PlexApi plexApi)
 		foreach (var id in candidates)
 		{
 			var result = await TryConvertAsync(id);
-			if (result.Value is Some<IReadOnlyList<IExternalMediaId>>)
+			if (result is Some<IReadOnlyList<IExternalMediaId>>)
 			{
 				return result;
 			}

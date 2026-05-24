@@ -1,12 +1,13 @@
 using Bogus;
 using Contracts.Auth;
+using Contracts.Blacklist;
 using Contracts.Media;
-using Contracts.Media.Blacklist;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Blacklist;
+using Test.Shared;
 
 namespace Core.Tests.Unit.Blacklist;
 
@@ -49,16 +50,15 @@ public class BlacklistServiceTests
 		var repository = IBlacklistRepository.Mock();
 		repository.GetBlacklistedEntriesAsync(Any()).Returns([entry]);
 
-		var metadataProvider = IMediaMetadataProvider.Mock();
-		metadataProvider.GetAsync(Any<MediaId>(), Any()).Returns(detailResult);
+		var media = new FakeMediaService().RegisterMetadata(mediaId, detailResult);
 
-		var testee = CreateTestee(repository, metadataProvider);
+		var testee = CreateTestee(repository, media);
 
 		var result = await testee.GetBlacklistItems().ToListAsync();
 
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
-		await Assert.That(item.Detail.Id).IsEqualTo(mediaId);
+		await Assert.That(item.Detail.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(item.Detail.Title).IsEqualTo(detailResult.Title);
 		await Assert.That(item.AddedAt).IsEqualTo(addedAt);
 	}
@@ -76,7 +76,7 @@ public class BlacklistServiceTests
 		await Assert.That(result).IsEmpty();
 	}
 
-	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, Mock<IMediaMetadataProvider>? metadataProvider = null)
+	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, FakeMediaService? media = null)
 	{
 		var repo = repository ?? IBlacklistRepository.Mock();
 		var providerConfigRepository = IProviderConfigRepository.Mock();
@@ -92,15 +92,13 @@ public class BlacklistServiceTests
 				}
 			);
 
-		var provider = metadataProvider ?? IMediaMetadataProvider.Mock();
-		return new BlacklistService(repo.Object, providerConfigRepository.Object, provider.Object);
+		return new BlacklistService(repo.Object, providerConfigRepository.Object, media ?? new FakeMediaService());
 	}
 
-	private MovieDetailResult CreateMovieDetailResult(MediaId mediaId) =>
+	private MovieDetail CreateMovieDetailResult(MediaId mediaId) =>
 		new()
 		{
-			Id = mediaId,
-			Externals = new List<IExternalMediaId> { PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie) },
+			Identity = new MediaIdentity(mediaId, [PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie)]),
 			Title = _faker.Lorem.Sentence(2),
 			Tagline = _faker.Company.CatchPhrase(),
 			Summary = _faker.Lorem.Paragraph(),

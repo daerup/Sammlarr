@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Contracts.Auth;
+using Contracts.Feed;
 using Contracts.Media;
-using Contracts.Media.Feed;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist;
@@ -18,10 +18,6 @@ public static class SammlarrTelemetry
 	private static readonly ActivitySource Source = new(ServiceName);
 	private static readonly Meter Meter = new(MeterName);
 
-	private static readonly Counter<long> CacheHits = Meter.CreateCounter<long>("sammlarr.metadata.cache.hits");
-	private static readonly Counter<long> CacheMisses = Meter.CreateCounter<long>("sammlarr.metadata.cache.misses");
-	private static readonly Counter<long> CacheStale = Meter.CreateCounter<long>("sammlarr.metadata.cache.stale");
-	private static readonly Counter<long> CachePartial = Meter.CreateCounter<long>("sammlarr.metadata.cache.partial");
 	private static readonly Counter<long> IdResolutionOutcomes = Meter.CreateCounter<long>("sammlarr.id_resolution.outcomes");
 	private static readonly Counter<long> FeedLoads = Meter.CreateCounter<long>("sammlarr.feed.load");
 	private static readonly Counter<long> WatchlistSyncs = Meter.CreateCounter<long>("sammlarr.watchlist.sync");
@@ -37,25 +33,6 @@ public static class SammlarrTelemetry
 		var activity = Source.StartActivity("metadata.item");
 		activity?.DisplayName = $"FETCH {mediaId}";
 		return activity;
-	}
-
-	public static void TagItemOutcome(Activity? activity, MetadataItemOutcome outcome, MediaType mediaType)
-	{
-		var counter = outcome switch
-		{
-			MetadataItemOutcome.Hit => CacheHits,
-			MetadataItemOutcome.Miss => CacheMisses,
-			MetadataItemOutcome.Stale => CacheStale,
-			MetadataItemOutcome.Partial => CachePartial,
-		};
-		counter.Add(1, new KeyValuePair<string, object?>("media.type", mediaType.ToString()));
-
-		if (activity is null)
-		{
-			return;
-		}
-		activity.SetTag("metadata.outcome", outcome.ToString().ToLowerInvariant());
-		activity.DisplayName += $" [{outcome.ToString().ToUpperInvariant()}]";
 	}
 
 	public static void TagIdResolutionOutcome(Activity? activity, IdResolutionOutcome outcome, MediaProvider target)
@@ -113,6 +90,32 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
+	public static Activity? StartMediaPersistChunk(int outcomeCount, int pendingCount)
+	{
+		var activity = Source.StartActivity("media.persist_chunk");
+		if (activity is null)
+		{
+			return null;
+		}
+		activity.SetTag("persist.outcome_count", outcomeCount);
+		activity.SetTag("persist.pending_count", pendingCount);
+		activity.DisplayName = $"PERSIST CHUNK {pendingCount}/{outcomeCount}";
+		return activity;
+	}
+
+	public static Activity? StartMediaFlush() => Source.StartActivity("media.flush");
+
+	public static void TagMediaFlushCounts(Activity? activity, int pendingExternals, int pendingMetadata)
+	{
+		if (activity is null)
+		{
+			return;
+		}
+		activity.SetTag("flush.pending_externals", pendingExternals);
+		activity.SetTag("flush.pending_metadata", pendingMetadata);
+		activity.DisplayName = $"FLUSH externals={pendingExternals} metadata={pendingMetadata}";
+	}
+
 	public static Activity? StartBlacklistLoad(WatchlistProvider provider)
 	{
 		BlacklistLoads.Add(1, new KeyValuePair<string, object?>("provider", provider.ToString()));
@@ -158,7 +161,7 @@ public static class SammlarrTelemetry
 			_ => "unknown",
 		};
 
-		var success = result.Value is WatchlistSyncSuccess s ? s : default;
+		var success = result is WatchlistSyncSuccess s ? s : default;
 
 		WatchlistSyncs.Add(
 			1,
@@ -170,7 +173,7 @@ public static class SammlarrTelemetry
 			new KeyValuePair<string, object?>("pushed_removes", success.PushedRemoves),
 			new KeyValuePair<string, object?>("remote_failures", success.RemoteFailures)
 		);
-		if (result.Value is not WatchlistSyncSuccess and not WatchlistSyncUnchanged)
+		if (result is not WatchlistSyncSuccess and not WatchlistSyncUnchanged)
 		{
 			WatchlistSyncFailures.Add(1, new KeyValuePair<string, object?>("outcome", outcome));
 		}
@@ -242,14 +245,6 @@ public static class SammlarrTelemetry
 	public static void TagItemSuccess(Activity? activity, bool success) => activity?.SetTag("success", success);
 
 	public static void TagCircuitId(Activity? activity, string? circuitId) => activity?.SetTag("circuit.id", circuitId);
-}
-
-public enum MetadataItemOutcome
-{
-	Hit,
-	Miss,
-	Stale,
-	Partial,
 }
 
 public enum IdResolutionOutcome

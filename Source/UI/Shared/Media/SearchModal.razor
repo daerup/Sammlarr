@@ -1,8 +1,7 @@
-@using Contracts.DI
 @using Contracts.Media
 @using Contracts.Media.Search
 @using global::Shared
-@inject IKeyedServiceIndex<MediaSearchProvider, IMediaSearchService> SearchServiceIndex
+@inject IMediaSearchService SearchService
 @inject Notifier Notifier
 @if (IsOpen)
 {
@@ -90,7 +89,7 @@
                                              OnFocusIn="() => _focusedResult = result"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<IMediaDetailResult>(this, ToggleAsync)))
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.Identity.Id), EventCallback.Factory.Create<IMediaDetail>(this, ToggleAsync)))
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -130,11 +129,11 @@
     private string? _searchHint;
     private string? _searchError;
     private MediaId? _activeToggledSourceId;
-    private List<IMediaDetailResult> _searchResults = [];
+    private List<IMediaDetail> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
-    private IMediaDetailResult? _focusedResult;
+    private IMediaDetail? _focusedResult;
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
@@ -165,7 +164,7 @@
     }
 
 
-    private bool IsSearchResultMarked(IMediaDetailResult result) => IsInWatchlist.Invoke(result.Id);
+    private bool IsSearchResultMarked(IMediaDetail result) => IsInWatchlist.Invoke(result.Identity.Id);
 
     private async Task CloseAsync()
     {
@@ -211,8 +210,7 @@
 
         try
         {
-            var searchService = SearchServiceIndex[SearchProvider];
-            _searchResults = [.. await searchService.SearchAsync(query, [MediaType.Movie, MediaType.Show])];
+            _searchResults = [.. await SearchService.SearchAsync(query, [MediaType.Movie, MediaType.Show])];
 
             _hasSearched = true;
         }
@@ -229,7 +227,7 @@
         }
     }
 
-    private async Task ToggleAsync(IMediaDetailResult result)
+    private async Task ToggleAsync(IMediaDetail result)
     {
         if (_isAdding)
         {
@@ -237,19 +235,19 @@
         }
 
         _isAdding = true;
-        _activeToggledSourceId = result.Id;
+        _activeToggledSourceId = result.Identity.Id;
         _searchHint = null;
         _searchError = null;
 
         var isMarked = IsSearchResultMarked(result);
-        await OnToggle(result.Id, result.Title, isMarked);
+        await OnToggle(result.Identity.Id, result.Title, isMarked);
 
         _isAdding = false;
         _activeToggledSourceId = null;
         _focusedResult = null;
     }
 
-    private void ClearFocusedResult(IMediaDetailResult result)
+    private void ClearFocusedResult(IMediaDetail result)
     {
         if (ReferenceEquals(_focusedResult, result))
         {

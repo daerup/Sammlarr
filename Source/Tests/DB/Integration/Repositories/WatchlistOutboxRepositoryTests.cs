@@ -10,21 +10,25 @@ namespace DB.Tests.Integration.Repositories;
 public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private WatchlistOutboxRepository _testee = null!;
-	private MediaRepository _mediaRepo = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
-	public void Setup()
+	public void Setup() => _testee = new WatchlistOutboxRepository(fixture.ContextFactory);
+
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
-		_mediaRepo = new MediaRepository(fixture.ContextFactory);
-		_testee = new WatchlistOutboxRepository(fixture.ContextFactory);
+		var media = new MediaEntity();
+		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+		return MediaId.From(media.Id);
 	}
 
 	[Test]
 	public async Task EnqueueAsync_NewId_InsertsRow()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-200", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
 
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
 
@@ -35,7 +39,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task EnqueueAsync_ExistingId_ReplacesKind()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-201", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
 
 		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId]);
@@ -48,8 +52,8 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task GetAsync_ReturnsAllOps()
 	{
-		var addId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-202", MediaType.Movie)])).Id;
-		var removeId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-203", MediaType.Movie)])).Id;
+		var addId = await SeedMediaAsync([PlexId.From("plex-202", MediaType.Movie)]);
+		var removeId = await SeedMediaAsync([PlexId.From("plex-203", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [addId]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [removeId]);
 
@@ -63,7 +67,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task DropAsync_RemovesEntry()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-205", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-205", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
 
 		await _testee.DropAsync(WatchlistOperationKind.Add, [mediaId]);
@@ -75,8 +79,8 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task EnqueueAsync_BatchOfDistinctMedia_CreatesSeparateRows()
 	{
-		var first = (await _mediaRepo.UpsertAsync([PlexId.From("plex-400", MediaType.Movie)])).Id;
-		var second = (await _mediaRepo.UpsertAsync([PlexId.From("plex-401", MediaType.Movie)])).Id;
+		var first = await SeedMediaAsync([PlexId.From("plex-400", MediaType.Movie)]);
+		var second = await SeedMediaAsync([PlexId.From("plex-401", MediaType.Movie)]);
 
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [first, second]);
 
@@ -96,7 +100,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task RecordFailureAsync_IncrementsAttemptsAndKeepsRow()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-500", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-500", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
 
 		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, [mediaId]);
@@ -110,7 +114,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task RecordFailureAsync_EmptyInput_NoOp()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-502", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-502", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
 
 		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, []);
@@ -123,7 +127,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task DropAsync_KindMismatch_LeavesRowAlone()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-600", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-600", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId]);
 
 		await _testee.DropAsync(WatchlistOperationKind.Add, [mediaId]);
@@ -135,7 +139,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task RecordFailureAsync_KindMismatch_LeavesAttemptsAlone()
 	{
-		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-601", MediaType.Movie)])).Id;
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-601", MediaType.Movie)]);
 		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId]);
 
 		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, [mediaId]);

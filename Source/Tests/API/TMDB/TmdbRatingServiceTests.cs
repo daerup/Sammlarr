@@ -1,4 +1,4 @@
-using API.TMDB;
+using API.Tmdb;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Media;

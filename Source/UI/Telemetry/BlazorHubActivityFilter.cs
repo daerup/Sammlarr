@@ -22,7 +22,16 @@ public class BlazorHubActivityFilter : IHubFilter
 			SammlarrTelemetry.TagCircuitId(current, connectionId);
 		}
 		using var activity = SammlarrTelemetry.StartBlazorHubInvocation(invocationContext.HubMethodName, connectionId);
-		return await next(invocationContext);
+		try
+		{
+			return await next(invocationContext);
+		}
+		catch (Exception ex)
+		{
+			activity?.AddException(ex);
+			activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+			throw;
+		}
 	}
 
 	public Task OnDisconnectedAsync(HubLifetimeContext context, Exception? exception, Func<HubLifetimeContext, Exception?, Task> next)

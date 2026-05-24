@@ -3,9 +3,9 @@ using Contracts;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 
-namespace API.IMDB;
+namespace API.Imdb;
 
-internal class ImdbIdConverter(PlexApi plexApi)
+internal class ImdbIdConverter(PlexApi plexApi) : IExternalIdConverter
 {
 	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
 		IEnumerable<IExternalMediaId> candidates,
@@ -16,7 +16,7 @@ internal class ImdbIdConverter(PlexApi plexApi)
 		foreach (var id in candidates)
 		{
 			var result = await TryConvertAsync(id);
-			if (result.Value is Some<IReadOnlyList<IExternalMediaId>>)
+			if (result is Some<IReadOnlyList<IExternalMediaId>>)
 			{
 				return result;
 			}
