@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Contracts.Media.Feed;
+using Contracts.Feed;
 using Contracts.Processing;
 
 namespace DB.Data.Feed;

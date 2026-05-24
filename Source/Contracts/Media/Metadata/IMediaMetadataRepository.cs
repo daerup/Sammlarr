@@ -4,7 +4,11 @@ namespace Contracts.Media.Metadata;
 
 public interface IMediaMetadataRepository
 {
-	Task<CachedMediaMetadata?> GetByMediaIdAsync(MediaId mediaId, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<CachedMedia>> QueryMediaMetadataAsync(
+		IMediaQuerySession session,
+		IQueryable<Guid> mediaIds,
+		CancellationToken cancellationToken = default
+	);
 
 	Task UpsertManyAsync(IReadOnlyList<MediaMetadataUpsert> items, CancellationToken cancellationToken = default);
 
@@ -13,6 +17,4 @@ public interface IMediaMetadataRepository
 	Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default);
 }
 
-public record CachedMediaMetadata(IMediaDetailResult Details, DateTimeOffset FetchedAt);
-
-public record MediaMetadataUpsert(MediaId MediaId, IMediaDetailResult Details);
+public record MediaMetadataUpsert(MediaId MediaId, IMediaDetail Details);

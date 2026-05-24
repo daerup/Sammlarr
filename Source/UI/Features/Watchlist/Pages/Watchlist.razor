@@ -2,7 +2,6 @@
 @using Contracts
 @using Contracts.Auth
 @using Contracts.Media
-@using Contracts.Media.Metadata
 @using Contracts.Media.Search
 @using Contracts.Settings
 @using Contracts.Watchlist
@@ -12,7 +11,7 @@
 @implements IDisposable
 @implements IAsyncDisposable
 @inject IWatchlistService WatchlistService
-@inject IMediaMetadataProvider MetadataProvider
+@inject IMediaService Media
 @inject IKeyboardShortcutService KeyboardShortcutService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
@@ -98,7 +97,7 @@ else
                     <BulkEditableMediaGrid TItem="WatchlistedMediaDetail"
                                            Items="_items"
                                            Detail="@(i => i.Detail)"
-                                           Key="@(i => i.Detail.Id)"
+                                           Key="@(i => i.Detail.Identity.Id)"
                                            IsEditMode="_isEditMode"
                                            IsEditModeChanged="@(v => _isEditMode = v)"
                                            OnTileClick="SelectItem"
@@ -136,7 +135,7 @@ else
                   ImageUrl="@(_selectedItem?.Detail.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
                   Description="@(_selectedItem?.Detail.Summary ?? string.Empty)"
-                  Ids="@(_selectedItem?.Detail.Externals)"
+                  Ids="@(_selectedItem?.Detail.Identity.Externals)"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromWatchlistAsync"
                   ButtonText="GetRemoveButtonText"
@@ -227,7 +226,7 @@ else
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(item => item.Detail.Id.Equals(_selectedItem.Detail.Id));
+                _selectedItem = _items.FirstOrDefault(item => item.Detail.Identity.Id.Equals(_selectedItem.Detail.Identity.Id));
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -254,7 +253,7 @@ else
         {
             return;
         }
-        await MetadataProvider.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
+        await Media.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
     }
 
     private async Task ReportSelectedImageBrokenAsync()
@@ -263,7 +262,7 @@ else
         {
             return;
         }
-        await ReportBrokenImageAsync(_selectedItem.Detail.Id);
+        await ReportBrokenImageAsync(_selectedItem.Detail.Identity.Id);
     }
 
     private static string GetRemoveButtonText() => "Remove from Watchlist";
@@ -286,7 +285,7 @@ else
         _isRemoving = true;
         try
         {
-            await WatchlistService.RemoveFromWatchlistAsync([_selectedItem.Detail.Id], _cancellationTokenSource.Token);
+            await WatchlistService.RemoveFromWatchlistAsync([_selectedItem.Detail.Identity.Id], _cancellationTokenSource.Token);
             CloseSelectedMedia();
             await LoadWatchlistAsync();
             await RefreshPendingAsync();
@@ -305,7 +304,7 @@ else
 
     private async Task RemoveBulkAsync(IReadOnlyList<WatchlistedMediaDetail> toRemove)
     {
-        await WatchlistService.RemoveFromWatchlistAsync(toRemove.Select(item => item.Detail.Id), _cancellationTokenSource.Token);
+        await WatchlistService.RemoveFromWatchlistAsync(toRemove.Select(item => item.Detail.Identity.Id), _cancellationTokenSource.Token);
         Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your watchlist.");
         await LoadWatchlistAsync();
         await RefreshPendingAsync();
@@ -360,7 +359,7 @@ else
         {
             return false;
         }
-        return _items.Any(i => i.Detail.Id == mediaId);
+        return _items.Any(i => i.Detail.Identity.Id == mediaId);
     }
 
     private async Task<bool> ToggleFromSearchAsync(MediaId id, string title, bool isMarked)

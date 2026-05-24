@@ -27,36 +27,20 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		_testee = new MediaMetadataRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object));
 	}
 
-	[Test]
-	public async Task GetByMediaIdAsync_WhenEntryExists_ReturnsCachedDetails()
+	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
-		var plexId = PlexId.From("plex-120", MediaType.Movie);
-		var imdbId = ImdbId.From("tt120", MediaType.Movie);
-		var mediaId = (await _mediaRepo.UpsertAsync([plexId, imdbId])).Id;
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId, imdbId]))]);
+		var media = new MediaEntity();
+		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
+		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
-
-		var cached = await _testee.GetByMediaIdAsync(mediaId);
-
-		await Assert.That(cached).IsNotNull();
-		await Assert.That(cached!.Details.Id).IsEqualTo(mediaId);
-		await Assert.That(cached.Details.Externals).Contains((IExternalMediaId)imdbId);
-		await Assert.That(cached.Details.Externals).Contains((IExternalMediaId)plexId);
-	}
-
-	[Test]
-	public async Task GetByMediaIdAsync_WhenNoEntryExists_ReturnsNull()
-	{
-		var cached = await _testee.GetByMediaIdAsync(MediaId.From(Guid.NewGuid()));
-
-		await Assert.That(cached).IsNull();
+		return MediaId.From(media.Id);
 	}
 
 	[Test]
 	public async Task UpsertAsync_AdvancesLastFetchedAtEvenWhenPayloadIsIdentical()
 	{
 		var plexId = PlexId.From("plex-700", MediaType.Movie);
-		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var mediaId = await SeedMediaAsync([plexId]);
 		var firstFetch = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 		var secondFetch = firstFetch.AddHours(2);
 
@@ -68,15 +52,18 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
 		fixture.Context.ChangeTracker.Clear();
 
-		var cached = await _testee.GetByMediaIdAsync(mediaId);
-		await Assert.That(cached!.FetchedAt).IsEqualTo(secondFetch);
+		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
+		await using var session = await sessionFactory.CreateAsync();
+		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
+		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
+		await Assert.That(row.FetchedAt).IsEqualTo(secondFetch);
 	}
 
 	[Test]
 	public async Task UpsertAsync_WhenEntryExists_PreservesCreatedAt()
 	{
 		var plexId = PlexId.From("plex-500", MediaType.Movie);
-		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var mediaId = await SeedMediaAsync([plexId]);
 		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
 		fixture.Context.ChangeTracker.Clear();
 
@@ -92,11 +79,66 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		await Assert.That(stored.CreatedAt).IsEqualTo(marker);
 	}
 
-	private static MovieDetailResult CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
+	[Test]
+	public async Task QueryMediaMetadata_WhenMetadataExists_YieldsCachedDetailWithFetchedAt()
+	{
+		var plexId = PlexId.From("plex-810", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
+		fixture.Context.ChangeTracker.Clear();
+
+		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
+		await using var session = await sessionFactory.CreateAsync();
+		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
+		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
+
+		await Assert.That(row.Detail.Identity.Id).IsEqualTo(mediaId);
+		await Assert.That(row.Detail).IsTypeOf<MovieDetail>();
+		await Assert.That(row.Detail.Identity.Externals).Contains((IExternalMediaId)plexId);
+		await Assert.That(row.FetchedAt).IsNotNull();
+	}
+
+	[Test]
+	public async Task QueryMediaMetadata_WhenMetadataMissing_YieldsUnresolvedMediaWithoutFetchedAt()
+	{
+		var plexId = PlexId.From("plex-811", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		fixture.Context.ChangeTracker.Clear();
+
+		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
+		await using var session = await sessionFactory.CreateAsync();
+		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
+		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
+
+		await Assert.That(row.Detail).IsTypeOf<UnresolvedMedia>();
+		await Assert.That(row.Detail.Identity.Id).IsEqualTo(mediaId);
+		await Assert.That(row.FetchedAt).IsNull();
+	}
+
+	[Test]
+	public async Task QueryMediaMetadata_MixedHitAndMiss_YieldsBothInOneRoundTrip()
+	{
+		var firstPlex = PlexId.From("plex-812", MediaType.Movie);
+		var secondPlex = PlexId.From("plex-813", MediaType.Movie);
+		var firstId = await SeedMediaAsync([firstPlex]);
+		var secondId = await SeedMediaAsync([secondPlex]);
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(firstId, CreateMovieDetails(firstId, [firstPlex]))]);
+		fixture.Context.ChangeTracker.Clear();
+
+		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
+		await using var session = await sessionFactory.CreateAsync();
+		var query = _mediaRepo.QueryMediaIds(session, [firstId, secondId]);
+		var rows = await _testee.QueryMediaMetadataAsync(session, query);
+
+		await Assert.That(rows.Count).IsEqualTo(2);
+		await Assert.That(rows.Single(r => r.Detail.Identity.Id == firstId).Detail).IsTypeOf<MovieDetail>();
+		await Assert.That(rows.Single(r => r.Detail.Identity.Id == secondId).Detail).IsTypeOf<UnresolvedMedia>();
+	}
+
+	private static MovieDetail CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
 		new()
 		{
-			Id = mediaId,
-			Externals = externals.ToList(),
+			Identity = new MediaIdentity(mediaId, externals),
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",

@@ -2,7 +2,7 @@ using DB.Conversion.Encryption;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DB.Tests.Unit.Encryption;
+namespace DB.Tests.Unit.Conversion;
 
 public class EncryptedGuidConverterTests
 {

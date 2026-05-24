@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Contracts.Media.Feed;
+using Contracts.Feed;
 using DB.Data.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +7,7 @@ namespace DB.Data.Feed;
 
 internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
 {
-	private static readonly Expression<Func<FeedEntity, Contracts.Media.Feed.Feed>> project = projection => new Contracts.Media.Feed.Feed
+	private static readonly Expression<Func<FeedEntity, Contracts.Feed.Feed>> project = projection => new Contracts.Feed.Feed
 	{
 		Id = projection.Id,
 		Name = projection.Name,
@@ -22,13 +22,13 @@ internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFact
 		Schedule = projection.SyncMode,
 	};
 
-	public async Task<IReadOnlyList<Contracts.Media.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<Contracts.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		return await ctx.Feeds.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
 	}
 
-	public async Task<Contracts.Media.Feed.Feed?> GetFeedByIdAsync(Guid id, CancellationToken cancellationToken = default)
+	public async Task<Contracts.Feed.Feed?> GetFeedByIdAsync(Guid id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		return await ctx.Feeds.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);

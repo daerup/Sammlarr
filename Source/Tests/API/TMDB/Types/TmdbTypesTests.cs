@@ -1,4 +1,4 @@
-using API.TMDB.Types;
+using API.Tmdb.Types;
 using Contracts.Media;
 
 namespace API.Tests.TMDB.Types;

@@ -1,4 +1,4 @@
-using Contracts.Media.Blacklist;
+using Contracts.Blacklist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 

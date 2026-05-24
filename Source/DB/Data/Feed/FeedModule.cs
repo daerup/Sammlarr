@@ -1,4 +1,4 @@
-using Contracts.Media.Feed;
+using Contracts.Feed;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 

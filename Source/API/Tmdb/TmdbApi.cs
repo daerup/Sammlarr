@@ -1,8 +1,8 @@
 using System.Text.Json;
-using API.TMDB.Types;
+using API.Tmdb.Types;
 using Contracts.Media;
 
-namespace API.TMDB;
+namespace API.Tmdb;
 
 internal class TmdbApi(TmdbClient tmdbClient)
 {

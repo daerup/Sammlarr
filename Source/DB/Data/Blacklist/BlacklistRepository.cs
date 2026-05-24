@@ -1,6 +1,5 @@
+using Contracts.Blacklist;
 using Contracts.Media;
-using Contracts.Media.Blacklist;
-using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Blacklist;

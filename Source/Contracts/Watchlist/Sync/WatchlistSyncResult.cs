@@ -9,8 +9,8 @@ public union WatchlistSyncResult(
 
 public readonly record struct WatchlistSyncSuccess(int Inserted, int Confirmed, int HardDeleted, int PushedAdds, int PushedRemoves, int RemoteFailures)
 {
-	public int TotalAdded => Inserted + PushedAdds;
-	public int TotalRemoved => HardDeleted + PushedRemoves;
+    private int TotalAdded => Inserted + PushedAdds;
+    private int TotalRemoved => HardDeleted + PushedRemoves;
 
 	public override string ToString()
 	{

@@ -2,8 +2,6 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
-using Contracts.Media.Convertions;
-using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
@@ -29,7 +27,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.Inserted).IsEqualTo(1);
 		scenario.Repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasCalled(Times.Once);
@@ -42,7 +40,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncRemoteFailed).IsTrue();
+		await Assert.That(result is WatchlistSyncRemoteFailed).IsTrue();
 		var failure = (WatchlistSyncRemoteFailed)result.Value;
 		await Assert.That(failure.Reason).IsEqualTo("network down");
 		scenario.Repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasNeverCalled();
@@ -59,11 +57,11 @@ public class WatchlistSyncEngineTests
 		await Task.Delay(50);
 		var second = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(second.Value is WatchlistSyncAlreadyRunning).IsTrue();
+		await Assert.That(second is WatchlistSyncAlreadyRunning).IsTrue();
 
 		gate.SetResult();
 		var firstResult = await first;
-		await Assert.That(firstResult.Value is WatchlistSyncUnchanged).IsTrue();
+		await Assert.That(firstResult is WatchlistSyncUnchanged).IsTrue();
 	}
 
 	[Test]
@@ -75,7 +73,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.Confirmed).IsEqualTo(1);
 		await Assert.That(success.PushedAdds).IsEqualTo(0);
@@ -90,7 +88,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.HardDeleted).IsEqualTo(1);
 		scenario.Repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
@@ -110,7 +108,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.PushedAdds).IsEqualTo(1);
 		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
@@ -131,7 +129,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.PushedRemoves).IsEqualTo(1);
 		scenario.Provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
@@ -145,7 +143,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncUnchanged).IsTrue();
+		await Assert.That(result is WatchlistSyncUnchanged).IsTrue();
 		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
 		scenario.Provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
 	}
@@ -164,7 +162,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.PushedAdds).IsEqualTo(0);
 		await Assert.That(success.RemoteFailures).IsEqualTo(1);
@@ -185,7 +183,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		await Assert.That(result is WatchlistSyncSuccess).IsTrue();
 		var success = (WatchlistSyncSuccess)result.Value;
 		await Assert.That(success.PushedAdds).IsEqualTo(0);
 		await Assert.That(success.RemoteFailures).IsEqualTo(1);
@@ -248,7 +246,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result.Value is WatchlistSyncUnchanged).IsTrue();
+		await Assert.That(result is WatchlistSyncUnchanged).IsTrue();
 		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
@@ -265,7 +263,7 @@ public class WatchlistSyncEngineTests
 
 		var dryRun = await scenario.Engine.DryRunAsync();
 
-		await Assert.That(dryRun.Value is WatchlistSyncDryRun).IsTrue();
+		await Assert.That(dryRun is WatchlistSyncDryRun).IsTrue();
 		var report = (WatchlistSyncDryRun)dryRun.Value;
 		await Assert.That(report.Changes).Contains(new WatchlistSyncChange(remoteOnlyId, WatchlistSyncDirection.Pull, WatchlistOperationKind.Add));
 		await Assert.That(report.Changes).Contains(new WatchlistSyncChange(localOnlyId, WatchlistSyncDirection.Pull, WatchlistOperationKind.Remove));
@@ -287,7 +285,7 @@ public class WatchlistSyncEngineTests
 
 		var dryRun = await scenario.Engine.DryRunAsync();
 
-		await Assert.That(dryRun.Value is Error).IsTrue();
+		await Assert.That(dryRun is Error).IsTrue();
 		var failure = (Error)dryRun.Value;
 		await Assert.That(failure.Reason).IsEqualTo("network down");
 	}
@@ -297,7 +295,7 @@ public class WatchlistSyncEngineTests
 		Mock<IWatchlistRepository> Repository,
 		Mock<IWatchlistOutbox> Outbox,
 		Mock<IMediaRepository> MediaRepo,
-		Mock<IMediaIdResolver> Resolver,
+		FakeMediaService Media,
 		WatchlistSyncEngine Engine
 	)
 	{
@@ -348,17 +346,10 @@ public class WatchlistSyncEngineTests
 			var outboxMock = IWatchlistOutbox.Mock();
 			outboxMock.GetAsync(Any()).Returns(outbox ?? []);
 
-			var resolver = IMediaIdResolver.Mock();
+			var media = new FakeMediaService();
 			foreach (var (external, mediaId) in remote ?? [])
 			{
-				resolver
-					.ResolveAsync(
-						Arg.Is<IEnumerable<IExternalMediaId>>(c => c.Contains(external)),
-						Any<MediaProvider>(),
-						Any<Optional<ResolutionHints>>(),
-						Any()
-					)
-					.Returns(new Resolved(mediaId, new List<IExternalMediaId> { external }, external));
+				media.RegisterResolution(external, mediaId);
 			}
 
 			var mediaRepo = IMediaRepository.Mock();
@@ -376,12 +367,12 @@ public class WatchlistSyncEngineTests
 			services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
 			services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
 			services.AddSingleton<IMediaRepository>(mediaRepo.Object);
-			services.AddSingleton<IMediaIdResolver>(resolver.Object);
+			services.AddSingleton<IMediaService>(media);
 			var sp = services.BuildServiceProvider();
 			var options = new WatchlistSyncOptions { DrainBudget = TimeSpan.FromSeconds(10) };
 			var engine = new WatchlistSyncEngine(sp.GetRequiredService<IServiceScopeFactory>(), options, NullLogger<WatchlistSyncEngine>.Instance);
 
-			return new Scenario(provider, repository, outboxMock, mediaRepo, resolver, engine);
+			return new Scenario(provider, repository, outboxMock, mediaRepo, media, engine);
 		}
 	}
 

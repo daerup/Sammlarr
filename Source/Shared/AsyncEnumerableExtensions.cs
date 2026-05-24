@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Contracts.Media.Convertions;
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Contracts.Watchlist;
 
 namespace Shared;
@@ -39,20 +38,29 @@ public static class AsyncEnumerableExtensions
 				}
 			}
 		}
+
+		public async IAsyncEnumerable<(TIn First, TOther Second)> Zip<TOther>(
+			IEnumerable<TOther> other,
+			[EnumeratorCancellation] CancellationToken cancellationToken = default
+		)
+		{
+
+			using var otherEnumerator = other.GetEnumerator();
+			await foreach (var item in source.WithCancellation(cancellationToken))
+			{
+				if (!otherEnumerator.MoveNext())
+				{
+					yield break;
+				}
+				yield return (item, otherEnumerator.Current);
+			}
+		}
 	}
 }
 
-public static class MediaMetadataProviderExtensions
+public static class MediaServiceExtensions
 {
-	extension(IMediaMetadataProvider)
-	{
-		public static int RecommendedConcurrency => 50;
-	}
-}
-
-public static class MediaIdResolverExtensions
-{
-	extension(IMediaIdResolver)
+	extension(IMediaService)
 	{
 		public static int RecommendedConcurrency => 50;
 	}

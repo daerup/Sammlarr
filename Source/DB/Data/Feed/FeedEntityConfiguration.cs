@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Contracts.Media.Feed;
 using Contracts.Processing;
+using Contracts.Feed;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;

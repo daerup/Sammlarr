@@ -30,7 +30,7 @@
                            Tagline="@detail.Tagline"
                            Rating="@detail.Rating"
                            OnClick="@(() => HandleTileClickAsync(item))"
-                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.Id))"/>
+                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.Identity.Id))"/>
             @if (IsEditMode)
             {
                 <div class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
@@ -47,7 +47,7 @@
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
-    [Parameter, EditorRequired] public Func<TItem, IMediaDetailResult> Detail { get; set; } = null!;
+    [Parameter, EditorRequired] public Func<TItem, IMediaDetail> Detail { get; set; } = null!;
     [Parameter, EditorRequired] public Func<TItem, MediaId> Key { get; set; } = null!;
     [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public EventCallback<bool> IsEditModeChanged { get; set; }

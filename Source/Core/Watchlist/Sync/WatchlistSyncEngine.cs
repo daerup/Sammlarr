@@ -10,6 +10,7 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.Options;
 using Shared.Telemetry;
 
@@ -115,7 +116,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			Repo: scope.ServiceProvider.GetRequiredService<IWatchlistRepository>(),
 			Outbox: scope.ServiceProvider.GetRequiredService<IWatchlistOutbox>(),
 			MediaRepo: scope.ServiceProvider.GetRequiredService<IMediaRepository>(),
-			Resolver: scope.ServiceProvider.GetRequiredService<IMediaIdResolver>(),
+			Media: scope.ServiceProvider.GetRequiredService<IMediaService>(),
 			RemoteWatchlistProvider: scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>()[provider]
 		);
 	}
@@ -126,13 +127,14 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		{
 			using var fetch = SammlarrTelemetry.StartWatchlistRemoteFetch(deps.Provider);
 			var externals = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
+			var requests = externals.Select(e => new ResolveRequest([e], deps.MediaProvider, new None()));
 			var remoteMediaIds = new List<MediaId>(externals.Count);
-			foreach (var external in externals.TakeWhile(_ => !cancellationToken.IsCancellationRequested))
+			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).Zip(externals, cancellationToken);
+			await foreach (var (result, external) in pipeline)
 			{
-				var resolution = await deps.Resolver.ResolveAsync([external], deps.MediaProvider, default(Optional<ResolutionHints>), cancellationToken);
-				if (resolution.Value is Resolved resolved)
+				if (result is Identification identification)
 				{
-					remoteMediaIds.Add(resolved.Id);
+					remoteMediaIds.Add(identification.Id);
 				}
 				else
 				{
@@ -246,15 +248,22 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		return new PushOutcome(pushed, failed);
 	}
 
-	private static async Task<int> SettleOrphansAsync(EngineDeps deps, WatchlistOperationKind kind, Dictionary<IExternalMediaId, MediaId> pending, CancellationToken cancellationToken)
+	private static async Task<int> SettleOrphansAsync(
+		EngineDeps deps,
+		WatchlistOperationKind kind,
+		Dictionary<IExternalMediaId, MediaId> pending,
+		CancellationToken cancellationToken
+	)
 	{
 		var orphans = pending.Values.ToList();
 		await deps.Outbox.RecordFailureAsync(kind, orphans, cancellationToken);
 		return orphans.Count;
 	}
 
-	private static Func<IEnumerable<IExternalMediaId>, CancellationToken, IAsyncEnumerable<WatchlistPushResult>> ResolveApply(EngineDeps deps, WatchlistOperationKind kind) =>
-		kind == WatchlistOperationKind.Add ? deps.RemoteWatchlistProvider.AddToWatchlistAsync : deps.RemoteWatchlistProvider.RemoveFromWatchlistAsync;
+	private static Func<IEnumerable<IExternalMediaId>, CancellationToken, IAsyncEnumerable<WatchlistPushResult>> ResolveApply(
+		EngineDeps deps,
+		WatchlistOperationKind kind
+	) => kind == WatchlistOperationKind.Add ? deps.RemoteWatchlistProvider.AddToWatchlistAsync : deps.RemoteWatchlistProvider.RemoveFromWatchlistAsync;
 
 	private async Task OnPushSuccess(EngineDeps deps, WatchlistOperationKind kind, MediaId mediaId, string op, CancellationToken cancellationToken)
 	{
@@ -293,7 +302,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		IWatchlistRepository Repo,
 		IWatchlistOutbox Outbox,
 		IMediaRepository MediaRepo,
-		IMediaIdResolver Resolver,
+		IMediaService Media,
 		IWatchlistProvider RemoteWatchlistProvider
 	);
 }

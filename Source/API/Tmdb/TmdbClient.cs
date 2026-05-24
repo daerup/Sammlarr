@@ -3,7 +3,7 @@ using Contracts.Auth;
 using Contracts.Media;
 using Shared.Options;
 
-namespace API.TMDB;
+namespace API.Tmdb;
 
 internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
 {

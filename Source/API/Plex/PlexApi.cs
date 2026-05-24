@@ -7,25 +7,24 @@ using Contracts.Media.Search;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient, IMediaRepository mediaRepository) : IMediaSearchService
+internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 {
 	private const string RatingKeyMetadataEndpoint = "https://metadata.provider.plex.tv/library/metadata/{0}?includeGuids=1&includeExternalMedia=1";
 
 	private const string SerachMetadataEndpoint =
 		"https://discover.provider.plex.tv/library/search?searchTypes={0}&searchProviders=discover&includeMetadata=1&query={1}";
 
-	public async Task<IMediaDetailResult> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<IMediaDetail> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		if (mediaId is not PlexId plexId)
 		{
 			throw new ArgumentException($"PlexApi only supports {nameof(PlexId)} lookups.", nameof(mediaId));
 		}
 
-		var raw = await ByIdAsync(plexId, cancellationToken);
-		return await StampMediaIdAsync(raw, cancellationToken);
+		return await ByIdAsync(plexId, cancellationToken);
 	}
 
-	public async Task<IReadOnlyList<IMediaDetailResult>> SearchAsync(
+	public async Task<IReadOnlyList<IMediaDetail>> SearchAsync(
 		string title,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -41,45 +40,31 @@ internal class PlexApi(PlexClient plexClient, IMediaRepository mediaRepository) 
 			return [];
 		}
 
-		var raws = result
+		return result
 			.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
 			.Select(s => s.Metadata.ToMediaDetailResult())
-			.DistinctBy(r => r.Externals.OfType<PlexId>().FirstOrDefault())
+			.DistinctBy(r => r.Identity.Externals.OfType<PlexId>().FirstOrDefault())
 			.ToList();
-
-		var stamped = new List<IMediaDetailResult>(raws.Count);
-		foreach (var raw in raws)
-		{
-			stamped.Add(await StampMediaIdAsync(raw, cancellationToken));
-		}
-		return stamped;
 	}
 
 	internal async Task<IReadOnlyList<IExternalMediaId>> LookUpExternalsAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var raw = await ByIdAsync(plexId, cancellationToken);
-		return raw.Externals;
+		return raw.Identity.Externals;
 	}
 
-	private async Task<IMediaDetailResult> StampMediaIdAsync(IMediaDetailResult raw, CancellationToken cancellationToken)
-	{
-		var identity = await mediaRepository.UpsertAsync(raw.Externals.ToList(), cancellationToken);
-		return raw switch
-		{
-			MovieDetailResult m => m with { Id = identity.Id },
-			ShowDetailResult s => s with { Id = identity.Id },
-			UnresolvedMediaResult u => u with { Id = identity.Id },
-			_ => throw new InvalidOperationException($"Unsupported detail result type '{raw.GetType().Name}'."),
-		};
-	}
-
-	private async Task<IMediaDetailResult> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	private async Task<IMediaDetail> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(RatingKeyMetadataEndpoint, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
-		return result!.MediaContainer.Metadata[0].ToMediaDetailResult();
+		if (result?.MediaContainer?.Metadata is not { Count: > 0 } metadata)
+		{
+			throw new InvalidOperationException($"Plex returned no metadata for ratingKey {plexId.Value}.");
+		}
+		return metadata[0].ToMediaDetailResult();
 	}
 
 	internal async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
@@ -103,7 +88,7 @@ internal class PlexApi(PlexClient plexClient, IMediaRepository mediaRepository) 
 
 file static class PlexMetadataMappingExtensions
 {
-	public static IMediaDetailResult ToMediaDetailResult(this PlexTypes.Search.Metadata result)
+	public static IMediaDetail ToMediaDetailResult(this PlexTypes.Search.Metadata result)
 	{
 		var mediatype = ParseMediaType(result.Type);
 		return mediatype switch
@@ -113,7 +98,7 @@ file static class PlexMetadataMappingExtensions
 		};
 	}
 
-	public static IMediaDetailResult ToMediaDetailResult(this PlexTypes.ById.Metadata result)
+	public static IMediaDetail ToMediaDetailResult(this PlexTypes.ById.Metadata result)
 	{
 		var mediatype = ParseMediaType(result.Type);
 		return mediatype switch
@@ -123,14 +108,13 @@ file static class PlexMetadataMappingExtensions
 		};
 	}
 
-	private static MovieDetailResult MapMovieResult(PlexTypes.ById.Metadata result) =>
+	private static MovieDetail MapMovieResult(PlexTypes.ById.Metadata result) =>
 		new()
 		{
-			Id = default,
+			Identity = new MediaIdentity(default, BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)),
 			Title = result.Title,
 			Tagline = result.Tagline ?? string.Empty,
 			Summary = result.Summary,
-			Externals = BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds),
 			PosterUrl = NormalizePlexImageUrl(result.Poster),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			Runtime = TimeSpan.FromMilliseconds(result.Duration),
@@ -142,14 +126,13 @@ file static class PlexMetadataMappingExtensions
 				.ToList(),
 		};
 
-	private static ShowDetailResult MapShowResult(PlexTypes.ById.Metadata result) =>
+	private static ShowDetail MapShowResult(PlexTypes.ById.Metadata result) =>
 		new()
 		{
-			Id = default,
+			Identity = new MediaIdentity(default, BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)),
 			Title = result.Title,
 			Tagline = result.Tagline ?? string.Empty,
 			Summary = result.Summary,
-			Externals = BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds),
 			Seasons = result.SeasonCount ?? 0,
 			Episodes = result.EpisodeCount ?? 0,
 			PosterUrl = NormalizePlexImageUrl(result.Poster),
@@ -163,14 +146,13 @@ file static class PlexMetadataMappingExtensions
 				.ToList(),
 		};
 
-	private static MovieDetailResult MapMovieResult(PlexTypes.Search.Metadata result) =>
+	private static MovieDetail MapMovieResult(PlexTypes.Search.Metadata result) =>
 		new()
 		{
-			Id = default,
+			Identity = new MediaIdentity(default, [result.PlexId]),
 			Title = result.Title,
 			Tagline = string.Empty,
 			Summary = string.Empty,
-			Externals = new List<IExternalMediaId> { result.PlexId },
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : TimeSpan.Zero,
@@ -182,14 +164,13 @@ file static class PlexMetadataMappingExtensions
 				.ToList(),
 		};
 
-	private static ShowDetailResult MapShowResult(PlexTypes.Search.Metadata result) =>
+	private static ShowDetail MapShowResult(PlexTypes.Search.Metadata result) =>
 		new()
 		{
-			Id = default,
+			Identity = new MediaIdentity(default, [result.PlexId]),
 			Title = result.Title,
 			Tagline = string.Empty,
 			Summary = string.Empty,
-			Externals = new List<IExternalMediaId> { result.PlexId },
 			Seasons = result.SeasonCount ?? 0,
 			Episodes = result.EpisodeCount ?? 0,
 			PosterUrl = NormalizePlexImageUrl(result.Thumb),

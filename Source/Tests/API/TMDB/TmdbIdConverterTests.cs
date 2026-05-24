@@ -1,7 +1,7 @@
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
-using API.TMDB;
+using API.Tmdb;
 using Bogus;
 using Contracts;
 using Contracts.Auth;
@@ -117,11 +117,7 @@ public class TmdbIdConverterTests
 		var credentialStore = ICredentialStore.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, CancellationToken.None).Returns(credential);
 		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore);
-		var mediaRepository = IMediaRepository.Mock();
-		mediaRepository
-			.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any())
-			.Returns(new MediaIdentity(MediaId.From(Guid.NewGuid()), new List<IExternalMediaId>()));
-		return new PlexApi(plexClient, mediaRepository.Object);
+		return new PlexApi(plexClient);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, IReadOnlyList<TmdbId> TmdbIds, ImdbId ImdbId, TvdbId? TvdbId);

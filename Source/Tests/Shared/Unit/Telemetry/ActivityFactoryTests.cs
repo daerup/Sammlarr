@@ -52,16 +52,6 @@ public class ActivityFactoryTests
 	}
 
 	[Test]
-	public async Task TagItemOutcome_AppendsUppercaseSuffixAndTagsOutcome()
-	{
-		using var activity = SammlarrTelemetry.StartMetadataItem(MediaId.From(Guid.NewGuid()));
-		SammlarrTelemetry.TagItemOutcome(activity, MetadataItemOutcome.Stale, MediaType.Movie);
-
-		await Assert.That(activity!.DisplayName).EndsWith(" [STALE]");
-		await Assert.That(activity.GetTagItem("metadata.outcome")).IsEqualTo("stale");
-	}
-
-	[Test]
 	public async Task IdResolution_WithTitle_TagsTitleAndOmitsItFromDisplayName()
 	{
 		using var activity = SammlarrTelemetry.StartIdResolution(MediaProvider.Plex, [TmdbId.From("1", MediaType.Movie)], "Inception");

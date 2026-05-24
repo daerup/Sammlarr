@@ -255,7 +255,7 @@ public class QueryProcessorTests
 
 public class QueryProcessorRatingTests
 {
-	private readonly QueryProcessor<IMediaDetailResult> _testee = new();
+	private readonly QueryProcessor<IMediaDetail> _testee = new();
 
 	[Test]
 	public async Task Execute_WhenSortedByRatingDescending_ItemsWithoutRatingComeLast()
@@ -265,11 +265,11 @@ public class QueryProcessorRatingTests
 		var unrated = MovieWithRating(2022, null);
 		var options = new QueryOptions
 		{
-			Sort = new QuerySort { Property = nameof(IMediaDetailResult.Rating), Direction = ListSortDirection.Descending },
+			Sort = new QuerySort { Property = nameof(IMediaDetail.Rating), Direction = ListSortDirection.Descending },
 		};
 
 		var results = await _testee.Execute([lowRated, unrated, rated], options, _ => false, _ => false).ToListAsync();
-		var ordered = results.OfUnionType<IMediaDetailResult>().ToList();
+		var ordered = results.OfUnionType<IMediaDetail>().ToList();
 
 		await Assert.That(ordered[0]).IsSameReferenceAs(rated);
 		await Assert.That(ordered[1]).IsSameReferenceAs(lowRated);
@@ -282,19 +282,18 @@ public class QueryProcessorRatingTests
 		var high = MovieWithRating(2020, 9.0f);
 		var low = MovieWithRating(2021, 6.0f);
 		var unrated = MovieWithRating(2022, null);
-		var options = new QueryOptions { Filter = Filter(Group(Number(nameof(IMediaDetailResult.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0))) };
+		var options = new QueryOptions { Filter = Filter(Group(Number(nameof(IMediaDetail.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0))) };
 
 		var results = await _testee.Execute([high, low, unrated], options, _ => false, _ => false).ToListAsync();
 
-		await Assert.That(results.OfUnionType<IMediaDetailResult>()).IsEquivalentTo([(IMediaDetailResult)high]);
-		await Assert.That(results.OfUnionType<Culled<IMediaDetailResult>>().Select(c => c.Item)).IsEquivalentTo(new IMediaDetailResult[] { low, unrated });
+		await Assert.That(results.OfUnionType<IMediaDetail>()).IsEquivalentTo([(IMediaDetail)high]);
+		await Assert.That(results.OfUnionType<Culled<IMediaDetail>>().Select(c => c.Item)).IsEquivalentTo(new IMediaDetail[] { low, unrated });
 	}
 
-	private static MovieDetailResult MovieWithRating(int year, float? rating) =>
+	private static MovieDetail MovieWithRating(int year, float? rating) =>
 		new()
 		{
-			Id = default,
-			Externals = new List<IExternalMediaId> { TmdbId.From(year.ToString(), MediaType.Movie) },
+			Identity = new MediaIdentity(default, [TmdbId.From(year.ToString(), MediaType.Movie)]),
 			Title = $"Movie {year}",
 			Tagline = string.Empty,
 			Summary = string.Empty,
@@ -314,8 +313,8 @@ file static class Extension
 	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<Item>> source) =>
 		EnumerableExtensions.OfUnionType<QueryResult<Item>, TOut>(source);
 
-	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<IMediaDetailResult>> source) =>
-		EnumerableExtensions.OfUnionType<QueryResult<IMediaDetailResult>, TOut>(source);
+	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<IMediaDetail>> source) =>
+		EnumerableExtensions.OfUnionType<QueryResult<IMediaDetail>, TOut>(source);
 
 	public static UnionCollectionAssertion<TCollection, QueryResult<Item>> AreOfUnionType<TCollection>(
 		this IAssertionSource<TCollection> source,

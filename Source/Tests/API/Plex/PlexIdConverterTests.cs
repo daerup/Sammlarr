@@ -1,8 +1,8 @@
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
-using API.TMDB;
-using API.TMDB.Types;
+using API.Tmdb;
+using API.Tmdb.Types;
 using Bogus;
 using Contracts;
 using Contracts.Auth;
@@ -23,8 +23,8 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenMediaIdIsPlexId_ReturnsPlexIdWithAdditionalIds()
 	{
 		var payload = CreatePlexByIdPayload(true, true);
-		var searchService = IMediaSearchService.Mock();
-		var testee = new PlexIdConverter(null!, CreatePlexApi(payload.Json), searchService);
+		var searchService = IMediaSearchProvider.Mock();
+		var testee = new PlexIdConverter(null!, CreatePlexApi(payload.Json));
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
@@ -41,13 +41,12 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenMediaIdIsTmdbAndSearchMatches_ReturnsResolvedPlexId()
 	{
 		var payload = CreatePlexByIdPayload(true, true);
-		var searchService = IMediaSearchService.Mock();
-		List<IMediaDetailResult> searchResults =
+		var searchService = IMediaSearchProvider.Mock();
+		List<IMediaDetail> searchResults =
 		[
-			new MovieDetailResult
+			new MovieDetail
 			{
-				Id = default,
-				Externals = new List<IExternalMediaId> { payload.PlexId },
+				Identity = new MediaIdentity(default, [payload.PlexId]),
 				Title = "match",
 				PosterUrl = string.Empty,
 				BackdropUrl = string.Empty,
@@ -60,7 +59,7 @@ public class PlexIdConverterTests
 		];
 		searchService.SearchAsync(Any(), Any(), Any()).Returns(searchResults);
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
-		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json), searchService);
+		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json));
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 
@@ -77,10 +76,10 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenMediaIdIsTmdbAndSearchHasNoMatch_ReturnsFailed()
 	{
 		var payload = CreatePlexByIdPayload(false, false);
-		var searchService = IMediaSearchService.Mock();
-		searchService.SearchAsync(Any(), Any(), Any()).Returns(new List<IMediaDetailResult>());
+		var searchService = IMediaSearchProvider.Mock();
+		searchService.SearchAsync(Any(), Any(), Any()).Returns(new List<IMediaDetail>());
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
-		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json), searchService);
+		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json));
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 		await Assert.That(result.Value).IsTypeOf<None>();
@@ -149,11 +148,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialStore.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		var mediaRepository = IMediaRepository.Mock();
-		mediaRepository
-			.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any())
-			.Returns(new MediaIdentity(MediaId.From(Guid.NewGuid()), new List<IExternalMediaId>()));
-		return new PlexApi(plexClient, mediaRepository.Object);
+		return new PlexApi(plexClient);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, TmdbId TmdbId, ImdbId? ImdbId, TvdbId? TvdbId);

@@ -1,15 +1,15 @@
 using System.Globalization;
-using API.TMDB.Types;
+using API.Tmdb.Types;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Shared.Options;
 
-namespace API.TMDB;
+namespace API.Tmdb;
 
 internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMetadataEnricher
 {
-	public async Task<IMediaDetailResult?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public async Task<IMediaDetail?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
 		if (id is not TmdbId tmdbId)
 		{
@@ -36,11 +36,10 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMet
 		}
 	}
 
-	private MovieDetailResult MapMovie(TmdbTypes.Details details, TmdbId sourceId) =>
+	private MovieDetail MapMovie(TmdbTypes.Details details, TmdbId sourceId) =>
 		new()
 		{
-			Id = default,
-			Externals = [sourceId],
+			Identity = new MediaIdentity(default, [sourceId]),
 			Title = details.Title ?? string.Empty,
 			Tagline = details.Tagline ?? string.Empty,
 			Summary = details.Overview ?? string.Empty,
@@ -51,11 +50,10 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMet
 			Runtime = details.Runtime is > 0 ? TimeSpan.FromMinutes(details.Runtime.Value) : TimeSpan.Zero,
 		};
 
-	private ShowDetailResult MapShow(TmdbTypes.Details details, TmdbId sourceId) =>
+	private ShowDetail MapShow(TmdbTypes.Details details, TmdbId sourceId) =>
 		new()
 		{
-			Id = default,
-			Externals = [sourceId],
+			Identity = new MediaIdentity(default, [sourceId]),
 			Title = details.Name ?? string.Empty,
 			Tagline = details.Tagline ?? string.Empty,
 			Summary = details.Overview ?? string.Empty,

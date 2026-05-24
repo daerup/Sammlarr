@@ -1,7 +1,7 @@
 using Contracts.Media;
 using Contracts.Media.Metadata;
 
-namespace API.TMDB;
+namespace API.Tmdb;
 
 internal class TmdbRatingService(TmdbApi tmdbApi) : IMediaRatingService
 {
