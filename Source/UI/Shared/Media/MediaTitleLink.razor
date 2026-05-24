@@ -14,7 +14,7 @@
 			<div class="id-links-popover-list">
 				@foreach (var id in Ids)
                 {
-                    var url = MediaIdUrlResolver.Resolve(id);
+                    var url = ExternalMediaIdUrlResolver.Resolve(id);
                     var branding = Branding.GetBrandingInfo(id.Source);
                     var brandStyle = $"--brand: {branding.BrandColor}";
                     var ariaLabel = url is not null ? $"View {id.Value} on {branding.DisplayName} (opens in new tab)" : $"{branding.DisplayName} ID {id.Value}";
@@ -63,7 +63,7 @@ else
 }
 
 @code {
-    [Parameter] [EditorRequired] public required IReadOnlyList<IMediaId> Ids { get; set; }
+    [Parameter] [EditorRequired] public required IReadOnlyList<IExternalMediaId> Ids { get; set; }
     [Parameter] [EditorRequired] public required string Title { get; set; }
     [Parameter] public string? Class { get; set; }
     [Parameter] [EditorRequired] public required PopoverSide Side { get; set; }

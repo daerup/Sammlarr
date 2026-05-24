@@ -28,7 +28,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task BuildFrom_WhenMovieDetails_CopiesAllFields()
 	{
-		var details = CreateMovieDetails(TmdbId.From("100", MediaType.Movie));
+		var details = CreateMovieDetails(default, [TmdbId.From("100", MediaType.Movie)]);
 
 		var entity = _testee.BuildFrom<MovieMetadataEntity>(details, Guid.NewGuid());
 
@@ -46,7 +46,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task BuildFrom_WhenShowDetails_CopiesAllFields()
 	{
-		var details = CreateShowDetails(TmdbId.From("200", MediaType.Show));
+		var details = CreateShowDetails(default, [TmdbId.From("200", MediaType.Show)]);
 
 		var entity = _testee.BuildFrom<ShowMetadataEntity>(details, Guid.NewGuid());
 
@@ -61,7 +61,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public async Task BuildFrom_WhenDetailsHaveRatings_BuildsRatings()
 	{
 		var ratings = new[] { new MediaRating(RatingSource.Tmdb, 8.4f, 1234) };
-		var details = CreateMovieDetails(TmdbId.From("110", MediaType.Movie)) with { Ratings = ratings };
+		var details = CreateMovieDetails(default, [TmdbId.From("110", MediaType.Movie)]) with { Ratings = ratings };
 
 		var entity = _testee.BuildFrom<MovieMetadataEntity>(details, Guid.NewGuid());
 
@@ -73,10 +73,11 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task Update_WhenSameType_MutatesScalarsInPlace()
 	{
-		var mediaId = TmdbId.From("300", MediaType.Movie);
-		var existing = await PersistAsync(CreateMovieDetails(mediaId) with { Title = "Original" });
+		var plexId = PlexId.From("plex-300", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var existing = await PersistAsync(CreateMovieDetails(mediaId, [plexId]) with { Title = "Original" }, mediaId);
 
-		_testee.Update(existing, CreateMovieDetails(mediaId) with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) });
+		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) });
 
 		await Assert.That(existing.Title).IsEqualTo("Updated");
 		await Assert.That(((MovieMetadataEntity)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
@@ -85,10 +86,11 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task Update_WhenSameType_ReplacesRatings()
 	{
-		var mediaId = TmdbId.From("310", MediaType.Movie);
-		var existing = await PersistAsync(CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] });
+		var plexId = PlexId.From("plex-310", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var existing = await PersistAsync(CreateMovieDetails(mediaId, [plexId]) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] }, mediaId);
 
-		_testee.Update(existing, CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 9.0f, 9999)] });
+		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Ratings = [new MediaRating(RatingSource.Tmdb, 9.0f, 9999)] });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -102,10 +104,11 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task Update_WhenNewRatingsAreEmpty_RemovesExistingRatings()
 	{
-		var mediaId = TmdbId.From("315", MediaType.Movie);
-		var existing = await PersistAsync(CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] });
+		var plexId = PlexId.From("plex-315", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var existing = await PersistAsync(CreateMovieDetails(mediaId, [plexId]) with { Ratings = [new MediaRating(RatingSource.Tmdb, 5.0f, 10)] }, mediaId);
 
-		_testee.Update(existing, CreateMovieDetails(mediaId) with { Ratings = [] });
+		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Ratings = [] });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -115,9 +118,10 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task Update_WhenTypeMismatch_Throws()
 	{
-		var mediaId = TmdbId.From("320", MediaType.Movie);
-		var existing = await PersistAsync(CreateMovieDetails(mediaId));
-		var showDetails = CreateShowDetails(TmdbId.From("321", MediaType.Show));
+		var plexId = PlexId.From("plex-320", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var existing = await PersistAsync(CreateMovieDetails(mediaId, [plexId]), mediaId);
+		var showDetails = CreateShowDetails(default, [TmdbId.From("321", MediaType.Show)]);
 
 		await Assert.That(() => _testee.Update(existing, showDetails)).Throws<InvalidOperationException>();
 	}
@@ -125,13 +129,14 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task ToDetailResult_WhenMovieEntity_ReturnsMovieDetailWithMappedFields()
 	{
-		var mediaId = TmdbId.From("400", MediaType.Movie);
-		var entity = await PersistAsync(CreateMovieDetails(mediaId) with { Title = "Movie", Runtime = TimeSpan.FromMinutes(110) });
+		var plexId = PlexId.From("plex-400", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var entity = await PersistAsync(CreateMovieDetails(mediaId, [plexId]) with { Title = "Movie", Runtime = TimeSpan.FromMinutes(110) }, mediaId);
 
-		var result = (MovieDetailResult)_testee.ToDetailResult(entity, mediaId, []);
+		var result = (MovieDetailResult)_testee.ToDetailResult(entity, mediaId, new List<IExternalMediaId> { plexId });
 
 		using var _ = Assert.Multiple();
-		await Assert.That(result.SourceId).IsEqualTo((IMediaId)mediaId);
+		await Assert.That(result.Id).IsEqualTo(mediaId);
 		await Assert.That(result.Title).IsEqualTo("Movie");
 		await Assert.That(result.Runtime).IsEqualTo(TimeSpan.FromMinutes(110));
 	}
@@ -139,10 +144,11 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task ToDetailResult_WhenShowEntity_ReturnsShowDetailWithMappedFields()
 	{
-		var mediaId = TmdbId.From("410", MediaType.Show);
-		var entity = await PersistAsync(CreateShowDetails(mediaId));
+		var plexId = PlexId.From("plex-410", MediaType.Show);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		var entity = await PersistAsync(CreateShowDetails(mediaId, [plexId]), mediaId);
 
-		var result = (ShowDetailResult)_testee.ToDetailResult(entity, mediaId, []);
+		var result = (ShowDetailResult)_testee.ToDetailResult(entity, mediaId, new List<IExternalMediaId> { plexId });
 
 		using var _ = Assert.Multiple();
 		await Assert.That(result.Seasons).IsEqualTo(3);
@@ -151,38 +157,42 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task ToDetailResult_PassesThroughAdditionalIdsAndRatings()
+	public async Task ToDetailResult_PassesThroughExternalsAndRatings()
 	{
-		var mediaId = TmdbId.From("420", MediaType.Movie);
+		var plexId = PlexId.From("plex-420", MediaType.Movie);
 		var imdbId = ImdbId.From("tt420", MediaType.Movie);
-		var entity = await PersistAsync(CreateMovieDetails(mediaId) with { Ratings = [new MediaRating(RatingSource.Tmdb, 7.5f, 500)] });
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId, imdbId])).Id;
+		var entity = await PersistAsync(
+			CreateMovieDetails(mediaId, [plexId, imdbId]) with
+			{
+				Ratings = [new MediaRating(RatingSource.Tmdb, 7.5f, 500)],
+			},
+			mediaId
+		);
 
-		var result = _testee.ToDetailResult(entity, mediaId, [imdbId]);
+		var result = _testee.ToDetailResult(entity, mediaId, new List<IExternalMediaId> { plexId, imdbId });
 
 		using var _ = Assert.Multiple();
-		await Assert.That(result.AdditionalIds).Contains(imdbId);
+		await Assert.That(result.Externals).Contains((IExternalMediaId)imdbId);
 		await Assert.That(result.Ratings).Count().IsEqualTo(1);
 		await Assert.That(result.Ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
 	}
 
-	private async Task<MediaMetadataEntity> PersistAsync(IMediaDetailResult details)
+	private async Task<MediaMetadataEntity> PersistAsync(IMediaDetailResult details, MediaId mediaId)
 	{
-		await _mediaRepo.UpsertAsync(details.AdditionalIds.Prepend(details.SourceId));
-		var media = await fixture.Context.MediaMatching(details.SourceId).SingleAsync();
-
-		var entity = _testee.BuildFrom<MediaMetadataEntity>(details, media.Id);
+		var entity = _testee.BuildFrom<MediaMetadataEntity>(details, mediaId.Value);
 		fixture.Context.MediaMetadata.Add(entity);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		return await fixture.Context.MediaMetadata.Include(m => m.Ratings).SingleAsync(m => m.MediaId == media.Id);
+		return await fixture.Context.MediaMetadata.Include(m => m.Ratings).SingleAsync(m => m.MediaId == mediaId.Value);
 	}
 
-	private static MovieDetailResult CreateMovieDetails(IMediaId sourceId) =>
+	private static MovieDetailResult CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
 		new()
 		{
-			SourceId = sourceId,
-			AdditionalIds = [],
+			Id = mediaId,
+			Externals = externals.ToList(),
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",
@@ -193,11 +203,11 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 			Runtime = TimeSpan.FromMinutes(120),
 		};
 
-	private static ShowDetailResult CreateShowDetails(IMediaId sourceId) =>
+	private static ShowDetailResult CreateShowDetails(MediaId mediaId, IExternalMediaId[] externals) =>
 		new()
 		{
-			SourceId = sourceId,
-			AdditionalIds = [],
+			Id = mediaId,
+			Externals = externals.ToList(),
 			Title = "Show Title",
 			Tagline = "Show Tagline",
 			Summary = "Show Summary",

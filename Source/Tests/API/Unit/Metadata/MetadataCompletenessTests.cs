@@ -99,8 +99,8 @@ public class MetadataCompletenessTests
 	{
 		var unknown = new UnresolvedMediaResult
 		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Movie) },
 			MediaType = MediaType.Movie,
 			Title = "Title",
 			ReleaseDate = new DateOnly(2024, 1, 1),
@@ -114,8 +114,8 @@ public class MetadataCompletenessTests
 	private static MovieDetailResult CreateCompleteMovie() =>
 		new()
 		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Movie) },
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",
@@ -129,8 +129,8 @@ public class MetadataCompletenessTests
 	private static ShowDetailResult CreateCompleteShow() =>
 		new()
 		{
-			SourceId = TmdbId.From("1", MediaType.Show),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Show) },
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",

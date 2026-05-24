@@ -79,7 +79,7 @@ else
                 <BulkEditableMediaGrid TItem="BlacklistedMediaDetail"
                                        Items="_items"
                                        Detail="@(i => i.Detail)"
-                                       Key="@(i => i.Detail.SourceId)"
+                                       Key="@(i => i.Detail.Id)"
                                        IsEditMode="_isEditMode"
                                        IsEditModeChanged="@(v => _isEditMode = v)"
                                        OnTileClick="@(i => SelectItem(i.Detail))"
@@ -100,7 +100,7 @@ else
                   ReleaseDate="@SelectedReleaseDate"
                   ImageUrl="@(_selectedItem?.PosterUrl ?? string.Empty)"
                   ShowMetadataRow="false"
-                  Ids="@(_selectedItem is null ? null : [_selectedItem.SourceId, .._selectedItem.AdditionalIds])"
+                  Ids="@(_selectedItem?.Externals)"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromBlacklistAsync"
                   ButtonText="GetRemoveButtonText"
@@ -127,7 +127,7 @@ else
     private bool _isEditMode;
     private string? _errorMessage;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly HashSet<IMediaId> _reportedBrokenImages = [];
+    private readonly HashSet<MediaId> _reportedBrokenImages = [];
     private ProviderConfig? _providerSettings;
     private IDisposable? _shortcutRegistration;
     private bool _isShortcutRegistered;
@@ -166,7 +166,7 @@ else
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(i => i.Detail.SourceId.Equals(_selectedItem.SourceId))?.Detail;
+                _selectedItem = _items.FirstOrDefault(i => i.Detail.Id == _selectedItem.Id)?.Detail;
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -185,13 +185,13 @@ else
         }
     }
 
-    private async Task ReportBrokenImageAsync(IMediaId sourceId)
+    private async Task ReportBrokenImageAsync(MediaId mediaId)
     {
-        if (!_reportedBrokenImages.Add(sourceId))
+        if (!_reportedBrokenImages.Add(mediaId))
         {
             return;
         }
-        await MetadataProvider.InvalidateAsync([sourceId], _cancellationTokenSource.Token);
+        await MetadataProvider.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
     }
 
     private async Task ReportSelectedImageBrokenAsync()
@@ -200,7 +200,7 @@ else
         {
             return;
         }
-        await ReportBrokenImageAsync(_selectedItem.SourceId);
+        await ReportBrokenImageAsync(_selectedItem.Id);
     }
 
     private static string GetRemoveButtonText() => "Remove from Blacklist";
@@ -223,7 +223,7 @@ else
     {
         foreach (var item in toRemove)
         {
-            await BlacklistService.RemoveFromBacklistAsync(item.Detail.SourceId, _cancellationTokenSource.Token);
+            await BlacklistService.RemoveFromBacklistAsync(item.Detail.Id, _cancellationTokenSource.Token);
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blacklist.");
         await LoadBlacklistAsync();
@@ -236,7 +236,7 @@ else
             return;
         }
 
-        if (_selectedItem?.SourceId is null)
+        if (_selectedItem is null)
         {
             return;
         }
@@ -245,7 +245,7 @@ else
 
         try
         {
-            await BlacklistService.RemoveFromBacklistAsync(_selectedItem.SourceId, _cancellationTokenSource.Token);
+            await BlacklistService.RemoveFromBacklistAsync(_selectedItem.Id, _cancellationTokenSource.Token);
             CloseSelectedMedia();
             await LoadBlacklistAsync();
         }
@@ -270,14 +270,14 @@ else
         return Task.CompletedTask;
     }
 
-    private bool IsBlacklisted(IMediaId mediaId)
+    private bool IsBlacklisted(MediaId mediaId)
     {
         if (_items is null)
         {
             return false;
         }
 
-        return _items.Any(item => item.Detail.SourceId.Equals(mediaId));
+        return _items.Any(item => item.Detail.Id.Equals(mediaId));
     }
 
     private void OpenSearchModal()
@@ -311,7 +311,7 @@ else
         return ValueTask.CompletedTask;
     }
 
-    private async Task<bool> ToggleFromSearchAsync(IMediaId id, string title, bool isMarked)
+    private async Task<bool> ToggleFromSearchAsync(MediaId id, string title, bool isMarked)
     {
         if (isMarked)
         {
@@ -343,14 +343,7 @@ else
 
         try
         {
-            var conversion = await MediaIdResolver.ResolveAsync([id], _providerSettings!.WatchlistProvider.AsMediaProvider(), new None());
-            var result = conversion switch
-            {
-                Resolved resolved => resolved.Id,
-                Unresolved _ => throw new ArgumentException("Failed to resolve media ID"),
-            };
-
-            await BlacklistService.AddToBacklistAsync(result, _cancellationTokenSource.Token);
+            await BlacklistService.AddToBacklistAsync(id, _cancellationTokenSource.Token);
             Notifier.Success($"'{title}' has been added to your blacklist.");
             await LoadBlacklistAsync();
             return true;

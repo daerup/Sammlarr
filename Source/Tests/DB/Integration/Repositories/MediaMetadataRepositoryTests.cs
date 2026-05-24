@@ -12,6 +12,7 @@ namespace DB.Tests.Integration.Repositories;
 public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	private MediaMetadataRepository _testee = null!;
+	private MediaRepository _mediaRepo = null!;
 	private Mock<IDateTimeProvider> _dateTimeProvider = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
@@ -22,47 +23,31 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		_dateTimeProvider = IDateTimeProvider.Mock();
 		_dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
 
-		_testee = new MediaMetadataRepository(
-			fixture.ContextFactory,
-			new MediaRepository(fixture.ContextFactory),
-			new MediaMetadataFactory(_dateTimeProvider.Object)
-		);
+		_mediaRepo = new MediaRepository(fixture.ContextFactory);
+		_testee = new MediaMetadataRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object));
 	}
 
 	[Test]
-	public async Task GetByMediaIdAsync_WhenAnchorMatches_ReturnsCachedDetails()
+	public async Task GetByMediaIdAsync_WhenEntryExists_ReturnsCachedDetails()
 	{
-		var mediaId = TmdbId.From("120", MediaType.Movie);
+		var plexId = PlexId.From("plex-120", MediaType.Movie);
 		var imdbId = ImdbId.From("tt120", MediaType.Movie);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [imdbId]))]);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId, imdbId])).Id;
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId, imdbId]))]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var cached = await _testee.GetByMediaIdAsync(mediaId);
 
 		await Assert.That(cached).IsNotNull();
-		await Assert.That(cached!.Details.SourceId).IsEqualTo(mediaId);
-		await Assert.That(cached.Details.AdditionalIds).Contains(imdbId);
-	}
-
-	[Test]
-	public async Task GetByMediaIdAsync_WhenLookedUpByLinkedId_ReturnsDetailsWithThatIdAsAnchor()
-	{
-		var mediaId = TmdbId.From("130", MediaType.Movie);
-		var imdbId = ImdbId.From("tt130", MediaType.Movie);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [imdbId]))]);
-		fixture.Context.ChangeTracker.Clear();
-
-		var cached = await _testee.GetByMediaIdAsync(imdbId);
-
-		await Assert.That(cached).IsNotNull();
-		await Assert.That(cached!.Details.SourceId).IsEqualTo(imdbId);
-		await Assert.That(cached.Details.AdditionalIds).Contains(mediaId);
+		await Assert.That(cached!.Details.Id).IsEqualTo(mediaId);
+		await Assert.That(cached.Details.Externals).Contains((IExternalMediaId)imdbId);
+		await Assert.That(cached.Details.Externals).Contains((IExternalMediaId)plexId);
 	}
 
 	[Test]
 	public async Task GetByMediaIdAsync_WhenNoEntryExists_ReturnsNull()
 	{
-		var cached = await _testee.GetByMediaIdAsync(TmdbId.From("999", MediaType.Movie));
+		var cached = await _testee.GetByMediaIdAsync(MediaId.From(Guid.NewGuid()));
 
 		await Assert.That(cached).IsNull();
 	}
@@ -70,16 +55,17 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	[Test]
 	public async Task UpsertAsync_AdvancesLastFetchedAtEvenWhenPayloadIsIdentical()
 	{
-		var mediaId = TmdbId.From("700", MediaType.Movie);
+		var plexId = PlexId.From("plex-700", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
 		var firstFetch = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 		var secondFetch = firstFetch.AddHours(2);
 
 		_dateTimeProvider.Now.Returns(firstFetch);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, []))]);
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
 		fixture.Context.ChangeTracker.Clear();
 
 		_dateTimeProvider.Now.Returns(secondFetch);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, []))]);
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var cached = await _testee.GetByMediaIdAsync(mediaId);
@@ -89,14 +75,15 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	[Test]
 	public async Task UpsertAsync_WhenEntryExists_PreservesCreatedAt()
 	{
-		var mediaId = TmdbId.From("500", MediaType.Movie);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, []))]);
+		var plexId = PlexId.From("plex-500", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([plexId])).Id;
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var marker = new DateTimeOffset(2020, 6, 15, 0, 0, 0, TimeSpan.Zero);
 		await fixture.Context.MediaMetadata.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
 
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, []) with { Title = "Updated" })]);
+		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]) with { Title = "Updated" })]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaMetadata.AsNoTracking().SingleAsync();
@@ -105,11 +92,11 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		await Assert.That(stored.CreatedAt).IsEqualTo(marker);
 	}
 
-	private static MovieDetailResult CreateMovieDetails(IMediaId sourceId, IMediaId[] additionalIds) =>
+	private static MovieDetailResult CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
 		new()
 		{
-			SourceId = sourceId,
-			AdditionalIds = additionalIds,
+			Id = mediaId,
+			Externals = externals.ToList(),
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",

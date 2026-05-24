@@ -2,9 +2,15 @@ namespace Contracts.Media;
 
 public interface IMediaRepository
 {
-	Task<List<IMediaId>> GetByIdsAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default);
+	Task<MediaIdentity?> FindAsync(IEnumerable<IExternalMediaId> externals, CancellationToken cancellationToken = default);
 
-	Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default);
+	Task<MediaIdentity?> FindAsync(MediaId id, CancellationToken cancellationToken = default);
 
-	Task UpsertAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default);
+	Task<MediaIdentity> UpsertAsync(IEnumerable<IExternalMediaId> externals, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
+		IEnumerable<MediaId> ids,
+		MediaProvider source,
+		CancellationToken cancellationToken = default
+	);
 }

@@ -32,7 +32,7 @@ public static class SammlarrTelemetry
 
 	private static readonly HashSet<string> ExcludedBlazorHubMethods = ["OnRenderCompleted", "EndInvokeJSFromDotNet"];
 
-	public static Activity? StartMetadataItem(IMediaId mediaId)
+	public static Activity? StartMetadataItem(MediaId mediaId)
 	{
 		var activity = Source.StartActivity("metadata.item");
 		activity?.DisplayName = $"FETCH {mediaId}";
@@ -74,14 +74,14 @@ public static class SammlarrTelemetry
 		activity.DisplayName += $" [{outcome.ToString().ToUpperInvariant()}]";
 	}
 
-	public static Activity? StartMetadataLookup(MediaSearchProvider provider, IMediaId id)
+	public static Activity? StartMetadataLookup(MediaSearchProvider provider, IExternalMediaId id)
 	{
 		var activity = Source.StartActivity("metadata.lookup");
 		activity?.DisplayName = $"LOOKUP {provider} → {id}";
 		return activity;
 	}
 
-	public static Activity? StartMetadataEnrich(IMediaId fromId, IEnumerable<string> missingFields)
+	public static Activity? StartMetadataEnrich(IExternalMediaId fromId, IEnumerable<string> missingFields)
 	{
 		const string metadata = "metadata";
 		var fields = missingFields.ToArray();
@@ -98,7 +98,7 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
-	public static Activity? StartIdResolution(MediaProvider target, IEnumerable<IMediaId> candidates, string? title = null)
+	public static Activity? StartIdResolution(MediaProvider target, IEnumerable<IExternalMediaId> candidates, string? title = null)
 	{
 		const string idResolution = "id_resolution";
 		var activity = Source.StartActivity($"media.{idResolution}");
@@ -205,7 +205,7 @@ public static class SammlarrTelemetry
 		return activity;
 	}
 
-	public static Activity? StartFeedItem(string? title, int year, IEnumerable<IMediaId> ids)
+	public static Activity? StartFeedItem(string? title, int year, IEnumerable<IExternalMediaId> ids)
 	{
 		var activity = Source.StartActivity("feed.item");
 		if (activity is null)

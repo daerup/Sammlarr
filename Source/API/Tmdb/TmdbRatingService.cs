@@ -5,7 +5,7 @@ namespace API.TMDB;
 
 internal class TmdbRatingService(TmdbApi tmdbApi) : IMediaRatingService
 {
-	public async Task<IReadOnlyList<MediaRating>> GetRatingsAsync(IMediaId id, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaRating>> GetRatingsAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
 		if (id is not TmdbId tmdbId)
 		{

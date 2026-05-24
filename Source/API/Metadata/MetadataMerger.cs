@@ -1,3 +1,4 @@
+using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using static API.Metadata.MetadataFields;
@@ -23,8 +24,8 @@ internal static class MetadataMerger
 	private static MovieDetailResult MergeMovie(MovieDetailResult primary, MovieDetailResult secondary) =>
 		new()
 		{
-			SourceId = primary.SourceId,
-			AdditionalIds = primary.AdditionalIds,
+			Id = primary.Id,
+			Externals = UnionExternals(primary.Externals, secondary.Externals),
 			Title = Coalesce(primary.Title, secondary.Title),
 			Tagline = Coalesce(primary.Tagline, secondary.Tagline),
 			Summary = Coalesce(primary.Summary, secondary.Summary),
@@ -39,8 +40,8 @@ internal static class MetadataMerger
 	private static ShowDetailResult MergeShow(ShowDetailResult primary, ShowDetailResult secondary) =>
 		new()
 		{
-			SourceId = primary.SourceId,
-			AdditionalIds = primary.AdditionalIds,
+			Id = primary.Id,
+			Externals = UnionExternals(primary.Externals, secondary.Externals),
 			Title = Coalesce(primary.Title, secondary.Title),
 			Tagline = Coalesce(primary.Tagline, secondary.Tagline),
 			Summary = Coalesce(primary.Summary, secondary.Summary),
@@ -53,6 +54,17 @@ internal static class MetadataMerger
 			RuntimePerEpisode = Coalesce(primary.RuntimePerEpisode, secondary.RuntimePerEpisode),
 			Ratings = MergeRatings(primary.Ratings, secondary.Ratings),
 		};
+
+	private static IReadOnlyList<IExternalMediaId> UnionExternals(IReadOnlyList<IExternalMediaId> primary, IReadOnlyList<IExternalMediaId> secondary)
+	{
+		if (secondary.Count == 0)
+		{
+			return primary;
+		}
+		var known = primary.ToHashSet();
+		var added = secondary.Where(known.Add).ToList();
+		return added.Count == 0 ? primary : [.. primary, .. added];
+	}
 
 	private static IReadOnlyList<MediaRating> MergeRatings(IReadOnlyList<MediaRating> primary, IReadOnlyList<MediaRating> secondary)
 	{

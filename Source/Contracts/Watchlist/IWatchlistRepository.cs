@@ -4,11 +4,11 @@ namespace Contracts.Watchlist;
 
 public interface IWatchlistRepository
 {
-	Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<IMediaId>> GetIdsAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<MediaId>> GetIdsAsync(CancellationToken cancellationToken = default);
 
-	Task AddAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
+	Task AddAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
 
-	Task RemoveAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default);
+	Task RemoveAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 }

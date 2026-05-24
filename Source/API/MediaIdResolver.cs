@@ -22,40 +22,40 @@ internal class MediaIdResolver(
 	private static readonly TimeSpan UnresolvedTtl = TimeSpan.FromHours(1);
 
 	public async Task<ConversionResult> ResolveAsync(
-		IReadOnlyCollection<IMediaId> candidates,
+		IEnumerable<IExternalMediaId> candidates,
 		MediaProvider target,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default
 	)
 	{
+		var materialized = candidates.ToList();
 		var title = hints is Some<ResolutionHints> some ? some.Value.Title : null;
-		using var activity = SammlarrTelemetry.StartIdResolution(target, candidates, title);
-		var cachedIds = await mediaRepository.GetByIdsAsync(candidates, cancellationToken);
-		var cachedTarget = cachedIds.FirstOrDefault(id => id.Source == target);
-		if (cachedTarget is not null)
+		using var activity = SammlarrTelemetry.StartIdResolution(target, materialized, title);
+        var cached = await mediaRepository.FindAsync(materialized, cancellationToken);
+        if (cached.HasValue && cached.Value.Externals.Any(e => e.Source == target))
 		{
-			await MergeNewCandidatesAsync(cachedIds, candidates, cancellationToken);
+			var merged = await MergeCandidatesAsync(cached.Value, materialized, cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Hit, target);
-			return new Resolved(cachedTarget, cachedIds.Except([cachedTarget]));
+			return new Resolved(merged.Id, merged.Externals, merged.Externals.First(e => e.Source == target));
 		}
 
-		var unresolvedKey = BuildUnresolvedKey(candidates, target);
+		var unresolvedKey = BuildUnresolvedKey(materialized, target);
 		if (unresolvedCache.TryGetValue(unresolvedKey, out _))
 		{
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
 			return new Unresolved();
 		}
 
-		ConversionResult conversionResult = new Unresolved();
+		Optional<IReadOnlyList<IExternalMediaId>> discovered = new None();
 		try
 		{
-			conversionResult = target switch
+			discovered = target switch
 			{
-				MediaProvider.Plex => await plex.ConvertAsync(candidates, hints, cancellationToken),
-				MediaProvider.Tmdb => await tmdb.ConvertAsync(candidates, hints, cancellationToken),
-				MediaProvider.Imdb => await imdb.ConvertAsync(candidates, hints, cancellationToken),
-				MediaProvider.Tvdb => await tvdb.ConvertAsync(candidates, hints, cancellationToken),
-				MediaProvider.Mdblist => new Unresolved(),
+				MediaProvider.Plex => await plex.ConvertAsync(materialized, hints, cancellationToken),
+				MediaProvider.Tmdb => await tmdb.ConvertAsync(materialized, hints, cancellationToken),
+				MediaProvider.Imdb => await imdb.ConvertAsync(materialized, hints, cancellationToken),
+				MediaProvider.Tvdb => await tvdb.ConvertAsync(materialized, hints, cancellationToken),
+				MediaProvider.Mdblist => new None(),
 			};
 		}
 		catch (Exception ex)
@@ -63,32 +63,32 @@ internal class MediaIdResolver(
 			activity?.AddException(ex);
 		}
 
-		if (conversionResult is Resolved resolved)
+		if (discovered is Some<IReadOnlyList<IExternalMediaId>>(var found))
 		{
-			var allIds = resolved.AllIds.Concat(candidates).Distinct().ToList();
-			await mediaRepository.UpsertAsync(allIds, cancellationToken);
+			var combined = materialized.Concat(found).ToHashSet();
+			var identity = await mediaRepository.UpsertAsync(combined, cancellationToken);
 			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, target);
-			return new Resolved(resolved.Id, allIds.Except([resolved.Id]));
+			return new Resolved(identity.Id, identity.Externals, identity.Externals.First(e => e.Source == target));
 		}
 
 		unresolvedCache.Set(unresolvedKey, true, UnresolvedTtl);
 		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, target);
-		return conversionResult;
+		return new Unresolved();
 	}
 
-	private async ValueTask MergeNewCandidatesAsync(List<IMediaId> cachedIds, IEnumerable<IMediaId> candidates, CancellationToken cancellationToken)
+	private async Task<MediaIdentity> MergeCandidatesAsync(MediaIdentity cached, List<IExternalMediaId> candidates, CancellationToken cancellationToken)
 	{
-		var missing = candidates.Except(cachedIds).ToList();
+		var missing = candidates.Where(c => !cached.Externals.Contains(c)).ToList();
 		if (missing.Count == 0)
 		{
-			return;
+			return cached;
 		}
 
-		await mediaRepository.UpsertAsync(cachedIds.Concat(missing), cancellationToken);
-		cachedIds.AddRange(missing);
+		var combined = cached.Externals.Concat(missing).ToList();
+		return await mediaRepository.UpsertAsync(combined, cancellationToken);
 	}
 
-	private static string BuildUnresolvedKey(IEnumerable<IMediaId> candidates, MediaProvider target)
+	private static string BuildUnresolvedKey(List<IExternalMediaId> candidates, MediaProvider target)
 	{
 		var sortedIds = candidates.Select(id => id.ToString()).OrderBy(id => id, StringComparer.Ordinal);
 		return $"{target}|{string.Join(",", sortedIds)}";

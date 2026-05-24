@@ -19,18 +19,19 @@ public class TmdbRecommendationServiceTests
 	public async Task GetTrendingAsync_WhenItemResolves_ReturnsResolvedTrendingMedia()
 	{
 		var watchlistTargetId = PlexId.From("plex-42", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
 		var json = BuildTrendingJson(id: 42, mediaType: "movie", title: "Resolved Movie");
 		var resolver = IMediaIdResolver.Mock();
 		resolver
-			.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
-			.Returns(new Resolved(watchlistTargetId, []));
+			.ResolveAsync(Any<IEnumerable<IExternalMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
+			.Returns(new Resolved(mediaId, new List<IExternalMediaId> { watchlistTargetId }, watchlistTargetId));
 		var testee = CreateTestee(json, resolver);
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<TrendingMedia>();
-		await Assert.That(result.Items[0].Ids).Contains((IMediaId)watchlistTargetId);
+		await Assert.That(result.Items[0].Externals).Contains((IExternalMediaId)watchlistTargetId);
 		await Assert.That(result.Items[0].Title).IsEqualTo("Resolved Movie");
 	}
 
@@ -39,14 +40,14 @@ public class TmdbRecommendationServiceTests
 	{
 		var json = BuildTrendingJson(id: 99, mediaType: "movie", title: "Unmatched Movie");
 		var resolver = IMediaIdResolver.Mock();
-		resolver.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any()).Returns(new Unresolved());
+		resolver.ResolveAsync(Any<IEnumerable<IExternalMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any()).Returns(new Unresolved());
 		var testee = CreateTestee(json, resolver);
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
 		await Assert.That(result.Items.Count).IsEqualTo(1);
 		await Assert.That(result.Items[0]).IsTypeOf<UnresolvedTrendingMedia>();
-		await Assert.That(result.Items[0].Ids).IsEquivalentTo(new IMediaId[] { TmdbId.From("99", MediaType.Movie) });
+		await Assert.That(result.Items[0].Externals).IsEquivalentTo(new IExternalMediaId[] { TmdbId.From("99", MediaType.Movie) });
 		await Assert.That(result.Items[0].Title).IsEqualTo("Unmatched Movie");
 	}
 
@@ -71,9 +72,10 @@ public class TmdbRecommendationServiceTests
 			(id: 3, mediaType: "movie", title: "Third")
 		);
 		var resolver = IMediaIdResolver.Mock();
+		var plexId = PlexId.From("plex-1", MediaType.Movie);
 		resolver
-			.ResolveAsync(Any<IReadOnlyCollection<IMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
-			.Returns(new Resolved(PlexId.From("plex-1", MediaType.Movie), []));
+			.ResolveAsync(Any<IEnumerable<IExternalMediaId>>(), Any<MediaProvider>(), Any<Optional<ResolutionHints>>(), Any())
+			.Returns(new Resolved(MediaId.From(Guid.NewGuid()), new List<IExternalMediaId> { plexId }, plexId));
 		var testee = CreateTestee(json, resolver);
 
 		var result = await testee.GetTrendingAsync(page: 1);

@@ -4,9 +4,13 @@ using API.Plex;
 using API.TMDB;
 using API.TvDB;
 using Contracts;
+using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Convertions;
+using Contracts.Media.Metadata;
+using Contracts.Media.Search;
+using Contracts.Settings;
 using Test.Shared;
 
 namespace API.Tests.Unit;
@@ -21,7 +25,7 @@ public class MediaIdResolverTests
 
 		var result = await testee.ResolveAsync([tmdbId], MediaProvider.Tvdb, new None());
 
-		await Assert.That(result).IsOfUnionType<ConversionResult, Unresolved>();
+		await Assert.That(result.Value is Unresolved).IsTrue();
 		await Assert.That(deps.Cache.SetWithTtlCalls).IsEqualTo(1);
 		await Assert.That(deps.Cache.LastTtl).IsEqualTo(TimeSpan.FromHours(1));
 	}
@@ -36,7 +40,7 @@ public class MediaIdResolverTests
 
 		var result = await testee.ResolveAsync([tmdbId], MediaProvider.Tvdb, new None());
 
-		await Assert.That(result).IsOfUnionType<ConversionResult, Unresolved>();
+		await Assert.That(result.Value is Unresolved).IsTrue();
 		await Assert.That(deps.Cache.SetWithTtlCalls).IsEqualTo(0);
 	}
 
@@ -49,7 +53,10 @@ public class MediaIdResolverTests
 
 		var result = await testee.ResolveAsync([tmdbId], MediaProvider.Tvdb, new None());
 
-		await Assert.That(result).IsOfUnionType<ConversionResult, Resolved>().And.Multiple(async resolved => await Assert.That(resolved.Id).IsEqualTo(tvdbId));
+		await Assert.That(result.Value is Resolved).IsTrue();
+		var resolved = (Resolved)result.Value;
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)tvdbId);
+		await Assert.That(resolved.TargetExternal).IsEqualTo<IExternalMediaId>(tvdbId);
 		await Assert.That(deps.Cache.SetWithTtlCalls).IsEqualTo(0);
 	}
 
@@ -59,20 +66,16 @@ public class MediaIdResolverTests
 		var tmdbId = TmdbId.From("123", MediaType.Movie);
 		var tvdbId = TvdbId.From("999", MediaType.Movie);
 		var newImdbId = ImdbId.From("tt0123", MediaType.Movie);
-		var (testee, deps) = CreateTestee(cachedIds: [tmdbId, tvdbId]);
+		var (testee, deps) = CreateTestee(cachedIds: [tmdbId, tvdbId], appendIds: [newImdbId]);
 
 		var result = await testee.ResolveAsync([tmdbId, newImdbId], MediaProvider.Tvdb, new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo(tvdbId);
-				await Assert.That(resolved.AdditionalIds).Contains(newImdbId);
-				await Assert.That(resolved.AdditionalIds).Contains(tmdbId);
-			});
-		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Once);
+		await Assert.That(result.Value is Resolved).IsTrue();
+		var resolved = (Resolved)result.Value;
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)tvdbId);
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)newImdbId);
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)tmdbId);
+		deps.Repo.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]
@@ -84,51 +87,60 @@ public class MediaIdResolverTests
 
 		await testee.ResolveAsync([tmdbId], MediaProvider.Tvdb, new None());
 
-		deps.Repo.UpsertAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.Never);
+		deps.Repo.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenConvertedFresh_MergesNonTargetCandidatesIntoAdditionalIds()
 	{
 		var tmdbId = TmdbId.From("42", MediaType.Movie);
-		IMediaId imdbId = ImdbId.From("tt0042", MediaType.Movie);
-		var (testee, _) = CreateTestee();
+		var imdbId = ImdbId.From("tt0042", MediaType.Movie);
+		var (testee, _) = CreateTestee(appendIds: [tmdbId, imdbId]);
 
 		var result = await testee.ResolveAsync([imdbId, tmdbId], MediaProvider.Tmdb, new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo<IMediaId>(tmdbId);
-				await Assert.That(resolved.AdditionalIds).Contains(imdbId);
-				await Assert.That(resolved.AdditionalIds.Count()).IsEqualTo(1);
-			});
+		await Assert.That(result.Value is Resolved).IsTrue();
+		var resolved = (Resolved)result.Value;
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)tmdbId);
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)imdbId);
+		await Assert.That(resolved.TargetExternal).IsEqualTo<IExternalMediaId>(tmdbId);
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenConvertedFresh_DoesNotDuplicateTargetInAdditionalIds()
 	{
 		var tmdbId = TmdbId.From("42", MediaType.Movie);
-		var (testee, _) = CreateTestee();
+		var (testee, _) = CreateTestee(appendIds: [tmdbId]);
 
 		var result = await testee.ResolveAsync([tmdbId], MediaProvider.Tmdb, new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo<IMediaId>(tmdbId);
-				await Assert.That(resolved.AdditionalIds).IsEmpty();
-			});
+		await Assert.That(result.Value is Resolved).IsTrue();
+		var resolved = (Resolved)result.Value;
+		await Assert.That(resolved.Externals.Count).IsEqualTo(1);
+		await Assert.That(resolved.Externals).Contains((IExternalMediaId)tmdbId);
+		await Assert.That(resolved.TargetExternal).IsEqualTo<IExternalMediaId>(tmdbId);
 	}
 
-	private static (MediaIdResolver Testee, Dependencies Deps) CreateTestee(IReadOnlyList<IMediaId>? cachedIds = null)
+	private static (MediaIdResolver Testee, Dependencies Deps) CreateTestee(
+		IReadOnlyList<IExternalMediaId>? cachedIds = null,
+		IReadOnlyList<IExternalMediaId>? appendIds = null
+	)
 	{
 		var repo = IMediaRepository.Mock();
-		repo.GetByIdsAsync(Any(), Any()).Returns([.. cachedIds ?? []]);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		IReadOnlyList<IExternalMediaId> cachedSet = (cachedIds ?? []).Distinct().ToList();
+		IReadOnlyList<IExternalMediaId> appendedSet = (appendIds is null ? cachedSet : cachedSet.Concat(appendIds)).Distinct().ToList();
+		if (cachedIds is not null && cachedIds.Count > 0)
+		{
+			repo.FindAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(new MediaIdentity(mediaId, cachedSet));
+		}
+		else
+		{
+			repo.FindAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns((MediaIdentity?)null);
+		}
+
+		repo.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(new MediaIdentity(mediaId, appendedSet));
+
 		var cache = new FakeCache();
 		var testee = new MediaIdResolver(
 			repo.Object,

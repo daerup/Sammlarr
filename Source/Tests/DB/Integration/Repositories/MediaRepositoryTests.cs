@@ -15,171 +15,176 @@ public class MediaRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public void Setup() => _testee = new MediaRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task GetByIdsAsync_WhenMediaExists_ReturnsAllMappedIds()
+	public async Task FindAsync_WhenMediaExists_ReturnsMediaId()
 	{
 		var imdbId = ImdbId.From("tt0101", MediaType.Movie);
-		IMediaId[] expectedIds = [TmdbId.From("101", MediaType.Movie), imdbId, TvdbId.From("201", MediaType.Movie)];
+		IExternalMediaId[] seededIds = [TmdbId.From("101", MediaType.Movie), imdbId, TvdbId.From("201", MediaType.Movie)];
 
-		await SetUpMediaAsync(expectedIds);
+		var seededMediaId = await SetUpMediaAsync(seededIds);
 
-		var mappedIds = await _testee.GetByIdsAsync([imdbId]);
+		var identity = await _testee.FindAsync([imdbId]);
 
-		await Assert.That(mappedIds).Count().IsEqualTo(expectedIds.Length);
-		await AssertContainsIds(mappedIds, expectedIds);
+		await Assert.That(identity!.Value.Id).IsEqualTo(seededMediaId);
 	}
 
 	[Test]
-	public async Task GetByIdsAsync_WhenMultipleCandidatesShareMedia_ReturnsIdsWithoutDuplicates()
+	public async Task FindAsync_WhenMultipleCandidatesShareMedia_ReturnsSingleMediaId()
 	{
 		var imdbId = ImdbId.From("tt0102", MediaType.Movie);
 		var tmdbId = TmdbId.From("102", MediaType.Movie);
-		IMediaId[] expectedIds = [tmdbId, imdbId, TvdbId.From("202", MediaType.Movie)];
+		IExternalMediaId[] seededIds = [tmdbId, imdbId, TvdbId.From("202", MediaType.Movie)];
 
-		await SetUpMediaAsync(expectedIds);
+		var seededMediaId = await SetUpMediaAsync(seededIds);
 
-		var mappedIds = await _testee.GetByIdsAsync([imdbId, tmdbId]);
+		var identity = await _testee.FindAsync([imdbId, tmdbId]);
 
-		await Assert.That(mappedIds).Count().IsEqualTo(expectedIds.Length);
-		await AssertContainsIds(mappedIds, expectedIds);
+		await Assert.That(identity!.Value.Id).IsEqualTo(seededMediaId);
 	}
 
 	[Test]
-	public async Task GetByIdsAsync_WhenNoIdsMatch_ReturnsEmptyList()
+	public async Task FindAsync_WhenNoIdsMatch_ReturnsNull()
 	{
-		var mappedIds = await _testee.GetByIdsAsync([ImdbId.From("tt-not-found", MediaType.Movie)]);
+		var mediaId = await _testee.FindAsync([ImdbId.From("tt-not-found", MediaType.Movie)]);
 
-		await Assert.That(mappedIds.Count).IsEqualTo(0);
+		await Assert.That(mediaId).IsNull();
 	}
 
 	[Test]
-	public async Task GetByIdsAsync_WhenEmptyInput_ReturnsEmptyList()
+	public async Task FindAsync_WhenCandidatesBridgeDisjointMediaRows_Throws()
 	{
-		var mappedIds = await _testee.GetByIdsAsync([]);
+		var tmdbId = TmdbId.From("103", MediaType.Movie);
+		var imdbId = ImdbId.From("tt0103", MediaType.Movie);
+		await SetUpMediaAsync([tmdbId]);
+		await SetUpMediaAsync([imdbId]);
 
-		await Assert.That(mappedIds.Count).IsEqualTo(0);
+		await Assert.That(async () => await _testee.FindAsync([tmdbId, imdbId])).Throws<MediaIdentityConflictException>();
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenIdsAreUnique_PersistsSingleMedia()
+	public async Task FindAsync_WhenEmptyInput_ReturnsNull()
 	{
-		IMediaId[] ids = [TmdbId.From("111", MediaType.Movie), ImdbId.From("tt0111", MediaType.Movie)];
+		var mediaId = await _testee.FindAsync([]);
 
-		await _testee.CreateAsync(ids);
+		await Assert.That(mediaId).IsNull();
+	}
+
+	[Test]
+	public async Task UpsertAsync_WhenIdsAreUnique_PersistsSingleMedia()
+	{
+		IExternalMediaId[] ids = [TmdbId.From("111", MediaType.Movie), ImdbId.From("tt0111", MediaType.Movie), PlexId.From("plex-111", MediaType.Movie)];
+
+		await _testee.UpsertAsync(ids);
 
 		var media = await fixture.Context.Media.Include(m => m.ExternalIds).SingleAsync();
-		var persistedIds = media.ExternalIds.Select(i => i.ToMediaId());
+		var persistedIds = media.ExternalIds.Select(i => i.ToExternalMediaId());
 
-		await Assert.That(media.ExternalIds).Count().IsEqualTo(2);
+		await Assert.That(media.ExternalIds).Count().IsEqualTo(3);
 		await AssertContainsIds(persistedIds, ids);
 	}
 
 	[Test]
-	public async Task CreateAsync_WhenInputContainsDuplicateIds_StoresDistinctIdsOnly()
+	public async Task UpsertAsync_WhenInputContainsDuplicateIds_StoresDistinctIdsOnly()
 	{
-		IMediaId[] ids =
+		IExternalMediaId[] ids =
 		[
 			TmdbId.From("121", MediaType.Movie),
 			TmdbId.From("121", MediaType.Movie),
 			ImdbId.From("tt0121", MediaType.Movie),
 			ImdbId.From("tt0121", MediaType.Movie),
+			PlexId.From("plex-121", MediaType.Movie),
 		];
-		IMediaId[] expected = [TmdbId.From("121", MediaType.Movie), ImdbId.From("tt0121", MediaType.Movie)];
-
-		await _testee.CreateAsync(ids);
-
-		var media = await fixture.Context.Media.Include(m => m.ExternalIds).SingleAsync();
-		var persistedIds = media.ExternalIds.Select(i => i.ToMediaId());
-
-		await Assert.That(media.ExternalIds).Count().IsEqualTo(2);
-		await AssertContainsIds(persistedIds, expected);
-	}
-
-	[Test]
-	public async Task CreateAsync_WhenIdsContainMultipleMediaTypes_ThrowsArgumentException()
-	{
-		IMediaId[] ids = [TmdbId.From("121", MediaType.Movie), ImdbId.From("tt0121", MediaType.Show)];
-
-		await Assert.That(async () => await _testee.CreateAsync(ids)).Throws<ArgumentException>();
-	}
-
-	[Test]
-	public async Task CreateAsync_WhenAnyIdAlreadyMapped_ThrowsDbUpdateException()
-	{
-		await SetUpMediaAsync([TmdbId.From("131", MediaType.Movie), ImdbId.From("tt0131", MediaType.Movie)]);
-		await Assert
-			.That(async () => await _testee.CreateAsync([TmdbId.From("131", MediaType.Movie), PlexId.From("plex-131", MediaType.Movie)]))
-			.Throws<DbUpdateException>();
-	}
-
-	[Test]
-	public async Task CreateAsync_WhenIdAlreadyMappedOfDifferentType_DoesNotThrowException()
-	{
-		await SetUpMediaAsync([TmdbId.From("131", MediaType.Movie), ImdbId.From("tt0131", MediaType.Movie)]);
-		await Assert.That(async () => await _testee.CreateAsync([TmdbId.From("131", MediaType.Show), PlexId.From("plex-131", MediaType.Show)])).ThrowsNothing();
-	}
-
-	[Test]
-	public async Task UpsertAsync_WhenNoMediaExists_CreatesSingleMedia()
-	{
-		IMediaId[] ids = [TmdbId.From("135", MediaType.Movie), ImdbId.From("tt0135", MediaType.Movie)];
+		IExternalMediaId[] expected = [TmdbId.From("121", MediaType.Movie), ImdbId.From("tt0121", MediaType.Movie), PlexId.From("plex-121", MediaType.Movie)];
 
 		await _testee.UpsertAsync(ids);
 
 		var media = await fixture.Context.Media.Include(m => m.ExternalIds).SingleAsync();
-		var persistedIds = media.ExternalIds.Select(i => i.ToMediaId());
-
-		await Assert.That(media.ExternalIds).Count().IsEqualTo(2);
-		await AssertContainsIds(persistedIds, ids);
-	}
-
-	[Test]
-	public async Task UpsertAsync_WhenMediaExists_AppendsOnlyMissingIds()
-	{
-		IMediaId[] initialIds = [TmdbId.From("136", MediaType.Movie), ImdbId.From("tt0136", MediaType.Movie)];
-		await SetUpMediaAsync(initialIds);
-		fixture.Context.ChangeTracker.Clear();
-
-		IMediaId[] ids = [TmdbId.From("136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie)];
-		IMediaId[] expected = [TmdbId.From("136", MediaType.Movie), ImdbId.From("tt0136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie)];
-
-		await _testee.UpsertAsync(ids);
-
-		var media = await fixture.Context.Media.Include(m => m.ExternalIds).SingleAsync();
-		var persistedIds = media.ExternalIds.Select(i => i.ToMediaId());
+		var persistedIds = media.ExternalIds.Select(i => i.ToExternalMediaId());
 
 		await Assert.That(media.ExternalIds).Count().IsEqualTo(3);
 		await AssertContainsIds(persistedIds, expected);
 	}
 
 	[Test]
-	public async Task UpsertAsync_WhenIdsContainMultipleMediaTypes_ThrowsArgumentException()
+	public async Task UpsertAsync_WhenIdsContainMultipleMediaTypes_ThrowsMixedMediaTypes()
 	{
-		IMediaId[] ids = [TmdbId.From("136", MediaType.Movie), PlexId.From("plex-136", MediaType.Show)];
+		IExternalMediaId[] ids = [TmdbId.From("121", MediaType.Movie), ImdbId.From("tt0121", MediaType.Show), PlexId.From("plex-121", MediaType.Movie)];
 
-		await Assert.That(async () => await _testee.UpsertAsync(ids)).Throws<ArgumentException>();
+		await Assert.That(async () => await _testee.UpsertAsync(ids)).Throws<MixedMediaTypesException>();
 	}
 
 	[Test]
-	public async Task UpsertAsync_WhenIdsMapToDifferentMedia_ThrowsInvalidOperationException()
+	public async Task UpsertAsync_WhenCandidatesBridgeDisjointMediaRows_Throws()
 	{
-		await SetUpMediaAsync([TmdbId.From("137", MediaType.Movie), ImdbId.From("tt0137", MediaType.Movie)]);
-		await SetUpMediaAsync([TmdbId.From("138", MediaType.Movie), PlexId.From("plex-138", MediaType.Movie)]);
-		fixture.Context.ChangeTracker.Clear();
+		var tmdbId = TmdbId.From("122", MediaType.Movie);
+		var imdbId = ImdbId.From("tt0122", MediaType.Movie);
+		var plexId = PlexId.From("plex-122", MediaType.Movie);
+		await SetUpMediaAsync([tmdbId, plexId]);
+		await SetUpMediaAsync([imdbId]);
 
-		await Assert
-			.That(async () => await _testee.UpsertAsync([TmdbId.From("137", MediaType.Movie), TmdbId.From("138", MediaType.Movie)]))
-			.Throws<InvalidOperationException>();
+		await Assert.That(async () => await _testee.UpsertAsync([tmdbId, imdbId, plexId])).Throws<MediaIdentityConflictException>();
 	}
 
-	private async Task SetUpMediaAsync(IEnumerable<IMediaId> ids)
+	[Test]
+	public async Task UpsertAsync_WhenNoMediaExists_CreatesSingleMedia()
+	{
+		IExternalMediaId[] ids = [TmdbId.From("135", MediaType.Movie), ImdbId.From("tt0135", MediaType.Movie), PlexId.From("plex-135", MediaType.Movie)];
+
+		await _testee.UpsertAsync(ids);
+
+		var media = await fixture.Context.Media.Include(m => m.ExternalIds).SingleAsync();
+		var persistedIds = media.ExternalIds.Select(i => i.ToExternalMediaId());
+
+		await Assert.That(media.ExternalIds).Count().IsEqualTo(3);
+		await AssertContainsIds(persistedIds, ids);
+	}
+
+	[Test]
+	public async Task UpsertAsync_WhenMediaExists_AppendsOnlyMissingIds()
+	{
+		IExternalMediaId[] initialIds = [TmdbId.From("136", MediaType.Movie), ImdbId.From("tt0136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie)];
+		await SetUpMediaAsync(initialIds);
+		fixture.Context.ChangeTracker.Clear();
+
+		IExternalMediaId[] ids = [TmdbId.From("136", MediaType.Movie), PlexId.From("plex-136", MediaType.Movie), TvdbId.From("tvdb-136", MediaType.Movie)];
+		IExternalMediaId[] expected =
+		[
+			TmdbId.From("136", MediaType.Movie),
+			ImdbId.From("tt0136", MediaType.Movie),
+			PlexId.From("plex-136", MediaType.Movie),
+			TvdbId.From("tvdb-136", MediaType.Movie),
+		];
+
+		await _testee.UpsertAsync(ids);
+
+		var media = await fixture.Context.Media.Include(m => m.ExternalIds).SingleAsync();
+		var persistedIds = media.ExternalIds.Select(i => i.ToExternalMediaId());
+
+		await Assert.That(media.ExternalIds).Count().IsEqualTo(4);
+		await AssertContainsIds(persistedIds, expected);
+	}
+
+	[Test]
+	public async Task GetExternalsAsync_WhenMediaExists_ReturnsExternalForRequestedSource()
+	{
+		var ids = new IExternalMediaId[] { TmdbId.From("210", MediaType.Movie), PlexId.From("plex-210", MediaType.Movie) };
+		var identity = await _testee.UpsertAsync(ids);
+
+		var result = await _testee.GetExternalsAsync([identity.Id], MediaProvider.Plex);
+
+		await Assert.That(result.Count).IsEqualTo(1);
+		await Assert.That(result[identity.Id]).IsEqualTo<IExternalMediaId>(PlexId.From("plex-210", MediaType.Movie));
+	}
+
+	private async Task<MediaId> SetUpMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
 		var media = new MediaEntity();
-		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalId(media)));
+		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
+		return MediaId.From(media.Id);
 	}
 
-	private static async Task AssertContainsIds(IEnumerable<IMediaId> actualIds, IEnumerable<IMediaId> expectedIds)
+	private static async Task AssertContainsIds(IEnumerable<IExternalMediaId> actualIds, IEnumerable<IExternalMediaId> expectedIds)
 	{
 		var actualIdList = actualIds.ToList();
 		var expectedIdList = expectedIds.ToList();

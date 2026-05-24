@@ -164,7 +164,7 @@
                                              IsFocused="_focusedResult == item"
                                              OnFocusIn="() => _focusedResult = item"
                                              OnFocusOut="() => ClearFocus(item)"
-                                             OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
+                                             OnImageBroken="() => ReportBrokenImageAsync(item.Id)">
                                 <Icons>
                                     @if (isDimmed)
                                     {
@@ -214,7 +214,7 @@
                                                  IsFocused="_focusedResult == item"
                                                  OnFocusIn="() => _focusedResult = item"
                                                  OnFocusOut="() => ClearFocus(item)"
-                                                 OnImageBroken="() => ReportBrokenImageAsync(item.SourceId)">
+                                                 OnImageBroken="() => ReportBrokenImageAsync(item.Id)">
                                     <Icons>
                                         <BbTooltipProvider>
                                             <BbTooltip DelayDuration="300">
@@ -295,9 +295,9 @@
     private IMediaDetailResult? _focusedResult;
     private IMediaDetailResult? _togglingWatchlistItem;
     private IMediaDetailResult? _togglingBlacklistItem;
-    private readonly HashSet<IMediaId> _watchlisted = new();
-    private readonly HashSet<IMediaId> _blacklistIds = new();
-    private readonly HashSet<IMediaId> _reportedBrokenImages = [];
+    private readonly HashSet<MediaId> _watchlisted = new();
+    private readonly HashSet<MediaId> _blacklistIds = new();
+    private readonly HashSet<MediaId> _reportedBrokenImages = [];
     private bool _hasEnrollmentChanges;
     private bool _refreshDialogOpen;
 
@@ -361,14 +361,14 @@
             return;
         }
 
-        var staleIds = _rawResults.Select(r => r.SourceId).ToList();
+        var staleIds = _rawResults.Select(r => r.Id).ToList();
         _refreshDialogOpen = false;
         _fetchState = FetchState.Loading;
         ClearResults();
         await RunRefreshAsync(staleIds);
     }
 
-    private async Task RunRefreshAsync(IEnumerable<IMediaId> staleIds)
+    private async Task RunRefreshAsync(IEnumerable<MediaId> staleIds)
     {
         await Task.Yield();
 
@@ -560,8 +560,8 @@
     private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && IsWatchlisted(item));
     private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && IsBlacklisted(item));
 
-    private bool IsBlacklisted(IMediaDetailResult item) => _blacklistIds.Contains(item.SourceId);
-    private bool IsWatchlisted(IMediaDetailResult item) => _watchlisted.Contains(item.SourceId);
+    private bool IsBlacklisted(IMediaDetailResult item) => _blacklistIds.Contains(item.Id);
+    private bool IsWatchlisted(IMediaDetailResult item) => _watchlisted.Contains(item.Id);
 
     private string BypassedTooltip(Bypassed<IMediaDetailResult> bypassed)
     {
@@ -575,13 +575,13 @@
         return bypassed.CountsTowardLimit ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }
 
-    private async Task ReportBrokenImageAsync(IMediaId sourceId)
+    private async Task ReportBrokenImageAsync(MediaId mediaId)
     {
-        if (!_reportedBrokenImages.Add(sourceId))
+        if (!_reportedBrokenImages.Add(mediaId))
         {
             return;
         }
-        await MetadataProvider.InvalidateAsync([sourceId]);
+        await MetadataProvider.InvalidateAsync([mediaId]);
     }
 
     private static IMediaDetailResult GetItem(QueryResult<IMediaDetailResult> result) =>
@@ -611,15 +611,15 @@
         _togglingBlacklistItem = item;
         try
         {
-            if (_blacklistIds.Contains(item.SourceId))
+            if (_blacklistIds.Contains(item.Id))
             {
-                await BlacklistService.RemoveFromBacklistAsync(item.SourceId);
-                _blacklistIds.Remove(item.SourceId);
+                await BlacklistService.RemoveFromBacklistAsync(item.Id);
+                _blacklistIds.Remove(item.Id);
             }
             else
             {
-                await BlacklistService.AddToBacklistAsync(item.SourceId);
-                _blacklistIds.Add(item.SourceId);
+                await BlacklistService.AddToBacklistAsync(item.Id);
+                _blacklistIds.Add(item.Id);
             }
         }
         finally
@@ -644,13 +644,13 @@
         {
             if (IsWatchlisted(item))
             {
-                await WatchlistService.RemoveFromWatchlistAsync(item.SourceId);
-                _watchlisted.Remove(item.SourceId);
+                await WatchlistService.RemoveFromWatchlistAsync([item.Id]);
+                _watchlisted.Remove(item.Id);
             }
             else
             {
-                await WatchlistService.AddToWatchlistAsync([item.SourceId], new ManualOrigin());
-                _watchlisted.Add(item.SourceId);
+                await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin());
+                _watchlisted.Add(item.Id);
             }
         }
         finally

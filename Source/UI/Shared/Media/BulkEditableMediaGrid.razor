@@ -30,7 +30,7 @@
                            Tagline="@detail.Tagline"
                            Rating="@detail.Rating"
                            OnClick="@(() => HandleTileClickAsync(item))"
-                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.SourceId))"/>
+                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.Id))"/>
             @if (IsEditMode)
             {
                 <div class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
@@ -48,17 +48,17 @@
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
     [Parameter, EditorRequired] public Func<TItem, IMediaDetailResult> Detail { get; set; } = null!;
-    [Parameter, EditorRequired] public Func<TItem, IMediaId> Key { get; set; } = null!;
+    [Parameter, EditorRequired] public Func<TItem, MediaId> Key { get; set; } = null!;
     [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public EventCallback<bool> IsEditModeChanged { get; set; }
     [Parameter] public EventCallback<TItem> OnTileClick { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<TItem>> OnBulkRemove { get; set; }
-    [Parameter] public EventCallback<IMediaId> OnImageBroken { get; set; }
+    [Parameter] public EventCallback<MediaId> OnImageBroken { get; set; }
     [Parameter] public RenderFragment<TItem>? Overlay { get; set; }
     [Parameter] public string RemoveLabel { get; set; } = "Remove";
 
-    private readonly HashSet<IMediaId> _selected = new();
-    private IMediaId? _anchor;
+    private readonly HashSet<MediaId> _selected = new();
+    private MediaId? _anchor;
     private bool _anchorSelected;
     private bool _isRemoving;
 
@@ -85,18 +85,18 @@
         await OnTileClick.InvokeAsync(item);
     }
 
-    private void HandleSelectionClick(IMediaId mediaId, MouseEventArgs e)
+    private void HandleSelectionClick(MediaId mediaId, MouseEventArgs e)
     {
-        if (e.ShiftKey && _anchor is not null)
+        if (e.ShiftKey && _anchor is { } anchorId)
         {
-            ApplyRange(_anchor, mediaId, _anchorSelected);
+            ApplyRange(anchorId, mediaId, _anchorSelected);
             return;
         }
         _anchorSelected = ToggleSelection(mediaId);
         _anchor = mediaId;
     }
 
-    private bool ToggleSelection(IMediaId mediaId)
+    private bool ToggleSelection(MediaId mediaId)
     {
         if (_selected.Add(mediaId))
         {
@@ -106,7 +106,7 @@
         return false;
     }
 
-    private void ApplyRange(IMediaId anchor, IMediaId target, bool select)
+    private void ApplyRange(MediaId anchor, MediaId target, bool select)
     {
         var anchorIdx = -1;
         var targetIdx = -1;

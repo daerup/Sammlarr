@@ -7,8 +7,9 @@ using Bogus;
 using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Contracts.Settings;
 using Shared.Options;
 using Test.Shared;
 
@@ -27,16 +28,13 @@ public class PlexIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo(payload.PlexId);
-				await Assert.That(resolved.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbId);
-				await Assert.That(resolved.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId.GetValueOrDefault());
-				await Assert.That(resolved.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId.GetValueOrDefault());
-			});
+		using var _ = Assert.Multiple();
+		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
+		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
+		await Assert.That(externals).Contains((IExternalMediaId)payload.PlexId);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbId);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.ImdbId!.Value);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TvdbId!.Value);
 	}
 
 	[Test]
@@ -48,14 +46,14 @@ public class PlexIdConverterTests
 		[
 			new MovieDetailResult
 			{
-				SourceId = payload.PlexId,
+				Id = default,
+				Externals = new List<IExternalMediaId> { payload.PlexId },
 				Title = "match",
 				PosterUrl = string.Empty,
 				BackdropUrl = string.Empty,
 				Runtime = TimeSpan.Zero,
 				ReleaseDate = DateOnly.MinValue,
 				Genres = [],
-				AdditionalIds = [],
 				Tagline = string.Empty,
 				Summary = string.Empty,
 			},
@@ -66,16 +64,13 @@ public class PlexIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo(payload.PlexId);
-				await Assert.That(resolved.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbId);
-				await Assert.That(resolved.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId!.Value);
-				await Assert.That(resolved.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId!.Value);
-			});
+		using var _ = Assert.Multiple();
+		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
+		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
+		await Assert.That(externals).Contains((IExternalMediaId)payload.PlexId);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbId);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.ImdbId!.Value);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TvdbId!.Value);
 	}
 
 	[Test]
@@ -88,7 +83,7 @@ public class PlexIdConverterTests
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json), searchService);
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
-		await Assert.That(result).IsOfUnionType<ConversionResult, Unresolved>();
+		await Assert.That(result.Value).IsTypeOf<None>();
 	}
 
 	private static TmdbApi CreateTmdbApi(TmdbId tmdbId, string originalTitle)
@@ -154,7 +149,11 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialStore.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient);
+		var mediaRepository = IMediaRepository.Mock();
+		mediaRepository
+			.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any())
+			.Returns(new MediaIdentity(MediaId.From(Guid.NewGuid()), new List<IExternalMediaId>()));
+		return new PlexApi(plexClient, mediaRepository.Object);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, TmdbId TmdbId, ImdbId? ImdbId, TvdbId? TvdbId);

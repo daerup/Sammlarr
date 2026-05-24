@@ -1,6 +1,8 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
@@ -21,16 +23,16 @@ public class WatchlistSyncEngineTests
 	[Test]
 	public async Task SyncAsync_InsertsRemoteOnly_AsRemoteOrigin()
 	{
-		IMediaId remoteId = PlexId.From("plex-1", MediaType.Movie);
-		var scenario = Scenario.Build(remote: [remoteId]);
+		var remoteExternal = PlexId.From("plex-1", MediaType.Movie);
+		var remoteMediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(remote: [(remoteExternal, remoteMediaId)]);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success => await Assert.That(success.Inserted).IsEqualTo(1));
-		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasCalled(Times.Once);
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.Inserted).IsEqualTo(1);
+		scenario.Repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -40,12 +42,11 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncRemoteFailed>()
-			.And.Multiple(async failure => await Assert.That(failure.Reason).IsEqualTo("network down"));
-		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasNeverCalled();
-		scenario.Repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
+		await Assert.That(result.Value is WatchlistSyncRemoteFailed).IsTrue();
+		var failure = (WatchlistSyncRemoteFailed)result.Value;
+		await Assert.That(failure.Reason).IsEqualTo("network down");
+		scenario.Repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasNeverCalled();
+		scenario.Repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -58,77 +59,83 @@ public class WatchlistSyncEngineTests
 		await Task.Delay(50);
 		var second = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(second).IsOfUnionType<WatchlistSyncResult, WatchlistSyncAlreadyRunning>();
+		await Assert.That(second.Value is WatchlistSyncAlreadyRunning).IsTrue();
 
 		gate.SetResult();
 		var firstResult = await first;
-		await Assert.That(firstResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncUnchanged>();
+		await Assert.That(firstResult.Value is WatchlistSyncUnchanged).IsTrue();
 	}
 
 	[Test]
 	public async Task SyncAsync_ConfirmsOutboxAdd_WhenPresentOnRemote()
 	{
-		IMediaId id = PlexId.From("plex-1", MediaType.Movie);
-		var scenario = Scenario.Build(remote: [id], local: [id], outbox: [new WatchlistOperation(id, WatchlistOperationKind.Add)]);
+		var external = PlexId.From("plex-1", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(remote: [(external, mediaId)], local: [mediaId], outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)]);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success =>
-			{
-				await Assert.That(success.Confirmed).IsEqualTo(1);
-				await Assert.That(success.PushedAdds).IsEqualTo(0);
-			});
-		scenario.Outbox.DropAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.Confirmed).IsEqualTo(1);
+		await Assert.That(success.PushedAdds).IsEqualTo(0);
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]
 	public async Task SyncAsync_HardDeletesEntry_WhenAbsentFromRemote()
 	{
-		var id = PlexId.From("plex-deleted-remote", MediaType.Movie);
-		var scenario = Scenario.Build(local: [id]);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(local: [mediaId]);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success => await Assert.That(success.HardDeleted).IsEqualTo(1));
-		scenario.Repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.HardDeleted).IsEqualTo(1);
+		scenario.Repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]
 	public async Task SyncAsync_PushAdd_DropsOutboxRow_OnSuccess()
 	{
-		IMediaId id = PlexId.From("plex-push-add", MediaType.Movie);
-		var scenario = Scenario.Build(local: [id], outbox: [new WatchlistOperation(id, WatchlistOperationKind.Add)], remoteAddSucceeds: true);
+		var external = PlexId.From("plex-push-add", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(
+			local: [mediaId],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>> { [mediaId] = new List<IExternalMediaId> { external } },
+			outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)],
+			remoteAddSucceeds: true
+		);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success => await Assert.That(success.PushedAdds).IsEqualTo(1));
-		scenario.Provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).WasCalled(Times.Once);
-		scenario.Outbox.DropAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.PushedAdds).IsEqualTo(1);
+		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]
 	public async Task SyncAsync_PushRemove_DropsOutboxRow_OnSuccess()
 	{
-		IMediaId id = PlexId.From("plex-push-remove", MediaType.Movie);
-		var scenario = Scenario.Build(remote: [id], outbox: [new WatchlistOperation(id, WatchlistOperationKind.Remove)], remoteRemoveSucceeds: true);
+		var external = PlexId.From("plex-push-remove", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(
+			remote: [(external, mediaId)],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>> { [mediaId] = new List<IExternalMediaId> { external } },
+			outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Remove)],
+			remoteRemoveSucceeds: true
+		);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success => await Assert.That(success.PushedRemoves).IsEqualTo(1));
-		scenario.Provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).WasCalled(Times.Once);
-		scenario.Outbox.DropAsync(WatchlistOperationKind.Remove, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.PushedRemoves).IsEqualTo(1);
+		scenario.Provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]
@@ -138,97 +145,139 @@ public class WatchlistSyncEngineTests
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncUnchanged>();
-		scenario.Provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
-		scenario.Provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
+		await Assert.That(result.Value is WatchlistSyncUnchanged).IsTrue();
+		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
+		scenario.Provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
 	public async Task SyncAsync_PushAddThrows_CountsRemoteFailure_OutboxNotDropped()
 	{
-		IMediaId id = PlexId.From("plex-push-fail", MediaType.Movie);
+		var external = PlexId.From("plex-push-fail", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
 		var scenario = Scenario.Build(
-			local: [id],
-			outbox: [new WatchlistOperation(id, WatchlistOperationKind.Add)],
+			local: [mediaId],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>> { [mediaId] = new List<IExternalMediaId> { external } },
+			outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)],
 			remoteAddThrows: new InvalidOperationException("provider rejected")
 		);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success =>
-			{
-				await Assert.That(success.PushedAdds).IsEqualTo(0);
-				await Assert.That(success.RemoteFailures).IsEqualTo(1);
-			});
-		scenario.Outbox.DropAsync(WatchlistOperationKind.Add, Arg.Is<IEnumerable<IMediaId>>(ids => ids.Contains(id)), Any()).WasNeverCalled();
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.PushedAdds).IsEqualTo(0);
+		await Assert.That(success.RemoteFailures).IsEqualTo(1);
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Arg.Is<IEnumerable<MediaId>>(ids => ids.Contains(mediaId)), Any()).WasNeverCalled();
 	}
 
 	[Test]
-	public async Task SyncAsync_PushAddReturnsFalse_StillDropsOutbox_AndCountsAsPushed()
+	public async Task SyncAsync_PushAddReturnsFalse_DoesNotDropOutbox_CountsAsFailed()
 	{
-		IMediaId id = PlexId.From("plex-push-false", MediaType.Movie);
-		var scenario = Scenario.Build(local: [id], outbox: [new WatchlistOperation(id, WatchlistOperationKind.Add)], remoteAddSucceeds: false);
+		var external = PlexId.From("plex-push-false", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(
+			local: [mediaId],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>> { [mediaId] = new List<IExternalMediaId> { external } },
+			outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)],
+			remoteAddSucceeds: false
+		);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSuccess>()
-			.And.Multiple(async success =>
-			{
-				await Assert.That(success.PushedAdds).IsEqualTo(1);
-				await Assert.That(success.RemoteFailures).IsEqualTo(0);
-			});
-		scenario.Outbox.DropAsync(WatchlistOperationKind.Add, Any<IEnumerable<IMediaId>>(), Any()).WasCalled(Times.AtLeastOnce);
+		await Assert.That(result.Value is WatchlistSyncSuccess).IsTrue();
+		var success = (WatchlistSyncSuccess)result.Value;
+		await Assert.That(success.PushedAdds).IsEqualTo(0);
+		await Assert.That(success.RemoteFailures).IsEqualTo(1);
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Arg.Is<IEnumerable<MediaId>>(ids => ids.Contains(mediaId)), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task SyncAsync_PushAddReturnsFalse_RecordsOutboxFailure()
+	{
+		var external = PlexId.From("plex-push-false-record", MediaType.Movie);
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(
+			local: [mediaId],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>> { [mediaId] = new List<IExternalMediaId> { external } },
+			outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)],
+			remoteAddSucceeds: false
+		);
+
+		await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+
+		scenario
+			.Outbox.RecordFailureAsync(Any<WatchlistOperationKind>(), Arg.Is<IEnumerable<MediaId>>(ids => ids.Contains(mediaId)), Any())
+			.WasCalled(Times.AtLeastOnce);
+	}
+
+	[Test]
+	public async Task SyncAsync_PushAddMissingExternal_RecordsOutboxFailure()
+	{
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(
+			local: [mediaId],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>>(),
+			outbox: [new WatchlistOperation(mediaId, WatchlistOperationKind.Add)]
+		);
+
+		await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+
+		scenario
+			.Outbox.RecordFailureAsync(Any<WatchlistOperationKind>(), Arg.Is<IEnumerable<MediaId>>(ids => ids.Contains(mediaId)), Any())
+			.WasCalled(Times.AtLeastOnce);
 	}
 
 	[Test]
 	public async Task SyncAsync_PushAddOperationCancelled_BreaksWithoutFailingOrCountingMore()
 	{
-		IMediaId first = PlexId.From("plex-push-cancel-1", MediaType.Movie);
-		IMediaId second = PlexId.From("plex-push-cancel-2", MediaType.Movie);
+		var firstExternal = PlexId.From("plex-push-cancel-1", MediaType.Movie);
+		var secondExternal = PlexId.From("plex-push-cancel-2", MediaType.Movie);
+		var firstId = MediaId.From(Guid.NewGuid());
+		var secondId = MediaId.From(Guid.NewGuid());
 		var scenario = Scenario.Build(
-			local: [first, second],
-			outbox: [new WatchlistOperation(first, WatchlistOperationKind.Add), new WatchlistOperation(second, WatchlistOperationKind.Add)],
+			local: [firstId, secondId],
+			externalsByMediaId: new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>>
+			{
+				[firstId] = new List<IExternalMediaId> { firstExternal },
+				[secondId] = new List<IExternalMediaId> { secondExternal },
+			},
+			outbox: [new WatchlistOperation(firstId, WatchlistOperationKind.Add), new WatchlistOperation(secondId, WatchlistOperationKind.Add)],
 			remoteAddThrows: new OperationCanceledException()
 		);
 
 		var result = await scenario.Engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncUnchanged>();
-		scenario.Provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).WasCalled(Times.Once);
+		await Assert.That(result.Value is WatchlistSyncUnchanged).IsTrue();
+		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
 	public async Task DryRunAsync_ReturnsReport_NoWrites()
 	{
-		IMediaId remoteOnly = PlexId.From("plex-remote-only", MediaType.Movie);
-		IMediaId localOnly = PlexId.From("plex-local-only", MediaType.Movie);
-		IMediaId synced = PlexId.From("plex-synced", MediaType.Movie);
-		var scenario = Scenario.Build(remote: [remoteOnly, synced], local: [localOnly, synced]);
+		var remoteOnlyExternal = PlexId.From("plex-remote-only", MediaType.Movie);
+		var localOnlyExternal = PlexId.From("plex-local-only", MediaType.Movie);
+		var syncedExternal = PlexId.From("plex-synced", MediaType.Movie);
+		var remoteOnlyId = MediaId.From(Guid.NewGuid());
+		var localOnlyId = MediaId.From(Guid.NewGuid());
+		var syncedId = MediaId.From(Guid.NewGuid());
+		var scenario = Scenario.Build(remote: [(remoteOnlyExternal, remoteOnlyId), (syncedExternal, syncedId)], local: [localOnlyId, syncedId]);
 
 		var dryRun = await scenario.Engine.DryRunAsync();
 
-		await Assert
-			.That(dryRun)
-			.IsOfUnionType<WatchlistSyncDryRun, WatchlistSyncDryRunReport>()
-			.And.Multiple(async report =>
-			{
-				await Assert.That(report.Changes).Contains(new WatchlistSyncChange(remoteOnly, WatchlistSyncDirection.Pull, WatchlistOperationKind.Add));
-				await Assert.That(report.Changes).Contains(new WatchlistSyncChange(localOnly, WatchlistSyncDirection.Pull, WatchlistOperationKind.Remove));
-				await Assert.That(report.AddCount).IsEqualTo(1);
-				await Assert.That(report.RemoveCount).IsEqualTo(1);
-				await Assert.That(report.InSync).IsEqualTo(1);
-			});
+		await Assert.That(dryRun.Value is WatchlistSyncDryRun).IsTrue();
+		var report = (WatchlistSyncDryRun)dryRun.Value;
+		await Assert.That(report.Changes).Contains(new WatchlistSyncChange(remoteOnlyId, WatchlistSyncDirection.Pull, WatchlistOperationKind.Add));
+		await Assert.That(report.Changes).Contains(new WatchlistSyncChange(localOnlyId, WatchlistSyncDirection.Pull, WatchlistOperationKind.Remove));
+		await Assert.That(report.AddCount).IsEqualTo(1);
+		await Assert.That(report.RemoveCount).IsEqualTo(1);
+		await Assert.That(report.InSync).IsEqualTo(1);
 
-		scenario.Repository.AddAsync(Any<IEnumerable<IMediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasNeverCalled();
-		scenario.Repository.RemoveAsync(Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
-		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<IMediaId>>(), Any()).WasNeverCalled();
-		scenario.Provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
-		scenario.Provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).WasNeverCalled();
+		scenario.Repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasNeverCalled();
+		scenario.Repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+		scenario.Outbox.DropAsync(Any<WatchlistOperationKind>(), Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+		scenario.Provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
+		scenario.Provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -238,25 +287,27 @@ public class WatchlistSyncEngineTests
 
 		var dryRun = await scenario.Engine.DryRunAsync();
 
-		await Assert
-			.That(dryRun)
-			.IsOfUnionType<WatchlistSyncDryRun, WatchlistSyncDryRunRemoteFailed>()
-			.And.Multiple(async failure => await Assert.That(failure.Reason).IsEqualTo("network down"));
+		await Assert.That(dryRun.Value is Error).IsTrue();
+		var failure = (Error)dryRun.Value;
+		await Assert.That(failure.Reason).IsEqualTo("network down");
 	}
 
 	private sealed record Scenario(
 		Mock<IWatchlistProvider> Provider,
 		Mock<IWatchlistRepository> Repository,
 		Mock<IWatchlistOutbox> Outbox,
+		Mock<IMediaRepository> MediaRepo,
+		Mock<IMediaIdResolver> Resolver,
 		WatchlistSyncEngine Engine
 	)
 	{
 		public static Scenario Build(
-			IReadOnlyList<IMediaId>? remote = null,
-			IReadOnlyList<IMediaId>? local = null,
+			IReadOnlyList<(IExternalMediaId External, MediaId Id)>? remote = null,
+			IReadOnlyList<MediaId>? local = null,
 			IReadOnlyList<WatchlistOperation>? outbox = null,
+			IReadOnlyDictionary<MediaId, IReadOnlyList<IExternalMediaId>>? externalsByMediaId = null,
 			Exception? remoteThrows = null,
-			IAsyncEnumerable<IMediaId>? remoteEnumerable = null,
+			IAsyncEnumerable<IExternalMediaId>? remoteEnumerable = null,
 			bool remoteAddSucceeds = false,
 			bool remoteRemoveSucceeds = false,
 			Exception? remoteAddThrows = null,
@@ -266,41 +317,71 @@ public class WatchlistSyncEngineTests
 			var provider = IWatchlistProvider.Mock();
 			provider
 				.GetWatchlistAsync(Any())
-				.Returns(remoteEnumerable ?? (remoteThrows is not null ? ThrowAsync<IMediaId>(remoteThrows) : AsAsyncEnumerable(remote ?? [])));
-			if (remoteAddThrows is not null)
-			{
-				provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).Throws(remoteAddThrows);
-			}
-			else
-			{
-				provider.AddToWatchlistAsync(Any<IMediaId>(), Any()).Returns(remoteAddSucceeds);
-			}
-			if (remoteRemoveThrows is not null)
-			{
-				provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).Throws(remoteRemoveThrows);
-			}
-			else
-			{
-				provider.RemoveFromWatchlistAsync(Any<IMediaId>(), Any()).Returns(remoteRemoveSucceeds);
-			}
+				.Returns(
+					remoteEnumerable
+						?? (
+							remoteThrows is not null
+								? ThrowAsync<IExternalMediaId>(remoteThrows)
+								: AsAsyncEnumerable((remote ?? []).Select(r => r.External).ToList())
+						)
+				);
+			var addExternals = ExternalsFor(outbox, externalsByMediaId, WatchlistOperationKind.Add);
+			var removeExternals = ExternalsFor(outbox, externalsByMediaId, WatchlistOperationKind.Remove);
+			provider
+				.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any())
+				.Returns(
+					remoteAddThrows is not null
+						? ThrowAsync<WatchlistPushResult>(remoteAddThrows)
+						: AsAsyncEnumerable(addExternals.Select(e => new WatchlistPushResult(e, remoteAddSucceeds)).ToList())
+				);
+			provider
+				.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any())
+				.Returns(
+					remoteRemoveThrows is not null
+						? ThrowAsync<WatchlistPushResult>(remoteRemoveThrows)
+						: AsAsyncEnumerable(removeExternals.Select(e => new WatchlistPushResult(e, remoteRemoveSucceeds)).ToList())
+				);
 
 			var repository = IWatchlistRepository.Mock();
-			repository.GetIdsAsync(Any(), Any()).Returns(local ?? []);
+			repository.GetIdsAsync(Any()).Returns(local ?? []);
 
 			var outboxMock = IWatchlistOutbox.Mock();
-			outboxMock.GetAsync(Any(), Any()).Returns(outbox ?? []);
+			outboxMock.GetAsync(Any()).Returns(outbox ?? []);
 
-			var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider);
+			var resolver = IMediaIdResolver.Mock();
+			foreach (var (external, mediaId) in remote ?? [])
+			{
+				resolver
+					.ResolveAsync(
+						Arg.Is<IEnumerable<IExternalMediaId>>(c => c.Contains(external)),
+						Any<MediaProvider>(),
+						Any<Optional<ResolutionHints>>(),
+						Any()
+					)
+					.Returns(new Resolved(mediaId, new List<IExternalMediaId> { external }, external));
+			}
+
+			var mediaRepo = IMediaRepository.Mock();
+			var flatExternalsByMediaId = (externalsByMediaId ?? new Dictionary<MediaId, IReadOnlyList<IExternalMediaId>>())
+				.Where(kvp => kvp.Value.Any(e => e.Source == MediaProvider.Plex))
+				.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.First(e => e.Source == MediaProvider.Plex));
+			mediaRepo
+				.GetExternalsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any())
+				.Returns((IReadOnlyDictionary<MediaId, IExternalMediaId>)flatExternalsByMediaId);
+
+			var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
 			var services = new ServiceCollection();
-			services.AddSingleton<IWatchlistRepository>(repository);
-			services.AddSingleton<IWatchlistOutbox>(outboxMock);
+			services.AddSingleton<IWatchlistRepository>(repository.Object);
+			services.AddSingleton<IWatchlistOutbox>(outboxMock.Object);
 			services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
 			services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
+			services.AddSingleton<IMediaRepository>(mediaRepo.Object);
+			services.AddSingleton<IMediaIdResolver>(resolver.Object);
 			var sp = services.BuildServiceProvider();
 			var options = new WatchlistSyncOptions { DrainBudget = TimeSpan.FromSeconds(10) };
 			var engine = new WatchlistSyncEngine(sp.GetRequiredService<IServiceScopeFactory>(), options, NullLogger<WatchlistSyncEngine>.Instance);
 
-			return new Scenario(provider, repository, outboxMock, engine);
+			return new Scenario(provider, repository, outboxMock, mediaRepo, resolver, engine);
 		}
 	}
 
@@ -313,6 +394,26 @@ public class WatchlistSyncEngineTests
 		}
 	}
 
+	private static IReadOnlyList<IExternalMediaId> ExternalsFor(
+		IReadOnlyList<WatchlistOperation>? outbox,
+		IReadOnlyDictionary<MediaId, IReadOnlyList<IExternalMediaId>>? externalsByMediaId,
+		WatchlistOperationKind kind
+	)
+	{
+		if (outbox is null || externalsByMediaId is null)
+		{
+			return [];
+		}
+		return
+		[
+			.. from op in outbox
+			where op.Kind == kind
+			where externalsByMediaId.ContainsKey(op.MediaId)
+			from external in externalsByMediaId[op.MediaId]
+			select external,
+		];
+	}
+
 	private static async IAsyncEnumerable<T> ThrowAsync<T>(Exception ex)
 	{
 		await Task.CompletedTask;
@@ -322,7 +423,7 @@ public class WatchlistSyncEngineTests
 #pragma warning restore CS0162
 	}
 
-	private static async IAsyncEnumerable<IMediaId> WaitingAsyncEnumerable(TaskCompletionSource gate)
+	private static async IAsyncEnumerable<IExternalMediaId> WaitingAsyncEnumerable(TaskCompletionSource gate)
 	{
 		await gate.Task;
 		yield break;

@@ -4,5 +4,5 @@ public interface IWatchlistSyncEngine
 {
 	Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, CancellationToken cancellationToken = default);
 
-	Task<WatchlistSyncDryRun> DryRunAsync(CancellationToken cancellationToken = default);
+	Task<Result<WatchlistSyncDryRun>> DryRunAsync(CancellationToken cancellationToken = default);
 }

@@ -1,3 +1,3 @@
 namespace Contracts.Media.Blacklist;
 
-public record BlacklistedMedia(IMediaId MediaId, DateTimeOffset AddedAt);
+public record BlacklistedMedia(MediaId MediaId, DateTimeOffset AddedAt);

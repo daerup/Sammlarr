@@ -4,8 +4,8 @@ namespace Contracts.Media.Search;
 
 public interface IMediaDetailResult
 {
-	public IMediaId SourceId { get; }
-	public IMediaId[] AdditionalIds { get; }
+	public MediaId Id { get; }
+	public IReadOnlyList<IExternalMediaId> Externals { get; }
 	public MediaType MediaType { get; }
 
 	public string PosterUrl { get; }

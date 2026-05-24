@@ -2,4 +2,4 @@ using Contracts.Media;
 
 namespace Contracts.Watchlist;
 
-public record WatchlistedMedia(IMediaId MediaId, DateTimeOffset AddedAt, WatchlistItemProvenance Provenance);
+public record WatchlistedMedia(MediaId MediaId, DateTimeOffset AddedAt, WatchlistItemProvenance Provenance);

@@ -1,3 +1,4 @@
+@using Contracts
 @using Contracts.Media
 @using Contracts.Media.Metadata
 @using Contracts.Media.Search
@@ -101,9 +102,9 @@ else
     private const string PreviewHeaderStyle = "background: oklch(from var(--muted) calc(l - 0.08) c h); border-bottom: 2px solid #09090b;";
 
     private readonly CancellationTokenSource _cts = new();
-    private WatchlistSyncDryRunReport? _dryRun;
+    private WatchlistSyncDryRun? _dryRun;
     private string? _dryRunError;
-    private Dictionary<IMediaId, IMediaDetailResult> _metadata = [];
+    private Dictionary<MediaId, IMediaDetailResult> _metadata = [];
     private bool _isSyncing;
     private bool _dryRunRequested;
 
@@ -135,21 +136,21 @@ else
         StateHasChanged();
 
         var result = await SyncEngine.DryRunAsync(_cts.Token);
-        switch (result.Value)
+        switch (result)
         {
-            case WatchlistSyncDryRunReport report:
-                _dryRun = report;
-                _metadata = await LoadMetadataAsync(report);
+            case WatchlistSyncDryRun dryRun:
+                _dryRun = dryRun;
+                _metadata = await LoadMetadataAsync(dryRun);
                 break;
-            case WatchlistSyncDryRunRemoteFailed failed:
+            case Error failed:
                 _dryRunError = $"Dry run unavailable — {failed.Reason}";
                 break;
         }
         StateHasChanged();
     }
 
-    private Task<Dictionary<IMediaId, IMediaDetailResult>> LoadMetadataAsync(WatchlistSyncDryRunReport report) =>
-        DryRunMetadataLoader.LoadAsync(MetadataProvider, report, DryRunPreviewLimit, _cts.Token);
+    private Task<Dictionary<MediaId, IMediaDetailResult>> LoadMetadataAsync(WatchlistSyncDryRun dryRun) =>
+        DryRunMetadataLoader.LoadAsync(MetadataProvider, dryRun, DryRunPreviewLimit, _cts.Token);
 
     public async Task SyncAsync()
     {

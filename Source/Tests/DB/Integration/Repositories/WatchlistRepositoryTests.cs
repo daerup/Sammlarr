@@ -18,15 +18,15 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	public void Setup()
 	{
 		_mediaRepo = new MediaRepository(fixture.ContextFactory);
-		_testee = new WatchlistRepository(fixture.ContextFactory, _mediaRepo);
+		_testee = new WatchlistRepository(fixture.ContextFactory);
 	}
 
 	[Test]
 	public async Task AddAsync_NewEntry_PersistsWithProvenance()
 	{
-		var id = PlexId.From("plex-100", MediaType.Movie);
+		var mediaId = (await _mediaRepo.UpsertAsync([PlexId.From("plex-100", MediaType.Movie)])).Id;
 
-		await _testee.AddAsync([id], new WatchlistItemProvenance(new ManualOrigin()));
+		await _testee.AddAsync([mediaId], new WatchlistItemProvenance(new ManualOrigin()));
 
 		var entry = await fixture.Context.Watchlist.AsNoTracking().SingleAsync();
 		await Assert.That(entry.Origin).IsEqualTo(WatchlistEntryOrigin.Manual);
@@ -35,8 +35,8 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_BatchOfDistinctMedia_CreatesSeparateEntries()
 	{
-		var first = PlexId.From("plex-200", MediaType.Movie);
-		var second = PlexId.From("plex-201", MediaType.Movie);
+		var first = (await _mediaRepo.UpsertAsync([PlexId.From("plex-200", MediaType.Movie)])).Id;
+		var second = (await _mediaRepo.UpsertAsync([PlexId.From("plex-201", MediaType.Movie)])).Id;
 
 		await _testee.AddAsync([first, second], new WatchlistItemProvenance(new RemoteOrigin()));
 
@@ -47,10 +47,9 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_ExistingEntry_IsIdempotent()
 	{
-		var id = PlexId.From("plex-102", MediaType.Movie);
-		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Remote);
+		var mediaId = await SeedWatchlistEntryAsync(PlexId.From("plex-102", MediaType.Movie), WatchlistEntryOrigin.Remote);
 
-		await _testee.AddAsync([id], new WatchlistItemProvenance(new ManualOrigin()));
+		await _testee.AddAsync([mediaId], new WatchlistItemProvenance(new ManualOrigin()));
 
 		var entries = await fixture.Context.Watchlist.AsNoTracking().ToListAsync();
 		await Assert.That(entries).Count().IsEqualTo(1);
@@ -60,10 +59,9 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task RemoveAsync_HardDeletes()
 	{
-		var id = PlexId.From("plex-104", MediaType.Movie);
-		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Manual);
+		var mediaId = await SeedWatchlistEntryAsync(PlexId.From("plex-104", MediaType.Movie), WatchlistEntryOrigin.Manual);
 
-		await _testee.RemoveAsync([id]);
+		await _testee.RemoveAsync([mediaId]);
 
 		var count = await fixture.Context.Watchlist.CountAsync();
 		await Assert.That(count).IsEqualTo(0);
@@ -81,8 +79,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task RemoveAsync_EmptyCollection_DoesNothing()
 	{
-		var id = PlexId.From("plex-108", MediaType.Movie);
-		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Manual);
+		await SeedWatchlistEntryAsync(PlexId.From("plex-108", MediaType.Movie), WatchlistEntryOrigin.Manual);
 
 		await _testee.RemoveAsync([]);
 
@@ -93,9 +90,8 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task RemoveAsync_UnknownId_IsNoOp()
 	{
-		var seeded = PlexId.From("plex-109", MediaType.Movie);
-		var unknown = PlexId.From("plex-never-added", MediaType.Movie);
-		await SeedWatchlistEntryAsync(seeded, WatchlistEntryOrigin.Manual);
+		await SeedWatchlistEntryAsync(PlexId.From("plex-109", MediaType.Movie), WatchlistEntryOrigin.Manual);
+		var unknown = MediaId.From(Guid.NewGuid());
 
 		await _testee.RemoveAsync([unknown]);
 
@@ -104,39 +100,35 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetIdsAsync_ReturnsAllEntriesForProvider()
+	public async Task GetIdsAsync_ReturnsAllEntries()
 	{
-		var plexId = PlexId.From("plex-105", MediaType.Movie);
-		var imdbId = ImdbId.From("tt0105", MediaType.Movie);
-		var tmdbId = TmdbId.From("tmdb-105", MediaType.Movie);
-		await SeedWatchlistEntryAsync(plexId, WatchlistEntryOrigin.Manual);
-		await _mediaRepo.UpsertAsync([plexId, imdbId, tmdbId]);
+		var mediaId = await SeedWatchlistEntryAsync(PlexId.From("plex-105", MediaType.Movie), WatchlistEntryOrigin.Manual);
 
-		var ids = await _testee.GetIdsAsync(MediaProvider.Plex);
+		var ids = await _testee.GetIdsAsync();
 
 		await Assert.That(ids).Count().IsEqualTo(1);
-		await Assert.That(ids[0]).IsEqualTo(plexId);
+		await Assert.That(ids[0]).IsEqualTo(mediaId);
 	}
 
 	[Test]
 	public async Task GetEntriesAsync_ReturnsEntries_WithProvenance()
 	{
-		var id = PlexId.From("plex-106", MediaType.Movie);
-		await SeedWatchlistEntryAsync(id, WatchlistEntryOrigin.Manual);
+		var mediaId = await SeedWatchlistEntryAsync(PlexId.From("plex-106", MediaType.Movie), WatchlistEntryOrigin.Manual);
 
-		var entries = await _testee.GetEntriesAsync(MediaProvider.Plex);
+		var entries = await _testee.GetEntriesAsync();
 
 		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].MediaId).IsEqualTo(id);
+		await Assert.That(entries[0].MediaId).IsEqualTo(mediaId);
 		await Assert.That(entries[0].Provenance.Value).IsTypeOf<ManualOrigin>();
 	}
 
-	private async Task SeedWatchlistEntryAsync(IMediaId id, WatchlistEntryOrigin origin)
+	private async Task<MediaId> SeedWatchlistEntryAsync(IExternalMediaId id, WatchlistEntryOrigin origin)
 	{
-		await _mediaRepo.UpsertAsync([id]);
-		var media = await fixture.Context.MediaMatching(id).SingleAsync();
+		var mediaId = (await _mediaRepo.UpsertAsync([id])).Id;
+		var media = await fixture.Context.Media.SingleAsync(m => m.Id == mediaId.Value);
 		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = media, Origin = origin });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
+		return mediaId;
 	}
 }

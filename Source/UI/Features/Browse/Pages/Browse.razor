@@ -72,7 +72,7 @@
                   Rating="@(_selectedMedia?.Rating)"
                   ShowMetadataRow="true"
                   Description="@_selectedMedia?.Description"
-                  Ids="@(_selectedMedia?.Ids)"
+                  Ids="@(_selectedMedia?.Externals)"
                   ButtonAction="ToggleWatchlistAsync"
                   ButtonText="GetSideMenuButtonText"
                   ButtonIcon="GetSideMenuButtonIcon"
@@ -86,7 +86,7 @@
     private bool _isOAuthenticated;
     private bool _hasTrendingProviderApiKey;
     private bool HasAccess => _isOAuthenticated && _hasTrendingProviderApiKey;
-    private IReadOnlySet<IMediaId> _watchlisted = new HashSet<IMediaId>();
+    private IReadOnlySet<MediaId> _watchlisted = new HashSet<MediaId>();
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
     private int _totalPages = 1;
@@ -107,7 +107,7 @@
         if (!_isOAuthenticated)
         {
             _hasTrendingProviderApiKey = false;
-            _watchlisted = new HashSet<IMediaId>();
+            _watchlisted = new HashSet<MediaId>();
             _trendingMedia = null;
             CloseSelectedMedia();
             _isLoading = false;
@@ -202,18 +202,7 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && IsInWatchlist(GetWatchlistProviderId(resolved));
-
-    private IMediaId GetWatchlistProviderId(TrendingMedia media) => media.Ids.Single(id => id.Source == _providerConfig.WatchlistProvider.AsMediaProvider());
-
-    private bool IsInWatchlist(IMediaId mediaId)
-    {
-        if (mediaId.Source == _providerConfig.WatchlistProvider.AsMediaProvider())
-        {
-            return _watchlisted.Contains(mediaId);
-        }
-        return false;
-    }
+    private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && _watchlisted.Contains(resolved.Id);
 
     private void SelectMedia(ITrendingMedia media)
     {
@@ -246,15 +235,13 @@
             return;
         }
 
-        var watchlistId = GetWatchlistProviderId(resolved);
-
         if (IsInWatchlist(resolved))
         {
-            await WatchlistService.RemoveFromWatchlistAsync(watchlistId);
+            await WatchlistService.RemoveFromWatchlistAsync([resolved.Id]);
         }
         else
         {
-            await WatchlistService.AddToWatchlistAsync([watchlistId], new ManualOrigin());
+            await WatchlistService.AddToWatchlistAsync([resolved.Id], new ManualOrigin());
         }
 
         await LoadWatchlistIdsAsync();
