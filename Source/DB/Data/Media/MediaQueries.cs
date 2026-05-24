@@ -8,33 +8,25 @@ internal static class MediaQueries
 {
 	extension(IQueryable<ExternalMediaIdEntity> source)
 	{
-		public IQueryable<ExternalMediaIdEntity> WhereMatching(IMediaId mediaId)
-		{
-			var src = mediaId.Source;
-			var type = mediaId.Type;
-			var value = mediaId.Value;
-			return source.Where(e => e.Source == src && e.MediaType == type && e.Id == value);
-		}
 
-		public IQueryable<ExternalMediaIdEntity> WhereMatchingAny(IEnumerable<IMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
+        public IQueryable<ExternalMediaIdEntity> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
 
-		public IQueryable<ExternalMediaIdEntity> WhereSource(MediaProvider provider) => source.Where(e => e.Source == provider);
-	}
+    }
 
 	extension(SammlarrDbContext ctx)
 	{
-		public IQueryable<MediaEntity> MediaMatching(IMediaId mediaId) => ctx.ExternalMediaIds.WhereMatching(mediaId).Select(e => e.Media);
 
-		public IQueryable<MediaEntity> MediaMatchingAny(IEnumerable<IMediaId> mediaIds) =>
+        public IQueryable<MediaEntity> MediaMatchingAny(IEnumerable<IExternalMediaId> mediaIds) =>
 			ctx.ExternalMediaIds.WhereMatchingAny(mediaIds).Select(e => e.Media).Distinct();
-	}
+
+    }
 
 	private static readonly MethodInfo ContainsMethod = typeof(Enumerable)
 		.GetMethods()
 		.First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
 		.MakeGenericMethod(typeof(string));
 
-	private static Expression<Func<ExternalMediaIdEntity, bool>> BuildAnyMatchPredicate(IEnumerable<IMediaId> mediaIds)
+	private static Expression<Func<ExternalMediaIdEntity, bool>> BuildAnyMatchPredicate(IEnumerable<IExternalMediaId> mediaIds)
 	{
 		var groups = mediaIds
 			.GroupBy(id => (id.Source, id.Type))

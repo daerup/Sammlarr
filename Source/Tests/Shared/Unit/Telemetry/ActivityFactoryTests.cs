@@ -54,7 +54,7 @@ public class ActivityFactoryTests
 	[Test]
 	public async Task TagItemOutcome_AppendsUppercaseSuffixAndTagsOutcome()
 	{
-		using var activity = SammlarrTelemetry.StartMetadataItem(TmdbId.From("1", MediaType.Movie));
+		using var activity = SammlarrTelemetry.StartMetadataItem(MediaId.From(Guid.NewGuid()));
 		SammlarrTelemetry.TagItemOutcome(activity, MetadataItemOutcome.Stale, MediaType.Movie);
 
 		await Assert.That(activity!.DisplayName).EndsWith(" [STALE]");

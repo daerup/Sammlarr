@@ -3,6 +3,7 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
+using Contracts.Media.Convertions;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -34,44 +35,12 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			var stopwatch = Stopwatch.StartNew();
 			using var activity = SammlarrTelemetry.StartWatchlistSync(deps.Provider, trigger);
 
-			var fetch = await FetchRemoteAsync(deps, cancellationToken);
-			if (fetch.FailureReason is { } reason)
+			var planning = await PlanAsync(deps, cancellationToken);
+			var syncResult = planning switch
 			{
-				logger.LogWarning("Remote fetch failed for {Provider}: {Reason}", deps.Provider, reason);
-				var result = new WatchlistSyncRemoteFailed(reason);
-				SammlarrTelemetry.TagWatchlistSyncOutcome(activity, result, stopwatch.ElapsedMilliseconds);
-				return result;
-			}
-
-			var plan = await ComputePlanAsync(deps, fetch.RemoteIds!, cancellationToken);
-
-			await deps.Repo.AddAsync(plan.InsertEntries, new WatchlistItemProvenance(new RemoteOrigin()), cancellationToken);
-			await deps.Repo.RemoveAsync(plan.DeleteEntries, cancellationToken);
-			await deps.Outbox.DropAsync(WatchlistOperationKind.Add, plan.DropOutboxAdds, cancellationToken);
-			await deps.Outbox.DropAsync(WatchlistOperationKind.Remove, plan.DropOutboxRemoves, cancellationToken);
-
-			using var drainCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			drainCts.CancelAfter(options.DrainBudget);
-
-			var adds = await PushAsync(
-				deps.Provider,
-				plan.PushAdds,
-				op: "add",
-				apply: deps.RemoteWatchlistProvider.AddToWatchlistAsync,
-				onSuccess: (id, ct) => deps.Outbox.DropAsync(WatchlistOperationKind.Add, [id], ct),
-				drainCts.Token
-			);
-
-			var removes = await PushAsync(
-				deps.Provider,
-				plan.PushRemoves,
-				op: "remove",
-				apply: deps.RemoteWatchlistProvider.RemoveFromWatchlistAsync,
-				onSuccess: (id, ct) => deps.Outbox.DropAsync(WatchlistOperationKind.Remove, [id], ct),
-				drainCts.Token
-			);
-
-			var syncResult = BuildResult(plan, adds, removes);
+				Error error => OnPlanError(error, deps.Provider),
+				WatchlistSyncPlan plan => await ExecutePlanAsync(plan, deps, cancellationToken),
+			};
 			SammlarrTelemetry.TagWatchlistSyncOutcome(activity, syncResult, stopwatch.ElapsedMilliseconds);
 			return syncResult;
 		}
@@ -81,20 +50,51 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		}
 	}
 
-	public async Task<WatchlistSyncDryRun> DryRunAsync(CancellationToken cancellationToken = default)
+	private WatchlistSyncResult OnPlanError(Error error, WatchlistProvider provider)
+	{
+		logger.LogWarning("Remote fetch failed for {Provider}: {Reason}", provider, error.Reason);
+		return new WatchlistSyncRemoteFailed(error.Reason);
+	}
+
+	private async Task<WatchlistSyncResult> ExecutePlanAsync(WatchlistSyncPlan plan, EngineDeps deps, CancellationToken cancellationToken)
+	{
+		await deps.Repo.AddAsync(plan.InsertEntries, new WatchlistItemProvenance(new RemoteOrigin()), cancellationToken);
+		await deps.Repo.RemoveAsync(plan.DeleteEntries, cancellationToken);
+		await deps.Outbox.DropAsync(WatchlistOperationKind.Add, plan.DropOutboxAdds, cancellationToken);
+		await deps.Outbox.DropAsync(WatchlistOperationKind.Remove, plan.DropOutboxRemoves, cancellationToken);
+
+		var pushExternals = await deps.MediaRepo.GetExternalsAsync(plan.PushAdds.Concat(plan.PushRemoves), deps.MediaProvider, cancellationToken);
+
+		using var drainCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		drainCts.CancelAfter(options.DrainBudget);
+
+		var adds = await PushAsync(deps, plan.PushAdds, pushExternals, WatchlistOperationKind.Add, drainCts.Token);
+		var removes = await PushAsync(deps, plan.PushRemoves, pushExternals, WatchlistOperationKind.Remove, drainCts.Token);
+
+		return BuildResult(plan, adds, removes);
+	}
+
+	public async Task<Result<WatchlistSyncDryRun>> DryRunAsync(CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopeFactory.CreateAsyncScope();
 		var deps = await ResolveAsync(scope, cancellationToken);
 
-		var fetch = await FetchRemoteAsync(deps, cancellationToken);
-		if (fetch.FailureReason is { } reason)
+		var planning = await PlanAsync(deps, cancellationToken);
+		return planning switch
 		{
-			logger.LogWarning("Remote fetch failed during dry run for {Provider}: {Reason}", deps.Provider, reason);
-			return new WatchlistSyncDryRunRemoteFailed(reason);
-		}
+			Error error => OnDryRunError(error, deps.Provider),
+			WatchlistSyncPlan plan => BuildDryRun(plan),
+		};
+	}
 
-		var plan = await ComputePlanAsync(deps, fetch.RemoteIds!, cancellationToken);
+	private Error OnDryRunError(Error error, WatchlistProvider provider)
+	{
+		logger.LogWarning("Remote fetch failed during dry run for {Provider}: {Reason}", provider, error.Reason);
+		return error;
+	}
 
+	private static WatchlistSyncDryRun BuildDryRun(WatchlistSyncPlan plan)
+	{
 		var changes = plan
 			.InsertEntries.Select(id => new WatchlistSyncChange(id, WatchlistSyncDirection.Pull, WatchlistOperationKind.Add))
 			.Concat(plan.DeleteEntries.Select(id => new WatchlistSyncChange(id, WatchlistSyncDirection.Pull, WatchlistOperationKind.Remove)))
@@ -102,7 +102,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			.Concat(plan.PushRemoves.Select(id => new WatchlistSyncChange(id, WatchlistSyncDirection.Push, WatchlistOperationKind.Remove)))
 			.ToList();
 
-		return new WatchlistSyncDryRunReport(changes, plan.InSync);
+		return new WatchlistSyncDryRun(changes, plan.InSync);
 	}
 
 	private static async Task<EngineDeps> ResolveAsync(AsyncServiceScope scope, CancellationToken cancellationToken)
@@ -114,79 +114,170 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			MediaProvider: provider.AsMediaProvider(),
 			Repo: scope.ServiceProvider.GetRequiredService<IWatchlistRepository>(),
 			Outbox: scope.ServiceProvider.GetRequiredService<IWatchlistOutbox>(),
+			MediaRepo: scope.ServiceProvider.GetRequiredService<IMediaRepository>(),
+			Resolver: scope.ServiceProvider.GetRequiredService<IMediaIdResolver>(),
 			RemoteWatchlistProvider: scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>()[provider]
 		);
 	}
 
-	private static async Task<RemoteFetch> FetchRemoteAsync(EngineDeps deps, CancellationToken cancellationToken)
+	private async Task<Result<IReadOnlyList<MediaId>>> FetchRemoteAsync(EngineDeps deps, CancellationToken cancellationToken)
 	{
 		try
 		{
 			using var fetch = SammlarrTelemetry.StartWatchlistRemoteFetch(deps.Provider);
-			var ids = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
-			return RemoteFetch.Success(ids);
+			var externals = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
+			var remoteMediaIds = new List<MediaId>(externals.Count);
+			foreach (var external in externals.TakeWhile(_ => !cancellationToken.IsCancellationRequested))
+			{
+				var resolution = await deps.Resolver.ResolveAsync([external], deps.MediaProvider, default(Optional<ResolutionHints>), cancellationToken);
+				if (resolution.Value is Resolved resolved)
+				{
+					remoteMediaIds.Add(resolved.Id);
+				}
+				else
+				{
+					logger.LogWarning("Remote watchlist item {External} could not be resolved during sync", external);
+				}
+			}
+			return remoteMediaIds;
 		}
 		catch (Exception ex)
 		{
-			return RemoteFetch.Failure(ex.Message);
+			return Error.From(ex);
 		}
 	}
 
-	private static async Task<WatchlistSyncPlan> ComputePlanAsync(EngineDeps deps, IReadOnlyList<IMediaId> remoteIds, CancellationToken cancellationToken)
+	private async Task<Result<WatchlistSyncPlan>> PlanAsync(EngineDeps deps, CancellationToken cancellationToken)
 	{
-		var localIds = await deps.Repo.GetIdsAsync(deps.MediaProvider, cancellationToken);
-		var outboxOps = await deps.Outbox.GetAsync(deps.MediaProvider, cancellationToken);
+		var fetch = await FetchRemoteAsync(deps, cancellationToken);
+		if (fetch is Error error)
+		{
+			return error;
+		}
+		var remoteIds = (IReadOnlyList<MediaId>)fetch.Value;
+		var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
+		var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
 		return WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps);
 	}
 
 	private async Task<PushOutcome> PushAsync(
-		WatchlistProvider provider,
-		IEnumerable<IMediaId> ids,
-		string op,
-		Func<IMediaId, CancellationToken, Task<bool>> apply,
-		Func<IMediaId, CancellationToken, Task> onSuccess,
+		EngineDeps deps,
+		IEnumerable<MediaId> ids,
+		IReadOnlyDictionary<MediaId, IExternalMediaId> externalsByMediaId,
+		WatchlistOperationKind kind,
 		CancellationToken cancellationToken
 	)
 	{
-		var pushed = 0;
-		var failed = 0;
+		var op = kind.ToString().ToLowerInvariant();
+		var (pending, unpushable) = await PartitionAsync(deps, kind, ids, externalsByMediaId, op, cancellationToken);
+		if (pending.Count == 0)
+		{
+			return new PushOutcome(0, unpushable);
+		}
+		var processed = await ApplyAndProcessAsync(deps, kind, pending, op, cancellationToken);
+		var orphans = await SettleOrphansAsync(deps, kind, pending, cancellationToken);
+		return processed with { Failed = unpushable + processed.Failed + orphans };
+	}
+
+	private async Task<(Dictionary<IExternalMediaId, MediaId> Pending, int Unpushable)> PartitionAsync(
+		EngineDeps deps,
+		WatchlistOperationKind kind,
+		IEnumerable<MediaId> ids,
+		IReadOnlyDictionary<MediaId, IExternalMediaId> externalsByMediaId,
+		string op,
+		CancellationToken cancellationToken
+	)
+	{
+		var pending = new Dictionary<IExternalMediaId, MediaId>();
+		var unpushable = new List<MediaId>();
 		foreach (var id in ids)
 		{
-			if (cancellationToken.IsCancellationRequested)
+			if (externalsByMediaId.TryGetValue(id, out var external))
 			{
-				break;
+				pending[external] = id;
+				continue;
 			}
-			using var push = SammlarrTelemetry.StartWatchlistPush(provider, op);
-			bool ok;
-			try
+			logger.LogWarning("No external id for media {MediaId}; skipping {Op} push", id, op);
+			unpushable.Add(id);
+		}
+		await deps.Outbox.RecordFailureAsync(kind, unpushable, cancellationToken);
+		return (pending, unpushable.Count);
+	}
+
+	private async Task<PushOutcome> ApplyAndProcessAsync(
+		EngineDeps deps,
+		WatchlistOperationKind kind,
+		Dictionary<IExternalMediaId, MediaId> pending,
+		string op,
+		CancellationToken cancellationToken
+	)
+	{
+		var apply = ResolveApply(deps, kind);
+		var pushed = 0;
+		var failed = 0;
+		try
+		{
+			await foreach (var result in apply([.. pending.Keys], cancellationToken).WithCancellation(cancellationToken))
 			{
-				ok = await apply(id, cancellationToken);
-				await onSuccess(id, cancellationToken);
-				pushed++;
+				if (!pending.Remove(result.ExternalId, out var mediaId))
+				{
+					continue;
+				}
+				if (result.Success)
+				{
+					await OnPushSuccess(deps, kind, mediaId, op, cancellationToken);
+					pushed++;
+				}
+				else
+				{
+					await OnPushFailure(deps, kind, mediaId, op, cancellationToken);
+					failed++;
+				}
 			}
-			catch (OperationCanceledException)
-			{
-				break;
-			}
-			catch (Exception ex)
-			{
-				logger.LogWarning(ex, "Push {Op} failed for {MediaId}", op, id);
-				ok = false;
-				failed++;
-			}
-			SammlarrTelemetry.TagWatchlistPushOutcome(push, ok);
+		}
+		catch (OperationCanceledException)
+		{
+			pending.Clear();
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "Push {Op} threw", op);
 		}
 		return new PushOutcome(pushed, failed);
+	}
+
+	private static async Task<int> SettleOrphansAsync(EngineDeps deps, WatchlistOperationKind kind, Dictionary<IExternalMediaId, MediaId> pending, CancellationToken cancellationToken)
+	{
+		var orphans = pending.Values.ToList();
+		await deps.Outbox.RecordFailureAsync(kind, orphans, cancellationToken);
+		return orphans.Count;
+	}
+
+	private static Func<IEnumerable<IExternalMediaId>, CancellationToken, IAsyncEnumerable<WatchlistPushResult>> ResolveApply(EngineDeps deps, WatchlistOperationKind kind) =>
+		kind == WatchlistOperationKind.Add ? deps.RemoteWatchlistProvider.AddToWatchlistAsync : deps.RemoteWatchlistProvider.RemoveFromWatchlistAsync;
+
+	private async Task OnPushSuccess(EngineDeps deps, WatchlistOperationKind kind, MediaId mediaId, string op, CancellationToken cancellationToken)
+	{
+		using var push = SammlarrTelemetry.StartWatchlistPush(deps.Provider, op);
+		await deps.Outbox.DropAsync(kind, [mediaId], cancellationToken);
+		SammlarrTelemetry.TagWatchlistPushOutcome(push, true);
+	}
+
+	private async Task OnPushFailure(EngineDeps deps, WatchlistOperationKind kind, MediaId mediaId, string op, CancellationToken cancellationToken)
+	{
+		using var push = SammlarrTelemetry.StartWatchlistPush(deps.Provider, op);
+		await deps.Outbox.RecordFailureAsync(kind, [mediaId], cancellationToken);
+		SammlarrTelemetry.TagWatchlistPushOutcome(push, false);
 	}
 
 	private static WatchlistSyncResult BuildResult(WatchlistSyncPlan plan, PushOutcome adds, PushOutcome removes)
 	{
 		if (
 			plan is { InsertCount: 0, ConfirmCount: 0, HardDeleteCount: 0 }
-            && adds.Pushed == 0
-            && removes.Pushed == 0
-            && adds.Failed == 0
-            && removes.Failed == 0
+			&& adds.Pushed == 0
+			&& removes.Pushed == 0
+			&& adds.Failed == 0
+			&& removes.Failed == 0
 		)
 		{
 			return new WatchlistSyncUnchanged();
@@ -201,13 +292,8 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		MediaProvider MediaProvider,
 		IWatchlistRepository Repo,
 		IWatchlistOutbox Outbox,
+		IMediaRepository MediaRepo,
+		IMediaIdResolver Resolver,
 		IWatchlistProvider RemoteWatchlistProvider
 	);
-
-	private readonly record struct RemoteFetch(IReadOnlyList<IMediaId>? RemoteIds, string? FailureReason)
-	{
-		public static RemoteFetch Failure(string reason) => new(null, reason);
-
-		public static RemoteFetch Success(IReadOnlyList<IMediaId> ids) => new(ids, null);
-	}
 }

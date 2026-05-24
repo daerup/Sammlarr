@@ -59,43 +59,51 @@ public class PlexWatchListProviderTests
 	}
 
 	[Test]
-	public async Task AddToWatchlistAsync_WhenRequestSucceeds_ReturnsTrue()
+	public async Task AddToWatchlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
 	{
 		var testee = CreateWatchListService(HttpStatusCode.OK);
+		var id = PlexId.From("plex-1", MediaType.Movie);
 
-		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
+		var results = await testee.AddToWatchlistAsync([id]).ToListAsync();
 
-		await Assert.That(result).IsTrue();
+		await Assert.That(results).Count().IsEqualTo(1);
+		await Assert.That(results[0].Success).IsTrue();
 	}
 
 	[Test]
-	public async Task AddToWatchlistAsync_WhenRequestFails_ReturnsFalse()
+	public async Task AddToWatchlistAsync_WhenRequestFails_YieldsFailureResult()
 	{
 		var testee = CreateWatchListService(HttpStatusCode.Unauthorized);
+		var id = PlexId.From("plex-1", MediaType.Movie);
 
-		var result = await testee.AddToWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
+		var results = await testee.AddToWatchlistAsync([id]).ToListAsync();
 
-		await Assert.That(result).IsFalse();
+		await Assert.That(results).Count().IsEqualTo(1);
+		await Assert.That(results[0].Success).IsFalse();
 	}
 
 	[Test]
-	public async Task RemoveFromWatchlistAsync_WhenRequestSucceeds_ReturnsTrue()
+	public async Task RemoveFromWatchlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
 	{
 		var testee = CreateWatchListService(HttpStatusCode.OK);
+		var id = PlexId.From("plex-1", MediaType.Movie);
 
-		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
+		var results = await testee.RemoveFromWatchlistAsync([id]).ToListAsync();
 
-		await Assert.That(result).IsTrue();
+		await Assert.That(results).Count().IsEqualTo(1);
+		await Assert.That(results[0].Success).IsTrue();
 	}
 
 	[Test]
-	public async Task RemoveFromWatchlistAsync_WhenRequestFails_ReturnsFalse()
+	public async Task RemoveFromWatchlistAsync_WhenRequestFails_YieldsFailureResult()
 	{
 		var testee = CreateWatchListService(HttpStatusCode.Unauthorized);
+		var id = PlexId.From("plex-1", MediaType.Movie);
 
-		var result = await testee.RemoveFromWatchlistAsync(PlexId.From("plex-1", MediaType.Movie));
+		var results = await testee.RemoveFromWatchlistAsync([id]).ToListAsync();
 
-		await Assert.That(result).IsFalse();
+		await Assert.That(results).Count().IsEqualTo(1);
+		await Assert.That(results[0].Success).IsFalse();
 	}
 
 	private static PlexWatchListProvider CreateWatchListService(string json) => new(CreatePlexClient(json));

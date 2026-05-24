@@ -6,9 +6,9 @@ public interface IWatchlistService
 {
 	IAsyncEnumerable<WatchlistedMediaDetail> GetWatchlistItemsAsync(CancellationToken cancellationToken = default);
 
-	Task<IReadOnlySet<IMediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlySet<MediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default);
 
-	Task AddToWatchlistAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
+	Task AddToWatchlistAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
 
-	Task RemoveFromWatchlistAsync(IMediaId mediaId, CancellationToken cancellationToken = default);
+	Task RemoveFromWatchlistAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 }

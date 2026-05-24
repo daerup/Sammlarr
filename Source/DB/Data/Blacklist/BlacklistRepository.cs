@@ -7,31 +7,30 @@ namespace DB.Data.Blacklist;
 
 internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IBlacklistRepository
 {
-	public async Task<IReadOnlyList<BlacklistedMedia>> GetBlacklistedEntriesAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<BlacklistedMedia>> GetBlacklistedEntriesAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = await (
-			from externalId in ctx.ExternalMediaIds.AsNoTracking().WhereSource(mediaProvider)
-			join blacklist in ctx.Blacklist.AsNoTracking() on externalId.Media.Id equals blacklist.Media.Id
-			select new { ExternalId = externalId, blacklist.CreatedAt }
-		).ToListAsync(cancellationToken);
-		return [.. rows.Select(row => new BlacklistedMedia(row.ExternalId.ToMediaId(), row.CreatedAt))];
+		var rows = await ctx
+			.Blacklist.AsNoTracking()
+			.Select(blacklist => new { MediaIdValue = blacklist.Media.Id, blacklist.CreatedAt })
+			.ToListAsync(cancellationToken);
+		return [.. rows.Select(row => new BlacklistedMedia(MediaId.From(row.MediaIdValue), row.CreatedAt))];
 	}
 
-	public async Task<bool> IsBlacklistedAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<bool> IsBlacklistedAsync(MediaId mediaId, CancellationToken cancellationToken = default)
 	{
+		var raw = mediaId.Value;
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await (from media in ctx.MediaMatching(mediaId) join blacklist in ctx.Blacklist on media.Id equals blacklist.Media.Id select 1).AnyAsync(
-			cancellationToken
-		);
+		return await ctx.Blacklist.AnyAsync(b => b.Media.Id == raw, cancellationToken);
 	}
 
-	public async Task AddAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task AddAsync(MediaId mediaId, CancellationToken cancellationToken = default)
 	{
+		var raw = mediaId.Value;
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var media = await ctx.MediaMatching(mediaId).SingleAsync(cancellationToken);
+		var media = await ctx.Media.SingleAsync(m => m.Id == raw, cancellationToken);
 
-		var alreadyBlacklisted = await ctx.Blacklist.AnyAsync(b => b.Media.Id == media.Id, cancellationToken);
+		var alreadyBlacklisted = await ctx.Blacklist.AnyAsync(b => b.Media.Id == raw, cancellationToken);
 		if (alreadyBlacklisted)
 		{
 			return;
@@ -41,12 +40,11 @@ internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task RemoveAsync(IMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task RemoveAsync(MediaId mediaId, CancellationToken cancellationToken = default)
 	{
+		var raw = mediaId.Value;
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var mediaIdValue = await ctx.MediaMatching(mediaId).Select(m => m.Id).SingleAsync(cancellationToken);
-
-		var entry = await ctx.Blacklist.SingleOrDefaultAsync(b => b.Media.Id == mediaIdValue, cancellationToken);
+		var entry = await ctx.Blacklist.SingleOrDefaultAsync(b => b.Media.Id == raw, cancellationToken);
 		if (entry is null)
 		{
 			return;

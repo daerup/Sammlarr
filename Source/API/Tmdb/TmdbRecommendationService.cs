@@ -62,11 +62,11 @@ internal class TmdbRecommendationService(
 		var posterUrl = options.ImageBaseUrl + response.PosterPath;
 		var backdropUrl = options.ImageBaseUrl + response.BackdropPath;
 
-		if (resolvedResult is not Resolved resolved)
+		if (resolvedResult.Value is not Resolved resolved)
 		{
 			return new UnresolvedTrendingMedia
 			{
-				Ids = [response.TmdbId],
+				Externals = new List<IExternalMediaId> { response.TmdbId },
 				MediaType = response.MediaType,
 				Title = response.DisplayTitle,
 				Description = response.Overview,
@@ -79,7 +79,8 @@ internal class TmdbRecommendationService(
 
 		return new TrendingMedia
 		{
-			Ids = resolved.AllIds.ToList(),
+			Id = resolved.Id,
+			Externals = resolved.Externals,
 			MediaType = response.MediaType,
 			Title = response.DisplayTitle,
 			Description = response.Overview,

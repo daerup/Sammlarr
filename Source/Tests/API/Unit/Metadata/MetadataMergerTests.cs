@@ -12,8 +12,8 @@ public class MetadataMergerTests
 	{
 		var primary = new MovieDetailResult
 		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Movie) },
 			Title = "Primary Title",
 			Tagline = string.Empty,
 			Summary = string.Empty,
@@ -25,8 +25,8 @@ public class MetadataMergerTests
 		};
 		var secondary = new MovieDetailResult
 		{
-			SourceId = TmdbId.From("2", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("2", MediaType.Movie) },
 			Title = "Secondary Title",
 			Tagline = "Secondary Tagline",
 			Summary = "Secondary Summary",
@@ -55,8 +55,8 @@ public class MetadataMergerTests
 	{
 		var primary = new MovieDetailResult
 		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Movie) },
 			Title = "Primary Title",
 			Tagline = "Primary Tagline",
 			Summary = "Primary Summary",
@@ -96,8 +96,8 @@ public class MetadataMergerTests
 	{
 		var primary = new ShowDetailResult
 		{
-			SourceId = TmdbId.From("1", MediaType.Show),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Show) },
 			Title = "Primary Title",
 			Tagline = string.Empty,
 			Summary = string.Empty,
@@ -111,8 +111,8 @@ public class MetadataMergerTests
 		};
 		var secondary = new ShowDetailResult
 		{
-			SourceId = TmdbId.From("2", MediaType.Show),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("2", MediaType.Show) },
 			Title = "Secondary Title",
 			Tagline = "Secondary Tagline",
 			Summary = "Secondary Summary",
@@ -142,8 +142,8 @@ public class MetadataMergerTests
 	{
 		var primary = new MovieDetailResult
 		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Movie) },
 			Title = "Title",
 			Tagline = "   ",
 			Summary = "Summary",
@@ -207,11 +207,55 @@ public class MetadataMergerTests
 		await Assert.That(result.Ratings[0].NormalizedValue).IsEqualTo(8.4f);
 	}
 
+	[Test]
+	public async Task FillMissing_UnionsExternals_KeepingPrimaryOrder()
+	{
+		var primaryTmdb = TmdbId.From("1", MediaType.Movie);
+		var sharedPlex = PlexId.From("plex-1", MediaType.Movie);
+		var secondaryImdb = ImdbId.From("tt0001", MediaType.Movie);
+		var primary = MovieWithExternals([primaryTmdb, sharedPlex]);
+		var secondary = MovieWithExternals([sharedPlex, secondaryImdb]);
+
+		var result = (MovieDetailResult)MetadataMerger.FillMissing(primary, secondary);
+
+		await Assert.That(result.Externals.Count).IsEqualTo(3);
+		await Assert.That(result.Externals[0]).IsEqualTo<IExternalMediaId>(primaryTmdb);
+		await Assert.That(result.Externals[1]).IsEqualTo<IExternalMediaId>(sharedPlex);
+		await Assert.That(result.Externals[2]).IsEqualTo<IExternalMediaId>(secondaryImdb);
+	}
+
+	[Test]
+	public async Task FillMissing_WhenSecondaryAddsNoExternals_ReturnsPrimaryReference()
+	{
+		var primary = MovieWithExternals([TmdbId.From("1", MediaType.Movie)]);
+		var secondary = MovieWithExternals([]);
+
+		var result = (MovieDetailResult)MetadataMerger.FillMissing(primary, secondary);
+
+		await Assert.That(result.Externals).IsSameReferenceAs(primary.Externals);
+	}
+
+	private static MovieDetailResult MovieWithExternals(IReadOnlyList<IExternalMediaId> externals) =>
+		new()
+		{
+			Id = default,
+			Externals = externals,
+			Title = "Title",
+			Tagline = "Tagline",
+			Summary = "Summary",
+			PosterUrl = "poster",
+			BackdropUrl = "backdrop",
+			ReleaseDate = new DateOnly(2024, 1, 1),
+			Genres = ["Action"],
+			Runtime = TimeSpan.FromMinutes(120),
+			Ratings = [],
+		};
+
 	private static MovieDetailResult MovieWithRatings(IReadOnlyList<MediaRating> ratings) =>
 		new()
 		{
-			SourceId = TmdbId.From("1", MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Movie) },
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",
@@ -226,8 +270,8 @@ public class MetadataMergerTests
 	private static ShowDetailResult ShowWithRatings(IReadOnlyList<MediaRating> ratings) =>
 		new()
 		{
-			SourceId = TmdbId.From("1", MediaType.Show),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From("1", MediaType.Show) },
 			Title = "Show",
 			Tagline = "Tagline",
 			Summary = "Summary",

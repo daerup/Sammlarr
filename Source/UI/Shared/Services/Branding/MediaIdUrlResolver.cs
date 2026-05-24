@@ -2,9 +2,9 @@ using Contracts.Media;
 
 namespace UI.Shared.Services.Branding;
 
-public static class MediaIdUrlResolver
+public static class ExternalMediaIdUrlResolver
 {
-	public static string? Resolve(IMediaId id) =>
+	public static string? Resolve(IExternalMediaId id) =>
 		id.Source switch
 		{
 			MediaProvider.Tmdb => id.Type switch

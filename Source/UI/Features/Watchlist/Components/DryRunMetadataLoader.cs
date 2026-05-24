@@ -8,15 +8,15 @@ namespace UI.Features.Watchlist.Components;
 
 internal static class DryRunMetadataLoader
 {
-	public static async Task<Dictionary<IMediaId, IMediaDetailResult>> LoadAsync(
+	public static async Task<Dictionary<MediaId, IMediaDetailResult>> LoadAsync(
 		IMediaMetadataProvider metadataProvider,
-		WatchlistSyncDryRunReport report,
+		WatchlistSyncDryRun dryRun,
 		int limit,
 		CancellationToken cancellationToken
 	)
 	{
-		var metadata = new Dictionary<IMediaId, IMediaDetailResult>();
-		var pipeline = report
+		var metadata = new Dictionary<MediaId, IMediaDetailResult>();
+		var pipeline = dryRun
 			.Changes.Take(limit)
 			.ToAsyncEnumerable()
 			.SelectAwait(
@@ -27,6 +27,10 @@ internal static class DryRunMetadataLoader
 
 		await foreach (var (id, detail) in pipeline)
 		{
+			if (detail is null)
+			{
+				continue;
+			}
 			metadata[id] = detail;
 		}
 		return metadata;

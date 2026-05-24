@@ -7,8 +7,8 @@ namespace API.TMDB;
 
 internal class TmdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ConversionResult> ConvertAsync(
-		IReadOnlyCollection<IMediaId> candidates,
+	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
+		IEnumerable<IExternalMediaId> candidates,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default
 	)
@@ -16,20 +16,20 @@ internal class TmdbIdConverter(PlexApi plexApi)
 		foreach (var id in candidates)
 		{
 			var result = await TryConvertAsync(id);
-			if (result is Resolved)
+			if (result.Value is Some<IReadOnlyList<IExternalMediaId>>)
 			{
 				return result;
 			}
 		}
 
-		return new Unresolved();
+		return new None();
 	}
 
-	private Task<ConversionResult> TryConvertAsync(IMediaId id) =>
+	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> TryConvertAsync(IExternalMediaId id) =>
 		id switch
 		{
-			TmdbId tmdbId => Task.FromResult<ConversionResult>(new Resolved(tmdbId, [])),
-			PlexId plexId => plexApi.ResolveById<TmdbId>(plexId),
-			_ => Task.FromResult<ConversionResult>(new Unresolved()),
+			TmdbId tmdbId => Some.Of<IReadOnlyList<IExternalMediaId>>([tmdbId]),
+			PlexId plexId => await plexApi.ResolveExternalsByPlexAsync(plexId, e => e is TmdbId),
+			_ => new None(),
 		};
 }

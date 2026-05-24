@@ -3,7 +3,7 @@ namespace Contracts.Media.Convertions;
 public interface IMediaIdResolver
 {
 	Task<ConversionResult> ResolveAsync(
-		IReadOnlyCollection<IMediaId> candidates,
+		IEnumerable<IExternalMediaId> candidates,
 		MediaProvider target,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default

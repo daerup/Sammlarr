@@ -8,4 +8,4 @@ public enum WatchlistOperationKind
 	Remove,
 }
 
-public record WatchlistOperation(IMediaId MediaId, WatchlistOperationKind Kind);
+public record WatchlistOperation(MediaId MediaId, WatchlistOperationKind Kind);

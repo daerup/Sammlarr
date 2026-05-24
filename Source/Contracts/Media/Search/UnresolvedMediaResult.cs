@@ -4,8 +4,8 @@ namespace Contracts.Media.Search;
 
 public record UnresolvedMediaResult : IMediaDetailResult
 {
-	public required IMediaId SourceId { get; init; }
-	public required IMediaId[] AdditionalIds { get; init; }
+	public required MediaId Id { get; init; }
+	public required IReadOnlyList<IExternalMediaId> Externals { get; init; }
 	public required MediaType MediaType { get; init; }
 	public string PosterUrl => string.Empty;
 	public string BackdropUrl => string.Empty;

@@ -4,5 +4,5 @@ namespace Contracts.Media.Metadata;
 
 public interface IMetadataEnricher
 {
-	Task<IMediaDetailResult?> LookUpAsync(IMediaId id, CancellationToken cancellationToken = default);
+	Task<IMediaDetailResult?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default);
 }

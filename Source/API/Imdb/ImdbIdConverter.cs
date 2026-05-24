@@ -7,8 +7,8 @@ namespace API.IMDB;
 
 internal class ImdbIdConverter(PlexApi plexApi)
 {
-	public async Task<ConversionResult> ConvertAsync(
-		IReadOnlyCollection<IMediaId> candidates,
+	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
+		IEnumerable<IExternalMediaId> candidates,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default
 	)
@@ -16,22 +16,20 @@ internal class ImdbIdConverter(PlexApi plexApi)
 		foreach (var id in candidates)
 		{
 			var result = await TryConvertAsync(id);
-			if (result is Resolved)
+			if (result.Value is Some<IReadOnlyList<IExternalMediaId>>)
 			{
 				return result;
 			}
 		}
 
-		return new Unresolved();
+		return new None();
 	}
 
-	private Task<ConversionResult> TryConvertAsync(IMediaId id) =>
+	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> TryConvertAsync(IExternalMediaId id) =>
 		id switch
 		{
-			ImdbId imdbId => Task.FromResult<ConversionResult>(new Resolved(imdbId, [])),
-			PlexId plexId => ResolveFromPlexAsync(plexId),
-			_ => Task.FromResult<ConversionResult>(new Unresolved()),
+			ImdbId imdbId => Some.Of<IReadOnlyList<IExternalMediaId>>([imdbId]),
+			PlexId plexId => await plexApi.ResolveExternalsByPlexAsync(plexId, e => e is ImdbId),
+			_ => new None(),
 		};
-
-	private Task<ConversionResult> ResolveFromPlexAsync(PlexId plexId) => plexApi.ResolveById<ImdbId>(plexId);
 }

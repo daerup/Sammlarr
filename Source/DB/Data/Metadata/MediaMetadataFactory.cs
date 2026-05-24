@@ -49,13 +49,13 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		existing.LastFetchedAt = dateTimeProvider.Now;
 	}
 
-	public IMediaDetailResult ToDetailResult(MediaMetadataEntity entity, IMediaId sourceId, IMediaId[] additionalIds) =>
+	public IMediaDetailResult ToDetailResult(MediaMetadataEntity entity, MediaId id, IReadOnlyList<IExternalMediaId> externals) =>
 		entity switch
 		{
 			MovieMetadataEntity movie => new MovieDetailResult
 			{
-				SourceId = sourceId,
-				AdditionalIds = additionalIds,
+				Id = id,
+				Externals = externals,
 				Title = movie.Title,
 				Tagline = movie.Tagline,
 				Summary = movie.Summary,
@@ -68,8 +68,8 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			},
 			ShowMetadataEntity show => new ShowDetailResult
 			{
-				SourceId = sourceId,
-				AdditionalIds = additionalIds,
+				Id = id,
+				Externals = externals,
 				Title = show.Title,
 				Tagline = show.Tagline,
 				Summary = show.Summary,

@@ -7,6 +7,7 @@ using Contracts.Media.Convertions;
 using Contracts.Media.Feed;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Contracts.Media.Trending;
 using Contracts.Settings;
 using Shared.Options;
 

@@ -293,8 +293,8 @@ public class QueryProcessorRatingTests
 	private static MovieDetailResult MovieWithRating(int year, float? rating) =>
 		new()
 		{
-			SourceId = TmdbId.From(year.ToString(), MediaType.Movie),
-			AdditionalIds = [],
+			Id = default,
+			Externals = new List<IExternalMediaId> { TmdbId.From(year.ToString(), MediaType.Movie) },
 			Title = $"Movie {year}",
 			Tagline = string.Empty,
 			Summary = string.Empty,

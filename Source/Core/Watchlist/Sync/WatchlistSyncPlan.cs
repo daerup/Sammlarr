@@ -4,12 +4,12 @@ using Contracts.Watchlist.Outbox;
 namespace Core.Watchlist.Sync;
 
 internal sealed record WatchlistSyncPlan(
-	IReadOnlyList<IMediaId> InsertEntries,
-	IReadOnlyList<IMediaId> DeleteEntries,
-	IReadOnlyList<IMediaId> DropOutboxAdds,
-	IReadOnlyList<IMediaId> DropOutboxRemoves,
-	IReadOnlyList<IMediaId> PushAdds,
-	IReadOnlyList<IMediaId> PushRemoves,
+	IReadOnlyList<MediaId> InsertEntries,
+	IReadOnlyList<MediaId> DeleteEntries,
+	IReadOnlyList<MediaId> DropOutboxAdds,
+	IReadOnlyList<MediaId> DropOutboxRemoves,
+	IReadOnlyList<MediaId> PushAdds,
+	IReadOnlyList<MediaId> PushRemoves,
 	int InSync
 )
 {
@@ -17,7 +17,7 @@ internal sealed record WatchlistSyncPlan(
 	public int ConfirmCount => DropOutboxAdds.Count;
 	public int HardDeleteCount => DeleteEntries.Count + DropOutboxRemoves.Count;
 
-	public static WatchlistSyncPlan Compute(IReadOnlyList<IMediaId> remoteIds, IReadOnlyList<IMediaId> localIds, IReadOnlyList<WatchlistOperation> outbox)
+	public static WatchlistSyncPlan Compute(IReadOnlyList<MediaId> remoteIds, IReadOnlyList<MediaId> localIds, IReadOnlyList<WatchlistOperation> outbox)
 	{
 		var remoteSet = remoteIds.ToHashSet();
 		var localSet = localIds.ToHashSet();

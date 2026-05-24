@@ -6,7 +6,9 @@ using Bogus;
 using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Metadata;
+using Contracts.Media.Search;
+using Contracts.Settings;
 using Test.Shared;
 
 namespace API.Tests.TMDB;
@@ -23,14 +25,10 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([tmdbId], new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo(tmdbId);
-				await Assert.That(resolved.AdditionalIds).IsEmpty();
-			});
+		using var _ = Assert.Multiple();
+		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
+		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
+		await Assert.That(externals).Contains((IExternalMediaId)tmdbId);
 	}
 
 	[Test]
@@ -41,17 +39,14 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		await Assert
-			.That(result)
-			.IsOfUnionType<ConversionResult, Resolved>()
-			.And.Multiple(async resolved =>
-			{
-				await Assert.That(resolved.Id).IsEqualTo(payload.TmdbIds[0]);
-				await Assert.That(resolved.AdditionalIds.OfType<TmdbId>()).Contains(payload.TmdbIds[1]);
-				await Assert.That(resolved.AdditionalIds.OfType<PlexId>()).Contains(payload.PlexId);
-				await Assert.That(resolved.AdditionalIds.OfType<ImdbId>()).Contains(payload.ImdbId);
-				await Assert.That(resolved.AdditionalIds.OfType<TvdbId>()).Contains(payload.TvdbId.GetValueOrDefault());
-			});
+		using var _ = Assert.Multiple();
+		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
+		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbIds[0]);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbIds[1]);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.PlexId);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.ImdbId);
+		await Assert.That(externals).Contains((IExternalMediaId)payload.TvdbId!.Value);
 	}
 
 	[Test]
@@ -62,7 +57,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		await Assert.That(result).IsOfUnionType<ConversionResult, Unresolved>();
+		await Assert.That(result.Value).IsTypeOf<None>();
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeTmdbId, bool includeExtraTmdbId, bool includeTvdbId)
@@ -122,7 +117,11 @@ public class TmdbIdConverterTests
 		var credentialStore = ICredentialStore.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, CancellationToken.None).Returns(credential);
 		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore);
-		return new PlexApi(plexClient);
+		var mediaRepository = IMediaRepository.Mock();
+		mediaRepository
+			.UpsertAsync(Any<IEnumerable<IExternalMediaId>>(), Any())
+			.Returns(new MediaIdentity(MediaId.From(Guid.NewGuid()), new List<IExternalMediaId>()));
+		return new PlexApi(plexClient, mediaRepository.Object);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, IReadOnlyList<TmdbId> TmdbIds, ImdbId ImdbId, TvdbId? TvdbId);

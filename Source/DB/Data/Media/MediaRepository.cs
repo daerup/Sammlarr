@@ -1,3 +1,4 @@
+using System.Data;
 using Contracts.Media;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,87 +6,95 @@ namespace DB.Data.Media;
 
 internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IMediaRepository
 {
-	private const string MixedMediaTypesMessage = "All IDs must be of the same media type.";
-
-	public async Task<List<IMediaId>> GetByIdsAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
+	public async Task<MediaIdentity?> FindAsync(IEnumerable<IExternalMediaId> externals, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds.Distinct().ToList();
-		if (ids.Count is 0)
+		var materialized = externals.ToList();
+		if (materialized.Count is 0)
 		{
-			return [];
+			return null;
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var matched = await ctx.MediaMatchingAny(materialized).Include(m => m.ExternalIds).ToListAsync(cancellationToken);
+		return matched.Count switch
+		{
+			0 => null,
+			1 => ToIdentity(matched[0]),
+			_ => throw new MediaIdentityConflictException([.. matched.Select(m => MediaId.From(m.Id))], materialized),
+		};
+	}
+
+	public async Task<MediaIdentity?> FindAsync(MediaId id, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var entity = await ctx.Media.Where(m => m.Id == id.Value).Include(m => m.ExternalIds).SingleOrDefaultAsync(cancellationToken);
+		return entity is null ? null : ToIdentity(entity);
+	}
+
+	public async Task<MediaIdentity> UpsertAsync(IEnumerable<IExternalMediaId> externals, CancellationToken cancellationToken = default)
+	{
+		var deduped = externals.Distinct().ToList();
+		deduped.EnsureSingleMediaType();
+
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+
 		var matched = await ctx
-			.ExternalMediaIds.WhereMatchingAny(ids)
-			.SelectMany(externalId => externalId.Media.ExternalIds)
-			.Distinct()
-			.ToListAsync(cancellationToken);
-		return matched.Select(externalId => externalId.ToMediaId()).ToList();
-	}
-
-	public async Task CreateAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
-	{
-		var idList = ids.Distinct().ToList();
-		if (idList.Count is 0)
-		{
-			return;
-		}
-
-		ValidateSingleMediaType(idList);
-
-		var media = new MediaEntity();
-		media.ExternalIds = idList.ToExternalIds(media);
-
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.Media.AddAsync(media, cancellationToken);
-		await ctx.SaveChangesAsync(cancellationToken);
-	}
-
-	public async Task UpsertAsync(IEnumerable<IMediaId> ids, CancellationToken cancellationToken = default)
-	{
-		var idList = ids.Distinct().ToList();
-		if (idList.Count is 0)
-		{
-			return;
-		}
-
-		ValidateSingleMediaType(idList);
-
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var existingMedia = await ctx
 			.ExternalMediaIds.Include(externalId => externalId.Media)
 				.ThenInclude(media => media.ExternalIds)
-			.WhereMatchingAny(idList)
+			.WhereMatchingAny(deduped)
 			.Select(externalId => externalId.Media)
 			.Distinct()
-			.SingleOrDefaultAsync(cancellationToken);
+			.ToListAsync(cancellationToken);
 
-		if (existingMedia is null)
+		if (matched.Count > 1)
+		{
+			throw new MediaIdentityConflictException([.. matched.Select(m => MediaId.From(m.Id))], deduped);
+		}
+
+		if (matched.Count == 0)
 		{
 			var newMedia = new MediaEntity();
-			newMedia.ExternalIds = idList.ToExternalIds(newMedia);
+			newMedia.ExternalIds = deduped.ToExternalIdEntities(newMedia);
 			await ctx.Media.AddAsync(newMedia, cancellationToken);
-		}
-		else
-		{
-			var existing = existingMedia.ExternalIds.Select(externalId => externalId.ToMediaId()).ToHashSet();
-			var missing = idList.Where(id => !existing.Contains(id)).ToList();
-			ValidateSingleMediaType(existing.Concat(missing));
-			foreach (var mediaId in missing)
-			{
-				existingMedia.ExternalIds.Add(mediaId.ToExternalId(existingMedia));
-			}
+			await ctx.SaveChangesAsync(cancellationToken);
+			await transaction.CommitAsync(cancellationToken);
+			return ToIdentity(newMedia);
 		}
 
-		await ctx.SaveChangesAsync(cancellationToken);
+		var existing = matched[0];
+		var current = existing.ExternalIds.Select(externalId => externalId.ToExternalMediaId()).ToHashSet();
+		var missing = deduped.Where(id => !current.Contains(id)).ToList();
+		missing.ForEach(id => existing.ExternalIds.Add(id.ToExternalIdEntity(existing)));
+		if (missing.Count > 0)
+		{
+			await ctx.SaveChangesAsync(cancellationToken);
+		}
+
+		await transaction.CommitAsync(cancellationToken);
+		return ToIdentity(existing);
 	}
 
-	private static void ValidateSingleMediaType(IEnumerable<IMediaId> mediaIds)
+	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
+		IEnumerable<MediaId> ids,
+		MediaProvider source,
+		CancellationToken cancellationToken = default
+	)
 	{
-		if (mediaIds.Select(id => id.Type).Distinct().Take(2).Count() > 1)
+		var rawIds = ids.Distinct().Select(id => id.Value).ToList();
+		if (rawIds.Count is 0)
 		{
-			throw new ArgumentException(MixedMediaTypesMessage);
+			return new Dictionary<MediaId, IExternalMediaId>();
 		}
+
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var rows = await ctx
+			.ExternalMediaIds.AsNoTracking()
+			.Where(e => e.Source == source && rawIds.Contains(e.Media.Id))
+			.Select(e => new { MediaId = e.Media.Id, External = e })
+			.ToListAsync(cancellationToken);
+		return rows.ToDictionary(r => MediaId.From(r.MediaId), r => r.External.ToExternalMediaId());
 	}
+
+	private static MediaIdentity ToIdentity(MediaEntity entity) => new(MediaId.From(entity.Id), entity.ExternalIds.Select(e => e.ToExternalMediaId()).ToList());
 }

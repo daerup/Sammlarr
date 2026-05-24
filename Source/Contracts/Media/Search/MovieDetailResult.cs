@@ -5,8 +5,8 @@ namespace Contracts.Media.Search;
 public record MovieDetailResult : IMediaDetailResult
 {
 	public MediaType MediaType => MediaType.Movie;
-	public required IMediaId SourceId { get; init; }
-	public required IMediaId[] AdditionalIds { get; init; }
+	public required MediaId Id { get; init; }
+	public required IReadOnlyList<IExternalMediaId> Externals { get; init; }
 	public required string Title { get; init; }
 	public required string Tagline { get; init; }
 	public required string Summary { get; init; }

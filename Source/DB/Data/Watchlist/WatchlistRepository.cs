@@ -5,49 +5,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist;
 
-internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, IMediaRepository mediaRepository) : IWatchlistRepository
+internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistRepository
 {
-	public async Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
-			from externalId in ctx.ExternalMediaIds.AsNoTracking().WhereSource(mediaProvider)
-			join watchlistEntry in ctx.Watchlist.AsNoTracking().Include(w => w.SourceFeed) on externalId.Media.Id equals watchlistEntry.Media.Id
-			select new { ExternalId = externalId, WatchlistEntry = watchlistEntry }
+			from watchlistEntry in ctx.Watchlist.AsNoTracking().Include(w => w.SourceFeed)
+			select new { WatchlistEntry = watchlistEntry, MediaIdValue = watchlistEntry.Media.Id }
 		).ToListAsync(cancellationToken);
 
-		return [.. rows.Select(row => new WatchlistedMedia(row.ExternalId.ToMediaId(), row.WatchlistEntry.CreatedAt, row.WatchlistEntry.ToProvenance()))];
+		return [.. rows.Select(row => new WatchlistedMedia(MediaId.From(row.MediaIdValue), row.WatchlistEntry.CreatedAt, row.WatchlistEntry.ToProvenance()))];
 	}
 
-	public async Task<IReadOnlyList<IMediaId>> GetIdsAsync(MediaProvider mediaProvider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaId>> GetIdsAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var externalIds = await (
-			from externalId in ctx.ExternalMediaIds.AsNoTracking().WhereSource(mediaProvider)
-			join watchlistEntry in ctx.Watchlist.AsNoTracking() on externalId.Media.Id equals watchlistEntry.Media.Id
-			select externalId
-		).ToListAsync(cancellationToken);
-		return [.. externalIds.Select(e => e.ToMediaId())];
+		var values = await ctx.Watchlist.AsNoTracking().Select(w => w.Media.Id).ToListAsync(cancellationToken);
+		return [.. values.Select(MediaId.From)];
 	}
 
-	public async Task AddAsync(IEnumerable<IMediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
+	public async Task AddAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds as IReadOnlyCollection<IMediaId> ?? mediaIds.ToList();
+		var ids = mediaIds.Distinct().ToList();
 		if (ids.Count == 0)
 		{
 			return;
 		}
 
-		foreach (var id in ids)
-		{
-			await mediaRepository.UpsertAsync([id], cancellationToken);
-		}
+		var rawIds = ids.Select(id => id.Value).ToList();
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var matchedMedia = await ctx.MediaMatchingAny(ids).ToListAsync(cancellationToken);
-		var mediaIdValues = matchedMedia.Select(m => m.Id).ToList();
-		var existingMediaIds = await ctx.Watchlist.Where(w => mediaIdValues.Contains(w.Media.Id)).Select(w => w.Media.Id).ToHashSetAsync(cancellationToken);
+		var matchedMedia = await ctx.Media.Where(m => rawIds.Contains(m.Id)).ToListAsync(cancellationToken);
+		var existingMediaIds = await ctx.Watchlist.Where(w => rawIds.Contains(w.Media.Id)).Select(w => w.Media.Id).ToHashSetAsync(cancellationToken);
 
 		foreach (var media in matchedMedia.Where(m => !existingMediaIds.Contains(m.Id)))
 		{
@@ -59,19 +50,16 @@ internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task RemoveAsync(IEnumerable<IMediaId> mediaIds, CancellationToken cancellationToken = default)
+	public async Task RemoveAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds as IReadOnlyCollection<IMediaId> ?? mediaIds.ToList();
+		var ids = mediaIds.Distinct().ToList();
 		if (ids.Count == 0)
 		{
 			return;
 		}
+		var rawIds = ids.Select(id => id.Value).ToList();
+
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var mediaIdValues = await ctx.MediaMatchingAny(ids).Select(m => m.Id).ToListAsync(cancellationToken);
-		if (mediaIdValues.Count == 0)
-		{
-			return;
-		}
-		await ctx.Watchlist.Where(w => mediaIdValues.Contains(w.Media.Id)).ExecuteDeleteAsync(cancellationToken);
+		await ctx.Watchlist.Where(w => rawIds.Contains(w.Media.Id)).ExecuteDeleteAsync(cancellationToken);
 	}
 }

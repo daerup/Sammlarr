@@ -94,7 +94,7 @@
 
     private string _backgroundStyle = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
-    private IReadOnlyList<IMediaId> _ids = [];
+    private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
     private IMediaDetailResult? _lastResult;
 
@@ -107,7 +107,7 @@
         }
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl : Result.BackdropUrl)}')";
         _displayFacts = GetDisplayFacts(Result);
-        _ids = [Result.SourceId, ..Result.AdditionalIds];
+        _ids = Result.Externals;
     }
 
     private async Task OnPosterError()

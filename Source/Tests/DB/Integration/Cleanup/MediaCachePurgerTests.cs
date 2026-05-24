@@ -52,9 +52,9 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var blacklistedMedia = new MediaEntity();
 		var purgedMedia = new MediaEntity();
 		fixture.Context.ExternalMediaIds.AddRange(
-			blacklistedId.ToExternalId(blacklistedMedia),
-			blacklistedImdb.ToExternalId(blacklistedMedia),
-			purgedId.ToExternalId(purgedMedia)
+			blacklistedId.ToExternalIdEntity(blacklistedMedia),
+			blacklistedImdb.ToExternalIdEntity(blacklistedMedia),
+			purgedId.ToExternalIdEntity(purgedMedia)
 		);
 		var blacklistedMetadata = BuildMetadata(blacklistedMedia, "Blacklisted");
 		var purgedMetadata = BuildMetadata(purgedMedia, "Purged");
@@ -88,7 +88,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(blacklistedMedia.Id);
 		await Assert.That(fixture.Context.ExternalMediaIds).IsSingleElement();
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToMediaId()).IsEqualTo<IMediaId>(blacklistedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(blacklistedId);
 	}
 
 	[Test]
@@ -98,7 +98,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var watchlistedImdb = ImdbId.From("tt3000", MediaType.Movie);
 
 		var watchlistedMedia = new MediaEntity();
-		fixture.Context.ExternalMediaIds.AddRange(watchlistedId.ToExternalId(watchlistedMedia), watchlistedImdb.ToExternalId(watchlistedMedia));
+		fixture.Context.ExternalMediaIds.AddRange(watchlistedId.ToExternalIdEntity(watchlistedMedia), watchlistedImdb.ToExternalIdEntity(watchlistedMedia));
 		var metadata = BuildMetadata(watchlistedMedia, "Watchlisted");
 		fixture.Context.MediaMetadata.Add(metadata);
 		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = watchlistedMedia, Origin = WatchlistEntryOrigin.Manual });
@@ -111,7 +111,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.Watchlist.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(watchlistedMedia.Id);
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToMediaId()).IsEqualTo<IMediaId>(watchlistedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(watchlistedId);
 	}
 
 	[Test]
@@ -121,7 +121,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var queuedImdb = ImdbId.From("tt4000", MediaType.Movie);
 
 		var queuedMedia = new MediaEntity();
-		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalId(queuedMedia), queuedImdb.ToExternalId(queuedMedia));
+		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalIdEntity(queuedMedia), queuedImdb.ToExternalIdEntity(queuedMedia));
 		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = queuedMedia, Kind = WatchlistOperationKind.Add });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -132,7 +132,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.WatchlistOutbox.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(queuedMedia.Id);
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToMediaId()).IsEqualTo<IMediaId>(queuedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(queuedId);
 	}
 
 	private static MovieMetadataEntity BuildMetadata(MediaEntity media, string title) =>

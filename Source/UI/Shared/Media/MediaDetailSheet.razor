@@ -11,7 +11,7 @@
         {
             <BbSheetHeader>
                 <BbSheetTitle Class="font-bold tracking-wide">
-                    <MediaTitleLink Title="@Title" Ids="@(Ids ?? [])" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                    <MediaTitleLink Title="@Title" Ids="@(Ids ?? new List<IExternalMediaId>())" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </BbSheetTitle>
                 <BbSheetDescription Class="font-normal tracking-wide">
                     <span class="inline-flex items-center justify-center gap-1.5">
@@ -155,7 +155,7 @@
     public EventCallback OnImageBroken { get; set; }
 
     [Parameter]
-    public IReadOnlyList<IMediaId>? Ids { get; set; }
+    public IReadOnlyList<IExternalMediaId>? Ids { get; set; }
 
     private bool _isButtonBusy;
     private bool _failed;

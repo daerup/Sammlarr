@@ -90,7 +90,7 @@
                                              OnFocusIn="() => _focusedResult = result"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.SourceId), EventCallback.Factory.Create<IMediaDetailResult>(this, ToggleAsync)))
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<IMediaDetailResult>(this, ToggleAsync)))
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -118,8 +118,8 @@
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
     [Parameter] [EditorRequired] public MediaSearchProvider SearchProvider { get; set; }
-    [Parameter] [EditorRequired] public required Func<IMediaId, bool> IsInWatchlist { get; set; }
-    [Parameter] [EditorRequired] public required Func<IMediaId, string, bool, Task<bool>> OnToggle { get; set; }
+    [Parameter] [EditorRequired] public required Func<MediaId, bool> IsInWatchlist { get; set; }
+    [Parameter] [EditorRequired] public required Func<MediaId, string, bool, Task<bool>> OnToggle { get; set; }
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Description { get; set; }
     [Parameter] public RenderFragment<TileIconContext>? TileIcons { get; set; }
@@ -129,7 +129,7 @@
     private string? _searchQuery = string.Empty;
     private string? _searchHint;
     private string? _searchError;
-    private IMediaId? _activeToggledSourceId;
+    private MediaId? _activeToggledSourceId;
     private List<IMediaDetailResult> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
@@ -165,7 +165,7 @@
     }
 
 
-    private bool IsSearchResultMarked(IMediaDetailResult result) => IsInWatchlist.Invoke(result.SourceId);
+    private bool IsSearchResultMarked(IMediaDetailResult result) => IsInWatchlist.Invoke(result.Id);
 
     private async Task CloseAsync()
     {
@@ -237,12 +237,12 @@
         }
 
         _isAdding = true;
-        _activeToggledSourceId = result.SourceId;
+        _activeToggledSourceId = result.Id;
         _searchHint = null;
         _searchError = null;
 
         var isMarked = IsSearchResultMarked(result);
-        await OnToggle(result.SourceId, result.Title, isMarked);
+        await OnToggle(result.Id, result.Title, isMarked);
 
         _isAdding = false;
         _activeToggledSourceId = null;

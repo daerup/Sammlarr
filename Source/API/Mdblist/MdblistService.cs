@@ -100,16 +100,17 @@ internal class MdblistService(
 		var candidates = ExtractIds(pair.ListItem.ids, pair.MediaType);
 		using var activity = SammlarrTelemetry.StartFeedItem(pair.ListItem.title, pair.ListItem.release_year, candidates);
 		var conversion = await mediaIdResolver.ResolveAsync(candidates, watchlistProvider, BuildHints(pair), cancellationToken);
-		if (conversion is Resolved resolved)
+		if (conversion.Value is Resolved resolved)
 		{
-            try
-            {
-    			return await metadataProvider.GetAsync(resolved.Id, cancellationToken);
-            }
-            catch (Exception)
-            {
-                return BuildUnresolved(pair.ListItem, pair.MediaType);
-            }
+			try
+			{
+				var detail = await metadataProvider.GetAsync(resolved.Id, cancellationToken);
+				return detail ?? BuildUnresolved(pair.ListItem, pair.MediaType);
+			}
+			catch (Exception)
+			{
+				return BuildUnresolved(pair.ListItem, pair.MediaType);
+			}
 		}
 		return BuildUnresolved(pair.ListItem, pair.MediaType);
 	}
@@ -129,8 +130,8 @@ internal class MdblistService(
 		var ids = ExtractIds(item.ids, mediaType);
 		return new UnresolvedMediaResult
 		{
-			SourceId = ids[0],
-			AdditionalIds = ids[1..],
+			Id = default,
+			Externals = ids,
 			MediaType = mediaType,
 			Title = item.title,
 			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : DateOnly.MinValue,
@@ -142,22 +143,22 @@ internal class MdblistService(
 		var ids = ExtractIds(item.ids, item.MediaType);
 		return new UnresolvedMediaResult
 		{
-			SourceId = ids[0],
-			AdditionalIds = ids[1..],
+			Id = default,
+			Externals = ids,
 			MediaType = item.MediaType,
 			Title = item.title,
 			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : DateOnly.MinValue,
 		};
 	}
 
-	private IMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
+	private IExternalMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
 	{
 		MdblistId? mdblistId = !string.IsNullOrEmpty(ids.mdblist) ? MdblistId.From(ids.mdblist, mediaType) : null;
 		TmdbId? tmdbId = ids.tmdb.HasValue ? TmdbId.From(ids.tmdb.Value.ToString(), mediaType) : null;
 		ImdbId? imdbId = !string.IsNullOrEmpty(ids.imdb) ? ImdbId.From(ids.imdb, mediaType) : null;
 		TvdbId? tvdbId = ids.tvdb.HasValue ? TvdbId.From(ids.tvdb.Value.ToString(), mediaType) : null;
 
-		return [.. new IMediaId?[] { mdblistId, tmdbId, imdbId, tvdbId }.OfType<IMediaId>()];
+		return [.. new IExternalMediaId?[] { mdblistId, tmdbId, imdbId, tvdbId }.OfType<IExternalMediaId>()];
 	}
 
 	private readonly record struct FeedItemResolution

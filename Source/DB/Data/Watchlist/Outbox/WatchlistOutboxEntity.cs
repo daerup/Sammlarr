@@ -8,4 +8,6 @@ internal record WatchlistOutboxEntity
 	public required MediaEntity Media { get; set; }
 
 	public required WatchlistOperationKind Kind { get; set; }
+
+	public int Attempts { get; set; }
 }
