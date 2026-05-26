@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 using Contracts.Media;
 using Contracts.Watchlist;
 
@@ -13,38 +14,51 @@ public static class AsyncEnumerableExtensions
 			source.Select(async (TIn @in, CancellationToken _) => await predicate(@in));
 
 		public async IAsyncEnumerable<TOut> SelectAwait<TOut>(
-			Func<TIn, ValueTask<TOut>> predicate,
+			Func<TIn, ValueTask<TOut>> selector,
 			int maxConcurrency,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)
 		{
-			var anchor = Activity.Current;
-			var window = new Queue<Task<TOut>>(maxConcurrency);
-			await using var enumerator = source.GetAsyncEnumerator(cancellationToken);
+            var anchor = Activity.Current;
+            var channel = Channel.CreateUnbounded<Task<TOut>>();
+            var sem = new SemaphoreSlim(maxConcurrency, maxConcurrency);
 
-			while (window.Count < maxConcurrency && await enumerator.MoveNextAsync())
-			{
-				Activity.Current = anchor;
-				window.Enqueue(predicate(enumerator.Current).AsTask());
-			}
+            var producer = Task.Run(async () =>
+            {
+                Activity.Current = anchor;
+                try
+                {
+                    await foreach (var item in source.WithCancellation(cancellationToken))
+                    {
+                        await sem.WaitAsync(cancellationToken);
+                        await channel.Writer.WriteAsync(RunAndRelease(item), cancellationToken);
+                    }
+                }
+                finally { channel.Writer.Complete(); }
+            }, cancellationToken);
 
-			while (window.Count > 0)
-			{
-				yield return await window.Dequeue();
-				if (await enumerator.MoveNextAsync())
-				{
-					Activity.Current = anchor;
-					window.Enqueue(predicate(enumerator.Current).AsTask());
-				}
-			}
+            await foreach (var task in channel.Reader.ReadAllAsync(cancellationToken))
+            {
+                Activity.Current = anchor;
+                yield return await task;
+            }
+
+            await producer;
+            yield break;
+
+            async Task<TOut> RunAndRelease(TIn item)
+            {
+                Activity.Current = anchor;
+                try   { return await selector(item); }
+                finally { sem.Release(); }
+            }
 		}
 
-		public async IAsyncEnumerable<(TIn First, TOther Second)> Zip<TOther>(
+        public async IAsyncEnumerable<(TIn First, TOther Second)> Zip<TOther>(
 			IEnumerable<TOther> other,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)
 		{
-
 			using var otherEnumerator = other.GetEnumerator();
 			await foreach (var item in source.WithCancellation(cancellationToken))
 			{
@@ -56,13 +70,22 @@ public static class AsyncEnumerableExtensions
 			}
 		}
 	}
+
+	extension<TIn>(IEnumerable<TIn> source)
+	{
+		public IAsyncEnumerable<TOut> SelectAwait<TOut>(
+			Func<TIn, ValueTask<TOut>> predicate,
+			int maxConcurrency,
+			CancellationToken cancellationToken = default
+		) => source.ToAsyncEnumerable().SelectAwait(predicate, maxConcurrency, cancellationToken);
+	}
 }
 
 public static class MediaServiceExtensions
 {
 	extension(IMediaService)
 	{
-		public static int RecommendedConcurrency => 50;
+		public static int RecommendedConcurrency => 100;
 	}
 }
 
