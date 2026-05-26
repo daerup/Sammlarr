@@ -1,6 +1,7 @@
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
+using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Media.Trending;
@@ -23,23 +24,27 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 		var settings = await providerConfigRepository.GetAsync(cancellationToken);
-		var watchlistProvider = settings.WatchlistProvider.AsMediaProvider();
 
-		var known = result.Results.Where(r => r.MediaType is not MediaType.Unknown).ToList();
-		var requests = known.Select(r => new ResolveRequest([r.TmdbId], watchlistProvider, BuildHints(r)));
+		var finalItems = new ITrendingMedia[result.Results.Count];
+		var indexed = result.Results.Index().ToList();
 
-		var pipeline = media.IdentifyAsync(requests, cancellationToken).Zip(known, cancellationToken);
-		var items = new List<ITrendingMedia>(known.Count);
-		await foreach (var (outcome, trending) in pipeline)
+		var unresolvable = indexed.Where(x => x.Item.MediaType is MediaType.Unknown).ToList();
+		unresolvable.ForEach(r => finalItems[r.Index] = BuildTrendingMedia(r.Item, Error.From("Unknown media type")));
+
+		var resolvable = indexed.Where(x => x.Item.MediaType is not MediaType.Unknown).ToList();
+		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], settings.WatchlistProvider.AsMediaProvider(), BuildHints(x.Item)));
+		var pipeline = media.IdentifyAsync(requests, cancellationToken);
+
+		await foreach (var (identity, entry) in pipeline.Zip(resolvable, cancellationToken))
 		{
-			items.Add(BuildTrendingMedia(trending, outcome));
+			finalItems[entry.Index] = BuildTrendingMedia(entry.Item, identity);
 		}
-
-		return new TrendingPageResult(items, result.TotalPages);
+		return new TrendingPageResult(finalItems, result.TotalPages);
 	}
 
-	private static Some<ResolutionHints> BuildHints(TmdbTypes.Trending.Result response) =>
-		new(
+	private static Some<ResolutionHints> BuildHints(TmdbTypes.Trending.Result response)
+	{
+		return new Some<ResolutionHints>(
 			new ResolutionHints
 			{
 				Title = response.DisplayTitle,
@@ -47,6 +52,7 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 				MediaType = response.MediaType,
 			}
 		);
+	}
 
 	private ITrendingMedia BuildTrendingMedia(TmdbTypes.Trending.Result response, Result<Identification> outcome)
 	{
@@ -65,7 +71,7 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 				Description = response.Overview,
 				PosterUrl = posterUrl,
 				BackdropUrl = backdropUrl,
-				Rating = (float)response.VoteAverage,
+				Rating = response.VoteAverage == 0 ? null : (float?)response.VoteAverage,
 				ReleaseDate = parsedReleaseDate,
 			};
 		}
