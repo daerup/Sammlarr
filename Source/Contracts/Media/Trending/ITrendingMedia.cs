@@ -8,6 +8,6 @@ public interface ITrendingMedia
 	string Description { get; }
 	string PosterUrl { get; }
 	string BackdropUrl { get; }
-	float Rating { get; }
+	float? Rating { get; }
 	DateTimeOffset ReleaseDate { get; }
 }

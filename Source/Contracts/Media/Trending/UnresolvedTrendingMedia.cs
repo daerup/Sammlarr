@@ -8,6 +8,6 @@ public record UnresolvedTrendingMedia : ITrendingMedia
 	public required string Description { get; init; }
 	public required string PosterUrl { get; init; }
 	public required string BackdropUrl { get; init; }
-	public required float Rating { get; init; }
+	public required float? Rating { get; init; }
 	public required DateTimeOffset ReleaseDate { get; init; }
 }
