@@ -114,7 +114,7 @@ file static class PlexMetadataMappingExtensions
 			Identity = new MediaIdentity(default, BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)),
 			Title = result.Title,
 			Tagline = result.Tagline ?? string.Empty,
-			Summary = result.Summary,
+			Summary = result.Summary ?? string.Empty,
 			PosterUrl = NormalizePlexImageUrl(result.Poster),
 			BackdropUrl = NormalizePlexImageUrl(result.Art),
 			Runtime = TimeSpan.FromMilliseconds(result.Duration),
@@ -130,9 +130,9 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Identity = new MediaIdentity(default, BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)),
-			Title = result.Title,
+			Title = result.Title ?? string.Empty,
 			Tagline = result.Tagline ?? string.Empty,
-			Summary = result.Summary,
+			Summary = result.Summary ?? string.Empty,
 			Seasons = result.SeasonCount ?? 0,
 			Episodes = result.EpisodeCount ?? 0,
 			PosterUrl = NormalizePlexImageUrl(result.Poster),

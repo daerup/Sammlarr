@@ -31,55 +31,36 @@ public class PlexIdConverterTests
 		using var _ = Assert.Multiple();
 		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
 		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains((IExternalMediaId)payload.PlexId);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbId);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.ImdbId!.Value);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TvdbId!.Value);
+		await Assert.That(externals).Contains(payload.PlexId);
+		await Assert.That(externals).Contains(payload.TmdbId);
+		await Assert.That(externals).Contains(payload.ImdbId!.Value);
+		await Assert.That(externals).Contains(payload.TvdbId!.Value);
 	}
 
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsTmdbAndSearchMatches_ReturnsResolvedPlexId()
 	{
 		var payload = CreatePlexByIdPayload(true, true);
-		var searchService = IMediaSearchProvider.Mock();
-		List<IMediaDetail> searchResults =
-		[
-			new MovieDetail
-			{
-				Identity = new MediaIdentity(default, [payload.PlexId]),
-				Title = "match",
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
-				Runtime = TimeSpan.Zero,
-				ReleaseDate = DateOnly.MinValue,
-				Genres = [],
-				Tagline = string.Empty,
-				Summary = string.Empty,
-			},
-		];
-		searchService.SearchAsync(Any(), Any(), Any()).Returns(searchResults);
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
-		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json));
+		var testee = new PlexIdConverter(tmdbApi, CreatePlexApiWithSearch(payload));
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
 		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains((IExternalMediaId)payload.PlexId);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbId);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.ImdbId!.Value);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TvdbId!.Value);
+		await Assert.That(externals).Contains(payload.PlexId);
+		await Assert.That(externals).Contains(payload.TmdbId);
+		await Assert.That(externals).Contains(payload.ImdbId!.Value);
+		await Assert.That(externals).Contains(payload.TvdbId!.Value);
 	}
 
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsTmdbAndSearchHasNoMatch_ReturnsFailed()
 	{
 		var payload = CreatePlexByIdPayload(false, false);
-		var searchService = IMediaSearchProvider.Mock();
-		searchService.SearchAsync(Any(), Any(), Any()).Returns(new List<IMediaDetail>());
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
-		var testee = new PlexIdConverter(tmdbApi, CreatePlexApi(payload.Json));
+		var testee = new PlexIdConverter(tmdbApi, CreatePlexApiWithEmptySearch());
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 		await Assert.That(result.Value).IsTypeOf<None>();
@@ -149,6 +130,53 @@ public class PlexIdConverterTests
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
 		return new PlexApi(plexClient);
+	}
+
+	private static PlexApi CreatePlexApiWithEmptySearch()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(BuildEmptySearchJson());
+		var httpClient = handler.CreateClient(PlexBaseUrl);
+		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credentialStore = ICredentialStore.Mock();
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
+		var plexClient = new PlexClient(httpClient, credentialStore);
+		return new PlexApi(plexClient);
+	}
+
+	private static PlexApi CreatePlexApiWithSearch(PlexByIdPayload payload)
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnRequest(r => r.PathStartsWith("/library/search")).RespondWithJson(BuildSearchJson(payload.PlexId));
+		handler.OnRequest(r => r.PathStartsWith("/library/metadata")).RespondWithJson(payload.Json);
+		var httpClient = handler.CreateClient(PlexBaseUrl);
+		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credentialStore = ICredentialStore.Mock();
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
+		var plexClient = new PlexClient(httpClient, credentialStore);
+		return new PlexApi(plexClient);
+	}
+
+	private static string BuildEmptySearchJson()
+	{
+		var root = new PlexTypes.Search.Root(
+			new PlexTypes.Search.MediaContainer([], "com.plexapp.plugins.library", 1, [new PlexTypes.Search.SearchResult(0, [])])
+		);
+		return JsonSerializer.Serialize(root);
+	}
+
+	private static string BuildSearchJson(PlexId plexId)
+	{
+		var metadata = new PlexTypes.Search.Metadata(plexId.Value, "match", null, null, "movie", 2021, null, null, null, null, null);
+		var root = new PlexTypes.Search.Root(
+			new PlexTypes.Search.MediaContainer(
+				[],
+				"com.plexapp.plugins.library",
+				1,
+				[new PlexTypes.Search.SearchResult(1, [new PlexTypes.Search.NestedSearchResult(metadata)])]
+			)
+		);
+		return JsonSerializer.Serialize(root);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, TmdbId TmdbId, ImdbId? ImdbId, TvdbId? TvdbId);
