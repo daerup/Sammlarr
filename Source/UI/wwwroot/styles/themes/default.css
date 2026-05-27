@@ -3,7 +3,8 @@
  * Customize these CSS variables to create your own theme
  */
 
-:root {
+:root,
+[data-base-color] {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
 
@@ -65,11 +66,12 @@
     --alert-danger-bg: oklch(0.993 0.003 27);
 }
 
-.dark {
+.dark,
+[data-base-color].dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
 
-    --card: oklch(0.2 0 0);
+    --card: oklch(0.173 0 0.9);
     --card-foreground: oklch(0.985 0 0);
 
     --popover: oklch(0.145 0 0);
@@ -87,7 +89,7 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
 
-    --destructive: oklch(0.396 0.141 25.723);
+    --destructive: oklch(0.63 0.25 28.552);
     --destructive-foreground: oklch(0.985 0 0);
 
     --border: oklch(0.269 0 0);
