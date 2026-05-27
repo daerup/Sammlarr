@@ -48,7 +48,7 @@ public class TmdbRecommendationServiceTests
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenMediaTypeUnknown_DropsItem()
+	public async Task GetTrendingAsync_WhenMediaTypeUnknown_ReturnsUnresolvedTrendingMedia()
 	{
 		var json = BuildTrendingJson(id: 7, mediaType: "person", title: "Some Person");
 		var media = new FakeMediaService();
@@ -56,7 +56,9 @@ public class TmdbRecommendationServiceTests
 
 		var result = await testee.GetTrendingAsync(page: 1);
 
-		await Assert.That(result.Items).IsEmpty();
+		await Assert.That(result.Items.Count).IsEqualTo(1);
+		await Assert.That(result.Items[0]).IsTypeOf<UnresolvedTrendingMedia>();
+		await Assert.That(result.Items[0].Title).IsEqualTo("Some Person");
 	}
 
 	[Test]
