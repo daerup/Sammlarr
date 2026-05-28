@@ -1,0 +1,293 @@
+using Contracts;
+using Contracts.Auth;
+using Contracts.Caching;
+using Contracts.Media;
+using Contracts.Media.Convertions;
+using Contracts.Media.Metadata;
+using Contracts.Media.Search;
+using Contracts.Media.Trending;
+using Contracts.Settings;
+using Core.Media;
+using Test.Shared;
+
+namespace Core.Tests.Media;
+
+public class MediaServiceTests
+{
+	private static readonly DateTimeOffset _now = new(2026, 5, 6, 12, 0, 0, TimeSpan.Zero);
+
+	[Test]
+	public async Task IdentifyAsync_YieldsOneResultPerInput()
+	{
+		var first = TmdbId.From("1", MediaType.Movie);
+		var second = TmdbId.From("2", MediaType.Movie);
+		var third = TmdbId.From("3", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any())
+			.Returns([
+				FreshCached(MediaId.From(Guid.NewGuid()), first),
+				FreshCached(MediaId.From(Guid.NewGuid()), second),
+				FreshCached(MediaId.From(Guid.NewGuid()), third),
+			]);
+
+		var results = await testee
+			.IdentifyAsync([
+				new ResolveRequest([first], MediaProvider.Tmdb, new None()),
+				new ResolveRequest([second], MediaProvider.Tmdb, new None()),
+				new ResolveRequest([third], MediaProvider.Tmdb, new None()),
+			])
+			.ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(3);
+		await Assert.That(results.All(r => r is Identification)).IsTrue();
+	}
+
+	[Test]
+	public async Task IdentifyAsync_IssuesSingleBatchedMetadataQuery()
+	{
+		var first = TmdbId.From("10", MediaType.Movie);
+		var second = TmdbId.From("11", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any())
+			.Returns([FreshCached(MediaId.From(Guid.NewGuid()), first), FreshCached(MediaId.From(Guid.NewGuid()), second)]);
+
+		await testee
+			.IdentifyAsync([new ResolveRequest([first], MediaProvider.Tmdb, new None()), new ResolveRequest([second], MediaProvider.Tmdb, new None())])
+			.ToListAsync();
+
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ById_YieldsOneResultPerInput()
+	{
+		var firstId = MediaId.From(Guid.NewGuid());
+		var secondId = MediaId.From(Guid.NewGuid());
+		var firstDetail = BuildDetail(firstId);
+		var secondDetail = BuildDetail(secondId);
+		var (testee, deps) = CreateTestee();
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any()).Returns([new CachedMedia(firstDetail, _now), new CachedMedia(secondDetail, _now)]);
+
+		var results = await testee.GetDetailsAsync([firstId, secondId]).ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(2);
+		await Assert.That(results[0].Value).IsSameReferenceAs(firstDetail);
+		await Assert.That(results[1].Value).IsSameReferenceAs(secondDetail);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ById_WhenMetadataMissing_YieldsError()
+	{
+		var id = MediaId.From(Guid.NewGuid());
+		var (testee, _) = CreateTestee();
+
+		var results = await testee.GetDetailsAsync([id]).ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(1);
+		await Assert.That(results[0] is Error).IsTrue();
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ById_IssuesSingleJoinedReadCall()
+	{
+		var firstId = MediaId.From(Guid.NewGuid());
+		var secondId = MediaId.From(Guid.NewGuid());
+		var (testee, deps) = CreateTestee();
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any())
+			.Returns([new CachedMedia(BuildDetail(firstId), _now), new CachedMedia(BuildDetail(secondId), _now)]);
+
+		await testee.GetDetailsAsync([firstId, secondId]).ToListAsync();
+
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ById_OnMisses_FlushesMetadataUpsertOnceAtEnd()
+	{
+		var firstId = MediaId.From(Guid.NewGuid());
+		var secondId = MediaId.From(Guid.NewGuid());
+		var thirdId = MediaId.From(Guid.NewGuid());
+		var (testee, deps) = CreateTestee();
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any()).Returns([StaleCached(firstId), StaleCached(secondId), StaleCached(thirdId)]);
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => CompleteMovie(ext));
+
+		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
+
+		deps.MetaRepo.UpsertManyAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ByRequest_IdentifiesAndFetches_YieldingMetadataPerRequest()
+	{
+		var firstExternal = TmdbId.From("100", MediaType.Movie);
+		var secondExternal = TmdbId.From("200", MediaType.Movie);
+		var firstId = MediaId.From(Guid.NewGuid());
+		var secondId = MediaId.From(Guid.NewGuid());
+		var firstDetail = BuildDetail(firstId, firstExternal);
+		var secondDetail = BuildDetail(secondId, secondExternal);
+		var (testee, deps) = CreateTestee();
+		deps.MetaRepo.QueryMediaMetadataAsync(Any(), Any(), Any()).Returns([new CachedMedia(firstDetail, _now), new CachedMedia(secondDetail, _now)]);
+
+		var results = await testee
+			.GetDetailsAsync([
+				new ResolveRequest([firstExternal], MediaProvider.Tmdb, new None()),
+				new ResolveRequest([secondExternal], MediaProvider.Tmdb, new None()),
+			])
+			.ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(2);
+		await Assert.That(results[0].Value).IsSameReferenceAs(firstDetail);
+		await Assert.That(results[1].Value).IsSameReferenceAs(secondDetail);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ByRequest_WhenIdentifyFails_YieldsErrorWithoutFetching()
+	{
+		var external = TmdbId.From("999", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.UnresolvedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
+
+		var results = await testee.GetDetailsAsync([new ResolveRequest([external], MediaProvider.Tmdb, new None())]).ToListAsync();
+
+		await Assert.That(results.Count).IsEqualTo(1);
+		await Assert.That(results[0] is Error).IsTrue();
+		deps.MetaRepo.UpsertManyAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveIdentitiesAsync_WhenEmpty_DoesNotWriteToRepository()
+	{
+		var (testee, deps) = CreateTestee();
+
+		var identities = await testee.ResolveIdentitiesAsync([]);
+
+		await Assert.That(identities).IsEmpty();
+		deps.MediaRepo.UpsertManyAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task InvalidateAsync_DelegatesToMetadataRepository()
+	{
+		var ids = new[] { MediaId.From(Guid.NewGuid()), MediaId.From(Guid.NewGuid()) };
+		var (testee, deps) = CreateTestee();
+
+		await testee.InvalidateAsync(ids);
+
+		deps.MetaRepo.RemoveManyAsync(Any(), Any()).WasCalled(Times.Once);
+	}
+
+	private static (IMediaService Testee, Deps Deps) CreateTestee()
+	{
+		var dateTimeProvider = IDateTimeProvider.Mock();
+		dateTimeProvider.Now.Returns(_now);
+		var mediaRepo = IMediaRepository.Mock();
+		var metaRepo = IMediaMetadataRepository.Mock();
+		var search = IMediaSearchProvider.Mock();
+		var unresolvedCache = ITypedMemoryCache<string, bool>.Mock();
+		var session = IMediaQuerySession.Mock();
+		var sessionFactory = IMediaQuerySessionFactory.Mock();
+		sessionFactory.CreateAsync(Any()).Returns(session.Object);
+
+		mediaRepo.FindManyAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
+		mediaRepo.UpsertManyAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
+		mediaRepo.QueryMediaIds(Any<IMediaQuerySession>(), Any<IEnumerable<IExternalMediaId>>()).Returns(Enumerable.Empty<Guid>().AsQueryable());
+		mediaRepo.QueryMediaIds(Any<IMediaQuerySession>(), Any<IEnumerable<MediaId>>()).Returns(Enumerable.Empty<Guid>().AsQueryable());
+		metaRepo.QueryMediaMetadataAsync(Any(), Any(), Any()).Returns(Array.Empty<CachedMedia>());
+
+		var enricher = IMetadataEnricher.Mock();
+		var rating = IMediaRatingService.Mock();
+		var configRepo = IProviderConfigRepository.Mock();
+		configRepo
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					WatchlistProvider = WatchlistProvider.Plex,
+					TrendingProvider = MediaRecommendationProvider.Tmdb,
+					SearchProvider = MediaSearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
+				}
+			);
+
+		var searchIndex = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider>().Register(MediaSearchProvider.Plex, search.Object);
+		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
+			.Register(MediaProvider.Plex, enricher.Object)
+			.Register(MediaProvider.Tmdb, enricher.Object);
+		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
+
+		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object);
+		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
+		var testee = new MediaService(
+			new MediaIdResolver(null, unresolvedCache.Object),
+			metadataResolver,
+			coordinator,
+			mediaRepo.Object,
+			metaRepo.Object,
+			sessionFactory.Object,
+			dateTimeProvider.Object
+		);
+		return (testee, new Deps(mediaRepo, metaRepo, search, unresolvedCache));
+	}
+
+	private record Deps(
+		Mock<IMediaRepository> MediaRepo,
+		Mock<IMediaMetadataRepository> MetaRepo,
+		Mock<IMediaSearchProvider> Search,
+		Mock<ITypedMemoryCache<string, bool>> UnresolvedCache
+	);
+
+	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external) =>
+		new(
+			new UnresolvedMedia
+			{
+				Identity = new MediaIdentity(id, [external]),
+				MediaType = MediaType.Unknown,
+				Title = string.Empty,
+				ReleaseDate = DateOnly.MinValue,
+			},
+			_now
+		);
+
+	private static CachedMedia StaleCached(MediaId id) =>
+		new(
+			new UnresolvedMedia
+			{
+				Identity = new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]),
+				MediaType = MediaType.Unknown,
+				Title = string.Empty,
+				ReleaseDate = DateOnly.MinValue,
+			},
+			null
+		);
+
+	private static MovieDetail BuildDetail(MediaId id, IExternalMediaId? extra = null)
+	{
+		var plex = PlexId.From($"plex-{id}", MediaType.Movie);
+		return new()
+		{
+			Identity = new MediaIdentity(id, extra is null ? [plex] : [plex, extra]),
+			Title = "Test",
+			Tagline = "Tag",
+			Summary = "Summary",
+			PosterUrl = "https://example.com/p.jpg",
+			BackdropUrl = "https://example.com/b.jpg",
+			ReleaseDate = new DateOnly(2024, 1, 1),
+			Genres = ["Action"],
+			Runtime = TimeSpan.FromMinutes(120),
+		};
+	}
+
+	private static MovieDetail CompleteMovie(IExternalMediaId external) =>
+		new()
+		{
+			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [external]),
+			Title = "T",
+			Tagline = "T",
+			Summary = "T",
+			PosterUrl = "https://example.com/p.jpg",
+			BackdropUrl = "https://example.com/b.jpg",
+			ReleaseDate = new DateOnly(2024, 1, 1),
+			Genres = ["Action"],
+			Runtime = TimeSpan.FromMinutes(90),
+		};
+}

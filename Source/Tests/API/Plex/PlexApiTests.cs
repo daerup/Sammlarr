@@ -27,8 +27,8 @@ public class PlexApiTests
 		await Assert.That(results).IsNotEmpty();
 		foreach (var r in results)
 		{
-			await Assert.That(r.Identity.Id).IsEqualTo(default(MediaId));
-			await Assert.That(r.Identity.Externals).Contains((IExternalMediaId)PlexId.From(plexValue, MediaType.Movie));
+			await Assert.That(r.Identity.Id).IsEqualTo(default);
+			await Assert.That(r.Identity.Externals).Contains(PlexId.From(plexValue, MediaType.Movie));
 		}
 	}
 

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<LangVersion>preview</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="TUnit" />
+		<PackageReference Include="TUnit.Assertions" />
+		<PackageReference Include="TUnit.Core" />
+		<PackageReference Include="TUnit.Mocks" />
+		<PackageReference Include="TUnit.Mocks.Http" />
+		<PackageReference Include="Bogus" />
+		<PackageReference Include="Reqnroll.TUnit" />
+		<PackageReference Include="Imposter">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\API\API.csproj" />
+		<ProjectReference Include="..\..\Core\Core.csproj" />
+		<ProjectReference Include="..\..\DB\DB.csproj" />
+		<ProjectReference Include="..\Test.Shared\Test.Shared.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="reqnroll.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="**\**\*.feature">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+</Project>
