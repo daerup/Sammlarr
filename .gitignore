@@ -68,3 +68,5 @@ Results/
 /Source/UI/sammlarr.db-wal
 /Source/.playwright-cli/*
 /Source/.playwright-mcp/*
+
+*.feature.cs

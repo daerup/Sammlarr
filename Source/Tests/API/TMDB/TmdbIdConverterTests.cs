@@ -28,7 +28,7 @@ public class TmdbIdConverterTests
 		using var _ = Assert.Multiple();
 		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
 		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains((IExternalMediaId)tmdbId);
+		await Assert.That(externals).Contains(tmdbId);
 	}
 
 	[Test]
@@ -42,11 +42,11 @@ public class TmdbIdConverterTests
 		using var _ = Assert.Multiple();
 		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
 		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbIds[0]);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TmdbIds[1]);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.PlexId);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.ImdbId);
-		await Assert.That(externals).Contains((IExternalMediaId)payload.TvdbId!.Value);
+		await Assert.That(externals).Contains(payload.TmdbIds[0]);
+		await Assert.That(externals).Contains(payload.TmdbIds[1]);
+		await Assert.That(externals).Contains(payload.PlexId);
+		await Assert.That(externals).Contains(payload.ImdbId);
+		await Assert.That(externals).Contains(payload.TvdbId!.Value);
 	}
 
 	[Test]

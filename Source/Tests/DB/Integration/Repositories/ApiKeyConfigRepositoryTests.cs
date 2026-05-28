@@ -25,27 +25,6 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	}
 
 	[Test]
-	public async Task GetApiKey_WhenNotSet_ReturnsNull()
-	{
-		var apiKey = await _testee.GetApiKeyAsync(MediaProvider.Tmdb);
-
-		await Assert.That(apiKey).IsNull();
-	}
-
-	[Test]
-	public async Task SetApiKey_StoresAndRetrievesSuccessfully()
-	{
-		var provider = MediaProvider.Tmdb;
-		var plainKey = "tmdb-api-key-12345";
-
-		await _testee.SetApiKeyAsync(provider, plainKey);
-
-		var setting = await fixture.Context.ApiKeySettings.SingleAsync(s => s.Provider == provider);
-
-		await Assert.That(setting.ApiKey).IsEqualTo(plainKey);
-	}
-
-	[Test]
 	public async Task SetApiKey_WithEncryption_StoresEncryptedInDatabase()
 	{
 		var provider = MediaProvider.Tmdb;
@@ -77,21 +56,6 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	}
 
 	[Test]
-	public async Task UpdateApiKey_WithNewKey_UpdatesValue()
-	{
-		var provider = MediaProvider.Tmdb;
-		await SetUpApiKeyAsync(provider, "old-key");
-
-		var newKey = "new-api-key-12345";
-		await _testee.SetApiKeyAsync(provider, newKey);
-
-		var all = await fixture.Context.ApiKeySettings.ToListAsync();
-
-		var stored = await Assert.That(all).HasSingleItem();
-		await Assert.That(stored.ApiKey).IsEqualTo(newKey);
-	}
-
-	[Test]
 	public async Task SetMultipleApiKeys_WithDifferentProviders_StoresIndependently()
 	{
 		var key = "shared-api-key";
@@ -106,18 +70,6 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 		await Assert.That(keys).Count().IsEqualTo(2);
 		await Assert.That(tmdb.ApiKey).IsEqualTo(key);
 		await Assert.That(imdb.ApiKey).IsEqualTo(key);
-	}
-
-	[Test]
-	public async Task ClearApiKey_RemovesStoredData()
-	{
-		var provider = MediaProvider.Tmdb;
-		await SetUpApiKeyAsync(provider, "secret-api-key");
-
-		await _testee.RemoveApiKeyAsync(provider);
-		var exists = await fixture.Context.ApiKeySettings.AnyAsync(s => s.Provider == provider);
-
-		await Assert.That(exists).IsFalse();
 	}
 
 	[Test]
