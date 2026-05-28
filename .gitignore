@@ -58,15 +58,16 @@ nunit-*.xml
 *.sln.DotSettings.user
 Results/
 **/Benchmark/Old/
+.idea
 
 # We vibin
-/Source/.claude/settings.local.json
+.claude/settings.local.json
 
 # Local SQLite databases
-/Source/UI/sammlarr.db
-/Source/UI/sammlarr.db-shm
-/Source/UI/sammlarr.db-wal
-/Source/.playwright-cli/*
-/Source/.playwright-mcp/*
+UI/sammlarr.db
+UI/sammlarr.db-shm
+UI/sammlarr.db-wal
+.playwright-cli/*
+.playwright-mcp/*
 
 *.feature.cs
