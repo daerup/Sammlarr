@@ -62,6 +62,7 @@ Results/
 
 # We vibin
 .claude/settings.local.json
+.agents/skills
 
 # Local SQLite databases
 UI/sammlarr.db
