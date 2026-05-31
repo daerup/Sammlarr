@@ -9,10 +9,6 @@ namespace API.Plex;
 
 internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 {
-	private const string AddToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/addToWatchlist?ratingKey={0}";
-	private const string RemoveToWatchlistEndpoint = "https://vod.provider.plex.tv/actions/removeFromWatchlist?ratingKey={0}";
-	private const string WatchlistEndpoint = "https://discover.provider.plex.tv/library/sections/watchlist/all";
-
 	public async IAsyncEnumerable<IExternalMediaId> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var (items, pages) = await FetchPageAsync(1, cancellationToken);
@@ -48,7 +44,7 @@ internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-            yield return await PushAsync(AddToWatchlistEndpoint, id, cancellationToken);
+            yield return await PushAsync(PlexEndpoints.AddToWatchlist, id, cancellationToken);
 		}
 	}
 
@@ -60,7 +56,7 @@ internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-            yield return await PushAsync(RemoveToWatchlistEndpoint, id, cancellationToken);
+            yield return await PushAsync(PlexEndpoints.RemoveFromWatchlist, id, cancellationToken);
 		}
 	}
 	private async Task<WatchlistPushResult> PushAsync(
@@ -85,7 +81,7 @@ internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 	{
 		const string containerStartHeader = "X-Plex-Container-Start";
 		var offset = (page - 1) * PlexClient.ContainerSize;
-		var response = await plexClient.SendAsync(HttpMethod.Get, WatchlistEndpoint, cancellationToken, null, (containerStartHeader, offset.ToString()));
+		var response = await plexClient.SendAsync(HttpMethod.Get, PlexEndpoints.Watchlist, cancellationToken, null, (containerStartHeader, offset.ToString()));
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result =
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)

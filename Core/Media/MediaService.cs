@@ -146,7 +146,12 @@ internal sealed class MediaService(
         MediaResolutionBuffer buffer
     )
     {
-        var match = request.Candidates.Select(cached.GetValueOrDefault).FirstOrDefault(r => r is not null);
+        var matches = request.Candidates.Select(cached.GetValueOrDefault).Where(r => r is not null).Select(r => r!).DistinctBy(r => r.Detail.Identity.Id).ToList();
+        if (matches.Count > 1)
+        {
+            throw new MediaIdentityConflictException([.. matches.Select(m => m.Detail.Identity.Id)], [.. request.Candidates]);
+        }
+        var match = matches.FirstOrDefault();
         if (match is null || match.Detail.Identity.Externals.All(e => e.Source != request.Target))
         {
             return new None();
@@ -222,7 +227,7 @@ internal sealed class MediaService(
         }
         catch (Exception ex)
         {
-            return Error.From(ex);
+            return cached?.Detail is { } stale ? stale : Error.From(ex);
         }
     }
 

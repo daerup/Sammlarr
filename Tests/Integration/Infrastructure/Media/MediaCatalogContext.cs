@@ -4,28 +4,30 @@ namespace Integration.Tests.Infrastructure.Media;
 
 public sealed class MediaCatalogContext
 {
-	private int _nextId = 1;
-	private readonly Dictionary<string, RegisteredMedia> _entries = new();
+	private int _nextOrdinal = 1;
+	private readonly Dictionary<string, CatalogEntry> _entries = new();
 
-	public RegisteredMedia this[string key] => _entries[key];
+	public CatalogEntry this[string key] => _entries[key];
 
-	public void RegisterMovie(string title) => Add(title, "movie");
+	public IEnumerable<CatalogEntry> Entries => _entries.Values;
 
-	public void RegisterPerson(string name) => Add(name, "person");
+	public bool Contains(string key) => _entries.ContainsKey(key);
 
-	private void Add(string key, string tmdbMediaType)
+	public CatalogEntry Register(string key, MediaType type, IReadOnlyDictionary<MediaProvider, string>? declaredIds = null, int? releaseYear = null)
 	{
-		_entries[key] = new RegisteredMedia(_nextId++, key, tmdbMediaType);
+		var entry = new CatalogEntry(key, key, type, releaseYear, _nextOrdinal++, declaredIds);
+		_entries[key] = entry;
+		return entry;
 	}
+
+	public CatalogEntry GetOrRegister(string key, MediaType type) => _entries.TryGetValue(key, out var existing) ? existing : Register(key, type);
 }
 
-public sealed record RegisteredMedia(int TmdbId, string Title, string TmdbMediaType)
-{
-	public MediaType MediaType =>
-		TmdbMediaType switch
-		{
-			"movie" => MediaType.Movie,
-			"tv" => MediaType.Show,
-			_ => MediaType.Unknown,
-		};
-}
+public sealed record CatalogEntry(
+	string Key,
+	string Title,
+	MediaType MediaType,
+	int? ReleaseYear,
+	int Ordinal,
+	IReadOnlyDictionary<MediaProvider, string>? DeclaredIds = null
+);

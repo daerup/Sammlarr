@@ -18,8 +18,7 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 	public async Task<TrendingPageResult> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartTrendingLoad(page);
-		const string endpoint = "trending/all/week?page={0}";
-		var formattedEndpoint = string.Format(endpoint, page);
+		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");

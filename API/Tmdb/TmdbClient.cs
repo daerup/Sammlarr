@@ -11,7 +11,7 @@ internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigR
 	{
 		try
 		{
-			var response = await SendWithKeyAsync(HttpMethod.Get, "configuration", apiKey, null, cancellationToken);
+			var response = await SendWithKeyAsync(HttpMethod.Get, TmdbEndpoints.Configuration, apiKey, null, cancellationToken);
 			return response.IsSuccessStatusCode;
 		}
 		catch

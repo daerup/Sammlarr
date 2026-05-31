@@ -9,11 +9,6 @@ namespace API.Plex;
 
 internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 {
-	private const string RatingKeyMetadataEndpoint = "https://metadata.provider.plex.tv/library/metadata/{0}?includeGuids=1&includeExternalMedia=1";
-
-	private const string SerachMetadataEndpoint =
-		"https://discover.provider.plex.tv/library/search?searchTypes={0}&searchProviders=discover&includeMetadata=1&query={1}";
-
 	public async Task<IMediaDetail> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		if (mediaId is not PlexId plexId)
@@ -31,7 +26,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 	)
 	{
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
-		var endpoint = string.Format(CultureInfo.InvariantCulture, SerachMetadataEndpoint, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title));
+		var endpoint = string.Format(CultureInfo.InvariantCulture, PlexEndpoints.Search, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Search.Root>(stream, cancellationToken: cancellationToken))!;
@@ -55,7 +50,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 
 	private async Task<IMediaDetail> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
-		var endpoint = string.Format(RatingKeyMetadataEndpoint, Uri.EscapeDataString(plexId.Value));
+		var endpoint = string.Format(PlexEndpoints.RatingKeyMetadata, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
