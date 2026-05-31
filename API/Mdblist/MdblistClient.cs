@@ -11,7 +11,7 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyC
 	{
 		try
 		{
-			var response = await SendWithKeyAsync(HttpMethod.Get, "user", apiKey, null, cancellationToken);
+			var response = await SendWithKeyAsync(HttpMethod.Get, MdblistEndpoints.User, apiKey, null, cancellationToken);
 			return response.IsSuccessStatusCode;
 		}
 		catch

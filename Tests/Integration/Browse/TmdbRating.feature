@@ -2,18 +2,23 @@ Feature: TMDB rating retrieval
 
   Background:
     Given a TMDB account with API key "test-key"
-    And the movie "Fight Club"
+    And the following media:
+      | media      | ids                     |
+      | Fight Club | tmdb:550, plex:550 |
 
   Scenario: TMDB responds with vote data delivers a rating
-    Given the TMDB API returns vote average 8.4 and vote count 23000 for "Fight Club"
+    Given tmdb has:
+      | media      | vote_average | vote_count |
+      | Fight Club | 8.4          | 23000      |
     When I fetch ratings for "Fight Club"
-    Then the result contains 1 rating
-    And the rating source is TMDB
-    And the normalized value is 8.4
-    And the vote count is 23000
+    Then the ratings are:
+      | source | value | votes |
+      | tmdb   | 8.4   | 23000 |
 
   Scenario: Vote average of zero returns no ratings
-    Given the TMDB API returns vote average 0 and vote count 0 for "Fight Club"
+    Given tmdb has:
+      | media      | vote_average | vote_count |
+      | Fight Club | 0            | 0          |
     When I fetch ratings for "Fight Club"
     Then the result is empty
 
@@ -22,6 +27,6 @@ Feature: TMDB rating retrieval
     Then the result is empty
 
   Scenario: Missing vote data returns no ratings
-    Given the TMDB API returns no vote data for "Fight Club"
+    Given TMDB returns no vote data for "Fight Club"
     When I fetch ratings for "Fight Club"
     Then the result is empty

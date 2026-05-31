@@ -16,10 +16,6 @@ internal class PlexOAuthService(
 	IDateTimeProvider dateTimeProvider
 ) : IOAuthService
 {
-	private const string PlexAuthAppUrl = "https://app.plex.tv/auth";
-	private const string PlexPinEndpoint = "https://plex.tv/api/v2/pins";
-	private const string PlexUserEndpoint = "https://plex.tv/api/v2/user";
-
 	public async Task<string> GetOAuthUrl(string forwardUrl, CancellationToken cancellationToken = default)
 	{
 		var credential = await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken);
@@ -33,7 +29,7 @@ internal class PlexOAuthService(
 
 	public async Task<AuthPinResponse> CallbackAsync(int pinId, Guid clientId, CancellationToken cancellationToken = default)
 	{
-		using var request = new HttpRequestMessage(HttpMethod.Get, $"{PlexPinEndpoint}/{pinId}");
+		using var request = new HttpRequestMessage(HttpMethod.Get, $"{PlexEndpoints.Pins}/{pinId}");
 		request.Headers.AddClientId(clientId);
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
 		response.EnsureSuccessStatusCode();
@@ -51,7 +47,7 @@ internal class PlexOAuthService(
 
 	public async Task<AuthUserInfo?> GetLoggedInUser()
 	{
-		var response = await plexClient.SendAsync(HttpMethod.Get, PlexUserEndpoint);
+		var response = await plexClient.SendAsync(HttpMethod.Get, PlexEndpoints.User);
 		if (!response.IsSuccessStatusCode)
 		{
 			return null;
@@ -84,7 +80,7 @@ internal class PlexOAuthService(
 	private async Task<string> AuthenticateAsync(string forwardUrl, CancellationToken cancellationToken = default)
 	{
 		var clientId = Guid.NewGuid();
-		using var request = new HttpRequestMessage(HttpMethod.Post, PlexPinEndpoint);
+		using var request = new HttpRequestMessage(HttpMethod.Post, PlexEndpoints.Pins);
 		request.Headers.AddClientId(clientId);
 		request.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["strong"] = "true" });
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
@@ -101,7 +97,7 @@ internal class PlexOAuthService(
 			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
 			["forwardUrl"] = formattedForwardUrl,
 		};
-		var authUrl = QueryHelpers.AddQueryString(PlexAuthAppUrl, queryParams).Replace("?", "#?");
+		var authUrl = QueryHelpers.AddQueryString(PlexEndpoints.AuthApp, queryParams).Replace("?", "#?");
 		return authUrl;
 	}
 }

@@ -1,88 +1,66 @@
+using API.Tmdb;
+using Contracts.Media;
 using Contracts.Media.Trending;
-using Integration.Tests.Infrastructure;
+using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
+using Integration.Tests.Infrastructure.Media.Tmdb;
+using Reqnroll.Assist;
 
 namespace Integration.Tests.Browse;
 
 [Binding]
-public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenarioContext sammlarr, MediaCatalogContext catalog)
+public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenarioContext sammlarr, MediaCatalogContext catalog, TmdbContext tmdb)
 {
-	[Given("the TMDB trending endpoint includes {string}")]
-	public void GivenTrendingEndpointIncludes(string key) => ctx.TrendingItems.Add(catalog[key]);
+	[Given("TMDB trending page {int} includes:")]
+	public void GivenTrendingPageIncludes(int page, DataTable table)
+	{
+		var items = table
+			.CreateSet<TrendingInputRow>()
+			.Select(row => catalog.GetOrRegister(row.Title!, StepTransformers.ParseMediaKind(row.Type ?? "movie")))
+			.Select(entry => tmdb.Versions.GetValueOrDefault(entry.Key) ?? MediaVersionResolver.Resolve(entry, new MediaRow()))
+			.ToList();
+		sammlarr.HttpHandler.RespondWithJsonForUrl($"{TmdbEndpoints.PageParam}={page}", TmdbStub.TrendingJson(items, page));
+	}
 
 	[When("I request trending page {int}")]
-	public async Task WhenRequestTrendingPage(int page)
+	public async Task WhenRequestTrendingPage(int page) =>
+		ctx.TrendingPage = await sammlarr.ResolveKeyed<IMediaRecommendationService>(MediaRecommendationProvider.Tmdb).GetTrendingAsync(page: page);
+
+	[Then("the trending results are:")]
+	public async Task ThenTrendingResultsAre(DataTable table)
 	{
-		sammlarr.HttpHandler.RespondWithJson(BuildTrendingJson(ctx.TrendingItems));
-		ctx.Result = await sammlarr.ResolveKeyed<IMediaRecommendationService>(MediaRecommendationProvider.Tmdb).GetTrendingAsync(page: page);
-	}
-
-	[Then(@"the result contains {int} item\(s\)")]
-	public async Task ThenResultContainsItems(int count) => await Assert.That(ctx.Result!.Items.Count).IsEqualTo(count);
-
-	[Then("item {int} is a resolved TrendingMedia with title {string}")]
-	public async Task ThenItemIsResolvedTrendingMedia(int position, string title)
-	{
-		var item = ctx.Result!.Items[position - 1];
-		await Assert.That(item).IsTypeOf<TrendingMedia>();
-		await Assert.That(item.Title).IsEqualTo(title);
-	}
-
-	[Then("item {int} is an UnresolvedTrendingMedia with title {string}")]
-	public async Task ThenItemIsUnresolvedTrendingMedia(int position, string title)
-	{
-		var item = ctx.Result!.Items[position - 1];
-		await Assert.That(item).IsTypeOf<UnresolvedTrendingMedia>();
-		await Assert.That(item.Title).IsEqualTo(title);
-	}
-
-	[Then("item {int} has a rating")]
-	public async Task ThenItemHasRating(int position)
-	{
-		var item = ctx.Result!.Items[position - 1];
-		await Assert.That(item.Rating).IsNotNull();
-		await Assert.That(item.Rating!.Value).IsGreaterThan(0f);
-	}
-
-	[Then("item {int} has a poster URL")]
-	public async Task ThenItemHasPosterUrl(int position) => await Assert.That(ctx.Result!.Items[position - 1].PosterUrl).IsNotEmpty();
-
-	[Then("item {int} has a description")]
-	public async Task ThenItemHasDescription(int position) => await Assert.That(ctx.Result!.Items[position - 1].Description).IsNotEmpty();
-
-	private static string BuildTrendingJson(IReadOnlyList<RegisteredMedia> items)
-	{
-		var results = string.Join(
-			",",
-			items.Select(item =>
-				$$"""
-				{
-				  "adult": false,
-				  "backdrop_path": "/backdrop.jpg",
-				  "id": {{item.TmdbId}},
-				  "title": "{{item.Title}}",
-				  "original_title": "{{item.Title}}",
-				  "overview": "An overview",
-				  "poster_path": "/poster.jpg",
-				  "media_type": "{{item.TmdbMediaType}}",
-				  "original_language": "en",
-				  "genre_ids": [28],
-				  "popularity": 1.5,
-				  "release_date": "2024-01-15",
-				  "video": false,
-				  "vote_average": 7.5,
-				  "vote_count": 100
-				}
-				"""
-			)
-		);
-		return $$"""
+		var expected = table.CreateSet<TrendingRow>().ToList();
+		var items = ctx.TrendingPage!.Items;
+		await Assert.That(items.Count).IsEqualTo(expected.Count);
+		foreach (var (row, item) in expected.Zip(items))
+		{
+			if (!string.IsNullOrEmpty(row.Title))
+				await Assert.That(item.Title).IsEqualTo(row.Title);
+			switch (row.Kind?.Trim().ToLowerInvariant())
 			{
-			  "page": 1,
-			  "results": [{{results}}],
-			  "total_pages": 1,
-			  "total_results": {{items.Count}}
+				case "resolved":
+					await Assert.That(item).IsTypeOf<TrendingMedia>();
+					break;
+				case "unresolved":
+					await Assert.That(item).IsTypeOf<UnresolvedTrendingMedia>();
+					break;
+				case null or "":
+					break;
+				default:
+					throw new InvalidOperationException($"Unknown trending kind '{row.Kind}'. Use 'resolved' or 'unresolved'.");
 			}
-			""";
+		}
+	}
+
+	private sealed class TrendingInputRow
+	{
+		public string? Title { get; set; }
+		public string? Type { get; set; }
+	}
+
+	private sealed class TrendingRow
+	{
+		public string? Title { get; set; }
+		public string? Kind { get; set; }
 	}
 }

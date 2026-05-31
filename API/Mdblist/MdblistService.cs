@@ -15,7 +15,6 @@ namespace API.Mdblist;
 
 internal class MdblistService(MdblistClient client, IMediaService media, IProviderConfigRepository configRepository) : IFeedService
 {
-    private const string ListItemsEndpoint = "lists/{0}/items?limit={1}&offset={2}";
     private const int PageSize = 1000;
     private const string HasMoreHeader = "X-Has-More";
 
@@ -57,7 +56,7 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 
     private async Task<(MdblistTypes.ListItems.Root Page, bool HasMore)> FetchPageAsync(string identifier, int offset, CancellationToken cancellationToken)
     {
-        var endpoint = string.Format(ListItemsEndpoint, identifier, PageSize, offset);
+        var endpoint = string.Format(MdblistEndpoints.ListItems, identifier, PageSize, offset);
         using var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
         if (response.StatusCode == HttpStatusCode.NotFound)
         {

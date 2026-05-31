@@ -8,7 +8,7 @@ internal class TmdbApi(TmdbClient tmdbClient)
 {
 	public async Task<TmdbTypes.Details?> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default)
 	{
-		var endpoint = $"{ToTmdbMediaType(id.Type)}/{id.Value}";
+		var endpoint = string.Format(TmdbEndpoints.Detail, ToTmdbMediaType(id.Type), id.Value);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Details>(stream);
@@ -21,7 +21,7 @@ internal class TmdbApi(TmdbClient tmdbClient)
 
 	public async Task<TmdbTypes.FindItem?> FindByImdbIdAsync(ImdbId id, CancellationToken cancellationToken = default)
 	{
-		var endpoint = $"find/{id.Value}?external_source=imdb_id";
+		var endpoint = string.Format(TmdbEndpoints.Find, id.Value);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Find>(stream);
@@ -36,8 +36,8 @@ internal class TmdbApi(TmdbClient tmdbClient)
 	private static string ToTmdbMediaType(MediaType mediaType) =>
 		mediaType switch
 		{
-			MediaType.Movie => "movie",
-			MediaType.Show => "tv",
+			MediaType.Movie => TmdbEndpoints.MovieType,
+			MediaType.Show => TmdbEndpoints.ShowType,
 			_ => throw new ArgumentOutOfRangeException(nameof(mediaType), $"Unsupported media type: {mediaType}"),
 		};
 }
