@@ -17,6 +17,7 @@ public sealed class MediaRow
 	public int? VoteCount { get; set; }
 	public string? Origin { get; set; }
 	public string? Rating { get; set; }
+	public string? Store { get; set; }
 }
 
 public sealed record ResolvedVersion(

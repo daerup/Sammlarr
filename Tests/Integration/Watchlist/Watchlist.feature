@@ -2,13 +2,9 @@ Feature: Watchlist
 
   Background:
     Given the following media:
-      | media      | ids                    |
-      | Fight Club | tmdb:550, plex:550     |
-      | Inception  | tmdb:27205, plex:27205 |
-    And media in db:
-      | media      |
-      | Fight Club |
-      | Inception  |
+      | media      | ids                    | store |
+      | Fight Club | tmdb:550, plex:550     | db    |
+      | Inception  | tmdb:27205, plex:27205 | db    |
 
   Scenario: Adding media with Manual origin persists the entry
     When I add "Inception" to the watchlist with Manual origin

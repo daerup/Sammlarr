@@ -28,10 +28,10 @@ public class PlexSteps(MediaCatalogContext catalog, SammlarrScenarioContext samm
 
 	private ResolvedVersion Resolve(MediaRow row)
 	{
-		var media = row.Media!;
-		if (!catalog.Contains(media))
-			catalog.Register(media, row.Type is null ? MediaType.Movie : StepTransformers.ParseMediaKind(row.Type), row.Ids);
-		return MediaVersionResolver.Resolve(catalog[media], row);
+		if (row.Ids is null)
+			return MediaVersionResolver.Resolve(catalog[row.Media!], row);
+		var type = row.Type is null ? MediaType.Movie : StepTransformers.ParseMediaKind(row.Type);
+		return MediaVersionResolver.Resolve(new CatalogEntry(row.Media!, row.Media!, type, null, row.Ids), row);
 	}
 
 	private static ResolvedVersion ToSearchHit(PlexSearchRow row)

@@ -42,14 +42,11 @@ Feature: Media metadata enrichment
 
   Scenario: Without an id for a provider the chain cannot enrich or rate from it
     Given additional media:
-      | media      | ids      |
-      | The Matrix | plex:603 |
-    And media in db:
+      | media      | ids      | store |
+      | The Matrix | plex:603 | db    |
+    And plex has:
       | media      |
       | The Matrix |
-    And plex has:
-      | media      | ids      |
-      | The Matrix | plex:603 |
     When I get details for "The Matrix"
     Then the detail is:
       | title      | rating |
