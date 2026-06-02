@@ -6,7 +6,9 @@ internal static class MediaVersionResolver
 {
 	public static ResolvedVersion Resolve(CatalogEntry entry, MediaRow overlay)
 	{
-		var ids = new Dictionary<MediaProvider, string>(entry.DeclaredIds ?? MediaIdDefaults.ForOrdinal(entry.Ordinal));
+		var ids = new Dictionary<MediaProvider, string>(
+			entry.DeclaredIds ?? throw new InvalidOperationException($"Media '{entry.Key}' has no declared ids.")
+		);
 		if (overlay.Ids is not null)
 			foreach (var (provider, id) in overlay.Ids)
 				ids[provider] = id;

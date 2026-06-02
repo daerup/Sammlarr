@@ -2,11 +2,8 @@ Feature: Blacklist management
 
   Background:
     Given the following media:
-      | media      | ids                |
-      | Fight Club | tmdb:550, plex:550 |
-    And media in db:
-      | media      |
-      | Fight Club |
+      | media      | ids                | store |
+      | Fight Club | tmdb:550, plex:550 | db    |
 
   Scenario: Adding a movie to the blacklist persists the entry
     When I add "Fight Club" to the blacklist
@@ -28,11 +25,8 @@ Feature: Blacklist management
 
   Scenario: Getting blacklist IDs returns IDs of all blacklisted items
     Given additional media:
-      | media     | ids                    |
-      | Inception | tmdb:27205, plex:27205 |
-    And media in db:
-      | media     |
-      | Inception |
+      | media     | ids                    | store |
+      | Inception | tmdb:27205, plex:27205 | db    |
     And the following are blacklisted:
       | media      |
       | Fight Club |

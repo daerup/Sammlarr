@@ -14,12 +14,17 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 	[Given("TMDB trending page {int} includes:")]
 	public void GivenTrendingPageIncludes(int page, DataTable table)
 	{
-		var items = table
-			.CreateSet<TrendingInputRow>()
-			.Select(row => catalog.GetOrRegister(row.Title!, StepTransformers.ParseMediaKind(row.Type ?? "movie")))
-			.Select(entry => tmdb.Versions.GetValueOrDefault(entry.Key) ?? MediaVersionResolver.Resolve(entry, new MediaRow()))
-			.ToList();
+		var items = table.CreateSet<TrendingInputRow>().Select(Versioned).ToList();
 		sammlarr.HttpHandler.RespondWithJsonForUrl($"{TmdbEndpoints.PageParam}={page}", TmdbStub.TrendingJson(items, page));
+	}
+
+	private ResolvedVersion Versioned(TrendingInputRow row)
+	{
+		var title = row.Title!;
+		if (catalog.Contains(title))
+			return tmdb.Versions.GetValueOrDefault(title) ?? MediaVersionResolver.Resolve(catalog[title], new MediaRow());
+		var type = StepTransformers.ParseMediaKind(row.Type ?? "movie");
+		return new ResolvedVersion(new Dictionary<MediaProvider, string>(), type, MediaIdDefaults.DefaultYear, title, null, null, null);
 	}
 
 	[When("I request trending page {int}")]

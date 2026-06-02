@@ -2,11 +2,8 @@ Feature: Watchlist outbox
 
   Background:
     Given the following media:
-      | media     | ids                    |
-      | Inception | tmdb:27205, plex:27205 |
-    And media in db:
-      | media     |
-      | Inception |
+      | media     | ids                    | store |
+      | Inception | tmdb:27205, plex:27205 | db    |
 
   Scenario: Adding a new item enqueues an Add operation
     When I add "Inception" to the watchlist
@@ -50,13 +47,9 @@ Feature: Watchlist outbox
 
   Scenario: Mixed batch partitions uncancels, pushes, and no-ops correctly
     Given additional media:
-      | media      | ids                |
-      | Fight Club | tmdb:550, plex:550 |
-      | The Matrix | tmdb:603, plex:603 |
-    And media in db:
-      | media      |
-      | Fight Club |
-      | The Matrix |
+      | media      | ids                | store |
+      | Fight Club | tmdb:550, plex:550 | db    |
+      | The Matrix | tmdb:603, plex:603 | db    |
     And the following are on the watchlist:
       | media      |
       | Inception  |
