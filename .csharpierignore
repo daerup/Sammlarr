@@ -1,0 +1,7 @@
+Contracts/Result.cs
+Contracts/Option.cs
+Contracts/Processing/QueryResult.cs
+Contracts/Feed/RunSchedule.cs
+Contracts/Watchlist/WatchlistItemProvenance.cs
+Contracts/Watchlist/Sync/WatchlistSyncResult.cs
+Contracts/Watchlist/Sync/WatchlistSyncTrigger.cs
