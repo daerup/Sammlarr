@@ -1,6 +1,6 @@
 namespace Contracts.Watchlist.Sync;
 
-public union WatchlistSyncTrigger(ManualTrigger manual);
+public union WatchlistSyncTrigger(ManualTrigger);
 
 public readonly record struct ManualTrigger
 {

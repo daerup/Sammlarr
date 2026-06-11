@@ -12,4 +12,4 @@ public readonly record struct Truncated<T>(T Item);
 
 public readonly record struct Culled<T>(T Item);
 
-public union QueryResult<T>(T Item, Bypassed<T> bypassed, Truncated<T> truncated, Culled<T> culled);
+public union QueryResult<T>(T, Bypassed<T>, Truncated<T>, Culled<T>);

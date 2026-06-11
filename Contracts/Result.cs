@@ -16,4 +16,4 @@ public readonly record struct Error
 	public static Error From(Exception exception) => new(exception.Message, exception);
 }
 
-public union Result<T>(T value, Error error) where T : notnull;
+public union Result<T>(T, Error) where T : notnull;

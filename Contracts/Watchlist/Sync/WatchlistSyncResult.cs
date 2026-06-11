@@ -1,10 +1,10 @@
 namespace Contracts.Watchlist.Sync;
 
 public union WatchlistSyncResult(
-	WatchlistSyncSuccess success,
-	WatchlistSyncUnchanged unchanged,
-	WatchlistSyncAlreadyRunning alreadyRunning,
-	WatchlistSyncRemoteFailed remoteFailed
+	WatchlistSyncSuccess,
+	WatchlistSyncUnchanged,
+	WatchlistSyncAlreadyRunning,
+	WatchlistSyncRemoteFailed
 );
 
 public readonly record struct WatchlistSyncSuccess(int Inserted, int Confirmed, int HardDeleted, int PushedAdds, int PushedRemoves, int RemoteFailures)

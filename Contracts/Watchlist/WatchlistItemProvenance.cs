@@ -8,4 +8,5 @@ public readonly record struct FeedOrigin(Guid FeedId, string FeedName);
 
 public readonly record struct OrphanedOrigin(string FormerFeedName);
 
-public union WatchlistItemProvenance(RemoteOrigin remote, ManualOrigin manual, FeedOrigin feed, OrphanedOrigin orphaned);
+public union WatchlistItemProvenance(RemoteOrigin, ManualOrigin, FeedOrigin, OrphanedOrigin);
+
