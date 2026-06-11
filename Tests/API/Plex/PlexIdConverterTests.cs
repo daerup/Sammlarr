@@ -159,9 +159,7 @@ public class PlexIdConverterTests
 
 	private static string BuildEmptySearchJson()
 	{
-		var root = new PlexTypes.Search.Root(
-			new PlexTypes.Search.MediaContainer([], "com.plexapp.plugins.library", 1, [new PlexTypes.Search.SearchResult(0, [])])
-		);
+		var root = new PlexTypes.Search.Root(new PlexTypes.Search.MediaContainer([], "com.plexapp.plugins.library", 1, [new PlexTypes.Search.SearchResult(0, [])]));
 		return JsonSerializer.Serialize(root);
 	}
 

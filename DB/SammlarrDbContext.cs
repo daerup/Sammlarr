@@ -74,7 +74,7 @@ internal sealed class SammlarrDbContext : DbContext
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
-        _modelConfigurations.ToList().ForEach(builder => builder.Apply(modelBuilder));
+		_modelConfigurations.ToList().ForEach(builder => builder.Apply(modelBuilder));
 	}
 
 	public override int SaveChanges()

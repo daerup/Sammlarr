@@ -70,13 +70,7 @@ public class FilterEvaluatorTests
 				Group(
 					FilterOperator.And,
 					[Number("Year", FilterPredicateOperator.GreaterOrEqual, 2020)],
-					[
-						Group(
-							FilterOperator.Or,
-							String("Genre", FilterPredicateOperator.Equals, "Action"),
-							String("Genre", FilterPredicateOperator.Equals, "Comedy")
-						),
-					]
+					[Group(FilterOperator.Or, String("Genre", FilterPredicateOperator.Equals, "Action"), String("Genre", FilterPredicateOperator.Equals, "Comedy"))]
 				)
 			)
 		);

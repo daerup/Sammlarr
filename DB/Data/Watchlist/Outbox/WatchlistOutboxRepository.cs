@@ -10,10 +10,9 @@ internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> db
 	public async Task<IReadOnlyList<WatchlistOperation>> GetAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = await (
-			from outboxEntry in ctx.WatchlistOutbox.AsNoTracking()
-			select new { MediaIdValue = outboxEntry.Media.Id, outboxEntry.Kind }
-		).ToListAsync(cancellationToken);
+		var rows = await (from outboxEntry in ctx.WatchlistOutbox.AsNoTracking() select new { MediaIdValue = outboxEntry.Media.Id, outboxEntry.Kind }).ToListAsync(
+			cancellationToken
+		);
 		return rows.Select(row => new WatchlistOperation(MediaId.From(row.MediaIdValue), row.Kind)).ToList();
 	}
 

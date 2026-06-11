@@ -11,10 +11,7 @@ public class PlexAuthSteps(PlexAuthScenarioContext ctx, SammlarrScenarioContext 
 {
 	[Given("plex reports the signed-in user {string}")]
 	public void GivenPlexUser(string name) =>
-		sammlarr.HttpHandler.RespondWithJsonForUrl(
-			PlexEndpoints.UserPath,
-			$$"""{ "username": "{{name}}", "title": "{{name}}", "friendlyName": "{{name}}" }"""
-		);
+		sammlarr.HttpHandler.RespondWithJsonForUrl(PlexEndpoints.UserPath, $$"""{ "username": "{{name}}", "title": "{{name}}", "friendlyName": "{{name}}" }""");
 
 	[Given("plex rejects the user request")]
 	public void GivenPlexRejects() => sammlarr.HttpHandler.RespondWithStatusForUrl(PlexEndpoints.UserPath, HttpStatusCode.Unauthorized);

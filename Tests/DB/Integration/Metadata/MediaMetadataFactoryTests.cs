@@ -169,13 +169,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var plexId = PlexId.From("plex-420", MediaType.Movie);
 		var imdbId = ImdbId.From("tt420", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId, imdbId]);
-		var entity = await PersistAsync(
-			CreateMovieDetails(mediaId, [plexId, imdbId]) with
-			{
-				Ratings = [new MediaRating(RatingSource.Tmdb, 7.5f, 500)],
-			},
-			mediaId
-		);
+		var entity = await PersistAsync(CreateMovieDetails(mediaId, [plexId, imdbId]) with { Ratings = [new MediaRating(RatingSource.Tmdb, 7.5f, 500)] }, mediaId);
 
 		var result = _testee.ToDetailResult(entity, new MediaIdentity(mediaId, [plexId, imdbId]));
 

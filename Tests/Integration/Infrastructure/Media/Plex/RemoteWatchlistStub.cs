@@ -25,8 +25,7 @@ internal static class RemoteWatchlistStub
 	private static string RatingKey(HttpRequestMessage req) =>
 		HttpUtility.ParseQueryString(req.RequestUri?.Query ?? string.Empty)[PlexEndpoints.RatingKeyParam] ?? string.Empty;
 
-	private static HttpResponseMessage Json(string json) =>
-		new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+	private static HttpResponseMessage Json(string json) => new(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
 
 	private static string WatchlistJson(RemoteWatchlistState state)
 	{

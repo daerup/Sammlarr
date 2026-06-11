@@ -21,9 +21,7 @@ public class TelemetryModule : IServiceModule
 		var telemetryOptions = ResolveTelemetryOptions(services);
 		var otlpEnabled = ShouldUseOtlp(telemetryOptions, Environment.GetEnvironmentVariable(OtlpEndpointEnvVar));
 		var environment =
-			Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-			?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-			?? Environments.Development;
+			Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? Environments.Development;
 		var version = typeof(TelemetryModule).Assembly.GetName().Version?.ToString() ?? "0.0.0";
 
 		services.AddLogging(b =>

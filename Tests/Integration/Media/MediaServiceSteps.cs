@@ -65,7 +65,14 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	{
 		Optional<ResolutionHints> hints = new None();
 		if (title is not null)
-			hints = Some.Of(new ResolutionHints { Title = title, Year = 0, MediaType = MediaType.Movie });
+			hints = Some.Of(
+				new ResolutionHints
+				{
+					Title = title,
+					Year = 0,
+					MediaType = MediaType.Movie,
+				}
+			);
 		return new ResolveRequest(candidates, target, hints);
 	}
 

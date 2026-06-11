@@ -56,10 +56,7 @@ internal class MediaMetadataRepository(IDbContextFactory<SammlarrDbContext> dbCo
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rawIds = deduped.Select(i => i.MediaId.Value).ToList();
-		var existing = await ctx
-			.MediaMetadata.Include(m => m.Ratings)
-			.Where(m => rawIds.Contains(m.MediaId))
-			.ToDictionaryAsync(m => m.MediaId, cancellationToken);
+		var existing = await ctx.MediaMetadata.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
 		foreach (var item in deduped)
 		{

@@ -135,9 +135,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 		await Assert.That(storedKeys).Count().IsEqualTo(1);
 		await Assert
 			.That(storedKeys.Single())
-			.Satisfies(c =>
-				c is not null && c.WatchlistProvider == authProvider && c.AccessToken == newToken && c.ClientId == clientId2 && c.ExpiresAt == expiresAt
-			);
+			.Satisfies(c => c is not null && c.WatchlistProvider == authProvider && c.AccessToken == newToken && c.ClientId == clientId2 && c.ExpiresAt == expiresAt);
 	}
 
 	[Test]

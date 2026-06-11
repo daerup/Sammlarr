@@ -38,7 +38,15 @@ public class PlexSteps(MediaCatalogContext catalog, SammlarrScenarioContext samm
 	{
 		var plexId = row.Id!.Contains(':') ? row.Id!.Split(':', 2)[1].Trim() : row.Id!.Trim();
 		var type = row.Type is null ? MediaType.Movie : StepTransformers.ParseMediaKind(row.Type);
-		return new ResolvedVersion(new Dictionary<MediaProvider, string> { [MediaProvider.Plex] = plexId }, type, MediaIdDefaults.DefaultYear, row.Media!, null, null, null);
+		return new ResolvedVersion(
+			new Dictionary<MediaProvider, string> { [MediaProvider.Plex] = plexId },
+			type,
+			MediaIdDefaults.DefaultYear,
+			row.Media!,
+			null,
+			null,
+			null
+		);
 	}
 }
 

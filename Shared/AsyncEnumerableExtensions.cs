@@ -19,42 +19,54 @@ public static class AsyncEnumerableExtensions
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)
 		{
-            var anchor = Activity.Current;
-            var channel = Channel.CreateUnbounded<Task<TOut>>();
-            var sem = new SemaphoreSlim(maxConcurrency, maxConcurrency);
+			var anchor = Activity.Current;
+			var channel = Channel.CreateUnbounded<Task<TOut>>();
+			var sem = new SemaphoreSlim(maxConcurrency, maxConcurrency);
 
-            var producer = Task.Run(async () =>
-            {
-                Activity.Current = anchor;
-                try
-                {
-                    await foreach (var item in source.WithCancellation(cancellationToken))
-                    {
-                        await sem.WaitAsync(cancellationToken);
-                        await channel.Writer.WriteAsync(RunAndRelease(item), cancellationToken);
-                    }
-                }
-                finally { channel.Writer.Complete(); }
-            }, cancellationToken);
+			var producer = Task.Run(
+				async () =>
+				{
+					Activity.Current = anchor;
+					try
+					{
+						await foreach (var item in source.WithCancellation(cancellationToken))
+						{
+							await sem.WaitAsync(cancellationToken);
+							await channel.Writer.WriteAsync(RunAndRelease(item), cancellationToken);
+						}
+					}
+					finally
+					{
+						channel.Writer.Complete();
+					}
+				},
+				cancellationToken
+			);
 
-            await foreach (var task in channel.Reader.ReadAllAsync(cancellationToken))
-            {
-                Activity.Current = anchor;
-                yield return await task;
-            }
+			await foreach (var task in channel.Reader.ReadAllAsync(cancellationToken))
+			{
+				Activity.Current = anchor;
+				yield return await task;
+			}
 
-            await producer;
-            yield break;
+			await producer;
+			yield break;
 
-            async Task<TOut> RunAndRelease(TIn item)
-            {
-                Activity.Current = anchor;
-                try   { return await selector(item); }
-                finally { sem.Release(); }
-            }
+			async Task<TOut> RunAndRelease(TIn item)
+			{
+				Activity.Current = anchor;
+				try
+				{
+					return await selector(item);
+				}
+				finally
+				{
+					sem.Release();
+				}
+			}
 		}
 
-        public async IAsyncEnumerable<(TIn First, TOther Second)> Zip<TOther>(
+		public async IAsyncEnumerable<(TIn First, TOther Second)> Zip<TOther>(
 			IEnumerable<TOther> other,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)
@@ -73,11 +85,8 @@ public static class AsyncEnumerableExtensions
 
 	extension<TIn>(IEnumerable<TIn> source)
 	{
-		public IAsyncEnumerable<TOut> SelectAwait<TOut>(
-			Func<TIn, ValueTask<TOut>> predicate,
-			int maxConcurrency,
-			CancellationToken cancellationToken = default
-		) => source.ToAsyncEnumerable().SelectAwait(predicate, maxConcurrency, cancellationToken);
+		public IAsyncEnumerable<TOut> SelectAwait<TOut>(Func<TIn, ValueTask<TOut>> predicate, int maxConcurrency, CancellationToken cancellationToken = default) =>
+			source.ToAsyncEnumerable().SelectAwait(predicate, maxConcurrency, cancellationToken);
 	}
 }
 
