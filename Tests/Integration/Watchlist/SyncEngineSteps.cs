@@ -31,8 +31,7 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	}
 
 	[Given("the remote watchlist is unavailable")]
-	public void GivenRemoteUnavailable() =>
-		sammlarr.HttpHandler.RespondWithStatusForUrl(PlexEndpoints.WatchlistPath, HttpStatusCode.InternalServerError);
+	public void GivenRemoteUnavailable() => sammlarr.HttpHandler.RespondWithStatusForUrl(PlexEndpoints.WatchlistPath, HttpStatusCode.InternalServerError);
 
 	[Given("the watchlist provider rejects pushes")]
 	public void GivenProviderRejectsPushes()

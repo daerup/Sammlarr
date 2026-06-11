@@ -12,4 +12,3 @@ public interface IWatchlistProvider
 }
 
 public readonly record struct WatchlistPushResult(IExternalMediaId ExternalId, bool Success);
-

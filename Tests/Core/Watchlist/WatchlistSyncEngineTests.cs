@@ -314,11 +314,7 @@ public class WatchlistSyncEngineTests
 				.GetWatchlistAsync(Any())
 				.Returns(
 					remoteEnumerable
-						?? (
-							remoteThrows is not null
-								? ThrowAsync<IExternalMediaId>(remoteThrows)
-								: AsAsyncEnumerable((remote ?? []).Select(r => r.External).ToList())
-						)
+						?? (remoteThrows is not null ? ThrowAsync<IExternalMediaId>(remoteThrows) : AsAsyncEnumerable((remote ?? []).Select(r => r.External).ToList()))
 				);
 			var addExternals = ExternalsFor(outbox, externalsByMediaId, WatchlistOperationKind.Add);
 			var removeExternals = ExternalsFor(outbox, externalsByMediaId, WatchlistOperationKind.Remove);

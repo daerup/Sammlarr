@@ -8,18 +8,14 @@ internal static class MediaQueries
 {
 	extension(IQueryable<ExternalMediaIdEntity> source)
 	{
-
-        public IQueryable<ExternalMediaIdEntity> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
-
-    }
+		public IQueryable<ExternalMediaIdEntity> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
+	}
 
 	extension(SammlarrDbContext ctx)
 	{
-
-        public IQueryable<MediaEntity> MediaMatchingAny(IEnumerable<IExternalMediaId> mediaIds) =>
+		public IQueryable<MediaEntity> MediaMatchingAny(IEnumerable<IExternalMediaId> mediaIds) =>
 			ctx.ExternalMediaIds.WhereMatchingAny(mediaIds).Select(e => e.Media).Distinct();
-
-    }
+	}
 
 	private static readonly MethodInfo ContainsMethod = typeof(Enumerable)
 		.GetMethods()

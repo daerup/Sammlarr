@@ -40,10 +40,7 @@ public class WatchlistManagementSteps(SammlarrScenarioContext sammlarr, LocalMed
 
 	[When("I add to the watchlist:")]
 	public Task WhenAddMany(DataTable table) =>
-		Service.AddToWatchlistAsync(
-			[.. table.CreateSet<MediaRow>().Select(row => local.MediaIds[row.Media!])],
-			new WatchlistItemProvenance(new ManualOrigin())
-		);
+		Service.AddToWatchlistAsync([.. table.CreateSet<MediaRow>().Select(row => local.MediaIds[row.Media!])], new WatchlistItemProvenance(new ManualOrigin()));
 
 	[When("I remove {string} from the watchlist")]
 	public Task WhenRemove(string key) => Service.RemoveFromWatchlistAsync([local.MediaIds[key]]);

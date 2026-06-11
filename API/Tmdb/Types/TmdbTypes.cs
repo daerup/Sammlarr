@@ -94,8 +94,7 @@ internal static class TmdbTypes
 	)
 	{
 		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
-		public string DisplayOriginalTitle =>
-			OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
+		public string DisplayOriginalTitle => OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
 		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
 	}
 }

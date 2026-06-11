@@ -44,7 +44,7 @@ internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-            yield return await PushAsync(PlexEndpoints.AddToWatchlist, id, cancellationToken);
+			yield return await PushAsync(PlexEndpoints.AddToWatchlist, id, cancellationToken);
 		}
 	}
 
@@ -56,25 +56,22 @@ internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-            yield return await PushAsync(PlexEndpoints.RemoveFromWatchlist, id, cancellationToken);
+			yield return await PushAsync(PlexEndpoints.RemoveFromWatchlist, id, cancellationToken);
 		}
 	}
-	private async Task<WatchlistPushResult> PushAsync(
-        string endpoint,
-		IExternalMediaId id,
-        CancellationToken cancellationToken
-	)
+
+	private async Task<WatchlistPushResult> PushAsync(string endpoint, IExternalMediaId id, CancellationToken cancellationToken)
 	{
-        var formattedEndpoint = string.Format(endpoint, Uri.EscapeDataString(id.Value));
-        try
-        {
-            using var response = await plexClient.SendAsync(HttpMethod.Put, formattedEndpoint, cancellationToken, new StringContent(string.Empty));
-            return new WatchlistPushResult(id, response.IsSuccessStatusCode);
-        }
-        catch (Exception)
-        {
-            return new WatchlistPushResult(id, false);
-        }
+		var formattedEndpoint = string.Format(endpoint, Uri.EscapeDataString(id.Value));
+		try
+		{
+			using var response = await plexClient.SendAsync(HttpMethod.Put, formattedEndpoint, cancellationToken, new StringContent(string.Empty));
+			return new WatchlistPushResult(id, response.IsSuccessStatusCode);
+		}
+		catch (Exception)
+		{
+			return new WatchlistPushResult(id, false);
+		}
 	}
 
 	private async Task<(List<IExternalMediaId>, int)> FetchPageAsync(int page, CancellationToken cancellationToken)

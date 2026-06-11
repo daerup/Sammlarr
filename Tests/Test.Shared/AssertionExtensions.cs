@@ -12,9 +12,7 @@ public static class AssertionExtensions
 		public async Task Multiple<TMapped>(Func<TValue, TMapped> selector, Func<TMapped, Task> multiple)
 		{
 			var valueTuple = await assertion.Context.GetAsync();
-			var mapped = selector(
-				valueTuple.Value ?? throw valueTuple.Exception ?? throw new AssertionException("Assertion failed without value or exception.")
-			);
+			var mapped = selector(valueTuple.Value ?? throw valueTuple.Exception ?? throw new AssertionException("Assertion failed without value or exception."));
 			using var _ = Assert.Multiple();
 			await multiple(mapped);
 		}

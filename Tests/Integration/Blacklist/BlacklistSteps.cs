@@ -29,8 +29,7 @@ public class BlacklistSteps(BlacklistScenarioContext ctx, SammlarrScenarioContex
 	public async Task WhenGetBlacklistIds() => ctx.Ids = await sammlarr.Resolve<IBlacklistService>().GetBlacklistIdsAsync();
 
 	[When("I get the blacklist items")]
-	public async Task WhenGetBlacklistItems() =>
-		ctx.Items = await sammlarr.Resolve<IBlacklistService>().GetBlacklistItems().Select(i => i.Detail).ToListAsync();
+	public async Task WhenGetBlacklistItems() => ctx.Items = await sammlarr.Resolve<IBlacklistService>().GetBlacklistItems().Select(i => i.Detail).ToListAsync();
 
 	[Then("the blacklist items are:")]
 	public Task ThenItemsAre(DataTable table) => MediaDetailAssertions.AssertItemsAsync(ctx.Items!, table);

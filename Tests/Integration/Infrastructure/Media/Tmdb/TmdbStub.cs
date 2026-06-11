@@ -10,7 +10,10 @@ internal static class TmdbStub
 	public static void Detail(HttpStub http, ResolvedVersion v, double voteAverage = 0, int voteCount = 0, bool hasVoteData = true)
 	{
 		var tmdbId = v.Ids.GetValueOrDefault(MediaProvider.Tmdb, "0");
-		http.RespondWithJsonForUrl(string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, tmdbId), DetailJson(tmdbId, v, voteAverage, voteCount, hasVoteData));
+		http.RespondWithJsonForUrl(
+			string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, tmdbId),
+			DetailJson(tmdbId, v, voteAverage, voteCount, hasVoteData)
+		);
 	}
 
 	public static string TrendingJson(IReadOnlyList<ResolvedVersion> items, int page)

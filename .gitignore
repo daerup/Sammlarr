@@ -63,6 +63,7 @@ Results/
 # We vibin
 .claude/settings.local.json
 .agents/skills
+.mcp.json
 
 # Local SQLite databases
 UI/sammlarr.db
@@ -72,3 +73,5 @@ UI/sammlarr.db-wal
 .playwright-mcp/*
 
 *.feature.cs
+
+.husky/_/

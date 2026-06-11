@@ -91,6 +91,5 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 			_ => null,
 		};
 
-	private static bool ContainsAnyCandidate(IReadOnlyList<IExternalMediaId> externals, List<IExternalMediaId> candidates) =>
-		candidates.Any(externals.Contains);
+	private static bool ContainsAnyCandidate(IReadOnlyList<IExternalMediaId> externals, List<IExternalMediaId> candidates) => candidates.Any(externals.Contains);
 }
