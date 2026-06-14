@@ -93,6 +93,91 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(entry.SourceFeedId).IsNull();
 	}
 
+	[Test]
+	public async Task CreateFeedAsync_PersistsAllFields()
+	{
+		var createData = new FeedCreateData
+		{
+			IsEnabled = true,
+			Provider = FeedProvider.Mdblist,
+			Strategy = FeedAddStrategy.Replace,
+			Identifier = "top-250",
+			Schedule = SyncMode.From("0 0 9 * * *"),
+		};
+
+		await _testee.CreateFeedAsync("Top 250", createData);
+
+		var feed = (await _testee.GetFeedsAsync()).Single();
+		await Assert.That(feed.Name).IsEqualTo("Top 250");
+		await Assert.That(feed.Identifier).IsEqualTo("top-250");
+		await Assert.That(feed.Provider).IsEqualTo(FeedProvider.Mdblist);
+		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Replace);
+		await Assert.That(feed.Enabled).IsTrue();
+		await Assert.That(feed.Schedule.ToString()).IsEqualTo("0 0 9 * * *");
+	}
+
+	[Test]
+	public async Task GetFeedByIdAsync_WhenFeedExists_ReturnsProjectedFeed()
+	{
+		var id = await SeedFeedAsync("Watchlist", "my-watchlist", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+
+		var feed = await _testee.GetFeedByIdAsync(id);
+
+		await Assert.That(feed).IsNotNull();
+		await Assert.That(feed!.Name).IsEqualTo("Watchlist");
+		await Assert.That(feed.Identifier).IsEqualTo("my-watchlist");
+		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Append);
+		await Assert.That(feed.Enabled).IsTrue();
+	}
+
+	[Test]
+	public async Task GetFeedByIdAsync_WhenFeedDoesNotExist_ReturnsNull()
+	{
+		var feed = await _testee.GetFeedByIdAsync(Guid.NewGuid());
+
+		await Assert.That(feed).IsNull();
+	}
+
+	[Test]
+	public async Task UpdateFeedAsync_WhenFeedExists_ChangesAllFields()
+	{
+		var id = await SeedFeedAsync("Old Name", "old-id", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
+		var updateData = new FeedUpdateData
+		{
+			Name = "New Name",
+			IsEnabled = false,
+			Provider = FeedProvider.Mdblist,
+			Strategy = FeedAddStrategy.Replace,
+			Identifier = "new-id",
+			Schedule = new SyncMode(new Manual()),
+		};
+
+		await _testee.UpdateFeedAsync(id, updateData);
+
+		var feed = await _testee.GetFeedByIdAsync(id);
+		await Assert.That(feed!.Name).IsEqualTo("New Name");
+		await Assert.That(feed.Identifier).IsEqualTo("new-id");
+		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Replace);
+		await Assert.That(feed.Enabled).IsFalse();
+		await Assert.That(feed.Schedule.ToString()).IsEqualTo("manual");
+	}
+
+	[Test]
+	public async Task UpdateFeedAsync_WhenFeedDoesNotExist_Throws()
+	{
+		var updateData = new FeedUpdateData
+		{
+			Name = "Ghost",
+			IsEnabled = true,
+			Provider = FeedProvider.Mdblist,
+			Strategy = FeedAddStrategy.Append,
+			Identifier = "ghost",
+			Schedule = new SyncMode(new Manual()),
+		};
+
+		await Assert.That(async () => await _testee.UpdateFeedAsync(Guid.NewGuid(), updateData)).Throws<InvalidOperationException>();
+	}
+
 	private async Task<Guid> SeedFeedAsync(string name, string identifier, DateTimeOffset createdAt)
 	{
 		var entity = new FeedEntity

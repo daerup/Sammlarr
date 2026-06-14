@@ -79,13 +79,29 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	[When("I invalidate {string}")]
 	public async Task WhenInvalidate(string key) => await Service.InvalidateAsync([local.MediaIds[key]]);
 
+	[When("I invalidate {string} and {string}")]
+	public async Task WhenInvalidateMany(string first, string second) => await Service.InvalidateAsync([local.MediaIds[first], local.MediaIds[second]]);
+
+	[When("I get details for:")]
+	public async Task WhenGetDetailsMany(DataTable table)
+	{
+		var keys = table.Rows.Select(row => row["media"]).ToList();
+		var results = await Service.GetDetailsAsync([.. keys.Select(key => local.MediaIds[key])]).ToListAsync();
+		ctx.DetailsByKey.Clear();
+		foreach (var (key, result) in keys.Zip(results))
+			ctx.DetailsByKey[key] = result is IMediaDetail detail ? detail : null;
+	}
+
+	[Then("the detail title for {string} is {string}")]
+	public async Task ThenDetailTitleFor(string key, string title) => await Assert.That(ctx.DetailsByKey[key]!.Title).IsEqualTo(title);
+
 	[Then("the detail title is {string}")]
 	public async Task ThenDetailTitle(string title) => await Assert.That(ctx.Detail!.Title).IsEqualTo(title);
 
 	[Then("the detail is:")]
 	public async Task ThenDetailIs(DataTable table)
 	{
-		var row = table.CreateSet<MediaRow>().Single();
+		var row = table.CreateSet<DetailRow>().Single();
 		var detail = ctx.Detail!;
 		if (row.Title is { } title)
 			await Assert.That(detail.Title).IsEqualTo(title);
@@ -117,39 +133,44 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 		await Assert.That(metadata.LastFetchedAt).IsEqualTo(Cells.Date(fetched)!.Value);
 	}
 
-	[Then("no id is resolved")]
-	public async Task ThenNoIdResolved() => await Assert.That(ctx.Identification).IsNull();
-
-	[Then("the matching id is {string}")]
-	public async Task ThenMatchingId(string id)
+	[Then("the resolution returns:")]
+	public async Task ThenResolutionReturns(DataTable table)
 	{
-		await Assert.That(ctx.Identification).IsNotNull();
-		var expected = ParseId(id);
-		await Assert.That(ctx.Identification!.TargetExternal.Source).IsEqualTo(expected.Source);
-		await Assert.That(ctx.Identification!.TargetExternal.Value).IsEqualTo(expected.Value);
+		var row = table.CreateSet<ResolutionRow>().Single();
+
+		if (row.ResolvedId is { } resolvedId)
+		{
+			await Assert.That(ctx.Identification).IsNotNull();
+			var expected = ParseId(resolvedId);
+			await Assert.That(ctx.Identification!.TargetExternal.Source).IsEqualTo(expected.Source);
+			await Assert.That(ctx.Identification!.TargetExternal.Value).IsEqualTo(expected.Value);
+		}
+
+		if (row.StoredIds is { Count: > 0 } storedIds)
+			await AssertStoredAsync(storedIds);
 	}
 
-	[Then("they resolve to one media")]
-	public async Task ThenResolveToOneMedia()
-	{
-		await Assert.That(ctx.Identifications!).IsNotEmpty();
-		await Assert.That(ctx.Identifications!.Select(identification => identification!.Id).Distinct().Count()).IsEqualTo(1);
-	}
+	[Then("the resolution is empty")]
+	public async Task ThenResolutionEmpty() => await Assert.That(ctx.Identification).IsNull();
 
-	[Then("the id {string} is stored")]
-	public async Task ThenIdStored(string id)
+	[Then("the stored ids are {string}")]
+	public async Task ThenStoredIdsAre(string ids) => await AssertStoredAsync([.. ids.Split(',').Select(token => token.Trim())]);
+
+	private async Task AssertStoredAsync(IReadOnlyList<string> tokens)
 	{
 		sammlarr.DbContext.ChangeTracker.Clear();
-		var external = ParseId(id);
-		var exists = await sammlarr.DbContext.ExternalMediaIds.AnyAsync(e => e.Source == external.Source && e.Id == external.Value);
-		await Assert.That(exists).IsTrue();
+		foreach (var token in tokens)
+		{
+			var external = ParseId(token);
+			var exists = await sammlarr.DbContext.ExternalMediaIds.AnyAsync(e => e.Source == external.Source && e.Id == external.Value);
+			await Assert.That(exists).IsTrue();
+		}
 	}
 
-	[Then("the media count is {int}")]
-	public async Task ThenMediaCount(int count)
+	private sealed class ResolutionRow
 	{
-		sammlarr.DbContext.ChangeTracker.Clear();
-		await Assert.That(await sammlarr.DbContext.Media.CountAsync()).IsEqualTo(count);
+		public string? ResolvedId { get; set; }
+		public IReadOnlyList<string>? StoredIds { get; set; }
 	}
 
 	private static IExternalMediaId ParseId(string token)
@@ -165,10 +186,28 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 		public string? To { get; set; }
 	}
 
+	private sealed class DetailRow
+	{
+		public string? Title { get; set; }
+		public string? Summary { get; set; }
+		public IReadOnlyList<string>? Genres { get; set; }
+		public string? Rating { get; set; }
+	}
+
+	private sealed class CachedAssertRow
+	{
+		public string? Media { get; set; }
+		public string? Title { get; set; }
+		public string? Summary { get; set; }
+		public IReadOnlyList<string>? Genres { get; set; }
+		public string? Rating { get; set; }
+		public string? Fetched { get; set; }
+	}
+
 	[Then("media is cached as:")]
 	public async Task ThenCachedAs(DataTable table)
 	{
-		foreach (var row in table.CreateSet<MediaRow>())
+		foreach (var row in table.CreateSet<CachedAssertRow>())
 		{
 			sammlarr.DbContext.ChangeTracker.Clear();
 			var mediaId = local.MediaIds[row.Media!].Value;

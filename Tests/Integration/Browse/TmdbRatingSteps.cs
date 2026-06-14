@@ -14,7 +14,7 @@ public class TmdbRatingSteps(TmdbRatingScenarioContext ctx, SammlarrScenarioCont
 	public async Task WhenFetchRatings(string title)
 	{
 		var entry = catalog[title];
-		var resolved = tmdb.Versions.GetValueOrDefault(title) ?? MediaVersionResolver.Resolve(entry, new MediaRow());
+		var resolved = tmdb.Versions.GetValueOrDefault(title) ?? MediaVersionResolver.Build(entry);
 		var tmdbId = resolved.Ids.GetValueOrDefault(MediaProvider.Tmdb, "0");
 		ctx.Ratings = await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(TmdbId.From(tmdbId, entry.MediaType));
 	}

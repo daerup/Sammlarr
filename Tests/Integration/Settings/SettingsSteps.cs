@@ -3,6 +3,8 @@ using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Watchlist;
 using Integration.Tests.Infrastructure.Hosting;
+using Integration.Tests.Infrastructure.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Integration.Tests.Settings;
 
@@ -46,6 +48,10 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 	public async Task WhenRequestTmdbRatings(int movieId) =>
 		ctx.Ratings = await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(TmdbId.From(movieId.ToString(), MediaType.Movie));
 
+	[Given("the TMDB API is unreachable")]
+	public void GivenTmdbUnreachable() =>
+		sammlarr.HttpHandler.RespondForUrl(TestUrls.TmdbApi, _ => throw new HttpRequestException("The TMDB API is unreachable."));
+
 	[When("I verify the {word} API key {string}")]
 	public async Task WhenVerifyKey(string provider, string apiKey) =>
 		ctx.KeyValid = await sammlarr.ResolveKeyed<IApiKeyValidator>(Enum.Parse<MediaProvider>(provider, ignoreCase: true)).ValidateApiKeyAsync(apiKey);
@@ -77,4 +83,12 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 
 	[Then("the Plex push succeeds")]
 	public async Task ThenPlexPushSucceeds() => await Assert.That(ctx.PlexPushResult!.Value.Success).IsTrue();
+
+	[Then("no TMDB ratings remain cached")]
+	public async Task ThenNoTmdbRatingsCached()
+	{
+		sammlarr.DbContext.ChangeTracker.Clear();
+		var any = await sammlarr.DbContext.MediaRatings.AsNoTracking().AnyAsync(r => r.Source == RatingSource.Tmdb);
+		await Assert.That(any).IsFalse();
+	}
 }

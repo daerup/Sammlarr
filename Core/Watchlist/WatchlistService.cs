@@ -40,7 +40,7 @@ internal class WatchlistService(
 
 	public async Task AddToWatchlistAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds as IReadOnlyCollection<MediaId> ?? mediaIds.ToList();
+		var ids = mediaIds.ToList();
 		if (ids.Count == 0)
 		{
 			return;
@@ -62,7 +62,7 @@ internal class WatchlistService(
 
 	public async Task RemoveFromWatchlistAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds as IReadOnlyCollection<MediaId> ?? mediaIds.ToList();
+		var ids = mediaIds.ToList();
 		if (ids.Count == 0)
 		{
 			return;

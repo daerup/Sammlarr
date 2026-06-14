@@ -1,7 +1,7 @@
 using Contracts.Media;
 using Contracts.Media.Search;
 
-namespace Integration.Tests.Feed;
+namespace Integration.Tests.Feeds;
 
 public sealed class FeedRegistration
 {

@@ -5,6 +5,7 @@ using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Tmdb;
 using Reqnroll.Assist;
+using Reqnroll.Assist.Attributes;
 
 namespace Integration.Tests.Browse;
 
@@ -18,18 +19,25 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 		sammlarr.HttpHandler.RespondWithJsonForUrl($"{TmdbEndpoints.PageParam}={page}", TmdbStub.TrendingJson(items, page));
 	}
 
+	[Given("TMDB trending page {int} is empty")]
+	public void GivenTrendingPageEmpty(int page) =>
+		sammlarr.HttpHandler.RespondWithJsonForUrl($"{TmdbEndpoints.PageParam}={page}", TmdbStub.TrendingJson([], page));
+
 	private ResolvedVersion Versioned(TrendingInputRow row)
 	{
-		var title = row.Title!;
-		if (catalog.Contains(title))
-			return tmdb.Versions.GetValueOrDefault(title) ?? MediaVersionResolver.Resolve(catalog[title], new MediaRow());
+		var key = row.Key!;
+		if (catalog.Contains(key))
+			return tmdb.Versions.GetValueOrDefault(key) ?? MediaVersionResolver.Build(catalog[key]);
 		var type = StepTransformers.ParseMediaKind(row.Type ?? "movie");
-		return new ResolvedVersion(new Dictionary<MediaProvider, string>(), type, MediaIdDefaults.DefaultYear, title, null, null, null);
+		return new ResolvedVersion(new Dictionary<MediaProvider, string>(), type, MediaIdDefaults.DefaultYear, key, null, null, null);
 	}
 
 	[When("I request trending page {int}")]
 	public async Task WhenRequestTrendingPage(int page) =>
 		ctx.TrendingPage = await sammlarr.ResolveKeyed<IMediaRecommendationService>(MediaRecommendationProvider.Tmdb).GetTrendingAsync(page: page);
+
+	[Then("the trending results are empty")]
+	public async Task ThenTrendingResultsEmpty() => await Assert.That(ctx.TrendingPage!.Items).IsEmpty();
 
 	[Then("the trending results are:")]
 	public async Task ThenTrendingResultsAre(DataTable table)
@@ -54,12 +62,22 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 				default:
 					throw new InvalidOperationException($"Unknown trending kind '{row.Kind}'. Use 'resolved' or 'unresolved'.");
 			}
+
+			if (row.Ids is { Count: > 0 } ids)
+			{
+				foreach (var token in ids)
+				{
+					var (provider, value) = MediaProviders.ParseToken(token);
+					await Assert.That(item.Externals.Any(external => external.Source == provider && external.Value == value)).IsTrue();
+				}
+			}
 		}
 	}
 
 	private sealed class TrendingInputRow
 	{
-		public string? Title { get; set; }
+		[TableAliases("^#$")]
+		public string? Key { get; set; }
 		public string? Type { get; set; }
 	}
 
@@ -67,5 +85,6 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 	{
 		public string? Title { get; set; }
 		public string? Kind { get; set; }
+		public IReadOnlyList<string>? Ids { get; set; }
 	}
 }

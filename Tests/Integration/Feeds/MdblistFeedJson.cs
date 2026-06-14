@@ -1,7 +1,7 @@
 using Contracts.Media;
 using Integration.Tests.Infrastructure.Media;
 
-namespace Integration.Tests.Feed;
+namespace Integration.Tests.Feeds;
 
 internal static class MdblistFeedJson
 {
