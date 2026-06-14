@@ -23,6 +23,11 @@ Feature: Provider credentials
       And I look up the TMDB API key
       Then no TMDB API key is stored
 
+    Scenario: Clearing a key that was never stored is safe
+      When I clear the TMDB API key
+      And I look up the TMDB API key
+      Then no TMDB API key is stored
+
   Rule: A key is verified against the provider before it is trusted
 
     Scenario: TMDB rejects a key it does not recognise
@@ -45,6 +50,11 @@ Feature: Provider credentials
       When I verify the MdbList API key "valid-mdblist-key"
       Then the MdbList key is accepted
 
+    Scenario: Verifying a key fails gracefully when the provider is unreachable
+      Given the TMDB API is unreachable
+      When I verify the TMDB API key "any-key"
+      Then the TMDB key is rejected
+
   Rule: Providers stay inert until their credential is configured
 
     Scenario: TMDB ratings are unavailable without a key
@@ -65,3 +75,21 @@ Feature: Provider credentials
       Given a Plex account with token "plex-access-token"
       When I add Plex item "plex-100" to the watchlist
       Then the Plex push succeeds
+
+  Rule: Clearing a provider key purges data sourced from it
+
+    Scenario: Clearing the TMDB key removes its cached ratings
+      Given a Plex account with token "plex-token"
+      And a TMDB account with API key "valid-tmdb-key"
+      And the library knows:
+        | #          | ids                |
+        | Fight Club | tmdb:550, plex:550 |
+      And Plex holds:
+        | #          | with ids of |
+        | Fight Club | tmdb, plex  |
+      And TMDB holds:
+        | #          | with ids of | vote_average | vote_count |
+        | Fight Club | tmdb        | 8.4          | 23000      |
+      When I get details for "Fight Club"
+      And I clear the TMDB API key
+      Then no TMDB ratings remain cached

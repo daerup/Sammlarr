@@ -9,4 +9,5 @@ public sealed class MediaServiceContext
 	public IMediaDetail? Detail { get; set; }
 	public Identification? Identification { get; set; }
 	public IReadOnlyList<Identification?>? Identifications { get; set; }
+	public Dictionary<string, IMediaDetail?> DetailsByKey { get; } = new();
 }

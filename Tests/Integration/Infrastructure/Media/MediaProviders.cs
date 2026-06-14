@@ -18,4 +18,19 @@ internal static class MediaProviders
 		}
 		throw new ArgumentException($"Unknown MediaProvider token '{raw}'.");
 	}
+
+	public static (MediaProvider Provider, string Value) ParseToken(string token)
+	{
+		var parts = token.Split(':', 2);
+		if (parts.Length != 2)
+			throw new InvalidOperationException($"Id token '{token}' must be written as 'provider:value'.");
+		return (Parse(parts[0].Trim()), parts[1].Trim());
+	}
+
+	public static IReadOnlyList<MediaProvider> ParseList(IReadOnlyList<string>? tokens)
+	{
+		if (tokens is null || tokens.Count == 0)
+			throw new InvalidOperationException("A 'providers' column listing at least one provider is required.");
+		return [.. tokens.Select(Parse)];
+	}
 }

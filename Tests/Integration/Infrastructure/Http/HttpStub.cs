@@ -22,12 +22,8 @@ internal sealed class HttpStub : HttpMessageHandler
 	public void RespondForUrl(string urlContains, Func<HttpRequestMessage, HttpResponseMessage> responder) =>
 		_urlResponders[urlContains] = req => Task.FromResult(responder(req));
 
-	public void RespondWith(HttpStatusCode statusCode) => _respond = _ => Task.FromResult(new HttpResponseMessage(statusCode));
-
 	public void RespondWithStatusForUrl(string urlContains, HttpStatusCode statusCode) =>
 		_urlResponders[urlContains] = _ => Task.FromResult(new HttpResponseMessage(statusCode));
-
-	public void ClearUrlStubs() => _urlResponders.Clear();
 
 	public void RequireQueryParam(string urlContains, string name, string value) =>
 		_credentialValidators.Add(

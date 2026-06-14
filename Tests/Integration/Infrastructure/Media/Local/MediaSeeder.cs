@@ -8,22 +8,9 @@ namespace Integration.Tests.Infrastructure.Media.Local;
 
 public sealed class MediaSeeder(SammlarrScenarioContext sammlarr)
 {
-	public async Task<MediaId> SeedAsync(IEnumerable<IExternalMediaId> externalIds)
-	{
-		var ctx = sammlarr.DbContext;
-		var media = new MediaEntity();
-		foreach (var id in externalIds)
-			await ctx.ExternalMediaIds.AddAsync(id.ToExternalIdEntity(media));
-		await ctx.SaveChangesAsync();
-		ctx.ChangeTracker.Clear();
-		return MediaId.From(media.Id);
-	}
+	public Task<MediaId> SeedIdentityAsync(ResolvedVersion resolved) => Seed(resolved, fetched: null, storeMetadata: false);
 
-	public Task<MediaId> SeedIdentityAsync(CatalogEntry entry, MediaRow row) =>
-		Seed(MediaVersionResolver.Resolve(entry, row), fetched: null, storeMetadata: false);
-
-	public Task<MediaId> SeedCachedAsync(CatalogEntry entry, MediaRow row) =>
-		Seed(MediaVersionResolver.Resolve(entry, row), Cells.Date(row.Fetched), storeMetadata: true);
+	public Task<MediaId> SeedCachedAsync(ResolvedVersion resolved, DateTimeOffset? fetched) => Seed(resolved, fetched, storeMetadata: true);
 
 	private async Task<MediaId> Seed(ResolvedVersion resolved, DateTimeOffset? fetched, bool storeMetadata)
 	{
