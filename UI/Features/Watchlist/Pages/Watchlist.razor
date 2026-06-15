@@ -105,13 +105,13 @@ else
                                            OnImageBroken="ReportBrokenImageAsync"
                                            RemoveLabel="Remove from Watchlist">
                         <Overlay Context="item">
-                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
-                                <BbBadge Variant="@ProvenanceBadgeVariant(item.Provenance)">
+                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 wl-badge-host">
+                                <BbBadge Variant="@ProvenanceBadgeVariant(item.Provenance)" Class="wl-badge">
                                     <BbTooltip>
                                         <BbTooltipTrigger AsChild="false" Class="p-0">
-                                            <span class="flex items-center gap-1">
+                                            <span class="flex items-center gap-1 wl-badge-content">
                                                 <LucideIcon Name="@ProvenanceIcon(item.Provenance)" Size="12"/>
-                                                @ProvenanceLabel(item.Provenance)
+                                                <span class="wl-badge-label">@ProvenanceLabel(item.Provenance)</span>
                                             </span>
                                         </BbTooltipTrigger>
                                         <BbTooltipContent>@ProvenanceTooltip(item)</BbTooltipContent>
@@ -439,7 +439,7 @@ else
         {
             RemoteOrigin => "From Plex",
             ManualOrigin => $"Added manually on {date}",
-            FeedOrigin feed => $"Added by '{feed.FeedName}' on {date}",
+            FeedOrigin feed => $"Added by feed '{feed.FeedName}' on {date}",
             OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
             _ => string.Empty,
         };
