@@ -1,0 +1,21 @@
+.preview-filter-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 5px 6px;
+    border-radius: var(--radius);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.preview-filter-badge:hover {
+    color: var(--foreground);
+    background-color: color-mix(in oklab, var(--accent) 45%, transparent);
+}
+
+.preview-filter-badge.is-active {
+    color: var(--accent-foreground);
+    background-color: var(--accent);
+}

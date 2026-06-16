@@ -54,8 +54,8 @@
             </BbAlertDialog>
         }
     </div>
-    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col">
-        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0))
+    <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 pb-4 pt-4 flex flex-col" style="scrollbar-gutter: stable;">
+        @if (HasItems)
         {
             <div class="mb-4 shrink-0 flex items-start justify-between gap-3">
                 <div>
@@ -73,67 +73,34 @@
                 </div>
                 <BbTooltipProvider>
                     <div class="stat-badges-row flex items-start text-xs font-medium">
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="p-0">
-                                <span class="stat-badge text-rose-500">
-                                    <LucideIcon Name="list" Size="14"/>
-                                    <span>@_rawResults.Count</span>
-                                </span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Total items fetched from the source list</BbTooltipContent>
-                        </BbTooltip>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="p-0">
-                                <span class="stat-badge text-rose-500">
-                                    <LucideIcon Name="check" Size="14"/>
-                                    <span>@IncludedCount</span>
-                                </span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Items that will be imported</BbTooltipContent>
-                        </BbTooltip>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="p-0">
-                                <span class="stat-badge text-rose-500">
-                                    <LucideIcon Name="redo-dot" Size="14"/>
-                                    <span>@BypassedCount</span>
-                                </span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>
+                        <PreviewFilterBadge Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0" OnClick="ResetFilters">
+                            <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
+                        </PreviewFilterBadge>
+                        <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewResultFilter.Included)" OnClick="() => ToggleFilter(PreviewResultFilter.Included)">
+                            <Tooltip>Items that will be imported</Tooltip>
+                        </PreviewFilterBadge>
+                        <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewResultFilter.Bypassed)" OnClick="() => ToggleFilter(PreviewResultFilter.Bypassed)">
+                            <Tooltip>
                                 <p class="font-medium mb-0.5">Bypasses import</p>
                                 <p>@WatchlistCount in your watchlist · @BlacklistCount in your blacklist</p>
                                 <p class="opacity-70 mt-0.5">These will not be imported.</p>
-                            </BbTooltipContent>
-                        </BbTooltip>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="p-0">
-                                <span class="stat-badge text-rose-500">
-                                    <LucideIcon Name="filter-x" Size="14"/>
-                                    <span>@FilteredCount</span>
-                                </span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Items excluded by your filter rules</BbTooltipContent>
-                        </BbTooltip>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="p-0">
-                                <span class="stat-badge text-rose-500">
-                                    <LucideIcon Name="scissors" Size="14"/>
-                                    <span>@SkippedCount</span>
-                                </span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Items excluded by the import limit</BbTooltipContent>
-                        </BbTooltip>
-                        <BbTooltip DelayDuration="0">
-                            <BbTooltipTrigger AsChild="false" Class="p-0">
-                                <span class="stat-badge text-rose-500">
-                                    <LucideIcon Name="circle-alert" Size="14"/>
-                                    <span>@UnresolvedCount</span>
-                                </span>
-                            </BbTooltipTrigger>
-                            <BbTooltipContent>Items that could not be matched in your media provider</BbTooltipContent>
-                        </BbTooltip>
+                            </Tooltip>
+                        </PreviewFilterBadge>
+                        <PreviewFilterBadge Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewResultFilter.Filtered)" OnClick="() => ToggleFilter(PreviewResultFilter.Filtered)">
+                            <Tooltip>Items excluded by your filter rules</Tooltip>
+                        </PreviewFilterBadge>
+                        <PreviewFilterBadge Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewResultFilter.Skipped)" OnClick="() => ToggleFilter(PreviewResultFilter.Skipped)">
+                            <Tooltip>Items excluded by the import limit</Tooltip>
+                        </PreviewFilterBadge>
+                        <PreviewFilterBadge Icon="circle-alert" Count="UnresolvedCount" Active="IsFilterActive(PreviewResultFilter.Unresolved)" OnClick="() => ToggleFilter(PreviewResultFilter.Unresolved)">
+                            <Tooltip>Items that could not be matched in your media provider</Tooltip>
+                        </PreviewFilterBadge>
                     </div>
                 </BbTooltipProvider>
             </div>
+        }
+        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0))
+        {
             @if (_filteredResults.Count > 0)
             {
                 <Virtualize TItem="QueryResult<IMediaDetail>" Items="_filteredResults" ItemSize="180" OverscanCount="3">
@@ -243,8 +210,8 @@
         {
             <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
                 <LucideIcon Name="search-x" Size="48" Class="text-muted-foreground mb-4"/>
-                <p class="text-lg font-semibold">No results match your search</p>
-                <p class="text-muted-foreground text-sm mt-2">Try adjusting or clearing the search filter.</p>
+                <p class="text-lg font-semibold">No results match</p>
+                <p class="text-muted-foreground text-sm mt-2">Try adjusting your search or filters.</p>
             </div>
         }
         else if (IsLoading)
@@ -291,6 +258,7 @@
     private PreviewStatus _lastEmittedStatus = new();
 
     private string _searchQuery = string.Empty;
+    private readonly HashSet<Func<QueryResult<IMediaDetail>, bool>> _activeFilters = [];
     private IMediaDetail? _focusedResult;
     private IMediaDetail? _togglingWatchlistItem;
     private IMediaDetail? _togglingBlacklistItem;
@@ -499,15 +467,32 @@
 
     private void RebuildFilteredViews()
     {
-        if (string.IsNullOrWhiteSpace(_searchQuery))
-        {
-            _filteredResults = _processedResults.ToList();
-            _filteredUnresolvedResults = _unresolvedResults.ToList();
-            return;
-        }
+        _filteredResults = _processedResults
+            .Where(r => PreviewResultFilter.IsVisible(r, _activeFilters) && MatchesSearch(GetItem(r).Title))
+            .ToList();
+        _filteredUnresolvedResults = _unresolvedResults
+            .Where(r => PreviewResultFilter.IsVisible(r, _activeFilters) && MatchesSearch(r.Title))
+            .ToList();
+    }
 
-        _filteredResults = _processedResults.Where(r => GetItem(r).Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
-        _filteredUnresolvedResults = _unresolvedResults.Where(r => r.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+    private bool MatchesSearch(string title) =>
+        string.IsNullOrWhiteSpace(_searchQuery) || title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase);
+
+    private bool IsFilterActive(Func<QueryResult<IMediaDetail>, bool> filter) => _activeFilters.Contains(filter);
+
+    private void ToggleFilter(Func<QueryResult<IMediaDetail>, bool> filter)
+    {
+        if (!_activeFilters.Add(filter))
+        {
+            _activeFilters.Remove(filter);
+        }
+        RebuildFilteredViews();
+    }
+
+    private void ResetFilters()
+    {
+        _activeFilters.Clear();
+        RebuildFilteredViews();
     }
 
     private Task EmitStatusIfChangedAsync()
