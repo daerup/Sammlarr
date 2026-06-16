@@ -1,5 +1,6 @@
 using BlazorBlueprint.Primitives.Filtering;
 using Contracts.Feed;
+using Contracts.Media.Search;
 using Contracts.Processing;
 
 namespace UI.Features.Feeds.Pages.Editor;
@@ -8,6 +9,18 @@ public enum ScheduleMode
 {
 	Manual,
 	Scheduled,
+}
+
+public static class PreviewResultFilter
+{
+	public static readonly Func<QueryResult<IMediaDetail>, bool> Included = result => result is IMediaDetail and not UnresolvedMedia;
+	public static readonly Func<QueryResult<IMediaDetail>, bool> Bypassed = result => result is Bypassed<IMediaDetail>;
+	public static readonly Func<QueryResult<IMediaDetail>, bool> Filtered = result => result is Culled<IMediaDetail>;
+	public static readonly Func<QueryResult<IMediaDetail>, bool> Skipped = result => result is Truncated<IMediaDetail>;
+	public static readonly Func<QueryResult<IMediaDetail>, bool> Unresolved = result => result is UnresolvedMedia;
+
+	public static bool IsVisible(QueryResult<IMediaDetail> result, IReadOnlyCollection<Func<QueryResult<IMediaDetail>, bool>> active) =>
+		active.Count == 0 || active.Any(matches => matches(result));
 }
 
 public record PreviewStatus

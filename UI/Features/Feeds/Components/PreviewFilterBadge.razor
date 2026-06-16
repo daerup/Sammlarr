@@ -1,0 +1,17 @@
+<BbTooltip DelayDuration="0">
+    <BbTooltipTrigger AsChild="false" Class="p-0">
+        <button type="button" class="preview-filter-badge @(Active ? "is-active" : null)" @onclick="OnClick">
+            <LucideIcon Name="@Icon" Size="14"/>
+            <span>@Count</span>
+        </button>
+    </BbTooltipTrigger>
+    <BbTooltipContent>@Tooltip</BbTooltipContent>
+</BbTooltip>
+
+@code {
+    [Parameter] [EditorRequired] public required string Icon { get; set; }
+    [Parameter] [EditorRequired] public required int Count { get; set; }
+    [Parameter] public bool Active { get; set; }
+    [Parameter] public RenderFragment? Tooltip { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+}
