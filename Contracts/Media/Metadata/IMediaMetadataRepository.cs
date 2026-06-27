@@ -1,5 +1,3 @@
-using Contracts.Media.Search;
-
 namespace Contracts.Media.Metadata;
 
 public interface IMediaMetadataRepository
@@ -17,4 +15,4 @@ public interface IMediaMetadataRepository
 	Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default);
 }
 
-public record MediaMetadataUpsert(MediaId MediaId, IMediaDetail Details);
+public record MediaMetadataUpsert(MediaId MediaId, KnownMedia Media);

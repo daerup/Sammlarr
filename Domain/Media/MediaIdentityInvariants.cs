@@ -1,4 +1,4 @@
-namespace Contracts.Media;
+namespace Domain.Media;
 
 public static class MediaIdentityInvariants
 {

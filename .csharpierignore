@@ -1,3 +1,4 @@
+Domain/Media/MediaLookup.cs
 Contracts/Result.cs
 Contracts/Option.cs
 Contracts/Processing/QueryResult.cs

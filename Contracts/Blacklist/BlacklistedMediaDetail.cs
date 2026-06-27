@@ -1,5 +1,3 @@
-using Contracts.Media.Search;
-
 namespace Contracts.Blacklist;
 
-public record BlacklistedMediaDetail(IMediaDetail Detail, DateTimeOffset AddedAt);
+public record BlacklistedMediaDetail(MediaLookup Detail, DateTimeOffset AddedAt);
