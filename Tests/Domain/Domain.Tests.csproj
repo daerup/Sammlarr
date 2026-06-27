@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Bogus" />
+		<PackageReference Include="TUnit" />
+		<PackageReference Include="TUnit.Assertions" />
+		<PackageReference Include="TUnit.Core" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Domain\Domain.csproj" />
+	</ItemGroup>
+</Project>

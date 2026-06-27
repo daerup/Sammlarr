@@ -1,6 +1,6 @@
-namespace Contracts.Media;
+namespace Domain.Media;
 
-public readonly record struct MediaIdentity(MediaId Id, IReadOnlyList<IExternalMediaId> Externals);
+public readonly record struct MediaIdentity(MediaId Id, ValueSet<IExternalMediaId> Externals);
 
 public readonly record struct MediaId
 {
