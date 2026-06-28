@@ -140,6 +140,7 @@
                              Value="@_identifier" ValueChanged="@ChangeIdentifier"
                              Class="bg-accent" Required="true"
                              AriaInvalid="@IdentifierIsInvalid"
+                             Disabled="@IsLoading"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </BbFieldContent>
                 <BbFieldDescription>@RenderIdentifierDescription()</BbFieldDescription>
@@ -390,6 +391,7 @@
 
     [Parameter] public required FeedConfig Value { get; set; }
     [Parameter] public required bool ShowValidation { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
 
     private static readonly FeedProvider[] AllProviders = Enum.GetValues<FeedProvider>();
