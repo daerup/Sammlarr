@@ -12,7 +12,7 @@
 @inject IBlacklistService BlacklistService
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedService> FeedServiceIndex
-@inject IQueryProcessor<IMediaDetail> QueryProcessor
+@inject IQueryProcessor<MediaMatch> QueryProcessor
 @inject Notifier Notifier
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
@@ -103,18 +103,18 @@
         {
             @if (_filteredResults.Count > 0)
             {
-                <Virtualize TItem="QueryResult<IMediaDetail>" Items="_filteredResults" ItemSize="180" OverscanCount="3">
+                <Virtualize TItem="QueryResult<MediaMatch>" Items="_filteredResults" ItemSize="180" OverscanCount="3">
                     <ItemContent Context="result">
                         @{
                             var item = GetItem(result);
-                            var isCulled = result is Culled<IMediaDetail>;
-                            var isTruncated = result is Truncated<IMediaDetail>;
+                            var isCulled = result is Culled<MediaMatch>;
+                            var isTruncated = result is Truncated<MediaMatch>;
                             var isDimmed = isCulled || isTruncated;
-                            var isGreyedOut = result is Bypassed<IMediaDetail>;
+                            var isGreyedOut = result is Bypassed<MediaMatch>;
                             var isBlacklisted = IsBlacklisted(item);
                             var isInWatchlist = IsWatchlisted(item);
-                            var isTogglingWatchlist = _togglingWatchlistItem == item;
-                            var isTogglingBlacklist = _togglingBlacklistItem == item;
+                            var isTogglingWatchlist = _togglingWatchlistItem == item.Id;
+                            var isTogglingBlacklist = _togglingBlacklistItem == item.Id;
 
                             var hoverStyle = (isDimmed, isGreyedOut) switch
                             {
@@ -127,10 +127,10 @@
                             <MediaDetailTile @key="item"
                                              Result="item"
                                              Class="@(hoverStyle)"
-                                             IsFocused="_focusedResult == item"
-                                             OnFocusIn="() => _focusedResult = item"
+                                             IsFocused="_focusedResult == item.Id"
+                                             OnFocusIn="() => _focusedResult = item.Id"
                                              OnFocusOut="() => ClearFocus(item)"
-                                             OnImageBroken="() => ReportBrokenImageAsync(item.Identity.Id)">
+                                             OnImageBroken="() => ReportBrokenImageAsync(item.Id)">
                                 <Icons>
                                     @if (isDimmed)
                                     {
@@ -156,7 +156,7 @@
                                                         <LucideIcon Name="redo-dot" Size="24"/>
                                                     </div>
                                                 </BbTooltipTrigger>
-                                                <BbTooltipContent>@BypassedTooltip((Bypassed<IMediaDetail>)result.Value)</BbTooltipContent>
+                                                <BbTooltipContent>@(result is Bypassed<MediaMatch> bypassed ? BypassedTooltip(bypassed) : string.Empty)</BbTooltipContent>
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     }
@@ -172,15 +172,15 @@
             {
                 <div class="mt-4">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
-                    <Virtualize TItem="IMediaDetail" Items="_filteredUnresolvedResults" ItemSize="180" OverscanCount="3">
+                    <Virtualize TItem="MediaMatch" Items="_filteredUnresolvedResults" ItemSize="180" OverscanCount="3">
                         <ItemContent Context="item">
                             <div class="pb-2">
                                 <MediaDetailTile @key="item"
                                                  Result="item"
-                                                 IsFocused="_focusedResult == item"
-                                                 OnFocusIn="() => _focusedResult = item"
+                                                 IsFocused="_focusedResult == item.Id"
+                                                 OnFocusIn="() => _focusedResult = item.Id"
                                                  OnFocusOut="() => ClearFocus(item)"
-                                                 OnImageBroken="() => ReportBrokenImageAsync(item.Identity.Id)">
+                                                 OnImageBroken="() => ReportBrokenImageAsync(item.Id)">
                                     <Icons>
                                         <BbTooltipProvider>
                                             <BbTooltip DelayDuration="300">
@@ -248,20 +248,20 @@
     private enum FetchState { Idle, Loading, Success, Failed }
 
     private FetchState _fetchState = FetchState.Idle;
-    private List<IMediaDetail> _rawResults = [];
-    private IReadOnlyList<IMediaDetail> _unresolvedResults = [];
-    private IReadOnlyList<QueryResult<IMediaDetail>> _processedResults = [];
-    private List<QueryResult<IMediaDetail>> _filteredResults = [];
-    private List<IMediaDetail> _filteredUnresolvedResults = [];
+    private List<MediaMatch> _rawResults = [];
+    private IReadOnlyList<MediaMatch> _unresolvedResults = [];
+    private IReadOnlyList<QueryResult<MediaMatch>> _processedResults = [];
+    private List<QueryResult<MediaMatch>> _filteredResults = [];
+    private List<MediaMatch> _filteredUnresolvedResults = [];
     private FeedConfig? _appliedConfig;
     private CancellationTokenSource? _cts;
     private PreviewStatus _lastEmittedStatus = new();
 
     private string _searchQuery = string.Empty;
-    private readonly HashSet<Func<QueryResult<IMediaDetail>, bool>> _activeFilters = [];
-    private IMediaDetail? _focusedResult;
-    private IMediaDetail? _togglingWatchlistItem;
-    private IMediaDetail? _togglingBlacklistItem;
+    private readonly HashSet<Func<QueryResult<MediaMatch>, bool>> _activeFilters = [];
+    private MediaId? _focusedResult;
+    private MediaId? _togglingWatchlistItem;
+    private MediaId? _togglingBlacklistItem;
     private readonly HashSet<MediaId> _watchlisted = new();
     private readonly HashSet<MediaId> _blacklistIds = new();
     private readonly HashSet<MediaId> _reportedBrokenImages = [];
@@ -328,7 +328,7 @@
             return;
         }
 
-        var staleIds = _rawResults.Select(r => r.Identity.Id).ToList();
+        var staleIds = _rawResults.Select(r => r.Id).ToList();
         _refreshDialogOpen = false;
         _fetchState = FetchState.Loading;
         ClearResults();
@@ -441,8 +441,8 @@
         }
         else
         {
-            _unresolvedResults = _rawResults.Where(r => r is UnresolvedMedia).ToList();
-            var resolvedItems = _rawResults.Where(r => r is not UnresolvedMedia).ToList();
+            _unresolvedResults = _rawResults.Where(r => r is UnmatchedMedia).ToList();
+            var resolvedItems = _rawResults.Where(r => r is not UnmatchedMedia).ToList();
 
             var applied = _appliedConfig ?? Config;
             var options = new QueryOptions
@@ -478,9 +478,9 @@
     private bool MatchesSearch(string title) =>
         string.IsNullOrWhiteSpace(_searchQuery) || title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase);
 
-    private bool IsFilterActive(Func<QueryResult<IMediaDetail>, bool> filter) => _activeFilters.Contains(filter);
+    private bool IsFilterActive(Func<QueryResult<MediaMatch>, bool> filter) => _activeFilters.Contains(filter);
 
-    private void ToggleFilter(Func<QueryResult<IMediaDetail>, bool> filter)
+    private void ToggleFilter(Func<QueryResult<MediaMatch>, bool> filter)
     {
         if (!_activeFilters.Add(filter))
         {
@@ -536,18 +536,18 @@
         }
     }
 
-    private int IncludedCount => _processedResults.Count(r => r is IMediaDetail);
-    private int BypassedCount => _processedResults.Count(r => r is Bypassed<IMediaDetail>);
-    private int FilteredCount => _processedResults.Count(r => r is Culled<IMediaDetail>);
-    private int SkippedCount => _processedResults.Count(r => r is Truncated<IMediaDetail>);
+    private int IncludedCount => _processedResults.Count(r => r is MediaMatch);
+    private int BypassedCount => _processedResults.Count(r => r is Bypassed<MediaMatch>);
+    private int FilteredCount => _processedResults.Count(r => r is Culled<MediaMatch>);
+    private int SkippedCount => _processedResults.Count(r => r is Truncated<MediaMatch>);
     private int UnresolvedCount => _unresolvedResults.Count;
-    private int WatchlistCount => _processedResults.Count(r => GetItem(r) is {} item && IsWatchlisted(item));
-    private int BlacklistCount => _processedResults.Count(r => GetItem(r) is {} item && IsBlacklisted(item));
+    private int WatchlistCount => _processedResults.Count(r => IsWatchlisted(GetItem(r)));
+    private int BlacklistCount => _processedResults.Count(r => IsBlacklisted(GetItem(r)));
 
-    private bool IsBlacklisted(IMediaDetail item) => _blacklistIds.Contains(item.Identity.Id);
-    private bool IsWatchlisted(IMediaDetail item) => _watchlisted.Contains(item.Identity.Id);
+    private bool IsBlacklisted(MediaMatch item) => _blacklistIds.Contains(item.Id);
+    private bool IsWatchlisted(MediaMatch item) => _watchlisted.Contains(item.Id);
 
-    private string BypassedTooltip(Bypassed<IMediaDetail> bypassed)
+    private string BypassedTooltip(Bypassed<MediaMatch> bypassed)
     {
         var source = bypassed.Source switch
         {
@@ -568,42 +568,42 @@
         await Media.InvalidateAsync([mediaId]);
     }
 
-    private static IMediaDetail GetItem(QueryResult<IMediaDetail> result) =>
+    private static MediaMatch GetItem(QueryResult<MediaMatch> result) =>
         result switch
         {
-            IMediaDetail item => item,
-            Bypassed<IMediaDetail> e => e.Item,
-            Truncated<IMediaDetail> s => s.Item,
-            Culled<IMediaDetail> f => f.Item,
+            MediaMatch item => item,
+            Bypassed<MediaMatch> e => e.Item,
+            Truncated<MediaMatch> s => s.Item,
+            Culled<MediaMatch> f => f.Item,
         };
 
-    private void ClearFocus(IMediaDetail item)
+    private void ClearFocus(MediaMatch item)
     {
-        if (ReferenceEquals(_focusedResult, item))
+        if (_focusedResult == item.Id)
         {
             _focusedResult = null;
         }
     }
 
-    private async Task ToggleBlacklistAsync(IMediaDetail item)
+    private async Task ToggleBlacklistAsync(MediaMatch item)
     {
         if (_togglingBlacklistItem is not null)
         {
             return;
         }
 
-        _togglingBlacklistItem = item;
+        _togglingBlacklistItem = item.Id;
         try
         {
-            if (_blacklistIds.Contains(item.Identity.Id))
+            if (_blacklistIds.Contains(item.Id))
             {
-                await BlacklistService.RemoveFromBacklistAsync(item.Identity.Id);
-                _blacklistIds.Remove(item.Identity.Id);
+                await BlacklistService.RemoveFromBacklistAsync(item.Id);
+                _blacklistIds.Remove(item.Id);
             }
             else
             {
-                await BlacklistService.AddToBacklistAsync(item.Identity.Id);
-                _blacklistIds.Add(item.Identity.Id);
+                await BlacklistService.AddToBacklistAsync(item.Id);
+                _blacklistIds.Add(item.Id);
             }
         }
         finally
@@ -616,25 +616,25 @@
         }
     }
 
-    private async Task ToggleWatchlistAsync(IMediaDetail item)
+    private async Task ToggleWatchlistAsync(MediaMatch item)
     {
         if (_togglingWatchlistItem is not null)
         {
             return;
         }
 
-        _togglingWatchlistItem = item;
+        _togglingWatchlistItem = item.Id;
         try
         {
             if (IsWatchlisted(item))
             {
-                await WatchlistService.RemoveFromWatchlistAsync([item.Identity.Id]);
-                _watchlisted.Remove(item.Identity.Id);
+                await WatchlistService.RemoveFromWatchlistAsync([item.Id]);
+                _watchlisted.Remove(item.Id);
             }
             else
             {
-                await WatchlistService.AddToWatchlistAsync([item.Identity.Id], new ManualOrigin());
-                _watchlisted.Add(item.Identity.Id);
+                await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin());
+                _watchlisted.Add(item.Id);
             }
         }
         finally

@@ -1,6 +1,5 @@
-using Contracts.Media.Search;
 using Microsoft.AspNetCore.Components;
 
 namespace UI.Shared.Media;
 
-public sealed record TileIconContext(IMediaDetail Result, bool IsToggled, bool IsToggling, EventCallback<IMediaDetail> OnToggle);
+public sealed record TileIconContext(MediaMatch Result, bool IsToggled, bool IsToggling, EventCallback<MediaMatch> OnToggle);

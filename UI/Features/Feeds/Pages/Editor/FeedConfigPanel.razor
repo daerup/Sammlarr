@@ -4,7 +4,6 @@
 @using Contracts.Auth
 @using Contracts.Feed
 @using Contracts.Media
-@using Contracts.Media.Search
 @using Contracts.Processing
 @using DB.Data.Feed
 @using UI.Features.Feeds.Components
@@ -395,7 +394,7 @@
     private static readonly FeedProvider[] AllProviders = Enum.GetValues<FeedProvider>();
     private readonly HashSet<FeedProvider> _disabledProviders = [];
 
-    private static readonly QuerySort DefaultSort = new() { Property = nameof(IMediaDetail.Title), Direction = ListSortDirection.Descending };
+    private static readonly QuerySort DefaultSort = new() { Property = nameof(IMedia.Title), Direction = ListSortDirection.Descending };
     private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = SlotPolicy.Consumed, Blacklisted = SlotPolicy.Consumed };
 
     private bool _isEnabled;
@@ -430,21 +429,21 @@
 
     private static readonly IReadOnlyList<FieldDefinition> FieldDefinitions =
     [
-        new(nameof(IMediaDetail.Title), "Title", FilterFieldType.Text),
-        new(nameof(IMediaDetail.Tagline), "Tagline", FilterFieldType.Text),
-        new(nameof(IMediaDetail.Summary), "Summary", FilterFieldType.Text),
-        new(nameof(IMediaDetail.Genres), "Genres", FilterFieldType.Text),
+        new(nameof(IMedia.Title), "Title", FilterFieldType.Text),
+        new(nameof(IMedia.Tagline), "Tagline", FilterFieldType.Text),
+        new(nameof(IMedia.Summary), "Summary", FilterFieldType.Text),
+        new(nameof(IMedia.Genres), "Genres", FilterFieldType.Text),
         new(
-            nameof(IMediaDetail.MediaType),
+            nameof(IMedia.Type),
             "Media Type",
             FilterFieldType.Enum,
             [new SelectOption<string>(nameof(MediaType.Movie), "Movie"), new SelectOption<string>(nameof(MediaType.Show), "Show")]
         ),
-        new(nameof(IMediaDetail.ReleaseDate), "Release Date", FilterFieldType.Date),
-        new(nameof(IMediaDetail.Rating), "Rating", FilterFieldType.Number),
-        new(nameof(IMediaDetail.RuntimeMinutes), "Runtime (min)", FilterFieldType.Number),
-        new(nameof(ShowDetail.SeasonCount), "Seasons", FilterFieldType.Number),
-        new(nameof(ShowDetail.EpisodeCount), "Episodes", FilterFieldType.Number),
+        new(nameof(IMedia.ReleaseDate), "Release Date", FilterFieldType.Date),
+        new(nameof(IMedia.Rating), "Rating", FilterFieldType.Number),
+        new(nameof(Movie.Runtime), "Runtime (min)", FilterFieldType.Number),
+        new(nameof(Show.Seasons), "Seasons", FilterFieldType.Number),
+        new(nameof(Show.Episodes), "Episodes", FilterFieldType.Number),
     ];
 
     private static readonly IReadOnlyList<SelectOption<string>> SortFields =

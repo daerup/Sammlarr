@@ -84,7 +84,7 @@
 
 @code {
 
-    [Parameter] [EditorRequired] public required IMediaDetail Result { get; set; }
+    [Parameter] [EditorRequired] public required MediaMatch Result { get; set; }
     [Parameter] public string Class { get; set; } = "hover-bg";
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
@@ -96,18 +96,18 @@
     private IReadOnlyList<string> _displayFacts = [];
     private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
-    private IMediaDetail? _lastResult;
+    private MediaId? _lastResult;
 
     protected override void OnParametersSet()
     {
-        if (!ReferenceEquals(_lastResult, Result))
+        if (_lastResult != Result.Id)
         {
-            _lastResult = Result;
+            _lastResult = Result.Id;
             _failed = false;
         }
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl : Result.BackdropUrl)}')";
         _displayFacts = GetDisplayFacts(Result);
-        _ids = Result.Identity.Externals;
+        _ids = Result.ExternalIds;
     }
 
     private async Task OnPosterError()
@@ -116,23 +116,22 @@
         await OnImageBroken.InvokeAsync();
     }
 
-    private static IReadOnlyList<string> GetDisplayFacts(IMediaDetail result)
+    private static IReadOnlyList<string> GetDisplayFacts(MediaMatch result)
     {
         var facts = new List<string>();
 
-        switch (result)
+        if (result.MediaType is MediaType.Show)
         {
-            case ShowDetail showResult:
-                AddCountFact(facts, showResult.Seasons, "season");
-                AddCountFact(facts, showResult.Episodes, "episode");
-                break;
-            case MovieDetail movieResult:
-                var runtime = GetRuntimeLabel(movieResult.Runtime);
-                if (!string.IsNullOrWhiteSpace(runtime))
-                {
-                    facts.Add(runtime);
-                }
-                break;
+            AddCountFact(facts, result.Seasons ?? 0, "season");
+            AddCountFact(facts, result.Episodes ?? 0, "episode");
+        }
+        else if (result.MediaType is MediaType.Movie && result.Runtime is { } runtime)
+        {
+            var label = GetRuntimeLabel(runtime);
+            if (!string.IsNullOrWhiteSpace(label))
+            {
+                facts.Add(label);
+            }
         }
 
         return facts;

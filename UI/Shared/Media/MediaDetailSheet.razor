@@ -7,15 +7,16 @@
 }
 <BbSheet Open="Open" OpenChanged="HandleSheetOpenChangedAsync">
     <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
-        @if (ShowContent)
+        @if (Media.HasValue)
         {
+            var media = Media.Value;
             <BbSheetHeader>
                 <BbSheetTitle Class="font-bold tracking-wide">
-                    <MediaTitleLink Title="@Title" Ids="@(Ids ?? new List<IExternalMediaId>())" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                    <MediaTitleLink Title="@media.Title" Ids="@media.ExternalIds" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </BbSheetTitle>
                 <BbSheetDescription Class="font-normal tracking-wide">
                     <span class="inline-flex items-center justify-center gap-1.5">
-                        @if (MediaType is MediaType.Movie)
+                        @if (media.MediaType is MediaType.Movie)
                         {
                             <LucideIcon Name="film" Size="16"/>
                         }
@@ -23,7 +24,7 @@
                         {
                             <LucideIcon Name="tv" Size="16"/>
                         }
-                        <span>@MediaType.GetDescription() • @ReleaseDate.Year</span>
+                        <span>@media.MediaType.GetDescription() • @media.ReleaseDate.Year</span>
                     </span>
                 </BbSheetDescription>
             </BbSheetHeader>
@@ -34,13 +35,13 @@
                         @if (_failed)
                         {
                             <div class="w-full aspect-[2/3] bg-muted flex items-center justify-center">
-                                <LucideIcon Name="@(MediaType is MediaType.Movie ? "film" : "tv")" Size="48" Class="text-muted-foreground"/>
+                                <LucideIcon Name="@(media.MediaType is MediaType.Movie ? "film" : "tv")" Size="48" Class="text-muted-foreground"/>
                             </div>
                         }
                         else
                         {
-                            <img src="@ImageUrl"
-                                 alt="@Title"
+                            <img src="@media.PosterUrl"
+                                 alt="@media.Title"
                                  class="w-full aspect-[2/3] object-cover"
                                  @onerror="OnImageError"/>
                         }
@@ -51,26 +52,26 @@
                 @if (ShowMetadataRow)
                 {
                     <div class="flex items-center gap-4 text-sm font-medium tracking-wide antialiased">
-                        @if (Rating is not null)
+                        @if (media.Rating is { } rating)
                         {
                             <div class="flex items-center gap-1.5 text-yellow-400">
                                 <LucideIcon Name="star" Size="16" Fill="currentColor"/>
-                                <span class="font-semibold">@Rating.Value.ToString("F1")</span>
+                                <span class="font-semibold">@rating.ToString("F1")</span>
                             </div>
                             <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-4"/>
                         }
                         <span class="text-muted-foreground font-medium">
-                            @ReleaseDate.ToString("MMM d, yyyy")
+                            @media.ReleaseDate.ToString("MMM d, yyyy")
                         </span>
                     </div>
                 }
 
-                @if (!string.IsNullOrWhiteSpace(Description))
+                @if (!string.IsNullOrWhiteSpace(media.Summary))
                 {
                     <div class="space-y-3">
                         <h3 class="text-sm font-bold tracking-wide">Overview</h3>
                         <p class="text-sm text-muted-foreground leading-relaxed font-normal tracking-wide antialiased">
-                            @Description
+                            @media.Summary
                         </p>
                     </div>
                 }
@@ -110,28 +111,10 @@
     public EventCallback<bool> OnOpenChanged { get; set; }
 
     [Parameter]
-    public bool ShowContent { get; set; }
-
-    [Parameter]
-    public string Title { get; set; } = string.Empty;
-
-    [Parameter]
-    public MediaType MediaType { get; set; }
-
-    [Parameter]
-    public DateTimeOffset ReleaseDate { get; set; }
-
-    [Parameter]
-    public string ImageUrl { get; set; } = string.Empty;
-
-    [Parameter]
-    public float? Rating { get; set; }
+    public MediaMatch? Media { get; set; }
 
     [Parameter]
     public bool ShowMetadataRow { get; set; }
-
-    [Parameter]
-    public string? Description { get; set; }
 
     [Parameter]
     public required Func<string> ButtonText { get; init; }
@@ -146,16 +129,7 @@
     public bool ButtonDisabled { get; set; }
 
     [Parameter]
-    public string? StatusMessage { get; set; }
-
-    [Parameter]
-    public bool IsStatusError { get; set; }
-
-    [Parameter]
     public EventCallback OnImageBroken { get; set; }
-
-    [Parameter]
-    public IReadOnlyList<IExternalMediaId>? Ids { get; set; }
 
     private bool _isButtonBusy;
     private bool _failed;
@@ -164,9 +138,10 @@
 
     protected override void OnParametersSet()
     {
-        if (_lastImageUrl != ImageUrl)
+        var poster = Media.HasValue ? Media.Value.PosterUrl : null;
+        if (_lastImageUrl != poster)
         {
-            _lastImageUrl = ImageUrl;
+            _lastImageUrl = poster;
             _failed = false;
         }
     }

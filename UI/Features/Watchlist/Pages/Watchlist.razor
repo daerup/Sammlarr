@@ -97,7 +97,7 @@ else
                     <BulkEditableMediaGrid TItem="WatchlistedMediaDetail"
                                            Items="_items"
                                            Detail="@(i => i.Detail)"
-                                           Key="@(i => i.Detail.Identity.Id)"
+                                           Key="@(i => i.Detail.Id)"
                                            IsEditMode="_isEditMode"
                                            IsEditModeChanged="@(v => _isEditMode = v)"
                                            OnTileClick="SelectItem"
@@ -128,14 +128,8 @@ else
 
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
-                  ShowContent="@(_selectedItem is not null)"
-                  Title="@(_selectedItem?.Detail.Title ?? string.Empty)"
-                  MediaType="@(_selectedItem?.Detail.MediaType ?? MediaType.Movie)"
-                  ReleaseDate="@SelectedReleaseDate"
-                  ImageUrl="@(_selectedItem?.Detail.PosterUrl ?? string.Empty)"
+                  Media="_selectedItem?.Detail"
                   ShowMetadataRow="false"
-                  Description="@(_selectedItem?.Detail.Summary ?? string.Empty)"
-                  Ids="@(_selectedItem?.Detail.Identity.Externals)"
                   OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromWatchlistAsync"
                   ButtonText="GetRemoveButtonText"
@@ -177,7 +171,6 @@ else
     private string PageDescription => _providerSettings is null ? "Your saved movies and shows." : $"Your saved movies and shows from {_providerSettings.WatchlistProvider.GetDescription()}";
     private string? WatchlistBrandColor => _providerSettings is null ? null : BrandingService.GetBrandingInfo(_providerSettings.WatchlistProvider.AsMediaProvider()).BrandColor;
     private bool IsOAuthAllowed() => _hasOAuthAccess;
-    private DateTimeOffset SelectedReleaseDate => _selectedItem is {} item ? new DateTimeOffset(item.Detail.ReleaseDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero) : DateTimeOffset.MinValue;
 
     protected override async Task OnInitializedAsync()
     {
@@ -226,7 +219,7 @@ else
 
             if (_selectedItem is not null)
             {
-                _selectedItem = _items.FirstOrDefault(item => item.Detail.Identity.Id.Equals(_selectedItem.Detail.Identity.Id));
+                _selectedItem = _items.FirstOrDefault(item => item.Detail.Id.Equals(_selectedItem.Detail.Id));
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -262,7 +255,7 @@ else
         {
             return;
         }
-        await ReportBrokenImageAsync(_selectedItem.Detail.Identity.Id);
+        await ReportBrokenImageAsync(_selectedItem.Detail.Id);
     }
 
     private static string GetRemoveButtonText() => "Remove from Watchlist";
@@ -285,7 +278,7 @@ else
         _isRemoving = true;
         try
         {
-            await WatchlistService.RemoveFromWatchlistAsync([_selectedItem.Detail.Identity.Id], _cancellationTokenSource.Token);
+            await WatchlistService.RemoveFromWatchlistAsync([_selectedItem.Detail.Id], _cancellationTokenSource.Token);
             CloseSelectedMedia();
             await LoadWatchlistAsync();
             await RefreshPendingAsync();
@@ -304,7 +297,7 @@ else
 
     private async Task RemoveBulkAsync(IReadOnlyList<WatchlistedMediaDetail> toRemove)
     {
-        await WatchlistService.RemoveFromWatchlistAsync(toRemove.Select(item => item.Detail.Identity.Id), _cancellationTokenSource.Token);
+        await WatchlistService.RemoveFromWatchlistAsync(toRemove.Select(item => item.Detail.Id), _cancellationTokenSource.Token);
         Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your watchlist.");
         await LoadWatchlistAsync();
         await RefreshPendingAsync();
@@ -359,7 +352,7 @@ else
         {
             return false;
         }
-        return _items.Any(i => i.Detail.Identity.Id == mediaId);
+        return _items.Any(i => i.Detail.Id == mediaId);
     }
 
     private async Task<bool> ToggleFromSearchAsync(MediaId id, string title, bool isMarked)

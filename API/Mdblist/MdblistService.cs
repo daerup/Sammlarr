@@ -6,7 +6,6 @@ using Contracts;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Convertions;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Shared;
 using Shared.Telemetry;
@@ -18,7 +17,7 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
 
-	public async IAsyncEnumerable<IMediaDetail> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<MediaMatch> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
@@ -32,7 +31,7 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 
 			await foreach (var (result, pair) in pipeline)
 			{
-				yield return result.Value as IMediaDetail ?? BuildUnresolved(pair.ListItem, pair.MediaType);
+				yield return result is MediaMatch detail ? detail : BuildUnmatched(pair.ListItem, pair.MediaType);
 			}
 
 			foreach (var unknown in page.unknowns)
@@ -81,31 +80,23 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 		);
 	}
 
-	private UnresolvedMedia BuildUnresolved(MdblistTypes.ListItems.IListItem item, MediaType mediaType)
-	{
-		var ids = ExtractIds(item.ids, mediaType);
-		return new UnresolvedMedia
+	private static MediaMatch BuildUnmatched(MdblistTypes.ListItems.IListItem item, MediaType mediaType) =>
+		new UnmatchedMedia
 		{
-			Identity = new MediaIdentity(default, ids),
-			MediaType = mediaType,
+			Externals = [.. ExtractIds(item.ids, mediaType)],
 			Title = item.title,
-			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : DateOnly.MinValue,
+			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
 		};
-	}
 
-	private UnresolvedMedia BuildUnknown(MdblistTypes.ListItems.UnknownListItem item)
-	{
-		var ids = ExtractIds(item.ids, item.MediaType);
-		return new UnresolvedMedia
+	private static MediaMatch BuildUnknown(MdblistTypes.ListItems.UnknownListItem item) =>
+		new UnmatchedMedia
 		{
-			Identity = new MediaIdentity(default, ids),
-			MediaType = item.MediaType,
+			Externals = [.. ExtractIds(item.ids, item.MediaType)],
 			Title = item.title,
-			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : DateOnly.MinValue,
+			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
 		};
-	}
 
-	private IExternalMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
+	private static IExternalMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
 	{
 		MdblistId? mdblistId = !string.IsNullOrEmpty(ids.mdblist) ? MdblistId.From(ids.mdblist, mediaType) : null;
 		TmdbId? tmdbId = ids.tmdb.HasValue ? TmdbId.From(ids.tmdb.Value.ToString(), mediaType) : null;

@@ -1,20 +1,17 @@
-using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 
 namespace API.Plex;
 
 internal class PlexMetadataEnricher(PlexApi plexApi) : IMetadataEnricher
 {
-	public Task<IMediaDetail?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public Task<MediaMatch?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
-		if (id is not PlexId)
+		if (id is not PlexId plexId)
 		{
-			return Task.FromResult<IMediaDetail?>(null);
+			return Task.FromResult<MediaMatch?>(null);
 		}
-		return LookUpInternalAsync(id, cancellationToken);
+		return LookUpInternalAsync(plexId, cancellationToken);
 	}
 
-	private async Task<IMediaDetail?> LookUpInternalAsync(IExternalMediaId id, CancellationToken cancellationToken) =>
-		await plexApi.LookUpAsync(id, cancellationToken);
+	private async Task<MediaMatch?> LookUpInternalAsync(PlexId plexId, CancellationToken cancellationToken) => await plexApi.ByIdAsync(plexId, cancellationToken);
 }

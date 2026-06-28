@@ -1,3 +1,3 @@
 namespace Contracts.Watchlist;
 
-public record WatchlistedMediaDetail(MediaLookup Detail, DateTimeOffset AddedAt, WatchlistItemProvenance Provenance);
+public record WatchlistedMediaDetail(MediaMatch Detail, DateTimeOffset AddedAt, WatchlistItemProvenance Provenance);

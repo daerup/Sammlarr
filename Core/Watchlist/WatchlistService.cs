@@ -24,7 +24,7 @@ internal class WatchlistService(
 
 		await foreach (var (result, entry) in pipeline)
 		{
-			if (result is not IMediaDetail detail)
+			if (result is not MediaMatch detail)
 			{
 				continue;
 			}

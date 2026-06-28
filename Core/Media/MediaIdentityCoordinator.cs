@@ -11,7 +11,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		CancellationToken cancellationToken
 	)
 	{
-		var groups = preliminary.Select(p => p.Externals).ToList();
+		var groups = preliminary.Select(p => p.Externals.ToList()).ToList();
 		var found = await mediaRepository.FindManyAsync(groups, cancellationToken);
 
 		var cached = new Dictionary<IExternalMediaId, MediaIdentity>();
@@ -30,7 +30,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 			MergeIntoCanonical(preliminary[i], cached, building);
 		}
 
-		var corrected = preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals[0]] : p).ToArray();
+		var corrected = preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals.First()] : p).ToArray();
 
 		foreach (var unique in building.Values.DistinctBy(c => c.Id))
 		{
@@ -78,7 +78,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var fromCache = preliminary.Externals.Select(e => cached.TryGetValue(e, out var m) ? (MediaIdentity?)m : null).FirstOrDefault(m => m is not null);
 
 		var anchor = fromBuilding ?? fromCache ?? preliminary;
-		var canonical = anchor with { Externals = [.. anchor.Externals, .. preliminary.Externals.Except(anchor.Externals)] };
+		var canonical = anchor with { Externals = anchor.Externals + preliminary.Externals };
 
 		foreach (var ext in canonical.Externals)
 		{

@@ -41,14 +41,10 @@
                         @foreach (var media in _trendingMedia)
                         {
                             <MediaGridTile @key="media"
-                                           ImageUrl="@media.BackdropUrl"
-                                           Title="@media.Title"
+                                           Media="media"
                                            OnClick="() => SelectMedia(media)"
                                            ShowBookmark="true"
-                                           IsInWatchlist="IsInWatchlist(media)"
-                                           IsUnresolved="@(media is UnresolvedTrendingMedia)"
-                                           Rating="@media.Rating"
-                                           Date="@media.ReleaseDate"/>
+                                           IsInWatchlist="IsInWatchlist(media)"/>
                         }
                     </div>
 
@@ -64,23 +60,16 @@
 
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
-                  ShowContent="@(_selectedMedia is not null)"
-                  Title="@(_selectedMedia?.Title ?? string.Empty)"
-                  MediaType="@(_selectedMedia?.MediaType ?? MediaType.Movie)"
-                  ReleaseDate="@(_selectedMedia?.ReleaseDate ?? DateTimeOffset.MinValue)"
-                  ImageUrl="@(_selectedMedia?.PosterUrl ?? string.Empty)"
-                  Rating="@(_selectedMedia?.Rating)"
+                  Media="_selectedMedia"
                   ShowMetadataRow="true"
-                  Description="@_selectedMedia?.Description"
-                  Ids="@(_selectedMedia?.Externals)"
                   ButtonAction="ToggleWatchlistAsync"
                   ButtonText="GetSideMenuButtonText"
                   ButtonIcon="GetSideMenuButtonIcon"
-                  ButtonDisabled="@(_selectedMedia is UnresolvedTrendingMedia or null)"/>
+                  ButtonDisabled="@SelectedIsUnresolvedOrNull"/>
 
 @code {
-    private IReadOnlyList<ITrendingMedia>? _trendingMedia;
-    private ITrendingMedia? _selectedMedia;
+    private IReadOnlyList<MediaMatch>? _trendingMedia;
+    private MediaMatch? _selectedMedia;
     private bool _isLoading;
     private bool _isSheetOpen;
     private bool _isOAuthenticated;
@@ -91,6 +80,8 @@
     private int _currentPage = 1;
     private int _totalPages = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    private bool SelectedIsUnresolvedOrNull => !_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved;
 
     protected override async Task OnInitializedAsync()
     {
@@ -202,9 +193,9 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWatchlist(ITrendingMedia media) => media is TrendingMedia resolved && _watchlisted.Contains(resolved.Id);
+    private bool IsInWatchlist(MediaMatch media) => !media.IsUnresolved && _watchlisted.Contains(media.Id);
 
-    private void SelectMedia(ITrendingMedia media)
+    private void SelectMedia(MediaMatch media)
     {
         _selectedMedia = media;
         _isSheetOpen = true;
@@ -212,28 +203,29 @@
 
     private string GetSideMenuButtonText()
     {
-        if (_selectedMedia is UnresolvedTrendingMedia or null)
+        if (!_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved)
         {
             return "Could not be matched";
         }
-        return IsInWatchlist(_selectedMedia) ? "Remove from Watchlist" : "Add to Watchlist";
+        return IsInWatchlist(_selectedMedia.Value) ? "Remove from Watchlist" : "Add to Watchlist";
     }
 
     private string GetSideMenuButtonIcon()
     {
-        if (_selectedMedia is UnresolvedTrendingMedia or null)
+        if (!_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved)
         {
             return "circle-alert";
         }
-        return IsInWatchlist(_selectedMedia) ? "x" : "plus";
+        return IsInWatchlist(_selectedMedia.Value) ? "x" : "plus";
     }
 
     private async Task ToggleWatchlistAsync()
     {
-        if (_selectedMedia is not TrendingMedia resolved)
+        if (!_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved)
         {
             return;
         }
+        var resolved = _selectedMedia.Value;
 
         if (IsInWatchlist(resolved))
         {

@@ -11,7 +11,7 @@ internal sealed class MediaSearchService(
 	IProviderConfigRepository configRepository
 ) : IMediaSearchService
 {
-	public async Task<IReadOnlyList<IMediaDetail>> SearchAsync(
+	public async Task<IReadOnlyList<MediaMatch>> SearchAsync(
 		string query,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -23,17 +23,8 @@ internal sealed class MediaSearchService(
 		{
 			return raws;
 		}
-		var groups = raws.Select(r => r.Identity.Externals).ToList();
+		var groups = raws.Select(r => r.Externals.ToList()).ToList();
 		var identities = await mediaService.ResolveIdentitiesAsync(groups, cancellationToken);
-		return raws.Zip(identities, StampIdentity).ToList();
+		return raws.Zip(identities, (raw, identity) => raw.CombineIdentity(identity)).ToList();
 	}
-
-	private static IMediaDetail StampIdentity(IMediaDetail detail, MediaIdentity identity) =>
-		detail switch
-		{
-			MovieDetail m => m with { Identity = identity },
-			ShowDetail s => s with { Identity = identity },
-			UnresolvedMedia u => u with { Identity = identity },
-			_ => detail,
-		};
 }

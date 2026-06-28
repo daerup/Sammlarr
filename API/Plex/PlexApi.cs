@@ -9,7 +9,7 @@ namespace API.Plex;
 
 internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 {
-	public async Task<IMediaDetail> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<MediaMatch> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		if (mediaId is not PlexId plexId)
 		{
@@ -19,7 +19,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 		return await ByIdAsync(plexId, cancellationToken);
 	}
 
-	public async Task<IReadOnlyList<IMediaDetail>> SearchAsync(
+	public async Task<IReadOnlyList<MediaMatch>> SearchAsync(
 		string title,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -37,18 +37,18 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 
 		return result
 			.MediaContainer.SearchResults.SelectMany(c => c.NestedSearchResult)
-			.Select(s => s.Metadata.ToMediaDetailResult())
-			.DistinctBy(r => r.Identity.Externals.OfType<PlexId>().FirstOrDefault())
+			.Select(s => s.Metadata.ToMediaResult())
+			.DistinctBy(r => r.Externals.OfType<PlexId>().FirstOrDefault())
 			.ToList();
 	}
 
 	internal async Task<IReadOnlyList<IExternalMediaId>> LookUpExternalsAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var raw = await ByIdAsync(plexId, cancellationToken);
-		return raw.Identity.Externals;
+		return [.. raw.Externals];
 	}
 
-	private async Task<IMediaDetail> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	internal async Task<MediaMatch> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(PlexEndpoints.RatingKeyMetadata, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
@@ -59,7 +59,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 		{
 			throw new InvalidOperationException($"Plex returned no metadata for ratingKey {plexId.Value}.");
 		}
-		return metadata[0].ToMediaDetailResult();
+		return metadata[0].ToMedia();
 	}
 
 	internal async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
@@ -83,103 +83,102 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 
 file static class PlexMetadataMappingExtensions
 {
-	public static IMediaDetail ToMediaDetailResult(this PlexTypes.Search.Metadata result)
-	{
-		var mediatype = ParseMediaType(result.Type);
-		return mediatype switch
+	public static MediaMatch ToMediaResult(this PlexTypes.Search.Metadata result) =>
+		ParseMediaType(result.Type) switch
 		{
-			MediaType.Movie => MapMovieResult(result),
-			MediaType.Show => MapShowResult(result),
+			MediaType.Movie => MediaMatch.FromMedia(MapMovieResult(result)),
+			MediaType.Show => MediaMatch.FromMedia(MapShowResult(result)),
+			_ => MapUnmatched(result),
 		};
-	}
 
-	public static IMediaDetail ToMediaDetailResult(this PlexTypes.ById.Metadata result)
-	{
-		var mediatype = ParseMediaType(result.Type);
-		return mediatype switch
+	public static MediaMatch ToMedia(this PlexTypes.ById.Metadata result) =>
+		ParseMediaType(result.Type) switch
 		{
-			MediaType.Movie => MapMovieResult(result),
-			MediaType.Show => MapShowResult(result),
+			MediaType.Movie => MediaMatch.FromMedia(MapMovieResult(result)),
+			MediaType.Show => MediaMatch.FromMedia(MapShowResult(result)),
+			_ => MapUnmatched(result),
 		};
-	}
 
-	private static MovieDetail MapMovieResult(PlexTypes.ById.Metadata result) =>
+	private static PartialMovie MapMovieResult(PlexTypes.ById.Metadata result) =>
 		new()
 		{
-			Identity = new MediaIdentity(default, BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)),
-			Title = result.Title,
-			Tagline = result.Tagline ?? string.Empty,
-			Summary = result.Summary ?? string.Empty,
-			PosterUrl = NormalizePlexImageUrl(result.Poster),
-			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			Runtime = TimeSpan.FromMilliseconds(result.Duration),
+			Identity = new MediaIdentity(default, [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)]),
+			Title = result.Title.NullIfBlank(),
+			Tagline = result.Tagline.NullIfBlank(),
+			Summary = result.Summary.NullIfBlank(),
+			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
+			Runtime = result.Duration > 0 ? TimeSpan.FromMilliseconds(result.Duration) : null,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = (result.Genre ?? [])
-				.Select(genre => genre.Tag)
-				.Where(tag => !string.IsNullOrWhiteSpace(tag))
-				.Distinct(StringComparer.OrdinalIgnoreCase)
-				.ToList(),
+			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
-	private static ShowDetail MapShowResult(PlexTypes.ById.Metadata result) =>
+	private static PartialShow MapShowResult(PlexTypes.ById.Metadata result) =>
 		new()
 		{
-			Identity = new MediaIdentity(default, BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)),
-			Title = result.Title ?? string.Empty,
-			Tagline = result.Tagline ?? string.Empty,
-			Summary = result.Summary ?? string.Empty,
-			Seasons = result.SeasonCount ?? 0,
-			Episodes = result.EpisodeCount ?? 0,
-			PosterUrl = NormalizePlexImageUrl(result.Poster),
-			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			RuntimePerEpisode = TimeSpan.FromMilliseconds(result.Duration),
+			Identity = new MediaIdentity(default, [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)]),
+			Title = result.Title.NullIfBlank(),
+			Tagline = result.Tagline.NullIfBlank(),
+			Summary = result.Summary.NullIfBlank(),
+			Seasons = result.SeasonCount,
+			Episodes = result.EpisodeCount,
+			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
+			RuntimePerEpisode = result.Duration > 0 ? TimeSpan.FromMilliseconds(result.Duration) : null,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = (result.Genre ?? [])
-				.Select(genre => genre.Tag)
-				.Where(tag => !string.IsNullOrWhiteSpace(tag))
-				.Distinct(StringComparer.OrdinalIgnoreCase)
-				.ToList(),
+			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
-	private static MovieDetail MapMovieResult(PlexTypes.Search.Metadata result) =>
+	private static PartialMovie MapMovieResult(PlexTypes.Search.Metadata result) =>
 		new()
 		{
 			Identity = new MediaIdentity(default, [result.PlexId]),
-			Title = result.Title,
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = NormalizePlexImageUrl(result.Thumb),
-			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : TimeSpan.Zero,
+			Title = result.Title.NullIfBlank(),
+			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
+			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = (result.Genre ?? [])
-				.Select(genre => genre.Tag)
-				.Where(tag => !string.IsNullOrWhiteSpace(tag))
-				.Distinct(StringComparer.OrdinalIgnoreCase)
-				.ToList(),
+			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
-	private static ShowDetail MapShowResult(PlexTypes.Search.Metadata result) =>
+	private static PartialShow MapShowResult(PlexTypes.Search.Metadata result) =>
 		new()
 		{
 			Identity = new MediaIdentity(default, [result.PlexId]),
-			Title = result.Title,
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			Seasons = result.SeasonCount ?? 0,
-			Episodes = result.EpisodeCount ?? 0,
-			PosterUrl = NormalizePlexImageUrl(result.Thumb),
-			BackdropUrl = NormalizePlexImageUrl(result.Art),
-			RuntimePerEpisode = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : TimeSpan.Zero,
+			Title = result.Title.NullIfBlank(),
+			Seasons = result.SeasonCount,
+			Episodes = result.EpisodeCount,
+			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
+			RuntimePerEpisode = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
-			Genres = (result.Genre ?? [])
-				.Select(genre => genre.Tag)
-				.Where(tag => !string.IsNullOrWhiteSpace(tag))
-				.Distinct(StringComparer.OrdinalIgnoreCase)
-				.ToList(),
+			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
-	private static IReadOnlyList<IExternalMediaId> BuildExternals(PlexId plex, IEnumerable<TmdbId> tmdb, IEnumerable<ImdbId> imdb, IEnumerable<TvdbId> tvdb)
+	private static UnmatchedMedia MapUnmatched(PlexTypes.ById.Metadata result) =>
+		new()
+		{
+			Externals = [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)],
+			Title = result.Title.NullIfBlank() ?? "",
+			Summary = result.Summary.NullIfBlank() ?? "",
+			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank() ?? "",
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank() ?? "",
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
+		};
+
+	private static UnmatchedMedia MapUnmatched(PlexTypes.Search.Metadata result) =>
+		new()
+		{
+			Externals = [result.PlexId],
+			Title = result.Title.NullIfBlank() ?? "",
+			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank() ?? "",
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank() ?? "",
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
+		};
+
+	private static List<IExternalMediaId> BuildExternals(PlexId plex, IEnumerable<TmdbId> tmdb, IEnumerable<ImdbId> imdb, IEnumerable<TvdbId> tvdb)
 	{
 		var set = new List<IExternalMediaId> { plex };
 		foreach (var id in tmdb)
@@ -197,15 +196,18 @@ file static class PlexMetadataMappingExtensions
 		return set;
 	}
 
+	private static IEnumerable<string> GenreTags(IEnumerable<string>? tags) =>
+		(tags ?? []).Where(tag => !string.IsNullOrWhiteSpace(tag)).Distinct(StringComparer.OrdinalIgnoreCase);
+
 	private static MediaType ParseMediaType(string value) =>
 		value.ToLowerInvariant() switch
 		{
 			"movie" => MediaType.Movie,
 			"show" => MediaType.Show,
+			_ => MediaType.Unknown,
 		};
 
-	private static DateOnly ParseReleaseDate(string? value) =>
-		DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : DateOnly.MinValue;
+	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 
 	private static string NormalizePlexImageUrl(string? url)
 	{

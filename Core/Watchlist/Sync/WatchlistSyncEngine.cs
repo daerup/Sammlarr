@@ -3,7 +3,6 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Media;
-using Contracts.Media.Convertions;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -132,9 +131,9 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).Zip(externals, cancellationToken);
 			await foreach (var (result, external) in pipeline)
 			{
-				if (result is Identification identification)
+				if (result is MediaIdentity identity)
 				{
-					remoteMediaIds.Add(identification.Id);
+					remoteMediaIds.Add(identity.Id);
 				}
 				else
 				{
