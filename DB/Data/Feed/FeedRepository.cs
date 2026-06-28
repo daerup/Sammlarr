@@ -34,7 +34,7 @@ internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFact
 		return await ctx.Feeds.AsNoTracking().Where(l => l.Id == id).Select(project).FirstOrDefaultAsync(cancellationToken);
 	}
 
-	public async Task CreateFeedAsync(string name, FeedCreateData createData, CancellationToken cancellationToken = default)
+	public async Task<Guid> CreateFeedAsync(string name, FeedCreateData createData, CancellationToken cancellationToken = default)
 	{
 		var entity = new FeedEntity
 		{
@@ -52,6 +52,7 @@ internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFact
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		ctx.Feeds.Add(entity);
 		await ctx.SaveChangesAsync(cancellationToken);
+		return entity.Id;
 	}
 
 	public async Task UpdateFeedAsync(Guid id, FeedUpdateData updateData, CancellationToken cancellationToken = default)

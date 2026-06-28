@@ -22,10 +22,25 @@
     <HeaderActions>
         @if (_previewStatus.IsLoading || _isApplying)
         {
-            <BbButton Variant="ButtonVariant.Default" Disabled="true">
-                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                <span>@(_isApplying && !_previewStatus.IsLoading ? "Applying…" : "Testing…")</span>
-            </BbButton>
+            @if (_previewStatus.EarlySaveAllowed && CanSave)
+            {
+                <BbTooltip>
+                    <BbTooltipTrigger>
+                        <HoverButton Preset="HoverButtonPreset.Success" OnClick="QuickSaveAsync" Disabled="_isSaving">
+                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            <span>Quick save</span>
+                        </HoverButton>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>Saves the feed now without waiting for the preview to finish</BbTooltipContent>
+                </BbTooltip>
+            }
+            else
+            {
+                <BbButton Variant="ButtonVariant.Default" Disabled="true">
+                    <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                    <span>@(_isApplying && !_previewStatus.IsLoading ? "Applying…" : "Testing…")</span>
+                </BbButton>
+            }
         }
         else if (ShowApplyButton)
         {
@@ -112,6 +127,7 @@
     private FeedConfig _config = new();
     private int? _storedHash;
     private int _appliedHash;
+    private Guid? _savedFeedId;
 
     private bool _showValidation;
     private bool _isSaving;
@@ -125,7 +141,7 @@
     private bool HasChanged => _storedHash is null || _config.GetSaveHash() != _storedHash;
     private bool HasPendingChanges => _config.GetPreviewHash() != _appliedHash;
 
-    private bool CanSave => _config.IsValid && _previewStatus.HasResults && HasChanged;
+    private bool CanSave => _config.IsValid && (_previewStatus.HasResults || _previewStatus.EarlySaveAllowed) && HasChanged;
 
     private bool ShowTestButton => !_previewStatus.HasResults && !_previewStatus.IsLoading && !_isSaving;
     private bool ShowApplyButton => _previewStatus.HasResults && (HasPendingChanges || _previewStatus.HasEnrollmentChanges) && !_isSaving;
@@ -174,6 +190,10 @@
             Schedule = feed.Schedule,
         };
         _storedHash = _config.GetSaveHash();
+        if (EditFeedId is not null)
+        {
+            _savedFeedId = sourceId;
+        }
         _configKey++;
         _pendingAutoApply = true;
     }
@@ -245,42 +265,7 @@
 
         try
         {
-            if (EditFeedId is not null)
-            {
-                var editId = UrlGuid.Decode(EditFeedId);
-                var updateData = new FeedUpdateData
-                {
-                    Name = _config.Name.Trim(),
-                    IsEnabled = _config.IsEnabled,
-                    Provider = _config.Provider!.Value,
-                    Strategy = _config.Strategy,
-                    Identifier = _config.Identifier.Trim(),
-                    Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
-                    Sort = _config.Sort,
-                    Limit = _config.Limit,
-                    Schedule = _config.Schedule,
-                };
-
-                await FeedRepository.UpdateFeedAsync(editId, updateData, CancellationToken.None);
-            }
-            else
-            {
-                var createData = new FeedCreateData
-                {
-                    IsEnabled = _config.IsEnabled,
-                    Provider = _config.Provider!.Value,
-                    Strategy = _config.Strategy,
-                    Identifier = _config.Identifier.Trim(),
-                    Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
-                    Sort = _config.Sort,
-                    Limit = _config.Limit,
-                    Schedule = _config.Schedule,
-                };
-
-                await FeedRepository.CreateFeedAsync(_config.Name.Trim(), createData, CancellationToken.None);
-            }
-
-            NavigationManager.NavigateTo("/feeds");
+            await PersistAsync(navigate: true);
         }
         catch (OperationCanceledException) {}
         catch (Exception ex)
@@ -289,6 +274,76 @@
             _isSaving = false;
         }
     }
+
+    private async Task QuickSaveAsync()
+    {
+        if (!CanSave || _isSaving)
+        {
+            return;
+        }
+
+        _isSaving = true;
+        try
+        {
+            await PersistAsync(navigate: false);
+            Notifier.Info("Feed saved.");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to save feed");
+        }
+        finally
+        {
+            _isSaving = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task PersistAsync(bool navigate)
+    {
+        if (_savedFeedId is { } id)
+        {
+            await FeedRepository.UpdateFeedAsync(id, BuildUpdateData(), CancellationToken.None);
+        }
+        else
+        {
+            _savedFeedId = await FeedRepository.CreateFeedAsync(_config.Name.Trim(), BuildCreateData(), CancellationToken.None);
+        }
+
+        _storedHash = _config.GetSaveHash();
+
+        if (navigate)
+        {
+            NavigationManager.NavigateTo("/feeds");
+        }
+    }
+
+    private FeedUpdateData BuildUpdateData() =>
+        new()
+        {
+            Name = _config.Name.Trim(),
+            IsEnabled = _config.IsEnabled,
+            Provider = _config.Provider!.Value,
+            Strategy = _config.Strategy,
+            Identifier = _config.Identifier.Trim(),
+            Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
+            Sort = _config.Sort,
+            Limit = _config.Limit,
+            Schedule = _config.Schedule,
+        };
+
+    private FeedCreateData BuildCreateData() =>
+        new()
+        {
+            IsEnabled = _config.IsEnabled,
+            Provider = _config.Provider!.Value,
+            Strategy = _config.Strategy,
+            Identifier = _config.Identifier.Trim(),
+            Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
+            Sort = _config.Sort,
+            Limit = _config.Limit,
+            Schedule = _config.Schedule,
+        };
 
     private Task HandleContainerKeyDownAsync(KeyboardEventArgs args)
     {
