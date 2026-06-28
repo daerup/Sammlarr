@@ -128,8 +128,8 @@
                             <MediaDetailTile @key="item"
                                              Media="item"
                                              Class="@(hoverStyle)"
-                                             IsFocused="_focusedResult == item.Id"
-                                             OnFocusIn="() => _focusedResult = item.Id"
+                                             IsFocused="_focusedResult == item.Key"
+                                             OnFocusIn="() => _focusedResult = item.Key"
                                              OnFocusOut="() => ClearFocus(item)">
                                 <Icons>
                                     @if (isDimmed)
@@ -177,8 +177,8 @@
                             <div class="pb-2">
                                 <MediaDetailTile @key="item"
                                                  Media="item.Media"
-                                                 IsFocused="_focusedResult == item.Media.Id"
-                                                 OnFocusIn="() => _focusedResult = item.Media.Id"
+                                                 IsFocused="_focusedResult == item.Media.Key"
+                                                 OnFocusIn="() => _focusedResult = item.Media.Key"
                                                  OnFocusOut="() => ClearFocus(item.Media)">
                                     <Icons>
                                         <BbTooltipProvider>
@@ -258,7 +258,7 @@
 
     private string _searchQuery = string.Empty;
     private readonly HashSet<Func<QueryResult<MediaQueryRow>, bool>> _activeFilters = [];
-    private MediaId? _focusedResult;
+    private string? _focusedResult;
     private MediaId? _togglingWatchlistItem;
     private MediaId? _togglingBlacklistItem;
     private readonly HashSet<MediaId> _watchlisted = new();
@@ -569,7 +569,7 @@
 
     private void ClearFocus(MediaMatch item)
     {
-        if (_focusedResult == item.Id)
+        if (_focusedResult == item.Key)
         {
             _focusedResult = null;
         }

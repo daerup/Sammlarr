@@ -84,13 +84,13 @@
                     <div class="search-modal-results space-y-2 pr-1" tabindex="-1">
                         @foreach (var result in _searchResults)
                         {
-                            <MediaDetailTile @key="result.Id"
+                            <MediaDetailTile @key="result.Key"
                                              Media="result"
-                                             IsFocused="_focusedResult == result.Id"
-                                             OnFocusIn="() => _focusedResult = result.Id"
+                                             IsFocused="_focusedResult == result.Key"
+                                             OnFocusIn="() => _focusedResult = result.Key"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaMatch>(this, ToggleAsync)))
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && !result.IsUnresolved && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaMatch>(this, ToggleAsync)))
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -136,7 +136,7 @@
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
-    private MediaId? _focusedResult;
+    private string? _focusedResult;
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
@@ -167,7 +167,7 @@
     }
 
 
-    private bool IsSearchResultMarked(MediaMatch result) => IsInWatchlist.Invoke(result.Id);
+    private bool IsSearchResultMarked(MediaMatch result) => !result.IsUnresolved && IsInWatchlist.Invoke(result.Id);
 
     private async Task CloseAsync()
     {
@@ -241,7 +241,7 @@
 
     private async Task ToggleAsync(MediaMatch result)
     {
-        if (_isAdding)
+        if (_isAdding || result.IsUnresolved)
         {
             return;
         }
@@ -261,7 +261,7 @@
 
     private void ClearFocusedResult(MediaMatch result)
     {
-        if (_focusedResult == result.Id)
+        if (_focusedResult == result.Key)
         {
             _focusedResult = null;
         }
