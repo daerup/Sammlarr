@@ -9,7 +9,15 @@ public class UnionAssertion<TOuter, TInner>(AssertionContext<TOuter> context) : 
 	where TOuter : IUnion
 {
 	private static Func<TOuter?, TInner?> MapToInner() =>
-		x => x?.Value is TInner inner ? inner : throw new InvalidCastException($"found {(x?.Value?.GetType()).GetGenericName()}");
+		x =>
+		{
+			object? current = x?.Value;
+			while (current is IUnion union && current is not TInner)
+			{
+				current = union.Value;
+			}
+			return current is TInner inner ? inner : throw new InvalidCastException($"found {(current?.GetType()).GetGenericName()}");
+		};
 
 	protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TInner> metadata) =>
 		Task.FromResult(metadata.Exception != null ? AssertionResult.Failed(metadata.Exception.Message) : AssertionResult.Passed);

@@ -75,7 +75,7 @@ public class MediaSearchServiceTests
 				(IReadOnlyList<IReadOnlyList<IExternalMediaId>> groups, CancellationToken _) =>
 				{
 					captured = groups;
-					return [new MediaIdentity(MediaId.From(Guid.NewGuid()), groups[0])];
+					return [new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. groups[0]])];
 				}
 			);
 		var configRepository = ConfigWithSearchProvider(MediaSearchProvider.Plex);
@@ -105,17 +105,6 @@ public class MediaSearchServiceTests
 		return repo;
 	}
 
-	private static MovieDetail BuildRawMovie(IReadOnlyList<IExternalMediaId> externals) =>
-		new()
-		{
-			Identity = new MediaIdentity(default, externals),
-			Title = "Title",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = DateOnly.MinValue,
-			Genres = [],
-			Runtime = TimeSpan.Zero,
-		};
+	private static PartialMovie BuildRawMovie(IReadOnlyList<IExternalMediaId> externals) =>
+		new() { Identity = new MediaIdentity(default, [.. externals]), Title = "Title" };
 }

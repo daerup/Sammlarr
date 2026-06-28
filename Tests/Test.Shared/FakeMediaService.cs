@@ -1,14 +1,12 @@
 using Contracts;
 using Contracts.Media;
-using Contracts.Media.Convertions;
-using Contracts.Media.Search;
 
 namespace Test.Shared;
 
 public sealed class FakeMediaService : IMediaService
 {
 	private readonly Dictionary<IExternalMediaId, MediaId> _resolutions = new();
-	private readonly Dictionary<MediaId, IMediaDetail> _metadata = new();
+	private readonly Dictionary<MediaId, MediaMatch> _metadata = new();
 	private readonly Dictionary<MediaId, TimeSpan> _delays = new();
 
 	public List<IReadOnlyList<MediaId>> InvalidatedBatches { get; } = new();
@@ -19,7 +17,7 @@ public sealed class FakeMediaService : IMediaService
 		return this;
 	}
 
-	public FakeMediaService RegisterMetadata(MediaId id, IMediaDetail detail)
+	public FakeMediaService RegisterMetadata(MediaId id, MediaMatch detail)
 	{
 		_metadata[id] = detail;
 		return this;
@@ -31,7 +29,7 @@ public sealed class FakeMediaService : IMediaService
 		return this;
 	}
 
-	public async IAsyncEnumerable<Result<Identification>> IdentifyAsync(
+	public async IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(
 		IEnumerable<ResolveRequest> requests,
 		[System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -44,7 +42,7 @@ public sealed class FakeMediaService : IMediaService
 		}
 	}
 
-	public async IAsyncEnumerable<Result<IMediaDetail>> GetDetailsAsync(
+	public async IAsyncEnumerable<Result<MediaMatch>> GetDetailsAsync(
 		IEnumerable<MediaId> mediaIds,
 		[System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -60,7 +58,7 @@ public sealed class FakeMediaService : IMediaService
 		}
 	}
 
-	public async IAsyncEnumerable<Result<IMediaDetail>> GetDetailsAsync(
+	public async IAsyncEnumerable<Result<MediaMatch>> GetDetailsAsync(
 		IEnumerable<ResolveRequest> requests,
 		[System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -68,16 +66,16 @@ public sealed class FakeMediaService : IMediaService
 		foreach (var req in requests)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			if (Identify(req) is not Identification identification)
+			if (Identify(req) is not MediaIdentity identity)
 			{
 				yield return Error.From("unresolved");
 				continue;
 			}
-			if (_delays.TryGetValue(identification.Id, out var delay))
+			if (_delays.TryGetValue(identity.Id, out var delay))
 			{
 				await Task.Delay(delay, cancellationToken);
 			}
-			yield return GetDetail(identification.Id);
+			yield return GetDetail(identity.Id);
 		}
 	}
 
@@ -90,7 +88,7 @@ public sealed class FakeMediaService : IMediaService
 			.Select(group =>
 			{
 				var existing = group.Select(c => _resolutions.GetValueOrDefault(c)).FirstOrDefault(id => id != default);
-				return new MediaIdentity(existing == default ? MediaId.From(Guid.NewGuid()) : existing, group);
+				return new MediaIdentity(existing == default ? MediaId.From(Guid.NewGuid()) : existing, [.. group]);
 			})
 			.ToList();
 		return Task.FromResult<IReadOnlyList<MediaIdentity>>(identities);
@@ -102,10 +100,10 @@ public sealed class FakeMediaService : IMediaService
 		return Task.CompletedTask;
 	}
 
-	private Result<Identification> Identify(ResolveRequest req) =>
-		TryResolve(req) is { } mediaId ? new Identification(mediaId, req.Candidates, req.Candidates[0]) : Error.From("unresolved");
+	private Result<MediaIdentity> Identify(ResolveRequest req) =>
+		TryResolve(req) is { } mediaId ? new MediaIdentity(mediaId, [.. req.Candidates]) : Error.From("unresolved");
 
-	private Result<IMediaDetail> GetDetail(MediaId id) => _metadata.TryGetValue(id, out var found) ? found : Error.From("not found");
+	private Result<MediaMatch> GetDetail(MediaId id) => _metadata.TryGetValue(id, out var found) ? found : Error.From("not found");
 
 	private MediaId? TryResolve(ResolveRequest req)
 	{

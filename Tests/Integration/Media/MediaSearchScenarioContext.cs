@@ -4,5 +4,5 @@ namespace Integration.Tests.Media;
 
 public sealed class MediaSearchScenarioContext
 {
-	public IReadOnlyList<IMediaDetail>? Results { get; set; }
+	public IReadOnlyList<MediaMatch>? Results { get; set; }
 }

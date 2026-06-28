@@ -59,7 +59,7 @@ public class BlacklistServiceTests
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
 		await Assert.That(item.Detail.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(item.Detail.Title).IsEqualTo(detailResult.Title);
+		await Assert.That(item.Detail is Movie movie && movie.Title == detailResult.Title).IsTrue();
 		await Assert.That(item.AddedAt).IsEqualTo(addedAt);
 	}
 
@@ -95,7 +95,7 @@ public class BlacklistServiceTests
 		return new BlacklistService(repo.Object, providerConfigRepository.Object, media ?? new FakeMediaService());
 	}
 
-	private MovieDetail CreateMovieDetailResult(MediaId mediaId) =>
+	private Movie CreateMovieDetailResult(MediaId mediaId) =>
 		new()
 		{
 			Identity = new MediaIdentity(mediaId, [PlexId.From(_faker.Random.AlphaNumeric(10), MediaType.Movie)]),

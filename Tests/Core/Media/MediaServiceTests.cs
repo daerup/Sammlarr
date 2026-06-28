@@ -39,7 +39,7 @@ public class MediaServiceTests
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(3);
-		await Assert.That(results.All(r => r is Identification)).IsTrue();
+		await Assert.That(results.All(r => r is MediaIdentity)).IsTrue();
 	}
 
 	[Test]
@@ -71,8 +71,8 @@ public class MediaServiceTests
 		var results = await testee.GetDetailsAsync([firstId, secondId]).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		await Assert.That(results[0].Value).IsSameReferenceAs(firstDetail);
-		await Assert.That(results[1].Value).IsSameReferenceAs(secondDetail);
+		await Assert.That(results[0]).IsOfUnionType<Result<MediaMatch>, Movie>().And.IsSameReferenceAs(firstDetail);
+		await Assert.That(results[1]).IsOfUnionType<Result<MediaMatch>, Movie>().And.IsSameReferenceAs(secondDetail);
 	}
 
 	[Test]
@@ -136,8 +136,8 @@ public class MediaServiceTests
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		await Assert.That(results[0].Value).IsSameReferenceAs(firstDetail);
-		await Assert.That(results[1].Value).IsSameReferenceAs(secondDetail);
+		await Assert.That(results[0]).IsOfUnionType<Result<MediaMatch>, Movie>().And.IsSameReferenceAs(firstDetail);
+		await Assert.That(results[1]).IsOfUnionType<Result<MediaMatch>, Movie>().And.IsSameReferenceAs(secondDetail);
 	}
 
 	[Test]
@@ -236,31 +236,12 @@ public class MediaServiceTests
 		Mock<ITypedMemoryCache<string, bool>> UnresolvedCache
 	);
 
-	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external) =>
-		new(
-			new UnresolvedMedia
-			{
-				Identity = new MediaIdentity(id, [external]),
-				MediaType = MediaType.Unknown,
-				Title = string.Empty,
-				ReleaseDate = DateOnly.MinValue,
-			},
-			_now
-		);
+	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external) => new(new PartialMovie { Identity = new MediaIdentity(id, [external]) }, _now);
 
 	private static CachedMedia StaleCached(MediaId id) =>
-		new(
-			new UnresolvedMedia
-			{
-				Identity = new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]),
-				MediaType = MediaType.Unknown,
-				Title = string.Empty,
-				ReleaseDate = DateOnly.MinValue,
-			},
-			null
-		);
+		new(new PartialMovie { Identity = new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]) }, null);
 
-	private static MovieDetail BuildDetail(MediaId id, IExternalMediaId? extra = null)
+	private static Movie BuildDetail(MediaId id, IExternalMediaId? extra = null)
 	{
 		var plex = PlexId.From($"plex-{id}", MediaType.Movie);
 		return new()
@@ -277,7 +258,7 @@ public class MediaServiceTests
 		};
 	}
 
-	private static MovieDetail CompleteMovie(IExternalMediaId external) =>
+	private static Movie CompleteMovie(IExternalMediaId external) =>
 		new()
 		{
 			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [external]),

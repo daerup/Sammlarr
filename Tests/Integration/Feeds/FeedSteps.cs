@@ -92,7 +92,7 @@ public class FeedSteps(FeedScenarioContext ctx, SammlarrScenarioContext sammlarr
 	public async Task ThenItemCount(int count) => await Assert.That(ctx.Items!).Count().IsEqualTo(count);
 
 	[Then("all feed items are unresolved")]
-	public async Task ThenAllUnresolved() => await Assert.That(ctx.Items!.All(item => item is UnresolvedMedia)).IsTrue();
+	public async Task ThenAllUnresolved() => await Assert.That(ctx.Items!.All(item => item is not IMedia)).IsTrue();
 
 	[Then("{string} has the {MediaProvider} ID {string} stored")]
 	public async Task ThenHasExternalIdStored(string key, MediaProvider provider, string id)

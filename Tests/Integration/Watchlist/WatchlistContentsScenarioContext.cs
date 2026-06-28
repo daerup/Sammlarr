@@ -5,6 +5,6 @@ namespace Integration.Tests.Watchlist;
 
 public sealed class WatchlistContentsScenarioContext
 {
-	public List<IMediaDetail>? Items { get; set; }
+	public List<MediaMatch>? Items { get; set; }
 	public IReadOnlySet<MediaId>? Ids { get; set; }
 }
