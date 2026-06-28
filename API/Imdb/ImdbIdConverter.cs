@@ -1,7 +1,7 @@
 using API.Plex;
 using Contracts;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 
 namespace API.Imdb;
 

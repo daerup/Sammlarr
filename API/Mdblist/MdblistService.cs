@@ -5,7 +5,7 @@ using API.Mdblist.Types;
 using Contracts;
 using Contracts.Feed;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Contracts.Settings;
 using Shared;
 using Shared.Telemetry;
@@ -17,7 +17,7 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
 
-	public async IAsyncEnumerable<MediaMatch> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
@@ -27,11 +27,9 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 		{
 			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie)).ToList();
 			var requests = pairs.Select(pair => new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), watchlistProvider, BuildHints(pair)));
-			var pipeline = media.GetDetailsAsync(requests, cancellationToken).Zip(pairs, cancellationToken);
-
-			await foreach (var (result, pair) in pipeline)
+			await foreach (var result in media.ResolveDetailsAsync(requests, cancellationToken))
 			{
-				yield return result is MediaMatch detail ? detail : BuildUnmatched(pair.ListItem, pair.MediaType);
+				yield return result;
 			}
 
 			foreach (var unknown in page.unknowns)
@@ -80,15 +78,7 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 		);
 	}
 
-	private static MediaMatch BuildUnmatched(MdblistTypes.ListItems.IListItem item, MediaType mediaType) =>
-		new UnmatchedMedia
-		{
-			Externals = [.. ExtractIds(item.ids, mediaType)],
-			Title = item.title,
-			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
-		};
-
-	private static MediaMatch BuildUnknown(MdblistTypes.ListItems.UnknownListItem item) =>
+	private static MediaLookup BuildUnknown(MdblistTypes.ListItems.UnknownListItem item) =>
 		new UnmatchedMedia
 		{
 			Externals = [.. ExtractIds(item.ids, item.MediaType)],

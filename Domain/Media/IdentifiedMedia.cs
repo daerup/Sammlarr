@@ -1,8 +1,8 @@
 namespace Domain.Media;
 
-public union MediaMatch(IMedia, IPartialMedia, UnmatchedMedia)
+public union IdentifiedMedia(IMedia, IPartialMedia)
 {
-	public static MediaMatch FromMedia(IPartialMedia partial) =>
+	public static IdentifiedMedia From(IPartialMedia partial) =>
 		partial switch
 		{
 			PartialMovie movie when partial.IsComplete => new Movie

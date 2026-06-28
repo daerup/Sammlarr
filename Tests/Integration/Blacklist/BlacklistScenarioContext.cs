@@ -5,6 +5,6 @@ namespace Integration.Tests.Blacklist;
 
 public sealed class BlacklistScenarioContext
 {
-	public List<MediaMatch>? Items { get; set; }
+	public List<MediaLookup>? Items { get; set; }
 	public IReadOnlySet<MediaId>? Ids { get; set; }
 }

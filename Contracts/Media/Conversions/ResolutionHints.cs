@@ -1,4 +1,4 @@
-namespace Contracts.Media.Convertions;
+namespace Contracts.Media.Conversions;
 
 public record ResolutionHints
 {

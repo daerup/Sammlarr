@@ -10,7 +10,7 @@ namespace DB.Data.Access;
 internal class ApiKeyConfigRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	ITypedMemoryCache<MediaProvider, string> cache,
-	IMediaMetadataRepository metadataRepository
+	IMediaRepository mediaRepository
 ) : IApiKeyConfigRepository
 {
 	public async ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
@@ -49,20 +49,17 @@ internal class ApiKeyConfigRepository(
 	public async Task RemoveApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
-		if (setting is null)
+		var deleted = await ctx.ApiKeySettings.Where(s => s.Provider == provider).ExecuteDeleteAsync(cancellationToken);
+		if (deleted == 0)
 		{
 			return;
 		}
-
-		ctx.ApiKeySettings.Remove(setting);
-		await ctx.SaveChangesAsync(cancellationToken);
 
 		cache.Remove(provider);
 
 		if (provider.AsRatingSource() is { } ratingSource)
 		{
-			await metadataRepository.RemoveRatingsBySourceAsync(ratingSource, cancellationToken);
+			await mediaRepository.RemoveRatingsBySourceAsync(ratingSource, cancellationToken);
 		}
 	}
 }

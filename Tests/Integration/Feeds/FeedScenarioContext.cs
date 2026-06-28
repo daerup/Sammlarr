@@ -14,5 +14,5 @@ public sealed record FeedItemSpec(string? Title, MediaType Type, int? Year, IRea
 public sealed class FeedScenarioContext
 {
 	public Dictionary<string, FeedRegistration> Feeds { get; } = new();
-	public List<MediaMatch>? Items { get; set; }
+	public List<MediaLookup>? Items { get; set; }
 }

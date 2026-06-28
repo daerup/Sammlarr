@@ -1,38 +1,34 @@
 namespace Core.Processing;
 
-public sealed record MediaQueryRow(MediaMatch Media)
+public sealed record MediaQueryRow(MediaLookup Media)
 {
-	public static MediaQueryRow From(MediaMatch media) => new(media);
+	public static MediaQueryRow From(MediaLookup media) => new(media);
 
 	public MediaType MediaType =>
 		Media switch
 		{
-			IMedia resolved => resolved.Type,
-			IPartialMedia partial => partial.Type,
+			IdentifiedMedia identified => identified.Type,
 			UnmatchedMedia unmatched => unmatched.Type,
 		};
 
 	public string? Title =>
 		Media switch
 		{
-			IMedia resolved => resolved.Title,
-			IPartialMedia partial => partial.Title,
+			IdentifiedMedia identified => identified.Title,
 			UnmatchedMedia unmatched => unmatched.Title,
 		};
 
 	public string? Tagline =>
 		Media switch
 		{
-			IMedia resolved => resolved.Tagline,
-			IPartialMedia partial => partial.Tagline,
-			_ => null,
+			IdentifiedMedia identified => identified.Tagline,
+			UnmatchedMedia => null,
 		};
 
 	public string? Summary =>
 		Media switch
 		{
-			IMedia resolved => resolved.Summary,
-			IPartialMedia partial => partial.Summary,
+			IdentifiedMedia identified => identified.Summary,
 			UnmatchedMedia unmatched => unmatched.Summary,
 		};
 
@@ -40,19 +36,19 @@ public sealed record MediaQueryRow(MediaMatch Media)
 		[
 			.. Media switch
 			{
-				IMedia resolved => resolved.Genres,
-				IPartialMedia partial => partial.Genres,
+				IdentifiedMedia identified => identified.Genres,
 				UnmatchedMedia unmatched => unmatched.Genres,
 			},
 		];
 
 	public DateOnly? ReleaseDate =>
-		Media switch
-		{
-			IMedia resolved => resolved.ReleaseDate,
-			IPartialMedia partial => partial.ReleaseDate,
-			UnmatchedMedia unmatched => unmatched.ReleaseDate,
-		}
+		(
+			Media switch
+			{
+				IdentifiedMedia identified => identified.ReleaseDate,
+				UnmatchedMedia unmatched => unmatched.ReleaseDate,
+			}
+		)
 			is { } date
 		&& date > DateOnly.MinValue
 			? date
@@ -62,8 +58,7 @@ public sealed record MediaQueryRow(MediaMatch Media)
 		(
 			Media switch
 			{
-				IMedia resolved => resolved.Rating,
-				IPartialMedia partial => partial.Rating,
+				IdentifiedMedia identified => identified.Rating,
 				UnmatchedMedia unmatched => unmatched.Rating,
 			}
 		).Average;
@@ -71,26 +66,23 @@ public sealed record MediaQueryRow(MediaMatch Media)
 	public int? RuntimeMinutes =>
 		Media switch
 		{
-			Movie movie => (int)Math.Round(movie.Runtime.TotalMinutes),
-			Show show => (int)Math.Round(show.RuntimePerEpisode.TotalMinutes),
-			PartialMovie movie => movie.Runtime is { } runtime ? (int)Math.Round(runtime.TotalMinutes) : null,
-			PartialShow show => show.RuntimePerEpisode is { } runtime ? (int)Math.Round(runtime.TotalMinutes) : null,
-			_ => null,
+			IdentifiedMedia identified => identified.RuntimePerEpisode is { } showRuntime ? (int)Math.Round(showRuntime.TotalMinutes)
+			: identified.Runtime is { } movieRuntime ? (int)Math.Round(movieRuntime.TotalMinutes)
+			: null,
+			UnmatchedMedia => null,
 		};
 
 	public int? Seasons =>
 		Media switch
 		{
-			Show show => show.Seasons,
-			PartialShow show => show.Seasons,
-			_ => null,
+			IdentifiedMedia identified => identified.Seasons,
+			UnmatchedMedia => null,
 		};
 
 	public int? Episodes =>
 		Media switch
 		{
-			Show show => show.Episodes,
-			PartialShow show => show.Episodes,
-			_ => null,
+			IdentifiedMedia identified => identified.Episodes,
+			UnmatchedMedia => null,
 		};
 }

@@ -9,7 +9,7 @@ namespace API.Plex;
 
 internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 {
-	public async Task<MediaMatch> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<MediaLookup> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		if (mediaId is not PlexId plexId)
 		{
@@ -19,7 +19,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 		return await ByIdAsync(plexId, cancellationToken);
 	}
 
-	public async Task<IReadOnlyList<MediaMatch>> SearchAsync(
+	public async Task<IReadOnlyList<MediaLookup>> SearchAsync(
 		string title,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default
@@ -49,7 +49,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 		return [.. raw.Externals];
 	}
 
-	internal async Task<MediaMatch> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	internal async Task<MediaLookup> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(PlexEndpoints.RatingKeyMetadata, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
@@ -84,19 +84,19 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 
 file static class PlexMetadataMappingExtensions
 {
-	public static MediaMatch ToMediaResult(this PlexTypes.Search.Metadata result) =>
+	public static MediaLookup ToMediaResult(this PlexTypes.Search.Metadata result) =>
 		ParseMediaType(result.Type) switch
 		{
-			MediaType.Movie => MediaMatch.FromMedia(MapMovieResult(result)),
-			MediaType.Show => MediaMatch.FromMedia(MapShowResult(result)),
+			MediaType.Movie => IdentifiedMedia.From(MapMovieResult(result)),
+			MediaType.Show => IdentifiedMedia.From(MapShowResult(result)),
 			_ => MapUnmatched(result),
 		};
 
-	public static MediaMatch ToMedia(this PlexTypes.ById.Metadata result) =>
+	public static MediaLookup ToMedia(this PlexTypes.ById.Metadata result) =>
 		ParseMediaType(result.Type) switch
 		{
-			MediaType.Movie => MediaMatch.FromMedia(MapMovieResult(result)),
-			MediaType.Show => MediaMatch.FromMedia(MapShowResult(result)),
+			MediaType.Movie => IdentifiedMedia.From(MapMovieResult(result)),
+			MediaType.Show => IdentifiedMedia.From(MapShowResult(result)),
 			_ => MapUnmatched(result),
 		};
 

@@ -58,14 +58,7 @@ internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbConte
 	public async Task ClearAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var credential = await ctx.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
-		if (credential is null)
-		{
-			return;
-		}
-
-		ctx.Credentials.Remove(credential);
-		await ctx.SaveChangesAsync(cancellationToken);
+		await ctx.Credentials.Where(c => c.WatchlistProvider == watchlistProvider).ExecuteDeleteAsync(cancellationToken);
 		cache.Remove(watchlistProvider);
 	}
 }

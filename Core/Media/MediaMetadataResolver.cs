@@ -17,16 +17,17 @@ internal sealed class MediaMetadataResolver(
 {
 	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
 
-	public async Task<Result<MediaMatch>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
+	public async Task<Result<MediaLookup>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartMetadataItem(identity.Id);
 
 		var config = await configRepository.GetAsync(cancellationToken);
 		var detail = await LookUpAsync(identity, config.SearchProvider, cancellationToken);
-		if (detail is not UnmatchedMedia)
+		var identified = detail.AsIdentified();
+		if (identified is not null)
 		{
-			detail = await EnrichAsync(detail, config.SearchProvider, cancellationToken);
-			detail = await ApplyRatingsAsync(detail, config.RatingProvider, cancellationToken);
+			var enriched = await EnrichAsync(identified.Value, config.SearchProvider, cancellationToken);
+			detail = await ApplyRatingsAsync(enriched, config.RatingProvider, cancellationToken);
 		}
 
 		SammlarrTelemetry.TagItemSuccess(activity, detail is not UnmatchedMedia);
@@ -34,7 +35,7 @@ internal sealed class MediaMetadataResolver(
 		return detail;
 	}
 
-	private async Task<MediaMatch> LookUpAsync(MediaIdentity identity, MediaSearchProvider provider, CancellationToken cancellationToken)
+	private async Task<MediaLookup> LookUpAsync(MediaIdentity identity, MediaSearchProvider provider, CancellationToken cancellationToken)
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
@@ -43,7 +44,7 @@ internal sealed class MediaMetadataResolver(
 		return detail.CombineIdentity(identity);
 	}
 
-	private async Task<MediaMatch> ApplyRatingsAsync(MediaMatch details, RatingProvider ratingProvider, CancellationToken cancellationToken)
+	private async Task<IdentifiedMedia> ApplyRatingsAsync(IdentifiedMedia details, RatingProvider ratingProvider, CancellationToken cancellationToken)
 	{
 		var ratingId = details.Externals.OfProvider(ratingProvider.AsMediaProvider());
 		if (ratingId is null)
@@ -56,7 +57,7 @@ internal sealed class MediaMetadataResolver(
 		return MediaMerger.WithRatings(details, ratings);
 	}
 
-	private async Task<MediaMatch> EnrichAsync(MediaMatch details, MediaSearchProvider searchProvider, CancellationToken cancellationToken)
+	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia details, MediaSearchProvider searchProvider, CancellationToken cancellationToken)
 	{
 		var primaryProvider = searchProvider.AsMediaProvider();
 		foreach (var provider in EnricherChain.Where(p => p != primaryProvider))
@@ -74,15 +75,15 @@ internal sealed class MediaMetadataResolver(
 
 			using var activity = SammlarrTelemetry.StartMetadataEnrich(providerId, partial.MissingFields);
 			var enrichment = await enricherIndex[provider].LookUpAsync(providerId, cancellationToken);
-			if (enrichment is null)
+			var enriched = enrichment?.AsIdentified();
+			if (enriched is null)
 			{
 				continue;
 			}
-			details = enrichment.Value switch
+			details = enriched.Value switch
 			{
 				IMedia complete => partial.MergeWith(complete),
 				IPartialMedia other => partial.MergeWith(other),
-				_ => details,
 			};
 		}
 		return details;

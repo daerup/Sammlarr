@@ -27,14 +27,12 @@ internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 	{
 		var raw = mediaId.Value;
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var media = await ctx.Media.SingleAsync(m => m.Id == raw, cancellationToken);
-
-		var alreadyBlacklisted = await ctx.Blacklist.AnyAsync(b => b.Media.Id == raw, cancellationToken);
-		if (alreadyBlacklisted)
+		if (await ctx.Blacklist.AnyAsync(b => b.Media.Id == raw, cancellationToken))
 		{
 			return;
 		}
 
+		var media = await ctx.Media.SingleAsync(m => m.Id == raw, cancellationToken);
 		ctx.Blacklist.Add(new BlacklistEntity { Media = media });
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
@@ -43,13 +41,6 @@ internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 	{
 		var raw = mediaId.Value;
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var entry = await ctx.Blacklist.SingleOrDefaultAsync(b => b.Media.Id == raw, cancellationToken);
-		if (entry is null)
-		{
-			return;
-		}
-
-		ctx.Blacklist.Remove(entry);
-		await ctx.SaveChangesAsync(cancellationToken);
+		await ctx.Blacklist.Where(b => b.Media.Id == raw).ExecuteDeleteAsync(cancellationToken);
 	}
 }

@@ -1,7 +1,5 @@
 using Contracts;
 using Contracts.Media;
-using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +9,7 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private MediaMetadataRepository _testee = null!;
-	private MediaRepository _mediaRepo = null!;
+	private MediaRepository _testee = null!;
 	private Mock<IDateTimeProvider> _dateTimeProvider = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
@@ -23,13 +20,12 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		_dateTimeProvider = IDateTimeProvider.Mock();
 		_dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
 
-		_mediaRepo = new MediaRepository(fixture.ContextFactory);
-		_testee = new MediaMetadataRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object));
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object));
 	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -45,17 +41,14 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		var secondFetch = firstFetch.AddHours(2);
 
 		_dateTimeProvider.Now.Returns(firstFetch);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
 		fixture.Context.ChangeTracker.Clear();
 
 		_dateTimeProvider.Now.Returns(secondFetch);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
 		fixture.Context.ChangeTracker.Clear();
 
-		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
-		await using var session = await sessionFactory.CreateAsync();
-		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
-		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
+		var row = (await _testee.GetAsync([mediaId])).Single();
 		await Assert.That(row.FetchedAt).IsEqualTo(secondFetch);
 	}
 
@@ -64,13 +57,13 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-500", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var marker = new DateTimeOffset(2020, 6, 15, 0, 0, 0, TimeSpan.Zero);
 		await fixture.Context.MediaMetadata.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
 
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]) with { Title = "Updated" })]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId]) with { Title = "Updated" }]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaMetadata.AsNoTracking().SingleAsync();
@@ -84,13 +77,10 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-810", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(mediaId, CreateMovieDetails(mediaId, [plexId]))]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])]);
 		fixture.Context.ChangeTracker.Clear();
 
-		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
-		await using var session = await sessionFactory.CreateAsync();
-		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
-		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
+		var row = (await _testee.GetAsync([mediaId])).Single();
 
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(row.Stored is Movie).IsTrue();
@@ -105,10 +95,7 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		var mediaId = await SeedMediaAsync([plexId]);
 		fixture.Context.ChangeTracker.Clear();
 
-		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
-		await using var session = await sessionFactory.CreateAsync();
-		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
-		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
+		var row = (await _testee.GetAsync([mediaId])).Single();
 
 		await Assert.That(row.Stored is PartialMovie).IsTrue();
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
@@ -122,13 +109,10 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		var secondPlex = PlexId.From("plex-813", MediaType.Movie);
 		var firstId = await SeedMediaAsync([firstPlex]);
 		var secondId = await SeedMediaAsync([secondPlex]);
-		await _testee.UpsertManyAsync([new MediaMetadataUpsert(firstId, CreateMovieDetails(firstId, [firstPlex]))]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(firstId, [firstPlex])]);
 		fixture.Context.ChangeTracker.Clear();
 
-		var sessionFactory = new MediaQuerySessionFactory(fixture.ContextFactory);
-		await using var session = await sessionFactory.CreateAsync();
-		var query = _mediaRepo.QueryMediaIds(session, [firstId, secondId]);
-		var rows = await _testee.QueryMediaMetadataAsync(session, query);
+		var rows = await _testee.GetAsync([firstId, secondId]);
 
 		await Assert.That(rows.Count).IsEqualTo(2);
 		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored is Movie).IsTrue();

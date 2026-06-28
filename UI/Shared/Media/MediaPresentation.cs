@@ -2,21 +2,19 @@ namespace UI.Shared.Media;
 
 public static class MediaPresentation
 {
-	extension(MediaMatch media)
+	extension(MediaLookup media)
 	{
 		public MediaType MediaType =>
 			media switch
 			{
-				IMedia resolved => resolved.Type,
-				IPartialMedia partial => partial.Type,
+				IdentifiedMedia identified => identified.Type,
 				UnmatchedMedia unmatched => unmatched.Type,
 			};
 
 		public MediaId Id =>
 			media switch
 			{
-				IMedia resolved => resolved.Identity.Id,
-				IPartialMedia partial => partial.Identity.Id,
+				IdentifiedMedia identified => identified.Identity.Id,
 				_ => throw new InvalidOperationException(),
 			};
 
@@ -26,48 +24,42 @@ public static class MediaPresentation
 		public string Title =>
 			media switch
 			{
-				IMedia resolved => resolved.Title,
-				IPartialMedia partial => partial.Title ?? "",
+				IdentifiedMedia identified => identified.Title ?? "",
 				UnmatchedMedia unmatched => unmatched.Title,
 			};
 
 		public string Tagline =>
 			media switch
 			{
-				IMedia resolved => resolved.Tagline,
-				IPartialMedia partial => partial.Tagline ?? "",
-				_ => "",
+				IdentifiedMedia identified => identified.Tagline ?? "",
+				UnmatchedMedia => "",
 			};
 
 		public string Summary =>
 			media switch
 			{
-				IMedia resolved => resolved.Summary,
-				IPartialMedia partial => partial.Summary ?? "",
+				IdentifiedMedia identified => identified.Summary ?? "",
 				UnmatchedMedia unmatched => unmatched.Summary,
 			};
 
 		public string PosterUrl =>
 			media switch
 			{
-				IMedia resolved => resolved.PosterUrl,
-				IPartialMedia partial => partial.PosterUrl ?? "",
+				IdentifiedMedia identified => identified.PosterUrl ?? "",
 				UnmatchedMedia unmatched => unmatched.PosterUrl,
 			};
 
 		public string BackdropUrl =>
 			media switch
 			{
-				IMedia resolved => resolved.BackdropUrl,
-				IPartialMedia partial => partial.BackdropUrl ?? "",
+				IdentifiedMedia identified => identified.BackdropUrl ?? "",
 				UnmatchedMedia unmatched => unmatched.BackdropUrl,
 			};
 
 		public DateOnly ReleaseDate =>
 			media switch
 			{
-				IMedia resolved => resolved.ReleaseDate,
-				IPartialMedia partial => partial.ReleaseDate ?? DateOnly.MinValue,
+				IdentifiedMedia identified => identified.ReleaseDate ?? DateOnly.MinValue,
 				UnmatchedMedia unmatched => unmatched.ReleaseDate ?? DateOnly.MinValue,
 			};
 
@@ -75,8 +67,7 @@ public static class MediaPresentation
 			(
 				media switch
 				{
-					IMedia resolved => resolved.Rating,
-					IPartialMedia partial => partial.Rating,
+					IdentifiedMedia identified => identified.Rating,
 					UnmatchedMedia unmatched => unmatched.Rating,
 				}
 			).Average;
@@ -84,8 +75,7 @@ public static class MediaPresentation
 		public IReadOnlyList<string> Genres =>
 			media switch
 			{
-				IMedia resolved => [.. resolved.Genres],
-				IPartialMedia partial => [.. partial.Genres],
+				IdentifiedMedia identified => [.. identified.Genres],
 				UnmatchedMedia unmatched => [.. unmatched.Genres],
 			};
 
@@ -96,25 +86,22 @@ public static class MediaPresentation
 		public int? Seasons =>
 			media switch
 			{
-				Show show => show.Seasons,
-				PartialShow show => show.Seasons,
-				_ => null,
+				IdentifiedMedia identified => identified.Seasons,
+				UnmatchedMedia => null,
 			};
 
 		public int? Episodes =>
 			media switch
 			{
-				Show show => show.Episodes,
-				PartialShow show => show.Episodes,
-				_ => null,
+				IdentifiedMedia identified => identified.Episodes,
+				UnmatchedMedia => null,
 			};
 
 		public TimeSpan? Runtime =>
 			media switch
 			{
-				Movie movie => movie.Runtime,
-				PartialMovie movie => movie.Runtime,
-				_ => null,
+				IdentifiedMedia identified => identified.Runtime,
+				UnmatchedMedia => null,
 			};
 	}
 }

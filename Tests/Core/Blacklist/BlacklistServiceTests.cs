@@ -58,8 +58,8 @@ public class BlacklistServiceTests
 
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
-		await Assert.That(item.Detail.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(item.Detail is Movie movie && movie.Title == detailResult.Title).IsTrue();
+		await Assert.That(item.Media.Id).IsEqualTo(mediaId);
+		await Assert.That(item.Media is Movie movie && movie.Title == detailResult.Title).IsTrue();
 		await Assert.That(item.AddedAt).IsEqualTo(addedAt);
 	}
 

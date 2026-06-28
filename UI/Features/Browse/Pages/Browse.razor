@@ -68,8 +68,8 @@
                   ButtonDisabled="@SelectedIsUnresolvedOrNull"/>
 
 @code {
-    private IReadOnlyList<MediaMatch>? _trendingMedia;
-    private MediaMatch? _selectedMedia;
+    private IReadOnlyList<MediaLookup>? _trendingMedia;
+    private MediaLookup? _selectedMedia;
     private bool _isLoading;
     private bool _isSheetOpen;
     private bool _isOAuthenticated;
@@ -193,9 +193,9 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWatchlist(MediaMatch media) => !media.IsUnresolved && _watchlisted.Contains(media.Id);
+    private bool IsInWatchlist(MediaLookup media) => !media.IsUnresolved && _watchlisted.Contains(media.Id);
 
-    private void SelectMedia(MediaMatch media)
+    private void SelectMedia(MediaLookup media)
     {
         _selectedMedia = media;
         _isSheetOpen = true;

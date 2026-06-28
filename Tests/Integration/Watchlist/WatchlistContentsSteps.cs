@@ -12,7 +12,7 @@ public class WatchlistContentsSteps(WatchlistContentsScenarioContext ctx, Sammla
 	public async Task WhenGetWatchlistItems()
 	{
 		var items = await sammlarr.Resolve<IWatchlistService>().GetWatchlistItemsAsync().ToListAsync();
-		ctx.Items = items.Select(i => i.Detail).ToList();
+		ctx.Items = items.Select(i => i.Media.ToMatch()).ToList();
 	}
 
 	[When("I get the watchlist IDs")]

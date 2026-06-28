@@ -8,7 +8,7 @@ namespace Integration.Tests.Assertions;
 
 internal static class MediaDetailAssertions
 {
-	public static async Task AssertItemsAsync(IReadOnlyList<MediaMatch> items, DataTable table)
+	public static async Task AssertItemsAsync(IReadOnlyList<MediaLookup> items, DataTable table)
 	{
 		var expected = table.CreateSet<ItemRow>().ToList();
 		await Assert.That(items.Count).IsEqualTo(expected.Count);

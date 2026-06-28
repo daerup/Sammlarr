@@ -90,7 +90,7 @@
                                              OnFocusIn="() => _focusedResult = result.Key"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && !result.IsUnresolved && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaMatch>(this, ToggleAsync)))
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && !result.IsUnresolved && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaLookup>(this, ToggleAsync)))
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -132,7 +132,7 @@
     private string? _searchHint;
     private string? _searchError;
     private MediaId? _activeToggledSourceId;
-    private List<MediaMatch> _searchResults = [];
+    private List<MediaLookup> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
@@ -167,7 +167,7 @@
     }
 
 
-    private bool IsSearchResultMarked(MediaMatch result) => !result.IsUnresolved && IsInWatchlist.Invoke(result.Id);
+    private bool IsSearchResultMarked(MediaLookup result) => !result.IsUnresolved && IsInWatchlist.Invoke(result.Id);
 
     private async Task CloseAsync()
     {
@@ -239,7 +239,7 @@
         }
     }
 
-    private async Task ToggleAsync(MediaMatch result)
+    private async Task ToggleAsync(MediaLookup result)
     {
         if (_isAdding || result.IsUnresolved)
         {
@@ -259,7 +259,7 @@
         _focusedResult = null;
     }
 
-    private void ClearFocusedResult(MediaMatch result)
+    private void ClearFocusedResult(MediaLookup result)
     {
         if (_focusedResult == result.Key)
         {

@@ -1,7 +1,7 @@
 using System.Net;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Trending;
 using Microsoft.Extensions.DependencyInjection;

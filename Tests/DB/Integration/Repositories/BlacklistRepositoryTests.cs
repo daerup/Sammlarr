@@ -106,7 +106,7 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();

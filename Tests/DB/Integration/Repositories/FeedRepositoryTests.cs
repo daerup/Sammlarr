@@ -72,7 +72,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync("My Feed", "my-feed", new DateTimeOffset(2026, 07, 01, 12, 0, 0, TimeSpan.Zero));
 		var mediaId = PlexId.From("plex-feed-1", MediaType.Movie);
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(mediaId.ToExternalIdEntity(media));
 		fixture.Context.Watchlist.Add(
 			new WatchlistEntity

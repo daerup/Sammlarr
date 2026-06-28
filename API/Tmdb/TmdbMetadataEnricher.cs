@@ -7,7 +7,7 @@ namespace API.Tmdb;
 
 internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMetadataEnricher
 {
-	public async Task<MediaMatch?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	public async Task<MediaLookup?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
 		if (id is not TmdbId tmdbId)
 		{
@@ -23,9 +23,9 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMet
 			}
 			return tmdbId.Type switch
 			{
-				MediaType.Movie => MediaMatch.FromMedia(MapMovie(details, tmdbId)),
-				MediaType.Show => MediaMatch.FromMedia(MapShow(details, tmdbId)),
-				_ => (MediaMatch?)null,
+				MediaType.Movie => IdentifiedMedia.From(MapMovie(details, tmdbId)),
+				MediaType.Show => IdentifiedMedia.From(MapShow(details, tmdbId)),
+				_ => (MediaLookup?)null,
 			};
 		}
 		catch (InvalidOperationException)

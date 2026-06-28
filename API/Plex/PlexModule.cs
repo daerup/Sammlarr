@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist;

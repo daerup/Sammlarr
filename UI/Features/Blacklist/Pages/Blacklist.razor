@@ -70,13 +70,13 @@ else
             }
             else if (_items is not null)
             {
-                <BulkEditableMediaGrid TItem="BlacklistedMediaDetail"
+                <BulkEditableMediaGrid TItem="BlacklistItem"
                                        Items="_items"
-                                       Detail="@(i => i.Detail)"
-                                       Key="@(i => i.Detail.Id)"
+                                       Detail="@(i => i.Media)"
+                                       Key="@(i => i.Media.Id)"
                                        IsEditMode="_isEditMode"
                                        IsEditModeChanged="@(v => _isEditMode = v)"
-                                       OnTileClick="@(i => SelectItem(i.Detail))"
+                                       OnTileClick="@(i => SelectItem(i.Media))"
                                        OnBulkRemove="RemoveBulkAsync"
                                        RemoveLabel="Remove from Blacklist"/>
             }
@@ -104,8 +104,8 @@ else
 </SearchModal>
 
 @code {
-    private IReadOnlyList<BlacklistedMediaDetail>? _items;
-    private MediaMatch? _selectedItem;
+    private IReadOnlyList<BlacklistItem>? _items;
+    private MediaLookup? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
@@ -138,7 +138,7 @@ else
             if (_selectedItem.HasValue)
             {
                 var selectedId = _selectedItem.Value.Id;
-                _selectedItem = _items.FirstOrDefault(i => i.Detail.Id == selectedId)?.Detail;
+                _selectedItem = _items.FirstOrDefault(i => i.Media.Id == selectedId)?.Media.ToMatch();
                 if (_selectedItem is null)
                 {
                     _isSheetOpen = false;
@@ -161,7 +161,7 @@ else
 
     private static string GetRemoveButtonIcon() => "x";
 
-    private void SelectItem(MediaMatch detail)
+    private void SelectItem(MediaLookup detail)
     {
         _selectedItem = detail;
         _isSheetOpen = true;
@@ -173,11 +173,11 @@ else
         CloseSelectedMedia();
     }
 
-    private async Task RemoveBulkAsync(IReadOnlyList<BlacklistedMediaDetail> toRemove)
+    private async Task RemoveBulkAsync(IReadOnlyList<BlacklistItem> toRemove)
     {
         foreach (var item in toRemove)
         {
-            await BlacklistService.RemoveFromBacklistAsync(item.Detail.Id, _cancellationTokenSource.Token);
+            await BlacklistService.RemoveFromBacklistAsync(item.Media.Id, _cancellationTokenSource.Token);
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blacklist.");
         await LoadBlacklistAsync();
@@ -231,7 +231,7 @@ else
             return false;
         }
 
-        return _items.Any(item => item.Detail.Id.Equals(mediaId));
+        return _items.Any(item => item.Media.Id.Equals(mediaId));
     }
 
     private void OpenSearchModal()

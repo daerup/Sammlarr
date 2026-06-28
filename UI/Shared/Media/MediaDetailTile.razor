@@ -85,7 +85,7 @@
 
 @code {
 
-    [Parameter] [EditorRequired] public required MediaMatch Media { get; set; }
+    [Parameter] [EditorRequired] public required MediaLookup Media { get; set; }
     [Parameter] public string Class { get; set; } = "hover-bg";
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
@@ -119,7 +119,7 @@
         }
     }
 
-    private static IReadOnlyList<string> GetDisplayFacts(MediaMatch result)
+    private static IReadOnlyList<string> GetDisplayFacts(MediaLookup result)
     {
         var facts = new List<string>();
 

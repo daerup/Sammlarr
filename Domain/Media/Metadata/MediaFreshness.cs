@@ -5,7 +5,7 @@ public static class MediaFreshness
 	private static readonly TimeSpan staleAfter = TimeSpan.FromDays(7);
 	private static readonly TimeSpan hydrationCooldown = TimeSpan.FromHours(1);
 
-	public static bool IsFresh(MediaMatch stored, DateTimeOffset? fetchedAt, DateTimeOffset now)
+	public static bool IsFresh(IdentifiedMedia stored, DateTimeOffset? fetchedAt, DateTimeOffset now)
 	{
 		if (fetchedAt is null)
 		{

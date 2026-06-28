@@ -1,10 +1,10 @@
 using Contracts;
 using Contracts.Caching;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Core.Media;
 using Test.Shared;
-using TUnit.Mocks.Generated.Contracts.Media.Convertions;
+using TUnit.Mocks.Generated.Contracts.Media.Conversions;
 
 namespace Core.Tests.Media;
 

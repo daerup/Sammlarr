@@ -4,7 +4,7 @@ namespace Contracts.Watchlist;
 
 public interface IWatchlistService
 {
-	IAsyncEnumerable<WatchlistedMediaDetail> GetWatchlistItemsAsync(CancellationToken cancellationToken = default);
+	IAsyncEnumerable<WatchlistItem> GetWatchlistItemsAsync(CancellationToken cancellationToken = default);
 
 	Task<IReadOnlySet<MediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default);
 

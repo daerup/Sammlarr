@@ -53,7 +53,7 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 			switch (row.Kind?.Trim().ToLowerInvariant())
 			{
 				case "resolved":
-					await Assert.That(item is IMedia or IPartialMedia).IsTrue();
+					await Assert.That(item is IdentifiedMedia).IsTrue();
 					break;
 				case "unresolved":
 					await Assert.That(item is UnmatchedMedia).IsTrue();

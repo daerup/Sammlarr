@@ -1,12 +1,13 @@
 using Contracts;
 using Contracts.Media;
+using Contracts.Media.Conversions;
 
 namespace Test.Shared;
 
 public sealed class FakeMediaService : IMediaService
 {
 	private readonly Dictionary<IExternalMediaId, MediaId> _resolutions = new();
-	private readonly Dictionary<MediaId, MediaMatch> _metadata = new();
+	private readonly Dictionary<MediaId, IdentifiedMedia> _metadata = new();
 	private readonly Dictionary<MediaId, TimeSpan> _delays = new();
 
 	public List<IReadOnlyList<MediaId>> InvalidatedBatches { get; } = new();
@@ -17,7 +18,7 @@ public sealed class FakeMediaService : IMediaService
 		return this;
 	}
 
-	public FakeMediaService RegisterMetadata(MediaId id, MediaMatch detail)
+	public FakeMediaService RegisterMetadata(MediaId id, IdentifiedMedia detail)
 	{
 		_metadata[id] = detail;
 		return this;
@@ -42,7 +43,7 @@ public sealed class FakeMediaService : IMediaService
 		}
 	}
 
-	public async IAsyncEnumerable<Result<MediaMatch>> GetDetailsAsync(
+	public async IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(
 		IEnumerable<MediaId> mediaIds,
 		[System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -58,7 +59,7 @@ public sealed class FakeMediaService : IMediaService
 		}
 	}
 
-	public async IAsyncEnumerable<Result<MediaMatch>> GetDetailsAsync(
+	public async IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(
 		IEnumerable<ResolveRequest> requests,
 		[System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -68,16 +69,19 @@ public sealed class FakeMediaService : IMediaService
 			cancellationToken.ThrowIfCancellationRequested();
 			if (Identify(req) is not MediaIdentity identity)
 			{
-				yield return Error.From("unresolved");
+				yield return ToUnmatched(req);
 				continue;
 			}
 			if (_delays.TryGetValue(identity.Id, out var delay))
 			{
 				await Task.Delay(delay, cancellationToken);
 			}
-			yield return GetDetail(identity.Id);
+			yield return GetDetail(identity.Id) is IdentifiedMedia detail ? detail : ToUnmatched(req);
 		}
 	}
+
+	private static MediaLookup ToUnmatched(ResolveRequest req) =>
+		new UnmatchedMedia { Externals = [.. req.Candidates], Title = req.Hints is Some<ResolutionHints>(var hints) ? hints.Title : "" };
 
 	public Task<IReadOnlyList<MediaIdentity>> ResolveIdentitiesAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
@@ -103,7 +107,7 @@ public sealed class FakeMediaService : IMediaService
 	private Result<MediaIdentity> Identify(ResolveRequest req) =>
 		TryResolve(req) is { } mediaId ? new MediaIdentity(mediaId, [.. req.Candidates]) : Error.From("unresolved");
 
-	private Result<MediaMatch> GetDetail(MediaId id) => _metadata.TryGetValue(id, out var found) ? found : Error.From("not found");
+	private Result<IdentifiedMedia> GetDetail(MediaId id) => _metadata.TryGetValue(id, out var found) ? found : Error.From("not found");
 
 	private MediaId? TryResolve(ResolveRequest req)
 	{

@@ -5,9 +5,9 @@ namespace DB.Data.Media;
 
 internal static class MediaIdConversionExtensions
 {
-	public static IExternalMediaId ToExternalMediaId(this ExternalMediaIdEntity externalId) => Create(externalId.Source, externalId.MediaType, externalId.Id);
+	public static IExternalMediaId ToExternalMediaId(this ExternalMediaIdRow externalId) => Create(externalId.Source, externalId.MediaType, externalId.Id);
 
-	public static ExternalMediaIdEntity ToExternalIdEntity(this IExternalMediaId mediaId, MediaEntity media) =>
+	public static ExternalMediaIdRow ToExternalIdEntity(this IExternalMediaId mediaId, MediaRow media) =>
 		new()
 		{
 			Source = mediaId.Source,
@@ -16,7 +16,7 @@ internal static class MediaIdConversionExtensions
 			Media = media,
 		};
 
-	public static Collection<ExternalMediaIdEntity> ToExternalIdEntities(this IEnumerable<IExternalMediaId> mediaIds, MediaEntity media) =>
+	public static Collection<ExternalMediaIdRow> ToExternalIdEntities(this IEnumerable<IExternalMediaId> mediaIds, MediaRow media) =>
 		[.. mediaIds.Select(id => id.ToExternalIdEntity(media))];
 
 	private static IExternalMediaId Create(MediaProvider source, MediaType mediaType, string externalId) =>

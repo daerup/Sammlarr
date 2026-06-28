@@ -247,7 +247,7 @@
     private enum FetchState { Idle, Loading, Success, Failed }
 
     private FetchState _fetchState = FetchState.Idle;
-    private List<MediaMatch> _rawResults = [];
+    private List<MediaLookup> _rawResults = [];
     private IReadOnlyList<MediaQueryRow> _unresolvedResults = [];
     private IReadOnlyList<QueryResult<MediaQueryRow>> _processedResults = [];
     private List<QueryResult<MediaQueryRow>> _filteredResults = [];
@@ -548,8 +548,8 @@
     private int WatchlistCount => _processedResults.Count(r => IsWatchlisted(GetItem(r)));
     private int BlacklistCount => _processedResults.Count(r => IsBlacklisted(GetItem(r)));
 
-    private bool IsBlacklisted(MediaMatch item) => _blacklistIds.Contains(item.Id);
-    private bool IsWatchlisted(MediaMatch item) => _watchlisted.Contains(item.Id);
+    private bool IsBlacklisted(MediaLookup item) => _blacklistIds.Contains(item.Id);
+    private bool IsWatchlisted(MediaLookup item) => _watchlisted.Contains(item.Id);
 
     private string BypassedTooltip(Bypassed<MediaQueryRow> bypassed)
     {
@@ -563,7 +563,7 @@
         return bypassed.CountsTowardLimit ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }
 
-    private static MediaMatch GetItem(QueryResult<MediaQueryRow> result) =>
+    private static MediaLookup GetItem(QueryResult<MediaQueryRow> result) =>
         (
             result switch
             {
@@ -574,7 +574,7 @@
             }
         ).Media;
 
-    private void ClearFocus(MediaMatch item)
+    private void ClearFocus(MediaLookup item)
     {
         if (_focusedResult == item.Key)
         {
@@ -582,7 +582,7 @@
         }
     }
 
-    private async Task ToggleBlacklistAsync(MediaMatch item)
+    private async Task ToggleBlacklistAsync(MediaLookup item)
     {
         if (_togglingBlacklistItem is not null)
         {
@@ -613,7 +613,7 @@
         }
     }
 
-    private async Task ToggleWatchlistAsync(MediaMatch item)
+    private async Task ToggleWatchlistAsync(MediaLookup item)
     {
         if (_togglingWatchlistItem is not null)
         {

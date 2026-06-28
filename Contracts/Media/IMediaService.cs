@@ -1,4 +1,4 @@
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 
 namespace Contracts.Media;
 
@@ -6,9 +6,9 @@ public interface IMediaService
 {
 	IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(IEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<Result<MediaMatch>> GetDetailsAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<Result<MediaMatch>> GetDetailsAsync(IEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(IEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaIdentity>> ResolveIdentitiesAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,

@@ -1,5 +1,5 @@
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 

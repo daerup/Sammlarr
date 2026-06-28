@@ -25,7 +25,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -37,7 +37,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var details = CreateMovieDetails(MediaId.From(Guid.NewGuid()), [TmdbId.From("100", MediaType.Movie)]);
 
-		var entity = (MovieMetadataEntity)_testee.BuildFrom(details, Guid.NewGuid());
+		var entity = (MovieMetadataRow)_testee.BuildFrom(details, Guid.NewGuid());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo(details.Title);
@@ -55,7 +55,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var details = CreateShowDetails(MediaId.From(Guid.NewGuid()), [TmdbId.From("200", MediaType.Show)]);
 
-		var entity = (ShowMetadataEntity)_testee.BuildFrom(details, Guid.NewGuid());
+		var entity = (ShowMetadataRow)_testee.BuildFrom(details, Guid.NewGuid());
 
 		using var _ = Assert.Multiple();
 		await Assert.That(entity.Title).IsEqualTo(details.Title);
@@ -72,7 +72,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 			Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 8.4f, 1234)]),
 		};
 
-		var entity = (MovieMetadataEntity)_testee.BuildFrom(details, Guid.NewGuid());
+		var entity = (MovieMetadataRow)_testee.BuildFrom(details, Guid.NewGuid());
 
 		await Assert.That(entity.Ratings).Count().IsEqualTo(1);
 		await Assert.That(entity.Ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
@@ -89,7 +89,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Title = "Updated", Runtime = TimeSpan.FromMinutes(99) });
 
 		await Assert.That(existing.Title).IsEqualTo("Updated");
-		await Assert.That(((MovieMetadataEntity)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
+		await Assert.That(((MovieMetadataRow)existing).Runtime).IsEqualTo(TimeSpan.FromMinutes(99));
 	}
 
 	[Test]
@@ -201,7 +201,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(stored is Movie m && m.Rating.Sources.Single().Source == RatingSource.Tmdb).IsTrue();
 	}
 
-	private async Task<MediaMetadataEntity> PersistAsync(MediaMatch details, MediaId mediaId)
+	private async Task<MediaMetadataRow> PersistAsync(IdentifiedMedia details, MediaId mediaId)
 	{
 		var entity = _testee.BuildFrom(details, mediaId.Value);
 		fixture.Context.MediaMetadata.Add(entity);
