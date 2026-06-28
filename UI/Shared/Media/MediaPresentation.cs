@@ -20,6 +20,9 @@ public static class MediaPresentation
 				_ => throw new InvalidOperationException(),
 			};
 
+		public string Key =>
+			media.IsUnresolved ? string.Join("|", media.ExternalIds.Select(id => $"{id.Source}:{id.Value}").OrderBy(value => value)) : media.Id.Value.ToString();
+
 		public string Title =>
 			media switch
 			{

@@ -96,13 +96,13 @@
     private IReadOnlyList<string> _displayFacts = [];
     private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
-    private MediaId? _lastMedia;
+    private string? _lastKey;
 
     protected override void OnParametersSet()
     {
-        if (_lastMedia != Media.Id)
+        if (_lastKey != Media.Key)
         {
-            _lastMedia = Media.Id;
+            _lastKey = Media.Key;
             _failed = false;
         }
         _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Media.BackdropUrl) ? Media.PosterUrl : Media.BackdropUrl)}')";
