@@ -1,6 +1,7 @@
 using BlazorBlueprint.Primitives.Filtering;
 using Contracts.Feed;
 using Contracts.Processing;
+using Core.Processing;
 
 namespace UI.Features.Feeds.Pages.Editor;
 
@@ -12,13 +13,13 @@ public enum ScheduleMode
 
 public static class PreviewResultFilter
 {
-	public static readonly Func<QueryResult<MediaMatch>, bool> Included = result => result is MediaMatch media && media is not UnmatchedMedia;
-	public static readonly Func<QueryResult<MediaMatch>, bool> Bypassed = result => result is Bypassed<MediaMatch>;
-	public static readonly Func<QueryResult<MediaMatch>, bool> Filtered = result => result is Culled<MediaMatch>;
-	public static readonly Func<QueryResult<MediaMatch>, bool> Skipped = result => result is Truncated<MediaMatch>;
-	public static readonly Func<QueryResult<MediaMatch>, bool> Unresolved = result => result is MediaMatch media && media is UnmatchedMedia;
+	public static readonly Func<QueryResult<MediaQueryRow>, bool> Included = result => result is MediaQueryRow row && row.Media is not UnmatchedMedia;
+	public static readonly Func<QueryResult<MediaQueryRow>, bool> Bypassed = result => result is Bypassed<MediaQueryRow>;
+	public static readonly Func<QueryResult<MediaQueryRow>, bool> Filtered = result => result is Culled<MediaQueryRow>;
+	public static readonly Func<QueryResult<MediaQueryRow>, bool> Skipped = result => result is Truncated<MediaQueryRow>;
+	public static readonly Func<QueryResult<MediaQueryRow>, bool> Unresolved = result => result is MediaQueryRow row && row.Media is UnmatchedMedia;
 
-	public static bool IsVisible(QueryResult<MediaMatch> result, IReadOnlyCollection<Func<QueryResult<MediaMatch>, bool>> active) =>
+	public static bool IsVisible(QueryResult<MediaQueryRow> result, IReadOnlyCollection<Func<QueryResult<MediaQueryRow>, bool>> active) =>
 		active.Count == 0 || active.Any(matches => matches(result));
 }
 

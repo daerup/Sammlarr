@@ -1,5 +1,6 @@
 @using Contracts.Media
 @using Contracts.Media.Search
+@inject IMediaService MediaService
 <div class="search-result-row rounded-sm bg-black @Class @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
@@ -7,9 +8,9 @@
     <div class="flex items-start justify-between gap-3">
         <div class="search-result-main-content flex items-start">
             <div class="search-result-poster">
-                @if (!_failed && !string.IsNullOrWhiteSpace(Result.PosterUrl))
+                @if (!_failed && !string.IsNullOrWhiteSpace(Media.PosterUrl))
                 {
-                    <img src="@Result.PosterUrl" alt="@Result.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
+                    <img src="@Media.PosterUrl" alt="@Media.Title" class="rounded-sm" loading="lazy" decoding="async" @onerror="OnPosterError"/>
                 }
                 else
                 {
@@ -18,11 +19,11 @@
             </div>
             <div class="search-result-content min-w-0">
                 <div class="text-xs text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-1 space-x-1">
-                    @if (Result.MediaType is MediaType.Movie)
+                    @if (Media.MediaType is MediaType.Movie)
                     {
                         <LucideIcon Name="film" Size="13"/>
                     }
-                    else if (Result.MediaType is MediaType.Show)
+                    else if (Media.MediaType is MediaType.Show)
                     {
                         <LucideIcon Name="tv" Size="13"/>
                     }
@@ -30,16 +31,16 @@
                     {
                         <LucideIcon Name="circle-help" Size="13"/>
                     }
-                    @if (Result.ReleaseDate > DateOnly.MinValue)
+                    @if (Media.ReleaseDate > DateOnly.MinValue)
                     {
-                        <span>@Result.ReleaseDate.Year</span>
+                        <span>@Media.ReleaseDate.Year</span>
                     }
                     @foreach (var fact in _displayFacts)
                     {
                         <span aria-hidden="true">•</span>
                         <span>@fact</span>
                     }
-                    @if (Result.Rating is { } rating)
+                    @if (Media.Rating is { } rating)
                     {
                         <span aria-hidden="true">•</span>
                         <span class="inline-flex items-center gap-1 text-yellow-400">
@@ -49,27 +50,27 @@
                     }
                 </div>
                 <div class="flex items-center gap-2 pt-2 min-w-0">
-                    <MediaTitleLink Title="@Result.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                    <MediaTitleLink Title="@Media.Title" Ids="@_ids" Class="font-bold truncate text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                 </div>
 
-                @if (!string.IsNullOrWhiteSpace(Result.Tagline))
+                @if (!string.IsNullOrWhiteSpace(Media.Tagline))
                 {
-                    <p class="text-xs italic text-muted-foreground line-clamp-1 pt-1">@Result.Tagline</p>
+                    <p class="text-xs italic text-muted-foreground line-clamp-1 pt-1">@Media.Tagline</p>
                 }
 
-                @if (Result.Genres.Count > 0)
+                @if (Media.Genres.Count > 0)
                 {
                     <div class="search-result-genres pt-1">
-                        @foreach (var genre in Result.Genres)
+                        @foreach (var genre in Media.Genres)
                         {
                             <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@genre</BbBadge>
                         }
                     </div>
                 }
 
-                @if (!string.IsNullOrWhiteSpace(Result.Summary))
+                @if (!string.IsNullOrWhiteSpace(Media.Summary))
                 {
-                    <p class="text-sm text-white line-clamp-2 pt-2">@Result.Summary</p>
+                    <p class="text-sm text-white line-clamp-2 pt-2">@Media.Summary</p>
                 }
             </div>
         </div>
@@ -84,36 +85,38 @@
 
 @code {
 
-    [Parameter] [EditorRequired] public required MediaMatch Result { get; set; }
+    [Parameter] [EditorRequired] public required MediaMatch Media { get; set; }
     [Parameter] public string Class { get; set; } = "hover-bg";
     [Parameter] public bool IsFocused { get; set; }
     [Parameter] public EventCallback OnFocusIn { get; set; }
     [Parameter] public EventCallback OnFocusOut { get; set; }
     [Parameter] public RenderFragment? Icons { get; set; }
-    [Parameter] public EventCallback OnImageBroken { get; set; }
 
     private string _backgroundStyle = string.Empty;
     private IReadOnlyList<string> _displayFacts = [];
     private IReadOnlyList<IExternalMediaId> _ids = new List<IExternalMediaId>();
     private bool _failed;
-    private MediaId? _lastResult;
+    private MediaId? _lastMedia;
 
     protected override void OnParametersSet()
     {
-        if (_lastResult != Result.Id)
+        if (_lastMedia != Media.Id)
         {
-            _lastResult = Result.Id;
+            _lastMedia = Media.Id;
             _failed = false;
         }
-        _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Result.BackdropUrl) ? Result.PosterUrl : Result.BackdropUrl)}')";
-        _displayFacts = GetDisplayFacts(Result);
-        _ids = Result.ExternalIds;
+        _backgroundStyle = $"--hover-bg: url('{(string.IsNullOrWhiteSpace(Media.BackdropUrl) ? Media.PosterUrl : Media.BackdropUrl)}')";
+        _displayFacts = GetDisplayFacts(Media);
+        _ids = Media.ExternalIds;
     }
 
     private async Task OnPosterError()
     {
         _failed = true;
-        await OnImageBroken.InvokeAsync();
+        if (!Media.IsUnresolved)
+        {
+            await MediaService.InvalidateAsync([Media.Id]);
+        }
     }
 
     private static IReadOnlyList<string> GetDisplayFacts(MediaMatch result)

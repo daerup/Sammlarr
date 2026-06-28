@@ -1,3 +1,5 @@
+@using Contracts.Media
+@inject IMediaService MediaService
 <div class="cursor-pointer group @(Media.IsUnresolved ? "tile-unresolved" : "")" @onclick="OnClick">
     <div class="relative overflow-hidden rounded-lg media-card-backdrop">
         @if (_failed)
@@ -74,7 +76,6 @@
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public bool ShowBookmark { get; set; }
     [Parameter] public bool IsInWatchlist { get; set; }
-    [Parameter] public EventCallback OnImageBroken { get; set; }
 
     private string _src = string.Empty;
     private string? _lastImageUrl;
@@ -97,7 +98,10 @@
         if (_isShowingPoster || string.IsNullOrWhiteSpace(Media.PosterUrl))
         {
             _failed = true;
-            await OnImageBroken.InvokeAsync();
+            if (!Media.IsUnresolved)
+            {
+                await MediaService.InvalidateAsync([Media.Id]);
+            }
             return;
         }
         _isShowingPoster = true;

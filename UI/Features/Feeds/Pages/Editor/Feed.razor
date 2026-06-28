@@ -4,15 +4,15 @@
 @using Contracts.Feed
 @using Contracts.Settings
 @using global::Shared
-@implements IDisposable
 @inject IFeedRepository FeedRepository
 @inject NavigationManager NavigationManager
-@inject IKeyboardShortcutService KeyboardShortcutService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject ProfileDropdownService ProfileDropdownService
 @inject Notifier Notifier
 
 <PageTitle>@PageTitleText</PageTitle>
+
+<KeyboardShortcut Keys="Ctrl+Enter" OnInvoked="OnShortcutActivatedAsync"/>
 
 <OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
 
@@ -119,10 +119,6 @@
     private PreviewStatus _previewStatus = new();
     private FeedPreviewPanel _previewPanel = null!;
 
-    private IDisposable? _shortcutRegistration;
-    private bool _isShortcutRegistered;
-    private const string FeedShortcutId = "feed-ctrl-enter";
-
     private int _configKey;
 
     private bool HasChanged => _storedHash is null || _config.GetSaveHash() != _storedHash;
@@ -187,12 +183,6 @@
         {
             _pendingAutoApply = false;
             await ApplyAsync();
-        }
-
-        if (!_isShortcutRegistered)
-        {
-            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+Enter", OnShortcutActivatedAsync, FeedShortcutId);
-            _isShortcutRegistered = true;
         }
     }
 
@@ -304,14 +294,4 @@
         return args is { CtrlKey: true, Key: "Enter" } ? OnShortcutActivatedAsync() : Task.CompletedTask;
     }
 
-    public void Dispose()
-    {
-        if (_isShortcutRegistered)
-        {
-            _shortcutRegistration?.Dispose();
-            _shortcutRegistration = null;
-            KeyboardShortcutService.Unregister(FeedShortcutId);
-            _isShortcutRegistered = false;
-        }
-    }
 }

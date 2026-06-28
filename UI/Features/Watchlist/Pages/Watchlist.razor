@@ -9,10 +9,7 @@
 @using UI.Features.Watchlist.Components
 @using UI.Shared.Services.Branding
 @implements IDisposable
-@implements IAsyncDisposable
 @inject IWatchlistService WatchlistService
-@inject IMediaService Media
-@inject IKeyboardShortcutService KeyboardShortcutService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject MediaProviderBrandingService BrandingService
@@ -102,7 +99,6 @@ else
                                            IsEditModeChanged="@(v => _isEditMode = v)"
                                            OnTileClick="SelectItem"
                                            OnBulkRemove="RemoveBulkAsync"
-                                           OnImageBroken="ReportBrokenImageAsync"
                                            RemoveLabel="Remove from Watchlist">
                         <Overlay Context="item">
                             <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 wl-badge-host">
@@ -130,7 +126,6 @@ else
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedItem?.Detail"
                   ShowMetadataRow="false"
-                  OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromWatchlistAsync"
                   ButtonText="GetRemoveButtonText"
                   ButtonIcon="GetRemoveButtonIcon"/>
@@ -140,7 +135,8 @@ else
     <SearchModal @bind-IsOpen="_isSearchModalOpen"
                  SearchProvider="@_providerSettings.SearchProvider"
                  IsInWatchlist="IsInWatchlist"
-                 OnToggle="ToggleFromSearchAsync">
+                 OnToggle="ToggleFromSearchAsync"
+                 ShortcutEnabled="_hasOAuthAccess">
         <TileIcons Context="ctx">
             <WatchlistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
         </TileIcons>
@@ -148,8 +144,6 @@ else
 }
 
 @code {
-    private const string SearchShortcutId = "watchlist-search-shortcut";
-
     private List<WatchlistedMediaDetail>? _items;
     private WatchlistedMediaDetail? _selectedItem;
     private bool _isLoading;
@@ -161,10 +155,7 @@ else
     private string? _errorMessage;
     private WatchlistSyncButton? _syncControl;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly HashSet<MediaId> _reportedBrokenImages = [];
     private ProviderConfig? _providerSettings;
-    private IDisposable? _shortcutRegistration;
-    private bool _isShortcutRegistered;
 
     private string PageTitleText => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
@@ -175,19 +166,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_hasOAuthAccess && !_isShortcutRegistered)
-        {
-            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+K", OpenSearchFromShortcutAsync, SearchShortcutId);
-            _isShortcutRegistered = true;
-        }
-        else if (!_hasOAuthAccess && _isShortcutRegistered)
-        {
-            await UnregisterShortcutAsync();
-        }
     }
 
     private async Task HandleAccessChanged(bool hasAccess)
@@ -239,24 +217,6 @@ else
     }
 
     private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
-
-    private async Task ReportBrokenImageAsync(MediaId mediaId)
-    {
-        if (!_reportedBrokenImages.Add(mediaId))
-        {
-            return;
-        }
-        await Media.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
-    }
-
-    private async Task ReportSelectedImageBrokenAsync()
-    {
-        if (_selectedItem is null)
-        {
-            return;
-        }
-        await ReportBrokenImageAsync(_selectedItem.Detail.Id);
-    }
 
     private static string GetRemoveButtonText() => "Remove from Watchlist";
 
@@ -323,29 +283,6 @@ else
         _isSearchModalOpen = true;
     }
 
-    private async Task OpenSearchFromShortcutAsync()
-    {
-        if (!_hasOAuthAccess || _isSearchModalOpen)
-        {
-            return;
-        }
-        OpenSearchModal();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private ValueTask UnregisterShortcutAsync()
-    {
-        if (!_isShortcutRegistered)
-        {
-            return ValueTask.CompletedTask;
-        }
-        _shortcutRegistration?.Dispose();
-        _shortcutRegistration = null;
-        KeyboardShortcutService.Unregister(SearchShortcutId);
-        _isShortcutRegistered = false;
-        return ValueTask.CompletedTask;
-    }
-
     private bool IsInWatchlist(MediaId mediaId)
     {
         if (_items is null)
@@ -387,12 +324,6 @@ else
     {
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await UnregisterShortcutAsync();
-        Dispose();
     }
 
     private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
