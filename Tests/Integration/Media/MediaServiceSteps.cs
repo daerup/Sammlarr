@@ -3,6 +3,7 @@ using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Integration.Tests.Assertions;
 using Integration.Tests.Infrastructure.Common;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
@@ -21,7 +22,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	public async Task WhenGetDetails(string key)
 	{
 		var results = await Service.GetDetailsAsync([local.MediaIds[key]]).ToListAsync();
-		ctx.Detail = results[0] is IMediaDetail detail ? detail : null;
+		ctx.Detail = results[0] is MediaMatch detail ? detail : (MediaMatch?)null;
 	}
 
 	[When("I resolve {string} to a {MediaProvider} id")]
@@ -39,7 +40,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	{
 		var requests = table.CreateSet<ResolveRow>().Select(BuildRequest).ToList();
 		var results = await Service.IdentifyAsync(requests).ToListAsync();
-		ctx.Identifications = [.. results.Select(r => r is Identification identification ? identification : null)];
+		ctx.Identifications = [.. results.Select(r => r is MediaIdentity identification ? identification : (MediaIdentity?)null)];
 	}
 
 	[When("I try to resolve:")]
@@ -49,7 +50,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	{
 		var request = BuildRequest([ParseId(id)], title, target);
 		var results = await Service.IdentifyAsync([request]).ToListAsync();
-		ctx.Identification = results[0] is Identification identification ? identification : null;
+		ctx.Identification = results[0] is MediaIdentity identification ? identification : (MediaIdentity?)null;
 		ctx.Identifications = [ctx.Identification];
 	}
 
@@ -89,20 +90,20 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 		var results = await Service.GetDetailsAsync([.. keys.Select(key => local.MediaIds[key])]).ToListAsync();
 		ctx.DetailsByKey.Clear();
 		foreach (var (key, result) in keys.Zip(results))
-			ctx.DetailsByKey[key] = result is IMediaDetail detail ? detail : null;
+			ctx.DetailsByKey[key] = result is MediaMatch detail ? detail : (MediaMatch?)null;
 	}
 
 	[Then("the detail title for {string} is {string}")]
-	public async Task ThenDetailTitleFor(string key, string title) => await Assert.That(ctx.DetailsByKey[key]!.Title).IsEqualTo(title);
+	public async Task ThenDetailTitleFor(string key, string title) => await Assert.That(ctx.DetailsByKey[key]!.Value.Title).IsEqualTo(title);
 
 	[Then("the detail title is {string}")]
-	public async Task ThenDetailTitle(string title) => await Assert.That(ctx.Detail!.Title).IsEqualTo(title);
+	public async Task ThenDetailTitle(string title) => await Assert.That(ctx.Detail!.Value.Title).IsEqualTo(title);
 
 	[Then("the detail is:")]
 	public async Task ThenDetailIs(DataTable table)
 	{
 		var row = table.CreateSet<DetailRow>().Single();
-		var detail = ctx.Detail!;
+		var detail = ctx.Detail!.Value;
 		if (row.Title is { } title)
 			await Assert.That(detail.Title).IsEqualTo(title);
 		if (row.Summary is { } summary)
@@ -124,7 +125,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 		sammlarr.DbContext.ChangeTracker.Clear();
 		var mediaId = local.MediaIds[key].Value;
 		var metadata = await sammlarr.DbContext.MediaMetadata.AsNoTracking().Include(m => m.Ratings).FirstAsync(m => m.MediaId == mediaId);
-		var detail = ctx.Detail!;
+		var detail = ctx.Detail!.Value;
 
 		await Assert.That(metadata.Title).IsEqualTo(detail.Title);
 		await Assert.That(metadata.Summary).IsEqualTo(detail.Summary);
@@ -142,8 +143,9 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 		{
 			await Assert.That(ctx.Identification).IsNotNull();
 			var expected = ParseId(resolvedId);
-			await Assert.That(ctx.Identification!.TargetExternal.Source).IsEqualTo(expected.Source);
-			await Assert.That(ctx.Identification!.TargetExternal.Value).IsEqualTo(expected.Value);
+			var target = ctx.Identification!.Value.Externals.OfProvider(expected.Source);
+			await Assert.That(target).IsNotNull();
+			await Assert.That(target!.Value).IsEqualTo(expected.Value);
 		}
 
 		if (row.StoredIds is { Count: > 0 } storedIds)

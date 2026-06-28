@@ -92,9 +92,9 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
 		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
 
-		await Assert.That(row.Detail.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(row.Detail).IsTypeOf<MovieDetail>();
-		await Assert.That(row.Detail.Identity.Externals).Contains((IExternalMediaId)plexId);
+		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
+		await Assert.That(row.Stored is Movie).IsTrue();
+		await Assert.That(row.Stored.Identity.Externals).Contains((IExternalMediaId)plexId);
 		await Assert.That(row.FetchedAt).IsNotNull();
 	}
 
@@ -110,8 +110,8 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		var query = _mediaRepo.QueryMediaIds(session, [mediaId]);
 		var row = (await _testee.QueryMediaMetadataAsync(session, query)).Single();
 
-		await Assert.That(row.Detail).IsTypeOf<UnresolvedMedia>();
-		await Assert.That(row.Detail.Identity.Id).IsEqualTo(mediaId);
+		await Assert.That(row.Stored is PartialMovie).IsTrue();
+		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(row.FetchedAt).IsNull();
 	}
 
@@ -131,14 +131,14 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		var rows = await _testee.QueryMediaMetadataAsync(session, query);
 
 		await Assert.That(rows.Count).IsEqualTo(2);
-		await Assert.That(rows.Single(r => r.Detail.Identity.Id == firstId).Detail).IsTypeOf<MovieDetail>();
-		await Assert.That(rows.Single(r => r.Detail.Identity.Id == secondId).Detail).IsTypeOf<UnresolvedMedia>();
+		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored is Movie).IsTrue();
+		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored is PartialMovie).IsTrue();
 	}
 
-	private static MovieDetail CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
+	private static Movie CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
 		new()
 		{
-			Identity = new MediaIdentity(mediaId, externals),
+			Identity = new MediaIdentity(mediaId, [.. externals]),
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",

@@ -1,6 +1,7 @@
 using API.Tmdb;
 using Contracts.Media;
 using Contracts.Media.Trending;
+using Integration.Tests.Assertions;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Tmdb;
@@ -52,10 +53,10 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 			switch (row.Kind?.Trim().ToLowerInvariant())
 			{
 				case "resolved":
-					await Assert.That(item).IsTypeOf<TrendingMedia>();
+					await Assert.That(item is IMedia or IPartialMedia).IsTrue();
 					break;
 				case "unresolved":
-					await Assert.That(item).IsTypeOf<UnresolvedTrendingMedia>();
+					await Assert.That(item is UnmatchedMedia).IsTrue();
 					break;
 				case null or "":
 					break;

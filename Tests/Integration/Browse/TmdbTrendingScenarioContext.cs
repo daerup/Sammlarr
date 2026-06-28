@@ -1,8 +1,8 @@
-using Contracts.Media.Trending;
+using Contracts;
 
 namespace Integration.Tests.Browse;
 
 public sealed class TmdbTrendingScenarioContext
 {
-	public TrendingPageResult? TrendingPage { get; set; }
+	public PagedResult<MediaMatch>? TrendingPage { get; set; }
 }

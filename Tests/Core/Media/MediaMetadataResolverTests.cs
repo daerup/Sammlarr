@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
@@ -24,7 +25,7 @@ public class MediaMetadataResolverTests
 
 		var result = await testee.ResolveAsync(identity, buffer);
 
-		await Assert.That(result.Value).IsTypeOf<MovieDetail>();
+		await Assert.That(result).IsOfUnionType<Result<MediaMatch>, Movie>();
 		await Assert.That(buffer.NewMetadata.Count).IsEqualTo(1);
 		await Assert.That(buffer.NewMetadata.Single().MediaId).IsEqualTo(mediaId);
 	}
@@ -48,7 +49,7 @@ public class MediaMetadataResolverTests
 		await Assert.That(queued.Externals).Contains((IExternalMediaId)tmdbId);
 		await Assert.That(queued.Externals).Contains((IExternalMediaId)plexId);
 		await Assert.That(queued.Externals).Contains((IExternalMediaId)imdbId);
-		await Assert.That(buffer.NewMetadata.Single().Details.Identity.Externals).IsEquivalentTo(queued.Externals);
+		await Assert.That(buffer.NewMetadata.Single().Media.Identity.Externals).IsEquivalentTo(queued.Externals);
 	}
 
 	private static (MediaMetadataResolver Testee, Dependencies Deps) CreateTestee()
@@ -84,7 +85,7 @@ public class MediaMetadataResolverTests
 		return (testee, new Dependencies(repository, mediaRepository, search, enricher, rating));
 	}
 
-	private static MovieDetail CompleteMovie(MediaId mediaId, IExternalMediaId external) =>
+	private static Movie CompleteMovie(MediaId mediaId, IExternalMediaId external) =>
 		new()
 		{
 			Identity = new MediaIdentity(mediaId, [external]),

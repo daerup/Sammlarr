@@ -146,10 +146,7 @@ public class MediaServiceOrderingTests
 
 		var metadataMap = builder
 			.Items.Where(i => i.Realizes)
-			.ToDictionary(
-				i => i.MediaId.Value,
-				i => new CachedMedia(i.Detail is MovieDetail m ? m with { Identity = new MediaIdentity(i.MediaId, [i.External]) } : i.Detail, _now)
-			);
+			.ToDictionary(i => i.MediaId.Value, i => new CachedMedia(i.Detail with { Identity = new MediaIdentity(i.MediaId, [i.External]) }, _now));
 
 		metaRepo
 			.QueryMediaMetadataAsync(Any(), Any(), Any())
@@ -201,11 +198,15 @@ public class MediaServiceOrderingTests
 
 internal static class OrderingAssertionExtensions
 {
-	public static List<int> ExtractTargetExternals(this IEnumerable<Result<Identification>> results) =>
-		[.. results.Where(r => r is Identification).Select(r => int.Parse(((Identification)r.Value).TargetExternal.Value))];
+	public static List<int> ExtractTargetExternals(this IEnumerable<Result<MediaIdentity>> results) =>
+		[
+			.. results
+				.Where(r => r is MediaIdentity)
+				.Select(r => r is MediaIdentity identity ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
+		];
 
-	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<IMediaDetail>> results) =>
-		[.. results.Select(r => r is IMediaDetail d ? (MediaId?)d.Identity.Id : null)];
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<MediaMatch>> results) =>
+		[.. results.Select(r => r is MediaMatch match && match is IMedia d ? (MediaId?)d.Identity.Id : null)];
 }
 
 internal sealed record TestItem
@@ -213,7 +214,7 @@ internal sealed record TestItem
 	public required int Index { get; init; }
 	public required IExternalMediaId External { get; init; }
 	public required MediaId MediaId { get; init; }
-	public required IMediaDetail Detail { get; init; }
+	public required Movie Detail { get; init; }
 	public bool Resolves { get; init; } = true;
 	public bool Realizes { get; init; } = true;
 	public ResolveRequest Request => new([External], MediaProvider.Tmdb, new None());
@@ -226,7 +227,7 @@ internal sealed record TestItem
 			Index = index,
 			External = TmdbId.From(index.ToString(), MediaType.Movie),
 			MediaId = mediaId,
-			Detail = new MovieDetail
+			Detail = new Movie
 			{
 				Identity = new MediaIdentity(mediaId, [PlexId.From($"plex-{index}", MediaType.Movie)]),
 				Title = $"Item {index}",
