@@ -24,6 +24,19 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
+	public async Task ResolveAsync_WhenConverterThrows_DoesNotCacheAndReturnsNone()
+	{
+		var tmdbId = TmdbId.From("789", MediaType.Movie);
+		var (testee, converter, cache) = CreateTestee();
+		converter.ConvertAsync(Any(), Any(), Any()).Throws(new InvalidOperationException("transient"));
+
+		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
+
+		await Assert.That(result.Value).IsTypeOf<None>();
+		cache.Set(Any(), Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
 	public async Task ResolveAsync_WhenUnresolvedCacheHit_ShortCircuitsAndReturnsNone()
 	{
 		var tmdbId = TmdbId.From("456", MediaType.Movie);
@@ -40,7 +53,7 @@ public class MediaIdResolverTests
 	{
 		var converter = IExternalIdConverter.Mock();
 		var cache = ITypedMemoryCache<string, bool>.Mock();
-		var converters = new FakeKeyedServiceIndex<MediaProvider, IExternalIdConverter>().Register(MediaProvider.Plex, converter);
+		var converters = new FakeKeyedServiceIndex<MediaProvider, IExternalIdConverter>().Register(MediaProvider.Tvdb, converter);
 		var testee = new MediaIdResolver(converters, cache);
 		return (testee, converter, cache);
 	}

@@ -37,21 +37,38 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 
 	public async ValueTask DisposeAsync()
 	{
-		SammlarrTelemetry.TagMediaFlushCounts(_activity, NewIdentities.Count, NewMetadata.Count);
+		var identities = NewIdentities.ToList();
+		var metadata = NewMetadata.ToList();
+		SammlarrTelemetry.TagMediaFlushCounts(_activity, identities.Count, metadata.Count);
 		try
 		{
-			if (!NewIdentities.IsEmpty)
+			if (identities.Count > 0)
 			{
-				await _mediaRepository.UpsertManyAsync(NewIdentities.ToList(), CancellationToken.None);
+				var canonical = await _mediaRepository.UpsertManyAsync(identities, CancellationToken.None);
+				metadata = RemapMetadata(metadata, identities, canonical);
 			}
-			if (!NewMetadata.IsEmpty)
+			if (metadata.Count > 0)
 			{
-				await _metadataRepository.UpsertManyAsync(NewMetadata.ToList(), CancellationToken.None);
+				await _metadataRepository.UpsertManyAsync(metadata, CancellationToken.None);
 			}
 		}
 		finally
 		{
 			_activity?.Dispose();
 		}
+	}
+
+	private static List<MediaMetadataUpsert> RemapMetadata(
+		List<MediaMetadataUpsert> metadata,
+		List<MediaIdentity> identities,
+		IReadOnlyList<MediaIdentity> canonical
+	)
+	{
+		var remap = new Dictionary<Guid, Guid>();
+		for (var i = 0; i < identities.Count && i < canonical.Count; i++)
+		{
+			remap[identities[i].Id.Value] = canonical[i].Id.Value;
+		}
+		return [.. metadata.Select(item => remap.TryGetValue(item.MediaId.Value, out var id) ? item with { MediaId = MediaId.From(id) } : item)];
 	}
 }

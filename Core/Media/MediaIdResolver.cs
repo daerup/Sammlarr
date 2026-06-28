@@ -23,7 +23,7 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 			return new None();
 		}
 
-		Optional<IReadOnlyList<IExternalMediaId>> discovered = new None();
+		Optional<IReadOnlyList<IExternalMediaId>> discovered;
 		try
 		{
 			discovered = await converters[target].ConvertAsync(candidates, hints, cancellationToken);
@@ -31,6 +31,7 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			Activity.Current?.AddException(ex);
+			return new None();
 		}
 
 		if (discovered is Some<IReadOnlyList<IExternalMediaId>>(var found))

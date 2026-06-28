@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
@@ -30,6 +31,21 @@ public class PlexApiTests
 			await Assert.That(r.Identity.Id).IsEqualTo(default);
 			await Assert.That(r.Identity.Externals).Contains(PlexId.From(plexValue, MediaType.Movie));
 		}
+	}
+
+	[Test]
+	public async Task SearchAsync_WhenResponseIsNotSuccess_Throws()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
+		var httpClient = handler.CreateClient(PlexBaseUrl);
+		var credentialStore = ICredentialStore.Mock();
+		credentialStore
+			.GetAsync(WatchlistProvider.Plex, Any())
+			.Returns(new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue));
+		var testee = new PlexApi(new PlexClient(httpClient, credentialStore));
+
+		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<HttpRequestException>();
 	}
 
 	[Test]
