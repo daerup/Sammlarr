@@ -1,0 +1,42 @@
+@implements IAsyncDisposable
+@inject IKeyboardShortcutService KeyboardShortcutService
+
+@code {
+    [Parameter] [EditorRequired] public required string Keys { get; set; }
+    [Parameter] public EventCallback OnInvoked { get; set; }
+    [Parameter] public bool Enabled { get; set; } = true;
+
+    private readonly string _id = Guid.NewGuid().ToString();
+    private IDisposable? _registration;
+    private bool _registered;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Enabled && !_registered)
+        {
+            _registration = await KeyboardShortcutService.RegisterAsync(Keys, () => OnInvoked.InvokeAsync(), _id);
+            _registered = true;
+        }
+        else if (!Enabled && _registered)
+        {
+            Unregister();
+        }
+    }
+
+    private void Unregister()
+    {
+        _registration?.Dispose();
+        _registration = null;
+        KeyboardShortcutService.Unregister(_id);
+        _registered = false;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        if (_registered)
+        {
+            Unregister();
+        }
+        return ValueTask.CompletedTask;
+    }
+}

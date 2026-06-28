@@ -5,10 +5,7 @@
 @using Contracts.Media
 @using Contracts.Media.Search
 @using Contracts.Settings
-@implements IAsyncDisposable
 @inject IBlacklistService BlacklistService
-@inject IMediaService Media
-@inject IKeyboardShortcutService KeyboardShortcutService
 @inject ScrollService ScrollService
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
@@ -81,7 +78,6 @@ else
                                        IsEditModeChanged="@(v => _isEditMode = v)"
                                        OnTileClick="@(i => SelectItem(i.Detail))"
                                        OnBulkRemove="RemoveBulkAsync"
-                                       OnImageBroken="ReportBrokenImageAsync"
                                        RemoveLabel="Remove from Blacklist"/>
             }
         </ChildContent>
@@ -92,7 +88,6 @@ else
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedItem"
                   ShowMetadataRow="false"
-                  OnImageBroken="ReportSelectedImageBrokenAsync"
                   ButtonAction="RemoveSelectedFromBlacklistAsync"
                   ButtonText="GetRemoveButtonText"
                   ButtonIcon="GetRemoveButtonIcon"/>
@@ -118,11 +113,7 @@ else
     private bool _isEditMode;
     private string? _errorMessage;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly HashSet<MediaId> _reportedBrokenImages = [];
     private ProviderConfig? _providerSettings;
-    private IDisposable? _shortcutRegistration;
-    private bool _isShortcutRegistered;
-    private const string BlacklistSearchShortcutId = "blacklist-search-shortcut";
 
     private string PageTitleText => "Blacklist";
     private string PageHeading => "Blacklist";
@@ -132,15 +123,6 @@ else
     {
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
         await LoadBlacklistAsync();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_providerSettings is not null && !_isShortcutRegistered)
-        {
-            _shortcutRegistration = await KeyboardShortcutService.RegisterAsync("Ctrl+K", OpenSearchFromShortcutAsync, BlacklistSearchShortcutId);
-            _isShortcutRegistered = true;
-        }
     }
 
     private async Task LoadBlacklistAsync()
@@ -173,24 +155,6 @@ else
             _isLoading = false;
             StateHasChanged();
         }
-    }
-
-    private async Task ReportBrokenImageAsync(MediaId mediaId)
-    {
-        if (!_reportedBrokenImages.Add(mediaId))
-        {
-            return;
-        }
-        await Media.InvalidateAsync([mediaId], _cancellationTokenSource.Token);
-    }
-
-    private async Task ReportSelectedImageBrokenAsync()
-    {
-        if (!_selectedItem.HasValue)
-        {
-            return;
-        }
-        await ReportBrokenImageAsync(_selectedItem.Value.Id);
     }
 
     private static string GetRemoveButtonText() => "Remove from Blacklist";
@@ -275,32 +239,6 @@ else
         _isSearchModalOpen = true;
     }
 
-    private async Task OpenSearchFromShortcutAsync()
-    {
-        if (_providerSettings is null || _isSearchModalOpen)
-        {
-            return;
-        }
-
-        OpenSearchModal();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private ValueTask UnregisterShortcutAsync()
-    {
-        if (!_isShortcutRegistered)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        _shortcutRegistration?.Dispose();
-        _shortcutRegistration = null;
-
-        KeyboardShortcutService.Unregister(BlacklistSearchShortcutId);
-        _isShortcutRegistered = false;
-        return ValueTask.CompletedTask;
-    }
-
     private async Task<bool> ToggleFromSearchAsync(MediaId id, string title, bool isMarked)
     {
         if (isMarked)
@@ -349,12 +287,6 @@ else
     {
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await UnregisterShortcutAsync();
-        Dispose();
     }
 }
 

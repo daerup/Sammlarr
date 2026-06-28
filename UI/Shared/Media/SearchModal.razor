@@ -3,6 +3,7 @@
 @using global::Shared
 @inject IMediaSearchService SearchService
 @inject Notifier Notifier
+<KeyboardShortcut Keys="@ShortcutKeys" OnInvoked="OpenFromShortcutAsync" Enabled="ShortcutEnabled"/>
 @if (IsOpen)
 {
     <div class="search-modal"
@@ -84,7 +85,7 @@
                         @foreach (var result in _searchResults)
                         {
                             <MediaDetailTile @key="result.Id"
-                                             Result="result"
+                                             Media="result"
                                              IsFocused="_focusedResult == result.Id"
                                              OnFocusIn="() => _focusedResult = result.Id"
                                              OnFocusOut="() => ClearFocusedResult(result)">
@@ -122,6 +123,8 @@
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Description { get; set; }
     [Parameter] public RenderFragment<TileIconContext>? TileIcons { get; set; }
+    [Parameter] public string ShortcutKeys { get; set; } = "Ctrl+K";
+    [Parameter] public bool ShortcutEnabled { get; set; } = true;
     private bool _isSearching;
     private bool _hasSearched;
     private bool _isAdding;
@@ -170,6 +173,15 @@
     {
         _focusedResult = null;
         await IsOpenChanged.InvokeAsync(false);
+    }
+
+    private async Task OpenFromShortcutAsync()
+    {
+        if (IsOpen)
+        {
+            return;
+        }
+        await IsOpenChanged.InvokeAsync(true);
     }
 
     private async Task HandleSearchKeyDown(KeyboardEventArgs args)

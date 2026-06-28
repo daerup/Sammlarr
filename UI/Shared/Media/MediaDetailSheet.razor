@@ -1,6 +1,7 @@
 @using Contracts.Media
 @using global::Shared
 @using UI.Shared.Services.Branding
+@inject IMediaService MediaService
 @if (Open)
 {
     <div class="sheet-modal-backdrop"></div>
@@ -128,9 +129,6 @@
     [Parameter]
     public bool ButtonDisabled { get; set; }
 
-    [Parameter]
-    public EventCallback OnImageBroken { get; set; }
-
     private bool _isButtonBusy;
     private bool _failed;
     private string? _lastImageUrl;
@@ -149,7 +147,10 @@
     private async Task OnImageError()
     {
         _failed = true;
-        await OnImageBroken.InvokeAsync();
+        if (Media.HasValue && !Media.Value.IsUnresolved)
+        {
+            await MediaService.InvalidateAsync([Media.Value.Id]);
+        }
     }
 
     private async Task HandleSheetOpenChangedAsync(bool isOpen)

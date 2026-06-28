@@ -25,8 +25,7 @@
         <div class="relative @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
             <MediaGridTile @key="renderKey"
                            Media="detail"
-                           OnClick="@(() => HandleTileClickAsync(item))"
-                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.Id))"/>
+                           OnClick="@(() => HandleTileClickAsync(item))"/>
             @if (IsEditMode)
             {
                 <div class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
@@ -49,7 +48,6 @@
     [Parameter] public EventCallback<bool> IsEditModeChanged { get; set; }
     [Parameter] public EventCallback<TItem> OnTileClick { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<TItem>> OnBulkRemove { get; set; }
-    [Parameter] public EventCallback<MediaId> OnImageBroken { get; set; }
     [Parameter] public RenderFragment<TItem>? Overlay { get; set; }
     [Parameter] public string RemoveLabel { get; set; } = "Remove";
 
