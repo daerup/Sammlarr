@@ -29,6 +29,7 @@ public record PreviewStatus
 	public bool HasResults { get; init; }
 	public bool HasFailed { get; init; }
 	public bool HasEnrollmentChanges { get; init; }
+	public bool EarlySaveAllowed { get; init; }
 }
 
 public record FeedConfig

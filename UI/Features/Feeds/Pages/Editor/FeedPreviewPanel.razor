@@ -265,11 +265,16 @@
     private readonly HashSet<MediaId> _blacklistIds = new();
     private bool _hasEnrollmentChanges;
     private bool _refreshDialogOpen;
+    private readonly Stopwatch _fetchTimer = new();
+
+    private static readonly TimeSpan EarlySaveDelay = TimeSpan.FromSeconds(10);
+    private const int EarlySaveMinItems = 100;
 
     private bool IsLoading => _fetchState == FetchState.Loading;
     private bool HasItems => _rawResults.Count > 0;
     private bool HasResults => _fetchState == FetchState.Success && _rawResults.Count > 0;
     private bool HasFailed => _fetchState == FetchState.Failed;
+    private bool EarlySaveAllowed => IsLoading && _fetchTimer.Elapsed >= EarlySaveDelay && _rawResults.Count >= EarlySaveMinItems;
 
     protected override void OnParametersSet()
     {
@@ -370,7 +375,7 @@
             await LoadWatchlistAndBlacklistAsync();
 
             var service = FeedServiceIndex[Config.Provider!.Value];
-            var totalSw = Stopwatch.StartNew();
+            _fetchTimer.Restart();
             var sw = Stopwatch.StartNew();
             await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), ct).WithCancellation(ct))
             {
@@ -378,11 +383,12 @@
                 if (sw.ElapsedMilliseconds >= 150)
                 {
                     await ReprocessAsync(ct);
+                    await EmitStatusIfChangedAsync();
                     await InvokeAsync(StateHasChanged);
                     sw.Restart();
                 }
             }
-            totalSw.Stop();
+            _fetchTimer.Stop();
 
             if (_rawResults.Count == 0)
             {
@@ -392,7 +398,7 @@
 
             _fetchState = FetchState.Success;
             await ReprocessAsync(ct);
-            Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(totalSw.Elapsed)}.");
+            Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(_fetchTimer.Elapsed)}.");
         }
         catch (OperationCanceledException)
         {
@@ -509,6 +515,7 @@
         HasResults = HasResults,
         HasFailed = HasFailed,
         HasEnrollmentChanges = _hasEnrollmentChanges,
+        EarlySaveAllowed = EarlySaveAllowed,
     };
 
     public void Dispose()
