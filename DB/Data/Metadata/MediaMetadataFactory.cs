@@ -4,7 +4,7 @@ namespace DB.Data.Metadata;
 
 internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 {
-	public MediaMetadataEntity BuildFrom(MediaMatch media, Guid mediaId)
+	public MediaMetadataRow BuildFrom(IdentifiedMedia media, Guid mediaId)
 	{
 		var entity = NewEntity(media);
 		ApplyCommonFields(entity, media, mediaId);
@@ -13,16 +13,16 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		return entity;
 	}
 
-	public void Update(MediaMetadataEntity existing, MediaMatch media)
+	public void Update(MediaMetadataRow existing, IdentifiedMedia media)
 	{
 		switch (existing)
 		{
-			case MovieMetadataEntity movie when media is Movie or PartialMovie:
+			case MovieMetadataRow movie when media is Movie or PartialMovie:
 				ApplyCommonFields(movie, media, movie.MediaId);
 				movie.Runtime = Runtime(media);
 				ReplaceRatings(movie, Ratings(media));
 				break;
-			case ShowMetadataEntity show when media is Show or PartialShow:
+			case ShowMetadataRow show when media is Show or PartialShow:
 				ApplyCommonFields(show, media, show.MediaId);
 				show.Seasons = Seasons(media);
 				show.Episodes = Episodes(media);
@@ -35,11 +35,11 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		existing.LastFetchedAt = dateTimeProvider.Now;
 	}
 
-	public MediaMatch ToStored(MediaMetadataEntity entity, MediaIdentity identity)
+	public IdentifiedMedia ToStored(MediaMetadataRow entity, MediaIdentity identity)
 	{
 		IPartialMedia partial = entity switch
 		{
-			MovieMetadataEntity movie => new PartialMovie
+			MovieMetadataRow movie => new PartialMovie
 			{
 				Identity = identity,
 				Title = movie.Title.NullIfBlank(),
@@ -52,7 +52,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 				Rating = RatingSummary.From(ToRatings(movie.Ratings)),
 				Runtime = movie.Runtime == TimeSpan.Zero ? null : movie.Runtime,
 			},
-			ShowMetadataEntity show => new PartialShow
+			ShowMetadataRow show => new PartialShow
 			{
 				Identity = identity,
 				Title = show.Title.NullIfBlank(),
@@ -69,14 +69,14 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			},
 			_ => throw new InvalidOperationException($"Unsupported metadata entity type '{entity.GetType().Name}'."),
 		};
-		return MediaMatch.FromMedia(partial);
+		return IdentifiedMedia.From(partial);
 	}
 
-	private static MediaMetadataEntity NewEntity(MediaMatch media) =>
+	private static MediaMetadataRow NewEntity(IdentifiedMedia media) =>
 		media switch
 		{
-			Movie or PartialMovie => new MovieMetadataEntity { Runtime = Runtime(media) },
-			Show or PartialShow => new ShowMetadataEntity
+			Movie or PartialMovie => new MovieMetadataRow { Runtime = Runtime(media) },
+			Show or PartialShow => new ShowMetadataRow
 			{
 				Seasons = Seasons(media),
 				Episodes = Episodes(media),
@@ -85,7 +85,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => throw new InvalidOperationException($"Unsupported media type '{media.GetType().Name}'."),
 		};
 
-	private static void ApplyCommonFields(MediaMetadataEntity entity, MediaMatch media, Guid mediaId)
+	private static void ApplyCommonFields(MediaMetadataRow entity, IdentifiedMedia media, Guid mediaId)
 	{
 		entity.MediaId = mediaId;
 		switch (media)
@@ -111,7 +111,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		}
 	}
 
-	private static TimeSpan Runtime(MediaMatch media) =>
+	private static TimeSpan Runtime(IdentifiedMedia media) =>
 		media switch
 		{
 			Movie movie => movie.Runtime,
@@ -119,7 +119,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => TimeSpan.Zero,
 		};
 
-	private static int Seasons(MediaMatch media) =>
+	private static int Seasons(IdentifiedMedia media) =>
 		media switch
 		{
 			Show show => show.Seasons,
@@ -127,7 +127,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => 0,
 		};
 
-	private static int Episodes(MediaMatch media) =>
+	private static int Episodes(IdentifiedMedia media) =>
 		media switch
 		{
 			Show show => show.Episodes,
@@ -135,7 +135,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => 0,
 		};
 
-	private static TimeSpan RuntimePerEpisode(MediaMatch media) =>
+	private static TimeSpan RuntimePerEpisode(IdentifiedMedia media) =>
 		media switch
 		{
 			Show show => show.RuntimePerEpisode,
@@ -143,7 +143,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => TimeSpan.Zero,
 		};
 
-	private static IReadOnlyList<MediaRating> Ratings(MediaMatch media) =>
+	private static IReadOnlyList<MediaRating> Ratings(IdentifiedMedia media) =>
 		media switch
 		{
 			IMedia resolved => [.. resolved.Rating.Sources],
@@ -151,7 +151,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			_ => [],
 		};
 
-	private static void ReplaceRatings(MediaMetadataEntity entity, IReadOnlyList<MediaRating> ratings)
+	private static void ReplaceRatings(MediaMetadataRow entity, IReadOnlyList<MediaRating> ratings)
 	{
 		entity.Ratings.Clear();
 		foreach (var rating in ratings)
@@ -160,7 +160,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 		}
 	}
 
-	private static MediaRatingEntity BuildRating(MediaRating rating, MediaMetadataEntity parent) =>
+	private static MediaRatingRow BuildRating(MediaRating rating, MediaMetadataRow parent) =>
 		new()
 		{
 			Source = rating.Source,
@@ -169,6 +169,6 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 			Metadata = parent,
 		};
 
-	private static IReadOnlyList<MediaRating> ToRatings(IEnumerable<MediaRatingEntity> ratings) =>
+	private static IReadOnlyList<MediaRating> ToRatings(IEnumerable<MediaRatingRow> ratings) =>
 		[.. ratings.Select(rating => new MediaRating(rating.Source, rating.NormalizedValue, rating.VoteCount))];
 }

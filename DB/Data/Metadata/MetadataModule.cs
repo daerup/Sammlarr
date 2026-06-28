@@ -1,4 +1,3 @@
-using Contracts.Media.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -8,8 +7,7 @@ internal class MetadataModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<IMediaMetadataRepository, MediaMetadataRepository>();
 		services.AddScoped<MediaMetadataFactory>();
-		services.AddScoped<IModelConfiguration, MediaMetadataEntityConfiguration>();
+		services.AddScoped<IModelConfiguration, MediaMetadataRowConfiguration>();
 	}
 }

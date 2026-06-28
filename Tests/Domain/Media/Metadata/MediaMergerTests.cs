@@ -7,7 +7,7 @@ public class MediaMergerTests
 	{
 		IPartialMedia partial = MediaFakes.CompletePartialMovie();
 
-		var match = MediaMatch.FromMedia(partial);
+		var match = IdentifiedMedia.From(partial);
 
 		await Assert.That(match is Movie).IsTrue();
 	}
@@ -17,7 +17,7 @@ public class MediaMergerTests
 	{
 		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Dune" };
 
-		var match = MediaMatch.FromMedia(partial);
+		var match = IdentifiedMedia.From(partial);
 
 		await Assert.That(match is PartialMovie).IsTrue();
 	}

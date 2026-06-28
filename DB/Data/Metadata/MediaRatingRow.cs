@@ -3,7 +3,7 @@ using Contracts.Media.Metadata;
 
 namespace DB.Data.Metadata;
 
-internal record MediaRatingEntity
+internal record MediaRatingRow
 {
 	[Required]
 	public required RatingSource Source { get; set; }
@@ -14,6 +14,6 @@ internal record MediaRatingEntity
 	public int? VoteCount { get; set; }
 
 #pragma warning disable CS8618
-	public MediaMetadataEntity Metadata { get; set; }
+	public MediaMetadataRow Metadata { get; set; }
 #pragma warning restore CS8618
 }

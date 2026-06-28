@@ -2,7 +2,7 @@ using Contracts.Media;
 
 namespace DB.Data.Media;
 
-internal record ExternalMediaIdEntity
+internal record ExternalMediaIdRow
 {
 	public required MediaProvider Source { get; set; }
 
@@ -10,5 +10,5 @@ internal record ExternalMediaIdEntity
 
 	public required string Id { get; set; }
 
-	public required MediaEntity Media { get; set; }
+	public required MediaRow Media { get; set; }
 }

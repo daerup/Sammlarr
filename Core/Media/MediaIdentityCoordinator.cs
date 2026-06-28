@@ -12,7 +12,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 	)
 	{
 		var groups = preliminary.Select(p => p.Externals.ToList()).ToList();
-		var found = await mediaRepository.FindManyAsync(groups, cancellationToken);
+		var found = await mediaRepository.FindIdentitiesAsync(groups, cancellationToken);
 
 		var cached = new Dictionary<IExternalMediaId, MediaIdentity>();
 		foreach (var match in found.Where(f => f.HasValue).Select(f => f!.Value))

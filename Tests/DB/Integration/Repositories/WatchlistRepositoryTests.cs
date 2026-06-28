@@ -85,7 +85,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
 	{
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddRangeAsync(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -94,7 +94,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 	private async Task<MediaId> SeedWatchlistEntryAsync(IExternalMediaId id, WatchlistEntryOrigin origin)
 	{
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddAsync(id.ToExternalIdEntity(media));
 		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = media, Origin = origin });
 		await fixture.Context.SaveChangesAsync();

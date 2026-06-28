@@ -6,14 +6,14 @@ namespace DB.Data.Media;
 
 internal static class MediaQueries
 {
-	extension(IQueryable<ExternalMediaIdEntity> source)
+	extension(IQueryable<ExternalMediaIdRow> source)
 	{
-		public IQueryable<ExternalMediaIdEntity> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
+		public IQueryable<ExternalMediaIdRow> WhereMatchingAny(IEnumerable<IExternalMediaId> mediaIds) => source.Where(BuildAnyMatchPredicate(mediaIds));
 	}
 
 	extension(SammlarrDbContext ctx)
 	{
-		public IQueryable<MediaEntity> MediaMatchingAny(IEnumerable<IExternalMediaId> mediaIds) =>
+		public IQueryable<MediaRow> MediaMatchingAny(IEnumerable<IExternalMediaId> mediaIds) =>
 			ctx.ExternalMediaIds.WhereMatchingAny(mediaIds).Select(e => e.Media).Distinct();
 	}
 
@@ -22,7 +22,7 @@ internal static class MediaQueries
 		.First(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
 		.MakeGenericMethod(typeof(string));
 
-	private static Expression<Func<ExternalMediaIdEntity, bool>> BuildAnyMatchPredicate(IEnumerable<IExternalMediaId> mediaIds)
+	private static Expression<Func<ExternalMediaIdRow, bool>> BuildAnyMatchPredicate(IEnumerable<IExternalMediaId> mediaIds)
 	{
 		var groups = mediaIds
 			.GroupBy(id => (id.Source, id.Type))
@@ -34,10 +34,10 @@ internal static class MediaQueries
 			return _ => false;
 		}
 
-		var parameter = Expression.Parameter(typeof(ExternalMediaIdEntity), "externalId");
-		var source = Expression.Property(parameter, nameof(ExternalMediaIdEntity.Source));
-		var type = Expression.Property(parameter, nameof(ExternalMediaIdEntity.MediaType));
-		var id = Expression.Property(parameter, nameof(ExternalMediaIdEntity.Id));
+		var parameter = Expression.Parameter(typeof(ExternalMediaIdRow), "externalId");
+		var source = Expression.Property(parameter, nameof(ExternalMediaIdRow.Source));
+		var type = Expression.Property(parameter, nameof(ExternalMediaIdRow.MediaType));
+		var id = Expression.Property(parameter, nameof(ExternalMediaIdRow.Id));
 
 		Expression? body = null;
 		foreach (var (idSource, idType, idValues) in groups)
@@ -49,6 +49,6 @@ internal static class MediaQueries
 			body = body is null ? clause : Expression.OrElse(body, clause);
 		}
 
-		return Expression.Lambda<Func<ExternalMediaIdEntity, bool>>(body!, parameter);
+		return Expression.Lambda<Func<ExternalMediaIdRow, bool>>(body!, parameter);
 	}
 }

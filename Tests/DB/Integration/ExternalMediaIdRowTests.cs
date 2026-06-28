@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 namespace DB.Tests.Integration;
 
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ExternalMediaIdEntityTests(SQLiteFixture fixture) : IAsyncDisposable
+public class ExternalMediaIdRowTests(SQLiteFixture fixture) : IAsyncDisposable
 {
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Test]
 	public async Task ExternalId_PersistsAndReloadsAllThreeFields()
 	{
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(
-			new ExternalMediaIdEntity
+			new ExternalMediaIdRow
 			{
 				Source = MediaProvider.Tmdb,
 				MediaType = MediaType.Movie,
@@ -36,10 +36,10 @@ public class ExternalMediaIdEntityTests(SQLiteFixture fixture) : IAsyncDisposabl
 	[Test]
 	public async Task UniqueIndex_RejectsDuplicateIdentifier()
 	{
-		var firstMedia = new MediaEntity();
-		var secondMedia = new MediaEntity();
+		var firstMedia = new MediaRow();
+		var secondMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(
-			new ExternalMediaIdEntity
+			new ExternalMediaIdRow
 			{
 				Source = MediaProvider.Imdb,
 				MediaType = MediaType.Show,
@@ -51,7 +51,7 @@ public class ExternalMediaIdEntityTests(SQLiteFixture fixture) : IAsyncDisposabl
 		fixture.Context.ChangeTracker.Clear();
 
 		fixture.Context.ExternalMediaIds.Add(
-			new ExternalMediaIdEntity
+			new ExternalMediaIdRow
 			{
 				Source = MediaProvider.Imdb,
 				MediaType = MediaType.Show,
@@ -68,7 +68,7 @@ public class ExternalMediaIdEntityTests(SQLiteFixture fixture) : IAsyncDisposabl
 	{
 		const int count = 2000;
 		var ids = Enumerable.Range(0, count).Select(i => (IExternalMediaId)TvdbId.From($"tvdb-{i}", MediaType.Movie)).ToList();
-		var media = new MediaEntity();
+		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(ids.Select(id => id.ToExternalIdEntity(media)));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();

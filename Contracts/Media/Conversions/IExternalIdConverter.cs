@@ -1,6 +1,6 @@
 using Contracts;
 
-namespace Contracts.Media.Convertions;
+namespace Contracts.Media.Conversions;
 
 public interface IExternalIdConverter
 {

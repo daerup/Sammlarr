@@ -49,8 +49,8 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var blacklistedImdb = ImdbId.From("tt2000", MediaType.Movie);
 		var purgedId = TmdbId.From("2001", MediaType.Movie);
 
-		var blacklistedMedia = new MediaEntity();
-		var purgedMedia = new MediaEntity();
+		var blacklistedMedia = new MediaRow();
+		var purgedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(
 			blacklistedId.ToExternalIdEntity(blacklistedMedia),
 			blacklistedImdb.ToExternalIdEntity(blacklistedMedia),
@@ -60,14 +60,14 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var purgedMetadata = BuildMetadata(purgedMedia, "Purged");
 		fixture.Context.MediaMetadata.AddRange(blacklistedMetadata, purgedMetadata);
 		fixture.Context.MediaRatings.AddRange(
-			new MediaRatingEntity
+			new MediaRatingRow
 			{
 				Source = RatingSource.Tmdb,
 				NormalizedValue = 8.0f,
 				VoteCount = 1234,
 				Metadata = blacklistedMetadata,
 			},
-			new MediaRatingEntity
+			new MediaRatingRow
 			{
 				Source = RatingSource.Tmdb,
 				NormalizedValue = 7.0f,
@@ -97,7 +97,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var watchlistedId = PlexId.From("3000", MediaType.Movie);
 		var watchlistedImdb = ImdbId.From("tt3000", MediaType.Movie);
 
-		var watchlistedMedia = new MediaEntity();
+		var watchlistedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(watchlistedId.ToExternalIdEntity(watchlistedMedia), watchlistedImdb.ToExternalIdEntity(watchlistedMedia));
 		var metadata = BuildMetadata(watchlistedMedia, "Watchlisted");
 		fixture.Context.MediaMetadata.Add(metadata);
@@ -120,7 +120,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		var queuedId = PlexId.From("4000", MediaType.Movie);
 		var queuedImdb = ImdbId.From("tt4000", MediaType.Movie);
 
-		var queuedMedia = new MediaEntity();
+		var queuedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalIdEntity(queuedMedia), queuedImdb.ToExternalIdEntity(queuedMedia));
 		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = queuedMedia, Kind = WatchlistOperationKind.Add });
 		await fixture.Context.SaveChangesAsync();
@@ -135,7 +135,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(queuedId);
 	}
 
-	private static MovieMetadataEntity BuildMetadata(MediaEntity media, string title) =>
+	private static MovieMetadataRow BuildMetadata(MediaRow media, string title) =>
 		new()
 		{
 			Media = media,

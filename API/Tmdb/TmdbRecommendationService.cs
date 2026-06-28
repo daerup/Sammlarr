@@ -3,7 +3,7 @@ using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Shared;
@@ -15,7 +15,7 @@ namespace API.Tmdb;
 internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions options, IMediaService media, IProviderConfigRepository providerConfigRepository)
 	: IMediaRecommendationService
 {
-	public async Task<PagedResult<MediaMatch>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
+	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartTrendingLoad(page);
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
@@ -24,7 +24,7 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 		var settings = await providerConfigRepository.GetAsync(cancellationToken);
 
-		var finalItems = new MediaMatch[result.Results.Count];
+		var finalItems = new MediaLookup[result.Results.Count];
 		var indexed = result.Results.Index().ToList();
 
 		var unresolvable = indexed.Where(x => x.Item.MediaType is MediaType.Unknown).ToList();
@@ -38,7 +38,7 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 		{
 			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}
-		return new PagedResult<MediaMatch>(finalItems, result.TotalPages);
+		return new PagedResult<MediaLookup>(finalItems, result.TotalPages);
 	}
 
 	private static Some<ResolutionHints> BuildHints(TmdbTypes.Trending.Result response) =>
@@ -49,37 +49,39 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 			MediaType = response.MediaType,
 		};
 
-	private MediaMatch BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
+	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
 	{
 		if (outcome is not MediaIdentity identity)
 		{
 			return BuildUnmatched(response);
 		}
 
-		return response.MediaType == MediaType.Show
-			? new PartialShow
-			{
-				Identity = identity,
-				Title = response.DisplayTitle,
-				Summary = response.Overview,
-				PosterUrl = options.ImageBaseUrl + response.PosterPath,
-				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
-				ReleaseDate = ParseReleaseDate(response.AvailableDate),
-				Rating = BuildRating(response.VoteAverage),
-			}
-			: new PartialMovie
-			{
-				Identity = identity,
-				Title = response.DisplayTitle,
-				Summary = response.Overview,
-				PosterUrl = options.ImageBaseUrl + response.PosterPath,
-				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
-				ReleaseDate = ParseReleaseDate(response.AvailableDate),
-				Rating = BuildRating(response.VoteAverage),
-			};
+		IPartialMedia partial =
+			response.MediaType == MediaType.Show
+				? new PartialShow
+				{
+					Identity = identity,
+					Title = response.DisplayTitle,
+					Summary = response.Overview,
+					PosterUrl = options.ImageBaseUrl + response.PosterPath,
+					BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+					ReleaseDate = ParseReleaseDate(response.AvailableDate),
+					Rating = BuildRating(response.VoteAverage),
+				}
+				: new PartialMovie
+				{
+					Identity = identity,
+					Title = response.DisplayTitle,
+					Summary = response.Overview,
+					PosterUrl = options.ImageBaseUrl + response.PosterPath,
+					BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+					ReleaseDate = ParseReleaseDate(response.AvailableDate),
+					Rating = BuildRating(response.VoteAverage),
+				};
+		return IdentifiedMedia.From(partial);
 	}
 
-	private MediaMatch BuildUnmatched(TmdbTypes.Trending.Result response) =>
+	private MediaLookup BuildUnmatched(TmdbTypes.Trending.Result response) =>
 		new UnmatchedMedia
 		{
 			Externals = [response.TmdbId],

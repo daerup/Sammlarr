@@ -17,18 +17,18 @@ internal class WatchlistService(
 	IProviderConfigRepository configRepository
 ) : IWatchlistService
 {
-	public async IAsyncEnumerable<WatchlistedMediaDetail> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<WatchlistItem> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var entries = (await repository.GetEntriesAsync(cancellationToken)).OrderByDescending(e => e.AddedAt).ToList();
 		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).Zip(entries, cancellationToken);
 
 		await foreach (var (result, entry) in pipeline)
 		{
-			if (result is not MediaMatch detail)
+			if (result is not IdentifiedMedia detail)
 			{
 				continue;
 			}
-			yield return new WatchlistedMediaDetail(detail, entry.AddedAt, entry.Provenance);
+			yield return new WatchlistItem(detail, entry.AddedAt, entry.Provenance);
 		}
 	}
 

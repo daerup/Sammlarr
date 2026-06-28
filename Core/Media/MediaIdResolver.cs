@@ -3,7 +3,7 @@ using Contracts;
 using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 
 namespace Core.Media;
 

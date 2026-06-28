@@ -4,7 +4,7 @@ using DB.Data.Media;
 
 namespace DB.Data.Metadata;
 
-internal abstract record MediaMetadataEntity : IAuditable
+internal abstract record MediaMetadataRow : IAuditable
 {
 	public DateTimeOffset CreatedAt { get; set; }
 	public DateTimeOffset UpdatedAt { get; set; }
@@ -14,7 +14,7 @@ internal abstract record MediaMetadataEntity : IAuditable
 	public Guid MediaId { get; set; }
 
 #pragma warning disable CS8618
-	public MediaEntity Media { get; set; }
+	public MediaRow Media { get; set; }
 #pragma warning restore CS8618
 
 	[Required]
@@ -42,12 +42,12 @@ internal abstract record MediaMetadataEntity : IAuditable
 	[Required]
 	public MediaType MediaType { get; init; }
 
-	public List<MediaRatingEntity> Ratings { get; set; } = [];
+	public List<MediaRatingRow> Ratings { get; set; } = [];
 }
 
-internal record MovieMetadataEntity : MediaMetadataEntity
+internal record MovieMetadataRow : MediaMetadataRow
 {
-	public MovieMetadataEntity()
+	public MovieMetadataRow()
 	{
 		MediaType = MediaType.Movie;
 	}
@@ -56,9 +56,9 @@ internal record MovieMetadataEntity : MediaMetadataEntity
 	public required TimeSpan Runtime { get; set; }
 }
 
-internal record ShowMetadataEntity : MediaMetadataEntity
+internal record ShowMetadataRow : MediaMetadataRow
 {
-	public ShowMetadataEntity()
+	public ShowMetadataRow()
 	{
 		MediaType = MediaType.Show;
 	}

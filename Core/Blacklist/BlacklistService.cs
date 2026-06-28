@@ -10,7 +10,7 @@ namespace Core.Blacklist;
 
 internal class BlacklistService(IBlacklistRepository repository, IProviderConfigRepository providerConfigRepository, IMediaService media) : IBlacklistService
 {
-	public async IAsyncEnumerable<BlacklistedMediaDetail> GetBlacklistItems([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<BlacklistItem> GetBlacklistItems([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
 		using var activity = SammlarrTelemetry.StartBlacklistLoad(config.WatchlistProvider);
@@ -19,11 +19,11 @@ internal class BlacklistService(IBlacklistRepository repository, IProviderConfig
 
 		await foreach (var (result, entry) in pipeline)
 		{
-			if (result is not MediaMatch detail)
+			if (result is not IdentifiedMedia detail)
 			{
 				continue;
 			}
-			yield return new BlacklistedMediaDetail(detail, entry.AddedAt);
+			yield return new BlacklistItem(detail, entry.AddedAt);
 		}
 	}
 

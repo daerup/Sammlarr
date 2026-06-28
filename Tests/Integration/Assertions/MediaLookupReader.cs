@@ -1,38 +1,34 @@
 namespace Integration.Tests.Assertions;
 
-internal static class MediaMatchReader
+internal static class MediaLookupReader
 {
-	extension(MediaMatch media)
+	extension(MediaLookup media)
 	{
 		public string Title =>
 			media switch
 			{
-				IMedia resolved => resolved.Title,
-				IPartialMedia partial => partial.Title ?? string.Empty,
+				IdentifiedMedia identified => identified.Title ?? string.Empty,
 				UnmatchedMedia unmatched => unmatched.Title,
 			};
 
 		public string Summary =>
 			media switch
 			{
-				IMedia resolved => resolved.Summary,
-				IPartialMedia partial => partial.Summary ?? string.Empty,
+				IdentifiedMedia identified => identified.Summary ?? string.Empty,
 				UnmatchedMedia unmatched => unmatched.Summary,
 			};
 
 		public string PosterUrl =>
 			media switch
 			{
-				IMedia resolved => resolved.PosterUrl,
-				IPartialMedia partial => partial.PosterUrl ?? string.Empty,
+				IdentifiedMedia identified => identified.PosterUrl ?? string.Empty,
 				UnmatchedMedia unmatched => unmatched.PosterUrl,
 			};
 
 		public MediaType MediaType =>
 			media switch
 			{
-				IMedia resolved => resolved.Type,
-				IPartialMedia partial => partial.Type,
+				IdentifiedMedia identified => identified.Type,
 				UnmatchedMedia unmatched => unmatched.Type,
 			};
 
@@ -40,8 +36,7 @@ internal static class MediaMatchReader
 			[
 				.. media switch
 				{
-					IMedia resolved => resolved.Genres,
-					IPartialMedia partial => partial.Genres,
+					IdentifiedMedia identified => identified.Genres,
 					UnmatchedMedia unmatched => unmatched.Genres,
 				},
 			];
@@ -50,8 +45,7 @@ internal static class MediaMatchReader
 			[
 				.. media switch
 				{
-					IMedia resolved => resolved.Rating.Sources,
-					IPartialMedia partial => partial.Rating.Sources,
+					IdentifiedMedia identified => identified.Rating.Sources,
 					UnmatchedMedia unmatched => unmatched.Rating.Sources,
 				},
 			];

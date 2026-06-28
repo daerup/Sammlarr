@@ -42,7 +42,7 @@
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
-    [Parameter, EditorRequired] public Func<TItem, MediaMatch> Detail { get; set; } = null!;
+    [Parameter, EditorRequired] public Func<TItem, MediaLookup> Detail { get; set; } = null!;
     [Parameter, EditorRequired] public Func<TItem, MediaId> Key { get; set; } = null!;
     [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public EventCallback<bool> IsEditModeChanged { get; set; }

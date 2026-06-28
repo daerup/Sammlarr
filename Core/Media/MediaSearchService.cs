@@ -11,7 +11,7 @@ internal sealed class MediaSearchService(
 	IProviderConfigRepository configRepository
 ) : IMediaSearchService
 {
-	public async Task<IReadOnlyList<MediaMatch>> SearchAsync(
+	public async Task<IReadOnlyList<MediaLookup>> SearchAsync(
 		string query,
 		IReadOnlyCollection<MediaType> mediaTypes,
 		CancellationToken cancellationToken = default

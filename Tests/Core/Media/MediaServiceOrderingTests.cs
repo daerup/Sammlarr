@@ -2,7 +2,7 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
-using Contracts.Media.Convertions;
+using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
@@ -92,7 +92,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(5);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.GetDetailsAsync(builder.AsRequests()).ToListAsync();
+		var results = await testee.ResolveDetailsAsync(builder.AsRequests()).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -103,7 +103,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(6).FailResolveAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.GetDetailsAsync(builder.AsRequests()).ToListAsync();
+		var results = await testee.ResolveDetailsAsync(builder.AsRequests()).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -115,7 +115,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(batchSize);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.GetDetailsAsync(builder.AsRequests()).ToListAsync();
+		var results = await testee.ResolveDetailsAsync(builder.AsRequests()).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -123,34 +123,34 @@ public class MediaServiceOrderingTests
 	private static IMediaService CreateTestee(RequestBuilder builder)
 	{
 		var mediaRepo = IMediaRepository.Mock();
-		var metaRepo = IMediaMetadataRepository.Mock();
 		var unresolvedCache = ITypedMemoryCache<string, bool>.Mock();
-		var session = IMediaQuerySession.Mock();
-		var sessionFactory = IMediaQuerySessionFactory.Mock();
-		sessionFactory.CreateAsync(Any()).Returns(session.Object);
 
 		var externalToId = builder.Items.Where(i => i.Resolves).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 
-		mediaRepo
-			.QueryMediaIds(Any<IMediaQuerySession>(), Any<IEnumerable<IExternalMediaId>>())
-			.Returns((_, externals) => externals.Where(externalToId.ContainsKey).Select(e => externalToId[e]).Distinct().AsQueryable());
-
-		var realizedGuids = builder.Items.Where(i => i.Realizes).Select(i => i.MediaId.Value).ToHashSet();
-
-		mediaRepo
-			.QueryMediaIds(Any<IMediaQuerySession>(), Any<IEnumerable<MediaId>>())
-			.Returns((_, ids) => ids.Select(id => id.Value).Where(realizedGuids.Contains).AsQueryable());
-
-		mediaRepo.FindManyAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
-		mediaRepo.UpsertManyAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
+		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
+		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
 
 		var metadataMap = builder
 			.Items.Where(i => i.Realizes)
 			.ToDictionary(i => i.MediaId.Value, i => new CachedMedia(i.Detail with { Identity = new MediaIdentity(i.MediaId, [i.External]) }, _now));
 
-		metaRepo
-			.QueryMediaMetadataAsync(Any(), Any(), Any())
-			.Returns((_, query, _) => (IReadOnlyList<CachedMedia>)query.ToList().Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList());
+		mediaRepo
+			.GetAsync(Any(), Any())
+			.Returns((ids, _) => (IReadOnlyList<CachedMedia>)ids.Select(id => id.Value).Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList());
+
+		mediaRepo
+			.GetByExternalsAsync(Any(), Any())
+			.Returns(
+				(externals, _) =>
+					(IReadOnlyList<CachedMedia>)
+						externals
+							.Where(externalToId.ContainsKey)
+							.Select(e => externalToId[e])
+							.Distinct()
+							.Where(metadataMap.ContainsKey)
+							.Select(g => metadataMap[g])
+							.ToList()
+			);
 
 		foreach (var item in builder.Items.Where(i => !i.Resolves))
 		{
@@ -184,15 +184,7 @@ public class MediaServiceOrderingTests
 
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepository.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
-		return new MediaService(
-			new MediaIdResolver(null, unresolvedCache.Object),
-			metadataResolver,
-			coordinator,
-			mediaRepo.Object,
-			metaRepo.Object,
-			sessionFactory.Object,
-			dateTimeProvider.Object
-		);
+		return new MediaService(new MediaIdResolver(null, unresolvedCache.Object), metadataResolver, coordinator, mediaRepo.Object, dateTimeProvider.Object);
 	}
 }
 
@@ -205,8 +197,11 @@ internal static class OrderingAssertionExtensions
 				.Select(r => r is MediaIdentity identity ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
 		];
 
-	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<MediaMatch>> results) =>
-		[.. results.Select(r => r is MediaMatch match && match is IMedia d ? (MediaId?)d.Identity.Id : null)];
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<IdentifiedMedia>> results) =>
+		[.. results.Select(r => r is IdentifiedMedia identified && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];
+
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaLookup> results) =>
+		[.. results.Select(r => r is IdentifiedMedia identified && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];
 }
 
 internal sealed record TestItem

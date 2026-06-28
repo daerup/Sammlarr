@@ -6,9 +6,9 @@ public static class MediaMerger
 {
 	extension(IPartialMedia partial)
 	{
-		public MediaMatch MergeWith(IPartialMedia other) => MediaMatch.FromMedia(Fill(partial, other));
+		public IdentifiedMedia MergeWith(IPartialMedia other) => IdentifiedMedia.From(Fill(partial, other));
 
-		public MediaMatch MergeWith(IMedia other) =>
+		public IdentifiedMedia MergeWith(IMedia other) =>
 			(partial, other) switch
 			{
 				(PartialMovie p, Movie m) => m with
@@ -43,7 +43,7 @@ public static class MediaMerger
 			};
 	}
 
-	public static MediaMatch WithRatings(MediaMatch media, IReadOnlyList<MediaRating> ratings)
+	public static IdentifiedMedia WithRatings(IdentifiedMedia media, IReadOnlyList<MediaRating> ratings)
 	{
 		var summary = RatingSummary.From(ratings);
 		return media switch

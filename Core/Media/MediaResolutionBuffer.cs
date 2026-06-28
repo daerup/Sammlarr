@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Shared.Telemetry;
 
 namespace Core.Media;
@@ -9,30 +8,28 @@ namespace Core.Media;
 internal sealed class MediaResolutionBuffer : IAsyncDisposable
 {
 	private readonly IMediaRepository _mediaRepository;
-	private readonly IMediaMetadataRepository _metadataRepository;
 	private readonly Activity? _activity;
 
 	public ConcurrentBag<MediaIdentity> NewIdentities { get; } = new();
-	public ConcurrentBag<MediaMetadataUpsert> NewMetadata { get; } = new();
+	public ConcurrentBag<IdentifiedMedia> NewMetadata { get; } = new();
 
-	public MediaResolutionBuffer(IMediaRepository mediaRepository, IMediaMetadataRepository metadataRepository)
+	public MediaResolutionBuffer(IMediaRepository mediaRepository)
 	{
 		_mediaRepository = mediaRepository;
-		_metadataRepository = metadataRepository;
 		_activity = SammlarrTelemetry.StartMediaFlush();
 	}
 
 	public void AddIdentity(MediaIdentity identity) => NewIdentities.Add(identity);
 
-	public void Add(MediaMatch detail)
+	public void Add(MediaLookup detail)
 	{
-		if (detail is UnmatchedMedia)
+		var stored = detail.AsIdentified();
+		if (stored is null)
 		{
 			return;
 		}
-		var identity = detail.Identity;
-		NewIdentities.Add(identity);
-		NewMetadata.Add(new MediaMetadataUpsert(identity.Id, detail));
+		NewIdentities.Add(stored.Value.Identity);
+		NewMetadata.Add(stored.Value);
 	}
 
 	public async ValueTask DisposeAsync()
@@ -44,12 +41,12 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 		{
 			if (identities.Count > 0)
 			{
-				var canonical = await _mediaRepository.UpsertManyAsync(identities, CancellationToken.None);
+				var canonical = await _mediaRepository.UpsertIdentitiesAsync(identities, CancellationToken.None);
 				metadata = RemapMetadata(metadata, identities, canonical);
 			}
 			if (metadata.Count > 0)
 			{
-				await _metadataRepository.UpsertManyAsync(metadata, CancellationToken.None);
+				await _mediaRepository.UpsertMetadataAsync(metadata, CancellationToken.None);
 			}
 		}
 		finally
@@ -58,17 +55,13 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 		}
 	}
 
-	private static List<MediaMetadataUpsert> RemapMetadata(
-		List<MediaMetadataUpsert> metadata,
-		List<MediaIdentity> identities,
-		IReadOnlyList<MediaIdentity> canonical
-	)
+	private static List<IdentifiedMedia> RemapMetadata(List<IdentifiedMedia> metadata, List<MediaIdentity> identities, IReadOnlyList<MediaIdentity> canonical)
 	{
 		var remap = new Dictionary<Guid, Guid>();
 		for (var i = 0; i < identities.Count && i < canonical.Count; i++)
 		{
 			remap[identities[i].Id.Value] = canonical[i].Id.Value;
 		}
-		return [.. metadata.Select(item => remap.TryGetValue(item.MediaId.Value, out var id) ? item with { MediaId = MediaId.From(id) } : item)];
+		return [.. metadata.Select(item => remap.TryGetValue(item.Id.Value, out var id) ? item.WithIdentity(item.Identity with { Id = MediaId.From(id) }) : item)];
 	}
 }

@@ -20,14 +20,14 @@ public class MediaMetadataResolverTests
 		var identity = new MediaIdentity(mediaId, [plexExternal]);
 		var fresh = CompleteMovie(mediaId, plexExternal);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh);
-		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, deps.Repository.Object);
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh.ToMatch());
+		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object);
 
 		var result = await testee.ResolveAsync(identity, buffer);
 
-		await Assert.That(result).IsOfUnionType<Result<MediaMatch>, Movie>();
+		await Assert.That(result).IsOfUnionType<Result<MediaLookup>, Movie>();
 		await Assert.That(buffer.NewMetadata.Count).IsEqualTo(1);
-		await Assert.That(buffer.NewMetadata.Single().MediaId).IsEqualTo(mediaId);
+		await Assert.That(buffer.NewMetadata.Single().Id).IsEqualTo(mediaId);
 	}
 
 	[Test]
@@ -40,8 +40,8 @@ public class MediaMetadataResolverTests
 		var identity = new MediaIdentity(mediaId, [tmdbId, plexId]);
 		var fresh = CompleteMovie(mediaId, plexId) with { Identity = new MediaIdentity(mediaId, [plexId, imdbId]) };
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh);
-		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, deps.Repository.Object);
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh.ToMatch());
+		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object);
 
 		await testee.ResolveAsync(identity, buffer);
 
@@ -49,15 +49,14 @@ public class MediaMetadataResolverTests
 		await Assert.That(queued.Externals).Contains((IExternalMediaId)tmdbId);
 		await Assert.That(queued.Externals).Contains((IExternalMediaId)plexId);
 		await Assert.That(queued.Externals).Contains((IExternalMediaId)imdbId);
-		await Assert.That(buffer.NewMetadata.Single().Media.Identity.Externals).IsEquivalentTo(queued.Externals);
+		await Assert.That(buffer.NewMetadata.Single().Identity.Externals).IsEquivalentTo(queued.Externals);
 	}
 
 	private static (MediaMetadataResolver Testee, Dependencies Deps) CreateTestee()
 	{
-		var repository = IMediaMetadataRepository.Mock();
 		var mediaRepository = IMediaRepository.Mock();
-		mediaRepository.UpsertManyAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
-		mediaRepository.FindManyAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any()).Returns(new MediaIdentity?[] { null });
+		mediaRepository.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
+		mediaRepository.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any()).Returns(new MediaIdentity?[] { null });
 		var search = IMediaSearchProvider.Mock();
 		var enricher = IMetadataEnricher.Mock();
 		var rating = IMediaRatingService.Mock();
@@ -82,7 +81,7 @@ public class MediaMetadataResolverTests
 		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
 
 		var testee = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepository.Object);
-		return (testee, new Dependencies(repository, mediaRepository, search, enricher, rating));
+		return (testee, new Dependencies(mediaRepository, search, enricher, rating));
 	}
 
 	private static Movie CompleteMovie(MediaId mediaId, IExternalMediaId external) =>
@@ -100,7 +99,6 @@ public class MediaMetadataResolverTests
 		};
 
 	private record Dependencies(
-		Mock<IMediaMetadataRepository> Repository,
 		Mock<IMediaRepository> MediaRepository,
 		Mock<IMediaSearchProvider> Search,
 		Mock<IMetadataEnricher> Enricher,

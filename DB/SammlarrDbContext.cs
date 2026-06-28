@@ -44,13 +44,13 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<CredentialEntity> Credentials => Set<CredentialEntity>();
 
-	public DbSet<MediaEntity> Media => Set<MediaEntity>();
+	public DbSet<MediaRow> Media => Set<MediaRow>();
 
-	public DbSet<ExternalMediaIdEntity> ExternalMediaIds => Set<ExternalMediaIdEntity>();
+	public DbSet<ExternalMediaIdRow> ExternalMediaIds => Set<ExternalMediaIdRow>();
 
-	public DbSet<MediaMetadataEntity> MediaMetadata => Set<MediaMetadataEntity>();
+	public DbSet<MediaMetadataRow> MediaMetadata => Set<MediaMetadataRow>();
 
-	public DbSet<MediaRatingEntity> MediaRatings => Set<MediaRatingEntity>();
+	public DbSet<MediaRatingRow> MediaRatings => Set<MediaRatingRow>();
 
 	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
 

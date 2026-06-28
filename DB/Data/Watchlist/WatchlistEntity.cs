@@ -5,7 +5,7 @@ namespace DB.Data.Watchlist;
 
 internal record WatchlistEntity : IAuditable
 {
-	public required MediaEntity Media { get; set; }
+	public required MediaRow Media { get; set; }
 
 	public required WatchlistEntryOrigin Origin { get; set; }
 

@@ -1,3 +1,3 @@
 namespace Contracts.Media.Metadata;
 
-public sealed record CachedMedia(MediaMatch Stored, DateTimeOffset? FetchedAt);
+public sealed record CachedMedia(IdentifiedMedia Stored, DateTimeOffset? FetchedAt);

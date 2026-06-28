@@ -1,5 +1,4 @@
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Core.Media;
 
 namespace Core.Tests.Media;
@@ -52,7 +51,7 @@ public class MediaIdentityCoordinatorTests
 		var existingId = MediaId.From(Guid.NewGuid());
 		var existingIdentity = new MediaIdentity(existingId, [tmdbExisting]);
 		var (coordinator, buffer) = CreateCoordinator(repo =>
-			repo.FindManyAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, tmdbExisting, existingIdentity))
+			repo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, tmdbExisting, existingIdentity))
 		);
 
 		var corrected = await coordinator.CoordinateAsync(
@@ -86,7 +85,7 @@ public class MediaIdentityCoordinatorTests
 		var existingId = MediaId.From(Guid.NewGuid());
 		var existingIdentity = new MediaIdentity(existingId, [external]);
 		var (coordinator, buffer) = CreateCoordinator(repo =>
-			repo.FindManyAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, external, existingIdentity))
+			repo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, external, existingIdentity))
 		);
 
 		var corrected = await coordinator.CoordinateAsync([new(MediaId.From(Guid.NewGuid()), [external])], buffer, CancellationToken.None);
@@ -103,7 +102,7 @@ public class MediaIdentityCoordinatorTests
 		var existingId = MediaId.From(Guid.NewGuid());
 		var existingIdentity = new MediaIdentity(existingId, [sharedTmdb, dbImdb]);
 		var (coordinator, buffer) = CreateCoordinator(repo =>
-			repo.FindManyAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, sharedTmdb, existingIdentity))
+			repo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, sharedTmdb, existingIdentity))
 		);
 
 		var corrected = await coordinator.CoordinateAsync([new(MediaId.From(Guid.NewGuid()), [sharedTmdb, freshPlex])], buffer, CancellationToken.None);
@@ -117,10 +116,10 @@ public class MediaIdentityCoordinatorTests
 	private static (MediaIdentityCoordinator Coordinator, MediaResolutionBuffer Buffer) CreateCoordinator(Action<Mock<IMediaRepository>>? setup = null)
 	{
 		var mediaRepo = IMediaRepository.Mock();
-		mediaRepo.FindManyAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
+		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
 		setup?.Invoke(mediaRepo);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
-		var buffer = new MediaResolutionBuffer(mediaRepo.Object, IMediaMetadataRepository.Mock().Object);
+		var buffer = new MediaResolutionBuffer(mediaRepo.Object);
 		return (coordinator, buffer);
 	}
 

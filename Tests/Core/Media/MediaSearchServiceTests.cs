@@ -105,6 +105,6 @@ public class MediaSearchServiceTests
 		return repo;
 	}
 
-	private static PartialMovie BuildRawMovie(IReadOnlyList<IExternalMediaId> externals) =>
-		new() { Identity = new MediaIdentity(default, [.. externals]), Title = "Title" };
+	private static MediaLookup BuildRawMovie(IReadOnlyList<IExternalMediaId> externals) =>
+		new PartialMovie { Identity = new MediaIdentity(default, [.. externals]), Title = "Title" }.ToMatch();
 }
