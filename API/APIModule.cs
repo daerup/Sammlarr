@@ -19,5 +19,6 @@ public class ApiModule : IServiceModule
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
 		services.AddModule<TelemetryModule>();
+		services.AddModule<ResilienceModule>();
 	}
 }

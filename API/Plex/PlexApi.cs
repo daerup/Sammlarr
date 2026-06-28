@@ -28,6 +28,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
 		var endpoint = string.Format(CultureInfo.InvariantCulture, PlexEndpoints.Search, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Search.Root>(stream, cancellationToken: cancellationToken))!;
 		if (result.MediaContainer.Size is 1 && result.MediaContainer.SearchResults[0].Size is 0)

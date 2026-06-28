@@ -147,13 +147,36 @@ public class MediaRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task UpsertManyAsync_WhenExistingIdMismatch_Throws()
+	public async Task UpsertManyAsync_WhenExternalAlreadyOwned_RoutesToExistingMedia()
 	{
 		var tmdbId = TmdbId.From("312", MediaType.Movie);
-		await SetUpMediaAsync([tmdbId]);
+		var existingId = await SetUpMediaAsync([tmdbId]);
 
-		var rogue = new MediaIdentity(MediaId.From(Guid.NewGuid()), [tmdbId]);
-		await Assert.That(async () => await _testee.UpsertManyAsync([rogue])).Throws<DbUpdateException>();
+		var incoming = new MediaIdentity(MediaId.From(Guid.NewGuid()), [tmdbId, ImdbId.From("tt0312", MediaType.Movie)]);
+		var identities = await _testee.UpsertManyAsync([incoming]);
+
+		await Assert.That(identities[0].Id).IsEqualTo(existingId);
+		var persisted = await fixture.Context.Media.Include(m => m.ExternalIds).ToListAsync();
+		await Assert.That(persisted.Count).IsEqualTo(1);
+		await Assert.That(persisted[0].ExternalIds.Count).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task UpsertManyAsync_WhenTwoNewIdentitiesShareExternal_CreatesSingleMedia()
+	{
+		var shared = ImdbId.From("tt0320", MediaType.Movie);
+		IReadOnlyList<MediaIdentity> input =
+		[
+			new(MediaId.From(Guid.NewGuid()), [TmdbId.From("320", MediaType.Movie), shared]),
+			new(MediaId.From(Guid.NewGuid()), [shared, TvdbId.From("420", MediaType.Movie)]),
+		];
+
+		var identities = await _testee.UpsertManyAsync(input);
+
+		await Assert.That(identities[0].Id).IsEqualTo(identities[1].Id);
+		var persisted = await fixture.Context.Media.Include(m => m.ExternalIds).ToListAsync();
+		await Assert.That(persisted.Count).IsEqualTo(1);
+		await Assert.That(persisted[0].ExternalIds.Count).IsEqualTo(3);
 	}
 
 	[Test]
@@ -166,7 +189,7 @@ public class MediaRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await Assert
 			.That(async () => await _testee.UpsertManyAsync([new MediaIdentity(MediaId.From(Guid.NewGuid()), [tmdbId, imdbId])]))
-			.Throws<DbUpdateException>();
+			.Throws<MediaIdentityConflictException>();
 	}
 
 	[Test]

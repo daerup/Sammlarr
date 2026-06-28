@@ -9,6 +9,7 @@ namespace API.Plex;
 internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdConverter
 {
 	private const int LookupConcurrency = 4;
+	private const int MaxCandidateLookups = 5;
 
 	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
 		IEnumerable<IExternalMediaId> candidates,
@@ -43,6 +44,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 	{
 		var searchResults = await plexApi.SearchAsync(title, [mediaType], cancellationToken);
 		var match = await searchResults
+			.Take(MaxCandidateLookups)
 			.ToAsyncEnumerable()
 			.SelectAwait(
 				async r =>

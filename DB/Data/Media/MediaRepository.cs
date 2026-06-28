@@ -70,34 +70,51 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 		}
 
 		var rawIds = identities.Select(i => i.Id.Value).ToList();
+		var allExternals = identities.SelectMany(i => i.Externals).Distinct().ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
-		var existing = await ctx.Media.Include(m => m.ExternalIds).Where(m => rawIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
+		var byId = await ctx.Media.Include(m => m.ExternalIds).Where(m => rawIds.Contains(m.Id)).ToListAsync(cancellationToken);
+		var byExternal = await ctx.MediaMatchingAny(allExternals).Include(m => m.ExternalIds).ToListAsync(cancellationToken);
+		var entities = byId.Concat(byExternal).DistinctBy(m => m.Id).ToDictionary(m => m.Id);
+		var ownerByExternal = entities
+			.Values.SelectMany(e => e.ExternalIds.Select(x => (Key: x.ToExternalMediaId(), Owner: e)))
+			.ToDictionary(t => t.Key, t => t.Owner);
 
-		var result = identities.Select(identity => UpsertOne(ctx, identity, existing)).ToList();
+		var result = identities.Select(identity => UpsertOne(ctx, identity, entities, ownerByExternal)).ToList();
 
 		await ctx.SaveChangesAsync(cancellationToken);
 		await transaction.CommitAsync(cancellationToken);
 		return result;
 	}
 
-	private static MediaIdentity UpsertOne(SammlarrDbContext ctx, MediaIdentity identity, Dictionary<Guid, MediaEntity> existing)
+	private static MediaIdentity UpsertOne(
+		SammlarrDbContext ctx,
+		MediaIdentity identity,
+		Dictionary<Guid, MediaEntity> entities,
+		Dictionary<IExternalMediaId, MediaEntity> ownerByExternal
+	)
 	{
-		if (existing.TryGetValue(identity.Id.Value, out var entity))
+		var owners = identity.Externals.Select(ownerByExternal.GetValueOrDefault).Where(o => o is not null).Select(o => o!).DistinctBy(o => o.Id).ToList();
+		if (owners.Count > 1)
 		{
-			var known = entity.ExternalIds.Select(e => e.ToExternalMediaId()).ToHashSet();
-			foreach (var external in identity.Externals.Where(e => !known.Contains(e)))
-			{
-				entity.ExternalIds.Add(external.ToExternalIdEntity(entity));
-			}
-			return ToIdentity(entity);
+			throw new MediaIdentityConflictException([.. owners.Select(o => MediaId.From(o.Id))], [.. identity.Externals]);
 		}
 
-		entity = new MediaEntity { Id = identity.Id.Value };
-		entity.ExternalIds = identity.Externals.ToExternalIdEntities(entity);
-		ctx.Media.Add(entity);
-		existing[identity.Id.Value] = entity;
+		var entity = owners.FirstOrDefault() ?? entities.GetValueOrDefault(identity.Id.Value);
+		if (entity is null)
+		{
+			entity = new MediaEntity { Id = identity.Id.Value };
+			ctx.Media.Add(entity);
+			entities[entity.Id] = entity;
+		}
+
+		foreach (var external in identity.Externals.Where(e => !ownerByExternal.ContainsKey(e)))
+		{
+			entity.ExternalIds.Add(external.ToExternalIdEntity(entity));
+			ownerByExternal[external] = entity;
+		}
+
 		return ToIdentity(entity);
 	}
 

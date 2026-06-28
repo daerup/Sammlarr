@@ -10,6 +10,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
 using Shared.DI;
 using Shared.Options;
 using TUnit.Mocks;
@@ -30,6 +31,7 @@ internal sealed class IntegrationTestModule : ITestServiceModule
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
 		services.AddModule<ApiModule>();
+		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero));
