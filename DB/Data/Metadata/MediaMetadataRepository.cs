@@ -1,6 +1,5 @@
 using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using DB.Data.Media;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,21 +27,20 @@ internal class MediaMetadataRepository(IDbContextFactory<SammlarrDbContext> dbCo
 			{
 				var mediaId = MediaId.From(row.Media.Id);
 				var externals = row.Media.ExternalIds.Select(e => e.ToExternalMediaId()).ToList();
-				var identity = new MediaIdentity(mediaId, externals);
+				var identity = new MediaIdentity(mediaId, [.. externals]);
 				return row.Metadata is null
-					? new CachedMedia(Unresolved(identity), null)
-					: new CachedMedia(metadataFactory.ToDetailResult(row.Metadata, identity), row.Metadata.LastFetchedAt);
+					? new CachedMedia(EmptyMedia(identity), null)
+					: new CachedMedia(metadataFactory.ToStored(row.Metadata, identity), row.Metadata.LastFetchedAt);
 			})
 			.ToList();
 	}
 
-	private static UnresolvedMedia Unresolved(MediaIdentity identity) =>
-		new()
+	private static MediaMatch EmptyMedia(MediaIdentity identity) =>
+		identity.Externals.FirstOrDefault()?.Type switch
 		{
-			Identity = identity,
-			MediaType = MediaType.Unknown,
-			Title = string.Empty,
-			ReleaseDate = DateOnly.MinValue,
+			MediaType.Show => new PartialShow { Identity = identity },
+			MediaType.Movie => new PartialMovie { Identity = identity },
+			_ => new UnmatchedMedia { Externals = identity.Externals },
 		};
 
 	public async Task UpsertManyAsync(IReadOnlyList<MediaMetadataUpsert> items, CancellationToken cancellationToken = default)
@@ -62,11 +60,11 @@ internal class MediaMetadataRepository(IDbContextFactory<SammlarrDbContext> dbCo
 		{
 			if (existing.TryGetValue(item.MediaId.Value, out var entity))
 			{
-				metadataFactory.Update(entity, item.Details);
+				metadataFactory.Update(entity, item.Media);
 			}
 			else
 			{
-				ctx.MediaMetadata.Add(metadataFactory.BuildFrom<MediaMetadataEntity>(item.Details, item.MediaId.Value));
+				ctx.MediaMetadata.Add(metadataFactory.BuildFrom(item.Media, item.MediaId.Value));
 			}
 		}
 

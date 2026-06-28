@@ -3,6 +3,26 @@ namespace Domain.Tests.Media.Metadata;
 public class MediaMergerTests
 {
 	[Test]
+	public async Task FromMedia_WhenComplete_PromotesToMovie()
+	{
+		IPartialMedia partial = MediaFakes.CompletePartialMovie();
+
+		var match = MediaMatch.FromMedia(partial);
+
+		await Assert.That(match is Movie).IsTrue();
+	}
+
+	[Test]
+	public async Task FromMedia_WhenIncomplete_StaysPartial()
+	{
+		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Dune" };
+
+		var match = MediaMatch.FromMedia(partial);
+
+		await Assert.That(match is PartialMovie).IsTrue();
+	}
+
+	[Test]
 	public async Task MergeWith_WhenGapsFilled_PromotesToMovie()
 	{
 		var identity = MediaFakes.MovieIdentity();
@@ -49,18 +69,12 @@ public class MediaMergerTests
 		{
 			Identity = identity,
 			Title = "Wrong",
-			Tagline = "Fear is the mind-killer",
 			Summary = "Paul Atreides.",
-			PosterUrl = "poster",
-			BackdropUrl = "backdrop",
-			ReleaseDate = new DateOnly(2021, 10, 22),
-			Genres = ["Science Fiction"],
-			Runtime = TimeSpan.FromMinutes(155),
 		};
 
 		var merged = first.MergeWith(second);
 
-		await Assert.That(merged is Movie movie && movie.Title == "Dune").IsTrue();
+		await Assert.That(merged is PartialMovie movie && movie.Title == "Dune").IsTrue();
 	}
 
 	[Test]
@@ -68,7 +82,7 @@ public class MediaMergerTests
 	{
 		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Dune" };
 
-		var withRatings = MediaMerger.WithRatings(new MediaLookup(partial), [new MediaRating(RatingSource.Tmdb, 7f)]);
+		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(RatingSource.Tmdb, 7f)]);
 
 		await Assert.That(withRatings is PartialMovie movie && movie.Rating.Average == 7f).IsTrue();
 	}

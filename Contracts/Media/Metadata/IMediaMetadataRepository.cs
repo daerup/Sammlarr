@@ -15,4 +15,4 @@ public interface IMediaMetadataRepository
 	Task RemoveRatingsBySourceAsync(RatingSource source, CancellationToken cancellationToken = default);
 }
 
-public record MediaMetadataUpsert(MediaId MediaId, KnownMedia Media);
+public record MediaMetadataUpsert(MediaId MediaId, MediaMatch Media);

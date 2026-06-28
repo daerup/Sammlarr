@@ -47,7 +47,7 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 			.SelectAwait(
 				async r =>
 				{
-					var plexExternal = r.Identity.Externals.OfType<PlexId>().FirstOrDefault();
+					var plexExternal = r.Externals.OfType<PlexId>().FirstOrDefault();
 					return plexExternal == default ? null : await plexApi.LookUpExternalsAsync(plexExternal, cancellationToken);
 				},
 				LookupConcurrency,

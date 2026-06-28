@@ -83,13 +83,13 @@
                     <div class="search-modal-results space-y-2 pr-1" tabindex="-1">
                         @foreach (var result in _searchResults)
                         {
-                            <MediaDetailTile @key="result"
+                            <MediaDetailTile @key="result.Id"
                                              Result="result"
-                                             IsFocused="_focusedResult == result"
-                                             OnFocusIn="() => _focusedResult = result"
+                                             IsFocused="_focusedResult == result.Id"
+                                             OnFocusIn="() => _focusedResult = result.Id"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.Identity.Id), EventCallback.Factory.Create<IMediaDetail>(this, ToggleAsync)))
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaMatch>(this, ToggleAsync)))
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -129,11 +129,11 @@
     private string? _searchHint;
     private string? _searchError;
     private MediaId? _activeToggledSourceId;
-    private List<IMediaDetail> _searchResults = [];
+    private List<MediaMatch> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
-    private IMediaDetail? _focusedResult;
+    private MediaId? _focusedResult;
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
@@ -164,7 +164,7 @@
     }
 
 
-    private bool IsSearchResultMarked(IMediaDetail result) => IsInWatchlist.Invoke(result.Identity.Id);
+    private bool IsSearchResultMarked(MediaMatch result) => IsInWatchlist.Invoke(result.Id);
 
     private async Task CloseAsync()
     {
@@ -227,7 +227,7 @@
         }
     }
 
-    private async Task ToggleAsync(IMediaDetail result)
+    private async Task ToggleAsync(MediaMatch result)
     {
         if (_isAdding)
         {
@@ -235,21 +235,21 @@
         }
 
         _isAdding = true;
-        _activeToggledSourceId = result.Identity.Id;
+        _activeToggledSourceId = result.Id;
         _searchHint = null;
         _searchError = null;
 
         var isMarked = IsSearchResultMarked(result);
-        await OnToggle(result.Identity.Id, result.Title, isMarked);
+        await OnToggle(result.Id, result.Title, isMarked);
 
         _isAdding = false;
         _activeToggledSourceId = null;
         _focusedResult = null;
     }
 
-    private void ClearFocusedResult(IMediaDetail result)
+    private void ClearFocusedResult(MediaMatch result)
     {
-        if (ReferenceEquals(_focusedResult, result))
+        if (_focusedResult == result.Id)
         {
             _focusedResult = null;
         }

@@ -64,22 +64,18 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 			return [];
 		}
 
-		var deduped = identities
-			.Select(i =>
-			{
-				var externals = i.Externals.Distinct().ToList();
-				externals.EnsureSingleMediaType();
-				return i with { Externals = externals };
-			})
-			.ToList();
+		foreach (var identity in identities)
+		{
+			identity.Externals.EnsureSingleMediaType();
+		}
 
-		var rawIds = deduped.Select(i => i.Id.Value).ToList();
+		var rawIds = identities.Select(i => i.Id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
 		var existing = await ctx.Media.Include(m => m.ExternalIds).Where(m => rawIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
 
-		var result = deduped.Select(identity => UpsertOne(ctx, identity, existing)).ToList();
+		var result = identities.Select(identity => UpsertOne(ctx, identity, existing)).ToList();
 
 		await ctx.SaveChangesAsync(cancellationToken);
 		await transaction.CommitAsync(cancellationToken);
@@ -139,5 +135,5 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 		return ctx.Media.Where(m => rawIds.Contains(m.Id)).Select(m => m.Id);
 	}
 
-	private static MediaIdentity ToIdentity(MediaEntity entity) => new(MediaId.From(entity.Id), entity.ExternalIds.Select(e => e.ToExternalMediaId()).ToList());
+	private static MediaIdentity ToIdentity(MediaEntity entity) => new(MediaId.From(entity.Id), [.. entity.ExternalIds.Select(e => e.ToExternalMediaId())]);
 }

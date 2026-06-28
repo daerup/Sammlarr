@@ -1,7 +1,7 @@
+using System.Globalization;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
-using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Convertions;
 using Contracts.Media.Trending;
@@ -15,7 +15,7 @@ namespace API.Tmdb;
 internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions options, IMediaService media, IProviderConfigRepository providerConfigRepository)
 	: IMediaRecommendationService
 {
-	public async Task<TrendingPageResult> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
+	public async Task<PagedResult<MediaMatch>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartTrendingLoad(page);
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
@@ -24,68 +24,75 @@ internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions opti
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 		var settings = await providerConfigRepository.GetAsync(cancellationToken);
 
-		var finalItems = new ITrendingMedia[result.Results.Count];
+		var finalItems = new MediaMatch[result.Results.Count];
 		var indexed = result.Results.Index().ToList();
 
 		var unresolvable = indexed.Where(x => x.Item.MediaType is MediaType.Unknown).ToList();
-		unresolvable.ForEach(r => finalItems[r.Index] = BuildTrendingMedia(r.Item, Error.From("Unknown media type")));
+		unresolvable.ForEach(r => finalItems[r.Index] = BuildUnmatched(r.Item));
 
-		var resolvable = indexed.Where(x => x.Item.MediaType is not MediaType.Unknown).ToList();
+		var resolvable = indexed.Except(unresolvable).ToList();
 		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], settings.WatchlistProvider.AsMediaProvider(), BuildHints(x.Item)));
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
 		await foreach (var (identity, entry) in pipeline.Zip(resolvable, cancellationToken))
 		{
-			finalItems[entry.Index] = BuildTrendingMedia(entry.Item, identity);
+			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}
-		return new TrendingPageResult(finalItems, result.TotalPages);
+		return new PagedResult<MediaMatch>(finalItems, result.TotalPages);
 	}
 
-	private static Some<ResolutionHints> BuildHints(TmdbTypes.Trending.Result response)
-	{
-		return new Some<ResolutionHints>(
-			new ResolutionHints
-			{
-				Title = response.DisplayTitle,
-				Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
-				MediaType = response.MediaType,
-			}
-		);
-	}
-
-	private ITrendingMedia BuildTrendingMedia(TmdbTypes.Trending.Result response, Result<Identification> outcome)
-	{
-		var releaseDate = string.IsNullOrEmpty(response.AvailableDate) ? "1900-01-01T00:00:00Z" : response.AvailableDate;
-		var parsedReleaseDate = DateTimeOffset.Parse(releaseDate);
-		var posterUrl = options.ImageBaseUrl + response.PosterPath;
-		var backdropUrl = options.ImageBaseUrl + response.BackdropPath;
-
-		if (outcome is not Identification identification)
+	private static Some<ResolutionHints> BuildHints(TmdbTypes.Trending.Result response) =>
+		new ResolutionHints
 		{
-			return new UnresolvedTrendingMedia
-			{
-				Externals = new List<IExternalMediaId> { response.TmdbId },
-				MediaType = response.MediaType,
-				Title = response.DisplayTitle,
-				Description = response.Overview,
-				PosterUrl = posterUrl,
-				BackdropUrl = backdropUrl,
-				Rating = response.VoteAverage == 0 ? null : (float?)response.VoteAverage,
-				ReleaseDate = parsedReleaseDate,
-			};
-		}
-
-		return new TrendingMedia
-		{
-			Id = identification.Id,
-			Externals = identification.Externals,
-			MediaType = response.MediaType,
 			Title = response.DisplayTitle,
-			Description = response.Overview,
-			PosterUrl = posterUrl,
-			BackdropUrl = backdropUrl,
-			Rating = (float)response.VoteAverage,
-			ReleaseDate = parsedReleaseDate,
+			Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
+			MediaType = response.MediaType,
 		};
+
+	private MediaMatch BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
+	{
+		if (outcome is not MediaIdentity identity)
+		{
+			return BuildUnmatched(response);
+		}
+
+		return response.MediaType == MediaType.Show
+			? new PartialShow
+			{
+				Identity = identity,
+				Title = response.DisplayTitle,
+				Summary = response.Overview,
+				PosterUrl = options.ImageBaseUrl + response.PosterPath,
+				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+				ReleaseDate = ParseReleaseDate(response.AvailableDate),
+				Rating = BuildRating(response.VoteAverage),
+			}
+			: new PartialMovie
+			{
+				Identity = identity,
+				Title = response.DisplayTitle,
+				Summary = response.Overview,
+				PosterUrl = options.ImageBaseUrl + response.PosterPath,
+				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+				ReleaseDate = ParseReleaseDate(response.AvailableDate),
+				Rating = BuildRating(response.VoteAverage),
+			};
 	}
+
+	private MediaMatch BuildUnmatched(TmdbTypes.Trending.Result response) =>
+		new UnmatchedMedia
+		{
+			Externals = [response.TmdbId],
+			Title = response.DisplayTitle,
+			Summary = response.Overview,
+			PosterUrl = options.ImageBaseUrl + response.PosterPath,
+			BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+			ReleaseDate = ParseReleaseDate(response.AvailableDate),
+			Rating = BuildRating(response.VoteAverage),
+		};
+
+	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
+
+	private static RatingSummary BuildRating(double voteAverage) =>
+		voteAverage > 0 ? RatingSummary.From([new MediaRating(RatingSource.Tmdb, (float)voteAverage)]) : RatingSummary.None;
 }

@@ -2,5 +2,5 @@ namespace Contracts.Media.Trending;
 
 public interface IMediaRecommendationService
 {
-	Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default);
+	Task<PagedResult<MediaMatch>> GetTrendingAsync(int page, CancellationToken cancellationToken = default);
 }

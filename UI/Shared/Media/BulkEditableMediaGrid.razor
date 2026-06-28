@@ -24,13 +24,9 @@
         var isSelected = _selected.Contains(mediaId);
         <div class="relative @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
             <MediaGridTile @key="renderKey"
-                           ImageUrl="@detail.BackdropUrl"
-                           Poster="@detail.PosterUrl"
-                           Title="@detail.Title"
-                           Tagline="@detail.Tagline"
-                           Rating="@detail.Rating"
+                           Media="detail"
                            OnClick="@(() => HandleTileClickAsync(item))"
-                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.Identity.Id))"/>
+                           OnImageBroken="@(() => OnImageBroken.InvokeAsync(detail.Id))"/>
             @if (IsEditMode)
             {
                 <div class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
@@ -47,7 +43,7 @@
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<TItem> Items { get; set; } = [];
-    [Parameter, EditorRequired] public Func<TItem, IMediaDetail> Detail { get; set; } = null!;
+    [Parameter, EditorRequired] public Func<TItem, MediaMatch> Detail { get; set; } = null!;
     [Parameter, EditorRequired] public Func<TItem, MediaId> Key { get; set; } = null!;
     [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public EventCallback<bool> IsEditModeChanged { get; set; }

@@ -103,7 +103,7 @@ else
     private readonly CancellationTokenSource _cts = new();
     private WatchlistSyncDryRun? _dryRun;
     private string? _dryRunError;
-    private Dictionary<MediaId, IMediaDetail> _metadata = [];
+    private Dictionary<MediaId, MediaMatch> _metadata = [];
     private bool _isSyncing;
     private bool _dryRunRequested;
 
@@ -148,7 +148,7 @@ else
         StateHasChanged();
     }
 
-    private Task<Dictionary<MediaId, IMediaDetail>> LoadMetadataAsync(WatchlistSyncDryRun dryRun) =>
+    private Task<Dictionary<MediaId, MediaMatch>> LoadMetadataAsync(WatchlistSyncDryRun dryRun) =>
         DryRunMetadataLoader.LoadAsync(Media, dryRun, DryRunPreviewLimit, _cts.Token);
 
     public async Task SyncAsync()

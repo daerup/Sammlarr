@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using Shared.Telemetry;
 
 namespace Core.Media;
@@ -25,10 +24,15 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 
 	public void AddIdentity(MediaIdentity identity) => NewIdentities.Add(identity);
 
-	public void Add(IMediaDetail detail)
+	public void Add(MediaMatch detail)
 	{
-		NewIdentities.Add(detail.Identity);
-		NewMetadata.Add(new MediaMetadataUpsert(detail.Identity.Id, detail));
+		if (detail is UnmatchedMedia)
+		{
+			return;
+		}
+		var identity = detail.Identity;
+		NewIdentities.Add(identity);
+		NewMetadata.Add(new MediaMetadataUpsert(identity.Id, detail));
 	}
 
 	public async ValueTask DisposeAsync()

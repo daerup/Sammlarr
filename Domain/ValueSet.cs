@@ -7,15 +7,16 @@ namespace Domain;
 public readonly struct ValueSet<T> : IReadOnlySet<T>, IEquatable<ValueSet<T>>
 {
 	private static readonly HashSet<T> Empty = [];
-	private readonly HashSet<T>? _items;
 
-	internal ValueSet(HashSet<T> items) => _items = items;
+	internal ValueSet(HashSet<T> items) => Items = items;
 
-	private HashSet<T> Items => _items ?? Empty;
+	private HashSet<T> Items => field ?? Empty;
 
 	public int Count => Items.Count;
 
 	public bool Contains(T item) => Items.Contains(item);
+
+	public static ValueSet<T> operator +(ValueSet<T> left, IEnumerable<T> right) => [.. left, .. right];
 
 	public bool IsSubsetOf(IEnumerable<T> other) => Items.IsSubsetOf(other);
 

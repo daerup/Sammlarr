@@ -10,5 +10,5 @@ public sealed record UnmatchedMedia
 	public DateOnly? ReleaseDate { get; init; }
 	public ValueSet<string> Genres { get; init; }
 	public RatingSummary Rating { get; init; } = RatingSummary.None;
-	public MediaType Type => Externals.Count > 0 ? Externals.First().Type : MediaType.Unknown;
+	public MediaType Type => Externals.FirstOrDefault()?.Type ?? MediaType.Unknown;
 }
