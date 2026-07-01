@@ -119,6 +119,26 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored is PartialMovie).IsTrue();
 	}
 
+	[Test]
+	public async Task QueryMediaMetadata_WhenRatingsExist_RoundTripsRatingsThroughInclude()
+	{
+		var plexId = PlexId.From("plex-814", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		var rated = CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 8.5f, 1200)]) };
+		await _testee.UpsertMetadataAsync([rated]);
+		fixture.Context.ChangeTracker.Clear();
+
+		var row = (await _testee.GetAsync([mediaId])).Single();
+
+		using var _ = Assert.Multiple();
+		await Assert.That(row.Stored is Movie).IsTrue();
+		await Assert.That(row.Stored.Rating.Sources.Count).IsEqualTo(1);
+		var rating = row.Stored.Rating.Sources.Single();
+		await Assert.That(rating.Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
+		await Assert.That(rating.VoteCount).IsEqualTo(1200);
+	}
+
 	private static Movie CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
 		new()
 		{

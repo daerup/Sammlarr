@@ -98,7 +98,7 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 		}
 		var rawIds = ids.Select(id => id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await QueryMetadataAsync(ctx, ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
+		return await QueryMetadataAsync(ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<CachedMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default)
@@ -109,22 +109,23 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var mediaIds = ctx.ExternalMediaIds.WhereMatchingAny(candidates).Select(e => e.Media.Id).Distinct();
-		return await QueryMetadataAsync(ctx, ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
+		return await QueryMetadataAsync(ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
 	}
 
-	private async Task<IReadOnlyList<CachedMedia>> QueryMetadataAsync(SammlarrDbContext ctx, IQueryable<MediaRow> media, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<CachedMedia>> QueryMetadataAsync(IQueryable<MediaRow> media, CancellationToken cancellationToken)
 	{
-		var query =
-			from m in media.AsNoTracking().Include(m => m.ExternalIds)
-			join md in ctx.MediaMetadata.AsNoTracking().Include(x => x.Ratings) on m.Id equals md.MediaId into joined
-			from md in joined.DefaultIfEmpty()
-			select new { Media = m, Metadata = md };
+		var rows = await media
+			.AsNoTracking()
+			.Include(m => m.ExternalIds)
+			.Include(m => m.Metadata!)
+				.ThenInclude(metadata => metadata.Ratings)
+			.AsSplitQuery()
+			.ToListAsync(cancellationToken);
 
-		var rows = await query.AsSplitQuery().ToListAsync(cancellationToken);
 		return rows.Select(row =>
 			{
-				var mediaId = MediaId.From(row.Media.Id);
-				var externals = row.Media.ExternalIds.Select(e => e.ToExternalMediaId()).ToList();
+				var mediaId = MediaId.From(row.Id);
+				var externals = row.ExternalIds.Select(e => e.ToExternalMediaId()).ToList();
 				var identity = new MediaIdentity(mediaId, [.. externals]);
 				return row.Metadata is null
 					? new CachedMedia(EmptyMedia(identity), null)
