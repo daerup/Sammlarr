@@ -1,4 +1,5 @@
 using Bogus;
+using Contracts;
 using Contracts.Auth;
 using Contracts.Blacklist;
 using Contracts.Media;
@@ -7,7 +8,6 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Blacklist;
-using Test.Shared;
 
 namespace Core.Tests.Blacklist;
 
@@ -50,9 +50,11 @@ public class BlacklistServiceTests
 		var repository = IBlacklistRepository.Mock();
 		repository.GetBlacklistedEntriesAsync(Any()).Returns([entry]);
 
-		var media = new FakeMediaService().RegisterMetadata(mediaId, detailResult);
+		IdentifiedMedia detail = detailResult;
+		var media = IMediaService.Mock();
+		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(detail));
 
-		var testee = CreateTestee(repository, media);
+		var testee = CreateTestee(repository, media.Object);
 
 		var result = await testee.GetBlacklistItems().ToListAsync();
 
@@ -76,7 +78,7 @@ public class BlacklistServiceTests
 		await Assert.That(result).IsEmpty();
 	}
 
-	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, FakeMediaService? media = null)
+	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, IMediaService? media = null)
 	{
 		var repo = repository ?? IBlacklistRepository.Mock();
 		var providerConfigRepository = IProviderConfigRepository.Mock();
@@ -92,7 +94,23 @@ public class BlacklistServiceTests
 				}
 			);
 
-		return new BlacklistService(repo.Object, providerConfigRepository.Object, media ?? new FakeMediaService());
+		return new BlacklistService(repo.Object, providerConfigRepository.Object, media ?? DefaultMedia());
+	}
+
+	private static IMediaService DefaultMedia()
+	{
+		var media = IMediaService.Mock();
+		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>());
+		return media.Object;
+	}
+
+	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
+	{
+		foreach (var item in items)
+		{
+			yield return item;
+			await Task.CompletedTask;
+		}
 	}
 
 	private Movie CreateMovieDetailResult(MediaId mediaId) =>

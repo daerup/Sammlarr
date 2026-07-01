@@ -98,8 +98,7 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 		}
 		var rawIds = ids.Select(id => id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var idsQuery = ctx.Media.Where(m => rawIds.Contains(m.Id)).Select(m => m.Id);
-		return await QueryMetadataAsync(ctx, idsQuery, cancellationToken);
+		return await QueryMetadataAsync(ctx, ctx.Media.Where(m => rawIds.Contains(m.Id)), cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<CachedMedia>> GetByExternalsAsync(IReadOnlyList<IExternalMediaId> candidates, CancellationToken cancellationToken = default)
@@ -109,15 +108,14 @@ internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFac
 			return [];
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var idsQuery = ctx.ExternalMediaIds.WhereMatchingAny(candidates).Select(e => e.Media.Id).Distinct();
-		return await QueryMetadataAsync(ctx, idsQuery, cancellationToken);
+		var mediaIds = ctx.ExternalMediaIds.WhereMatchingAny(candidates).Select(e => e.Media.Id).Distinct();
+		return await QueryMetadataAsync(ctx, ctx.Media.Where(m => mediaIds.Contains(m.Id)), cancellationToken);
 	}
 
-	private async Task<IReadOnlyList<CachedMedia>> QueryMetadataAsync(SammlarrDbContext ctx, IQueryable<Guid> mediaIds, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<CachedMedia>> QueryMetadataAsync(SammlarrDbContext ctx, IQueryable<MediaRow> media, CancellationToken cancellationToken)
 	{
 		var query =
-			from m in ctx.Media.AsNoTracking().Include(m => m.ExternalIds)
-			where mediaIds.Contains(m.Id)
+			from m in media.AsNoTracking().Include(m => m.ExternalIds)
 			join md in ctx.MediaMetadata.AsNoTracking().Include(x => x.Ratings) on m.Id equals md.MediaId into joined
 			from md in joined.DefaultIfEmpty()
 			select new { Media = m, Metadata = md };
