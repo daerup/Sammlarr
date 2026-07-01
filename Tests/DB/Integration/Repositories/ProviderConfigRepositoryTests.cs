@@ -45,7 +45,7 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 
 		var entity = await fixture.Context.ProviderSettings.SingleAsync();
 
-		await Assert.That(entity.Id).IsEqualTo(ProviderConfigEntity.SingletonId);
+		await Assert.That(entity.Id).IsEqualTo(ProviderConfigRow.SingletonId);
 		await Assert.That(entity.WatchlistProvider).IsEqualTo(expected.WatchlistProvider);
 		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
 		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
