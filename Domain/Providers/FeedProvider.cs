@@ -1,4 +1,4 @@
-namespace Contracts.Feed;
+namespace Domain.Providers;
 
 public enum FeedProvider
 {

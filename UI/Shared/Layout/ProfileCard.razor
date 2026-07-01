@@ -120,7 +120,7 @@
 @code {
     private readonly CancellationTokenSource _disposeCts = new();
 
-    private AuthUserInfo? _user;
+    private AuthorizedUser? _user;
     private bool _isDisposed;
     private bool _isProcessing;
     private bool _isProfileDropdownOpen;
@@ -180,22 +180,20 @@
         _branding = BrandingService.GetBrandingInfo(_watchlistProvider.AsMediaProvider());
 
         await using var scope = ScopeFactory.CreateAsyncScope();
-        var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
-        var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
-        var oauthService = oauthServiceIndex[_watchlistProvider];
+        var oauthService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
 
-        var credential = await credentialStore.GetAsync(_watchlistProvider, cancellationToken);
-        if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
+        switch (await oauthService.GetUserAsync(cancellationToken))
         {
-            _user = null;
-            return;
-        }
-
-        _user = await oauthService.GetLoggedInUser();
-
-        if (_user is null)
-        {
-            await credentialStore.ClearAsync(_watchlistProvider, cancellationToken);
+            case AuthorizedUser user:
+                _user = user;
+                break;
+            case SignedOut:
+                _user = null;
+                await oauthService.LogoutAsync(cancellationToken);
+                break;
+            case Unavailable:
+                _user = null;
+                break;
         }
     }
 
@@ -205,13 +203,12 @@
         try
         {
             await using var scope = ScopeFactory.CreateAsyncScope();
-            var oauthServiceIndex = scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IOAuthService>>();
-            var oauthService = oauthServiceIndex[_watchlistProvider];
+            var oauthService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
 
             var returnUrl = GetReturnUrlForOAuth();
             var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
-            var forwardUrl = NavigationManager.ToAbsoluteUri($"/plex-auth?pinId={{0}}&clientId={{1}}&returnUrl={escapedReturnUrl}").ToString();
-            var authUrl = await oauthService.GetOAuthUrl(forwardUrl, _disposeCts.Token);
+            var callbackUrl = NavigationManager.ToAbsoluteUri($"/auth?returnUrl={escapedReturnUrl}").ToString();
+            var authUrl = await oauthService.BeginLoginAsync(callbackUrl, _disposeCts.Token);
             NavigationManager.NavigateTo(authUrl, true);
         }
         catch
@@ -228,7 +225,7 @@
             return "/";
         }
 
-        if (relative.StartsWith("plex-auth", StringComparison.OrdinalIgnoreCase))
+        if (relative.StartsWith("auth", StringComparison.OrdinalIgnoreCase))
         {
             return "/";
         }
@@ -239,8 +236,8 @@
     private async Task DisconnectAsync()
     {
         await using var scope = ScopeFactory.CreateAsyncScope();
-        var credentialStore = scope.ServiceProvider.GetRequiredService<ICredentialStore>();
-        await credentialStore.ClearAsync(_watchlistProvider, _disposeCts.Token);
+        var oauthService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
+        await oauthService.LogoutAsync(_disposeCts.Token);
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 

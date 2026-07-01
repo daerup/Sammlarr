@@ -9,7 +9,7 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private Mock<ITypedMemoryCache<MediaProvider, string>> _cache = null!;
+	private Mock<ITypedMemoryCache<ApiKeyProvider, IApiKey>> _cache = null!;
 	private Mock<IMediaRepository> _mediaRepository = null!;
 	private IApiKeyConfigRepository _testee = null!;
 
@@ -18,20 +18,20 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<MediaProvider, string>.Mock();
+		_cache = ITypedMemoryCache<ApiKeyProvider, IApiKey>.Mock();
 		_mediaRepository = IMediaRepository.Mock();
-		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object);
+		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object, IApiKeyFactory.Mock().Object);
 	}
 
 	[Test]
 	public async Task SetApiKey_WithEncryption_StoresEncryptedInDatabase()
 	{
-		var provider = MediaProvider.Tmdb;
+		var provider = ApiKeyProvider.Tmdb;
 		var plainKey = "secret-api-key";
 
-		await _testee.SetApiKeyAsync(provider, plainKey);
+		await _testee.SetApiKeyAsync(new TestApiKey(provider, plainKey));
 
-		var encrypted = (await fixture.RawContext.Table<ApiKeyConfigEntity>().QueryAsync(x => x.ApiKey)).Single();
+		var encrypted = (await fixture.RawContext.Table<ApiKeyConfigRow>().QueryAsync(x => x.ApiKey)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainKey);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -45,9 +45,9 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	[Arguments("")]
 	public async Task SetApiKey_WithVariousKeys_PreservesPlaintext(string apiKey)
 	{
-		var provider = MediaProvider.Tmdb;
+		var provider = ApiKeyProvider.Tmdb;
 
-		await _testee.SetApiKeyAsync(provider, apiKey);
+		await _testee.SetApiKeyAsync(new TestApiKey(provider, apiKey));
 
 		var setting = await fixture.Context.ApiKeySettings.SingleAsync();
 
@@ -59,12 +59,12 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	{
 		var key = "shared-api-key";
 
-		await _testee.SetApiKeyAsync(MediaProvider.Tmdb, key);
-		await _testee.SetApiKeyAsync(MediaProvider.Imdb, key);
+		await _testee.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, key));
+		await _testee.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Mdblist, key));
 
 		var keys = await fixture.Context.ApiKeySettings.ToListAsync();
-		var tmdb = keys.Single(s => s.Provider == MediaProvider.Tmdb);
-		var imdb = keys.Single(s => s.Provider == MediaProvider.Imdb);
+		var tmdb = keys.Single(s => s.Provider == ApiKeyProvider.Tmdb);
+		var imdb = keys.Single(s => s.Provider == ApiKeyProvider.Mdblist);
 
 		await Assert.That(keys).Count().IsEqualTo(2);
 		await Assert.That(tmdb.ApiKey).IsEqualTo(key);
@@ -74,7 +74,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	[Test]
 	public async Task GetApiKeyAsync_ReadsFromCache()
 	{
-		var provider = MediaProvider.Tmdb;
+		var provider = ApiKeyProvider.Tmdb;
 
 		await _testee.GetApiKeyAsync(provider);
 
@@ -84,10 +84,10 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	[Test]
 	public async Task SetApiKey_AddsToCache()
 	{
-		var provider = MediaProvider.Tmdb;
-		var apiKey = "secret-api-key";
+		var provider = ApiKeyProvider.Tmdb;
+		var apiKey = new TestApiKey(provider, "secret-api-key");
 
-		await _testee.SetApiKeyAsync(provider, apiKey);
+		await _testee.SetApiKeyAsync(apiKey);
 
 		_cache.Set(provider, apiKey).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
@@ -96,7 +96,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	[Test]
 	public async Task ClearApiKey_RemovesFromCache()
 	{
-		var provider = MediaProvider.Tmdb;
+		var provider = ApiKeyProvider.Tmdb;
 		await SetUpApiKeyAsync(provider, "secret-api-key");
 		_cache.Reset();
 
@@ -106,9 +106,9 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 		_cache.VerifyNoOtherCalls();
 	}
 
-	private async Task SetUpApiKeyAsync(MediaProvider provider, string apiKey)
+	private async Task SetUpApiKeyAsync(ApiKeyProvider provider, string apiKey)
 	{
-		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeyConfigEntity { Provider = provider, ApiKey = apiKey });
+		await fixture.Context.ApiKeySettings.AddAsync(new ApiKeyConfigRow { Provider = provider, ApiKey = apiKey });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 	}
@@ -128,3 +128,5 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 		return Convert.TryFromBase64String(value, buffer, out _);
 	}
 }
+
+file sealed record TestApiKey(ApiKeyProvider Provider, string Value) : IApiKey;

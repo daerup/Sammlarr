@@ -1,4 +1,4 @@
-namespace Contracts.Media.Metadata;
+namespace Domain.Providers;
 
 public enum RatingProvider
 {

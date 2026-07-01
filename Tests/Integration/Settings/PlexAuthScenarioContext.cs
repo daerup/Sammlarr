@@ -4,5 +4,5 @@ namespace Integration.Tests.Settings;
 
 public sealed class PlexAuthScenarioContext
 {
-	public AuthUserInfo? User { get; set; }
+	public AuthorizedUser? User { get; set; }
 }

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
+using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Trending;
@@ -12,14 +13,23 @@ using Shared.Telemetry;
 
 namespace API.Tmdb;
 
-internal class TmdbRecommendationService(TmdbClient tmdbClient, TmdbOptions options, IMediaService media, IProviderConfigRepository providerConfigRepository)
-	: IMediaRecommendationService
+internal class TmdbRecommendationService(
+	TmdbClient tmdbClient,
+	TmdbOptions options,
+	IMediaService media,
+	IProviderConfigRepository providerConfigRepository,
+	IApiKeyConfigRepository apiKeyConfigRepository
+) : IMediaRecommendationService
 {
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		using var activity = SammlarrTelemetry.StartTrendingLoad(page);
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
-		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, cancellationToken);
+		if (await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is not IApiKey apiKey)
+		{
+			throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
+		}
+		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 		var settings = await providerConfigRepository.GetAsync(cancellationToken);

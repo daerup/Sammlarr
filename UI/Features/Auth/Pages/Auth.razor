@@ -1,13 +1,12 @@
-@page "/plex-auth"
+@page "/auth"
+@using Contracts
 @using Contracts.Auth
-@using Contracts.DI
 @using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager NavigationManager
-@inject ICredentialStore CredentialStore
-@inject IKeyedServiceIndex<WatchlistProvider, IOAuthService> OAuthServiceIndex
+@inject IOAuthService OAuthService
 @inject Notifier Notifier
 
-<PageTitle>Connecting to Plex…</PageTitle>
+<PageTitle>Signing in…</PageTitle>
 
 <div class="container flex items-center justify-center min-h-[60vh]">
     @if (_isHandlingCallback)
@@ -35,30 +34,25 @@
     private bool _isHandlingCallback;
     private string _returnUrl = "/";
 
-    private IOAuthService OAuthService => OAuthServiceIndex[WatchlistProvider.Plex];
-
     protected override async Task OnInitializedAsync()
     {
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (string.IsNullOrEmpty(uri.Query))
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
         var query = QueryHelpers.ParseQuery(uri.Query);
         _returnUrl = GetSafeReturnUrl(query.TryGetValue("returnUrl", out var returnUrlValues) ? returnUrlValues.FirstOrDefault() : null);
 
-        if (
-            query.TryGetValue("pinId", out var pinIdValues) && int.TryParse(pinIdValues.FirstOrDefault(), out var pinId) &&
-            query.TryGetValue("clientId", out var clientValues) && Guid.TryParse(clientValues.FirstOrDefault(), out var clientId))
-        {
-            _isHandlingCallback = true;
-            await HandlePinCallbackAsync(pinId, clientId);
-            _isHandlingCallback = false;
+        _isHandlingCallback = true;
+        await CompleteLoginAsync(uri.Query);
+        _isHandlingCallback = false;
 
-            if (_errorMessage is null)
-            {
-                NavigationManager.NavigateTo(_returnUrl, replace: true);
-            }
-        }
-        else
+        if (_errorMessage is null)
         {
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo(_returnUrl, replace: true);
         }
     }
 
@@ -87,18 +81,13 @@
         return returnUrl;
     }
 
-    private async Task HandlePinCallbackAsync(int pinId, Guid clientId)
+    private async Task CompleteLoginAsync(string callbackQuery)
     {
         try
         {
-            var pinStatus = await OAuthService.CallbackAsync(pinId, clientId);
-            if (pinStatus.AuthToken is not null)
+            if (await OAuthService.CompleteLoginAsync(callbackQuery) is Error error)
             {
-                await CredentialStore.StoreAsync(WatchlistProvider.Plex, pinStatus.AuthToken, pinStatus.ExpiresAt, clientId);
-            }
-            else
-            {
-                _errorMessage = "Authentication was not completed. Please try again.";
+                _errorMessage = error.Reason;
             }
         }
         catch (Exception ex)
@@ -108,4 +97,3 @@
         }
     }
 }
-

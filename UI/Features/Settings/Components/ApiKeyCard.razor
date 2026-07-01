@@ -1,38 +1,39 @@
+@using Contracts
 @using Contracts.Auth
 @using Contracts.DI
 @using Contracts.Media
 @using UI.Shared.Services.Branding
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
-@inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
+@inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject Notifier Notifier
 
 <SettingsCard Title="@Branding.DisplayName" Color="@Branding.BrandColor" Icon="@Branding.Icon">
     <Badge>
-        @if (_state == State.Failed || _savedState == State.Failed)
+        @if (_state == State.Failed)
         {
-            <BbBadge Variant="BadgeVariant.Destructive" Class="gap-1.5">
+            <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 badge-soft-destructive">
                 <LucideIcon Name="circle-alert" Size="12"/>
                 Invalid
             </BbBadge>
         }
         else if (_state == State.Success)
         {
-            <BbBadge Variant="BadgeVariant.Outline" Class="gap-1.5 text-success border-success">
+            <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
                 <LucideIcon Name="check" Size="12"/>
                 Verified
             </BbBadge>
         }
-        else if (_savedState == State.Saved)
+        else if (_state == State.Saved)
         {
-            <BbBadge Variant="BadgeVariant.Outline" Class="gap-1.5 text-success border-success">
+            <BbBadge Variant="BadgeVariant.Outline" Class="h-6 items-center gap-1.5 text-success border-success">
                 <span class="inline-block w-1.5 h-1.5 rounded-full bg-success"></span>
                 Connected
             </BbBadge>
         }
         else
         {
-            <BbBadge Variant="BadgeVariant.Secondary" Class="gap-1.5 text-muted-foreground">
+            <BbBadge Variant="BadgeVariant.Secondary" Class="h-6 items-center gap-1.5 text-muted-foreground">
                 <span class="inline-block w-1.5 h-1.5 rounded-full bg-muted-foreground/60"></span>
                 Not configured
             </BbBadge>
@@ -150,16 +151,17 @@
     private enum State { Idle, Testing, Success, Saving, Saved, Failed }
 
     [Parameter] [EditorRequired]
-    public required MediaProvider Provider { get; set; }
+    public required ApiKeyProvider Provider { get; set; }
 
     [Parameter] [EditorRequired]
     public required RenderFragment Description { get; set; }
 
-    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider);
+    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
 
     private string _apiKeyInput = string.Empty;
     private string _savedApiKey = string.Empty;
-    private MediaProvider? _loadedProvider;
+    private IApiKey? _validatedKey;
+    private ApiKeyProvider? _loadedProvider;
     private State _state = State.Idle;
     private State _savedState = State.Idle;
     private bool _showApiKey;
@@ -187,20 +189,20 @@
         {
             return;
         }
-
-        var key = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
-        _savedApiKey = key ?? string.Empty;
-        _apiKeyInput = _savedApiKey;
         _loadedProvider = Provider;
 
-        if (string.IsNullOrEmpty(_savedApiKey))
+        if (await ApiKeyConfigRepository.GetApiKeyAsync(Provider) is IApiKey key)
         {
-            _savedState = State.Idle;
-            _state = State.Idle;
-            return;
+            _savedApiKey = key.Value;
+            _apiKeyInput = key.Value;
+            _savedState = State.Saved;
         }
-        var isValid = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_savedApiKey);
-        _savedState = isValid ? State.Saved : State.Failed;
+        else
+        {
+            _savedApiKey = string.Empty;
+            _apiKeyInput = string.Empty;
+            _savedState = State.Idle;
+        }
         _state = _savedState;
     }
 
@@ -210,14 +212,14 @@
     {
         _state = State.Testing;
 
-        try
+        if (await ApiKeyFactory.CreateAsync(Provider, _apiKeyInput) is IApiKey key)
         {
-            var ok = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(_apiKeyInput);
-            _state = ok ? State.Success : State.Failed;
+            _validatedKey = key;
+            _state = State.Success;
         }
-        catch (Exception ex)
+        else
         {
-            Notifier.Error(ex, $"Failed to test {Branding.DisplayName} API key");
+            _validatedKey = null;
             _state = State.Failed;
         }
     }
@@ -226,7 +228,7 @@
     {
         _state = State.Saving;
 
-        await ApiKeyConfigRepository.SetApiKeyAsync(Provider, _apiKeyInput);
+        await ApiKeyConfigRepository.SetApiKeyAsync(_validatedKey!);
         _savedApiKey = _apiKeyInput;
         _savedState = State.Saved;
 

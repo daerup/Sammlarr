@@ -2,6 +2,7 @@ using System.Net;
 using API.Plex;
 using Bogus;
 using Contracts.Auth;
+using Test.Shared;
 
 namespace API.Tests.Plex;
 
@@ -9,7 +10,7 @@ public class PlexClientTests
 {
 	private const string PlexBaseUrl = "https://plex.tv";
 
-	private static readonly Faker<StoredCredential> credentialFaker = new Faker<StoredCredential>().CustomInstantiator(f => new StoredCredential(
+	private static readonly Faker<TestCredential> credentialFaker = new Faker<TestCredential>().CustomInstantiator(f => new TestCredential(
 		WatchlistProvider.Plex,
 		f.Random.Guid(),
 		f.Random.AlphaNumeric(32),
@@ -21,13 +22,13 @@ public class PlexClientTests
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credentialStore = ICredentialStore.Mock();
+		var credentialStore = ICredentialRepository.Mock();
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await Assert
 			.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl))
 			.Throws<InvalidOperationException>()
-			.WithMessageContaining("No Plex credentials are stored");
+			.WithMessageContaining("No valid Plex credentials are stored");
 	}
 
 	[Test]
@@ -36,7 +37,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
-		var credentialStore = ICredentialStore.Mock();
+		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore);
 
@@ -60,7 +61,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
-		var credentialStore = ICredentialStore.Mock();
+		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore);
 

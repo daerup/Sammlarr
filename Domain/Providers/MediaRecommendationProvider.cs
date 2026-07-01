@@ -1,4 +1,4 @@
-namespace Contracts.Media.Trending;
+namespace Domain.Providers;
 
 public enum MediaRecommendationProvider
 {

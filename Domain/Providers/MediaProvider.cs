@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Domain.Media;
+namespace Domain.Providers;
 
 public enum MediaProvider
 {

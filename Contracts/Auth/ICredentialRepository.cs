@@ -1,8 +1,8 @@
 namespace Contracts.Auth;
 
-public interface ICredentialStore
+public interface ICredentialRepository
 {
-	ValueTask<StoredCredential?> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default);
+	Task<Result<ICredential>> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default);
 
 	Task StoreAsync(
 		WatchlistProvider watchlistProvider,

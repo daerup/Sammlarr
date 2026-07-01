@@ -5,6 +5,7 @@ using Contracts.Watchlist;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Http;
 using Microsoft.EntityFrameworkCore;
+using Test.Shared;
 
 namespace Integration.Tests.Settings;
 
@@ -12,16 +13,19 @@ namespace Integration.Tests.Settings;
 public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext sammlarr)
 {
 	[Given("the TMDB API key is {string}")]
-	public async Task GivenTmdbKeyStored(string apiKey) => await sammlarr.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(MediaProvider.Tmdb, apiKey);
+	public async Task GivenTmdbKeyStored(string apiKey) =>
+		await sammlarr.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, apiKey));
 
 	[When("I look up the TMDB API key")]
-	public async Task WhenLookUpTmdbKey() => ctx.RetrievedKey = await sammlarr.Resolve<IApiKeyConfigRepository>().GetApiKeyAsync(MediaProvider.Tmdb);
+	public async Task WhenLookUpTmdbKey() =>
+		ctx.RetrievedKey = await sammlarr.Resolve<IApiKeyConfigRepository>().GetApiKeyAsync(ApiKeyProvider.Tmdb) is IApiKey key ? key.Value : null;
 
 	[When("I store the TMDB API key {string}")]
-	public async Task WhenStoreTmdbKey(string apiKey) => await sammlarr.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(MediaProvider.Tmdb, apiKey);
+	public async Task WhenStoreTmdbKey(string apiKey) =>
+		await sammlarr.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, apiKey));
 
 	[When("I clear the TMDB API key")]
-	public async Task WhenClearTmdbKey() => await sammlarr.Resolve<IApiKeyConfigRepository>().RemoveApiKeyAsync(MediaProvider.Tmdb);
+	public async Task WhenClearTmdbKey() => await sammlarr.Resolve<IApiKeyConfigRepository>().RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 
 	[Then("no TMDB API key is stored")]
 	public async Task ThenNoTmdbKeyStored() => await Assert.That(ctx.RetrievedKey).IsNull();
@@ -54,7 +58,7 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 
 	[When("I verify the {word} API key {string}")]
 	public async Task WhenVerifyKey(string provider, string apiKey) =>
-		ctx.KeyValid = await sammlarr.ResolveKeyed<IApiKeyValidator>(Enum.Parse<MediaProvider>(provider, ignoreCase: true)).ValidateApiKeyAsync(apiKey);
+		ctx.KeyValid = await sammlarr.Resolve<IApiKeyFactory>().CreateAsync(Enum.Parse<ApiKeyProvider>(provider, ignoreCase: true), apiKey) is IApiKey;
 
 	[When("I add Plex item {string} to the watchlist")]
 	public async Task WhenAddPlexItem(string plexId)

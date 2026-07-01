@@ -2,7 +2,7 @@ using Contracts.Auth;
 
 namespace API.Plex;
 
-internal class PlexClient(HttpClient client, ICredentialStore credentialStore)
+internal class PlexClient(HttpClient client, ICredentialRepository credentialStore)
 {
 	public const string Unauthenticated = "Plex";
 	public const int ContainerSize = 100;
@@ -34,10 +34,9 @@ internal class PlexClient(HttpClient client, ICredentialStore credentialStore)
 			return;
 		}
 
-		var credential = await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken);
-		if (credential is null || string.IsNullOrWhiteSpace(credential.AccessToken))
+		if (await credentialStore.GetAsync(WatchlistProvider.Plex, cancellationToken) is not ICredential credential)
 		{
-			throw new InvalidOperationException("No Plex credentials are stored. Use Plex auth to sign in first.");
+			throw new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first.");
 		}
 		client.DefaultRequestHeaders.Add(plexToken, credential.AccessToken);
 		client.DefaultRequestHeaders.Add(plexClientIdentifier, credential.ClientId.ToString());

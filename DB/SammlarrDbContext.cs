@@ -42,7 +42,7 @@ internal sealed class SammlarrDbContext : DbContext
 		SeedProviderSettings();
 	}
 
-	public DbSet<CredentialEntity> Credentials => Set<CredentialEntity>();
+	public DbSet<CredentialRow> Credentials => Set<CredentialRow>();
 
 	public DbSet<MediaRow> Media => Set<MediaRow>();
 
@@ -52,7 +52,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<MediaRatingRow> MediaRatings => Set<MediaRatingRow>();
 
-	public DbSet<ApiKeyConfigEntity> ApiKeySettings => Set<ApiKeyConfigEntity>();
+	public DbSet<ApiKeyConfigRow> ApiKeySettings => Set<ApiKeyConfigRow>();
 
 	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
 	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();

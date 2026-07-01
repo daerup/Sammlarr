@@ -1,4 +1,4 @@
-namespace Contracts.Auth;
+namespace Domain.Providers;
 
 public enum WatchlistProvider
 {

@@ -293,6 +293,13 @@ body:has(.error-dialog) .search-modal {
     background-color: oklch(from var(--background) l c h / 0.15) !important;
 }
 
+/* Status-badge counterpart to the HoverButton failure tint — same chroma-reduced destructive so the two read as one state, not a solid-red shout. */
+.badge-soft-destructive {
+    color: oklch(from var(--destructive) l calc(c * 0.65) h) !important;
+    border-color: oklch(from var(--destructive) l calc(c * 0.65) h) !important;
+    background-color: transparent !important;
+}
+
 .watchlist-sync-preview {
     min-width: 12rem;
     width: max-content;

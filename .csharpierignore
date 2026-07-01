@@ -1,5 +1,6 @@
 Domain/Media/MediaLookup.cs
 Domain/Media/IdentifiedMedia.cs
+Contracts/Auth/AuthSession.cs
 Contracts/Result.cs
 Contracts/Option.cs
 Contracts/Processing/QueryResult.cs
