@@ -4,7 +4,7 @@ using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace API.Tests.Plex;
 

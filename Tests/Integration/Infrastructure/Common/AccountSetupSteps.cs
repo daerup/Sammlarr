@@ -2,7 +2,7 @@ using Contracts.Auth;
 using Contracts.Media;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Http;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Integration.Tests.Infrastructure.Common;
 

@@ -4,7 +4,7 @@ public interface IOAuthService
 {
 	Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default);
 
-	Task<Result<None>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default);
+	Task<Optional<Error>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default);
 
 	Task LogoutAsync(CancellationToken cancellationToken = default);
 

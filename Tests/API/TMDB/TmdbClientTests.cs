@@ -2,7 +2,7 @@ using System.Net;
 using API.Tmdb;
 using Bogus;
 using Shared.Options;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace API.Tests.TMDB;
 

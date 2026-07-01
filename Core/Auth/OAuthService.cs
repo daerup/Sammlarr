@@ -19,14 +19,14 @@ internal sealed class OAuthService(
 	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) =>
 		await (await ResolveAsync(cancellationToken)).BeginLoginAsync(callbackUrl, cancellationToken);
 
-	public async Task<Result<None>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
+	public async Task<Optional<Error>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
 		var outcome = await providers[config.WatchlistProvider].CompleteLoginAsync(callbackQuery, cancellationToken);
 		return outcome switch
 		{
 			AuthGrant grant => await StoreAsync(config.WatchlistProvider, grant, cancellationToken),
-			Error error => error,
+			Error error => Some.Of(error),
 		};
 	}
 
@@ -58,7 +58,7 @@ internal sealed class OAuthService(
 		return session;
 	}
 
-	private async Task<Result<None>> StoreAsync(WatchlistProvider provider, AuthGrant grant, CancellationToken cancellationToken)
+	private async Task<Optional<Error>> StoreAsync(WatchlistProvider provider, AuthGrant grant, CancellationToken cancellationToken)
 	{
 		await credentialRepository.StoreAsync(provider, grant.AccessToken, grant.ExpiresAt, grant.ClientId, cancellationToken);
 		userCache.Remove(provider);

@@ -9,7 +9,7 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Shared.Options;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace API.Tests.Mdblist;
 

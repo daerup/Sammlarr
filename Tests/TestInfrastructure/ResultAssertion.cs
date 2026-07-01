@@ -1,0 +1,16 @@
+using Contracts;
+using TUnit.Assertions.Core;
+using TUnit.Assertions.Sources;
+
+namespace TestInfrastructure;
+
+public static class ResultAssertionExtensions
+{
+	extension<T>(IAssertionSource<Result<T>> source)
+		where T : notnull
+	{
+		public UnionAssertion<Result<T>, T> IsOk() => source.IsOfUnionType<Result<T>, T>();
+
+		public UnionAssertion<Result<T>, Error> IsError() => source.IsOfUnionType<Result<T>, Error>();
+	}
+}

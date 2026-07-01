@@ -6,7 +6,7 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Core.Tests.Media;
 

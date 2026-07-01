@@ -1,7 +1,7 @@
 ﻿using TUnit.Assertions.Exceptions;
 using TUnit.Assertions.Sources;
 
-namespace Test.Shared;
+namespace TestInfrastructure;
 
 public static class AssertionExtensions
 {

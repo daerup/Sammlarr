@@ -8,7 +8,7 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Core.Tests.Media;
 
@@ -84,7 +84,7 @@ public class MediaServiceTests
 		var results = await testee.GetDetailsAsync([id]).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
-		await Assert.That(results[0] is Error).IsTrue();
+		await Assert.That(results[0]).IsError();
 	}
 
 	[Test]

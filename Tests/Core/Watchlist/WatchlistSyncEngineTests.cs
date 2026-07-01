@@ -9,7 +9,7 @@ using Core.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Core.Tests.Watchlist;
 

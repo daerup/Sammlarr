@@ -1,6 +1,6 @@
 using Contracts.Processing;
 using Core.Processing;
-using static Test.Shared.QueryFilterFactory;
+using static TestInfrastructure.QueryFilterFactory;
 
 namespace Core.Tests.Processing;
 

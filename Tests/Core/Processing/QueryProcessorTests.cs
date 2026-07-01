@@ -4,10 +4,10 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Processing;
 using Core.Processing;
-using Test.Shared;
+using TestInfrastructure;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
-using static Test.Shared.QueryFilterFactory;
+using static TestInfrastructure.QueryFilterFactory;
 
 namespace Core.Tests.Processing;
 

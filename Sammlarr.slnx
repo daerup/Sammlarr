@@ -20,7 +20,7 @@
 		<Project Path="Tests/Integration/Integration.Tests.csproj" />
 		<Project Path="Tests/Shared.Options.Generator/Shared.Options.Generator.Tests.csproj" />
 		<Project Path="Tests/Shared/Shared.Tests.csproj" />
-		<Project Path="Tests/Test.Shared/Test.Shared.csproj" />
+		<Project Path="Tests/TestInfrastructure/TestInfrastructure.csproj" />
 	</Folder>
 	<Project Path="API/API.csproj" />
 	<Project Path="Contracts/Contracts.csproj" />

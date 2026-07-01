@@ -6,7 +6,7 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Auth;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Core.Tests.Auth;
 
@@ -94,7 +94,7 @@ public class OAuthServiceTests
 
 		var result = await testee.CompleteLoginAsync(callback);
 
-		await Assert.That(result is None).IsTrue();
+		await Assert.That(result).IsNone();
 		credentials.StoreAsync(WatchlistProvider.Plex, "token", expiresAt, clientId, Any()).WasCalled(Times.Once);
 	}
 
@@ -111,7 +111,7 @@ public class OAuthServiceTests
 
 		var result = await testee.CompleteLoginAsync(callback);
 
-		await Assert.That(result is Error).IsTrue();
+		await Assert.That(result).IsSome();
 		credentials.StoreAsync(Any(), Any(), Any(), Any(), Any()).WasNeverCalled();
 	}
 

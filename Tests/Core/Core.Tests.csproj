@@ -17,7 +17,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Core\Core.csproj" />
-		<ProjectReference Include="..\Test.Shared\Test.Shared.csproj" />
+		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Remove="Integration\**\*.cs" />

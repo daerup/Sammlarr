@@ -3,7 +3,7 @@ using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Core.Media;
-using Test.Shared;
+using TestInfrastructure;
 using TUnit.Mocks.Generated.Contracts.Media.Conversions;
 
 namespace Core.Tests.Media;
