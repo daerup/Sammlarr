@@ -54,7 +54,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ApiKeyConfigRow> ApiKeySettings => Set<ApiKeyConfigRow>();
 
-	public DbSet<ProviderConfigEntity> ProviderSettings => Set<ProviderConfigEntity>();
+	public DbSet<ProviderConfigRow> ProviderSettings => Set<ProviderConfigRow>();
 	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();
 	public DbSet<BlacklistEntity> Blacklist => Set<BlacklistEntity>();
 	public DbSet<WatchlistEntity> Watchlist => Set<WatchlistEntity>();
@@ -114,7 +114,7 @@ internal sealed class SammlarrDbContext : DbContext
 			return;
 		}
 
-		ProviderSettings.Add(ProviderConfigEntity.Default);
+		ProviderSettings.Add(ProviderConfigRow.Default);
 		base.SaveChanges();
 	}
 }

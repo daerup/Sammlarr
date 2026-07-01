@@ -7,7 +7,7 @@ namespace DB.Data.Config;
 internal class ProviderConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<string, ProviderConfig> cache)
 	: IProviderConfigRepository
 {
-	private const string CacheKey = nameof(ProviderConfigEntity);
+	private const string CacheKey = nameof(ProviderConfig);
 
 	public async ValueTask<ProviderConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
@@ -16,27 +16,27 @@ internal class ProviderConfigRepository(IDbContextFactory<SammlarrDbContext> dbC
 			return cached!;
 		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var settings = await ctx.ProviderSettings.SingleAsync(cancellationToken);
-		var dto = new ProviderConfig
+		var row = await ctx.ProviderSettings.SingleAsync(cancellationToken);
+		var config = new ProviderConfig
 		{
-			WatchlistProvider = settings.WatchlistProvider,
-			TrendingProvider = settings.TrendingProvider,
-			SearchProvider = settings.SearchProvider,
-			RatingProvider = settings.RatingProvider,
+			WatchlistProvider = row.WatchlistProvider,
+			TrendingProvider = row.TrendingProvider,
+			SearchProvider = row.SearchProvider,
+			RatingProvider = row.RatingProvider,
 		};
-		cache.Set(CacheKey, dto);
-		return dto;
+		cache.Set(CacheKey, config);
+		return config;
 	}
 
-	public async Task StoreAsync(ProviderConfig providerConfig, CancellationToken cancellationToken = default)
+	public async Task StoreAsync(ProviderConfig config, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var settings = await ctx.ProviderSettings.SingleAsync(cancellationToken);
-		settings.WatchlistProvider = providerConfig.WatchlistProvider;
-		settings.TrendingProvider = providerConfig.TrendingProvider;
-		settings.SearchProvider = providerConfig.SearchProvider;
-		settings.RatingProvider = providerConfig.RatingProvider;
+		var row = await ctx.ProviderSettings.SingleAsync(cancellationToken);
+		row.WatchlistProvider = config.WatchlistProvider;
+		row.TrendingProvider = config.TrendingProvider;
+		row.SearchProvider = config.SearchProvider;
+		row.RatingProvider = config.RatingProvider;
 		await ctx.SaveChangesAsync(cancellationToken);
-		cache.Set(CacheKey, providerConfig);
+		cache.Set(CacheKey, config);
 	}
 }
