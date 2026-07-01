@@ -157,7 +157,8 @@ Feature: Watchlist sync engine
       | Remove    | Inception |
     And the remote watchlist is unavailable
     When the watchlist syncs
-    Then the watchlist contains 1 entry with Manual origin
+    Then the sync reports a remote failure
+    And the watchlist contains 1 entry with Manual origin
     And the outbox is:
       | operation | #         |
       | Remove    | Inception |

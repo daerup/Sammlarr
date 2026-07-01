@@ -99,6 +99,9 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	[Then("the sync is unchanged")]
 	public async Task ThenSyncIsUnchanged() => await Assert.That(_syncResult is WatchlistSyncUnchanged).IsTrue();
 
+	[Then("the sync reports a remote failure")]
+	public async Task ThenSyncReportsRemoteFailure() => await Assert.That(_syncResult is WatchlistSyncRemoteFailed).IsTrue();
+
 	private sealed class SyncResultRow
 	{
 		public int? Inserted { get; set; }

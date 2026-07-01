@@ -199,19 +199,11 @@ internal sealed class MediaService(
 	{
 		if (resolution is not Some<ResolvedIdentity>(var r))
 		{
-			return ToUnmatched(request);
+			return request.ToUnmatched();
 		}
 		var realized = await RealizeAsync(r.Identity, r.Cached, buffer, cancellationToken);
-		return realized is IdentifiedMedia identified ? identified : ToUnmatched(request);
+		return realized is IdentifiedMedia identified ? identified : request.ToUnmatched();
 	}
-
-	private static MediaLookup ToUnmatched(ResolveRequest request) =>
-		new UnmatchedMedia
-		{
-			Externals = [.. request.Candidates],
-			Title = request.Hints is Some<ResolutionHints>(var hints) ? hints.Title : "",
-			ReleaseDate = request.Hints is Some<ResolutionHints>(var year) && year.Year > 0 ? new DateOnly(year.Year, 1, 1) : null,
-		};
 
 	private async ValueTask<Result<IdentifiedMedia>> RealizeAsync(
 		MediaIdentity identity,
@@ -267,5 +259,22 @@ internal sealed class MediaService(
 		}
 		var rows = await mediaRepository.GetByExternalsAsync(ids, cancellationToken);
 		return rows.SelectMany(r => r.Stored.Externals.Select(e => (External: e, Row: r))).ToDictionary(t => t.External, t => t.Row);
+	}
+}
+
+file static class ResolveRequestExtensions
+{
+	extension(ResolveRequest request)
+	{
+		public MediaLookup ToUnmatched()
+		{
+			var hint = request.Hints is Some<ResolutionHints>(var hints) ? hints : null;
+			return new UnmatchedMedia
+			{
+				Externals = [.. request.Candidates],
+				Title = hint?.Title ?? "",
+				ReleaseDate = hint is { Year: > 0 } year ? new DateOnly(year.Year, 1, 1) : null,
+			};
+		}
 	}
 }

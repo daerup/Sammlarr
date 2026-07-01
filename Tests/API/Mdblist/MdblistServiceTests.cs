@@ -27,7 +27,7 @@ public class MdblistServiceTests
 		apiKeyStore.GetApiKeyAsync(MediaProvider.Mdblist, Any()).Returns("test-key");
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(handler.CreateClient(BaseUrl), options, apiKeyStore);
-		var media = new FakeMediaService();
+		var media = IMediaService.Mock();
 		var providerConfig = IProviderConfigRepository.Mock();
 		providerConfig
 			.GetAsync(Any())
@@ -40,7 +40,7 @@ public class MdblistServiceTests
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		var testee = new MdblistService(client, media, providerConfig.Object);
+		var testee = new MdblistService(client, media.Object, providerConfig.Object);
 
 		var act = async () =>
 		{
