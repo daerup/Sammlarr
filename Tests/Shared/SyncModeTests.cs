@@ -1,5 +1,5 @@
 using Contracts.Feed;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Shared.Tests;
 

@@ -85,7 +85,7 @@
     {
         try
         {
-            if (await OAuthService.CompleteLoginAsync(callbackQuery) is Error error)
+            if (await OAuthService.CompleteLoginAsync(callbackQuery) is Some<Error>(var error))
             {
                 _errorMessage = error.Reason;
             }

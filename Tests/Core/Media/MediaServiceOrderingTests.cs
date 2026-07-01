@@ -9,7 +9,7 @@ using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
 using Shared;
-using Test.Shared;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Media;

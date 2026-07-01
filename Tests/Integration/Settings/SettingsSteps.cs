@@ -5,7 +5,7 @@ using Contracts.Watchlist;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Http;
 using Microsoft.EntityFrameworkCore;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace Integration.Tests.Settings;
 

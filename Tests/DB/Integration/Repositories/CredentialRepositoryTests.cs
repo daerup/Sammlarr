@@ -3,6 +3,7 @@ using Contracts.Auth;
 using Contracts.Caching;
 using DB.Data.Access;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
@@ -26,7 +27,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 	{
 		var credential = await _testee.GetAsync(WatchlistProvider.Plex);
 
-		await Assert.That(credential is Error).IsTrue();
+		await Assert.That(credential).IsError();
 	}
 
 	[Test]
@@ -93,7 +94,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		var credential = await _testee.GetAsync(authProvider);
 
-		await Assert.That(credential is ICredential resolved && resolved.ClientId == clientId).IsTrue();
+		await Assert.That(credential).IsOk().And.Multiple(async resolved => await Assert.That(resolved.ClientId).IsEqualTo(clientId));
 	}
 
 	[Test]
@@ -223,22 +224,5 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		var buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);
-	}
-}
-
-file sealed record TestCredential(WatchlistProvider Provider, Guid ClientId, string AccessToken, DateTimeOffset ExpiresAt) : ICredential;
-
-file sealed class TestCredentialFactory : ICredentialFactory
-{
-	public Task<Result<ICredential>> CreateAsync(
-		WatchlistProvider provider,
-		Guid clientId,
-		string accessToken,
-		DateTimeOffset expiresAt,
-		CancellationToken cancellationToken = default
-	)
-	{
-		Result<ICredential> result = new TestCredential(provider, clientId, accessToken, expiresAt);
-		return Task.FromResult(result);
 	}
 }

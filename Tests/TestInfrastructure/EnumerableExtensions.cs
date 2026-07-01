@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Test.Shared;
+namespace TestInfrastructure;
 
 public static class EnumerableExtensions
 {

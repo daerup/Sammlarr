@@ -7,9 +7,8 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using Contracts.Settings;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace API.Tests.TMDB;
 
@@ -25,10 +24,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([tmdbId], new None());
 
-		using var _ = Assert.Multiple();
-		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
-		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains(tmdbId);
+		await Assert.That(result).IsSome().And.Multiple(async externals => await Assert.That(externals).Contains(tmdbId));
 	}
 
 	[Test]
@@ -39,14 +35,17 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		using var _ = Assert.Multiple();
-		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
-		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains(payload.TmdbIds[0]);
-		await Assert.That(externals).Contains(payload.TmdbIds[1]);
-		await Assert.That(externals).Contains(payload.PlexId);
-		await Assert.That(externals).Contains(payload.ImdbId);
-		await Assert.That(externals).Contains(payload.TvdbId!.Value);
+		await Assert
+			.That(result)
+			.IsSome()
+			.And.Multiple(async externals =>
+			{
+				await Assert.That(externals).Contains(payload.TmdbIds[0]);
+				await Assert.That(externals).Contains(payload.TmdbIds[1]);
+				await Assert.That(externals).Contains(payload.PlexId);
+				await Assert.That(externals).Contains(payload.ImdbId);
+				await Assert.That(externals).Contains(payload.TvdbId!.Value);
+			});
 	}
 
 	[Test]
@@ -57,7 +56,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		await Assert.That(result.Value).IsTypeOf<None>();
+		await Assert.That(result).IsNone();
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeTmdbId, bool includeExtraTmdbId, bool includeTvdbId)

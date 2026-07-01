@@ -1,6 +1,6 @@
 using Contracts.DI;
 
-namespace Test.Shared;
+namespace TestInfrastructure;
 
 public class FakeKeyedServiceIndex<TKey, TService> : IKeyedServiceIndex<TKey, TService>
 	where TKey : struct, Enum

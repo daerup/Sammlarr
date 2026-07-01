@@ -3,7 +3,7 @@ using Shared;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 
-namespace Test.Shared;
+namespace TestInfrastructure;
 
 public class UnionAssertion<TOuter, TInner>(AssertionContext<TOuter> context) : Assertion<TInner>(context.Map(MapToInner()))
 	where TOuter : IUnion

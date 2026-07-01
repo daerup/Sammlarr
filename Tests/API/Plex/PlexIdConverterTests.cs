@@ -8,10 +8,9 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Shared.Options;
-using Test.Shared;
+using TestInfrastructure;
 
 namespace API.Tests.Plex;
 
@@ -23,18 +22,20 @@ public class PlexIdConverterTests
 	public async Task ConvertAsync_WhenMediaIdIsPlexId_ReturnsPlexIdWithAdditionalIds()
 	{
 		var payload = CreatePlexByIdPayload(true, true);
-		var searchService = IMediaSearchProvider.Mock();
 		var testee = new PlexIdConverter(null!, CreatePlexApi(payload.Json));
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		using var _ = Assert.Multiple();
-		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
-		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains(payload.PlexId);
-		await Assert.That(externals).Contains(payload.TmdbId);
-		await Assert.That(externals).Contains(payload.ImdbId!.Value);
-		await Assert.That(externals).Contains(payload.TvdbId!.Value);
+		await Assert
+			.That(result)
+			.IsSome()
+			.And.Multiple(async externals =>
+			{
+				await Assert.That(externals).Contains(payload.PlexId);
+				await Assert.That(externals).Contains(payload.TmdbId);
+				await Assert.That(externals).Contains(payload.ImdbId!.Value);
+				await Assert.That(externals).Contains(payload.TvdbId!.Value);
+			});
 	}
 
 	[Test]
@@ -46,13 +47,16 @@ public class PlexIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
 
-		using var _ = Assert.Multiple();
-		await Assert.That(result.Value).IsTypeOf<Some<IReadOnlyList<IExternalMediaId>>>();
-		var externals = ((Some<IReadOnlyList<IExternalMediaId>>)result.Value).Value;
-		await Assert.That(externals).Contains(payload.PlexId);
-		await Assert.That(externals).Contains(payload.TmdbId);
-		await Assert.That(externals).Contains(payload.ImdbId!.Value);
-		await Assert.That(externals).Contains(payload.TvdbId!.Value);
+		await Assert
+			.That(result)
+			.IsSome()
+			.And.Multiple(async externals =>
+			{
+				await Assert.That(externals).Contains(payload.PlexId);
+				await Assert.That(externals).Contains(payload.TmdbId);
+				await Assert.That(externals).Contains(payload.ImdbId!.Value);
+				await Assert.That(externals).Contains(payload.TvdbId!.Value);
+			});
 	}
 
 	[Test]
@@ -63,7 +67,7 @@ public class PlexIdConverterTests
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApiWithEmptySearch());
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
-		await Assert.That(result.Value).IsTypeOf<None>();
+		await Assert.That(result).IsNone();
 	}
 
 	private static TmdbApi CreateTmdbApi(TmdbId tmdbId, string originalTitle)
