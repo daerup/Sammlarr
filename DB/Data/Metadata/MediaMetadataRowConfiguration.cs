@@ -9,7 +9,7 @@ internal sealed class MediaMetadataRowConfiguration : IModelConfiguration
 	{
 		modelBuilder.Entity<MediaMetadataRow>(builder =>
 		{
-			builder.HasOne(m => m.Media).WithOne().HasForeignKey<MediaMetadataRow>(m => m.MediaId).OnDelete(DeleteBehavior.Cascade);
+			builder.HasOne(m => m.Media).WithOne(media => media.Metadata).HasForeignKey<MediaMetadataRow>(m => m.MediaId).OnDelete(DeleteBehavior.Cascade);
 			builder.HasDiscriminator(m => m.MediaType).HasValue<MovieMetadataRow>(MediaType.Movie).HasValue<ShowMetadataRow>(MediaType.Show);
 		});
 
