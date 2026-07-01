@@ -1,11 +1,4 @@
-using Contracts.Auth;
-using Contracts.Feed;
-using Contracts.Media;
-using Contracts.Media.Metadata;
-using Contracts.Media.Search;
-using Contracts.Media.Trending;
-
-namespace Contracts;
+namespace Domain.Providers;
 
 public static class ProviderExtensions
 {
@@ -34,6 +27,12 @@ public static class ProviderExtensions
 			{
 				MediaRecommendationProvider.Tmdb => MediaProvider.Tmdb,
 			};
+
+		public ApiKeyProvider AsApiKeyProvider() =>
+			provider switch
+			{
+				MediaRecommendationProvider.Tmdb => ApiKeyProvider.Tmdb,
+			};
 	}
 
 	extension(FeedProvider provider)
@@ -43,6 +42,13 @@ public static class ProviderExtensions
 			{
 				FeedProvider.Mdblist => MediaProvider.Mdblist,
 				FeedProvider.Tmdb => MediaProvider.Tmdb,
+			};
+
+		public ApiKeyProvider AsApiKeyProvider() =>
+			provider switch
+			{
+				FeedProvider.Mdblist => ApiKeyProvider.Mdblist,
+				FeedProvider.Tmdb => ApiKeyProvider.Tmdb,
 			};
 	}
 
@@ -67,6 +73,23 @@ public static class ProviderExtensions
 			provider switch
 			{
 				MediaProvider.Tmdb => RatingSource.Tmdb,
+				_ => null,
+			};
+	}
+
+	extension(ApiKeyProvider provider)
+	{
+		public MediaProvider AsMediaProvider() =>
+			provider switch
+			{
+				ApiKeyProvider.Tmdb => MediaProvider.Tmdb,
+				ApiKeyProvider.Mdblist => MediaProvider.Mdblist,
+			};
+
+		public RatingSource? AsRatingSource() =>
+			provider switch
+			{
+				ApiKeyProvider.Tmdb => RatingSource.Tmdb,
 				_ => null,
 			};
 	}

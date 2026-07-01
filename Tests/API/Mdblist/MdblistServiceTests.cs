@@ -24,9 +24,10 @@ public class MdblistServiceTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 		var apiKeyStore = IApiKeyConfigRepository.Mock();
-		apiKeyStore.GetApiKeyAsync(MediaProvider.Mdblist, Any()).Returns("test-key");
+		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
+		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Mdblist, Any()).Returns(apiKey);
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
-		var client = new MdblistClient(handler.CreateClient(BaseUrl), options, apiKeyStore);
+		var client = new MdblistClient(handler.CreateClient(BaseUrl), options);
 		var media = IMediaService.Mock();
 		var providerConfig = IProviderConfigRepository.Mock();
 		providerConfig
@@ -40,7 +41,7 @@ public class MdblistServiceTests
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		var testee = new MdblistService(client, media.Object, providerConfig.Object);
+		var testee = new MdblistService(client, media.Object, providerConfig.Object, apiKeyStore.Object);
 
 		var act = async () =>
 		{

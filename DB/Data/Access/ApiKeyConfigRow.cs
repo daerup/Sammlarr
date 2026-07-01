@@ -1,15 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Contracts.Media;
 using DB.Conversion.Encryption;
 
 namespace DB.Data.Access;
 
 [Table("ApiKeyConfigs")]
-internal record ApiKeyConfigEntity : Entity<Guid>
+internal record ApiKeyConfigRow : Entity<Guid>
 {
 	[Required]
-	public required MediaProvider Provider { get; set; }
+	public required ApiKeyProvider Provider { get; set; }
 
 	[Required]
 	[MaxLength(4096)]

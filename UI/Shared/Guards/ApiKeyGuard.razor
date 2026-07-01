@@ -1,23 +1,17 @@
 @using Contracts.Auth
-@using Contracts.DI
-@using Contracts.Media
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
-@inject IKeyedServiceIndex<MediaProvider, IApiKeyValidator> ApiKeyValidatorIndex
 
 @code {
-    [Parameter] [EditorRequired] public MediaProvider Provider { get; set; }
+    [Parameter] [EditorRequired] public ApiKeyProvider Provider { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }
 
     private bool _hasAccess;
     private bool? _lastReportedAccess;
-    private string? _lastValidatedKey;
-    private MediaProvider? _lastValidatedProvider;
-    private bool _lastValidationResult;
 
     protected override async Task OnParametersSetAsync()
     {
-        var apiKey = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
-        _hasAccess = await ValidateApiKeyAsync(apiKey);
+        var result = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
+        _hasAccess = result is IApiKey;
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
         {
@@ -25,37 +19,4 @@
             await AccessChanged.InvokeAsync(_hasAccess);
         }
     }
-
-    private async Task<bool> ValidateApiKeyAsync(string? apiKey)
-    {
-        var normalizedApiKey = apiKey?.Trim();
-        if (string.IsNullOrWhiteSpace(normalizedApiKey))
-        {
-            return false;
-        }
-
-        var keyToValidate = normalizedApiKey;
-
-        if (_lastValidatedProvider == Provider && string.Equals(_lastValidatedKey, keyToValidate, StringComparison.Ordinal))
-        {
-            return _lastValidationResult;
-        }
-
-        try
-        {
-            var isValid = await ApiKeyValidatorIndex[Provider].ValidateApiKeyAsync(keyToValidate);
-            _lastValidatedProvider = Provider;
-            _lastValidatedKey = keyToValidate;
-            _lastValidationResult = isValid;
-            return isValid;
-        }
-        catch
-        {
-            _lastValidatedProvider = Provider;
-            _lastValidatedKey = keyToValidate;
-            _lastValidationResult = false;
-            return false;
-        }
-    }
 }
-

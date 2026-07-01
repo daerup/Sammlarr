@@ -1,11 +1,9 @@
 using System.Web;
-using Contracts.Auth;
-using Contracts.Media;
 using Shared.Options;
 
 namespace API.Mdblist;
 
-internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
+internal class MdblistClient(HttpClient client, MdblistOptions options)
 {
 	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
 	{
@@ -20,19 +18,13 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyC
 		}
 	}
 
-	public async Task<HttpResponseMessage> SendAsync(
+	public Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
 		string endpoint,
+		IApiKey apiKey,
 		HttpContent? content = null,
 		CancellationToken cancellationToken = default
-	)
-	{
-		var apiKey =
-			await apiKeyConfigRepository.GetApiKeyAsync(MediaProvider.Mdblist, cancellationToken)
-			?? throw new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys.");
-
-		return await SendWithKeyAsync(method, endpoint, apiKey, content, cancellationToken);
-	}
+	) => SendWithKeyAsync(method, endpoint, apiKey.Value, content, cancellationToken);
 
 	private Task<HttpResponseMessage> SendWithKeyAsync(
 		HttpMethod method,

@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Mdblist.Types;
 using Contracts;
+using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -12,7 +13,8 @@ using Shared.Telemetry;
 
 namespace API.Mdblist;
 
-internal class MdblistService(MdblistClient client, IMediaService media, IProviderConfigRepository configRepository) : IFeedService
+internal class MdblistService(MdblistClient client, IMediaService media, IProviderConfigRepository configRepository, IApiKeyConfigRepository apiKeyRepository)
+	: IFeedService
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
@@ -54,7 +56,11 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 	private async Task<(MdblistTypes.ListItems.Root Page, bool HasMore)> FetchPageAsync(string identifier, int offset, CancellationToken cancellationToken)
 	{
 		var endpoint = string.Format(MdblistEndpoints.ListItems, identifier, PageSize, offset);
-		using var response = await client.SendAsync(HttpMethod.Get, endpoint, null, cancellationToken);
+		if (await apiKeyRepository.GetApiKeyAsync(ApiKeyProvider.Mdblist, cancellationToken) is not IApiKey apiKey)
+		{
+			throw new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys.");
+		}
+		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, null, cancellationToken);
 		if (response.StatusCode == HttpStatusCode.NotFound)
 		{
 			throw new FeedIdentifierNotFoundException(identifier);

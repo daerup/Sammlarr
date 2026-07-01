@@ -2,51 +2,56 @@ using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
 internal class ApiKeyConfigRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
-	ITypedMemoryCache<MediaProvider, string> cache,
-	IMediaRepository mediaRepository
+	ITypedMemoryCache<ApiKeyProvider, IApiKey> cache,
+	IMediaRepository mediaRepository,
+	IApiKeyFactory apiKeyFactory
 ) : IApiKeyConfigRepository
 {
-	public async ValueTask<string?> GetApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
+	public async Task<Result<IApiKey>> GetApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(provider, out var cached))
+		if (cache.TryGetValue(provider, out var cached) && cached is not null)
 		{
 			return cached;
 		}
 
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var apiKey = await ctx.ApiKeySettings.Where(s => s.Provider == provider).Select(s => (string?)s.ApiKey).FirstOrDefaultAsync(cancellationToken);
-		if (apiKey is not null)
+		var stored = await LoadStoredKeyAsync(provider, cancellationToken);
+		if (stored is null)
+		{
+			return Error.From("No API key is configured for this provider.");
+		}
+
+		var result = await apiKeyFactory.CreateAsync(provider, stored, cancellationToken);
+		if (result is IApiKey apiKey)
 		{
 			cache.Set(provider, apiKey);
 		}
-		return apiKey;
+		return result;
 	}
 
-	public async Task SetApiKeyAsync(MediaProvider provider, string apiKey, CancellationToken cancellationToken = default)
+	public async Task SetApiKeyAsync(IApiKey apiKey, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
+		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == apiKey.Provider, cancellationToken);
 		if (setting is null)
 		{
-			ctx.ApiKeySettings.Add(new ApiKeyConfigEntity { Provider = provider, ApiKey = apiKey });
+			ctx.ApiKeySettings.Add(new ApiKeyConfigRow { Provider = apiKey.Provider, ApiKey = apiKey.Value });
 		}
 		else
 		{
-			setting.ApiKey = apiKey;
+			setting.ApiKey = apiKey.Value;
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
-		cache.Set(provider, apiKey);
+		cache.Set(apiKey.Provider, apiKey);
 	}
 
-	public async Task RemoveApiKeyAsync(MediaProvider provider, CancellationToken cancellationToken = default)
+	public async Task RemoveApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var deleted = await ctx.ApiKeySettings.Where(s => s.Provider == provider).ExecuteDeleteAsync(cancellationToken);
@@ -61,5 +66,11 @@ internal class ApiKeyConfigRepository(
 		{
 			await mediaRepository.RemoveRatingsBySourceAsync(ratingSource, cancellationToken);
 		}
+	}
+
+	private async Task<string?> LoadStoredKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.ApiKeySettings.Where(s => s.Provider == provider).Select(s => (string?)s.ApiKey).FirstOrDefaultAsync(cancellationToken);
 	}
 }

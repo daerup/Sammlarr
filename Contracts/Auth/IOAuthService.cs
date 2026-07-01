@@ -2,9 +2,11 @@ namespace Contracts.Auth;
 
 public interface IOAuthService
 {
-	Task<string> GetOAuthUrl(string forwardUrl, CancellationToken cancellationToken = default);
+	Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default);
 
-	Task<AuthPinResponse> CallbackAsync(int pinId, Guid clientId, CancellationToken cancellationToken = default);
+	Task<Result<None>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default);
 
-	Task<AuthUserInfo?> GetLoggedInUser();
+	Task LogoutAsync(CancellationToken cancellationToken = default);
+
+	Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default);
 }

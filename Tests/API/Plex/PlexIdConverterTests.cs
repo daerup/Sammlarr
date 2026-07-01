@@ -72,10 +72,11 @@ public class PlexIdConverterTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(JsonSerializer.Serialize(details));
 		var apiKeyStore = IApiKeyConfigRepository.Mock();
-		apiKeyStore.GetApiKeyAsync(MediaProvider.Tmdb, Any()).Returns("test-api-key");
+		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-api-key");
+		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(apiKey);
 		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
-		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore);
-		return new TmdbApi(tmdbClient);
+		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options);
+		return new TmdbApi(tmdbClient, apiKeyStore.Object);
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeImdbId, bool includeTvdbId)
@@ -125,8 +126,8 @@ public class PlexIdConverterTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
 		var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialStore.Mock();
+		var credential = new TestCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
 		return new PlexApi(plexClient);
@@ -137,8 +138,8 @@ public class PlexIdConverterTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(BuildEmptySearchJson());
 		var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialStore.Mock();
+		var credential = new TestCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
 		return new PlexApi(plexClient);
@@ -150,8 +151,8 @@ public class PlexIdConverterTests
 		handler.OnRequest(r => r.PathStartsWith("/library/search")).RespondWithJson(BuildSearchJson(payload.PlexId));
 		handler.OnRequest(r => r.PathStartsWith("/library/metadata")).RespondWithJson(payload.Json);
 		var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credential = new StoredCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialStore.Mock();
+		var credential = new TestCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
+		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
 		return new PlexApi(plexClient);

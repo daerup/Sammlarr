@@ -1,4 +1,4 @@
-namespace Contracts.Media.Search;
+namespace Domain.Providers;
 
 public enum MediaSearchProvider
 {

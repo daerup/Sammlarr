@@ -1,6 +1,8 @@
 global using Bogus;
+global using Domain.Auth;
 global using Domain.Media;
 global using Domain.Media.Metadata;
+global using Domain.Providers;
 global using Reqnroll;
 global using TUnit.Assertions;
 global using TUnit.Core;

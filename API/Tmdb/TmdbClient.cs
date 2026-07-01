@@ -1,11 +1,9 @@
 using System.Web;
-using Contracts.Auth;
-using Contracts.Media;
 using Shared.Options;
 
 namespace API.Tmdb;
 
-internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigRepository apiKeyConfigRepository) : IApiKeyValidator
+internal class TmdbClient(HttpClient client, TmdbOptions options)
 {
 	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
 	{
@@ -20,19 +18,13 @@ internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyConfigR
 		}
 	}
 
-	public async Task<HttpResponseMessage> SendAsync(
+	public Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
 		string endpoint,
+		IApiKey apiKey,
 		CancellationToken cancellationToken = default,
 		HttpContent? content = null
-	)
-	{
-		var apiKey =
-			await apiKeyConfigRepository.GetApiKeyAsync(MediaProvider.Tmdb, cancellationToken)
-			?? throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
-
-		return await SendWithKeyAsync(method, endpoint, apiKey, content, cancellationToken);
-	}
+	) => SendWithKeyAsync(method, endpoint, apiKey.Value, content, cancellationToken);
 
 	private Task<HttpResponseMessage> SendWithKeyAsync(
 		HttpMethod method,

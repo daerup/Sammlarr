@@ -1,10 +1,12 @@
 using Contracts;
+using Contracts.Auth;
 using Contracts.Blacklist;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Processing;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Sync;
+using Core.Auth;
 using Core.Blacklist;
 using Core.Caching;
 using Core.DI;
@@ -33,5 +35,6 @@ public class CoreModule : IServiceModule
 		services.AddScoped<MediaIdentityCoordinator>();
 		services.AddScoped<IMediaService, MediaService>();
 		services.AddScoped<IMediaSearchService, MediaSearchService>();
+		services.AddScoped<IOAuthService, OAuthService>();
 	}
 }

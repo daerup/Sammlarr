@@ -16,8 +16,8 @@
 
 <PageTitle>Browse Movies</PageTitle>
 
-<OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleOAuthAccessChanged"/>
-<ApiKeyGuard Provider="@_providerConfig.TrendingProvider.AsMediaProvider()" AccessChanged="HandleTrendingProviderAccessChanged"/>
+<OAuthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleOAuthAccessChanged"/>
+<ApiKeyGuard Provider="@_providerConfig.TrendingProvider.AsApiKeyProvider()" AccessChanged="HandleTrendingProviderAccessChanged"/>
 
 <PageContainer Heading="Trending Movies & Shows" Description="Discover what's popular this week">
     <ChildContent>

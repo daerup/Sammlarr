@@ -484,8 +484,7 @@
 
         foreach (var provider in AllProviders)
         {
-            var apiKey = await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsMediaProvider());
-            if (string.IsNullOrEmpty(apiKey))
+            if (await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsApiKeyProvider()) is not IApiKey)
             {
                 _disabledProviders.Add(provider);
             }

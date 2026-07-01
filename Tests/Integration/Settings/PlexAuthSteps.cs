@@ -37,7 +37,7 @@ public class PlexAuthSteps(PlexAuthScenarioContext ctx, SammlarrScenarioContext 
 	public void GivenPlexUserServerError() => sammlarr.HttpHandler.RespondWithStatusForUrl(PlexEndpoints.UserPath, HttpStatusCode.InternalServerError);
 
 	[When("I look up the signed-in Plex user")]
-	public async Task WhenLookUpUser() => ctx.User = await sammlarr.ResolveKeyed<IOAuthService>(WatchlistProvider.Plex).GetLoggedInUser();
+	public async Task WhenLookUpUser() => ctx.User = await sammlarr.Resolve<IOAuthService>().GetUserAsync() is AuthorizedUser user ? user : null;
 
 	[Then("the signed-in Plex user is {string}")]
 	public async Task ThenUserIs(string name)

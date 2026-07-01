@@ -6,7 +6,7 @@ internal sealed class AccessEntityConfiguration : IModelConfiguration
 {
 	public void Apply(ModelBuilder modelBuilder)
 	{
-		modelBuilder.Entity<CredentialEntity>().HasIndex(c => c.WatchlistProvider).IsUnique();
-		modelBuilder.Entity<ApiKeyConfigEntity>().HasIndex(s => s.Provider).IsUnique();
+		modelBuilder.Entity<CredentialRow>().HasIndex(c => c.WatchlistProvider).IsUnique();
+		modelBuilder.Entity<ApiKeyConfigRow>().HasIndex(s => s.Provider).IsUnique();
 	}
 }

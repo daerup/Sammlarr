@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Contracts.Auth;
 using DB.Conversion.Encryption;
 
 namespace DB.Data.Access;
 
 [Table("Credentials")]
-internal record CredentialEntity : Entity<Guid>
+internal record CredentialRow : Entity<Guid>
 {
 	[Required]
 	public required WatchlistProvider WatchlistProvider { get; set; }

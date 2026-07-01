@@ -1,9 +1,11 @@
+using API.Auth;
 using API.Imdb;
 using API.Mdblist;
 using API.Plex;
 using API.Telemetry;
 using API.Tmdb;
 using API.TvDB;
+using Contracts.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -20,5 +22,8 @@ public class ApiModule : IServiceModule
 		services.AddModule<MdblistModule>();
 		services.AddModule<TelemetryModule>();
 		services.AddModule<ResilienceModule>();
+
+		services.AddScoped<IApiKeyFactory, ApiKeyFactory>();
+		services.AddScoped<ICredentialFactory, CredentialFactory>();
 	}
 }

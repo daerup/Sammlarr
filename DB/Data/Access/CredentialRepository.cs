@@ -1,26 +1,42 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<WatchlistProvider, StoredCredential> cache)
-	: ICredentialStore
+internal class CredentialRepository(
+	IDbContextFactory<SammlarrDbContext> dbContextFactory,
+	ITypedMemoryCache<WatchlistProvider, ICredential> cache,
+	ICredentialFactory credentialFactory
+) : ICredentialRepository
 {
-	public async ValueTask<StoredCredential?> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
+	public async Task<Result<ICredential>> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(watchlistProvider, out var cached))
+		if (cache.TryGetValue(watchlistProvider, out var cached) && cached is not null)
 		{
 			return cached;
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var credential = await ctx.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
+		var credential = await ctx.Credentials.SingleOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
 		if (credential is null)
 		{
-			return null;
+			return Error.From("No credential is stored for this provider.");
 		}
-		return new StoredCredential(credential.WatchlistProvider, credential.ClientId, credential.AccessToken, credential.ExpiresAt);
+
+		var result = await credentialFactory.CreateAsync(
+			credential.WatchlistProvider,
+			credential.ClientId,
+			credential.AccessToken,
+			credential.ExpiresAt,
+			cancellationToken
+		);
+		if (result is ICredential valid)
+		{
+			cache.Set(watchlistProvider, valid);
+		}
+		return result;
 	}
 
 	public async Task StoreAsync(
@@ -35,7 +51,7 @@ internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		var credential = await ctx.Credentials.FirstOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
 		if (credential is null)
 		{
-			credential = new CredentialEntity
+			credential = new CredentialRow
 			{
 				WatchlistProvider = watchlistProvider,
 				AccessToken = accessToken,
@@ -52,7 +68,7 @@ internal class CredentialRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
-		cache.Set(watchlistProvider, new StoredCredential(watchlistProvider, clientId, accessToken, accessTokenExpiresAt));
+		cache.Remove(watchlistProvider);
 	}
 
 	public async Task ClearAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)

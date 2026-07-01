@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using DB.Data.Access;
@@ -8,24 +9,24 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class CredentialRepositoryTests(SQLiteFixture fixture)
 {
-	private Mock<ITypedMemoryCache<WatchlistProvider, StoredCredential>> _cache = null!;
-	private ICredentialStore _testee = null!;
+	private Mock<ITypedMemoryCache<WatchlistProvider, ICredential>> _cache = null!;
+	private ICredentialRepository _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<WatchlistProvider, StoredCredential>.Mock();
-		_testee = new CredentialRepository(fixture.ContextFactory, _cache.Object);
+		_cache = ITypedMemoryCache<WatchlistProvider, ICredential>.Mock();
+		_testee = new CredentialRepository(fixture.ContextFactory, _cache.Object, new TestCredentialFactory());
 	}
 
 	[Test]
-	public async Task GetCredential_WhenNotStored_ReturnsNull()
+	public async Task GetCredential_WhenNotStored_ReturnsError()
 	{
 		var credential = await _testee.GetAsync(WatchlistProvider.Plex);
 
-		await Assert.That(credential).IsNull();
+		await Assert.That(credential is Error).IsTrue();
 	}
 
 	[Test]
@@ -57,7 +58,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, plainToken, expiresAt, clientId);
 
-		var encrypted = (await fixture.RawContext.Table<CredentialEntity>().QueryAsync(x => x.AccessToken)).Single();
+		var encrypted = (await fixture.RawContext.Table<CredentialRow>().QueryAsync(x => x.AccessToken)).Single();
 
 		await Assert.That(encrypted).IsNotEqualTo(plainToken);
 		await Assert.That(encrypted).Satisfies(IsBase64OrEmpty);
@@ -73,7 +74,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		var encryptedClientId = (await fixture.RawContext.Table<CredentialEntity>().QueryAsync<string>(nameof(CredentialEntity.ClientId))).Single();
+		var encryptedClientId = (await fixture.RawContext.Table<CredentialRow>().QueryAsync<string>(nameof(CredentialRow.ClientId))).Single();
 
 		await Assert.That(encryptedClientId).IsNotEqualTo(clientId.ToString());
 		await Assert.That(encryptedClientId).Satisfies(IsBase64OrEmpty);
@@ -92,8 +93,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		var credential = await _testee.GetAsync(authProvider);
 
-		await Assert.That(credential).IsNotNull();
-		await Assert.That(credential!.ClientId).IsEqualTo(clientId);
+		await Assert.That(credential is ICredential resolved && resolved.ClientId == clientId).IsTrue();
 	}
 
 	[Test]
@@ -165,7 +165,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 	}
 
 	[Test]
-	public async Task StoreAsync_AddsToCache()
+	public async Task StoreAsync_InvalidatesCache()
 	{
 		var authProvider = WatchlistProvider.Plex;
 		var clientId = Guid.NewGuid();
@@ -174,7 +174,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
-		_cache.Set(authProvider, new StoredCredential(authProvider, clientId, token, expiresAt)).WasCalled(Times.Once);
+		_cache.Remove(authProvider).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
 	}
 
@@ -198,7 +198,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 	private async Task SetUpCredentialAsync(WatchlistProvider watchlistProvider, string accessToken, DateTimeOffset expiresAt, Guid clientId)
 	{
 		await fixture.Context.Credentials.AddAsync(
-			new CredentialEntity
+			new CredentialRow
 			{
 				WatchlistProvider = watchlistProvider,
 				AccessToken = accessToken,
@@ -223,5 +223,22 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		var buffer = new Span<byte>(new byte[value.Length]);
 		return Convert.TryFromBase64String(value, buffer, out _);
+	}
+}
+
+file sealed record TestCredential(WatchlistProvider Provider, Guid ClientId, string AccessToken, DateTimeOffset ExpiresAt) : ICredential;
+
+file sealed class TestCredentialFactory : ICredentialFactory
+{
+	public Task<Result<ICredential>> CreateAsync(
+		WatchlistProvider provider,
+		Guid clientId,
+		string accessToken,
+		DateTimeOffset expiresAt,
+		CancellationToken cancellationToken = default
+	)
+	{
+		Result<ICredential> result = new TestCredential(provider, clientId, accessToken, expiresAt);
+		return Task.FromResult(result);
 	}
 }

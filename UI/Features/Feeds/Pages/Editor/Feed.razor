@@ -14,7 +14,7 @@
 
 <KeyboardShortcut Keys="Ctrl+Enter" OnInvoked="OnShortcutActivatedAsync"/>
 
-<OauthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
+<OAuthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
 
 <PageContainer Heading="@PageHeadingText"
                Description="@PageDescriptionText"
