@@ -1,3 +1,6 @@
+using Domain.Media;
+using Domain.Media.Metadata;
+
 namespace Domain.Tests.Media;
 
 public class MediaValueEqualityTests

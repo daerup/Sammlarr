@@ -1,5 +1,6 @@
 using Contracts.Media.Metadata;
 using Contracts.Watchlist;
+using Domain.Media.Metadata;
 
 namespace Integration.Tests.Settings;
 

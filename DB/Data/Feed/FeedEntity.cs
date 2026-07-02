@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Feed;
 using Contracts.Processing;
+using Domain.Providers;
 
 namespace DB.Data.Feed;
 

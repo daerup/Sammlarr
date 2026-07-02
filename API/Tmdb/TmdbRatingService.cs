@@ -1,5 +1,7 @@
 using Contracts.Media;
 using Contracts.Media.Metadata;
+using Domain.Media;
+using Domain.Media.Metadata;
 
 namespace API.Tmdb;
 

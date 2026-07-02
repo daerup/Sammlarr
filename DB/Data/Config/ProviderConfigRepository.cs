@@ -1,5 +1,7 @@
 using Contracts.Caching;
 using Contracts.Settings;
+using Domain.Providers;
+using Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Config;

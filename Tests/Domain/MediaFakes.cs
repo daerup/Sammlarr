@@ -1,3 +1,7 @@
+using Bogus;
+using Domain.Media;
+using Domain.Media.Metadata;
+
 namespace Domain.Tests;
 
 internal static class MediaFakes

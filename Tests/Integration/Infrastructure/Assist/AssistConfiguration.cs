@@ -1,3 +1,4 @@
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Infrastructure.Assist;

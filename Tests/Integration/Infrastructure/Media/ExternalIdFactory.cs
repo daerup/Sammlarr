@@ -1,5 +1,7 @@
 using System;
 using Contracts.Media;
+using Domain.Media;
+using Domain.Providers;
 
 namespace Integration.Tests.Infrastructure.Media;
 

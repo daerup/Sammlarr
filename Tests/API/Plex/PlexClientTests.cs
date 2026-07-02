@@ -2,6 +2,7 @@ using System.Net;
 using API.Plex;
 using Bogus;
 using Contracts.Auth;
+using Domain.Providers;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;

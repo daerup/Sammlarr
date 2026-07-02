@@ -1,5 +1,7 @@
 using API.Tmdb;
 using Contracts.Media;
+using Domain.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Http;
 using Integration.Tests.Infrastructure.Media;
 

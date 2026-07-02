@@ -1,4 +1,5 @@
 using BlazorBlueprint.Components;
+using Domain.Media;
 using Microsoft.Extensions.Logging;
 using UI.Shared.Common;
 

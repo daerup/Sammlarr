@@ -1,4 +1,5 @@
 using Contracts.Media.Metadata;
+using Domain.Media.Metadata;
 
 namespace Integration.Tests.Browse;
 

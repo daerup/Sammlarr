@@ -2,6 +2,7 @@ using Contracts.Media;
 using Contracts.Watchlist;
 using DB.Data.Media;
 using DB.Data.Watchlist;
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;

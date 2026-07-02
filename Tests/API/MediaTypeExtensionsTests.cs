@@ -1,4 +1,5 @@
 using Contracts.Media;
+using Domain.Media;
 
 namespace API.Tests;
 

@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace Contracts.Media.Search;
 
 public interface IMediaSearchProvider

@@ -6,6 +6,8 @@ using Bogus;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Search;
+using Domain.Media;
+using Domain.Providers;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;

@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using Contracts.Media;
+using Domain.Media;
+using Domain.Providers;
 
 namespace DB.Data.Media;
 

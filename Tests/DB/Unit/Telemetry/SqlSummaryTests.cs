@@ -1,4 +1,5 @@
 using DB.Telemetry;
+using Domain.Media;
 
 namespace DB.Tests.Unit.Telemetry;
 

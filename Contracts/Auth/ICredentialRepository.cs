@@ -1,3 +1,6 @@
+using Domain.Auth;
+using Domain.Providers;
+
 namespace Contracts.Auth;
 
 public interface ICredentialRepository

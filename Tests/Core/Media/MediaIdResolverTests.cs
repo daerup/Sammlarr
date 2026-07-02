@@ -3,6 +3,8 @@ using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Core.Media;
+using Domain.Media;
+using Domain.Providers;
 using TestInfrastructure;
 using TUnit.Mocks.Generated.Contracts.Media.Conversions;
 

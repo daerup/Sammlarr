@@ -2,6 +2,7 @@ using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Metadata;
+using Domain.Media;
 using Integration.Tests.Infrastructure.Hosting;
 
 namespace Integration.Tests.Infrastructure.Media.Local;

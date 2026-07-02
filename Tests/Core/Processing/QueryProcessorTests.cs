@@ -4,6 +4,8 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Processing;
 using Core.Processing;
+using Domain.Media;
+using Domain.Media.Metadata;
 using TestInfrastructure;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;

@@ -1,4 +1,6 @@
 using Contracts;
+using Domain.Auth;
+using Domain.Providers;
 
 namespace API.Tmdb;
 

@@ -1,4 +1,5 @@
 using Contracts.Media;
+using Domain.Media;
 using Reqnroll;
 using Reqnroll.Assist;
 

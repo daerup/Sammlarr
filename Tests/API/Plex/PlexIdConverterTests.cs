@@ -9,6 +9,9 @@ using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
+using Domain.Auth;
+using Domain.Media;
+using Domain.Providers;
 using Shared.Options;
 using TestInfrastructure;
 

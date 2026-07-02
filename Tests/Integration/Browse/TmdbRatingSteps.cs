@@ -1,8 +1,12 @@
 using Contracts.Media;
 using Contracts.Media.Metadata;
+using Domain.Media;
+using Domain.Media.Metadata;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Tmdb;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Browse;

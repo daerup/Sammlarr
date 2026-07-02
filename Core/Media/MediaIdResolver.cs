@@ -4,6 +4,8 @@ using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Conversions;
+using Domain.Media;
+using Domain.Providers;
 
 namespace Core.Media;
 

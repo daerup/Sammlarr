@@ -5,6 +5,8 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using DB.Data.Config;
+using Domain.Providers;
+using Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;

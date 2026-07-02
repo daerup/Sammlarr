@@ -2,6 +2,9 @@ using System.Data;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using DB.Data.Metadata;
+using Domain.Media;
+using Domain.Media.Metadata;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DB.Conversion.Encryption;
+using Domain.Providers;
 
 namespace DB.Data.Access;
 

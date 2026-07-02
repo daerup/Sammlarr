@@ -8,6 +8,9 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
+using Domain.Media;
+using Domain.Providers;
+using Domain.Settings;
 using TestInfrastructure;
 
 namespace Core.Tests.Media;

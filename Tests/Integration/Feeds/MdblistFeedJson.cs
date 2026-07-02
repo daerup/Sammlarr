@@ -1,4 +1,6 @@
 using Contracts.Media;
+using Domain.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Media;
 
 namespace Integration.Tests.Feeds;

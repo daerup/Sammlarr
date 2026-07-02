@@ -1,5 +1,6 @@
 using Contracts.Processing;
 using Core.Processing;
+using Domain.Media;
 using static TestInfrastructure.QueryFilterFactory;
 
 namespace Core.Tests.Processing;

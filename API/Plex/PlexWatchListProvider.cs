@@ -3,6 +3,7 @@ using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Media;
 using Contracts.Watchlist;
+using Domain.Media;
 using Shared;
 
 namespace API.Plex;

@@ -2,6 +2,8 @@ using Contracts;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
 using DB.Data.Media;
+using Domain.Media;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Cleanup;

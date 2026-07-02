@@ -1,3 +1,5 @@
+using Domain.Media.Metadata;
+
 namespace Domain.Tests.Media.Metadata;
 
 public class RatingSummaryTests

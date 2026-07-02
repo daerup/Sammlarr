@@ -1,6 +1,8 @@
 using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
+using Domain.Auth;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;

@@ -4,6 +4,7 @@ using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Settings;
 using Domain.Auth;
+using Domain.Providers;
 
 namespace Core.Auth;
 

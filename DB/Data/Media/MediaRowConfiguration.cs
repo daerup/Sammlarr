@@ -1,3 +1,4 @@
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;

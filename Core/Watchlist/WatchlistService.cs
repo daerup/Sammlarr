@@ -5,6 +5,8 @@ using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
+using Domain.Media;
+using Domain.Providers;
 using Shared;
 
 namespace Core.Watchlist;

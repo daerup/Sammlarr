@@ -1,7 +1,9 @@
 using Contracts.Watchlist;
+using Domain.Media;
 using Integration.Tests.Assertions;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media.Local;
+using Reqnroll;
 
 namespace Integration.Tests.Watchlist;
 

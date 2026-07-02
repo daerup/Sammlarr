@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace UI.Shared.Media;
 
 public static class MediaPresentation
@@ -80,8 +82,6 @@ public static class MediaPresentation
 			};
 
 		public IReadOnlyList<IExternalMediaId> ExternalIds => [.. media.Externals];
-
-		public bool IsUnresolved => media is UnmatchedMedia;
 
 		public int? Seasons =>
 			media switch

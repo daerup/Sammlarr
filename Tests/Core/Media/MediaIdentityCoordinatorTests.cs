@@ -1,5 +1,6 @@
 using Contracts.Media;
 using Core.Media;
+using Domain.Media;
 
 namespace Core.Tests.Media;
 

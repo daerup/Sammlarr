@@ -1,3 +1,6 @@
+using Domain.Media;
+using Domain.Media.Metadata;
+
 namespace Contracts.Media.Metadata;
 
 public interface IMediaRatingService

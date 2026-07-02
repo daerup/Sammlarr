@@ -4,6 +4,8 @@ using Contracts.Media;
 using DB.Data.Feed;
 using DB.Data.Media;
 using DB.Data.Watchlist;
+using Domain.Media;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;

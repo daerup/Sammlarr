@@ -1,3 +1,5 @@
+using Domain.Media.Metadata;
+
 namespace Domain.Providers;
 
 public static class ProviderExtensions

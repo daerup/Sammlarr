@@ -1,3 +1,6 @@
+using Domain.Media;
+using Domain.Providers;
+
 namespace Domain.Tests.Media;
 
 public class MediaIdentityInvariantsTests

@@ -7,6 +7,8 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Sync;
+using Domain.Media;
+using Domain.Providers;
 
 namespace Shared.Telemetry;
 
