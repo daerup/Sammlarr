@@ -1,10 +1,12 @@
 using Contracts.Blacklist;
 using Contracts.Media;
+using Domain.Media;
 using Integration.Tests.Assertions;
 using Integration.Tests.Infrastructure.Common;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Local;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Blacklist;

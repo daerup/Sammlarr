@@ -1,5 +1,7 @@
 using Contracts.Blacklist;
 using Contracts.Media;
+using Domain.Blacklist;
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Blacklist;
@@ -33,7 +35,7 @@ internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 		}
 
 		var media = await ctx.Media.SingleAsync(m => m.Id == raw, cancellationToken);
-		ctx.Blacklist.Add(new BlacklistEntity { Media = media });
+		ctx.Blacklist.Add(new BlacklistRow { Media = media });
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 

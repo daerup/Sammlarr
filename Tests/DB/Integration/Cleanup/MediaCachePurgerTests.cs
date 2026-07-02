@@ -13,6 +13,10 @@ using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
+using Domain.Media;
+using Domain.Media.Metadata;
+using Domain.Providers;
+using Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Cleanup;
@@ -75,7 +79,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 				Metadata = purgedMetadata,
 			}
 		);
-		fixture.Context.Blacklist.Add(new BlacklistEntity { Media = blacklistedMedia });
+		fixture.Context.Blacklist.Add(new BlacklistRow { Media = blacklistedMedia });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 

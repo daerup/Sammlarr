@@ -8,6 +8,7 @@ using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -56,7 +57,7 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ProviderConfigRow> ProviderSettings => Set<ProviderConfigRow>();
 	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();
-	public DbSet<BlacklistEntity> Blacklist => Set<BlacklistEntity>();
+	public DbSet<BlacklistRow> Blacklist => Set<BlacklistRow>();
 	public DbSet<WatchlistEntity> Watchlist => Set<WatchlistEntity>();
 	public DbSet<WatchlistOutboxEntity> WatchlistOutbox => Set<WatchlistOutboxEntity>();
 

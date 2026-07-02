@@ -2,6 +2,7 @@ using Contracts.Blacklist;
 using Contracts.Media;
 using DB.Data.Blacklist;
 using DB.Data.Media;
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
@@ -98,7 +99,7 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var mediaId = await SeedMediaAsync(ids);
 		var media = await fixture.Context.Media.FindAsync(mediaId.Value);
-		fixture.Context.Blacklist.Add(new BlacklistEntity { Media = media! });
+		fixture.Context.Blacklist.Add(new BlacklistRow { Media = media! });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 		return mediaId;
