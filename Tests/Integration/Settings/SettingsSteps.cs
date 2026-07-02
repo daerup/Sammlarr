@@ -2,9 +2,14 @@ using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Watchlist;
+using Domain.Auth;
+using Domain.Media;
+using Domain.Media.Metadata;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Http;
 using Microsoft.EntityFrameworkCore;
+using Reqnroll;
 using TestInfrastructure;
 
 namespace Integration.Tests.Settings;

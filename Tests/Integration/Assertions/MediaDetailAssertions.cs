@@ -1,7 +1,10 @@
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Domain.Media;
+using Domain.Media.Metadata;
 using Integration.Tests.Infrastructure.Media.Local;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Assertions;

@@ -5,6 +5,7 @@ using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Local;
 using Microsoft.EntityFrameworkCore;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Watchlist;

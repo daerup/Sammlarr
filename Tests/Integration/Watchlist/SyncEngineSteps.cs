@@ -3,10 +3,13 @@ using API.Plex;
 using Contracts;
 using Contracts.Media;
 using Contracts.Watchlist.Sync;
+using Domain.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Local;
 using Integration.Tests.Infrastructure.Media.Plex;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Watchlist;

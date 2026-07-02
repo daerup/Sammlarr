@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace Contracts.Media.Metadata;
 
 public interface IMetadataEnricher

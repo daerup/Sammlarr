@@ -1,7 +1,9 @@
 using Contracts.Auth;
 using Contracts.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Http;
+using Reqnroll;
 using TestInfrastructure;
 
 namespace Integration.Tests.Infrastructure.Common;

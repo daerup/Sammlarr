@@ -1,3 +1,5 @@
+using Domain.Providers;
+
 namespace Domain.Settings;
 
 public record ProviderConfig

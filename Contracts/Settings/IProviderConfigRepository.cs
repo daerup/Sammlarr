@@ -1,3 +1,5 @@
+using Domain.Settings;
+
 namespace Contracts.Settings;
 
 public interface IProviderConfigRepository

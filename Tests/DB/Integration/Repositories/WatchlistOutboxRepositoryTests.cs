@@ -2,6 +2,7 @@ using Contracts.Media;
 using Contracts.Watchlist.Outbox;
 using DB.Data.Media;
 using DB.Data.Watchlist.Outbox;
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;

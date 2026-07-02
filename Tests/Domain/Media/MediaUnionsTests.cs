@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace Domain.Tests.Media;
 
 public class MediaUnionsTests

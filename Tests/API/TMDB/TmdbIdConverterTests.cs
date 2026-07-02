@@ -8,6 +8,8 @@ using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
+using Domain.Media;
+using Domain.Providers;
 using TestInfrastructure;
 
 namespace API.Tests.TMDB;

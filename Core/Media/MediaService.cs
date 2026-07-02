@@ -5,6 +5,8 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Domain.Media;
+using Domain.Media.Metadata;
 using Shared;
 using Shared.Telemetry;
 

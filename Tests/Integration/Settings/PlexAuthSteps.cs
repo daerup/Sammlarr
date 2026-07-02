@@ -3,6 +3,7 @@ using API.Plex;
 using Contracts;
 using Contracts.Auth;
 using Integration.Tests.Infrastructure.Hosting;
+using Reqnroll;
 
 namespace Integration.Tests.Settings;
 

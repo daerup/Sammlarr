@@ -1,3 +1,5 @@
+using Reqnroll;
+
 namespace Integration.Tests.Infrastructure.Common;
 
 [Binding]

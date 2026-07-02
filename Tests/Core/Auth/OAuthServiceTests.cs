@@ -6,6 +6,8 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Auth;
+using Domain.Providers;
+using Domain.Settings;
 using TestInfrastructure;
 
 namespace Core.Tests.Auth;

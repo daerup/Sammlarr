@@ -6,6 +6,8 @@ using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Core.Watchlist.Sync;
+using Domain.Media;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;

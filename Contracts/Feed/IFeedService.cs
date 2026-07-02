@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace Contracts.Feed;
 
 public interface IFeedService

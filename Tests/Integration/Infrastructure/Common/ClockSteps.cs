@@ -1,6 +1,7 @@
 using System.Globalization;
 using Contracts;
 using Integration.Tests.Infrastructure.Hosting;
+using Reqnroll;
 using TUnit.Mocks;
 
 namespace Integration.Tests.Infrastructure.Common;

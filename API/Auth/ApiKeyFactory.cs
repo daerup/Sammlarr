@@ -2,6 +2,8 @@ using API.Mdblist;
 using API.Tmdb;
 using Contracts;
 using Contracts.Auth;
+using Domain.Auth;
+using Domain.Providers;
 
 namespace API.Auth;
 

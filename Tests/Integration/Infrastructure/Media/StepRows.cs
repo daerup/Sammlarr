@@ -1,4 +1,5 @@
 using Contracts.Media;
+using Domain.Providers;
 using Reqnroll.Assist.Attributes;
 
 namespace Integration.Tests.Infrastructure.Media;

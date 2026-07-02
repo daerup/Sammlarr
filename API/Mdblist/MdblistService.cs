@@ -8,6 +8,9 @@ using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Settings;
+using Domain.Auth;
+using Domain.Media;
+using Domain.Providers;
 using Shared;
 using Shared.Telemetry;
 

@@ -1,5 +1,7 @@
 using Contracts.Media;
+using Domain.Media;
 using Integration.Tests.Infrastructure.Media;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Infrastructure.Media.Local;

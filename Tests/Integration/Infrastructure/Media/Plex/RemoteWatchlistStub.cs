@@ -3,6 +3,8 @@ using System.Text;
 using System.Web;
 using API.Plex;
 using Contracts.Media;
+using Domain.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Http;
 
 namespace Integration.Tests.Infrastructure.Media.Plex;

@@ -1,6 +1,8 @@
 using Contracts.Media;
 using DB.Data;
 using DB.Data.Media;
+using Domain.Media;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 

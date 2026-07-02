@@ -8,6 +8,9 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
+using Domain.Auth;
+using Domain.Providers;
+using Domain.Settings;
 using Shared.Options;
 using TestInfrastructure;
 

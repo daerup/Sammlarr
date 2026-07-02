@@ -1,4 +1,7 @@
 using Contracts;
+using Domain;
+using Domain.Media;
+using Domain.Media.Metadata;
 
 namespace DB.Data.Metadata;
 

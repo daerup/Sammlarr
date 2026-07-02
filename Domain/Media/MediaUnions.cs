@@ -1,3 +1,5 @@
+using Domain.Media.Metadata;
+
 namespace Domain.Media;
 
 public static class MediaUnions

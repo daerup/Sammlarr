@@ -2,6 +2,8 @@ using Contracts.DI;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Settings;
+using Domain.Media;
+using Domain.Providers;
 
 namespace Core.Media;
 

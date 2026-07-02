@@ -1,6 +1,8 @@
 using System.Net;
 using API.Plex;
 using Contracts.Media;
+using Domain.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Http;
 using Integration.Tests.Infrastructure.Media;
 

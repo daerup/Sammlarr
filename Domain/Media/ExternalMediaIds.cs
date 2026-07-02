@@ -1,3 +1,5 @@
+using Domain.Providers;
+
 namespace Domain.Media;
 
 public static class ExternalMediaIds

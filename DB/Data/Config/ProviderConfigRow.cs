@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Providers;
+using Domain.Settings;
 
 namespace DB.Data.Config;
 

@@ -1,4 +1,5 @@
 using Contracts.Processing;
+using Domain.Providers;
 
 namespace Contracts.Feed;
 

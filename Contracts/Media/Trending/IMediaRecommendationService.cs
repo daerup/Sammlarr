@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace Contracts.Media.Trending;
 
 public interface IMediaRecommendationService

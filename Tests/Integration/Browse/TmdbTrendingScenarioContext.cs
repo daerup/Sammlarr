@@ -1,4 +1,5 @@
 using Contracts;
+using Domain.Media;
 
 namespace Integration.Tests.Browse;
 

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using Contracts.Media;
+using Domain.Providers;
 
 namespace Integration.Tests.Infrastructure.Media;
 

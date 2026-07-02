@@ -1,10 +1,13 @@
 using API.Tmdb;
 using Contracts.Media;
 using Contracts.Media.Trending;
+using Domain.Media;
+using Domain.Providers;
 using Integration.Tests.Assertions;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Tmdb;
+using Reqnroll;
 using Reqnroll.Assist;
 using Reqnroll.Assist.Attributes;
 

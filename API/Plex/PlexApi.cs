@@ -4,6 +4,8 @@ using API.Plex.Types;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Search;
+using Domain;
+using Domain.Media;
 
 namespace API.Plex;
 

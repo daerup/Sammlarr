@@ -4,6 +4,7 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Trending;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 

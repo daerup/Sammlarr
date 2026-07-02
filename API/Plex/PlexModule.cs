@@ -6,6 +6,7 @@ using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Watchlist;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 using Shared.Options;

@@ -2,6 +2,7 @@ using API.Tmdb;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Conversions;
+using Domain.Media;
 using Shared;
 
 namespace API.Plex;

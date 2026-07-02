@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media;
 using DB.Data.Media;
+using Domain.Media;
 
 namespace DB.Data.Metadata;
 

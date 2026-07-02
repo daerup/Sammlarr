@@ -1,6 +1,8 @@
 using System.Globalization;
 using API.Tmdb.Types;
 using Contracts.Media.Metadata;
+using Domain;
+using Domain.Media;
 using Shared.Options;
 
 namespace API.Tmdb;

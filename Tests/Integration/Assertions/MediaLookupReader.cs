@@ -1,3 +1,6 @@
+using Domain.Media;
+using Domain.Media.Metadata;
+
 namespace Integration.Tests.Assertions;
 
 internal static class MediaLookupReader

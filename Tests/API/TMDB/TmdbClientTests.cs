@@ -1,6 +1,7 @@
 using System.Net;
 using API.Tmdb;
 using Bogus;
+using Domain.Providers;
 using Shared.Options;
 using TestInfrastructure;
 

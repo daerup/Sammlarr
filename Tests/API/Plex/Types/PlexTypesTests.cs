@@ -1,6 +1,7 @@
 using API.Plex.Types;
 using Bogus;
 using Contracts.Media;
+using Domain.Media;
 
 namespace API.Tests.Plex.Types;
 

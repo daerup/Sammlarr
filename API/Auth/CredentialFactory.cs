@@ -1,6 +1,8 @@
 using API.Plex;
 using Contracts;
 using Contracts.Auth;
+using Domain.Auth;
+using Domain.Providers;
 
 namespace API.Auth;
 

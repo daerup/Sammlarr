@@ -2,6 +2,8 @@ using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Metadata;
+using Domain.Media;
+using Domain.Media.Metadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;

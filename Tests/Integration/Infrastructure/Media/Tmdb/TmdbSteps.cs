@@ -1,7 +1,9 @@
 using API.Tmdb;
 using Contracts.Media;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
+using Reqnroll;
 using Reqnroll.Assist;
 
 namespace Integration.Tests.Infrastructure.Media.Tmdb;

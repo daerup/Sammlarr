@@ -1,3 +1,5 @@
+using Domain.Media;
+
 namespace Integration.Tests.Media;
 
 public sealed class MediaServiceContext

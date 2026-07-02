@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Contracts.Media;
+using Domain.Media;
 using Shared.Telemetry;
 
 namespace Core.Media;

@@ -4,6 +4,9 @@ using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
+using Domain.Media;
+using Domain.Media.Metadata;
+using Domain.Providers;
 using Shared.Telemetry;
 
 namespace Core.Media;

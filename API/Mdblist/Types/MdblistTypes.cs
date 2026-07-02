@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Contracts.Media;
+using Domain.Media;
 
 namespace API.Mdblist.Types;
 

@@ -1,5 +1,7 @@
 using Contracts.Media;
 using Contracts.Media.Search;
+using Domain.Media;
+using Domain.Providers;
 
 namespace Integration.Tests.Feeds;
 

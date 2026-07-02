@@ -1,3 +1,5 @@
+using Domain.Providers;
+
 namespace Domain.Media;
 
 public readonly record struct MediaIdentity(MediaId Id, ValueSet<IExternalMediaId> Externals);

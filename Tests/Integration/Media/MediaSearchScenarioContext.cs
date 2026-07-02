@@ -1,4 +1,5 @@
 using Contracts.Media.Search;
+using Domain.Media;
 
 namespace Integration.Tests.Media;
 

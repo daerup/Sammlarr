@@ -1,5 +1,6 @@
 using Contracts.Media;
 using Contracts.Watchlist.Sync;
+using Domain.Media;
 using Shared;
 using UI.Shared.Media;
 

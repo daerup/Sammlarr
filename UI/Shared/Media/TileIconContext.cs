@@ -1,3 +1,4 @@
+using Domain.Media;
 using Microsoft.AspNetCore.Components;
 
 namespace UI.Shared.Media;

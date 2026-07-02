@@ -1,3 +1,5 @@
+using Domain.Providers;
+
 namespace Domain.Auth;
 
 public interface ICredential
