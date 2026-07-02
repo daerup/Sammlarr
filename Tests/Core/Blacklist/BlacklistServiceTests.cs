@@ -8,6 +8,10 @@ using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Blacklist;
+using Domain.Blacklist;
+using Domain.Media;
+using Domain.Providers;
+using Domain.Settings;
 
 namespace Core.Tests.Blacklist;
 

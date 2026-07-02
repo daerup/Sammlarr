@@ -1,5 +1,5 @@
-using Contracts.Media;
+using Domain.Media;
 
-namespace Contracts.Blacklist;
+namespace Domain.Blacklist;
 
 public record BlacklistedMedia(MediaId MediaId, DateTimeOffset AddedAt);
