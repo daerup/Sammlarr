@@ -6,12 +6,13 @@
       dockerfile: UI/Dockerfile
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://aspire-dashboard:18889
+      Sammlarr__Telemetry__Exporter: Auto
       Sammlarr__Telemetry__Verbosity: Verbose
     depends_on:
       - aspire-dashboard
 
   aspire-dashboard:
-    image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
     container_name: sammlarr-aspire-dashboard
     environment:
       DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"

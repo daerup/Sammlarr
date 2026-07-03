@@ -5,19 +5,30 @@ description: Cheat sheet for working in the Sammlarr repo — build, test, forma
 
 # Sammlarr dev cheat sheet
 
-Sammlarr is a .NET Blazor Server app (UI/API/Core/DB/Contracts/Shared layered architecture). Use the commands below from the repo root (`C:/Repos/Sammlarr/Source`).
+Sammlarr is a .NET Blazor Server app (UI/API/Core/DB/Contracts/Shared layered architecture) orchestrated by a .NET Aspire AppHost. Use the commands below from the repo root (`C:/Repos/Sammlarr`).
 
 ## Build, test, run
 
 | Task | Command |
 | --- | --- |
-| Restore | `dotnet restore Sammlarr.sln` |
-| Build | `dotnet build Sammlarr.sln` |
-| Run all tests | `dotnet test Sammlarr.sln` |
+| Restore | `dotnet restore` |
+| Build | `dotnet build` |
+| Run all tests | `dotnet test` |
 | Run a single test project | `dotnet test Tests/API/API.Tests.csproj` |
-| Run the app | `dotnet run --project UI/UI.csproj` |
+| Run the app | `aspire run` |
+| Run the app with hot reload | `aspire run --watch` |
 | Format changed files | `dotnet csharpier format <paths>` |
 | Format everything | `dotnet csharpier format .` |
+
+The solution is `Sammlarr.slnx` (the XML solution format); `dotnet` auto-detects it, so no filename is needed on `restore`/`build`/`test`.
+
+## Running the app — single entry point
+
+The **Aspire AppHost (`Sammlarr.AppHost`) is the only way to run the app.** It orchestrates the `UI` resource and brings up the Aspire dashboard (logs/metrics/traces). Don't run `UI` directly — its `launchSettings.json` exists only to supply the endpoint binding Aspire reads.
+
+- **CLI:** `aspire run` (or `aspire run --watch` for the hot-reload dev loop) from the repo root — auto-detects the AppHost, no `--project`.
+- **Rider:** the `AppHost` run config (`.run/AppHost.run.xml`) — F5 to debug.
+- Telemetry (`OTEL_EXPORTER_OTLP_ENDPOINT`, `Sammlarr__Telemetry__*`) is injected into `UI` by the AppHost; the custom `Shared/Telemetry` module reads it. `compose.yaml` is a separate self-host/deploy artifact (UI container + standalone dashboard), not part of the dev loop.
 
 The app uses SQLite (`sammlarr.db` auto-created via `Database.EnsureCreated()` + column migrations in `DB/SammlarrDbContext.cs`). There are no EF migrations — schema evolution happens in `MigrateListColumns()` with `ALTER TABLE` + try/catch.
 
