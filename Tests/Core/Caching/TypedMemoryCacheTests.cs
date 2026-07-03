@@ -71,6 +71,25 @@ public class TypedMemoryCacheUnitTests
 	}
 
 	[Test]
+	public async Task TypedMemoryCache_WhenTwoCachesShareKeyButDifferInValueType_DoNotCollide()
+	{
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
+		var credentials = new TypedMemoryCache<string, string>(memoryCache);
+		var counts = new TypedMemoryCache<string, int>(memoryCache);
+
+		credentials.Set("plex", "credential");
+		counts.Set("plex", 42);
+
+		var credentialFound = credentials.TryGetValue("plex", out var credential);
+		var countFound = counts.TryGetValue("plex", out var count);
+
+		await Assert.That(credentialFound).IsTrue();
+		await Assert.That(credential).IsEqualTo("credential");
+		await Assert.That(countFound).IsTrue();
+		await Assert.That(count).IsEqualTo(42);
+	}
+
+	[Test]
 	public async Task TypedMemoryCache_WhenSetWithTtl_ExpiresAfterDuration()
 	{
 		using var memoryCache = new MemoryCache(new MemoryCacheOptions { ExpirationScanFrequency = TimeSpan.FromMilliseconds(1) });
