@@ -11,6 +11,9 @@
 		<ProjectReference Include="..\Shared.Options.Generator\Shared.Options.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 	<ItemGroup>
+		<InternalsVisibleTo Include="Sammlarr.AppHost" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />

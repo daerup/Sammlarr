@@ -119,7 +119,7 @@ Prefer **SQLite in-memory** over the EF InMemory provider — it catches relatio
 
 ```bash
 dotnet test Tests/API/API.Tests.csproj
-dotnet test Sammlarr.sln              # everything
+dotnet test                           # everything (auto-detects Sammlarr.slnx)
 ```
 
 See `sammlarr-dev` for more project commands.
