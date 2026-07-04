@@ -46,7 +46,7 @@ public class MediaSearchServiceTests
 		mediaService
 			.ResolveIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
 			.Returns(
-				(IReadOnlyList<IReadOnlyList<IExternalMediaId>> _, CancellationToken _) =>
+				(_, _) =>
 				{
 					resolveCalls++;
 					return [];
@@ -75,7 +75,7 @@ public class MediaSearchServiceTests
 		mediaService
 			.ResolveIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
 			.Returns(
-				(IReadOnlyList<IReadOnlyList<IExternalMediaId>> groups, CancellationToken _) =>
+				(groups, _) =>
 				{
 					captured = groups;
 					return [new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. groups[0]])];
