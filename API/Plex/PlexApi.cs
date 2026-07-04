@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using API.Plex.Types;
 using Contracts;
@@ -6,11 +7,20 @@ using Contracts.Media;
 using Contracts.Media.Search;
 using Domain;
 using Domain.Media;
+using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
+internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaSearchProvider
 {
+	private void LogIfDegraded(HttpResponseMessage response, string endpoint)
+	{
+		if (response.StatusCode is HttpStatusCode.TooManyRequests || (int)response.StatusCode >= 500)
+		{
+			logger.LogWarning("Plex lookup degraded ({StatusCode}) on {Endpoint}; treated as no-match downstream", (int)response.StatusCode, endpoint);
+		}
+	}
+
 	public async Task<MediaLookup> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		if (mediaId is not PlexId plexId)
@@ -30,6 +40,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
 		var endpoint = string.Format(CultureInfo.InvariantCulture, PlexEndpoints.Search, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		LogIfDegraded(response, endpoint);
 		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Search.Root>(stream, cancellationToken: cancellationToken))!;
@@ -55,6 +66,7 @@ internal class PlexApi(PlexClient plexClient) : IMediaSearchProvider
 	{
 		var endpoint = string.Format(PlexEndpoints.RatingKeyMetadata, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
+		LogIfDegraded(response, endpoint);
 		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);

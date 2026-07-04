@@ -4,11 +4,12 @@ using API.Plex.Types;
 using Contracts.Media;
 using Contracts.Watchlist;
 using Domain.Media;
+using Microsoft.Extensions.Logging;
 using Shared;
 
 namespace API.Plex;
 
-internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
+internal class PlexWatchListProvider(PlexClient plexClient, ILogger<PlexWatchListProvider> logger) : IWatchlistProvider
 {
 	public async IAsyncEnumerable<IExternalMediaId> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
@@ -67,10 +68,15 @@ internal class PlexWatchListProvider(PlexClient plexClient) : IWatchlistProvider
 		try
 		{
 			using var response = await plexClient.SendAsync(HttpMethod.Put, formattedEndpoint, cancellationToken, new StringContent(string.Empty));
+			if (!response.IsSuccessStatusCode)
+			{
+				logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, id.Value, formattedEndpoint);
+			}
 			return new WatchlistPushResult(id, response.IsSuccessStatusCode);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
+			logger.LogWarning(ex, "Plex watchlist push threw for {ExternalId} at {Endpoint}", id.Value, formattedEndpoint);
 			return new WatchlistPushResult(id, false);
 		}
 	}

@@ -1,4 +1,5 @@
 using Contracts;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -15,7 +16,9 @@ public class SQLiteFixture : IAsyncDisposable
 	public SQLiteFixture()
 	{
 		var services = new ServiceCollection();
+		services.AddLogging();
 		services.AddModule<DbModule>();
+		services.AddDataProtection().UseEphemeralDataProtectionProvider();
 		_serviceProvider = services.BuildServiceProvider();
 		_connection = new SqliteConnection("DataSource=:memory:");
 		_connection.Open();

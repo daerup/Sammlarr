@@ -8,6 +8,7 @@ using Contracts.Media;
 using Contracts.Media.Search;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -45,7 +46,7 @@ public class PlexApiTests
 		credentialStore
 			.GetAsync(WatchlistProvider.Plex, Any())
 			.Returns(new TestCredential(WatchlistProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue));
-		var testee = new PlexApi(new PlexClient(httpClient, credentialStore));
+		var testee = new PlexApi(new PlexClient(httpClient, credentialStore), NullLogger<PlexApi>.Instance);
 
 		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<HttpRequestException>();
 	}
@@ -98,6 +99,6 @@ public class PlexApiTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient);
+		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
 	}
 }

@@ -18,6 +18,7 @@ using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DB.Tests.Integration.Cleanup;
 
@@ -43,7 +44,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
-		_testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object);
+		_testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, NullLogger<MediaCachePurger>.Instance);
 	}
 
 	[Test]

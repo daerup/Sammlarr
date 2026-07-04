@@ -6,6 +6,7 @@ using Contracts.Auth;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -109,9 +110,10 @@ public class PlexWatchListProviderTests
 		await Assert.That(results[0].Success).IsFalse();
 	}
 
-	private static PlexWatchListProvider CreateWatchListService(string json) => new(CreatePlexClient(json));
+	private static PlexWatchListProvider CreateWatchListService(string json) => new(CreatePlexClient(json), NullLogger<PlexWatchListProvider>.Instance);
 
-	private static PlexWatchListProvider CreateWatchListService(HttpStatusCode statusCode) => new(CreatePlexClient(statusCode));
+	private static PlexWatchListProvider CreateWatchListService(HttpStatusCode statusCode) =>
+		new(CreatePlexClient(statusCode), NullLogger<PlexWatchListProvider>.Instance);
 
 	private static PlexClient CreatePlexClient(string json)
 	{
