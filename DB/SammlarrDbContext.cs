@@ -37,10 +37,11 @@ internal sealed class SammlarrDbContext : DbContext
 		_dateTimeProvider = dateTimeProvider;
 	}
 
-	public void Initialize()
+	public bool Initialize()
 	{
-		Database.EnsureCreated();
+		var created = Database.EnsureCreated();
 		SeedProviderSettings();
+		return created;
 	}
 
 	public DbSet<CredentialRow> Credentials => Set<CredentialRow>();

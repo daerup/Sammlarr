@@ -12,6 +12,7 @@ using Contracts.Settings;
 using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -83,7 +84,7 @@ public class PlexIdConverterTests
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(apiKey);
 		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
 		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options);
-		return new TmdbApi(tmdbClient, apiKeyStore.Object);
+		return new TmdbApi(tmdbClient, apiKeyStore.Object, NullLogger<TmdbApi>.Instance);
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeImdbId, bool includeTvdbId)
@@ -137,7 +138,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient);
+		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
 	}
 
 	private static PlexApi CreatePlexApiWithEmptySearch()
@@ -149,7 +150,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient);
+		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
 	}
 
 	private static PlexApi CreatePlexApiWithSearch(PlexByIdPayload payload)
@@ -162,7 +163,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient);
+		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
 	}
 
 	private static string BuildEmptySearchJson()

@@ -7,13 +7,29 @@ namespace UI.Shared.Services;
 
 internal sealed class Notifier(ToastService toastService, DialogService dialogService, ILogger<Notifier> logger)
 {
-	public void Success(string description, string? title = null) => toastService.Success(description, title);
+	public void Success(string description, string? title = null)
+	{
+		logger.LogInformation("{Title}: {Description}", title ?? "Success", description);
+		toastService.Success(description, title);
+	}
 
-	public void Info(string description, string? title = null) => toastService.Info(description, title);
+	public void Info(string description, string? title = null)
+	{
+		logger.LogInformation("{Title}: {Description}", title ?? "Info", description);
+		toastService.Info(description, title);
+	}
 
-	public void Warning(string description, string? title = null) => toastService.Warning(description, title);
+	public void Warning(string description, string? title = null)
+	{
+		logger.LogWarning("{Title}: {Description}", title ?? "Warning", description);
+		toastService.Warning(description, title);
+	}
 
-	public void Error(string description, string? title = null) => toastService.Error(description, title);
+	public void Error(string description, string? title = null)
+	{
+		logger.LogError("{Title}: {Description}", title ?? "Error", description);
+		toastService.Error(description, title);
+	}
 
 	public void Error(Exception exception, string? title = null)
 	{

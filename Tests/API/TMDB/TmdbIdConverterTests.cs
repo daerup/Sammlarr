@@ -10,6 +10,7 @@ using Contracts.Media.Metadata;
 using Contracts.Settings;
 using Domain.Media;
 using Domain.Providers;
+using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace API.Tests.TMDB;
@@ -118,7 +119,7 @@ public class TmdbIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(WatchlistProvider.Plex, CancellationToken.None).Returns(credential);
 		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore);
-		return new PlexApi(plexClient);
+		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
 	}
 
 	private record PlexByIdPayload(string Json, PlexId PlexId, IReadOnlyList<TmdbId> TmdbIds, ImdbId ImdbId, TvdbId? TvdbId);

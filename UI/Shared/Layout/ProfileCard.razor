@@ -10,6 +10,7 @@
 @inject ProfileDropdownService ProfileDropdownService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject MediaProviderBrandingService BrandingService
+@inject Notifier Notifier
 
 <BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
     <BbDropdownMenuTrigger>
@@ -211,8 +212,12 @@
             var authUrl = await oauthService.BeginLoginAsync(callbackUrl, _disposeCts.Token);
             NavigationManager.NavigateTo(authUrl, true);
         }
-        catch
+        catch (Exception ex)
         {
+            if (ex is not OperationCanceledException)
+            {
+                Notifier.Error(ex, "Failed to start sign-in");
+            }
             _isProcessing = false;
         }
     }

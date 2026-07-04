@@ -33,6 +33,8 @@ internal sealed class IntegrationTestModule : ITestServiceModule
 		services.AddModule<ApiModule>();
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 
+		services.AddLogging();
+
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(new DateTimeOffset(2024, 6, 1, 0, 0, 0, TimeSpan.Zero));
 		services.AddSingleton<Mock<IDateTimeProvider>>(clock);
