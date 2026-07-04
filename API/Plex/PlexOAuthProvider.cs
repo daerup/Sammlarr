@@ -5,11 +5,13 @@ using API.Plex.Types;
 using Contracts;
 using Contracts.Auth;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexClient plexClient) : IOAuthProvider
+internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexClient plexClient, ILogger<PlexOAuthProvider> logger)
+	: IOAuthProvider
 {
 	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{
@@ -37,7 +39,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		return QueryHelpers.AddQueryString(PlexEndpoints.AuthApp, queryParams).Replace("?", "#?");
 	}
 
-	public async Task<Result<AuthGrant>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
+	public async Task<Result<OAuthTokenGrant>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
 	{
 		var query = QueryHelpers.ParseQuery(callbackQuery);
 		if (
@@ -64,7 +66,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 			return Error.From("Authentication was not completed. Please try again.");
 		}
 
-		return new AuthGrant(authToken, result.ExpiresAt, clientId);
+		return new OAuthTokenGrant(authToken, result.ExpiresAt, clientId);
 	}
 
 	public async Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default)
@@ -74,8 +76,9 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		{
 			response = await plexClient.SendAsync(HttpMethod.Get, PlexEndpoints.User, cancellationToken);
 		}
-		catch
+		catch (Exception ex)
 		{
+			logger.LogWarning(ex, "Plex GetUser request failed; treating account as unavailable");
 			return new Unavailable();
 		}
 
@@ -85,6 +88,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		}
 		if (!response.IsSuccessStatusCode)
 		{
+			logger.LogWarning("Plex GetUser returned {StatusCode}; treating account as unavailable", (int)response.StatusCode);
 			return new Unavailable();
 		}
 

@@ -8,6 +8,7 @@ using Contracts.Settings;
 using Core.Auth;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace Core.Tests.Auth;
@@ -33,7 +34,8 @@ public class OAuthServiceTests
 			new FakeKeyedServiceIndex<WatchlistProvider, IOAuthProvider>().Register(WatchlistProvider.Plex, provider.Object),
 			config.Object,
 			credentials.Object,
-			userCache.Object
+			userCache.Object,
+			NullLogger<OAuthService>.Instance
 		);
 
 	[Test]
@@ -88,7 +90,7 @@ public class OAuthServiceTests
 		var clientId = Guid.NewGuid();
 		var expiresAt = new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero);
 		var provider = IOAuthProvider.Mock();
-		provider.CompleteLoginAsync(callback, Any()).Returns(new AuthGrant("token", expiresAt, clientId));
+		provider.CompleteLoginAsync(callback, Any()).Returns(new OAuthTokenGrant("token", expiresAt, clientId));
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
 		var credentials = ICredentialRepository.Mock();

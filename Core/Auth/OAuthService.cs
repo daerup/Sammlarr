@@ -5,6 +5,7 @@ using Contracts.DI;
 using Contracts.Settings;
 using Domain.Auth;
 using Domain.Providers;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Auth;
 
@@ -12,10 +13,11 @@ internal sealed class OAuthService(
 	IKeyedServiceIndex<WatchlistProvider, IOAuthProvider> providers,
 	IProviderConfigRepository configRepository,
 	ICredentialRepository credentialRepository,
-	ITypedMemoryCache<WatchlistProvider, AuthorizedUser> userCache
+	ITypedMemoryCache<WatchlistProvider, AuthorizedUser> userCache,
+	ILogger<OAuthService> logger
 ) : IOAuthService
 {
-	private static readonly TimeSpan UserCacheTtl = TimeSpan.FromMinutes(5);
+	private static readonly TimeSpan UserCacheTtl = TimeSpan.FromHours(1);
 
 	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) =>
 		await (await ResolveAsync(cancellationToken)).BeginLoginAsync(callbackUrl, cancellationToken);
@@ -26,9 +28,15 @@ internal sealed class OAuthService(
 		var outcome = await providers[config.WatchlistProvider].CompleteLoginAsync(callbackQuery, cancellationToken);
 		return outcome switch
 		{
-			AuthGrant grant => await StoreAsync(config.WatchlistProvider, grant, cancellationToken),
-			Error error => Some.Of(error),
+			OAuthTokenGrant grant => await StoreAsync(config.WatchlistProvider, grant, cancellationToken),
+			Error error => OnLoginFailed(config.WatchlistProvider, error),
 		};
+	}
+
+	private Optional<Error> OnLoginFailed(WatchlistProvider provider, Error error)
+	{
+		logger.LogWarning("Sign-in failed for provider {Provider}: {Reason}", provider, error.Reason);
+		return Some.Of(error);
 	}
 
 	public async Task LogoutAsync(CancellationToken cancellationToken = default)
@@ -36,6 +44,7 @@ internal sealed class OAuthService(
 		var config = await configRepository.GetAsync(cancellationToken);
 		await credentialRepository.ClearAsync(config.WatchlistProvider, cancellationToken);
 		userCache.Remove(config.WatchlistProvider);
+		logger.LogInformation("Logged out of provider {Provider}", config.WatchlistProvider);
 	}
 
 	public async Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default)
@@ -59,10 +68,11 @@ internal sealed class OAuthService(
 		return session;
 	}
 
-	private async Task<Optional<Error>> StoreAsync(WatchlistProvider provider, AuthGrant grant, CancellationToken cancellationToken)
+	private async Task<Optional<Error>> StoreAsync(WatchlistProvider provider, OAuthTokenGrant grant, CancellationToken cancellationToken)
 	{
 		await credentialRepository.StoreAsync(provider, grant.AccessToken, grant.ExpiresAt, grant.ClientId, cancellationToken);
 		userCache.Remove(provider);
+		logger.LogInformation("Sign-in completed for provider {Provider}", provider);
 		return new None();
 	}
 
