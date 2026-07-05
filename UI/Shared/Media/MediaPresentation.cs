@@ -27,7 +27,7 @@ public static class MediaPresentation
 			media switch
 			{
 				IdentifiedMedia identified => identified.Title ?? "",
-				UnmatchedMedia unmatched => unmatched.Title,
+				UnmatchedMedia unmatched => unmatched.Title ?? "",
 			};
 
 		public string Tagline =>
@@ -41,21 +41,21 @@ public static class MediaPresentation
 			media switch
 			{
 				IdentifiedMedia identified => identified.Summary ?? "",
-				UnmatchedMedia unmatched => unmatched.Summary,
+				UnmatchedMedia unmatched => unmatched.Summary ?? "",
 			};
 
 		public string PosterUrl =>
 			media switch
 			{
 				IdentifiedMedia identified => identified.PosterUrl ?? "",
-				UnmatchedMedia unmatched => unmatched.PosterUrl,
+				UnmatchedMedia unmatched => unmatched.PosterUrl ?? "",
 			};
 
 		public string BackdropUrl =>
 			media switch
 			{
 				IdentifiedMedia identified => identified.BackdropUrl ?? "",
-				UnmatchedMedia unmatched => unmatched.BackdropUrl,
+				UnmatchedMedia unmatched => unmatched.BackdropUrl ?? "",
 			};
 
 		public DateOnly ReleaseDate =>

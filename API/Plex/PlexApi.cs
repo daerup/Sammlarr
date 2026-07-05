@@ -174,10 +174,10 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Externals = [.. BuildExternals(result.PlexId, result.TmdbIds, result.ImdbIds, result.TvdbIds)],
-			Title = result.Title.NullIfBlank() ?? "",
-			Summary = result.Summary.NullIfBlank() ?? "",
-			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank() ?? "",
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank() ?? "",
+			Title = result.Title.NullIfBlank(),
+			Summary = result.Summary.NullIfBlank(),
+			PosterUrl = NormalizePlexImageUrl(result.Poster).NullIfBlank(),
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
@@ -186,9 +186,9 @@ file static class PlexMetadataMappingExtensions
 		new()
 		{
 			Externals = [result.PlexId],
-			Title = result.Title.NullIfBlank() ?? "",
-			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank() ?? "",
-			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank() ?? "",
+			Title = result.Title.NullIfBlank(),
+			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
+			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
 			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
