@@ -165,10 +165,10 @@ else
             var message = result.Value.ToString() ?? string.Empty;
             Action<string, string?> notify = result.Value switch
             {
-                WatchlistSyncSuccess => Notifier.Success,
-                WatchlistSyncUnchanged => Notifier.Info,
-                WatchlistSyncAlreadyRunning => Notifier.Info,
-                WatchlistSyncRemoteFailed => Notifier.Warning,
+                WatchlistSyncSuccess => (m, t) => Notifier.Success(m, t),
+                WatchlistSyncUnchanged => (m, t) => Notifier.Info(m, t),
+                WatchlistSyncAlreadyRunning => (m, t) => Notifier.Info(m, t),
+                WatchlistSyncRemoteFailed => (m, t) => Notifier.Warning(m, t),
             };
 
             notify(message, null);
