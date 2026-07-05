@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
-using Contracts.Media;
-using Contracts.Watchlist;
 
 namespace Shared;
 
@@ -87,21 +85,5 @@ public static class AsyncEnumerableExtensions
 	{
 		public IAsyncEnumerable<TOut> SelectAwait<TOut>(Func<TIn, ValueTask<TOut>> predicate, int maxConcurrency, CancellationToken cancellationToken = default) =>
 			source.ToAsyncEnumerable().SelectAwait(predicate, maxConcurrency, cancellationToken);
-	}
-}
-
-public static class MediaServiceExtensions
-{
-	extension(IMediaService)
-	{
-		public static int RecommendedConcurrency => 100;
-	}
-}
-
-public static class WatchlistServiceExtensions
-{
-	extension(IWatchlistService)
-	{
-		public static int RecommendedConcurrency => 10;
 	}
 }

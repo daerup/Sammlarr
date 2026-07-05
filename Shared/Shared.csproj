@@ -7,7 +7,6 @@
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Contracts\Contracts.csproj" />
 		<ProjectReference Include="..\Shared.Options.Generator\Shared.Options.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 	<ItemGroup>
