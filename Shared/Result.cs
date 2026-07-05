@@ -16,4 +16,14 @@ public readonly record struct Error
 	public static Error From(Exception exception) => new(exception.Message, exception);
 }
 
-public union Result<T>(T, Error) where T : notnull;
+public record Success<T>(T Value) where T : notnull
+{
+	public static implicit operator Success<T>(T value) => new(value);
+}
+
+public static class Success
+{
+	public static Success<T> Of<T>(T value) where T : notnull => new(value);
+}
+
+public union Result<T>(Success<T>, Error) where T : notnull;

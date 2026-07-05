@@ -14,7 +14,7 @@ internal sealed class UnionDestructuringPolicy : IDestructuringPolicy
 			return true;
 		}
 
-		if ((value is IUnion || IsSome(value.GetType())) && value.GetType().GetProperty(nameof(Some<>.Value)) is { } caseProperty)
+		if ((value is IUnion || IsWrapper(value.GetType())) && value.GetType().GetProperty(nameof(Some<>.Value)) is { } caseProperty)
 		{
 			result = propertyValueFactory.CreatePropertyValue(caseProperty.GetValue(value), destructureObjects: true);
 			return true;
@@ -24,5 +24,6 @@ internal sealed class UnionDestructuringPolicy : IDestructuringPolicy
 		return false;
 	}
 
-	private static bool IsSome(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Some<>);
+	private static bool IsWrapper(Type type) =>
+		type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Some<>) || type.GetGenericTypeDefinition() == typeof(Success<>));
 }

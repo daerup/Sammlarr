@@ -41,7 +41,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			var syncResult = planning switch
 			{
 				Error error => OnPlanError(error, deps.Provider),
-				WatchlistSyncPlan plan => await ExecutePlanAsync(plan, deps, cancellationToken),
+				Success<WatchlistSyncPlan>(var plan) => await ExecutePlanAsync(plan, deps, cancellationToken),
 			};
 			if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
 			{
@@ -98,7 +98,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		return planning switch
 		{
 			Error error => OnDryRunError(error, deps.Provider),
-			WatchlistSyncPlan plan => BuildDryRun(plan),
+			Success<WatchlistSyncPlan>(var plan) => Success.Of(BuildDryRun(plan)),
 		};
 	}
 
@@ -145,7 +145,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).Zip(externals, cancellationToken);
 			await foreach (var (result, external) in pipeline)
 			{
-				if (result is MediaIdentity identity)
+				if (result is Success<MediaIdentity>(var identity))
 				{
 					remoteMediaIds.Add(identity.Id);
 				}
@@ -154,7 +154,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 					logger.LogWarning("Remote watchlist item {External} could not be resolved during sync", external);
 				}
 			}
-			return remoteMediaIds;
+			return Success.Of<IReadOnlyList<MediaId>>(remoteMediaIds);
 		}
 		catch (Exception ex)
 		{
@@ -165,14 +165,13 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 	private async Task<Result<WatchlistSyncPlan>> PlanAsync(EngineDeps deps, CancellationToken cancellationToken)
 	{
 		var fetch = await FetchRemoteAsync(deps, cancellationToken);
-		if (fetch is Error error)
+		if (fetch is not Success<IReadOnlyList<MediaId>>(var remoteIds))
 		{
-			return error;
+			return (Error)fetch.Value;
 		}
-		var remoteIds = (IReadOnlyList<MediaId>)fetch.Value;
 		var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
 		var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
-		return WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps);
+		return Success.Of(WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps));
 	}
 
 	private async Task<PushOutcome> PushAsync(

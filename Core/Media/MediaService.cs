@@ -201,7 +201,7 @@ internal sealed class MediaService(
 			return request.ToUnmatched();
 		}
 		var realized = await RealizeAsync(r.Identity, r.Cached, buffer, cancellationToken);
-		return realized is IdentifiedMedia identified ? identified : request.ToUnmatched();
+		return realized is Success<IdentifiedMedia>(var identified) ? identified : request.ToUnmatched();
 	}
 
 	private async ValueTask<Result<IdentifiedMedia>> RealizeAsync(
@@ -215,25 +215,25 @@ internal sealed class MediaService(
 		{
 			if (cached is { } row && MediaFreshness.IsFresh(row.Stored, row.FetchedAt, dateTimeProvider.Now))
 			{
-				return row.Stored;
+				return Success.Of(row.Stored);
 			}
 			var resolved = await metadataResolver.ResolveAsync(identity, buffer, cancellationToken);
-			if (resolved is MediaLookup lookup)
+			if (resolved is Success<MediaLookup>(var lookup))
 			{
 				var identified = lookup.AsIdentified();
 				if (identified is not null)
 				{
-					return identified.Value;
+					return Success.Of(identified.Value);
 				}
 			}
-			return cached is { } fallback ? fallback.Stored : Error.From("media could not be resolved");
+			return cached is { } fallback ? Success.Of(fallback.Stored) : Error.From("media could not be resolved");
 		}
 		catch (Exception ex)
 		{
 			if (cached is { } stale)
 			{
 				logger.LogWarning(ex, "Media realize failed for {MediaId}; serving stale cache", identity.Id);
-				return stale.Stored;
+				return Success.Of(stale.Stored);
 			}
 			logger.LogError(ex, "Media realize failed for {MediaId}; no cache fallback", identity.Id);
 			return Error.From(ex);
@@ -241,7 +241,7 @@ internal sealed class MediaService(
 	}
 
 	private static Result<MediaIdentity> ToIdentityResult(Optional<ResolvedIdentity> resolution) =>
-		resolution is Some<ResolvedIdentity>(var r) ? r.Identity : Error.From("unresolved");
+		resolution is Some<ResolvedIdentity>(var r) ? Success.Of(r.Identity) : Error.From("unresolved");
 
 	private async Task<IReadOnlyDictionary<MediaId, CachedMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
 	{

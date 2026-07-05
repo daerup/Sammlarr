@@ -12,12 +12,31 @@ public class UnionAssertion<TOuter, TInner>(AssertionContext<TOuter> context) : 
 		x =>
 		{
 			object? current = x?.Value;
-			while (current is IUnion union && current is not TInner)
+			while (current is not TInner && TryUnwrap(current, out var next))
 			{
-				current = union.Value;
+				current = next;
 			}
 			return current is TInner inner ? inner : throw new InvalidCastException($"found {(current?.GetType()).GetGenericName()}");
 		};
+
+	private static bool TryUnwrap(object? value, out object? inner)
+	{
+		switch (value)
+		{
+			case IUnion union:
+				inner = union.Value;
+				return true;
+			case not null when IsWrapper(value.GetType()):
+				inner = value.GetType().GetProperty(nameof(Some<>.Value))!.GetValue(value);
+				return true;
+			default:
+				inner = null;
+				return false;
+		}
+	}
+
+	private static bool IsWrapper(Type type) =>
+		type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Some<>) || type.GetGenericTypeDefinition() == typeof(Success<>));
 
 	protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TInner> metadata) =>
 		Task.FromResult(metadata.Exception != null ? AssertionResult.Failed(metadata.Exception.Message) : AssertionResult.Passed);

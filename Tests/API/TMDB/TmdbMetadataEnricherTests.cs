@@ -21,7 +21,7 @@ public class TmdbMetadataEnricherTests
 		handler.OnAnyRequest().RespondWithJson("{\"id\":123,\"title\":\"Example\",\"vote_average\":7.5,\"vote_count\":1000}");
 		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
-		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(apiKey);
+		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
 		var tmdbApi = new TmdbApi(new TmdbClient(handler.CreateClient(options.BaseUrl), options), apiKeyStore.Object, NullLogger<TmdbApi>.Instance);
 		var testee = new TmdbMetadataEnricher(tmdbApi, options);
 

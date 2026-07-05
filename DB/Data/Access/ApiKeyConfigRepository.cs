@@ -19,7 +19,7 @@ internal class ApiKeyConfigRepository(
 	{
 		if (cache.TryGetValue(provider, out var cached) && cached is not null)
 		{
-			return cached;
+			return Success.Of(cached);
 		}
 
 		var stored = await LoadStoredKeyAsync(provider, cancellationToken);
@@ -29,7 +29,7 @@ internal class ApiKeyConfigRepository(
 		}
 
 		var result = await apiKeyFactory.CreateAsync(provider, stored, cancellationToken);
-		if (result is IApiKey apiKey)
+		if (result is Success<IApiKey>(var apiKey))
 		{
 			cache.Set(provider, apiKey);
 		}

@@ -23,7 +23,7 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 
 	[When("I look up the TMDB API key")]
 	public async Task WhenLookUpTmdbKey() =>
-		ctx.RetrievedKey = await sammlarr.Resolve<IApiKeyConfigRepository>().GetApiKeyAsync(ApiKeyProvider.Tmdb) is IApiKey key ? key.Value : null;
+		ctx.RetrievedKey = await sammlarr.Resolve<IApiKeyConfigRepository>().GetApiKeyAsync(ApiKeyProvider.Tmdb) is Success<IApiKey>(var key) ? key.Value : null;
 
 	[When("I store the TMDB API key {string}")]
 	public async Task WhenStoreTmdbKey(string apiKey) =>
@@ -63,7 +63,7 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 
 	[When("I verify the {word} API key {string}")]
 	public async Task WhenVerifyKey(string provider, string apiKey) =>
-		ctx.KeyValid = await sammlarr.Resolve<IApiKeyFactory>().CreateAsync(Enum.Parse<ApiKeyProvider>(provider, ignoreCase: true), apiKey) is IApiKey;
+		ctx.KeyValid = await sammlarr.Resolve<IApiKeyFactory>().CreateAsync(Enum.Parse<ApiKeyProvider>(provider, ignoreCase: true), apiKey) is Success<IApiKey>;
 
 	[When("I add Plex item {string} to the watchlist")]
 	public async Task WhenAddPlexItem(string plexId)

@@ -21,6 +21,6 @@ internal sealed class MdblistApiKey : IApiKey
 			return Error.From("The MDBList API key is not valid.");
 		}
 
-		return new MdblistApiKey(value);
+		return Success.Of<IApiKey>(new MdblistApiKey(value));
 	}
 }

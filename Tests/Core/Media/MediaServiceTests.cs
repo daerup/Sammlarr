@@ -43,7 +43,7 @@ public class MediaServiceTests
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(3);
-		await Assert.That(results.All(r => r is MediaIdentity)).IsTrue();
+		await Assert.That(results.All(r => r is Success<MediaIdentity>)).IsTrue();
 	}
 
 	[Test]

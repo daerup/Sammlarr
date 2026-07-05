@@ -66,7 +66,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 			return Error.From("Authentication was not completed. Please try again.");
 		}
 
-		return new OAuthTokenGrant(authToken, result.ExpiresAt, clientId);
+		return Success.Of(new OAuthTokenGrant(authToken, result.ExpiresAt, clientId));
 	}
 
 	public async Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default)

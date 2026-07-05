@@ -83,7 +83,7 @@ public class OAuthServiceTests
 		var clientId = Guid.NewGuid();
 		var expiresAt = new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero);
 		var provider = IOAuthProvider.Mock();
-		provider.CompleteLoginAsync(callback, Any()).Returns(new OAuthTokenGrant("token", expiresAt, clientId));
+		provider.CompleteLoginAsync(callback, Any()).Returns(Success.Of(new OAuthTokenGrant("token", expiresAt, clientId)));
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
 		var credentials = ICredentialRepository.Mock();

@@ -31,7 +31,7 @@ internal sealed class MediaMetadataResolver(
 		}
 
 		buffer.Add(detail);
-		return detail;
+		return Success.Of(detail);
 	}
 
 	private async Task<MediaLookup> LookUpAsync(MediaIdentity identity, MediaSearchProvider provider, CancellationToken cancellationToken)

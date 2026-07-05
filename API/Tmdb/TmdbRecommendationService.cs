@@ -27,7 +27,7 @@ internal class TmdbRecommendationService(
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
-		if (await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is not IApiKey apiKey)
+		if (await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is not Success<IApiKey>(var apiKey))
 		{
 			throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
 		}
@@ -63,7 +63,7 @@ internal class TmdbRecommendationService(
 
 	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
 	{
-		if (outcome is not MediaIdentity identity)
+		if (outcome is not Success<MediaIdentity>(var identity))
 		{
 			return BuildUnmatched(response);
 		}

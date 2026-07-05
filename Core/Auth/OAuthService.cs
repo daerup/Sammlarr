@@ -24,7 +24,7 @@ internal sealed class OAuthService(
 		var outcome = await providers[config.WatchlistProvider].CompleteLoginAsync(callbackQuery, cancellationToken);
 		return outcome switch
 		{
-			OAuthTokenGrant grant => await StoreAsync(config.WatchlistProvider, grant, cancellationToken),
+			Success<OAuthTokenGrant>(var grant) => await StoreAsync(config.WatchlistProvider, grant, cancellationToken),
 			Error error => OnLoginFailed(config.WatchlistProvider, error),
 		};
 	}
@@ -45,7 +45,7 @@ internal sealed class OAuthService(
 	public async Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
-		if (await credentialRepository.GetAsync(config.WatchlistProvider, cancellationToken) is not ICredential)
+		if (await credentialRepository.GetAsync(config.WatchlistProvider, cancellationToken) is not Success<ICredential>)
 		{
 			return new SignedOut();
 		}

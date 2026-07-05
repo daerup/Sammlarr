@@ -17,7 +17,7 @@ internal class CredentialRepository(
 	{
 		if (cache.TryGetValue(watchlistProvider, out var cached) && cached is not null)
 		{
-			return cached;
+			return Success.Of(cached);
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -34,7 +34,7 @@ internal class CredentialRepository(
 			credential.ExpiresAt,
 			cancellationToken
 		);
-		if (result is ICredential valid)
+		if (result is Success<ICredential>(var valid))
 		{
 			cache.Set(watchlistProvider, valid);
 		}
