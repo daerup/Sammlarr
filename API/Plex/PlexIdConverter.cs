@@ -21,22 +21,15 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 		var materialized = candidates.ToList();
 		foreach (var plexId in materialized.OfType<PlexId>())
 		{
-			return Some.Of(await ConvertFromPlexIdAsync(plexId, cancellationToken));
+			return await Some.Of(plexApi.LookUpExternalsAsync(plexId, cancellationToken));
 		}
 
-		if (hints is Some<ResolutionHints>(var h))
-		{
-			var result = await ResolveFromTitleSearchAsync(h.Title, h.MediaType, materialized, cancellationToken);
-			if (result is Some<IReadOnlyList<IExternalMediaId>>)
-			{
-				return result;
-			}
-		}
-
-		return await TryResolveFromApiTitleSearchAsync(materialized, cancellationToken);
+		return await hints
+			.Map(h => ResolveByTitleAsync(h.Title, h.MediaType, materialized, cancellationToken))
+			.Or(() => ResolveByTmdbTitleAsync(materialized, cancellationToken));
 	}
 
-	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveFromTitleSearchAsync(
+	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveByTitleAsync(
 		string title,
 		MediaType mediaType,
 		List<IExternalMediaId> candidates,
@@ -58,33 +51,16 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 			)
 			.FirstOrDefaultAsync(externals => externals is not null && ContainsAnyCandidate(externals, candidates), cancellationToken);
 
-		return match is null ? new None() : Some.Of(match);
+		return Optional.Of(match);
 	}
 
 	private async Task<IReadOnlyList<IExternalMediaId>> ConvertFromPlexIdAsync(PlexId plexId, CancellationToken cancellationToken) =>
 		await plexApi.LookUpExternalsAsync(plexId, cancellationToken);
 
-	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> TryResolveFromApiTitleSearchAsync(
-		List<IExternalMediaId> candidates,
-		CancellationToken cancellationToken
-	)
-	{
-		foreach (var candidate in candidates)
-		{
-			var title = await GetOriginalTitleAsync(candidate, cancellationToken);
-			if (title is null)
-			{
-				continue;
-			}
-			var result = await ResolveFromTitleSearchAsync(title, candidate.Type, candidates, cancellationToken);
-			if (result is Some<IReadOnlyList<IExternalMediaId>>)
-			{
-				return result;
-			}
-		}
-
-		return new None();
-	}
+	private Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveByTmdbTitleAsync(List<IExternalMediaId> candidates, CancellationToken cancellationToken) =>
+		candidates.FirstSomeAsync(candidate =>
+			Optional.Of(GetOriginalTitleAsync(candidate, cancellationToken)).Map(title => ResolveByTitleAsync(title, candidate.Type, candidates, cancellationToken))
+		);
 
 	private async Task<string?> GetOriginalTitleAsync(IExternalMediaId candidate, CancellationToken cancellationToken) =>
 		candidate switch
@@ -94,5 +70,6 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 			_ => null,
 		};
 
-	private static bool ContainsAnyCandidate(IReadOnlyList<IExternalMediaId> externals, List<IExternalMediaId> candidates) => candidates.Any(externals.Contains);
+	private static bool ContainsAnyCandidate(IEnumerable<IExternalMediaId> externals, IEnumerable<IExternalMediaId> candidates) =>
+		candidates.Any(externals.Contains);
 }

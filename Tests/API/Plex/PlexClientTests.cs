@@ -24,6 +24,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialRepository.Mock();
+		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(Error.From("No credential is stored for this provider."));
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await Assert

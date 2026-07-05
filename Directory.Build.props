@@ -4,5 +4,7 @@
 	</PropertyGroup>
 	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Shared.Generators' and '$(MSBuildProjectName)' != 'Shared.Generators.Tests'">
 		<Using Include="Shared" />
+		<Using Include="Shared.Collections" />
+		<Using Include="Shared.Extensions" />
 	</ItemGroup>
 </Project>

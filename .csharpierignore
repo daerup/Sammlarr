@@ -1,8 +1,8 @@
 Domain/Media/MediaLookup.cs
 Domain/Media/IdentifiedMedia.cs
 Contracts/Auth/AuthSession.cs
-Shared/Result.cs
-Shared/Option.cs
+Shared/Result/Result.cs
+Shared/Optional/Optional.cs
 Contracts/Processing/QueryResult.cs
 Contracts/Feed/RunSchedule.cs
 Contracts/Watchlist/WatchlistItemProvenance.cs

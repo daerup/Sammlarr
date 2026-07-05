@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Shared.Options.Generator;
+namespace Shared.Generators.Options;
 
 [Generator]
 public class OptionsSectionRegistrationGenerator : IIncrementalGenerator

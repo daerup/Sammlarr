@@ -26,4 +26,15 @@ public static class Success
 	public static Success<T> Of<T>(T value) where T : notnull => new(value);
 }
 
+public static class Result
+{
+	public static Result<T> Of<T>(T? value, Error error) where T : class => value is not null ? Success.Of(value) : error;
+
+	public static Result<T> Of<T>(T? value, string reason) where T : class => Of(value, Error.From(reason));
+
+	public static async Task<Result<T>> Of<T>(Task<T?> value, Error error) where T : class => Of(await value, error);
+
+	public static async Task<Result<T>> Of<T>(Task<T?> value, string reason) where T : class => Of(await value, reason);
+}
+
 public union Result<T>(Success<T>, Error) where T : notnull;

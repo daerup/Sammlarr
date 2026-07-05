@@ -213,3 +213,9 @@ end_of_line = lf
 
 [*.{cmd,bat}]
 end_of_line = crlf
+
+# Optional/Result stay in the flat `Shared` namespace: folding to `Shared.Optional`/`Shared.Result`
+# would collide with the eponymous `Optional`/`Result` types. Skip the folder-to-namespace check there.
+[Shared/{Optional,Result}/*.cs]
+dotnet_style_namespace_match_folder = false
+resharper_check_namespace_highlighting = none

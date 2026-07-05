@@ -84,7 +84,7 @@ internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaS
 	)
 	{
 		var externals = await LookUpExternalsAsync(plexId, cancellationToken);
-		return externals.Any(requires) ? Some.Of(externals) : new None();
+		return Optional.Of(externals).When(externals.Any(requires));
 	}
 
 	private static string ToPlexMediaType(MediaType mediaType) =>

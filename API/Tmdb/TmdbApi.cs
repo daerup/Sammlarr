@@ -53,9 +53,9 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConf
 	}
 
 	private async Task<IApiKey> GetApiKeyAsync(CancellationToken cancellationToken) =>
-		await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is Success<IApiKey>(var apiKey)
-			? apiKey
-			: throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
+		await apiKeyConfigRepository
+			.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken)
+			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys."));
 
 	private static string ToTmdbMediaType(MediaType mediaType) =>
 		mediaType switch

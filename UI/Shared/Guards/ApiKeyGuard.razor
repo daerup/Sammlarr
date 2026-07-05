@@ -10,8 +10,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var result = await ApiKeyConfigRepository.GetApiKeyAsync(Provider);
-        _hasAccess = result is IApiKey;
+        _hasAccess = await ApiKeyConfigRepository.GetApiKeyAsync(Provider).IsSuccess();
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
         {

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 
-namespace Shared;
+namespace Shared.Collections;
 
 [CollectionBuilder(typeof(ValueSet), nameof(ValueSet.Create))]
 public readonly struct ValueSet<T> : IReadOnlySet<T>, IEquatable<ValueSet<T>>

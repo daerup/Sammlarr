@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace Shared.Options.Generator;
+namespace Shared.Generators.Options;
 
 internal static class OptionsRegistrationSource
 {

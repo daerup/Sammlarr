@@ -162,17 +162,14 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		}
 	}
 
-	private async Task<Result<WatchlistSyncPlan>> PlanAsync(EngineDeps deps, CancellationToken cancellationToken)
-	{
-		var fetch = await FetchRemoteAsync(deps, cancellationToken);
-		if (fetch is not Success<IReadOnlyList<MediaId>>(var remoteIds))
-		{
-			return (Error)fetch.Value;
-		}
-		var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
-		var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
-		return Success.Of(WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps));
-	}
+	private async Task<Result<WatchlistSyncPlan>> PlanAsync(EngineDeps deps, CancellationToken cancellationToken) =>
+		await FetchRemoteAsync(deps, cancellationToken)
+			.Map(async remoteIds =>
+			{
+				var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
+				var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
+				return Success.Of(WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps));
+			});
 
 	private async Task<PushOutcome> PushAsync(
 		EngineDeps deps,

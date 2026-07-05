@@ -484,10 +484,7 @@
 
         foreach (var provider in AllProviders)
         {
-            if (await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsApiKeyProvider()) is not IApiKey)
-            {
-                _disabledProviders.Add(provider);
-            }
+            await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsApiKeyProvider()).ApplyError(_ => _disabledProviders.Add(provider));
         }
 
         if (_provider is not null && _disabledProviders.Contains(_provider.Value))

@@ -190,19 +190,11 @@
             return;
         }
         _loadedProvider = Provider;
-
-        if (await ApiKeyConfigRepository.GetApiKeyAsync(Provider) is IApiKey key)
-        {
-            _savedApiKey = key.Value;
-            _apiKeyInput = key.Value;
-            _savedState = State.Saved;
-        }
-        else
-        {
-            _savedApiKey = string.Empty;
-            _apiKeyInput = string.Empty;
-            _savedState = State.Idle;
-        }
+        _savedState = await ApiKeyConfigRepository
+                           .GetApiKeyAsync(Provider)
+                           .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
+                           .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
+                           .Match(State.Saved, State.Idle);
         _state = _savedState;
     }
 
@@ -212,16 +204,11 @@
     {
         _state = State.Testing;
 
-        if (await ApiKeyFactory.CreateAsync(Provider, _apiKeyInput) is IApiKey key)
-        {
-            _validatedKey = key;
-            _state = State.Success;
-        }
-        else
-        {
-            _validatedKey = null;
-            _state = State.Failed;
-        }
+        _state = await ApiKeyFactory
+            .CreateAsync(Provider, _apiKeyInput)
+            .Apply(key => _validatedKey = key)
+            .ApplyError(_ => _validatedKey = null)
+            .Match(State.Success, State.Failed);
     }
 
     private async Task SaveAsync()
