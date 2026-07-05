@@ -22,18 +22,11 @@ internal class ApiKeyConfigRepository(
 			return Success.Of(cached);
 		}
 
-		var stored = await LoadStoredKeyAsync(provider, cancellationToken);
-		if (stored is null)
-		{
-			return Error.From("No API key is configured for this provider.");
-		}
-
-		var result = await apiKeyFactory.CreateAsync(provider, stored, cancellationToken);
-		if (result is Success<IApiKey>(var apiKey))
-		{
-			cache.Set(provider, apiKey);
-		}
-		return result;
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx
+			.ApiKeySettings.SingleResultAsync(stored => stored.Provider == provider, "No API key is configured for this provider.", cancellationToken)
+			.Map(stored => apiKeyFactory.CreateAsync(provider, stored.ApiKey, cancellationToken))
+			.Apply(apiKey => cache.Set(provider, apiKey));
 	}
 
 	public async Task SetApiKeyAsync(IApiKey apiKey, CancellationToken cancellationToken = default)
@@ -68,11 +61,5 @@ internal class ApiKeyConfigRepository(
 		{
 			await mediaRepository.RemoveRatingsBySourceAsync(ratingProvider, cancellationToken);
 		}
-	}
-
-	private async Task<string?> LoadStoredKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.ApiKeySettings.Where(s => s.Provider == provider).Select(s => (string?)s.ApiKey).FirstOrDefaultAsync(cancellationToken);
 	}
 }

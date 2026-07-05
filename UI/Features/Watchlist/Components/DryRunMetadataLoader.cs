@@ -18,12 +18,8 @@ internal static class DryRunMetadataLoader
 		var metadata = new Dictionary<MediaId, MediaLookup>();
 		var ids = dryRun.Changes.Take(limit).Select(c => c.MediaId);
 
-		await foreach (var result in media.GetDetailsAsync(ids, cancellationToken))
+		await foreach (var detail in media.GetDetailsAsync(ids, cancellationToken).WhereSuccess())
 		{
-			if (result is not Success<IdentifiedMedia>(var detail))
-			{
-				continue;
-			}
 			metadata[detail.Id] = detail;
 		}
 		return metadata;

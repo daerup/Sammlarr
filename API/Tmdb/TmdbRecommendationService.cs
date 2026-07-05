@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using API.Tmdb.Types;
@@ -27,10 +28,9 @@ internal class TmdbRecommendationService(
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
-		if (await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is not Success<IApiKey>(var apiKey))
-		{
-			throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
-		}
+		var apiKey = await apiKeyConfigRepository
+			.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken)
+			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys."));
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
@@ -61,37 +61,34 @@ internal class TmdbRecommendationService(
 			MediaType = response.MediaType,
 		};
 
-	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome)
-	{
-		if (outcome is not Success<MediaIdentity>(var identity))
-		{
-			return BuildUnmatched(response);
-		}
+	private MediaLookup BuildTrending(TmdbTypes.Trending.Result response, Result<MediaIdentity> outcome) =>
+		outcome.Match(identity => IdentifiedMedia.From(BuildPartial(response, identity)), _ => BuildUnmatched(response));
 
-		IPartialMedia partial =
-			response.MediaType == MediaType.Show
-				? new PartialShow
-				{
-					Identity = identity,
-					Title = response.DisplayTitle,
-					Summary = response.Overview,
-					PosterUrl = options.ImageBaseUrl + response.PosterPath,
-					BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
-					ReleaseDate = ParseReleaseDate(response.AvailableDate),
-					Rating = BuildRating(response.VoteAverage),
-				}
-				: new PartialMovie
-				{
-					Identity = identity,
-					Title = response.DisplayTitle,
-					Summary = response.Overview,
-					PosterUrl = options.ImageBaseUrl + response.PosterPath,
-					BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
-					ReleaseDate = ParseReleaseDate(response.AvailableDate),
-					Rating = BuildRating(response.VoteAverage),
-				};
-		return IdentifiedMedia.From(partial);
-	}
+	private IPartialMedia BuildPartial(TmdbTypes.Trending.Result response, MediaIdentity identity) =>
+		response.MediaType switch
+		{
+			MediaType.Show => new PartialShow
+			{
+				Identity = identity,
+				Title = response.DisplayTitle,
+				Summary = response.Overview,
+				PosterUrl = options.ImageBaseUrl + response.PosterPath,
+				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+				ReleaseDate = ParseReleaseDate(response.AvailableDate),
+				Rating = BuildRating(response.VoteAverage),
+			},
+			MediaType.Movie => new PartialMovie
+			{
+				Identity = identity,
+				Title = response.DisplayTitle,
+				Summary = response.Overview,
+				PosterUrl = options.ImageBaseUrl + response.PosterPath,
+				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+				ReleaseDate = ParseReleaseDate(response.AvailableDate),
+				Rating = BuildRating(response.VoteAverage),
+			},
+			MediaType.Unknown => throw new UnreachableException(),
+		};
 
 	private MediaLookup BuildUnmatched(TmdbTypes.Trending.Result response) =>
 		new UnmatchedMedia

@@ -58,6 +58,25 @@ Key points:
 - Union types: `.IsOfUnionType<TUnion, TCase>()` — returns the case for chained assertions.
 - `.And.Multiple(async resolved => { ... })` to make grouped assertions on the unwrapped value.
 
+### Assert union cases with the extension, never a raw pattern (`using TestInfrastructure;`)
+
+Every union has purpose-built case assertions in `TestInfrastructure` — **use them instead of `Assert.That(x is Case).IsTrue()`**. They report the *actual* case on failure ("found Some") instead of a bare "Expected true but was False", and they narrow to the inner value for chaining.
+
+- `Result<T>` → `await Assert.That(r).IsOk();` / `await Assert.That(r).IsError();`
+- `Optional<T>` → `await Assert.That(o).IsSome();` / `await Assert.That(o).IsNone();`
+- Any union → `.IsOfUnionType<TUnion, TCase>()`; collections → `.AreOfUnionType(type1, type2, …)`.
+
+```csharp
+// ❌ raw pattern
+await Assert.That(mapped is Error).IsTrue();
+await Assert.That(opt is None).IsTrue();
+
+// ✅ extension
+await Assert.That(mapped).IsError();
+await Assert.That(opt).IsNone();
+```
+(Only exception: a collection "all cases are X" check — `values.All(v => v is Success<T>)` — has no dedicated extension and is acceptable.)
+
 Example from `TmdbIdConverterTests`:
 ```csharp
 await Assert.That(result)
@@ -110,6 +129,8 @@ Prefer **SQLite in-memory** over the EF InMemory provider — it catches relatio
 - ❌ Real network calls. Always stub via Imposter.
 - ❌ XML `/// <summary>` comments on tests.
 - ❌ `Moq` / `NSubstitute` directly — use `TUnit.Mocks` helpers, or `Mock.HttpHandler()` for HTTP.
+- ❌ `Assert.That(x is Error).IsTrue()` / `x is None` — use `.IsError()` / `.IsNone()` / `.IsOk()` / `.IsSome()` / `.IsOfUnionType<…>()`.
+- ❌ Returning a bare value from a `Result`/`Optional`-returning mock, e.g. `.Returns(credential)` when the method returns `Result<ICredential>` — wrap it (`Success.Of(...)` / `Error.From(...)`), or the mock yields a `default(Result<…>)` with **no** case set, which blows up any exhaustive `switch`. (`TestCredential` has an implicit conversion to `Result<ICredential>`, so `.Returns(testCredential)` is fine for that one.)
 
 ## ⚠️ Misleading snippet in `.github/instructions/`
 

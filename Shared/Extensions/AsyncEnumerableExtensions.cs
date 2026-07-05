@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
-namespace Shared;
+namespace Shared.Extensions;
 
 public static class AsyncEnumerableExtensions
 {

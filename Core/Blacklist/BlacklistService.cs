@@ -13,12 +13,8 @@ internal class BlacklistService(IBlacklistRepository repository, IMediaService m
 		var entries = (await repository.GetBlacklistedEntriesAsync(cancellationToken)).ToList();
 		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).Zip(entries, cancellationToken);
 
-		await foreach (var (result, entry) in pipeline)
+		await foreach (var (detail, entry) in pipeline.WhereSuccess())
 		{
-			if (result is not Success<IdentifiedMedia>(var detail))
-			{
-				continue;
-			}
 			yield return new BlacklistItem(detail, entry.AddedAt);
 		}
 	}

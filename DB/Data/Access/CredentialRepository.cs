@@ -21,24 +21,12 @@ internal class CredentialRepository(
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var credential = await ctx.Credentials.SingleOrDefaultAsync(c => c.WatchlistProvider == watchlistProvider, cancellationToken);
-		if (credential is null)
-		{
-			return Error.From("No credential is stored for this provider.");
-		}
-
-		var result = await credentialFactory.CreateAsync(
-			credential.WatchlistProvider,
-			credential.ClientId,
-			credential.AccessToken,
-			credential.ExpiresAt,
-			cancellationToken
-		);
-		if (result is Success<ICredential>(var valid))
-		{
-			cache.Set(watchlistProvider, valid);
-		}
-		return result;
+		return await ctx
+			.Credentials.SingleResultAsync(c => c.WatchlistProvider == watchlistProvider, "No credential is stored for this provider.", cancellationToken)
+			.Map(credential =>
+				credentialFactory.CreateAsync(credential.WatchlistProvider, credential.ClientId, credential.AccessToken, credential.ExpiresAt, cancellationToken)
+			)
+			.Apply(valid => cache.Set(watchlistProvider, valid));
 	}
 
 	public async Task StoreAsync(

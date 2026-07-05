@@ -5,6 +5,7 @@ using DB.Data.Access;
 using Domain.Auth;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
@@ -22,7 +23,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	{
 		_cache = ITypedMemoryCache<ApiKeyProvider, IApiKey>.Mock();
 		_mediaRepository = IMediaRepository.Mock();
-		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object, IApiKeyFactory.Mock().Object);
+		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object, new TestApiKeyFactory());
 	}
 
 	[Test]
@@ -84,6 +85,25 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 	}
 
 	[Test]
+	public async Task GetApiKeyAsync_WhenNotStored_ReturnsError()
+	{
+		var apiKey = await _testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
+
+		await Assert.That(apiKey).IsError();
+	}
+
+	[Test]
+	public async Task GetApiKeyAsync_WhenStored_ReturnsApiKey()
+	{
+		var provider = ApiKeyProvider.Tmdb;
+		await SetUpApiKeyAsync(provider, "secret-api-key");
+
+		var apiKey = await _testee.GetApiKeyAsync(provider);
+
+		await Assert.That(apiKey).IsOk().And.Multiple(async resolved => await Assert.That(resolved.Value).IsEqualTo("secret-api-key"));
+	}
+
+	[Test]
 	public async Task SetApiKey_AddsToCache()
 	{
 		var provider = ApiKeyProvider.Tmdb;
@@ -132,3 +152,9 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 }
 
 file sealed record TestApiKey(ApiKeyProvider Provider, string Value) : IApiKey;
+
+file sealed class TestApiKeyFactory : IApiKeyFactory
+{
+	public Task<Result<IApiKey>> CreateAsync(ApiKeyProvider provider, string value, CancellationToken cancellationToken = default) =>
+		Task.FromResult<Result<IApiKey>>(Success.Of<IApiKey>(new TestApiKey(provider, value)));
+}

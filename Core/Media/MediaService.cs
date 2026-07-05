@@ -167,12 +167,9 @@ internal sealed class MediaService(
 
 	private async ValueTask<Optional<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, CancellationToken cancellationToken)
 	{
-		var discovered = await idResolver.ResolveAsync(request, cancellationToken);
-		if (discovered is not Some<IReadOnlyList<IExternalMediaId>>(var externals))
-		{
-			return new None();
-		}
-		return Some.Of(new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), null));
+		return await idResolver
+			.ResolveAsync(request, cancellationToken)
+			.Map(externals => new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), null));
 	}
 
 	private async ValueTask<Result<IdentifiedMedia>> RealizeFromCacheAsync(
@@ -240,8 +237,7 @@ internal sealed class MediaService(
 		}
 	}
 
-	private static Result<MediaIdentity> ToIdentityResult(Optional<ResolvedIdentity> resolution) =>
-		resolution is Some<ResolvedIdentity>(var r) ? Success.Of(r.Identity) : Error.From("unresolved");
+	private static Result<MediaIdentity> ToIdentityResult(Optional<ResolvedIdentity> resolution) => resolution.Map(r => r.Identity).ToResult("unresolved");
 
 	private async Task<IReadOnlyDictionary<MediaId, CachedMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
 	{

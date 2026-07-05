@@ -8,23 +8,11 @@ namespace API.Imdb;
 
 internal class ImdbIdConverter(PlexApi plexApi) : IExternalIdConverter
 {
-	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
+	public Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
 		IEnumerable<IExternalMediaId> candidates,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default
-	)
-	{
-		foreach (var id in candidates)
-		{
-			var result = await TryConvertAsync(id);
-			if (result is Some<IReadOnlyList<IExternalMediaId>>)
-			{
-				return result;
-			}
-		}
-
-		return new None();
-	}
+	) => candidates.FirstSomeAsync(TryConvertAsync);
 
 	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> TryConvertAsync(IExternalMediaId id) =>
 		id switch

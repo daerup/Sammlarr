@@ -57,10 +57,9 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 	private async Task<(MdblistTypes.ListItems.Root Page, bool HasMore)> FetchPageAsync(string identifier, int offset, CancellationToken cancellationToken)
 	{
 		var endpoint = string.Format(MdblistEndpoints.ListItems, identifier, PageSize, offset);
-		if (await apiKeyRepository.GetApiKeyAsync(ApiKeyProvider.Mdblist, cancellationToken) is not Success<IApiKey>(var apiKey))
-		{
-			throw new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys.");
-		}
+		var apiKey = await apiKeyRepository
+			.GetApiKeyAsync(ApiKeyProvider.Mdblist, cancellationToken)
+			.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys."));
 		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, null, cancellationToken);
 		if (response.StatusCode == HttpStatusCode.NotFound)
 		{
