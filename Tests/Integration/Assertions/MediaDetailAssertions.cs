@@ -3,6 +3,7 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Media.Local;
 using Reqnroll;
 using Reqnroll.Assist;
@@ -39,7 +40,7 @@ internal static class MediaDetailAssertions
 		public string? Title { get; set; }
 		public MediaType? Type { get; set; }
 		public string? Poster { get; set; }
-		public RatingSource? Rating { get; set; }
+		public RatingProvider? Rating { get; set; }
 	}
 
 	private sealed class TitleRow

@@ -7,6 +7,7 @@ using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -54,6 +55,31 @@ public class MediaMetadataResolverTests
 		await Assert.That(queued.Externals).Contains(plexId);
 		await Assert.That(queued.Externals).Contains(imdbId);
 		await Assert.That(buffer.NewMetadata.Single().Identity.Externals).IsEquivalentTo(queued.Externals);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenEnrichmentSuppliesRating_SkipsSeparateRatingFetch()
+	{
+		var mediaId = MediaId.From(Guid.NewGuid());
+		var plexExternal = PlexId.From("plex-rating", MediaType.Movie);
+		var tmdbExternal = TmdbId.From("500", MediaType.Movie);
+		var identity = new MediaIdentity(mediaId, [plexExternal, tmdbExternal]);
+		var (testee, deps) = CreateTestee();
+
+		var basePartial = new PartialMovie { Identity = new MediaIdentity(mediaId, [plexExternal]), Title = "Base" };
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(IdentifiedMedia.From(basePartial).ToMatch());
+		var enriched = new PartialMovie
+		{
+			Identity = new MediaIdentity(mediaId, [tmdbExternal]),
+			Title = "Enriched",
+			Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8f, 500)]),
+		};
+		deps.Enricher.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(IdentifiedMedia.From(enriched).ToMatch());
+		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, NullLogger<MediaResolutionBuffer>.Instance);
+
+		await testee.ResolveAsync(identity, buffer);
+
+		deps.Rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	private static (MediaMetadataResolver Testee, Dependencies Deps) CreateTestee()

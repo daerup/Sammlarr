@@ -34,5 +34,5 @@ public class TmdbRatingSteps(TmdbRatingScenarioContext ctx, SammlarrScenarioCont
 	[Then("the result is empty")]
 	public async Task ThenResultIsEmpty() => await Assert.That(ctx.Ratings!).IsEmpty();
 
-	private sealed record RatingRow(RatingSource Source, float Value, int Votes);
+	private sealed record RatingRow(RatingProvider Source, float Value, int Votes);
 }

@@ -1,6 +1,5 @@
 using Contracts;
 using Contracts.Auth;
-using Contracts.Caching;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
@@ -24,17 +23,11 @@ public class OAuthServiceTests
 			RatingProvider = RatingProvider.Tmdb,
 		};
 
-	private static OAuthService CreateTestee(
-		Mock<IOAuthProvider> provider,
-		Mock<IProviderConfigRepository> config,
-		Mock<ICredentialRepository> credentials,
-		Mock<ITypedMemoryCache<WatchlistProvider, AuthorizedUser>> userCache
-	) =>
+	private static OAuthService CreateTestee(Mock<IOAuthProvider> provider, Mock<IProviderConfigRepository> config, Mock<ICredentialRepository> credentials) =>
 		new(
 			new FakeKeyedServiceIndex<WatchlistProvider, IOAuthProvider>().Register(WatchlistProvider.Plex, provider.Object),
 			config.Object,
 			credentials.Object,
-			userCache.Object,
 			NullLogger<OAuthService>.Instance
 		);
 
@@ -48,7 +41,7 @@ public class OAuthServiceTests
 		config.GetAsync(Any()).Returns(PlexConfig);
 		var credentials = ICredentialRepository.Mock();
 		credentials.GetAsync(WatchlistProvider.Plex, Any()).Returns(new TestCredential(WatchlistProvider.Plex, Guid.NewGuid(), "token", DateTimeOffset.MaxValue));
-		var testee = CreateTestee(provider, config, credentials, ITypedMemoryCache<WatchlistProvider, AuthorizedUser>.Mock());
+		var testee = CreateTestee(provider, config, credentials);
 
 		var result = await testee.GetUserAsync();
 
@@ -61,7 +54,7 @@ public class OAuthServiceTests
 		var provider = IOAuthProvider.Mock();
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
-		var testee = CreateTestee(provider, config, ICredentialRepository.Mock(), ITypedMemoryCache<WatchlistProvider, AuthorizedUser>.Mock());
+		var testee = CreateTestee(provider, config, ICredentialRepository.Mock());
 
 		var result = await testee.GetUserAsync();
 
@@ -76,7 +69,7 @@ public class OAuthServiceTests
 		provider.BeginLoginAsync("https://callback", Any()).Returns("https://auth-url");
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
-		var testee = CreateTestee(provider, config, ICredentialRepository.Mock(), ITypedMemoryCache<WatchlistProvider, AuthorizedUser>.Mock());
+		var testee = CreateTestee(provider, config, ICredentialRepository.Mock());
 
 		var result = await testee.BeginLoginAsync("https://callback");
 
@@ -94,7 +87,7 @@ public class OAuthServiceTests
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
 		var credentials = ICredentialRepository.Mock();
-		var testee = CreateTestee(provider, config, credentials, ITypedMemoryCache<WatchlistProvider, AuthorizedUser>.Mock());
+		var testee = CreateTestee(provider, config, credentials);
 
 		var result = await testee.CompleteLoginAsync(callback);
 
@@ -111,7 +104,7 @@ public class OAuthServiceTests
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
 		var credentials = ICredentialRepository.Mock();
-		var testee = CreateTestee(provider, config, credentials, ITypedMemoryCache<WatchlistProvider, AuthorizedUser>.Mock());
+		var testee = CreateTestee(provider, config, credentials);
 
 		var result = await testee.CompleteLoginAsync(callback);
 
@@ -120,18 +113,16 @@ public class OAuthServiceTests
 	}
 
 	[Test]
-	public async Task LogoutAsync_ClearsCredentialAndEvictsCachedUser()
+	public async Task LogoutAsync_ClearsCredential()
 	{
 		var provider = IOAuthProvider.Mock();
 		var config = IProviderConfigRepository.Mock();
 		config.GetAsync(Any()).Returns(PlexConfig);
 		var credentials = ICredentialRepository.Mock();
-		var userCache = ITypedMemoryCache<WatchlistProvider, AuthorizedUser>.Mock();
-		var testee = CreateTestee(provider, config, credentials, userCache);
+		var testee = CreateTestee(provider, config, credentials);
 
 		await testee.LogoutAsync();
 
 		credentials.ClearAsync(WatchlistProvider.Plex, Any()).WasCalled(Times.Once);
-		userCache.Remove(WatchlistProvider.Plex).WasCalled(Times.Once);
 	}
 }

@@ -1,9 +1,6 @@
-namespace Domain.Media.Metadata;
+using Domain.Providers;
 
-public enum RatingSource
-{
-	Tmdb,
-}
+namespace Domain.Media.Metadata;
 
 public readonly record struct RatingSummary(float? Average, ValueSet<MediaRating> Sources)
 {
@@ -13,4 +10,4 @@ public readonly record struct RatingSummary(float? Average, ValueSet<MediaRating
 		sources.Count == 0 ? None : new(sources.Average(rating => rating.NormalizedValue), [.. sources]);
 }
 
-public readonly record struct MediaRating(RatingSource Source, float NormalizedValue, int? VoteCount = null);
+public readonly record struct MediaRating(RatingProvider Source, float NormalizedValue, int? VoteCount = null);

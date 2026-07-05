@@ -6,6 +6,7 @@ using DB.Data.Media;
 using DB.Data.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Metadata;
@@ -71,13 +72,13 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var details = CreateMovieDetails(MediaId.From(Guid.NewGuid()), [TmdbId.From("110", MediaType.Movie)]) with
 		{
-			Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 8.4f, 1234)]),
+			Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.4f, 1234)]),
 		};
 
 		var entity = (MovieMetadataRow)_testee.BuildFrom(details, Guid.NewGuid());
 
 		await Assert.That(entity.Ratings).Count().IsEqualTo(1);
-		await Assert.That(entity.Ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(entity.Ratings[0].Source).IsEqualTo(RatingProvider.Tmdb);
 		await Assert.That(entity.Ratings[0].NormalizedValue).IsEqualTo(8.4f);
 	}
 
@@ -102,18 +103,18 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var existing = await PersistAsync(
 			CreateMovieDetails(mediaId, [plexId]) with
 			{
-				Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 5.0f, 10)]),
+				Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 5.0f, 10)]),
 			},
 			mediaId
 		);
 
-		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 9.0f, 9999)]) });
+		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 9.0f, 9999)]) });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaRatings.AsNoTracking().SingleAsync();
 		using var _ = Assert.Multiple();
-		await Assert.That(stored.Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(stored.Source).IsEqualTo(RatingProvider.Tmdb);
 		await Assert.That(stored.NormalizedValue).IsEqualTo(9.0f);
 		await Assert.That(stored.VoteCount).IsEqualTo(9999);
 	}
@@ -126,7 +127,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var existing = await PersistAsync(
 			CreateMovieDetails(mediaId, [plexId]) with
 			{
-				Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 5.0f, 10)]),
+				Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 5.0f, 10)]),
 			},
 			mediaId
 		);
@@ -189,7 +190,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var entity = await PersistAsync(
 			CreateMovieDetails(mediaId, [plexId, imdbId]) with
 			{
-				Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 7.5f, 500)]),
+				Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 7.5f, 500)]),
 			},
 			mediaId
 		);
@@ -200,7 +201,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(stored is Movie).IsTrue();
 		await Assert.That(stored is Movie movie && movie.Identity.Externals.Contains(imdbId)).IsTrue();
 		await Assert.That(stored is Movie { Rating.Sources.Count: 1 }).IsTrue();
-		await Assert.That(stored is Movie m && m.Rating.Sources.Single().Source == RatingSource.Tmdb).IsTrue();
+		await Assert.That(stored is Movie m && m.Rating.Sources.Single().Source == RatingProvider.Tmdb).IsTrue();
 	}
 
 	private async Task<MediaMetadataRow> PersistAsync(IdentifiedMedia details, MediaId mediaId)

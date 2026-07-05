@@ -1,5 +1,6 @@
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 
 namespace Domain.Tests.Media.Metadata;
 
@@ -85,7 +86,7 @@ public class MediaMergerTests
 	{
 		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Dune" };
 
-		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(RatingSource.Tmdb, 7f)]);
+		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(RatingProvider.Tmdb, 7f)]);
 
 		await Assert.That(withRatings is PartialMovie movie && movie.Rating.Average == 7f).IsTrue();
 	}

@@ -44,6 +44,11 @@ internal sealed class MediaMetadataResolver(
 
 	private async Task<IdentifiedMedia> ApplyRatingsAsync(IdentifiedMedia details, RatingProvider ratingProvider, CancellationToken cancellationToken)
 	{
+		if (details.Rating.Sources.Any(rating => rating.Source == ratingProvider))
+		{
+			return details;
+		}
+
 		var ratingId = details.Externals.OfProvider(ratingProvider.AsMediaProvider());
 		if (ratingId is null)
 		{

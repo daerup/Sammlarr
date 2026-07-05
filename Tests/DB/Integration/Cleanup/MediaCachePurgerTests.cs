@@ -67,14 +67,14 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		fixture.Context.MediaRatings.AddRange(
 			new MediaRatingRow
 			{
-				Source = RatingSource.Tmdb,
+				Source = RatingProvider.Tmdb,
 				NormalizedValue = 8.0f,
 				VoteCount = 1234,
 				Metadata = blacklistedMetadata,
 			},
 			new MediaRatingRow
 			{
-				Source = RatingSource.Tmdb,
+				Source = RatingProvider.Tmdb,
 				NormalizedValue = 7.0f,
 				VoteCount = 567,
 				Metadata = purgedMetadata,

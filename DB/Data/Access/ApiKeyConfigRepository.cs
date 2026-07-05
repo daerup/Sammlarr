@@ -64,9 +64,9 @@ internal class ApiKeyConfigRepository(
 
 		cache.Remove(provider);
 
-		if (provider.AsRatingSource() is { } ratingSource)
+		if (provider.AsRatingProvider() is { } ratingProvider)
 		{
-			await mediaRepository.RemoveRatingsBySourceAsync(ratingSource, cancellationToken);
+			await mediaRepository.RemoveRatingsBySourceAsync(ratingProvider, cancellationToken);
 		}
 	}
 

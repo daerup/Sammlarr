@@ -1,6 +1,6 @@
-using System.Threading.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
+using Polly.Timeout;
 using Shared.DI;
 
 namespace API;
@@ -11,14 +11,14 @@ internal sealed class ResilienceModule : IServiceModule
 
 	private static void Configure(HttpStandardResilienceOptions options)
 	{
-		options.Retry.MaxRetryAttempts = 5;
+		options.Retry.MaxRetryAttempts = 2;
 		options.Retry.UseJitter = true;
-		options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(120);
-		options.CircuitBreaker.FailureRatio = 0.9;
-		options.CircuitBreaker.MinimumThroughput = 1000;
-		options.RateLimiter = new HttpRateLimiterStrategyOptions
-		{
-			DefaultRateLimiterOptions = new ConcurrencyLimiterOptions { PermitLimit = 8, QueueLimit = 4096 },
-		};
+		options.Retry.ShouldHandle = static args => new ValueTask<bool>(
+			args.Outcome.Exception is not TimeoutRejectedException && HttpClientResiliencePredicates.IsTransient(args.Outcome)
+		);
+		options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(6);
+		options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(15);
+		options.CircuitBreaker.FailureRatio = 0.5;
+		options.CircuitBreaker.MinimumThroughput = 20;
 	}
 }
