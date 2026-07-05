@@ -1,4 +1,6 @@
-namespace Shared.Options.Generator.Tests;
+using Shared.Options;
+
+namespace Shared.Generators.Tests;
 
 internal sealed record DummyOptions : IOptionsSection
 {
