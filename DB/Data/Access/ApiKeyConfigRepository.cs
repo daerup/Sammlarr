@@ -15,7 +15,7 @@ internal class ApiKeyConfigRepository(
 	IApiKeyFactory apiKeyFactory
 ) : IApiKeyConfigRepository
 {
-	public async Task<Result<IApiKey>> GetApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	public async ValueTask<Result<IApiKey>> GetApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
 		if (cache.TryGetValue(provider, out var cached) && cached is not null)
 		{

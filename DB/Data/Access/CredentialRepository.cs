@@ -13,7 +13,7 @@ internal class CredentialRepository(
 	ICredentialFactory credentialFactory
 ) : ICredentialRepository
 {
-	public async Task<Result<ICredential>> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
+	public async ValueTask<Result<ICredential>> GetAsync(WatchlistProvider watchlistProvider, CancellationToken cancellationToken = default)
 	{
 		if (cache.TryGetValue(watchlistProvider, out var cached) && cached is not null)
 		{
