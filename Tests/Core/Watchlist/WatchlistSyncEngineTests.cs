@@ -57,9 +57,7 @@ public class WatchlistSyncEngineTests
 		var mediaRepo = IMediaRepository.Mock();
 		mediaRepo
 			.GetExternalsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any())
-			.Returns(
-				(IReadOnlyDictionary<MediaId, IExternalMediaId>)new Dictionary<MediaId, IExternalMediaId> { [firstId] = firstExternal, [secondId] = secondExternal }
-			);
+			.Returns(new Dictionary<MediaId, IExternalMediaId> { [firstId] = firstExternal, [secondId] = secondExternal });
 
 		var engine = BuildEngine(provider, repository, outbox, mediaRepo);
 

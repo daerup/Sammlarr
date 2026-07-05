@@ -1,23 +1,22 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Contracts.Media;
 using Domain.Media;
-using Shared.Telemetry;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Media;
 
 internal sealed class MediaResolutionBuffer : IAsyncDisposable
 {
 	private readonly IMediaRepository _mediaRepository;
-	private readonly Activity? _activity;
+	private readonly ILogger<MediaResolutionBuffer> _logger;
 
 	public ConcurrentBag<MediaIdentity> NewIdentities { get; } = new();
 	public ConcurrentBag<IdentifiedMedia> NewMetadata { get; } = new();
 
-	public MediaResolutionBuffer(IMediaRepository mediaRepository)
+	public MediaResolutionBuffer(IMediaRepository mediaRepository, ILogger<MediaResolutionBuffer> logger)
 	{
 		_mediaRepository = mediaRepository;
-		_activity = SammlarrTelemetry.StartMediaFlush();
+		_logger = logger;
 	}
 
 	public void AddIdentity(MediaIdentity identity) => NewIdentities.Add(identity);
@@ -37,22 +36,18 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 	{
 		var identities = NewIdentities.ToList();
 		var metadata = NewMetadata.ToList();
-		SammlarrTelemetry.TagMediaFlushCounts(_activity, identities.Count, metadata.Count);
-		try
+		if (identities.Count > 0)
 		{
-			if (identities.Count > 0)
-			{
-				var canonical = await _mediaRepository.UpsertIdentitiesAsync(identities, CancellationToken.None);
-				metadata = RemapMetadata(metadata, identities, canonical);
-			}
-			if (metadata.Count > 0)
-			{
-				await _mediaRepository.UpsertMetadataAsync(metadata, CancellationToken.None);
-			}
+			var canonical = await _mediaRepository.UpsertIdentitiesAsync(identities, CancellationToken.None);
+			metadata = RemapMetadata(metadata, identities, canonical);
 		}
-		finally
+		if (metadata.Count > 0)
 		{
-			_activity?.Dispose();
+			await _mediaRepository.UpsertMetadataAsync(metadata, CancellationToken.None);
+		}
+		if (identities.Count > 0 || metadata.Count > 0)
+		{
+			_logger.LogDebug("Media resolution buffer flushed: upserted {Identities} identities, {Metadata} metadata rows", identities.Count, metadata.Count);
 		}
 	}
 

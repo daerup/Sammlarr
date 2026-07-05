@@ -54,7 +54,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	{
 		var request = BuildRequest([ParseId(id)], title, target);
 		var results = await Service.IdentifyAsync([request]).ToListAsync();
-		ctx.Identification = results[0] is MediaIdentity identification ? identification : (MediaIdentity?)null;
+		ctx.Identification = results[0] is MediaIdentity identification ? identification : null;
 		ctx.Identifications = [ctx.Identification];
 	}
 

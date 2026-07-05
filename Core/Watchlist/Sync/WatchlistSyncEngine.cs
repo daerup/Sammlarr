@@ -11,9 +11,9 @@ using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Observability.Tracing;
 using Shared;
 using Shared.Options;
-using Shared.Telemetry;
 
 namespace Core.Watchlist.Sync;
 
@@ -29,13 +29,13 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			return new WatchlistSyncAlreadyRunning();
 		}
 
+		using var activity = Instrumentation.Source.StartActivity(nameof(WatchlistSyncEngine));
+		activity?.SetTag("sammlarr.sync.trigger", trigger.ToString());
 		try
 		{
 			await using var scope = scopeFactory.CreateAsyncScope();
 			var deps = await ResolveAsync(scope, cancellationToken);
-
-			var stopwatch = Stopwatch.StartNew();
-			using var activity = SammlarrTelemetry.StartWatchlistSync(deps.Provider, trigger);
+			activity?.SetTag("sammlarr.sync.provider", deps.Provider.ToString());
 
 			var planning = await PlanAsync(deps, cancellationToken);
 			var syncResult = planning switch
@@ -43,7 +43,10 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 				Error error => OnPlanError(error, deps.Provider),
 				WatchlistSyncPlan plan => await ExecutePlanAsync(plan, deps, cancellationToken),
 			};
-			SammlarrTelemetry.TagWatchlistSyncOutcome(activity, syncResult, stopwatch.ElapsedMilliseconds);
+			if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
+			{
+				activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
+			}
 			return syncResult;
 		}
 		finally
@@ -73,6 +76,16 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		var adds = await PushAsync(deps, plan.PushAdds, pushExternals, WatchlistOperationKind.Add, drainCts.Token);
 		var removes = await PushAsync(deps, plan.PushRemoves, pushExternals, WatchlistOperationKind.Remove, drainCts.Token);
 
+		logger.LogInformation(
+			"Watchlist sync {Provider} complete: inserted {Inserted}, confirmed {Confirmed}, deleted {Deleted}, pushed +{PushedAdds}/-{PushedRemoves}, failed {Failed}",
+			deps.Provider,
+			plan.InsertCount,
+			plan.ConfirmCount,
+			plan.HardDeleteCount,
+			adds.Pushed,
+			removes.Pushed,
+			adds.Failed + removes.Failed
+		);
 		return BuildResult(plan, adds, removes);
 	}
 
@@ -126,7 +139,6 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 	{
 		try
 		{
-			using var fetch = SammlarrTelemetry.StartWatchlistRemoteFetch(deps.Provider);
 			var externals = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
 			var requests = externals.Select(e => new ResolveRequest([e], deps.MediaProvider, new None()));
 			var remoteMediaIds = new List<MediaId>(externals.Count);
@@ -268,16 +280,12 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 
 	private async Task OnPushSuccess(EngineDeps deps, WatchlistOperationKind kind, MediaId mediaId, string op, CancellationToken cancellationToken)
 	{
-		using var push = SammlarrTelemetry.StartWatchlistPush(deps.Provider, op);
 		await deps.Outbox.DropAsync(kind, [mediaId], cancellationToken);
-		SammlarrTelemetry.TagWatchlistPushOutcome(push, true);
 	}
 
 	private async Task OnPushFailure(EngineDeps deps, WatchlistOperationKind kind, MediaId mediaId, string op, CancellationToken cancellationToken)
 	{
-		using var push = SammlarrTelemetry.StartWatchlistPush(deps.Provider, op);
 		await deps.Outbox.RecordFailureAsync(kind, [mediaId], cancellationToken);
-		SammlarrTelemetry.TagWatchlistPushOutcome(push, false);
 	}
 
 	private static WatchlistSyncResult BuildResult(WatchlistSyncPlan plan, PushOutcome adds, PushOutcome removes)

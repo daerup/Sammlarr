@@ -7,8 +7,8 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Microsoft.Extensions.Logging;
 using Shared;
-using Shared.Telemetry;
 
 namespace Core.Media;
 
@@ -16,8 +16,10 @@ internal sealed class MediaService(
 	MediaIdResolver idResolver,
 	MediaMetadataResolver metadataResolver,
 	MediaIdentityCoordinator coordinator,
+	MediaResolutionBufferFactory bufferFactory,
 	IMediaRepository mediaRepository,
-	IDateTimeProvider dateTimeProvider
+	IDateTimeProvider dateTimeProvider,
+	ILogger<MediaService> logger
 ) : IMediaService
 {
 	public async IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(
@@ -31,7 +33,7 @@ internal sealed class MediaService(
 			yield break;
 		}
 
-		await using var buffer = new MediaResolutionBuffer(mediaRepository);
+		await using var buffer = bufferFactory.Create();
 		var resolutions = await ResolveBatchAsync(materialized, buffer, cancellationToken);
 		foreach (var (request, resolution) in materialized.Zip(resolutions))
 		{
@@ -50,7 +52,7 @@ internal sealed class MediaService(
 			yield break;
 		}
 
-		await using var buffer = new MediaResolutionBuffer(mediaRepository);
+		await using var buffer = bufferFactory.Create();
 		var cached = await LoadByInternalsAsync(materialized, cancellationToken);
 		var pipeline = materialized.SelectAwait(
 			id => RealizeFromCacheAsync(id, cached, buffer, cancellationToken),
@@ -74,7 +76,7 @@ internal sealed class MediaService(
 			yield break;
 		}
 
-		await using var buffer = new MediaResolutionBuffer(mediaRepository);
+		await using var buffer = bufferFactory.Create();
 		var resolutions = await ResolveBatchAsync(materialized, buffer, cancellationToken);
 		var pipeline = materialized
 			.Zip(resolutions)
@@ -98,7 +100,7 @@ internal sealed class MediaService(
 		{
 			return [];
 		}
-		await using var buffer = new MediaResolutionBuffer(mediaRepository);
+		await using var buffer = bufferFactory.Create();
 		var preliminary = candidateGroups.Select(g => new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. g])).ToList();
 		return await coordinator.CoordinateAsync(preliminary, buffer, cancellationToken);
 	}
@@ -129,14 +131,11 @@ internal sealed class MediaService(
 		CancellationToken cancellationToken
 	)
 	{
-		var title = request.Hints is Some<ResolutionHints>(var hints) ? hints.Title : null;
-		using var activity = SammlarrTelemetry.StartIdResolution(request.Target, request.Candidates, title);
 		if (TryResolveFromCache(request, cached, buffer) is Some<ResolvedIdentity> hit)
 		{
-			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Hit, request.Target);
 			return hit;
 		}
-		return await ResolveFromProviderAsync(request, activity, cancellationToken);
+		return await ResolveFromProviderAsync(request, cancellationToken);
 	}
 
 	private static Optional<ResolvedIdentity> TryResolveFromCache(
@@ -166,15 +165,13 @@ internal sealed class MediaService(
 		return Some.Of(new ResolvedIdentity(merged, match));
 	}
 
-	private async ValueTask<Optional<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, Activity? activity, CancellationToken cancellationToken)
+	private async ValueTask<Optional<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, CancellationToken cancellationToken)
 	{
 		var discovered = await idResolver.ResolveAsync(request, cancellationToken);
 		if (discovered is not Some<IReadOnlyList<IExternalMediaId>>(var externals))
 		{
-			SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Unresolved, request.Target);
 			return new None();
 		}
-		SammlarrTelemetry.TagIdResolutionOutcome(activity, IdResolutionOutcome.Resolved, request.Target);
 		return Some.Of(new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), null));
 	}
 
@@ -233,7 +230,13 @@ internal sealed class MediaService(
 		}
 		catch (Exception ex)
 		{
-			return cached is { } stale ? stale.Stored : Error.From(ex);
+			if (cached is { } stale)
+			{
+				logger.LogWarning(ex, "Media realize failed for {MediaId}; serving stale cache", identity.Id);
+				return stale.Stored;
+			}
+			logger.LogError(ex, "Media realize failed for {MediaId}; no cache fallback", identity.Id);
+			return Error.From(ex);
 		}
 	}
 

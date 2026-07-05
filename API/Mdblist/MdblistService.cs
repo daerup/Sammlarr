@@ -12,7 +12,6 @@ using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
 using Shared;
-using Shared.Telemetry;
 
 namespace API.Mdblist;
 
@@ -24,7 +23,6 @@ internal class MdblistService(MdblistClient client, IMediaService media, IProvid
 
 	public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		using var activity = SammlarrTelemetry.StartFeedLoad(FeedProvider.Mdblist, identifier);
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
 		var watchlistProvider = providerConfig.WatchlistProvider.AsMediaProvider();
 

@@ -1,4 +1,5 @@
 using Contracts;
+using Domain;
 using Domain.Auth;
 using Domain.Providers;
 
@@ -10,6 +11,7 @@ internal sealed class TmdbApiKey : IApiKey
 
 	public ApiKeyProvider Provider => ApiKeyProvider.Tmdb;
 
+	[Sensitive]
 	public string Value { get; }
 
 	public static async Task<Result<IApiKey>> CreateAsync(string value, TmdbClient client, CancellationToken cancellationToken = default)
@@ -21,6 +23,4 @@ internal sealed class TmdbApiKey : IApiKey
 
 		return new TmdbApiKey(value);
 	}
-
-	public override string ToString() => $"ApiKey({Provider}, ****)";
 }

@@ -12,6 +12,7 @@
 		<ProjectReference Include="..\DB\DB.csproj" />
 		<ProjectReference Include="..\Shared\Shared.csproj" />
 		<ProjectReference Include="..\API\API.csproj" />
+		<ProjectReference Include="..\Observability\Observability.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="UI.Tests" />
@@ -22,6 +23,7 @@
 		<PackageReference Include="BlazorBlueprint.Icons.Lucide" />
 		<PackageReference Include="CronExpressionDescriptor" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+		<PackageReference Include="Serilog" />
 		<PackageReference Include="timewarp-simple-icons" />
 	</ItemGroup>
 	<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">

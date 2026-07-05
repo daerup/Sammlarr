@@ -85,20 +85,7 @@ public class BlacklistServiceTests
 	private BlacklistService CreateTestee(Mock<IBlacklistRepository>? repository = null, IMediaService? media = null)
 	{
 		var repo = repository ?? IBlacklistRepository.Mock();
-		var providerConfigRepository = IProviderConfigRepository.Mock();
-		providerConfigRepository
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					WatchlistProvider = WatchlistProvider.Plex,
-					TrendingProvider = MediaRecommendationProvider.Tmdb,
-					SearchProvider = MediaSearchProvider.Plex,
-					RatingProvider = RatingProvider.Tmdb,
-				}
-			);
-
-		return new BlacklistService(repo.Object, providerConfigRepository.Object, media ?? DefaultMedia());
+		return new BlacklistService(repo.Object, media ?? DefaultMedia());
 	}
 
 	private static IMediaService DefaultMedia()

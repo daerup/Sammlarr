@@ -11,6 +11,7 @@ using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace Core.Tests.Media;
@@ -214,7 +215,15 @@ public class MediaServiceTests
 
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
-		var testee = new MediaService(new MediaIdResolver(null, unresolvedCache.Object), metadataResolver, coordinator, mediaRepo.Object, dateTimeProvider.Object);
+		var testee = new MediaService(
+			new MediaIdResolver(null, unresolvedCache.Object),
+			metadataResolver,
+			coordinator,
+			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
+			mediaRepo.Object,
+			dateTimeProvider.Object,
+			NullLogger<MediaService>.Instance
+		);
 		return (testee, new Deps(mediaRepo, search, unresolvedCache));
 	}
 

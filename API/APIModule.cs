@@ -1,8 +1,8 @@
 using API.Auth;
 using API.Imdb;
 using API.Mdblist;
+using API.Observability;
 using API.Plex;
-using API.Telemetry;
 using API.Tmdb;
 using API.TvDB;
 using Contracts.Auth;
@@ -20,7 +20,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<PlexModule>();
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
-		services.AddModule<TelemetryModule>();
+		services.AddModule<InstrumentationModule>();
 		services.AddModule<ResilienceModule>();
 
 		services.AddScoped<IApiKeyFactory, ApiKeyFactory>();

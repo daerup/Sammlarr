@@ -1,10 +1,10 @@
 using API;
 using Core;
 using DB;
+using Observability.Diagnostics;
 using Shared;
 using Shared.DI;
 using UI;
-using UI.Telemetry.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 

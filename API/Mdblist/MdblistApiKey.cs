@@ -1,4 +1,5 @@
 using Contracts;
+using Domain;
 using Domain.Auth;
 using Domain.Providers;
 
@@ -10,6 +11,7 @@ internal sealed class MdblistApiKey : IApiKey
 
 	public ApiKeyProvider Provider => ApiKeyProvider.Mdblist;
 
+	[Sensitive]
 	public string Value { get; }
 
 	public static async Task<Result<IApiKey>> CreateAsync(string value, MdblistClient client, CancellationToken cancellationToken = default)
@@ -21,6 +23,4 @@ internal sealed class MdblistApiKey : IApiKey
 
 		return new MdblistApiKey(value);
 	}
-
-	public override string ToString() => $"ApiKey({Provider}, ****)";
 }
