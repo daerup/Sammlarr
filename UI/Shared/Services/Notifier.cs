@@ -1,3 +1,5 @@
+using System.IO;
+using System.Runtime.CompilerServices;
 using BlazorBlueprint.Components;
 using Domain.Media;
 using Microsoft.Extensions.Logging;
@@ -7,33 +9,33 @@ namespace UI.Shared.Services;
 
 internal sealed class Notifier(ToastService toastService, DialogService dialogService, ILogger<Notifier> logger)
 {
-	public void Success(string description, string? title = null)
+	public void Success(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
-		logger.LogDebug("{Title}: {Description}", title ?? "Success", description);
+		logger.LogDebug("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Success", description);
 		toastService.Success(description, title);
 	}
 
-	public void Info(string description, string? title = null)
+	public void Info(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
-		logger.LogDebug("{Title}: {Description}", title ?? "Info", description);
+		logger.LogDebug("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Info", description);
 		toastService.Info(description, title);
 	}
 
-	public void Warning(string description, string? title = null)
+	public void Warning(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
-		logger.LogWarning("{Title}: {Description}", title ?? "Warning", description);
+		logger.LogWarning("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Warning", description);
 		toastService.Warning(description, title);
 	}
 
-	public void Error(string description, string? title = null)
+	public void Error(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
-		logger.LogError("{Title}: {Description}", title ?? "Error", description);
+		logger.LogError("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Error", description);
 		toastService.Error(description, title);
 	}
 
-	public void Error(Exception exception, string? title = null)
+	public void Error(Exception exception, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
-		logger.LogError(exception, "{Title}", title ?? "Unhandled exception surfaced to user");
+		logger.LogError(exception, "{Source}.{Member} {Title}", Component(source), member, title ?? "Unhandled exception surfaced to user");
 		toastService.Show(
 			new ToastData
 			{
@@ -53,4 +55,6 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 			}
 		);
 	}
+
+	private static string Component(string sourcePath) => Path.GetFileName(sourcePath).Split('.', 2)[0];
 }
