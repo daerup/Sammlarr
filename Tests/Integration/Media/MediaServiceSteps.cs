@@ -26,7 +26,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	public async Task WhenGetDetails(string key)
 	{
 		var results = await Service.GetDetailsAsync([local.MediaIds[key]]).ToListAsync();
-		ctx.Detail = results[0] is IdentifiedMedia detail ? detail.ToMatch() : (MediaLookup?)null;
+		ctx.Detail = results[0] is Success<IdentifiedMedia>(var detail) ? detail.ToMatch() : (MediaLookup?)null;
 	}
 
 	[When("I resolve {string} to a {MediaProvider} id")]
@@ -44,7 +44,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	{
 		var requests = table.CreateSet<ResolveRow>().Select(BuildRequest).ToList();
 		var results = await Service.IdentifyAsync(requests).ToListAsync();
-		ctx.Identifications = [.. results.Select(r => r is MediaIdentity identification ? identification : (MediaIdentity?)null)];
+		ctx.Identifications = [.. results.Select(r => r is Success<MediaIdentity>(var identification) ? identification : (MediaIdentity?)null)];
 	}
 
 	[When("I try to resolve:")]
@@ -54,7 +54,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 	{
 		var request = BuildRequest([ParseId(id)], title, target);
 		var results = await Service.IdentifyAsync([request]).ToListAsync();
-		ctx.Identification = results[0] is MediaIdentity identification ? identification : null;
+		ctx.Identification = results[0] is Success<MediaIdentity>(var identification) ? identification : null;
 		ctx.Identifications = [ctx.Identification];
 	}
 
@@ -94,7 +94,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 		var results = await Service.GetDetailsAsync([.. keys.Select(key => local.MediaIds[key])]).ToListAsync();
 		ctx.DetailsByKey.Clear();
 		foreach (var (key, result) in keys.Zip(results))
-			ctx.DetailsByKey[key] = result is IdentifiedMedia detail ? detail.ToMatch() : (MediaLookup?)null;
+			ctx.DetailsByKey[key] = result is Success<IdentifiedMedia>(var detail) ? detail.ToMatch() : (MediaLookup?)null;
 	}
 
 	[Then("the detail title for {string} is {string}")]

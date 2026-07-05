@@ -20,7 +20,7 @@ internal static class DryRunMetadataLoader
 
 		await foreach (var result in media.GetDetailsAsync(ids, cancellationToken))
 		{
-			if (result is not IdentifiedMedia detail)
+			if (result is not Success<IdentifiedMedia>(var detail))
 			{
 				continue;
 			}

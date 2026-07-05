@@ -40,6 +40,6 @@ internal sealed class PlexCredential : ICredential
 			return Error.From("The Plex credential is not valid.");
 		}
 
-		return new PlexCredential(clientId, accessToken, expiresAt);
+		return Success.Of<ICredential>(new PlexCredential(clientId, accessToken, expiresAt));
 	}
 }

@@ -21,6 +21,6 @@ internal sealed class TmdbApiKey : IApiKey
 			return Error.From("The TMDB API key is not valid.");
 		}
 
-		return new TmdbApiKey(value);
+		return Success.Of<IApiKey>(new TmdbApiKey(value));
 	}
 }

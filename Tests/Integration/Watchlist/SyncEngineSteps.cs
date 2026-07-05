@@ -54,7 +54,7 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	public async Task WhenDryRun()
 	{
 		var result = await sammlarr.Resolve<IWatchlistSyncEngine>().DryRunAsync();
-		_dryRun = result is WatchlistSyncDryRun dryRun ? dryRun : null;
+		_dryRun = result is Success<WatchlistSyncDryRun>(var dryRun) ? dryRun : null;
 		_dryRunFailed = result is Error;
 	}
 

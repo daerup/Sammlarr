@@ -35,7 +35,7 @@ public class UnionDestructuringPolicyTests
 	[Test]
 	public async Task Result_Value_UnwrapsToInnerValue_WithoutWrapper()
 	{
-		var outcome = (StructureValue)Capture(new ResultEnvelope(new Payload("Minions", 2026))).Properties.Single(p => p.Name == "Outcome").Value;
+		var outcome = (StructureValue)Capture(new ResultEnvelope(Success.Of(new Payload("Minions", 2026)))).Properties.Single(p => p.Name == "Outcome").Value;
 		var title = ((ScalarValue)outcome.Properties.Single(p => p.Name == "Title").Value).Value;
 
 		await Assert.That(title).IsEqualTo("Minions");

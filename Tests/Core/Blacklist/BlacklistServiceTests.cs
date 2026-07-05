@@ -56,7 +56,7 @@ public class BlacklistServiceTests
 
 		IdentifiedMedia detail = detailResult;
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(detail));
+		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(detail)));
 
 		var testee = CreateTestee(repository, media.Object);
 

@@ -196,12 +196,12 @@ internal static class OrderingAssertionExtensions
 	public static List<int> ExtractTargetExternals(this IEnumerable<Result<MediaIdentity>> results) =>
 		[
 			.. results
-				.Where(r => r is MediaIdentity)
-				.Select(r => r is MediaIdentity identity ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
+				.Where(r => r is Success<MediaIdentity>)
+				.Select(r => r is Success<MediaIdentity>(var identity) ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
 		];
 
 	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<IdentifiedMedia>> results) =>
-		[.. results.Select(r => r is IdentifiedMedia identified && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];
+		[.. results.Select(r => r is Success<IdentifiedMedia>(var identified) && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];
 
 	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaLookup> results) =>
 		[.. results.Select(r => r is IdentifiedMedia identified && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];

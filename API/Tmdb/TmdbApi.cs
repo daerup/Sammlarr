@@ -53,7 +53,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConf
 	}
 
 	private async Task<IApiKey> GetApiKeyAsync(CancellationToken cancellationToken) =>
-		await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is IApiKey apiKey
+		await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is Success<IApiKey>(var apiKey)
 			? apiKey
 			: throw new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys.");
 

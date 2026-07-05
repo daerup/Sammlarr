@@ -137,7 +137,7 @@ else
         var result = await SyncEngine.DryRunAsync(_cts.Token);
         switch (result)
         {
-            case WatchlistSyncDryRun dryRun:
+            case Success<WatchlistSyncDryRun>(var dryRun):
                 _dryRun = dryRun;
                 _metadata = await LoadMetadataAsync(dryRun);
                 break;
