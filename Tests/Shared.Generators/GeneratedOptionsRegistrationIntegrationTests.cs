@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Shared.Options;
 
-namespace Shared.Options.Generator.Tests;
+namespace Shared.Generators.Tests;
 
 public class GeneratedOptionsRegistrationIntegrationTests
 {
