@@ -88,8 +88,8 @@ public class MediaSearchServiceTests
 
 		await Assert.That(captured).IsNotNull();
 		await Assert.That(captured!.Count).IsEqualTo(1);
-		await Assert.That(captured[0]).Contains((IExternalMediaId)plexId);
-		await Assert.That(captured[0]).Contains((IExternalMediaId)tmdbId);
+		await Assert.That(captured[0]).Contains(plexId);
+		await Assert.That(captured[0]).Contains(tmdbId);
 	}
 
 	private static Mock<IProviderConfigRepository> ConfigWithSearchProvider(MediaSearchProvider provider)

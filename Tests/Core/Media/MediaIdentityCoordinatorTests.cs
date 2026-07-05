@@ -1,6 +1,7 @@
 using Contracts.Media;
 using Core.Media;
 using Domain.Media;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Media;
 
@@ -120,7 +121,7 @@ public class MediaIdentityCoordinatorTests
 		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
 		setup?.Invoke(mediaRepo);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
-		var buffer = new MediaResolutionBuffer(mediaRepo.Object);
+		var buffer = new MediaResolutionBuffer(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance);
 		return (coordinator, buffer);
 	}
 

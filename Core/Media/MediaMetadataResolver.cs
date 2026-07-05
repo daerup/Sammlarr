@@ -7,7 +7,6 @@ using Contracts.Settings;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
-using Shared.Telemetry;
 
 namespace Core.Media;
 
@@ -22,8 +21,6 @@ internal sealed class MediaMetadataResolver(
 
 	public async Task<Result<MediaLookup>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
 	{
-		using var activity = SammlarrTelemetry.StartMetadataItem(identity.Id);
-
 		var config = await configRepository.GetAsync(cancellationToken);
 		var detail = await LookUpAsync(identity, config.SearchProvider, cancellationToken);
 		var identified = detail.AsIdentified();
@@ -33,7 +30,6 @@ internal sealed class MediaMetadataResolver(
 			detail = await ApplyRatingsAsync(enriched, config.RatingProvider, cancellationToken);
 		}
 
-		SammlarrTelemetry.TagItemSuccess(activity, detail is not UnmatchedMedia);
 		buffer.Add(detail);
 		return detail;
 	}
@@ -42,7 +38,6 @@ internal sealed class MediaMetadataResolver(
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
-		using var activity = SammlarrTelemetry.StartMetadataLookup(provider, external);
 		var detail = await searchIndex[provider].LookUpAsync(external, cancellationToken);
 		return detail.CombineIdentity(identity);
 	}
@@ -55,7 +50,6 @@ internal sealed class MediaMetadataResolver(
 			return details;
 		}
 
-		using var activity = SammlarrTelemetry.StartMetadataRatings(ratingProvider);
 		var ratings = await ratingIndex[ratingProvider].GetRatingsAsync(ratingId, cancellationToken);
 		return MediaMerger.WithRatings(details, ratings);
 	}
@@ -76,7 +70,6 @@ internal sealed class MediaMetadataResolver(
 				continue;
 			}
 
-			using var activity = SammlarrTelemetry.StartMetadataEnrich(providerId, partial.MissingFields);
 			var enrichment = await enricherIndex[provider].LookUpAsync(providerId, cancellationToken);
 			var enriched = enrichment?.AsIdentified();
 			if (enriched is null)

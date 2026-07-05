@@ -1,21 +1,15 @@
 using System.Runtime.CompilerServices;
 using Contracts.Blacklist;
 using Contracts.Media;
-using Contracts.Media.Search;
-using Contracts.Settings;
 using Domain.Media;
-using Domain.Providers;
 using Shared;
-using Shared.Telemetry;
 
 namespace Core.Blacklist;
 
-internal class BlacklistService(IBlacklistRepository repository, IProviderConfigRepository providerConfigRepository, IMediaService media) : IBlacklistService
+internal class BlacklistService(IBlacklistRepository repository, IMediaService media) : IBlacklistService
 {
 	public async IAsyncEnumerable<BlacklistItem> GetBlacklistItems([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var config = await providerConfigRepository.GetAsync(cancellationToken);
-		using var activity = SammlarrTelemetry.StartBlacklistLoad(config.WatchlistProvider);
 		var entries = (await repository.GetBlacklistedEntriesAsync(cancellationToken)).ToList();
 		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).Zip(entries, cancellationToken);
 

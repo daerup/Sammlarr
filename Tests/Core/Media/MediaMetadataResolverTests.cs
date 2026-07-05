@@ -9,6 +9,7 @@ using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace Core.Tests.Media;
@@ -24,7 +25,7 @@ public class MediaMetadataResolverTests
 		var fresh = CompleteMovie(mediaId, plexExternal);
 		var (testee, deps) = CreateTestee();
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh.ToMatch());
-		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object);
+		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, NullLogger<MediaResolutionBuffer>.Instance);
 
 		var result = await testee.ResolveAsync(identity, buffer);
 
@@ -44,14 +45,14 @@ public class MediaMetadataResolverTests
 		var fresh = CompleteMovie(mediaId, plexId) with { Identity = new MediaIdentity(mediaId, [plexId, imdbId]) };
 		var (testee, deps) = CreateTestee();
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh.ToMatch());
-		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object);
+		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, NullLogger<MediaResolutionBuffer>.Instance);
 
 		await testee.ResolveAsync(identity, buffer);
 
 		var queued = buffer.NewIdentities.Single();
-		await Assert.That(queued.Externals).Contains((IExternalMediaId)tmdbId);
-		await Assert.That(queued.Externals).Contains((IExternalMediaId)plexId);
-		await Assert.That(queued.Externals).Contains((IExternalMediaId)imdbId);
+		await Assert.That(queued.Externals).Contains(tmdbId);
+		await Assert.That(queued.Externals).Contains(plexId);
+		await Assert.That(queued.Externals).Contains(imdbId);
 		await Assert.That(buffer.NewMetadata.Single().Identity.Externals).IsEquivalentTo(queued.Externals);
 	}
 

@@ -15,6 +15,7 @@ using Core.Processing;
 using Core.Watchlist;
 using Core.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
+using Observability.Tracing;
 using Shared.DI;
 
 namespace Core;
@@ -27,14 +28,15 @@ public class CoreModule : IServiceModule
 		services.AddModule<DiModule>();
 		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
 		services.AddTransient(typeof(IQueryProcessor<>), typeof(QueryProcessor<>));
-		services.AddScoped<IBlacklistService, BlacklistService>();
-		services.AddScoped<IWatchlistService, WatchlistService>();
+		services.AddTracedScoped<IBlacklistService, BlacklistService>();
+		services.AddTracedScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
 		services.AddScoped<MediaIdResolver>();
 		services.AddScoped<MediaMetadataResolver>();
 		services.AddScoped<MediaIdentityCoordinator>();
-		services.AddScoped<IMediaService, MediaService>();
-		services.AddScoped<IMediaSearchService, MediaSearchService>();
-		services.AddScoped<IOAuthService, OAuthService>();
+		services.AddScoped<MediaResolutionBufferFactory>();
+		services.AddTracedScoped<IMediaService, MediaService>();
+		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
+		services.AddTracedScoped<IOAuthService, OAuthService>();
 	}
 }

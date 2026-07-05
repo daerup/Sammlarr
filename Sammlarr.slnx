@@ -21,12 +21,14 @@
 		<Project Path="Tests/Shared.Options.Generator/Shared.Options.Generator.Tests.csproj" />
 		<Project Path="Tests/Shared/Shared.Tests.csproj" />
 		<Project Path="Tests/TestInfrastructure/TestInfrastructure.csproj" />
+		<Project Path="Tests/UI/UI.Tests.csproj" />
 	</Folder>
 	<Project Path="API/API.csproj" />
 	<Project Path="Contracts/Contracts.csproj" />
 	<Project Path="Core/Core.csproj" />
 	<Project Path="DB/DB.csproj" />
 	<Project Path="Domain/Domain.csproj" />
+	<Project Path="Observability/Observability.csproj" />
 	<Project Path="Sammlarr.AppHost/Sammlarr.AppHost.csproj" />
 	<Project Path="Shared.Options.Generator/Shared.Options.Generator.csproj" />
 	<Project Path="Shared/Shared.csproj" />

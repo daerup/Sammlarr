@@ -13,7 +13,6 @@ using Domain.Media.Metadata;
 using Domain.Providers;
 using Shared;
 using Shared.Options;
-using Shared.Telemetry;
 
 namespace API.Tmdb;
 
@@ -27,7 +26,6 @@ internal class TmdbRecommendationService(
 {
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
-		using var activity = SammlarrTelemetry.StartTrendingLoad(page);
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
 		if (await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken) is not IApiKey apiKey)
 		{

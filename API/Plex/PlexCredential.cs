@@ -1,4 +1,5 @@
 using Contracts;
+using Domain;
 using Domain.Auth;
 using Domain.Providers;
 
@@ -17,6 +18,7 @@ internal sealed class PlexCredential : ICredential
 
 	public Guid ClientId { get; }
 
+	[Sensitive]
 	public string AccessToken { get; }
 
 	public DateTimeOffset ExpiresAt { get; }
@@ -40,6 +42,4 @@ internal sealed class PlexCredential : ICredential
 
 		return new PlexCredential(clientId, accessToken, expiresAt);
 	}
-
-	public override string ToString() => $"Credential({Provider}, ****)";
 }

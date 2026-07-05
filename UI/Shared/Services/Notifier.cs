@@ -9,13 +9,13 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 {
 	public void Success(string description, string? title = null)
 	{
-		logger.LogInformation("{Title}: {Description}", title ?? "Success", description);
+		logger.LogDebug("{Title}: {Description}", title ?? "Success", description);
 		toastService.Success(description, title);
 	}
 
 	public void Info(string description, string? title = null)
 	{
-		logger.LogInformation("{Title}: {Description}", title ?? "Info", description);
+		logger.LogDebug("{Title}: {Description}", title ?? "Info", description);
 		toastService.Info(description, title);
 	}
 

@@ -198,7 +198,7 @@ public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		using var _ = Assert.Multiple();
 		await Assert.That(stored is Movie).IsTrue();
-		await Assert.That(stored is Movie movie && movie.Identity.Externals.Contains((IExternalMediaId)imdbId)).IsTrue();
+		await Assert.That(stored is Movie movie && movie.Identity.Externals.Contains(imdbId)).IsTrue();
 		await Assert.That(stored is Movie { Rating.Sources.Count: 1 }).IsTrue();
 		await Assert.That(stored is Movie m && m.Rating.Sources.Single().Source == RatingSource.Tmdb).IsTrue();
 	}

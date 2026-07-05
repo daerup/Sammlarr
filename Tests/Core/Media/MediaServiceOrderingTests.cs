@@ -11,6 +11,7 @@ using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shared;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -137,22 +138,13 @@ public class MediaServiceOrderingTests
 			.Items.Where(i => i.Realizes)
 			.ToDictionary(i => i.MediaId.Value, i => new CachedMedia(i.Detail with { Identity = new MediaIdentity(i.MediaId, [i.External]) }, _now));
 
-		mediaRepo
-			.GetAsync(Any(), Any())
-			.Returns((ids, _) => (IReadOnlyList<CachedMedia>)ids.Select(id => id.Value).Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList());
+		mediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList());
 
 		mediaRepo
 			.GetByExternalsAsync(Any(), Any())
 			.Returns(
 				(externals, _) =>
-					(IReadOnlyList<CachedMedia>)
-						externals
-							.Where(externalToId.ContainsKey)
-							.Select(e => externalToId[e])
-							.Distinct()
-							.Where(metadataMap.ContainsKey)
-							.Select(g => metadataMap[g])
-							.ToList()
+					externals.Where(externalToId.ContainsKey).Select(e => externalToId[e]).Distinct().Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList()
 			);
 
 		foreach (var item in builder.Items.Where(i => !i.Resolves))
@@ -187,7 +179,15 @@ public class MediaServiceOrderingTests
 
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepository.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
-		return new MediaService(new MediaIdResolver(null, unresolvedCache.Object), metadataResolver, coordinator, mediaRepo.Object, dateTimeProvider.Object);
+		return new MediaService(
+			new MediaIdResolver(null, unresolvedCache.Object),
+			metadataResolver,
+			coordinator,
+			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
+			mediaRepo.Object,
+			dateTimeProvider.Object,
+			NullLogger<MediaService>.Instance
+		);
 	}
 }
 

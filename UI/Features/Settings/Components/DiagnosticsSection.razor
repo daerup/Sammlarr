@@ -2,7 +2,7 @@
 @using Microsoft.Extensions.Logging
 @using Microsoft.JSInterop
 @using global::Shared.Options
-@using UI.Telemetry.Diagnostics
+@using global::Observability.Diagnostics
 @implements IAsyncDisposable
 @inject LogCaptureService Capture
 @inject IJSRuntime JS
@@ -17,7 +17,7 @@
 
     <div class="flex flex-wrap items-center gap-3">
         <div class="w-36">
-            <BbSelect TValue="TelemetryVerbosity"
+            <BbSelect TValue="LogVerbosity"
                       Value="_verbosity"
                       ValueChanged="HandleVerbosityChanged"
                       Options="VerbosityOptions"/>
@@ -157,11 +157,11 @@
 @code {
     private static readonly TimeSpan RenderInterval = TimeSpan.FromMilliseconds(200);
 
-    private static readonly IReadOnlyList<SelectOption<TelemetryVerbosity>> VerbosityOptions =
+    private static readonly IReadOnlyList<SelectOption<LogVerbosity>> VerbosityOptions =
     [
-        new(TelemetryVerbosity.Quiet, "Quiet"),
-        new(TelemetryVerbosity.Standard, "Standard"),
-        new(TelemetryVerbosity.Verbose, "Verbose"),
+        new(LogVerbosity.Quiet, "Quiet"),
+        new(LogVerbosity.Standard, "Standard"),
+        new(LogVerbosity.Verbose, "Verbose"),
     ];
 
     private static readonly IReadOnlyList<SelectOption<int>> BufferSizeOptions =
@@ -169,7 +169,7 @@
 
     private readonly CancellationTokenSource _cts = new();
 
-    private TelemetryVerbosity _verbosity = TelemetryVerbosity.Standard;
+    private LogVerbosity _verbosity = LogVerbosity.Standard;
     private int _bufferSize = LogCaptureService.DefaultBufferSize;
     private string _filterText = string.Empty;
     private bool _autoscroll = true;
@@ -250,7 +250,7 @@
         || (entry.SpanId is not null && entry.SpanId.Contains(needle, StringComparison.OrdinalIgnoreCase))
         || (entry.Exception is not null && entry.Exception.Contains(needle, StringComparison.OrdinalIgnoreCase));
 
-    private void HandleVerbosityChanged(TelemetryVerbosity verbosity)
+    private void HandleVerbosityChanged(LogVerbosity verbosity)
     {
         _verbosity = verbosity;
         var level = MapToLogLevel(verbosity);
@@ -293,20 +293,20 @@
         await _jsModule.InvokeVoidAsync("downloadFile", "/diagnostics/export");
     }
 
-    private static LogLevel MapToLogLevel(TelemetryVerbosity verbosity) =>
+    private static LogLevel MapToLogLevel(LogVerbosity verbosity) =>
         verbosity switch
         {
-            TelemetryVerbosity.Verbose => LogLevel.Debug,
-            TelemetryVerbosity.Standard => LogLevel.Information,
+            LogVerbosity.Verbose => LogLevel.Debug,
+            LogVerbosity.Standard => LogLevel.Information,
             _ => LogLevel.Warning,
         };
 
-    private static TelemetryVerbosity MapToVerbosity(LogLevel level) =>
+    private static LogVerbosity MapToVerbosity(LogLevel level) =>
         level switch
         {
-            <= LogLevel.Debug => TelemetryVerbosity.Verbose,
-            LogLevel.Information => TelemetryVerbosity.Standard,
-            _ => TelemetryVerbosity.Quiet,
+            <= LogLevel.Debug => LogVerbosity.Verbose,
+            LogLevel.Information => LogVerbosity.Standard,
+            _ => LogVerbosity.Quiet,
         };
 
     private static BadgeVariant LevelVariant(LogLevel level) =>
