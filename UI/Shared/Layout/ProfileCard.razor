@@ -3,7 +3,6 @@
 @using Contracts.Auth
 @using Contracts.DI
 @using Contracts.Settings
-@using Microsoft.AspNetCore.Components.Routing
 @using UI.Shared.Services.Branding
 @inject IServiceScopeFactory ScopeFactory
 @inject NavigationManager NavigationManager
@@ -138,7 +137,6 @@
         _isDisposed = true;
         _disposeCts.Cancel();
         _disposeCts.Dispose();
-        NavigationManager.LocationChanged -= HandleLocationChanged;
         ProfileDropdownService.OnOpenRequested -= HandleProfileDropdownOpenRequestedAsync;
     }
 
@@ -148,30 +146,10 @@
     {
         if (firstRender)
         {
-            NavigationManager.LocationChanged += HandleLocationChanged;
             ProfileDropdownService.OnOpenRequested += HandleProfileDropdownOpenRequestedAsync;
 
             StateHasChanged();
         }
-    }
-
-    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e) => _ = HandleLocationChangedAsync();
-
-    private async Task HandleLocationChangedAsync()
-    {
-        if (_isDisposed || _disposeCts.IsCancellationRequested)
-        {
-            return;
-        }
-
-        await RefreshAuthStatusAsync(_disposeCts.Token);
-
-        if (_isDisposed || _disposeCts.IsCancellationRequested)
-        {
-            return;
-        }
-
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task RefreshAuthStatusAsync(CancellationToken cancellationToken = default)
@@ -183,19 +161,12 @@
         await using var scope = ScopeFactory.CreateAsyncScope();
         var oauthService = scope.ServiceProvider.GetRequiredService<IOAuthService>();
 
-        switch (await oauthService.GetUserAsync(cancellationToken))
+        _user = await oauthService.GetUserAsync(cancellationToken) switch
         {
-            case AuthorizedUser user:
-                _user = user;
-                break;
-            case SignedOut:
-                _user = null;
-                await oauthService.LogoutAsync(cancellationToken);
-                break;
-            case Unavailable:
-                _user = null;
-                break;
-        }
+            AuthorizedUser user => user,
+            SignedOut => null,
+            Unavailable => null,
+        };
     }
 
     private async Task InitiateAuthAsync()

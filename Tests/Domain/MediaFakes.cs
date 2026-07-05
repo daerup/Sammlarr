@@ -1,6 +1,7 @@
 using Bogus;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 
 namespace Domain.Tests;
 
@@ -25,7 +26,7 @@ internal static class MediaFakes
 			BackdropUrl = faker.Internet.Url(),
 			ReleaseDate = DateOnly.FromDateTime(faker.Date.Past()),
 			Genres = [.. faker.Lorem.Words(2)],
-			Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, faker.Random.Float(1, 10))]),
+			Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, faker.Random.Float(1, 10))]),
 			Runtime = TimeSpan.FromMinutes(faker.Random.Int(80, 200)),
 		};
 	}
@@ -43,7 +44,7 @@ internal static class MediaFakes
 			BackdropUrl = faker.Internet.Url(),
 			ReleaseDate = DateOnly.FromDateTime(faker.Date.Past()),
 			Genres = [.. faker.Lorem.Words(2)],
-			Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, faker.Random.Float(1, 10))]),
+			Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, faker.Random.Float(1, 10))]),
 			Runtime = TimeSpan.FromMinutes(faker.Random.Int(80, 200)),
 		};
 	}

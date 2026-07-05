@@ -52,7 +52,7 @@
 
         if (_errorMessage is null)
         {
-            NavigationManager.NavigateTo(_returnUrl, replace: true);
+            NavigationManager.NavigateTo(_returnUrl, forceLoad: true, replace: true);
         }
     }
 

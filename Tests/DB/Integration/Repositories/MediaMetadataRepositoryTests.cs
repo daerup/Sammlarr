@@ -4,6 +4,7 @@ using DB.Data.Media;
 using DB.Data.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
@@ -126,7 +127,7 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var rated = CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(RatingSource.Tmdb, 8.5f, 1200)]) };
+		var rated = CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.5f, 1200)]) };
 		await _testee.UpsertMetadataAsync([rated]);
 		fixture.Context.ChangeTracker.Clear();
 
@@ -136,7 +137,7 @@ public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposa
 		await Assert.That(row.Stored is Movie).IsTrue();
 		await Assert.That(row.Stored.Rating.Sources.Count).IsEqualTo(1);
 		var rating = row.Stored.Rating.Sources.Single();
-		await Assert.That(rating.Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(rating.Source).IsEqualTo(RatingProvider.Tmdb);
 		await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
 		await Assert.That(rating.VoteCount).IsEqualTo(1200);
 	}

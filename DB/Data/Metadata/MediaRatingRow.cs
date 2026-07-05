@@ -1,13 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using Contracts.Media.Metadata;
-using Domain.Media.Metadata;
+using Domain.Providers;
 
 namespace DB.Data.Metadata;
 
 internal record MediaRatingRow
 {
 	[Required]
-	public required RatingSource Source { get; set; }
+	public required RatingProvider Source { get; set; }
 
 	[Required]
 	public required float NormalizedValue { get; set; }

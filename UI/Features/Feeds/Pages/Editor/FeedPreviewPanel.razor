@@ -8,6 +8,7 @@
 @using Contracts.Watchlist
 @using Core.Processing
 @using UI.Features.Feeds.Components
+@using global::Observability.Tracing
 @implements IDisposable
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
@@ -366,6 +367,10 @@
         _cts = new CancellationTokenSource();
         var ct = _cts.Token;
 
+        using var activity = Instrumentation.Source.StartActivity("FeedPreview", ActivityKind.Internal, default(ActivityContext));
+        activity?.SetTag("sammlarr.feed.provider", Config.Provider?.ToString());
+        activity?.SetTag("sammlarr.feed.identifier", Config.Identifier?.Trim());
+
         ClearResults();
 
         try
@@ -398,6 +403,7 @@
 
             _fetchState = FetchState.Success;
             await ReprocessAsync(ct);
+            activity?.SetTag("sammlarr.feed.items", _rawResults.Count);
             Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(_fetchTimer.Elapsed)}.");
         }
         catch (OperationCanceledException)

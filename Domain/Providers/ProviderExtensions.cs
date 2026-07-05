@@ -1,5 +1,3 @@
-using Domain.Media.Metadata;
-
 namespace Domain.Providers;
 
 public static class ProviderExtensions
@@ -61,22 +59,6 @@ public static class ProviderExtensions
 			{
 				RatingProvider.Tmdb => MediaProvider.Tmdb,
 			};
-
-		public RatingSource AsRatingSource() =>
-			provider switch
-			{
-				RatingProvider.Tmdb => RatingSource.Tmdb,
-			};
-	}
-
-	extension(MediaProvider provider)
-	{
-		public RatingSource? AsRatingSource() =>
-			provider switch
-			{
-				MediaProvider.Tmdb => RatingSource.Tmdb,
-				_ => null,
-			};
 	}
 
 	extension(ApiKeyProvider provider)
@@ -88,10 +70,10 @@ public static class ProviderExtensions
 				ApiKeyProvider.Mdblist => MediaProvider.Mdblist,
 			};
 
-		public RatingSource? AsRatingSource() =>
+		public RatingProvider? AsRatingProvider() =>
 			provider switch
 			{
-				ApiKeyProvider.Tmdb => RatingSource.Tmdb,
+				ApiKeyProvider.Tmdb => RatingProvider.Tmdb,
 				_ => null,
 			};
 	}

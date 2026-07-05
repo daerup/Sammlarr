@@ -119,7 +119,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 			if (rating.Trim().Equals("none", StringComparison.OrdinalIgnoreCase))
 				await Assert.That(detail.Ratings).IsEmpty();
 			else
-				await Assert.That(detail.Ratings.Any(r => r.Source == Enum.Parse<RatingSource>(rating, ignoreCase: true))).IsTrue();
+				await Assert.That(detail.Ratings.Any(r => r.Source == Enum.Parse<RatingProvider>(rating, ignoreCase: true))).IsTrue();
 		}
 	}
 
@@ -226,7 +226,7 @@ public class MediaServiceSteps(MediaServiceContext ctx, LocalMediaContext local,
 				foreach (var genre in genres)
 					await Assert.That(metadata.Genres).Contains(genre);
 			if (row.Rating is { } ratingSource)
-				await Assert.That(metadata.Ratings.Any(r => r.Source == Enum.Parse<RatingSource>(ratingSource, ignoreCase: true))).IsTrue();
+				await Assert.That(metadata.Ratings.Any(r => r.Source == Enum.Parse<RatingProvider>(ratingSource, ignoreCase: true))).IsTrue();
 			if (Cells.Date(row.Fetched) is { } fetched)
 				await Assert.That(metadata.LastFetchedAt).IsEqualTo(fetched);
 		}

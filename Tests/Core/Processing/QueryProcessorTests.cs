@@ -6,6 +6,7 @@ using Contracts.Processing;
 using Core.Processing;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 using TestInfrastructure;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
@@ -304,7 +305,7 @@ public class QueryProcessorRatingTests
 				ReleaseDate = new DateOnly(year, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),
-				Rating = rating is { } value ? RatingSummary.From([new MediaRating(RatingSource.Tmdb, value, 1)]) : RatingSummary.None,
+				Rating = rating is { } value ? RatingSummary.From([new MediaRating(RatingProvider.Tmdb, value, 1)]) : RatingSummary.None,
 			}.ToMatch()
 		);
 }

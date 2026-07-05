@@ -2,6 +2,7 @@ using Contracts.Media;
 using Contracts.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 
 namespace API.Tmdb;
 
@@ -22,7 +23,7 @@ internal class TmdbRatingService(TmdbApi tmdbApi) : IMediaRatingService
 				return [];
 			}
 
-			return [new MediaRating(RatingSource.Tmdb, (float)voteAverage, details.VoteCount)];
+			return [new MediaRating(RatingProvider.Tmdb, (float)voteAverage, details.VoteCount)];
 		}
 		catch (InvalidOperationException)
 		{

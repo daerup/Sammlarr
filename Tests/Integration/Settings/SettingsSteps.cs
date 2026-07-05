@@ -97,7 +97,7 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 	public async Task ThenNoTmdbRatingsCached()
 	{
 		sammlarr.DbContext.ChangeTracker.Clear();
-		var any = await sammlarr.DbContext.MediaRatings.AsNoTracking().AnyAsync(r => r.Source == RatingSource.Tmdb);
+		var any = await sammlarr.DbContext.MediaRatings.AsNoTracking().AnyAsync(r => r.Source == RatingProvider.Tmdb);
 		await Assert.That(any).IsFalse();
 	}
 }

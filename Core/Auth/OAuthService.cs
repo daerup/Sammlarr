@@ -1,6 +1,5 @@
 using Contracts;
 using Contracts.Auth;
-using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Settings;
 using Domain.Auth;
@@ -13,12 +12,9 @@ internal sealed class OAuthService(
 	IKeyedServiceIndex<WatchlistProvider, IOAuthProvider> providers,
 	IProviderConfigRepository configRepository,
 	ICredentialRepository credentialRepository,
-	ITypedMemoryCache<WatchlistProvider, AuthorizedUser> userCache,
 	ILogger<OAuthService> logger
 ) : IOAuthService
 {
-	private static readonly TimeSpan UserCacheTtl = TimeSpan.FromHours(1);
-
 	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default) =>
 		await (await ResolveAsync(cancellationToken)).BeginLoginAsync(callbackUrl, cancellationToken);
 
@@ -43,35 +39,23 @@ internal sealed class OAuthService(
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
 		await credentialRepository.ClearAsync(config.WatchlistProvider, cancellationToken);
-		userCache.Remove(config.WatchlistProvider);
 		logger.LogInformation("Logged out of provider {Provider}", config.WatchlistProvider);
 	}
 
 	public async Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
-		if (userCache.TryGetValue(config.WatchlistProvider, out var cached) && cached is not null)
-		{
-			return cached;
-		}
-
 		if (await credentialRepository.GetAsync(config.WatchlistProvider, cancellationToken) is not ICredential)
 		{
 			return new SignedOut();
 		}
 
-		var session = await providers[config.WatchlistProvider].GetUserAsync(cancellationToken);
-		if (session is AuthorizedUser user)
-		{
-			userCache.Set(config.WatchlistProvider, user, UserCacheTtl);
-		}
-		return session;
+		return await providers[config.WatchlistProvider].GetUserAsync(cancellationToken);
 	}
 
 	private async Task<Optional<Error>> StoreAsync(WatchlistProvider provider, OAuthTokenGrant grant, CancellationToken cancellationToken)
 	{
 		await credentialRepository.StoreAsync(provider, grant.AccessToken, grant.ExpiresAt, grant.ClientId, cancellationToken);
-		userCache.Remove(provider);
 		logger.LogInformation("Sign-in completed for provider {Provider}", provider);
 		return new None();
 	}
