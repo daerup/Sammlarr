@@ -1,6 +1,6 @@
 using Domain.Media;
 
-namespace Domain.Tests.Media;
+namespace Shared.Tests;
 
 public class ValueSetTests
 {

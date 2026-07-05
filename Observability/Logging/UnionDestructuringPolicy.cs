@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Contracts;
 using Serilog.Core;
 using Serilog.Events;
 

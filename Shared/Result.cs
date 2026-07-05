@@ -1,4 +1,4 @@
-namespace Contracts;
+namespace Shared;
 
 public readonly record struct Error
 {
