@@ -110,7 +110,7 @@ internal sealed class MediaService(
 		return mediaRepository.RemoveMetadataAsync([.. mediaIds], cancellationToken);
 	}
 
-	private async Task<IReadOnlyList<Optional<ResolvedIdentity>>> ResolveBatchAsync(
+	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
 		IReadOnlyList<ResolveRequest> requests,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
@@ -124,16 +124,16 @@ internal sealed class MediaService(
 		return await coordinator.CoordinateResolutionsAsync(preliminary, buffer, cancellationToken);
 	}
 
-	private async ValueTask<Optional<ResolvedIdentity>> ResolveIdentityAsync(
+	private async ValueTask<Result<ResolvedIdentity>> ResolveIdentityAsync(
 		ResolveRequest request,
 		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		if (TryResolveFromCache(request, cached, buffer) is Some<ResolvedIdentity> hit)
+		if (TryResolveFromCache(request, cached, buffer) is Some<ResolvedIdentity>(var resolved))
 		{
-			return hit;
+			return Success.Of(resolved);
 		}
 		return await ResolveFromProviderAsync(request, cancellationToken);
 	}
@@ -165,7 +165,7 @@ internal sealed class MediaService(
 		return Some.Of(new ResolvedIdentity(merged, match));
 	}
 
-	private async ValueTask<Optional<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, CancellationToken cancellationToken)
+	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, CancellationToken cancellationToken)
 	{
 		return await idResolver
 			.ResolveAsync(request, cancellationToken)
@@ -188,12 +188,12 @@ internal sealed class MediaService(
 
 	private async ValueTask<MediaLookup> RealizeFromRequestAsync(
 		ResolveRequest request,
-		Optional<ResolvedIdentity> resolution,
+		Result<ResolvedIdentity> resolution,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		if (resolution is not Some<ResolvedIdentity>(var r))
+		if (resolution is not Success<ResolvedIdentity>(var r))
 		{
 			return request.ToUnmatched();
 		}
@@ -237,7 +237,7 @@ internal sealed class MediaService(
 		}
 	}
 
-	private static Result<MediaIdentity> ToIdentityResult(Optional<ResolvedIdentity> resolution) => resolution.Map(r => r.Identity).ToResult("unresolved");
+	private static Result<MediaIdentity> ToIdentityResult(Result<ResolvedIdentity> resolution) => resolution.Map(r => r.Identity);
 
 	private async Task<IReadOnlyDictionary<MediaId, CachedMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
 	{

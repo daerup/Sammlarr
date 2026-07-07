@@ -100,7 +100,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 
 		var apiKey = await _testee.GetApiKeyAsync(provider);
 
-		await Assert.That(apiKey).IsOk().And.Multiple(async resolved => await Assert.That(resolved.Value).IsEqualTo("secret-api-key"));
+		await Assert.That(apiKey).IsSuccess().And.Multiple(async resolved => await Assert.That(resolved.Value).IsEqualTo("secret-api-key"));
 	}
 
 	[Test]

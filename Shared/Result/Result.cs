@@ -28,13 +28,13 @@ public static class Success
 
 public static class Result
 {
-	public static Result<T> Of<T>(T? value, Error error) where T : class => value is not null ? Success.Of(value) : error;
+	public static Result<T> WhenNotNull<T>(T? value, Error error) where T : class => value is not null ? Success.Of(value) : error;
 
-	public static Result<T> Of<T>(T? value, string reason) where T : class => Of(value, Error.From(reason));
+	public static Result<T> WhenNotNull<T>(T? value, string reason) where T : class => WhenNotNull(value, Error.From(reason));
 
-	public static async Task<Result<T>> Of<T>(Task<T?> value, Error error) where T : class => Of(await value, error);
+	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, Error error) where T : class => WhenNotNull(await value, error);
 
-	public static async Task<Result<T>> Of<T>(Task<T?> value, string reason) where T : class => Of(await value, reason);
+	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, string reason) where T : class => WhenNotNull(await value, reason);
 }
 
 public union Result<T>(Success<T>, Error) where T : notnull;

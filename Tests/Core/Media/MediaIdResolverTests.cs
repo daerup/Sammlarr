@@ -17,11 +17,11 @@ public class MediaIdResolverTests
 	{
 		var tmdbId = TmdbId.From("123", MediaType.Movie);
 		var (testee, converter, cache) = CreateTestee();
-		converter.ConvertAsync(Any(), Any(), Any()).Returns(new None());
+		converter.ConvertAsync(Any(), Any(), Any()).Returns(Error.From("no ids resolved"));
 
 		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
 
-		await Assert.That(result.Value).IsTypeOf<None>();
+		await Assert.That(result).IsError();
 		cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled();
 	}
 
@@ -34,7 +34,7 @@ public class MediaIdResolverTests
 
 		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
 
-		await Assert.That(result.Value).IsTypeOf<None>();
+		await Assert.That(result).IsError();
 		cache.Set(Any(), Any(), Any()).WasNeverCalled();
 	}
 
@@ -47,7 +47,7 @@ public class MediaIdResolverTests
 
 		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
 
-		await Assert.That(result.Value).IsTypeOf<None>();
+		await Assert.That(result).IsError();
 		converter.ConvertAsync(Any(), Any(), Any()).WasNeverCalled();
 	}
 

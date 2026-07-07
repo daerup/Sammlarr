@@ -22,24 +22,32 @@ internal sealed class MediaMetadataResolver(
 	public async Task<Result<MediaLookup>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		var config = await configRepository.GetAsync(cancellationToken);
-		var detail = await LookUpAsync(identity, config.SearchProvider, cancellationToken);
-		var identified = detail.AsIdentified();
-		if (identified is not null)
-		{
-			var enriched = await EnrichAsync(identified.Value, config.SearchProvider, cancellationToken);
-			detail = await ApplyRatingsAsync(enriched, config.RatingProvider, cancellationToken);
-		}
-
-		buffer.Add(detail);
-		return Success.Of(detail);
+		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
+			.Map(detail => CompleteAsync(detail, config.SearchProvider, config.RatingProvider, cancellationToken))
+			.Apply(buffer.Add);
 	}
 
-	private async Task<MediaLookup> LookUpAsync(MediaIdentity identity, MediaSearchProvider provider, CancellationToken cancellationToken)
+	private async Task<MediaLookup> CompleteAsync(
+		MediaLookup detail,
+		MediaSearchProvider searchProvider,
+		RatingProvider ratingProvider,
+		CancellationToken cancellationToken
+	)
+	{
+		var identified = detail.AsIdentified();
+		if (identified is null)
+		{
+			return detail;
+		}
+		var enriched = await EnrichAsync(identified.Value, searchProvider, cancellationToken);
+		return await ApplyRatingsAsync(enriched, ratingProvider, cancellationToken);
+	}
+
+	private Task<Result<MediaLookup>> LookUpAsync(MediaIdentity identity, MediaSearchProvider provider, CancellationToken cancellationToken)
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
-		var detail = await searchIndex[provider].LookUpAsync(external, cancellationToken);
-		return detail.CombineIdentity(identity);
+		return searchIndex[provider].LookUpAsync(external, cancellationToken).Map(detail => detail.CombineIdentity(identity));
 	}
 
 	private async Task<IdentifiedMedia> ApplyRatingsAsync(IdentifiedMedia details, RatingProvider ratingProvider, CancellationToken cancellationToken)
@@ -55,8 +63,10 @@ internal sealed class MediaMetadataResolver(
 			return details;
 		}
 
-		var ratings = await ratingIndex[ratingProvider].GetRatingsAsync(ratingId, cancellationToken);
-		return MediaMerger.WithRatings(details, ratings);
+		return await ratingIndex[ratingProvider]
+			.GetRatingsAsync(ratingId, cancellationToken)
+			.Map(ratings => MediaMerger.WithRatings(details, ratings))
+			.GetValueOr(details);
 	}
 
 	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia details, MediaSearchProvider searchProvider, CancellationToken cancellationToken)
@@ -69,24 +79,14 @@ internal sealed class MediaMetadataResolver(
 				break;
 			}
 
-			var providerId = details.Externals.OfProvider(provider);
-			if (providerId is null)
-			{
-				continue;
-			}
-
-			var enrichment = await enricherIndex[provider].LookUpAsync(providerId, cancellationToken);
-			var enriched = enrichment?.AsIdentified();
-			if (enriched is null)
-			{
-				continue;
-			}
-			details = enriched.Value switch
-			{
-				IMedia complete => partial.MergeWith(complete),
-				IPartialMedia other => partial.MergeWith(other),
-			};
+			details = await EnrichFromAsync(partial, provider, cancellationToken).Map(enriched => partial.MergeWith(enriched)).GetValueOr(details);
 		}
 		return details;
 	}
+
+	private Task<Optional<IdentifiedMedia>> EnrichFromAsync(IPartialMedia partial, MediaProvider provider, CancellationToken cancellationToken) =>
+		Optional
+			.Of(partial.Identity.Externals.OfProvider(provider))
+			.Map(id => enricherIndex[provider].LookUpAsync(id, cancellationToken).ToOptional())
+			.Map(lookup => lookup.ToIdentified());
 }

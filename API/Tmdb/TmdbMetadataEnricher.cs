@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using API.Tmdb.Types;
 using Contracts.Media.Metadata;
@@ -11,32 +12,17 @@ namespace API.Tmdb;
 
 internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMetadataEnricher
 {
-	public async Task<MediaLookup?> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
-	{
-		if (id is not TmdbId tmdbId)
-		{
-			return null;
-		}
+	public Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
+		id.Require<TmdbId>("TMDB enrichment requires a TMDB id.")
+			.Map(tmdbId => tmdbApi.GetDetailAsync(tmdbId, cancellationToken).Map(details => ToLookup(details, tmdbId)));
 
-		try
+	private MediaLookup ToLookup(TmdbTypes.Details details, TmdbId tmdbId) =>
+		tmdbId.Type switch
 		{
-			var details = await tmdbApi.GetDetailAsync(tmdbId, cancellationToken);
-			if (details is null)
-			{
-				return null;
-			}
-			return tmdbId.Type switch
-			{
-				MediaType.Movie => IdentifiedMedia.From(MapMovie(details, tmdbId)),
-				MediaType.Show => IdentifiedMedia.From(MapShow(details, tmdbId)),
-				_ => (MediaLookup?)null,
-			};
-		}
-		catch (InvalidOperationException)
-		{
-			return null;
-		}
-	}
+			MediaType.Movie => IdentifiedMedia.From(MapMovie(details, tmdbId)),
+			MediaType.Show => IdentifiedMedia.From(MapShow(details, tmdbId)),
+			MediaType.Unknown => throw new UnreachableException(),
+		};
 
 	private PartialMovie MapMovie(TmdbTypes.Details details, TmdbId sourceId) =>
 		new()

@@ -27,7 +27,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([tmdbId], new None());
 
-		await Assert.That(result).IsSome().And.Multiple(async externals => await Assert.That(externals).Contains(tmdbId));
+		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(tmdbId));
 	}
 
 	[Test]
@@ -40,7 +40,7 @@ public class TmdbIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSome()
+			.IsSuccess()
 			.And.Multiple(async externals =>
 			{
 				await Assert.That(externals).Contains(payload.TmdbIds[0]);
@@ -59,7 +59,7 @@ public class TmdbIdConverterTests
 
 		var result = await testee.ConvertAsync([payload.PlexId], new None());
 
-		await Assert.That(result).IsNone();
+		await Assert.That(result).IsError();
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeTmdbId, bool includeExtraTmdbId, bool includeTvdbId)

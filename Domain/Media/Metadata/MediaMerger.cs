@@ -6,6 +6,13 @@ public static class MediaMerger
 {
 	extension(IPartialMedia partial)
 	{
+		public IdentifiedMedia MergeWith(IdentifiedMedia other) =>
+			other switch
+			{
+				IMedia complete => partial.MergeWith(complete),
+				IPartialMedia incomplete => partial.MergeWith(incomplete),
+			};
+
 		public IdentifiedMedia MergeWith(IPartialMedia other) => IdentifiedMedia.From(Fill(partial, other));
 
 		public IdentifiedMedia MergeWith(IMedia other) =>

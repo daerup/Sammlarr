@@ -60,4 +60,4 @@ Feature: Blacklist management
 
   Scenario: Adding a media that is not in the library is rejected
     When I try to add a media that is not in the library to the blacklist
-    Then an exception of type "InvalidOperationException" occurred
+    Then an exception of type "UnknownMediaException" occurred

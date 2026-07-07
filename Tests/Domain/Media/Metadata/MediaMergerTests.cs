@@ -101,4 +101,27 @@ public class MediaMergerTests
 
 		await Assert.That(merged is Movie movie && movie.Title == "Custom").IsTrue();
 	}
+
+	[Test]
+	public async Task MergeWith_WhenOtherIsIdentifiedComplete_DispatchesToMediaOverload()
+	{
+		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Custom" };
+		IdentifiedMedia other = MediaFakes.CompleteMovie();
+
+		var merged = partial.MergeWith(other);
+
+		await Assert.That(merged is Movie movie && movie.Title == "Custom").IsTrue();
+	}
+
+	[Test]
+	public async Task MergeWith_WhenOtherIsIdentifiedPartial_DispatchesToPartialOverload()
+	{
+		var identity = MediaFakes.MovieIdentity();
+		IPartialMedia partial = new PartialMovie { Identity = identity, Title = "Dune" };
+		IdentifiedMedia other = IdentifiedMedia.From(new PartialMovie { Identity = identity, Summary = "Paul Atreides." });
+
+		var merged = partial.MergeWith(other);
+
+		await Assert.That(merged is PartialMovie movie && movie.Title == "Dune").IsTrue();
+	}
 }

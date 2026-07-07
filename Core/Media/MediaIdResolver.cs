@@ -13,7 +13,7 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 {
 	private static readonly TimeSpan unresolvedTtl = TimeSpan.FromHours(1);
 
-	public async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveAsync(ResolveRequest request, CancellationToken cancellationToken = default)
+	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(ResolveRequest request, CancellationToken cancellationToken = default)
 	{
 		var candidates = request.Candidates;
 		var target = request.Target;
@@ -22,10 +22,10 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 
 		if (unresolvedCache.TryGetValue(key, out _))
 		{
-			return new None();
+			return Error.From("Candidates were previously resolved as unmatched.");
 		}
 
-		Optional<IReadOnlyList<IExternalMediaId>> discovered;
+		Result<IReadOnlyList<IExternalMediaId>> discovered;
 		try
 		{
 			discovered = await converters[target].ConvertAsync(candidates, hints, cancellationToken);
@@ -33,15 +33,11 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			Activity.Current?.AddException(ex);
-			return new None();
+			return Error.From(ex);
 		}
 
-		if (discovered is Some<IReadOnlyList<IExternalMediaId>>(var found))
-		{
-			return Some.Of<IReadOnlyList<IExternalMediaId>>([.. candidates.Concat(found).Distinct()]);
-		}
-
-		unresolvedCache.Set(key, true, unresolvedTtl);
-		return new None();
+		return discovered
+			.Map(found => (IReadOnlyList<IExternalMediaId>)[.. candidates.Concat(found).Distinct()])
+			.ApplyError(_ => unresolvedCache.Set(key, true, unresolvedTtl));
 	}
 }

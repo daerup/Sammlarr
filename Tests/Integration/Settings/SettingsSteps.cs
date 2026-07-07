@@ -55,7 +55,9 @@ public class SettingsSteps(SettingsScenarioContext ctx, SammlarrScenarioContext 
 
 	[When("I request TMDB ratings for movie {int}")]
 	public async Task WhenRequestTmdbRatings(int movieId) =>
-		ctx.Ratings = await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(TmdbId.From(movieId.ToString(), MediaType.Movie));
+		ctx.Ratings = (
+			await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(TmdbId.From(movieId.ToString(), MediaType.Movie))
+		).GetValueOr([]);
 
 	[Given("the TMDB API is unreachable")]
 	public void GivenTmdbUnreachable() =>

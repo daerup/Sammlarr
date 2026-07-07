@@ -25,7 +25,7 @@ public class MediaMetadataResolverTests
 		var identity = new MediaIdentity(mediaId, [plexExternal]);
 		var fresh = CompleteMovie(mediaId, plexExternal);
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh.ToMatch());
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(fresh.ToMatch()));
 		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, NullLogger<MediaResolutionBuffer>.Instance);
 
 		var result = await testee.ResolveAsync(identity, buffer);
@@ -45,7 +45,7 @@ public class MediaMetadataResolverTests
 		var identity = new MediaIdentity(mediaId, [tmdbId, plexId]);
 		var fresh = CompleteMovie(mediaId, plexId) with { Identity = new MediaIdentity(mediaId, [plexId, imdbId]) };
 		var (testee, deps) = CreateTestee();
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(fresh.ToMatch());
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(fresh.ToMatch()));
 		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, NullLogger<MediaResolutionBuffer>.Instance);
 
 		await testee.ResolveAsync(identity, buffer);
@@ -67,14 +67,14 @@ public class MediaMetadataResolverTests
 		var (testee, deps) = CreateTestee();
 
 		var basePartial = new PartialMovie { Identity = new MediaIdentity(mediaId, [plexExternal]), Title = "Base" };
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(IdentifiedMedia.From(basePartial).ToMatch());
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(basePartial).ToMatch()));
 		var enriched = new PartialMovie
 		{
 			Identity = new MediaIdentity(mediaId, [tmdbExternal]),
 			Title = "Enriched",
 			Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8f, 500)]),
 		};
-		deps.Enricher.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(IdentifiedMedia.From(enriched).ToMatch());
+		deps.Enricher.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(enriched).ToMatch()));
 		await using var buffer = new MediaResolutionBuffer(deps.MediaRepository.Object, NullLogger<MediaResolutionBuffer>.Instance);
 
 		await testee.ResolveAsync(identity, buffer);
@@ -90,6 +90,7 @@ public class MediaMetadataResolverTests
 		var search = IMediaSearchProvider.Mock();
 		var enricher = IMetadataEnricher.Mock();
 		var rating = IMediaRatingService.Mock();
+		rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of<IReadOnlyList<MediaRating>>([]));
 
 		var configRepository = IProviderConfigRepository.Mock();
 		configRepository

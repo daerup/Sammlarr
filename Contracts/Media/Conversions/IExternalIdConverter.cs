@@ -5,7 +5,7 @@ namespace Contracts.Media.Conversions;
 
 public interface IExternalIdConverter
 {
-	Task<Optional<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
+	Task<Result<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
 		IEnumerable<IExternalMediaId> candidates,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default

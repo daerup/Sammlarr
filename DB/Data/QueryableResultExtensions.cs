@@ -9,6 +9,6 @@ internal static class QueryableResultExtensions
 		where T : class
 	{
 		public Task<Result<T>> SingleResultAsync(Expression<Func<T, bool>> predicate, string missingReason, CancellationToken cancellationToken = default) =>
-			Result.Of(query.SingleOrDefaultAsync(predicate, cancellationToken), missingReason);
+			Result.WhenNotNull(query.SingleOrDefaultAsync(predicate, cancellationToken), missingReason);
 	}
 }

@@ -11,10 +11,19 @@ namespace API.Tmdb;
 
 internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConfigRepository, ILogger<TmdbApi> logger)
 {
-	public async Task<TmdbTypes.Details?> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default)
+	public async Task<Result<TmdbTypes.Details>> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default) =>
+		await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
+
+	public async Task<Result<TmdbTypes.FindItem>> FindByImdbIdAsync(ImdbId id, CancellationToken cancellationToken = default) =>
+		await apiKeyConfigRepository.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+
+	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{
-		var endpoint = string.Format(TmdbEndpoints.Detail, ToTmdbMediaType(id.Type), id.Value);
-		var apiKey = await GetApiKeyAsync(cancellationToken);
+		if (ToTmdbMediaType(id.Type) is not { } mediaType)
+		{
+			return Error.From($"TMDB does not support media type {id.Type}.");
+		}
+		var endpoint = string.Format(TmdbEndpoints.Detail, mediaType, id.Value);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
@@ -23,45 +32,38 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConf
 				(int)response.StatusCode,
 				id.Value
 			);
+			return Error.From($"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = JsonSerializer.Deserialize<TmdbTypes.Details>(stream);
-		if (result is null || result.Id == 0)
-		{
-			return null;
-		}
-		return result;
+		var reason = $"TMDB has no metadata for {id.Value}";
+		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.Details>(stream), reason).When(detail => detail.Id != 0, reason);
 	}
 
-	public async Task<TmdbTypes.FindItem?> FindByImdbIdAsync(ImdbId id, CancellationToken cancellationToken = default)
+	private async Task<Result<TmdbTypes.FindItem>> FetchFindAsync(ImdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{
 		var endpoint = string.Format(TmdbEndpoints.Find, id.Value);
-		var apiKey = await GetApiKeyAsync(cancellationToken);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB find returned {StatusCode} for {ImdbId}; treated as no match (check API key / rate limits)", (int)response.StatusCode, id.Value);
+			return Error.From($"TMDB find returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Find>(stream);
-		return id.Type switch
+		var item = id.Type switch
 		{
 			MediaType.Movie => result?.MovieResults.FirstOrDefault(),
 			MediaType.Show => result?.TvResults.FirstOrDefault(),
-			_ => null,
+			MediaType.Unknown => null,
 		};
+		return Result.WhenNotNull(item, $"TMDB has no {id.Type} match for {id.Value}");
 	}
 
-	private async Task<IApiKey> GetApiKeyAsync(CancellationToken cancellationToken) =>
-		await apiKeyConfigRepository
-			.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken)
-			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys."));
-
-	private static string ToTmdbMediaType(MediaType mediaType) =>
+	private static string? ToTmdbMediaType(MediaType mediaType) =>
 		mediaType switch
 		{
 			MediaType.Movie => TmdbEndpoints.MovieType,
 			MediaType.Show => TmdbEndpoints.ShowType,
-			_ => throw new ArgumentOutOfRangeException(nameof(mediaType), $"Unsupported media type: {mediaType}"),
+			MediaType.Unknown => null,
 		};
 }
