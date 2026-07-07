@@ -608,12 +608,20 @@
                 await BlacklistService.AddToBacklistAsync(item.Id);
                 _blacklistIds.Add(item.Id);
             }
+            _hasEnrollmentChanges = true;
+        }
+        catch (UnknownMediaException)
+        {
+            Notifier.Warning($"'{item.Title}' isn't ready yet — still loading.", "Can't update blacklist");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to update blacklist");
         }
         finally
         {
             _togglingBlacklistItem = null;
             _focusedResult = null;
-            _hasEnrollmentChanges = true;
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -639,12 +647,20 @@
                 await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin());
                 _watchlisted.Add(item.Id);
             }
+            _hasEnrollmentChanges = true;
+        }
+        catch (MissingWatchlistExternalIdException)
+        {
+            Notifier.Warning($"'{item.Title}' isn't ready yet — still loading.", "Can't update watchlist");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to update watchlist");
         }
         finally
         {
             _togglingWatchlistItem = null;
             _focusedResult = null;
-            _hasEnrollmentChanges = true;
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }

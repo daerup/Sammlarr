@@ -32,6 +32,11 @@ public sealed class MissingWatchlistExternalIdException(MediaProvider watchlistP
 
 public sealed class MixedMediaTypesException() : Exception("All external IDs must be of the same media type.");
 
+public sealed class UnknownMediaException(MediaId mediaId) : Exception($"Media '{mediaId.Value}' is not known.")
+{
+	public MediaId MediaId { get; } = mediaId;
+}
+
 public sealed class MediaIdentityConflictException(IReadOnlyList<MediaId> mediaIds, IReadOnlyList<IExternalMediaId> candidates)
 	: Exception($"External IDs [{string.Join(", ", candidates)}] match {mediaIds.Count} media rows [{string.Join(", ", mediaIds)}]; expected at most one.")
 {

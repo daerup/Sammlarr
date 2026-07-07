@@ -64,11 +64,11 @@ public class BlacklistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task AddAsync_WhenMediaIdIsNotMapped_ThrowsInvalidOperationException()
+	public async Task AddAsync_WhenMediaIdIsNotMapped_ThrowsUnknownMediaException()
 	{
 		var unmappedId = MediaId.From(Guid.NewGuid());
 
-		await Assert.That(async () => await _testee.AddAsync(unmappedId)).Throws<InvalidOperationException>();
+		await Assert.That(async () => await _testee.AddAsync(unmappedId)).Throws<UnknownMediaException>();
 	}
 
 	[Test]

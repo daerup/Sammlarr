@@ -20,12 +20,14 @@ public class TmdbRatingSteps(TmdbRatingScenarioContext ctx, SammlarrScenarioCont
 		var entry = catalog[title];
 		var resolved = tmdb.Versions.GetValueOrDefault(title) ?? MediaVersionResolver.Build(entry);
 		var tmdbId = resolved.Ids.GetValueOrDefault(MediaProvider.Tmdb, "0");
-		ctx.Ratings = await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(TmdbId.From(tmdbId, entry.MediaType));
+		ctx.Ratings = (await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(TmdbId.From(tmdbId, entry.MediaType))).GetValueOr([]);
 	}
 
 	[When("I fetch ratings using an IMDb ID")]
 	public async Task WhenFetchRatingsWithImdbId() =>
-		ctx.Ratings = await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(ImdbId.From("tt0137523", MediaType.Movie));
+		ctx.Ratings = (
+			await sammlarr.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(ImdbId.From("tt0137523", MediaType.Movie))
+		).GetValueOr([]);
 
 	[Then("the ratings are:")]
 	public void ThenRatingsAre(DataTable table) =>

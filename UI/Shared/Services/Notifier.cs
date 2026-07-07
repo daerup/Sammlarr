@@ -24,13 +24,13 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 	public void Warning(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
 		logger.LogWarning("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Warning", description);
-		toastService.Warning(description, title);
+		toastService.Show(description, title, ToastVariant.Warning, duration: 20000);
 	}
 
 	public void Error(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
 		logger.LogError("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Error", description);
-		toastService.Error(description, title);
+		toastService.Show(description, title, ToastVariant.Destructive, duration: 20000);
 	}
 
 	public void Error(Exception exception, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
@@ -42,7 +42,7 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 				Title = title,
 				Description = $"Exception occured in {exception.Source}",
 				Variant = ToastVariant.Destructive,
-				Duration = 15000,
+				Duration = 20000,
 				ActionText = "Details",
 				Class = "flex-col! items-stretch! space-x-0! gap-2",
 				OnAction = () =>

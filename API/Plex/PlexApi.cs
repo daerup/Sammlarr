@@ -21,15 +21,8 @@ internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaS
 		}
 	}
 
-	public async Task<MediaLookup> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		if (mediaId is not PlexId plexId)
-		{
-			throw new ArgumentException($"PlexApi only supports {nameof(PlexId)} lookups.", nameof(mediaId));
-		}
-
-		return await ByIdAsync(plexId, cancellationToken);
-	}
+	public Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default) =>
+		mediaId.Require<PlexId>($"PlexApi only supports {nameof(PlexId)} lookups.").Map(plexId => ByIdAsync(plexId, cancellationToken));
 
 	public async Task<IReadOnlyList<MediaLookup>> SearchAsync(
 		string title,
@@ -56,13 +49,12 @@ internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaS
 			.ToList();
 	}
 
-	internal async Task<IReadOnlyList<IExternalMediaId>> LookUpExternalsAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	internal Task<Result<IReadOnlyList<IExternalMediaId>>> LookUpExternalsAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
-		var raw = await ByIdAsync(plexId, cancellationToken);
-		return [.. raw.Externals];
+		return ByIdAsync(plexId, cancellationToken).Map<MediaLookup, IReadOnlyList<IExternalMediaId>>(raw => [.. raw.Externals]);
 	}
 
-	internal async Task<MediaLookup> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	internal async Task<Result<MediaLookup>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
 		var endpoint = string.Format(PlexEndpoints.RatingKeyMetadata, Uri.EscapeDataString(plexId.Value));
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
@@ -70,22 +62,15 @@ internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaS
 		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
-		if (result?.MediaContainer?.Metadata is not { Count: > 0 } metadata)
-		{
-			throw new InvalidOperationException($"Plex returned no metadata for ratingKey {plexId.Value}.");
-		}
-		return metadata[0].ToMedia();
+		var reason = $"Plex returned no metadata for ratingKey {plexId.Value}.";
+		return Result.WhenNotNull(result?.MediaContainer?.Metadata, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToMedia());
 	}
 
-	internal async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
+	internal Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
 		PlexId plexId,
 		Func<IExternalMediaId, bool> requires,
 		CancellationToken cancellationToken = default
-	)
-	{
-		var externals = await LookUpExternalsAsync(plexId, cancellationToken);
-		return Optional.Of(externals).When(externals.Any(requires));
-	}
+	) => LookUpExternalsAsync(plexId, cancellationToken).ToOptional().When(list => list.Any(requires));
 
 	private static string ToPlexMediaType(MediaType mediaType) =>
 		mediaType switch

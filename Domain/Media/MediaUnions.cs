@@ -165,6 +165,13 @@ public static class MediaUnions
 				UnmatchedMedia => null,
 			};
 
+		public Optional<IdentifiedMedia> ToIdentified() =>
+			media switch
+			{
+				IdentifiedMedia identified => Some.Of(identified),
+				UnmatchedMedia => new None(),
+			};
+
 		public MediaLookup CombineIdentity(MediaIdentity identity)
 		{
 			var combined = identity with { Externals = identity.Externals + media.Externals };

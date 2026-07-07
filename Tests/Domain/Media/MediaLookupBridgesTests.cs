@@ -1,4 +1,5 @@
 using Domain.Media;
+using TestInfrastructure;
 
 namespace Domain.Tests.Media;
 
@@ -21,6 +22,22 @@ public class MediaLookupBridgesTests
 		MediaLookup match = new UnmatchedMedia { Externals = [TmdbId.From("1", MediaType.Movie)] };
 
 		await Assert.That(match.AsIdentified() is null).IsTrue();
+	}
+
+	[Test]
+	public async Task ToIdentified_WhenIdentified_IsSome()
+	{
+		MediaLookup match = MediaFakes.CompleteMovie().ToMatch();
+
+		await Assert.That(match.ToIdentified()).IsSome().And.Multiple(async identified => await Assert.That(identified is Movie).IsTrue());
+	}
+
+	[Test]
+	public async Task ToIdentified_WhenUnmatched_IsNone()
+	{
+		MediaLookup match = new UnmatchedMedia { Externals = [TmdbId.From("1", MediaType.Movie)] };
+
+		await Assert.That(match.ToIdentified()).IsNone();
 	}
 
 	[Test]

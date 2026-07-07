@@ -27,12 +27,16 @@ public class TmdbMetadataEnricherTests
 
 		var result = await testee.LookUpAsync(TmdbId.From("123", MediaType.Movie));
 
-		await Assert.That(result).IsNotNull();
-		var identified = result!.Value.AsIdentified();
-		await Assert.That(identified).IsNotNull();
-		var rating = identified!.Value.Rating;
-		using var _ = Assert.Multiple();
-		await Assert.That(rating.Sources.Any(source => source.Source == RatingProvider.Tmdb)).IsTrue();
-		await Assert.That(rating.Average).IsEqualTo(7.5f);
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async lookup =>
+			{
+				var identified = lookup.AsIdentified();
+				await Assert.That(identified).IsNotNull();
+				var rating = identified!.Value.Rating;
+				await Assert.That(rating.Sources.Any(source => source.Source == RatingProvider.Tmdb)).IsTrue();
+				await Assert.That(rating.Average).IsEqualTo(7.5f);
+			});
 	}
 }

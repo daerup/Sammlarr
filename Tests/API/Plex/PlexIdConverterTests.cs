@@ -32,7 +32,7 @@ public class PlexIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSome()
+			.IsSuccess()
 			.And.Multiple(async externals =>
 			{
 				await Assert.That(externals).Contains(payload.PlexId);
@@ -53,7 +53,7 @@ public class PlexIdConverterTests
 
 		await Assert
 			.That(result)
-			.IsSome()
+			.IsSuccess()
 			.And.Multiple(async externals =>
 			{
 				await Assert.That(externals).Contains(payload.PlexId);
@@ -71,7 +71,7 @@ public class PlexIdConverterTests
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApiWithEmptySearch());
 
 		var result = await testee.ConvertAsync([payload.TmdbId], new None());
-		await Assert.That(result).IsNone();
+		await Assert.That(result).IsError();
 	}
 
 	private static TmdbApi CreateTmdbApi(TmdbId tmdbId, string originalTitle)

@@ -41,8 +41,8 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		return corrected;
 	}
 
-	public async Task<IReadOnlyList<Optional<ResolvedIdentity>>> CoordinateResolutionsAsync(
-		List<Optional<ResolvedIdentity>> resolutions,
+	public async Task<IReadOnlyList<Result<ResolvedIdentity>>> CoordinateResolutionsAsync(
+		List<Result<ResolvedIdentity>> resolutions,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -51,7 +51,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var pendingPreliminary = new List<MediaIdentity>();
 		foreach (var (idx, resolution) in resolutions.Index())
 		{
-			if (resolution is Some<ResolvedIdentity>(var r) && r.Cached is null)
+			if (resolution is Success<ResolvedIdentity>(var r) && r.Cached is null)
 			{
 				pendingIndices.Add(idx);
 				pendingPreliminary.Add(r.Identity);
@@ -64,7 +64,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var corrected = await CoordinateAsync(pendingPreliminary, buffer, cancellationToken);
 		for (var i = 0; i < corrected.Count; i++)
 		{
-			resolutions[pendingIndices[i]] = Some.Of(new ResolvedIdentity(corrected[i], null));
+			resolutions[pendingIndices[i]] = Success.Of(new ResolvedIdentity(corrected[i], null));
 		}
 		return resolutions;
 	}

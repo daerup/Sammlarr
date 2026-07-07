@@ -34,7 +34,7 @@ internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 			return;
 		}
 
-		var media = await ctx.Media.SingleAsync(m => m.Id == raw, cancellationToken);
+		var media = await ctx.Media.SingleOrDefaultAsync(m => m.Id == raw, cancellationToken) ?? throw new UnknownMediaException(mediaId);
 		ctx.Blacklist.Add(new BlacklistRow { Media = media });
 		await ctx.SaveChangesAsync(cancellationToken);
 	}

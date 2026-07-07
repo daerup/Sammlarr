@@ -32,6 +32,12 @@ file static class ExternalMediaIdExtensions
 	public static string ToString(this IExternalMediaId id) => $"{id.Source}:{id.Type}:{id.Value}";
 }
 
+public static class ExternalMediaId
+{
+	public static Result<T> Require<T>(this IExternalMediaId id, string reason)
+		where T : struct, IExternalMediaId => id is T typed ? Success.Of(typed) : Error.From(reason);
+}
+
 public readonly record struct TmdbId : IExternalMediaId
 {
 	public MediaProvider Source => MediaProvider.Tmdb;

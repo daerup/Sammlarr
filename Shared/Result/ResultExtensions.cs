@@ -54,6 +54,23 @@ public static partial class ResultExtensions
 				Error err => map(err),
 			};
 
+		[GenerateAsync]
+		public Result<T> When(Func<T, bool> predicate, Error error) =>
+			result switch
+			{
+				Success<T>(var value) => predicate(value) ? result : error,
+				Error err => err,
+			};
+
+		public Result<T> When(Func<T, bool> predicate, string reason) => result.When(predicate, Error.From(reason));
+
+		public Optional<T> ToOptional() =>
+			result switch
+			{
+				Success<T>(var value) => Some.Of(value),
+				Error => new None(),
+			};
+
 		public bool IsSuccess() => result is Success<T>;
 
 		public bool IsError() => result is Error;

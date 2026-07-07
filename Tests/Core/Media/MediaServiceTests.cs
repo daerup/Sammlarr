@@ -112,7 +112,7 @@ public class MediaServiceTests
 		var thirdId = MediaId.From(Guid.NewGuid());
 		var (testee, deps) = CreateTestee();
 		deps.MediaRepo.GetAsync(Any(), Any()).Returns([StaleCached(firstId), StaleCached(secondId), StaleCached(thirdId)]);
-		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => CompleteMovie(ext).ToMatch());
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
 
 		await testee.GetDetailsAsync([firstId, secondId, thirdId]).ToListAsync();
 

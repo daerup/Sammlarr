@@ -96,7 +96,7 @@ public class CredentialRepositoryTests(SQLiteFixture fixture)
 
 		var credential = await _testee.GetAsync(authProvider);
 
-		await Assert.That(credential).IsOk().And.Multiple(async resolved => await Assert.That(resolved.ClientId).IsEqualTo(clientId));
+		await Assert.That(credential).IsSuccess().And.Multiple(async resolved => await Assert.That(resolved.ClientId).IsEqualTo(clientId));
 	}
 
 	[Test]

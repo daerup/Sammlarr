@@ -91,6 +91,22 @@ public class ResultExtensionsTests
 	}
 
 	[Test]
+	public async Task ToOptional_WhenSuccess_IsSome()
+	{
+		Result<int> result = Success.Of(7);
+
+		await Assert.That(result.ToOptional().GetValueOr(0)).IsEqualTo(7);
+	}
+
+	[Test]
+	public async Task ToOptional_WhenError_IsNone()
+	{
+		Result<int> result = Error.From("boom");
+
+		await Assert.That(result.ToOptional().IsNone()).IsTrue();
+	}
+
+	[Test]
 	public async Task GetValueOr_WhenError_ReturnsFallback()
 	{
 		Result<int> result = Error.From("boom");
@@ -282,33 +298,63 @@ public class ResultExtensionsTests
 	}
 
 	[Test]
-	public async Task Of_WhenNull_IsErrorWithReason()
+	public async Task WhenNotNull_WhenNull_IsErrorWithReason()
 	{
-		var result = Result.Of((string?)null, "missing");
+		var result = Result.WhenNotNull((string?)null, "missing");
 
 		await Assert.That(result.Match(_ => "ok", error => error.Reason)).IsEqualTo("missing");
 	}
 
 	[Test]
-	public async Task Of_WhenNotNull_IsSuccess()
+	public async Task WhenNotNull_WhenNotNull_IsSuccess()
 	{
-		var result = Result.Of((string?)"x", "missing");
+		var result = Result.WhenNotNull((string?)"x", "missing");
 
 		await Assert.That(result.GetValueOr("none")).IsEqualTo("x");
 	}
 
 	[Test]
-	public async Task Of_WhenTaskOfNull_IsErrorWithReason()
+	public async Task When_WhenSuccessButPredicateFails_IsErrorWithReason()
 	{
-		var result = await Result.Of(Task.FromResult<string?>(null), "missing");
+		Result<string> result = Success.Of("x");
+
+		var filtered = result.When(value => value.Length > 3, "too short");
+
+		await Assert.That(filtered.Match(_ => "ok", error => error.Reason)).IsEqualTo("too short");
+	}
+
+	[Test]
+	public async Task When_WhenSuccessAndPredicatePasses_IsSuccess()
+	{
+		Result<string> result = Success.Of("xyzw");
+
+		var filtered = result.When(value => value.Length > 3, "too short");
+
+		await Assert.That(filtered.GetValueOr("none")).IsEqualTo("xyzw");
+	}
+
+	[Test]
+	public async Task When_WhenError_DoesNotInvokePredicateAndKeepsOriginalError()
+	{
+		Result<string> result = Error.From("boom");
+
+		var filtered = result.When(_ => throw new InvalidOperationException("predicate ran"), "too short");
+
+		await Assert.That(filtered.Match(_ => "ok", error => error.Reason)).IsEqualTo("boom");
+	}
+
+	[Test]
+	public async Task WhenNotNull_WhenTaskOfNull_IsErrorWithReason()
+	{
+		var result = await Result.WhenNotNull(Task.FromResult<string?>(null), "missing");
 
 		await Assert.That(result.Match(_ => "ok", error => error.Reason)).IsEqualTo("missing");
 	}
 
 	[Test]
-	public async Task Of_WhenTaskOfNotNull_IsSuccess()
+	public async Task WhenNotNull_WhenTaskOfNotNull_IsSuccess()
 	{
-		var result = await Result.Of(Task.FromResult<string?>("x"), "missing");
+		var result = await Result.WhenNotNull(Task.FromResult<string?>("x"), "missing");
 
 		await Assert.That(result.GetValueOr("none")).IsEqualTo("x");
 	}
