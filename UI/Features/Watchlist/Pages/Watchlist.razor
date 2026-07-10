@@ -102,17 +102,7 @@ else
                                            RemoveLabel="Remove from Watchlist">
                         <Overlay Context="item">
                             <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 wl-badge-host">
-                                <BbBadge Variant="@ProvenanceBadgeVariant(item.Provenance)" Class="wl-badge">
-                                    <BbTooltip>
-                                        <BbTooltipTrigger AsChild="false" Class="p-0">
-                                            <span class="flex items-center gap-1 wl-badge-content">
-                                                <LucideIcon Name="@ProvenanceIcon(item.Provenance)" Size="12"/>
-                                                <span class="wl-badge-label">@ProvenanceLabel(item.Provenance)</span>
-                                            </span>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>@ProvenanceTooltip(item)</BbTooltipContent>
-                                    </BbTooltip>
-                                </BbBadge>
+                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt"/>
                             </div>
                         </Overlay>
                     </BulkEditableMediaGrid>
@@ -324,48 +314,5 @@ else
     {
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
-    }
-
-    private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
-        provenance.Value switch
-        {
-            RemoteOrigin => BadgeVariant.Secondary,
-            ManualOrigin => BadgeVariant.Default,
-            FeedOrigin => BadgeVariant.Default,
-            OrphanedOrigin => BadgeVariant.Outline,
-            _ => BadgeVariant.Secondary,
-        };
-
-    private static string ProvenanceIcon(WatchlistItemProvenance provenance) =>
-        provenance.Value switch
-        {
-            RemoteOrigin => "cloud",
-            ManualOrigin => "user",
-            FeedOrigin => "rss",
-            OrphanedOrigin => "unlink",
-            _ => "circle",
-        };
-
-    private static string ProvenanceLabel(WatchlistItemProvenance provenance) =>
-        provenance.Value switch
-        {
-            RemoteOrigin => "From Plex",
-            ManualOrigin => "Manual",
-            FeedOrigin feed => feed.FeedName,
-            OrphanedOrigin orphaned => $"{orphaned.FormerFeedName} (deleted)",
-            _ => string.Empty,
-        };
-
-    private static string ProvenanceTooltip(WatchlistedMedia item)
-    {
-        var date = item.AddedAt.LocalDateTime.ToString("MMM d, yyyy");
-        return item.Provenance.Value switch
-        {
-            RemoteOrigin => "From Plex",
-            ManualOrigin => $"Added manually on {date}",
-            FeedOrigin feed => $"Added by feed '{feed.FeedName}' on {date}",
-            OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
-            _ => string.Empty,
-        };
     }
 }
