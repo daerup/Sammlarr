@@ -1,4 +1,4 @@
-namespace Contracts.Processing;
+namespace Domain.Processing;
 
 public record FilterPredicate
 {

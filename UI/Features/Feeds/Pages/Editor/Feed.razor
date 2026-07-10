@@ -127,7 +127,7 @@
     private FeedConfig _config = new();
     private int? _storedHash;
     private int _appliedHash;
-    private Guid? _savedFeedId;
+    private FeedId? _savedFeedId;
 
     private bool _showValidation;
     private bool _isSaving;
@@ -168,7 +168,7 @@
             return;
         }
 
-        var sourceId = UrlGuid.Decode(EditFeedId ?? CloneFeedId);
+        var sourceId = FeedId.From(UrlGuid.Decode(EditFeedId ?? CloneFeedId));
         var feed = await FeedRepository.GetFeedByIdAsync(sourceId);
 
         if (feed is null)

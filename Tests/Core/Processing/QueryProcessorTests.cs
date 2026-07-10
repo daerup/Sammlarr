@@ -6,6 +6,7 @@ using Contracts.Processing;
 using Core.Processing;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Processing;
 using Domain.Providers;
 using TestInfrastructure;
 using TUnit.Assertions.Core;

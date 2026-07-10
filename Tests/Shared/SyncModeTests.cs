@@ -1,4 +1,4 @@
-using Contracts.Feed;
+using Domain.Feed;
 using TestInfrastructure;
 
 namespace Shared.Tests;

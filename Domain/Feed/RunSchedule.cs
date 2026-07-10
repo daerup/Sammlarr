@@ -1,6 +1,6 @@
 using Cronos;
 
-namespace Contracts.Feed;
+namespace Domain.Feed;
 
 public readonly record struct Manual;
 

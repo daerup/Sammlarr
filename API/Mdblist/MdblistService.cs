@@ -9,6 +9,7 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Settings;
 using Domain.Auth;
+using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Shared;

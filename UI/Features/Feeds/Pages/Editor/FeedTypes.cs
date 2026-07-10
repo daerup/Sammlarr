@@ -1,8 +1,9 @@
 using BlazorBlueprint.Primitives.Filtering;
-using Contracts.Feed;
 using Contracts.Processing;
 using Core.Processing;
+using Domain.Feed;
 using Domain.Media;
+using Domain.Processing;
 using Domain.Providers;
 
 namespace UI.Features.Feeds.Pages.Editor;

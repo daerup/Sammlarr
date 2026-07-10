@@ -1,53 +1,54 @@
 <Project>
-	<PropertyGroup>
-		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
-		<PackageVersion Include="BlazorBlueprint.Components" Version="3.9.2" />
-		<PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.0" />
-		<PackageVersion Include="BlazorBlueprint.Primitives" Version="3.9.2" />
-		<PackageVersion Include="CronExpressionDescriptor" Version="2.45.0" />
-		<PackageVersion Include="Cronos" Version="0.13.0" />
-		<PackageVersion Include="Dapper" Version="2.1.72" />
-		<PackageVersion Include="Enterprize1.BenchmarkDotNet.GitCompare" Version="0.0.1" />
-		<PackageVersion Include="Imposter" Version="0.1.9" />
-		<PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
-		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-		<PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
-		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
-		<PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
-		<PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.0" />
-		<PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.11.2" />
-		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.2" />
-		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.11.2" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.1" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.12.0-beta.1" />
-		<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.11.1" />
-		<PackageVersion Include="Serilog" Version="4.3.1" />
-		<PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
-		<PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
-		<PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.5" />
-		<PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.2" />
-		<PackageVersion Include="timewarp-simple-icons" Version="16.14.0" />
-		<PackageVersion Include="TUnit.Core" Version="1.25.0" />
-		<PackageVersion Include="TUnit.Mocks" Version="1.28.0-beta" />
-		<PackageVersion Include="TUnit.Mocks.Http" Version="1.21.30" />
-		<PackageVersion Include="TUnit" Version="1.25.0" />
-		<PackageVersion Include="TUnit.Assertions" Version="1.25.0" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
-		<PackageVersion Include="Bogus" Version="35.6.5" />
-		<PackageVersion Include="Reqnroll.TUnit" Version="3.0.0" />
-	</ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="BlazorBlueprint.Components" Version="3.9.2" />
+    <PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.0" />
+    <PackageVersion Include="BlazorBlueprint.Primitives" Version="3.9.2" />
+    <PackageVersion Include="CronExpressionDescriptor" Version="2.45.0" />
+    <PackageVersion Include="Cronos" Version="0.13.0" />
+    <PackageVersion Include="Dapper" Version="2.1.72" />
+    <PackageVersion Include="Enterprize1.BenchmarkDotNet.GitCompare" Version="0.0.1" />
+    <PackageVersion Include="Imposter" Version="0.1.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.11.2" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.2" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.11.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.11.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.12.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.11.1" />
+    <PackageVersion Include="Serilog" Version="4.3.1" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
+    <PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.5" />
+    <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.2" />
+    <PackageVersion Include="timewarp-simple-icons" Version="16.14.0" />
+    <PackageVersion Include="TUnit.Core" Version="1.25.0" />
+    <PackageVersion Include="TUnit.Mocks" Version="1.28.0-beta" />
+    <PackageVersion Include="TUnit.Mocks.Http" Version="1.21.30" />
+    <PackageVersion Include="TUnit" Version="1.25.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.25.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
+    <PackageVersion Include="Bogus" Version="35.6.5" />
+    <PackageVersion Include="Reqnroll.TUnit" Version="3.0.0" />
+    <PackageVersion Include="Vogen" Version="8.0.6" />
+  </ItemGroup>
 </Project>

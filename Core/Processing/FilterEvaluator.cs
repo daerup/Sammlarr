@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Contracts.Processing;
 using Domain.Media;
+using Domain.Processing;
 
 namespace Core.Processing;
 

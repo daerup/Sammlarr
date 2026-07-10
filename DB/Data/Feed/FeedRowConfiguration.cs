@@ -1,17 +1,17 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Contracts.Feed;
-using Contracts.Processing;
+using Domain.Feed;
+using Domain.Processing;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
 
-internal sealed class FeedEntityConfiguration : IModelConfiguration
+internal sealed class FeedRowConfiguration : IModelConfiguration
 {
 	private static readonly JsonSerializerOptions JsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
 
 	public void Apply(ModelBuilder modelBuilder) =>
-		modelBuilder.Entity<FeedEntity>(builder =>
+		modelBuilder.Entity<FeedRow>(builder =>
 		{
 			builder
 				.Property(x => x.Filter)

@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace Contracts.Processing;
+namespace Domain.Processing;
 
 public record QuerySort
 {
