@@ -1,0 +1,62 @@
+<BbBadge Variant="@ProvenanceBadgeVariant(Provenance)" Class="wl-badge">
+    <BbTooltip>
+        <BbTooltipTrigger AsChild="false" Class="p-0">
+            <span class="flex items-center gap-1 wl-badge-content">
+                <LucideIcon Name="@ProvenanceIcon(Provenance)" Size="12"/>
+                <span class="wl-badge-label">@ProvenanceLabel(Provenance)</span>
+            </span>
+        </BbTooltipTrigger>
+        <BbTooltipContent>@ProvenanceTooltip()</BbTooltipContent>
+    </BbTooltip>
+</BbBadge>
+
+@code {
+    [Parameter, EditorRequired]
+    public required WatchlistItemProvenance Provenance { get; set; }
+
+    [Parameter, EditorRequired]
+    public required DateTimeOffset AddedAt { get; set; }
+
+    private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            RemoteOrigin => BadgeVariant.Secondary,
+            ManualOrigin => BadgeVariant.Default,
+            FeedOrigin => BadgeVariant.Default,
+            OrphanedOrigin => BadgeVariant.Outline,
+            _ => BadgeVariant.Secondary,
+        };
+
+    private static string ProvenanceIcon(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            RemoteOrigin => "cloud",
+            ManualOrigin => "user",
+            FeedOrigin => "rss",
+            OrphanedOrigin => "unlink",
+            _ => "circle",
+        };
+
+    private static string ProvenanceLabel(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            RemoteOrigin => "From Plex",
+            ManualOrigin => "Manual",
+            FeedOrigin feed => feed.FeedName,
+            OrphanedOrigin orphaned => $"{orphaned.FormerFeedName} (deleted)",
+            _ => string.Empty,
+        };
+
+    private string ProvenanceTooltip()
+    {
+        var date = AddedAt.LocalDateTime.ToString("MMM d, yyyy");
+        return Provenance.Value switch
+        {
+            RemoteOrigin => "From Plex",
+            ManualOrigin => $"Added manually on {date}",
+            FeedOrigin feed => $"Added by feed '{feed.FeedName}' on {date}",
+            OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
+            _ => string.Empty,
+        };
+    }
+}

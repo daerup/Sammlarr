@@ -3,14 +3,3 @@
     color: var(--foreground) !important;
     border: 1px solid var(--border) !important;
 }
-
-.wl-badge-content {
-    min-width: 0;
-}
-
-.wl-badge-label {
-    max-width: 8rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
