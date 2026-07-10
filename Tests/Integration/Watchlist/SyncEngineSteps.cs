@@ -5,6 +5,7 @@ using Contracts.Media;
 using Contracts.Watchlist.Sync;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Watchlist.Sync;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Local;
@@ -68,7 +69,7 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 		{
 			var mediaId = local.MediaIds[row.Key!];
 			var direction = Enum.Parse<WatchlistSyncDirection>(row.Direction!, ignoreCase: true);
-			var kind = Enum.Parse<Contracts.Watchlist.Outbox.WatchlistOperationKind>(row.Operation!, ignoreCase: true);
+			var kind = Enum.Parse<Domain.Watchlist.Outbox.WatchlistOperationKind>(row.Operation!, ignoreCase: true);
 			await Assert.That(_dryRun!.Changes.Any(c => c.MediaId == mediaId && c.Direction == direction && c.Kind == kind)).IsTrue();
 		}
 	}

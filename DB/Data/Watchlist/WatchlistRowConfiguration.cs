@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist;
 
-internal sealed class WatchlistEntityConfiguration : IModelConfiguration
+internal sealed class WatchlistRowConfiguration : IModelConfiguration
 {
 	public void Apply(ModelBuilder modelBuilder) =>
-		modelBuilder.Entity<WatchlistEntity>(builder =>
+		modelBuilder.Entity<WatchlistRow>(builder =>
 		{
 			builder.Property<Guid>("MediaId");
 			builder.HasKey("MediaId");
-			builder.HasOne(w => w.Media).WithOne().HasForeignKey<WatchlistEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasOne(w => w.Media).WithOne().HasForeignKey<WatchlistRow>("MediaId").OnDelete(DeleteBehavior.Restrict);
 			builder.HasOne(w => w.SourceFeed).WithMany().HasForeignKey(w => w.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
 			builder.HasIndex(w => w.SourceFeedId);
 		});

@@ -1,5 +1,5 @@
-using Contracts.Watchlist;
 using DB.Data.Watchlist;
+using Domain.Watchlist;
 
 namespace Integration.Tests.Watchlist;
 

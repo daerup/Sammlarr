@@ -2,6 +2,7 @@ using Contracts.Media;
 using Contracts.Watchlist.Outbox;
 using DB.Data.Media;
 using Domain.Media;
+using Domain.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist.Outbox;
@@ -38,7 +39,7 @@ internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> db
 				existing.Kind = kind;
 				continue;
 			}
-			ctx.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = media, Kind = kind });
+			ctx.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = media, Kind = kind });
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);

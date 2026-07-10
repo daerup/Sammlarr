@@ -1,8 +1,8 @@
 using Contracts.Media;
-using Contracts.Watchlist;
 using DB.Data.Media;
 using DB.Data.Watchlist;
 using Domain.Media;
+using Domain.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
@@ -97,7 +97,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var media = new MediaRow();
 		await fixture.Context.ExternalMediaIds.AddAsync(id.ToExternalIdEntity(media));
-		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = media, Origin = origin });
+		fixture.Context.Watchlist.Add(new WatchlistRow { Media = media, Origin = origin });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 		return MediaId.From(media.Id);

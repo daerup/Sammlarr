@@ -1,8 +1,7 @@
-using Contracts.Media;
-using Contracts.Watchlist.Outbox;
 using Domain.Media;
+using Domain.Watchlist.Outbox;
 
-namespace Contracts.Watchlist.Sync;
+namespace Domain.Watchlist.Sync;
 
 public record WatchlistSyncDryRun(IReadOnlyList<WatchlistSyncChange> Changes, int InSync)
 {

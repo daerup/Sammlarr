@@ -1,5 +1,6 @@
 using Contracts.Media;
 using Domain.Media;
+using Domain.Watchlist.Outbox;
 
 namespace Contracts.Watchlist.Outbox;
 

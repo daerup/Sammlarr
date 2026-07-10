@@ -1,4 +1,4 @@
-namespace Contracts.Watchlist.Sync;
+namespace Domain.Watchlist.Sync;
 
 public union WatchlistSyncTrigger(ManualTrigger)
 {

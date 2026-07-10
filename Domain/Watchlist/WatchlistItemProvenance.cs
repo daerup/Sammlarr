@@ -1,4 +1,4 @@
-namespace Contracts.Watchlist;
+namespace Domain.Watchlist;
 
 public readonly record struct RemoteOrigin;
 

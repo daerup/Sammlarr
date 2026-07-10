@@ -8,14 +8,14 @@ namespace DB.Data.Blacklist;
 
 internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IBlacklistRepository
 {
-	public async Task<IReadOnlyList<BlacklistedMedia>> GetBlacklistedEntriesAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<BlacklistEntry>> GetBlacklistedEntriesAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await ctx
 			.Blacklist.AsNoTracking()
 			.Select(blacklist => new { MediaIdValue = blacklist.Media.Id, blacklist.CreatedAt })
 			.ToListAsync(cancellationToken);
-		return [.. rows.Select(row => new BlacklistedMedia(MediaId.From(row.MediaIdValue), row.CreatedAt))];
+		return [.. rows.Select(row => new BlacklistEntry(MediaId.From(row.MediaIdValue), row.CreatedAt))];
 	}
 
 	public async Task<bool> IsBlacklistedAsync(MediaId mediaId, CancellationToken cancellationToken = default)

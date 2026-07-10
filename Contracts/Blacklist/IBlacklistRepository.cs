@@ -6,7 +6,7 @@ namespace Contracts.Blacklist;
 
 public interface IBlacklistRepository
 {
-	Task<IReadOnlyList<BlacklistedMedia>> GetBlacklistedEntriesAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<BlacklistEntry>> GetBlacklistedEntriesAsync(CancellationToken cancellationToken = default);
 
 	Task<bool> IsBlacklistedAsync(MediaId mediaId, CancellationToken cancellationToken = default);
 

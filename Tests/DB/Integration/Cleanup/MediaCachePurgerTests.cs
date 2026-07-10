@@ -5,7 +5,6 @@ using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Media.Trending;
 using Contracts.Settings;
-using Contracts.Watchlist.Outbox;
 using DB.Data.Blacklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
@@ -17,6 +16,7 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -106,7 +106,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		fixture.Context.ExternalMediaIds.AddRange(watchlistedId.ToExternalIdEntity(watchlistedMedia), watchlistedImdb.ToExternalIdEntity(watchlistedMedia));
 		var metadata = BuildMetadata(watchlistedMedia, "Watchlisted");
 		fixture.Context.MediaMetadata.Add(metadata);
-		fixture.Context.Watchlist.Add(new WatchlistEntity { Media = watchlistedMedia, Origin = WatchlistEntryOrigin.Manual });
+		fixture.Context.Watchlist.Add(new WatchlistRow { Media = watchlistedMedia, Origin = WatchlistEntryOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -127,7 +127,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		var queuedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalIdEntity(queuedMedia), queuedImdb.ToExternalIdEntity(queuedMedia));
-		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxEntity { Media = queuedMedia, Kind = WatchlistOperationKind.Add });
+		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = queuedMedia, Kind = WatchlistOperationKind.Add });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 

@@ -1,9 +1,9 @@
-using Contracts.Watchlist.Outbox;
 using DB.Data.Media;
+using Domain.Watchlist.Outbox;
 
 namespace DB.Data.Watchlist.Outbox;
 
-internal record WatchlistOutboxEntity
+internal record WatchlistOutboxRow
 {
 	public required MediaRow Media { get; set; }
 

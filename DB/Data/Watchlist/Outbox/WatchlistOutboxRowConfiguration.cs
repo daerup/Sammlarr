@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist.Outbox;
 
-internal sealed class WatchlistOutboxEntityConfiguration : IModelConfiguration
+internal sealed class WatchlistOutboxRowConfiguration : IModelConfiguration
 {
 	public void Apply(ModelBuilder modelBuilder) =>
-		modelBuilder.Entity<WatchlistOutboxEntity>(builder =>
+		modelBuilder.Entity<WatchlistOutboxRow>(builder =>
 		{
 			builder.Property<Guid>("MediaId");
 			builder.HasKey("MediaId");
-			builder.HasOne(o => o.Media).WithOne().HasForeignKey<WatchlistOutboxEntity>("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasOne(o => o.Media).WithOne().HasForeignKey<WatchlistOutboxRow>("MediaId").OnDelete(DeleteBehavior.Restrict);
 			builder.HasIndex(o => o.Kind);
 		});
 }
