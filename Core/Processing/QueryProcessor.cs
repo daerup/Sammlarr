@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Linq.Dynamic.Core;
 using System.Runtime.CompilerServices;
 using Contracts.Processing;
+using Domain.Processing;
 
 namespace Core.Processing;
 

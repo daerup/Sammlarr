@@ -4,6 +4,7 @@ using Contracts.Media;
 using DB.Data.Feed;
 using DB.Data.Media;
 using DB.Data.Watchlist;
+using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +54,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		await _testee.DeleteFeedAsync(id);
 
-		var exists = await fixture.Context.Feeds.AnyAsync(l => l.Id == id);
+		var exists = await fixture.Context.Feeds.AnyAsync(l => l.Id == id.Value);
 		await Assert.That(exists).IsFalse();
 	}
 
@@ -62,11 +63,11 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	{
 		var id = await SeedFeedAsync("Keep", "keep", new DateTimeOffset(2026, 06, 01, 12, 0, 0, TimeSpan.Zero));
 
-		await _testee.DeleteFeedAsync(Guid.NewGuid());
+		await _testee.DeleteFeedAsync(FeedId.From(Guid.NewGuid()));
 
 		var feeds = await fixture.Context.Feeds.AsNoTracking().ToListAsync();
 		await Assert.That(feeds).Count().IsEqualTo(1);
-		await Assert.That(feeds[0].Id).IsEqualTo(id);
+		await Assert.That(feeds[0].Id).IsEqualTo(id.Value);
 	}
 
 	[Test]
@@ -81,7 +82,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 			{
 				Media = media,
 				Origin = WatchlistEntryOrigin.Feed,
-				SourceFeedId = feedId,
+				SourceFeedId = feedId.Value,
 			}
 		);
 		await fixture.Context.SaveChangesAsync();
@@ -135,7 +136,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetFeedByIdAsync_WhenFeedDoesNotExist_ReturnsNull()
 	{
-		var feed = await _testee.GetFeedByIdAsync(Guid.NewGuid());
+		var feed = await _testee.GetFeedByIdAsync(FeedId.From(Guid.NewGuid()));
 
 		await Assert.That(feed).IsNull();
 	}
@@ -177,12 +178,12 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 			Schedule = new SyncMode(new Manual()),
 		};
 
-		await Assert.That(async () => await _testee.UpdateFeedAsync(Guid.NewGuid(), updateData)).Throws<InvalidOperationException>();
+		await Assert.That(async () => await _testee.UpdateFeedAsync(FeedId.From(Guid.NewGuid()), updateData)).Throws<InvalidOperationException>();
 	}
 
-	private async Task<Guid> SeedFeedAsync(string name, string identifier, DateTimeOffset createdAt)
+	private async Task<FeedId> SeedFeedAsync(string name, string identifier, DateTimeOffset createdAt)
 	{
-		var entity = new FeedEntity
+		var entity = new FeedRow
 		{
 			Name = name,
 			IsEnabled = true,
@@ -195,6 +196,6 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await fixture.Context.SaveChangesAsync();
 		await fixture.Context.Feeds.Where(f => f.Id == entity.Id).ExecuteUpdateAsync(s => s.SetProperty(f => f.CreatedAt, createdAt));
 		fixture.Context.ChangeTracker.Clear();
-		return entity.Id;
+		return FeedId.From(entity.Id);
 	}
 }

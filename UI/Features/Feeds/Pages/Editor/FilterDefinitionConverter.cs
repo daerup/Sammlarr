@@ -1,9 +1,9 @@
 using System.Text.Json;
 using BlazorBlueprint.Primitives.Filtering;
-using Contracts.Processing;
+using Domain.Processing;
 using BBFilterOp = BlazorBlueprint.Primitives.Filtering.FilterOperator;
 using BBLogicalOp = BlazorBlueprint.Primitives.Filtering.LogicalOperator;
-using ContractsFilterOp = Contracts.Processing.FilterOperator;
+using ContractsFilterOp = Domain.Processing.FilterOperator;
 
 namespace UI.Features.Feeds.Pages.Editor;
 

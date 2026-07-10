@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using Contracts.Feed;
-using Contracts.Processing;
+using Domain.Feed;
+using Domain.Processing;
 using Domain.Providers;
 
 namespace DB.Data.Feed;
 
-internal record FeedEntity : Entity<Guid>
+internal record FeedRow : Entity<Guid>
 {
 	[Required]
 	public bool IsEnabled { get; set; }

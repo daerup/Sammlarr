@@ -1,4 +1,4 @@
-namespace Contracts.Feed;
+namespace Domain.Feed;
 
 public enum FeedAddStrategy
 {

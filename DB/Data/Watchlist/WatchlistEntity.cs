@@ -10,7 +10,7 @@ internal record WatchlistEntity : IAuditable
 	public required WatchlistEntryOrigin Origin { get; set; }
 
 	public Guid? SourceFeedId { get; set; }
-	public FeedEntity? SourceFeed { get; set; }
+	public FeedRow? SourceFeed { get; set; }
 	public string? SourceFeedNameSnapshot { get; set; }
 
 	public DateTimeOffset CreatedAt { get; set; }

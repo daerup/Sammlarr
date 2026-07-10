@@ -4,7 +4,7 @@ Contracts/Auth/AuthSession.cs
 Shared/Result/Result.cs
 Shared/Optional/Optional.cs
 Contracts/Processing/QueryResult.cs
-Contracts/Feed/RunSchedule.cs
+Domain/Feed/RunSchedule.cs
 Contracts/Watchlist/WatchlistItemProvenance.cs
 Contracts/Watchlist/Sync/WatchlistSyncResult.cs
 Contracts/Watchlist/Sync/WatchlistSyncTrigger.cs

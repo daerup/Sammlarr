@@ -1,12 +1,12 @@
-using Contracts.Processing;
+using Domain.Processing;
 using Domain.Providers;
 
-namespace Contracts.Feed;
+namespace Domain.Feed;
 
 public record Feed
 {
 	public required string Name { get; init; }
-	public required Guid Id { get; init; }
+	public required FeedId Id { get; init; }
 	public required bool Enabled { get; init; }
 	public required FeedProvider Provider { get; init; }
 	public required FeedAddStrategy Strategy { get; init; }

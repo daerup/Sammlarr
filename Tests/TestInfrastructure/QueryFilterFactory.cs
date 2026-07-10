@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Contracts.Processing;
+using Domain.Processing;
 
 namespace TestInfrastructure;
 

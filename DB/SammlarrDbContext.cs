@@ -57,7 +57,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ApiKeyConfigRow> ApiKeySettings => Set<ApiKeyConfigRow>();
 
 	public DbSet<ProviderConfigRow> ProviderSettings => Set<ProviderConfigRow>();
-	public DbSet<FeedEntity> Feeds => Set<FeedEntity>();
+	public DbSet<FeedRow> Feeds => Set<FeedRow>();
 	public DbSet<BlacklistRow> Blacklist => Set<BlacklistRow>();
 	public DbSet<WatchlistEntity> Watchlist => Set<WatchlistEntity>();
 	public DbSet<WatchlistOutboxEntity> WatchlistOutbox => Set<WatchlistOutboxEntity>();
