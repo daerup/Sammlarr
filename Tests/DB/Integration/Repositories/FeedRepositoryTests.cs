@@ -78,7 +78,7 @@ public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(mediaId.ToExternalIdEntity(media));
 		fixture.Context.Watchlist.Add(
-			new WatchlistEntity
+			new WatchlistRow
 			{
 				Media = media,
 				Origin = WatchlistEntryOrigin.Feed,

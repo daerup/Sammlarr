@@ -1,7 +1,6 @@
-using Contracts.Media;
 using Domain.Media;
 
-namespace Contracts.Watchlist.Outbox;
+namespace Domain.Watchlist.Outbox;
 
 public enum WatchlistOperationKind
 {

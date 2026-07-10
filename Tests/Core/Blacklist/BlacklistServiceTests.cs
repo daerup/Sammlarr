@@ -48,7 +48,7 @@ public class BlacklistServiceTests
 	{
 		var addedAt = _faker.Date.PastOffset();
 		var mediaId = MediaId.From(Guid.NewGuid());
-		var entry = new BlacklistedMedia(mediaId, addedAt);
+		var entry = new BlacklistEntry(mediaId, addedAt);
 		var detailResult = CreateMovieDetailResult(mediaId);
 
 		var repository = IBlacklistRepository.Mock();
@@ -73,7 +73,7 @@ public class BlacklistServiceTests
 	public async Task GetBlacklistItems_WhenNoEntriesExist_ReturnsEmptyList()
 	{
 		var repository = IBlacklistRepository.Mock();
-		repository.GetBlacklistedEntriesAsync(Any()).Returns(new List<BlacklistedMedia>());
+		repository.GetBlacklistedEntriesAsync(Any()).Returns(new List<BlacklistEntry>());
 
 		var testee = CreateTestee(repository);
 

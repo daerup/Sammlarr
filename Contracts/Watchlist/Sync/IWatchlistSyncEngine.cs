@@ -1,3 +1,5 @@
+using Domain.Watchlist.Sync;
+
 namespace Contracts.Watchlist.Sync;
 
 public interface IWatchlistSyncEngine

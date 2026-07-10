@@ -2,13 +2,14 @@ using Contracts.Media;
 using Contracts.Watchlist;
 using DB.Data.Media;
 using Domain.Media;
+using Domain.Watchlist;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist;
 
 internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistRepository
 {
-	public async Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WatchlistEntry>> GetEntriesAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
@@ -16,7 +17,7 @@ internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 			select new { WatchlistEntry = watchlistEntry, MediaIdValue = watchlistEntry.Media.Id }
 		).ToListAsync(cancellationToken);
 
-		return [.. rows.Select(row => new WatchlistedMedia(MediaId.From(row.MediaIdValue), row.WatchlistEntry.CreatedAt, row.WatchlistEntry.ToProvenance()))];
+		return [.. rows.Select(row => new WatchlistEntry(MediaId.From(row.MediaIdValue), row.WatchlistEntry.CreatedAt, row.WatchlistEntry.ToProvenance()))];
 	}
 
 	public async Task<IReadOnlyList<MediaId>> GetIdsAsync(CancellationToken cancellationToken = default)
@@ -43,7 +44,7 @@ internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContex
 
 		foreach (var media in matchedMedia.Where(m => !existingMediaIds.Contains(m.Id)))
 		{
-			var row = new WatchlistEntity { Media = media, Origin = WatchlistEntryOrigin.Manual };
+			var row = new WatchlistRow { Media = media, Origin = WatchlistEntryOrigin.Manual };
 			row.Apply(provenance);
 			ctx.Watchlist.Add(row);
 		}

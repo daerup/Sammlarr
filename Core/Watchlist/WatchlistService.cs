@@ -7,6 +7,8 @@ using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Watchlist;
+using Domain.Watchlist.Outbox;
 using Shared;
 
 namespace Core.Watchlist;
@@ -19,14 +21,14 @@ internal class WatchlistService(
 	IProviderConfigRepository configRepository
 ) : IWatchlistService
 {
-	public async IAsyncEnumerable<WatchlistItem> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<WatchlistedMedia> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var entries = (await repository.GetEntriesAsync(cancellationToken)).OrderByDescending(e => e.AddedAt).ToList();
 		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).Zip(entries, cancellationToken);
 
 		await foreach (var (detail, entry) in pipeline.WhereSuccess())
 		{
-			yield return new WatchlistItem(detail, entry.AddedAt, entry.Provenance);
+			yield return new WatchlistedMedia(detail, entry.AddedAt, entry.Provenance);
 		}
 	}
 

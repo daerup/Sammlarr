@@ -91,7 +91,7 @@ else
                 }
                 else if (_items is not null)
                 {
-                    <BulkEditableMediaGrid TItem="WatchlistItem"
+                    <BulkEditableMediaGrid TItem="WatchlistedMedia"
                                            Items="_items"
                                            Detail="@(i => i.Media)"
                                            Key="@(i => i.Media.Id)"
@@ -144,8 +144,8 @@ else
 }
 
 @code {
-    private List<WatchlistItem>? _items;
-    private WatchlistItem? _selectedItem;
+    private List<WatchlistedMedia>? _items;
+    private WatchlistedMedia? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
@@ -222,7 +222,7 @@ else
 
     private static string GetRemoveButtonIcon() => "x";
 
-    private void SelectItem(WatchlistItem item)
+    private void SelectItem(WatchlistedMedia item)
     {
         _selectedItem = item;
         _isSheetOpen = true;
@@ -255,7 +255,7 @@ else
         CloseSelectedMedia();
     }
 
-    private async Task RemoveBulkAsync(IReadOnlyList<WatchlistItem> toRemove)
+    private async Task RemoveBulkAsync(IReadOnlyList<WatchlistedMedia> toRemove)
     {
         await WatchlistService.RemoveFromWatchlistAsync(toRemove.Select(item => item.Media.Id), _cancellationTokenSource.Token);
         Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your watchlist.");
@@ -356,7 +356,7 @@ else
             _ => string.Empty,
         };
 
-    private static string ProvenanceTooltip(WatchlistItem item)
+    private static string ProvenanceTooltip(WatchlistedMedia item)
     {
         var date = item.AddedAt.LocalDateTime.ToString("MMM d, yyyy");
         return item.Provenance.Value switch

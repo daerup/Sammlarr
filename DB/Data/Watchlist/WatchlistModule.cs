@@ -12,7 +12,7 @@ internal class WatchlistModule : IServiceModule
 	{
 		services.AddScoped<IWatchlistRepository, WatchlistRepository>();
 		services.AddScoped<IWatchlistOutbox, WatchlistOutboxRepository>();
-		services.AddScoped<IModelConfiguration, WatchlistEntityConfiguration>();
-		services.AddScoped<IModelConfiguration, WatchlistOutboxEntityConfiguration>();
+		services.AddScoped<IModelConfiguration, WatchlistRowConfiguration>();
+		services.AddScoped<IModelConfiguration, WatchlistOutboxRowConfiguration>();
 	}
 }

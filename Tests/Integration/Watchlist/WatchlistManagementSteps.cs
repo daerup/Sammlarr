@@ -1,5 +1,7 @@
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
+using Domain.Watchlist;
+using Domain.Watchlist.Outbox;
 using Integration.Tests.Infrastructure.Common;
 using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;

@@ -59,8 +59,8 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<ProviderConfigRow> ProviderSettings => Set<ProviderConfigRow>();
 	public DbSet<FeedRow> Feeds => Set<FeedRow>();
 	public DbSet<BlacklistRow> Blacklist => Set<BlacklistRow>();
-	public DbSet<WatchlistEntity> Watchlist => Set<WatchlistEntity>();
-	public DbSet<WatchlistOutboxEntity> WatchlistOutbox => Set<WatchlistOutboxEntity>();
+	public DbSet<WatchlistRow> Watchlist => Set<WatchlistRow>();
+	public DbSet<WatchlistOutboxRow> WatchlistOutbox => Set<WatchlistOutboxRow>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{

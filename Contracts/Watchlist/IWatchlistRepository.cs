@@ -1,11 +1,12 @@
 using Contracts.Media;
 using Domain.Media;
+using Domain.Watchlist;
 
 namespace Contracts.Watchlist;
 
 public interface IWatchlistRepository
 {
-	Task<IReadOnlyList<WatchlistedMedia>> GetEntriesAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<WatchlistEntry>> GetEntriesAsync(CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaId>> GetIdsAsync(CancellationToken cancellationToken = default);
 
