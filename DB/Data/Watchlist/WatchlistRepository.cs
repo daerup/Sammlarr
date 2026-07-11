@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist;
 
-internal class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistRepository
+internal sealed class WatchlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistRepository
 {
 	public async Task<IReadOnlyList<WatchlistEntry>> GetEntriesAsync(CancellationToken cancellationToken = default)
 	{

@@ -2,7 +2,7 @@ namespace Shared;
 
 public static class AsyncEnumerableResultExtensions
 {
-	public static async IAsyncEnumerable<T> WhereSuccess<T>(this IAsyncEnumerable<Result<T>> source)
+	public static async IAsyncEnumerable<T> WhereSuccessAwait<T>(this IAsyncEnumerable<Result<T>> source)
 		where T : notnull
 	{
 		await foreach (var result in source)
@@ -14,7 +14,7 @@ public static class AsyncEnumerableResultExtensions
 		}
 	}
 
-	public static async IAsyncEnumerable<(T Value, TCompanion Companion)> WhereSuccess<T, TCompanion>(
+	public static async IAsyncEnumerable<(T Value, TCompanion Companion)> WhereSuccessAwait<T, TCompanion>(
 		this IAsyncEnumerable<(Result<T> Result, TCompanion Companion)> source
 	)
 		where T : notnull

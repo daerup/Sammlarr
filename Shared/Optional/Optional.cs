@@ -10,6 +10,7 @@ public record Some<T>(T Value) where T : notnull
 public static class Some
 {
     public static Some<T> Of<T>(T value) where T : notnull => new(value);
+    [SuppressArchTest]
     public static async Task<Some<T>> Of<T>(Task<T> value) where T : notnull => new(await value);
 }
 
@@ -17,6 +18,7 @@ public static class Optional
 {
     public static Optional<T> Of<T>(T? value) where T : class => value is not null ? Some.Of(value) : new None();
 
+    [SuppressArchTest]
     public static async Task<Optional<T>> Of<T>(Task<T?> value) where T : class => Of(await value);
 }
 

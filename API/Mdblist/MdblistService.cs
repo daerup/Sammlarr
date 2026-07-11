@@ -16,8 +16,12 @@ using Shared;
 
 namespace API.Mdblist;
 
-internal class MdblistService(MdblistClient client, IMediaService media, IProviderConfigRepository configRepository, IApiKeyConfigRepository apiKeyRepository)
-	: IFeedService
+internal sealed class MdblistService(
+	MdblistClient client,
+	IMediaService media,
+	IProviderConfigRepository configRepository,
+	IApiKeyConfigRepository apiKeyRepository
+) : IFeedService
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";

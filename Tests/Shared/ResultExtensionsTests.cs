@@ -390,7 +390,7 @@ public class ResultExtensionsTests
 	{
 		var values = new List<int>();
 
-		await foreach (var value in ToAsync<Result<int>>(Success.Of(1), Error.From("x"), Success.Of(3)).WhereSuccess())
+		await foreach (var value in ToAsync<Result<int>>(Success.Of(1), Error.From("x"), Success.Of(3)).WhereSuccessAwait())
 		{
 			values.Add(value);
 		}
@@ -403,7 +403,9 @@ public class ResultExtensionsTests
 	{
 		var pairs = new List<string>();
 
-		await foreach (var (value, companion) in ToAsync<(Result<int>, string)>((Success.Of(1), "a"), (Error.From("x"), "b"), (Success.Of(3), "c")).WhereSuccess())
+		await foreach (
+			var (value, companion) in ToAsync<(Result<int>, string)>((Success.Of(1), "a"), (Error.From("x"), "b"), (Success.Of(3), "c")).WhereSuccessAwait()
+		)
 		{
 			pairs.Add($"{value}{companion}");
 		}

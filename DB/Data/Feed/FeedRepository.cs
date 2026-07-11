@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
 
-internal class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
+internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
 {
 	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = projection => new Domain.Feed.Feed
 	{

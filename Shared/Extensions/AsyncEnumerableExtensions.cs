@@ -64,7 +64,7 @@ public static class AsyncEnumerableExtensions
 			}
 		}
 
-		public async IAsyncEnumerable<(TIn First, TOther Second)> Zip<TOther>(
+		public async IAsyncEnumerable<(TIn First, TOther Second)> ZipAwait<TOther>(
 			IEnumerable<TOther> other,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
 		)

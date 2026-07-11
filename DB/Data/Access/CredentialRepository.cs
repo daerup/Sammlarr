@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class CredentialRepository(
+internal sealed class CredentialRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	ITypedMemoryCache<WatchlistProvider, ICredential> cache,
 	ICredentialFactory credentialFactory

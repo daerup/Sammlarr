@@ -1,6 +1,6 @@
 namespace DB.Data;
 
-public interface IIdentifiable<TId>
+internal interface IIdentifiable<TId>
 {
 	TId Id { get; set; }
 }

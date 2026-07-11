@@ -461,7 +461,7 @@
                 Filter = FilterDefinitionConverter.ToQueryFilter(applied.Filter),
             };
             _processedResults = resolvedItems.Count > 0
-                ? await QueryProcessor.Execute(resolvedItems, options, r => IsWatchlisted(r.Media), r => IsBlacklisted(r.Media), cancellationToken).ToListAsync(cancellationToken)
+                ? await QueryProcessor.ExecuteAsync(resolvedItems, options, r => IsWatchlisted(r.Media), r => IsBlacklisted(r.Media), cancellationToken).ToListAsync(cancellationToken)
                 : [];
         }
 

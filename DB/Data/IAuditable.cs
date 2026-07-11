@@ -1,6 +1,6 @@
 namespace DB.Data;
 
-public interface IAuditable
+internal interface IAuditable
 {
 	DateTimeOffset CreatedAt { get; set; }
 	DateTimeOffset UpdatedAt { get; set; }

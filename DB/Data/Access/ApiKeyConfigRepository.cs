@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Access;
 
-internal class ApiKeyConfigRepository(
+internal sealed class ApiKeyConfigRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	ITypedMemoryCache<ApiKeyProvider, IApiKey> cache,
 	IMediaRepository mediaRepository,

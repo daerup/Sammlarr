@@ -4,7 +4,7 @@ namespace Contracts.Processing;
 
 public interface IQueryProcessor<T>
 {
-	IAsyncEnumerable<QueryResult<T>> Execute(
+	IAsyncEnumerable<QueryResult<T>> ExecuteAsync(
 		IEnumerable<T> source,
 		QueryOptions options,
 		Func<T, bool> isWatchlisted,

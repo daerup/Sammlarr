@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist.Outbox;
 
-internal class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistOutbox
+internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistOutbox
 {
 	public async Task<IReadOnlyList<WatchlistOperation>> GetAsync(CancellationToken cancellationToken = default)
 	{

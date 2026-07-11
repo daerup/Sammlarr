@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.DataProtection;
 
 namespace DB.Conversion.Encryption;
 
-internal class DataProtectionService(IDataProtectionProvider dataProtectionProvider) : IDataProtectionService
+internal sealed class DataProtectionService(IDataProtectionProvider dataProtectionProvider) : IDataProtectionService
 {
 	private readonly IDataProtector _protector = dataProtectionProvider.CreateProtector("Sammlarr.DB.Encryption");
 

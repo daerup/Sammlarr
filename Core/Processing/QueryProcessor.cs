@@ -8,7 +8,7 @@ namespace Core.Processing;
 
 internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 {
-	public async IAsyncEnumerable<QueryResult<T>> Execute(
+	public async IAsyncEnumerable<QueryResult<T>> ExecuteAsync(
 		IEnumerable<T> source,
 		QueryOptions options,
 		Func<T, bool> isWatchlisted,

@@ -133,7 +133,7 @@ else
 
         try
         {
-            _items = await BlacklistService.GetBlacklistItems(_cancellationTokenSource.Token).ToListAsync();
+            _items = await BlacklistService.GetBlacklistItemsAsync(_cancellationTokenSource.Token).ToListAsync();
 
             if (_selectedItem.HasValue)
             {
