@@ -145,7 +145,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 			var externals = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
 			var requests = externals.Select(e => new ResolveRequest([e], deps.MediaProvider, new None()));
 			var remoteMediaIds = new List<MediaId>(externals.Count);
-			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).Zip(externals, cancellationToken);
+			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).ZipAwait(externals, cancellationToken);
 			await foreach (var (result, external) in pipeline)
 			{
 				if (result is Success<MediaIdentity>(var identity))

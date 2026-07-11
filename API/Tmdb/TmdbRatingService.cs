@@ -6,7 +6,7 @@ using Domain.Providers;
 
 namespace API.Tmdb;
 
-internal class TmdbRatingService(TmdbApi tmdbApi) : IMediaRatingService
+internal sealed class TmdbRatingService(TmdbApi tmdbApi) : IMediaRatingService
 {
 	public Task<Result<IReadOnlyList<MediaRating>>> GetRatingsAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
 		id.Require<TmdbId>("TMDB ratings require a TMDB id.")

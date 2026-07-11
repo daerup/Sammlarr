@@ -80,6 +80,7 @@ public static partial class OptionalExtensions
 				None => fallback(),
 			};
 
+		[SuppressArchTest]
 		public Optional<T> When(bool condition) => condition ? optional : new None();
 
 		[GenerateAsync]

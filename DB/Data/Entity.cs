@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DB.Data;
 
-public abstract record Entity<TId> : IIdentifiable<TId>, IAuditable
+internal abstract record Entity<TId> : IIdentifiable<TId>, IAuditable
 {
 	public DateTimeOffset CreatedAt { get; set; }
 	public DateTimeOffset UpdatedAt { get; set; }

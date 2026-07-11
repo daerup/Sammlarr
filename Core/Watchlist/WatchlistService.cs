@@ -13,7 +13,7 @@ using Shared;
 
 namespace Core.Watchlist;
 
-internal class WatchlistService(
+internal sealed class WatchlistService(
 	IWatchlistRepository repository,
 	IWatchlistOutbox outbox,
 	IMediaService media,
@@ -24,9 +24,9 @@ internal class WatchlistService(
 	public async IAsyncEnumerable<WatchlistedMedia> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var entries = (await repository.GetEntriesAsync(cancellationToken)).OrderByDescending(e => e.AddedAt).ToList();
-		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).Zip(entries, cancellationToken);
+		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).ZipAwait(entries, cancellationToken);
 
-		await foreach (var (detail, entry) in pipeline.WhereSuccess())
+		await foreach (var (detail, entry) in pipeline.WhereSuccessAwait())
 		{
 			yield return new WatchlistedMedia(detail, entry.AddedAt, entry.Provenance);
 		}

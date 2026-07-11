@@ -24,7 +24,7 @@ public class QueryProcessorTests
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 
-		var results = await _testee.Execute(items, new QueryOptions(), _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, new QueryOptions(), _ => false, _ => false).ToListAsync();
 		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item));
 	}
 
@@ -34,7 +34,7 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
-		var results = await _testee.Execute(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Truncated<Item>));
 	}
@@ -48,7 +48,7 @@ public class QueryProcessorTests
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Descending },
 		};
 
-		var results = await _testee.Execute(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
 		await Assert.That(results).AreOfUnionType<IList<QueryResult<Item>>, QueryResult<Item>>(typeof(Item), typeof(Item));
 		await Assert.That(results.OfUnionType<Item>()).IsEquivalentTo([items[1], items[0]], CollectionOrdering.Matching);
 	}
@@ -63,7 +63,7 @@ public class QueryProcessorTests
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Ascending },
 		};
 
-		var results = await _testee.Execute(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
 		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item), typeof(Truncated<Item>));
 		await Assert.That(results.OfUnionType<Item>()).IsEquivalentTo([items[2], items[0]], CollectionOrdering.Matching);
 		await Assert.That(results.OfUnionType<Truncated<Item>>().Select(i => i.Item)).IsEquivalentTo([items[1]]);
@@ -75,7 +75,7 @@ public class QueryProcessorTests
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
 
-		var results = await _testee.Execute(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
 		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Culled<Item>));
 	}
 
@@ -100,7 +100,7 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 2 },
 		};
 
-		var results = await _testee.Execute(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
 		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Culled<Item>), typeof(Item), typeof(Truncated<Item>));
 	}
 
@@ -116,7 +116,7 @@ public class QueryProcessorTests
 				Group(Number("Year", FilterPredicateOperator.LessOrEqual, 2019))
 			),
 		};
-		var results = await _testee.Execute(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
 		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Item));
 	}
 
@@ -130,7 +130,7 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.Execute([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
 	}
@@ -145,7 +145,7 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Blacklisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.Execute([blacklisted, normal], options, _ => false, i => i == blacklisted).ToListAsync();
+		var results = await _testee.ExecuteAsync([blacklisted, normal], options, _ => false, i => i == blacklisted).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
 		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().Source).IsEqualTo(BypassReason.Blacklisted);
@@ -162,7 +162,7 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.Execute([watchlisted, normal1, normal2], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal1, normal2], options, i => i == watchlisted, _ => false).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item), typeof(Truncated<Item>));
 	}
@@ -178,7 +178,7 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.Execute([normal1, watchlisted, normal2], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([normal1, watchlisted, normal2], options, i => i == watchlisted, _ => false).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Truncated<Item>), typeof(Truncated<Item>));
 	}
@@ -190,7 +190,7 @@ public class QueryProcessorTests
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 2 } };
 
-		var results = await _testee.Execute([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
 		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().Source).IsEqualTo(BypassReason.Watchlisted);
@@ -212,7 +212,7 @@ public class QueryProcessorTests
 			},
 		};
 
-		var results = await _testee.Execute([both, normal], options, i => i == both, i => i == both).ToListAsync();
+		var results = await _testee.ExecuteAsync([both, normal], options, i => i == both, i => i == both).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
 		var bypassed = results.OfUnionType<Bypassed<Item>>().Single();
@@ -235,7 +235,7 @@ public class QueryProcessorTests
 			},
 		};
 
-		var results = await _testee.Execute([both, normal], options, i => i == both, i => i == both).ToListAsync();
+		var results = await _testee.ExecuteAsync([both, normal], options, i => i == both, i => i == both).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Truncated<Item>));
 		var bypassed = results.OfUnionType<Bypassed<Item>>().Single();
@@ -250,7 +250,7 @@ public class QueryProcessorTests
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
-		var results = await _testee.Execute([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
 
 		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Truncated<Item>));
 	}
@@ -271,7 +271,7 @@ public class QueryProcessorRatingTests
 			Sort = new QuerySort { Property = nameof(MediaQueryRow.Rating), Direction = ListSortDirection.Descending },
 		};
 
-		var results = await _testee.Execute([lowRated, unrated, rated], options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([lowRated, unrated, rated], options, _ => false, _ => false).ToListAsync();
 		var ordered = results.OfUnionType<MediaQueryRow>().ToList();
 
 		await Assert.That(ordered[0]).IsSameReferenceAs(rated);
@@ -287,7 +287,7 @@ public class QueryProcessorRatingTests
 		var unrated = MovieWithRating(2022, null);
 		var options = new QueryOptions { Filter = Filter(Group(Number(nameof(MediaQueryRow.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0))) };
 
-		var results = await _testee.Execute([high, low, unrated], options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([high, low, unrated], options, _ => false, _ => false).ToListAsync();
 
 		await Assert.That(results.OfUnionType<MediaQueryRow>()).IsEquivalentTo([high]);
 		await Assert.That(results.OfUnionType<Culled<MediaQueryRow>>().Select(c => c.Item)).IsEquivalentTo([low, unrated]);

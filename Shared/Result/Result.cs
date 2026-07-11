@@ -32,8 +32,10 @@ public static class Result
 
 	public static Result<T> WhenNotNull<T>(T? value, string reason) where T : class => WhenNotNull(value, Error.From(reason));
 
+	[SuppressArchTest]
 	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, Error error) where T : class => WhenNotNull(await value, error);
 
+	[SuppressArchTest]
 	public static async Task<Result<T>> WhenNotNull<T>(Task<T?> value, string reason) where T : class => WhenNotNull(await value, reason);
 }
 

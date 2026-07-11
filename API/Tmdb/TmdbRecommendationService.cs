@@ -17,7 +17,7 @@ using Shared.Options;
 
 namespace API.Tmdb;
 
-internal class TmdbRecommendationService(
+internal sealed class TmdbRecommendationService(
 	TmdbClient tmdbClient,
 	TmdbOptions options,
 	IMediaService media,
@@ -46,7 +46,7 @@ internal class TmdbRecommendationService(
 		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], settings.WatchlistProvider.AsMediaProvider(), BuildHints(x.Item)));
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
-		await foreach (var (identity, entry) in pipeline.Zip(resolvable, cancellationToken))
+		await foreach (var (identity, entry) in pipeline.ZipAwait(resolvable, cancellationToken))
 		{
 			finalItems[entry.Index] = BuildTrending(entry.Item, identity);
 		}

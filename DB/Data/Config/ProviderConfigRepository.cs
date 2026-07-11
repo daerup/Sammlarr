@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Config;
 
-internal class ProviderConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<string, ProviderConfig> cache)
+internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, ITypedMemoryCache<string, ProviderConfig> cache)
 	: IProviderConfigRepository
 {
 	private const string CacheKey = nameof(ProviderConfig);

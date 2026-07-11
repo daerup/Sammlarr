@@ -60,7 +60,7 @@ public class BlacklistServiceTests
 
 		var testee = CreateTestee(repository, media.Object);
 
-		var result = await testee.GetBlacklistItems().ToListAsync();
+		var result = await testee.GetBlacklistItemsAsync().ToListAsync();
 
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
@@ -77,7 +77,7 @@ public class BlacklistServiceTests
 
 		var testee = CreateTestee(repository);
 
-		var result = await testee.GetBlacklistItems().ToListAsync();
+		var result = await testee.GetBlacklistItemsAsync().ToListAsync();
 
 		await Assert.That(result).IsEmpty();
 	}

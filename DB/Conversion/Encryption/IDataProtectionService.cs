@@ -1,6 +1,6 @@
 namespace DB.Conversion.Encryption;
 
-public interface IDataProtectionService
+internal interface IDataProtectionService
 {
 	string Encrypt(string plaintext);
 

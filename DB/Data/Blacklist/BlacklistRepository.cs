@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Blacklist;
 
-internal class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IBlacklistRepository
+internal sealed class BlacklistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IBlacklistRepository
 {
 	public async Task<IReadOnlyList<BlacklistEntry>> GetBlacklistedEntriesAsync(CancellationToken cancellationToken = default)
 	{

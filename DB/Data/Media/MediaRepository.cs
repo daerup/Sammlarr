@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaMetadataFactory metadataFactory) : IMediaRepository
+internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaMetadataFactory metadataFactory) : IMediaRepository
 {
 	public async Task<IReadOnlyList<MediaIdentity?>> FindIdentitiesAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
