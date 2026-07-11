@@ -117,7 +117,7 @@
 
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
-    [Parameter] [EditorRequired] public MediaSearchProvider SearchProvider { get; set; }
+    [Parameter] [EditorRequired] public SearchProvider SearchProvider { get; set; }
     [Parameter] [EditorRequired] public required Func<MediaId, bool> IsInWatchlist { get; set; }
     [Parameter] [EditorRequired] public required Func<MediaId, string, bool, Task<bool>> OnToggle { get; set; }
     [Parameter] public string? Title { get; set; }

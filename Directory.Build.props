@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
 	</PropertyGroup>
-	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Shared.Generators' and '$(MSBuildProjectName)' != 'Shared.Generators.Tests'">
+	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Generators' and '$(MSBuildProjectName)' != 'Generators.Tests'">
 		<Using Include="Shared" />
 		<Using Include="Shared.Collections" />
 		<Using Include="Shared.Extensions" />

@@ -11,7 +11,7 @@ using Domain.Providers;
 namespace Core.Media;
 
 internal sealed class MediaMetadataResolver(
-	IKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider> searchIndex,
+	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> searchIndex,
 	IKeyedServiceIndex<MediaProvider, IMetadataEnricher> enricherIndex,
 	IKeyedServiceIndex<RatingProvider, IMediaRatingService> ratingIndex,
 	IProviderConfigRepository configRepository
@@ -29,7 +29,7 @@ internal sealed class MediaMetadataResolver(
 
 	private async Task<MediaLookup> CompleteAsync(
 		MediaLookup detail,
-		MediaSearchProvider searchProvider,
+		SearchProvider searchProvider,
 		RatingProvider ratingProvider,
 		CancellationToken cancellationToken
 	)
@@ -43,7 +43,7 @@ internal sealed class MediaMetadataResolver(
 		return await ApplyRatingsAsync(enriched, ratingProvider, cancellationToken);
 	}
 
-	private Task<Result<MediaLookup>> LookUpAsync(MediaIdentity identity, MediaSearchProvider provider, CancellationToken cancellationToken)
+	private Task<Result<MediaLookup>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
 	{
 		var providerMedia = provider.AsMediaProvider();
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
@@ -69,7 +69,7 @@ internal sealed class MediaMetadataResolver(
 			.GetValueOr(details);
 	}
 
-	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia details, MediaSearchProvider searchProvider, CancellationToken cancellationToken)
+	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia details, SearchProvider searchProvider, CancellationToken cancellationToken)
 	{
 		var primaryProvider = searchProvider.AsMediaProvider();
 		foreach (var provider in EnricherChain.Where(p => p != primaryProvider))

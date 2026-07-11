@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Shared.Generators.AsyncMirror;
+namespace Generators.AsyncMirror;
 
 [Generator]
 public class AsyncMirrorGenerator : IIncrementalGenerator

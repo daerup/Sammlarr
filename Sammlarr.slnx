@@ -19,7 +19,7 @@
 		<Project Path="Tests/DB/DB.Tests.csproj" />
 		<Project Path="Tests/Domain/Domain.Tests.csproj" />
 		<Project Path="Tests/Integration/Integration.Tests.csproj" />
-		<Project Path="Tests/Shared.Generators/Shared.Generators.Tests.csproj" />
+		<Project Path="Tests/Generators/Generators.Tests.csproj" />
 		<Project Path="Tests/Shared/Shared.Tests.csproj" />
 		<Project Path="Tests/TestInfrastructure/TestInfrastructure.csproj" />
 		<Project Path="Tests/UI/UI.Tests.csproj" />
@@ -31,7 +31,7 @@
 	<Project Path="Domain/Domain.csproj" />
 	<Project Path="Observability/Observability.csproj" />
 	<Project Path="Sammlarr.AppHost/Sammlarr.AppHost.csproj" />
-	<Project Path="Shared.Generators/Shared.Generators.csproj" />
+	<Project Path="Generators/Generators.csproj" />
 	<Project Path="Shared/Shared.csproj" />
 	<Project Path="UI/UI.csproj" />
 </Solution>

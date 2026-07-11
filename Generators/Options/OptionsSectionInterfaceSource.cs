@@ -1,4 +1,4 @@
-namespace Shared.Generators.Options;
+namespace Generators.Options;
 
 internal static class OptionsSectionInterfaceSource
 {

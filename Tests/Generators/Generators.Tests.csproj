@@ -16,9 +16,9 @@
 		<PackageReference Include="TUnit.Mocks" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\Shared.Generators\Shared.Generators.csproj" />
+		<ProjectReference Include="..\..\Generators\Generators.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\Shared.Generators\Shared.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\..\Generators\Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 </Project>

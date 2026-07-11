@@ -33,15 +33,15 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 
 		await Assert.That(providerSettings).IsNotNull();
 		await Assert.That(providerSettings!.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
-		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(MediaRecommendationProvider.Tmdb);
-		await Assert.That(providerSettings.SearchProvider).IsEqualTo(MediaSearchProvider.Plex);
+		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(TrendingProvider.Tmdb);
+		await Assert.That(providerSettings.SearchProvider).IsEqualTo(SearchProvider.Plex);
 		_cache.TryGetValue(Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
 	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
 	{
-		var expected = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex, RatingProvider.Tmdb);
+		var expected = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 
 		await _testee.StoreAsync(expected);
 
@@ -57,8 +57,8 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 	[Test]
 	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
 	{
-		var initial = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex, RatingProvider.Tmdb);
-		var updated = CreateProviderSettings(WatchlistProvider.Plex, MediaRecommendationProvider.Tmdb, MediaSearchProvider.Plex, RatingProvider.Tmdb);
+		var initial = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
+		var updated = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 
 		await _testee.StoreAsync(initial);
 		await _testee.StoreAsync(updated);
@@ -70,8 +70,8 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 
 	private static ProviderConfig CreateProviderSettings(
 		WatchlistProvider watchlistProvider,
-		MediaRecommendationProvider trendingProvider,
-		MediaSearchProvider searchProvider,
+		TrendingProvider trendingProvider,
+		SearchProvider searchProvider,
 		RatingProvider ratingProvider
 	) =>
 		new()
