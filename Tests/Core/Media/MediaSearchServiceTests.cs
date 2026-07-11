@@ -21,11 +21,11 @@ public class MediaSearchServiceTests
 		var raw = BuildRawMovie([plexId]);
 		var provider = IMediaSearchProvider.Mock();
 		provider.SearchAsync("matrix", Any<IReadOnlyCollection<MediaType>>(), Any()).Returns([raw]);
-		var providers = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider>().Register(MediaSearchProvider.Plex, provider.Object);
+		var providers = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, provider.Object);
 		var resolvedId = MediaId.From(Guid.NewGuid());
 		var mediaService = IMediaService.Mock();
 		mediaService.ResolveIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any()).Returns([new MediaIdentity(resolvedId, [plexId])]);
-		var configRepository = ConfigWithSearchProvider(MediaSearchProvider.Plex);
+		var configRepository = ConfigWithSearchProvider(SearchProvider.Plex);
 		var testee = new MediaSearchService(providers, mediaService.Object, configRepository.Object);
 
 		var results = await testee.SearchAsync("matrix", [MediaType.Movie]);
@@ -40,7 +40,7 @@ public class MediaSearchServiceTests
 	{
 		var provider = IMediaSearchProvider.Mock();
 		provider.SearchAsync(Any(), Any<IReadOnlyCollection<MediaType>>(), Any()).Returns([]);
-		var providers = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider>().Register(MediaSearchProvider.Plex, provider.Object);
+		var providers = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, provider.Object);
 		var resolveCalls = 0;
 		var mediaService = IMediaService.Mock();
 		mediaService
@@ -52,7 +52,7 @@ public class MediaSearchServiceTests
 					return [];
 				}
 			);
-		var configRepository = ConfigWithSearchProvider(MediaSearchProvider.Plex);
+		var configRepository = ConfigWithSearchProvider(SearchProvider.Plex);
 		var testee = new MediaSearchService(providers, mediaService.Object, configRepository.Object);
 
 		var results = await testee.SearchAsync("nothing", [MediaType.Movie]);
@@ -69,7 +69,7 @@ public class MediaSearchServiceTests
 		var raw = BuildRawMovie([plexId, tmdbId]);
 		var provider = IMediaSearchProvider.Mock();
 		provider.SearchAsync(Any(), Any<IReadOnlyCollection<MediaType>>(), Any()).Returns([raw]);
-		var providers = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider>().Register(MediaSearchProvider.Plex, provider.Object);
+		var providers = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, provider.Object);
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>>? captured = null;
 		var mediaService = IMediaService.Mock();
 		mediaService
@@ -81,7 +81,7 @@ public class MediaSearchServiceTests
 					return [new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. groups[0]])];
 				}
 			);
-		var configRepository = ConfigWithSearchProvider(MediaSearchProvider.Plex);
+		var configRepository = ConfigWithSearchProvider(SearchProvider.Plex);
 		var testee = new MediaSearchService(providers, mediaService.Object, configRepository.Object);
 
 		await testee.SearchAsync("anything", [MediaType.Movie]);
@@ -92,7 +92,7 @@ public class MediaSearchServiceTests
 		await Assert.That(captured[0]).Contains(tmdbId);
 	}
 
-	private static Mock<IProviderConfigRepository> ConfigWithSearchProvider(MediaSearchProvider provider)
+	private static Mock<IProviderConfigRepository> ConfigWithSearchProvider(SearchProvider provider)
 	{
 		var repo = IProviderConfigRepository.Mock();
 		repo.GetAsync(Any())
@@ -100,7 +100,7 @@ public class MediaSearchServiceTests
 				new ProviderConfig
 				{
 					WatchlistProvider = WatchlistProvider.Plex,
-					TrendingProvider = MediaRecommendationProvider.Tmdb,
+					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = provider,
 					RatingProvider = RatingProvider.Tmdb,
 				}

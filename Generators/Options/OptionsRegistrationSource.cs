@@ -1,15 +1,20 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace Shared.Generators.Options;
+namespace Generators.Options;
 
 internal static class OptionsRegistrationSource
 {
 	internal const string FileName = "OptionsSectionRegistration.g.cs";
 
-	internal static string Generate(ImmutableArray<INamedTypeSymbol?> candidateTypes, INamedTypeSymbol markerInterface)
+	internal static string? Generate(ImmutableArray<INamedTypeSymbol?> candidateTypes, INamedTypeSymbol markerInterface)
 	{
 		var discoveredTypes = CollectOptionTypes(candidateTypes, markerInterface);
+		if (discoveredTypes.Count == 0)
+		{
+			return null;
+		}
+
 		var registrationCalls = string.Join("\n\t\t\t", discoveredTypes.Select(static t => $"services.RegisterOption<{t}>();"));
 
 		return $$"""

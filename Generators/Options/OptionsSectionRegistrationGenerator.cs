@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Shared.Generators.Options;
+namespace Generators.Options;
 
 [Generator]
 public class OptionsSectionRegistrationGenerator : IIncrementalGenerator
@@ -36,7 +36,11 @@ public class OptionsSectionRegistrationGenerator : IIncrementalGenerator
 			return;
 		}
 
-		AddGeneratedSource(context, OptionsRegistrationSource.FileName, OptionsRegistrationSource.Generate(candidateTypes, markerInterface));
+		var source = OptionsRegistrationSource.Generate(candidateTypes, markerInterface);
+		if (source is not null)
+		{
+			AddGeneratedSource(context, OptionsRegistrationSource.FileName, source);
+		}
 	}
 
 	private static void AddGeneratedSource(IncrementalGeneratorPostInitializationContext context, string fileName, string source) =>

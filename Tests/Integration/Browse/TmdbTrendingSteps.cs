@@ -38,7 +38,7 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 
 	[When("I request trending page {int}")]
 	public async Task WhenRequestTrendingPage(int page) =>
-		ctx.TrendingPage = await sammlarr.ResolveKeyed<IMediaRecommendationService>(MediaRecommendationProvider.Tmdb).GetTrendingAsync(page: page);
+		ctx.TrendingPage = await sammlarr.ResolveKeyed<ITrendingService>(TrendingProvider.Tmdb).GetTrendingAsync(page: page);
 
 	[Then("the trending results are empty")]
 	public async Task ThenTrendingResultsEmpty() => await Assert.That(ctx.TrendingPage!.Items).IsEmpty();

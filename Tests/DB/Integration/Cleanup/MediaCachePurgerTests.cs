@@ -39,8 +39,8 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 				new ProviderConfig
 				{
 					WatchlistProvider = WatchlistProvider.Plex,
-					TrendingProvider = MediaRecommendationProvider.Tmdb,
-					SearchProvider = MediaSearchProvider.Plex,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);

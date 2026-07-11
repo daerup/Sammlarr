@@ -7,7 +7,7 @@
 @using Contracts.Media.Trending
 @using Contracts.Settings
 @using Contracts.Watchlist
-@inject IKeyedServiceIndex<MediaRecommendationProvider, IMediaRecommendationService> RecommendationServiceIndex
+@inject IKeyedServiceIndex<TrendingProvider, ITrendingService> TrendingServiceIndex
 @inject IWatchlistService WatchlistService
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
@@ -152,8 +152,8 @@
         await TryStateHasChangedAsync();
         try
         {
-            var recommendationService = RecommendationServiceIndex[_providerConfig.TrendingProvider];
-            (_trendingMedia, _totalPages) = await recommendationService.GetTrendingAsync(_currentPage, _cancellationTokenSource.Token);
+            var trendingService = TrendingServiceIndex[_providerConfig.TrendingProvider];
+            (_trendingMedia, _totalPages) = await trendingService.GetTrendingAsync(_currentPage, _cancellationTokenSource.Token);
         }
         finally
         {

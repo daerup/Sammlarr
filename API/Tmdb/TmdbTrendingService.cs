@@ -17,13 +17,13 @@ using Shared.Options;
 
 namespace API.Tmdb;
 
-internal sealed class TmdbRecommendationService(
+internal sealed class TmdbTrendingService(
 	TmdbClient tmdbClient,
 	TmdbOptions options,
 	IMediaService media,
 	IProviderConfigRepository providerConfigRepository,
 	IApiKeyConfigRepository apiKeyConfigRepository
-) : IMediaRecommendationService
+) : ITrendingService
 {
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{

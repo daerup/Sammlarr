@@ -15,8 +15,8 @@ internal record ProviderConfigRow
 		{
 			Id = SingletonId,
 			WatchlistProvider = WatchlistProvider.Plex,
-			TrendingProvider = MediaRecommendationProvider.Tmdb,
-			SearchProvider = MediaSearchProvider.Plex,
+			TrendingProvider = TrendingProvider.Tmdb,
+			SearchProvider = SearchProvider.Plex,
 			RatingProvider = RatingProvider.Tmdb,
 		};
 
@@ -28,10 +28,10 @@ internal record ProviderConfigRow
 	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	[Required]
-	public required MediaRecommendationProvider TrendingProvider { get; set; }
+	public required TrendingProvider TrendingProvider { get; set; }
 
 	[Required]
-	public required MediaSearchProvider SearchProvider { get; set; }
+	public required SearchProvider SearchProvider { get; set; }
 
 	[Required]
 	public required RatingProvider RatingProvider { get; set; }

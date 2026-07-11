@@ -5,6 +5,7 @@ namespace Domain.Providers;
 public enum MediaProvider
 {
 	[Description("TMDB")]
+	[Capabilities<ProviderCapability>(ProviderCapability.Trending | ProviderCapability.Rating | ProviderCapability.Feed | ProviderCapability.ApiKey)]
 	Tmdb,
 
 	[Description("IMDb")]
@@ -14,8 +15,10 @@ public enum MediaProvider
 	Tvdb,
 
 	[Description("Plex")]
+	[Capabilities<ProviderCapability>(ProviderCapability.Search | ProviderCapability.Watchlist)]
 	Plex,
 
 	[Description("Mdblist")]
+	[Capabilities<ProviderCapability>(ProviderCapability.Feed | ProviderCapability.ApiKey)]
 	Mdblist,
 }

@@ -8,7 +8,7 @@ using Domain.Providers;
 namespace Core.Media;
 
 internal sealed class MediaSearchService(
-	IKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider> providers,
+	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> providers,
 	IMediaService mediaService,
 	IProviderConfigRepository configRepository
 ) : IMediaSearchService

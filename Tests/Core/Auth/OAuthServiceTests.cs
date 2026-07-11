@@ -18,8 +18,8 @@ public class OAuthServiceTests
 		new()
 		{
 			WatchlistProvider = WatchlistProvider.Plex,
-			TrendingProvider = MediaRecommendationProvider.Tmdb,
-			SearchProvider = MediaSearchProvider.Plex,
+			TrendingProvider = TrendingProvider.Tmdb,
+			SearchProvider = SearchProvider.Plex,
 			RatingProvider = RatingProvider.Tmdb,
 		};
 

@@ -165,13 +165,13 @@ public class MediaServiceOrderingTests
 				new ProviderConfig
 				{
 					WatchlistProvider = WatchlistProvider.Plex,
-					TrendingProvider = MediaRecommendationProvider.Tmdb,
-					SearchProvider = MediaSearchProvider.Plex,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
 				}
 			);
 
-		var searchIndex = new FakeKeyedServiceIndex<MediaSearchProvider, IMediaSearchProvider>().Register(MediaSearchProvider.Plex, search.Object);
+		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, search.Object);
 		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);

@@ -26,15 +26,15 @@ else
                              OnChange="@SetWatchlistProviderAsync"
                              IsDisabled="@_isSaving"/>
 
-        <ProviderSettingCard TEnum="MediaRecommendationProvider"
+        <ProviderSettingCard TEnum="TrendingProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
-                             Title="Recommendation Provider"
+                             Title="Trending Provider"
                              Description="Choose which media provider supplies recommendations."
                              Selected="@_providerConfig.TrendingProvider"
                              OnChange="@SetTrendingProviderAsync"
                              IsDisabled="@_isSaving"/>
 
-        <ProviderSettingCard TEnum="MediaSearchProvider"
+        <ProviderSettingCard TEnum="SearchProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Search Provider"
                              Description="Choose which provider powers search inside the watchlist flow."
@@ -66,9 +66,9 @@ else
 
     private Task SetWatchlistProviderAsync(WatchlistProvider provider) => UpdateAsync(settings => settings with { WatchlistProvider = provider });
 
-    private Task SetTrendingProviderAsync(MediaRecommendationProvider provider) => UpdateAsync(settings => settings with { TrendingProvider = provider });
+    private Task SetTrendingProviderAsync(TrendingProvider provider) => UpdateAsync(settings => settings with { TrendingProvider = provider });
 
-    private Task SetSearchProviderAsync(MediaSearchProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
+    private Task SetSearchProviderAsync(SearchProvider provider) => UpdateAsync(settings => settings with { SearchProvider = provider });
 
     private Task SetRatingProviderAsync(RatingProvider provider) => UpdateAsync(settings => settings with { RatingProvider = provider });
 
