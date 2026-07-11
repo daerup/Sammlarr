@@ -12,8 +12,8 @@ internal sealed class DbInitializer(IServiceProvider serviceProvider, ILogger<Db
 		await using var scope = serviceProvider.CreateAsyncScope();
 		var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<SammlarrDbContext>>();
 		await using var ctx = await factory.CreateDbContextAsync(cancellationToken);
-		var created = ctx.Initialize();
-		logger.LogInformation("Database schema ensured (freshly created={Created})", created);
+		await ctx.Database.MigrateAsync(cancellationToken);
+		logger.LogInformation("Database migrations applied");
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

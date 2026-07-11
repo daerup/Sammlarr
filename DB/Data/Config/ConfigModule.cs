@@ -6,5 +6,9 @@ namespace DB.Data.Config;
 
 internal class ConfigModule : IServiceModule
 {
-	public void RegisterServices(IServiceCollection services) => services.AddScoped<IProviderConfigRepository, ProviderConfigRepository>();
+	public void RegisterServices(IServiceCollection services)
+	{
+		services.AddScoped<IProviderConfigRepository, ProviderConfigRepository>();
+		services.AddScoped<IModelConfiguration, ProviderConfigConfiguration>();
+	}
 }
