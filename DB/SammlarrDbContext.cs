@@ -37,13 +37,6 @@ internal sealed class SammlarrDbContext : DbContext
 		_dateTimeProvider = dateTimeProvider;
 	}
 
-	public bool Initialize()
-	{
-		var created = Database.EnsureCreated();
-		SeedProviderSettings();
-		return created;
-	}
-
 	public DbSet<CredentialRow> Credentials => Set<CredentialRow>();
 
 	public DbSet<MediaRow> Media => Set<MediaRow>();
@@ -107,16 +100,5 @@ internal sealed class SammlarrDbContext : DbContext
 	{
 		var now = _dateTimeProvider.Now;
 		ChangeTracker.Entries<IAuditable>().ToList().ForEach(entry => _entityAuditer.UpdateTimestamps(entry, now));
-	}
-
-	private void SeedProviderSettings()
-	{
-		if (ProviderSettings.Any())
-		{
-			return;
-		}
-
-		ProviderSettings.Add(ProviderConfigRow.Default);
-		base.SaveChanges();
 	}
 }

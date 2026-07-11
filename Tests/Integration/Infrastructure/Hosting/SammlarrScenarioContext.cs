@@ -1,6 +1,7 @@
 using DB;
 using Integration.Tests.Infrastructure.Http;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Integration.Tests.Infrastructure.Hosting;
@@ -31,7 +32,7 @@ public sealed class SammlarrScenarioContext : IDisposable
 		_rootProvider = services.BuildServiceProvider();
 		_scope = _rootProvider.CreateScope();
 
-		DbContext.Initialize();
+		DbContext.Database.Migrate();
 	}
 
 	public void Dispose()

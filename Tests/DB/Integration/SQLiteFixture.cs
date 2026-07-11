@@ -47,7 +47,7 @@ public class SQLiteFixture : IAsyncDisposable
 			_serviceProvider.GetRequiredService<IEnumerable<IModelConfiguration>>(),
 			dateTimeProvider
 		);
-		ctx.Initialize();
+		ctx.Database.Migrate();
 		return ctx;
 	}
 

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using NetArchTest.Rules;
 
 namespace Architecture.Tests;
@@ -23,6 +25,10 @@ public class DesignTests
 			.AreNotNested()
 			.And()
 			.DoNotImplementInterface<Shared.DI.IServiceModule>()
+			.And()
+			.DoNotInherit<Migration>()
+			.And()
+			.DoNotInherit<ModelSnapshot>()
 			.GetTypes()
 			.AssertNone();
 	}
