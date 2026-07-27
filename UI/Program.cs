@@ -22,7 +22,8 @@ builder
 	.AddCookie(options =>
 	{
 		options.Cookie.Name = "sammlarr.auth";
-		options.LoginPath = "/auth/login";
+		options.LoginPath = "/signin";
+		options.ReturnUrlParameter = "returnUrl";
 		options.ExpireTimeSpan = TimeSpan.FromDays(30);
 		options.SlidingExpiration = true;
 	});
@@ -46,13 +47,14 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapAuthEndpoints();
 
 app.MapGet(
-	"/diagnostics/export",
-	(LogCaptureService capture) =>
-	{
-		var stream = capture.ExportZip();
-		var fileName = $"diagnostics-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.zip";
-		return Results.File(stream, "application/zip", fileName);
-	}
-);
+		"/diagnostics/export",
+		(LogCaptureService capture) =>
+		{
+			var stream = capture.ExportZip();
+			var fileName = $"diagnostics-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.zip";
+			return Results.File(stream, "application/zip", fileName);
+		}
+	)
+	.RequireAuthorization();
 
 app.Run();

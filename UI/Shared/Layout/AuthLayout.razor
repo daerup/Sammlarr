@@ -1,0 +1,14 @@
+@inherits LayoutComponentBase
+
+<div class="relative min-h-screen flex flex-col items-center justify-center gap-8 px-6 bg-background">
+    <div class="absolute top-4 right-4">
+        <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"/>
+    </div>
+    <a href="/" class="flex items-center gap-2 group" aria-label="Sammlarr — home">
+        <LucideIcon Name="library-big" Size="26" Class="text-primary transition-transform duration-200 group-hover:rotate-[-6deg]"/>
+        <span class="font-bold tracking-tight text-lg">Sammlarr</span>
+    </a>
+    @Body
+</div>
+
+<BbPortalHost/>
