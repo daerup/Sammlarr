@@ -23,13 +23,27 @@ else
             <HoverButton OnClick="SyncAsync" Color="@BrandColor" Class="relative whitespace-nowrap">
                 <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
                 <span>Sync</span>
-                @if (_dryRun is { TotalChanges: > 0 } report)
-                {
-                    <BbBadge Variant="BadgeVariant.Outline"
-                             Class="hover-button-badge ml-2 min-w-5 h-5 px-1.5 rounded-full text-[10px] font-semibold">
-                        @report.TotalChanges
-                    </BbBadge>
-                }
+                <span class="ml-2 inline-flex items-center justify-center h-5" style="min-width: 1.5rem">
+                    @if (_isLoadingDryRun)
+                    {
+                        <BbSpinner Size="SpinnerSize.Small"/>
+                    }
+                    else if (_dryRun is { TotalChanges: > 0 } report)
+                    {
+                        <BbBadge Variant="BadgeVariant.Outline"
+                                 Class="hover-button-badge min-w-5 h-5 px-1.5 rounded-full text-[10px] font-semibold">
+                            @report.TotalChanges
+                        </BbBadge>
+                    }
+                    else if (_dryRun is not null)
+                    {
+                        <LucideIcon Name="check" Size="14"/>
+                    }
+                    else if (_dryRunError is not null)
+                    {
+                        <LucideIcon Name="cloud-off" Size="14"/>
+                    }
+                </span>
             </HoverButton>
         </BbHoverCardTrigger>
         <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="p-0 watchlist-sync-preview">
@@ -107,6 +121,7 @@ else
     private Dictionary<MediaId, MediaLookup> _metadata = [];
     private bool _isSyncing;
     private bool _dryRunRequested;
+    private bool _isLoadingDryRun;
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,6 +145,7 @@ else
     private async Task LoadDryRunAsync()
     {
         _dryRunRequested = true;
+        _isLoadingDryRun = true;
         _dryRun = null;
         _dryRunError = null;
         _metadata = [];
@@ -146,6 +162,7 @@ else
                 _dryRunError = $"Dry run unavailable — {failed.Reason}";
                 break;
         }
+        _isLoadingDryRun = false;
         StateHasChanged();
     }
 
