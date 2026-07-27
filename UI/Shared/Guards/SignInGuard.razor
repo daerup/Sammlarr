@@ -1,0 +1,19 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+    [Parameter] public EventCallback<bool> AccessChanged { get; set; }
+
+    private bool? _lastReportedAccess;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var hasAccess = AuthState is not null && (await AuthState).User.Identity?.IsAuthenticated == true;
+
+        if (AccessChanged.HasDelegate && _lastReportedAccess != hasAccess)
+        {
+            _lastReportedAccess = hasAccess;
+            await AccessChanged.InvokeAsync(hasAccess);
+        }
+    }
+}

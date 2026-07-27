@@ -7,18 +7,18 @@
 @inject IFeedRepository FeedRepository
 @inject NavigationManager NavigationManager
 @inject IProviderConfigRepository ProviderConfigRepository
-@inject ProfileDropdownService ProfileDropdownService
+@inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
 
 <PageTitle>@PageTitleText</PageTitle>
 
 <KeyboardShortcut Keys="Ctrl+Enter" OnInvoked="OnShortcutActivatedAsync"/>
 
-<OAuthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
+<SignInGuard AccessChanged="HandleSignInChangedAsync"/>
 
 <PageContainer Heading="@PageHeadingText"
                Description="@PageDescriptionText"
-               HeaderClass="@(IsOAuthAllowed() ? "border-b" : "")">
+               HeaderClass="@(IsSignedIn() ? "border-b" : "")">
     <HeaderActions>
         @if (_previewStatus.IsLoading || _isApplying)
         {
@@ -83,10 +83,9 @@
                      Disabled="@(_previewStatus.IsLoading || _isSaving || _isApplying)"/>
     </HeaderActions>
     <ChildContent>
-        <ProtectedSection GuardState="IsOAuthAllowed"
-                          AuthProvider="@_providerConfig.WatchlistProvider"
+        <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing feeds"
-                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+                          FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" @onkeydown="HandleContainerKeyDownAsync">
 
                 <FeedConfigPanel @key="_configKey"
@@ -121,8 +120,8 @@
         : "Subscribe to a list from an external provider as a feed.";
 
     private ProviderConfig _providerConfig = null!;
-    private bool _hasOAuthAccess;
-    private bool IsOAuthAllowed() => _hasOAuthAccess;
+    private bool _isSignedIn;
+    private bool IsSignedIn() => _isSignedIn;
 
     private FeedConfig _config = new();
     private int? _storedHash;
@@ -154,9 +153,9 @@
         StateHasChanged();
     }
 
-    private Task HandleAccessChangedAsync(bool hasAccess)
+    private Task HandleSignInChangedAsync(bool hasAccess)
     {
-        _hasOAuthAccess = hasAccess;
+        _isSignedIn = hasAccess;
         return Task.CompletedTask;
     }
 

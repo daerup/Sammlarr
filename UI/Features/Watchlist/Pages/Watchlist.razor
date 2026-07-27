@@ -10,7 +10,7 @@
 @using UI.Shared.Services.Branding
 @implements IDisposable
 @inject IWatchlistService WatchlistService
-@inject ProfileDropdownService ProfileDropdownService
+@inject AccountConnectionPrompt AccountConnectionPrompt
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject MediaProviderBrandingService BrandingService
 @inject Notifier Notifier
@@ -27,20 +27,24 @@
 }
 else
 {
-    <OAuthGuard Provider="@_providerSettings.WatchlistProvider"
-                AccessChanged="HandleAccessChanged"/>
+    <SignInGuard AccessChanged="HandleSignInChanged"/>
+    <OAuthGuard Provider="@_providerSettings.AuthProvider" AccessChanged="HandlePlexAccessChanged"/>
 
     <PageContainer Heading="@PageHeading" Description="@PageDescription">
         <HeaderActions>
-            <ProtectedSection GuardState="IsOAuthAllowed" ShowFallback="false">
+            <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
                 <div class="flex items-center gap-2">
-                    <BbCommand Class="border">
-                        <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                            <LucideIcon Name="search" Class="mr-2"/>
-                            Add from Search
-                            <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                        </BbCommandItem>
-                    </BbCommand>
+                    <ProtectedComponent GuardState="IsPlexConnected"
+                                        AuthProvider="@_providerSettings.AuthProvider"
+                                        DeniedActionDescription="search and add titles">
+                        <BbCommand Class="border">
+                            <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
+                                <LucideIcon Name="search" Class="mr-2"/>
+                                Add from Search
+                                <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
+                            </BbCommandItem>
+                        </BbCommand>
+                    </ProtectedComponent>
                     @if (_items is { Count: > 0 } && !_isEditMode)
                     {
                         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="EnterEditMode" Class="whitespace-nowrap">
@@ -48,15 +52,18 @@ else
                             Bulk edit
                         </BbButton>
                     }
-                    <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
+                    <ProtectedComponent GuardState="IsPlexConnected"
+                                        AuthProvider="@_providerSettings.AuthProvider"
+                                        DeniedActionDescription="sync your watchlist">
+                        <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
+                    </ProtectedComponent>
                 </div>
             </ProtectedSection>
         </HeaderActions>
         <ChildContent>
-            <ProtectedSection GuardState="IsOAuthAllowed"
-                              AuthProvider="@_providerSettings.WatchlistProvider"
+            <ProtectedSection GuardState="IsSignedIn"
                               DeniedActionDescription="viewing your watchlist"
-                              FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+                              FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
@@ -84,9 +91,13 @@ else
                         <p class="text-sm text-muted-foreground leading-relaxed">Click Sync to load it
                             from @_providerSettings.WatchlistProvider.GetDescription(), or add a title with <span
                                 class="font-medium text-foreground">Ctrl+K</span>.</p>
-                        <div class="flex justify-center">
-                            <WatchlistSyncButton OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
-                        </div>
+                        <ProtectedComponent GuardState="IsPlexConnected"
+                                            AuthProvider="@_providerSettings.AuthProvider"
+                                            DeniedActionDescription="sync your watchlist">
+                            <div class="flex justify-center">
+                                <WatchlistSyncButton OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
+                            </div>
+                        </ProtectedComponent>
                     </div>
                 }
                 else if (_items is not null)
@@ -126,7 +137,7 @@ else
                  SearchProvider="@_providerSettings.SearchProvider"
                  IsInWatchlist="IsInWatchlist"
                  OnToggle="ToggleFromSearchAsync"
-                 ShortcutEnabled="_hasOAuthAccess">
+                 ShortcutEnabled="_hasPlexAccess">
         <TileIcons Context="ctx">
             <WatchlistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
         </TileIcons>
@@ -139,7 +150,8 @@ else
     private bool _isLoading;
     private bool _isRemoving;
     private bool _isSheetOpen;
-    private bool _hasOAuthAccess;
+    private bool _isSignedIn;
+    private bool _hasPlexAccess;
     private bool _isSearchModalOpen;
     private bool _isEditMode;
     private string? _errorMessage;
@@ -151,16 +163,24 @@ else
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageDescription => _providerSettings is null ? "Your saved movies and shows." : $"Your saved movies and shows from {_providerSettings.WatchlistProvider.GetDescription()}";
     private string? WatchlistBrandColor => _providerSettings is null ? null : BrandingService.GetBrandingInfo(_providerSettings.WatchlistProvider.AsMediaProvider()).BrandColor;
-    private bool IsOAuthAllowed() => _hasOAuthAccess;
+    private bool IsSignedIn() => _isSignedIn;
+
+    private bool IsPlexConnected() => _hasPlexAccess;
+
+    private void HandlePlexAccessChanged(bool hasAccess)
+    {
+        _hasPlexAccess = hasAccess;
+        StateHasChanged();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
     }
 
-    private async Task HandleAccessChanged(bool hasAccess)
+    private async Task HandleSignInChanged(bool hasAccess)
     {
-        _hasOAuthAccess = hasAccess;
+        _isSignedIn = hasAccess;
 
         if (!hasAccess)
         {

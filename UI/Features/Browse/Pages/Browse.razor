@@ -10,25 +10,24 @@
 @inject IKeyedServiceIndex<TrendingProvider, ITrendingService> TrendingServiceIndex
 @inject IWatchlistService WatchlistService
 @inject NavigationManager NavigationManager
-@inject ProfileDropdownService ProfileDropdownService
+@inject AccountConnectionPrompt AccountConnectionPrompt
 @inject ScrollService ScrollService
 @inject IProviderConfigRepository ProviderConfigRepository
 
 <PageTitle>Browse Movies</PageTitle>
 
-<OAuthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleOAuthAccessChanged"/>
+<SignInGuard AccessChanged="HandleSignInChanged"/>
 <ApiKeyGuard Provider="@_providerConfig.TrendingProvider.AsApiKeyProvider()" AccessChanged="HandleTrendingProviderAccessChanged"/>
 
 <PageContainer Heading="Trending Movies & Shows" Description="Discover what's popular this week">
     <ChildContent>
-        <ProtectedSection GuardState="HasOAuthAccess"
-                          AuthProvider="@_providerConfig.WatchlistProvider"
+        <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="browsing trending media"
-                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+                          FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             <ProtectedSection GuardState="HasTrendingProviderAccess"
-                              MediaProvider="@_providerConfig.TrendingProvider.AsMediaProvider()"
+                              ApiProvider="@_providerConfig.TrendingProvider.AsApiKeyProvider()"
                               DeniedActionDescription="browse trending media"
-                              FallbackAction="@(() => NavigationManager.NavigateTo("/settings?section=api-keys"))">
+                              FallbackAction="@(() => NavigationManager.NavigateTo("/settings?section=secrets"))">
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
@@ -72,9 +71,9 @@
     private MediaLookup? _selectedMedia;
     private bool _isLoading;
     private bool _isSheetOpen;
-    private bool _isOAuthenticated;
+    private bool _isSignedIn;
     private bool _hasTrendingProviderApiKey;
-    private bool HasAccess => _isOAuthenticated && _hasTrendingProviderApiKey;
+    private bool HasAccess => _isSignedIn && _hasTrendingProviderApiKey;
     private IReadOnlySet<MediaId> _watchlisted = new HashSet<MediaId>();
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
@@ -88,14 +87,14 @@
         _providerConfig = await ProviderConfigRepository.GetAsync();
     }
 
-    private bool HasOAuthAccess() => _isOAuthenticated;
+    private bool IsSignedIn() => _isSignedIn;
     private bool HasTrendingProviderAccess() => _hasTrendingProviderApiKey;
 
-    private async Task HandleOAuthAccessChanged(bool isAuthenticated)
+    private async Task HandleSignInChanged(bool isAuthenticated)
     {
-        _isOAuthenticated = isAuthenticated;
+        _isSignedIn = isAuthenticated;
 
-        if (!_isOAuthenticated)
+        if (!_isSignedIn)
         {
             _hasTrendingProviderApiKey = false;
             _watchlisted = new HashSet<MediaId>();

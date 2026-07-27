@@ -1,0 +1,41 @@
+@using global::Shared
+
+@if (GuardState())
+{
+    @ChildContent
+}
+else
+{
+    <BbTooltip>
+        <BbTooltipTrigger AsChild="false" Class="inline-block cursor-not-allowed" Focusable="false">
+            <div class="pointer-events-none opacity-50">
+                @ChildContent
+            </div>
+        </BbTooltipTrigger>
+        <BbTooltipContent>@GetDisabledMessage()</BbTooltipContent>
+    </BbTooltip>
+}
+
+@code {
+    [Parameter] [EditorRequired] public Func<bool> GuardState { get; set; } = () => true;
+    [Parameter] [EditorRequired] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public AuthProvider? AuthProvider { get; set; }
+    [Parameter] public ApiKeyProvider? ApiProvider { get; set; }
+    [Parameter] public string DeniedActionDescription { get; set; } = "use this";
+
+    private string GetDisabledMessage()
+    {
+        if (AuthProvider.HasValue)
+        {
+            return $"Connect your {AuthProvider.Value.GetDescription()} account to {DeniedActionDescription}.";
+        }
+
+        if (ApiProvider.HasValue)
+        {
+            return $"A valid {ApiProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
+        }
+
+        return $"Sign in to {DeniedActionDescription}.";
+    }
+}
