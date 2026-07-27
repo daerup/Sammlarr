@@ -6,5 +6,7 @@ public interface IUserScope
 {
 	IDisposable As(User user);
 
-	Task<IDisposable> As(UserId userId, CancellationToken cancellationToken = default);
+	IDisposable As(ICurrentUser user);
+
+	Task<IDisposable> AsAsync(UserId userId, CancellationToken cancellationToken = default);
 }

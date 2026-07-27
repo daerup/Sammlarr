@@ -1,10 +1,12 @@
 @using Contracts
+@using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Media.Search
 @using Contracts.Watchlist.Sync
 @implements IDisposable
 @inject IMediaService Media
 @inject IWatchlistSyncEngine SyncEngine
+@inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 
 @if (_isSyncing)
@@ -133,7 +135,7 @@ else
         _metadata = [];
         StateHasChanged();
 
-        var result = await SyncEngine.DryRunAsync(_cts.Token);
+        var result = await SyncEngine.DryRunAsync(CurrentUser, _cts.Token);
         switch (result)
         {
             case Success<WatchlistSyncDryRun>(var dryRun):
@@ -160,7 +162,7 @@ else
         StateHasChanged();
         try
         {
-            var result = await SyncEngine.SyncAsync(new ManualTrigger(), _cts.Token);
+            var result = await SyncEngine.SyncAsync(new ManualTrigger(), CurrentUser, _cts.Token);
             var message = result.Value.ToString() ?? string.Empty;
             Action<string, string?> notify = result.Value switch
             {

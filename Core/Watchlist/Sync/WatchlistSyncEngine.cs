@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Watchlist;
@@ -25,7 +26,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 {
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
-	public async Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, CancellationToken cancellationToken = default)
+	public async Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default)
 	{
 		if (!await _gate.WaitAsync(0, cancellationToken))
 		{
@@ -37,6 +38,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		try
 		{
 			await using var scope = scopeFactory.CreateAsyncScope();
+			using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
 			var deps = await ResolveAsync(scope, cancellationToken);
 			activity?.SetTag("sammlarr.sync.provider", deps.Provider.ToString());
 
@@ -92,9 +94,10 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 		return BuildResult(plan, adds, removes);
 	}
 
-	public async Task<Result<WatchlistSyncDryRun>> DryRunAsync(CancellationToken cancellationToken = default)
+	public async Task<Result<WatchlistSyncDryRun>> DryRunAsync(ICurrentUser user, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopeFactory.CreateAsyncScope();
+		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
 		var deps = await ResolveAsync(scope, cancellationToken);
 
 		var planning = await PlanAsync(deps, cancellationToken);

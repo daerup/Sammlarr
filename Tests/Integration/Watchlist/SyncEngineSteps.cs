@@ -1,6 +1,7 @@
 using System.Net;
 using API.Plex;
 using Contracts;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Watchlist.Sync;
 using Domain.Media;
@@ -49,12 +50,13 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	}
 
 	[When("the watchlist syncs")]
-	public async Task WhenSync() => _syncResult = await sammlarr.Resolve<IWatchlistSyncEngine>().SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+	public async Task WhenSync() =>
+		_syncResult = await sammlarr.Resolve<IWatchlistSyncEngine>().SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), sammlarr.Resolve<ICurrentUser>());
 
 	[When("I perform a dry run")]
 	public async Task WhenDryRun()
 	{
-		var result = await sammlarr.Resolve<IWatchlistSyncEngine>().DryRunAsync();
+		var result = await sammlarr.Resolve<IWatchlistSyncEngine>().DryRunAsync(sammlarr.Resolve<ICurrentUser>());
 		_dryRun = result is Success<WatchlistSyncDryRun>(var dryRun) ? dryRun : null;
 		_dryRunFailed = result is Error;
 	}
