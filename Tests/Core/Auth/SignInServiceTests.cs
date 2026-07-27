@@ -1,10 +1,13 @@
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
+using Contracts.Settings;
 using Core.Auth;
 using Core.Identity;
+using Core.Tests.Watchlist;
 using Domain.Identity;
 using Domain.Providers;
+using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
@@ -14,12 +17,18 @@ public class SignInServiceTests
 {
 	private static readonly OAuthTokenGrant Grant = new("plex-token", new DateTimeOffset(2027, 1, 1, 0, 0, 0, TimeSpan.Zero), Guid.NewGuid());
 
-	private static SignInService CreateTestee(Mock<IOAuthProvider> provider, Mock<ICredentialRepository> credentials, Mock<IUserRepository> users) =>
+	private static SignInService CreateTestee(
+		Mock<IOAuthProvider> provider,
+		Mock<ICredentialRepository> credentials,
+		Mock<IUserRepository> users,
+		Mock<IProviderConfigRepository>? providerConfig = null
+	) =>
 		new(
 			new FakeKeyedServiceIndex<AuthProvider, IOAuthProvider>().Register(AuthProvider.Plex, provider.Object),
 			credentials.Object,
 			users.Object,
 			new UserScope(new CurrentUserOverride(), users.Object),
+			(providerConfig ?? ProviderConfigStubs.PlexWatchlist()).Object,
 			NullLogger<SignInService>.Instance
 		);
 
@@ -44,7 +53,8 @@ public class SignInServiceTests
 		var users = IUserRepository.Mock();
 		users.FindByLoginAsync(AuthProvider.Plex, "plex-uuid", Any()).Returns(new None());
 		users.AnyAsync(Any()).Returns(false);
-		var testee = CreateTestee(provider, credentials, users);
+		var providerConfig = ProviderConfigStubs.PlexWatchlist();
+		var testee = CreateTestee(provider, credentials, users, providerConfig);
 
 		var result = await testee.CompleteAsync(AuthProvider.Plex, "q");
 
@@ -59,6 +69,7 @@ public class SignInServiceTests
 			});
 		credentials.StoreAsync(AuthProvider.Plex, Grant.AccessToken, Grant.ExpiresAt, Grant.ClientId, Any()).WasCalled(Times.Once);
 		users.CreateAsync(Any<User>(), AuthProvider.Plex, "plex-uuid", Any()).WasCalled(Times.Once);
+		providerConfig.StoreAsync(Any<ProviderConfig>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -69,11 +80,13 @@ public class SignInServiceTests
 		var users = IUserRepository.Mock();
 		users.FindByLoginAsync(AuthProvider.Plex, "plex-uuid", Any()).Returns(new None());
 		users.AnyAsync(Any()).Returns(true);
-		var testee = CreateTestee(provider, ICredentialRepository.Mock(), users);
+		var providerConfig = ProviderConfigStubs.PlexWatchlist();
+		var testee = CreateTestee(provider, ICredentialRepository.Mock(), users, providerConfig);
 
 		var result = await testee.CompleteAsync(AuthProvider.Plex, "q");
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Member));
+		providerConfig.StoreAsync(Any<ProviderConfig>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
@@ -84,12 +97,14 @@ public class SignInServiceTests
 		provider.CompleteLoginAsync("q", Any()).Returns(Success.Of(new ExternalLogin("plex-uuid", "John", "avatar", Grant)));
 		var users = IUserRepository.Mock();
 		users.FindByLoginAsync(AuthProvider.Plex, "plex-uuid", Any()).Returns(Some.Of(existing));
-		var testee = CreateTestee(provider, ICredentialRepository.Mock(), users);
+		var providerConfig = ProviderConfigStubs.PlexWatchlist();
+		var testee = CreateTestee(provider, ICredentialRepository.Mock(), users, providerConfig);
 
 		var result = await testee.CompleteAsync(AuthProvider.Plex, "q");
 
 		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Id).IsEqualTo(existing.Id));
 		users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any<string>(), Any()).WasNeverCalled();
+		providerConfig.StoreAsync(Any<ProviderConfig>(), Any()).WasNeverCalled();
 	}
 
 	[Test]
