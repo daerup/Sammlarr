@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts.Auth;
@@ -25,7 +24,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConf
 			return Error.From($"TMDB does not support media type {id.Type}.");
 		}
 		var endpoint = string.Format(TmdbEndpoints.Detail, mediaType, id.Value);
-		var response = await SendAsync(endpoint, apiKey, cancellationToken);
+		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning(
@@ -43,7 +42,7 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConf
 	private async Task<Result<TmdbTypes.FindItem>> FetchFindAsync(ImdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{
 		var endpoint = string.Format(TmdbEndpoints.Find, id.Value);
-		var response = await SendAsync(endpoint, apiKey, cancellationToken);
+		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning("TMDB find returned {StatusCode} for {ImdbId}; treated as no match (check API key / rate limits)", (int)response.StatusCode, id.Value);
@@ -58,17 +57,6 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyConfigRepository apiKeyConf
 			MediaType.Unknown => null,
 		};
 		return Result.WhenNotNull(item, $"TMDB has no {id.Type} match for {id.Value}");
-	}
-
-	private async Task<HttpResponseMessage> SendAsync(string endpoint, IApiKey apiKey, CancellationToken cancellationToken)
-	{
-		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
-		if (response.StatusCode == HttpStatusCode.Unauthorized)
-		{
-			apiKeyConfigRepository.Invalidate(ApiKeyProvider.Tmdb);
-		}
-
-		return response;
 	}
 
 	private static string? ToTmdbMediaType(MediaType mediaType) =>

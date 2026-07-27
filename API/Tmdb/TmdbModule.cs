@@ -20,6 +20,7 @@ internal class TmdbModule : IServiceModule
 			client.DefaultRequestVersion = HttpVersion.Version20;
 			client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
 		});
+		services.AddHttpClient(TmdbClient.Unauthenticated);
 		services.AddKeyedScoped<ITrendingService, TmdbTrendingService>(TrendingProvider.Tmdb);
 		services.AddKeyedScoped<IMetadataEnricher, TmdbMetadataEnricher>(MediaProvider.Tmdb);
 		services.AddKeyedScoped<IMediaRatingService, TmdbRatingService>(RatingProvider.Tmdb);

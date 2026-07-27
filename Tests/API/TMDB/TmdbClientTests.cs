@@ -1,6 +1,8 @@
 using System.Net;
 using API.Tmdb;
 using Bogus;
+using Contracts.Auth;
+using Domain.Auth;
 using Domain.Providers;
 using Shared.Options;
 using TestInfrastructure;
@@ -18,7 +20,7 @@ public class TmdbClientTests
 		var apiKey = GetApiKey();
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(options.BaseUrl);
-		var testee = new TmdbClient(httpClient, options);
+		var testee = new TmdbClient(httpClient, options, IApiKeyConfigRepository.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, "trending/all/week?page=2", new TestApiKey(ApiKeyProvider.Tmdb, apiKey));
 
@@ -26,35 +28,18 @@ public class TmdbClientTests
 	}
 
 	[Test]
-	public async Task ValidateApiKeyAsync_WhenRequestSucceeds_ReturnsTrue()
+	public async Task SendAsync_WhenUnauthorized_InvalidatesCachedApiKey()
 	{
 		var options = CreateOptions();
-		var apiKey = GetApiKey();
 		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.Accepted);
+		handler.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
 		using var httpClient = handler.CreateClient(options.BaseUrl);
-		var testee = new TmdbClient(httpClient, options);
+		var apiKeys = IApiKeyConfigRepository.Mock();
+		var testee = new TmdbClient(httpClient, options, apiKeys.Object);
 
-		var result = await testee.ValidateApiKeyAsync(apiKey);
+		await testee.SendAsync(HttpMethod.Get, "trending/all/week?page=1", new TestApiKey(ApiKeyProvider.Tmdb, GetApiKey()));
 
-		await Assert.That(result).IsTrue();
-		handler.Verify(request => request.Method(HttpMethod.Get).PathMatches($".*api_key={apiKey}.*"), Times.Once);
-		handler.VerifyNoUnmatchedRequests();
-	}
-
-	[Test]
-	public async Task ValidateApiKeyAsync_WhenHandlerThrows_ReturnsFalse()
-	{
-		var options = CreateOptions();
-		var apiKey = GetApiKey();
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Throws(new HttpRequestException("network"));
-		using var httpClient = handler.CreateClient(options.BaseUrl);
-		var testee = new TmdbClient(httpClient, options);
-
-		var result = await testee.ValidateApiKeyAsync(apiKey);
-
-		await Assert.That(result).IsFalse();
+		apiKeys.Invalidate(ApiKeyProvider.Tmdb).WasCalled(Times.Once);
 	}
 
 	private string GetApiKey() => new Faker().Random.AlphaNumeric(32);
