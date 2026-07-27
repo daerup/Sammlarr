@@ -7,7 +7,7 @@
 @using Contracts.Settings
 @inject IBlacklistService BlacklistService
 @inject ScrollService ScrollService
-@inject ProfileDropdownService ProfileDropdownService
+@inject AccountConnectionPrompt AccountConnectionPrompt
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject Notifier Notifier
 @inject ToastService ToastService
@@ -24,16 +24,24 @@
 }
 else
 {
+    <SignInGuard AccessChanged="HandleSignInChanged"/>
+    <OAuthGuard Provider="@_providerSettings.AuthProvider" AccessChanged="HandlePlexAccessChanged"/>
+
     <PageContainer Heading="@PageHeading" Description="@PageDescription">
         <HeaderActions>
-            <div class="flex items-center gap-2">
-                <BbCommand Class="border">
-                    <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                        <LucideIcon Name="search" Class="mr-2"/>
-                        Add from Search
-                        <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                    </BbCommandItem>
-                </BbCommand>
+            <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
+                <div class="flex items-center gap-2">
+                <ProtectedComponent GuardState="IsPlexConnected"
+                                    AuthProvider="@_providerSettings.AuthProvider"
+                                    DeniedActionDescription="search and add titles">
+                    <BbCommand Class="border">
+                        <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
+                            <LucideIcon Name="search" Class="mr-2"/>
+                            Add from Search
+                            <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
+                        </BbCommandItem>
+                    </BbCommand>
+                </ProtectedComponent>
                 @if (_items is { Count: > 0 } && !_isEditMode)
                 {
                     <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="EnterEditMode" Class="whitespace-nowrap">
@@ -41,9 +49,13 @@ else
                         Bulk edit
                     </BbButton>
                 }
-            </div>
+                </div>
+            </ProtectedSection>
         </HeaderActions>
         <ChildContent>
+            <ProtectedSection GuardState="IsSignedIn"
+                              DeniedActionDescription="managing your blacklist"
+                              FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             @if (_isLoading)
             {
                 <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
@@ -80,6 +92,7 @@ else
                                        OnBulkRemove="RemoveBulkAsync"
                                        RemoveLabel="Remove from Blacklist"/>
             }
+            </ProtectedSection>
         </ChildContent>
     </PageContainer>
 }
@@ -119,9 +132,39 @@ else
     private string PageHeading => "Blacklist";
     private string PageDescription => "Your blacklisted movies and shows.";
     private string EmptyStateMessage => "Your blacklist is empty.";
+    private bool _isSignedIn;
+
+    private bool IsSignedIn() => _isSignedIn;
+
+    private bool _hasPlexAccess;
+
+    private bool IsPlexConnected() => _hasPlexAccess;
+
+    private void HandlePlexAccessChanged(bool hasAccess)
+    {
+        _hasPlexAccess = hasAccess;
+        StateHasChanged();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+    }
+
+    private async Task HandleSignInChanged(bool hasAccess)
+    {
+        _isSignedIn = hasAccess;
+
+        if (!hasAccess)
+        {
+            _items = null;
+            _errorMessage = null;
+            _isLoading = false;
+            _isEditMode = false;
+            CloseSelectedMedia();
+            return;
+        }
+
         await LoadBlacklistAsync();
     }
 

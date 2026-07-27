@@ -1,6 +1,8 @@
 using BlazorBlueprint.Components;
+using Contracts.Identity;
 using Observability;
 using Shared.DI;
+using UI.Shared.Identity;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
 
@@ -14,9 +16,11 @@ internal class UiModule : IServiceModule
 		services.AddModule<UI.Observability.InstrumentationModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
 		services.AddBlazorBlueprintComponents();
+		services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 		services.AddScoped<ScrollService>();
 		services.AddScoped<Notifier>();
 		services.AddScoped<ProfileDropdownService>();
+		services.AddScoped<AccountConnectionPrompt>();
 		services.AddScoped<MediaProviderBrandingService>();
 	}
 }

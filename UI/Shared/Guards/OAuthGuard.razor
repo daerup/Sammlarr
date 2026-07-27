@@ -1,22 +1,21 @@
 @using Contracts.Auth
+@using Domain.Providers
 @inject ICredentialRepository CredentialStore
 
 @code {
-    [Parameter] [EditorRequired] public WatchlistProvider Provider { get; set; }
+    [Parameter] [EditorRequired] public AuthProvider Provider { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }
 
-    private bool _hasAccess;
     private bool? _lastReportedAccess;
 
     protected override async Task OnParametersSetAsync()
     {
-        _hasAccess = await CredentialStore.GetAsync(Provider).IsSuccess();
+        var hasAccess = await CredentialStore.GetAsync(Provider).IsSuccess();
 
-        if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
+        if (AccessChanged.HasDelegate && _lastReportedAccess != hasAccess)
         {
-            _lastReportedAccess = _hasAccess;
-            await AccessChanged.InvokeAsync(_hasAccess);
+            _lastReportedAccess = hasAccess;
+            await AccessChanged.InvokeAsync(hasAccess);
         }
     }
 }
-

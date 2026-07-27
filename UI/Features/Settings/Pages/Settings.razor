@@ -1,9 +1,15 @@
 @page "/settings"
+@inject AccountConnectionPrompt AccountConnectionPrompt
 
 <PageTitle>Settings</PageTitle>
 
+<SignInGuard AccessChanged="HandleSignInChanged"/>
+
 <PageContainer Heading="Settings"
-               Description="Connect providers, manage API keys, and keep the local cache and diagnostics in check.">
+               Description="Connect providers, manage secrets, and keep the local cache and diagnostics in check.">
+    <ProtectedSection GuardState="IsSignedIn"
+                      DeniedActionDescription="manage your settings"
+                      FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
     <div class="flex items-start gap-8 pt-2">
         <nav class="w-48 shrink-0 flex flex-col gap-0.5 sticky top-20" aria-label="Settings sections">
             @foreach (var item in _sections)
@@ -24,6 +30,7 @@
             <DynamicComponent Type="_activeSection.ComponentType"/>
         </div>
     </div>
+    </ProtectedSection>
 </PageContainer>
 
 @code {
@@ -33,12 +40,21 @@
     private readonly List<SettingsSection> _sections =
     [
         new("Provider Settings", "sliders-horizontal", typeof(ProviderSettingsSection)),
-        new("API Keys", "key", typeof(ApiKeysSection)),
+        new("Secrets", "key", typeof(SecretsSection)),
         new("Cache", "database", typeof(CacheSection)),
         new("Diagnostics", "activity", typeof(DiagnosticsSection)),
     ];
 
     private SettingsSection _activeSection = null!;
+    private bool _isSignedIn;
+
+    private bool IsSignedIn() => _isSignedIn;
+
+    private void HandleSignInChanged(bool hasAccess)
+    {
+        _isSignedIn = hasAccess;
+        StateHasChanged();
+    }
 
     [SupplyParameterFromQuery(Name = "section")]
     public string? Section { get; set; }

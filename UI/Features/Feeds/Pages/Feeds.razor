@@ -9,11 +9,11 @@
 @inject NavigationManager NavigationManager
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject IProviderConfigRepository ProviderConfigRepository
-@inject ProfileDropdownService ProfileDropdownService
+@inject AccountConnectionPrompt AccountConnectionPrompt
 
 <PageTitle>Feeds</PageTitle>
 
-<OAuthGuard Provider="@_providerConfig.WatchlistProvider" AccessChanged="HandleAccessChangedAsync"/>
+<SignInGuard AccessChanged="HandleSignInChangedAsync"/>
 
 <PageContainer Heading="@PageHeading" Description="@PageDescription">
     <HeaderActions>
@@ -23,10 +23,9 @@
         </BbButton>
     </HeaderActions>
     <ChildContent>
-        <ProtectedSection GuardState="IsOAuthAllowed"
-                          AuthProvider="@_providerConfig?.WatchlistProvider"
+        <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing your feeds"
-                          FallbackAction="() => ProfileDropdownService.RequestOpenAsync()">
+                          FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             @if (!_isLoading && _feeds.Count == 0)
             {
                 <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-4">
@@ -200,8 +199,8 @@
     private string PageDescription => "Subscribe to media lists from supported providers to get started.";
 
     private ProviderConfig _providerConfig = null!;
-    private bool _hasOAuthAccess;
-    private bool IsOAuthAllowed() => _hasOAuthAccess;
+    private bool _isSignedIn;
+    private bool IsSignedIn() => _isSignedIn;
 
     private IReadOnlyList<Feed> _feeds = [];
     private IReadOnlyList<Feed> _pagedFeeds = [];
@@ -217,9 +216,9 @@
         _isLoading = false;
     }
 
-    private Task HandleAccessChangedAsync(bool hasAccess)
+    private Task HandleSignInChangedAsync(bool hasAccess)
     {
-        _hasOAuthAccess = hasAccess;
+        _isSignedIn = hasAccess;
         return Task.CompletedTask;
     }
 

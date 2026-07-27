@@ -1,5 +1,3 @@
-@using Contracts.Auth
-@using Contracts.Media
 @using global::Shared
 @if (GuardState())
 {
@@ -25,41 +23,41 @@ else if (ShowFallback)
     [Parameter] [EditorRequired] public RenderFragment? ChildContent { get; set; }
     [Parameter] public bool ShowFallback { get; set; } = true;
 
-    [Parameter] public WatchlistProvider? AuthProvider { get; set; }
-    [Parameter] public MediaProvider? MediaProvider { get; set; }
+    [Parameter] public AuthProvider? AuthProvider { get; set; }
+    [Parameter] public ApiKeyProvider? ApiProvider { get; set; }
     [Parameter] public string DeniedActionDescription { get; set; } = "access this section";
     [Parameter] public EventCallback FallbackAction { get; set; }
 
-    private string FallbackIcon => MediaProvider.HasValue ? "key" : "lock";
+    private string FallbackIcon => AuthProvider.HasValue ? "lock" : ApiProvider.HasValue ? "key" : "log-in";
 
     private string GetFallbackMessage()
     {
         if (AuthProvider.HasValue)
         {
-            return $"You need to connect your {AuthProvider.Value} account before {DeniedActionDescription}.";
+            return $"You need to connect your {AuthProvider.Value.GetDescription()} account before {DeniedActionDescription}.";
         }
 
-        if (MediaProvider.HasValue)
+        if (ApiProvider.HasValue)
         {
-            return $"A valid {MediaProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
+            return $"A valid {ApiProvider.Value.GetDescription()} API key is required to {DeniedActionDescription}.";
         }
 
-        return "You do not have access to this section.";
+        return $"You need to sign in before {DeniedActionDescription}.";
     }
 
     private string GetFallbackActionText()
     {
         if (AuthProvider.HasValue)
         {
-            return $"Connect {AuthProvider.Value} Account";
+            return $"Connect {AuthProvider.Value.GetDescription()} Account";
         }
 
-        if (MediaProvider.HasValue)
+        if (ApiProvider.HasValue)
         {
             return "Configure API Key";
         }
 
-        return "Continue";
+        return "Sign in";
     }
 
     private Task InvokeFallbackActionAsync() => FallbackAction.InvokeAsync();
