@@ -16,7 +16,6 @@ builder.Services.AddModule<DbModule>();
 builder.Services.AddModule<ApiModule>();
 builder.Services.AddModule<UiModule>();
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
 builder
 	.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
