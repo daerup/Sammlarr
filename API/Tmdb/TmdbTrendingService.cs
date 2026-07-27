@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts;
@@ -32,6 +33,10 @@ internal sealed class TmdbTrendingService(
 			.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys."));
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);
+		if (response.StatusCode == HttpStatusCode.Unauthorized)
+		{
+			apiKeyConfigRepository.Invalidate(ApiKeyProvider.Tmdb);
+		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
 		var settings = await providerConfigRepository.GetAsync(cancellationToken);

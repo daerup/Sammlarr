@@ -42,6 +42,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
 				}
 			);
 		_testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, NullLogger<MediaCachePurger>.Instance);

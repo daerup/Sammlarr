@@ -42,6 +42,7 @@ public class MdblistServiceTests
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
 				}
 			);
 		var testee = new MdblistService(client, media.Object, providerConfig.Object, apiKeyStore.Object);
@@ -53,5 +54,40 @@ public class MdblistServiceTests
 
 		var exception = await Assert.That(act).Throws<FeedIdentifierNotFoundException>();
 		await Assert.That(exception!.Identifier).IsEqualTo(identifier);
+	}
+
+	[Test]
+	public async Task GetFeedItemsAsync_WhenUnauthorized_InvalidatesCachedApiKey()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
+		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
+		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
+		var options = new MdblistOptions { BaseUrl = BaseUrl };
+		var client = new MdblistClient(handler.CreateClient(BaseUrl), options);
+		var media = IMediaService.Mock();
+		var providerConfig = IProviderConfigRepository.Mock();
+		providerConfig
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					WatchlistProvider = WatchlistProvider.Plex,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
+				}
+			);
+		var testee = new MdblistService(client, media.Object, providerConfig.Object, apiKeyStore.Object);
+
+		var act = async () =>
+		{
+			await foreach (var _ in testee.GetFeedItemsAsync("any-list")) { }
+		};
+
+		await Assert.That(act).Throws<HttpRequestException>();
+		apiKeyStore.Invalidate(ApiKeyProvider.Mdblist).WasCalled(Times.Once);
 	}
 }

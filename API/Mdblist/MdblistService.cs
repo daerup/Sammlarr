@@ -70,6 +70,10 @@ internal sealed class MdblistService(
 		{
 			throw new FeedIdentifierNotFoundException(identifier);
 		}
+		if (response.StatusCode == HttpStatusCode.Unauthorized)
+		{
+			apiKeyRepository.Invalidate(ApiKeyProvider.Mdblist);
+		}
 		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var page = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(stream)!;

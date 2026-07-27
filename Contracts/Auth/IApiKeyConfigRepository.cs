@@ -10,4 +10,6 @@ public interface IApiKeyConfigRepository
 	Task SetApiKeyAsync(IApiKey apiKey, CancellationToken cancellationToken = default);
 
 	Task RemoveApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
+
+	void Invalidate(ApiKeyProvider provider);
 }

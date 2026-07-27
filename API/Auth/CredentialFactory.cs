@@ -9,7 +9,7 @@ namespace API.Auth;
 internal sealed class CredentialFactory(IHttpClientFactory httpClientFactory) : ICredentialFactory
 {
 	public Task<Result<ICredential>> CreateAsync(
-		WatchlistProvider provider,
+		AuthProvider provider,
 		Guid clientId,
 		string accessToken,
 		DateTimeOffset expiresAt,
@@ -17,6 +17,6 @@ internal sealed class CredentialFactory(IHttpClientFactory httpClientFactory) : 
 	) =>
 		provider switch
 		{
-			WatchlistProvider.Plex => PlexCredential.CreateAsync(clientId, accessToken, expiresAt, httpClientFactory, cancellationToken),
+			AuthProvider.Plex => PlexCredential.CreateAsync(clientId, accessToken, expiresAt, httpClientFactory, cancellationToken),
 		};
 }

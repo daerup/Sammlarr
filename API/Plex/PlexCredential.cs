@@ -14,7 +14,7 @@ internal sealed class PlexCredential : ICredential
 		ExpiresAt = expiresAt;
 	}
 
-	public WatchlistProvider Provider => WatchlistProvider.Plex;
+	public AuthProvider Provider => AuthProvider.Plex;
 
 	public Guid ClientId { get; }
 

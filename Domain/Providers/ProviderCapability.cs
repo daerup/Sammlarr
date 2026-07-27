@@ -17,4 +17,6 @@ internal enum ProviderCapability
 
 	[ConvertsTo<ProviderCapability>(Rating)]
 	ApiKey = 32,
+
+	Auth = 64,
 }

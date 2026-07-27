@@ -204,6 +204,7 @@ public class MediaServiceTests
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
 				}
 			);
 

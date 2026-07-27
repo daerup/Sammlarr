@@ -21,6 +21,7 @@ internal static class ProviderConfigStubs
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
 				}
 			);
 		return mock;
