@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -19,6 +20,8 @@ namespace Core.Tests.Watchlist;
 
 public class WatchlistSyncEngineTests
 {
+	private static readonly ICurrentUser User = new TestCurrentUser();
+
 	[Test]
 	public async Task SyncAsync_OverlappingCalls_ReturnsAlreadyRunning()
 	{
@@ -27,9 +30,9 @@ public class WatchlistSyncEngineTests
 		provider.GetWatchlistAsync(Any()).Returns(WaitingAsyncEnumerable(gate));
 		var engine = BuildEngine(provider);
 
-		var first = engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+		var first = engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 		await Task.Delay(50);
-		var second = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+		var second = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
 		await Assert.That(second is WatchlistSyncAlreadyRunning).IsTrue();
 
@@ -63,10 +66,25 @@ public class WatchlistSyncEngineTests
 
 		var engine = BuildEngine(provider, repository, outbox, mediaRepo);
 
-		var result = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+		var result = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
 		await Assert.That(result is WatchlistSyncUnchanged).IsTrue();
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task DryRunAsync_RunsInScopeOfGivenUser()
+	{
+		var user = new TestCurrentUser();
+		var userScope = IUserScope.Mock();
+		userScope.As(Any<ICurrentUser>()).Returns(new NoopScope());
+		var provider = IWatchlistProvider.Mock();
+		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
+		var engine = BuildEngine(provider, userScope: userScope);
+
+		await engine.DryRunAsync(user);
+
+		userScope.As(user).WasCalled(Times.Once);
 	}
 
 	private static WatchlistSyncEngine BuildEngine(
@@ -74,7 +92,8 @@ public class WatchlistSyncEngineTests
 		Mock<IWatchlistRepository>? repository = null,
 		Mock<IWatchlistOutbox>? outbox = null,
 		Mock<IMediaRepository>? mediaRepo = null,
-		Mock<IMediaService>? media = null
+		Mock<IMediaService>? media = null,
+		Mock<IUserScope>? userScope = null
 	)
 	{
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
@@ -85,9 +104,22 @@ public class WatchlistSyncEngineTests
 		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
 		services.AddSingleton((mediaRepo ?? IMediaRepository.Mock()).Object);
 		services.AddSingleton((media ?? UnresolvedMedia()).Object);
+		services.AddSingleton((userScope ?? NoopUserScope()).Object);
 		var sp = services.BuildServiceProvider();
 		var options = new WatchlistSyncOptions { DrainBudget = TimeSpan.FromSeconds(10) };
 		return new WatchlistSyncEngine(sp.GetRequiredService<IServiceScopeFactory>(), options, NullLogger<WatchlistSyncEngine>.Instance);
+	}
+
+	private static Mock<IUserScope> NoopUserScope()
+	{
+		var userScope = IUserScope.Mock();
+		userScope.As(Any<ICurrentUser>()).Returns(new NoopScope());
+		return userScope;
+	}
+
+	private sealed class NoopScope : IDisposable
+	{
+		public void Dispose() { }
 	}
 
 	private static Mock<IWatchlistRepository> EmptyRepository()
