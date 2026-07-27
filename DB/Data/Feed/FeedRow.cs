@@ -5,7 +5,7 @@ using Domain.Providers;
 
 namespace DB.Data.Feed;
 
-internal record FeedRow : Entity<Guid>
+internal record FeedRow : Entity<Guid>, IUserOwned
 {
 	[Required]
 	public bool IsEnabled { get; set; }

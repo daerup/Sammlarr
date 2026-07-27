@@ -4,5 +4,10 @@ namespace DB.Data.Config;
 
 internal sealed class ProviderConfigConfiguration : IModelConfiguration
 {
-	public void Apply(ModelBuilder modelBuilder) => modelBuilder.Entity<ProviderConfigRow>().HasData(ProviderConfigRow.Default);
+	public void Apply(ModelBuilder modelBuilder) =>
+		modelBuilder.Entity<ProviderConfigRow>(builder =>
+		{
+			builder.HasUserOwner();
+			builder.HasKey(UserOwnedConfigurationExtensions.UserIdColumn);
+		});
 }

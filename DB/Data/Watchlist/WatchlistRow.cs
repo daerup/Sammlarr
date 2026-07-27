@@ -3,7 +3,7 @@ using DB.Data.Media;
 
 namespace DB.Data.Watchlist;
 
-internal record WatchlistRow : IAuditable
+internal record WatchlistRow : IAuditable, IUserOwned
 {
 	public required MediaRow Media { get; set; }
 

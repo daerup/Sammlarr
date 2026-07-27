@@ -1,4 +1,3 @@
-using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Watchlist;
@@ -8,9 +7,10 @@ internal sealed class WatchlistRowConfiguration : IModelConfiguration
 	public void Apply(ModelBuilder modelBuilder) =>
 		modelBuilder.Entity<WatchlistRow>(builder =>
 		{
+			builder.HasUserOwner();
 			builder.Property<Guid>("MediaId");
-			builder.HasKey("MediaId");
-			builder.HasOne(w => w.Media).WithOne().HasForeignKey<WatchlistRow>("MediaId").OnDelete(DeleteBehavior.Restrict);
+			builder.HasKey(UserOwnedConfigurationExtensions.UserIdColumn, "MediaId");
+			builder.HasOne(w => w.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
 			builder.HasOne(w => w.SourceFeed).WithMany().HasForeignKey(w => w.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
 			builder.HasIndex(w => w.SourceFeedId);
 		});
