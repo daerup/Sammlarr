@@ -16,7 +16,8 @@ internal class UiModule : IServiceModule
 		services.AddModule<UI.Observability.InstrumentationModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
 		services.AddBlazorBlueprintComponents();
-		services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
+		services.AddScoped<CurrentUserAccessor>();
+		services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUserAccessor>());
 		services.AddScoped<ScrollService>();
 		services.AddScoped<Notifier>();
 		services.AddScoped<ProfileDropdownService>();
