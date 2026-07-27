@@ -1,10 +1,13 @@
 using Contracts;
+using DB.Data.Identity;
+using Domain.Providers;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration;
 
@@ -24,6 +27,7 @@ public class SQLiteFixture : IAsyncDisposable
 		_connection.Open();
 	}
 
+	internal TestCurrentUser CurrentUser { get; } = new();
 	internal SammlarrDbContext Context => field ??= CreateDbContext();
 	internal RawDbContext RawContext => field ??= new RawDbContext(Context);
 	internal IDbContextFactory<SammlarrDbContext> ContextFactory => field ??= new SharedConnectionFactory(this);
@@ -43,12 +47,36 @@ public class SQLiteFixture : IAsyncDisposable
 		var ctx = new SammlarrDbContext(
 			BuildOptions(),
 			new EntityAuditer(),
+			new UserOwnershipStamper(),
+			CurrentUser,
 			_serviceProvider.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
 			_serviceProvider.GetRequiredService<IEnumerable<IModelConfiguration>>(),
 			dateTimeProvider
 		);
 		ctx.Database.Migrate();
+		SeedCurrentUser(ctx);
 		return ctx;
+	}
+
+	private void SeedCurrentUser(SammlarrDbContext ctx)
+	{
+		if (ctx.Users.Any(user => user.Id == CurrentUser.Id.Value))
+		{
+			return;
+		}
+
+		ctx.Users.Add(
+			new UserRow
+			{
+				Id = CurrentUser.Id.Value,
+				Provider = AuthProvider.Plex,
+				ExternalUserId = CurrentUser.Id.Value.ToString(),
+				DisplayName = CurrentUser.DisplayName,
+				AvatarUrl = CurrentUser.AvatarUrl,
+				Role = CurrentUser.Role,
+			}
+		);
+		ctx.SaveChanges();
 	}
 
 	private sealed class SharedConnectionFactory(SQLiteFixture fixture) : IDbContextFactory<SammlarrDbContext>

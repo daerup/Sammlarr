@@ -13,6 +13,8 @@ internal sealed class FeedRowConfiguration : IModelConfiguration
 	public void Apply(ModelBuilder modelBuilder) =>
 		modelBuilder.Entity<FeedRow>(builder =>
 		{
+			builder.HasUserOwner();
+			builder.HasIndex(UserOwnedConfigurationExtensions.UserIdColumn);
 			builder
 				.Property(x => x.Filter)
 				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);

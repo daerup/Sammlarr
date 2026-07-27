@@ -3,6 +3,7 @@ using API.Mdblist;
 using API.Plex;
 using API.Tmdb;
 using Contracts;
+using Contracts.Identity;
 using Core;
 using DB;
 using Integration.Tests.Infrastructure.Http;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Shared.DI;
 using Shared.Options;
+using TestInfrastructure;
 using TUnit.Mocks;
 
 namespace Integration.Tests.Infrastructure.Hosting;
@@ -24,6 +26,9 @@ internal sealed class IntegrationTestModule : ITestServiceModule
 
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddSingleton<TestCurrentUser>();
+		services.AddSingleton<ICurrentUser>(sp => sp.GetRequiredService<TestCurrentUser>());
+
 		// Pre-register before DbModule so EF Core's TryAdd skips its IDbContextFactory registration
 		services.AddScoped<IDbContextFactory<SammlarrDbContext>>(sp => new TestDbContextFactory(sp, Connection));
 		services.AddScoped<SammlarrDbContext>(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
@@ -61,6 +66,8 @@ internal sealed class IntegrationTestModule : ITestServiceModule
 			return new SammlarrDbContext(
 				new DbContextOptionsBuilder<SammlarrDbContext>().UseSqlite(connection).Options,
 				sp.GetRequiredService<EntityAuditer>(),
+				sp.GetRequiredService<UserOwnershipStamper>(),
+				sp.GetRequiredService<ICurrentUser>(),
 				sp.GetRequiredService<IEnumerable<IPropertyAddedConvention>>(),
 				sp.GetRequiredService<IEnumerable<IModelConfiguration>>(),
 				sp.GetRequiredService<IDateTimeProvider>()

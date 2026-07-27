@@ -8,4 +8,5 @@ public record ProviderConfig
 	public required TrendingProvider TrendingProvider { get; init; }
 	public required SearchProvider SearchProvider { get; init; }
 	public required RatingProvider RatingProvider { get; init; }
+	public required AuthProvider AuthProvider { get; init; }
 }

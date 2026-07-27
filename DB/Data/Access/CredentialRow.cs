@@ -6,10 +6,10 @@ using Domain.Providers;
 namespace DB.Data.Access;
 
 [Table("Credentials")]
-internal record CredentialRow : Entity<Guid>
+internal record CredentialRow : Entity<Guid>, IUserOwned
 {
 	[Required]
-	public required WatchlistProvider WatchlistProvider { get; set; }
+	public required AuthProvider Provider { get; set; }
 
 	[Required]
 	[Encrypted]

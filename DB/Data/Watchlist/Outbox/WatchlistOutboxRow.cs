@@ -3,7 +3,7 @@ using Domain.Watchlist.Outbox;
 
 namespace DB.Data.Watchlist.Outbox;
 
-internal record WatchlistOutboxRow
+internal record WatchlistOutboxRow : IUserOwned
 {
 	public required MediaRow Media { get; set; }
 

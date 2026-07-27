@@ -23,7 +23,7 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 	public void Setup()
 	{
 		_cache = ITypedMemoryCache<string, ProviderConfig>.Mock();
-		_testee = new ProviderConfigRepository(fixture.ContextFactory, _cache.Object);
+		_testee = new ProviderConfigRepository(fixture.ContextFactory, _cache.Object, fixture.CurrentUser);
 	}
 
 	[Test]
@@ -35,6 +35,7 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 		await Assert.That(providerSettings!.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
 		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(TrendingProvider.Tmdb);
 		await Assert.That(providerSettings.SearchProvider).IsEqualTo(SearchProvider.Plex);
+		await Assert.That(providerSettings.AuthProvider).IsEqualTo(AuthProvider.Plex);
 		_cache.TryGetValue(Any()).WasCalled(Times.Once);
 	}
 
@@ -47,7 +48,6 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 
 		var entity = await fixture.Context.ProviderSettings.SingleAsync();
 
-		await Assert.That(entity.Id).IsEqualTo(ProviderConfigRow.SingletonId);
 		await Assert.That(entity.WatchlistProvider).IsEqualTo(expected.WatchlistProvider);
 		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
 		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
@@ -80,5 +80,6 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 			TrendingProvider = trendingProvider,
 			SearchProvider = searchProvider,
 			RatingProvider = ratingProvider,
+			AuthProvider = AuthProvider.Plex,
 		};
 }

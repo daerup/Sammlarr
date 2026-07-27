@@ -1,8 +1,11 @@
 using DB;
+using DB.Data.Identity;
+using Domain.Providers;
 using Integration.Tests.Infrastructure.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TestInfrastructure;
 
 namespace Integration.Tests.Infrastructure.Hosting;
 
@@ -33,6 +36,28 @@ public sealed class SammlarrScenarioContext : IDisposable
 		_scope = _rootProvider.CreateScope();
 
 		DbContext.Database.Migrate();
+		SeedUser(Resolve<TestCurrentUser>());
+	}
+
+	internal void SeedUser(TestCurrentUser user)
+	{
+		if (DbContext.Users.Any(row => row.Id == user.Id.Value))
+		{
+			return;
+		}
+
+		DbContext.Users.Add(
+			new UserRow
+			{
+				Id = user.Id.Value,
+				Provider = AuthProvider.Plex,
+				ExternalUserId = user.Id.Value.ToString(),
+				DisplayName = user.DisplayName,
+				AvatarUrl = user.AvatarUrl,
+				Role = user.Role,
+			}
+		);
+		DbContext.SaveChanges();
 	}
 
 	public void Dispose()

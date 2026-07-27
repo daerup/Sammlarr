@@ -2,7 +2,7 @@ using DB.Data.Media;
 
 namespace DB.Data.Blacklist;
 
-internal record BlacklistRow : IAuditable
+internal record BlacklistRow : IAuditable, IUserOwned
 {
 	public required MediaRow Media { get; set; }
 	public DateTimeOffset CreatedAt { get; set; }

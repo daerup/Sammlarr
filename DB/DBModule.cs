@@ -18,6 +18,7 @@ public class DbModule : IServiceModule
 		services.AddModule<DataAccessModule>();
 		services.AddModule<InstrumentationModule>();
 		services.AddScoped<EntityAuditer>();
+		services.AddScoped<UserOwnershipStamper>();
 		services.AddDbContextFactory<SammlarrDbContext>(
 			(sp, options) =>
 			{

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations
 {
     [DbContext(typeof(SammlarrDbContext))]
-    [Migration("20260711173353_InitialCreate")]
+    [Migration("20260712081947_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -41,9 +41,12 @@ namespace DB.Migrations
                     b.Property<long>("UpdatedAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Provider")
+                    b.HasIndex("UserId", "Provider")
                         .IsUnique();
 
                     b.ToTable("ApiKeyConfigs");
@@ -70,16 +73,19 @@ namespace DB.Migrations
                     b.Property<long>("ExpiresAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("UpdatedAt")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("WatchlistProvider")
-                        .IsRequired()
+                    b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WatchlistProvider")
+                    b.HasIndex("UserId", "Provider")
                         .IsUnique();
 
                     b.ToTable("Credentials");
@@ -87,6 +93,9 @@ namespace DB.Migrations
 
             modelBuilder.Entity("DB.Data.Blacklist.BlacklistRow", b =>
                 {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
 
@@ -96,14 +105,20 @@ namespace DB.Migrations
                     b.Property<long>("UpdatedAt")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("MediaId");
+                    b.HasKey("UserId", "MediaId");
+
+                    b.HasIndex("MediaId");
 
                     b.ToTable("Blacklist");
                 });
 
             modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AuthProvider")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RatingProvider")
@@ -122,19 +137,9 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.ToTable("ProviderConfig");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                            RatingProvider = "Tmdb",
-                            SearchProvider = "Plex",
-                            TrendingProvider = "Tmdb",
-                            WatchlistProvider = "Plex"
-                        });
                 });
 
             modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
@@ -181,9 +186,54 @@ namespace DB.Migrations
                     b.Property<long>("UpdatedAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Feeds");
+                });
+
+            modelBuilder.Entity("DB.Data.Identity.UserRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExternalUserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Provider", "ExternalUserId")
+                        .IsUnique();
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("DB.Data.Media.ExternalMediaIdRow", b =>
@@ -302,6 +352,9 @@ namespace DB.Migrations
 
             modelBuilder.Entity("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", b =>
                 {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
 
@@ -312,15 +365,20 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("MediaId");
+                    b.HasKey("UserId", "MediaId");
 
                     b.HasIndex("Kind");
+
+                    b.HasIndex("MediaId");
 
                     b.ToTable("WatchlistOutbox");
                 });
 
             modelBuilder.Entity("DB.Data.Watchlist.WatchlistRow", b =>
                 {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
 
@@ -340,7 +398,9 @@ namespace DB.Migrations
                     b.Property<long>("UpdatedAt")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("MediaId");
+                    b.HasKey("UserId", "MediaId");
+
+                    b.HasIndex("MediaId");
 
                     b.HasIndex("SourceFeedId");
 
@@ -373,15 +433,57 @@ namespace DB.Migrations
                     b.HasDiscriminator().HasValue("Show");
                 });
 
+            modelBuilder.Entity("DB.Data.Access.ApiKeyConfigRow", b =>
+                {
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DB.Data.Access.CredentialRow", b =>
+                {
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DB.Data.Blacklist.BlacklistRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
-                        .WithOne()
-                        .HasForeignKey("DB.Data.Blacklist.BlacklistRow", "MediaId")
+                        .WithMany()
+                        .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Media");
+                });
+
+            modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
+                {
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
+                {
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DB.Data.Media.ExternalMediaIdRow", b =>
@@ -420,9 +522,15 @@ namespace DB.Migrations
             modelBuilder.Entity("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
-                        .WithOne()
-                        .HasForeignKey("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", "MediaId")
+                        .WithMany()
+                        .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Media");
@@ -431,8 +539,8 @@ namespace DB.Migrations
             modelBuilder.Entity("DB.Data.Watchlist.WatchlistRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
-                        .WithOne()
-                        .HasForeignKey("DB.Data.Watchlist.WatchlistRow", "MediaId")
+                        .WithMany()
+                        .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -440,6 +548,12 @@ namespace DB.Migrations
                         .WithMany()
                         .HasForeignKey("SourceFeedId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Media");
 

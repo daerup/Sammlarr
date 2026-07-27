@@ -1,38 +1,29 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DB.Data;
 using Domain.Providers;
-using Domain.Settings;
 
 namespace DB.Data.Config;
 
 [Table("ProviderConfig")]
-internal record ProviderConfigRow
+internal record ProviderConfigRow : IUserOwned
 {
-	public static readonly Guid SingletonId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+	public required WatchlistProvider WatchlistProvider { get; set; }
+
+	public required TrendingProvider TrendingProvider { get; set; }
+
+	public required SearchProvider SearchProvider { get; set; }
+
+	public required RatingProvider RatingProvider { get; set; }
+
+	public required AuthProvider AuthProvider { get; set; }
 
 	public static ProviderConfigRow Default =>
 		new()
 		{
-			Id = SingletonId,
 			WatchlistProvider = WatchlistProvider.Plex,
 			TrendingProvider = TrendingProvider.Tmdb,
 			SearchProvider = SearchProvider.Plex,
 			RatingProvider = RatingProvider.Tmdb,
+			AuthProvider = AuthProvider.Plex,
 		};
-
-	[Key]
-	[DatabaseGenerated(DatabaseGeneratedOption.None)]
-	public Guid Id { get; set; } = SingletonId;
-
-	[Required]
-	public required WatchlistProvider WatchlistProvider { get; set; }
-
-	[Required]
-	public required TrendingProvider TrendingProvider { get; set; }
-
-	[Required]
-	public required SearchProvider SearchProvider { get; set; }
-
-	[Required]
-	public required RatingProvider RatingProvider { get; set; }
 }
