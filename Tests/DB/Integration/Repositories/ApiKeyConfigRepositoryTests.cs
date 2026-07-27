@@ -12,18 +12,20 @@ namespace DB.Tests.Integration.Repositories;
 [ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
 public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 {
-	private Mock<ITypedMemoryCache<ApiKeyProvider, IApiKey>> _cache = null!;
+	private Mock<ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>> _cache = null!;
 	private Mock<IMediaRepository> _mediaRepository = null!;
 	private IApiKeyConfigRepository _testee = null!;
 
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
+	private (Guid, ApiKeyProvider) Key(ApiKeyProvider provider) => (fixture.CurrentUser.Id.Value, provider);
+
 	[Before(Test)]
 	public void Setup()
 	{
-		_cache = ITypedMemoryCache<ApiKeyProvider, IApiKey>.Mock();
+		_cache = ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>.Mock();
 		_mediaRepository = IMediaRepository.Mock();
-		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object, new TestApiKeyFactory());
+		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object, new TestApiKeyFactory(), fixture.CurrentUser);
 	}
 
 	[Test]
@@ -81,7 +83,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 
 		await _testee.GetApiKeyAsync(provider);
 
-		_cache.TryGetValue(provider).WasCalled(Times.Once);
+		_cache.TryGetValue(Key(provider)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -111,8 +113,22 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 
 		await _testee.SetApiKeyAsync(apiKey);
 
-		_cache.Set(provider, apiKey).WasCalled(Times.Once);
+		_cache.Set(Key(provider), apiKey, Any()).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
+	}
+
+	[Test]
+	public async Task Invalidate_RemovesFromCacheOnly()
+	{
+		var provider = ApiKeyProvider.Tmdb;
+		await SetUpApiKeyAsync(provider, "secret-api-key");
+		_cache.Reset();
+
+		_testee.Invalidate(provider);
+
+		_cache.Remove(Key(provider)).WasCalled(Times.Once);
+		_cache.VerifyNoOtherCalls();
+		await Assert.That(await fixture.Context.ApiKeySettings.AnyAsync()).IsTrue();
 	}
 
 	[Test]
@@ -124,7 +140,7 @@ public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposab
 
 		await _testee.RemoveApiKeyAsync(provider);
 
-		_cache.Remove(provider).WasCalled(Times.Once);
+		_cache.Remove(Key(provider)).WasCalled(Times.Once);
 		_cache.VerifyNoOtherCalls();
 	}
 

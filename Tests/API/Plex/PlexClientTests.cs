@@ -12,7 +12,7 @@ public class PlexClientTests
 	private const string PlexBaseUrl = "https://plex.tv";
 
 	private static readonly Faker<TestCredential> credentialFaker = new Faker<TestCredential>().CustomInstantiator(f => new TestCredential(
-		WatchlistProvider.Plex,
+		AuthProvider.Plex,
 		f.Random.Guid(),
 		f.Random.AlphaNumeric(32),
 		f.Date.FutureOffset()
@@ -24,7 +24,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialRepository.Mock();
-		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(Error.From("No credential is stored for this provider."));
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(Error.From("No credential is stored for this provider."));
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await Assert
@@ -40,7 +40,7 @@ public class PlexClientTests
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialRepository.Mock();
-		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await testee.SendAsync(HttpMethod.Get, PlexBaseUrl, customHeaders: [("X-Custom", "abc")]);
@@ -54,23 +54,37 @@ public class PlexClientTests
 					.Header("X-Custom", "abc"),
 			Times.Once
 		);
-		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).WasCalled(Times.Once);
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task SendAsync_WhenCalledTwice_DoesNotReReadCredentialAfterHeadersExist()
+	public async Task SendAsync_ReadsCredentialForEachRequest()
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialRepository.Mock();
-		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).Returns(credential);
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore);
 
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/one");
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/two");
 
-		credentialStore.GetAsync(WatchlistProvider.Plex, Any()).WasCalled(Times.Once);
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Exactly(2));
 		await Assert.That(handler.Requests.Count).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task SendAsync_WhenResponseIsUnauthorized_InvalidatesCachedCredential()
+	{
+		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
+		using var httpClient = handler.CreateClient(PlexBaseUrl);
+		var credentialStore = ICredentialRepository.Mock();
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
+		var testee = new PlexClient(httpClient, credentialStore);
+
+		await testee.SendAsync(HttpMethod.Get, PlexBaseUrl);
+
+		credentialStore.Invalidate(AuthProvider.Plex).WasCalled(Times.Once);
 	}
 }

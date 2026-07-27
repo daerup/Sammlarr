@@ -103,6 +103,7 @@ public class MediaSearchServiceTests
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = provider,
 					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
 				}
 			);
 		return repo;

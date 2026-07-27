@@ -1,3 +1,4 @@
+using System.Net;
 using API.Tmdb;
 using Contracts.Auth;
 using Contracts.Media;
@@ -38,5 +39,23 @@ public class TmdbMetadataEnricherTests
 				await Assert.That(rating.Sources.Any(source => source.Source == RatingProvider.Tmdb)).IsTrue();
 				await Assert.That(rating.Average).IsEqualTo(7.5f);
 			});
+	}
+
+	[Test]
+	public async Task LookUpAsync_WhenUnauthorized_InvalidatesCachedApiKey()
+	{
+		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
+		var apiKeyStore = IApiKeyConfigRepository.Mock();
+		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
+		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
+		var tmdbApi = new TmdbApi(new TmdbClient(handler.CreateClient(options.BaseUrl), options), apiKeyStore.Object, NullLogger<TmdbApi>.Instance);
+		var testee = new TmdbMetadataEnricher(tmdbApi, options);
+
+		var result = await testee.LookUpAsync(TmdbId.From("123", MediaType.Movie));
+
+		await Assert.That(result).IsError();
+		apiKeyStore.Invalidate(ApiKeyProvider.Tmdb).WasCalled(Times.Once);
 	}
 }

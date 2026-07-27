@@ -28,7 +28,7 @@ public class AccountSetupSteps(SammlarrScenarioContext sammlarr)
 	[Given("a Plex account with token {string}")]
 	public async Task GivenPlexAccount(string token)
 	{
-		await sammlarr.Resolve<ICredentialRepository>().StoreAsync(WatchlistProvider.Plex, token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
+		await sammlarr.Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
 		sammlarr.HttpHandler.RequireHeader(TestUrls.PlexApi, "X-Plex-Token", token);
 	}
 }

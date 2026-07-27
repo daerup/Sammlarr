@@ -1,3 +1,4 @@
+using System.Net;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Providers;
@@ -17,29 +18,22 @@ internal class PlexClient(HttpClient client, ICredentialRepository credentialSto
 		params List<(string, string)> customHeaders
 	)
 	{
-		await SetAuthHeaders(cancellationToken);
+		var credential = await credentialStore
+			.GetAsync(AuthProvider.Plex, cancellationToken)
+			.GetOrThrow(_ => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."));
 
 		var request = new HttpRequestMessage(method, uri);
-
+		request.Headers.Add("X-Plex-Token", credential.AccessToken);
+		request.Headers.Add("X-Plex-Client-Identifier", credential.ClientId.ToString());
 		customHeaders.ForEach(header => request.Headers.Add(header.Item1, header.Item2));
 		request.Content = content;
-		return await client.SendAsync(request, cancellationToken);
-	}
 
-	private async Task SetAuthHeaders(CancellationToken cancellationToken)
-	{
-		const string plexClientIdentifier = "X-Plex-Client-Identifier";
-		const string plexToken = "X-Plex-Token";
-
-		if (client.DefaultRequestHeaders.Contains(plexToken) && client.DefaultRequestHeaders.Contains(plexClientIdentifier))
+		var response = await client.SendAsync(request, cancellationToken);
+		if (response.StatusCode == HttpStatusCode.Unauthorized)
 		{
-			return;
+			credentialStore.Invalidate(AuthProvider.Plex);
 		}
 
-		var credential = await credentialStore
-			.GetAsync(WatchlistProvider.Plex, cancellationToken)
-			.GetOrThrow(_ => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."));
-		client.DefaultRequestHeaders.Add(plexToken, credential.AccessToken);
-		client.DefaultRequestHeaders.Add(plexClientIdentifier, credential.ClientId.ToString());
+		return response;
 	}
 }

@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
+using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
 using Domain.Providers;
@@ -10,14 +11,19 @@ namespace DB.Data.Access;
 
 internal sealed class ApiKeyConfigRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
-	ITypedMemoryCache<ApiKeyProvider, IApiKey> cache,
+	ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey> cache,
 	IMediaRepository mediaRepository,
-	IApiKeyFactory apiKeyFactory
+	IApiKeyFactory apiKeyFactory,
+	ICurrentUser currentUser
 ) : IApiKeyConfigRepository
 {
+	private static readonly TimeSpan CacheLifetime = TimeSpan.FromMinutes(10);
+
+	private (Guid User, ApiKeyProvider Provider) CacheKey(ApiKeyProvider provider) => (currentUser.IsAuthenticated ? currentUser.Id.Value : Guid.Empty, provider);
+
 	public async ValueTask<Result<IApiKey>> GetApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(provider, out var cached) && cached is not null)
+		if (cache.TryGetValue(CacheKey(provider), out var cached) && cached is not null)
 		{
 			return Success.Of(cached);
 		}
@@ -26,8 +32,10 @@ internal sealed class ApiKeyConfigRepository(
 		return await ctx
 			.ApiKeySettings.SingleResultAsync(stored => stored.Provider == provider, "No API key is configured for this provider.", cancellationToken)
 			.Map(stored => apiKeyFactory.CreateAsync(provider, stored.ApiKey, cancellationToken))
-			.Apply(apiKey => cache.Set(provider, apiKey));
+			.Apply(apiKey => cache.Set(CacheKey(provider), apiKey, CacheLifetime));
 	}
+
+	public void Invalidate(ApiKeyProvider provider) => cache.Remove(CacheKey(provider));
 
 	public async Task SetApiKeyAsync(IApiKey apiKey, CancellationToken cancellationToken = default)
 	{
@@ -43,7 +51,7 @@ internal sealed class ApiKeyConfigRepository(
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
-		cache.Set(apiKey.Provider, apiKey);
+		cache.Set(CacheKey(apiKey.Provider), apiKey, CacheLifetime);
 	}
 
 	public async Task RemoveApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
@@ -55,7 +63,7 @@ internal sealed class ApiKeyConfigRepository(
 			return;
 		}
 
-		cache.Remove(provider);
+		cache.Remove(CacheKey(provider));
 
 		if (provider.AsRatingProvider() is { } ratingProvider)
 		{

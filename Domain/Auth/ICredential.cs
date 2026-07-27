@@ -4,7 +4,7 @@ namespace Domain.Auth;
 
 public interface ICredential
 {
-	WatchlistProvider Provider { get; }
+	AuthProvider Provider { get; }
 
 	Guid ClientId { get; }
 

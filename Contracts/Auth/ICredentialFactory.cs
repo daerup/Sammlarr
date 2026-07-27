@@ -6,7 +6,7 @@ namespace Contracts.Auth;
 public interface ICredentialFactory
 {
 	Task<Result<ICredential>> CreateAsync(
-		WatchlistProvider provider,
+		AuthProvider provider,
 		Guid clientId,
 		string accessToken,
 		DateTimeOffset expiresAt,

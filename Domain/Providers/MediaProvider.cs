@@ -15,7 +15,7 @@ public enum MediaProvider
 	Tvdb,
 
 	[Description("Plex")]
-	[Capabilities<ProviderCapability>(ProviderCapability.Search | ProviderCapability.Watchlist)]
+	[Capabilities<ProviderCapability>(ProviderCapability.Search | ProviderCapability.Watchlist | ProviderCapability.Auth)]
 	Plex,
 
 	[Description("Mdblist")]
