@@ -1,7 +1,9 @@
+using API.Http;
 using Contracts;
 using Domain;
 using Domain.Auth;
 using Domain.Providers;
+using Shared.Options;
 
 namespace API.Mdblist;
 
@@ -14,13 +16,22 @@ internal sealed class MdblistApiKey : IApiKey
 	[Sensitive]
 	public string Value { get; }
 
-	public static async Task<Result<IApiKey>> CreateAsync(string value, MdblistClient client, CancellationToken cancellationToken = default)
+	public static async Task<Result<IApiKey>> CreateAsync(
+		string value,
+		IHttpClientFactory httpClientFactory,
+		MdblistOptions options,
+		CancellationToken cancellationToken = default
+	)
 	{
-		if (!await client.ValidateApiKeyAsync(value, cancellationToken))
+		using var request = new HttpRequestMessage(HttpMethod.Get, ApiKeyRequest.BuildUri(options.BaseUrl, MdblistEndpoints.User, MdblistClient.QueryParam, value));
+		try
+		{
+			using var response = await httpClientFactory.CreateClient(MdblistClient.Unauthenticated).SendAsync(request, cancellationToken);
+			return response.IsSuccessStatusCode ? Success.Of<IApiKey>(new MdblistApiKey(value)) : Error.From("The MDBList API key is not valid.");
+		}
+		catch (HttpRequestException)
 		{
 			return Error.From("The MDBList API key is not valid.");
 		}
-
-		return Success.Of<IApiKey>(new MdblistApiKey(value));
 	}
 }

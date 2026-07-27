@@ -23,7 +23,11 @@ public class TmdbMetadataEnricherTests
 		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
-		var tmdbApi = new TmdbApi(new TmdbClient(handler.CreateClient(options.BaseUrl), options), apiKeyStore.Object, NullLogger<TmdbApi>.Instance);
+		var tmdbApi = new TmdbApi(
+			new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore.Object),
+			apiKeyStore.Object,
+			NullLogger<TmdbApi>.Instance
+		);
 		var testee = new TmdbMetadataEnricher(tmdbApi, options);
 
 		var result = await testee.LookUpAsync(TmdbId.From("123", MediaType.Movie));
@@ -50,7 +54,11 @@ public class TmdbMetadataEnricherTests
 		var apiKeyStore = IApiKeyConfigRepository.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
-		var tmdbApi = new TmdbApi(new TmdbClient(handler.CreateClient(options.BaseUrl), options), apiKeyStore.Object, NullLogger<TmdbApi>.Instance);
+		var tmdbApi = new TmdbApi(
+			new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore.Object),
+			apiKeyStore.Object,
+			NullLogger<TmdbApi>.Instance
+		);
 		var testee = new TmdbMetadataEnricher(tmdbApi, options);
 
 		var result = await testee.LookUpAsync(TmdbId.From("123", MediaType.Movie));

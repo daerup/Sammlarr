@@ -1,50 +1,26 @@
-using System.Web;
+using API.Http;
+using Contracts.Auth;
 using Domain.Auth;
+using Domain.Providers;
 using Shared.Options;
 
 namespace API.Mdblist;
 
-internal class MdblistClient(HttpClient client, MdblistOptions options)
+internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyConfigRepository apiKeys)
 {
-	public async Task<bool> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default)
-	{
-		try
-		{
-			var response = await SendWithKeyAsync(HttpMethod.Get, MdblistEndpoints.User, apiKey, null, cancellationToken);
-			return response.IsSuccessStatusCode;
-		}
-		catch
-		{
-			return false;
-		}
-	}
+	public const string Unauthenticated = "Mdblist";
+	public const string QueryParam = "apikey";
 
-	public Task<HttpResponseMessage> SendAsync(
+	public async Task<HttpResponseMessage> SendAsync(
 		HttpMethod method,
 		string endpoint,
 		IApiKey apiKey,
-		HttpContent? content = null,
-		CancellationToken cancellationToken = default
-	) => SendWithKeyAsync(method, endpoint, apiKey.Value, content, cancellationToken);
-
-	private Task<HttpResponseMessage> SendWithKeyAsync(
-		HttpMethod method,
-		string endpoint,
-		string apiKey,
-		HttpContent? content,
-		CancellationToken cancellationToken = default
+		CancellationToken cancellationToken = default,
+		HttpContent? content = null
 	)
 	{
-		var baseUri = new Uri(options.BaseUrl.TrimEnd('/') + "/", UriKind.Absolute);
-		var requestUri = Uri.TryCreate(endpoint, UriKind.Absolute, out var absolute) ? absolute : new Uri(baseUri, endpoint);
-
-		var builder = new UriBuilder(requestUri);
-		var query = HttpUtility.ParseQueryString(builder.Query);
-		query["apikey"] = apiKey;
-		builder.Query = query.ToString() ?? string.Empty;
-
-		using var request = new HttpRequestMessage(method, builder.Uri);
+		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
 		request.Content = content;
-		return client.SendAsync(request, cancellationToken);
+		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.Invalidate(ApiKeyProvider.Mdblist));
 	}
 }

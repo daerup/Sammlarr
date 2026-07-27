@@ -65,14 +65,10 @@ internal sealed class MdblistService(
 		var apiKey = await apiKeyRepository
 			.GetApiKeyAsync(ApiKeyProvider.Mdblist, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys."));
-		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, null, cancellationToken);
+		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (response.StatusCode == HttpStatusCode.NotFound)
 		{
 			throw new FeedIdentifierNotFoundException(identifier);
-		}
-		if (response.StatusCode == HttpStatusCode.Unauthorized)
-		{
-			apiKeyRepository.Invalidate(ApiKeyProvider.Mdblist);
 		}
 		response.EnsureSuccessStatusCode();
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);

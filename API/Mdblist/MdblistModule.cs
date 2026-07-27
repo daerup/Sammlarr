@@ -13,6 +13,7 @@ public class MdblistModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddHttpClient<MdblistClient>();
+		services.AddHttpClient(MdblistClient.Unauthenticated);
 		services.AddTracedKeyedScoped<IFeedService, MdblistService>(FeedProvider.Mdblist);
 	}
 }

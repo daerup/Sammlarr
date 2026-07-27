@@ -1,4 +1,4 @@
-using System.Net;
+using API.Http;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Providers;
@@ -28,12 +28,6 @@ internal class PlexClient(HttpClient client, ICredentialRepository credentialSto
 		customHeaders.ForEach(header => request.Headers.Add(header.Item1, header.Item2));
 		request.Content = content;
 
-		var response = await client.SendAsync(request, cancellationToken);
-		if (response.StatusCode == HttpStatusCode.Unauthorized)
-		{
-			credentialStore.Invalidate(AuthProvider.Plex);
-		}
-
-		return response;
+		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentialStore.Invalidate(AuthProvider.Plex));
 	}
 }
