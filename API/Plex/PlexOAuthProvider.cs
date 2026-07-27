@@ -1,17 +1,13 @@
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using API.Plex.Types;
-using Contracts;
 using Contracts.Auth;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexClient plexClient, ILogger<PlexOAuthProvider> logger)
-	: IOAuthProvider
+internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options) : IOAuthProvider
 {
 	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{
@@ -39,7 +35,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		return QueryHelpers.AddQueryString(PlexEndpoints.AuthApp, queryParams).Replace("?", "#?");
 	}
 
-	public async Task<Result<OAuthTokenGrant>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
+	public async Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
 	{
 		var query = QueryHelpers.ParseQuery(callbackQuery);
 		if (
@@ -58,45 +54,33 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 		response.EnsureSuccessStatusCode();
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Auth.Root>(stream, cancellationToken: cancellationToken))!;
+		var pin = (await JsonSerializer.DeserializeAsync<PlexTypes.Auth.Root>(stream, cancellationToken: cancellationToken))!;
 
-		var authToken = result.AuthToken?.ToString();
+		var authToken = pin.AuthToken?.ToString();
 		if (string.IsNullOrEmpty(authToken))
 		{
 			return Error.From("Authentication was not completed. Please try again.");
 		}
 
-		return Success.Of(new OAuthTokenGrant(authToken, result.ExpiresAt, clientId));
+		return await FetchAccountAsync(authToken, clientId, pin.ExpiresAt, cancellationToken);
 	}
 
-	public async Task<AuthSession> GetUserAsync(CancellationToken cancellationToken = default)
+	private async Task<Result<ExternalLogin>> FetchAccountAsync(string accessToken, Guid clientId, DateTimeOffset expiresAt, CancellationToken cancellationToken)
 	{
-		HttpResponseMessage response;
-		try
-		{
-			response = await plexClient.SendAsync(HttpMethod.Get, PlexEndpoints.User, cancellationToken);
-		}
-		catch (Exception ex)
-		{
-			logger.LogWarning(ex, "Plex GetUser request failed; treating account as unavailable");
-			return new Unavailable();
-		}
-
-		if (response.StatusCode == HttpStatusCode.Unauthorized)
-		{
-			return new SignedOut();
-		}
+		using var request = new HttpRequestMessage(HttpMethod.Get, PlexEndpoints.User);
+		request.Headers.Add("X-Plex-Token", accessToken);
+		request.Headers.AddClientId(clientId);
+		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			logger.LogWarning("Plex GetUser returned {StatusCode}; treating account as unavailable", (int)response.StatusCode);
-			return new Unavailable();
+			return Error.From("Your Plex profile could not be loaded. Please try again.");
 		}
 
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var user = await JsonSerializer.DeserializeAsync<PlexTypes.User.Root>(stream, cancellationToken: cancellationToken);
 		if (user is null)
 		{
-			return new Unavailable();
+			return Error.From("Your Plex profile could not be loaded. Please try again.");
 		}
 
 		var displayName =
@@ -104,15 +88,8 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 			: !string.IsNullOrWhiteSpace(user.Title) ? user.Title
 			: user.Username;
 
-		var joinedAt = user.JoinedAt is { } seconds ? DateTimeOffset.FromUnixTimeSeconds(seconds) : default;
-		var subscriptionDescription = user.Subscription?.Active == true ? user.SubscriptionDescription ?? string.Empty : string.Empty;
-		return new AuthorizedUser(
-			DisplayName: displayName,
-			AvatarUrl: user.Thumb ?? string.Empty,
-			Email: user.Email ?? string.Empty,
-			SubscriptionDescription: subscriptionDescription,
-			JoinedAt: joinedAt,
-			AccountUrl: "https://watch.plex.tv/de/account/profile"
+		return Success.Of(
+			new ExternalLogin(user.Uuid ?? user.Username, displayName, user.Thumb ?? string.Empty, new OAuthTokenGrant(accessToken, expiresAt, clientId))
 		);
 	}
 }

@@ -14,7 +14,7 @@ public class UserScopeTests
 		var testee = new UserScope(currentUserOverride, IUserRepository.Mock().Object);
 
 		ICurrentUser? insideScope;
-		using (testee.AsUser(user))
+		using (testee.As(user))
 		{
 			insideScope = currentUserOverride.Value;
 		}

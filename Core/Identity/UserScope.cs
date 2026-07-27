@@ -5,15 +5,15 @@ namespace Core.Identity;
 
 internal sealed class UserScope(CurrentUserOverride currentUserOverride, IUserRepository users) : IUserScope
 {
-	public IDisposable AsUser(User user)
+	public IDisposable As(User user)
 	{
 		var previous = currentUserOverride.Value;
 		currentUserOverride.Value = new SignedInUser(user);
 		return new Restore(currentUserOverride, previous);
 	}
 
-	public async Task<IDisposable> AsUser(UserId userId, CancellationToken cancellationToken = default) =>
-		AsUser(await users.GetAsync(userId, cancellationToken));
+	public async Task<IDisposable> As(UserId userId, CancellationToken cancellationToken = default) =>
+		As(await users.GetAsync(userId, cancellationToken));
 
 	private sealed class Restore(CurrentUserOverride currentUserOverride, ICurrentUser? previous) : IDisposable
 	{

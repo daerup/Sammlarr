@@ -140,6 +140,7 @@ internal static class PlexTypes
 	internal static class User
 	{
 		public record Root(
+			[property: JsonPropertyName("uuid")] string? Uuid,
 			[property: JsonPropertyName("username")] string Username,
 			[property: JsonPropertyName("title")] string Title,
 			[property: JsonPropertyName("thumb")] string? Thumb,

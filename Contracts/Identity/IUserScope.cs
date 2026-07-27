@@ -4,7 +4,7 @@ namespace Contracts.Identity;
 
 public interface IUserScope
 {
-	IDisposable AsUser(User user);
+	IDisposable As(User user);
 
-	Task<IDisposable> AsUser(UserId userId, CancellationToken cancellationToken = default);
+	Task<IDisposable> As(UserId userId, CancellationToken cancellationToken = default);
 }

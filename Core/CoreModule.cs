@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Auth;
 using Contracts.Blacklist;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Processing;
@@ -10,6 +11,7 @@ using Core.Auth;
 using Core.Blacklist;
 using Core.Caching;
 using Core.DI;
+using Core.Identity;
 using Core.Media;
 using Core.Processing;
 using Core.Watchlist;
@@ -37,6 +39,8 @@ public class CoreModule : IServiceModule
 		services.AddScoped<MediaResolutionBufferFactory>();
 		services.AddTracedScoped<IMediaService, MediaService>();
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
-		services.AddTracedScoped<IOAuthService, OAuthService>();
+		services.AddScoped<CurrentUserOverride>();
+		services.AddScoped<IUserScope, UserScope>();
+		services.AddTracedScoped<ISignInService, SignInService>();
 	}
 }
