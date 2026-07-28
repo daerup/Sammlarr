@@ -104,6 +104,7 @@ public class MediaSearchServiceTests
 					SearchProvider = provider,
 					RatingProvider = RatingProvider.Tmdb,
 					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
 				}
 			);
 		return repo;

@@ -9,4 +9,5 @@ public record ProviderConfig
 	public required SearchProvider SearchProvider { get; init; }
 	public required RatingProvider RatingProvider { get; init; }
 	public required AuthProvider AuthProvider { get; init; }
+	public required RegistrationMode RegistrationMode { get; init; }
 }

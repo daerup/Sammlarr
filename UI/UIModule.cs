@@ -14,6 +14,7 @@ internal class UiModule : IServiceModule
 	{
 		services.AddModule<ObservabilityModule>();
 		services.AddModule<UI.Observability.InstrumentationModule>();
+		services.AddModule<AuthenticationModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
 		services.AddBlazorBlueprintComponents();
 		services.AddScoped<CurrentUserAccessor>();

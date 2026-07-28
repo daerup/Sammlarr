@@ -1,7 +1,7 @@
 using API;
 using Core;
 using DB;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Domain.Identity;
 using Observability.Diagnostics;
 using Shared;
 using Shared.DI;
@@ -15,19 +15,6 @@ builder.Services.AddModule<SharedModule>();
 builder.Services.AddModule<DbModule>();
 builder.Services.AddModule<ApiModule>();
 builder.Services.AddModule<UiModule>();
-
-builder.Services.AddCascadingAuthenticationState();
-builder
-	.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-	.AddCookie(options =>
-	{
-		options.Cookie.Name = "sammlarr.auth";
-		options.LoginPath = "/signin";
-		options.ReturnUrlParameter = "returnUrl";
-		options.ExpireTimeSpan = TimeSpan.FromDays(30);
-		options.SlidingExpiration = true;
-	});
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -55,6 +42,6 @@ app.MapGet(
 			return Results.File(stream, "application/zip", fileName);
 		}
 	)
-	.RequireAuthorization();
+	.RequireAuthorization(policy => policy.RequireRole(nameof(UserRole.Admin)));
 
 app.Run();

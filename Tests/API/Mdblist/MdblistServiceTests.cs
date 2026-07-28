@@ -43,6 +43,7 @@ public class MdblistServiceTests
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
 					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
 				}
 			);
 		var testee = new MdblistService(client, media.Object, providerConfig.Object, apiKeyStore.Object);

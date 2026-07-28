@@ -12,7 +12,7 @@ internal sealed class ProviderConfigRepository(
 	ICurrentUser currentUser
 ) : IProviderConfigRepository
 {
-	private string CacheKey => $"{(currentUser.IsAuthenticated ? currentUser.Id.Value : Guid.Empty)}:{nameof(ProviderConfig)}";
+	private const string CacheKey = nameof(ProviderConfig);
 
 	public async ValueTask<ProviderConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
@@ -29,6 +29,7 @@ internal sealed class ProviderConfigRepository(
 			SearchProvider = row.SearchProvider,
 			RatingProvider = row.RatingProvider,
 			AuthProvider = row.AuthProvider,
+			RegistrationMode = row.RegistrationMode,
 		};
 		cache.Set(CacheKey, config);
 		return config;
@@ -36,6 +37,7 @@ internal sealed class ProviderConfigRepository(
 
 	public async Task StoreAsync(ProviderConfig config, CancellationToken cancellationToken = default)
 	{
+		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.ProviderSettings.SingleOrDefaultAsync(cancellationToken);
 		if (row is null)
@@ -48,6 +50,7 @@ internal sealed class ProviderConfigRepository(
 					SearchProvider = config.SearchProvider,
 					RatingProvider = config.RatingProvider,
 					AuthProvider = config.AuthProvider,
+					RegistrationMode = config.RegistrationMode,
 				}
 			);
 		}
@@ -58,6 +61,7 @@ internal sealed class ProviderConfigRepository(
 			row.SearchProvider = config.SearchProvider;
 			row.RatingProvider = config.RatingProvider;
 			row.AuthProvider = config.AuthProvider;
+			row.RegistrationMode = config.RegistrationMode;
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);

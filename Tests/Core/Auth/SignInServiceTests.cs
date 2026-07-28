@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
@@ -29,6 +30,7 @@ public class SignInServiceTests
 			users.Object,
 			new UserScope(new CurrentUserOverride(), users.Object),
 			(providerConfig ?? ProviderConfigStubs.PlexWatchlist()).Object,
+			IDateTimeProvider.Mock().Object,
 			NullLogger<SignInService>.Instance
 		);
 
@@ -45,7 +47,7 @@ public class SignInServiceTests
 	}
 
 	[Test]
-	public async Task CompleteAsync_WhenFirstUser_StoresCredentialAndProvisionsOwner()
+	public async Task CompleteAsync_WhenFirstUser_StoresCredentialAndProvisionsAdmin()
 	{
 		var provider = IOAuthProvider.Mock();
 		provider.CompleteLoginAsync("q", Any()).Returns(Success.Of(new ExternalLogin("plex-uuid", "John", "avatar", Grant)));
@@ -65,7 +67,7 @@ public class SignInServiceTests
 			{
 				await Assert.That(user.DisplayName).IsEqualTo("John");
 				await Assert.That(user.AvatarUrl).IsEqualTo("avatar");
-				await Assert.That(user.Role).IsEqualTo(UserRole.Owner);
+				await Assert.That(user.Role).IsEqualTo(UserRole.Admin);
 			});
 		credentials.StoreAsync(AuthProvider.Plex, Grant.AccessToken, Grant.ExpiresAt, Grant.ClientId, Any()).WasCalled(Times.Once);
 		users.CreateAsync(Any<User>(), AuthProvider.Plex, "plex-uuid", Any()).WasCalled(Times.Once);
@@ -90,9 +92,59 @@ public class SignInServiceTests
 	}
 
 	[Test]
+	public async Task CompleteAsync_WhenRegistrationClosedAndNotFirstUser_ReturnsErrorWithoutCreating()
+	{
+		var provider = IOAuthProvider.Mock();
+		provider.CompleteLoginAsync("q", Any()).Returns(Success.Of(new ExternalLogin("plex-uuid", "Zoe", "avatar", Grant)));
+		var users = IUserRepository.Mock();
+		users.FindByLoginAsync(AuthProvider.Plex, "plex-uuid", Any()).Returns(new None());
+		users.AnyAsync(Any()).Returns(true);
+		var testee = CreateTestee(provider, ICredentialRepository.Mock(), users, ClosedRegistration());
+
+		var result = await testee.CompleteAsync(AuthProvider.Plex, "q");
+
+		await Assert.That(result).IsError();
+		users.CreateAsync(Any<User>(), Any<AuthProvider>(), Any<string>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task CompleteAsync_WhenRegistrationClosedButFirstUser_StillProvisionsAdmin()
+	{
+		var provider = IOAuthProvider.Mock();
+		provider.CompleteLoginAsync("q", Any()).Returns(Success.Of(new ExternalLogin("plex-uuid", "Ada", "avatar", Grant)));
+		var users = IUserRepository.Mock();
+		users.FindByLoginAsync(AuthProvider.Plex, "plex-uuid", Any()).Returns(new None());
+		users.AnyAsync(Any()).Returns(false);
+		var testee = CreateTestee(provider, ICredentialRepository.Mock(), users, ClosedRegistration());
+
+		var result = await testee.CompleteAsync(AuthProvider.Plex, "q");
+
+		await Assert.That(result).IsSuccess().And.Multiple(async user => await Assert.That(user.Role).IsEqualTo(UserRole.Admin));
+		users.CreateAsync(Any<User>(), AuthProvider.Plex, "plex-uuid", Any()).WasCalled(Times.Once);
+	}
+
+	private static Mock<IProviderConfigRepository> ClosedRegistration()
+	{
+		var mock = ProviderConfigStubs.PlexWatchlist();
+		mock.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					WatchlistProvider = WatchlistProvider.Plex,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Closed,
+				}
+			);
+		return mock;
+	}
+
+	[Test]
 	public async Task CompleteAsync_WhenUserExists_ReturnsExistingWithoutCreating()
 	{
-		var existing = new User(UserId.New(), "John", "avatar", UserRole.Owner);
+		var existing = new User(UserId.New(), "John", "avatar", UserRole.Admin, DateTimeOffset.UnixEpoch);
 		var provider = IOAuthProvider.Mock();
 		provider.CompleteLoginAsync("q", Any()).Returns(Success.Of(new ExternalLogin("plex-uuid", "John", "avatar", Grant)));
 		var users = IUserRepository.Mock();

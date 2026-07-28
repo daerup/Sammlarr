@@ -3,9 +3,12 @@
 @using Contracts.Media.Metadata
 @using Contracts.Media.Search
 @using Contracts.Media.Trending
+@using Contracts.Identity
 @using Contracts.Settings
+@using Domain.Identity
 @using UI.Shared.Services.Branding
 @inject IProviderConfigRepository ProviderConfigRepository
+@inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
@@ -17,14 +20,21 @@
 }
 else
 {
-    <div class="flex gap-8 w-full max-w-7xl">
+    @if (!IsAdmin)
+    {
+        <div class="w-full mb-4 rounded-lg border bg-muted/40 px-4 py-3 flex items-center gap-2 text-sm text-muted-foreground">
+            <LucideIcon Name="lock" Size="14"/>
+            <span>Provider settings are managed by an admin. You're viewing them read-only.</span>
+        </div>
+    }
+    <div class="flex gap-8 w-full">
         <ProviderSettingCard TEnum="WatchlistProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
                              Title="Watchlist Provider"
                              Description="Choose which provider powers the watchlist and OAuth flow."
                              Selected="@_providerConfig.WatchlistProvider"
                              OnChange="@SetWatchlistProviderAsync"
-                             IsDisabled="@_isSaving"/>
+                             IsDisabled="@(_isSaving || !IsAdmin)"/>
 
         <ProviderSettingCard TEnum="TrendingProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
@@ -32,7 +42,7 @@ else
                              Description="Choose which media provider supplies recommendations."
                              Selected="@_providerConfig.TrendingProvider"
                              OnChange="@SetTrendingProviderAsync"
-                             IsDisabled="@_isSaving"/>
+                             IsDisabled="@(_isSaving || !IsAdmin)"/>
 
         <ProviderSettingCard TEnum="SearchProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
@@ -40,7 +50,7 @@ else
                              Description="Choose which provider powers search inside the watchlist flow."
                              Selected="@_providerConfig.SearchProvider"
                              OnChange="@SetSearchProviderAsync"
-                             IsDisabled="@_isSaving"/>
+                             IsDisabled="@(_isSaving || !IsAdmin)"/>
 
         <ProviderSettingCard TEnum="RatingProvider"
                              BrandingProvider="@(p => MediaProviderBrandingService.GetBrandingInfo(p.AsMediaProvider()))"
@@ -48,7 +58,7 @@ else
                              Description="Choose which provider supplies ratings used for display, filtering, and sorting."
                              Selected="@_providerConfig.RatingProvider"
                              OnChange="@SetRatingProviderAsync"
-                             IsDisabled="@_isSaving"/>
+                             IsDisabled="@(_isSaving || !IsAdmin)"/>
     </div>
 }
 
@@ -57,6 +67,8 @@ else
     private ProviderConfig _providerConfig = null!;
     private bool _isLoaded;
     private bool _isSaving;
+
+    private bool IsAdmin => CurrentUser.Role == UserRole.Admin;
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,7 +86,7 @@ else
 
     private async Task UpdateAsync(Func<ProviderConfig, ProviderConfig> update)
     {
-        if (_isSaving || !_isLoaded)
+        if (_isSaving || !_isLoaded || !IsAdmin)
         {
             return;
         }

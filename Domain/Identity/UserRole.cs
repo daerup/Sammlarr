@@ -2,6 +2,6 @@ namespace Domain.Identity;
 
 public enum UserRole
 {
-	Owner,
+	Admin,
 	Member,
 }

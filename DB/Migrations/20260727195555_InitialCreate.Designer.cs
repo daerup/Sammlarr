@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations
 {
     [DbContext(typeof(SammlarrDbContext))]
-    [Migration("20260712081947_InitialCreate")]
+    [Migration("20260727195555_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -114,14 +114,18 @@ namespace DB.Migrations
 
             modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AuthProvider")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RatingProvider")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RegistrationMode")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -137,9 +141,21 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("ProviderConfig");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AuthProvider = "Plex",
+                            RatingProvider = "Tmdb",
+                            RegistrationMode = "Open",
+                            SearchProvider = "Plex",
+                            TrendingProvider = "Tmdb",
+                            WatchlistProvider = "Plex"
+                        });
                 });
 
             modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>
@@ -216,6 +232,9 @@ namespace DB.Migrations
                     b.Property<string>("ExternalUserId")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("JoinedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Provider")
                         .IsRequired()
@@ -466,15 +485,6 @@ namespace DB.Migrations
                         .IsRequired();
 
                     b.Navigation("Media");
-                });
-
-            modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
-                {
-                    b.HasOne("DB.Data.Identity.UserRow", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("DB.Data.Feed.FeedRow", b =>

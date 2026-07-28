@@ -25,10 +25,3 @@ Feature: Per-user data isolation
     When I sign out
     And I sign in as "Bob"
     Then I have no stored credentials
-
-  Scenario: Provider config is private to each user
-    Given I am signed in as "Alice"
-    And I save my provider config
-    When I sign out
-    And I sign in as "Bob"
-    Then I have no saved provider config

@@ -1,12 +1,16 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using DB.Data;
 using Domain.Providers;
+using Domain.Settings;
 
 namespace DB.Data.Config;
 
 [Table("ProviderConfig")]
-internal record ProviderConfigRow : IUserOwned
+internal record ProviderConfigRow
 {
+	public const int SingletonId = 1;
+
+	public int Id { get; set; } = SingletonId;
+
 	public required WatchlistProvider WatchlistProvider { get; set; }
 
 	public required TrendingProvider TrendingProvider { get; set; }
@@ -17,6 +21,8 @@ internal record ProviderConfigRow : IUserOwned
 
 	public required AuthProvider AuthProvider { get; set; }
 
+	public required RegistrationMode RegistrationMode { get; set; }
+
 	public static ProviderConfigRow Default =>
 		new()
 		{
@@ -25,5 +31,6 @@ internal record ProviderConfigRow : IUserOwned
 			SearchProvider = SearchProvider.Plex,
 			RatingProvider = RatingProvider.Tmdb,
 			AuthProvider = AuthProvider.Plex,
+			RegistrationMode = RegistrationMode.Open,
 		};
 }

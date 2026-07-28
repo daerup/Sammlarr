@@ -300,6 +300,13 @@ body:has(.error-dialog) .search-modal {
     background-color: transparent !important;
 }
 
+/* Soft destructive alert box — same chroma-reduced tone as the HoverButton failure tint, with a faint fill so it reads as a notice rather than a solid-red shout. */
+.alert-soft-destructive {
+    color: oklch(from var(--destructive) l calc(c * 0.65) h);
+    border-color: oklch(from var(--destructive) l calc(c * 0.65) h / 0.45);
+    background-color: oklch(from var(--destructive) l c h / 0.1);
+}
+
 .watchlist-sync-preview {
     min-width: 12rem;
     width: max-content;

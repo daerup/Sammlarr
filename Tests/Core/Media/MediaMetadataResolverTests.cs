@@ -103,6 +103,7 @@ public class MediaMetadataResolverTests
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
 					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
 				}
 			);
 

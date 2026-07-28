@@ -55,6 +55,7 @@ public sealed class SammlarrScenarioContext : IDisposable
 				DisplayName = user.DisplayName,
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
+				JoinedAt = DateTimeOffset.UnixEpoch,
 			}
 		);
 		DbContext.SaveChanges();

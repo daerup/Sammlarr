@@ -41,6 +41,8 @@ public class CoreModule : IServiceModule
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
 		services.AddScoped<CurrentUserOverride>();
 		services.AddScoped<IUserScope, UserScope>();
+		services.AddTracedScoped<IUserManagementService, UserManagementService>();
 		services.AddTracedScoped<ISignInService, SignInService>();
+		services.AddScoped<ISessionValidator, SessionValidator>();
 	}
 }
