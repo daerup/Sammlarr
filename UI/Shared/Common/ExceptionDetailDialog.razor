@@ -14,7 +14,7 @@
         <div class="space-y-2 min-w-0">
             <p class="text-xs font-medium text-muted-foreground">Stack Trace</p>
             <div class="rounded-md bg-muted overflow-auto scrollbar-thin" style="max-height: 55vh">
-                <pre class="text-xs font-mono whitespace-pre" style="padding: 0.625rem 1.25rem; width: max-content; min-width: 100%">@(Exception.StackTrace ?? "(no stack trace)")</pre>
+                <pre class="text-xs font-mono whitespace-pre" style="padding: 1rem 1.25rem 1rem 0; width: max-content; min-width: 100%">@(Exception.StackTrace ?? "(no stack trace)")</pre>
             </div>
         </div>
         @if (Exception.InnerException is not null)
