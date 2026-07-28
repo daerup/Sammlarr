@@ -1,33 +1,713 @@
 @using BlazorBlueprint.Components
+@using Contracts.Feed
+@using Contracts.Media
+@using Domain.Media
+@using Domain.Media.Metadata
+@using Domain.Providers
+@using Domain.Watchlist
+@using UI.Shared.Common
+@using UI.Shared.Guards
+@using UI.Shared.Media
+@using UI.Shared.Media.Icons
+@using UI.Shared.Services.Branding
+@using UI.Features.Feeds.Components
+@using UI.Features.Watchlist.Components
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
 @inject Notifier Notifier
+@inject MediaProviderBrandingService Branding
+@inject IJSRuntime JS
 
-<div class="w-full flex flex-col gap-6">
-    <div>
+<div class="w-full flex flex-col gap-3">
+    <div class="mb-1">
         <h2 class="text-lg font-semibold tracking-tight">Testing</h2>
         <p class="text-muted-foreground mt-1 text-sm leading-relaxed max-w-2xl">
-            Tools for exercising app behavior during development. This section is only useful for verification and will be limited to Development builds.
+            A playground for the app's UI components. Only useful for verification during development; will be limited to Development builds.
         </p>
     </div>
 
-    <div class="rounded-lg border p-5 flex items-start justify-between gap-6 max-w-2xl">
+    <section class="rounded-lg border p-6 space-y-5">
         <div class="space-y-1">
-            <h3 class="text-sm font-semibold">Throw test exception</h3>
-            <p class="text-sm text-muted-foreground leading-relaxed">
-                Raises an exception and surfaces it through the error toast and detail dialog, so you can verify error handling end to end.
-            </p>
+            <h3 class="text-sm font-semibold">Media card <span class="font-normal text-muted-foreground">— Browse / Watchlist grid</span></h3>
+            <p class="text-xs text-muted-foreground leading-relaxed">MediaGridTile in the real grid. A resolved movie and show, an unresolved item, and the loading skeleton. Click a tile to open the detail sheet.</p>
         </div>
-        <BbButton Variant="ButtonVariant.Outline" OnClick="ThrowTestException" Class="shrink-0">
-            <LucideIcon Name="bug" Size="14" Class="mr-1.5"/>
-            Throw
-        </BbButton>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <MediaGridTile Media="_demoMovie" OnClick="() => OpenSheet(_demoMovie)" ShowBookmark="true" IsInWatchlist="@_demoWatchlisted.Contains(_demoMovie.Id)"/>
+            <MediaGridTile Media="_demoShow" OnClick="() => OpenSheet(_demoShow)" ShowBookmark="true" IsInWatchlist="@_demoWatchlisted.Contains(_demoShow.Id)"/>
+            <MediaGridTile Media="_demoUnknown" OnClick="() => OpenSheet(_demoUnknown)" ShowBookmark="false" IsInWatchlist="false"/>
+            <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="1"/>
+        </div>
+    </section>
+
+    <div class="flex gap-4 items-start">
+    <section class="rounded-lg border p-6 space-y-5 shrink-0" style="order: 2; width: 36rem">
+        <div class="space-y-1">
+            <h3 class="text-sm font-semibold">Media detail tiles <span class="font-normal text-muted-foreground">— Feed preview</span></h3>
+            <p class="text-xs text-muted-foreground leading-relaxed">MediaDetailTile with watchlist / blacklist toggles and status indicators, plus the preview stat badges. Toggles are visual-only.</p>
+        </div>
+        <BbTooltipProvider>
+            <div class="flex items-start text-xs font-medium">
+                <PreviewFilterBadge Icon="list" Count="3" Active="true" OnClick="() => {}">
+                    <Tooltip>Total items fetched from the source list.</Tooltip>
+                </PreviewFilterBadge>
+                <PreviewFilterBadge Icon="check" Count="2" Active="false" OnClick="() => {}">
+                    <Tooltip>Items that will be imported.</Tooltip>
+                </PreviewFilterBadge>
+                <PreviewFilterBadge Icon="scissors" Count="1" Active="false" OnClick="() => {}">
+                    <Tooltip>Excluded by the import limit.</Tooltip>
+                </PreviewFilterBadge>
+                <PreviewFilterBadge Icon="circle-alert" Count="1" Active="false" OnClick="() => {}">
+                    <Tooltip>Could not be matched in your media provider.</Tooltip>
+                </PreviewFilterBadge>
+            </div>
+        </BbTooltipProvider>
+        <div class="space-y-2 overflow-hidden">
+            <MediaDetailTile Media="_demoMovie">
+                <Icons>
+                    <WatchlistToggleIcon Result="_demoMovie" IsToggled="@_demoWatchlisted.Contains(_demoMovie.Id)" IsToggling="false" OnToggle="ToggleDemoWatchlist"/>
+                    <BlacklistToggleIcon Result="_demoMovie" IsToggled="@_demoBlacklisted.Contains(_demoMovie.Id)" IsToggling="false" OnToggle="ToggleDemoBlacklist"/>
+                </Icons>
+            </MediaDetailTile>
+            <MediaDetailTile Media="_demoShow" Class="result-dimmed">
+                <Icons>
+                    <BbTooltipProvider>
+                        <BbTooltip DelayDuration="300">
+                            <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                <div class="search-result-status-indicator">
+                                    <LucideIcon Name="scissors" Size="24"/>
+                                </div>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Excluded by the specified import limit.</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                    <WatchlistToggleIcon Result="_demoShow" IsToggled="@_demoWatchlisted.Contains(_demoShow.Id)" IsToggling="false" OnToggle="ToggleDemoWatchlist"/>
+                    <BlacklistToggleIcon Result="_demoShow" IsToggled="@_demoBlacklisted.Contains(_demoShow.Id)" IsToggling="false" OnToggle="ToggleDemoBlacklist"/>
+                </Icons>
+            </MediaDetailTile>
+            <MediaDetailTile Media="_demoUnknown">
+                <Icons>
+                    <BbTooltipProvider>
+                        <BbTooltip DelayDuration="300">
+                            <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                                <div class="search-result-status-indicator">
+                                    <LucideIcon Name="circle-alert" Size="24"/>
+                                </div>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
+                        </BbTooltip>
+                    </BbTooltipProvider>
+                </Icons>
+            </MediaDetailTile>
+            <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="1"/>
+        </div>
+    </section>
+
+    <div @ref="_grid" class="flex-1 min-w-0" style="order: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); column-gap: 0.75rem; grid-auto-rows: 1px; grid-auto-flow: dense; align-items: start">
+        <section class="rounded-lg border p-6 space-y-5" style="grid-column: span 2; order: -2">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Bulk actions &amp; pagination</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">A paged set (page size 12). Pagination changes the visible items; select/remove mutate the set, re-add restores it.</p>
+            </div>
+            @if (_items.Count > 0)
+            {
+                <BulkActionBar SelectedCount="_selected.Count"
+                               TotalCount="_items.Count"
+                               RemoveLabel="Remove"
+                               IsRemoving="false"
+                               OnSelectAll="SelectAllItems"
+                               OnClearSelection="() => _selected.Clear()"
+                               OnCancel="() => _selected.Clear()"
+                               OnRemove="RemoveSelectedItems"/>
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var item in PageItems)
+                    {
+                        var isSelected = _selected.Contains(item);
+                        <button type="button" @onclick="() => ToggleItem(item)"
+                                class="@($"rounded-md border px-2 py-1 text-xs transition-colors {(isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground hover:text-foreground")}")">
+                            Item @item
+                        </button>
+                    }
+                </div>
+                <PaginationControls CurrentPage="_page" TotalPages="TotalPages" IsDisabled="false" PageChanged="OnPageChanged"/>
+            }
+            else
+            {
+                <p class="text-sm text-muted-foreground">All items removed.</p>
+            }
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ReAddItems">
+                <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                Re-add items
+            </BbButton>
+        </section>
+
+        <section class="rounded-lg border p-6" style="display: flex; flex-direction: column; gap: 1rem">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Notifications</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Fire a toast of the chosen kind. Exceptions also open the detail dialog.</p>
+            </div>
+            <div class="flex items-end gap-3">
+                <div class="w-36">
+                    <BbSelect TValue="NotificationKind" Value="_kind" ValueChanged="OnKindChanged" Options="KindOptions"/>
+                </div>
+                <BbButton Variant="ButtonVariant.Default" OnClick="ShowNotification">
+                    <LucideIcon Name="bell" Size="14" Class="mr-1.5"/>
+                    Show
+                </BbButton>
+            </div>
+            @if (_kind == NotificationKind.Exception)
+            {
+                <div class="flex items-center gap-2">
+                    <BbCheckbox @bind-Checked="_includeInner" Id="nested-exception" AriaLabel="Include inner exception"/>
+                    <label for="nested-exception" class="text-sm cursor-pointer select-none">Include inner (nested) exception</label>
+                </div>
+            }
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-4" style="grid-column: span 2">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Branding</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Every brand treatment MediaProviderBrandingService drives — icon chip, colored name, brand hover button, the SettingsCard gradient header, provider pills, brand badges, and external links.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    @foreach (var provider in BrandProviders)
+                    {
+                        var info = Branding.GetBrandingInfo(provider);
+                        <div class="flex items-center gap-3">
+                            <span class="shrink-0 inline-flex items-center justify-center rounded-lg" style="width: 2.25rem; height: 2.25rem; background-color: color-mix(in oklch, @info.BrandColor 16%, transparent); color: @info.BrandColor">
+                                @info.IconWithClass("h-6 w-6")
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-sm font-medium truncate">@info.DisplayName</div>
+                                <code class="text-xs text-muted-foreground">@info.BrandColor</code>
+                            </div>
+                            <HoverButton Preset="HoverButtonPreset.Custom" Color="@info.BrandColor" Text="@info.NickName"/>
+                        </div>
+                    }
+                </div>
+                <div class="space-y-4">
+                    @{
+                        var head = Branding.GetBrandingInfo(_toggleProvider);
+                    }
+                    <div class="space-y-2">
+                        <p class="text-xs font-medium text-muted-foreground">Card header (SettingsCard) — follows the enum toggle</p>
+                        <div class="rounded-lg border overflow-hidden" style="--brand: @head.BrandColor">
+                            <div class="flex items-center gap-3" style="padding: 0.75rem 1rem; background: linear-gradient(90deg, color-mix(in oklch, @head.BrandColor 26%, transparent) 0%, color-mix(in oklch, @head.BrandColor 12%, transparent) 100%); border-bottom: 2px solid @head.BrandColor">
+                                <span class="inline-flex items-center justify-center" style="color: @head.BrandColor">@head.IconWithClass("h-6 w-6")</span>
+                                <span class="text-sm font-semibold">Auth provider</span>
+                                <BbBadge Variant="BadgeVariant.Outline" Class="provider-pill whitespace-nowrap ml-auto">@head.DisplayName</BbBadge>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-xs font-medium text-muted-foreground">Sign-in button (SignInRequired) — follows the enum toggle</p>
+                        <HoverButton Color="@head.BrandColor" Class="font-medium w-full" Border="false">
+                            <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
+                            <span>Sign in with @head.NickName</span>
+                        </HoverButton>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-xs font-medium text-muted-foreground">Provider pills</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach (var provider in BrandProviders)
+                            {
+                                var info = Branding.GetBrandingInfo(provider);
+                                <span class="inline-flex" style="--brand: @info.BrandColor">
+                                    <BbBadge Variant="BadgeVariant.Outline" Class="provider-pill whitespace-nowrap">@info.DisplayName</BbBadge>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-xs font-medium text-muted-foreground">Brand badges</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach (var provider in BrandProviders)
+                            {
+                                var info = Branding.GetBrandingInfo(provider);
+                                <span class="inline-flex" style="--brand: @info.BrandColor">
+                                    <BbBadge Variant="BadgeVariant.Outline" Class="brand-badge whitespace-nowrap">@info.NickName</BbBadge>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-4 border-t space-y-2">
+                <p class="text-xs font-medium text-muted-foreground">External link (FeedSourceLink)</p>
+                <div class="flex flex-wrap items-center gap-6">
+                    <FeedSourceLink Provider="FeedProvider.Mdblist" Identifier="top-movies-2026"/>
+                    <FeedSourceLink Provider="FeedProvider.Tmdb" Identifier="8321"/>
+                </div>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6" style="display: flex; flex-direction: column; gap: 1rem">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Dialogs &amp; confirms</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Neutral and destructive confirmation dialogs.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <BbAlertDialog>
+                    <BbAlertDialogTrigger>
+                        <BbButton Variant="ButtonVariant.Outline">Confirm action</BbButton>
+                    </BbAlertDialogTrigger>
+                    <BbAlertDialogContent>
+                        <BbAlertDialogHeader>
+                            <BbAlertDialogTitle>Apply changes?</BbAlertDialogTitle>
+                            <BbAlertDialogDescription>A neutral confirmation dialog for testing.</BbAlertDialogDescription>
+                        </BbAlertDialogHeader>
+                        <BbAlertDialogFooter>
+                            <BbAlertDialogCancel>
+                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                            </BbAlertDialogCancel>
+                            <BbAlertDialogAction>
+                                <BbButton Variant="ButtonVariant.Default" OnClick="@(() => Notifier.Success("Confirmed."))">Confirm</BbButton>
+                            </BbAlertDialogAction>
+                        </BbAlertDialogFooter>
+                    </BbAlertDialogContent>
+                </BbAlertDialog>
+
+                <BbAlertDialog>
+                    <BbAlertDialogTrigger>
+                        <BbButton Variant="ButtonVariant.Outline" Class="text-muted-foreground hover:text-destructive">Delete something</BbButton>
+                    </BbAlertDialogTrigger>
+                    <BbAlertDialogContent>
+                        <BbAlertDialogHeader>
+                            <BbAlertDialogTitle>Delete this item?</BbAlertDialogTitle>
+                            <BbAlertDialogDescription>A destructive confirmation. This cannot be undone.</BbAlertDialogDescription>
+                        </BbAlertDialogHeader>
+                        <BbAlertDialogFooter>
+                            <BbAlertDialogCancel>
+                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                            </BbAlertDialogCancel>
+                            <BbAlertDialogAction>
+                                <HoverButton Preset="HoverButtonPreset.Destructive" Text="Yes, delete" OnClick="@(() => Notifier.Success("Deleted."))"/>
+                            </BbAlertDialogAction>
+                        </BbAlertDialogFooter>
+                    </BbAlertDialogContent>
+                </BbAlertDialog>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-5">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Hover buttons</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Ghost until hovered, then filled with the tint. Presets read the theme; Custom takes an inline color.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Destructive"/>
+                <HoverButton Preset="HoverButtonPreset.Success" Icon="check" Text="Success"/>
+                <HoverButton Preset="HoverButtonPreset.Custom" Color="oklch(0.62 0.19 260)" Icon="star" Text="Custom"/>
+                <HoverButton Preset="HoverButtonPreset.Custom" Color="oklch(0.62 0.2 300)" Icon="sparkles" Text="Custom"/>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-6">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Form controls</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Input, select, switch, checkbox, and radio group.</p>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-medium">Text input</label>
+                <BbInput Value="@_text" ValueChanged="@(v => _text = v ?? string.Empty)" Placeholder="Type something…"/>
+            </div>
+            <div class="space-y-2">
+                <label class="text-sm font-medium">Select</label>
+                <BbSelect TValue="string" Value="_selectValue" ValueChanged="v => _selectValue = v" Options="DemoSelectOptions"/>
+            </div>
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-3">
+                    <BbSwitch @bind-Checked="_switch"/>
+                    <span class="text-sm">Switch</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <BbCheckbox @bind-Checked="_check" Id="demo-check"/>
+                    <label for="demo-check" class="text-sm cursor-pointer select-none">Checkbox</label>
+                </div>
+            </div>
+            <div class="space-y-2.5">
+                <label class="text-sm font-medium">Radio group</label>
+                <BbRadioGroup @bind-Value="_radio">
+                    <BbRadioGroupItem Value="@("one")" Label="Option one"/>
+                    <BbRadioGroupItem Value="@("two")" Label="Option two"/>
+                    <BbRadioGroupItem Value="@("three")" Label="Option three"/>
+                </BbRadioGroup>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-5" style="grid-column: span 2; order: -1">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Enum toggle</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">EnumToggleGroup — a segmented selector over an enum's values.</p>
+            </div>
+            <EnumToggleGroup TEnum="MediaProvider" Value="_toggleProvider" OnChange="v => _toggleProvider = v" TooltipProvider="null"/>
+        </section>
+
+        <section class="rounded-lg border p-6" style="display: flex; flex-direction: column; gap: 0.75rem">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Guards</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">ProtectedSection and ProtectedComponent. The toggle stands in for real auth state.</p>
+            </div>
+            <BbTooltipProvider>
+                <div class="flex items-center justify-between gap-3">
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _guardAllowed = !_guardAllowed">
+                        Access: @(_guardAllowed ? "granted" : "denied")
+                    </BbButton>
+                    <ProtectedComponent GuardState="() => _guardAllowed" DeniedActionDescription="use this button">
+                        <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small">Protected button</BbButton>
+                    </ProtectedComponent>
+                </div>
+            </BbTooltipProvider>
+            <div class="flex flex-col" style="min-height: 12rem">
+                <ProtectedSection GuardState="() => _guardAllowed" DeniedActionDescription="view this demo section">
+                    <div class="flex-1 flex items-center justify-center rounded-lg border bg-muted/40 p-5 text-sm">Protected content is visible.</div>
+                </ProtectedSection>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-5" style="grid-column: span 2">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Schedule</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">SchedulePicker — daily / weekly / raw-cron modes with a human-readable summary.</p>
+            </div>
+            <SchedulePicker CronExpression="_cron" CronExpressionChanged="v => _cron = v"/>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-6">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Buttons &amp; badges</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Button variants, sizes and states, plus badge variants including the soft tones.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <BbButton Variant="ButtonVariant.Default">Default</BbButton>
+                <BbButton Variant="ButtonVariant.Secondary">Secondary</BbButton>
+                <BbButton Variant="ButtonVariant.Outline">Outline</BbButton>
+                <BbButton Variant="ButtonVariant.Ghost">Ghost</BbButton>
+                <BbButton Variant="ButtonVariant.Destructive">Destructive</BbButton>
+                <BbButton Variant="ButtonVariant.Link">Link</BbButton>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small">Small</BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default">Default</BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Large">Large</BbButton>
+                <BbButton Variant="ButtonVariant.Default" Loading LoadingText="Loading">Loading</BbButton>
+                <BbButton Variant="ButtonVariant.Default" Disabled>Disabled</BbButton>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <BbBadge Variant="BadgeVariant.Default">Default</BbBadge>
+                <BbBadge Variant="BadgeVariant.Secondary">Secondary</BbBadge>
+                <BbBadge Variant="BadgeVariant.Outline">Outline</BbBadge>
+                <BbBadge Variant="BadgeVariant.Destructive">Destructive</BbBadge>
+                <BbBadge Variant="BadgeVariant.Outline" Class="badge-soft-destructive">Soft destructive</BbBadge>
+                <BbBadge Variant="BadgeVariant.Outline" Class="badge-soft-success">Soft success</BbBadge>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-5">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Custom components</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">App-authored: provenance badges and the soft alert callout.</p>
+            </div>
+            <BbTooltipProvider>
+                <div class="flex flex-wrap items-center gap-2">
+                    <ProvenanceBadge Provenance="_manualProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_remoteProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_feedProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_orphanedProvenance" AddedAt="_sampleDate"/>
+                </div>
+            </BbTooltipProvider>
+            <div class="alert-soft-destructive rounded-lg border p-3 flex items-start gap-2">
+                <LucideIcon Name="circle-alert" Size="16" Class="shrink-0 mt-0.5"/>
+                <span class="text-sm">A soft destructive alert callout.</span>
+            </div>
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-5">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Loading &amp; empty states</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">Spinner sizes and an empty-state callout. (Media skeletons live in the media cards above.)</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <BbSpinner Size="SpinnerSize.Small"/>
+                <BbSpinner Size="SpinnerSize.Default"/>
+                <BbSpinner Size="SpinnerSize.Large"/>
+            </div>
+            <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                <LucideIcon Name="inbox" Size="36" Class="mx-auto text-muted-foreground"/>
+                <h3 class="text-base font-semibold tracking-tight">Nothing here yet.</h3>
+                <p class="text-sm text-muted-foreground leading-relaxed">An example empty-state callout.</p>
+            </div>
+        </section>
+    </div>
     </div>
 </div>
 
+<MediaDetailSheet Open="_sheetOpen"
+                  OnOpenChanged="v => _sheetOpen = v"
+                  Media="_sheetMedia"
+                  ShowMetadataRow="true"
+                  ButtonText="SheetButtonText"
+                  ButtonIcon="SheetButtonIcon"
+                  ButtonAction="SheetButtonAction"
+                  ButtonDisabled="_sheetUnresolved"/>
+
 @code {
-    private void ThrowTestException()
+    private ElementReference _grid;
+    private IJSObjectReference? _masonry;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _masonry = await JS.InvokeAsync<IJSObjectReference>("import", "./js/masonry.js");
+            await _masonry.InvokeVoidAsync("init", _grid);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_masonry is not null)
+        {
+            try
+            {
+                await _masonry.InvokeVoidAsync("dispose", _grid);
+                await _masonry.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+    }
+
+    private enum NotificationKind
+    {
+        Success,
+        Info,
+        Warning,
+        Error,
+        Exception,
+    }
+
+    private static readonly IReadOnlyList<SelectOption<NotificationKind>> KindOptions =
+    [
+        new(NotificationKind.Success, "Success"),
+        new(NotificationKind.Info, "Info"),
+        new(NotificationKind.Warning, "Warning"),
+        new(NotificationKind.Error, "Error"),
+        new(NotificationKind.Exception, "Exception"),
+    ];
+
+    private static readonly IReadOnlyList<SelectOption<string>> DemoSelectOptions =
+    [
+        new("a", "Option A"),
+        new("b", "Option B"),
+        new("c", "Option C"),
+    ];
+
+    private static readonly MediaProvider[] BrandProviders =
+    [
+        MediaProvider.Plex,
+        MediaProvider.Tmdb,
+        MediaProvider.Imdb,
+        MediaProvider.Tvdb,
+        MediaProvider.Mdblist,
+    ];
+
+    private static readonly DateTimeOffset _sampleDate = new(2026, 1, 15, 0, 0, 0, TimeSpan.Zero);
+
+    private static readonly WatchlistItemProvenance _manualProvenance = new(new ManualOrigin());
+    private static readonly WatchlistItemProvenance _remoteProvenance = new(new RemoteOrigin());
+    private static readonly WatchlistItemProvenance _feedProvenance = new(new FeedOrigin(Guid.Empty, "Trending feed"));
+    private static readonly WatchlistItemProvenance _orphanedProvenance = new(new OrphanedOrigin("Old feed"));
+
+    private static readonly MediaLookup _demoMovie = new Movie
+    {
+        Identity = new MediaIdentity(
+            MediaId.From(new Guid("11111111-1111-1111-1111-111111111111")),
+            [
+                TmdbId.From("687163", MediaType.Movie),
+                ImdbId.From("tt12042730", MediaType.Movie),
+                PlexId.From("5d776be07bb7e9001e73bb0f", MediaType.Movie),
+            ]),
+        Title = "Project Hail Mary",
+        Tagline = "One man. One ship. One shot to save humanity.",
+        Summary = "A lone astronaut wakes far from home with no memory of how he got there, and must piece together a desperate mission to keep the sun from dying.",
+        PosterUrl = "https://image.tmdb.org/t/p/w500/1hJdqwEDES96CRZCaiOVuqWLJFX.jpg",
+        BackdropUrl = "https://image.tmdb.org/t/p/w780/qL4dBGLkWOVP5vImN7EEoqJQYd8.jpg",
+        ReleaseDate = new DateOnly(2026, 3, 20),
+        Genres = ["Science Fiction", "Adventure"],
+        Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.4f)]),
+        Runtime = TimeSpan.FromMinutes(150),
+    }.ToMatch();
+
+    private static readonly MediaLookup _demoShow = new Show
+    {
+        Identity = new MediaIdentity(
+            MediaId.From(new Guid("22222222-2222-2222-2222-222222222222")),
+            [
+                TmdbId.From("1396", MediaType.Show),
+                ImdbId.From("tt0903747", MediaType.Show),
+                TvdbId.From("81189", MediaType.Show),
+                PlexId.From("5d9c081b166f9e0020c6f1e0", MediaType.Show),
+            ]),
+        Title = "Breaking Bad",
+        Tagline = "A quiet life takes a darker turn.",
+        Summary = "A high-school chemistry teacher turns to making illicit product to secure his family's future, and is slowly reshaped by the choices he makes.",
+        PosterUrl = "https://image.tmdb.org/t/p/w500/anFx9aTOOYqgS3v7x3R84Kz67ly.jpg",
+        BackdropUrl = "https://image.tmdb.org/t/p/w780/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+        ReleaseDate = new DateOnly(2008, 1, 20),
+        Genres = ["Drama", "Crime"],
+        Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.9f)]),
+        Seasons = 5,
+        Episodes = 62,
+        RuntimePerEpisode = TimeSpan.FromMinutes(47),
+    }.ToMatch();
+
+    private static readonly MediaLookup _demoUnknown = new UnmatchedMedia
+    {
+        Externals = [TmdbId.From("999999", MediaType.Movie)],
+        Title = "Unmatched Title",
+        ReleaseDate = new DateOnly(2024, 1, 1),
+    };
+
+    private NotificationKind _kind = NotificationKind.Success;
+    private bool _includeInner;
+
+    private string _text = string.Empty;
+    private string _selectValue = "a";
+    private bool _switch = true;
+    private bool _check;
+    private string _radio = "one";
+
+    private MediaProvider _toggleProvider = MediaProvider.Plex;
+    private bool _guardAllowed = true;
+    private string? _cron = "0 9 * * *";
+
+    private readonly List<int> _items = [.. Enumerable.Range(1, 30)];
+    private readonly HashSet<int> _selected = [];
+    private const int PageSize = 12;
+    private int _page = 1;
+
+    private readonly HashSet<MediaId> _demoWatchlisted = [_demoMovie.Id];
+    private readonly HashSet<MediaId> _demoBlacklisted = [];
+
+    private bool _sheetOpen;
+    private MediaLookup? _sheetMedia;
+    private bool _sheetUnresolved;
+
+    private void ToggleDemoWatchlist(MediaLookup media)
+    {
+        if (!_demoWatchlisted.Remove(media.Id))
+        {
+            _demoWatchlisted.Add(media.Id);
+        }
+    }
+
+    private void ToggleDemoBlacklist(MediaLookup media)
+    {
+        if (!_demoBlacklisted.Remove(media.Id))
+        {
+            _demoBlacklisted.Add(media.Id);
+        }
+    }
+
+    private void OpenSheet(MediaLookup media)
+    {
+        _sheetMedia = media;
+        _sheetUnresolved = media.IsUnresolved;
+        _sheetOpen = true;
+    }
+
+    private string SheetButtonText() => "Add to Watchlist";
+
+    private string SheetButtonIcon() => "plus";
+
+    private Task SheetButtonAction()
+    {
+        Notifier.Info("Adding to the watchlist is demo-only here.");
+        return Task.CompletedTask;
+    }
+
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling(_items.Count / (double)PageSize));
+
+    private IEnumerable<int> PageItems => _items.Skip((_page - 1) * PageSize).Take(PageSize);
+
+    private void OnPageChanged(int page) => _page = Math.Clamp(page, 1, TotalPages);
+
+    private void ToggleItem(int item)
+    {
+        if (!_selected.Remove(item))
+        {
+            _selected.Add(item);
+        }
+    }
+
+    private void SelectAllItems()
+    {
+        foreach (var item in _items)
+        {
+            _selected.Add(item);
+        }
+    }
+
+    private void RemoveSelectedItems()
+    {
+        _items.RemoveAll(_selected.Contains);
+        _selected.Clear();
+        if (_page > TotalPages)
+        {
+            _page = TotalPages;
+        }
+    }
+
+    private void ReAddItems()
+    {
+        _items.Clear();
+        _items.AddRange(Enumerable.Range(1, 30));
+        _selected.Clear();
+        _page = 1;
+    }
+
+    private void OnKindChanged(NotificationKind kind) => _kind = kind;
+
+    private void ShowNotification()
+    {
+        switch (_kind)
+        {
+            case NotificationKind.Success:
+                Notifier.Success("Operation completed successfully.");
+                break;
+            case NotificationKind.Info:
+                Notifier.Info("Here is some information worth noting.");
+                break;
+            case NotificationKind.Warning:
+                Notifier.Warning("Something looks off, but it is not fatal.");
+                break;
+            case NotificationKind.Error:
+                Notifier.Error("The operation failed.");
+                break;
+            case NotificationKind.Exception:
+                ShowException();
+                break;
+        }
+    }
+
+    private void ShowException()
     {
         try
         {
+            if (_includeInner)
+            {
+                try
+                {
+                    throw new InvalidOperationException("Inner cause: a lower-level operation failed.");
+                }
+                catch (Exception inner)
+                {
+                    throw new ApplicationException("Outer exception wrapping an inner cause.", inner);
+                }
+            }
+
             throw new InvalidOperationException("This is a test exception thrown from the Testing section to verify the error dialog.");
         }
         catch (Exception ex)
