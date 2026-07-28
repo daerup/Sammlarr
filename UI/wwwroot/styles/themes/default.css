@@ -26,7 +26,7 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
 
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: oklch(0.577 0.15925 27.325);
     --destructive-foreground: oklch(1 0 0);
 
     --border: oklch(0.922 0 0);
@@ -52,7 +52,7 @@
     --sidebar-ring: oklch(0.708 0 0);
 
     /* Alert colors */
-    --alert-success: oklch(0.55 0.20 142);
+    --alert-success: oklch(0.55 0.13 142);
     --alert-success-foreground: oklch(0.30 0.09 142);
     --alert-success-bg: oklch(0.993 0.003 142);
     --alert-info: oklch(0.50 0.20 255);
@@ -89,7 +89,7 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
 
-    --destructive: oklch(0.63 0.25 28.552);
+    --destructive: oklch(0.63 0.1625 28.552);
     --destructive-foreground: oklch(0.985 0 0);
 
     --border: oklch(0.269 0 0);
@@ -113,7 +113,7 @@
     --sidebar-ring: oklch(0.556 0 0);
 
     /* Alert colors */
-    --alert-success: oklch(0.60 0.18 142);
+    --alert-success: oklch(0.60 0.117 142);
     --alert-success-foreground: oklch(0.90 0.06 142);
     --alert-success-bg: oklch(0.18 0.008 142);
     --alert-info: oklch(0.55 0.18 255);
@@ -246,19 +246,18 @@ body:has(.error-dialog) .search-modal {
     color: var(--brand) !important;
 }
 
-/* HoverButton — ghost by default in --tint, fills with --tint on hover/focus. Chroma is reduced ~35% via oklch-from so the tint reads as a tone, not a shout. Pair with a preset modifier (.hover-button--destructive, .hover-button--success) or set --tint inline for the Custom preset. Lives in the global theme (not the component's scoped CSS) because BbButton renders the actual button element, so HoverButton's scope attribute never lands on it. */
 .hover-button {
     background-color: transparent !important;
-    color: oklch(from var(--tint) l calc(c * 0.65) h) !important;
-    border: 1px solid oklch(from var(--tint) l calc(c * 0.65) h) !important;
+    color: var(--tint) !important;
+    border: 1px solid var(--tint) !important;
     transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
 }
 .hover-button:hover,
 .hover-button:focus,
 .hover-button:focus-visible {
-    background-color: oklch(from var(--tint) l calc(c * 0.65) h) !important;
+    background-color: var(--tint) !important;
     color: var(--tint-foreground, white) !important;
-    border-color: oklch(from var(--tint) l calc(c * 0.65) h) !important;
+    border-color: var(--tint) !important;
 }
 .hover-button:disabled,
 .hover-button[aria-disabled="true"] {
@@ -293,17 +292,15 @@ body:has(.error-dialog) .search-modal {
     background-color: oklch(from var(--background) l c h / 0.15) !important;
 }
 
-/* Status-badge counterpart to the HoverButton failure tint — same chroma-reduced destructive so the two read as one state, not a solid-red shout. */
 .badge-soft-destructive {
-    color: oklch(from var(--destructive) l calc(c * 0.65) h) !important;
-    border-color: oklch(from var(--destructive) l calc(c * 0.65) h) !important;
+    color: var(--destructive) !important;
+    border-color: var(--destructive) !important;
     background-color: transparent !important;
 }
 
-/* Soft destructive alert box — same chroma-reduced tone as the HoverButton failure tint, with a faint fill so it reads as a notice rather than a solid-red shout. */
 .alert-soft-destructive {
-    color: oklch(from var(--destructive) l calc(c * 0.65) h);
-    border-color: oklch(from var(--destructive) l calc(c * 0.65) h / 0.45);
+    color: var(--destructive);
+    border-color: oklch(from var(--destructive) l c h / 0.45);
     background-color: oklch(from var(--destructive) l c h / 0.1);
 }
 

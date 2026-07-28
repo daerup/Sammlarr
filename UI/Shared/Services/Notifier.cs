@@ -44,7 +44,6 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 				Variant = ToastVariant.Destructive,
 				Duration = 20000,
 				ActionText = "Details",
-				Class = "flex-col! items-stretch! space-x-0! gap-2",
 				OnAction = () =>
 				{
 					_ = dialogService.OpenAsync<ExceptionDetailDialog>(
