@@ -6,11 +6,14 @@
 
 <PageTitle>Sign in</PageTitle>
 
-<SignInRequired ReturnUrl="@ReturnUrl"/>
+<SignInRequired ReturnUrl="@ReturnUrl" Error="@AuthError"/>
 
 @code {
     [SupplyParameterFromQuery(Name = "returnUrl")]
     public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "authError")]
+    public string? AuthError { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

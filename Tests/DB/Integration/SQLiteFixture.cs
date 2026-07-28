@@ -74,6 +74,7 @@ public class SQLiteFixture : IAsyncDisposable
 				DisplayName = CurrentUser.DisplayName,
 				AvatarUrl = CurrentUser.AvatarUrl,
 				Role = CurrentUser.Role,
+				JoinedAt = DateTimeOffset.UnixEpoch,
 			}
 		);
 		ctx.SaveChanges();

@@ -12,6 +12,7 @@ using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -19,6 +20,7 @@ using Domain.Settings;
 using Domain.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration.Cleanup;
 
@@ -43,9 +45,20 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
 					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
 				}
 			);
-		_testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, NullLogger<MediaCachePurger>.Instance);
+		_testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, fixture.CurrentUser, NullLogger<MediaCachePurger>.Instance);
+	}
+
+	[Test]
+	public async Task PurgeAsync_WhenNotAdmin_Throws()
+	{
+		var configRepository = IProviderConfigRepository.Mock();
+		var member = new TestCurrentUser { Role = UserRole.Member };
+		var testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, member, NullLogger<MediaCachePurger>.Instance);
+
+		await Assert.That(async () => await testee.PurgeAsync()).Throws<UnauthorizedAccessException>();
 	}
 
 	[Test]

@@ -11,5 +11,5 @@ public sealed class TestCurrentUser : ICurrentUser
 	public UserId Id { get; set; } = DefaultId;
 	public string DisplayName { get; set; } = "Test User";
 	public string AvatarUrl { get; set; } = string.Empty;
-	public UserRole Role { get; set; } = UserRole.Owner;
+	public UserRole Role { get; set; } = UserRole.Admin;
 }

@@ -1,0 +1,45 @@
+@using System.Security.Claims
+@using Domain.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@implements IDisposable
+@inject NavigationManager Navigation
+@inject CircuitUserRegistry Registry
+@inject AuthenticationStateProvider AuthProvider
+
+<BbAlertDialog Open="showPrompt" OpenChanged="value => showPrompt = value">
+	<BbAlertDialogContent>
+		<BbAlertDialogHeader>
+			<BbAlertDialogTitle>Your access changed</BbAlertDialogTitle>
+			<BbAlertDialogDescription>
+				An administrator changed your account. Please sign in again for it to take effect.
+			</BbAlertDialogDescription>
+		</BbAlertDialogHeader>
+		<BbAlertDialogFooter>
+			<BbButton Variant="ButtonVariant.Default" OnClick="SignIn">Sign in</BbButton>
+		</BbAlertDialogFooter>
+	</BbAlertDialogContent>
+</BbAlertDialog>
+
+@code {
+	private bool showPrompt;
+	private IDisposable? registration;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var state = await AuthProvider.GetAuthenticationStateAsync();
+		if (Guid.TryParse(state.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id))
+		{
+			registration = Registry.Register(UserId.From(id), () => _ = InvokeAsync(ShowPrompt));
+		}
+	}
+
+	private void ShowPrompt()
+	{
+		showPrompt = true;
+		StateHasChanged();
+	}
+
+	private void SignIn() => Navigation.NavigateTo("/signin", forceLoad: true);
+
+	public void Dispose() => registration?.Dispose();
+}

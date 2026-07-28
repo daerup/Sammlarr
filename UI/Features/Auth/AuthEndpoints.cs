@@ -47,7 +47,7 @@ internal static class AuthEndpoints
 				return await signIn.CompleteAsync(authProvider, context.Request.QueryString.Value ?? string.Empty, cancellationToken) switch
 				{
 					Success<User>(var user) => await SignInAndRedirectAsync(context, user, returnUrl),
-					Error error => Results.Redirect($"/?authError={Uri.EscapeDataString(error.Reason)}"),
+					Error error => Results.Redirect($"/signin?authError={Uri.EscapeDataString(error.Reason)}"),
 				};
 			}
 		);

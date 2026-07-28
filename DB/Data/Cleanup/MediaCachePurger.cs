@@ -1,4 +1,5 @@
 using Contracts;
+using Contracts.Identity;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
 using DB.Data.Media;
@@ -12,11 +13,13 @@ namespace DB.Data.Cleanup;
 internal class MediaCachePurger(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	IProviderConfigRepository providerConfigRepository,
+	ICurrentUser currentUser,
 	ILogger<MediaCachePurger> logger
 ) : IMediaCachePurger
 {
 	public async Task PurgeAsync(CancellationToken cancellationToken = default)
 	{
+		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
 		var anchor = config.WatchlistProvider.AsMediaProvider();

@@ -1,0 +1,21 @@
+using System.Security.Claims;
+using Contracts.Identity;
+using Domain.Identity;
+
+namespace UI.Shared.Identity;
+
+internal static class SessionRevalidation
+{
+	public static async Task<bool> IsCurrentAsync(ClaimsPrincipal principal, ISessionValidator validator, CancellationToken cancellationToken)
+	{
+		if (
+			Guid.TryParse(principal.FindFirstValue(ClaimTypes.NameIdentifier), out var idValue) is false
+			|| Enum.TryParse<UserRole>(principal.FindFirstValue(ClaimTypes.Role), out var role) is false
+		)
+		{
+			return false;
+		}
+
+		return await validator.IsCurrentAsync(UserId.From(idValue), role, cancellationToken);
+	}
+}

@@ -11,7 +11,7 @@ public class UserScopeTests
 	public async Task AsUser_ExposesTheUsersRealRole_ThenRestoresOnDispose()
 	{
 		var currentUserOverride = new CurrentUserOverride();
-		var user = new User(UserId.New(), "Ada", "avatar", UserRole.Owner);
+		var user = new User(UserId.New(), "Ada", "avatar", UserRole.Admin, DateTimeOffset.UnixEpoch);
 		var testee = new UserScope(currentUserOverride, IUserRepository.Mock().Object);
 
 		ICurrentUser? insideScope;
@@ -21,7 +21,7 @@ public class UserScopeTests
 		}
 
 		await Assert.That(insideScope!.Id).IsEqualTo(user.Id);
-		await Assert.That(insideScope!.Role).IsEqualTo(UserRole.Owner);
+		await Assert.That(insideScope!.Role).IsEqualTo(UserRole.Admin);
 		await Assert.That(currentUserOverride.Value).IsNull();
 	}
 

@@ -10,4 +10,5 @@ internal sealed record UserRow : Entity<Guid>
 	public required string DisplayName { get; set; }
 	public required string AvatarUrl { get; set; }
 	public required UserRole Role { get; set; }
+	public required DateTimeOffset JoinedAt { get; set; }
 }

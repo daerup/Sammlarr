@@ -10,11 +10,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	public async Task<User> GetAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx
-			.Users.AsNoTracking()
-			.Where(user => user.Id == id.Value)
-			.Select(user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role))
-			.SingleAsync(cancellationToken);
+		return await ctx.Users.AsNoTracking().Where(user => user.Id == id.Value).Select(Project).SingleAsync(cancellationToken);
 	}
 
 	public async Task<Optional<User>> FindByLoginAsync(AuthProvider provider, string externalUserId, CancellationToken cancellationToken = default)
@@ -23,7 +19,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		var found = await ctx
 			.Users.AsNoTracking()
 			.Where(user => user.Provider == provider && user.ExternalUserId == externalUserId)
-			.Select(user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role))
+			.Select(Project)
 			.SingleOrDefaultAsync(cancellationToken);
 
 		return Optional.Of(found);
@@ -41,6 +37,7 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 				DisplayName = user.DisplayName,
 				AvatarUrl = user.AvatarUrl,
 				Role = user.Role,
+				JoinedAt = user.JoinedAt,
 			}
 		);
 		await ctx.SaveChangesAsync(cancellationToken);
@@ -58,4 +55,35 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		var ids = await ctx.Users.AsNoTracking().Select(user => user.Id).ToListAsync(cancellationToken);
 		return ids.Select(UserId.From).ToList();
 	}
+
+	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.Users.AsNoTracking().OrderBy(user => user.JoinedAt).Select(Project).ToListAsync(cancellationToken);
+	}
+
+	public async Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var row = await ctx.Users.SingleAsync(user => user.Id == id.Value, cancellationToken);
+		row.Role = role;
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task DeleteAsync(UserId id, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var row = await ctx.Users.SingleAsync(user => user.Id == id.Value, cancellationToken);
+		ctx.Users.Remove(row);
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task<int> CountByRoleAsync(UserRole role, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await ctx.Users.CountAsync(user => user.Role == role, cancellationToken);
+	}
+
+	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>
+		user => new User(UserId.From(user.Id), user.DisplayName, user.AvatarUrl, user.Role, user.JoinedAt);
 }

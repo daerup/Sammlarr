@@ -81,5 +81,6 @@ public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDispos
 			SearchProvider = searchProvider,
 			RatingProvider = ratingProvider,
 			AuthProvider = AuthProvider.Plex,
+			RegistrationMode = RegistrationMode.Open,
 		};
 }

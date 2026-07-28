@@ -25,6 +25,23 @@ namespace DB.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProviderConfig",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
+                    WatchlistProvider = table.Column<string>(type: "TEXT", nullable: false),
+                    TrendingProvider = table.Column<string>(type: "TEXT", nullable: false),
+                    SearchProvider = table.Column<string>(type: "TEXT", nullable: false),
+                    RatingProvider = table.Column<string>(type: "TEXT", nullable: false),
+                    AuthProvider = table.Column<string>(type: "TEXT", nullable: false),
+                    RegistrationMode = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProviderConfig", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -34,6 +51,7 @@ namespace DB.Migrations
                     DisplayName = table.Column<string>(type: "TEXT", nullable: false),
                     AvatarUrl = table.Column<string>(type: "TEXT", nullable: false),
                     Role = table.Column<string>(type: "TEXT", nullable: false),
+                    JoinedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
                     UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false)
                 },
@@ -196,28 +214,6 @@ namespace DB.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProviderConfig",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    WatchlistProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    TrendingProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    SearchProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    RatingProvider = table.Column<string>(type: "TEXT", nullable: false),
-                    AuthProvider = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProviderConfig", x => x.UserId);
-                    table.ForeignKey(
-                        name: "FK_ProviderConfig_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "WatchlistOutbox",
                 columns: table => new
                 {
@@ -297,6 +293,11 @@ namespace DB.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "ProviderConfig",
+                columns: new[] { "Id", "AuthProvider", "RatingProvider", "RegistrationMode", "SearchProvider", "TrendingProvider", "WatchlistProvider" },
+                values: new object[] { 1, "Plex", "Tmdb", "Open", "Plex", "Tmdb", "Plex" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ApiKeyConfigs_UserId_Provider",

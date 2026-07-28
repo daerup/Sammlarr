@@ -72,24 +72,6 @@ public class UserIsolationSteps(SammlarrScenarioContext sammlarr)
 	[Then("I have no stored credentials")]
 	public async Task NoCredentials() => await Assert.That(await CountAsync(ctx => ctx.Credentials)).IsEqualTo(0);
 
-	[Given("I save my provider config")]
-	public async Task SaveConfig() =>
-		await sammlarr
-			.Resolve<IProviderConfigRepository>()
-			.StoreAsync(
-				new ProviderConfig
-				{
-					WatchlistProvider = WatchlistProvider.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					RatingProvider = RatingProvider.Tmdb,
-					AuthProvider = AuthProvider.Plex,
-				}
-			);
-
-	[Then("I have no saved provider config")]
-	public async Task NoConfig() => await Assert.That(await CountAsync(ctx => ctx.ProviderSettings)).IsEqualTo(0);
-
 	private async Task<int> CountAsync<T>(Func<SammlarrDbContext, IQueryable<T>> set)
 	{
 		await using var ctx = sammlarr.Resolve<IDbContextFactory<SammlarrDbContext>>().CreateDbContext();

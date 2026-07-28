@@ -169,6 +169,7 @@ public class MediaServiceOrderingTests
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
 					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
 				}
 			);
 

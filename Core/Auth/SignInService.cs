@@ -1,9 +1,11 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Identity;
 using Domain.Providers;
+using Domain.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Auth;
@@ -14,6 +16,7 @@ internal sealed class SignInService(
 	IUserRepository users,
 	IUserScope userScope,
 	IProviderConfigRepository providerConfig,
+	IDateTimeProvider dateTimeProvider,
 	ILogger<SignInService> logger
 ) : ISignInService
 {
@@ -29,11 +32,36 @@ internal sealed class SignInService(
 
 	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, CancellationToken cancellationToken)
 	{
-		var (user, isInitialOwner) = await FindOrCreateAsync(provider, login, cancellationToken);
+		if (await users.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken) is Some<User>(var existing))
+		{
+			return await CompleteSignInAsync(provider, login, existing, isInitialAdmin: false, cancellationToken);
+		}
+
+		var isFirstUser = !await users.AnyAsync(cancellationToken);
+		if (!isFirstUser && (await providerConfig.GetAsync(cancellationToken)).RegistrationMode == RegistrationMode.Closed)
+		{
+			logger.LogWarning("Registration is closed; rejected new {Provider} sign-in", provider);
+			return Error.From("Registration is closed. Ask an admin for access.");
+		}
+
+		var role = isFirstUser ? UserRole.Admin : UserRole.Member;
+		var user = new User(UserId.New(), login.DisplayName, login.AvatarUrl, role, dateTimeProvider.Now);
+		await users.CreateAsync(user, provider, login.ExternalUserId, cancellationToken);
+		return await CompleteSignInAsync(provider, login, user, isInitialAdmin: isFirstUser, cancellationToken);
+	}
+
+	private async Task<Result<User>> CompleteSignInAsync(
+		AuthProvider provider,
+		ExternalLogin login,
+		User user,
+		bool isInitialAdmin,
+		CancellationToken cancellationToken
+	)
+	{
 		using (userScope.As(user))
 		{
 			await credentials.StoreAsync(provider, login.Token.AccessToken, login.Token.ExpiresAt, login.Token.ClientId, cancellationToken);
-			if (isInitialOwner)
+			if (isInitialAdmin)
 			{
 				await SetAuthProviderAsync(provider, cancellationToken);
 			}
@@ -47,20 +75,6 @@ internal sealed class SignInService(
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		await providerConfig.StoreAsync(config with { AuthProvider = provider }, cancellationToken);
-	}
-
-	private async Task<(User User, bool IsInitialOwner)> FindOrCreateAsync(AuthProvider provider, ExternalLogin login, CancellationToken cancellationToken)
-	{
-		if (await users.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken) is Some<User>(var existing))
-		{
-			return (existing, false);
-		}
-
-		var isFirstUser = !await users.AnyAsync(cancellationToken);
-		var role = isFirstUser ? UserRole.Owner : UserRole.Member;
-		var user = new User(UserId.New(), login.DisplayName, login.AvatarUrl, role);
-		await users.CreateAsync(user, provider, login.ExternalUserId, cancellationToken);
-		return (user, isFirstUser);
 	}
 
 	private Result<User> OnFailed(AuthProvider provider, Error error)
