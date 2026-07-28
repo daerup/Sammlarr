@@ -298,6 +298,12 @@ body:has(.error-dialog) .search-modal {
     background-color: transparent !important;
 }
 
+.badge-soft-success {
+    color: var(--alert-success) !important;
+    border-color: var(--alert-success) !important;
+    background-color: transparent !important;
+}
+
 .alert-soft-destructive {
     color: var(--destructive);
     border-color: oklch(from var(--destructive) l c h / 0.45);
