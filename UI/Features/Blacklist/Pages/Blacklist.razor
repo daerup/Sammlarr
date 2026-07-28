@@ -17,7 +17,7 @@
 @if (_providerSettings is null)
 {
     <PageContainer>
-        <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
         </div>
     </PageContainer>
@@ -58,7 +58,7 @@ else
                               FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
             @if (_isLoading)
             {
-                <div class="grid grid-cols-4 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
                 </div>
             }
