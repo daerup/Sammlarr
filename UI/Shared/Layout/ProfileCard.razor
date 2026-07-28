@@ -10,27 +10,26 @@
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject MediaProviderBrandingService BrandingService
 
-<BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
-    <BbDropdownMenuTrigger>
-        <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0"
-                  AriaLabel="@(_isAuthenticated ? $"Account menu, signed in as {_displayName}" : "Account menu, not signed in")">
-            <BbAvatar Size="AvatarSize.Small" ShowDot="@_isAuthenticated" DotClass="bg-green-500">
-                <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
-                <BbAvatarFallback>
-                    <LucideIcon Name="user" Size="16"/>
-                </BbAvatarFallback>
-            </BbAvatar>
-        </BbButton>
-    </BbDropdownMenuTrigger>
-    <BbDropdownMenuContent Align="PopoverAlign.End" Class="p-0 overflow-hidden">
-        @if (_branding is not null)
-        {
-            var brand = _branding.BrandColor;
-            var headerStyle = $"background: linear-gradient(180deg, {brand}1F 0%, {brand}08 60%, transparent 100%);";
-            var brandChipStyle = $"background-color: {brand}24; color: {brand};";
+@if (_isAuthenticated && _branding is not null)
+{
+    var brand = _branding.BrandColor;
+    var headerStyle = $"background: linear-gradient(180deg, {brand}1F 0%, {brand}08 60%, transparent 100%);";
 
+    <BbDropdownMenu @bind-Open="_isProfileDropdownOpen">
+        <BbDropdownMenuTrigger>
+            <BbButton id="profile-dropdown-trigger" Variant="ButtonVariant.Ghost" Class="relative h-8 w-8 rounded-full p-0"
+                      AriaLabel="@($"Account menu, signed in as {_displayName}")">
+                <BbAvatar Size="AvatarSize.Small" ShowDot="true" DotClass="bg-green-500">
+                    <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
+                    <BbAvatarFallback>
+                        <LucideIcon Name="user" Size="16"/>
+                    </BbAvatarFallback>
+                </BbAvatar>
+            </BbButton>
+        </BbDropdownMenuTrigger>
+        <BbDropdownMenuContent Align="PopoverAlign.End" Class="p-0 overflow-hidden">
             <div class="relative" style="width: 17rem;">
-                @if (_isAuthenticated && _accountUrl is not null)
+                @if (_accountUrl is not null)
                 {
                     <a href="@_accountUrl" target="_blank" rel="noopener noreferrer"
                        class="absolute top-3 right-3 z-10 text-muted-foreground/60 hover:text-foreground transition-colors"
@@ -39,57 +38,32 @@
                     </a>
                 }
                 <div class="px-4 py-4 border-b border-border/60" style="@headerStyle">
-                    @if (_isAuthenticated)
-                    {
-                        <div class="flex items-center gap-3">
-                            <BbAvatar Size="AvatarSize.Large" Class="avatar-rect">
-                                <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
-                                <BbAvatarFallback>
-                                    <LucideIcon Name="user-round" Size="20"/>
-                                </BbAvatarFallback>
-                            </BbAvatar>
-                            <div class="flex min-w-0 flex-1 flex-col gap-1">
-                                <span class="text-sm font-semibold truncate">@_displayName</span>
-                                <span class="text-xs text-muted-foreground truncate">@_role</span>
-                            </div>
+                    <div class="flex items-center gap-3">
+                        <BbAvatar Size="AvatarSize.Large" Class="avatar-rect">
+                            <BbAvatarImage Source="@_avatarUrl" Alt="@_displayName"/>
+                            <BbAvatarFallback>
+                                <LucideIcon Name="user-round" Size="20"/>
+                            </BbAvatarFallback>
+                        </BbAvatar>
+                        <div class="flex min-w-0 flex-1 flex-col gap-1">
+                            <span class="text-sm font-semibold truncate">@_displayName</span>
+                            <span class="text-xs text-muted-foreground truncate">@_role</span>
                         </div>
-                    }
-                    else
-                    {
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style="@brandChipStyle">
-                                <span class="inline-flex size-6 items-center justify-center">@_branding.Icon</span>
-                            </div>
-                            <div class="flex min-w-0 flex-1 flex-col gap-1">
-                                <span class="text-sm font-semibold">Connect your @_branding.NickName Account</span>
-                                <span class="text-xs text-muted-foreground">Sign in to get started</span>
-                            </div>
-                        </div>
-                    }
+                    </div>
                 </div>
 
                 <div class="p-2">
-                    @if (_isAuthenticated)
-                    {
-                        <HoverButton Preset="HoverButtonPreset.Destructive"
-                                     Icon="log-out"
-                                     Text="Sign out"
-                                     OnClick="SignOut"
-                                     Border="false"
-                                     Class="w-full"/>
-                    }
-                    else
-                    {
-                        <HoverButton OnClick="SignIn" Color="@brand" Class="font-medium w-full" Border="false">
-                            <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
-                            <span>Sign in with @_branding.NickName</span>
-                        </HoverButton>
-                    }
+                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                 Icon="log-out"
+                                 Text="Sign out"
+                                 OnClick="SignOut"
+                                 Border="false"
+                                 Class="w-full"/>
                 </div>
             </div>
-        }
-    </BbDropdownMenuContent>
-</BbDropdownMenu>
+        </BbDropdownMenuContent>
+    </BbDropdownMenu>
+}
 
 @code {
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
@@ -99,7 +73,6 @@
     private string? _avatarUrl;
     private string? _role;
     private string? _accountUrl;
-    private string _providerSegment = "plex";
     private bool _isProfileDropdownOpen;
     private BrandingInfo? _branding;
 
@@ -109,7 +82,6 @@
     {
         var config = await ProviderConfigRepository.GetAsync();
         _branding = BrandingService.GetBrandingInfo(config.WatchlistProvider.AsMediaProvider());
-        _providerSegment = config.AuthProvider.ToString().ToLowerInvariant();
         _accountUrl = config.AuthProvider == AuthProvider.Plex ? "https://app.plex.tv/desktop/#!/settings/account" : null;
 
         if (AuthState is not null)
@@ -129,12 +101,6 @@
             ProfileDropdownService.OnOpenRequested += HandleProfileDropdownOpenRequestedAsync;
             StateHasChanged();
         }
-    }
-
-    private void SignIn()
-    {
-        var returnUrl = "/" + NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.NavigateTo($"/auth/{_providerSegment}/login?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
     }
 
     private void SignOut() => NavigationManager.NavigateTo("/auth/logout", forceLoad: true);
