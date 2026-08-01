@@ -10,8 +10,8 @@
         }
         else
         {
-            <div class="media-card-image" style="--poster: @PosterVar"></div>
-            <img class="media-card-probe" src="@_src" alt="" aria-hidden="true" loading="lazy" decoding="async" @onerror="OnImageError"/>
+            <img class="media-card-poster" src="@_src" alt="" @onerror="OnImageError"/>
+            <div class="media-card-scrim"></div>
         }
 
         @if (Media.IsUnresolved)
@@ -77,8 +77,6 @@
     private string? _lastImageUrl;
     private bool _isShowingPoster;
     private bool _failed;
-
-    private string PosterVar => string.IsNullOrWhiteSpace(_src) ? "none" : $"url('{_src}')";
 
     protected override void OnParametersSet()
     {
