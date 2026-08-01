@@ -8,14 +8,10 @@
                 <LucideIcon Name="image-off" Size="48" Class="text-muted-foreground"/>
             </div>
         }
-        else if (_isShowingPoster)
-        {
-            <div class="poster-bg" style="background-image: url('@Media.PosterUrl')"></div>
-            <img class="poster-img" src="@Media.PosterUrl" alt="@Media.Title" loading="lazy" decoding="async" @onerror="OnImageError"/>
-        }
         else
         {
-            <img src="@_src" alt="@Media.Title" loading="lazy" decoding="async" @onerror="OnImageError"/>
+            <div class="media-card-image" style="--poster: @PosterVar"></div>
+            <img class="media-card-probe" src="@_src" alt="" aria-hidden="true" loading="lazy" decoding="async" @onerror="OnImageError"/>
         }
 
         @if (Media.IsUnresolved)
@@ -82,6 +78,8 @@
     private bool _isShowingPoster;
     private bool _failed;
 
+    private string PosterVar => string.IsNullOrWhiteSpace(_src) ? "none" : $"url('{_src}')";
+
     protected override void OnParametersSet()
     {
         if (_lastImageUrl != Media.BackdropUrl)
@@ -105,5 +103,6 @@
             return;
         }
         _isShowingPoster = true;
+        _src = Media.PosterUrl;
     }
 }
