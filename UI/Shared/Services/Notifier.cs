@@ -52,7 +52,8 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 				Description = $"Exception occured in {exception.Source}",
 				Variant = ToastVariant.Destructive,
 				Duration = 20000,
-				ActionText = "Details",
+				Class = "toast-soft-destructive",
+				ActionText = "View details",
 				OnAction = () =>
 				{
 					_ = dialogService.OpenAsync<ExceptionDetailDialog>(
