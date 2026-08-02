@@ -68,7 +68,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, Wat
 
 	private async Task<WatchlistSyncResult> ExecutePlanAsync(WatchlistSyncPlan plan, EngineDeps deps, CancellationToken cancellationToken)
 	{
-		await deps.Repo.AddAsync(plan.InsertEntries, new WatchlistItemProvenance(new RemoteOrigin()), cancellationToken);
+		await deps.Repo.AddAsync(plan.InsertEntries, new RemoteOrigin(deps.Provider), cancellationToken);
 		await deps.Repo.RemoveAsync(plan.DeleteEntries, cancellationToken);
 		await deps.Outbox.DropAsync(WatchlistOperationKind.Add, plan.DropOutboxAdds, cancellationToken);
 		await deps.Outbox.DropAsync(WatchlistOperationKind.Remove, plan.DropOutboxRemoves, cancellationToken);

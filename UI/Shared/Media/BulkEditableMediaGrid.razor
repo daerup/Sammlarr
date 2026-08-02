@@ -22,7 +22,7 @@
         var mediaId = Key(item);
         var renderKey = mediaId.Value;
         var isSelected = _selected.Contains(mediaId);
-        <div class="relative @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
+        <div class="relative media-card @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
             <MediaGridTile @key="renderKey"
                            Media="detail"
                            OnClick="@(() => HandleTileClickAsync(item))"/>

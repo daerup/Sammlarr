@@ -1,3 +1,4 @@
+using DB.Data.Media;
 using Domain.Watchlist;
 
 namespace DB.Data.Watchlist;
@@ -7,38 +8,41 @@ internal static class WatchlistEntryMapping
 	public static WatchlistItemProvenance ToProvenance(this WatchlistRow row) =>
 		row.Origin switch
 		{
-			WatchlistEntryOrigin.Remote => new WatchlistItemProvenance(new RemoteOrigin()),
-			WatchlistEntryOrigin.Manual => new WatchlistItemProvenance(new ManualOrigin()),
+			WatchlistEntryOrigin.Remote => new WatchlistItemProvenance(new RemoteOrigin(row.RemoteProvider ?? default)),
+			WatchlistEntryOrigin.Manual => new WatchlistItemProvenance(new ManualOrigin(row.ManualSource ?? ManualSource.Unknown)),
 			WatchlistEntryOrigin.Feed => new WatchlistItemProvenance(
-				new FeedOrigin(row.SourceFeedId ?? Guid.Empty, row.SourceFeed?.Name ?? row.SourceFeedNameSnapshot ?? string.Empty)
+				new FeedOrigin(row.SourceFeedId ?? Guid.Empty, row.SourceFeed?.Name ?? row.SourceFeedNameSnapshot ?? string.Empty, row.SourceFeed?.Provider ?? default)
 			),
 			WatchlistEntryOrigin.Orphaned => new WatchlistItemProvenance(new OrphanedOrigin(row.SourceFeedNameSnapshot ?? string.Empty)),
 		};
 
-	public static void Apply(this WatchlistRow row, WatchlistItemProvenance provenance)
-	{
-		switch (provenance.Value)
+	public static WatchlistRow ToRow(MediaRow media, WatchlistItemProvenance provenance) =>
+		provenance.Value switch
 		{
-			case RemoteOrigin:
-				row.Origin = WatchlistEntryOrigin.Remote;
-				row.SourceFeedId = null;
-				row.SourceFeedNameSnapshot = null;
-				break;
-			case ManualOrigin:
-				row.Origin = WatchlistEntryOrigin.Manual;
-				row.SourceFeedId = null;
-				row.SourceFeedNameSnapshot = null;
-				break;
-			case FeedOrigin feed:
-				row.Origin = WatchlistEntryOrigin.Feed;
-				row.SourceFeedId = feed.FeedId;
-				row.SourceFeedNameSnapshot = null;
-				break;
-			case OrphanedOrigin orphaned:
-				row.Origin = WatchlistEntryOrigin.Orphaned;
-				row.SourceFeedId = null;
-				row.SourceFeedNameSnapshot = orphaned.FormerFeedName;
-				break;
-		}
-	}
+			RemoteOrigin remote => new WatchlistRow
+			{
+				Media = media,
+				Origin = WatchlistEntryOrigin.Remote,
+				RemoteProvider = remote.Provider,
+			},
+			ManualOrigin manual => new WatchlistRow
+			{
+				Media = media,
+				Origin = WatchlistEntryOrigin.Manual,
+				ManualSource = manual.Source,
+			},
+			FeedOrigin feed => new WatchlistRow
+			{
+				Media = media,
+				Origin = WatchlistEntryOrigin.Feed,
+				SourceFeedId = feed.FeedId,
+			},
+			OrphanedOrigin orphaned => new WatchlistRow
+			{
+				Media = media,
+				Origin = WatchlistEntryOrigin.Orphaned,
+				SourceFeedNameSnapshot = orphaned.FormerFeedName,
+			},
+			_ => throw new InvalidOperationException($"Unhandled provenance '{provenance.Value?.GetType().Name}'."),
+		};
 }

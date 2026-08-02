@@ -112,7 +112,7 @@ else
                                            OnBulkRemove="RemoveBulkAsync"
                                            RemoveLabel="Remove from Watchlist">
                         <Overlay Context="item">
-                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 wl-badge-host">
+                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
                                 <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt"/>
                             </div>
                         </Overlay>
@@ -323,7 +323,7 @@ else
             Notifier.Warning($"'{title}' is already in your watchlist.");
             return false;
         }
-        await WatchlistService.AddToWatchlistAsync([id], new ManualOrigin(), _cancellationTokenSource.Token);
+        await WatchlistService.AddToWatchlistAsync([id], new ManualOrigin(ManualSource.Search), _cancellationTokenSource.Token);
         await LoadWatchlistAsync();
         await RefreshPendingAsync();
         Notifier.Success($"'{title}' has been added to your watchlist.");

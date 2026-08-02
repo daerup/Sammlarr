@@ -644,7 +644,7 @@
             }
             else
             {
-                await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin());
+                await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin(ManualSource.FeedPreview));
                 _watchlisted.Add(item.Id);
             }
             _hasEnrollmentChanges = true;

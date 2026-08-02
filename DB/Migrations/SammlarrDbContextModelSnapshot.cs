@@ -401,8 +401,14 @@ namespace DB.Migrations
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ManualSource")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Origin")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RemoteProvider")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("SourceFeedId")
