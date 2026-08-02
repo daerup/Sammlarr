@@ -1,7 +1,7 @@
 @using Contracts.Media
 @using Contracts.Media.Search
 @inject IMediaService MediaService
-<div class="search-result-row rounded-sm bg-black @Class @(IsFocused ? "row-focused" : "")"
+<div class="search-result-row rounded-sm border bg-card @Class @(Media.IsUnresolved ? "is-unresolved" : null) @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
@@ -70,7 +70,7 @@
 
                 @if (!string.IsNullOrWhiteSpace(Media.Summary))
                 {
-                    <p class="text-sm text-white line-clamp-2 pt-2">@Media.Summary</p>
+                    <p class="text-sm text-foreground line-clamp-2 pt-2">@Media.Summary</p>
                 }
             </div>
         </div>
