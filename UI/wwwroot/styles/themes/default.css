@@ -309,6 +309,15 @@ body:has(.error-dialog) .search-modal {
     background-color: oklch(from var(--destructive) l c h / 0.1);
 }
 
+.toast-soft-destructive {
+    color: var(--destructive) !important;
+    border-color: oklch(from var(--destructive) l c h / 0.45) !important;
+    background-color: oklch(from var(--destructive) l c h / 0.1) !important;
+}
+.toast-soft-destructive * {
+    color: var(--destructive) !important;
+}
+
 .watchlist-sync-preview {
     min-width: 12rem;
     width: max-content;
