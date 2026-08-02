@@ -30,7 +30,16 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 	public void Error(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
 		logger.LogError("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Error", description);
-		toastService.Show(description, title, ToastVariant.Destructive, duration: 20000);
+		toastService.Show(
+			new ToastData
+			{
+				Title = title,
+				Description = description,
+				Variant = ToastVariant.Destructive,
+				Duration = 20000,
+				Class = "toast-soft-destructive",
+			}
+		);
 	}
 
 	public void Error(Exception exception, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
