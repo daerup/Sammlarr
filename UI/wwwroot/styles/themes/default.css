@@ -269,13 +269,12 @@ body:has(.error-dialog) .search-modal {
 }
 .hover-button--success {
     --tint: var(--alert-success);
-    --tint-foreground: var(--alert-success-foreground);
+    --tint-foreground: white;
 }
-/* Custom preset only — auto-pick black/white text based on tint lightness. Caller-supplied --tint-foreground still wins. clamp(...) acts as a step function: l > 0.6 → near-black, l < 0.6 → near-white. If the formula doesn't evaluate in an older engine, this declaration is dropped and the base rule's `var(--tint-foreground, white)` kicks in. */
 .hover-button--custom:hover,
 .hover-button--custom:focus,
 .hover-button--custom:focus-visible {
-    color: var(--tint-foreground, oklch(from var(--tint) calc(0.565 - clamp(-0.415, (l - 0.6) * 1000, 0.415)) 0 h)) !important;
+    color: var(--tint-foreground, oklch(from var(--tint) calc(0.565 - clamp(-0.415, (l - 0.68) * 1000, 0.415)) 0 h)) !important;
 }
 .hover-button--borderless {
     border: none !important;
