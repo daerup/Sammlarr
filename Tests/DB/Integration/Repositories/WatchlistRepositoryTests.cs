@@ -2,8 +2,10 @@ using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Watchlist;
 using Domain.Media;
+using Domain.Providers;
 using Domain.Watchlist;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
@@ -23,7 +25,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		var first = await SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
 		var second = await SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
 
-		await _testee.AddAsync([first, second], new WatchlistItemProvenance(new RemoteOrigin()));
+		await _testee.AddAsync([first, second], new WatchlistItemProvenance(new RemoteOrigin(WatchlistProvider.Plex)));
 
 		var entries = await fixture.Context.Watchlist.AsNoTracking().ToListAsync();
 		await Assert.That(entries).Count().IsEqualTo(2);
@@ -32,7 +34,7 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_EmptyCollection_DoesNothing()
 	{
-		await _testee.AddAsync([], new WatchlistItemProvenance(new ManualOrigin()));
+		await _testee.AddAsync([], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
 
 		var count = await fixture.Context.Watchlist.CountAsync();
 		await Assert.That(count).IsEqualTo(0);
@@ -82,6 +84,32 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(entries).Count().IsEqualTo(1);
 		await Assert.That(entries[0].MediaId).IsEqualTo(mediaId);
 		await Assert.That(entries[0].Provenance.Value).IsTypeOf<ManualOrigin>();
+	}
+
+	[Test]
+	public async Task GetEntriesAsync_RemoteEntry_CarriesStoredWatchlistProvider()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-107", MediaType.Movie)]);
+		await _testee.AddAsync([mediaId], new WatchlistItemProvenance(new RemoteOrigin(WatchlistProvider.Plex)));
+
+		var entries = await _testee.GetEntriesAsync();
+
+		await Assert.That(entries[0].Provenance).IsOfUnionType<WatchlistItemProvenance, RemoteOrigin>();
+		var remote = (RemoteOrigin)entries[0].Provenance.Value;
+		await Assert.That(remote.Provider).IsEqualTo(WatchlistProvider.Plex);
+	}
+
+	[Test]
+	public async Task GetEntriesAsync_ManualEntry_CarriesStoredSource()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-110", MediaType.Movie)]);
+		await _testee.AddAsync([mediaId], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Browse)));
+
+		var entries = await _testee.GetEntriesAsync();
+
+		await Assert.That(entries[0].Provenance).IsOfUnionType<WatchlistItemProvenance, ManualOrigin>();
+		var manual = (ManualOrigin)entries[0].Provenance.Value;
+		await Assert.That(manual.Source).IsEqualTo(ManualSource.Browse);
 	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)

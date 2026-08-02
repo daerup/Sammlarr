@@ -34,14 +34,16 @@ public class WatchlistManagementSteps(SammlarrScenarioContext sammlarr, LocalMed
 		Service.AddToWatchlistAsync([local.MediaIds[key]], WatchlistOrigins.ToProvenance(WatchlistOrigins.Parse(origin)));
 
 	[When("I add {string} to the watchlist")]
-	public Task WhenAdd(string key) => Service.AddToWatchlistAsync([local.MediaIds[key]], new WatchlistItemProvenance(new ManualOrigin()));
+	public Task WhenAdd(string key) => Service.AddToWatchlistAsync([local.MediaIds[key]], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
 
 	[When("I add nothing to the watchlist")]
-	public Task WhenAddNothing() => Service.AddToWatchlistAsync([], new WatchlistItemProvenance(new ManualOrigin()));
+	public Task WhenAddNothing() => Service.AddToWatchlistAsync([], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
 
 	[When("I try to add {string} to the watchlist")]
 	public Task WhenTryAdd(string key) =>
-		exceptionContext.TryExecuteAsync(() => Service.AddToWatchlistAsync([local.MediaIds[key]], new WatchlistItemProvenance(new ManualOrigin())));
+		exceptionContext.TryExecuteAsync(() =>
+			Service.AddToWatchlistAsync([local.MediaIds[key]], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)))
+		);
 
 	[When("I try to remove {string} from the watchlist")]
 	public Task WhenTryRemove(string key) => exceptionContext.TryExecuteAsync(() => Service.RemoveFromWatchlistAsync([local.MediaIds[key]]));
@@ -51,7 +53,10 @@ public class WatchlistManagementSteps(SammlarrScenarioContext sammlarr, LocalMed
 
 	[When("I add to the watchlist:")]
 	public Task WhenAddMany(DataTable table) =>
-		Service.AddToWatchlistAsync([.. table.CreateSet<HandleRow>().Select(row => local.MediaIds[row.Media!])], new WatchlistItemProvenance(new ManualOrigin()));
+		Service.AddToWatchlistAsync(
+			[.. table.CreateSet<HandleRow>().Select(row => local.MediaIds[row.Media!])],
+			new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown))
+		);
 
 	[When("I remove {string} from the watchlist")]
 	public Task WhenRemove(string key) => Service.RemoveFromWatchlistAsync([local.MediaIds[key]]);

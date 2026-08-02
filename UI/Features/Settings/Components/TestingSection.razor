@@ -411,8 +411,12 @@
             <BbTooltipProvider>
                 <div class="flex flex-wrap items-center gap-2">
                     <ProvenanceBadge Provenance="_manualProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_searchProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_browseProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_feedPreviewProvenance" AddedAt="_sampleDate"/>
                     <ProvenanceBadge Provenance="_remoteProvenance" AddedAt="_sampleDate"/>
                     <ProvenanceBadge Provenance="_feedProvenance" AddedAt="_sampleDate"/>
+                    <ProvenanceBadge Provenance="_feedMdblistProvenance" AddedAt="_sampleDate"/>
                     <ProvenanceBadge Provenance="_orphanedProvenance" AddedAt="_sampleDate"/>
                 </div>
             </BbTooltipProvider>
@@ -515,9 +519,13 @@
 
     private static readonly DateTimeOffset _sampleDate = new(2026, 1, 15, 0, 0, 0, TimeSpan.Zero);
 
-    private static readonly WatchlistItemProvenance _manualProvenance = new(new ManualOrigin());
-    private static readonly WatchlistItemProvenance _remoteProvenance = new(new RemoteOrigin());
-    private static readonly WatchlistItemProvenance _feedProvenance = new(new FeedOrigin(Guid.Empty, "Trending feed"));
+    private static readonly WatchlistItemProvenance _manualProvenance = new(new ManualOrigin(ManualSource.Unknown));
+    private static readonly WatchlistItemProvenance _searchProvenance = new(new ManualOrigin(ManualSource.Search));
+    private static readonly WatchlistItemProvenance _browseProvenance = new(new ManualOrigin(ManualSource.Browse));
+    private static readonly WatchlistItemProvenance _feedPreviewProvenance = new(new ManualOrigin(ManualSource.FeedPreview));
+    private static readonly WatchlistItemProvenance _remoteProvenance = new(new RemoteOrigin(WatchlistProvider.Plex));
+    private static readonly WatchlistItemProvenance _feedProvenance = new(new FeedOrigin(Guid.Empty, "Trending feed", FeedProvider.Tmdb));
+    private static readonly WatchlistItemProvenance _feedMdblistProvenance = new(new FeedOrigin(Guid.Empty, "Top watched (MDBList)", FeedProvider.Mdblist));
     private static readonly WatchlistItemProvenance _orphanedProvenance = new(new OrphanedOrigin("Old feed"));
 
     private static readonly MediaLookup _demoMovie = new Movie

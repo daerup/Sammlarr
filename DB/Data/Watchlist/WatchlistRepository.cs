@@ -44,9 +44,7 @@ internal sealed class WatchlistRepository(IDbContextFactory<SammlarrDbContext> d
 
 		foreach (var media in matchedMedia.Where(m => !existingMediaIds.Contains(m.Id)))
 		{
-			var row = new WatchlistRow { Media = media, Origin = WatchlistEntryOrigin.Manual };
-			row.Apply(provenance);
-			ctx.Watchlist.Add(row);
+			ctx.Watchlist.Add(WatchlistEntryMapping.ToRow(media, provenance));
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);

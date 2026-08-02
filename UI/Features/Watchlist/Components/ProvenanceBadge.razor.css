@@ -1,3 +1,9 @@
+::deep .wl-badge {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    border: 1px solid var(--wl-brand, var(--border)) !important;
+}
+
 .wl-badge-content {
     min-width: 0;
 }
@@ -7,4 +13,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+@container media-card (min-width: 0) {
+    .wl-badge-label {
+        max-width: 33.333cqw;
+    }
 }

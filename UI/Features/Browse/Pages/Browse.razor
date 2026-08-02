@@ -232,7 +232,7 @@
         }
         else
         {
-            await WatchlistService.AddToWatchlistAsync([resolved.Id], new ManualOrigin());
+            await WatchlistService.AddToWatchlistAsync([resolved.Id], new ManualOrigin(ManualSource.Browse));
         }
 
         await LoadWatchlistIdsAsync();
