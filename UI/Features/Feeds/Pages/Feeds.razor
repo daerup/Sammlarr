@@ -118,9 +118,9 @@
                                 <BbTooltip>
                                     <BbTooltipTrigger>
                                         <span
-                                            class="text-sm text-muted-foreground tabular-nums">@feed.CreatedAt.ToLocalTime().ToString("MMM d, yyyy HH:mm")</span>
+                                            class="text-sm text-muted-foreground tabular-nums">@feed.CreatedAt.ToLocalTime().ToString("MMMM d, yyyy HH:mm")</span>
                                     </BbTooltipTrigger>
-                                    <BbTooltipContent>@feed.CreatedAt.ToLocalTime().ToString("f")</BbTooltipContent>
+                                    <BbTooltipContent>@feed.CreatedAt.ToLocalTime().ToString("MMMM d, yyyy HH:mm:ss")</BbTooltipContent>
                                 </BbTooltip>
                             </CellTemplate>
                         </BbDataTableColumn>
