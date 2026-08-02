@@ -73,7 +73,7 @@ else
 
     private string ProvenanceTooltip()
     {
-        var when = AddedAt.LocalDateTime.ToString("MMM d, yyyy 'at' HH:mm");
+        var when = AddedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm");
         return Provenance.Value switch
         {
             RemoteOrigin remote => $"From your remote {ProviderName(remote.Provider)} watchlist",

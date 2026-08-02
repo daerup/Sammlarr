@@ -18,6 +18,8 @@ builder.Services.AddModule<UiModule>();
 
 var app = builder.Build();
 
+app.UseRequestLocalization(BrowserLocalization.CreateOptions());
+
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error");
