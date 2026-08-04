@@ -7,6 +7,7 @@ using Shared;
 using Shared.DI;
 using UI;
 using UI.Features.Auth;
+using Westwind.AspNetCore.LiveReload;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,17 @@ builder.Services.AddModule<DbModule>();
 builder.Services.AddModule<ApiModule>();
 builder.Services.AddModule<UiModule>();
 
+if (builder.Environment.IsDevelopment())
+{
+	builder.Services.AddLiveReload();
+}
+
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+	app.UseLiveReload();
+}
 
 app.UseRequestLocalization(BrowserLocalization.CreateOptions());
 

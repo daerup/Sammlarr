@@ -30,7 +30,7 @@
 	<Project Path="DB/DB.csproj" />
 	<Project Path="Domain/Domain.csproj" />
 	<Project Path="Observability/Observability.csproj" />
-	<Project Path="Sammlarr.AppHost/Sammlarr.AppHost.csproj" />
+	<Project Path="AppHost/AppHost.csproj" />
 	<Project Path="Generators/Generators.csproj" />
 	<Project Path="Shared/Shared.csproj" />
 	<Project Path="UI/UI.csproj" />

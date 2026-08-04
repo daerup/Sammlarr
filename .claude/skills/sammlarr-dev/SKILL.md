@@ -16,7 +16,7 @@ Sammlarr is a .NET Blazor Server app (UI/API/Core/DB/Contracts/Shared layered ar
 | Run all tests | `dotnet test` |
 | Run a single test project | `dotnet test Tests/API/API.Tests.csproj` |
 | Run the app | `aspire run` |
-| Run the app with hot reload | `aspire run --watch` |
+| Run with watch / hot reload | `dotnet watch --project AppHost` (or Aspire watch mode — see "Hot reload / watch") |
 | Format changed files | `dotnet csharpier format <paths>` |
 | Format everything | `dotnet csharpier format .` |
 
@@ -24,17 +24,27 @@ The solution is `Sammlarr.slnx` (the XML solution format); `dotnet` auto-detects
 
 ## Running the app — single entry point
 
-The **Aspire AppHost (`Sammlarr.AppHost`) is the only way to run the app.** It orchestrates the `UI` resource and brings up the Aspire dashboard (logs/metrics/traces). Don't run `UI` directly — its `launchSettings.json` exists only to supply the endpoint binding Aspire reads.
+The **Aspire AppHost (`AppHost`) is the way to run the full app.** It orchestrates the `UI` resource and brings up the Aspire dashboard (logs/metrics/traces). The UI is pinned to a fixed dev URL **http://localhost:6769** (`AppHost/AppHost.cs` `WithHttpEndpoint`), and the AppHost's `launchSettings.json` bakes `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true`, so a bare `aspire run` starts cleanly (no https `applicationUrl` crash).
 
-- **CLI:** `aspire run` (or `aspire run --watch` for the hot-reload dev loop) from the repo root — auto-detects the AppHost, no `--project`.
-- **Rider:** the `AppHost` run config (`.run/AppHost.run.xml`) — F5 to debug.
+- **CLI:** `aspire run` from the repo root — auto-detects the AppHost, no `--project`. UI → http://localhost:6769, dashboard → http://localhost:15223. (There is **no** `aspire run --watch` flag — see "Hot reload / watch" for the real options.)
+- **Rider:** the auto-generated **`AppHost: http`** Aspire run config — F5 to run/debug. Rider derives it from the `<IsAspireHost>` project + its `http` launch profile; there is **no** checked-in `.run/*.xml`.
+- **UI only:** the `UI: http` launch profile runs the UI standalone (also on :6769) for pure-UI work. It and the AppHost both bind :6769 — run one or the other. (The UI project has a single `http` launch profile — Aspire reads its `applicationUrl`; there is intentionally no hand-rolled `watch` profile.)
 - Telemetry (`OTEL_EXPORTER_OTLP_ENDPOINT`, `Sammlarr__Telemetry__*`) is injected into `UI` by the AppHost; the custom `Shared/Telemetry` module reads it. `compose.yaml` is a separate self-host/deploy artifact (UI container + standalone dashboard), not part of the dev loop.
 
-The app uses SQLite (`sammlarr.db` auto-created via `Database.EnsureCreated()` + column migrations in `DB/SammlarrDbContext.cs`). There are no EF migrations — schema evolution happens in `MigrateListColumns()` with `ALTER TABLE` + try/catch.
+**Agent live-inspect** (only when the user asks or a task needs it — otherwise let the user run their own session; never auto-start on edits): build (`mcp__rider__build_solution` / `dotnet build`) → ensure `:6769` is free → start (`AppHost: http` via `mcp__rider__execute_run_configuration`, or `aspire run`) → drive Chrome at **http://localhost:6769** → errors via `mcp__rider__get_file_problems` + the Aspire dashboard in Chrome (http://localhost:15223 — Console/Structured/Traces). Stop by killing the `AppHost`/`dcp`/`UI` tree — **never blanket-kill `aspire`** (kills the Aspire MCP) or `rider64.exe`. On this toolchain the Aspire MCP does not detect the AppHost, so don't rely on `mcp__aspire__list_resources`/`list_console_logs`.
+
+**Hot reload / watch.** Watch is driven at the **AppHost level**, never via a per-project `dotnet watch` launch profile (that bypasses Aspire orchestration — anti-pattern). Options, best-first:
+- **Rider Debug** — run `AppHost: http` in Debug; .NET Hot Reload applies most `.razor`/`.cs` edits live. Rude edits (new `await`/`yield`, renamed params, removed `[Parameter]` attributes) still need a restart.
+- **Aspire watch mode** (restart-based, opt-in per developer) — enable globally for yourself with `aspire config set -g features.defaultWatchEnabled true`, then plain `aspire run` restarts the app graph on AppHost / C#-project changes. It's a feature flag with quirks (some edits still need a manual restart) — prefer Rider Debug. **Don't** set it repo-locally: a committed `.aspire/settings.json` would force restart-based watch on everyone (incl. agents/CI) and break deterministic `aspire run`. (`aspire run` has **no** `--watch` flag in CLI 13.3.0.)
+- **`dotnet watch --project AppHost`** — the .NET SDK watch loop; it transitively watches the AppHost and its C# project resources (incl. `UI`). Has quirks — some edits still need an explicit restart; when a change doesn't apply, restart the resource rather than fighting the watcher.
+
+**CSS / browser auto-refresh.** The UI wires **`Westwind.AspNetCore.LiveReload`** (dev-only, in `UI/Program.cs`, gated on `IsDevelopment()`). It runs its own in-process file watcher, so editing a `.css`/`.js`/`.razor` refreshes the browser **automatically under any launcher** — Rider Debug, `aspire run`, `dotnet run` — no manual reload. This fills the gap that a Rider/`aspire run` launch does NOT inject `dotnet watch`'s `aspnetcore-browser-refresh.js`. (For `wwwroot/app.css` specifically, remember it's a compiled Tailwind output — LiveReload refreshes once the file changes on disk, but new utility classes still need the `npx @tailwindcss/cli` rebuild first. If you ever see reload loops, narrow LiveReload's `FolderToMonitor`.)
+
+The app uses SQLite (`sammlarr.db`) with **EF Core migrations** applied via `Database.Migrate()` at startup — change the model, then `dotnet ef migrations add <Name>`.
 
 ## SDK pinning
 
-`global.json` pins a specific .NET 10 preview SDK. If `dotnet build` errors with SDK-not-found, the user needs to install the exact SDK version listed in `global.json` — do NOT edit `global.json` to downgrade.
+`global.json` pins a specific .NET 11 preview SDK. If `dotnet build` errors with SDK-not-found, the user needs to install the exact SDK version listed in `global.json` — do NOT edit `global.json` to downgrade.
 
 ## Test framework
 
