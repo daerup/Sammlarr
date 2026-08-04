@@ -25,6 +25,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="timewarp-simple-icons" />
+		<PackageReference Include="Westwind.AspNetCore.LiveReload" />
 	</ItemGroup>
 	<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
 		<Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />

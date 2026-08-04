@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Linq.Expressions;
 using Shared.Options;
 
-namespace Sammlarr.AppHost;
+namespace AppHost;
 
 internal static class OptionsEnvironmentExtensions
 {
