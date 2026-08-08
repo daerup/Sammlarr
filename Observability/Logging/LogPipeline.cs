@@ -20,7 +20,8 @@ internal static class LogPipeline
 
 		logger
 			.MinimumLevel.Warning()
-			.MinimumLevel.Override("Polly", LogEventLevel.Error)
+			.MinimumLevel.Override("Polly", appLevelSwitch)
+			.Filter.ByExcluding(logEvent => logEvent.MessageTemplate.Text.StartsWith("Resilience pipeline execut", StringComparison.Ordinal))
 			.Enrich.FromLogContext()
 			.Destructure.With(new UnionDestructuringPolicy())
 			.Destructure.With(new SensitiveDataDestructuringPolicy())

@@ -1,7 +1,10 @@
 using API.Http;
 using Contracts.Auth;
 using Domain.Auth;
+using Domain.Feed;
 using Domain.Providers;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
 using Shared.Options;
 
 namespace API.Mdblist;
@@ -21,6 +24,13 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyC
 	{
 		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
 		request.Content = content;
-		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.Invalidate(ApiKeyProvider.Mdblist));
+		try
+		{
+			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.Invalidate(ApiKeyProvider.Mdblist));
+		}
+		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
+		{
+			throw new ProviderUnavailableException(FeedProvider.Mdblist, ex);
+		}
 	}
 }

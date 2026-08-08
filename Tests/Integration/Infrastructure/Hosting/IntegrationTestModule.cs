@@ -45,7 +45,12 @@ internal sealed class IntegrationTestModule : ITestServiceModule
 		services.AddSingleton<Mock<IDateTimeProvider>>(clock);
 		services.AddSingleton(clock.Object);
 
-		services.ConfigureHttpClientDefaults(builder => builder.ConfigurePrimaryHttpMessageHandler(_ => Handler));
+		services.AddHttpClient<PlexClient>().ConfigurePrimaryHttpMessageHandler(_ => Handler);
+		services.AddHttpClient(PlexClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => Handler);
+		services.AddHttpClient<TmdbClient>().ConfigurePrimaryHttpMessageHandler(_ => Handler);
+		services.AddHttpClient(TmdbClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => Handler);
+		services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(_ => Handler);
+		services.AddHttpClient(MdblistClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => Handler);
 
 		services.AddSingleton(new TmdbOptions { BaseUrl = "https://api.test.com", ImageBaseUrl = "https://image.tmdb.org/t/p/original" });
 		services.AddSingleton(new MdblistOptions { BaseUrl = "https://mdblist.test.com" });
