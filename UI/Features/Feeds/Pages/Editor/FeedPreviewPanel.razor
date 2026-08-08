@@ -101,6 +101,19 @@
                 </BbTooltipProvider>
             </div>
         }
+        @if (_providerUnavailable && HasItems)
+        {
+            <div class="mb-4 shrink-0 flex items-center justify-between gap-3 rounded-md border border-border bg-muted/40 px-4 py-3">
+                <div class="flex items-center gap-2 text-sm">
+                    <LucideIcon Name="triangle-alert" Size="18" Class="text-muted-foreground shrink-0"/>
+                    <span>The provider became unavailable before the full list finished loading — showing partial results.</span>
+                </div>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="RetryAsync" Disabled="IsLoading">
+                    <LucideIcon Name="refresh-cw" Size="14" Class="mr-1"/>
+                    Retry
+                </BbButton>
+            </div>
+        }
         @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0))
         {
             @if (_filteredResults.Count > 0)
@@ -224,9 +237,22 @@
         else if (HasFailed)
         {
             <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
-                <LucideIcon Name="zap-off" Size="48" Class="mb-4"/>
-                <p class="text-lg font-semibold">Test failed</p>
-                <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
+                @if (_providerUnavailable)
+                {
+                    <LucideIcon Name="cloud-off" Size="48" Class="text-muted-foreground mb-4"/>
+                    <p class="text-lg font-semibold">Provider temporarily unavailable</p>
+                    <p class="text-muted-foreground text-sm mt-2">The list provider is rate-limited or unreachable right now. Try again in a moment.</p>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" Class="mt-4" OnClick="RetryAsync" Disabled="IsLoading">
+                        <LucideIcon Name="refresh-cw" Size="14" Class="mr-1"/>
+                        Retry
+                    </BbButton>
+                }
+                else
+                {
+                    <LucideIcon Name="zap-off" Size="48" Class="mb-4"/>
+                    <p class="text-lg font-semibold">Test failed</p>
+                    <p class="text-muted-foreground text-sm mt-2">Could not fetch media from the provider. Please check your input and try again.</p>
+                }
             </div>
         }
         else
@@ -266,6 +292,7 @@
     private readonly HashSet<MediaId> _blacklistIds = new();
     private bool _hasEnrollmentChanges;
     private bool _refreshDialogOpen;
+    private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
 
     private static readonly TimeSpan EarlySaveDelay = TimeSpan.FromSeconds(10);
@@ -323,6 +350,12 @@
 
         await EmitStatusIfChangedAsync();
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RetryAsync()
+    {
+        _fetchState = FetchState.Idle;
+        await ApplyAsync();
     }
 
     private async Task OnRefreshConfirmedAsync()
@@ -421,6 +454,21 @@
             _fetchState = FetchState.Failed;
             Notifier.Warning($"No list found with identifier '{ex.Identifier}'.", "List not found");
         }
+        catch (ProviderUnavailableException)
+        {
+            _providerUnavailable = true;
+            if (_rawResults.Count > 0)
+            {
+                _fetchState = FetchState.Success;
+                await ReprocessAsync(ct);
+                Notifier.Warning("The provider became unavailable before the full list loaded. Showing partial results — retry to load the rest.", "Provider unavailable");
+            }
+            else
+            {
+                _fetchState = FetchState.Failed;
+                Notifier.Warning("The list provider is temporarily unavailable (rate-limited or unreachable). Try again in a moment.", "Provider unavailable");
+            }
+        }
         catch (Exception ex)
         {
             _rawResults = [];
@@ -437,6 +485,7 @@
         _processedResults = [];
         _filteredResults = [];
         _filteredUnresolvedResults = [];
+        _providerUnavailable = false;
     }
 
     private async Task ReprocessAsync(CancellationToken cancellationToken)

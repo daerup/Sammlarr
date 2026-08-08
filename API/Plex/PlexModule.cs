@@ -1,5 +1,5 @@
-using System.Net;
 using System.Net.Http.Headers;
+using API.Http;
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -24,8 +24,8 @@ internal class PlexModule : IServiceModule
 		services.AddKeyedScoped<IWatchlistProvider, PlexWatchListProvider>(WatchlistProvider.Plex);
 		services.AddKeyedScoped<IExternalIdConverter, PlexIdConverter>(MediaProvider.Plex);
 
-		services.AddHttpClient<PlexClient>(ConfigurePlexClient);
-		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient);
+		services.AddHttpClient<PlexClient>(ConfigurePlexClient).AddProviderHttp<PlexOptions>();
+		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient).AddProviderHttp<PlexOptions>();
 	}
 
 	private static void ConfigurePlexClient(IServiceProvider sp, HttpClient client)
@@ -34,8 +34,6 @@ internal class PlexModule : IServiceModule
 		var auth = plexOptions.Authentication;
 
 		client.BaseAddress = new Uri(plexOptions.BaseUrl);
-		client.DefaultRequestVersion = HttpVersion.Version20;
-		client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower;
 		client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 		client.DefaultRequestHeaders.UserAgent.ParseAdd($"{auth.ProductName}/1.0");
 		client.DefaultRequestHeaders.Add("X-Plex-Product", auth.ProductName);

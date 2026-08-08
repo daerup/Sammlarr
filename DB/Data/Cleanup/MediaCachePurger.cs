@@ -25,9 +25,10 @@ internal class MediaCachePurger(
 		var anchor = config.WatchlistProvider.AsMediaProvider();
 
 		var protectedMediaIds = await ctx
-			.Blacklist.Select(b => b.Media.Id)
-			.Union(ctx.Watchlist.Select(w => w.Media.Id))
-			.Union(ctx.WatchlistOutbox.Select(o => o.Media.Id))
+			.Blacklist.IgnoreQueryFilters()
+			.Select(b => b.Media.Id)
+			.Union(ctx.Watchlist.IgnoreQueryFilters().Select(w => w.Media.Id))
+			.Union(ctx.WatchlistOutbox.IgnoreQueryFilters().Select(o => o.Media.Id))
 			.ToListAsync(cancellationToken);
 
 		var metadataDeleted = await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);

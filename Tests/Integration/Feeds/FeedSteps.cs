@@ -13,6 +13,7 @@ using Integration.Tests.Infrastructure.Hosting;
 using Integration.Tests.Infrastructure.Media;
 using Integration.Tests.Infrastructure.Media.Local;
 using Microsoft.EntityFrameworkCore;
+using Polly.CircuitBreaker;
 using Reqnroll;
 using Reqnroll.Assist;
 
@@ -55,6 +56,40 @@ public class FeedSteps(FeedScenarioContext ctx, SammlarrScenarioContext sammlarr
 		sammlarr.HttpHandler.RespondWithJsonForUrl(string.Format(MdblistEndpoints.ListItemsPath, identifier), """{ "movies": [], "shows": [] }""");
 	}
 
+	[Given("the MDBList feed {string} as {string} is unavailable")]
+	public void GivenFeedUnavailable(string identifier, string feedName)
+	{
+		ctx.Feeds[feedName] = new FeedRegistration { Identifier = identifier };
+		sammlarr.HttpHandler.RespondForUrl(
+			string.Format(MdblistEndpoints.ListItemsPath, identifier),
+			_ => throw new BrokenCircuitException("The circuit is now open and is not allowing calls.")
+		);
+	}
+
+	[Given("the MDBList feed {string} as {string} yields one page then becomes unavailable:")]
+	public void GivenFeedPartialThenUnavailable(string identifier, string feedName, DataTable table)
+	{
+		var registration = new FeedRegistration { Identifier = identifier };
+		ctx.Feeds[feedName] = registration;
+		foreach (var row in table.CreateSet<FeedItemRow>())
+			registration.Items.Add(ParseRow(row));
+		sammlarr.HttpHandler.RespondForUrl(
+			string.Format(MdblistEndpoints.ListItemsPath, identifier),
+			request =>
+			{
+				var offset = int.Parse(HttpUtility.ParseQueryString(request.RequestUri?.Query ?? string.Empty)["offset"] ?? "0");
+				if (offset > 0)
+					throw new BrokenCircuitException("The circuit is now open and is not allowing calls.");
+				var response = new HttpResponseMessage(HttpStatusCode.OK)
+				{
+					Content = new StringContent(MdblistFeedJson.Build(registration.Items), Encoding.UTF8, "application/json"),
+				};
+				response.Headers.TryAddWithoutValidation("X-Has-More", "true");
+				return response;
+			}
+		);
+	}
+
 	[Given("the MDBList feed {string} as {string} is paginated:")]
 	public void GivenFeedPaginated(string identifier, string feedName, DataTable table)
 	{
@@ -87,6 +122,18 @@ public class FeedSteps(FeedScenarioContext ctx, SammlarrScenarioContext sammlarr
 		await exceptionContext.TryExecuteAsync(async () =>
 			ctx.Items = await sammlarr.ResolveKeyed<IFeedService>(FeedProvider.Mdblist).GetFeedItemsAsync(ctx.Feeds[feedName].Identifier).ToListAsync()
 		);
+
+	[When("I load the feed {string} keeping partial results")]
+	public async Task WhenLoadFeedKeepingPartial(string feedName)
+	{
+		var items = new List<MediaLookup>();
+		await exceptionContext.TryExecuteAsync(async () =>
+		{
+			await foreach (var item in sammlarr.ResolveKeyed<IFeedService>(FeedProvider.Mdblist).GetFeedItemsAsync(ctx.Feeds[feedName].Identifier))
+				items.Add(item);
+		});
+		ctx.Items = items;
+	}
 
 	[Then("the feed items are:")]
 	public Task ThenItemsAre(DataTable table) => MediaDetailAssertions.AssertItemsAsync(ctx.Items!, table);

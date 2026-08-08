@@ -8,6 +8,7 @@ using Contracts.Settings;
 using DB.Data.Blacklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
+using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Watchlist;
@@ -152,6 +153,40 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(queuedMedia.Id);
 		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(queuedId);
+	}
+
+	[Test]
+	public async Task PurgeAsync_ProtectsMediaReferencedByAnotherUser()
+	{
+		var otherUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+		fixture.Context.Users.Add(
+			new UserRow
+			{
+				Id = otherUserId,
+				Provider = AuthProvider.Plex,
+				ExternalUserId = otherUserId.ToString(),
+				DisplayName = "Other",
+				AvatarUrl = string.Empty,
+				Role = UserRole.Member,
+				JoinedAt = DateTimeOffset.UnixEpoch,
+			}
+		);
+
+		var sharedMedia = new MediaRow();
+		fixture.Context.ExternalMediaIds.Add(PlexId.From("9000", MediaType.Movie).ToExternalIdEntity(sharedMedia));
+		fixture.Context.MediaMetadata.Add(BuildMetadata(sharedMedia, "Referenced By Other"));
+		await fixture.Context.SaveChangesAsync();
+
+		var adminId = fixture.CurrentUser.Id;
+		fixture.CurrentUser.Id = UserId.From(otherUserId);
+		fixture.Context.Watchlist.Add(new WatchlistRow { Media = sharedMedia, Origin = WatchlistEntryOrigin.Manual });
+		await fixture.Context.SaveChangesAsync();
+		fixture.CurrentUser.Id = adminId;
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.PurgeAsync();
+
+		await Assert.That(await fixture.Context.Media.IgnoreQueryFilters().AnyAsync(m => m.Id == sharedMedia.Id)).IsTrue();
 	}
 
 	private static MovieMetadataRow BuildMetadata(MediaRow media, string title) =>

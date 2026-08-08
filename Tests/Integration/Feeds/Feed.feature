@@ -24,6 +24,22 @@ Feature: MDBList feed loading
       When I try to load the feed "Corrupt"
       Then an exception of type "JsonException" occurred
 
+    Scenario: A feed whose provider circuit is open surfaces a typed provider-unavailable failure
+      Given an MdbList account with API key "test-key"
+      And the MDBList feed "storm-list" as "Storm" is unavailable
+      When I try to load the feed "Storm"
+      Then an exception of type "ProviderUnavailableException" occurred
+
+    Scenario: A feed that becomes unavailable mid-load still yields the items fetched before the failure
+      Given an MdbList account with API key "test-key"
+      And the MDBList feed "partial-list" as "Partial" yields one page then becomes unavailable:
+        | title | type  |
+        | Item1 | movie |
+        | Item2 | movie |
+      When I load the feed "Partial" keeping partial results
+      Then the item count is 2
+      And an exception of type "ProviderUnavailableException" occurred
+
   Rule: Loading and pagination
 
     Scenario: A feed that returns no movies or shows loads no items
