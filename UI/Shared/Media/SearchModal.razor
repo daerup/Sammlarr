@@ -67,7 +67,7 @@
 
                 @if (_isSearching)
                 {
-                    <div class="search-modal-results space-y-2 pr-1" aria-hidden="true" tabindex="-1">
+                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1" aria-hidden="true" tabindex="-1">
                         <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="4"/>
                     </div>
                 }
@@ -81,7 +81,7 @@
                 }
                 else if (_searchResults.Count > 0)
                 {
-                    <div class="search-modal-results space-y-2 pr-1" tabindex="-1">
+                    <div class="search-modal-results scrollbar-thin space-y-2 pr-1" tabindex="-1">
                         @foreach (var result in _searchResults)
                         {
                             <MediaDetailTile @key="result.Key"

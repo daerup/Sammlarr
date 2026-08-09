@@ -118,27 +118,25 @@
         {
             @if (_filteredResults.Count > 0)
             {
-                <Virtualize TItem="QueryResult<MediaQueryRow>" Items="_filteredResults" ItemSize="180" OverscanCount="3">
-                    <ItemContent Context="result">
-                        @{
-                            var item = GetItem(result);
-                            var isCulled = result is Culled<MediaQueryRow>;
-                            var isTruncated = result is Truncated<MediaQueryRow>;
-                            var isDimmed = isCulled || isTruncated;
-                            var isGreyedOut = result is Bypassed<MediaQueryRow>;
-                            var isBlacklisted = IsBlacklisted(item);
-                            var isInWatchlist = IsWatchlisted(item);
-                            var isTogglingWatchlist = _togglingWatchlistItem == item.Id;
-                            var isTogglingBlacklist = _togglingBlacklistItem == item.Id;
+                @foreach (var result in _filteredResults)
+                {
+                    var item = GetItem(result);
+                    var isCulled = result is Culled<MediaQueryRow>;
+                    var isTruncated = result is Truncated<MediaQueryRow>;
+                    var isDimmed = isCulled || isTruncated;
+                    var isGreyedOut = result is Bypassed<MediaQueryRow>;
+                    var isBlacklisted = IsBlacklisted(item);
+                    var isInWatchlist = IsWatchlisted(item);
+                    var isTogglingWatchlist = _togglingWatchlistItem == item.Id;
+                    var isTogglingBlacklist = _togglingBlacklistItem == item.Id;
 
-                            var hoverStyle = (isDimmed, isGreyedOut) switch
-                            {
-                                (true, _) => "result-dimmed",
-                                (false, true) => "result-grey",
-                                _ => "hover-bg"
-                            };
-                        }
-                        <div class="pb-2">
+                    var hoverStyle = (isDimmed, isGreyedOut) switch
+                    {
+                        (true, _) => "result-dimmed",
+                        (false, true) => "result-grey",
+                        _ => "hover-bg"
+                    };
+                    <div class="pb-2">
                             <MediaDetailTile @key="item"
                                              Media="item"
                                              Class="@(hoverStyle)"
@@ -179,15 +177,14 @@
                                 </Icons>
                             </MediaDetailTile>
                         </div>
-                    </ItemContent>
-                </Virtualize>
+                }
             }
             @if (_filteredUnresolvedResults.Count > 0)
             {
                 <div class="mt-4">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
-                    <Virtualize TItem="MediaQueryRow" Items="_filteredUnresolvedResults" ItemSize="180" OverscanCount="3">
-                        <ItemContent Context="item">
+                    @foreach (var item in _filteredUnresolvedResults)
+                    {
                             <div class="pb-2">
                                 <MediaDetailTile @key="item"
                                                  Media="item.Media"
@@ -208,8 +205,7 @@
                                     </Icons>
                                 </MediaDetailTile>
                             </div>
-                        </ItemContent>
-                    </Virtualize>
+                    }
                 </div>
             }
             @if (IsLoading)
