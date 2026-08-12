@@ -1,6 +1,6 @@
 namespace Shared;
 
-public readonly record struct Error
+public sealed record Error
 {
 	public string Reason { get; }
 	public Exception? Exception { get; }
