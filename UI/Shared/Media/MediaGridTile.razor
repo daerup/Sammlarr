@@ -48,18 +48,25 @@
                 </div>
             }
 
-            <div class="flex items-center justify-between gap-2">
+            @if (!string.IsNullOrWhiteSpace(Media.Tagline))
+            {
                 <h3 class="text-white text-base font-bold text-lg">@Media.Title</h3>
+            }
+
+            <div class="flex items-end justify-between gap-2">
+                @if (!string.IsNullOrWhiteSpace(Media.Tagline))
+                {
+                    <p class="text-white text-xs line-clamp-2">@Media.Tagline</p>
+                }
+                else
+                {
+                    <h3 class="text-white text-base font-bold text-lg">@Media.Title</h3>
+                }
                 @if (Media.ReleaseDate > DateOnly.MinValue)
                 {
                     <span class="text-white/70 font-medium text-sm shrink-0">@Media.ReleaseDate.ToString("MMM d, yyyy")</span>
                 }
             </div>
-
-            @if (!string.IsNullOrWhiteSpace(Media.Tagline))
-            {
-                <p class="text-white text-xs line-clamp-2">@Media.Tagline</p>
-            }
         </div>
 
         <div

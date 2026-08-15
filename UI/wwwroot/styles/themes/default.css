@@ -163,8 +163,11 @@
     cursor: pointer;
 }
 
-.media-title-trigger:hover .media-title-text,
-.media-title-trigger:focus-visible .media-title-text {
+.media-title-trigger:focus-visible {
+    outline: none;
+}
+
+.media-title-trigger:hover .media-title-text {
     text-decoration: underline;
     text-underline-offset: 4px;
 }
@@ -378,4 +381,14 @@ body:has(.error-dialog) .search-modal {
 .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: color-mix(in oklch, var(--muted-foreground) 55%, transparent) transparent;
+}
+
+.media-detail-sheet-content[data-state] {
+    width: 75%;
+    max-width: 28rem;
+    border-left-width: 0;
+}
+
+.lucide-icon.meta-tv-icon {
+    transform: translateY(-1px);
 }
