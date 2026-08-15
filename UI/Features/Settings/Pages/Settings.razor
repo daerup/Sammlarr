@@ -3,6 +3,7 @@
 @using Domain.Identity
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
 
 <PageTitle>Settings</PageTitle>
 
@@ -20,7 +21,7 @@
                 var isActive = _activeSection == item;
                 <BbButton Variant="@(isActive ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
                           Class="@($"w-full justify-start font-medium {(isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}")"
-                          OnClick="() => _activeSection = item">
+                          OnClick='() => Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("section", Slug(item.Label)))'>
                     <LucideIcon Name="@item.Icon" Size="15" Class="mr-2.5 shrink-0"/>
                     @item.Label
                 </BbButton>
