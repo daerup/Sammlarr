@@ -1,0 +1,136 @@
+.poster-fade {
+    --bleed: 24;
+    --transition: 45;
+    --total: calc(var(--bleed) + var(--transition));
+    --slice: 5;
+    --blur: 55;
+    --pad: calc(var(--blur) * 2px);
+    --feather: 0%;
+    --offset: 0;
+    --ramp: linear-gradient(to bottom, rgb(0 0 0 / 1.000) 0.0%, rgb(0 0 0 / 0.999) 1.1%, rgb(0 0 0 / 0.998) 2.1%, rgb(0 0 0 / 0.997) 3.2%, rgb(0 0 0 / 0.995) 4.2%, rgb(0 0 0 / 0.994) 5.3%, rgb(0 0 0 / 0.992) 6.3%, rgb(0 0 0 / 0.989) 7.4%, rgb(0 0 0 / 0.986) 8.4%, rgb(0 0 0 / 0.982) 9.5%, rgb(0 0 0 / 0.978) 10.5%, rgb(0 0 0 / 0.974) 11.6%, rgb(0 0 0 / 0.968) 12.6%, rgb(0 0 0 / 0.962) 13.7%, rgb(0 0 0 / 0.956) 14.7%, rgb(0 0 0 / 0.948) 15.8%, rgb(0 0 0 / 0.940) 16.8%, rgb(0 0 0 / 0.932) 17.9%, rgb(0 0 0 / 0.922) 18.9%, rgb(0 0 0 / 0.912) 20.0%, rgb(0 0 0 / 0.901) 21.1%, rgb(0 0 0 / 0.889) 22.1%, rgb(0 0 0 / 0.877) 23.2%, rgb(0 0 0 / 0.864) 24.2%, rgb(0 0 0 / 0.850) 25.3%, rgb(0 0 0 / 0.836) 26.3%, rgb(0 0 0 / 0.821) 27.4%, rgb(0 0 0 / 0.805) 28.4%, rgb(0 0 0 / 0.789) 29.5%, rgb(0 0 0 / 0.772) 30.5%, rgb(0 0 0 / 0.754) 31.6%, rgb(0 0 0 / 0.736) 32.6%, rgb(0 0 0 / 0.718) 33.7%, rgb(0 0 0 / 0.699) 34.7%, rgb(0 0 0 / 0.680) 35.8%, rgb(0 0 0 / 0.660) 36.8%, rgb(0 0 0 / 0.640) 37.9%, rgb(0 0 0 / 0.620) 38.9%, rgb(0 0 0 / 0.599) 40.0%, rgb(0 0 0 / 0.579) 41.1%, rgb(0 0 0 / 0.558) 42.1%, rgb(0 0 0 / 0.537) 43.2%, rgb(0 0 0 / 0.516) 44.2%, rgb(0 0 0 / 0.495) 45.3%, rgb(0 0 0 / 0.474) 46.3%, rgb(0 0 0 / 0.453) 47.4%, rgb(0 0 0 / 0.432) 48.4%, rgb(0 0 0 / 0.411) 49.5%, rgb(0 0 0 / 0.390) 50.5%, rgb(0 0 0 / 0.370) 51.6%, rgb(0 0 0 / 0.350) 52.6%, rgb(0 0 0 / 0.330) 53.7%, rgb(0 0 0 / 0.310) 54.7%, rgb(0 0 0 / 0.291) 55.8%, rgb(0 0 0 / 0.273) 56.8%, rgb(0 0 0 / 0.255) 57.9%, rgb(0 0 0 / 0.237) 58.9%, rgb(0 0 0 / 0.220) 60.0%, rgb(0 0 0 / 0.203) 61.1%, rgb(0 0 0 / 0.187) 62.1%, rgb(0 0 0 / 0.172) 63.2%, rgb(0 0 0 / 0.157) 64.2%, rgb(0 0 0 / 0.143) 65.3%, rgb(0 0 0 / 0.129) 66.3%, rgb(0 0 0 / 0.117) 67.4%, rgb(0 0 0 / 0.105) 68.4%, rgb(0 0 0 / 0.093) 69.5%, rgb(0 0 0 / 0.083) 70.5%, rgb(0 0 0 / 0.073) 71.6%, rgb(0 0 0 / 0.064) 72.6%, rgb(0 0 0 / 0.055) 73.7%, rgb(0 0 0 / 0.048) 74.7%, rgb(0 0 0 / 0.041) 75.8%, rgb(0 0 0 / 0.035) 76.8%, rgb(0 0 0 / 0.029) 77.9%, rgb(0 0 0 / 0.024) 78.9%, rgb(0 0 0 / 0.019) 80.0%, rgb(0 0 0 / 0.016) 81.1%, rgb(0 0 0 / 0.012) 82.1%, rgb(0 0 0 / 0.010) 83.2%, rgb(0 0 0 / 0.007) 84.2%, rgb(0 0 0 / 0.005) 85.3%, rgb(0 0 0 / 0.004) 86.3%, rgb(0 0 0 / 0.003) 87.4%, rgb(0 0 0 / 0.001) 88.4%, rgb(0 0 0 / 0.000) 89.5%, rgb(0 0 0 / 0.000) 90.5%, rgb(0 0 0 / 0.000) 91.6%, rgb(0 0 0 / 0.000) 92.6%, rgb(0 0 0 / 0.000) 93.7%, rgb(0 0 0 / 0.000) 94.7%, rgb(0 0 0 / 0.000) 95.8%, rgb(0 0 0 / 0.000) 96.8%, rgb(0 0 0 / 0.000) 97.9%, rgb(0 0 0 / 0.000) 98.9%, rgb(0 0 0 / 0.000) 100.0%);
+
+    position: relative;
+    display: block;
+    padding-block-end: calc(var(--total) * 1px);
+}
+
+.poster-fade > .poster {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.poster-fade > .bleed {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: calc(var(--total) * 1px + 1px);
+    overflow: hidden;
+    pointer-events: none;
+
+    --sides: linear-gradient(to right,
+        transparent 0,
+        #000 var(--feather),
+        #000 calc(100% - var(--feather)),
+        transparent 100%);
+    -webkit-mask-image: var(--ramp), var(--sides);
+    mask-image: var(--ramp), var(--sides);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+}
+
+.poster-fade .pb {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.poster-fade .pbase {
+    -webkit-mask-image: linear-gradient(to bottom, #000 3%, transparent 85.5%);
+    mask-image: linear-gradient(to bottom, #000 3%, transparent 85.5%);
+}
+
+.poster-fade .pb1 {
+    filter: url(#pf-vb1);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 3%, #000 85.5%);
+    mask-image: linear-gradient(to bottom, transparent 3%, #000 85.5%);
+}
+
+.poster-fade .pb2 {
+    filter: url(#pf-vb2);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 23.63%, #000 85.5%);
+    mask-image: linear-gradient(to bottom, transparent 23.63%, #000 85.5%);
+}
+
+.poster-fade .pb3 {
+    filter: url(#pf-vb3);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 44.25%, #000 85.5%);
+    mask-image: linear-gradient(to bottom, transparent 44.25%, #000 85.5%);
+}
+
+.poster-fade .pb4 {
+    filter: url(#pf-vb4);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 64.88%, #000 85.5%);
+    mask-image: linear-gradient(to bottom, transparent 64.88%, #000 85.5%);
+}
+
+.poster-fade .haze {
+    position: absolute;
+    top: calc(-1 * var(--pad));
+    inset-inline: 0;
+    height: calc(var(--total) * 1px + var(--pad));
+    filter: url(#pf-blur);
+}
+
+.poster-fade .cap {
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    height: 1px;
+    overflow: hidden;
+    transform: scaleY(calc(var(--blur) * 2));
+    transform-origin: top;
+}
+
+.poster-fade .cap > img {
+    position: absolute;
+    bottom: calc(var(--offset) * -1px);
+    inset-inline: 0;
+    width: 100%;
+    height: auto;
+}
+
+.poster-fade .mirror {
+    position: absolute;
+    top: var(--pad);
+    inset-inline: 0;
+    height: calc(var(--total) * 1px);
+    overflow: hidden;
+}
+
+.poster-fade .mirror > .mirror-inner {
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    height: calc(var(--slice) * var(--total) / var(--bleed) * 1px);
+    overflow: hidden;
+    transform: scaleY(calc(var(--bleed) / var(--slice)));
+    transform-origin: top;
+}
+
+.poster-fade .mirror-inner > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    transform: scaleY(-1);
+}
+
+.poster-fade .poster-fade-svg {
+    position: absolute;
+    width: 0;
+    height: 0;
+}

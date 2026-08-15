@@ -7,65 +7,64 @@
     <div class="sheet-modal-backdrop"></div>
 }
 <BbSheet Open="Open" OpenChanged="HandleSheetOpenChangedAsync">
-    <BbSheetContent Side="SheetSide.Right" Class="sm:max-w-lg">
+    <BbSheetContent Side="SheetSide.Right" ShowClose="false" Class="media-detail-sheet-content overflow-y-auto scrollbar-thin">
         @if (Media.HasValue)
         {
             var media = Media.Value;
-            <BbSheetHeader>
-                <BbSheetTitle Class="font-bold tracking-wide">
-                    <MediaTitleLink Title="@media.Title" Ids="@media.ExternalIds" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
-                </BbSheetTitle>
-                <BbSheetDescription Class="font-normal tracking-wide">
-                    <span class="inline-flex items-center justify-center gap-1.5">
-                        @if (media.MediaType is MediaType.Movie)
-                        {
-                            <LucideIcon Name="film" Size="16"/>
-                        }
-                        else
-                        {
-                            <LucideIcon Name="tv" Size="16"/>
-                        }
-                        <span>@media.MediaType.GetDescription() • @media.ReleaseDate.Year</span>
-                    </span>
-                </BbSheetDescription>
-            </BbSheetHeader>
-
-            <div class="space-y-6 py-6">
-                <div class="flex justify-center">
-                    <div class="relative overflow-hidden rounded-lg shadow-xl max-w-[260px]">
-                        @if (_failed)
-                        {
-                            <div class="w-full aspect-[2/3] bg-muted flex items-center justify-center">
-                                <LucideIcon Name="@(media.MediaType is MediaType.Movie ? "film" : "tv")" Size="48" Class="text-muted-foreground"/>
+            <div class="space-y-6">
+                <div class="media-sheet-hero">
+                    @if (_failed || string.IsNullOrWhiteSpace(media.PosterUrl))
+                    {
+                        <div class="media-sheet-poster relative overflow-hidden">
+                            <div class="w-full h-full bg-muted flex items-center justify-center">
+                                <LucideIcon Name="@(media.MediaType is MediaType.Movie ? "film" : "tv")" Size="64" Class="text-muted-foreground"/>
                             </div>
-                        }
-                        else
-                        {
-                            <img src="@media.PosterUrl"
-                                 alt="@media.Title"
-                                 class="w-full aspect-[2/3] object-cover"
-                                 @onerror="OnImageError"/>
-                        }
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <PosterFade Src="@media.PosterUrl" Alt="@media.Title" OnError="OnImageError"/>
+                    }
                 </div>
 
-                @if (ShowMetadataRow)
-                {
-                    <div class="flex items-center gap-4 text-sm font-medium tracking-wide antialiased">
-                        @if (media.Rating is { } rating)
-                        {
-                            <div class="flex items-center gap-1.5 text-yellow-400">
-                                <LucideIcon Name="star" Size="16" Fill="currentColor"/>
-                                <span class="font-semibold">@rating.ToString("F1")</span>
-                            </div>
-                            <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-4"/>
-                        }
-                        <span class="text-muted-foreground font-medium">
-                            @media.ReleaseDate.ToString("MMM d, yyyy")
+                <BbSheetHeader Class="media-sheet-meta">
+                    <BbSheetTitle Class="font-bold tracking-wide text-xl">
+                        <MediaTitleLink Title="@media.Title" Ids="@media.ExternalIds" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                    </BbSheetTitle>
+                    <BbSheetDescription Class="font-normal tracking-wide">
+                        <span class="media-sheet-meta-line inline-flex items-center gap-1.5 flex-wrap">
+                            <LucideIcon Name="@(media.MediaType is MediaType.Movie ? "film" : "tv")" Size="16" Class="@(media.MediaType is MediaType.Movie ? "" : "meta-tv-icon")"/>
+                            <span>@media.MediaType.GetDescription()</span>
+                            @if (media.ReleaseDate > DateOnly.MinValue)
+                            {
+                                <span aria-hidden="true">•</span>
+                                <span>@media.ReleaseDate.Year</span>
+                            }
+                            @foreach (var fact in MediaFacts.GetDisplayFacts(media))
+                            {
+                                <span aria-hidden="true">•</span>
+                                <span>@fact</span>
+                            }
+                            @if (media.Rating is { } rating)
+                            {
+                                <span aria-hidden="true">•</span>
+                                <span class="inline-flex items-center gap-1 text-yellow-400">
+                                    <LucideIcon Name="star" Size="16" Fill="currentColor"/>
+                                    <span class="font-semibold">@rating.ToString("F1")</span>
+                                </span>
+                            }
                         </span>
-                    </div>
-                }
+                    </BbSheetDescription>
+                    @if (media.Genres.Count > 0)
+                    {
+                        <div class="flex flex-wrap justify-center gap-1.5">
+                            @foreach (var genre in media.Genres)
+                            {
+                                <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@genre</BbBadge>
+                            }
+                        </div>
+                    }
+                </BbSheetHeader>
 
                 @if (!string.IsNullOrWhiteSpace(media.Summary))
                 {
@@ -79,26 +78,23 @@
 
                 <BbSeparator/>
 
-                <div class="flex gap-2">
-                    <BbButton Class="flex-1"
-                              OnClick="HandleButtonClickedAsync"
-                              Disabled="@(_isButtonBusy || ButtonDisabled)">
-                        @if (_isButtonBusy)
+                <BbButton Class="w-full"
+                          OnClick="HandleButtonClickedAsync"
+                          Disabled="@(_isButtonBusy || ButtonDisabled)">
+                    @if (_isButtonBusy)
+                    {
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                        <span>Processing...</span>
+                    }
+                    else
+                    {
+                        @if (!string.IsNullOrWhiteSpace(ResolvedButtonIcon))
                         {
-                            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                            <span>Processing...</span>
+                            <LucideIcon Name="@ResolvedButtonIcon" Size="16" Class="mr-2"/>
                         }
-                        else
-                        {
-                            @if (!string.IsNullOrWhiteSpace(ResolvedButtonIcon))
-                            {
-                                <LucideIcon Name="@ResolvedButtonIcon" Size="16" Class="mr-2"/>
-                            }
-                            <span>@ButtonText()</span>
-                        }
-                    </BbButton>
-                </div>
-
+                        <span>@ButtonText()</span>
+                    }
+                </BbButton>
             </div>
         }
     </BbSheetContent>
@@ -113,9 +109,6 @@
 
     [Parameter]
     public MediaLookup? Media { get; set; }
-
-    [Parameter]
-    public bool ShowMetadataRow { get; set; }
 
     [Parameter]
     public required Func<string> ButtonText { get; init; }

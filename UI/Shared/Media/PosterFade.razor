@@ -1,0 +1,28 @@
+<div class="poster-fade">
+    <img class="poster" src="@Src" alt="@Alt" @onerror="OnError"/>
+    <div class="bleed" aria-hidden="true">
+        <div class="pb pbase"><div class="haze"><div class="cap"><img src="@Src" alt=""/></div><div class="mirror"><div class="mirror-inner"><img src="@Src" alt=""/></div></div></div></div>
+        <div class="pb pb1"><div class="haze"><div class="cap"><img src="@Src" alt=""/></div><div class="mirror"><div class="mirror-inner"><img src="@Src" alt=""/></div></div></div></div>
+        <div class="pb pb2"><div class="haze"><div class="cap"><img src="@Src" alt=""/></div><div class="mirror"><div class="mirror-inner"><img src="@Src" alt=""/></div></div></div></div>
+        <div class="pb pb3"><div class="haze"><div class="cap"><img src="@Src" alt=""/></div><div class="mirror"><div class="mirror-inner"><img src="@Src" alt=""/></div></div></div></div>
+        <div class="pb pb4"><div class="haze"><div class="cap"><img src="@Src" alt=""/></div><div class="mirror"><div class="mirror-inner"><img src="@Src" alt=""/></div></div></div></div>
+    </div>
+    <svg class="poster-fade-svg" width="0" height="0" focusable="false" aria-hidden="true">
+        <filter id="pf-blur" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="0.4 27.5"/></filter>
+        <filter id="pf-vb1" x="-100%" y="-400%" width="300%" height="900%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="16.13 16.13"/></filter>
+        <filter id="pf-vb2" x="-100%" y="-400%" width="300%" height="900%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="32.25 32.25"/></filter>
+        <filter id="pf-vb3" x="-100%" y="-400%" width="300%" height="900%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="48.38 48.38"/></filter>
+        <filter id="pf-vb4" x="-100%" y="-400%" width="300%" height="900%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="64.50 64.50"/></filter>
+    </svg>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string Src { get; set; }
+
+    [Parameter]
+    public string Alt { get; set; } = "";
+
+    [Parameter]
+    public EventCallback OnError { get; set; }
+}
