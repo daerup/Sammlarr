@@ -6,7 +6,7 @@
 }
 
 <div class="w-full max-w-lg">
-    <div class="rounded-lg border bg-card overflow-hidden">
+    <div class="rounded-lg border bg-card overflow-hidden h-full flex flex-col">
         <div class="flex items-center gap-3 px-6 py-4 settings-card-header" style="@headerStyle">
             @Icon
             <h3 class="text-sm font-semibold">@Title</h3>
@@ -18,8 +18,17 @@
             }
         </div>
 
-        <div class="px-6 py-6 space-y-6">
-            @ChildContent
+        <div class="px-6 py-6 flex-1 flex flex-col gap-6">
+            <div class="space-y-6 flex-1">
+                @ChildContent
+            </div>
+
+            @if (Actions is not null)
+            {
+                <div class="flex items-center gap-3">
+                    @Actions
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -34,4 +43,6 @@
     [Parameter] public RenderFragment? Badge { get; set; }
 
     [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    [Parameter] public RenderFragment? Actions { get; set; }
 }
