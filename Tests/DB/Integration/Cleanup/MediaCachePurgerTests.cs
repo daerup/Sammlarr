@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
@@ -187,6 +188,74 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 		await _testee.PurgeAsync();
 
 		await Assert.That(await fixture.Context.Media.IgnoreQueryFilters().AnyAsync(m => m.Id == sharedMedia.Id)).IsTrue();
+	}
+
+	[Test]
+	public async Task PurgeMetadataAsync_WhenNotAdmin_Throws()
+	{
+		var configRepository = IProviderConfigRepository.Mock();
+		var member = new TestCurrentUser { Role = UserRole.Member };
+		var testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, member, NullLogger<MediaCachePurger>.Instance);
+
+		await Assert.That(async () => await testee.PurgeMetadataAsync()).Throws<UnauthorizedAccessException>();
+	}
+
+	[Test]
+	public async Task PurgeMetadataAsync_DeletesAllMetadataAndRatings_KeepsMediaAndExternalIds()
+	{
+		var plexId = PlexId.From("5000", MediaType.Movie);
+		var imdbId = ImdbId.From("tt5000", MediaType.Movie);
+
+		var media = new MediaRow();
+		fixture.Context.ExternalMediaIds.AddRange(plexId.ToExternalIdEntity(media), imdbId.ToExternalIdEntity(media));
+		var metadata = BuildMetadata(media, "Cached");
+		fixture.Context.MediaMetadata.Add(metadata);
+		fixture.Context.MediaRatings.Add(
+			new MediaRatingRow
+			{
+				Source = RatingProvider.Tmdb,
+				NormalizedValue = 8.5f,
+				VoteCount = 999,
+				Metadata = metadata,
+			}
+		);
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.PurgeMetadataAsync();
+
+		using var _ = Assert.Multiple();
+		await Assert.That(await fixture.Context.MediaMetadata.AnyAsync()).IsFalse();
+		await Assert.That(await fixture.Context.MediaRatings.AnyAsync()).IsFalse();
+		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.ExternalMediaIds.CountAsync()).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task PurgeMetadataAsync_RetainedMediaStillResolvesAsPartial()
+	{
+		var plexId = PlexId.From("6000", MediaType.Movie);
+		var imdbId = ImdbId.From("tt6000", MediaType.Movie);
+
+		var media = new MediaRow();
+		fixture.Context.ExternalMediaIds.AddRange(plexId.ToExternalIdEntity(media), imdbId.ToExternalIdEntity(media));
+		fixture.Context.MediaMetadata.Add(BuildMetadata(media, "Cached"));
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+
+		await _testee.PurgeMetadataAsync();
+
+		var dateTimeProvider = IDateTimeProvider.Mock();
+		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
+		var repository = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(dateTimeProvider.Object));
+		var cached = await repository.GetAsync([MediaId.From(media.Id)]);
+
+		using var _ = Assert.Multiple();
+		await Assert.That(cached.Count).IsEqualTo(1);
+		await Assert.That(cached[0].Stored).IsOfUnionType<IdentifiedMedia, PartialMovie>();
+		await Assert.That(cached[0].Stored.Identity.Id).IsEqualTo(MediaId.From(media.Id));
+		await Assert.That(cached[0].Stored.Identity.Externals.Count).IsEqualTo(2);
+		await Assert.That(cached[0].FetchedAt).IsNull();
 	}
 
 	private static MovieMetadataRow BuildMetadata(MediaRow media, string title) =>

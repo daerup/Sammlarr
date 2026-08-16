@@ -105,4 +105,50 @@ public class TypedMemoryCacheUnitTests
 		await Assert.That(foundAfterExpiry).IsFalse();
 		await Assert.That(expired).IsNull();
 	}
+
+	[Test]
+	[NotInParallel("typed-memory-cache-clear")]
+	public async Task TypedMemoryCache_WhenClearCalled_EvictsEveryEntryOfThatType()
+	{
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
+		var testee = new TypedMemoryCache<string, bool>(memoryCache);
+
+		testee.Set("first", true);
+		testee.Set("second", false);
+		testee.Clear();
+
+		await Assert.That(testee.TryGetValue("first", out _)).IsFalse();
+		await Assert.That(testee.TryGetValue("second", out _)).IsFalse();
+	}
+
+	[Test]
+	[NotInParallel("typed-memory-cache-clear")]
+	public async Task TypedMemoryCache_WhenClearCalled_EvictsEntriesSetWithTtl()
+	{
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
+		var testee = new TypedMemoryCache<string, bool>(memoryCache);
+
+		testee.Set("ttl", true, TimeSpan.FromHours(1));
+		testee.Clear();
+
+		await Assert.That(testee.TryGetValue("ttl", out _)).IsFalse();
+	}
+
+	[Test]
+	[NotInParallel("typed-memory-cache-clear")]
+	public async Task TypedMemoryCache_WhenClearCalled_LeavesOtherValueTypesUntouched()
+	{
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
+		var flags = new TypedMemoryCache<string, bool>(memoryCache);
+		var counts = new TypedMemoryCache<string, int>(memoryCache);
+
+		flags.Set("shared", true);
+		counts.Set("shared", 7);
+		flags.Clear();
+
+		await Assert.That(flags.TryGetValue("shared", out _)).IsFalse();
+		var countFound = counts.TryGetValue("shared", out var count);
+		await Assert.That(countFound).IsTrue();
+		await Assert.That(count).IsEqualTo(7);
+	}
 }

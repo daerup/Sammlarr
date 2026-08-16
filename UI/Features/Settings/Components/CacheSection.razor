@@ -1,19 +1,64 @@
+@using Contracts.Media
 @using Contracts.Media.Metadata
 @inject IMediaCachePurger CachePurger
+@inject IUnresolvedMediaCache UnresolvedCache
 @inject Notifier Notifier
 
-<SettingsCard Title="Media cache" Color="var(--destructive)">
-    <Icon>
-        <div class="w-9 h-9 flex items-center justify-center">
-            <LucideIcon Name="database" Size="22"/>
-        </div>
-    </Icon>
-    <ChildContent>
-        <p class="text-muted-foreground text-sm leading-relaxed">
-            Sammlarr caches every media identifier group, metadata record, and rating locally. Purging removes all cached data and forces a clean refetch from the configured providers on demand. Existing watchlist entries are preserved.
-        </p>
+<div class="space-y-6">
+    <BbAccordion Type="AccordionType.Single" Collapsible>
+        <BbAccordionItem Value="what-is-cached">
+            <BbAccordionTrigger Class="text-sm font-semibold">
+                <span class="inline-flex items-center gap-2">
+                    <LucideIcon Name="info" Size="16" Class="text-muted-foreground"/>
+                    What does Sammlarr cache?
+                </span>
+            </BbAccordionTrigger>
+            <BbAccordionContent>
+                <div class="space-y-4 pt-1 text-sm text-muted-foreground leading-relaxed max-w-3xl">
+                    <p>
+                        To avoid re-querying Plex, TMDB, IMDb, TheTVDB, and MDBList on every request, Sammlarr keeps a local copy of what it learns about your media. That cache has three layers, and the cards below clear each one on its own.
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
+                            <LucideIcon Name="link" Size="16" Class="mt-0.5 shrink-0 text-foreground"/>
+                            <p>
+                                <span class="font-semibold text-foreground">Id groups.</span>
+                                Every provider gives the same movie or show a different id — a Plex key, a TMDB id, an IMDb id, and so on. An id group ties them all to a single internal Sammlarr id, so a title found through any provider is recognised as the same item everywhere. Working these out is the expensive part, since it means matching each item across the providers.
+                            </p>
+                        </div>
+                        <div class="flex gap-3">
+                            <LucideIcon Name="film" Size="16" Class="mt-0.5 shrink-0 text-foreground"/>
+                            <p>
+                                <span class="font-semibold text-foreground">Metadata &amp; ratings.</span>
+                                With an item matched, its display details — title, poster, summary, genres, release year, and provider scores — are stored against its id group, so they don't have to be fetched again every time it's shown.
+                            </p>
+                        </div>
+                        <div class="flex gap-3">
+                            <LucideIcon Name="circle-alert" Size="16" Class="mt-0.5 shrink-0 text-foreground"/>
+                            <p>
+                                <span class="font-semibold text-foreground">Unresolved lookups.</span>
+                                When no provider can match an item, that miss is held in memory for an hour and skipped on the next run, so it isn't retried in a tight loop. This list never touches the database and resets whenever the app restarts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </BbAccordionContent>
+        </BbAccordionItem>
+    </BbAccordion>
 
-        <div class="flex items-center gap-3">
+    <div class="flex flex-row flex-wrap gap-6">
+    <SettingsCard Title="Media cache" Color="var(--destructive)">
+        <Icon>
+            <div class="w-9 h-9 flex items-center justify-center">
+                <LucideIcon Name="database" Size="22"/>
+            </div>
+        </Icon>
+        <ChildContent>
+            <p class="text-muted-foreground text-sm leading-relaxed">
+                The deepest reset: deletes the id groups, all metadata, and ratings alike, so every item is re-matched from scratch on demand. Slowest to rebuild — your watchlist stays intact.
+            </p>
+        </ChildContent>
+        <Actions>
             <BbAlertDialog>
                 <BbAlertDialogTrigger>
                     <HoverButton Preset="HoverButtonPreset.Destructive"
@@ -25,8 +70,8 @@
                     <BbAlertDialogHeader>
                         <BbAlertDialogTitle>Purge the media cache?</BbAlertDialogTitle>
                         <BbAlertDialogDescription>
-                            This permanently deletes all media identifier groups, identifier entries, metadata records, and ratings.
-                            The next time the app needs an item it will refetch from the providers. This cannot be undone.
+                            This permanently deletes every id group along with all cached metadata and ratings.
+                            Each item is then re-matched against the providers the next time it's needed. This cannot be undone.
                         </BbAlertDialogDescription>
                     </BbAlertDialogHeader>
                     <BbAlertDialogFooter>
@@ -41,12 +86,78 @@
                     </BbAlertDialogFooter>
                 </BbAlertDialogContent>
             </BbAlertDialog>
-        </div>
-    </ChildContent>
-</SettingsCard>
+        </Actions>
+    </SettingsCard>
+
+    <SettingsCard Title="Cached assets" Color="var(--destructive)">
+        <Icon>
+            <div class="w-9 h-9 flex items-center justify-center">
+                <LucideIcon Name="film" Size="22"/>
+            </div>
+        </Icon>
+        <ChildContent>
+            <p class="text-muted-foreground text-sm leading-relaxed">
+                Clears cached metadata and ratings but keeps the id groups, so items just refetch their details on demand — no re-matching. The quick fix for stale artwork or ratings.
+            </p>
+        </ChildContent>
+        <Actions>
+            <BbAlertDialog>
+                <BbAlertDialogTrigger>
+                    <HoverButton Preset="HoverButtonPreset.Destructive"
+                                 Icon="film"
+                                 Text="@(_isRemovingAssets ? "Removing…" : "Remove cached assets")"
+                                 Disabled="@_isRemovingAssets"/>
+                </BbAlertDialogTrigger>
+                <BbAlertDialogContent>
+                    <BbAlertDialogHeader>
+                        <BbAlertDialogTitle>Remove cached assets?</BbAlertDialogTitle>
+                        <BbAlertDialogDescription>
+                            This clears all cached metadata and ratings but keeps the id groups.
+                            Items re-download their details on demand, without being re-matched against the providers.
+                        </BbAlertDialogDescription>
+                    </BbAlertDialogHeader>
+                    <BbAlertDialogFooter>
+                        <BbAlertDialogCancel>
+                            <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                        </BbAlertDialogCancel>
+                        <BbAlertDialogAction>
+                            <HoverButton Preset="HoverButtonPreset.Destructive"
+                                         Text="Yes, remove cached assets"
+                                         OnClick="RemoveAssetsAsync"/>
+                        </BbAlertDialogAction>
+                    </BbAlertDialogFooter>
+                </BbAlertDialogContent>
+            </BbAlertDialog>
+        </Actions>
+    </SettingsCard>
+
+    <SettingsCard Title="Unresolved lookups" Color="var(--primary)">
+        <Icon>
+            <div class="w-9 h-9 flex items-center justify-center">
+                <LucideIcon Name="circle-alert" Size="22"/>
+            </div>
+        </Icon>
+        <ChildContent>
+            <p class="text-muted-foreground text-sm leading-relaxed">
+                Re-checks items no provider could match right away, instead of leaving them skipped for an hour. Handy after a provider outage or a config fix.
+            </p>
+        </ChildContent>
+        <Actions>
+            <BbButton Variant="ButtonVariant.Outline"
+                      OnClick="ClearUnresolved"
+                      Disabled="@_isClearingUnresolved">
+                <LucideIcon Name="circle-alert" Size="14" Class="mr-2"/>
+                <span>@(_isClearingUnresolved ? "Clearing…" : "Clear unresolved lookups")</span>
+            </BbButton>
+        </Actions>
+    </SettingsCard>
+    </div>
+</div>
 
 @code {
     private bool _isPurging;
+    private bool _isRemovingAssets;
+    private bool _isClearingUnresolved;
 
     private async Task PurgeAsync()
     {
@@ -68,6 +179,52 @@
         finally
         {
             _isPurging = false;
+        }
+    }
+
+    private async Task RemoveAssetsAsync()
+    {
+        if (_isRemovingAssets)
+        {
+            return;
+        }
+
+        _isRemovingAssets = true;
+        try
+        {
+            await CachePurger.PurgeMetadataAsync();
+            Notifier.Success("Cached assets removed. Metadata will refetch on demand.");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to remove cached assets");
+        }
+        finally
+        {
+            _isRemovingAssets = false;
+        }
+    }
+
+    private void ClearUnresolved()
+    {
+        if (_isClearingUnresolved)
+        {
+            return;
+        }
+
+        _isClearingUnresolved = true;
+        try
+        {
+            UnresolvedCache.Clear();
+            Notifier.Success("Unresolved-lookup cache cleared — items will be re-checked.");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to clear unresolved-lookup cache");
+        }
+        finally
+        {
+            _isClearingUnresolved = false;
         }
     }
 }

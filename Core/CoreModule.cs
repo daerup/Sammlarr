@@ -34,6 +34,7 @@ public class CoreModule : IServiceModule
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
 		services.AddScoped<MediaIdResolver>();
+		services.AddScoped<IUnresolvedMediaCache, UnresolvedMediaCache>();
 		services.AddScoped<MediaMetadataResolver>();
 		services.AddScoped<MediaIdentityCoordinator>();
 		services.AddScoped<MediaResolutionBufferFactory>();

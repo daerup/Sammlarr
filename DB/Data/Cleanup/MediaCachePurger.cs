@@ -46,4 +46,12 @@ internal class MediaCachePurger(
 			anchor
 		);
 	}
+
+	public async Task PurgeMetadataAsync(CancellationToken cancellationToken = default)
+	{
+		currentUser.EnsureAdmin();
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var deleted = await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);
+		logger.LogInformation("Media metadata purged: deleted {MetadataDeleted} metadata records", deleted);
+	}
 }
