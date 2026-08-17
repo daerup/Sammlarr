@@ -52,5 +52,8 @@
     <PackageVersion Include="Reqnroll.TUnit" Version="3.0.0" />
     <PackageVersion Include="Vogen" Version="8.0.6" />
     <PackageVersion Include="Westwind.AspNetCore.LiveReload" Version="0.7.0" />
+    <PackageVersion Include="WolverineFx" Version="6.28.2" />
+    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.28.2" />
+    <PackageVersion Include="WolverineFx.Sqlite" Version="6.28.2" />
   </ItemGroup>
 </Project>

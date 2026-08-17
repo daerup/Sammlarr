@@ -2,6 +2,7 @@ using API;
 using Core;
 using DB;
 using Domain.Identity;
+using Messaging;
 using Observability.Diagnostics;
 using Shared;
 using Shared.DI;
@@ -16,6 +17,8 @@ builder.Services.AddModule<SharedModule>();
 builder.Services.AddModule<DbModule>();
 builder.Services.AddModule<ApiModule>();
 builder.Services.AddModule<UiModule>();
+builder.Services.AddModule<MessagingModule>();
+builder.Host.UseSammlarrMessaging(builder.Configuration);
 
 if (builder.Environment.IsDevelopment())
 {

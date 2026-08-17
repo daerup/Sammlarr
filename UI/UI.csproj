@@ -12,6 +12,7 @@
 		<ProjectReference Include="..\DB\DB.csproj" />
 		<ProjectReference Include="..\Shared\Shared.csproj" />
 		<ProjectReference Include="..\API\API.csproj" />
+		<ProjectReference Include="..\Messaging\Messaging.csproj" />
 		<ProjectReference Include="..\Observability\Observability.csproj" />
 	</ItemGroup>
 	<ItemGroup>

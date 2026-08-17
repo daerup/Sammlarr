@@ -29,6 +29,7 @@
 	<Project Path="Core/Core.csproj" />
 	<Project Path="DB/DB.csproj" />
 	<Project Path="Domain/Domain.csproj" />
+	<Project Path="Messaging/Messaging.csproj" />
 	<Project Path="Observability/Observability.csproj" />
 	<Project Path="AppHost/AppHost.csproj" />
 	<Project Path="Generators/Generators.csproj" />
