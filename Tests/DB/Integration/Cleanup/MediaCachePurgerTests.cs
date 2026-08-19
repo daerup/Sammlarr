@@ -143,7 +143,7 @@ public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
 
 		var queuedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalIdEntity(queuedMedia), queuedImdb.ToExternalIdEntity(queuedMedia));
-		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = queuedMedia, Kind = WatchlistOperationKind.Add });
+		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = queuedMedia, Action = WatchlistOperationAction.Add });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 

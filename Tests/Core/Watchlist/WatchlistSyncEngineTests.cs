@@ -3,6 +3,7 @@ using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
+using Contracts.Messaging;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
@@ -13,7 +14,6 @@ using Domain.Watchlist.Outbox;
 using Domain.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Options;
 using TestInfrastructure;
 
 namespace Core.Tests.Watchlist;
@@ -38,38 +38,31 @@ public class WatchlistSyncEngineTests
 
 		gate.SetResult();
 		var firstResult = await first;
-		await Assert.That(firstResult is WatchlistSyncUnchanged).IsTrue();
+		await Assert.That(firstResult is WatchlistSyncChanges).IsTrue();
 	}
 
 	[Test]
-	public async Task SyncAsync_PushAddOperationCancelled_BreaksWithoutFailingOrCountingMore()
+	public async Task SyncAsync_PendingAddNotOnRemote_ResetsOutboxAndPublishesPushTrigger()
 	{
-		var firstExternal = PlexId.From("plex-push-cancel-1", MediaType.Movie);
-		var secondExternal = PlexId.From("plex-push-cancel-2", MediaType.Movie);
-		var firstId = MediaId.From(Guid.NewGuid());
-		var secondId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.From(Guid.NewGuid());
 
 		var provider = IWatchlistProvider.Mock();
 		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
-		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(ThrowAsync<WatchlistPushResult>(new OperationCanceledException()));
-
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any()).Returns([firstId, secondId]);
 
 		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOperation(firstId, WatchlistOperationKind.Add), new WatchlistOperation(secondId, WatchlistOperationKind.Add)]);
+		outbox.GetAsync(Any()).Returns([new WatchlistDelivery(mediaId, WatchlistOperationAction.Add, WatchlistDeliveryStatus.Pending, 0)]);
 
-		var mediaRepo = IMediaRepository.Mock();
-		mediaRepo
-			.GetExternalsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any())
-			.Returns(new Dictionary<MediaId, IExternalMediaId> { [firstId] = firstExternal, [secondId] = secondExternal });
+		var publisher = new RecordingPublisher();
 
-		var engine = BuildEngine(provider, repository, outbox, mediaRepo);
+		var engine = BuildEngine(provider, outbox: outbox, publisher: publisher);
 
 		var result = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
-		await Assert.That(result is WatchlistSyncUnchanged).IsTrue();
-		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
+		await Assert.That(result is WatchlistSyncChanges).IsTrue();
+		outbox.EnqueueAsync(WatchlistOperationAction.Add, Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
+		var triggers = publisher.Published.OfType<PushWatchlistOperation>().ToList();
+		await Assert.That(triggers.Count).IsEqualTo(1);
+		await Assert.That(triggers[0].MediaId).IsEqualTo(mediaId);
 	}
 
 	[Test]
@@ -91,9 +84,9 @@ public class WatchlistSyncEngineTests
 		Mock<IWatchlistProvider> provider,
 		Mock<IWatchlistRepository>? repository = null,
 		Mock<IWatchlistOutbox>? outbox = null,
-		Mock<IMediaRepository>? mediaRepo = null,
 		Mock<IMediaService>? media = null,
-		Mock<IUserScope>? userScope = null
+		Mock<IUserScope>? userScope = null,
+		IMessagePublisher? publisher = null
 	)
 	{
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
@@ -102,12 +95,23 @@ public class WatchlistSyncEngineTests
 		services.AddSingleton((outbox ?? EmptyOutbox()).Object);
 		services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
 		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
-		services.AddSingleton((mediaRepo ?? IMediaRepository.Mock()).Object);
 		services.AddSingleton((media ?? UnresolvedMedia()).Object);
 		services.AddSingleton((userScope ?? NoopUserScope()).Object);
+		services.AddSingleton<IMessagePublisher>(publisher ?? new RecordingPublisher());
 		var sp = services.BuildServiceProvider();
-		var options = new WatchlistSyncOptions { DrainBudget = TimeSpan.FromSeconds(10) };
-		return new WatchlistSyncEngine(sp.GetRequiredService<IServiceScopeFactory>(), options, NullLogger<WatchlistSyncEngine>.Instance);
+		return new WatchlistSyncEngine(sp.GetRequiredService<IServiceScopeFactory>(), NullLogger<WatchlistSyncEngine>.Instance);
+	}
+
+	private sealed class RecordingPublisher : IMessagePublisher
+	{
+		public List<object> Published { get; } = [];
+
+		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
+			where TMessage : notnull
+		{
+			Published.Add(message);
+			return Task.CompletedTask;
+		}
 	}
 
 	private static Mock<IUserScope> NoopUserScope()
@@ -152,15 +156,6 @@ public class WatchlistSyncEngineTests
 			yield return item;
 			await Task.CompletedTask;
 		}
-	}
-
-	private static async IAsyncEnumerable<T> ThrowAsync<T>(Exception ex)
-	{
-		await Task.CompletedTask;
-		throw ex;
-#pragma warning disable CS0162
-		yield break;
-#pragma warning restore CS0162
 	}
 
 	private static async IAsyncEnumerable<IExternalMediaId> WaitingAsyncEnumerable(TaskCompletionSource gate)

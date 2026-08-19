@@ -79,7 +79,7 @@ public class WatchlistManagementSteps(SammlarrScenarioContext sammlarr, LocalMed
 	public async Task GivenOutboxHas(DataTable table)
 	{
 		foreach (var row in table.CreateSet<OutboxRow>())
-			await Outbox.EnqueueAsync(Enum.Parse<WatchlistOperationKind>(row.Operation!, ignoreCase: true), [local.MediaIds[row.Key!]]);
+			await Outbox.EnqueueAsync(Enum.Parse<WatchlistOperationAction>(row.Operation!, ignoreCase: true), [local.MediaIds[row.Key!]]);
 	}
 
 	[Then("the outbox is:")]
@@ -91,8 +91,8 @@ public class WatchlistManagementSteps(SammlarrScenarioContext sammlarr, LocalMed
 		foreach (var row in expected)
 		{
 			var mediaId = local.MediaIds[row.Key!];
-			var kind = Enum.Parse<WatchlistOperationKind>(row.Operation!, ignoreCase: true);
-			await Assert.That(actual).Contains(new WatchlistOperation(mediaId, kind));
+			var kind = Enum.Parse<WatchlistOperationAction>(row.Operation!, ignoreCase: true);
+			await Assert.That(actual.Any(delivery => delivery.MediaId == mediaId && delivery.Action == kind)).IsTrue();
 			if (row.Attempts is { } attempts)
 			{
 				sammlarr.DbContext.ChangeTracker.Clear();

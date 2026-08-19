@@ -19,7 +19,7 @@ namespace Integration.Tests.Watchlist;
 [Binding]
 public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogContext catalog, LocalMediaContext local, RemoteWatchlistState remote)
 {
-	private WatchlistSyncDryRun? _dryRun;
+	private WatchlistSyncChanges? _dryRun;
 	private bool _dryRunFailed;
 	private WatchlistSyncResult _syncResult = default!;
 
@@ -57,8 +57,8 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	public async Task WhenDryRun()
 	{
 		var result = await sammlarr.Resolve<IWatchlistSyncEngine>().DryRunAsync(sammlarr.Resolve<ICurrentUser>());
-		_dryRun = result is Success<WatchlistSyncDryRun>(var dryRun) ? dryRun : null;
-		_dryRunFailed = result is Error;
+		_dryRun = result is WatchlistSyncChanges changes ? changes : null;
+		_dryRunFailed = result is WatchlistSyncRemoteFailed;
 	}
 
 	[Then("the dry run plans:")]
@@ -71,8 +71,8 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 		{
 			var mediaId = local.MediaIds[row.Key!];
 			var direction = Enum.Parse<WatchlistSyncDirection>(row.Direction!, ignoreCase: true);
-			var kind = Enum.Parse<Domain.Watchlist.Outbox.WatchlistOperationKind>(row.Operation!, ignoreCase: true);
-			await Assert.That(_dryRun!.Changes.Any(c => c.MediaId == mediaId && c.Direction == direction && c.Kind == kind)).IsTrue();
+			var kind = Enum.Parse<Domain.Watchlist.Outbox.WatchlistOperationAction>(row.Operation!, ignoreCase: true);
+			await Assert.That(_dryRun!.Changes.Any(c => c.MediaId == mediaId && c.Direction == direction && c.Action == kind)).IsTrue();
 		}
 	}
 
@@ -82,40 +82,31 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	[Then("the sync result is:")]
 	public async Task ThenSyncResultIs(DataTable table)
 	{
-		if (_syncResult is not WatchlistSyncSuccess success)
+		if (_syncResult is not WatchlistSyncChanges success)
 		{
-			await Assert.That(_syncResult is WatchlistSyncSuccess).IsTrue();
+			await Assert.That(_syncResult is WatchlistSyncChanges).IsTrue();
 			return;
 		}
 		var row = table.CreateSet<SyncResultRow>().Single();
-		if (row.Inserted is { } inserted)
-			await Assert.That(success.Inserted).IsEqualTo(inserted);
-		if (row.Confirmed is { } confirmed)
-			await Assert.That(success.Confirmed).IsEqualTo(confirmed);
-		if (row.HardDeleted is { } hardDeleted)
-			await Assert.That(success.HardDeleted).IsEqualTo(hardDeleted);
-		if (row.PushedAdds is { } pushedAdds)
-			await Assert.That(success.PushedAdds).IsEqualTo(pushedAdds);
-		if (row.PushedRemoves is { } pushedRemoves)
-			await Assert.That(success.PushedRemoves).IsEqualTo(pushedRemoves);
-		if (row.RemoteFailures is { } remoteFailures)
-			await Assert.That(success.RemoteFailures).IsEqualTo(remoteFailures);
+		if (row.Pulled is { } pulled)
+			await Assert.That(success.Pull.Adds.Count).IsEqualTo(pulled);
+		if (row.Removed is { } removed)
+			await Assert.That(success.Pull.Removes.Count).IsEqualTo(removed);
+		if (row.Queued is { } queued)
+			await Assert.That(success.Push.Count).IsEqualTo(queued);
 	}
 
 	[Then("the sync is unchanged")]
-	public async Task ThenSyncIsUnchanged() => await Assert.That(_syncResult is WatchlistSyncUnchanged).IsTrue();
+	public async Task ThenSyncIsUnchanged() => await Assert.That(_syncResult is WatchlistSyncChanges { TotalChanges: 0 }).IsTrue();
 
 	[Then("the sync reports a remote failure")]
 	public async Task ThenSyncReportsRemoteFailure() => await Assert.That(_syncResult is WatchlistSyncRemoteFailed).IsTrue();
 
 	private sealed class SyncResultRow
 	{
-		public int? Inserted { get; set; }
-		public int? Confirmed { get; set; }
-		public int? HardDeleted { get; set; }
-		public int? PushedAdds { get; set; }
-		public int? PushedRemoves { get; set; }
-		public int? RemoteFailures { get; set; }
+		public int? Pulled { get; set; }
+		public int? Removed { get; set; }
+		public int? Queued { get; set; }
 	}
 
 	[Then("the remote watchlist contains {string}")]

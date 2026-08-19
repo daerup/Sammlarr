@@ -27,27 +27,28 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task EnqueueAsync_NewId_InsertsRow()
+	public async Task EnqueueAsync_NewId_InsertsPendingRow()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
 
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
 
-		var row = await fixture.Context.WatchlistOutbox.AsNoTracking().SingleAsync();
-		await Assert.That(row.Kind).IsEqualTo(WatchlistOperationKind.Add);
+		var delivery = (await _testee.GetAsync()).Single();
+		await Assert.That(delivery.Action).IsEqualTo(WatchlistOperationAction.Add);
+		await Assert.That(delivery.Status).IsEqualTo(WatchlistDeliveryStatus.Pending);
 	}
 
 	[Test]
 	public async Task EnqueueAsync_ExistingId_ReplacesKind()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
 
-		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Remove, [mediaId]);
 
-		var rows = await fixture.Context.WatchlistOutbox.AsNoTracking().ToListAsync();
-		await Assert.That(rows).Count().IsEqualTo(1);
-		await Assert.That(rows[0].Kind).IsEqualTo(WatchlistOperationKind.Remove);
+		var deliveries = await _testee.GetAsync();
+		await Assert.That(deliveries).Count().IsEqualTo(1);
+		await Assert.That(deliveries[0].Action).IsEqualTo(WatchlistOperationAction.Remove);
 	}
 
 	[Test]
@@ -55,23 +56,71 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	{
 		var addId = await SeedMediaAsync([PlexId.From("plex-202", MediaType.Movie)]);
 		var removeId = await SeedMediaAsync([PlexId.From("plex-203", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [addId]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [removeId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [addId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Remove, [removeId]);
 
-		var ops = await _testee.GetAsync();
+		var deliveries = await _testee.GetAsync();
 
-		await Assert.That(ops).Count().IsEqualTo(2);
-		await Assert.That(ops.Single(o => o.Kind == WatchlistOperationKind.Add).MediaId).IsEqualTo(addId);
-		await Assert.That(ops.Single(o => o.Kind == WatchlistOperationKind.Remove).MediaId).IsEqualTo(removeId);
+		await Assert.That(deliveries).Count().IsEqualTo(2);
+		await Assert.That(deliveries.Single(o => o.Action == WatchlistOperationAction.Add).MediaId).IsEqualTo(addId);
+		await Assert.That(deliveries.Single(o => o.Action == WatchlistOperationAction.Remove).MediaId).IsEqualTo(removeId);
+	}
+
+	[Test]
+	public async Task GetAsync_IncludesStatusAndAttempts()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-700", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
+		await _testee.RecordFailureAsync([mediaId], WatchlistDeliveryStatus.Pending);
+
+		var delivery = (await _testee.GetAsync()).Single();
+
+		await Assert.That(delivery.MediaId).IsEqualTo(mediaId);
+		await Assert.That(delivery.Status).IsEqualTo(WatchlistDeliveryStatus.Pending);
+		await Assert.That(delivery.Attempts).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task FindPendingAsync_ReturnsPendingRow()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-710", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Remove, [mediaId]);
+
+		var delivery = await _testee.FindPendingAsync(mediaId);
+
+		await Assert.That(delivery).IsNotNull();
+		await Assert.That(delivery!.Action).IsEqualTo(WatchlistOperationAction.Remove);
+	}
+
+	[Test]
+	public async Task FindPendingAsync_ReturnsNullForFailedRow()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-711", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
+		await _testee.RecordFailureAsync([mediaId], WatchlistDeliveryStatus.Failed);
+
+		var delivery = await _testee.FindPendingAsync(mediaId);
+
+		await Assert.That(delivery).IsNull();
+	}
+
+	[Test]
+	public async Task FindPendingAsync_ReturnsNullWhenAbsent()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-712", MediaType.Movie)]);
+
+		var delivery = await _testee.FindPendingAsync(mediaId);
+
+		await Assert.That(delivery).IsNull();
 	}
 
 	[Test]
 	public async Task DropAsync_RemovesEntry()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-205", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
 
-		await _testee.DropAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.DropAsync([mediaId]);
 
 		var any = await fixture.Context.WatchlistOutbox.AnyAsync();
 		await Assert.That(any).IsFalse();
@@ -83,7 +132,7 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 		var first = await SeedMediaAsync([PlexId.From("plex-400", MediaType.Movie)]);
 		var second = await SeedMediaAsync([PlexId.From("plex-401", MediaType.Movie)]);
 
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [first, second]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [first, second]);
 
 		var rows = await fixture.Context.WatchlistOutbox.AsNoTracking().ToListAsync();
 		await Assert.That(rows).Count().IsEqualTo(2);
@@ -92,61 +141,63 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 	[Test]
 	public async Task EnqueueAsync_EmptyInput_NoOp()
 	{
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, []);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, []);
 
 		var any = await fixture.Context.WatchlistOutbox.AnyAsync();
 		await Assert.That(any).IsFalse();
 	}
 
 	[Test]
-	public async Task RecordFailureAsync_IncrementsAttemptsAndKeepsRow()
+	public async Task RecordFailureAsync_TransientIncrementsAttemptsAndKeepsPending()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-500", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
 
-		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, [mediaId]);
-		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.RecordFailureAsync([mediaId], WatchlistDeliveryStatus.Pending);
+		await _testee.RecordFailureAsync([mediaId], WatchlistDeliveryStatus.Pending);
 
-		fixture.Context.ChangeTracker.Clear();
-		var row = await fixture.Context.WatchlistOutbox.AsNoTracking().SingleAsync();
-		await Assert.That(row.Attempts).IsEqualTo(2);
+		var delivery = (await _testee.GetAsync()).Single();
+		await Assert.That(delivery.Attempts).IsEqualTo(2);
+		await Assert.That(delivery.Status).IsEqualTo(WatchlistDeliveryStatus.Pending);
+	}
+
+	[Test]
+	public async Task RecordFailureAsync_GiveUpMarksFailedAndRoundTrips()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-701", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
+
+		await _testee.RecordFailureAsync([mediaId], WatchlistDeliveryStatus.Failed);
+
+		var delivery = (await _testee.GetAsync()).Single();
+		await Assert.That(delivery.Status).IsEqualTo(WatchlistDeliveryStatus.Failed);
+		await Assert.That(delivery.Attempts).IsEqualTo(1);
 	}
 
 	[Test]
 	public async Task RecordFailureAsync_EmptyInput_NoOp()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-502", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
 
-		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, []);
+		await _testee.RecordFailureAsync([], WatchlistDeliveryStatus.Failed);
 
-		fixture.Context.ChangeTracker.Clear();
-		var row = await fixture.Context.WatchlistOutbox.AsNoTracking().SingleAsync();
-		await Assert.That(row.Attempts).IsEqualTo(0);
+		var delivery = (await _testee.GetAsync()).Single();
+		await Assert.That(delivery.Attempts).IsEqualTo(0);
+		await Assert.That(delivery.Status).IsEqualTo(WatchlistDeliveryStatus.Pending);
 	}
 
 	[Test]
-	public async Task DropAsync_KindMismatch_LeavesRowAlone()
+	public async Task EnqueueAsync_ExistingId_ResetsStatusToPendingAndAttemptsToZero()
 	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-600", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId]);
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-702", MediaType.Movie)]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
+		await _testee.RecordFailureAsync([mediaId], WatchlistDeliveryStatus.Failed);
 
-		await _testee.DropAsync(WatchlistOperationKind.Add, [mediaId]);
+		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [mediaId]);
 
-		var row = await fixture.Context.WatchlistOutbox.AsNoTracking().SingleAsync();
-		await Assert.That(row.Kind).IsEqualTo(WatchlistOperationKind.Remove);
-	}
-
-	[Test]
-	public async Task RecordFailureAsync_KindMismatch_LeavesAttemptsAlone()
-	{
-		var mediaId = await SeedMediaAsync([PlexId.From("plex-601", MediaType.Movie)]);
-		await _testee.EnqueueAsync(WatchlistOperationKind.Remove, [mediaId]);
-
-		await _testee.RecordFailureAsync(WatchlistOperationKind.Add, [mediaId]);
-
-		fixture.Context.ChangeTracker.Clear();
-		var row = await fixture.Context.WatchlistOutbox.AsNoTracking().SingleAsync();
-		await Assert.That(row.Attempts).IsEqualTo(0);
+		var delivery = (await _testee.GetAsync()).Single();
+		await Assert.That(delivery.Status).IsEqualTo(WatchlistDeliveryStatus.Pending);
+		await Assert.That(delivery.Attempts).IsEqualTo(0);
 	}
 }

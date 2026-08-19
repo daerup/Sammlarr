@@ -10,7 +10,7 @@ internal static class DryRunMetadataLoader
 {
 	public static async Task<Dictionary<MediaId, MediaLookup>> LoadAsync(
 		IMediaService media,
-		WatchlistSyncDryRun dryRun,
+		WatchlistSyncChanges dryRun,
 		int limit,
 		CancellationToken cancellationToken
 	)

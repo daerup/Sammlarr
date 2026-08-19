@@ -11,6 +11,6 @@ internal sealed class WatchlistOutboxRowConfiguration : IModelConfiguration
 			builder.Property<Guid>("MediaId");
 			builder.HasKey(UserOwnedConfigurationExtensions.UserIdColumn, "MediaId");
 			builder.HasOne(o => o.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
-			builder.HasIndex(o => o.Kind);
+			builder.HasIndex(o => o.Action);
 		});
 }
