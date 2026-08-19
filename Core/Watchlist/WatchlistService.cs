@@ -47,7 +47,7 @@ internal sealed class WatchlistService(
 		}
 
 		var ops = await outbox.GetAsync(cancellationToken);
-		var pendingRemoves = ops.Where(o => o.Kind == WatchlistOperationKind.Remove).Select(o => o.MediaId).ToHashSet();
+		var pendingRemoves = ops.Where(o => o.Action == WatchlistOperationAction.Remove).Select(o => o.MediaId).ToHashSet();
 		var existing = (await repository.GetIdsAsync(cancellationToken)).ToHashSet();
 
 		var uncancel = ids.Where(pendingRemoves.Contains).ToList();
@@ -55,9 +55,9 @@ internal sealed class WatchlistService(
 
 		await EnsureWatchlistProviderInExternalsAsync(needsPush, cancellationToken);
 
-		await outbox.DropAsync(WatchlistOperationKind.Remove, uncancel, cancellationToken);
+		await outbox.DropAsync(uncancel, cancellationToken);
 		await repository.AddAsync(ids, provenance, cancellationToken);
-		await outbox.EnqueueAsync(WatchlistOperationKind.Add, needsPush, cancellationToken);
+		await outbox.EnqueueAsync(WatchlistOperationAction.Add, needsPush, cancellationToken);
 	}
 
 	public async Task RemoveFromWatchlistAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
@@ -69,7 +69,7 @@ internal sealed class WatchlistService(
 		}
 
 		var ops = await outbox.GetAsync(cancellationToken);
-		var unpushedAdds = ops.Where(o => o.Kind == WatchlistOperationKind.Add).Select(o => o.MediaId).ToHashSet();
+		var unpushedAdds = ops.Where(o => o.Action == WatchlistOperationAction.Add).Select(o => o.MediaId).ToHashSet();
 
 		var cancelAdds = ids.Where(unpushedAdds.Contains).ToList();
 		var needsEnqueue = ids.Where(id => !unpushedAdds.Contains(id)).ToList();
@@ -78,11 +78,11 @@ internal sealed class WatchlistService(
 
 		if (cancelAdds.Count > 0)
 		{
-			await outbox.DropAsync(WatchlistOperationKind.Add, cancelAdds, cancellationToken);
+			await outbox.DropAsync(cancelAdds, cancellationToken);
 		}
 		if (needsEnqueue.Count > 0)
 		{
-			await outbox.EnqueueAsync(WatchlistOperationKind.Remove, needsEnqueue, cancellationToken);
+			await outbox.EnqueueAsync(WatchlistOperationAction.Remove, needsEnqueue, cancellationToken);
 		}
 		await repository.RemoveAsync(ids, cancellationToken);
 	}

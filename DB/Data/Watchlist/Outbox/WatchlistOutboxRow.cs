@@ -7,7 +7,9 @@ internal record WatchlistOutboxRow : IUserOwned
 {
 	public required MediaRow Media { get; set; }
 
-	public required WatchlistOperationKind Kind { get; set; }
+	public required WatchlistOperationAction Action { get; set; }
+
+	public WatchlistDeliveryStatus Status { get; set; }
 
 	public int Attempts { get; set; }
 }

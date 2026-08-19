@@ -69,7 +69,7 @@ else
                         <span class="text-sm font-semibold text-success tabular-nums">+@_dryRun.AddCount</span>
                         <span class="text-sm font-semibold text-destructive tabular-nums">−@_dryRun.RemoveCount</span>
                     </div>
-                    <p class="text-xs text-muted-foreground mt-1.5">@_dryRun.InSync already in sync</p>
+                    <p class="text-xs text-muted-foreground mt-1.5">@_dryRun.NoOps.Count already in sync</p>
                 }
             </div>
             @if (_dryRun is not null && _dryRun.TotalChanges > 0)
@@ -80,8 +80,8 @@ else
                     {
                         var directionIcon = change.Direction == WatchlistSyncDirection.Pull ? "arrow-down-left" : "arrow-up-right";
                         var directionTooltip = change.Direction == WatchlistSyncDirection.Pull ? "from Plex" : "to Plex";
-                        var kindIcon = change.Kind == WatchlistOperationKind.Add ? "plus" : "minus";
-                        var kindColor = change.Kind == WatchlistOperationKind.Add ? "text-success" : "text-destructive";
+                        var kindIcon = change.Action == WatchlistOperationAction.Add ? "plus" : "minus";
+                        var kindColor = change.Action == WatchlistOperationAction.Add ? "text-success" : "text-destructive";
                         var title = _metadata.TryGetValue(change.MediaId, out var detail) ? detail.Title : "…";
                         <div class="flex items-center gap-2 px-4 py-1.5 text-sm">
                             <span class="inline-flex h-5 items-center shrink-0 @kindColor">
@@ -116,7 +116,7 @@ else
     private const string PreviewHeaderStyle = "background: oklch(from var(--muted) calc(l - 0.08) c h); border-bottom: 2px solid #09090b;";
 
     private readonly CancellationTokenSource _cts = new();
-    private WatchlistSyncDryRun? _dryRun;
+    private WatchlistSyncChanges? _dryRun;
     private string? _dryRunError;
     private Dictionary<MediaId, MediaLookup> _metadata = [];
     private bool _isSyncing;
@@ -154,19 +154,22 @@ else
         var result = await SyncEngine.DryRunAsync(CurrentUser, _cts.Token);
         switch (result)
         {
-            case Success<WatchlistSyncDryRun>(var dryRun):
-                _dryRun = dryRun;
-                _metadata = await LoadMetadataAsync(dryRun);
+            case WatchlistSyncChanges changes:
+                _dryRun = changes;
+                _metadata = await LoadMetadataAsync(changes);
                 break;
-            case Error failed:
+            case WatchlistSyncRemoteFailed failed:
                 _dryRunError = $"Dry run unavailable — {failed.Reason}";
+                break;
+            case WatchlistSyncAlreadyRunning:
+                _dryRunError = "Dry run unavailable — a sync is already running.";
                 break;
         }
         _isLoadingDryRun = false;
         StateHasChanged();
     }
 
-    private Task<Dictionary<MediaId, MediaLookup>> LoadMetadataAsync(WatchlistSyncDryRun dryRun) =>
+    private Task<Dictionary<MediaId, MediaLookup>> LoadMetadataAsync(WatchlistSyncChanges dryRun) =>
         DryRunMetadataLoader.LoadAsync(Media, dryRun, DryRunPreviewLimit, _cts.Token);
 
     public async Task SyncAsync()
@@ -180,16 +183,21 @@ else
         try
         {
             var result = await SyncEngine.SyncAsync(new ManualTrigger(), CurrentUser, _cts.Token);
-            var message = result.Value.ToString() ?? string.Empty;
-            Action<string, string?> notify = result.Value switch
+            switch (result)
             {
-                WatchlistSyncSuccess => (m, t) => Notifier.Success(m, t),
-                WatchlistSyncUnchanged => (m, t) => Notifier.Info(m, t),
-                WatchlistSyncAlreadyRunning => (m, t) => Notifier.Info(m, t),
-                WatchlistSyncRemoteFailed => (m, t) => Notifier.Warning(m, t),
-            };
-
-            notify(message, null);
+                case WatchlistSyncChanges { TotalChanges: 0 } changes:
+                    Notifier.Info(changes.ToString(), null);
+                    break;
+                case WatchlistSyncChanges changes:
+                    Notifier.Success(changes.ToString(), null);
+                    break;
+                case WatchlistSyncAlreadyRunning running:
+                    Notifier.Info(running.ToString(), null);
+                    break;
+                case WatchlistSyncRemoteFailed failed:
+                    Notifier.Warning(failed.ToString(), null);
+                    break;
+            }
         }
         catch (Exception ex)
         {

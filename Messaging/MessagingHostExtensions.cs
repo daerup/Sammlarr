@@ -1,7 +1,9 @@
+using Contracts.Watchlist.Outbox;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Shared.Options;
 using Wolverine;
+using Wolverine.ErrorHandling;
 using Wolverine.Sqlite;
 
 namespace Messaging;
@@ -25,5 +27,10 @@ public static class MessagingHostExtensions
 		options.PersistMessagesWithSqlite(connectionString);
 		options.Policies.UseDurableLocalQueues();
 		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);
+		options.LocalQueueFor<PushWatchlistOperation>().Sequential();
+
+		options
+			.Policies.OnException<WatchlistPushFailedException>()
+			.RetryWithCooldown(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
 	}
 }

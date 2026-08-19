@@ -374,16 +374,20 @@ namespace DB.Migrations
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Attempts")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Kind")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("UserId", "MediaId");
 
-                    b.HasIndex("Kind");
+                    b.HasIndex("Action");
 
                     b.HasIndex("MediaId");
 

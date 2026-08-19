@@ -93,7 +93,7 @@ public class UserRepositoryTests(SQLiteFixture fixture)
 				}
 			);
 			seed.Watchlist.Add(new WatchlistRow { Media = media, Origin = WatchlistEntryOrigin.Manual });
-			seed.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = media, Kind = WatchlistOperationKind.Add });
+			seed.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = media, Action = WatchlistOperationAction.Add });
 			seed.Blacklist.Add(new BlacklistRow { Media = media });
 			seed.ApiKeySettings.Add(new ApiKeyConfigRow { Provider = ApiKeyProvider.Tmdb, ApiKey = "victim-key" });
 			seed.Credentials.Add(

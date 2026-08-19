@@ -4,6 +4,7 @@ using API.Plex;
 using API.Tmdb;
 using Contracts;
 using Contracts.Identity;
+using Contracts.Messaging;
 using Core;
 using DB;
 using Integration.Tests.Infrastructure.Http;
@@ -61,7 +62,7 @@ internal sealed class IntegrationTestModule : ITestServiceModule
 				Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
 			}
 		);
-		services.AddSingleton(new WatchlistSyncOptions());
+		services.AddScoped<IMessagePublisher, InlineWatchlistPushPublisher>();
 	}
 
 	private sealed class TestDbContextFactory(IServiceProvider sp, SqliteConnection connection) : IDbContextFactory<SammlarrDbContext>
