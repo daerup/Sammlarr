@@ -151,7 +151,8 @@ else
                   Media="_selectedItem?.Media.ToMatch()"
                   ButtonAction="ApplyDetailActionAsync"
                   ButtonText="GetRemoveButtonText"
-                  ButtonIcon="GetRemoveButtonIcon"/>
+                  ButtonIcon="GetRemoveButtonIcon"
+                  ButtonDisabled="@(IsSelectedRemoved && _syncing)"/>
 
 @if (_providerSettings is not null)
 {
@@ -422,7 +423,7 @@ else
 
     private async Task CancelRemovalAsync()
     {
-        if (_isRemoving || _selectedItem is null)
+        if (_isRemoving || _selectedItem is null || _syncing)
         {
             return;
         }
