@@ -16,20 +16,21 @@ internal sealed class InlineWatchlistPushPublisher(IServiceProvider services) : 
 	public async Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
 		where TMessage : notnull
 	{
-		if (message is not PushWatchlistOperation push)
+		if (message is not WatchlistPushRequest push)
 		{
 			return;
 		}
 
 		try
 		{
-			await new WatchlistPushHandler().Handle(
+			await WatchlistPushRequestHandler.Handle(
 				push,
 				services.GetRequiredService<IUserScope>(),
 				services.GetRequiredService<IWatchlistOutbox>(),
 				services.GetRequiredService<IProviderConfigRepository>(),
 				services.GetRequiredService<IMediaRepository>(),
 				services.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(),
+				services.GetRequiredService<IWatchlistOutboxEventFeed>(),
 				cancellationToken
 			);
 		}

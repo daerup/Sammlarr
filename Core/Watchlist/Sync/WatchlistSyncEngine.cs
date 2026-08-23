@@ -89,7 +89,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 	{
 		await deps.Repo.AddAsync(plan.Pull.Adds, new RemoteOrigin(deps.Provider), cancellationToken);
 		await deps.Repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
-		await deps.Outbox.DropAsync(plan.Redundant.All, cancellationToken);
+		await deps.Outbox.DropAsync(plan.Redundant, cancellationToken);
 
 		await QueuePushesAsync(deps, plan, userId, cancellationToken);
 
@@ -110,7 +110,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 
 		foreach (var mediaId in plan.Push.All)
 		{
-			await deps.Publisher.PublishAsync(new PushWatchlistOperation(userId, mediaId), cancellationToken);
+			await deps.Publisher.PublishAsync(new WatchlistPushRequest(userId, mediaId), cancellationToken);
 		}
 	}
 
@@ -120,7 +120,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 		return new WatchlistSyncRemoteFailed(error.Reason);
 	}
 
-	private static WatchlistSyncResult BuildChanges(WatchlistSyncPlan plan) => new WatchlistSyncChanges(plan.Pull, plan.Push, plan.NoOps);
+	private static WatchlistSyncResult BuildChanges(WatchlistSyncPlan plan) => new WatchlistSyncSummary(plan.Pull, plan.Push, plan.NoOps);
 
 	private static async Task<EngineDeps> ResolveAsync(AsyncServiceScope scope, CancellationToken cancellationToken)
 	{
@@ -170,8 +170,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 			{
 				var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
 				var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
-				var operations = outboxOps.Select(delivery => new WatchlistOperation(delivery.MediaId, delivery.Action)).ToList();
-				return Success.Of(WatchlistSyncPlan.Compute(remoteIds, localIds, operations));
+				return Success.Of(WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps));
 			});
 
 	private readonly record struct EngineDeps(

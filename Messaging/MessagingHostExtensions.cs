@@ -1,4 +1,5 @@
 using Contracts.Watchlist.Outbox;
+using JasperFx.CodeGeneration.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Shared.Options;
@@ -24,10 +25,11 @@ public static class MessagingHostExtensions
 
 	private static void Configure(WolverineOptions options, string connectionString)
 	{
+		options.ServiceLocationPolicy = ServiceLocationPolicy.AlwaysAllowed;
 		options.PersistMessagesWithSqlite(connectionString);
 		options.Policies.UseDurableLocalQueues();
 		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);
-		options.LocalQueueFor<PushWatchlistOperation>().Sequential();
+		options.LocalQueueFor<WatchlistPushRequest>().Sequential();
 
 		options
 			.Policies.OnException<WatchlistPushFailedException>()

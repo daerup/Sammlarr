@@ -5,13 +5,13 @@ namespace Contracts.Watchlist.Outbox;
 
 public interface IWatchlistOutbox
 {
-	Task<IReadOnlyList<WatchlistDelivery>> GetAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<WatchlistOutboxEntry>> GetAsync(CancellationToken cancellationToken = default);
 
 	Task EnqueueAsync(WatchlistOperationAction action, IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 
-	Task<WatchlistDelivery?> FindPendingAsync(MediaId mediaId, CancellationToken cancellationToken = default);
+	Task<WatchlistOutboxEntry?> FindPendingAsync(MediaId mediaId, CancellationToken cancellationToken = default);
 
 	Task DropAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 
-	Task RecordFailureAsync(IEnumerable<MediaId> mediaIds, WatchlistDeliveryStatus status, CancellationToken cancellationToken = default);
+	Task RecordFailedAttemptAsync(IEnumerable<MediaId> mediaIds, WatchlistOutboxState resultingState, CancellationToken cancellationToken = default);
 }

@@ -51,7 +51,10 @@ internal sealed class SammlarrDbContext : DbContext
 		_dateTimeProvider = dateTimeProvider;
 	}
 
-	private Guid CurrentUserId => _currentUser.IsAuthenticated ? _currentUser.Id.Value : Guid.Empty;
+	private Guid CurrentUserId =>
+		_currentUser.IsAuthenticated
+			? _currentUser.Id.Value
+			: throw new InvalidOperationException("No authenticated user in scope; user-owned data cannot be accessed anonymously.");
 
 	public DbSet<CredentialRow> Credentials => Set<CredentialRow>();
 

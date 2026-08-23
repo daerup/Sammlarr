@@ -1,8 +1,6 @@
-using Domain.Watchlist.Sync;
+namespace Domain.Watchlist.Sync;
 
-namespace Contracts.Watchlist.Sync;
-
-public union WatchlistSyncResult(WatchlistSyncChanges, WatchlistSyncAlreadyRunning, WatchlistSyncRemoteFailed);
+public union WatchlistSyncResult(WatchlistSyncSummary, WatchlistSyncAlreadyRunning, WatchlistSyncRemoteFailed);
 
 public readonly record struct WatchlistSyncAlreadyRunning
 {

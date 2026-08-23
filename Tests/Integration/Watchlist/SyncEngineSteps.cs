@@ -19,7 +19,7 @@ namespace Integration.Tests.Watchlist;
 [Binding]
 public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogContext catalog, LocalMediaContext local, RemoteWatchlistState remote)
 {
-	private WatchlistSyncChanges? _dryRun;
+	private WatchlistSyncSummary? _dryRun;
 	private bool _dryRunFailed;
 	private WatchlistSyncResult _syncResult = default!;
 
@@ -57,7 +57,7 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	public async Task WhenDryRun()
 	{
 		var result = await sammlarr.Resolve<IWatchlistSyncEngine>().DryRunAsync(sammlarr.Resolve<ICurrentUser>());
-		_dryRun = result is WatchlistSyncChanges changes ? changes : null;
+		_dryRun = result is WatchlistSyncSummary changes ? changes : null;
 		_dryRunFailed = result is WatchlistSyncRemoteFailed;
 	}
 
@@ -82,9 +82,9 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	[Then("the sync result is:")]
 	public async Task ThenSyncResultIs(DataTable table)
 	{
-		if (_syncResult is not WatchlistSyncChanges success)
+		if (_syncResult is not WatchlistSyncSummary success)
 		{
-			await Assert.That(_syncResult is WatchlistSyncChanges).IsTrue();
+			await Assert.That(_syncResult is WatchlistSyncSummary).IsTrue();
 			return;
 		}
 		var row = table.CreateSet<SyncResultRow>().Single();
@@ -97,7 +97,7 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	}
 
 	[Then("the sync is unchanged")]
-	public async Task ThenSyncIsUnchanged() => await Assert.That(_syncResult is WatchlistSyncChanges { TotalChanges: 0 }).IsTrue();
+	public async Task ThenSyncIsUnchanged() => await Assert.That(_syncResult is WatchlistSyncSummary { TotalChanges: 0 }).IsTrue();
 
 	[Then("the sync reports a remote failure")]
 	public async Task ThenSyncReportsRemoteFailure() => await Assert.That(_syncResult is WatchlistSyncRemoteFailed).IsTrue();

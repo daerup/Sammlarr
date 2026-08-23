@@ -38,7 +38,7 @@ public class WatchlistSyncEngineTests
 
 		gate.SetResult();
 		var firstResult = await first;
-		await Assert.That(firstResult is WatchlistSyncChanges).IsTrue();
+		await Assert.That(firstResult is WatchlistSyncSummary).IsTrue();
 	}
 
 	[Test]
@@ -50,7 +50,7 @@ public class WatchlistSyncEngineTests
 		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
 
 		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistDelivery(mediaId, WatchlistOperationAction.Add, WatchlistDeliveryStatus.Pending, 0)]);
+		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0)]);
 
 		var publisher = new RecordingPublisher();
 
@@ -58,9 +58,9 @@ public class WatchlistSyncEngineTests
 
 		var result = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
-		await Assert.That(result is WatchlistSyncChanges).IsTrue();
+		await Assert.That(result is WatchlistSyncSummary).IsTrue();
 		outbox.EnqueueAsync(WatchlistOperationAction.Add, Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
-		var triggers = publisher.Published.OfType<PushWatchlistOperation>().ToList();
+		var triggers = publisher.Published.OfType<WatchlistPushRequest>().ToList();
 		await Assert.That(triggers.Count).IsEqualTo(1);
 		await Assert.That(triggers[0].MediaId).IsEqualTo(mediaId);
 	}

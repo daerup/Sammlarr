@@ -3,7 +3,7 @@ using Domain.Watchlist.Outbox;
 
 namespace Domain.Watchlist.Sync;
 
-public record WatchlistSyncChanges(WatchlistDelta Pull, WatchlistDelta Push, IReadOnlyList<MediaId> NoOps)
+public record WatchlistSyncSummary(WatchlistDelta Pull, WatchlistDelta Push, IReadOnlyList<MediaId> NoOps)
 {
 	private int Pulled => Pull.Adds.Count;
 	private int Removed => Pull.Removes.Count;

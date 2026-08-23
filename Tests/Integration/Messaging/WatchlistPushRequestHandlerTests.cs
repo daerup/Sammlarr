@@ -14,7 +14,7 @@ using TestInfrastructure;
 
 namespace Integration.Tests.Messaging;
 
-public class WatchlistPushHandlerTests
+public class WatchlistPushRequestHandlerTests
 {
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
@@ -24,14 +24,16 @@ public class WatchlistPushHandlerTests
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-1", MediaType.Movie);
 
-		var outbox = OutboxWith(new WatchlistDelivery(mediaId, WatchlistOperationAction.Add, WatchlistDeliveryStatus.Pending, 0));
+		var outbox = OutboxWith(new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0));
 		var provider = ProviderPushing(external, success: true);
+		var feed = IWatchlistOutboxEventFeed.Mock();
 
-		await Handle(new PushWatchlistOperation(User, mediaId), outbox, provider, Externals(mediaId, external));
+		await Handle(new WatchlistPushRequest(User, mediaId), outbox, provider, Externals(mediaId, external), feed: feed);
 
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
-		outbox.RecordFailureAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistDeliveryStatus>(), Any()).WasCalled(Times.Never);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistOutboxState>(), Any()).WasCalled(Times.Never);
+		feed.Publish(new WatchlistOutboxEvent(User, mediaId, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -42,7 +44,7 @@ public class WatchlistPushHandlerTests
 		var outbox = OutboxWith(null);
 		var provider = IWatchlistProvider.Mock();
 
-		await Handle(new PushWatchlistOperation(User, mediaId), outbox, provider, Externals());
+		await Handle(new WatchlistPushRequest(User, mediaId), outbox, provider, Externals());
 
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Never);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Never);
@@ -53,13 +55,13 @@ public class WatchlistPushHandlerTests
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 
-		var outbox = OutboxWith(new WatchlistDelivery(mediaId, WatchlistOperationAction.Add, WatchlistDeliveryStatus.Pending, 0));
+		var outbox = OutboxWith(new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0));
 		var provider = IWatchlistProvider.Mock();
 
-		await Handle(new PushWatchlistOperation(User, mediaId), outbox, provider, Externals());
+		await Handle(new WatchlistPushRequest(User, mediaId), outbox, provider, Externals());
 
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Never);
-		outbox.RecordFailureAsync(Any<IEnumerable<MediaId>>(), WatchlistDeliveryStatus.Failed, Any()).WasCalled(Times.Once);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WatchlistOutboxState.Failed, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -68,13 +70,13 @@ public class WatchlistPushHandlerTests
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-2", MediaType.Movie);
 
-		var outbox = OutboxWith(new WatchlistDelivery(mediaId, WatchlistOperationAction.Remove, WatchlistDeliveryStatus.Pending, 0));
+		var outbox = OutboxWith(new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Remove, WatchlistOutboxState.Pending, 0));
 		var provider = ProviderPushing(external, success: false);
 
 		var threw = false;
 		try
 		{
-			await Handle(new PushWatchlistOperation(User, mediaId), outbox, provider, Externals(mediaId, external));
+			await Handle(new WatchlistPushRequest(User, mediaId), outbox, provider, Externals(mediaId, external));
 		}
 		catch (WatchlistPushFailedException)
 		{
@@ -82,7 +84,7 @@ public class WatchlistPushHandlerTests
 		}
 
 		await Assert.That(threw).IsTrue();
-		outbox.RecordFailureAsync(Any<IEnumerable<MediaId>>(), WatchlistDeliveryStatus.Pending, Any()).WasCalled(Times.Once);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WatchlistOutboxState.Pending, Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -91,12 +93,12 @@ public class WatchlistPushHandlerTests
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-3", MediaType.Movie);
 
-		var outbox = OutboxWith(new WatchlistDelivery(mediaId, WatchlistOperationAction.Add, WatchlistDeliveryStatus.Pending, 4));
+		var outbox = OutboxWith(new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 4));
 		var provider = ProviderPushing(external, success: false);
 
-		await Handle(new PushWatchlistOperation(User, mediaId), outbox, provider, Externals(mediaId, external));
+		await Handle(new WatchlistPushRequest(User, mediaId), outbox, provider, Externals(mediaId, external));
 
-		outbox.RecordFailureAsync(Any<IEnumerable<MediaId>>(), WatchlistDeliveryStatus.Failed, Any()).WasCalled(Times.Once);
+		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WatchlistOutboxState.Failed, Any()).WasCalled(Times.Once);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -105,18 +107,18 @@ public class WatchlistPushHandlerTests
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-9", MediaType.Movie);
-		var outbox = OutboxWith(new WatchlistDelivery(mediaId, WatchlistOperationAction.Add, WatchlistDeliveryStatus.Pending, 0));
+		var outbox = OutboxWith(new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0));
 		var provider = ProviderPushing(external, success: true);
 
 		var userScope = IUserScope.Mock();
 		userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
 
-		await Handle(new PushWatchlistOperation(User, mediaId), outbox, provider, Externals(mediaId, external), userScope);
+		await Handle(new WatchlistPushRequest(User, mediaId), outbox, provider, Externals(mediaId, external), userScope);
 
 		userScope.AsAsync(User, Any()).WasCalled(Times.Once);
 	}
 
-	private static Mock<IWatchlistOutbox> OutboxWith(WatchlistDelivery? pending)
+	private static Mock<IWatchlistOutbox> OutboxWith(WatchlistOutboxEntry? pending)
 	{
 		var outbox = IWatchlistOutbox.Mock();
 		outbox.FindPendingAsync(Any<MediaId>(), Any()).Returns(pending);
@@ -126,17 +128,18 @@ public class WatchlistPushHandlerTests
 	private static Mock<IWatchlistProvider> ProviderPushing(IExternalMediaId external, bool success)
 	{
 		var provider = IWatchlistProvider.Mock();
-		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(new WatchlistPushResult(external, success)));
-		provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(new WatchlistPushResult(external, success)));
+		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(new WatchlistPushAck(external, success)));
+		provider.RemoveFromWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(new WatchlistPushAck(external, success)));
 		return provider;
 	}
 
 	private static async Task Handle(
-		PushWatchlistOperation message,
+		WatchlistPushRequest message,
 		Mock<IWatchlistOutbox> outbox,
 		Mock<IWatchlistProvider> provider,
 		IReadOnlyDictionary<MediaId, IExternalMediaId> externals,
-		Mock<IUserScope>? userScope = null
+		Mock<IUserScope>? userScope = null,
+		Mock<IWatchlistOutboxEventFeed>? feed = null
 	)
 	{
 		if (userScope is null)
@@ -144,6 +147,8 @@ public class WatchlistPushHandlerTests
 			userScope = IUserScope.Mock();
 			userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
 		}
+
+		feed ??= IWatchlistOutboxEventFeed.Mock();
 
 		var config = IProviderConfigRepository.Mock();
 		config
@@ -165,7 +170,16 @@ public class WatchlistPushHandlerTests
 
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
 
-		await new WatchlistPushHandler().Handle(message, userScope.Object, outbox.Object, config.Object, mediaRepo.Object, index, CancellationToken.None);
+		await WatchlistPushRequestHandler.Handle(
+			message,
+			userScope.Object,
+			outbox.Object,
+			config.Object,
+			mediaRepo.Object,
+			index,
+			feed.Object,
+			CancellationToken.None
+		);
 	}
 
 	private static IReadOnlyDictionary<MediaId, IExternalMediaId> Externals(MediaId id, IExternalMediaId external) =>
