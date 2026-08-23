@@ -25,6 +25,7 @@
         <div class="relative media-card @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
             <MediaGridTile @key="renderKey"
                            Media="detail"
+                           Dimmed="@(IsDimmed?.Invoke(item) ?? false)"
                            OnClick="@(() => HandleTileClickAsync(item))"/>
             @if (IsEditMode)
             {
@@ -49,6 +50,7 @@
     [Parameter] public EventCallback<TItem> OnTileClick { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<TItem>> OnBulkRemove { get; set; }
     [Parameter] public RenderFragment<TItem>? Overlay { get; set; }
+    [Parameter] public Func<TItem, bool>? IsDimmed { get; set; }
     [Parameter] public string RemoveLabel { get; set; } = "Remove";
 
     private readonly HashSet<MediaId> _selected = new();

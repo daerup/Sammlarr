@@ -8,7 +8,7 @@ namespace DB.Data.Watchlist.Outbox;
 
 internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWatchlistOutbox
 {
-	public async Task<IReadOnlyList<WatchlistDelivery>> GetAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WatchlistOutboxEntry>> GetAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
@@ -19,21 +19,22 @@ internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbCont
 				Kind = outboxEntry.Action,
 				outboxEntry.Status,
 				outboxEntry.Attempts,
+				outboxEntry.AddedAt,
 			}
 		).ToListAsync(cancellationToken);
-		return rows.Select(row => new WatchlistDelivery(MediaId.From(row.MediaIdValue), row.Kind, row.Status, row.Attempts)).ToList();
+		return rows.Select(row => new WatchlistOutboxEntry(MediaId.From(row.MediaIdValue), row.Kind, row.Status, row.Attempts) { AddedAt = row.AddedAt }).ToList();
 	}
 
-	public async Task<WatchlistDelivery?> FindPendingAsync(MediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task<WatchlistOutboxEntry?> FindPendingAsync(MediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		var rawId = mediaId.Value;
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx
 			.WatchlistOutbox.AsNoTracking()
-			.Where(o => o.Media.Id == rawId && o.Status == WatchlistDeliveryStatus.Pending)
+			.Where(o => o.Media.Id == rawId && o.Status == WatchlistOutboxState.Pending)
 			.Select(o => new { Kind = o.Action, o.Attempts })
 			.FirstOrDefaultAsync(cancellationToken);
-		return row is null ? null : new WatchlistDelivery(mediaId, row.Kind, WatchlistDeliveryStatus.Pending, row.Attempts);
+		return row is null ? null : new WatchlistOutboxEntry(mediaId, row.Kind, WatchlistOutboxState.Pending, row.Attempts);
 	}
 
 	public async Task EnqueueAsync(WatchlistOperationAction action, IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
@@ -49,14 +50,20 @@ internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbCont
 
 		var matchedMedia = await ctx.Media.Where(m => rawIds.Contains(m.Id)).ToListAsync(cancellationToken);
 		var existingByMediaId = await ctx.WatchlistOutbox.Where(o => rawIds.Contains(o.Media.Id)).ToDictionaryAsync(o => o.Media.Id, cancellationToken);
+		var addedAtByMediaId = await ctx
+			.Watchlist.Where(w => rawIds.Contains(w.Media.Id))
+			.Select(w => new { w.Media.Id, w.CreatedAt })
+			.ToDictionaryAsync(entry => entry.Id, entry => entry.CreatedAt, cancellationToken);
 
 		foreach (var media in matchedMedia)
 		{
+			var addedAt = addedAtByMediaId.GetValueOrDefault(media.Id);
 			if (existingByMediaId.TryGetValue(media.Id, out var existing))
 			{
 				existing.Action = action;
-				existing.Status = WatchlistDeliveryStatus.Pending;
+				existing.Status = WatchlistOutboxState.Pending;
 				existing.Attempts = 0;
+				existing.AddedAt = addedAt;
 				continue;
 			}
 			ctx.WatchlistOutbox.Add(
@@ -64,7 +71,8 @@ internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbCont
 				{
 					Media = media,
 					Action = action,
-					Status = WatchlistDeliveryStatus.Pending,
+					Status = WatchlistOutboxState.Pending,
+					AddedAt = addedAt,
 				}
 			);
 		}
@@ -84,7 +92,7 @@ internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbCont
 		await ctx.WatchlistOutbox.Where(o => rawIds.Contains(o.Media.Id)).ExecuteDeleteAsync(cancellationToken);
 	}
 
-	public async Task RecordFailureAsync(IEnumerable<MediaId> mediaIds, WatchlistDeliveryStatus status, CancellationToken cancellationToken = default)
+	public async Task RecordFailedAttemptAsync(IEnumerable<MediaId> mediaIds, WatchlistOutboxState resultingState, CancellationToken cancellationToken = default)
 	{
 		var rawIds = mediaIds.Select(id => id.Value).Distinct().ToList();
 		if (rawIds.Count == 0)
@@ -95,6 +103,6 @@ internal sealed class WatchlistOutboxRepository(IDbContextFactory<SammlarrDbCont
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await ctx
 			.WatchlistOutbox.Where(o => rawIds.Contains(o.Media.Id))
-			.ExecuteUpdateAsync(s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1).SetProperty(o => o.Status, status), cancellationToken);
+			.ExecuteUpdateAsync(s => s.SetProperty(o => o.Attempts, o => o.Attempts + 1).SetProperty(o => o.Status, resultingState), cancellationToken);
 	}
 }

@@ -1,0 +1,55 @@
+<span class="push-badge-wrap" style="@AccentStyle">
+    <BbBadge Variant="BadgeVariant.Secondary" Class="push-badge">
+        <BbTooltip>
+            <BbTooltipTrigger AsChild="false" Class="p-0">
+                <span class="push-badge-content inline-flex items-center justify-center" aria-label="@Label">
+                    <LucideIcon Name="@Icon" Size="14" Color="currentColor"/>
+                </span>
+            </BbTooltipTrigger>
+            <BbTooltipContent>@Label</BbTooltipContent>
+        </BbTooltip>
+    </BbBadge>
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public required PushDotState State { get; set; }
+
+    [Parameter]
+    public int Attempts { get; set; }
+
+    [Parameter]
+    public string ProviderName { get; set; } = "the watchlist provider";
+
+    private string Icon =>
+        State switch
+        {
+            PushDotState.Pending => "cloud-upload",
+            PushDotState.Pushed => "cloud-check",
+            PushDotState.Failed => "triangle-alert",
+            PushDotState.Removed => "trash-2",
+        };
+
+    private string Accent =>
+        State switch
+        {
+            PushDotState.Pending => "#f59e0b",
+            PushDotState.Pushed => "#22c55e",
+            PushDotState.Failed => "#ef4444",
+            PushDotState.Removed => "var(--destructive)",
+        };
+
+    private string AccentStyle => $"--wl-accent: {Accent};";
+
+    private string Label =>
+        State switch
+        {
+            PushDotState.Pushed => $"Synced to {ProviderName}",
+            PushDotState.Failed => $"Synchronization failed after {AttemptText(Attempts)}",
+            PushDotState.Removed => $"Pending removal from {ProviderName}",
+            PushDotState.Pending when Attempts == 0 => "Synchronization pending",
+            PushDotState.Pending => $"Synchronization pending (attempt {Attempts + 1})",
+        };
+
+    private static string AttemptText(int attempts) => $"{attempts} attempt{(attempts == 1 ? "" : "s")}";
+}

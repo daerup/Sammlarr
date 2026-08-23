@@ -3,4 +3,4 @@ using Domain.Media;
 
 namespace Contracts.Watchlist.Outbox;
 
-public sealed record PushWatchlistOperation(UserId UserId, MediaId MediaId);
+public sealed record WatchlistPushRequest(UserId UserId, MediaId MediaId);

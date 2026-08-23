@@ -378,6 +378,9 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("AddedAt")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Attempts")
                         .HasColumnType("INTEGER");
 

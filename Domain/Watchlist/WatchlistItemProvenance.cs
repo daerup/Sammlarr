@@ -6,6 +6,8 @@ public readonly record struct RemoteOrigin(WatchlistProvider Provider);
 
 public readonly record struct ManualOrigin(ManualSource Source);
 
+public enum ManualSource { Unknown, Search, Browse, FeedPreview }
+
 public readonly record struct FeedOrigin(Guid FeedId, string FeedName, FeedProvider Provider);
 
 public readonly record struct OrphanedOrigin(string FormerFeedName);

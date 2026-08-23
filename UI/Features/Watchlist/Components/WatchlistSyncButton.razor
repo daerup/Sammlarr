@@ -9,7 +9,7 @@
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 
-@if (_isSyncing)
+@if (_isSyncing || IsSyncing)
 {
     <HoverButton Disabled="true" Color="@BrandColor" Class="whitespace-nowrap">
         <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -47,6 +47,13 @@ else
             </HoverButton>
         </BbHoverCardTrigger>
         <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="p-0 watchlist-sync-preview">
+            @if (OutboxEntries.Count > 0)
+            {
+                <div class="px-4 py-2 flex items-center gap-2 text-sm @(HasFailedEntries ? "text-destructive" : "text-muted-foreground")" style="border-bottom: 1px solid var(--border);">
+                    <LucideIcon Name="send" Size="14"/>
+                    <span>@OutboxSummary</span>
+                </div>
+            }
             <div class="px-4 py-3" style="@PreviewHeaderStyle">
                 <p class="text-xs uppercase tracking-wide font-medium text-muted-foreground">Sync preview</p>
                 @if (_dryRunError is not null)
@@ -113,10 +120,43 @@ else
     [Parameter]
     public string? BrandColor { get; set; }
 
+    [Parameter]
+    public IReadOnlyCollection<WatchlistOutboxEntry> OutboxEntries { get; set; } = [];
+
+    [Parameter]
+    public EventCallback OnStatusRefresh { get; set; }
+
+    [Parameter]
+    public bool IsSyncing { get; set; }
+
+    [Parameter]
+    public EventCallback OnSyncStarted { get; set; }
+
+    private bool HasFailedEntries => OutboxEntries.Any(entry => entry.Status is WatchlistOutboxState.Failed);
+
+    private string OutboxSummary
+    {
+        get
+        {
+            var failed = OutboxEntries.Count(entry => entry.Status is WatchlistOutboxState.Failed);
+            var inFlight = OutboxEntries.Count - failed;
+            var parts = new List<string>(2);
+            if (inFlight > 0)
+            {
+                parts.Add($"{inFlight} in flight");
+            }
+            if (failed > 0)
+            {
+                parts.Add($"{failed} failed");
+            }
+            return string.Join(" · ", parts);
+        }
+    }
+
     private const string PreviewHeaderStyle = "background: oklch(from var(--muted) calc(l - 0.08) c h); border-bottom: 2px solid #09090b;";
 
     private readonly CancellationTokenSource _cts = new();
-    private WatchlistSyncChanges? _dryRun;
+    private WatchlistSyncSummary? _dryRun;
     private string? _dryRunError;
     private Dictionary<MediaId, MediaLookup> _metadata = [];
     private bool _isSyncing;
@@ -135,7 +175,12 @@ else
 
     private async Task OnHoverChanged(bool open)
     {
-        if (!open || _dryRunRequested)
+        if (!open)
+        {
+            return;
+        }
+        await OnStatusRefresh.InvokeAsync();
+        if (_dryRunRequested)
         {
             return;
         }
@@ -154,7 +199,7 @@ else
         var result = await SyncEngine.DryRunAsync(CurrentUser, _cts.Token);
         switch (result)
         {
-            case WatchlistSyncChanges changes:
+            case WatchlistSyncSummary changes:
                 _dryRun = changes;
                 _metadata = await LoadMetadataAsync(changes);
                 break;
@@ -169,7 +214,7 @@ else
         StateHasChanged();
     }
 
-    private Task<Dictionary<MediaId, MediaLookup>> LoadMetadataAsync(WatchlistSyncChanges dryRun) =>
+    private Task<Dictionary<MediaId, MediaLookup>> LoadMetadataAsync(WatchlistSyncSummary dryRun) =>
         DryRunMetadataLoader.LoadAsync(Media, dryRun, DryRunPreviewLimit, _cts.Token);
 
     public async Task SyncAsync()
@@ -182,14 +227,14 @@ else
         StateHasChanged();
         try
         {
+            await OnSyncStarted.InvokeAsync();
             var result = await SyncEngine.SyncAsync(new ManualTrigger(), CurrentUser, _cts.Token);
             switch (result)
             {
-                case WatchlistSyncChanges { TotalChanges: 0 } changes:
-                    Notifier.Info(changes.ToString(), null);
+                case WatchlistSyncSummary { Push.Count: > 0 }:
                     break;
-                case WatchlistSyncChanges changes:
-                    Notifier.Success(changes.ToString(), null);
+                case WatchlistSyncSummary changes:
+                    Notifier.Info(changes.ToString(), null);
                     break;
                 case WatchlistSyncAlreadyRunning running:
                     Notifier.Info(running.ToString(), null);

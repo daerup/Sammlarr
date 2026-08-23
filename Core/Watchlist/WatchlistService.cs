@@ -21,12 +21,25 @@ internal sealed class WatchlistService(
 	IProviderConfigRepository configRepository
 ) : IWatchlistService
 {
-	public async IAsyncEnumerable<WatchlistedMedia> GetWatchlistItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<WatchlistedMedia> GetWatchlistItemsAsync(
+		WatchlistQueryOptions options,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
 	{
-		var entries = (await repository.GetEntriesAsync(cancellationToken)).OrderByDescending(e => e.AddedAt).ToList();
-		var pipeline = media.GetDetailsAsync(entries.Select(e => e.MediaId), cancellationToken).ZipAwait(entries, cancellationToken);
+		var entries = (await repository.GetEntriesAsync(cancellationToken)).ToList();
 
-		await foreach (var (detail, entry) in pipeline.WhereSuccessAwait())
+		if (options.IncludeRemoved)
+		{
+			var removals = (await outbox.GetAsync(cancellationToken))
+				.Where(op => op.Action == WatchlistOperationAction.Remove)
+				.Select(op => new WatchlistEntry(op.MediaId, op.AddedAt, new ManualOrigin(ManualSource.Unknown)));
+			entries = [.. entries, .. removals];
+		}
+
+		var ordered = entries.OrderByDescending(entry => entry.AddedAt).ToList();
+		var pipeline = media.GetDetailsAsync(ordered.Select(entry => entry.MediaId), cancellationToken).ZipAwait(ordered, cancellationToken);
+
+		await foreach (var (detail, entry) in pipeline.WhereSuccessAwait().WithCancellation(cancellationToken))
 		{
 			yield return new WatchlistedMedia(detail, entry.AddedAt, entry.Provenance);
 		}

@@ -1,19 +1,26 @@
 @page "/watchlist"
 @using Contracts
 @using Contracts.Auth
+@using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Media.Search
 @using Contracts.Settings
 @using Contracts.Watchlist
+@using Contracts.Watchlist.Outbox
+@using Domain.Identity
+@using Domain.Watchlist.Outbox
 @using global::Shared
 @using UI.Features.Watchlist.Components
 @using UI.Shared.Services.Branding
 @implements IDisposable
 @inject IWatchlistService WatchlistService
+@inject IWatchlistOutbox Outbox
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject MediaProviderBrandingService BrandingService
 @inject Notifier Notifier
+@inject IWatchlistOutboxEventFeed OutboxEventFeed
+@inject ICurrentUser CurrentUser
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -52,10 +59,17 @@ else
                             Bulk edit
                         </BbButton>
                     }
+                    @if (_removedItems.Count > 0 && !_isEditMode)
+                    {
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="ToggleShowRemoved" Class="whitespace-nowrap">
+                            <LucideIcon Name="@(_showRemoved ? "eye-off" : "eye")" Size="16" Class="mr-2"/>
+                            @(_showRemoved ? "Hide removed" : "Show removed") (@_removedItems.Count)
+                        </BbButton>
+                    }
                     <ProtectedComponent GuardState="IsPlexConnected"
                                         AuthProvider="@_providerSettings.AuthProvider"
                                         DeniedActionDescription="sync your watchlist">
-                        <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
+                        <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadWatchlistAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@WatchlistBrandColor" OutboxEntries="_outboxEntries.Values"/>
                     </ProtectedComponent>
                 </div>
             </ProtectedSection>
@@ -83,38 +97,47 @@ else
                         </div>
                     </div>
                 }
-                else if (_items is not null && _items.Count == 0)
+                else if (_items is not null && GridItems.Count == 0)
                 {
                     <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
                         <LucideIcon Name="inbox" Size="36" Class="mx-auto text-muted-foreground"/>
                         <h3 class="text-base font-semibold tracking-tight">Your watchlist is empty.</h3>
-                        <p class="text-sm text-muted-foreground leading-relaxed">Click Sync to load it
+                        <p class="text-sm text-muted-foreground leading-relaxed">Click Sync above to load it
                             from @_providerSettings.WatchlistProvider.GetDescription(), or add a title with <span
                                 class="font-medium text-foreground">Ctrl+K</span>.</p>
-                        <ProtectedComponent GuardState="IsPlexConnected"
-                                            AuthProvider="@_providerSettings.AuthProvider"
-                                            DeniedActionDescription="sync your watchlist">
-                            <div class="flex justify-center">
-                                <WatchlistSyncButton OnSynced="LoadWatchlistAsync" BrandColor="@WatchlistBrandColor"/>
-                            </div>
-                        </ProtectedComponent>
                     </div>
                 }
                 else if (_items is not null)
                 {
                     <BulkEditableMediaGrid TItem="WatchlistedMedia"
-                                           Items="_items"
+                                           Items="GridItems"
                                            Detail="@(i => i.Media)"
                                            Key="@(i => i.Media.Id)"
                                            IsEditMode="_isEditMode"
                                            IsEditModeChanged="@(v => _isEditMode = v)"
+                                           IsDimmed="@(gridItem => _removedIds.Contains(gridItem.Media.Id))"
                                            OnTileClick="SelectItem"
                                            OnBulkRemove="RemoveBulkAsync"
                                            RemoveLabel="Remove from Watchlist">
                         <Overlay Context="item">
-                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
-                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt"/>
-                            </div>
+                            @if (_removedIds.Contains(item.Media.Id))
+                            {
+                                <div class="absolute top-2 right-2 z-10">
+                                    <PushStatusDot State="PushDotState.Removed" ProviderName="@WatchlistProviderName"/>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                                    <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt"/>
+                                </div>
+                                @if (PushDotFor(item.Media.Id) is { } dot)
+                                {
+                                    <div class="absolute top-2 right-2 z-10">
+                                        <PushStatusDot State="dot.State" Attempts="dot.Attempts" ProviderName="@WatchlistProviderName"/>
+                                    </div>
+                                }
+                            }
                         </Overlay>
                     </BulkEditableMediaGrid>
                 }
@@ -126,7 +149,7 @@ else
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedItem?.Media.ToMatch()"
-                  ButtonAction="RemoveSelectedFromWatchlistAsync"
+                  ButtonAction="ApplyDetailActionAsync"
                   ButtonText="GetRemoveButtonText"
                   ButtonIcon="GetRemoveButtonIcon"/>
 
@@ -145,6 +168,13 @@ else
 
 @code {
     private List<WatchlistedMedia>? _items;
+    private Dictionary<MediaId, WatchlistOutboxEntry> _outboxEntries = [];
+    private List<WatchlistedMedia> _removedItems = [];
+    private HashSet<MediaId> _removedIds = [];
+    private bool _showRemoved;
+    private readonly HashSet<MediaId> _pushed = [];
+    private UserId? _userId;
+    private bool _syncing;
     private WatchlistedMedia? _selectedItem;
     private bool _isLoading;
     private bool _isRemoving;
@@ -162,7 +192,15 @@ else
     private string PageHeading => _providerSettings is null ? "Watchlist" : $"{_providerSettings.WatchlistProvider.GetDescription()} Watchlist";
     private string PageDescription => _providerSettings is null ? "Your saved movies and shows." : $"Your saved movies and shows from {_providerSettings.WatchlistProvider.GetDescription()}";
     private string? WatchlistBrandColor => _providerSettings is null ? null : BrandingService.GetBrandingInfo(_providerSettings.WatchlistProvider.AsMediaProvider()).BrandColor;
+    private string WatchlistProviderName => _providerSettings is null ? "your watchlist provider" : _providerSettings.WatchlistProvider.GetDescription();
     private bool IsSignedIn() => _isSignedIn;
+
+    private IReadOnlyList<WatchlistedMedia> GridItems =>
+        _showRemoved && !_isEditMode && _items is not null
+            ? [.. _items.Concat(_removedItems).OrderByDescending(item => item.AddedAt)]
+            : _items ?? [];
+
+    private void ToggleShowRemoved() => _showRemoved = !_showRemoved;
 
     private bool IsPlexConnected() => _hasPlexAccess;
 
@@ -174,6 +212,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        OutboxEventFeed.Published += OnOutboxEvent;
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
     }
 
@@ -183,6 +222,7 @@ else
 
         if (!hasAccess)
         {
+            _userId = null;
             _items = null;
             _errorMessage = null;
             _isLoading = false;
@@ -191,6 +231,7 @@ else
             return;
         }
 
+        _userId = CurrentUser.Id;
         await LoadWatchlistAsync();
     }
 
@@ -202,7 +243,12 @@ else
 
         try
         {
-            _items = await WatchlistService.GetWatchlistItemsAsync(_cancellationTokenSource.Token).ToListAsync(_cancellationTokenSource.Token);
+            await LoadOutboxAsync();
+            _removedIds = _outboxEntries.Values.Where(entry => entry.Action == WatchlistOperationAction.Remove).Select(entry => entry.MediaId).ToHashSet();
+
+            var all = await WatchlistService.GetWatchlistItemsAsync(WatchlistQueryOptions.WithRemoved, _cancellationTokenSource.Token).ToListAsync(_cancellationTokenSource.Token);
+            _items = all.Where(item => !_removedIds.Contains(item.Media.Id)).ToList();
+            _removedItems = all.Where(item => _removedIds.Contains(item.Media.Id)).ToList();
 
             if (_selectedItem is not null)
             {
@@ -227,9 +273,125 @@ else
 
     private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
 
-    private static string GetRemoveButtonText() => "Remove from Watchlist";
+    private async Task LoadOutboxAsync()
+    {
+        _outboxEntries = (await Outbox.GetAsync(_cancellationTokenSource.Token)).ToDictionary(entry => entry.MediaId);
+        CompleteIfDrained();
+        StateHasChanged();
+    }
 
-    private static string GetRemoveButtonIcon() => "x";
+    private void StartSync()
+    {
+        _pushed.Clear();
+        _syncing = true;
+        StateHasChanged();
+    }
+
+    private void CompleteIfDrained()
+    {
+        if (!_syncing || _outboxEntries.Values.Any(entry => entry.Status == WatchlistOutboxState.Pending))
+        {
+            return;
+        }
+
+        _syncing = false;
+        _ = RefreshPendingAsync();
+        var pushed = _pushed.Count;
+        var failed = _outboxEntries.Values.Count(entry => entry.Status == WatchlistOutboxState.Failed);
+
+        if (pushed == 0 && failed == 0)
+        {
+            _pushed.Clear();
+            return;
+        }
+        if (failed == 0)
+        {
+            Notifier.Success($"Synced {pushed} item{(pushed == 1 ? "" : "s")} to {WatchlistProviderName}.");
+        }
+        else
+        {
+            Notifier.Warning($"Synced {pushed} to {WatchlistProviderName} — {failed} failed.");
+        }
+
+        _ = ClearPushedAfterDelayAsync();
+    }
+
+    private async Task ClearPushedAfterDelayAsync()
+    {
+        try
+        {
+            await Task.Delay(1000, _cancellationTokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        _pushed.Clear();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private (PushDotState State, int Attempts)? PushDotFor(MediaId mediaId)
+    {
+        if (_pushed.Contains(mediaId))
+        {
+            return (PushDotState.Pushed, 0);
+        }
+        if (_outboxEntries.TryGetValue(mediaId, out var entry))
+        {
+            var state = entry.Status == WatchlistOutboxState.Failed ? PushDotState.Failed : PushDotState.Pending;
+            return (state, entry.Attempts);
+        }
+        return null;
+    }
+
+    private void OnOutboxEvent(WatchlistOutboxEvent outboxEvent)
+    {
+        if (_userId is not { } current || outboxEvent.UserId != current)
+        {
+            return;
+        }
+        _ = InvokeAsync(() => ApplyOutboxEvent(outboxEvent));
+    }
+
+    private void ApplyOutboxEvent(WatchlistOutboxEvent outboxEvent)
+    {
+        switch (outboxEvent.Kind)
+        {
+            case WatchlistOutboxEventKind.Pushed:
+                _outboxEntries.Remove(outboxEvent.MediaId);
+                if (_removedIds.Remove(outboxEvent.MediaId))
+                {
+                    _removedItems.RemoveAll(item => item.Media.Id == outboxEvent.MediaId);
+                }
+                if (_syncing)
+                {
+                    _pushed.Add(outboxEvent.MediaId);
+                }
+                break;
+            case WatchlistOutboxEventKind.Abandoned:
+                if (_outboxEntries.TryGetValue(outboxEvent.MediaId, out var failedRow))
+                {
+                    _outboxEntries[outboxEvent.MediaId] = failedRow with { Status = WatchlistOutboxState.Failed };
+                }
+                break;
+            case WatchlistOutboxEventKind.Retrying:
+                if (_outboxEntries.TryGetValue(outboxEvent.MediaId, out var retryRow))
+                {
+                    _outboxEntries[outboxEvent.MediaId] = retryRow with { Attempts = retryRow.Attempts + 1 };
+                }
+                break;
+        }
+        CompleteIfDrained();
+        StateHasChanged();
+    }
+
+    private bool IsSelectedRemoved => _selectedItem is not null && _removedIds.Contains(_selectedItem.Media.Id);
+
+    private string GetRemoveButtonText() => IsSelectedRemoved ? "Cancel removal" : "Remove from Watchlist";
+
+    private string GetRemoveButtonIcon() => IsSelectedRemoved ? "rotate-ccw" : "x";
+
+    private Task ApplyDetailActionAsync() => IsSelectedRemoved ? CancelRemovalAsync() : RemoveSelectedFromWatchlistAsync();
 
     private void SelectItem(WatchlistedMedia item)
     {
@@ -251,6 +413,28 @@ else
             CloseSelectedMedia();
             await LoadWatchlistAsync();
             await RefreshPendingAsync();
+        }
+        finally
+        {
+            _isRemoving = false;
+        }
+    }
+
+    private async Task CancelRemovalAsync()
+    {
+        if (_isRemoving || _selectedItem is null)
+        {
+            return;
+        }
+
+        _isRemoving = true;
+        try
+        {
+            await WatchlistService.AddToWatchlistAsync([_selectedItem.Media.Id], new ManualOrigin(ManualSource.Unknown), _cancellationTokenSource.Token);
+            CloseSelectedMedia();
+            await LoadWatchlistAsync();
+            await RefreshPendingAsync();
+            Notifier.Success("Removal cancelled.");
         }
         finally
         {
@@ -331,6 +515,7 @@ else
 
     public void Dispose()
     {
+        OutboxEventFeed.Published -= OnOutboxEvent;
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }

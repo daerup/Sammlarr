@@ -92,7 +92,7 @@ public class WatchlistManagementSteps(SammlarrScenarioContext sammlarr, LocalMed
 		{
 			var mediaId = local.MediaIds[row.Key!];
 			var kind = Enum.Parse<WatchlistOperationAction>(row.Operation!, ignoreCase: true);
-			await Assert.That(actual.Any(delivery => delivery.MediaId == mediaId && delivery.Action == kind)).IsTrue();
+			await Assert.That(actual.Any(entry => entry.MediaId == mediaId && entry.Action == kind)).IsTrue();
 			if (row.Attempts is { } attempts)
 			{
 				sammlarr.DbContext.ChangeTracker.Clear();

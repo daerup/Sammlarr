@@ -9,7 +9,9 @@ internal record WatchlistOutboxRow : IUserOwned
 
 	public required WatchlistOperationAction Action { get; set; }
 
-	public WatchlistDeliveryStatus Status { get; set; }
+	public WatchlistOutboxState Status { get; set; }
 
 	public int Attempts { get; set; }
+
+	public DateTimeOffset AddedAt { get; set; }
 }

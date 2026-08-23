@@ -6,6 +6,7 @@ using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Processing;
 using Contracts.Watchlist;
+using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Core.Auth;
 using Core.Blacklist;
@@ -33,6 +34,7 @@ public class CoreModule : IServiceModule
 		services.AddTracedScoped<IBlacklistService, BlacklistService>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
+		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();
 		services.AddScoped<MediaIdResolver>();
 		services.AddScoped<IUnresolvedMediaCache, UnresolvedMediaCache>();
 		services.AddScoped<MediaMetadataResolver>();

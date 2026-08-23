@@ -58,6 +58,10 @@
     filter: grayscale(0.85) brightness(60%);
 }
 
+.media-card-dimmed {
+    filter: brightness(0.4) saturate(0.85);
+}
+
 .tile-unresolved-indicator {
     display: inline-flex;
     align-items: center;

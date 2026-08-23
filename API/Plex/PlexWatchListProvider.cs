@@ -38,7 +38,7 @@ internal class PlexWatchListProvider(PlexClient plexClient, ILogger<PlexWatchLis
 		}
 	}
 
-	public async IAsyncEnumerable<WatchlistPushResult> AddToWatchlistAsync(
+	public async IAsyncEnumerable<WatchlistPushAck> AddToWatchlistAsync(
 		IEnumerable<IExternalMediaId> ids,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -50,7 +50,7 @@ internal class PlexWatchListProvider(PlexClient plexClient, ILogger<PlexWatchLis
 		}
 	}
 
-	public async IAsyncEnumerable<WatchlistPushResult> RemoveFromWatchlistAsync(
+	public async IAsyncEnumerable<WatchlistPushAck> RemoveFromWatchlistAsync(
 		IEnumerable<IExternalMediaId> ids,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -62,7 +62,7 @@ internal class PlexWatchListProvider(PlexClient plexClient, ILogger<PlexWatchLis
 		}
 	}
 
-	private async Task<WatchlistPushResult> PushAsync(string endpoint, IExternalMediaId id, CancellationToken cancellationToken)
+	private async Task<WatchlistPushAck> PushAsync(string endpoint, IExternalMediaId id, CancellationToken cancellationToken)
 	{
 		var formattedEndpoint = string.Format(endpoint, Uri.EscapeDataString(id.Value));
 		try
@@ -72,12 +72,12 @@ internal class PlexWatchListProvider(PlexClient plexClient, ILogger<PlexWatchLis
 			{
 				logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, id.Value, formattedEndpoint);
 			}
-			return new WatchlistPushResult(id, response.IsSuccessStatusCode);
+			return new WatchlistPushAck(id, response.IsSuccessStatusCode);
 		}
 		catch (Exception ex)
 		{
 			logger.LogWarning(ex, "Plex watchlist push threw for {ExternalId} at {Endpoint}", id.Value, formattedEndpoint);
-			return new WatchlistPushResult(id, false);
+			return new WatchlistPushAck(id, false);
 		}
 	}
 
