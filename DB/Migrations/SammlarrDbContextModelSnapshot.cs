@@ -366,6 +366,89 @@ namespace DB.Migrations
                     b.ToTable("MediaRatings");
                 });
 
+            modelBuilder.Entity("DB.Data.Notifications.NotificationSubscriptionRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TargetId", "EventType")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "EventType");
+
+                    b.ToTable("NotificationSubscriptions");
+                });
+
+            modelBuilder.Entity("DB.Data.Notifications.NotificationTargetRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AppToken")
+                        .HasMaxLength(4096)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SigningSecret")
+                        .HasMaxLength(4096)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserKey")
+                        .HasMaxLength(4096)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Channel");
+
+                    b.ToTable("NotificationTargets");
+                });
+
             modelBuilder.Entity("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -537,6 +620,30 @@ namespace DB.Migrations
                         .IsRequired();
 
                     b.Navigation("Metadata");
+                });
+
+            modelBuilder.Entity("DB.Data.Notifications.NotificationSubscriptionRow", b =>
+                {
+                    b.HasOne("DB.Data.Notifications.NotificationTargetRow", null)
+                        .WithMany()
+                        .HasForeignKey("TargetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DB.Data.Notifications.NotificationTargetRow", b =>
+                {
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", b =>

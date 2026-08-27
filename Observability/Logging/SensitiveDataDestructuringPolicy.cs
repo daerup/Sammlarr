@@ -1,19 +1,20 @@
 using System.Collections.Concurrent;
 using System.Reflection;
+using Contracts;
 using Serilog.Core;
 using Serilog.Events;
 
 namespace Observability.Logging;
 
-internal sealed class SensitiveDataDestructuringPolicy : IDestructuringPolicy
+internal sealed class SensitiveDataDestructuringPolicy(IReadOnlyDictionary<Type, IReadOnlySet<string>> registry) : IDestructuringPolicy
 {
 	private const string Mask = "***";
 
-	private static readonly ConcurrentDictionary<Type, PropertyReader[]?> Plans = new();
+	private readonly ConcurrentDictionary<Type, PropertyReader[]?> _plans = new();
 
 	public bool TryDestructure(object value, ILogEventPropertyValueFactory propertyValueFactory, out LogEventPropertyValue? result)
 	{
-		var readers = Plans.GetOrAdd(value.GetType(), BuildPlan);
+		var readers = _plans.GetOrAdd(value.GetType(), BuildPlan);
 		if (readers is null)
 		{
 			result = null;
@@ -31,20 +32,22 @@ internal sealed class SensitiveDataDestructuringPolicy : IDestructuringPolicy
 		return true;
 	}
 
-	private static PropertyReader[]? BuildPlan(Type type)
+	private PropertyReader[]? BuildPlan(Type type)
 	{
+		var registered = registry.GetValueOrDefault(type);
+
 		var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
 			.Where(property => property.CanRead && property.GetIndexParameters().Length == 0)
 			.ToArray();
 
-		if (!properties.Any(property => property.IsDefined(typeof(SensitiveAttribute), inherit: true)))
+		bool IsSensitive(PropertyInfo property) => property.IsDefined(typeof(SensitiveAttribute), inherit: true) || (registered?.Contains(property.Name) ?? false);
+
+		if (!properties.Any(IsSensitive))
 		{
 			return null;
 		}
 
-		return properties
-			.Select(property => new PropertyReader(property.Name, property.GetValue, property.IsDefined(typeof(SensitiveAttribute), inherit: true)))
-			.ToArray();
+		return properties.Select(property => new PropertyReader(property.Name, property.GetValue, IsSensitive(property))).ToArray();
 	}
 
 	private sealed record PropertyReader(string Name, Func<object?, object?> Read, bool IsSensitive);
