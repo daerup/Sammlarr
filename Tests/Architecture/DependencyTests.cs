@@ -23,10 +23,10 @@ public class DependencyTests
 	}
 
 	[Test]
-	public async Task Observability_depends_only_on_Shared()
+	public async Task Observability_depends_only_on_the_kernel_and_contracts()
 	{
 		await Projects
-			.Observability.OnlyDependsOn(Projects.Shared)
+			.Observability.OnlyDependsOn(Projects.Shared, Projects.Contracts, Projects.Domain)
 			.AndPackages(Packages.OpenTelemetry, Packages.Serilog, Packages.DependencyInjection, Packages.Hosting, Packages.Logging);
 	}
 

@@ -1,4 +1,5 @@
-using Domain;
+using Contracts;
+using Domain.Notifications;
 using Observability.Logging;
 using Serilog;
 using Serilog.Core;
@@ -12,11 +13,15 @@ public class SensitiveDataDestructuringPolicyTests
 
 	private sealed record Plain(string Name);
 
+	private static SensitiveDataDestructuringPolicy WithModel() => new(SensitiveModel.Build());
+
+	private static SensitiveDataDestructuringPolicy WithoutModel() => new(new SensitiveModelBuilder().Build());
+
 	[Test]
-	public async Task Destructure_MasksSensitiveProperty_AndKeepsOthers()
+	public async Task Destructure_MasksAttributeSensitiveProperty_AndKeepsOthers()
 	{
 		var captured = new CapturingSink();
-		using var logger = new LoggerConfiguration().Destructure.With(new SensitiveDataDestructuringPolicy()).WriteTo.Sink(captured).CreateLogger();
+		using var logger = new LoggerConfiguration().Destructure.With(WithoutModel()).WriteTo.Sink(captured).CreateLogger();
 
 		logger.Information("Loaded {@Account}", new Account("john", "super-secret-token"));
 
@@ -30,10 +35,27 @@ public class SensitiveDataDestructuringPolicyTests
 	}
 
 	[Test]
+	public async Task Destructure_MasksRegistrySensitiveProperty_AndKeepsOthers()
+	{
+		var captured = new CapturingSink();
+		using var logger = new LoggerConfiguration().Destructure.With(WithModel()).WriteTo.Sink(captured).CreateLogger();
+
+		logger.Information("Loaded {@Config}", new WebhookConfig("https://example.test/hook", "whsec_super-secret"));
+
+		var structure = (StructureValue)captured.Last.Properties["Config"];
+		var url = ((ScalarValue)structure.Properties.Single(p => p.Name == "Url").Value).Value;
+		var secret = structure.Properties.Single(p => p.Name == "SigningSecret").Value.ToString();
+
+		await Assert.That(url).IsEqualTo("https://example.test/hook");
+		await Assert.That(secret).DoesNotContain("whsec_super-secret");
+		await Assert.That(captured.Last.RenderMessage()).DoesNotContain("whsec_super-secret");
+	}
+
+	[Test]
 	public async Task Destructure_LeavesTypesWithoutSensitiveProperties_Intact()
 	{
 		var captured = new CapturingSink();
-		using var logger = new LoggerConfiguration().Destructure.With(new SensitiveDataDestructuringPolicy()).WriteTo.Sink(captured).CreateLogger();
+		using var logger = new LoggerConfiguration().Destructure.With(WithoutModel()).WriteTo.Sink(captured).CreateLogger();
 
 		logger.Information("Loaded {@Plain}", new Plain("hello"));
 

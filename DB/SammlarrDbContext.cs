@@ -9,6 +9,7 @@ using DB.Data.Feed;
 using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Metadata;
+using DB.Data.Notifications;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
 using Domain.Media;
@@ -74,6 +75,8 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<WatchlistRow> Watchlist => Set<WatchlistRow>();
 	public DbSet<WatchlistOutboxRow> WatchlistOutbox => Set<WatchlistOutboxRow>();
 	public DbSet<UserRow> Users => Set<UserRow>();
+	public DbSet<NotificationTargetRow> NotificationTargets => Set<NotificationTargetRow>();
+	public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{

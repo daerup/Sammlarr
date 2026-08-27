@@ -24,7 +24,7 @@ internal static class LogPipeline
 			.Filter.ByExcluding(logEvent => logEvent.MessageTemplate.Text.StartsWith("Resilience pipeline execut", StringComparison.Ordinal))
 			.Enrich.FromLogContext()
 			.Destructure.With(new UnionDestructuringPolicy())
-			.Destructure.With(new SensitiveDataDestructuringPolicy())
+			.Destructure.With(new SensitiveDataDestructuringPolicy(SensitiveModel.Build()))
 			.Destructure.ToMaximumCollectionCount(50)
 			.Destructure.ToMaximumStringLength(512);
 
