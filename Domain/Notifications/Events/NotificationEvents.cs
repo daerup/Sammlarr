@@ -9,8 +9,14 @@ public abstract record BaseNotification(string Type, UserId UserId, DateTimeOffs
 	public Guid Id { get; init; } = Guid.CreateVersion7();
 }
 
-public sealed record WatchlistSyncedEvent(UserId UserId, DateTimeOffset OccurredAt, int PulledAdds, int PulledRemoves, int PushedAdds, int PushedRemoves)
-	: BaseNotification("watchlist.synced", UserId, OccurredAt);
+public sealed record WatchlistSyncedEvent(
+	UserId UserId,
+	DateTimeOffset OccurredAt,
+	IReadOnlyList<MediaId> PulledAdds,
+	IReadOnlyList<MediaId> PulledRemoves,
+	IReadOnlyList<MediaId> PushedAdds,
+	IReadOnlyList<MediaId> PushedRemoves
+) : BaseNotification("watchlist.synced", UserId, OccurredAt);
 
 public sealed record WatchlistItemsAddedEvent(UserId UserId, DateTimeOffset OccurredAt, IReadOnlyList<MediaId> MediaIds)
 	: BaseNotification("watchlist.items.added", UserId, OccurredAt);
