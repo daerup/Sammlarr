@@ -409,6 +409,10 @@ namespace DB.Migrations
                         .HasMaxLength(4096)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BodyTemplate")
+                        .HasMaxLength(8192)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Channel")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -419,6 +423,10 @@ namespace DB.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("MessageTemplate")
+                        .HasMaxLength(8192)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -426,6 +434,10 @@ namespace DB.Migrations
 
                     b.Property<string>("SigningSecret")
                         .HasMaxLength(4096)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TitleTemplate")
+                        .HasMaxLength(2048)
                         .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")

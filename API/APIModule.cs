@@ -1,6 +1,7 @@
 using API.Auth;
 using API.Imdb;
 using API.Mdblist;
+using API.Notifications;
 using API.Observability;
 using API.Plex;
 using API.Tmdb;
@@ -20,6 +21,7 @@ public class ApiModule : IServiceModule
 		services.AddModule<PlexModule>();
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();
+		services.AddModule<NotificationsApiModule>();
 		services.AddModule<InstrumentationModule>();
 		services.AddModule<ResilienceModule>();
 

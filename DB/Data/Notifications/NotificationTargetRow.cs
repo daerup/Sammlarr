@@ -31,4 +31,13 @@ internal record NotificationTargetRow : Entity<Guid>, IUserOwned
 	[MaxLength(4096)]
 	[Encrypted]
 	public string? UserKey { get; set; }
+
+	[MaxLength(8192)]
+	public string? BodyTemplate { get; set; }
+
+	[MaxLength(2048)]
+	public string? TitleTemplate { get; set; }
+
+	[MaxLength(8192)]
+	public string? MessageTemplate { get; set; }
 }
