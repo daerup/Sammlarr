@@ -42,7 +42,9 @@ public class NotificationTargetRepositoryTests(SQLiteFixture fixture)
 	[Test]
 	public async Task Create_pushover_target_roundtrips_decrypted_config()
 	{
-		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "My Pushover", true, new PushoverConfig("app-token", "user-key")));
+		var id = await _testee.CreateAsync(
+			new NotificationTarget(Guid.Empty, "My Pushover", true, new PushoverConfig("app-token", "user-key", "[{{ type }}]", "{{ summary }}"))
+		);
 
 		var target = await _testee.FindAsync(id);
 
@@ -55,6 +57,8 @@ public class NotificationTargetRepositoryTests(SQLiteFixture fixture)
 			{
 				await Assert.That(pushover.AppToken).IsEqualTo("app-token");
 				await Assert.That(pushover.UserKey).IsEqualTo("user-key");
+				await Assert.That(pushover.TitleTemplate).IsEqualTo("[{{ type }}]");
+				await Assert.That(pushover.MessageTemplate).IsEqualTo("{{ summary }}");
 			});
 	}
 

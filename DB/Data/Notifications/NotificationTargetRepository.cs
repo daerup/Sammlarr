@@ -61,14 +61,22 @@ internal sealed class NotificationTargetRepository(IDbContextFactory<SammlarrDbC
 	private static NotificationConfig BuildConfig(NotificationTargetRow row) =>
 		row.Channel switch
 		{
-			NotificationChannel.Webhook => new WebhookConfig(row.Url ?? string.Empty, row.SigningSecret ?? string.Empty),
-			NotificationChannel.Pushover => new PushoverConfig(row.AppToken ?? string.Empty, row.UserKey ?? string.Empty),
+			NotificationChannel.Webhook => new WebhookConfig(row.Url ?? string.Empty, row.SigningSecret ?? string.Empty, row.BodyTemplate),
+			NotificationChannel.Pushover => new PushoverConfig(row.AppToken ?? string.Empty, row.UserKey ?? string.Empty, row.TitleTemplate, row.MessageTemplate),
 		};
 
 	private static void ApplyConfig(NotificationTargetRow row, NotificationConfig config) =>
-		(row.Url, row.SigningSecret, row.AppToken, row.UserKey) = config switch
+		(row.Url, row.SigningSecret, row.AppToken, row.UserKey, row.BodyTemplate, row.TitleTemplate, row.MessageTemplate) = config switch
 		{
-			WebhookConfig webhook => (webhook.Url, webhook.SigningSecret, (string?)null, (string?)null),
-			PushoverConfig pushover => ((string?)null, (string?)null, pushover.AppToken, pushover.UserKey),
+			WebhookConfig webhook => (webhook.Url, webhook.SigningSecret, (string?)null, (string?)null, webhook.BodyTemplate, (string?)null, (string?)null),
+			PushoverConfig pushover => (
+				(string?)null,
+				(string?)null,
+				pushover.AppToken,
+				pushover.UserKey,
+				(string?)null,
+				pushover.TitleTemplate,
+				pushover.MessageTemplate
+			),
 		};
 }
