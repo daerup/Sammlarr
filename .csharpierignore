@@ -9,3 +9,4 @@ Domain/Watchlist/WatchlistItemProvenance.cs
 Domain/Watchlist/Sync/WatchlistSyncResult.cs
 Domain/Watchlist/Sync/WatchlistSyncTrigger.cs
 Domain/Notifications/NotificationConfig.cs
+Domain/Notifications/DeliveryResult.cs

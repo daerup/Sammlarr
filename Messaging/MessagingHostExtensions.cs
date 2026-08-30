@@ -1,5 +1,6 @@
 using Contracts.Watchlist.Outbox;
 using JasperFx.CodeGeneration.Model;
+using Messaging.Notifications;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Shared.Options;
@@ -34,5 +35,9 @@ public static class MessagingHostExtensions
 		options
 			.Policies.OnException<WatchlistPushFailedException>()
 			.RetryWithCooldown(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
+
+		options
+			.Policies.OnException<NotificationDeliveryFailedException>()
+			.RetryWithCooldown(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromHours(1));
 	}
 }
