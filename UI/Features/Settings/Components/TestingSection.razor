@@ -313,6 +313,11 @@
                 <BbInput Value="@_text" ValueChanged="@(v => _text = v ?? string.Empty)" Placeholder="Type something…"/>
             </div>
             <div class="space-y-2">
+                <label class="text-sm font-medium">Sensitive input <span class="font-normal text-muted-foreground">— masked, click the eye to reveal</span></label>
+                <SensitiveInput @bind-Value="_secret" Placeholder="Enter a secret…" Label="secret"/>
+                <p class="text-xs text-muted-foreground">Bound value: <code class="font-mono">@(string.IsNullOrEmpty(_secret) ? "(empty)" : _secret)</code></p>
+            </div>
+            <div class="space-y-2">
                 <label class="text-sm font-medium">Select</label>
                 <BbSelect TValue="string" Value="_selectValue" ValueChanged="v => _selectValue = v" Options="DemoSelectOptions"/>
             </div>
@@ -582,6 +587,7 @@
     private bool _includeInner;
 
     private string _text = string.Empty;
+    private string _secret = string.Empty;
     private string _selectValue = "a";
     private bool _switch = true;
     private bool _check;

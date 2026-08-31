@@ -1,0 +1,42 @@
+<div class="relative">
+    <BbInput Id="@Id"
+             Placeholder="@Placeholder"
+             Value="@Value"
+             ValueChanged="ValueChanged"
+             Type="@(_show ? InputType.Text : InputType.Password)"
+             Class="@InputClass"
+             UpdateTiming="UpdateTiming.Immediate"/>
+    <BbButton Variant="ButtonVariant.Ghost"
+              Size="ButtonSize.IconSmall"
+              AriaLabel="@((_show ? "Hide " : "Show ") + Label)"
+              Class="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground hover:bg-transparent"
+              OnClick="Toggle">
+        <LucideIcon Name="@(_show ? "eye-off" : "eye")" Size="16"/>
+    </BbButton>
+</div>
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Label { get; set; } = "value";
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+
+    private bool _show;
+
+    private string InputClass => $"bg-accent pr-10 {Class}".Trim();
+
+    private void Toggle() => _show = !_show;
+}

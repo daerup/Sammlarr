@@ -1,0 +1,7 @@
+::deep input[type="password"]:not(:placeholder-shown) {
+    font-size: 1.1rem;
+    line-height: normal;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 6px;
+}
