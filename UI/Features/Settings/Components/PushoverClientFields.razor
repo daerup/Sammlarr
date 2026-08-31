@@ -1,0 +1,25 @@
+<BbField>
+    <BbLabel>App token</BbLabel>
+    <SensitiveInput Value="@AppToken" ValueChanged="AppTokenChanged" Placeholder="@Placeholder" Label="app token"/>
+</BbField>
+<BbField>
+    <BbLabel>User key</BbLabel>
+    <SensitiveInput Value="@UserKey" ValueChanged="UserKeyChanged" Placeholder="@Placeholder" Label="user key"/>
+</BbField>
+
+@code {
+    [Parameter]
+    public string AppToken { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> AppTokenChanged { get; set; }
+
+    [Parameter]
+    public string UserKey { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> UserKeyChanged { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = string.Empty;
+}

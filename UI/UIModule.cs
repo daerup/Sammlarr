@@ -24,5 +24,6 @@ internal class UiModule : IServiceModule
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
 		services.AddScoped<MediaProviderBrandingService>();
+		services.AddScoped<UI.Features.Settings.Components.NotificationTester>();
 	}
 }

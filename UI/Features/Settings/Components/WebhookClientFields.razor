@@ -1,0 +1,29 @@
+<BbField>
+    <BbLabel>Webhook URL</BbLabel>
+    <BbInput Value="@Url" ValueChanged="UrlChanged" Placeholder="https://example.com/hook" UpdateTiming="UpdateTiming.Immediate"/>
+    <BbFieldDescription>An absolute https URL. The rendered body is HMAC-signed (Standard Webhooks).</BbFieldDescription>
+</BbField>
+@if (ShowRegenerate)
+{
+    <div class="flex items-center gap-2.5">
+        <BbSwitch Checked="Regenerate" CheckedChanged="RegenerateChanged"/>
+        <span class="text-sm">Regenerate the signing secret</span>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Url { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> UrlChanged { get; set; }
+
+    [Parameter]
+    public bool Regenerate { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> RegenerateChanged { get; set; }
+
+    [Parameter]
+    public bool ShowRegenerate { get; set; }
+}

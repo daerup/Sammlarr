@@ -1,0 +1,43 @@
+<BbField>
+    <BbLabel>Title template</BbLabel>
+    <BbInput Id="alert-title" Value="@Title" ValueChanged="TitleChanged" Placeholder="@TitlePlaceholder" UpdateTiming="UpdateTiming.Immediate"/>
+</BbField>
+<div class="flex min-h-0 flex-1 flex-col gap-1.5">
+    <BbLabel>Message template</BbLabel>
+    <BbTextarea Id="alert-message" Value="@Message" ValueChanged="MessageChanged" Placeholder="@MessagePlaceholder" MaxLength="8192" UpdateTiming="UpdateTiming.Immediate" Class="field-sizing-fixed min-h-0 flex-1 resize-none"/>
+</div>
+<BbField>
+    <BbLabel>Priority</BbLabel>
+    <BbSelect TValue="int?" Value="@Priority" ValueChanged="PriorityChanged" Options="PriorityOptions"/>
+</BbField>
+
+@code {
+    private const string TitlePlaceholder = "e.g. {{ title }}";
+    private const string MessagePlaceholder = "e.g. {{ summary }}";
+
+    private static readonly List<SelectOption<int?>> PriorityOptions =
+    [
+        new(-2, "Lowest (-2)"),
+        new(-1, "Low (-1)"),
+        new(0, "Normal (0)"),
+        new(1, "High (1)"),
+    ];
+
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> TitleChanged { get; set; }
+
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> MessageChanged { get; set; }
+
+    [Parameter]
+    public int? Priority { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> PriorityChanged { get; set; }
+}

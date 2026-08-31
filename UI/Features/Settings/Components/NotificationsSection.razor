@@ -1,0 +1,246 @@
+@using Contracts.Notifications
+@using Domain.Notifications
+@inject INotificationTargetRepository Targets
+@inject INotificationSubscriptionRepository Subscriptions
+@inject Notifier Notifier
+@inject DialogService DialogService
+
+<div class="flex max-w-3xl flex-col gap-8">
+    <div class="flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold">Clients</h2>
+                <p class="text-sm text-muted-foreground">Webhook or Pushover connections to deliver to.</p>
+            </div>
+            <BbButton OnClick="AddClientAsync">
+                <LucideIcon Name="plus" Size="15" Class="mr-2"/>
+                Add client
+            </BbButton>
+        </div>
+
+        @if (!_loaded)
+        {
+            <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                <BbSpinner Size="SpinnerSize.Small"/>
+                <span>Loading…</span>
+            </div>
+        }
+        else if (_clients.Count == 0)
+        {
+            <div class="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">No clients yet. Add a webhook or Pushover connection.</div>
+        }
+        else
+        {
+            @foreach (var client in _clients)
+            {
+                <div class="flex items-center gap-3 rounded-lg border p-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <LucideIcon Name="@ChannelIcon(client.Channel)" Size="18"/>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate font-medium">@client.Name</p>
+                        <p class="text-xs text-muted-foreground">@client.Channel@(client.Enabled ? "" : " · disabled")</p>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                        <BbSwitch Checked="client.Enabled" CheckedChanged="value => ToggleEnabledAsync(client, value)"/>
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditClientAsync(client)">
+                            <LucideIcon Name="pencil" Size="14"/>
+                        </BbButton>
+                        @Delete($"Delete {client.Name}?", "This removes the client and all its alerts.", () => DeleteClientAsync(client))
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="flex flex-col gap-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold">Alerts</h2>
+                <p class="text-sm text-muted-foreground">Notify a client when an event happens, with an optional template.</p>
+            </div>
+            <BbButton OnClick="AddAlert" Disabled="_clients.Count == 0">
+                <LucideIcon Name="plus" Size="15" Class="mr-2"/>
+                Add alert
+            </BbButton>
+        </div>
+
+        @if (_loaded && _alerts.Count == 0)
+        {
+            <div class="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">No alerts yet. Add one to start receiving notifications.</div>
+        }
+        else if (_loaded)
+        {
+            @foreach (var alert in _alerts)
+            {
+                <div class="flex items-start gap-3 rounded-lg border p-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                        <LucideIcon Name="bell" Size="18"/>
+                    </div>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <p class="truncate font-medium">@alert.Client.Name</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach (var eventType in alert.Subscription.EventTypes)
+                            {
+                                <span class="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">@NotificationEventCatalog.LabelFor(eventType)</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-1">
+                        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditAlert(alert)">
+                            <LucideIcon Name="pencil" Size="14"/>
+                        </BbButton>
+                        @Delete("Delete alert?", $"Stop notifying {alert.Client.Name} on {EventsLabel(alert.Subscription)}.", () => DeleteAlertAsync(alert))
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<NotificationAlertDialog @key="_alertKey"
+                         Open="_alertOpen"
+                         OpenChanged="value => _alertOpen = value"
+                         Clients="_clients"
+                         Existing="_alertExisting"
+                         Client="_alertClient"
+                         OnSaved="LoadAsync"/>
+
+@code {
+    private sealed record Alert(NotificationSubscription Subscription, NotificationTarget Client);
+
+    private List<NotificationTarget> _clients = [];
+    private List<Alert> _alerts = [];
+    private bool _loaded;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _clients = [.. await Targets.GetAllAsync()];
+        var alerts = new List<Alert>();
+        foreach (var client in _clients)
+        {
+            foreach (var subscription in await Subscriptions.GetForTargetAsync(client.Id))
+            {
+                alerts.Add(new Alert(subscription, client));
+            }
+        }
+        _alerts = alerts;
+        _loaded = true;
+    }
+
+	private static string EventsLabel(NotificationSubscription subscription) => string.Join(", ", subscription.EventTypes.Select(NotificationEventCatalog.LabelFor));
+
+	private static string ChannelIcon(NotificationChannel channel) =>
+		channel switch
+		{
+			NotificationChannel.Webhook => "webhook",
+			NotificationChannel.Pushover => "smartphone",
+		};
+
+    private async Task AddClientAsync()
+    {
+        var result = await DialogService.OpenAsync<NotificationTargetDialog>(new DialogOpenOptions { Title = "Add client" });
+        if (!result.Cancelled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task EditClientAsync(NotificationTarget client)
+    {
+        var result = await DialogService.OpenAsync<NotificationTargetDialog>(
+            new Dictionary<string, object?> { ["Target"] = client },
+            new DialogOpenOptions { Title = "Edit client" }
+        );
+        if (!result.Cancelled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private bool _alertOpen;
+    private int _alertKey;
+    private NotificationSubscription? _alertExisting;
+    private NotificationTarget? _alertClient;
+
+    private void AddAlert()
+    {
+        _alertExisting = null;
+        _alertClient = null;
+        _alertKey++;
+        _alertOpen = true;
+    }
+
+    private void EditAlert(Alert alert)
+    {
+        _alertExisting = alert.Subscription;
+        _alertClient = alert.Client;
+        _alertKey++;
+        _alertOpen = true;
+    }
+
+    private async Task ToggleEnabledAsync(NotificationTarget client, bool enabled)
+    {
+        try
+        {
+            await Targets.UpdateAsync(client with { Enabled = enabled });
+            await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            Notifier.Error(exception, "Failed to update client");
+        }
+    }
+
+
+    private async Task DeleteClientAsync(NotificationTarget client)
+    {
+        try
+        {
+            await Targets.DeleteAsync(client.Id);
+            await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            Notifier.Error(exception, "Failed to delete client");
+        }
+    }
+
+    private async Task DeleteAlertAsync(Alert alert)
+    {
+        try
+        {
+            await Subscriptions.DeleteAsync(alert.Subscription.Id);
+            await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            Notifier.Error(exception, "Failed to delete alert");
+        }
+    }
+
+    private RenderFragment Delete(string title, string description, Func<Task> onConfirm) =>
+        @<BbAlertDialog>
+            <BbAlertDialogTrigger>
+                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" Class="text-destructive hover:text-destructive">
+                    <LucideIcon Name="trash-2" Size="14"/>
+                </BbButton>
+            </BbAlertDialogTrigger>
+            <BbAlertDialogContent>
+                <BbAlertDialogHeader>
+                    <BbAlertDialogTitle>@title</BbAlertDialogTitle>
+                    <BbAlertDialogDescription>@description</BbAlertDialogDescription>
+                </BbAlertDialogHeader>
+                <BbAlertDialogFooter>
+                    <BbAlertDialogCancel>
+                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                    </BbAlertDialogCancel>
+                    <BbAlertDialogAction>
+                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Delete" OnClick="onConfirm"/>
+                    </BbAlertDialogAction>
+                </BbAlertDialogFooter>
+            </BbAlertDialogContent>
+        </BbAlertDialog>;
+}

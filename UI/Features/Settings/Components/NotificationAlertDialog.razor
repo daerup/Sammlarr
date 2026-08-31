@@ -1,0 +1,259 @@
+@using Contracts.Notifications
+@using Domain.Notifications
+@using Shared
+@inject INotificationSubscriptionRepository Subscriptions
+@inject INotificationTemplateRenderer Renderer
+@inject Notifier Notifier
+@inject DialogService DialogService
+@inject IJSRuntime JS
+
+@if (Open)
+{
+    <div class="fixed inset-0 z-50 overflow-auto bg-black/50 backdrop-blur-sm" @onclick="TryClose">
+        <div class="mx-auto my-[6vh] flex w-max items-start gap-6">
+            <div @onclick:stopPropagation="true" class="@($"flex w-[42rem] shrink-0 flex-col gap-5 overflow-y-auto rounded-lg border bg-background p-6 shadow-xl {(_client is null ? "max-h-[88vh]" : "h-[88vh]")}")">
+            <div class="flex items-start justify-between gap-4">
+                <h2 class="text-lg font-semibold">@(_isCreate ? "Add alert" : "Edit alert")</h2>
+                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="TryClose" Disabled="_saving" AriaLabel="Close">
+                    <LucideIcon Name="x" Size="16"/>
+                </BbButton>
+            </div>
+
+            @if (_isCreate)
+            {
+                <BbField>
+                    <BbLabel>Client</BbLabel>
+                    <BbSelect TValue="Guid?" Value="_clientId" ValueChanged="OnClientChanged" Options="ClientOptions" Placeholder="Pick a client"/>
+                </BbField>
+            }
+
+            @if (_client is { } client)
+            {
+                <div class="flex flex-col gap-2">
+                    <p class="text-sm font-medium">Events</p>
+                    <div class="flex flex-col gap-2 rounded-md border p-3">
+                        @foreach (var option in NotificationEventCatalog.Subscribable)
+                        {
+                            <label class="flex items-center gap-2 text-sm">
+                                <BbCheckbox Checked="_selected.Contains(option.EventType)" CheckedChanged="value => Toggle(option.EventType, value)"/>
+                                <span>@option.Label</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                @switch (client.Channel)
+                {
+                    case NotificationChannel.Webhook:
+                        <WebhookAlertFields @bind-Body="_body" @bind-Body:after="MarkDirty"/>
+                        break;
+                    case NotificationChannel.Pushover:
+                        <PushoverAlertFields @bind-Title="_title" @bind-Title:after="MarkDirty" @bind-Message="_message" @bind-Message:after="MarkDirty" @bind-Priority="_priority" @bind-Priority:after="MarkDirty"/>
+                        break;
+                }
+
+                <NotificationTemplateVariablesCard EventTypes="_selected" OnInsert="InsertAsync" OnInsertItem="InsertItemAsync"/>
+
+                @if (_error is { } error)
+                {
+                    <p class="text-sm text-destructive">@error</p>
+                }
+
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <BbSwitch Checked="_previewOpen" CheckedChanged="value => _previewOpen = value"/>
+                        <span class="text-sm">Preview</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <BbButton Variant="ButtonVariant.Outline" OnClick="TryClose" Disabled="_saving">Cancel</BbButton>
+                        <BbButton OnClick="SaveAsync" Disabled="_saving">
+                            @if (_saving)
+                            {
+                                <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                            }
+                            <span>Save</span>
+                        </BbButton>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (_previewOpen && _client is { } previewClient && _selected.Count > 0)
+        {
+            <div @onclick:stopPropagation="true" class="flex max-h-[88vh] shrink-0 flex-col flex-wrap content-start gap-6">
+                @foreach (var option in NotificationEventCatalog.Subscribable.Where(o => _selected.Contains(o.EventType)))
+                {
+                    var context = NotificationSampleContext.For(option.EventType);
+                    <div class="flex w-[34rem] shrink-0 flex-col gap-3 rounded-lg border bg-background p-6 shadow-xl">
+                        <p class="text-sm font-medium">Preview — @option.Label</p>
+                        @if (previewClient.Channel == NotificationChannel.Webhook)
+                        {
+                            <PreviewField Label="Body" Value="@RenderOrDefault(_body, context, "(default JSON body)")"/>
+                        }
+                        else
+                        {
+                            <PreviewField Label="Title" Value="@RenderField(_title, context)"/>
+                            <PreviewField Label="Message" Value="@RenderField(_message, context)"/>
+                            <PreviewField Label="Priority" Value="@(_priority?.ToString() ?? "default")"/>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<NotificationTarget> Clients { get; set; } = [];
+
+    [Parameter]
+    public NotificationSubscription? Existing { get; set; }
+
+    [Parameter]
+    public NotificationTarget? Client { get; set; }
+
+    private bool _isCreate => Existing is null;
+
+    private List<SelectOption<Guid?>> ClientOptions => Clients.Select(client => new SelectOption<Guid?>(client.Id, $"{client.Name} ({client.Channel})")).ToList();
+
+    private NotificationTarget? _client;
+    private Guid? _clientId;
+    private readonly HashSet<string> _selected = [];
+    private string _body = string.Empty;
+    private string _title = string.Empty;
+    private string _message = string.Empty;
+    private int? _priority;
+
+    private bool _previewOpen = true;
+    private string? _error;
+    private bool _saving;
+    private bool _dirty;
+
+    protected override void OnInitialized()
+    {
+        if (Existing is { } existing)
+        {
+            _client = Client;
+            _clientId = Client?.Id;
+            foreach (var eventType in existing.EventTypes)
+            {
+                _selected.Add(eventType);
+            }
+            _body = Value(existing.Template.Body);
+            _title = Value(existing.Template.Title);
+            _message = Value(existing.Template.Message);
+            _priority = existing.Template.Priority.Match(value => (int?)value, () => 0);
+        }
+        else
+        {
+            _title = "{{ title }}";
+            _message = "{{ summary }}";
+            _priority = 0;
+        }
+    }
+
+    private void MarkDirty() => _dirty = true;
+
+    private void OnClientChanged(Guid? clientId)
+    {
+        _dirty = true;
+        _clientId = clientId;
+        _client = Clients.FirstOrDefault(client => client.Id == clientId);
+    }
+
+    private void Toggle(string eventType, bool selected)
+    {
+        _dirty = true;
+        if (selected)
+        {
+            _selected.Add(eventType);
+        }
+        else
+        {
+            _selected.Remove(eventType);
+        }
+    }
+
+    private Task InsertAsync(string token) => JS.InvokeVoidAsync("sammlarrTemplate.insertToken", DefaultFieldId, token).AsTask();
+
+    private Task InsertItemAsync(string itemToken) => JS.InvokeVoidAsync("sammlarrTemplate.insertItem", DefaultFieldId, itemToken, "data.media").AsTask();
+
+    private string DefaultFieldId => _client?.Channel == NotificationChannel.Webhook ? "alert-body" : "alert-message";
+
+    private string RenderField(string template, NotificationContext context) =>
+        string.IsNullOrWhiteSpace(template) ? string.Empty : Renderer.Render(template, context) is Success<string> rendered ? rendered.Value : Error(template, context);
+
+    private string RenderOrDefault(string template, NotificationContext context, string fallback) => string.IsNullOrWhiteSpace(template) ? fallback : RenderField(template, context);
+
+    private string Error(string template, NotificationContext context) => Renderer.Render(template, context) is Error error ? "⚠ " + error.Reason : string.Empty;
+
+    private async Task SaveAsync()
+    {
+        _error = null;
+        if (_client is null || _selected.Count == 0)
+        {
+            _error = "Pick a client and at least one event.";
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var events = _selected.ToList();
+            var template = BuildTemplate();
+            if (_isCreate)
+            {
+                await Subscriptions.AddAsync(_client.Id, events, template);
+            }
+            else
+            {
+                await Subscriptions.UpdateAsync(Existing!.Id, events, template);
+            }
+
+            Notifier.Success("Alert saved.");
+            await OnSaved.InvokeAsync();
+            await OpenChanged.InvokeAsync(false);
+        }
+        catch (Exception exception)
+        {
+            _saving = false;
+            Notifier.Error(exception, "Failed to save alert");
+        }
+    }
+
+    private NotificationTemplate BuildTemplate() =>
+        _client?.Channel == NotificationChannel.Webhook
+            ? new NotificationTemplate(Opt(_body), new None(), new None(), new None())
+            : new NotificationTemplate(new None(), Opt(_title), Opt(_message), _priority is { } value ? Some.Of(value) : new None());
+
+    private static Optional<string> Opt(string value) => string.IsNullOrWhiteSpace(value) ? new None() : Some.Of(value);
+
+    private static string Value(Optional<string> optional) => optional.Match(value => value, () => string.Empty);
+
+    private async Task TryClose()
+    {
+        if (
+            _dirty
+            && !await DialogService.Confirm(
+                "Discard changes?",
+                "Your unsaved changes to this alert will be lost.",
+                new ConfirmDialogOptions { ConfirmText = "Discard", CancelText = "Keep editing", Destructive = true }
+            )
+        )
+        {
+            return;
+        }
+        await OpenChanged.InvokeAsync(false);
+    }
+}

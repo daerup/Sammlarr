@@ -1,0 +1,253 @@
+@using Contracts.Notifications
+@using Domain.Notifications
+@inject INotificationTargetRepository Targets
+@inject NotificationTester Tester
+@inject Notifier Notifier
+
+<div class="flex flex-col gap-5 p-1 min-w-[26rem]">
+    @if (_createdSecret is { } secret)
+    {
+        <div class="flex flex-col gap-2">
+            <p class="text-sm font-medium">Signing secret</p>
+            <p class="text-sm text-muted-foreground">
+                Copy this now — it is shown only once. Use it to verify the <code>webhook-signature</code> header on your endpoint.
+            </p>
+            <BbCopyText Value="@secret" Class="block w-full rounded-md border bg-accent px-3 py-2 font-mono text-xs break-all" OnCopied="SecretCopied">
+                @secret
+            </BbCopyText>
+        </div>
+        <div class="flex justify-end">
+            <BbButton OnClick="Done">Done</BbButton>
+        </div>
+    }
+    else
+    {
+        <BbField>
+            <BbLabel>Name</BbLabel>
+            <BbInput @bind-Value="_name" Placeholder="My webhook" UpdateTiming="UpdateTiming.Immediate"/>
+        </BbField>
+
+        @if (_isCreate)
+        {
+            <BbField>
+                <BbLabel>Channel</BbLabel>
+                <BbSelect TValue="NotificationChannel" @bind-Value="_channel" Options="ChannelOptions"/>
+            </BbField>
+        }
+
+        @switch (_channel)
+        {
+            case NotificationChannel.Webhook:
+                <WebhookClientFields @bind-Url="_url" @bind-Regenerate="_regenerate" ShowRegenerate="!_isCreate"/>
+                break;
+            case NotificationChannel.Pushover:
+                <PushoverClientFields @bind-AppToken="_appToken" @bind-UserKey="_userKey" Placeholder="@SecretPlaceholder"/>
+                break;
+        }
+
+        @if (_error is { } error)
+        {
+            <p class="text-sm text-destructive">@error</p>
+        }
+        @if (_testMessage is { } testMessage)
+        {
+            <p class="text-sm @(_testOk ? "text-success" : "text-destructive")">@testMessage</p>
+        }
+
+        <div class="flex items-center justify-between gap-2">
+            @if (!_isCreate)
+            {
+                <BbButton Variant="ButtonVariant.Outline" OnClick="TestAsync" Disabled="_busy">
+                    @if (_testing)
+                    {
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="zap" Size="14" Class="mr-2"/>
+                    }
+                    <span>Test connection</span>
+                </BbButton>
+            }
+            else
+            {
+                <span></span>
+            }
+            <div class="flex gap-2">
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Cancel" Disabled="_busy">Cancel</BbButton>
+                <BbButton OnClick="SaveAsync" Disabled="_busy">
+                    @if (_saving)
+                    {
+                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+                    }
+                    <span>Save</span>
+                </BbButton>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly List<SelectOption<NotificationChannel>> ChannelOptions =
+    [
+        new(NotificationChannel.Webhook, "Webhook"),
+        new(NotificationChannel.Pushover, "Pushover"),
+    ];
+
+    [CascadingParameter]
+    public IDialogReference DialogRef { get; set; } = null!;
+
+    [Parameter]
+    public NotificationTarget? Target { get; set; }
+
+    private bool _isCreate => Target is null;
+    private string SecretPlaceholder => _isCreate ? "Required" : "Leave blank to keep the current value";
+    private bool _busy => _saving || _testing;
+
+    private string _name = string.Empty;
+    private NotificationChannel _channel = NotificationChannel.Webhook;
+    private string _url = string.Empty;
+    private bool _regenerate;
+    private string _appToken = string.Empty;
+    private string _userKey = string.Empty;
+    private string _signingSecret = string.Empty;
+
+    private string? _createdSecret;
+    private string? _error;
+    private string? _testMessage;
+    private bool _testOk;
+    private bool _saving;
+    private bool _testing;
+
+    protected override void OnInitialized()
+    {
+        if (Target is { } target)
+        {
+            _name = target.Name;
+            _channel = target.Channel;
+            if (target.Config is WebhookConfig webhook)
+            {
+                _url = webhook.Url;
+                _signingSecret = webhook.SigningSecret;
+            }
+        }
+        else
+        {
+            _signingSecret = WebhookSecret.Generate();
+        }
+    }
+
+    private async Task TestAsync()
+    {
+        _error = Validate();
+        _testMessage = null;
+        if (_error is not null)
+        {
+            return;
+        }
+
+        _testing = true;
+        try
+        {
+            (_testOk, _testMessage) = Describe(await Tester.PingAsync(BuildTarget()));
+        }
+        catch (Exception exception)
+        {
+            Notifier.Error(exception, "Test failed");
+        }
+        _testing = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        _error = Validate();
+        if (_error is not null)
+        {
+            return;
+        }
+
+        _saving = true;
+        try
+        {
+            var target = BuildTarget();
+            var regeneratedWebhook = _channel == NotificationChannel.Webhook && (_isCreate || _regenerate);
+            if (_isCreate)
+            {
+                await Targets.CreateAsync(target);
+            }
+            else
+            {
+                await Targets.UpdateAsync(target);
+            }
+
+            if (regeneratedWebhook)
+            {
+                _createdSecret = _signingSecret;
+                _saving = false;
+                return;
+            }
+
+            Notifier.Success("Client saved.");
+            await DialogRef.CloseAsync(DialogResult.Ok(true));
+        }
+        catch (Exception exception)
+        {
+            _saving = false;
+            Notifier.Error(exception, "Failed to save client");
+        }
+    }
+
+    private NotificationTarget BuildTarget()
+    {
+        if (_channel == NotificationChannel.Webhook)
+        {
+            if (_regenerate && !_isCreate)
+            {
+                _signingSecret = WebhookSecret.Generate();
+            }
+            return new NotificationTarget(Target?.Id ?? Guid.Empty, _name.Trim(), Target?.Enabled ?? true, NotificationConfigBuilder.Webhook(_url, _signingSecret));
+        }
+
+        var existingPushover = Target?.Config is PushoverConfig pushover ? pushover : (PushoverConfig?)null;
+        return new NotificationTarget(
+            Target?.Id ?? Guid.Empty,
+            _name.Trim(),
+            Target?.Enabled ?? true,
+            NotificationConfigBuilder.Pushover(_appToken, _userKey, existingPushover)
+        );
+    }
+
+    private static (bool Ok, string Message) Describe(DeliveryResult result) =>
+        result switch
+        {
+            DeliverySucceeded => (true, "Delivered."),
+            DeliveryTransient transient => (false, transient.Reason),
+            DeliveryPermanent permanent => (false, permanent.Reason),
+        };
+
+    private string? Validate()
+    {
+        if (string.IsNullOrWhiteSpace(_name))
+        {
+            return "Name is required.";
+        }
+        if (_channel == NotificationChannel.Webhook)
+        {
+            if (!Uri.TryCreate(_url.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+            {
+                return "Enter an absolute https:// URL.";
+            }
+        }
+        else if (_isCreate && (string.IsNullOrWhiteSpace(_appToken) || string.IsNullOrWhiteSpace(_userKey)))
+        {
+            return "App token and user key are required.";
+        }
+        return null;
+    }
+
+    private void SecretCopied(string? _) => Notifier.Success("Signing secret copied.");
+
+    private Task Cancel() => DialogRef.CancelAsync();
+
+    private Task Done() => DialogRef.CloseAsync(DialogResult.Ok(true));
+}
