@@ -32,6 +32,31 @@ public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task AddAsync_ReturnsOnlyNewlyInsertedIds()
+	{
+		var alreadyWatchlisted = await SeedWatchlistEntryAsync(PlexId.From("plex-300", MediaType.Movie), WatchlistEntryOrigin.Manual);
+		var newMedia = await SeedMediaAsync([PlexId.From("plex-301", MediaType.Movie)]);
+		var unknown = MediaId.From(Guid.NewGuid());
+
+		var added = await _testee.AddAsync([alreadyWatchlisted, newMedia, unknown], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
+
+		await Assert.That(added).Count().IsEqualTo(1);
+		await Assert.That(added).Contains(newMedia);
+	}
+
+	[Test]
+	public async Task RemoveAsync_ReturnsOnlyActuallyRemovedIds()
+	{
+		var watchlisted = await SeedWatchlistEntryAsync(PlexId.From("plex-302", MediaType.Movie), WatchlistEntryOrigin.Manual);
+		var unknown = MediaId.From(Guid.NewGuid());
+
+		var removed = await _testee.RemoveAsync([watchlisted, unknown]);
+
+		await Assert.That(removed).Count().IsEqualTo(1);
+		await Assert.That(removed).Contains(watchlisted);
+	}
+
+	[Test]
 	public async Task AddAsync_EmptyCollection_DoesNothing()
 	{
 		await _testee.AddAsync([], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));

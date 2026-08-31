@@ -10,7 +10,7 @@ public interface IWatchlistRepository
 
 	Task<IReadOnlyList<MediaId>> GetIdsAsync(CancellationToken cancellationToken = default);
 
-	Task AddAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<MediaId>> AddAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default);
 
-	Task RemoveAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 }

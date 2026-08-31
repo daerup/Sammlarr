@@ -10,6 +10,7 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Domain.Identity;
 using Domain.Media;
+using Domain.Notifications.Events;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -87,11 +88,12 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 
 	private async Task<WatchlistSyncResult> ExecuteAsync(WatchlistSyncPlan plan, EngineDeps deps, UserId userId, CancellationToken cancellationToken)
 	{
-		await deps.Repo.AddAsync(plan.Pull.Adds, new RemoteOrigin(deps.Provider), cancellationToken);
-		await deps.Repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
+		var pulledAdds = await deps.Repo.AddAsync(plan.Pull.Adds, new RemoteOrigin(deps.Provider), cancellationToken);
+		var pulledRemoves = await deps.Repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
 		await deps.Outbox.DropAsync(plan.Redundant, cancellationToken);
 
 		await QueuePushesAsync(deps, plan, userId, cancellationToken);
+		await PublishNotificationsAsync(deps, userId, pulledAdds, pulledRemoves, plan.Push, cancellationToken);
 
 		logger.LogInformation(
 			"Watchlist sync {Provider} complete: pulled {Pulled}, removed {Removed}, queued {Queued}",
@@ -101,6 +103,30 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 			plan.Push.Count
 		);
 		return BuildChanges(plan);
+	}
+
+	private static async Task PublishNotificationsAsync(
+		EngineDeps deps,
+		UserId userId,
+		IReadOnlyList<MediaId> pulledAdds,
+		IReadOnlyList<MediaId> pulledRemoves,
+		WatchlistDelta push,
+		CancellationToken cancellationToken
+	)
+	{
+		var now = deps.Clock.Now;
+		if (pulledAdds.Count > 0)
+		{
+			await deps.Publisher.PublishAsync(new WatchlistItemsAddedEvent(userId, now, pulledAdds), cancellationToken);
+		}
+		if (pulledRemoves.Count > 0)
+		{
+			await deps.Publisher.PublishAsync(new WatchlistItemsRemovedEvent(userId, now, pulledRemoves), cancellationToken);
+		}
+		if (pulledAdds.Count + pulledRemoves.Count > 0)
+		{
+			await deps.Publisher.PublishAsync(new WatchlistSyncedEvent(userId, now, pulledAdds, pulledRemoves, push.Adds, push.Removes), cancellationToken);
+		}
 	}
 
 	private static async Task QueuePushesAsync(EngineDeps deps, WatchlistSyncPlan plan, UserId userId, CancellationToken cancellationToken)
@@ -133,7 +159,8 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 			Outbox: scope.ServiceProvider.GetRequiredService<IWatchlistOutbox>(),
 			Media: scope.ServiceProvider.GetRequiredService<IMediaService>(),
 			RemoteWatchlistProvider: scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>()[provider],
-			Publisher: scope.ServiceProvider.GetRequiredService<IMessagePublisher>()
+			Publisher: scope.ServiceProvider.GetRequiredService<IMessagePublisher>(),
+			Clock: scope.ServiceProvider.GetRequiredService<IDateTimeProvider>()
 		);
 	}
 
@@ -180,6 +207,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 		IWatchlistOutbox Outbox,
 		IMediaService Media,
 		IWatchlistProvider RemoteWatchlistProvider,
-		IMessagePublisher Publisher
+		IMessagePublisher Publisher,
+		IDateTimeProvider Clock
 	);
 }
