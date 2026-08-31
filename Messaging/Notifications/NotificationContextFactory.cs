@@ -1,5 +1,7 @@
+using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Notifications;
+using Domain.Feed;
 using Domain.Media;
 using Domain.Notifications.Events;
 
@@ -7,11 +9,27 @@ namespace Messaging.Notifications;
 
 internal static class NotificationContextFactory
 {
-	public static async Task<NotificationContext> BuildAsync(BaseNotification message, IMediaRepository mediaRepository, CancellationToken cancellationToken)
+	public static async Task<NotificationContext> BuildAsync(
+		BaseNotification message,
+		IMediaRepository mediaRepository,
+		IFeedRepository feedRepository,
+		CancellationToken cancellationToken
+	)
 	{
 		var payload = ToPayload(message);
 		var resolved = await ResolveAsync(payload, mediaRepository, cancellationToken);
-		return Build(payload, resolved);
+		var feed = await ResolveFeedAsync(payload.FeedId, feedRepository, cancellationToken);
+		return Build(payload, resolved, feed);
+	}
+
+	private static async Task<NotificationFeed?> ResolveFeedAsync(string? feedId, IFeedRepository feedRepository, CancellationToken cancellationToken)
+	{
+		if (feedId is null || !Guid.TryParse(feedId, out var guid))
+		{
+			return null;
+		}
+		var feed = await feedRepository.GetFeedByIdAsync(FeedId.From(guid), cancellationToken);
+		return feed is null ? null : new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider.ToString(), feed.Identifier);
 	}
 
 	private static NotificationPayload ToPayload(BaseNotification message) =>
@@ -58,11 +76,11 @@ internal static class NotificationContextFactory
 		var cached = await mediaRepository.GetAsync(ids, cancellationToken);
 		return cached.ToDictionary(
 			entry => entry.Stored.Id,
-			entry => new NotificationMedia(entry.Stored.Id.ToString(), entry.Stored.Title, entry.Stored.Type.ToString())
+			entry => new NotificationMedia(entry.Stored.Id.ToString(), entry.Stored.Title, entry.Stored.Type.ToString(), entry.Stored.ReleaseDate?.Year)
 		);
 	}
 
-	private static NotificationContext Build(NotificationPayload payload, IReadOnlyDictionary<MediaId, NotificationMedia> resolved) =>
+	private static NotificationContext Build(NotificationPayload payload, IReadOnlyDictionary<MediaId, NotificationMedia> resolved, NotificationFeed? feed) =>
 		new(
 			payload.Id,
 			payload.Type,
@@ -71,12 +89,8 @@ internal static class NotificationContextFactory
 			payload.Summary,
 			new NotificationData
 			{
-				PulledAdds = Lookup(payload.PulledAdds, resolved),
-				PulledRemoves = Lookup(payload.PulledRemoves, resolved),
-				PushedAdds = Lookup(payload.PushedAdds, resolved),
-				PushedRemoves = Lookup(payload.PushedRemoves, resolved),
-				Media = Lookup(payload.Media, resolved),
-				FeedId = payload.FeedId,
+				Media = BuildMedia(payload, resolved),
+				Feed = feed,
 				Added = payload.Added,
 				Removed = payload.Removed,
 				Reason = payload.Reason,
@@ -112,8 +126,26 @@ internal static class NotificationContextFactory
 			null
 		);
 
-	private static IReadOnlyList<NotificationMedia>? Lookup(IReadOnlyList<MediaId> ids, IReadOnlyDictionary<MediaId, NotificationMedia> resolved) =>
-		ids.Count == 0
-			? null
-			: ids.Select(id => resolved.GetValueOrDefault(id) ?? new NotificationMedia(id.ToString(), null, MediaType.Unknown.ToString())).ToList();
+	private static IReadOnlyList<NotificationMedia>? BuildMedia(NotificationPayload payload, IReadOnlyDictionary<MediaId, NotificationMedia> resolved)
+	{
+		var items = Describe(payload.PulledAdds, "Added locally", resolved)
+			.Concat(Describe(payload.PulledRemoves, "Removed locally", resolved))
+			.Concat(Describe(payload.PushedAdds, "Added remotely", resolved))
+			.Concat(Describe(payload.PushedRemoves, "Removed remotely", resolved))
+			.Concat(Describe(payload.Media, null, resolved))
+			.ToList();
+		return items.Count == 0 ? null : items.OrderBy(item => item.Descriptor ?? string.Empty).ToList();
+	}
+
+	private static IEnumerable<NotificationMedia> Describe(
+		IReadOnlyList<MediaId> ids,
+		string? descriptor,
+		IReadOnlyDictionary<MediaId, NotificationMedia> resolved
+	) =>
+		ids.Select(id =>
+			(resolved.GetValueOrDefault(id) ?? new NotificationMedia(id.ToString(), null, MediaType.Unknown.ToString())) with
+			{
+				Descriptor = descriptor,
+			}
+		);
 }

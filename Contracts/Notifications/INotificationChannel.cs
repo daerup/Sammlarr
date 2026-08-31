@@ -6,5 +6,10 @@ public interface INotificationChannel
 {
 	NotificationChannel Kind { get; }
 
-	Task<DeliveryResult> SendAsync(NotificationContext context, NotificationTarget target, CancellationToken cancellationToken = default);
+	Task<DeliveryResult> SendAsync(
+		NotificationContext context,
+		NotificationTarget target,
+		NotificationTemplate template,
+		CancellationToken cancellationToken = default
+	);
 }

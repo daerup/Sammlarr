@@ -9,6 +9,16 @@ internal record NotificationSubscriptionRow : Entity<Guid>, IUserOwned
 	public required Guid TargetId { get; set; }
 
 	[Required]
-	[MaxLength(100)]
-	public required string EventType { get; set; }
+	public required List<string> EventTypes { get; set; }
+
+	[MaxLength(8192)]
+	public string? BodyTemplate { get; set; }
+
+	[MaxLength(2048)]
+	public string? TitleTemplate { get; set; }
+
+	[MaxLength(8192)]
+	public string? MessageTemplate { get; set; }
+
+	public int? Priority { get; set; }
 }

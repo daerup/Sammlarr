@@ -4,6 +4,7 @@ using API.Notifications;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications;
@@ -13,11 +14,12 @@ public class PushoverChannelTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
 
 	[Test]
-	public async Task Default_message_posts_the_expected_form_fields_to_the_pushover_endpoint()
+	public async Task Posts_the_rendered_template_form_fields_to_the_pushover_endpoint()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		var result = await Channel(handler).SendAsync(Context(), PushoverTarget(), CancellationToken.None);
+		var result = await Channel(handler)
+			.SendAsync(Context(), PushoverTarget(), Template(title: "{{ title }}", message: "{{ summary }}"), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(handler.Request!.RequestUri!.ToString()).IsEqualTo("https://api.pushover.net/1/messages.json");
@@ -30,11 +32,23 @@ public class PushoverChannelTests
 	}
 
 	[Test]
+	public async Task Empty_templates_send_empty_title_and_message()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
+
+		var form = Form(handler);
+		await Assert.That(form["title"]).IsEqualTo(string.Empty);
+		await Assert.That(form["message"]).IsEqualTo(string.Empty);
+	}
+
+	[Test]
 	public async Task Templates_override_the_title_and_message()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		await Channel(handler).SendAsync(Context(), PushoverTarget(titleTemplate: "[{{ type }}]", messageTemplate: "{{ summary }} now"), CancellationToken.None);
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(title: "[{{ type }}]", message: "{{ summary }} now"), CancellationToken.None);
 
 		var form = Form(handler);
 		await Assert.That(form["title"]).IsEqualTo("[watchlist.synced]");
@@ -46,15 +60,26 @@ public class PushoverChannelTests
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		await Channel(handler).SendAsync(Context("feed.run.failed"), PushoverTarget(), CancellationToken.None);
+		await Channel(handler).SendAsync(Context("feed.run.failed"), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
 		await Assert.That(Form(handler)["priority"]).IsEqualTo("1");
 	}
 
 	[Test]
+	public async Task Configured_priority_overrides_the_derived_one()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "hi", priority: -1), CancellationToken.None);
+
+		await Assert.That(Form(handler)["priority"]).IsEqualTo("-1");
+	}
+
+	[Test]
 	public async Task Monthly_limit_is_permanent()
 	{
-		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests)).SendAsync(Context(), PushoverTarget(), CancellationToken.None);
+		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
+			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
 	}
@@ -62,7 +87,8 @@ public class PushoverChannelTests
 	[Test]
 	public async Task Bad_request_is_permanent()
 	{
-		var result = await Channel(new CapturingHandler(HttpStatusCode.BadRequest)).SendAsync(Context(), PushoverTarget(), CancellationToken.None);
+		var result = await Channel(new CapturingHandler(HttpStatusCode.BadRequest))
+			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
 	}
@@ -70,7 +96,8 @@ public class PushoverChannelTests
 	[Test]
 	public async Task Server_error_is_transient()
 	{
-		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError)).SendAsync(Context(), PushoverTarget(), CancellationToken.None);
+		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
+			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryTransient>();
 	}
@@ -80,7 +107,7 @@ public class PushoverChannelTests
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		var result = await Channel(handler).SendAsync(Context(), PushoverTarget(messageTemplate: "{{ unclosed"), CancellationToken.None);
+		var result = await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "{{ unclosed"), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
 		await Assert.That(handler.Request).IsNull();
@@ -95,6 +122,7 @@ public class PushoverChannelTests
 			.SendAsync(
 				Context(),
 				new NotificationTarget(Guid.NewGuid(), "Hook", true, new WebhookConfig("https://example.test/hook", "whsec_x")),
+				NotificationTemplate.None,
 				CancellationToken.None
 			);
 
@@ -108,8 +136,12 @@ public class PushoverChannelTests
 	private static NotificationContext Context(string type = "watchlist.synced") =>
 		new(Guid.NewGuid(), type, Now, "Watchlist synced", "Synced.", new NotificationData());
 
-	private static NotificationTarget PushoverTarget(string? titleTemplate = null, string? messageTemplate = null) =>
-		new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key", titleTemplate, messageTemplate));
+	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));
+
+	private static NotificationTemplate Template(string? title = null, string? message = null, int? priority = null) =>
+		new(new None(), Opt(title), Opt(message), priority is { } value ? Some.Of(value) : new None());
+
+	private static Optional<string> Opt(string? value) => value is null ? new None() : Some.Of(value);
 
 	private static Dictionary<string, string> Form(CapturingHandler handler) =>
 		Encoding

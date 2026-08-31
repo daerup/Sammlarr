@@ -1,7 +1,7 @@
 using Contracts.Notifications;
 using DB.Data.Notifications;
 using Domain.Notifications;
-using Microsoft.EntityFrameworkCore;
+using Shared;
 using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
@@ -29,44 +29,54 @@ public class NotificationSubscriptionRepositoryTests(SQLiteFixture fixture)
 	{
 		var targetId = await CreateTargetAsync();
 
-		await _testee.AddAsync(targetId, "watchlist.synced");
+		await _testee.AddAsync(targetId, ["watchlist.synced"], NotificationTemplate.None);
 
 		var byTarget = await _testee.GetForTargetAsync(targetId);
 		var byEventType = await _testee.GetForEventTypeAsync("watchlist.synced");
 
 		await Assert.That(byTarget).Count().IsEqualTo(1);
-		await Assert.That(byTarget[0].EventType).IsEqualTo("watchlist.synced");
+		await Assert.That(byTarget[0].EventTypes).Contains("watchlist.synced");
 		await Assert.That(byEventType).Count().IsEqualTo(1);
 		await Assert.That(byEventType[0].TargetId).IsEqualTo(targetId);
+	}
+
+	[Test]
+	public async Task A_bundled_subscription_matches_each_of_its_events()
+	{
+		var targetId = await CreateTargetAsync();
+
+		await _testee.AddAsync(targetId, ["watchlist.synced", "watchlist.items.added"], NotificationTemplate.None);
+
+		await Assert.That(await _testee.GetForEventTypeAsync("watchlist.synced")).Count().IsEqualTo(1);
+		await Assert.That(await _testee.GetForEventTypeAsync("watchlist.items.added")).Count().IsEqualTo(1);
+		await Assert.That(await _testee.GetForEventTypeAsync("feed.run.failed")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Subscription_template_and_priority_round_trip_and_update()
+	{
+		var targetId = await CreateTargetAsync();
+		var id = await _testee.AddAsync(targetId, ["watchlist.synced"], new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(1)));
+
+		var created = (await _testee.GetForTargetAsync(targetId)).Single();
+		await Assert.That(created.Template.Body.Match(value => value, () => null)).IsEqualTo("{{ title }}");
+		await Assert.That(created.Template.Priority.Match(value => (int?)value, () => null)).IsEqualTo(1);
+
+		await _testee.UpdateAsync(id, ["watchlist.synced"], new NotificationTemplate(Some.Of("{{ summary }}"), new None(), new None(), new None()));
+
+		var updated = (await _testee.GetForTargetAsync(targetId)).Single();
+		await Assert.That(updated.Template.Body.Match(value => value, () => null)).IsEqualTo("{{ summary }}");
+		await Assert.That(updated.Template.Priority.Match(value => (int?)value, () => null)).IsNull();
 	}
 
 	[Test]
 	public async Task Deleting_a_target_cascades_its_subscriptions()
 	{
 		var targetId = await CreateTargetAsync();
-		await _testee.AddAsync(targetId, "watchlist.items.added");
+		await _testee.AddAsync(targetId, ["watchlist.items.added"], NotificationTemplate.None);
 
 		await _targets.DeleteAsync(targetId);
 
 		await Assert.That(await _testee.GetForTargetAsync(targetId)).IsEmpty();
-	}
-
-	[Test]
-	public async Task Duplicate_subscription_for_same_target_and_event_is_rejected()
-	{
-		var targetId = await CreateTargetAsync();
-		await _testee.AddAsync(targetId, "watchlist.synced");
-
-		var threw = false;
-		try
-		{
-			await _testee.AddAsync(targetId, "watchlist.synced");
-		}
-		catch (DbUpdateException)
-		{
-			threw = true;
-		}
-
-		await Assert.That(threw).IsTrue();
 	}
 }

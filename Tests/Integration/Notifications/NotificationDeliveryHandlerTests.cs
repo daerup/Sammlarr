@@ -75,7 +75,13 @@ public class NotificationDeliveryHandlerTests
 
 		var index = new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, channel);
 
-		await NotificationDeliveryHandler.Handle(new DeliverNotification(Context(), targetId, User), Scope(), targets.Object, index, CancellationToken.None);
+		await NotificationDeliveryHandler.Handle(
+			new DeliverNotification(Context(), targetId, User, NotificationTemplate.None),
+			Scope(),
+			targets.Object,
+			index,
+			CancellationToken.None
+		);
 	}
 
 	private static NotificationContext Context() =>
@@ -97,7 +103,12 @@ public class NotificationDeliveryHandlerTests
 
 		public NotificationChannel Kind => NotificationChannel.Webhook;
 
-		public Task<DeliveryResult> SendAsync(NotificationContext context, NotificationTarget target, CancellationToken cancellationToken)
+		public Task<DeliveryResult> SendAsync(
+			NotificationContext context,
+			NotificationTarget target,
+			NotificationTemplate template,
+			CancellationToken cancellationToken
+		)
 		{
 			Sent.Add(target);
 			return Task.FromResult(result);
