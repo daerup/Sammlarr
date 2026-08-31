@@ -1,0 +1,54 @@
+<div class="rounded-md border bg-accent/40 text-sm">
+    <button type="button" class="flex w-full items-center justify-between px-3 py-2 font-medium" @onclick="() => _open = !_open">
+        <span class="flex items-center gap-2">
+            <LucideIcon Name="braces" Size="14"/>
+            Variables
+        </span>
+        <LucideIcon Name="@(_open ? "chevron-down" : "chevron-right")" Size="14"/>
+    </button>
+    @if (_open)
+    {
+        <div class="flex flex-col gap-3 border-t px-3 py-3">
+            @foreach (var group in NotificationTemplateVariables.GroupsFor(EventTypes))
+            {
+                var isMediaItem = group.Title.StartsWith("Media item");
+                <div class="flex flex-col gap-1.5">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">@group.Title</p>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach (var variable in group.Variables)
+                        {
+                            <button type="button"
+                                    title="@(isMediaItem ? $"Insert {variable.Token} — wrapped in a loop unless the cursor is already inside one" : variable.Description)"
+                                    class="rounded bg-background px-1.5 py-0.5 font-mono text-xs hover:bg-primary hover:text-primary-foreground"
+                                    @onmousedown:preventDefault="true"
+                                    @onclick="() => (isMediaItem ? OnInsertItem : OnInsert).InvokeAsync(variable.Token)">
+                                @variable.Token
+                            </button>
+                        }
+                    </div>
+                    @if (isMediaItem)
+                    {
+                        <p class="text-xs text-muted-foreground">Each field inserts a loop over every changed item.</p>
+                    }
+                </div>
+            }
+            <a href="https://shopify.github.io/liquid/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-xs text-muted-foreground underline hover:text-foreground">
+                <LucideIcon Name="external-link" Size="12"/>
+                Template syntax reference
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IReadOnlyCollection<string> EventTypes { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<string> OnInsert { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnInsertItem { get; set; }
+
+    private bool _open = true;
+}

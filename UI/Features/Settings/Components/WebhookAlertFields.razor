@@ -1,0 +1,15 @@
+<div class="flex min-h-0 flex-1 flex-col gap-1.5">
+    <BbLabel>Body template</BbLabel>
+    <BbTextarea Id="alert-body" Value="@Body" ValueChanged="BodyChanged" Placeholder="@Placeholder" MaxLength="8192" UpdateTiming="UpdateTiming.Immediate" Class="field-sizing-fixed min-h-0 flex-1 resize-none"/>
+    <BbFieldDescription>Empty sends the default JSON body.</BbFieldDescription>
+</div>
+
+@code {
+    private const string Placeholder = "{ \"text\": \"{{ title }}\" }";
+
+    [Parameter]
+    public string Body { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> BodyChanged { get; set; }
+}

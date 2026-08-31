@@ -1,0 +1,12 @@
+<div class="flex flex-col gap-1">
+    <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">@Label</p>
+    <div class="whitespace-pre-wrap break-words rounded-md border bg-accent px-3 py-2 font-mono text-xs">@(string.IsNullOrEmpty(Value) ? "(empty)" : Value)</div>
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+}
