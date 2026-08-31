@@ -20,7 +20,12 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 
 	public NotificationChannel Kind => NotificationChannel.Webhook;
 
-	public async Task<DeliveryResult> SendAsync(NotificationContext context, NotificationTarget target, CancellationToken cancellationToken)
+	public async Task<DeliveryResult> SendAsync(
+		NotificationContext context,
+		NotificationTarget target,
+		NotificationTemplate template,
+		CancellationToken cancellationToken
+	)
 	{
 		if (target.Config is not WebhookConfig config)
 		{
@@ -31,7 +36,7 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 			return new DeliveryPermanent("The webhook URL must be an absolute https URI.");
 		}
 
-		var rendered = RenderBody(context, config);
+		var rendered = RenderBody(context, template);
 		if (rendered is not Success<string> body)
 		{
 			var reason = rendered is Error error ? error.Reason : "The webhook body could not be rendered.";
@@ -56,8 +61,8 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		return result;
 	}
 
-	private Result<string> RenderBody(NotificationContext context, WebhookConfig config) =>
-		config.BodyTemplate is { } template ? renderer.Render(template, context) : DefaultBody(context);
+	private Result<string> RenderBody(NotificationContext context, NotificationTemplate template) =>
+		template.Body is Some<string> body ? renderer.Render(body.Value, context) : DefaultBody(context);
 
 	private static Result<string> DefaultBody(NotificationContext context) =>
 		Success.Of(

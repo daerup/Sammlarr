@@ -37,6 +37,7 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 		options.MemberAccessStrategy.Register<NotificationContext>();
 		options.MemberAccessStrategy.Register<NotificationData>();
 		options.MemberAccessStrategy.Register<NotificationMedia>();
+		options.MemberAccessStrategy.Register<NotificationFeed>();
 		return options;
 	}
 }

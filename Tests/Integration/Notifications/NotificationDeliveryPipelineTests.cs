@@ -69,7 +69,9 @@ public class NotificationDeliveryPipelineTests
 		var subscriptions = INotificationSubscriptionRepository.Mock();
 		subscriptions
 			.GetForEventTypeAsync(Any<string>(), Any())
-			.Returns((IReadOnlyList<NotificationSubscription>)[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), "watchlist.synced")]);
+			.Returns(
+				(IReadOnlyList<NotificationSubscription>)[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.synced"], NotificationTemplate.None)]
+			);
 
 		var targets = INotificationTargetRepository.Mock();
 		targets
@@ -99,6 +101,7 @@ public class NotificationDeliveryPipelineTests
 					services.AddSingleton(targets.Object);
 					services.AddSingleton(userScope.Object);
 					services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
+					services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
 					services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
 				})
 				.UseSammlarrMessaging(configuration)
@@ -122,7 +125,12 @@ public class NotificationDeliveryPipelineTests
 
 		public NotificationChannel Kind => NotificationChannel.Webhook;
 
-		public Task<DeliveryResult> SendAsync(NotificationContext context, NotificationTarget target, CancellationToken cancellationToken)
+		public Task<DeliveryResult> SendAsync(
+			NotificationContext context,
+			NotificationTarget target,
+			NotificationTemplate template,
+			CancellationToken cancellationToken
+		)
 		{
 			Sent.Add(target);
 			return Task.FromResult<DeliveryResult>(new DeliverySucceeded());

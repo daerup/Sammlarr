@@ -6,6 +6,7 @@ using Contracts;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shared;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications;
@@ -21,7 +22,7 @@ public class WebhookChannelTests
 		var context = Context();
 		var secret = WebhookSigning.GenerateSecret();
 
-		var result = await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", secret, template: null), CancellationToken.None);
+		var result = await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", secret), Body(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		await Assert.That(handler.Request!.Method).IsEqualTo(HttpMethod.Post);
@@ -44,8 +45,7 @@ public class WebhookChannelTests
 			new NotificationData { Media = [new NotificationMedia("abc", "The Matrix", "Movie")] }
 		);
 
-		await Channel(handler)
-			.SendAsync(context, WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret(), template: null), CancellationToken.None);
+		await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
 		var body = Encoding.UTF8.GetString(handler.Body!);
 		await Assert.That(body).Contains("\"data\":{");
@@ -60,7 +60,8 @@ public class WebhookChannelTests
 		await Channel(handler)
 			.SendAsync(
 				Context(),
-				WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret(), template: "{\"t\":\"{{ title }}\"}"),
+				WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()),
+				Body("{\"t\":\"{{ title }}\"}"),
 				CancellationToken.None
 			);
 
@@ -73,7 +74,7 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), WebhookTarget("http://example.test/hook", WebhookSigning.GenerateSecret(), null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("http://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
 		await Assert.That(handler.Request).IsNull();
@@ -85,7 +86,7 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret(), "{{ unclosed"), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body("{{ unclosed"), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
 		await Assert.That(handler.Request).IsNull();
@@ -95,7 +96,7 @@ public class WebhookChannelTests
 	public async Task Server_error_is_transient()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret(), null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryTransient>();
 	}
@@ -104,7 +105,7 @@ public class WebhookChannelTests
 	public async Task Unauthorized_is_permanent()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.Unauthorized))
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret(), null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
 	}
@@ -113,7 +114,7 @@ public class WebhookChannelTests
 	public async Task Rate_limited_is_transient()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
-			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret(), null), CancellationToken.None);
+			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
 		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryTransient>();
 	}
@@ -127,8 +128,10 @@ public class WebhookChannelTests
 
 	private static NotificationContext Context() => new(Guid.NewGuid(), "watchlist.synced", Now, "Watchlist synced", "Synced.", new NotificationData());
 
-	private static NotificationTarget WebhookTarget(string url, string secret, string? template) =>
-		new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret, template));
+	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
+
+	private static NotificationTemplate Body(string? template) =>
+		template is null ? NotificationTemplate.None : new NotificationTemplate(Some.Of(template), new None(), new None(), new None());
 
 	private static string Header(CapturingHandler handler, string name) => handler.Request!.Headers.GetValues(name).Single();
 

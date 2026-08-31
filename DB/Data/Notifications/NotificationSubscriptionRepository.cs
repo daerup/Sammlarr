@@ -16,17 +16,36 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 	public async Task<IReadOnlyList<NotificationSubscription>> GetForEventTypeAsync(string eventType, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rows = await ctx.NotificationSubscriptions.AsNoTracking().Where(subscription => subscription.EventType == eventType).ToListAsync(cancellationToken);
-		return rows.Select(Map).ToList();
+		var rows = await ctx.NotificationSubscriptions.AsNoTracking().ToListAsync(cancellationToken);
+		return rows.Where(row => row.EventTypes.Contains(eventType)).Select(Map).ToList();
 	}
 
-	public async Task<Guid> AddAsync(Guid targetId, string eventType, CancellationToken cancellationToken = default)
+	public async Task<Guid> AddAsync(
+		Guid targetId,
+		IReadOnlyList<string> eventTypes,
+		NotificationTemplate template,
+		CancellationToken cancellationToken = default
+	)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var row = new NotificationSubscriptionRow { TargetId = targetId, EventType = eventType };
+		var row = new NotificationSubscriptionRow { TargetId = targetId, EventTypes = [.. eventTypes] };
+		ApplyTemplate(row, template);
 		ctx.NotificationSubscriptions.Add(row);
 		await ctx.SaveChangesAsync(cancellationToken);
 		return row.Id;
+	}
+
+	public async Task UpdateAsync(Guid id, IReadOnlyList<string> eventTypes, NotificationTemplate template, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var row = await ctx.NotificationSubscriptions.FirstOrDefaultAsync(subscription => subscription.Id == id, cancellationToken);
+		if (row is null)
+		{
+			return;
+		}
+		row.EventTypes = [.. eventTypes];
+		ApplyTemplate(row, template);
+		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
 	public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
@@ -35,5 +54,23 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 		await ctx.NotificationSubscriptions.Where(subscription => subscription.Id == id).ExecuteDeleteAsync(cancellationToken);
 	}
 
-	private static NotificationSubscription Map(NotificationSubscriptionRow row) => new(row.Id, row.TargetId, row.EventType);
+	private static NotificationSubscription Map(NotificationSubscriptionRow row) =>
+		new(
+			row.Id,
+			row.TargetId,
+			row.EventTypes,
+			new NotificationTemplate(Optional.Of(row.BodyTemplate), Optional.Of(row.TitleTemplate), Optional.Of(row.MessageTemplate), Priority(row.Priority))
+		);
+
+	private static void ApplyTemplate(NotificationSubscriptionRow row, NotificationTemplate template)
+	{
+		row.BodyTemplate = ToColumn(template.Body);
+		row.TitleTemplate = ToColumn(template.Title);
+		row.MessageTemplate = ToColumn(template.Message);
+		row.Priority = template.Priority is Some<int> priority ? priority.Value : null;
+	}
+
+	private static string? ToColumn(Optional<string> value) => value is Some<string> some ? some.Value : null;
+
+	private static Optional<int> Priority(int? value) => value is { } priority ? Some.Of(priority) : new None();
 }

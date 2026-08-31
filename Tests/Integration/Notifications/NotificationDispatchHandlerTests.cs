@@ -1,3 +1,4 @@
+using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Metadata;
@@ -22,12 +23,19 @@ public class NotificationDispatchHandlerTests
 		var targetB = Guid.NewGuid();
 		var subscriptions = SubscriptionsFor(
 			"watchlist.synced",
-			new NotificationSubscription(Guid.NewGuid(), targetA, "watchlist.synced"),
-			new NotificationSubscription(Guid.NewGuid(), targetB, "watchlist.synced")
+			new NotificationSubscription(Guid.NewGuid(), targetA, ["watchlist.synced"], NotificationTemplate.None),
+			new NotificationSubscription(Guid.NewGuid(), targetB, ["watchlist.synced"], NotificationTemplate.None)
 		);
 		var @event = new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []);
 
-		var messages = await NotificationDispatchHandler.Handle(@event, Scope().Object, subscriptions.Object, Media().Object, CancellationToken.None);
+		var messages = await NotificationDispatchHandler.Handle(
+			@event,
+			Scope().Object,
+			subscriptions.Object,
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
 
 		var deliveries = messages.OfType<DeliverNotification>().ToList();
 		await Assert.That(deliveries).Count().IsEqualTo(2);
@@ -37,11 +45,47 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
+	public async Task Watchlist_synced_consolidates_pulled_and_pushed_into_media_sorted_by_descriptor()
+	{
+		var pulledAdd = MediaId.From(Guid.NewGuid());
+		var pushedRemove = MediaId.From(Guid.NewGuid());
+		var subscriptions = SubscriptionsFor(
+			"watchlist.synced",
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.synced"], NotificationTemplate.None)
+		);
+		var media = Media(
+			new CachedMedia(new PartialMovie { Identity = new MediaIdentity(pulledAdd, []), Title = "Pulled Movie" }, DateTimeOffset.UtcNow),
+			new CachedMedia(new PartialMovie { Identity = new MediaIdentity(pushedRemove, []), Title = "Pushed Movie" }, DateTimeOffset.UtcNow)
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove]),
+			Scope().Object,
+			subscriptions.Object,
+			media.Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		var items = messages.OfType<DeliverNotification>().Single().Context.Data.Media!;
+		await Assert.That(items).Count().IsEqualTo(2);
+		await Assert.That(items[0].Descriptor).IsEqualTo("Added locally");
+		await Assert.That(items[0].Title).IsEqualTo("Pulled Movie");
+		await Assert.That(items[1].Descriptor).IsEqualTo("Removed remotely");
+		await Assert.That(items[1].Title).IsEqualTo("Pushed Movie");
+	}
+
+	[Test]
 	public async Task Test_ping_routes_directly_to_its_target_without_a_subscription_lookup()
 	{
 		var targetId = Guid.NewGuid();
 
-		var message = await NotificationDispatchHandler.Handle(new TestPingEvent(User, DateTimeOffset.UtcNow, targetId), Media().Object, CancellationToken.None);
+		var message = await NotificationDispatchHandler.Handle(
+			new TestPingEvent(User, DateTimeOffset.UtcNow, targetId),
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
 
 		await Assert.That(message.TargetId).IsEqualTo(targetId);
 		await Assert.That(message.UserId).IsEqualTo(User);
@@ -58,6 +102,7 @@ public class NotificationDispatchHandlerTests
 			scope.Object,
 			SubscriptionsFor("watchlist.items.added").Object,
 			Media().Object,
+			Feed().Object,
 			CancellationToken.None
 		);
 
@@ -74,6 +119,7 @@ public class NotificationDispatchHandlerTests
 			Scope().Object,
 			SubscriptionsFor("watchlist.items.removed").Object,
 			media.Object,
+			Feed().Object,
 			CancellationToken.None
 		);
 
@@ -87,8 +133,8 @@ public class NotificationDispatchHandlerTests
 		var id = MediaId.From(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(
 			"watchlist.items.added",
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), "watchlist.items.added"),
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), "watchlist.items.added")
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.items.added"], NotificationTemplate.None),
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.items.added"], NotificationTemplate.None)
 		);
 		var media = Media(new CachedMedia(new PartialMovie { Identity = new MediaIdentity(id, []), Title = "The Matrix" }, DateTimeOffset.UtcNow));
 
@@ -97,6 +143,7 @@ public class NotificationDispatchHandlerTests
 			Scope().Object,
 			subscriptions.Object,
 			media.Object,
+			Feed().Object,
 			CancellationToken.None
 		);
 
@@ -118,6 +165,13 @@ public class NotificationDispatchHandlerTests
 	{
 		var repository = IMediaRepository.Mock();
 		repository.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).Returns((IReadOnlyList<CachedMedia>)cached);
+		return repository;
+	}
+
+	private static Mock<IFeedRepository> Feed()
+	{
+		var repository = IFeedRepository.Mock();
+		repository.GetFeedByIdAsync(Any(), Any()).Returns((Domain.Feed.Feed?)null);
 		return repository;
 	}
 

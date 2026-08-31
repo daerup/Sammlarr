@@ -372,15 +372,29 @@ namespace DB.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BodyTemplate")
+                        .HasMaxLength(8192)
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("EventType")
+                    b.PrimitiveCollection<string>("EventTypes")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("MessageTemplate")
+                        .HasMaxLength(8192)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Priority")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("TargetId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TitleTemplate")
+                        .HasMaxLength(2048)
                         .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")
@@ -391,10 +405,9 @@ namespace DB.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TargetId", "EventType")
-                        .IsUnique();
+                    b.HasIndex("TargetId");
 
-                    b.HasIndex("UserId", "EventType");
+                    b.HasIndex("UserId");
 
                     b.ToTable("NotificationSubscriptions");
                 });
@@ -409,10 +422,6 @@ namespace DB.Migrations
                         .HasMaxLength(4096)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("BodyTemplate")
-                        .HasMaxLength(8192)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Channel")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -423,10 +432,6 @@ namespace DB.Migrations
                     b.Property<bool>("Enabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MessageTemplate")
-                        .HasMaxLength(8192)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -434,10 +439,6 @@ namespace DB.Migrations
 
                     b.Property<string>("SigningSecret")
                         .HasMaxLength(4096)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TitleTemplate")
-                        .HasMaxLength(2048)
                         .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedAt")

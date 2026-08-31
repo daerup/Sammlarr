@@ -15,8 +15,7 @@ internal sealed class NotificationModelConfiguration : IModelConfiguration
 		modelBuilder.Entity<NotificationSubscriptionRow>(builder =>
 		{
 			builder.HasUserOwner();
-			builder.HasIndex(UserOwnedConfigurationExtensions.UserIdColumn, nameof(NotificationSubscriptionRow.EventType));
-			builder.HasIndex(nameof(NotificationSubscriptionRow.TargetId), nameof(NotificationSubscriptionRow.EventType)).IsUnique();
+			builder.HasIndex(subscription => subscription.TargetId);
 			builder.HasOne<NotificationTargetRow>().WithMany().HasForeignKey(subscription => subscription.TargetId).OnDelete(DeleteBehavior.Cascade);
 		});
 	}

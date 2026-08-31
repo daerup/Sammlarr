@@ -10,25 +10,31 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 
 	public NotificationChannel Kind => NotificationChannel.Pushover;
 
-	public async Task<DeliveryResult> SendAsync(NotificationContext context, NotificationTarget target, CancellationToken cancellationToken)
+	public async Task<DeliveryResult> SendAsync(
+		NotificationContext context,
+		NotificationTarget target,
+		NotificationTemplate template,
+		CancellationToken cancellationToken
+	)
 	{
 		if (target.Config is not PushoverConfig config)
 		{
 			return new DeliveryPermanent("The target is not a Pushover target.");
 		}
 
-		var titleResult = Render(config.TitleTemplate, context, context.Title);
+		var titleResult = Render(template.Title, context);
 		if (titleResult is not Success<string> title)
 		{
 			return RenderFailure(titleResult, "title");
 		}
-		var messageResult = Render(config.MessageTemplate, context, context.Summary);
+		var messageResult = Render(template.Message, context);
 		if (messageResult is not Success<string> message)
 		{
 			return RenderFailure(messageResult, "message");
 		}
 
-		var request = new PushoverMessage(config.AppToken, config.UserKey, title.Value, message.Value, Priority(context.Type));
+		var priority = template.Priority is Some<int> configured ? configured.Value : DerivedPriority(context.Type);
+		var request = new PushoverMessage(config.AppToken, config.UserKey, title.Value, message.Value, priority);
 		var result = await client.SendAsync(request, cancellationToken);
 		if (result is DeliveryPermanent permanent)
 		{
@@ -37,8 +43,8 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		return result;
 	}
 
-	private Result<string> Render(string? template, NotificationContext context, string fallback) =>
-		template is { } value ? renderer.Render(value, context) : Success.Of(fallback);
+	private Result<string> Render(Optional<string> template, NotificationContext context) =>
+		template is Some<string> value ? renderer.Render(value.Value, context) : Success.Of(string.Empty);
 
 	private DeliveryResult RenderFailure(Result<string> rendered, string field)
 	{
@@ -47,5 +53,5 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		return new DeliveryPermanent(reason);
 	}
 
-	private static int Priority(string type) => type == FeedRunFailedType ? 1 : 0;
+	private static int DerivedPriority(string type) => type == FeedRunFailedType ? 1 : 0;
 }

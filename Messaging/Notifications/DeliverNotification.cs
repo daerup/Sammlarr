@@ -1,6 +1,7 @@
 using Contracts.Notifications;
 using Domain.Identity;
+using Domain.Notifications;
 
 namespace Messaging.Notifications;
 
-public sealed record DeliverNotification(NotificationContext Context, Guid TargetId, UserId UserId);
+public sealed record DeliverNotification(NotificationContext Context, Guid TargetId, UserId UserId, NotificationTemplate Template);

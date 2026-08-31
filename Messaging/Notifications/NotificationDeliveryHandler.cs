@@ -23,7 +23,7 @@ public static class NotificationDeliveryHandler
 			return;
 		}
 
-		var result = await channels[target.Channel].SendAsync(message.Context, target, cancellationToken);
+		var result = await channels[target.Channel].SendAsync(message.Context, target, message.Template, cancellationToken);
 		if (result is DeliveryTransient transient)
 		{
 			throw new NotificationDeliveryFailedException(message.TargetId, transient.Reason);
