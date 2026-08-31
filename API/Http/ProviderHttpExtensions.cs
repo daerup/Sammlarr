@@ -42,11 +42,12 @@ internal static class ProviderHttpExtensions
 	{
 		options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(http.AttemptTimeoutSeconds);
 		options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(http.TotalTimeoutSeconds);
-		options.Retry.MaxRetryAttempts = http.RetryAttempts;
+		options.Retry.MaxRetryAttempts = Math.Max(1, http.RetryAttempts);
 		options.Retry.UseJitter = true;
-		options.Retry.ShouldHandle = static args => new ValueTask<bool>(
-			args.Outcome.Exception is not TimeoutRejectedException && HttpClientResiliencePredicates.IsTransient(args.Outcome)
-		);
+		options.Retry.ShouldHandle =
+			http.RetryAttempts > 0
+				? static args => new ValueTask<bool>(args.Outcome.Exception is not TimeoutRejectedException && HttpClientResiliencePredicates.IsTransient(args.Outcome))
+				: static _ => new ValueTask<bool>(false);
 		if (http.HonorRetryAfter)
 		{
 			options.Retry.DelayGenerator = static args =>
