@@ -6,11 +6,11 @@ window.sammlarrTemplate = {
         }
         return el;
     },
-    write: function (el, text) {
+    write: function (el, text, caretOffset) {
         const start = el.selectionStart ?? el.value.length;
         const end = el.selectionEnd ?? el.value.length;
         el.value = el.value.substring(0, start) + text + el.value.substring(end);
-        const caret = start + text.length;
+        const caret = start + (caretOffset ?? text.length);
         el.selectionStart = el.selectionEnd = caret;
         el.focus();
         el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -28,6 +28,11 @@ window.sammlarrTemplate = {
         }
         const before = el.value.substring(0, el.selectionStart ?? el.value.length);
         const inLoop = before.lastIndexOf('{% for') > before.lastIndexOf('{% endfor');
-        this.write(el, inLoop ? itemToken : '{% for item in ' + listExpression + ' %}' + itemToken + '\n{% endfor %}');
+        if (inLoop) {
+            this.write(el, itemToken);
+            return;
+        }
+        const open = '{% for item in ' + listExpression + ' %}';
+        this.write(el, open + itemToken + '\n{% endfor %}', open.length + itemToken.length);
     }
 };

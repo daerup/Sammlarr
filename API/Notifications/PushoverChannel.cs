@@ -7,6 +7,7 @@ namespace API.Notifications;
 internal sealed class PushoverChannel(PushoverClient client, INotificationTemplateRenderer renderer, ILogger<PushoverChannel> logger) : INotificationChannel
 {
 	private const string FeedRunFailedType = "feed.run.failed";
+	private const string EmptyMessagePlaceholder = "(empty)";
 
 	public NotificationChannel Kind => NotificationChannel.Pushover;
 
@@ -34,7 +35,8 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		}
 
 		var priority = template.Priority is Some<int> configured ? configured.Value : DerivedPriority(context.Type);
-		var request = new PushoverMessage(config.AppToken, config.UserKey, title.Value, message.Value, priority);
+		var messageText = string.IsNullOrWhiteSpace(message.Value) ? EmptyMessagePlaceholder : message.Value;
+		var request = new PushoverMessage(config.AppToken, config.UserKey, title.Value, messageText, priority);
 		var result = await client.SendAsync(request, cancellationToken);
 		if (result is DeliveryPermanent permanent)
 		{

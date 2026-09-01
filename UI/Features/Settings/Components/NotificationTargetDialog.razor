@@ -101,7 +101,7 @@
     public NotificationTarget? Target { get; set; }
 
     private bool _isCreate => Target is null;
-    private string SecretPlaceholder => _isCreate ? "Required" : "Leave blank to keep the current value";
+    private string SecretPlaceholder => "Required";
     private bool _busy => _saving || _testing;
 
     private string _name = string.Empty;
@@ -129,6 +129,11 @@
             {
                 _url = webhook.Url;
                 _signingSecret = webhook.SigningSecret;
+            }
+            else if (target.Config is PushoverConfig pushover)
+            {
+                _appToken = pushover.AppToken;
+                _userKey = pushover.UserKey;
             }
         }
         else
@@ -208,13 +213,7 @@
             return new NotificationTarget(Target?.Id ?? Guid.Empty, _name.Trim(), Target?.Enabled ?? true, NotificationConfigBuilder.Webhook(_url, _signingSecret));
         }
 
-        var existingPushover = Target?.Config is PushoverConfig pushover ? pushover : (PushoverConfig?)null;
-        return new NotificationTarget(
-            Target?.Id ?? Guid.Empty,
-            _name.Trim(),
-            Target?.Enabled ?? true,
-            NotificationConfigBuilder.Pushover(_appToken, _userKey, existingPushover)
-        );
+        return new NotificationTarget(Target?.Id ?? Guid.Empty, _name.Trim(), Target?.Enabled ?? true, NotificationConfigBuilder.Pushover(_appToken, _userKey));
     }
 
     private static (bool Ok, string Message) Describe(DeliveryResult result) =>
@@ -233,12 +232,12 @@
         }
         if (_channel == NotificationChannel.Webhook)
         {
-            if (!Uri.TryCreate(_url.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+            if (string.IsNullOrWhiteSpace(_url) || !Uri.TryCreate(_url.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
             {
                 return "Enter an absolute https:// URL.";
             }
         }
-        else if (_isCreate && (string.IsNullOrWhiteSpace(_appToken) || string.IsNullOrWhiteSpace(_userKey)))
+        else if (string.IsNullOrWhiteSpace(_appToken) || string.IsNullOrWhiteSpace(_userKey))
         {
             return "App token and user key are required.";
         }
