@@ -14,15 +14,15 @@ internal sealed class WebhookClient(HttpClient client)
 		}
 		catch (HttpRequestException error) when (Blocked(error) is { } blocked)
 		{
-			return new DeliveryPermanent(blocked.Message);
+			return new DeliveryUnrecoverable(blocked.Message);
 		}
 		catch (HttpRequestException error)
 		{
-			return new DeliveryTransient(error.Message);
+			return new DeliveryRetryable(error.Message);
 		}
 		catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
-			return new DeliveryTransient("The webhook request timed out.");
+			return new DeliveryRetryable("The webhook request timed out.");
 		}
 	}
 
@@ -38,9 +38,9 @@ internal sealed class WebhookClient(HttpClient client)
 		(int)status switch
 		{
 			>= 200 and < 300 => new DeliverySucceeded(),
-			>= 300 and < 400 => new DeliveryPermanent($"The webhook endpoint returned an unfollowed redirect (HTTP {(int)status})."),
-			429 => new DeliveryTransient("The webhook endpoint is rate limiting (HTTP 429)."),
-			>= 400 and < 500 => new DeliveryPermanent($"The webhook endpoint returned HTTP {(int)status}."),
-			_ => new DeliveryTransient($"The webhook endpoint returned HTTP {(int)status}."),
+			>= 300 and < 400 => new DeliveryUnrecoverable($"The webhook endpoint returned an unfollowed redirect (HTTP {(int)status})."),
+			429 => new DeliveryRetryable("The webhook endpoint is rate limiting (HTTP 429)."),
+			>= 400 and < 500 => new DeliveryUnrecoverable($"The webhook endpoint returned HTTP {(int)status}."),
+			_ => new DeliveryRetryable($"The webhook endpoint returned HTTP {(int)status}."),
 		};
 }

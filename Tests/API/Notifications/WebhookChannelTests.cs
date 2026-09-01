@@ -69,54 +69,54 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Non_https_url_is_permanent_and_sends_nothing()
+	public async Task Non_https_url_is_unrecoverable_and_sends_nothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
 			.SendAsync(Context(), WebhookTarget("http://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(handler.Request).IsNull();
 	}
 
 	[Test]
-	public async Task Invalid_template_is_permanent_and_sends_nothing()
+	public async Task Invalid_template_is_unrecoverable_and_sends_nothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler)
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body("{{ unclosed"), CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(handler.Request).IsNull();
 	}
 
 	[Test]
-	public async Task Server_error_is_transient()
+	public async Task Server_error_is_retryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryTransient>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
 
 	[Test]
-	public async Task Unauthorized_is_permanent()
+	public async Task Unauthorized_is_unrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.Unauthorized))
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 	}
 
 	[Test]
-	public async Task Rate_limited_is_transient()
+	public async Task Rate_limited_is_retryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryTransient>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
 
 	private static WebhookChannel Channel(HttpMessageHandler handler)

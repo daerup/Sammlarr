@@ -24,9 +24,9 @@ public static class NotificationDeliveryHandler
 		}
 
 		var result = await channels[target.Channel].SendAsync(message.Context, target, message.Template, cancellationToken);
-		if (result is DeliveryTransient transient)
+		if (result is DeliveryRetryable retryable)
 		{
-			throw new NotificationDeliveryFailedException(message.TargetId, transient.Reason);
+			throw new NotificationDeliveryFailedException(message.TargetId, retryable.Reason);
 		}
 	}
 }
