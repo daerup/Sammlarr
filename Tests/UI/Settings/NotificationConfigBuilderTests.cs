@@ -15,33 +15,11 @@ public class NotificationConfigBuilderTests
 	}
 
 	[Test]
-	public async Task Pushover_keeps_existing_secrets_when_left_blank()
+	public async Task Pushover_trims_the_entered_values()
 	{
-		var existing = new PushoverConfig("old-token", "old-key");
-
-		var config = NotificationConfigBuilder.Pushover("   ", "", existing);
-
-		await Assert.That(config.AppToken).IsEqualTo("old-token");
-		await Assert.That(config.UserKey).IsEqualTo("old-key");
-	}
-
-	[Test]
-	public async Task Pushover_replaces_secrets_when_entered()
-	{
-		var existing = new PushoverConfig("old-token", "old-key");
-
-		var config = NotificationConfigBuilder.Pushover("  new-token ", "new-key", existing);
+		var config = NotificationConfigBuilder.Pushover("  new-token ", " new-key ");
 
 		await Assert.That(config.AppToken).IsEqualTo("new-token");
 		await Assert.That(config.UserKey).IsEqualTo("new-key");
-	}
-
-	[Test]
-	public async Task Pushover_on_create_uses_the_entered_values()
-	{
-		var config = NotificationConfigBuilder.Pushover("token", "key", existing: null);
-
-		await Assert.That(config.AppToken).IsEqualTo("token");
-		await Assert.That(config.UserKey).IsEqualTo("key");
 	}
 }

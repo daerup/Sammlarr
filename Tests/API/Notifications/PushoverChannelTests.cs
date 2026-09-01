@@ -32,15 +32,26 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Empty_templates_send_empty_title_and_message()
+	public async Task Empty_message_template_is_sent_as_an_empty_placeholder()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		await Channel(handler).SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
+		var result = await Channel(handler).SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliverySucceeded>();
 		var form = Form(handler);
 		await Assert.That(form["title"]).IsEqualTo(string.Empty);
-		await Assert.That(form["message"]).IsEqualTo(string.Empty);
+		await Assert.That(form["message"]).IsEqualTo("(empty)");
+	}
+
+	[Test]
+	public async Task Blank_message_template_is_sent_as_an_empty_placeholder()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(title: "{{ title }}", message: ""), CancellationToken.None);
+
+		await Assert.That(Form(handler)["message"]).IsEqualTo("(empty)");
 	}
 
 	[Test]
