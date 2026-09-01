@@ -28,7 +28,7 @@ public class NotificationDeliveryHandlerTests
 		var threw = false;
 		try
 		{
-			await Handle(Guid.NewGuid(), WebhookTarget(enabled: true), new RecordingChannel(new DeliveryTransient("boom")));
+			await Handle(Guid.NewGuid(), WebhookTarget(enabled: true), new RecordingChannel(new DeliveryRetryable("boom")));
 		}
 		catch (NotificationDeliveryFailedException)
 		{
@@ -41,7 +41,7 @@ public class NotificationDeliveryHandlerTests
 	[Test]
 	public async Task Permanent_result_sends_but_does_not_throw()
 	{
-		var channel = new RecordingChannel(new DeliveryPermanent("401"));
+		var channel = new RecordingChannel(new DeliveryUnrecoverable("401"));
 
 		await Handle(Guid.NewGuid(), WebhookTarget(enabled: true), channel);
 

@@ -87,45 +87,45 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Monthly_limit_is_permanent()
+	public async Task Monthly_limit_is_unrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
 			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 	}
 
 	[Test]
-	public async Task Bad_request_is_permanent()
+	public async Task Bad_request_is_unrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.BadRequest))
 			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 	}
 
 	[Test]
-	public async Task Server_error_is_transient()
+	public async Task Server_error_is_retryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
 			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryTransient>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryRetryable>();
 	}
 
 	[Test]
-	public async Task Invalid_template_is_permanent_and_sends_nothing()
+	public async Task Invalid_template_is_unrecoverable_and_sends_nothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
 		var result = await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "{{ unclosed"), CancellationToken.None);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(handler.Request).IsNull();
 	}
 
 	[Test]
-	public async Task Non_pushover_target_is_permanent_and_sends_nothing()
+	public async Task Non_pushover_target_is_unrecoverable_and_sends_nothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -137,7 +137,7 @@ public class PushoverChannelTests
 				CancellationToken.None
 			);
 
-		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryPermanent>();
+		await Assert.That(result).IsOfUnionType<DeliveryResult, DeliveryUnrecoverable>();
 		await Assert.That(handler.Request).IsNull();
 	}
 

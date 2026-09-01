@@ -220,8 +220,8 @@
         result switch
         {
             DeliverySucceeded => (true, "Delivered."),
-            DeliveryTransient transient => (false, transient.Reason),
-            DeliveryPermanent permanent => (false, permanent.Reason),
+            DeliveryRetryable retryable => (false, retryable.Reason),
+            DeliveryUnrecoverable unrecoverable => (false, unrecoverable.Reason),
         };
 
     private string? Validate()

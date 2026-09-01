@@ -20,7 +20,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 	{
 		if (target.Config is not PushoverConfig config)
 		{
-			return new DeliveryPermanent("The target is not a Pushover target.");
+			return new DeliveryUnrecoverable("The target is not a Pushover target.");
 		}
 
 		var titleResult = Render(template.Title, context);
@@ -38,9 +38,9 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		var messageText = string.IsNullOrWhiteSpace(message.Value) ? EmptyMessagePlaceholder : message.Value;
 		var request = new PushoverMessage(config.AppToken, config.UserKey, title.Value, messageText, priority);
 		var result = await client.SendAsync(request, cancellationToken);
-		if (result is DeliveryPermanent permanent)
+		if (result is DeliveryUnrecoverable unrecoverable)
 		{
-			logger.LogWarning("Pushover delivery permanently failed: {Reason}", permanent.Reason);
+			logger.LogWarning("Pushover delivery permanently failed: {Reason}", unrecoverable.Reason);
 		}
 		return result;
 	}
@@ -52,7 +52,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 	{
 		var reason = rendered is Error error ? error.Reason : $"The Pushover {field} template could not be rendered.";
 		logger.LogWarning("Pushover {Field} template could not be rendered: {Reason}", field, reason);
-		return new DeliveryPermanent(reason);
+		return new DeliveryUnrecoverable(reason);
 	}
 
 	private static int DerivedPriority(string type) => type == FeedRunFailedType ? 1 : 0;

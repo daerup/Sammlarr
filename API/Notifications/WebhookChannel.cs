@@ -29,11 +29,11 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 	{
 		if (target.Config is not WebhookConfig config)
 		{
-			return new DeliveryPermanent("The target is not a webhook.");
+			return new DeliveryUnrecoverable("The target is not a webhook.");
 		}
 		if (!Uri.TryCreate(config.Url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
 		{
-			return new DeliveryPermanent("The webhook URL must be an absolute https URI.");
+			return new DeliveryUnrecoverable("The webhook URL must be an absolute https URI.");
 		}
 
 		var rendered = RenderBody(context, template);
@@ -41,7 +41,7 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		{
 			var reason = rendered is Error error ? error.Reason : "The webhook body could not be rendered.";
 			logger.LogWarning("Webhook body for {Url} could not be rendered: {Reason}", uri, reason);
-			return new DeliveryPermanent(reason);
+			return new DeliveryUnrecoverable(reason);
 		}
 
 		var payload = Encoding.UTF8.GetBytes(body.Value);
@@ -54,9 +54,9 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		request.Headers.TryAddWithoutValidation("webhook-signature", signature);
 
 		var result = await client.SendAsync(request, cancellationToken);
-		if (result is DeliveryPermanent permanent)
+		if (result is DeliveryUnrecoverable unrecoverable)
 		{
-			logger.LogWarning("Webhook delivery to {Url} permanently failed: {Reason}", uri, permanent.Reason);
+			logger.LogWarning("Webhook delivery to {Url} permanently failed: {Reason}", uri, unrecoverable.Reason);
 		}
 		return result;
 	}

@@ -29,11 +29,11 @@ internal sealed class PushoverClient(HttpClient client)
 		}
 		catch (HttpRequestException error)
 		{
-			return new DeliveryTransient(error.Message);
+			return new DeliveryRetryable(error.Message);
 		}
 		catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
 		{
-			return new DeliveryTransient("The Pushover request timed out.");
+			return new DeliveryRetryable("The Pushover request timed out.");
 		}
 	}
 
@@ -48,13 +48,13 @@ internal sealed class PushoverClient(HttpClient client)
 		if (status == (int)HttpStatusCode.TooManyRequests)
 		{
 			var remaining = response.Headers.TryGetValues("X-Limit-App-Remaining", out var values) ? values.FirstOrDefault() : null;
-			return new DeliveryPermanent($"Pushover monthly message limit reached (HTTP 429; app remaining {remaining ?? "0"}).");
+			return new DeliveryUnrecoverable($"Pushover monthly message limit reached (HTTP 429; app remaining {remaining ?? "0"}).");
 		}
 		if (status is >= 400 and < 500)
 		{
-			return new DeliveryPermanent($"Pushover rejected the message (HTTP {status}){Detail(body)}");
+			return new DeliveryUnrecoverable($"Pushover rejected the message (HTTP {status}){Detail(body)}");
 		}
-		return new DeliveryTransient($"Pushover returned HTTP {status}{Detail(body)}");
+		return new DeliveryRetryable($"Pushover returned HTTP {status}{Detail(body)}");
 	}
 
 	private static string Detail(string body)
