@@ -17,3 +17,4 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 
 | # | Title | Status | Date |
 |---|-------|--------|------|
+| 0001 | [Drive deployment from the Aspire AppHost](0001-drive-deployment-from-the-aspire-apphost.md) | accepted | 2026-09-02 |
