@@ -38,10 +38,10 @@
         @switch (_channel)
         {
             case NotificationChannel.Webhook:
-                <WebhookClientFields @bind-Url="_url" @bind-Regenerate="_regenerate" ShowRegenerate="!_isCreate"/>
+                <WebhookClientEditor @ref="_editor" Target="Target"/>
                 break;
             case NotificationChannel.Pushover:
-                <PushoverClientFields @bind-AppToken="_appToken" @bind-UserKey="_userKey" Placeholder="@SecretPlaceholder"/>
+                <PushoverClientEditor @ref="_editor" Target="Target"/>
                 break;
         }
 
@@ -101,16 +101,11 @@
     public NotificationTarget? Target { get; set; }
 
     private bool _isCreate => Target is null;
-    private string SecretPlaceholder => "Required";
     private bool _busy => _saving || _testing;
 
+    private ClientEditorBase _editor = null!;
     private string _name = string.Empty;
     private NotificationChannel _channel = NotificationChannel.Webhook;
-    private string _url = string.Empty;
-    private bool _regenerate;
-    private string _appToken = string.Empty;
-    private string _userKey = string.Empty;
-    private string _signingSecret = string.Empty;
 
     private string? _createdSecret;
     private string? _error;
@@ -125,28 +120,13 @@
         {
             _name = target.Name;
             _channel = target.Channel;
-            if (target.Config is WebhookConfig webhook)
-            {
-                _url = webhook.Url;
-                _signingSecret = webhook.SigningSecret;
-            }
-            else if (target.Config is PushoverConfig pushover)
-            {
-                _appToken = pushover.AppToken;
-                _userKey = pushover.UserKey;
-            }
-        }
-        else
-        {
-            _signingSecret = WebhookSecret.Generate();
         }
     }
 
     private async Task TestAsync()
     {
-        _error = Validate();
         _testMessage = null;
-        if (_error is not null)
+        if (!TryBuildTarget(out var target))
         {
             return;
         }
@@ -154,7 +134,7 @@
         _testing = true;
         try
         {
-            (_testOk, _testMessage) = Describe(await Tester.PingAsync(BuildTarget()));
+            (_testOk, _testMessage) = Describe(await Tester.PingAsync(target));
         }
         catch (Exception exception)
         {
@@ -165,8 +145,7 @@
 
     private async Task SaveAsync()
     {
-        _error = Validate();
-        if (_error is not null)
+        if (!TryBuildTarget(out var target))
         {
             return;
         }
@@ -174,8 +153,6 @@
         _saving = true;
         try
         {
-            var target = BuildTarget();
-            var regeneratedWebhook = _channel == NotificationChannel.Webhook && (_isCreate || _regenerate);
             if (_isCreate)
             {
                 await Targets.CreateAsync(target);
@@ -185,9 +162,9 @@
                 await Targets.UpdateAsync(target);
             }
 
-            if (regeneratedWebhook)
+            if (_editor.CreatedSecret is { } secret)
             {
-                _createdSecret = _signingSecret;
+                _createdSecret = secret;
                 _saving = false;
                 return;
             }
@@ -202,18 +179,21 @@
         }
     }
 
-    private NotificationTarget BuildTarget()
+    private bool TryBuildTarget(out NotificationTarget target)
     {
-        if (_channel == NotificationChannel.Webhook)
+        target = default!;
+        _error = null;
+        if (string.IsNullOrWhiteSpace(_name))
         {
-            if (_regenerate && !_isCreate)
-            {
-                _signingSecret = WebhookSecret.Generate();
-            }
-            return new NotificationTarget(Target?.Id ?? Guid.Empty, _name.Trim(), Target?.Enabled ?? true, NotificationConfigBuilder.Webhook(_url, _signingSecret));
+            _error = "Name is required.";
+            return false;
         }
-
-        return new NotificationTarget(Target?.Id ?? Guid.Empty, _name.Trim(), Target?.Enabled ?? true, NotificationConfigBuilder.Pushover(_appToken, _userKey));
+        if (!_editor.TryBuild(out var config, out _error))
+        {
+            return false;
+        }
+        target = new NotificationTarget(Target?.Id ?? Guid.Empty, _name.Trim(), Target?.Enabled ?? true, config);
+        return true;
     }
 
     private static (bool Ok, string Message) Describe(DeliveryResult result) =>
@@ -223,26 +203,6 @@
             DeliveryRetryable retryable => (false, retryable.Reason),
             DeliveryUnrecoverable unrecoverable => (false, unrecoverable.Reason),
         };
-
-    private string? Validate()
-    {
-        if (string.IsNullOrWhiteSpace(_name))
-        {
-            return "Name is required.";
-        }
-        if (_channel == NotificationChannel.Webhook)
-        {
-            if (string.IsNullOrWhiteSpace(_url) || !Uri.TryCreate(_url.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
-            {
-                return "Enter an absolute https:// URL.";
-            }
-        }
-        else if (string.IsNullOrWhiteSpace(_appToken) || string.IsNullOrWhiteSpace(_userKey))
-        {
-            return "App token and user key are required.";
-        }
-        return null;
-    }
 
     private void SecretCopied(string? _) => Notifier.Success("Signing secret copied.");
 
