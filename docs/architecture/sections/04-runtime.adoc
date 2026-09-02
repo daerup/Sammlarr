@@ -1,0 +1,3 @@
+[[section-runtime-view]]
+== Runtime View
+// Key scenarios as sequence diagrams (feed refresh, watchlist push, notification, sign-in).
