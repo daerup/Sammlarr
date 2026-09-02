@@ -2,6 +2,7 @@
 @using Domain.Notifications
 @inject INotificationTargetRepository Targets
 @inject INotificationSubscriptionRepository Subscriptions
+@inject INotificationDeliveryOutcomeRepository Outcomes
 @inject Notifier Notifier
 @inject DialogService DialogService
 
@@ -38,7 +39,10 @@
                         <LucideIcon Name="@ChannelIcon(client.Channel)" Size="18"/>
                     </div>
                     <div class="min-w-0 flex-1">
-                        <p class="truncate font-medium">@client.Name</p>
+                        <div class="flex items-center gap-2">
+                            <p class="min-w-0 truncate font-medium">@client.Name</p>
+                            <NotificationHealthDot Outcomes="Health(client.Id)"/>
+                        </div>
                         <p class="text-xs text-muted-foreground">@client.Channel@(client.Enabled ? "" : " · disabled")</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
@@ -111,6 +115,7 @@
 
     private List<NotificationTarget> _clients = [];
     private List<Alert> _alerts = [];
+    private IReadOnlyDictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>> _health = new Dictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>();
     private bool _loaded;
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
@@ -118,6 +123,7 @@
     private async Task LoadAsync()
     {
         _clients = [.. await Targets.GetAllAsync()];
+        _health = await Outcomes.GetRecentByTargetAsync(10);
         var alerts = new List<Alert>();
         foreach (var client in _clients)
         {
@@ -129,6 +135,8 @@
         _alerts = alerts;
         _loaded = true;
     }
+
+    private IReadOnlyList<NotificationDeliveryOutcome> Health(Guid clientId) => _health.GetValueOrDefault(clientId, []);
 
 	private static string EventsLabel(NotificationSubscription subscription) => string.Join(", ", subscription.EventTypes.Select(NotificationEventCatalog.LabelFor));
 

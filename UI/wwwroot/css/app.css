@@ -415,6 +415,9 @@
   .h-1\.5 {
     height: calc(var(--spacing) * 1.5);
   }
+  .h-2 {
+    height: calc(var(--spacing) * 2);
+  }
   .h-5 {
     height: calc(var(--spacing) * 5);
   }
@@ -462,6 +465,9 @@
   }
   .w-1\.5 {
     width: calc(var(--spacing) * 1.5);
+  }
+  .w-2 {
+    width: calc(var(--spacing) * 2);
   }
   .w-2\/3 {
     width: calc(2 / 3 * 100%);
@@ -819,6 +825,9 @@
       background-color: color-mix(in oklab, var(--accent) 40%, transparent);
     }
   }
+  .bg-amber-500 {
+    background-color: var(--color-amber-500);
+  }
   .bg-background {
     background-color: var(--background);
   }
@@ -851,6 +860,12 @@
   }
   .bg-muted {
     background-color: var(--muted);
+  }
+  .bg-muted-foreground\/30 {
+    background-color: var(--muted-foreground);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+    }
   }
   .bg-muted-foreground\/60 {
     background-color: var(--muted-foreground);

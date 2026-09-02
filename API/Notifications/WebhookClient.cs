@@ -1,5 +1,5 @@
 using System.Net;
-using Domain.Notifications;
+using Contracts.Notifications;
 
 namespace API.Notifications;
 

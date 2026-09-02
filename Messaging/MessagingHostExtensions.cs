@@ -36,8 +36,6 @@ public static class MessagingHostExtensions
 			.Policies.OnException<WatchlistPushFailedException>()
 			.RetryWithCooldown(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
 
-		options
-			.Policies.OnException<NotificationDeliveryFailedException>()
-			.RetryWithCooldown(TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromHours(1));
+		options.Policies.OnException<NotificationDeliveryFailedException>().RetryWithCooldown(NotificationDeliveryRetry.Cooldowns);
 	}
 }

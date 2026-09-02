@@ -1,4 +1,4 @@
-namespace Domain.Notifications;
+namespace Contracts.Notifications;
 
 public union DeliveryResult(DeliverySucceeded, DeliveryRetryable, DeliveryUnrecoverable);
 

@@ -18,5 +18,13 @@ internal sealed class NotificationModelConfiguration : IModelConfiguration
 			builder.HasIndex(subscription => subscription.TargetId);
 			builder.HasOne<NotificationTargetRow>().WithMany().HasForeignKey(subscription => subscription.TargetId).OnDelete(DeleteBehavior.Cascade);
 		});
+
+		modelBuilder.Entity<NotificationDeliveryOutcomeRow>(builder =>
+		{
+			builder.HasUserOwner();
+			builder.HasIndex(nameof(NotificationDeliveryOutcomeRow.TargetId), nameof(NotificationDeliveryOutcomeRow.UpdatedAt));
+			builder.HasIndex(nameof(NotificationDeliveryOutcomeRow.EventId), nameof(NotificationDeliveryOutcomeRow.TargetId)).IsUnique();
+			builder.HasOne<NotificationTargetRow>().WithMany().HasForeignKey(outcome => outcome.TargetId).OnDelete(DeleteBehavior.Cascade);
+		});
 	}
 }
