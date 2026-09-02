@@ -3,7 +3,7 @@ using Contracts.Notifications;
 using Domain.Notifications;
 using Shared;
 
-namespace UI.Features.Settings.Components;
+namespace UI.Features.Settings.Components.Notifications;
 
 internal sealed class NotificationTester(IKeyedServiceIndex<NotificationChannel, INotificationChannel> channels)
 {

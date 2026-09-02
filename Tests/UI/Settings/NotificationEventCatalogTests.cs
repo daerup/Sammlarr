@@ -1,7 +1,7 @@
 using Domain.Identity;
 using Domain.Notifications;
 using Domain.Notifications.Events;
-using UI.Features.Settings.Components;
+using UI.Features.Settings.Components.Notifications;
 
 namespace UI.Tests.Settings;
 

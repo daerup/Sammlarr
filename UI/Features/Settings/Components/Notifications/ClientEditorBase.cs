@@ -1,7 +1,7 @@
 using Domain.Notifications;
 using Microsoft.AspNetCore.Components;
 
-namespace UI.Features.Settings.Components;
+namespace UI.Features.Settings.Components.Notifications;
 
 public abstract class ClientEditorBase : ComponentBase
 {
