@@ -44,10 +44,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
+app.UseRequestTimeouts();
+app.UseOutputCache();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapAuthEndpoints();
+app.MapHealthEndpoints();
 
 app.MapGet(
 		"/diagnostics/export",

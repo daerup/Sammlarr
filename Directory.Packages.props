@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Aspire.Hosting.Docker" Version="13.4.6" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="BlazorBlueprint.Components" Version="3.9.2" />
     <PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.0" />
@@ -13,7 +14,7 @@
     <PackageVersion Include="Enterprize1.BenchmarkDotNet.GitCompare" Version="0.0.1" />
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
     <PackageVersion Include="Imposter" Version="0.1.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.11" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5" />

@@ -1,13 +1,39 @@
 using AppHost;
+using Aspire.Hosting;
 using Shared.Options;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder
-	.AddProject<Projects.UI>("blazor-ui")
-	.WithHttpEndpoint(port: 6769, name: "http")
-	.WithExternalHttpEndpoints()
-	.WithEnvironment((ObservabilityOptions o) => o.LogLevel, LogVerbosity.Verbose)
-	.WithBrowserLaunch();
+if (builder.ExecutionContext.IsRunMode)
+{
+	builder
+		.AddProject<Projects.UI>("blazor-ui")
+		.WithHttpEndpoint(port: 6769, name: "http")
+		.WithExternalHttpEndpoints()
+		.WithHttpHealthCheck("/health")
+		.WithEnvironment((ObservabilityOptions o) => o.LogLevel, LogVerbosity.Verbose)
+		.WithBrowserLaunch();
+}
+else
+{
+	builder.AddDockerComposeEnvironment("sammlarr").WithDashboard(enabled: false);
+
+#pragma warning disable ASPIRECOMPUTE003
+	var registry = builder.AddContainerRegistry("ghcr", "ghcr.io", "daerup/sammlarr");
+#pragma warning restore ASPIRECOMPUTE003
+
+	var ui = builder
+		.AddDockerfile("blazor-ui", "..", "UI/Dockerfile")
+		.WithHttpEndpoint(port: 8080, targetPort: 8080, name: "http")
+		.WithExternalHttpEndpoints()
+		.WithHttpHealthCheck("/health")
+		.WithEnvironment("Sammlarr__ConnectionString", "Data Source=/data/sammlarr.db")
+		.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", "/data/dp-keys")
+		.WithVolume("sammlarr-data", "/data");
+
+#pragma warning disable ASPIRECOMPUTE003
+	ui.WithContainerRegistry(registry);
+#pragma warning restore ASPIRECOMPUTE003
+}
 
 builder.Build().Run();
