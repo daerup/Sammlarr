@@ -1,0 +1,42 @@
+@using Domain.Notifications
+@inherits ClientEditorBase
+
+<WebhookClientFields @bind-Url="_url" @bind-Regenerate="_regenerate" ShowRegenerate="!IsCreate"/>
+
+@code {
+    private string _url = string.Empty;
+    private bool _regenerate;
+    private string _signingSecret = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (Target?.Config is WebhookConfig webhook)
+        {
+            _url = webhook.Url;
+            _signingSecret = webhook.SigningSecret;
+        }
+        else
+        {
+            _signingSecret = WebhookSecret.Generate();
+        }
+    }
+
+    public override bool TryBuild(out NotificationConfig config, out string? error)
+    {
+        config = default!;
+        if (string.IsNullOrWhiteSpace(_url) || !Uri.TryCreate(_url.Trim(), UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
+        {
+            error = "Enter an absolute https:// URL.";
+            return false;
+        }
+        if (_regenerate && !IsCreate)
+        {
+            _signingSecret = WebhookSecret.Generate();
+        }
+        config = NotificationConfigBuilder.Webhook(_url, _signingSecret);
+        error = null;
+        return true;
+    }
+
+    public override string? CreatedSecret => IsCreate || _regenerate ? _signingSecret : null;
+}

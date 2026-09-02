@@ -1,0 +1,31 @@
+@using Domain.Notifications
+@inherits ClientEditorBase
+
+<PushoverClientFields @bind-AppToken="_appToken" @bind-UserKey="_userKey" Placeholder="Required"/>
+
+@code {
+    private string _appToken = string.Empty;
+    private string _userKey = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (Target?.Config is PushoverConfig pushover)
+        {
+            _appToken = pushover.AppToken;
+            _userKey = pushover.UserKey;
+        }
+    }
+
+    public override bool TryBuild(out NotificationConfig config, out string? error)
+    {
+        config = default!;
+        if (string.IsNullOrWhiteSpace(_appToken) || string.IsNullOrWhiteSpace(_userKey))
+        {
+            error = "App token and user key are required.";
+            return false;
+        }
+        config = NotificationConfigBuilder.Pushover(_appToken, _userKey);
+        error = null;
+        return true;
+    }
+}
