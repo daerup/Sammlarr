@@ -1,0 +1,9 @@
+[[section-building-block-view]]
+== Building Block View
+// Level 1: the projects and how they depend on each other. Level 2: zoom on API and UI/Features.
+
+=== Whitebox Overall System
+
+=== Level 2
+
+=== Level 3

@@ -1,0 +1,7 @@
+[[section-glossary]]
+== Glossary
+// Project vocabulary and coined domain terms: term/definition table.
+// Especially the media-union terms (MediaLookup / IdentifiedMedia / UnmatchedMedia /
+// IMedia / IPartialMedia / MediaType) and reused phrases (feed, watchlist/wantlist,
+// sink, blacklist, provider, module, keyed service). Define terms tersely here and
+// link the media-union structure to <<section-concepts>> / ADR-0004.

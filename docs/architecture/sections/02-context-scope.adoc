@@ -1,0 +1,7 @@
+[[section-context-and-scope]]
+== Context and Scope
+// External systems (Plex/TMDB/IMDb/TheTVDB/MDBList) and the human user.
+
+=== Business Context
+
+=== Technical Context

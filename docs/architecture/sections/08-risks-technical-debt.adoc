@@ -1,0 +1,6 @@
+[[section-technical-risks]]
+== Risks and Technical Debt
+// Known risks and deferred work: deferred feed-resolution fix; planned testing overhaul;
+// .NET preview-SDK dependency (dotnetup); manual Tailwind app.css rebuild gotcha; Plex
+// ById 429 storm; planned media-sinks reversal of the Wolverine push; hot-reload limits;
+// the docs' own Kroki-render dependency.

@@ -1,0 +1,10 @@
+[[section-quality-scenarios]]
+== Quality Requirements
+// Quality Tree (7.1): the top quality goals from <<section-introduction-and-goals>>
+// decomposed into sub-attributes. Optional 2-3 Quality Scenarios (7.2): measurable
+// stimulus/response (e.g. feed of N loads < X s; provider 429 storm doesn't fail a run;
+// user A never sees user B's data).
+
+=== Quality Tree
+
+=== Quality Scenarios
