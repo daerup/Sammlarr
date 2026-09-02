@@ -1,4 +1,4 @@
-using UI.Features.Settings.Components;
+using UI.Features.Settings.Components.Notifications;
 
 namespace UI.Tests.Settings;
 

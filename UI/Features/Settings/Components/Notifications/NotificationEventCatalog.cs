@@ -1,7 +1,7 @@
 using Domain.Notifications;
 using Shared.Extensions;
 
-namespace UI.Features.Settings.Components;
+namespace UI.Features.Settings.Components.Notifications;
 
 internal sealed record NotificationEventOption(NotificationEventType EventType, string Label);
 

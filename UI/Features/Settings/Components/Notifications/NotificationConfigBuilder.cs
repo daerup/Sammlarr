@@ -1,6 +1,6 @@
 using Domain.Notifications;
 
-namespace UI.Features.Settings.Components;
+namespace UI.Features.Settings.Components.Notifications;
 
 internal static class NotificationConfigBuilder
 {

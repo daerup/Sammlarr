@@ -2,7 +2,7 @@ using Contracts.Notifications;
 using Domain.Notifications;
 using Shared.Extensions;
 
-namespace UI.Features.Settings.Components;
+namespace UI.Features.Settings.Components.Notifications;
 
 internal static class NotificationSampleContext
 {
