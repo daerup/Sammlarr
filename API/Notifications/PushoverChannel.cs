@@ -6,7 +6,6 @@ namespace API.Notifications;
 
 internal sealed class PushoverChannel(PushoverClient client, INotificationTemplateRenderer renderer, ILogger<PushoverChannel> logger) : INotificationChannel
 {
-	private const string FeedRunFailedType = "feed.run.failed";
 	private const string EmptyMessagePlaceholder = "(empty)";
 
 	public NotificationChannel Kind => NotificationChannel.Pushover;
@@ -55,5 +54,5 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		return new DeliveryUnrecoverable(reason);
 	}
 
-	private static int DerivedPriority(string type) => type == FeedRunFailedType ? 1 : 0;
+	private static int DerivedPriority(NotificationEventType type) => type == NotificationEventType.FeedRunFailed ? 1 : 0;
 }

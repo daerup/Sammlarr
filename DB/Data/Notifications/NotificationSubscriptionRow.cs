@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Notifications;
 
 namespace DB.Data.Notifications;
 
@@ -9,7 +10,7 @@ internal record NotificationSubscriptionRow : Entity<Guid>, IUserOwned
 	public required Guid TargetId { get; set; }
 
 	[Required]
-	public required List<string> EventTypes { get; set; }
+	public required List<NotificationEventType> EventTypes { get; set; }
 
 	[MaxLength(8192)]
 	public string? BodyTemplate { get; set; }

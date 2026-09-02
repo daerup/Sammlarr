@@ -125,7 +125,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	private static NotificationContext Context() =>
-		new(Guid.CreateVersion7(), "watchlist.items.added", DateTimeOffset.UtcNow, "Watchlist items added", "Added 1 item(s).", new NotificationData());
+		new(Guid.CreateVersion7(), NotificationEventType.WatchlistSynced, DateTimeOffset.UtcNow, "Watchlist synced", "Added 1 item(s).", new NotificationData());
 
 	private static NotificationTarget WebhookTarget(bool enabled) =>
 		new(Guid.NewGuid(), "Hook", enabled, new WebhookConfig("https://example.test/hook", "whsec_x"));
@@ -141,7 +141,13 @@ public class NotificationDeliveryHandlerTests
 	{
 		public List<DeliveryOutcome> Recorded { get; } = [];
 
-		public Task RecordAsync(Guid eventId, Guid targetId, string eventType, DeliveryOutcome outcome, CancellationToken cancellationToken = default)
+		public Task RecordAsync(
+			Guid eventId,
+			Guid targetId,
+			NotificationEventType eventType,
+			DeliveryOutcome outcome,
+			CancellationToken cancellationToken = default
+		)
 		{
 			Recorded.Add(outcome);
 			return Task.CompletedTask;

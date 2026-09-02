@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Contracts;
+using Domain.Notifications;
 
 namespace DB.Data.Notifications;
 
@@ -11,9 +12,7 @@ internal record NotificationDeliveryOutcomeRow : Entity<Guid>, IUserOwned
 
 	public required Guid TargetId { get; set; }
 
-	[Required]
-	[MaxLength(100)]
-	public required string EventType { get; set; }
+	public required NotificationEventType EventType { get; set; }
 
 	public required OutcomeKind Kind { get; set; }
 

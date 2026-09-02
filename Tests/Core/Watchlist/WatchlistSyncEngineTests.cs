@@ -68,7 +68,7 @@ public class WatchlistSyncEngineTests
 	}
 
 	[Test]
-	public async Task SyncAsync_PullInsert_PublishesWatchlistItemsAddedEvent()
+	public async Task SyncAsync_PullInsert_PublishesWatchlistSyncedEvent()
 	{
 		var pulledId = MediaId.From(Guid.NewGuid());
 
@@ -84,10 +84,6 @@ public class WatchlistSyncEngineTests
 		var engine = BuildEngine(provider, repository: repository, media: ResolvedMedia(pulledId), publisher: publisher);
 
 		await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
-
-		var added = publisher.Published.OfType<WatchlistItemsAddedEvent>().ToList();
-		await Assert.That(added.Count).IsEqualTo(1);
-		await Assert.That(added[0].MediaIds).Contains(pulledId);
 
 		var synced = publisher.Published.OfType<WatchlistSyncedEvent>().ToList();
 		await Assert.That(synced.Count).IsEqualTo(1);
@@ -106,7 +102,6 @@ public class WatchlistSyncEngineTests
 		await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
 		await Assert.That(publisher.Published.OfType<WatchlistSyncedEvent>()).IsEmpty();
-		await Assert.That(publisher.Published.OfType<WatchlistItemsAddedEvent>()).IsEmpty();
 	}
 
 	[Test]

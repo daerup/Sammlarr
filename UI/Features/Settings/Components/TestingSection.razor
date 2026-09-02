@@ -3,6 +3,7 @@
 @using Contracts.Media
 @using Domain.Media
 @using Domain.Media.Metadata
+@using Domain.Notifications
 @using Domain.Providers
 @using Domain.Watchlist
 @using UI.Shared.Common
@@ -161,6 +162,40 @@
                     <label for="nested-exception" class="text-sm cursor-pointer select-none">Include inner (nested) exception</label>
                 </div>
             }
+        </section>
+
+        <section class="rounded-lg border p-6 space-y-4">
+            <div class="space-y-1">
+                <h3 class="text-sm font-semibold">Delivery health dot <span class="font-normal text-muted-foreground">— Notifications / Clients</span></h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">NotificationHealthDot over a live outcome list — red on any failure, amber on any retry, else green; grey when empty. Click the dot for the popover. Add or remove entries below.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium">Dot:</span>
+                <NotificationHealthDot Outcomes="_healthOutcomes"/>
+                <span class="text-xs text-muted-foreground">@_healthOutcomes.Count @(_healthOutcomes.Count == 1 ? "entry" : "entries")</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="AddDelivered">
+                    <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                    Delivered
+                </BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="AddRetrying">
+                    <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                    Retrying
+                </BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="AddFailed">
+                    <LucideIcon Name="plus" Size="14" Class="mr-1.5"/>
+                    Failed
+                </BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="RemoveLastHealthOutcome" Disabled="_healthOutcomes.Count == 0">
+                    <LucideIcon Name="minus" Size="14" Class="mr-1.5"/>
+                    Remove last
+                </BbButton>
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="ClearHealthOutcomes" Disabled="_healthOutcomes.Count == 0">
+                    <LucideIcon Name="trash-2" Size="14" Class="mr-1.5"/>
+                    Clear
+                </BbButton>
+            </div>
         </section>
 
         <section class="rounded-lg border p-6 space-y-4" style="grid-column: span 2">
@@ -729,4 +764,31 @@
             Notifier.Error(ex, "Test exception");
         }
     }
+
+    private IReadOnlyList<NotificationDeliveryOutcome> _healthOutcomes = [];
+
+    private static readonly NotificationEventType[] _healthEvents =
+    [
+        NotificationEventType.WatchlistSynced,
+        NotificationEventType.FeedRunCompleted,
+        NotificationEventType.FeedRunFailed,
+    ];
+
+    private int _healthEventIndex;
+
+    private void AddDelivered() => AddHealthOutcome(new Delivered());
+
+    private void AddRetrying() => AddHealthOutcome(new Retrying("Connection timed out", DateTimeOffset.UtcNow.AddMinutes(4)));
+
+    private void AddFailed() => AddHealthOutcome(new Failed("Endpoint returned HTTP 500"));
+
+    private void AddHealthOutcome(DeliveryOutcome outcome)
+    {
+        var eventType = _healthEvents[_healthEventIndex++ % _healthEvents.Length];
+        _healthOutcomes = [new NotificationDeliveryOutcome(outcome, eventType, DateTimeOffset.UtcNow), .. _healthOutcomes];
+    }
+
+    private void RemoveLastHealthOutcome() => _healthOutcomes = [.. _healthOutcomes.Skip(1)];
+
+    private void ClearHealthOutcomes() => _healthOutcomes = [];
 }

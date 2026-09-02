@@ -1,5 +1,6 @@
 @using Contracts.Notifications
 @using Domain.Notifications
+@using global::Shared.Extensions
 @inject INotificationTargetRepository Targets
 @inject INotificationSubscriptionRepository Subscriptions
 @inject INotificationDeliveryOutcomeRepository Outcomes
@@ -86,7 +87,7 @@
                         <div class="flex flex-wrap gap-1.5">
                             @foreach (var eventType in alert.Subscription.EventTypes)
                             {
-                                <span class="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">@NotificationEventCatalog.LabelFor(eventType)</span>
+                                <span class="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">@eventType.GetDescription()</span>
                             }
                         </div>
                     </div>
@@ -138,7 +139,7 @@
 
     private IReadOnlyList<NotificationDeliveryOutcome> Health(Guid clientId) => _health.GetValueOrDefault(clientId, []);
 
-	private static string EventsLabel(NotificationSubscription subscription) => string.Join(", ", subscription.EventTypes.Select(NotificationEventCatalog.LabelFor));
+	private static string EventsLabel(NotificationSubscription subscription) => string.Join(", ", subscription.EventTypes.Select(eventType => eventType.GetDescription()));
 
 	private static string ChannelIcon(NotificationChannel channel) =>
 		channel switch

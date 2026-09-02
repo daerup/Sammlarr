@@ -1,4 +1,5 @@
 @using Domain.Notifications
+@using global::Shared.Extensions
 
 @if (Outcomes.Count == 0)
 {
@@ -21,7 +22,7 @@ else
                             <div class="flex items-center justify-between gap-2">
                                 <span class="flex min-w-0 items-baseline gap-1.5">
                                     <span class="font-medium">@Label(entry.Outcome)</span>
-                                    <span class="truncate text-muted-foreground">@NotificationEventCatalog.LabelFor(entry.EventType)</span>
+                                    <span class="truncate text-muted-foreground">@entry.EventType.GetDescription()</span>
                                 </span>
                                 <span class="shrink-0 text-muted-foreground">@Relative(entry.RecordedAt)</span>
                             </div>

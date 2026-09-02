@@ -1,14 +1,11 @@
 using Bogus;
-using Contracts;
 using Contracts.Media;
 using Contracts.Media.Search;
-using Contracts.Messaging;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Core.Watchlist;
 using Domain.Media;
-using Domain.Notifications.Events;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
 using TestInfrastructure;
@@ -92,102 +89,11 @@ public class WatchlistServiceTests
 		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasCalled(Times.Once);
 	}
 
-	[Test]
-	public async Task AddToWatchlistAsync_PublishesItemsAddedForTheEffectiveDelta()
-	{
-		var mediaId = MediaId.From(Guid.NewGuid());
-
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any()).Returns([]);
-		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).Returns([mediaId]);
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Remove, WatchlistOutboxState.Pending, 0)]);
-
-		var publisher = new RecordingPublisher();
-		var testee = CreateTestee(repository, outbox, IMediaService.Mock().Object, publisher);
-
-		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin(ManualSource.Search));
-
-		var events = publisher.Published.OfType<WatchlistItemsAddedEvent>().ToList();
-		await Assert.That(events.Count).IsEqualTo(1);
-		await Assert.That(events[0].MediaIds).Contains(mediaId);
-	}
-
-	[Test]
-	public async Task AddToWatchlistAsync_WithNoEffectiveDelta_DoesNotPublish()
-	{
-		var mediaId = MediaId.From(Guid.NewGuid());
-
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any()).Returns([]);
-		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).Returns([]);
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Remove, WatchlistOutboxState.Pending, 0)]);
-
-		var publisher = new RecordingPublisher();
-		var testee = CreateTestee(repository, outbox, IMediaService.Mock().Object, publisher);
-
-		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin(ManualSource.Search));
-
-		await Assert.That(publisher.Published).IsEmpty();
-	}
-
-	[Test]
-	public async Task RemoveFromWatchlistAsync_PublishesItemsRemovedForTheEffectiveDelta()
-	{
-		var mediaId = MediaId.From(Guid.NewGuid());
-
-		var repository = IWatchlistRepository.Mock();
-		repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).Returns([mediaId]);
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0)]);
-
-		var publisher = new RecordingPublisher();
-		var testee = CreateTestee(repository, outbox, IMediaService.Mock().Object, publisher);
-
-		await testee.RemoveFromWatchlistAsync([mediaId]);
-
-		var events = publisher.Published.OfType<WatchlistItemsRemovedEvent>().ToList();
-		await Assert.That(events.Count).IsEqualTo(1);
-		await Assert.That(events[0].MediaIds).Contains(mediaId);
-	}
-
-	private static WatchlistService CreateTestee(
-		Mock<IWatchlistRepository> repository,
-		Mock<IWatchlistOutbox> outbox,
-		IMediaService media,
-		IMessagePublisher? publisher = null
-	)
+	private static WatchlistService CreateTestee(Mock<IWatchlistRepository> repository, Mock<IWatchlistOutbox> outbox, IMediaService media)
 	{
 		var mediaRepository = IMediaRepository.Mock();
 		var configRepository = IProviderConfigRepository.Mock();
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
-		return new WatchlistService(
-			repository.Object,
-			outbox.Object,
-			media,
-			mediaRepository.Object,
-			configRepository.Object,
-			publisher ?? new RecordingPublisher(),
-			new TestCurrentUser(),
-			clock.Object
-		);
-	}
-
-	private sealed class RecordingPublisher : IMessagePublisher
-	{
-		public List<object> Published { get; } = [];
-
-		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
-			where TMessage : notnull
-		{
-			Published.Add(message);
-			return Task.CompletedTask;
-		}
+		return new WatchlistService(repository.Object, outbox.Object, media, mediaRepository.Object, configRepository.Object);
 	}
 
 	private static async IAsyncEnumerable<T> Async<T>(params T[] items)

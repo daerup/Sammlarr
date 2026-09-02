@@ -13,5 +13,12 @@ internal sealed class NotificationTester(IKeyedServiceIndex<NotificationChannel,
 		channels[target.Channel].SendAsync(PingContext(), target, pingTemplate, cancellationToken);
 
 	private static NotificationContext PingContext() =>
-		new(Guid.CreateVersion7(), "test.ping", DateTimeOffset.UtcNow, "Test notification", "This is a test notification from Sammlarr.", new NotificationData());
+		new(
+			Guid.CreateVersion7(),
+			NotificationEventType.TestPing,
+			DateTimeOffset.UtcNow,
+			"Test notification",
+			"This is a test notification from Sammlarr.",
+			new NotificationData()
+		);
 }

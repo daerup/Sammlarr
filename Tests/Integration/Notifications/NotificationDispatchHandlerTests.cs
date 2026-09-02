@@ -22,9 +22,9 @@ public class NotificationDispatchHandlerTests
 		var targetA = Guid.NewGuid();
 		var targetB = Guid.NewGuid();
 		var subscriptions = SubscriptionsFor(
-			"watchlist.synced",
-			new NotificationSubscription(Guid.NewGuid(), targetA, ["watchlist.synced"], NotificationTemplate.None),
-			new NotificationSubscription(Guid.NewGuid(), targetB, ["watchlist.synced"], NotificationTemplate.None)
+			NotificationEventType.WatchlistSynced,
+			new NotificationSubscription(Guid.NewGuid(), targetA, [NotificationEventType.WatchlistSynced], NotificationTemplate.None),
+			new NotificationSubscription(Guid.NewGuid(), targetB, [NotificationEventType.WatchlistSynced], NotificationTemplate.None)
 		);
 		var @event = new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []);
 
@@ -50,8 +50,8 @@ public class NotificationDispatchHandlerTests
 		var pulledAdd = MediaId.From(Guid.NewGuid());
 		var pushedRemove = MediaId.From(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(
-			"watchlist.synced",
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.synced"], NotificationTemplate.None)
+			NotificationEventType.WatchlistSynced,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSynced], NotificationTemplate.None)
 		);
 		var media = Media(
 			new CachedMedia(new PartialMovie { Identity = new MediaIdentity(pulledAdd, []), Title = "Pulled Movie" }, DateTimeOffset.UtcNow),
@@ -89,7 +89,7 @@ public class NotificationDispatchHandlerTests
 
 		await Assert.That(message.TargetId).IsEqualTo(targetId);
 		await Assert.That(message.UserId).IsEqualTo(User);
-		await Assert.That(message.Context.Type).IsEqualTo("test.ping");
+		await Assert.That(message.Context.Type).IsEqualTo(NotificationEventType.TestPing);
 	}
 
 	[Test]
@@ -98,9 +98,9 @@ public class NotificationDispatchHandlerTests
 		var scope = Scope();
 
 		await NotificationDispatchHandler.Handle(
-			new WatchlistItemsAddedEvent(User, DateTimeOffset.UtcNow, []),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []),
 			scope.Object,
-			SubscriptionsFor("watchlist.items.added").Object,
+			SubscriptionsFor(NotificationEventType.WatchlistSynced).Object,
 			Media().Object,
 			Feed().Object,
 			CancellationToken.None
@@ -115,9 +115,9 @@ public class NotificationDispatchHandlerTests
 		var media = Media();
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistItemsRemovedEvent(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())]),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())], [], [], []),
 			Scope().Object,
-			SubscriptionsFor("watchlist.items.removed").Object,
+			SubscriptionsFor(NotificationEventType.WatchlistSynced).Object,
 			media.Object,
 			Feed().Object,
 			CancellationToken.None
@@ -132,14 +132,14 @@ public class NotificationDispatchHandlerTests
 	{
 		var id = MediaId.From(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(
-			"watchlist.items.added",
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.items.added"], NotificationTemplate.None),
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.items.added"], NotificationTemplate.None)
+			NotificationEventType.WatchlistSynced,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSynced], NotificationTemplate.None),
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSynced], NotificationTemplate.None)
 		);
 		var media = Media(new CachedMedia(new PartialMovie { Identity = new MediaIdentity(id, []), Title = "The Matrix" }, DateTimeOffset.UtcNow));
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistItemsAddedEvent(User, DateTimeOffset.UtcNow, [id]),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [id], [], [], []),
 			Scope().Object,
 			subscriptions.Object,
 			media.Object,
@@ -154,7 +154,7 @@ public class NotificationDispatchHandlerTests
 		await Assert.That(deliveries[0].Context.Data.Media!.Single().Title).IsEqualTo("The Matrix");
 	}
 
-	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(string eventType, params NotificationSubscription[] subscriptions)
+	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(NotificationEventType eventType, params NotificationSubscription[] subscriptions)
 	{
 		var repository = INotificationSubscriptionRepository.Mock();
 		repository.GetForEventTypeAsync(eventType, Any()).Returns((IReadOnlyList<NotificationSubscription>)subscriptions);

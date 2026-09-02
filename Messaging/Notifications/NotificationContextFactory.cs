@@ -3,6 +3,7 @@ using Contracts.Media;
 using Contracts.Notifications;
 using Domain.Feed;
 using Domain.Media;
+using Domain.Notifications;
 using Domain.Notifications.Events;
 
 namespace Messaging.Notifications;
@@ -44,14 +45,7 @@ internal static class NotificationContextFactory
 				pushedAdds: e.PushedAdds,
 				pushedRemoves: e.PushedRemoves
 			),
-			WatchlistItemsAddedEvent e => Payload(e, "Watchlist items added", $"Added {e.MediaIds.Count} item(s).", media: e.MediaIds),
-			WatchlistItemsRemovedEvent e => Payload(e, "Watchlist items removed", $"Removed {e.MediaIds.Count} item(s).", media: e.MediaIds),
 			TestPingEvent e => Payload(e, "Test notification", "This is a test notification from Sammlarr."),
-			FeedItemsAddedEvent e => Payload(e, "Feed items added", $"Added {e.MediaIds.Count} item(s).", media: e.MediaIds) with { FeedId = e.FeedId.ToString() },
-			FeedItemsRemovedEvent e => Payload(e, "Feed items removed", $"Removed {e.MediaIds.Count} item(s).", media: e.MediaIds) with
-			{
-				FeedId = e.FeedId.ToString(),
-			},
 			FeedRunCompletedEvent e => Payload(e, "Feed run completed", $"Added {e.Added}, removed {e.Removed}.") with
 			{
 				FeedId = e.FeedId.ToString(),
@@ -59,7 +53,7 @@ internal static class NotificationContextFactory
 				Removed = e.Removed,
 			},
 			FeedRunFailedEvent e => Payload(e, "Feed run failed", e.Reason) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
-			_ => Payload(message, message.Type, string.Empty),
+			_ => Payload(message, message.Type.ToString(), string.Empty),
 		};
 
 	private static async Task<IReadOnlyDictionary<MediaId, NotificationMedia>> ResolveAsync(

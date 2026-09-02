@@ -1,5 +1,6 @@
 using API.Notifications;
 using Contracts.Notifications;
+using Domain.Notifications;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications;
@@ -13,22 +14,22 @@ public class FluidTemplateRendererTests
 	{
 		var context = new NotificationContext(
 			Guid.NewGuid(),
-			"watchlist.items.added",
+			NotificationEventType.WatchlistSynced,
 			DateTimeOffset.UtcNow,
-			"Watchlist items added",
+			"Watchlist synced",
 			"Added.",
 			new NotificationData { Media = [new NotificationMedia("id-1", "The Matrix", "Movie")] }
 		);
 
 		var result = _testee.Render("{{ title }}: {% for m in data.media %}{{ m.title }} ({{ m.type }}){% endfor %}", context);
 
-		await Assert.That(result).IsSuccess().And.Multiple(async rendered => await Assert.That(rendered).IsEqualTo("Watchlist items added: The Matrix (Movie)"));
+		await Assert.That(result).IsSuccess().And.Multiple(async rendered => await Assert.That(rendered).IsEqualTo("Watchlist synced: The Matrix (Movie)"));
 	}
 
 	[Test]
 	public async Task Invalid_template_returns_error()
 	{
-		var context = new NotificationContext(Guid.NewGuid(), "test.ping", DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
+		var context = new NotificationContext(Guid.NewGuid(), NotificationEventType.TestPing, DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
 
 		var result = _testee.Render("{{ unclosed", context);
 
@@ -38,7 +39,7 @@ public class FluidTemplateRendererTests
 	[Test]
 	public async Task Render_exceeding_the_step_limit_returns_an_error()
 	{
-		var context = new NotificationContext(Guid.NewGuid(), "test.ping", DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
+		var context = new NotificationContext(Guid.NewGuid(), NotificationEventType.TestPing, DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
 
 		var result = _testee.Render("{% for i in (1..100000) %}{{ i }}{% endfor %}", context);
 
