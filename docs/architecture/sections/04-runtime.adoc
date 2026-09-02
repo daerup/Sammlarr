@@ -1,3 +1,199 @@
 [[section-runtime-view]]
 == Runtime View
-// Key scenarios as sequence diagrams (feed refresh, watchlist push, notification, sign-in).
+
+Three scenarios exercise the building blocks from <<section-building-block-view>>: resolving a
+title to the library, previewing a feed, and syncing the watchlist to Plex. Resolution is the
+one the other two build on. Each runs across the layers through the `Contracts` interfaces, with
+providers resolved by keyed DI.
+
+=== Resolving a title
+
+Turning an external reference (a TMDB or IMDb id, or a bare title from a list) into the right row
+in the local library, and into the Plex id it can be pushed under, is the operation correctness
+hinges on: a wrong match silently corrupts every list the title appears in. It runs in two
+phases. Phase A settles _identity_ (which library row these ids are), Phase B fills in _metadata_
+(title, art, ratings).
+
+[mermaid]
+....
+sequenceDiagram
+  actor C as Caller (feed / sync / trending)
+  participant MS as IMediaService
+  participant DB as Library (IMediaRepository)
+  participant IC as Id converter
+  participant MR as Metadata resolver
+
+  C->>MS: ResolveDetailsAsync(external ids + hints)
+  MS->>DB: GetByExternalsAsync (one batched read)
+  alt in library and fresh
+    DB-->>MS: stored title
+  else missing or stale
+    MS->>IC: Phase A, resolve ids to an identity
+    IC-->>MS: canonical identity (or unmatched)
+    MS->>MR: Phase B, fill metadata
+    MR->>DB: upsert (write-behind, on flush)
+    MR-->>MS: IdentifiedMedia
+  end
+  MS-->>C: MediaLookup
+....
+
+The first lookup is the library itself, one batched `GetByExternalsAsync`. A row that is present
+and fresh is returned as is; freshness is seven days for a complete row and one hour for a
+partial one, so a half-filled title is re-fetched soon. Only a missing or stale title runs the
+two phases.
+
+==== Phase A: ids to a Plex identity
+
+Phase A resolves the candidate ids to a canonical identity through one `IExternalIdConverter`,
+chosen by the target provider. For the TMDB, IMDb and TheTVDB targets it is just id passthrough.
+The Plex target is the one that does real work, because an MDBList or TMDB reference carries no
+Plex id and the watchlist can only push a Plex id.
+
+[mermaid]
+....
+sequenceDiagram
+  participant MS as IMediaService
+  participant NC as Unresolved cache
+  participant IC as Plex converter
+  participant PX as Plex
+
+  MS->>NC: known unmatched? (skip providers if cached)
+  MS->>IC: ConvertAsync(ids, title hint)
+  alt candidate already has a Plex id
+    IC->>PX: look up externals by that id
+    PX-->>IC: external ids
+  else only foreign ids (TMDB / IMDb)
+    IC->>PX: search by title hint
+    PX-->>IC: search hits
+    loop each hit
+      IC->>PX: look up the hit's externals
+      PX-->>IC: its external ids
+    end
+    Note over IC,PX: keep the hit whose externals<br/>contain one of the original ids
+  end
+  alt a hit matched
+    IC-->>MS: canonical identity
+  else nothing matched
+    IC-->>MS: unresolved
+    MS->>NC: cache unmatched (1h)
+  end
+....
+
+The title search is the step that keeps matches honest. Plex is searched by the title hint, then
+each hit's own external ids are looked up and the converter keeps the first hit whose externals
+contain one of the original ids. A title match on its own is never trusted; it is confirmed by
+id. If the given title finds nothing, the converter retries with the title TMDB has on record.
+Before any provider call it checks an in-memory negative cache of ids already known to be
+unmatched (kept an hour), so a repeated miss skips the provider. Resolved ids then pass through
+the coordinator (not shown), which merges them against existing rows in one more read, so two
+references to the same title can never create two library ids.
+
+==== Phase B: metadata
+
+Metadata comes from the configured search provider first (Plex), then an enricher chain (TMDB)
+until the record is complete, then ratings (TMDB). Writes are batched write-behind: a run flushes
+one identity upsert and one metadata upsert at the end.
+
+Two failure behaviours matter. A candidate that never resolves becomes `UnmatchedMedia`, surfaced
+to the caller but never written to the library. And when a provider is down or rate-limiting,
+resolution fails and the id is cached as unmatched for the hour, which is why a run during a Plex
+429 storm reports titles as "not found" even though they exist; see <<section-technical-risks>>.
+
+=== Feed preview
+
+The user edits a feed in the editor and previews it. The result is computed live and never
+written anywhere; it just shows what the feed would resolve to right now.
+
+[mermaid]
+....
+sequenceDiagram
+  actor U as User
+  participant P as Feeds editor (UI)
+  participant F as IFeedService (MDBList)
+  participant M as MDBList
+  participant R as IMediaService (+ cache, DB)
+  participant Q as IQueryProcessor
+
+  U->>P: edit feed, preview
+  P->>F: GetFeedItemsAsync, keyed by FeedProvider
+  loop each page, while X-Has-More
+    F->>M: GET list items (resilience pipeline)
+    M-->>F: entries
+    F->>R: ResolveDetailsAsync(externals)
+    R-->>F: MediaLookup (matched or unmatched)
+    F-->>P: stream items
+  end
+  P->>Q: ExecuteAsync(filter, sort, limit)
+  Q-->>P: rows (included / bypassed / filtered / truncated)
+  P-->>U: tiles, stat badges, unresolved list
+....
+
+`IFeedService` is resolved by the feed's `FeedProvider` key, so the editor never names MDBList.
+Each list entry is resolved to a `MediaLookup` by the pipeline above, so a preview reuses cached
+library rows and rarely hits every provider. If a provider trips its circuit breaker or times
+out, the client raises `ProviderUnavailableException`; the panel shows the partial results it has
+and a retry affordance rather than failing the whole preview.
+
+NOTE: Only preview exists today. A scheduler that runs feeds on a cron and reconciles the
+results into the watchlist is planned, not built (see <<section-technical-risks>>). Titles enter
+the watchlist by manual add or by sync, below.
+
+=== Watchlist sync and push to Plex
+
+Adding a title and pushing it to Plex are two separate steps. An add writes the local row and
+queues the change; the push to Plex happens on the next sync, drained from a durable outbox so
+it survives restarts and provider outages.
+
+[mermaid]
+....
+sequenceDiagram
+  actor U as User
+  participant W as UI (Watchlist / Browse)
+  participant S as IWatchlistService
+  participant DB as DB (watchlist + outbox)
+  participant SE as WatchlistSyncEngine
+  participant WO as Wolverine queue (SQLite)
+  participant H as Push handler
+  participant PX as IWatchlistProvider (Plex)
+  participant Plex as Plex
+
+  Note over U,DB: Add: local only, no Plex call
+  U->>W: add title
+  W->>S: AddToWatchlistAsync(ids, origin)
+  S->>DB: insert watchlist row + outbox row (Pending)
+  S-->>W: item shows a Pending push dot
+
+  Note over U,Plex: Sync: push pending changes
+  U->>SE: Sync
+  SE->>WO: publish WatchlistPushRequest per item
+  WO->>H: deliver (durable, retried)
+  H->>DB: find pending row (skip if already gone)
+  H->>PX: AddToWatchlistAsync(external id)
+  PX->>Plex: PUT watchlist
+  Plex-->>PX: ack
+  alt success
+    H->>DB: drop outbox row
+    H-->>W: event Pushed (dot clears)
+  else failure
+    H->>DB: record attempt
+    H-->>W: event Retrying or Failed
+    H->>WO: throw, re-queued with cooldown
+  end
+....
+
+Adds and removes cancel each other in the queue: adding a title that has a pending removal drops
+the removal instead of pushing, and removing a title that was never pushed drops the queued add.
+If the outbox row is gone by the time a message runs, the handler does nothing (a cancelled
+push leaves a harmless "ghost" message). Failures retry on two levels: the handler caps at five
+attempts and records per-item status, and Wolverine re-delivers on a cooldown (5s, 15s, 30s,
+1min). Status changes reach the open page through an in-process event feed, which updates the
+per-item push dot.
+
+=== Other flows
+
+Two flows are worth a mention but not a diagram of their own. Notifications ride the same durable
+outbox as the watchlist push: a sync raises one `WatchlistSyncedEvent`, a handler fans it out to
+each matching subscription, and each is rendered from a Fluid template and delivered on its own
+retry schedule. Plex sign-in is a standard OAuth PIN flow; its notable parts, the app-owned
+`User`, the first user becoming Admin, the open or closed registration gate, and per-request
+session revalidation, are covered in <<section-concepts>>.

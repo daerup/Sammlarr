@@ -1,9 +1,132 @@
 [[section-building-block-view]]
 == Building Block View
-// Level 1: the projects and how they depend on each other. Level 2: zoom on API and UI/Features.
+
+Sammlarr is a set of .NET projects with one strict rule: dependencies point down, toward the
+domain model and the kernel, and the concrete implementations never reference each other. They
+meet only through the interfaces in `Contracts`.
 
 === Whitebox Overall System
 
+[mermaid]
+....
+flowchart TD
+  apphost["AppHost: Aspire host"]
+  ui["UI: Blazor Server + composition root"]
+  core["Core: business logic"]
+  db["DB: EF Core / SQLite"]
+  api["API: provider clients"]
+  msg["Messaging: Wolverine outbox"]
+  contracts["Contracts: interfaces + ids"]
+  domain["Domain: model + unions"]
+  shared["Shared: kernel"]
+  gen["Generators: source gen"]
+
+  apphost --> ui
+  ui --> core
+  ui --> db
+  ui --> api
+  ui --> msg
+  core --> contracts
+  db --> contracts
+  api --> contracts
+  msg --> contracts
+  msg --> domain
+  contracts --> domain
+  domain --> shared
+  gen -. build-time .-> domain
+....
+
+`Shared` and `Observability` are referenced by almost every project; only the `Domain -> Shared`
+spine is drawn, the rest are left out so the graph stays readable.
+
+[cols="1,3", options="header"]
+|===
+| Building block | Responsibility
+
+| Shared | The kernel below everything. Monads (`Optional`, `Result`), `ValueSet`, options records, and the `AddModule<T>()` DI infrastructure. Depends on nothing.
+| Domain | The pure model: entities, value objects, the media union types, and the feed, watchlist, blacklist, provider and notification vocabulary. No infrastructure. See <<section-glossary>>.
+| Contracts | The seams: service, repository and provider interfaces, the record-struct ids, and DI markers. Depends on `Domain` because its signatures use domain types.
+| Observability | Serilog and OpenTelemetry setup, plus the tracing helpers (`AddTracedScoped`, `AddTracedKeyedScoped`) the other layers register through.
+| Core | Business logic: media resolution and merging, the query processor (filter, sort, limit), caching, the blacklist, the watchlist and its sync, sign-in and user management. Implements most `Contracts` interfaces.
+| DB | Persistence: `SammlarrDbContext`, entities, repositories and migrations on SQLite. Holds secrets under data protection.
+| API | One folder per external provider, each an `IServiceModule` that registers a typed HTTP client and keyed services. Also the shared HTTP resilience pipeline and the notification channels.
+| Messaging | Wolverine durable messaging on SQLite: the handlers that drain the watchlist push outbox.
+| UI | Blazor Server. The `Features/*` vertical slices and, in `Program.cs`, the single composition root that wires every module.
+| AppHost | The Aspire host that runs the UI and its dependencies for local development.
+| Generators | A Roslyn source generator, build-time only, that produces the provider-subset enums and their conversions from the capability matrix.
+|===
+
+The dependency direction is the load-bearing constraint:
+
+* `Shared` and `Domain` know nothing about infrastructure.
+* `Core`, `DB` and `API` are siblings. None references another. When `Core` pushes a watchlist change to Plex it goes through the `IWatchlistProvider` that `API` implements, resolved by DI.
+* `UI` is the only project that sees every implementation, and the only place they are composed.
+* `Generators` runs at build time and ships no runtime assembly.
+
 === Level 2
 
+Two blocks are worth opening: `API`, where providers plug in, and `UI`, where features live.
+
+==== API: one module per provider
+
+Each provider is a folder with an `IServiceModule`. The module registers a typed HTTP client,
+wrapped by the shared resilience pipeline, and keyed services against `Contracts` interfaces.
+`ApiModule` adds every provider module plus the cross-cutting ones.
+
+[cols="1,3", options="header"]
+|===
+| Provider | Implements, as keyed services
+
+| TMDB | `ITrendingService`, `IMediaRatingService`, `IMetadataEnricher`, `IExternalIdConverter`
+| Plex | `IMediaSearchProvider`, `IWatchlistProvider`, `IOAuthProvider`, `IMetadataEnricher`, `IExternalIdConverter`
+| MDBList | `IFeedService`
+| IMDb | `IExternalIdConverter`
+| TheTVDB | `IExternalIdConverter`
+|===
+
+The cross-cutting folders under `API`:
+
+* `Http`: `AddProviderHttp<TOptions>`, the resilience pipeline (per-provider concurrency gate, retry with jitter and `Retry-After`, circuit breaker, attempt and total timeouts).
+* `Auth`: `IApiKeyFactory` and `ICredentialFactory`, which turn stored secrets into request credentials.
+* `Notifications`: the webhook and Pushover channels and the Fluid template renderer.
+* `Observability`: HTTP and provider instrumentation.
+
+A consumer never names a provider class. It asks for, say, `IExternalIdConverter` keyed to
+`MediaProvider.Imdb`, and DI hands back the right one.
+
+==== UI: feature slices and one composition root
+
+`UI/Features` holds one folder per feature area, each a vertical slice of Blazor pages and
+components: Auth (sign-in), Browse, Feeds (the list plus an editor with live preview), Home,
+Watchlist (with per-item push status and a sync action), Blacklist, and Settings (providers,
+secrets, users, notifications, cache and diagnostics). `UI/Shared` holds the cross-feature
+components and services, such as the current-user accessor and the notifier.
+
+`Program.cs` is the composition root. It calls `AddModule<T>()` for Core, Shared, DB, API, UI
+and Messaging, then wires Wolverine, authentication, the Blazor interactive server render mode,
+the auth endpoints, and the admin-only `/diagnostics/export`.
+
 === Level 3
+
+The anatomy of a provider module, using MDBList. The whole registration is three lines:
+
+[source,csharp]
+----
+services.AddHttpClient<MdblistClient>().AddProviderHttp<MdblistOptions>();
+services.AddHttpClient(MdblistClient.Unauthenticated).AddProviderHttp<MdblistOptions>();
+services.AddTracedKeyedScoped<IFeedService, MdblistService>(FeedProvider.Mdblist);
+----
+
+* `MdblistClient` is a typed HTTP client. `AddProviderHttp` gives it the resilience pipeline and a concurrency gate sized from `MdblistOptions`.
+* `MdblistService` implements `IFeedService`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a generated subset of `MediaProvider` holding only the providers with the `Feed` capability.
+* Nothing outside the folder references `MdblistService`. The feed preview resolves `IFeedService` by the feed's `FeedProvider` key.
+
+Adding a provider is four steps, with no change to any consumer:
+
+. Add an enum value and its `[Capabilities<…>]` to `MediaProvider`.
+. Create an `API/<Provider>` folder with an `IServiceModule`.
+. Register the typed client and the keyed service(s) against the matching `Contracts` interface(s).
+. Add `AddModule<…>()` in `ApiModule`.
+
+The capability attribute drives the generated subset enums, so the new provider shows up in the
+right keyed lookups on its own. See <<section-concepts>> for the generator.
