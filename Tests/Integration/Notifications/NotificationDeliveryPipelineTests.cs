@@ -1,3 +1,4 @@
+using Contracts;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Messaging;
@@ -83,6 +84,9 @@ public class NotificationDeliveryPipelineTests
 
 		var index = new FakeKeyedServiceIndex<NotificationChannel, INotificationChannel>().Register(NotificationChannel.Webhook, channel);
 
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Returns(DateTimeOffset.UnixEpoch);
+
 		var dbPath = Path.Combine(Path.GetTempPath(), $"wolverine-dispatch-test-{Guid.NewGuid():N}.db");
 		var connectionString = $"Data Source={dbPath}";
 		try
@@ -103,6 +107,8 @@ public class NotificationDeliveryPipelineTests
 					services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
 					services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
 					services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
+					services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
+					services.AddSingleton(clock.Object);
 				})
 				.UseSammlarrMessaging(configuration)
 				.StartAsync();
@@ -135,6 +141,20 @@ public class NotificationDeliveryPipelineTests
 			Sent.Add(target);
 			return Task.FromResult<DeliveryResult>(new DeliverySucceeded());
 		}
+	}
+
+	private sealed class NoopOutcomes : INotificationDeliveryOutcomeRepository
+	{
+		public Task RecordAsync(Guid eventId, Guid targetId, string eventType, DeliveryOutcome outcome, CancellationToken cancellationToken = default) =>
+			Task.CompletedTask;
+
+		public Task<IReadOnlyDictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>> GetRecentByTargetAsync(
+			int count,
+			CancellationToken cancellationToken = default
+		) =>
+			Task.FromResult<IReadOnlyDictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>>(
+				new Dictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>()
+			);
 	}
 
 	private sealed class NoopDisposable : IDisposable

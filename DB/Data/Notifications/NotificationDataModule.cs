@@ -10,6 +10,7 @@ internal sealed class NotificationDataModule : IServiceModule
 	{
 		services.AddScoped<INotificationTargetRepository, NotificationTargetRepository>();
 		services.AddScoped<INotificationSubscriptionRepository, NotificationSubscriptionRepository>();
+		services.AddScoped<INotificationDeliveryOutcomeRepository, NotificationDeliveryOutcomeRepository>();
 		services.AddScoped<IModelConfiguration, NotificationModelConfiguration>();
 	}
 }

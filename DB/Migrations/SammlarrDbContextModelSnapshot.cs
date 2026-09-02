@@ -366,6 +366,55 @@ namespace DB.Migrations
                     b.ToTable("MediaRatings");
                 });
 
+            modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("NextAttemptAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TargetId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EventId", "TargetId")
+                        .IsUnique();
+
+                    b.HasIndex("TargetId", "UpdatedAt");
+
+                    b.ToTable("NotificationDeliveryOutcomes");
+                });
+
             modelBuilder.Entity("DB.Data.Notifications.NotificationSubscriptionRow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -633,6 +682,21 @@ namespace DB.Migrations
                         .IsRequired();
 
                     b.Navigation("Metadata");
+                });
+
+            modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
+                {
+                    b.HasOne("DB.Data.Notifications.NotificationTargetRow", null)
+                        .WithMany()
+                        .HasForeignKey("TargetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DB.Data.Notifications.NotificationSubscriptionRow", b =>

@@ -77,6 +77,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<UserRow> Users => Set<UserRow>();
 	public DbSet<NotificationTargetRow> NotificationTargets => Set<NotificationTargetRow>();
 	public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();
+	public DbSet<NotificationDeliveryOutcomeRow> NotificationDeliveryOutcomes => Set<NotificationDeliveryOutcomeRow>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
