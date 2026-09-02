@@ -1,7 +1,7 @@
 # Architecture Decision Log
 
 This folder records significant architecture decisions as
-[MADR](https://adr.github.io/madr/) files — one Markdown file per decision.
+[MADR](https://adr.github.io/madr/) files, one Markdown file per decision.
 
 ## How to add an ADR
 

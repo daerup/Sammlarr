@@ -1,9 +1,62 @@
 [[section-introduction-and-goals]]
 == Introduction and Goals
-// What Sammlarr is; the core features; top quality goals; stakeholders.
+
+Sammlarr is a self-hosted https://learn.microsoft.com/aspnet/core/blazor[Blazor Server]
+app that builds curated lists of movies and shows. It has no catalogue of its own. It pulls
+from external services and stitches the results into one local library: trending titles and
+metadata from TMDB, list contents from MDBList, and a watchlist it reads from and writes back
+to Plex. IMDb and TheTVDB identifiers tie the same title together across all of them.
+
+The app is multi-user but small. Each person signs in with their Plex account and keeps their
+own feeds, watchlist and blacklist on a shared instance.
 
 === Requirements Overview
 
+The user-facing feature areas. Most map to a folder under `UI/Features`:
+
+[cols="1,3", options="header"]
+|===
+| Feature | What it does
+
+| Browse | Browse trending movies and shows from TMDB and add them to the watchlist.
+| Feeds | Define and preview a _feed_: a saved query over an external provider list (an MDBList list) with filter, sort and limit rules.
+| Watchlist | The watchlist Sammlarr keeps in sync with Plex, pulling remote changes and pushing local ones through a durable outbox, with per-item push status.
+| Home | The local library view of the current watchlist.
+| Blacklist | Exclude specific media so they never appear in curated lists.
+| Notifications | Webhook and Pushover notifications for watchlist and sync events, bundled and templated (configured under Settings).
+| Auth | Plex OAuth sign-in; app-owned users with Admin/Member roles and open or closed registration.
+| Settings | Manage providers, secrets (API keys and credentials), users, notifications, caching and diagnostics.
+|===
+
+NOTE: Feeds can be defined and previewed today. The background scheduler that would run them
+on a cron and reconcile them into the watchlist is planned, not built yet (see
+<<section-technical-risks>>). For now items enter the watchlist by manual add or Plex sync.
+
 === Quality Goals
 
+The qualities that shape the design, most important first. Each is a top node of the quality
+tree in <<section-quality-scenarios>>.
+
+[cols="1,3", options="header"]
+|===
+| Goal | Motivation
+
+| Correctness of list building | Feeds and the watchlist must resolve to the _right_ movies and shows. A bad match quietly corrupts the whole library.
+| Resilience of provider calls | External providers rate-limit and fail. A 429 storm or an outage must not take down an entire run.
+| Per-user data isolation | Several people share one instance. Each must only ever see and change their own feeds, watchlist and blacklist.
+| Maintainability | One person evolves the code. Strong typing, clear layering and source generation keep that tractable.
+|===
+
 === Stakeholders
+
+[cols="1,3", options="header"]
+|===
+| Role | Expectation
+
+| Admin | The first user to sign in. Configures providers, secrets, users and registration mode; has full Settings access.
+| Member | Any later user. Curates their own feeds, watchlist and blacklist; no administrative settings.
+| Maintainer | The single developer who builds and operates Sammlarr; wants a low-ceremony, well-documented architecture.
+|===
+
+The significant technical choices are captured as short decision records (ADRs). See the
+link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/README.md[architecture decision log].

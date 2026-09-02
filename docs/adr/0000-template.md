@@ -11,7 +11,7 @@ of the decision explicit by pointing at the structural elements it affects.}
 
 ## Decision Drivers
 
-* {decision driver 1 — a desired quality, faced concern, constraint, or force}
+* {decision driver 1: a desired quality, faced concern, constraint, or force}
 * {decision driver 2}
 
 ## Considered Options
@@ -22,7 +22,7 @@ of the decision explicit by pointing at the structural elements it affects.}
 
 ## Decision Outcome
 
-Chosen option: "{title of option 1}", because {justification — e.g. it is the only option that meets a k.o. criterion, resolves a key force, or comes out best
+Chosen option: "{title of option 1}", because {justification, e.g. it is the only option that meets a k.o. criterion, resolves a key force, or comes out best
 below}.
 
 ### Consequences
