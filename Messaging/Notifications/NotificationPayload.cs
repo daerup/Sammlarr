@@ -1,10 +1,11 @@
 using Domain.Media;
+using Domain.Notifications;
 
 namespace Messaging.Notifications;
 
 internal sealed record NotificationPayload(
 	Guid Id,
-	string Type,
+	NotificationEventType Type,
 	DateTimeOffset OccurredAt,
 	string Title,
 	string Summary,

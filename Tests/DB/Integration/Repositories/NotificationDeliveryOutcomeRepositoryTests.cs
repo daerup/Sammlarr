@@ -31,7 +31,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 	{
 		var targetId = await CreateTargetAsync();
 
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, "watchlist.synced", new Delivered());
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Delivered());
 
 		var recent = await RecentAsync(targetId);
 		await Assert.That(recent).Count().IsEqualTo(1);
@@ -44,7 +44,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 		var targetId = await CreateTargetAsync();
 		var next = DateTimeOffset.UnixEpoch.AddMinutes(5);
 
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, "watchlist.synced", new Retrying("HTTP 500", next));
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Retrying("HTTP 500", next));
 
 		var recent = await RecentAsync(targetId);
 		await Assert
@@ -63,8 +63,8 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 		var targetId = await CreateTargetAsync();
 		var eventId = Guid.CreateVersion7();
 
-		await _testee.RecordAsync(eventId, targetId, "watchlist.synced", new Retrying("down", DateTimeOffset.UnixEpoch.AddMinutes(1)));
-		await _testee.RecordAsync(eventId, targetId, "watchlist.synced", new Delivered());
+		await _testee.RecordAsync(eventId, targetId, NotificationEventType.WatchlistSynced, new Retrying("down", DateTimeOffset.UnixEpoch.AddMinutes(1)));
+		await _testee.RecordAsync(eventId, targetId, NotificationEventType.WatchlistSynced, new Delivered());
 
 		var recent = await RecentAsync(targetId);
 		await Assert.That(recent).Count().IsEqualTo(1);
@@ -77,7 +77,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 		var targetId = await CreateTargetAsync();
 		for (var i = 0; i < 5; i++)
 		{
-			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, "watchlist.synced", new Failed($"fail {i}"));
+			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Failed($"fail {i}"));
 		}
 
 		await Assert.That(await RecentAsync(targetId, count: 3)).Count().IsEqualTo(3);
@@ -89,7 +89,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 		var targetId = await CreateTargetAsync();
 		for (var i = 0; i < 25; i++)
 		{
-			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, "watchlist.synced", new Delivered());
+			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Delivered());
 		}
 
 		await Assert.That(await RecentAsync(targetId, count: 100)).Count().IsEqualTo(20);
@@ -99,7 +99,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 	public async Task Outcomes_are_isolated_per_user()
 	{
 		var targetId = await CreateTargetAsync();
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, "watchlist.synced", new Delivered());
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Delivered());
 
 		fixture.CurrentUser.Id = UserId.From(Guid.NewGuid());
 		await Assert.That(await RecentAsync(targetId)).IsEmpty();
@@ -112,7 +112,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
 	public async Task Deleting_a_target_cascades_its_outcomes()
 	{
 		var targetId = await CreateTargetAsync();
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, "watchlist.synced", new Delivered());
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Delivered());
 
 		await _targets.DeleteAsync(targetId);
 

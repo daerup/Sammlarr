@@ -69,9 +69,10 @@ public class NotificationDeliveryPipelineTests
 	{
 		var subscriptions = INotificationSubscriptionRepository.Mock();
 		subscriptions
-			.GetForEventTypeAsync(Any<string>(), Any())
+			.GetForEventTypeAsync(Any<NotificationEventType>(), Any())
 			.Returns(
-				(IReadOnlyList<NotificationSubscription>)[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), ["watchlist.synced"], NotificationTemplate.None)]
+				(IReadOnlyList<NotificationSubscription>)
+					[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSynced], NotificationTemplate.None)]
 			);
 
 		var targets = INotificationTargetRepository.Mock();
@@ -145,8 +146,13 @@ public class NotificationDeliveryPipelineTests
 
 	private sealed class NoopOutcomes : INotificationDeliveryOutcomeRepository
 	{
-		public Task RecordAsync(Guid eventId, Guid targetId, string eventType, DeliveryOutcome outcome, CancellationToken cancellationToken = default) =>
-			Task.CompletedTask;
+		public Task RecordAsync(
+			Guid eventId,
+			Guid targetId,
+			NotificationEventType eventType,
+			DeliveryOutcome outcome,
+			CancellationToken cancellationToken = default
+		) => Task.CompletedTask;
 
 		public Task<IReadOnlyDictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>> GetRecentByTargetAsync(
 			int count,

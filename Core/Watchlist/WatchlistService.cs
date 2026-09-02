@@ -1,14 +1,10 @@
 using System.Runtime.CompilerServices;
-using Contracts;
-using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Search;
-using Contracts.Messaging;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Domain.Media;
-using Domain.Notifications.Events;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -21,10 +17,7 @@ internal sealed class WatchlistService(
 	IWatchlistOutbox outbox,
 	IMediaService media,
 	IMediaRepository mediaRepository,
-	IProviderConfigRepository configRepository,
-	IMessagePublisher publisher,
-	ICurrentUser currentUser,
-	IDateTimeProvider clock
+	IProviderConfigRepository configRepository
 ) : IWatchlistService
 {
 	public async IAsyncEnumerable<WatchlistedMedia> GetWatchlistItemsAsync(
@@ -75,13 +68,8 @@ internal sealed class WatchlistService(
 		await EnsureWatchlistProviderInExternalsAsync(needsPush, cancellationToken);
 
 		await outbox.DropAsync(uncancel, cancellationToken);
-		var added = await repository.AddAsync(ids, provenance, cancellationToken);
+		await repository.AddAsync(ids, provenance, cancellationToken);
 		await outbox.EnqueueAsync(WatchlistOperationAction.Add, needsPush, cancellationToken);
-
-		if (added.Count > 0)
-		{
-			await publisher.PublishAsync(new WatchlistItemsAddedEvent(currentUser.Id, clock.Now, added), cancellationToken);
-		}
 	}
 
 	public async Task RemoveFromWatchlistAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
@@ -108,12 +96,7 @@ internal sealed class WatchlistService(
 		{
 			await outbox.EnqueueAsync(WatchlistOperationAction.Remove, needsEnqueue, cancellationToken);
 		}
-		var removed = await repository.RemoveAsync(ids, cancellationToken);
-
-		if (removed.Count > 0)
-		{
-			await publisher.PublishAsync(new WatchlistItemsRemovedEvent(currentUser.Id, clock.Now, removed), cancellationToken);
-		}
+		await repository.RemoveAsync(ids, cancellationToken);
 	}
 
 	private async Task EnsureWatchlistProviderInExternalsAsync(List<MediaId> ids, CancellationToken cancellationToken)

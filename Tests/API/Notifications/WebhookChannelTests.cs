@@ -29,7 +29,7 @@ public class WebhookChannelTests
 		await Assert.That(Header(handler, "webhook-id")).IsEqualTo(context.Id.ToString());
 		await Assert.That(Header(handler, "webhook-timestamp")).IsEqualTo("1700000000");
 		await Assert.That(Header(handler, "webhook-signature")).IsEqualTo(ExpectedSignature(secret, context.Id.ToString(), "1700000000", handler.Body!));
-		await Assert.That(Encoding.UTF8.GetString(handler.Body!)).Contains("\"type\":\"watchlist.synced\"");
+		await Assert.That(Encoding.UTF8.GetString(handler.Body!)).Contains("\"type\":\"WatchlistSynced\"");
 	}
 
 	[Test]
@@ -38,9 +38,9 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 		var context = new NotificationContext(
 			Guid.NewGuid(),
-			"watchlist.items.added",
+			NotificationEventType.WatchlistSynced,
 			Now,
-			"Watchlist items added",
+			"Watchlist synced",
 			"Added 1 item(s).",
 			new NotificationData { Media = [new NotificationMedia("abc", "The Matrix", "Movie")] }
 		);
@@ -126,7 +126,8 @@ public class WebhookChannelTests
 		return new WebhookChannel(new WebhookClient(new HttpClient(handler)), new FluidTemplateRenderer(), clock.Object, NullLogger<WebhookChannel>.Instance);
 	}
 
-	private static NotificationContext Context() => new(Guid.NewGuid(), "watchlist.synced", Now, "Watchlist synced", "Synced.", new NotificationData());
+	private static NotificationContext Context() =>
+		new(Guid.NewGuid(), NotificationEventType.WatchlistSynced, Now, "Watchlist synced", "Synced.", new NotificationData());
 
 	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
 

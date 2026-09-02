@@ -1,3 +1,5 @@
+using Domain.Notifications;
+
 namespace UI.Features.Settings.Components;
 
 internal sealed record TemplateVariable(string Token, string Description);
@@ -35,15 +37,15 @@ internal static class NotificationTemplateVariables
 	private static readonly TemplateVariable Removed = new("{{ data.removed }}", "Count removed");
 	private static readonly TemplateVariable Reason = new("{{ data.reason }}", "Failure reason");
 
-	private static readonly Dictionary<string, TemplateVariable[]> DataByEvent = new()
+	private static readonly Dictionary<NotificationEventType, TemplateVariable[]> DataByEvent = new()
 	{
-		["feed.run.completed"] = [FeedName, FeedProvider, FeedIdentifier, Added, Removed],
-		["feed.run.failed"] = [FeedName, FeedProvider, FeedIdentifier, Reason],
+		[NotificationEventType.FeedRunCompleted] = [FeedName, FeedProvider, FeedIdentifier, Added, Removed],
+		[NotificationEventType.FeedRunFailed] = [FeedName, FeedProvider, FeedIdentifier, Reason],
 	};
 
-	private static readonly HashSet<string> HasMediaLists = ["watchlist.synced", "watchlist.items.added", "watchlist.items.removed"];
+	private static readonly HashSet<NotificationEventType> HasMediaLists = [NotificationEventType.WatchlistSynced];
 
-	public static IReadOnlyList<TemplateVariableGroup> GroupsFor(IReadOnlyCollection<string> eventTypes)
+	public static IReadOnlyList<TemplateVariableGroup> GroupsFor(IReadOnlyCollection<NotificationEventType> eventTypes)
 	{
 		var groups = new List<TemplateVariableGroup> { Notification };
 

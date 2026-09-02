@@ -8,7 +8,13 @@ internal sealed class NotificationDeliveryOutcomeRepository(IDbContextFactory<Sa
 {
 	private const int MaxPerTarget = 20;
 
-	public async Task RecordAsync(Guid eventId, Guid targetId, string eventType, DeliveryOutcome outcome, CancellationToken cancellationToken = default)
+	public async Task RecordAsync(
+		Guid eventId,
+		Guid targetId,
+		NotificationEventType eventType,
+		DeliveryOutcome outcome,
+		CancellationToken cancellationToken = default
+	)
 	{
 		var (kind, reason, nextAttemptAt) = Flatten(outcome);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);

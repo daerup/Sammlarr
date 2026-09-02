@@ -16,6 +16,7 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 	{
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		Converters = { new JsonStringEnumConverter() },
 	};
 
 	public NotificationChannel Kind => NotificationChannel.Webhook;

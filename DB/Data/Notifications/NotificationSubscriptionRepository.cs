@@ -13,7 +13,10 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 		return rows.Select(Map).ToList();
 	}
 
-	public async Task<IReadOnlyList<NotificationSubscription>> GetForEventTypeAsync(string eventType, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<NotificationSubscription>> GetForEventTypeAsync(
+		NotificationEventType eventType,
+		CancellationToken cancellationToken = default
+	)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await ctx.NotificationSubscriptions.AsNoTracking().ToListAsync(cancellationToken);
@@ -22,7 +25,7 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 
 	public async Task<Guid> AddAsync(
 		Guid targetId,
-		IReadOnlyList<string> eventTypes,
+		IReadOnlyList<NotificationEventType> eventTypes,
 		NotificationTemplate template,
 		CancellationToken cancellationToken = default
 	)
@@ -35,7 +38,12 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 		return row.Id;
 	}
 
-	public async Task UpdateAsync(Guid id, IReadOnlyList<string> eventTypes, NotificationTemplate template, CancellationToken cancellationToken = default)
+	public async Task UpdateAsync(
+		Guid id,
+		IReadOnlyList<NotificationEventType> eventTypes,
+		NotificationTemplate template,
+		CancellationToken cancellationToken = default
+	)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.NotificationSubscriptions.FirstOrDefaultAsync(subscription => subscription.Id == id, cancellationToken);

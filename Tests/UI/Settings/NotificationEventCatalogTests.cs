@@ -1,4 +1,5 @@
 using Domain.Identity;
+using Domain.Notifications;
 using Domain.Notifications.Events;
 using UI.Features.Settings.Components;
 
@@ -10,17 +11,15 @@ public class NotificationEventCatalogTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch;
 
 	[Test]
-	public async Task Catalog_covers_the_watchlist_event_types()
+	public async Task Catalog_covers_the_watchlist_sync_event()
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
 		await Assert.That(catalog).Contains(new WatchlistSyncedEvent(User, Now, [], [], [], []).Type);
-		await Assert.That(catalog).Contains(new WatchlistItemsAddedEvent(User, Now, []).Type);
-		await Assert.That(catalog).Contains(new WatchlistItemsRemovedEvent(User, Now, []).Type);
 	}
 
 	[Test]
-	public async Task Catalog_excludes_the_test_ping_event()
+	public async Task Catalog_excludes_granular_and_internal_events()
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 

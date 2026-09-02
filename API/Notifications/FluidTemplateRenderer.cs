@@ -33,6 +33,7 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 	private static TemplateOptions BuildOptions()
 	{
 		var options = new TemplateOptions { MaxSteps = 400 };
+		options.ValueConverters.Add(value => value is NotificationEventType type ? type.ToString() : null);
 		options.MemberAccessStrategy.MemberNameStrategy = MemberNameStrategies.CamelCase;
 		options.MemberAccessStrategy.Register<NotificationContext>();
 		options.MemberAccessStrategy.Register<NotificationData>();

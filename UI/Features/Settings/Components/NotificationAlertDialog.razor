@@ -129,7 +129,7 @@
 
     private NotificationTarget? _client;
     private Guid? _clientId;
-    private readonly HashSet<string> _selected = [];
+    private readonly HashSet<NotificationEventType> _selected = [];
     private string _body = string.Empty;
     private string _title = string.Empty;
     private string _message = string.Empty;
@@ -172,7 +172,7 @@
         _client = Clients.FirstOrDefault(client => client.Id == clientId);
     }
 
-    private void Toggle(string eventType, bool selected)
+    private void Toggle(NotificationEventType eventType, bool selected)
     {
         _dirty = true;
         if (selected)

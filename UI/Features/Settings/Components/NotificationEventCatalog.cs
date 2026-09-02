@@ -1,17 +1,16 @@
+using Domain.Notifications;
+using Shared.Extensions;
+
 namespace UI.Features.Settings.Components;
 
-internal sealed record NotificationEventOption(string EventType, string Label);
+internal sealed record NotificationEventOption(NotificationEventType EventType, string Label);
 
 internal static class NotificationEventCatalog
 {
-	public static readonly IReadOnlyList<NotificationEventOption> Subscribable =
-	[
-		new("watchlist.synced", "Watchlist synced"),
-		new("watchlist.items.added", "Items added to watchlist"),
-		new("watchlist.items.removed", "Items removed from watchlist"),
-		new("feed.run.completed", "Feed run completed"),
-		new("feed.run.failed", "Feed run failed"),
-	];
+	private static readonly IReadOnlyList<NotificationEventType> NotSubscribable = [NotificationEventType.TestPing];
 
-	public static string LabelFor(string eventType) => Subscribable.FirstOrDefault(option => option.EventType == eventType)?.Label ?? eventType;
+	public static readonly IReadOnlyList<NotificationEventOption> Subscribable = Enum.GetValues<NotificationEventType>()
+		.Except(NotSubscribable)
+		.Select(type => new NotificationEventOption(type, type.GetDescription()))
+		.ToList();
 }

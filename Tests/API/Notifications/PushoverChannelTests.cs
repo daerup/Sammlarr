@@ -62,7 +62,7 @@ public class PushoverChannelTests
 		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(title: "[{{ type }}]", message: "{{ summary }} now"), CancellationToken.None);
 
 		var form = Form(handler);
-		await Assert.That(form["title"]).IsEqualTo("[watchlist.synced]");
+		await Assert.That(form["title"]).IsEqualTo("[WatchlistSynced]");
 		await Assert.That(form["message"]).IsEqualTo("Synced. now");
 	}
 
@@ -71,7 +71,7 @@ public class PushoverChannelTests
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		await Channel(handler).SendAsync(Context("feed.run.failed"), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
+		await Channel(handler).SendAsync(Context(NotificationEventType.FeedRunFailed), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
 		await Assert.That(Form(handler)["priority"]).IsEqualTo("1");
 	}
@@ -144,7 +144,7 @@ public class PushoverChannelTests
 	private static PushoverChannel Channel(HttpMessageHandler handler) =>
 		new(new PushoverClient(new HttpClient(handler)), new FluidTemplateRenderer(), NullLogger<PushoverChannel>.Instance);
 
-	private static NotificationContext Context(string type = "watchlist.synced") =>
+	private static NotificationContext Context(NotificationEventType type = NotificationEventType.WatchlistSynced) =>
 		new(Guid.NewGuid(), type, Now, "Watchlist synced", "Synced.", new NotificationData());
 
 	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));

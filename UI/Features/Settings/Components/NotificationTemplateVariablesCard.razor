@@ -1,3 +1,5 @@
+@using Domain.Notifications
+
 <div class="rounded-md border bg-accent/40 text-sm">
     <button type="button" class="flex w-full items-center justify-between px-3 py-2 font-medium" @onclick="() => _open = !_open">
         <span class="flex items-center gap-2">
@@ -42,7 +44,7 @@
 
 @code {
     [Parameter]
-    public IReadOnlyCollection<string> EventTypes { get; set; } = [];
+    public IReadOnlyCollection<NotificationEventType> EventTypes { get; set; } = [];
 
     [Parameter]
     public EventCallback<string> OnInsert { get; set; }
