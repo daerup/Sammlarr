@@ -54,6 +54,7 @@ across providers.
 |===
 
 Provider credentials and API keys are held as `[Sensitive]` secrets and redacted from logs.
-Every outbound provider call goes through a shared resilience pipeline: retry with backoff,
-circuit breaker, timeout and a concurrency limit. A slow or rate-limiting provider therefore
-cannot overwhelm the app. See <<section-concepts>>.
+Every outbound provider call goes through a shared resilience pipeline: a per-provider concurrency
+gate, then retry with jitter that honours `Retry-After`, a circuit breaker, and attempt and total
+timeouts. A slow or rate-limiting provider therefore cannot overwhelm the app. See
+<<section-concepts>>.
