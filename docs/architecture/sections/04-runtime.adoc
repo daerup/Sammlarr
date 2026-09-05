@@ -1,18 +1,14 @@
 [[section-runtime-view]]
 == Runtime View
 
-Three scenarios exercise the building blocks from <<section-building-block-view>>: resolving a
-title to the library, previewing a feed, and syncing the watchlist to Plex. Resolution is the
-one the other two build on. Each runs across the layers through the `Contracts` interfaces, with
-providers resolved by keyed DI.
+Three scenarios: resolving a title (the one the others build on), feed preview, and watchlist
+sync/push. Each runs across the layers through `Contracts`, with providers resolved by keyed DI.
 
 === Resolving a title
 
-Turning an external reference (a TMDB or IMDb id, or a bare title from a list) into the right row
-in the local library, and into the Plex id it can be pushed under, is the operation correctness
-hinges on: a wrong match silently corrupts every list the title appears in. It runs in two
-phases. Phase A settles _identity_ (which library row these ids are), Phase B fills in _metadata_
-(title, art, ratings).
+Turning an external reference (a TMDB/IMDb id or a bare title) into the right library row, and the
+Plex id it can be pushed under, is where correctness hinges: a wrong match corrupts every list the
+title appears in. Two phases: A settles _identity_ (which library row), B fills in _metadata_.
 
 [mermaid]
 ....
@@ -37,17 +33,15 @@ sequenceDiagram
   MS-->>C: MediaLookup
 ....
 
-The first lookup is the library itself, one batched `GetByExternalsAsync`. A row that is present
-and fresh is returned as is; freshness is seven days for a complete row and one hour for a
-partial one, so a half-filled title is re-fetched soon. Only a missing or stale title runs the
-two phases.
+The first lookup is the library itself (one batched `GetByExternalsAsync`); a fresh row is
+returned as is (fresh = 7 days for a complete row, 1 hour for a partial one). Only a missing or
+stale title runs the two phases.
 
 ==== Phase A: ids to a Plex identity
 
-Phase A resolves the candidate ids to a canonical identity through one `IExternalIdConverter`,
-chosen by the target provider. For the TMDB, IMDb and TheTVDB targets it is just id passthrough.
-The Plex target is the one that does real work, because an MDBList or TMDB reference carries no
-Plex id and the watchlist can only push a Plex id.
+One `IExternalIdConverter`, chosen by the target provider, resolves the ids. The TMDB, IMDb and
+TheTVDB targets just pass ids through; the Plex target does the work, since an MDBList or TMDB
+reference has no Plex id and the watchlist can only push a Plex id.
 
 [mermaid]
 ....
@@ -79,25 +73,21 @@ sequenceDiagram
   end
 ....
 
-The title search is the step that keeps matches honest. Plex is searched by the title hint, then
-each hit's own external ids are looked up and the converter keeps the first hit whose externals
-contain one of the original ids. A title match on its own is never trusted; it is confirmed by
-id. If the given title finds nothing, the converter retries with the title TMDB has on record.
-Before any provider call it checks an in-memory negative cache of ids already known to be
-unmatched (kept an hour), so a repeated miss skips the provider. Resolved ids then pass through
-the coordinator (not shown), which merges them against existing rows in one more read, so two
-references to the same title can never create two library ids.
+A title match is confirmed by id, never trusted on the title alone: Plex is searched by the hint,
+each hit's externals are looked up, and the first hit whose externals contain an original id wins
+(if the hint finds nothing, it retries with TMDB's title). A negative cache of known-unmatched ids
+(kept an hour) short-circuits repeats before any provider call. Resolved ids pass through the
+coordinator (not shown), which merges them against existing rows so one title can't become two
+library ids.
 
 ==== Phase B: metadata
 
-Metadata comes from the configured search provider first (Plex), then an enricher chain (TMDB)
-until the record is complete, then ratings (TMDB). Writes are batched write-behind: a run flushes
-one identity upsert and one metadata upsert at the end.
-
-Two failure behaviours matter. A candidate that never resolves becomes `UnmatchedMedia`, surfaced
-to the caller but never written to the library. And when a provider is down or rate-limiting,
-resolution fails and the id is cached as unmatched for the hour, which is why a run during a Plex
-429 storm reports titles as "not found" even though they exist; see <<section-technical-risks>>.
+Metadata comes from the search provider first (Plex), then an enricher chain (TMDB) until the
+record is complete, then ratings (TMDB); writes are batched write-behind (one identity + one
+metadata upsert per run). Two failure behaviours matter: an unresolved candidate becomes
+`UnmatchedMedia` (surfaced, never persisted); and when a provider is down or rate-limiting the id
+is cached unmatched for the hour, which is why a Plex 429 storm reports existing titles as "not
+found" (see <<section-technical-risks>>).
 
 === Feed preview
 
@@ -124,15 +114,14 @@ sequenceDiagram
     F-->>P: stream items
   end
   P->>Q: ExecuteAsync(filter, sort, limit)
-  Q-->>P: rows (included / bypassed / filtered / truncated)
+  Q-->>P: rows (included / bypassed / culled / truncated)
   P-->>U: tiles, stat badges, unresolved list
 ....
 
-`IFeedService` is resolved by the feed's `FeedProvider` key, so the editor never names MDBList.
-Each list entry is resolved to a `MediaLookup` by the pipeline above, so a preview reuses cached
-library rows and rarely hits every provider. If a provider trips its circuit breaker or times
-out, the client raises `ProviderUnavailableException`; the panel shows the partial results it has
-and a retry affordance rather than failing the whole preview.
+`IFeedService` is resolved by the feed's `FeedProvider` key. Each entry is resolved to a
+`MediaLookup` by the pipeline above, so a preview reuses cached rows and rarely hits every
+provider. On a circuit-breaker trip or timeout the client raises `ProviderUnavailableException`;
+the panel shows partial results and a retry rather than failing the whole preview.
 
 NOTE: Only preview exists today. A scheduler that runs feeds on a cron and reconciles the
 results into the watchlist is planned, not built (see <<section-technical-risks>>). Titles enter
@@ -181,13 +170,11 @@ sequenceDiagram
   end
 ....
 
-Adds and removes cancel each other in the queue: adding a title that has a pending removal drops
-the removal instead of pushing, and removing a title that was never pushed drops the queued add.
-If the outbox row is gone by the time a message runs, the handler does nothing (a cancelled
-push leaves a harmless "ghost" message). Failures retry on two levels: the handler caps at five
-attempts and records per-item status, and Wolverine re-delivers on a cooldown (5s, 15s, 30s,
-1min). Status changes reach the open page through an in-process event feed, which updates the
-per-item push dot.
+Adds and removes cancel each other in the queue (adding cancels a pending removal; removing
+cancels an un-pushed add); if the outbox row is gone when a message runs, the handler no-ops (a
+harmless "ghost"). Retries are two-level: the handler caps at five attempts and records per-item
+status, and Wolverine re-delivers on a cooldown (5s, 15s, 30s, 1min). Status reaches the open page
+through an in-process event feed.
 
 === Other flows
 
