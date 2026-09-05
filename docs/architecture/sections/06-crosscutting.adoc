@@ -1,3 +1,95 @@
 [[section-concepts]]
 == Cross-cutting Concepts
-// One subsection per concern that touches every layer (the heavy section).
+
+Concerns that cut across every layer, carrying the quality goals from
+<<section-introduction-and-goals>>: correctness (media model + resolution), resilience (HTTP
+pipeline), isolation (auth + query filters), maintainability (modules + code generation).
+
+=== Domain model and kernel
+
+`Domain` holds the media model: the union types (`MediaLookup`, `IdentifiedMedia`, the `Movie`,
+`Show` and partial cases) every layer speaks, defined in <<section-glossary>> and produced by the
+resolution in <<section-runtime-view>>. Below it, `Shared` is the kernel: `Optional<T>`,
+`Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional` not null;
+expected failure is a `Result` not an exception. Unions are matched by case directly, never through
+`.Value`, and enum switches are exhaustive with no default arm.
+
+=== Modularity and dependency injection
+
+Every layer and provider ships an `IServiceModule`; `Program.cs` composes them with `AddModule<T>()`
+(see <<section-building-block-view>>), and modules nest. Anything with more than one implementation
+is a keyed service, resolved by an enum key (`IFeedService` keyed `FeedProvider.Mdblist`);
+`IKeyedServiceIndex<TKey, TService>` wraps the lookup when the key is only known at runtime.
+
+=== Provider extensibility and code generation
+
+Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[Capabilities]`
+attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
+`WatchlistProvider`, …) and their conversions from that matrix, plus the options-record
+registration. Adding a provider is a folder, an enum value and a module (recipe in
+<<section-building-block-view>>).
+
+=== HTTP resilience
+
+Every outbound provider call goes through one pipeline, `AddProviderHttp<TOptions>` (`API/Http`): a
+per-provider concurrency gate, then the standard resilience handler (retry with jitter honouring
+`Retry-After`, a circuit breaker, per-attempt and total timeouts), all from the provider's options.
+On breaker-open or timeout the client raises `ProviderUnavailableException`, which callers degrade
+on rather than fail a whole run. Per-provider numbers are in configuration
+(<<section-deployment-view>>); the rate-limit-storm interaction is in <<section-runtime-view>>.
+
+=== Persistence and migrations
+
+State is one SQLite database via EF Core. Repositories create a context per operation from
+`IDbContextFactory<SammlarrDbContext>` (the context is `internal`). A `SqlitePragmaInterceptor`
+sets WAL, `synchronous=NORMAL` and a busy timeout. Schema is applied at startup by a hosted
+`DbInitializer` calling `Database.Migrate()`, never `EnsureCreated`; migrations live in
+`DB/Migrations`, the only `HasData` seed is the singleton provider-config row, and a test asserts
+`HasPendingModelChanges()` is false. Conventions: enums stored as their string name
+(`EnumAsStringConvention`), `DateTimeOffset` as binary. `SaveChanges` stamps audit timestamps and
+the owning user.
+
+=== Secrets and configuration
+
+Two distinct secret mechanisms: `[Encrypted]` (`DB`) encrypts credential and API-key columns at
+rest through an EF converter over `Microsoft.AspNetCore.DataProtection`; `[Sensitive]` (`Contracts`)
+only masks members as `***` in logs. A stored credential is usually both. Configuration comes in
+two shapes: static infrastructure settings (URLs, timeouts, connection string) are options records
+bound from config, with a generator emitting their section names and registration so a component
+injects the record itself; runtime settings an admin changes (active search, rating and auth
+provider, registration mode) live in `ProviderConfig`, one global row behind a cached repository.
+Provider selection is instance-wide, not per user.
+
+NOTE: Data-protection keys are persisted to a filesystem key ring under a stable application name
+(`EncryptionModule`), so stored secrets survive a restart. In a container the ring shares the
+`/data` volume with the database; that volume must be writable by the container user (see
+<<section-technical-risks>>).
+
+=== Authentication and per-user isolation
+
+Users sign in with Plex (<<section-runtime-view>>) and get an app auth cookie revalidated against
+the stored user on each request, so a removed user or a role change takes effect at once. Isolation
+is enforced in persistence: a user-owned entity implements `IUserOwned`, `OnModelCreating` gives it
+a global query filter on a shadow `UserId`, and the current-user lookup throws when unauthenticated
+(fails closed). An ownership stamper sets the owner on insert and blocks it from changing. Feeds,
+watchlist, blacklist, notification targets and stored secrets are user-owned; `ProviderConfig` and
+the media catalogue are global. Background code (Wolverine handlers, the sync engine) calls
+`IUserScope.As(user)` so the same filters apply. Isolation tests are noted in
+<<section-quality-scenarios>>.
+
+=== Durable messaging
+
+Work that must survive a restart or a provider outage runs as Wolverine messages on a durable
+SQLite-backed queue: the watchlist push and notification delivery (<<section-runtime-view>>). Each
+has its own retry policy keyed on its exception type, with escalating cooldowns and an attempt cap.
+There is no external broker; the queue is the application database.
+
+=== Logging and observability
+
+Serilog with two custom destructuring policies: one unwraps `Optional`/`Result` to log the payload
+rather than the wrapper, the other masks `[Sensitive]` members as `***`. Sinks: console, an
+in-memory ring buffer behind the admin `/diagnostics/export` zip, and OTLP when an endpoint is
+present. Tracing is OpenTelemetry over the `Sammlarr` activity source; services opt in via
+`AddTracedScoped`/`AddTracedKeyedScoped`, a proxy that spans each method call. OTLP export turns on
+only when Aspire injects an endpoint; otherwise console plus local errored-trace logging. Logs and
+traces only, no metrics.
