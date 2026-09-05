@@ -1,14 +1,13 @@
 [[section-glossary]]
 == Glossary
 
-Project vocabulary, with an emphasis on the coined domain terms. The media-model terms are
-the union types Sammlarr resolves external data into; <<section-concepts>> shows how they fit
-together. Types named here live in the `Domain` project unless noted.
+Project vocabulary, the coined domain terms especially. The media-model terms are the union types
+resolution produces; their structure is in <<section-concepts>>.
 
 === Media model
 
-Media:: The movies and shows Sammlarr tracks. There is no single `Media` type. A title is one
-of the union types below, depending on how fully it has been resolved.
+Media:: The movies and shows Sammlarr tracks. No single `Media` type; a title is one of the union
+types below.
 
 MediaType:: `Movie`, `Show`, or `Unknown`.
 
@@ -23,8 +22,8 @@ row, so it carries a `MediaIdentity`. It may be fully or partially filled.
 `UnmatchedMedia`:: External ids that could not be matched to any library row. It has externals
 but no `MediaIdentity`.
 
-`MediaLookup`:: The union of `IdentifiedMedia` and `UnmatchedMedia`: the result of resolving a
-set of external ids, matched or not. List building works over this type.
+`MediaLookup`:: The union of `IdentifiedMedia` and `UnmatchedMedia`: the result of resolving
+external ids, matched or not. List building works over it.
 
 `MediaIdentity`:: The identity of a matched title: Sammlarr's own `MediaId` plus the external
 ids that resolve to it.
@@ -37,9 +36,8 @@ Cases: `TmdbId`, `ImdbId`, `TvdbId`, `PlexId`, `MdblistId`.
 Completeness:: Whether a partial title has all its fields. A complete partial is promoted to a
 full `Movie` or `Show` (`MediaCompleteness.IsComplete`, `MissingFields`).
 
-Freshness:: Whether a stored title is recent enough to skip a re-fetch. Fully resolved titles
-stay fresh for 7 days; a partial is only fresh within a 1-hour hydration cooldown, so it is
-re-fetched sooner to fill the gaps (`MediaFreshness`).
+Freshness:: Whether a stored title is recent enough to skip a re-fetch: 7 days for a complete
+title, 1 hour for a partial (`MediaFreshness`).
 
 CachedMedia:: The stored form of a title with the time it was fetched (an `IdentifiedMedia`
 plus `FetchedAt`). Freshness reads `FetchedAt` to decide whether a re-fetch is due.
@@ -116,6 +114,12 @@ from `Program.cs` via `AddModule<T>()`.
 Keyed service:: A service resolved by an enum key, so a caller asks for, say, `IFeedService`
 keyed to `FeedProvider.Mdblist`.
 
+`ProviderConfig`:: The single global, admin-managed row of active provider selections (search,
+rating, auth) plus the registration mode. Not per-user.
+
+`ProviderUnavailableException`:: Raised when a provider's circuit breaker is open or a call times
+out. Callers degrade on it (partial results) rather than fail a whole run.
+
 === Identity and access
 
 Role:: `Admin` or `Member`. The first user to sign in becomes Admin; everyone after is a
@@ -126,6 +130,12 @@ sign-ins are rejected.
 
 Secret:: An API key or a provider credential. Stored under data protection and redacted from
 logs through `[Sensitive]`. See <<section-concepts>>.
+
+`IUserOwned`:: A marker interface on entities that belong to a user. The `DbContext` gives each a
+per-user query filter and stamps the owner on insert.
+
+`IUserScope`:: Sets the ambient current user for a scope via `As(user)`, so background work (the
+Wolverine handlers, the sync engine) runs under the right user's filters.
 
 === Sync and messaging
 
