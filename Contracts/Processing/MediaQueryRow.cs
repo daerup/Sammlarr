@@ -1,6 +1,6 @@
 using Domain.Media;
 
-namespace Core.Processing;
+namespace Contracts.Processing;
 
 public sealed record MediaQueryRow(MediaLookup Media)
 {

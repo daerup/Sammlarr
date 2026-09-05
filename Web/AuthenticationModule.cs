@@ -2,8 +2,9 @@ using Contracts.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Shared.DI;
+using UI.Shared.Identity;
 
-namespace UI.Shared.Identity;
+namespace Web;
 
 internal sealed class AuthenticationModule : IServiceModule
 {

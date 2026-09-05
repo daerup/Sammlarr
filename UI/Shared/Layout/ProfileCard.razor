@@ -89,7 +89,7 @@
             var principal = (await AuthState).User;
             _isAuthenticated = principal.Identity?.IsAuthenticated == true;
             _displayName = principal.Identity?.Name;
-            _avatarUrl = principal.FindFirst(AuthEndpoints.AvatarClaim)?.Value;
+            _avatarUrl = principal.FindFirst(Contracts.Identity.AuthClaims.Avatar)?.Value;
             _role = principal.FindFirst(ClaimTypes.Role)?.Value;
         }
     }

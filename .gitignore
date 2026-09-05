@@ -66,9 +66,9 @@ Results/
 .mcp.json
 
 # Local SQLite databases
-UI/sammlarr.db
-UI/sammlarr.db-shm
-UI/sammlarr.db-wal
+# Local runtime state, never commit (SQLite DB + data-protection key ring)
+sammlarr.db*
+dp-keys/
 .playwright-cli/*
 .playwright-mcp/*
 

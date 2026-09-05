@@ -1,6 +1,7 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Builder;
 
-namespace UI;
+namespace Web;
 
 internal static class BrowserLocalization
 {

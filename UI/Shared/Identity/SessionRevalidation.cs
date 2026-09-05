@@ -9,8 +9,8 @@ internal static class SessionRevalidation
 	public static async Task<bool> IsCurrentAsync(ClaimsPrincipal principal, ISessionValidator validator, CancellationToken cancellationToken)
 	{
 		if (
-			Guid.TryParse(principal.FindFirstValue(ClaimTypes.NameIdentifier), out var idValue) is false
-			|| Enum.TryParse<UserRole>(principal.FindFirstValue(ClaimTypes.Role), out var role) is false
+			Guid.TryParse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var idValue) is false
+			|| Enum.TryParse<UserRole>(principal.FindFirst(ClaimTypes.Role)?.Value, out var role) is false
 		)
 		{
 			return false;

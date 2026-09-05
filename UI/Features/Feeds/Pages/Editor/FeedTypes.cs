@@ -1,6 +1,5 @@
 using BlazorBlueprint.Primitives.Filtering;
 using Contracts.Processing;
-using Core.Processing;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Processing;

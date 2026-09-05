@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.DI;
 
-namespace UI;
+namespace Web;
 
 internal sealed class HealthModule : IServiceModule
 {
