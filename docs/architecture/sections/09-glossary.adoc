@@ -109,7 +109,7 @@ Provider-subset enum:: A generated enum holding only the providers with a given 
 such as `FeedProvider` or `WatchlistProvider`. See <<section-concepts>>.
 
 Module:: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
-from `Program.cs` via `AddModule<T>()`.
+from `Web`'s `Program.cs` via `AddModule<T>()`.
 
 Keyed service:: A service resolved by an enum key, so a caller asks for, say, `IFeedService`
 keyed to `FeedProvider.Mdblist`.

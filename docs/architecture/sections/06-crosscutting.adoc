@@ -16,7 +16,7 @@ expected failure is a `Result` not an exception. Unions are matched by case dire
 
 === Modularity and dependency injection
 
-Every layer and provider ships an `IServiceModule`; `Program.cs` composes them with `AddModule<T>()`
+Every layer and provider ships an `IServiceModule`; `Web`'s `Program.cs` composes them with `AddModule<T>()`
 (see <<section-building-block-view>>), and modules nest. Anything with more than one implementation
 is a keyed service, resolved by an enum key (`IFeedService` keyed `FeedProvider.Mdblist`);
 `IKeyedServiceIndex<TKey, TService>` wraps the lookup when the key is only known at runtime.
