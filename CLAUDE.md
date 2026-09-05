@@ -4,20 +4,14 @@ A Blazor Server media-list curator that aggregates Plex / TMDB / IMDb / TheTVDB 
 
 ## Architecture
 
-Layered: `Contracts ← Shared ← {Core, DB, API} ← UI`
+Layered .NET solution; dependencies point down toward the kernel (`Shared`). The full
+building-block view (projects, dependency graph, per-layer roles) and the cross-cutting concepts
+(DI, providers, resilience, persistence, auth, observability) live in `docs/architecture`
+(sections 3 and 6). Read those rather than duplicating them here.
 
-| Project      | Role                                                                            |
-|--------------|---------------------------------------------------------------------------------|
-| `Contracts/` | Interfaces, enums, record-struct IDs, DI markers                                |
-| `Shared/`    | Options records, extension methods, `AddModule<T>()` infra                      |
-| `Core/`      | Business logic, blacklist, query/cache                                          |
-| `DB/`        | `SammlarrDbContext`, entities, repositories                                     |
-| `API/`       | Per-provider folders — HTTP clients + keyed DI                                  |
-| `UI/`        | Blazor Server; `Features/{Auth,Blacklist,Browse,Feeds,Home,Settings,Watchlist}` |
-| `Tests/`     | Mirrored per layer                                                              |
-
-DI uses a module pattern: each layer ships an `IServiceModule` registered from `UI/Program.cs` via `AddModule<T>()`. Providers register as keyed services keyed
-off enums in `Contracts/` (`MediaSearchProvider`, `WatchlistProvider`, …).
+DI uses a module pattern: each layer and provider ships an `IServiceModule` registered from
+`UI/Program.cs` via `AddModule<T>()`; providers register as keyed services keyed off the
+`MediaProvider` enums in `Domain/Providers`.
 
 ## UI
 
