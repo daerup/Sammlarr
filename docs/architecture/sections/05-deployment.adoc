@@ -1,7 +1,87 @@
 [[section-deployment-view]]
 == Deployment View
-// Aspire dev topology and the container deploy from compose.yaml.
+
+Sammlarr deploys as one self-hosted process. It is an ASP.NET Core / Blazor Server app whose
+entire state lives in a local SQLite file: the application data and the Wolverine message queue
+share one database. There is no external database server and no message broker. Telemetry is
+sent over OTLP to an Aspire dashboard, which is optional. Provider secrets are not held in
+configuration; they are stored in the database, encrypted with data protection (see
+<<section-concepts>>).
+
+It runs two ways: through the Aspire AppHost for development, and as containers from a compose
+artifact the AppHost generates.
 
 === Infrastructure Level 1
 
+Development runs through the Aspire AppHost (`AppHost/AppHost.cs`), which launches the Web host and
+wires it to the dashboard.
+
+[mermaid]
+....
+flowchart LR
+  dev([Developer])
+  subgraph host["Dev machine"]
+    apphost["AppHost (Aspire)"]
+    web["Web (Blazor host)"]
+    dash["Aspire dashboard :15223"]
+    db[("sammlarr.db (SQLite)")]
+    apphost -->|launches| web
+    web -->|OTLP| dash
+    web -->|file| db
+  end
+  dev -->|http :6769| web
+....
+
+The Web endpoint is pinned to `http://localhost:6769` (`WithHttpEndpoint(port: 6769)`), so the app
+always has the same dev URL, and the AppHost is set to launch a browser at it. The Aspire
+dashboard serves resource state, logs and traces at `http://localhost:15223`. The AppHost's
+`launchSettings.json` bakes in `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true`, so a bare `aspire run`
+starts over plain HTTP without the usual https requirement, and sets logging to verbose. The
+SQLite file (`Data Source=sammlarr.db`) is created in the working directory.
+
+[cols="1,3", options="header"]
+|===
+| Node / artifact | Role
+
+| AppHost | The Aspire orchestrator. Starts the Web host, injects its telemetry settings, opens a browser.
+| Web process | The whole application: the Blazor host and its `UI` components, providers, the Wolverine worker, all in one process on `:6769`.
+| Aspire dashboard | Receives OTLP logs and traces; the dev window into the running app.
+| `sammlarr.db` | The SQLite database: application data plus the durable Wolverine queue.
+|===
+
 === Infrastructure Level 2
+
+The container deployment is not hand-authored. The AppHost is the source of truth
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0001-drive-deployment-from-the-aspire-apphost.md[ADR 0001]):
+`aspire publish` generates the Docker Compose artifact from the same model that runs the app in
+development, and `aspire do push` builds the Web image from `Web/Dockerfile` and pushes it to the
+GitHub Container Registry (`ghcr.io/daerup/sammlarr`). The dev-only dashboard is omitted from the
+published compose; telemetry goes wherever `OTEL_EXPORTER_OTLP_ENDPOINT` points, or to the console
+when it is unset (see <<section-concepts>>).
+
+[mermaid]
+....
+flowchart LR
+  user([User])
+  subgraph compose["generated compose (aspire publish)"]
+    web["web container<br/>ghcr.io/daerup/sammlarr"]
+    vol[("/data volume<br/>sammlarr.db + dp-keys")]
+    web -->|file| vol
+  end
+  user -->|"http :8080"| web
+  web -.->|"OTLP (optional)"| backend["telemetry backend"]
+....
+
+The container runs the single Web process on port `8080`. One volume mounted at `/data` holds both
+the SQLite database and the data-protection key ring, so application data and stored secrets
+survive a restart; the keys use a stable application name so they still decrypt. Provider
+selection and secrets are read from the database as before.
+
+NOTE: The AppHost models this deployment, but it cannot be published yet, `Web/Dockerfile` does not
+exist. The Dockerfile, the GHCR push and the signing and SBOM steps are owned by the
+release-engineering work (see <<section-technical-risks>>). That Dockerfile must make `/data`
+writable by the container user, or the app cannot write the database and keys.
+
+Because the Wolverine queue and the database are in-process and file-based, a deployment is a
+single instance. There is no horizontal scale-out today; a second replica would contend on the
+same SQLite file.
