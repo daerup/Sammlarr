@@ -1,17 +1,16 @@
 using System.Security.Claims;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace UI.Features.Auth;
+namespace Web;
 
 internal static class AuthEndpoints
 {
-	internal const string AvatarClaim = "sammlarr:avatar";
-
 	public static void MapAuthEndpoints(this IEndpointRouteBuilder endpoints)
 	{
 		var group = endpoints.MapGroup("/auth/{provider}");
@@ -86,7 +85,7 @@ internal static class AuthEndpoints
 					new Claim(ClaimTypes.NameIdentifier, user.Id.Value.ToString()),
 					new Claim(ClaimTypes.Name, user.DisplayName),
 					new Claim(ClaimTypes.Role, user.Role.ToString()),
-					new Claim(AvatarClaim, user.AvatarUrl),
+					new Claim(AuthClaims.Avatar, user.AvatarUrl),
 				],
 				CookieAuthenticationDefaults.AuthenticationScheme
 			)

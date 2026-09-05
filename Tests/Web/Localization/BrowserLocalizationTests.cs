@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
-using UI;
+using Web;
 
-namespace UI.Tests.Localization;
+namespace Web.Tests.Localization;
 
 public class BrowserLocalizationTests
 {

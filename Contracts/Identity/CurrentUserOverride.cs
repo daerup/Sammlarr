@@ -1,6 +1,4 @@
-using Contracts.Identity;
-
-namespace Core.Identity;
+namespace Contracts.Identity;
 
 public sealed class CurrentUserOverride
 {

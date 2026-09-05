@@ -6,14 +6,14 @@ using UI.Shared.Identity;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
 
-namespace UI;
+namespace Web;
 
 internal class UiModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddModule<ObservabilityModule>();
-		services.AddModule<UI.Observability.InstrumentationModule>();
+		services.AddModule<InstrumentationModule>();
 		services.AddModule<AuthenticationModule>();
 		services.AddModule<HealthModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
@@ -24,7 +24,7 @@ internal class UiModule : IServiceModule
 		services.AddScoped<Notifier>();
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
-		services.AddScoped<MediaProviderBrandingService>();
+		services.AddScoped(sp => new MediaProviderBrandingService(sp.GetRequiredService<IWebHostEnvironment>().WebRootPath));
 		services.AddScoped<UI.Features.Settings.Components.Notifications.NotificationTester>();
 	}
 }

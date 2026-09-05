@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>preview</LangVersion>
+		<!-- CS8524: allow exhaustive-over-named enum switches without a default arm (Razor compiler warnings ignore .editorconfig). -->
+		<NoWarn>$(NoWarn);CS8524</NoWarn>
+	</PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Core\Core.csproj" />
+		<ProjectReference Include="..\DB\DB.csproj" />
+		<ProjectReference Include="..\API\API.csproj" />
+		<ProjectReference Include="..\Messaging\Messaging.csproj" />
+		<ProjectReference Include="..\Observability\Observability.csproj" />
+		<ProjectReference Include="..\Shared\Shared.csproj" />
+		<ProjectReference Include="..\UI\UI.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+		<PackageReference Include="Westwind.AspNetCore.LiveReload" />
+	</ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="Web.Tests" />
+	</ItemGroup>
+</Project>

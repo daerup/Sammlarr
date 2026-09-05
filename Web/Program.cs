@@ -6,8 +6,7 @@ using Messaging;
 using Observability.Diagnostics;
 using Shared;
 using Shared.DI;
-using UI;
-using UI.Features.Auth;
+using Web;
 using Westwind.AspNetCore.LiveReload;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +47,7 @@ app.UseRequestTimeouts();
 app.UseOutputCache();
 
 app.MapStaticAssets();
-app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddAdditionalAssemblies(typeof(UI.Shared.Layout.MainLayout).Assembly);
 app.MapAuthEndpoints();
 app.MapHealthEndpoints();
 

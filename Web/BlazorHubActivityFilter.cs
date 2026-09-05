@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Observability.Tracing;
+using UI.Observability;
 
-namespace UI.Observability;
+namespace Web;
 
-public class BlazorHubActivityFilter : IHubFilter
+internal sealed class BlazorHubActivityFilter : IHubFilter
 {
 	private readonly BlazorRouteTracker _routes = new();
 

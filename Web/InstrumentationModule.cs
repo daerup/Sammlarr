@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Trace;
 using Shared.DI;
 
-namespace UI.Observability;
+namespace Web;
 
 internal class InstrumentationModule : IServiceModule
 {

@@ -27,7 +27,7 @@
 	protected override async Task OnInitializedAsync()
 	{
 		var state = await AuthProvider.GetAuthenticationStateAsync();
-		if (Guid.TryParse(state.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id))
+		if (Guid.TryParse(state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id))
 		{
 			registration = Registry.Register(UserId.From(id), () => _ = InvokeAsync(ShowPrompt));
 		}

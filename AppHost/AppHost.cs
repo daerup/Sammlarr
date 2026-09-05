@@ -7,7 +7,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 if (builder.ExecutionContext.IsRunMode)
 {
 	builder
-		.AddProject<Projects.UI>("blazor-ui")
+		.AddProject<Projects.Web>("blazor-ui")
 		.WithHttpEndpoint(port: 6769, name: "http")
 		.WithExternalHttpEndpoints()
 		.WithHttpHealthCheck("/health")

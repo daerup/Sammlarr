@@ -10,6 +10,21 @@
 		<File Path=".gitignore" />
 		<File Path="compose.yaml" />
 		<File Path="Directory.Packages.props" />
+		<File Path="docs/adr/0000-template.md" />
+		<File Path="docs/adr/0001-drive-deployment-from-the-aspire-apphost.md" />
+		<File Path="docs/adr/README.md" />
+		<File Path="docs/architecture/arc42.adoc" />
+		<File Path="docs/architecture/images/.gitkeep" />
+		<File Path="docs/architecture/sections/01-introduction-goals.adoc" />
+		<File Path="docs/architecture/sections/02-context-scope.adoc" />
+		<File Path="docs/architecture/sections/03-building-blocks.adoc" />
+		<File Path="docs/architecture/sections/04-runtime.adoc" />
+		<File Path="docs/architecture/sections/05-deployment.adoc" />
+		<File Path="docs/architecture/sections/06-crosscutting.adoc" />
+		<File Path="docs/architecture/sections/07-quality.adoc" />
+		<File Path="docs/architecture/sections/08-risks-technical-debt.adoc" />
+		<File Path="docs/architecture/sections/09-glossary.adoc" />
+		<File Path="docs/architecture/theme.css" />
 		<File Path="global.json" />
 	</Folder>
 	<Folder Name="/Tests/">
@@ -23,6 +38,7 @@
 		<Project Path="Tests/Shared/Shared.Tests.csproj" />
 		<Project Path="Tests/TestInfrastructure/TestInfrastructure.csproj" />
 		<Project Path="Tests/UI/UI.Tests.csproj" />
+		<Project Path="Tests/Web/Web.Tests.csproj" />
 	</Folder>
 	<Project Path="API/API.csproj" />
 	<Project Path="Contracts/Contracts.csproj" />
@@ -35,4 +51,5 @@
 	<Project Path="Generators/Generators.csproj" />
 	<Project Path="Shared/Shared.csproj" />
 	<Project Path="UI/UI.csproj" />
+	<Project Path="Web/Web.csproj" />
 </Solution>
