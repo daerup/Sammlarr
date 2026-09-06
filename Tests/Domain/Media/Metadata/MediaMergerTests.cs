@@ -1,6 +1,7 @@
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
+using TestInfrastructure;
 
 namespace Domain.Tests.Media.Metadata;
 
@@ -13,7 +14,7 @@ public class MediaMergerTests
 
 		var match = IdentifiedMedia.From(partial);
 
-		await Assert.That(match is Movie).IsTrue();
+		await Assert.That(match).IsOfUnionType<IdentifiedMedia, Movie>();
 	}
 
 	[Test]
@@ -23,7 +24,7 @@ public class MediaMergerTests
 
 		var match = IdentifiedMedia.From(partial);
 
-		await Assert.That(match is PartialMovie).IsTrue();
+		await Assert.That(match).IsOfUnionType<IdentifiedMedia, PartialMovie>();
 	}
 
 	[Test]
@@ -49,7 +50,7 @@ public class MediaMergerTests
 
 		var merged = first.MergeWith(second);
 
-		await Assert.That(merged is Movie).IsTrue();
+		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, Movie>();
 	}
 
 	[Test]
@@ -61,7 +62,7 @@ public class MediaMergerTests
 
 		var merged = first.MergeWith(second);
 
-		await Assert.That(merged is PartialMovie).IsTrue();
+		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, PartialMovie>();
 	}
 
 	[Test]
@@ -78,7 +79,7 @@ public class MediaMergerTests
 
 		var merged = first.MergeWith(second);
 
-		await Assert.That(merged is PartialMovie movie && movie.Title == "Dune").IsTrue();
+		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, PartialMovie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Dune"));
 	}
 
 	[Test]
@@ -88,7 +89,10 @@ public class MediaMergerTests
 
 		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(RatingProvider.Tmdb, 7f)]);
 
-		await Assert.That(withRatings is PartialMovie movie && movie.Rating.Average == 7f).IsTrue();
+		await Assert
+			.That(withRatings)
+			.IsOfUnionType<IdentifiedMedia, PartialMovie>()
+			.And.Multiple(async movie => await Assert.That(movie.Rating.Average).IsEqualTo(7f));
 	}
 
 	[Test]
@@ -99,7 +103,7 @@ public class MediaMergerTests
 
 		var merged = partial.MergeWith(complete);
 
-		await Assert.That(merged is Movie movie && movie.Title == "Custom").IsTrue();
+		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Custom"));
 	}
 
 	[Test]
@@ -110,7 +114,7 @@ public class MediaMergerTests
 
 		var merged = partial.MergeWith(other);
 
-		await Assert.That(merged is Movie movie && movie.Title == "Custom").IsTrue();
+		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Custom"));
 	}
 
 	[Test]
@@ -122,6 +126,6 @@ public class MediaMergerTests
 
 		var merged = partial.MergeWith(other);
 
-		await Assert.That(merged is PartialMovie movie && movie.Title == "Dune").IsTrue();
+		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, PartialMovie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Dune"));
 	}
 }

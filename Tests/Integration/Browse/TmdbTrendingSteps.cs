@@ -10,6 +10,7 @@ using Integration.Tests.Infrastructure.Media.Tmdb;
 using Reqnroll;
 using Reqnroll.Assist;
 using Reqnroll.Assist.Attributes;
+using TestInfrastructure;
 
 namespace Integration.Tests.Browse;
 
@@ -56,10 +57,10 @@ public class TmdbTrendingSteps(TmdbTrendingScenarioContext ctx, SammlarrScenario
 			switch (row.Kind?.Trim().ToLowerInvariant())
 			{
 				case "resolved":
-					await Assert.That(item is IdentifiedMedia).IsTrue();
+					await Assert.That(item).IsOfUnionType<MediaLookup, IdentifiedMedia>();
 					break;
 				case "unresolved":
-					await Assert.That(item is UnmatchedMedia).IsTrue();
+					await Assert.That(item).IsOfUnionType<MediaLookup, UnmatchedMedia>();
 					break;
 				case null or "":
 					break;

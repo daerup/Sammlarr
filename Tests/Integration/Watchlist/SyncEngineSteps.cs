@@ -13,6 +13,7 @@ using Integration.Tests.Infrastructure.Media.Local;
 using Integration.Tests.Infrastructure.Media.Plex;
 using Reqnroll;
 using Reqnroll.Assist;
+using TestInfrastructure;
 
 namespace Integration.Tests.Watchlist;
 
@@ -84,7 +85,7 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	{
 		if (_syncResult is not WatchlistSyncSummary success)
 		{
-			await Assert.That(_syncResult is WatchlistSyncSummary).IsTrue();
+			await Assert.That(_syncResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
 			return;
 		}
 		var row = table.CreateSet<SyncResultRow>().Single();
@@ -97,10 +98,14 @@ public class SyncEngineSteps(SammlarrScenarioContext sammlarr, MediaCatalogConte
 	}
 
 	[Then("the sync is unchanged")]
-	public async Task ThenSyncIsUnchanged() => await Assert.That(_syncResult is WatchlistSyncSummary { TotalChanges: 0 }).IsTrue();
+	public async Task ThenSyncIsUnchanged() =>
+		await Assert
+			.That(_syncResult)
+			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>()
+			.And.Multiple(async summary => await Assert.That(summary.TotalChanges).IsEqualTo(0));
 
 	[Then("the sync reports a remote failure")]
-	public async Task ThenSyncReportsRemoteFailure() => await Assert.That(_syncResult is WatchlistSyncRemoteFailed).IsTrue();
+	public async Task ThenSyncReportsRemoteFailure() => await Assert.That(_syncResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncRemoteFailed>();
 
 	private sealed class SyncResultRow
 	{
