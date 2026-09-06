@@ -12,6 +12,10 @@
 		<File Path="Directory.Packages.props" />
 		<File Path="docs/adr/0000-template.md" />
 		<File Path="docs/adr/0001-drive-deployment-from-the-aspire-apphost.md" />
+		<File Path="docs/adr/0002-split-presentation-from-the-host.md" />
+		<File Path="docs/adr/0003-use-ef-core-migrations-for-the-schema.md" />
+		<File Path="docs/adr/0004-store-all-state-in-one-sqlite-file.md" />
+		<File Path="docs/adr/0005-enforce-per-user-data-isolation.md" />
 		<File Path="docs/adr/README.md" />
 		<File Path="docs/architecture/arc42.adoc" />
 		<File Path="docs/architecture/images/.gitkeep" />

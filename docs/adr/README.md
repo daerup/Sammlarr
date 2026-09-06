@@ -18,3 +18,7 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | # | Title | Status | Date |
 |---|-------|--------|------|
 | 0001 | [Drive deployment from the Aspire AppHost](0001-drive-deployment-from-the-aspire-apphost.md) | accepted | 2026-09-02 |
+| 0002 | [Split presentation from the host](0002-split-presentation-from-the-host.md) | accepted | 2026-09-06 |
+| 0003 | [Use EF Core migrations for the schema](0003-use-ef-core-migrations-for-the-schema.md) | accepted | 2026-09-06 |
+| 0004 | [Store all state in one SQLite file](0004-store-all-state-in-one-sqlite-file.md) | accepted | 2026-09-06 |
+| 0005 | [Enforce per-user data isolation](0005-enforce-per-user-data-isolation.md) | accepted | 2026-09-06 |
