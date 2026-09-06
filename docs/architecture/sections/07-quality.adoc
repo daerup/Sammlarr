@@ -1,10 +1,45 @@
 [[section-quality-scenarios]]
 == Quality Requirements
-// Quality Tree (7.1): the top quality goals from <<section-introduction-and-goals>>
-// decomposed into sub-attributes. Optional 2-3 Quality Scenarios (7.2): measurable
-// stimulus/response (e.g. feed of N loads < X s; provider 429 storm doesn't fail a run;
-// user A never sees user B's data).
 
 === Quality Tree
 
+The quality goals from <<section-introduction-and-goals>>, in priority order, refined into the
+attributes that make them concrete and where each is enforced.
+
+[cols="1,2,2", options="header"]
+|===
+| Goal | Refined into | Enforced by
+
+| Correctness of list building | Resolution matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity coordinator and media repository (<<section-runtime-view>>, scenario C), keyed by the composite external-id constraint and surfacing collisions as `MediaIdentityConflictException`; the planned Mirror wipe guard (<<section-technical-risks>>)
+| Resilience of provider calls | A 429 storm or outage degrades to partial results, never a failed run; outbound concurrency is bounded; transient faults retry, sustained ones trip a breaker | The shared HTTP pipeline (<<section-concepts>>); scenario R
+| Per-user data isolation | Reads are filtered to the current user; writes are stamped to the owner; the filter fails closed; background work runs under the right user | EF query filters, the ownership stamper and `IUserScope` (<<section-concepts>>); scenario I
+| Maintainability | Strong typing and unions over primitives; strict layer dependencies; provider wiring generated, not hand-written; least visibility | Architecture tests; the module and generator patterns (<<section-concepts>>)
+|===
+
 === Quality Scenarios
+
+Scenario C (identity dedup):: A list yields entries with overlapping ids: two in one flush (both
+carry TMDB 5, one also IMDb tt9) and one already stored by an earlier flush. _Response:_ every
+entry that shares any one external id `(Source, MediaType, Value)` is anchored onto a single
+canonical identity, its extra ids unioned in; the repository reuses the existing row and appends
+only new ids, so each title stays one library row across flushes. MediaType is part of id
+equality, so a movie and a show that share a number never merge, and a candidate that would bridge
+two already-stored, distinct rows throws `MediaIdentityConflictException` rather than merging them.
+_Measure:_ the coordinator, repository and `MediaIdentity` feature tests pass. _Limit:_ one shared
+id is enough to merge, with no multi-id agreement check, so within a single flush two same-type
+titles a provider tags with the same or conflicting id coalesce silently; only collisions against
+already-persisted rows are surfaced (<<section-technical-risks>>).
+
+Scenario I (isolation):: User B requests feeds/watchlist/blacklist while User A's rows exist.
+_Response:_ B sees only B's rows; a query with no authenticated user throws rather than returning
+everyone's. _Measure:_ the isolation integration tests pass; the current-user lookup is fail-closed.
+
+Scenario R (resilience):: A feed resolves while Plex returns 429 or is unreachable. _Response:_
+affected ids become `UnmatchedMedia` ("not found"), the run completes, no exception escapes, and
+the ids are cached unmatched for an hour so the storm is not amplified. _Measure:_ partial results
+are returned; `ProviderUnavailableException` is handled, not propagated.
+
+Scenario P (performance):: A feed of N items is previewed. _Response:_ resolution reuses fresh
+library rows and the negative cache and calls providers at the recommended concurrency, so a
+repeat preview does little I/O. _Measure:_ the resilience concurrency limit stays at or above the
+recommended concurrency; an eight-wide cap slows a large feed by roughly an order of magnitude.
