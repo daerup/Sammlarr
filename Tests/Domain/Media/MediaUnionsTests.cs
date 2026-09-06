@@ -1,4 +1,5 @@
 using Domain.Media;
+using TestInfrastructure;
 
 namespace Domain.Tests.Media;
 
@@ -23,7 +24,7 @@ public class MediaUnionsTests
 
 		var combined = unmatched.CombineIdentity(identity);
 
-		await Assert.That(combined is IdentifiedMedia identified && identified is PartialMovie movie && movie.Title == "Dune").IsTrue();
+		await Assert.That(combined).IsOfUnionType<MediaLookup, PartialMovie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Dune"));
 	}
 
 	[Test]
@@ -34,6 +35,6 @@ public class MediaUnionsTests
 
 		var combined = unmatched.CombineIdentity(identity);
 
-		await Assert.That(combined is UnmatchedMedia).IsTrue();
+		await Assert.That(combined).IsOfUnionType<MediaLookup, UnmatchedMedia>();
 	}
 }

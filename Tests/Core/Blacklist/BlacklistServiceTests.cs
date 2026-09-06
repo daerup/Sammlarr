@@ -12,6 +12,7 @@ using Domain.Blacklist;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
+using TestInfrastructure;
 
 namespace Core.Tests.Blacklist;
 
@@ -65,7 +66,10 @@ public class BlacklistServiceTests
 		await Assert.That(result).Count().IsEqualTo(1);
 		var item = result[0];
 		await Assert.That(item.Media.Id).IsEqualTo(mediaId);
-		await Assert.That(item.Media is Movie movie && movie.Title == detailResult.Title).IsTrue();
+		await Assert
+			.That(item.Media)
+			.IsOfUnionType<IdentifiedMedia, Movie>()
+			.And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo(detailResult.Title));
 		await Assert.That(item.AddedAt).IsEqualTo(addedAt);
 	}
 

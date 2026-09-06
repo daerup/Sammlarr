@@ -36,11 +36,11 @@ public class WatchlistSyncEngineTests
 		await Task.Delay(50);
 		var second = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
-		await Assert.That(second is WatchlistSyncAlreadyRunning).IsTrue();
+		await Assert.That(second).IsOfUnionType<WatchlistSyncResult, WatchlistSyncAlreadyRunning>();
 
 		gate.SetResult();
 		var firstResult = await first;
-		await Assert.That(firstResult is WatchlistSyncSummary).IsTrue();
+		await Assert.That(firstResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
 	}
 
 	[Test]
@@ -60,7 +60,7 @@ public class WatchlistSyncEngineTests
 
 		var result = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
 
-		await Assert.That(result is WatchlistSyncSummary).IsTrue();
+		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
 		outbox.EnqueueAsync(WatchlistOperationAction.Add, Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 		var triggers = publisher.Published.OfType<WatchlistPushRequest>().ToList();
 		await Assert.That(triggers.Count).IsEqualTo(1);

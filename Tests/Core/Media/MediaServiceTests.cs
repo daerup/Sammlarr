@@ -43,7 +43,10 @@ public class MediaServiceTests
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(3);
-		await Assert.That(results.All(r => r is Success<MediaIdentity>)).IsTrue();
+		foreach (var result in results)
+		{
+			await Assert.That(result).IsSuccess();
+		}
 	}
 
 	[Test]
@@ -153,7 +156,7 @@ public class MediaServiceTests
 		var results = await testee.ResolveDetailsAsync([new ResolveRequest([external], MediaProvider.Tmdb, new None())]).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
-		await Assert.That(results[0] is UnmatchedMedia).IsTrue();
+		await Assert.That(results[0]).IsOfUnionType<MediaLookup, UnmatchedMedia>();
 		deps.MediaRepo.UpsertMetadataAsync(Any(), Any()).WasNeverCalled();
 	}
 

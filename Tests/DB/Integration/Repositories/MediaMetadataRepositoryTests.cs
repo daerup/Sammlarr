@@ -6,6 +6,7 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
@@ -86,7 +87,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		var row = (await _testee.GetAsync([mediaId])).Single();
 
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(row.Stored is Movie).IsTrue();
+		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, Movie>();
 		await Assert.That(row.Stored.Identity.Externals).Contains((IExternalMediaId)plexId);
 		await Assert.That(row.FetchedAt).IsNotNull();
 	}
@@ -100,7 +101,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 
 		var row = (await _testee.GetAsync([mediaId])).Single();
 
-		await Assert.That(row.Stored is PartialMovie).IsTrue();
+		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, PartialMovie>();
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(row.FetchedAt).IsNull();
 	}
@@ -118,8 +119,8 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		var rows = await _testee.GetAsync([firstId, secondId]);
 
 		await Assert.That(rows.Count).IsEqualTo(2);
-		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored is Movie).IsTrue();
-		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored is PartialMovie).IsTrue();
+		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored).IsOfUnionType<IdentifiedMedia, Movie>();
+		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored).IsOfUnionType<IdentifiedMedia, PartialMovie>();
 	}
 
 	[Test]
@@ -134,7 +135,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		var row = (await _testee.GetAsync([mediaId])).Single();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(row.Stored is Movie).IsTrue();
+		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, Movie>();
 		await Assert.That(row.Stored.Rating.Sources.Count).IsEqualTo(1);
 		var rating = row.Stored.Rating.Sources.Single();
 		await Assert.That(rating.Source).IsEqualTo(RatingProvider.Tmdb);

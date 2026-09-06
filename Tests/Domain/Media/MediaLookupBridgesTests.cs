@@ -13,7 +13,7 @@ public class MediaLookupBridgesTests
 		var identified = match.AsIdentified();
 
 		await Assert.That(identified is not null).IsTrue();
-		await Assert.That(identified!.Value is Movie).IsTrue();
+		await Assert.That(identified!.Value).IsOfUnionType<IdentifiedMedia, Movie>();
 	}
 
 	[Test]
@@ -29,7 +29,7 @@ public class MediaLookupBridgesTests
 	{
 		MediaLookup match = MediaFakes.CompleteMovie().ToMatch();
 
-		await Assert.That(match.ToIdentified()).IsSome().And.Multiple(async identified => await Assert.That(identified is Movie).IsTrue());
+		await Assert.That(match.ToIdentified()).IsSome().And.Multiple(async identified => await Assert.That(identified).IsOfUnionType<IdentifiedMedia, Movie>());
 	}
 
 	[Test]
@@ -49,7 +49,7 @@ public class MediaLookupBridgesTests
 		var roundTripped = identified.ToMatch().AsIdentified();
 
 		await Assert.That(roundTripped is not null).IsTrue();
-		await Assert.That(roundTripped!.Value is Movie restored && ReferenceEquals(restored, movie)).IsTrue();
+		await Assert.That(roundTripped!.Value).IsOfUnionType<IdentifiedMedia, Movie>().And.IsSameReferenceAs(movie);
 	}
 
 	[Test]

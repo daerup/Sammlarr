@@ -8,6 +8,7 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace DB.Tests.Integration.Metadata;
 
@@ -160,10 +161,13 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
 
 		using var _ = Assert.Multiple();
-		await Assert.That(stored is Movie).IsTrue();
-		await Assert.That(stored is Movie movie && movie.Identity.Id == mediaId).IsTrue();
-		await Assert.That(stored is Movie { Title: "Movie" }).IsTrue();
-		await Assert.That(stored is Movie m && m.Runtime == TimeSpan.FromMinutes(110)).IsTrue();
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>();
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Identity.Id).IsEqualTo(mediaId));
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Movie"));
+		await Assert
+			.That(stored)
+			.IsOfUnionType<IdentifiedMedia, Movie>()
+			.And.Multiple(async movie => await Assert.That(movie.Runtime).IsEqualTo(TimeSpan.FromMinutes(110)));
 	}
 
 	[Test]
@@ -176,9 +180,12 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
 
 		using var _ = Assert.Multiple();
-		await Assert.That(stored is Show { Seasons: 3 }).IsTrue();
-		await Assert.That(stored is Show { Episodes: 30 }).IsTrue();
-		await Assert.That(stored is Show show && show.RuntimePerEpisode == TimeSpan.FromMinutes(45)).IsTrue();
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Show>().And.Multiple(async show => await Assert.That(show.Seasons).IsEqualTo(3));
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Show>().And.Multiple(async show => await Assert.That(show.Episodes).IsEqualTo(30));
+		await Assert
+			.That(stored)
+			.IsOfUnionType<IdentifiedMedia, Show>()
+			.And.Multiple(async show => await Assert.That(show.RuntimePerEpisode).IsEqualTo(TimeSpan.FromMinutes(45)));
 	}
 
 	[Test]
@@ -198,10 +205,16 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId, imdbId]));
 
 		using var _ = Assert.Multiple();
-		await Assert.That(stored is Movie).IsTrue();
-		await Assert.That(stored is Movie movie && movie.Identity.Externals.Contains(imdbId)).IsTrue();
-		await Assert.That(stored is Movie { Rating.Sources.Count: 1 }).IsTrue();
-		await Assert.That(stored is Movie m && m.Rating.Sources.Single().Source == RatingProvider.Tmdb).IsTrue();
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>();
+		await Assert
+			.That(stored)
+			.IsOfUnionType<IdentifiedMedia, Movie>()
+			.And.Multiple(async movie => await Assert.That(movie.Identity.Externals).Contains((IExternalMediaId)imdbId));
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Rating.Sources.Count).IsEqualTo(1));
+		await Assert
+			.That(stored)
+			.IsOfUnionType<IdentifiedMedia, Movie>()
+			.And.Multiple(async movie => await Assert.That(movie.Rating.Sources.Single().Source).IsEqualTo(RatingProvider.Tmdb));
 	}
 
 	private async Task<MediaMetadataRow> PersistAsync(IdentifiedMedia details, MediaId mediaId)
