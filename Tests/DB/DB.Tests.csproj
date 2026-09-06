@@ -9,7 +9,6 @@
 	<ItemGroup>
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Assertions" />
@@ -19,6 +18,10 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\DB\DB.csproj" />
+		<ProjectReference Include="..\Harness\Harness.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="Harness" />
 	</ItemGroup>
 </Project>

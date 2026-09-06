@@ -9,14 +9,14 @@ using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ApiKeyConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	private Mock<ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>> _cache = null!;
 	private Mock<IMediaRepository> _mediaRepository = null!;
 	private IApiKeyConfigRepository _testee = null!;
-
-	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	private (Guid, ApiKeyProvider) Key(ApiKeyProvider provider) => (fixture.CurrentUser.Id.Value, provider);
 

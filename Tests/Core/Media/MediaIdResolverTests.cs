@@ -6,7 +6,6 @@ using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
-using TUnit.Mocks.Generated.Contracts.Media.Conversions;
 
 namespace Core.Tests.Media;
 
@@ -51,7 +50,7 @@ public class MediaIdResolverTests
 		converter.ConvertAsync(Any(), Any(), Any()).WasNeverCalled();
 	}
 
-	private static (MediaIdResolver testee, IExternalIdConverterMock converter, Mock<ITypedMemoryCache<string, bool>> cache) CreateTestee()
+	private static (MediaIdResolver testee, Mock<IExternalIdConverter> converter, Mock<ITypedMemoryCache<string, bool>> cache) CreateTestee()
 	{
 		var converter = IExternalIdConverter.Mock();
 		var cache = ITypedMemoryCache<string, bool>.Mock();

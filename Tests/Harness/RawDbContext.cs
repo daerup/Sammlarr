@@ -1,10 +1,11 @@
 using System.Data.Common;
 using System.Linq.Expressions;
 using Dapper;
+using DB;
 using DB.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Tests.Integration;
+namespace Harness;
 
 internal class RawDbContext(SammlarrDbContext context)
 {

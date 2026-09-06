@@ -26,12 +26,12 @@ using TestInfrastructure;
 
 namespace DB.Tests.Integration.Cleanup;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class MediaCachePurgerTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private IMediaCachePurger _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private IMediaCachePurger _testee = null!;
 
 	[Before(Test)]
 	public void Setup()

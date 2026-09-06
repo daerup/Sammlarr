@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class UserOwnedAccessGuardTests(SQLiteFixture fixture)
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class UserOwnedAccessGuardTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	[Test]
 	public async Task Querying_owned_data_without_an_authenticated_user_throws()
 	{
