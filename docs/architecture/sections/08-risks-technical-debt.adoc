@@ -1,6 +1,32 @@
 [[section-technical-risks]]
 == Risks and Technical Debt
-// Known risks and deferred work: deferred feed-resolution fix; planned testing overhaul;
-// .NET preview-SDK dependency (dotnetup); manual Tailwind app.css rebuild gotcha; Plex
-// ById 429 storm; planned media-sinks reversal of the Wolverine push; hot-reload limits;
-// the docs' own Kroki-render dependency.
+
+Operational risks in what is built, and deliberately deferred work.
+
+=== Risks in the current system
+
+[cols="1,2,2", options="header"]
+|===
+| Risk | Impact | Mitigation
+
+| Data-protection key ring | Keys persist under a stable app name (secrets survive restarts), but on the shared `/data` volume they sit unencrypted at rest and the volume must be writable by the container user or startup fails | Restrict `/data` permissions; the Dockerfile must make `/data` writable; optionally add an at-rest protector (<<section-concepts>>)
+| Single instance only | SQLite + in-process Wolverine mean a second replica contends on one file; the `ProviderConfig` cache has no cross-instance invalidation | Run one instance; scale-out is out of scope
+| Plex `ById` 429 storm | Under rate-limiting many ids fail to resolve, are cached unmatched for an hour, and show as "not found" | Concurrency gate + `Retry-After` reduce it; a fuller fix is deferred (below)
+| Identity merge on one shared id | Within a flush, two same-type titles a provider tags with the same or a conflicting external id merge into one row, since a single shared `(Source, Type, Value)` is enough and there is no multi-id agreement check. MediaType still separates a movie from a show, and a collision bridging two already-stored rows throws | Provider ids are trusted; a multi-id agreement or intra-flush same-type conflict check is possible hardening if a provider proves unreliable (scenario C)
+| TMDB feed capability unimplemented | `MediaProvider.Tmdb` has the `Feed` capability so `FeedProvider` includes it, but no `IFeedService` exists; selecting it fails | Drop `Feed` from TMDB, or implement a TMDB feed service. Only MDBList feeds work
+| Manual Tailwind build | `app.css` is compiled by hand, not by `dotnet build`, so new classes are silent no-ops until regenerated | Rebuild `app.css` with the Tailwind CLI on class changes
+|===
+
+=== Deferred and planned work
+
+[cols="1,3", options="header"]
+|===
+| Item | State
+
+| Feed run engine + scheduler | Not built; feeds are preview plus manual/sync only. `feed-mirror-run-engine` adds the engine, Manual/Scheduled triggers, the `Replace`-to-`Mirror` rename, and the wipe guard. Feed-run notification events are modelled but unemitted until then.
+| Media-sinks redesign | Planned (`arr-sink-and-wantlist-rename`): replace the Wolverine push with inline reconcile plus direct Radarr/Sonarr sinks, rename Watchlist to Wantlist/Sink. Reverses the outbox push in <<section-runtime-view>>.
+| Testing overhaul | Planned: a unified harness, drop Reqnroll/Gherkin for in-code Given/When/Then, add bUnit and Playwright, real-SQLite two-backend.
+| Result-based error handling | Planned (`retire-control-flow-exceptions-to-result`): replace control-flow exceptions with `Result` at the service boundaries.
+| Metrics | Not implemented; only logs and traces over OTLP.
+| Release pipeline | Not built. CI/CD, the image, GHCR releases (Aspire-driven, Option A) and the in-app version/update footer belong to the release-engineering plan.
+|===

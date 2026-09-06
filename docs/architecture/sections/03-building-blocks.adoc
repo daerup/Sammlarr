@@ -1,43 +1,54 @@
 [[section-building-block-view]]
 == Building Block View
 
-Sammlarr is a set of .NET projects with one strict rule: dependencies point down, toward the
-domain model and the kernel, and the concrete implementations never reference each other. They
-meet only through the interfaces in `Contracts`.
+A set of .NET projects with one rule: dependencies point down toward the kernel. The
+implementations never reference each other, and the presentation never references them; they meet
+only through `Contracts`. `Web` is the one project that composes them.
 
 === Whitebox Overall System
 
 [mermaid]
 ....
 flowchart TD
-  apphost["AppHost: Aspire host"]
-  ui["UI: Blazor Server + composition root"]
-  core["Core: business logic"]
-  db["DB: EF Core / SQLite"]
-  api["API: provider clients"]
-  msg["Messaging: Wolverine outbox"]
-  contracts["Contracts: interfaces + ids"]
-  domain["Domain: model + unions"]
-  shared["Shared: kernel"]
-  gen["Generators: source gen"]
+  apphost["AppHost<br/>Aspire host"]
+  web["Web<br/>Blazor host, composition root"]
+  ui["UI<br/>Blazor components (RCL)"]
+  core["Core<br/>business logic"]
+  db["DB<br/>EF + SQLite"]
+  api["API<br/>providers + HTTP"]
+  msg["Messaging<br/>Wolverine outbox"]
+  obs["Observability<br/>Serilog + OTel"]
+  contracts["Contracts<br/>interfaces + ids"]
+  domain["Domain<br/>model + unions"]
+  shared["Shared<br/>kernel"]
+  gen["Generators<br/>source gen"]
 
-  apphost --> ui
-  ui --> core
-  ui --> db
-  ui --> api
-  ui --> msg
+  apphost --> web
+  web --> ui
+  web --> core
+  web --> db
+  web --> api
+  web --> msg
+  ui --> contracts
   core --> contracts
   db --> contracts
   api --> contracts
+  core --> obs
+  db --> obs
+  api --> obs
   msg --> contracts
-  msg --> domain
+  obs --> contracts
+  ui ~~~ obs
+  msg ~~~ obs
   contracts --> domain
   domain --> shared
-  gen -. build-time .-> domain
+  domain -. build-time .-> gen
 ....
 
-`Shared` and `Observability` are referenced by almost every project; only the `Domain -> Shared`
-spine is drawn, the rest are left out so the graph stays readable.
+Arrows are direct project references; every project reaches `Domain` transitively through
+`Contracts`. Core, DB and API are peers with the same dependency
+shape and never reference each other. Every project also references the `Shared` kernel, and both
+`Web` and `UI` reference `Observability`; those edges are omitted to keep the graph readable.
 
 [cols="1,3", options="header"]
 |===
@@ -51,17 +62,17 @@ spine is drawn, the rest are left out so the graph stays readable.
 | DB | Persistence: `SammlarrDbContext`, entities, repositories and migrations on SQLite. Holds secrets under data protection.
 | API | One folder per external provider, each an `IServiceModule` that registers a typed HTTP client and keyed services. Also the shared HTTP resilience pipeline and the notification channels.
 | Messaging | Wolverine durable messaging on SQLite: the handlers that drain the watchlist push outbox.
-| UI | Blazor Server. The `Features/*` vertical slices and, in `Program.cs`, the single composition root that wires every module.
-| AppHost | The Aspire host that runs the UI and its dependencies for local development.
-| Generators | A Roslyn source generator, build-time only, that produces the provider-subset enums and their conversions from the capability matrix.
+| UI | Blazor components as a Razor class library: the `Features/*` vertical slices and the `Shared` cross-feature components and services. References only `Contracts`, `Shared` and `Observability`, never an implementation.
+| Web | The Blazor host and composition root. Holds the root components (`App`, `Routes`) and, in `Program.cs`, the single `AddModule<T>()` wiring of every layer, plus the endpoints, health checks and host services. The one project that references every implementation and `UI`.
+| AppHost | The Aspire host that runs `Web` and its dependencies for local development.
+| Generators | Roslyn source generators, build-time only: the provider-subset enums and their conversions from the capability matrix, plus the options-section registration.
 |===
 
-The dependency direction is the load-bearing constraint:
-
-* `Shared` and `Domain` know nothing about infrastructure.
-* `Core`, `DB` and `API` are siblings. None references another. When `Core` pushes a watchlist change to Plex it goes through the `IWatchlistProvider` that `API` implements, resolved by DI.
-* `UI` is the only project that sees every implementation, and the only place they are composed.
-* `Generators` runs at build time and ships no runtime assembly.
+The load-bearing rule: `Core`, `DB` and `API` are siblings that never reference each other; when
+`Core` pushes to Plex it goes through the `IWatchlistProvider` that `API` implements, resolved by
+DI. `UI` is presentation on abstractions only; `Web` is the one project that sees every
+implementation and the only place they compose. `Generators` runs at build time and ships no
+runtime assembly.
 
 === Level 2
 
@@ -69,9 +80,9 @@ Two blocks are worth opening: `API`, where providers plug in, and `UI`, where fe
 
 ==== API: one module per provider
 
-Each provider is a folder with an `IServiceModule`. The module registers a typed HTTP client,
-wrapped by the shared resilience pipeline, and keyed services against `Contracts` interfaces.
-`ApiModule` adds every provider module plus the cross-cutting ones.
+Each provider is a folder with an `IServiceModule` that registers a typed HTTP client (wrapped by
+the resilience pipeline) and keyed services against `Contracts` interfaces; `ApiModule` adds them
+all.
 
 [cols="1,3", options="header"]
 |===
@@ -91,20 +102,18 @@ The cross-cutting folders under `API`:
 * `Notifications`: the webhook and Pushover channels and the Fluid template renderer.
 * `Observability`: HTTP and provider instrumentation.
 
-A consumer never names a provider class. It asks for, say, `IExternalIdConverter` keyed to
-`MediaProvider.Imdb`, and DI hands back the right one.
+==== UI and Web: feature slices, and the host that composes them
 
-==== UI: feature slices and one composition root
+`UI/Features` is one folder per feature area (Auth, Browse, Feeds with a live-preview editor,
+Home, Watchlist with per-item push status + sync, Blacklist, Settings), each a vertical slice of
+Blazor pages and components; `UI/Shared` holds the cross-feature components and services. `UI` is
+a Razor class library on abstractions only, so it ships no `Program.cs` and references no
+implementation.
 
-`UI/Features` holds one folder per feature area, each a vertical slice of Blazor pages and
-components: Auth (sign-in), Browse, Feeds (the list plus an editor with live preview), Home,
-Watchlist (with per-item push status and a sync action), Blacklist, and Settings (providers,
-secrets, users, notifications, cache and diagnostics). `UI/Shared` holds the cross-feature
-components and services, such as the current-user accessor and the notifier.
-
-`Program.cs` is the composition root. It calls `AddModule<T>()` for Core, Shared, DB, API, UI
-and Messaging, then wires Wolverine, authentication, the Blazor interactive server render mode,
-the auth endpoints, and the admin-only `/diagnostics/export`.
+`Web` is the host. It owns the root components (`App`, `Routes`), and its `Program.cs` is the
+composition root: `AddModule<T>()` for Core, Shared, DB, API, UI and Messaging, then Wolverine,
+authentication, the Blazor interactive server render mode (with `UI`'s assembly registered so its
+pages are discovered), the auth and health endpoints, and the admin-only `/diagnostics/export`.
 
 === Level 3
 
