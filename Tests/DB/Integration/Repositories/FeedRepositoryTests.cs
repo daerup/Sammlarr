@@ -11,12 +11,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class FeedRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private IFeedRepository _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private IFeedRepository _testee = null!;
 
 	[Before(Test)]
 	public void Setup() => _testee = new FeedRepository(fixture.ContextFactory);

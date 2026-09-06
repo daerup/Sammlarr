@@ -18,13 +18,6 @@ internal sealed class BlacklistRepository(IDbContextFactory<SammlarrDbContext> d
 		return [.. rows.Select(row => new BlacklistEntry(MediaId.From(row.MediaIdValue), row.CreatedAt))];
 	}
 
-	public async Task<bool> IsBlacklistedAsync(MediaId mediaId, CancellationToken cancellationToken = default)
-	{
-		var raw = mediaId.Value;
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Blacklist.AnyAsync(b => b.Media.Id == raw, cancellationToken);
-	}
-
 	public async Task AddAsync(MediaId mediaId, CancellationToken cancellationToken = default)
 	{
 		var raw = mediaId.Value;

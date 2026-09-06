@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ExternalMediaIdRowTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class ExternalMediaIdRowTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 

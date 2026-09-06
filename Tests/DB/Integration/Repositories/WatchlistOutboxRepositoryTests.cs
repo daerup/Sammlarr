@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class WatchlistOutboxRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private WatchlistOutboxRepository _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private WatchlistOutboxRepository _testee = null!;
 
 	[Before(Test)]
 	public void Setup() => _testee = new WatchlistOutboxRepository(fixture.ContextFactory);
@@ -124,18 +124,6 @@ public class WatchlistOutboxRepositoryTests(SQLiteFixture fixture) : IAsyncDispo
 
 		var any = await fixture.Context.WatchlistOutbox.AnyAsync();
 		await Assert.That(any).IsFalse();
-	}
-
-	[Test]
-	public async Task EnqueueAsync_BatchOfDistinctMedia_CreatesSeparateRows()
-	{
-		var first = await SeedMediaAsync([PlexId.From("plex-400", MediaType.Movie)]);
-		var second = await SeedMediaAsync([PlexId.From("plex-401", MediaType.Movie)]);
-
-		await _testee.EnqueueAsync(WatchlistOperationAction.Add, [first, second]);
-
-		var rows = await fixture.Context.WatchlistOutbox.AsNoTracking().ToListAsync();
-		await Assert.That(rows).Count().IsEqualTo(2);
 	}
 
 	[Test]

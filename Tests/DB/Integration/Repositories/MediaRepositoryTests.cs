@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class MediaRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private IMediaRepository _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private IMediaRepository _testee = null!;
 
 	[Before(Test)]
 	public void Setup()
@@ -240,17 +240,5 @@ public class MediaRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 		return MediaId.From(media.Id);
-	}
-
-	private static async Task AssertContainsIds(IEnumerable<IExternalMediaId> actualIds, IEnumerable<IExternalMediaId> expectedIds)
-	{
-		var actualIdList = actualIds.ToList();
-		var expectedIdList = expectedIds.ToList();
-		using var disposable = Assert.Multiple();
-		await Assert.That(actualIdList).Count().IsEqualTo(expectedIdList.Count);
-		foreach (var expectedId in expectedIdList)
-		{
-			await Assert.That(actualIdList).Contains(expectedId);
-		}
 	}
 }

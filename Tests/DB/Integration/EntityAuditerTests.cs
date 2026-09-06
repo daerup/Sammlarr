@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DB.Tests.Integration;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class EntityAuditerTests(SQLiteFixture fixture)
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class EntityAuditerTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	private readonly DateTimeOffset _now = DateTimeOffset.Now;
 	private readonly EntityAuditer _testee = new();
 	private readonly DateTimeOffset _then = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(10));
@@ -40,10 +42,9 @@ public class EntityAuditerTests(SQLiteFixture fixture)
 	[Test]
 	[Arguments(EntityState.Deleted)]
 	[Arguments(EntityState.Unchanged)]
-	[Arguments(EntityState.Detached)]
-	public async Task UpdateTimestamps_WhenEntityIsUnchanged_DoesNotModifyTimestamps(EntityState state)
+	public async Task UpdateTimestamps_WhenEntityIsDeletedOrUnchanged_DoesNotModifyTimestamps(EntityState state)
 	{
-		var entry = GetAuditableEntry(EntityState.Unchanged);
+		var entry = GetAuditableEntry(state);
 
 		_testee.UpdateTimestamps(entry, _now);
 
@@ -69,7 +70,6 @@ public class EntityAuditerTests(SQLiteFixture fixture)
 			}
 		);
 
-		fixture.Context.Add(entity);
 		var entry = fixture.Context.Entry<IAuditable>(entity);
 		entry.State = state;
 

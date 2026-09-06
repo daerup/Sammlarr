@@ -16,12 +16,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class UserRepositoryTests(SQLiteFixture fixture)
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private IUserRepository _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private IUserRepository _testee = null!;
 
 	[Before(Test)]
 	public void Setup() => _testee = new UserRepository(fixture.ContextFactory);

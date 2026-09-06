@@ -9,12 +9,12 @@ using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class WatchlistRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class WatchlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private WatchlistRepository _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private WatchlistRepository _testee = null!;
 
 	[Before(Test)]
 	public void Setup() => _testee = new WatchlistRepository(fixture.ContextFactory);

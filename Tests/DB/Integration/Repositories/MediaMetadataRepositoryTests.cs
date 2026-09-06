@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class MediaMetadataRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	private MediaRepository _testee = null!;
 	private Mock<IDateTimeProvider> _dateTimeProvider = null!;
-
-	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()

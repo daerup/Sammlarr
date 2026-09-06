@@ -11,12 +11,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Metadata;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class MediaMetadataFactoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
-	private MediaMetadataFactory _testee = null!;
-
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
+	private MediaMetadataFactory _testee = null!;
 
 	[Before(Test)]
 	public void Setup()

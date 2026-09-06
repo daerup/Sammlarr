@@ -6,13 +6,13 @@ using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class NotificationDeliveryOutcomeRepositoryTests(SQLiteFixture fixture)
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	private INotificationTargetRepository _targets = null!;
 	private INotificationDeliveryOutcomeRepository _testee = null!;
-
-	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()

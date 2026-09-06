@@ -9,13 +9,13 @@ using TestInfrastructure;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class CredentialRepositoryTests(SQLiteFixture fixture)
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	private Mock<ITypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>> _cache = null!;
 	private ICredentialRepository _testee = null!;
-
-	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	private (Guid, AuthProvider) Key(AuthProvider provider) => (fixture.CurrentUser.Id.Value, provider);
 

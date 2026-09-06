@@ -13,7 +13,6 @@
     <PackageVersion Include="Dapper" Version="2.1.72" />
     <PackageVersion Include="Enterprize1.BenchmarkDotNet.GitCompare" Version="0.0.1" />
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
-    <PackageVersion Include="Imposter" Version="0.1.9" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection" Version="10.0.11" />
@@ -46,12 +45,11 @@
     <PackageVersion Include="System.Linq.AsyncEnumerable" Version="10.0.5" />
     <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.2" />
     <PackageVersion Include="timewarp-simple-icons" Version="16.14.0" />
-    <PackageVersion Include="TUnit.Core" Version="1.25.0" />
-    <PackageVersion Include="TUnit.Mocks" Version="1.28.0-beta" />
-    <PackageVersion Include="TUnit.Mocks.Http" Version="1.21.30" />
-    <PackageVersion Include="TUnit" Version="1.25.0" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.25.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.5" />
+    <PackageVersion Include="TUnit.Core" Version="1.66.10" />
+    <PackageVersion Include="TUnit.Mocks" Version="1.66.10" />
+    <PackageVersion Include="TUnit.Mocks.Http" Version="1.66.10" />
+    <PackageVersion Include="TUnit" Version="1.66.10" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.66.10" />
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Reqnroll.TUnit" Version="3.0.0" />
     <PackageVersion Include="Vogen" Version="8.0.6" />

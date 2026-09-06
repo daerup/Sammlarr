@@ -11,13 +11,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration.Repositories;
 
-[ClassDataSource<SQLiteFixture>(Shared = SharedType.None)]
-public class ProviderConfigRepositoryTests(SQLiteFixture fixture) : IAsyncDisposable
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
+	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
+
 	private Mock<ITypedMemoryCache<string, ProviderConfig>> _cache = null!;
 	private IProviderConfigRepository _testee = null!;
-
-	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Before(Test)]
 	public void Setup()

@@ -36,6 +36,7 @@
 		<Project Path="Tests/Architecture/Architecture.Tests.csproj" />
 		<Project Path="Tests/Core/Core.Tests.csproj" />
 		<Project Path="Tests/DB/DB.Tests.csproj" />
+		<Project Path="Tests/Harness/Harness.csproj" />
 		<Project Path="Tests/Domain/Domain.Tests.csproj" />
 		<Project Path="Tests/Integration/Integration.Tests.csproj" />
 		<Project Path="Tests/Generators/Generators.Tests.csproj" />
