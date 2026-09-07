@@ -14,6 +14,7 @@ using Core;
 using DB;
 using DB.Data.Identity;
 using DB.Data.Media;
+using DB.Data.Metadata;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
@@ -47,6 +48,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private bool _tmdbAccountConfigured;
 
 	private readonly RemoteWatchlistState _remote = new();
+	private readonly MutableClock _clock = new();
 
 	internal TestCurrentUser CurrentUser { get; } = new();
 
@@ -96,6 +98,48 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return MediaId.From(media.Id);
 	}
 
+	internal void SetCurrentTime(DateTimeOffset now) => _clock.Now = now;
+
+	internal async Task<MediaId> SeedWithMetadataAsync(ResolvedVersion resolved, DateTimeOffset? fetched)
+	{
+		var context = ScopedDbContext;
+		var media = new MediaRow();
+		foreach (var (provider, id) in resolved.Ids)
+		{
+			await context.ExternalMediaIds.AddAsync(new ProviderId(provider, id).ToExternal(resolved.Type).ToExternalIdEntity(media));
+		}
+
+		await context.SaveChangesAsync();
+		await context.MediaMetadata.AddAsync(BuildMetadata(media.Id, resolved, fetched));
+		await context.SaveChangesAsync();
+		context.ChangeTracker.Clear();
+		return MediaId.From(media.Id);
+	}
+
+	private MediaMetadataRow BuildMetadata(Guid mediaId, ResolvedVersion resolved, DateTimeOffset? fetched)
+	{
+		MediaMetadataRow metadata =
+			resolved.Type == MediaType.Show
+				? new ShowMetadataRow
+				{
+					Seasons = 1,
+					Episodes = 1,
+					RuntimePerEpisode = TimeSpan.FromMinutes(30),
+				}
+				: new MovieMetadataRow { Runtime = TimeSpan.FromHours(2) };
+
+		metadata.MediaId = mediaId;
+		metadata.Title = resolved.Title;
+		metadata.Tagline = "Tagline";
+		metadata.Summary = resolved.Summary ?? "An overview";
+		metadata.PosterUrl = resolved.Poster ?? "/poster.jpg";
+		metadata.BackdropUrl = "/backdrop.jpg";
+		metadata.ReleaseDate = new DateOnly(resolved.Year, 1, 15);
+		metadata.Genres = resolved.Genres is null ? ["Action"] : [.. resolved.Genres];
+		metadata.LastFetchedAt = fetched ?? _clock.Now;
+		return metadata;
+	}
+
 	internal async Task WithPlexAccount(string token)
 	{
 		await Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
@@ -137,6 +181,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void TmdbHolds(ResolvedVersion version, double? rating, int votes) =>
 		TmdbStub.Detail(HttpStub, version, rating ?? 0, votes, hasVoteData: rating.HasValue);
+
+	internal void TmdbHasNoDetail(MediaSpec spec)
+	{
+		var tmdbId = spec.Ids.First(id => id.Provider == MediaProvider.Tmdb).Value;
+		HttpStub.RespondWithJsonForUrl(string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, tmdbId), """{ "id": 0 }""");
+	}
 
 	internal async Task TmdbTrendingPage(int page, params MediaSpec[] items)
 	{
@@ -362,7 +412,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddModule<ApiModule>();
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 		services.AddLogging();
-		services.AddSingleton<IDateTimeProvider>(new FixedClock());
+		services.AddSingleton<IDateTimeProvider>(_clock);
 
 		services.AddHttpClient<PlexClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient(PlexClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
@@ -416,6 +466,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private sealed class FixedClock : IDateTimeProvider
 	{
 		public DateTimeOffset Now { get; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
+	}
+
+	private sealed class MutableClock : IDateTimeProvider
+	{
+		public DateTimeOffset Now { get; set; } = new(2024, 6, 1, 0, 0, 0, TimeSpan.Zero);
 	}
 
 	private sealed class SharedConnectionFactory(IServiceProvider provider, SqliteConnection connection, ICurrentUser user) : IDbContextFactory<SammlarrDbContext>
