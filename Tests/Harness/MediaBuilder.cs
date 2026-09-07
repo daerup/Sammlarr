@@ -44,10 +44,11 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		IReadOnlyList<ProviderId>? reports = null,
 		string? summary = null,
 		IReadOnlyList<string>? genres = null,
-		string? poster = null
+		string? poster = null,
+		string? title = null
 	)
 	{
-		host.PlexHolds(Version(reports, summary, genres, poster));
+		host.PlexHolds(Version(reports, summary, genres, poster, title));
 		_usesPlex = true;
 		return this;
 	}
@@ -57,10 +58,11 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		double? rating = null,
 		int votes = 0,
 		string? summary = null,
-		IReadOnlyList<string>? genres = null
+		IReadOnlyList<string>? genres = null,
+		string? title = null
 	)
 	{
-		host.TmdbHolds(Version(reports, summary, genres, null), rating, votes);
+		host.TmdbHolds(Version(reports, summary, genres, null, title), rating, votes);
 		_usesTmdb = true;
 		return this;
 	}
@@ -101,14 +103,45 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		return id;
 	}
 
-	private ResolvedVersion Version(IReadOnlyList<ProviderId>? reports, string? summary, IReadOnlyList<string>? genres, string? poster)
+	internal async Task<MediaId> SeedWithMetadataAsync(
+		string title,
+		DateTimeOffset fetched,
+		string? summary = null,
+		IReadOnlyList<string>? genres = null,
+		string? poster = null
+	)
+	{
+		if (_usesPlex)
+		{
+			await host.EnsurePlexAccount();
+		}
+
+		if (_usesTmdb)
+		{
+			await host.EnsureTmdbAccount();
+		}
+
+		var resolved = new ResolvedVersion(
+			ids.ToDictionary(providerId => providerId.Provider, providerId => providerId.Value),
+			type,
+			DefaultYear,
+			title,
+			poster,
+			summary,
+			genres
+		);
+		_seeded = await host.SeedWithMetadataAsync(resolved, fetched);
+		return _seeded.Value;
+	}
+
+	private ResolvedVersion Version(IReadOnlyList<ProviderId>? reports, string? summary, IReadOnlyList<string>? genres, string? poster, string? titleOverride)
 	{
 		var source = reports ?? ids;
 		return new ResolvedVersion(
 			source.ToDictionary(providerId => providerId.Provider, providerId => providerId.Value),
 			type,
 			DefaultYear,
-			title,
+			titleOverride ?? title,
 			poster,
 			summary,
 			genres
