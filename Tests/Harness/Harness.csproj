@@ -9,10 +9,12 @@
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Core.csproj" />
+		<ProjectReference Include="..\..\API\API.csproj" />
 		<ProjectReference Include="..\..\DB\DB.csproj" />
+		<ProjectReference Include="..\..\Messaging\Messaging.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
 	</ItemGroup>
 </Project>
