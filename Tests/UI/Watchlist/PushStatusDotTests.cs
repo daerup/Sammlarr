@@ -1,0 +1,28 @@
+using BlazorBlueprint.Components;
+using Bunit;
+using UI.Features.Watchlist.Components;
+
+namespace UI.Tests.Watchlist;
+
+public class PushStatusDotTests : BunitContext
+{
+	[Before(Test)]
+	public void Setup()
+	{
+		Services.AddBlazorBlueprintComponents();
+		JSInterop.Mode = JSRuntimeMode.Loose;
+	}
+
+	[Test]
+	[Arguments(PushDotState.Pending, 0, "Synchronization pending")]
+	[Arguments(PushDotState.Pending, 2, "Synchronization pending (attempt 3)")]
+	[Arguments(PushDotState.Failed, 1, "Synchronization failed after 1 attempt")]
+	[Arguments(PushDotState.Failed, 3, "Synchronization failed after 3 attempts")]
+	[Arguments(PushDotState.Pushed, 0, "Synced to the watchlist provider")]
+	public async Task Renders_the_expected_accessibility_label(PushDotState state, int attempts, string expected)
+	{
+		var cut = Render<PushStatusDot>(parameters => parameters.Add(dot => dot.State, state).Add(dot => dot.Attempts, attempts));
+
+		await Assert.That(cut.Find("[aria-label]").GetAttribute("aria-label")).IsEqualTo(expected);
+	}
+}
