@@ -108,6 +108,14 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		HttpStub.RequireQueryParam(TestUrls.TmdbApi, "api_key", apiKey);
 	}
 
+	internal async Task WithMdblistAccount(string apiKey)
+	{
+		await Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Mdblist, apiKey));
+		HttpStub.RequireQueryParam(TestUrls.MdblistApi, "apikey", apiKey);
+	}
+
+	internal void TmdbUnreachable() => HttpStub.RespondForUrl(TestUrls.TmdbApi, _ => throw new HttpRequestException("The TMDB API is unreachable."));
+
 	internal void PlexHolds(ResolvedVersion version) => PlexStub.Lookup(HttpStub, version);
 
 	internal void PlexHolds(MediaSpec spec) => PlexStub.Lookup(HttpStub, FullVersion(spec));
