@@ -1,0 +1,92 @@
+using Contracts.Auth;
+using Contracts.Blacklist;
+using Contracts.Feed;
+using Contracts.Media;
+using Contracts.Watchlist;
+using Domain.Feed;
+using Domain.Providers;
+using Domain.Settings;
+using Domain.Watchlist;
+using Harness;
+using TestInfrastructure;
+
+namespace Integration.Tests.Identity;
+
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
+{
+	private static readonly WatchlistItemProvenance Remote = new(new RemoteOrigin(WatchlistProvider.Plex));
+
+	public async ValueTask DisposeAsync() => await host.DisposeAsync();
+
+	[Test]
+	public async Task Feeds_are_private_to_each_user()
+	{
+		await host.SignInAs("Alice");
+		await host.Resolve<IFeedRepository>()
+			.CreateFeedAsync(
+				"Weekly",
+				new FeedCreateData
+				{
+					IsEnabled = true,
+					Provider = FeedProvider.Mdblist,
+					Strategy = FeedAddStrategy.Append,
+					Identifier = "list",
+					Schedule = new SyncMode(new Manual()),
+				}
+			);
+
+		host.SignOut();
+		await host.SignInAs("Bob");
+		await Assert.That(await host.Resolve<IFeedRepository>().GetFeedsAsync()).IsEmpty();
+
+		host.SignOut();
+		await host.SignInAs("Alice");
+		var feeds = await host.Resolve<IFeedRepository>().GetFeedsAsync();
+		await Assert.That(feeds.Any(feed => feed.Name == "Weekly")).IsTrue();
+	}
+
+	[Test]
+	public async Task Api_keys_are_private_to_each_user()
+	{
+		await host.SignInAs("Alice");
+		await host.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-secret"));
+
+		host.SignOut();
+		await host.SignInAs("Bob");
+		await Assert.That(await host.CountOwnedAsync(context => context.ApiKeySettings)).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Credentials_are_private_to_each_user()
+	{
+		await host.SignInAs("Alice");
+		await host.Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, "plex-token", DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
+
+		host.SignOut();
+		await host.SignInAs("Bob");
+		await Assert.That(await host.CountOwnedAsync(context => context.Credentials)).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Watchlist_entries_are_private_to_each_user()
+	{
+		await host.SignInAs("Alice");
+		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
+
+		host.SignOut();
+		await host.SignInAs("Bob");
+		await Assert.That(await host.Resolve<IWatchlistService>().GetWatchlistIdsAsync()).IsEmpty();
+	}
+
+	[Test]
+	public async Task Blacklist_entries_are_private_to_each_user()
+	{
+		await host.SignInAs("Alice");
+		await host.Movie(TestMedia.Inception).OnBlacklist();
+
+		host.SignOut();
+		await host.SignInAs("Bob");
+		await Assert.That(await host.Resolve<IBlacklistService>().GetBlacklistIdsAsync()).IsEmpty();
+	}
+}

@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using API;
 using API.Mdblist;
 using API.Plex;
@@ -11,6 +13,7 @@ using Core;
 using DB;
 using DB.Data.Identity;
 using DB.Data.Media;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.AspNetCore.DataProtection;
@@ -153,6 +156,40 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 		await WithTmdbAccount("tmdb-key");
 		_tmdbAccountConfigured = true;
+	}
+
+	internal async Task SignInAs(string name)
+	{
+		CurrentUser.Id = UserId.From(new Guid(MD5.HashData(Encoding.UTF8.GetBytes(name))));
+		CurrentUser.DisplayName = name;
+		CurrentUser.Role = UserRole.Member;
+		CurrentUser.IsAuthenticated = true;
+
+		await using var context = Resolve<IDbContextFactory<SammlarrDbContext>>().CreateDbContext();
+		if (!await context.Users.AnyAsync(user => user.Id == CurrentUser.Id.Value))
+		{
+			context.Users.Add(
+				new UserRow
+				{
+					Id = CurrentUser.Id.Value,
+					Provider = AuthProvider.Plex,
+					ExternalUserId = CurrentUser.Id.Value.ToString(),
+					DisplayName = CurrentUser.DisplayName,
+					AvatarUrl = CurrentUser.AvatarUrl,
+					Role = CurrentUser.Role,
+					JoinedAt = DateTimeOffset.UnixEpoch,
+				}
+			);
+			await context.SaveChangesAsync();
+		}
+	}
+
+	internal void SignOut() => CurrentUser.IsAuthenticated = false;
+
+	internal async Task<int> CountOwnedAsync<T>(Func<SammlarrDbContext, IQueryable<T>> selector)
+	{
+		await using var context = Resolve<IDbContextFactory<SammlarrDbContext>>().CreateDbContext();
+		return await selector(context).CountAsync();
 	}
 
 	public async ValueTask DisposeAsync()
