@@ -1,3 +1,4 @@
+using DB.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Tests.Integration;
@@ -24,5 +25,17 @@ public class UserOwnedAccessGuardTests(SammlarrTestHost fixture) : IAsyncDisposa
 		}
 
 		await Assert.That(threw).IsTrue();
+	}
+
+	[Test]
+	public async Task Every_user_owned_entity_has_the_user_query_filter()
+	{
+		var userOwned = fixture.Context.Model.GetEntityTypes().Where(entityType => typeof(IUserOwned).IsAssignableFrom(entityType.ClrType)).ToList();
+
+		await Assert.That(userOwned).IsNotEmpty();
+		foreach (var entityType in userOwned)
+		{
+			await Assert.That(entityType.GetQueryFilter()).IsNotNull();
+		}
 	}
 }
