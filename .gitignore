@@ -77,3 +77,6 @@ dp-keys/
 .husky/_/
 
 /plans
+
+# Verify snapshot testing (transient received files; .verified.* are committed)
+*.received.*

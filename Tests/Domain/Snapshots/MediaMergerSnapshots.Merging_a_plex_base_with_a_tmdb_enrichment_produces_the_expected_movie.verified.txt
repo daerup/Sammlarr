@@ -1,0 +1,33 @@
+﻿{
+  Value: {
+    Identity: {
+      Id: {
+        Value: Guid_1
+      },
+      Externals: [
+        {
+          Source: Plex,
+          Value: 550
+        },
+        {
+          Value: 550
+        },
+        {
+          Source: Imdb,
+          Value: tt0137523
+        }
+      ]
+    },
+    Title: Fight Club,
+    Tagline: Mischief. Mayhem. Soap.,
+    Summary: An insomniac office worker and a soap maker form an underground fight club.,
+    PosterUrl: /poster.jpg,
+    BackdropUrl: /backdrop.jpg,
+    ReleaseDate: Date_1,
+    Genres: [
+      Drama,
+      Thriller
+    ],
+    Runtime: 02:19:00
+  }
+}

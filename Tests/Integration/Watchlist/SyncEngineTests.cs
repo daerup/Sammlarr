@@ -3,6 +3,7 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using DB.Data.Watchlist;
 using Domain.Media;
+using Domain.Notifications.Events;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -237,6 +238,56 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncRemoteFailed>();
 		await AssertWatchlist(1, WatchlistEntryOrigin.Manual);
+	}
+
+	[Test]
+	public async Task A_pull_publishes_a_watchlist_synced_event()
+	{
+		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		await host.RemoteWatchlistHas(TestMedia.Inception);
+
+		await Testee.SyncAsync(Trigger, CurrentUser);
+
+		var events = host.Published<WatchlistSyncedEvent>();
+		await Assert.That(events).Count().IsEqualTo(1);
+		await Assert.That(events[0].PulledAdds).Contains(inception);
+	}
+
+	[Test]
+	public async Task A_push_only_sync_publishes_a_synced_event_reporting_the_pushed_item()
+	{
+		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		await host.RemoteWatchlistEmpty();
+		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
+
+		await Testee.SyncAsync(Trigger, CurrentUser);
+
+		var events = host.Published<WatchlistSyncedEvent>();
+		await Assert.That(events).Count().IsEqualTo(1);
+		await Assert.That(events[0].PushedAdds).Contains(inception);
+	}
+
+	[Test]
+	public async Task A_sync_with_no_changes_publishes_no_events()
+	{
+		await host.Movie(TestMedia.Inception).SeedAsync();
+		await host.RemoteWatchlistEmpty();
+
+		await Testee.SyncAsync(Trigger, CurrentUser);
+
+		await Assert.That(host.Published<WatchlistSyncedEvent>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task A_pending_add_republishes_a_push_request_for_the_item()
+	{
+		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		await host.RemoteWatchlistEmpty();
+		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
+
+		await Testee.SyncAsync(Trigger, CurrentUser);
+
+		await Assert.That(host.Published<WatchlistPushRequest>().Any(push => push.MediaId == inception)).IsTrue();
 	}
 
 	private static async Task AssertPlanned(WatchlistSyncSummary summary, WatchlistSyncDirection direction, WatchlistOperationAction action, MediaId mediaId) =>

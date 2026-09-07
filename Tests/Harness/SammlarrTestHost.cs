@@ -84,6 +84,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal SammlarrDbContext ScopedDbContext => Resolve<SammlarrDbContext>();
 
+	internal IReadOnlyList<T> Published<T>() => Resolve<PublishedMessages>().Recorded<T>();
+
 	internal async Task<MediaId> SeedMediaAsync(params IExternalMediaId[] externals)
 	{
 		var context = ScopedDbContext;
@@ -430,6 +432,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
 			}
 		);
+		services.AddSingleton<PublishedMessages>();
 		services.AddScoped<IMessagePublisher, InlineWatchlistPushPublisher>();
 		return services.BuildServiceProvider();
 	}

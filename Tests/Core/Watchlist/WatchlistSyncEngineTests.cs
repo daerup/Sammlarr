@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
@@ -9,10 +8,8 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Core.Watchlist.Sync;
 using Domain.Media;
-using Domain.Notifications.Events;
 using Domain.Providers;
 using Domain.Watchlist;
-using Domain.Watchlist.Outbox;
 using Domain.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -44,86 +41,6 @@ public class WatchlistSyncEngineTests
 	}
 
 	[Test]
-	public async Task SyncAsync_PendingAddNotOnRemote_ResetsOutboxAndPublishesPushTrigger()
-	{
-		var mediaId = MediaId.From(Guid.NewGuid());
-
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0)]);
-
-		var publisher = new RecordingPublisher();
-
-		var engine = BuildEngine(provider, outbox: outbox, publisher: publisher);
-
-		var result = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
-
-		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
-		outbox.EnqueueAsync(WatchlistOperationAction.Add, Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
-		var triggers = publisher.Published.OfType<WatchlistPushRequest>().ToList();
-		await Assert.That(triggers.Count).IsEqualTo(1);
-		await Assert.That(triggers[0].MediaId).IsEqualTo(mediaId);
-	}
-
-	[Test]
-	public async Task SyncAsync_PullInsert_PublishesWatchlistSyncedEvent()
-	{
-		var pulledId = MediaId.From(Guid.NewGuid());
-
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([PlexId.From("plex-pull", MediaType.Movie)]));
-
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any()).Returns([]);
-		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).Returns([pulledId]);
-		repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).Returns([]);
-
-		var publisher = new RecordingPublisher();
-		var engine = BuildEngine(provider, repository: repository, media: ResolvedMedia(pulledId), publisher: publisher);
-
-		await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
-
-		var synced = publisher.Published.OfType<WatchlistSyncedEvent>().ToList();
-		await Assert.That(synced.Count).IsEqualTo(1);
-		await Assert.That(synced[0].PulledAdds).Contains(pulledId);
-	}
-
-	[Test]
-	public async Task SyncAsync_NoChanges_PublishesNothing()
-	{
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
-
-		var publisher = new RecordingPublisher();
-		var engine = BuildEngine(provider, publisher: publisher);
-
-		await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
-
-		await Assert.That(publisher.Published.OfType<WatchlistSyncedEvent>()).IsEmpty();
-	}
-
-	[Test]
-	public async Task SyncAsync_PushBacklogOnly_DoesNotPublishWatchlistSynced()
-	{
-		var mediaId = MediaId.From(Guid.NewGuid());
-
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0)]);
-
-		var publisher = new RecordingPublisher();
-		var engine = BuildEngine(provider, outbox: outbox, publisher: publisher);
-
-		await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
-
-		await Assert.That(publisher.Published.OfType<WatchlistSyncedEvent>()).IsEmpty();
-	}
-
-	[Test]
 	public async Task DryRunAsync_RunsInScopeOfGivenUser()
 	{
 		var user = new TestCurrentUser();
@@ -131,48 +48,37 @@ public class WatchlistSyncEngineTests
 		userScope.As(Any<ICurrentUser>()).Returns(new NoopScope());
 		var provider = IWatchlistProvider.Mock();
 		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
-		var engine = BuildEngine(provider, userScope: userScope);
+		var engine = BuildEngine(provider, userScope);
 
 		await engine.DryRunAsync(user);
 
 		userScope.As(user).WasCalled(Times.Once);
 	}
 
-	private static WatchlistSyncEngine BuildEngine(
-		Mock<IWatchlistProvider> provider,
-		Mock<IWatchlistRepository>? repository = null,
-		Mock<IWatchlistOutbox>? outbox = null,
-		Mock<IMediaService>? media = null,
-		Mock<IUserScope>? userScope = null,
-		IMessagePublisher? publisher = null
-	)
+	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider, Mock<IUserScope>? userScope = null)
 	{
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
-		var services = new ServiceCollection();
-		services.AddSingleton((repository ?? EmptyRepository()).Object);
-		services.AddSingleton((outbox ?? EmptyOutbox()).Object);
-		services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
-		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
-		services.AddSingleton((media ?? UnresolvedMedia()).Object);
-		services.AddSingleton((userScope ?? NoopUserScope()).Object);
-		services.AddSingleton<IMessagePublisher>(publisher ?? new RecordingPublisher());
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
+
+		var services = new ServiceCollection();
+		services.AddSingleton(EmptyRepository().Object);
+		services.AddSingleton(EmptyOutbox().Object);
+		services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
+		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
+		services.AddSingleton(UnresolvedMedia().Object);
+		services.AddSingleton((userScope ?? NoopUserScope()).Object);
+		services.AddSingleton<IMessagePublisher>(new NoopPublisher());
 		services.AddSingleton<IDateTimeProvider>(clock.Object);
-		var sp = services.BuildServiceProvider();
-		return new WatchlistSyncEngine(sp.GetRequiredService<IServiceScopeFactory>(), NullLogger<WatchlistSyncEngine>.Instance);
+
+		var serviceProvider = services.BuildServiceProvider();
+		return new WatchlistSyncEngine(serviceProvider.GetRequiredService<IServiceScopeFactory>(), NullLogger<WatchlistSyncEngine>.Instance);
 	}
 
-	private sealed class RecordingPublisher : IMessagePublisher
+	private sealed class NoopPublisher : IMessagePublisher
 	{
-		public List<object> Published { get; } = [];
-
 		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
-			where TMessage : notnull
-		{
-			Published.Add(message);
-			return Task.CompletedTask;
-		}
+			where TMessage : notnull => Task.CompletedTask;
 	}
 
 	private static Mock<IUserScope> NoopUserScope()
@@ -211,25 +117,6 @@ public class WatchlistSyncEngineTests
 	}
 
 	private static Result<MediaIdentity> Unresolved(ResolveRequest request) => Error.From("unresolved");
-
-	private static Mock<IMediaService> ResolvedMedia(MediaId id)
-	{
-		var media = IMediaService.Mock();
-		media
-			.IdentifyAsync(Any<IEnumerable<ResolveRequest>>(), Any())
-			.Returns(
-				(requests, _) =>
-				{
-					var results = new List<Result<MediaIdentity>>();
-					foreach (var request in requests)
-					{
-						results.Add(Success.Of(new MediaIdentity(id, [])));
-					}
-					return AsAsyncEnumerable(results);
-				}
-			);
-		return media;
-	}
 
 	private static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(IReadOnlyList<T> items)
 	{
