@@ -130,6 +130,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		PlexStub.Search(HttpStub, term, []);
 	}
 
+	internal void PlexLookupFails(MediaSpec spec) => PlexStub.LookupFails(HttpStub, FullVersion(spec));
+
 	private static ResolvedVersion FullVersion(MediaSpec spec) =>
 		new(spec.Ids.ToDictionary(id => id.Provider, id => id.Value), spec.Type, DefaultYear, spec.Title, null, null, null);
 
