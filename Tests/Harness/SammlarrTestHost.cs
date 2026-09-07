@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using API;
@@ -44,6 +45,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private RawDbContext? _rawContext;
 	private bool _plexAccountConfigured;
 	private bool _tmdbAccountConfigured;
+
+	private readonly RemoteWatchlistState _remote = new();
 
 	internal TestCurrentUser CurrentUser { get; } = new();
 
@@ -131,6 +134,43 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void PlexLookupFails(MediaSpec spec) => PlexStub.LookupFails(HttpStub, FullVersion(spec));
+
+	internal async Task RemoteWatchlistHas(params MediaSpec[] specs)
+	{
+		await EnsurePlexAccount();
+		foreach (var spec in specs)
+		{
+			var version = FullVersion(spec);
+			var plexId = version.Ids[MediaProvider.Plex];
+			_remote.Known[plexId] = version;
+			_remote.PlexIds.Add(plexId);
+		}
+
+		RemoteWatchlistStub.Install(HttpStub, _remote);
+	}
+
+	internal async Task RemoteWatchlistEmpty()
+	{
+		await EnsurePlexAccount();
+		RemoteWatchlistStub.Install(HttpStub, _remote);
+	}
+
+	internal async Task RemoteWatchlistUnavailable()
+	{
+		await EnsurePlexAccount();
+		HttpStub.RespondWithStatusForUrl(PlexEndpoints.WatchlistPath, HttpStatusCode.InternalServerError);
+	}
+
+	internal async Task ProviderRejectsPushes()
+	{
+		await EnsurePlexAccount();
+		HttpStub.RespondWithStatusForUrl(PlexEndpoints.AddToWatchlistPath, HttpStatusCode.InternalServerError);
+		HttpStub.RespondWithStatusForUrl(PlexEndpoints.RemoveFromWatchlistPath, HttpStatusCode.InternalServerError);
+	}
+
+	internal bool RemoteWatchlistContains(MediaSpec spec) => _remote.PlexIds.Contains(FullVersion(spec).Ids[MediaProvider.Plex]);
+
+	internal IReadOnlyCollection<string> RemoteWatchlistPlexIds => _remote.PlexIds;
 
 	private static ResolvedVersion FullVersion(MediaSpec spec) =>
 		new(spec.Ids.ToDictionary(id => id.Provider, id => id.Value), spec.Type, DefaultYear, spec.Title, null, null, null);

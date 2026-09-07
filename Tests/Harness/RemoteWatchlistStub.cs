@@ -2,16 +2,14 @@ using System.Net;
 using System.Text;
 using System.Web;
 using API.Plex;
-using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
-using Integration.Tests.Infrastructure.Http;
 
-namespace Integration.Tests.Infrastructure.Media.Plex;
+namespace Harness;
 
 internal static class RemoteWatchlistStub
 {
-	public static void Install(HttpStub http, RemoteWatchlistState state)
+	internal static void Install(HttpStub http, RemoteWatchlistState state)
 	{
 		http.RespondForUrl(PlexEndpoints.WatchlistPath, _ => Json(WatchlistJson(state)));
 		http.RespondForUrl(PlexEndpoints.AddToWatchlistPath, req => Mutate(() => state.PlexIds.Add(RatingKey(req))));
