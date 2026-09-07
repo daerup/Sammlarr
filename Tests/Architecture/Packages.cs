@@ -14,6 +14,5 @@ internal static class Packages
 	internal const string Serilog = "Serilog";
 	internal const string Roslyn = "Microsoft.CodeAnalysis";
 	internal const string TUnit = "TUnit";
-	internal const string Reqnroll = "Reqnroll";
 	internal const string Bogus = "Bogus";
 }

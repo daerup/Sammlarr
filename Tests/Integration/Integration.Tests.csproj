@@ -13,7 +13,6 @@
 		<PackageReference Include="TUnit.Mocks" />
 		<PackageReference Include="TUnit.Mocks.Http" />
 		<PackageReference Include="Bogus" />
-		<PackageReference Include="Reqnroll.TUnit" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" />
@@ -28,13 +27,5 @@
 		<ProjectReference Include="..\..\Messaging\Messaging.csproj" />
 		<ProjectReference Include="..\Harness\Harness.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="reqnroll.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="**\**\*.feature">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
 </Project>

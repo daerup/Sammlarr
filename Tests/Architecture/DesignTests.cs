@@ -85,12 +85,7 @@ public class DesignTests
 	[Test]
 	public async Task Production_does_not_depend_on_test_infrastructure()
 	{
-		await Types
-			.InAssemblies(Projects.All)
-			.Should()
-			.NotHaveDependencyOnAny("TestInfrastructure", Packages.TUnit, Packages.Reqnroll, Packages.Bogus)
-			.GetResult()
-			.AssertNone();
+		await Types.InAssemblies(Projects.All).Should().NotHaveDependencyOnAny("TestInfrastructure", Packages.TUnit, Packages.Bogus).GetResult().AssertNone();
 	}
 
 	[Test]
