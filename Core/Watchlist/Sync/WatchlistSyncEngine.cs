@@ -115,7 +115,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 	)
 	{
 		var now = deps.Clock.Now;
-		if (pulledAdds.Count + pulledRemoves.Count > 0)
+		if (pulledAdds.Count + pulledRemoves.Count + push.Adds.Count + push.Removes.Count > 0)
 		{
 			await deps.Publisher.PublishAsync(new WatchlistSyncedEvent(userId, now, pulledAdds, pulledRemoves, push.Adds, push.Removes), cancellationToken);
 		}

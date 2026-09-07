@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Bogus" />
 		<PackageReference Include="CsCheck" />
+		<PackageReference Include="Verify.TUnit" />
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Assertions" />
 		<PackageReference Include="TUnit.Core" />

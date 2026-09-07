@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts.Media.Search;
 using Domain.Media;
 using UI.Shared.Media.Icons;
 
