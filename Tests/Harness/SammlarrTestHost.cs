@@ -116,6 +116,21 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void TmdbUnreachable() => HttpStub.RespondForUrl(TestUrls.TmdbApi, _ => throw new HttpRequestException("The TMDB API is unreachable."));
 
+	internal void MdblistFeedContains(string identifier, params FeedItemSpec[] items) => MdblistFeedStub.Contains(HttpStub, identifier, items);
+
+	internal void MdblistFeedReturnsStatus(string identifier, HttpStatusCode status) => MdblistFeedStub.ReturnsStatus(HttpStub, identifier, status);
+
+	internal void MdblistFeedReturnsInvalidJson(string identifier) => MdblistFeedStub.ReturnsInvalidJson(HttpStub, identifier);
+
+	internal void MdblistFeedEmpty(string identifier) => MdblistFeedStub.Empty(HttpStub, identifier);
+
+	internal void MdblistFeedUnavailable(string identifier) => MdblistFeedStub.Unavailable(HttpStub, identifier);
+
+	internal void MdblistFeedPartialThenUnavailable(string identifier, params FeedItemSpec[] items) =>
+		MdblistFeedStub.PartialThenUnavailable(HttpStub, identifier, items);
+
+	internal void MdblistFeedPaginated(string identifier, params FeedPage[] pages) => MdblistFeedStub.Paginated(HttpStub, identifier, pages);
+
 	internal void PlexHolds(ResolvedVersion version) => PlexStub.Lookup(HttpStub, version);
 
 	internal void PlexHolds(MediaSpec spec) => PlexStub.Lookup(HttpStub, FullVersion(spec));
