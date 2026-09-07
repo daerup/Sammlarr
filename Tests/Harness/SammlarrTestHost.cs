@@ -110,6 +110,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal MediaBuilder Movie(MediaSpec spec) => new(this, spec.Type, spec.Title, spec.Ids);
 
+	internal MediaBuilder Show(MediaSpec spec) => new(this, spec.Type, spec.Title, spec.Ids);
+
 	internal MediaBuilder Movie(string title, string? tmdb = null, string? plex = null, string? imdb = null, string? tvdb = null)
 	{
 		var ids = new List<ProviderId>();
