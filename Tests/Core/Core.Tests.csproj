@@ -13,6 +13,7 @@
 		<PackageReference Include="TUnit.Assertions" />
 		<PackageReference Include="TUnit.Core" />
 		<PackageReference Include="Bogus" />
+		<PackageReference Include="CsCheck" />
 		<PackageReference Include="TUnit.Mocks" />
 	</ItemGroup>
 	<ItemGroup>
