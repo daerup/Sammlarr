@@ -5,6 +5,9 @@ using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
+using TUnit.Assertions;
+using TUnit.Assertions.Extensions;
+using TUnit.Core;
 using static Harness.Ids;
 
 namespace Integration.Tests.Media;
