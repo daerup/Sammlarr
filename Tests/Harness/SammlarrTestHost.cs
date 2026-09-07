@@ -30,6 +30,8 @@ namespace Harness;
 
 public sealed class SammlarrTestHost : IAsyncDisposable
 {
+	private const int DefaultYear = 2024;
+
 	private static readonly SqliteConnection Template = BuildTemplate();
 	private static readonly Lock BackupGate = new();
 
@@ -105,8 +107,42 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void PlexHolds(ResolvedVersion version) => PlexStub.Lookup(HttpStub, version);
 
+	internal void PlexHolds(MediaSpec spec) => PlexStub.Lookup(HttpStub, FullVersion(spec));
+
 	internal void TmdbHolds(ResolvedVersion version, double? rating, int votes) =>
 		TmdbStub.Detail(HttpStub, version, rating ?? 0, votes, hasVoteData: rating.HasValue);
+
+	internal async Task TmdbTrendingPage(int page, params MediaSpec[] items)
+	{
+		await EnsureTmdbAccount();
+		HttpStub.RespondWithJsonForUrl($"{TmdbEndpoints.PageParam}={page}", TmdbStub.TrendingJson([.. items.Select(FullVersion)], page));
+	}
+
+	internal async Task PlexSearchReturns(string term, params MediaSpec[] hits)
+	{
+		await EnsurePlexAccount();
+		PlexStub.Search(HttpStub, term, [.. hits.Select(PlexHit)]);
+	}
+
+	internal async Task PlexFindsNothing(string term)
+	{
+		await EnsurePlexAccount();
+		PlexStub.Search(HttpStub, term, []);
+	}
+
+	private static ResolvedVersion FullVersion(MediaSpec spec) =>
+		new(spec.Ids.ToDictionary(id => id.Provider, id => id.Value), spec.Type, DefaultYear, spec.Title, null, null, null);
+
+	private static ResolvedVersion PlexHit(MediaSpec spec) =>
+		new(
+			new Dictionary<MediaProvider, string> { [MediaProvider.Plex] = spec.Ids.First(id => id.Provider == MediaProvider.Plex).Value },
+			spec.Type,
+			DefaultYear,
+			spec.Title,
+			null,
+			null,
+			null
+		);
 
 	internal MediaBuilder Movie(MediaSpec spec) => new(this, spec.Type, spec.Title, spec.Ids);
 
