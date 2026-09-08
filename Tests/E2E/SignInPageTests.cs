@@ -5,7 +5,7 @@ namespace E2E.Tests;
 public class SignInPageTests
 {
 	[Test]
-	public async Task An_unauthenticated_visitor_is_shown_the_sign_in_page()
+	public async Task Visit_WhenUnauthenticated_ShowsSignInPage()
 	{
 		var page = await AspireApp.OpenPageAsync();
 
