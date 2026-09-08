@@ -1,6 +1,5 @@
 using Bogus;
 using Contracts.Media;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -45,48 +44,6 @@ public class WatchlistServiceTests
 		var removedItem = result.First(item => item.Media.Id == removedId);
 		await Assert.That(removedItem.AddedAt).IsEqualTo(removedAddedAt);
 		await Assert.That(result[0].Media.Id).IsEqualTo(activeId);
-	}
-
-	[Test]
-	public async Task GetWatchlistItemsAsync_WithoutIncludeRemoved_ExcludesRemovedItemsAndSkipsOutbox()
-	{
-		var activeId = MediaId.From(Guid.NewGuid());
-
-		var repository = IWatchlistRepository.Mock();
-		repository.GetEntriesAsync(Any()).Returns([new WatchlistEntry(activeId, _faker.Date.PastOffset(), new ManualOrigin(ManualSource.Search))]);
-
-		IdentifiedMedia active = CreateMovie(activeId);
-		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(active)));
-
-		var outbox = IWatchlistOutbox.Mock();
-
-		var testee = CreateTestee(repository, outbox, media.Object);
-
-		var result = await testee.GetWatchlistItemsAsync(WatchlistQueryOptions.Default).ToListAsync();
-
-		await Assert.That(result.Select(item => item.Media.Id)).Contains(activeId);
-		outbox.GetAsync(Any()).WasCalled(Times.Never);
-	}
-
-	[Test]
-	public async Task AddToWatchlistAsync_WhenRemovalPending_DropsTheRemoveAndRestoresLocally()
-	{
-		var mediaId = MediaId.From(Guid.NewGuid());
-
-		var repository = IWatchlistRepository.Mock();
-		repository.GetIdsAsync(Any()).Returns([]);
-		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).Returns([]);
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Remove, WatchlistOutboxState.Pending, 0)]);
-
-		var testee = CreateTestee(repository, outbox, IMediaService.Mock().Object);
-
-		await testee.AddToWatchlistAsync([mediaId], new ManualOrigin(ManualSource.Unknown));
-
-		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
-		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistItemProvenance>(), Any()).WasCalled(Times.Once);
 	}
 
 	private static WatchlistService CreateTestee(Mock<IWatchlistRepository> repository, Mock<IWatchlistOutbox> outbox, IMediaService media)

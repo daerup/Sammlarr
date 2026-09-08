@@ -1,9 +1,12 @@
+using Contracts.Caching;
 using Core.Caching;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Shared.DI;
 
 namespace Core.Tests.Caching;
 
-public class TypedMemoryCacheUnitTests
+public class TypedMemoryCacheTests
 {
 	[Test]
 	public async Task TypedMemoryCache_WhenKeyDoesNotExist_ReturnsFalseAndNullValue()
@@ -150,5 +153,20 @@ public class TypedMemoryCacheUnitTests
 		var countFound = counts.TryGetValue("shared", out var count);
 		await Assert.That(countFound).IsTrue();
 		await Assert.That(count).IsEqualTo(7);
+	}
+
+	[Test]
+	public async Task TypedMemoryCache_ResolvedFromCoreModule_StoresAndReturnsValue()
+	{
+		var services = new ServiceCollection();
+		services.AddModule<CoreModule>();
+		await using var serviceProvider = services.BuildServiceProvider();
+		using var scope = serviceProvider.CreateScope();
+		var testee = scope.ServiceProvider.GetRequiredService<ITypedMemoryCache<string, string>>();
+
+		testee.Set("key", "value");
+
+		await Assert.That(testee.TryGetValue("key", out var value)).IsTrue();
+		await Assert.That(value).IsEqualTo("value");
 	}
 }

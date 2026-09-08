@@ -8,7 +8,6 @@ using API.Tmdb;
 using Contracts;
 using Contracts.Auth;
 using Contracts.Identity;
-using Contracts.Media;
 using Contracts.Messaging;
 using Core;
 using DB;
@@ -18,6 +17,7 @@ using DB.Data.Metadata;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Settings;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +49,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	private readonly RemoteWatchlistState _remote = new();
 	private readonly MutableClock _clock = new();
+	private readonly OAuthStub _oauth = new();
+	private readonly SessionInvalidatorStub _sessionInvalidator = new();
 
 	internal TestCurrentUser CurrentUser { get; } = new();
 
@@ -339,6 +341,59 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		}
 	}
 
+	internal void OAuthReturns(string externalUserId, string displayName) =>
+		_oauth.Returns(new ExternalLogin(externalUserId, displayName, "avatar", new OAuthTokenGrant("plex-token", _clock.Now.AddDays(30), Guid.NewGuid())));
+
+	internal void OAuthFails(string reason) => _oauth.Fails(reason);
+
+	internal IReadOnlyList<UserId> InvalidatedSessions => _sessionInvalidator.Invalidated;
+
+	internal async Task SetDatabaseRole(UserId userId, UserRole role)
+	{
+		var context = ScopedDbContext;
+		var user = await context.Users.SingleAsync(candidate => candidate.Id == userId.Value);
+		user.Role = role;
+		await context.SaveChangesAsync();
+		context.ChangeTracker.Clear();
+	}
+
+	internal async Task NoUsers()
+	{
+		var context = ScopedDbContext;
+		await context.Users.ExecuteDeleteAsync();
+		context.ChangeTracker.Clear();
+	}
+
+	internal async Task RegistrationClosed()
+	{
+		var context = ScopedDbContext;
+		var row = await context.ProviderSettings.SingleAsync();
+		row.RegistrationMode = RegistrationMode.Closed;
+		await context.SaveChangesAsync();
+		context.ChangeTracker.Clear();
+	}
+
+	internal async Task<UserId> SeedExistingUser(string externalUserId, UserRole role, string displayName)
+	{
+		var id = Guid.NewGuid();
+		var context = ScopedDbContext;
+		context.Users.Add(
+			new UserRow
+			{
+				Id = id,
+				Provider = AuthProvider.Plex,
+				ExternalUserId = externalUserId,
+				DisplayName = displayName,
+				AvatarUrl = "avatar",
+				Role = role,
+				JoinedAt = DateTimeOffset.UnixEpoch,
+			}
+		);
+		await context.SaveChangesAsync();
+		context.ChangeTracker.Clear();
+		return UserId.From(id);
+	}
+
 	internal void SignOut() => CurrentUser.IsAuthenticated = false;
 
 	internal async Task<int> CountOwnedAsync<T>(Func<SammlarrDbContext, IQueryable<T>> selector)
@@ -404,14 +459,21 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton(CurrentUser);
-		services.AddSingleton<ICurrentUser>(sp => sp.GetRequiredService<TestCurrentUser>());
+		services.AddScoped<OverrideAwareCurrentUser>(sp => new OverrideAwareCurrentUser(sp.GetRequiredService<CurrentUserOverride>(), CurrentUser));
+		services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<OverrideAwareCurrentUser>());
 
-		services.AddScoped<IDbContextFactory<SammlarrDbContext>>(sp => new SharedConnectionFactory(sp, _connection, CurrentUser));
+		services.AddScoped<IDbContextFactory<SammlarrDbContext>>(sp => new SharedConnectionFactory(
+			sp,
+			_connection,
+			sp.GetRequiredService<OverrideAwareCurrentUser>()
+		));
 		services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
 
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
 		services.AddModule<ApiModule>();
+		services.AddKeyedSingleton<IOAuthProvider>(AuthProvider.Plex, _oauth);
+		services.AddSingleton<ISessionInvalidator>(_sessionInvalidator);
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
 		services.AddLogging();
 		services.AddSingleton<IDateTimeProvider>(_clock);
