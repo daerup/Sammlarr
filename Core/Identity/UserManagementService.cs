@@ -13,10 +13,10 @@ internal sealed class UserManagementService(
 	ISessionInvalidator sessionInvalidator
 ) : IUserManagementService
 {
-	public Task<IReadOnlyList<User>> ListAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<User>> ListAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
-		return users.GetAllAsync(cancellationToken);
+		return await users.GetAllAsync(cancellationToken);
 	}
 
 	public async Task ChangeRoleAsync(UserId userId, UserRole role, CancellationToken cancellationToken = default)
