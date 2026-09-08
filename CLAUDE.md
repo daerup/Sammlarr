@@ -17,6 +17,10 @@ DI uses a module pattern: each layer and provider ships an `IServiceModule` regi
 
 Use **BlazorBlueprint** components for everything in `UI/` unless explicitly asked otherwise. Reach for the `mcp__blazorblueprint__*` tools (`list_components`, `search_components`, `get_component`, `get_primitive`, `get_patterns`, `get_icon_library`, …) before hand-rolling markup or pulling in another library.
 
+## Testing
+
+**TUnit** everywhere, run on Microsoft.Testing.Platform via `dotnet run --project Tests/<X> --no-build` (not `dotnet test`; Verify snapshots require the native runner). Tiers: `Tests/{Domain,Shared}` pure unit (+ CsCheck laws); `Tests/Core` single-collaborator units (`IFoo.Mock()`); `Tests/API` provider clients (`TUnit.Mocks.Http`); `Tests/Integration` full-graph behavior + repository tests on the real-SQLite **`SammlarrTestHost`** harness; `Tests/UI` bUnit component tests. Assert unions/results with the `TestInfrastructure` extensions (`.IsSuccess`/`.IsError`/`.IsSome`/`.IsNone`/`.IsOfUnionType<,>`), never `Assert.That(x is Case).IsTrue()`. Every test file must be analyzer-clean. Full how-to (tier placement, harness seed helpers, mocks, CsCheck, Verify, bUnit, the `--coverage` command) in the **`write-tunit-test`** skill.
+
 ## System
 
 Windows 11. Use **PowerShell** for shell commands — never bash, sh, git-bash, or WSL. No Python.
