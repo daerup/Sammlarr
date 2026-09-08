@@ -88,10 +88,13 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Beginning_a_login_routes_to_the_configured_provider()
+	public async Task A_successful_sign_in_stores_the_provider_credential()
 	{
-		var url = await Testee.BeginAsync(AuthProvider.Plex, "https://callback");
+		await host.NoUsers();
+		host.OAuthReturns("plex-uuid", "John");
 
-		await Assert.That(url).IsEqualTo("https://auth.plex.tv/link");
+		await Testee.CompleteAsync(AuthProvider.Plex, "callback");
+
+		await Assert.That(await host.HasStoredCredential(AuthProvider.Plex)).IsTrue();
 	}
 }

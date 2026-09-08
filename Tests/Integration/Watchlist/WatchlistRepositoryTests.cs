@@ -1,4 +1,3 @@
-using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Watchlist;
 using Domain.Media;
@@ -121,7 +120,7 @@ public class WatchlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var entries = await _testee.GetEntriesAsync();
 
 		await Assert.That(entries[0].Provenance).IsOfUnionType<WatchlistItemProvenance, RemoteOrigin>();
-		var remote = (RemoteOrigin)entries[0].Provenance.Value;
+		var remote = (RemoteOrigin)entries[0].Provenance.Value!;
 		await Assert.That(remote.Provider).IsEqualTo(WatchlistProvider.Plex);
 	}
 
@@ -134,7 +133,7 @@ public class WatchlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 		var entries = await _testee.GetEntriesAsync();
 
 		await Assert.That(entries[0].Provenance).IsOfUnionType<WatchlistItemProvenance, ManualOrigin>();
-		var manual = (ManualOrigin)entries[0].Provenance.Value;
+		var manual = (ManualOrigin)entries[0].Provenance.Value!;
 		await Assert.That(manual.Source).IsEqualTo(ManualSource.Browse);
 	}
 

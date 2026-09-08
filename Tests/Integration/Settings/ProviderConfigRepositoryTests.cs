@@ -1,8 +1,4 @@
-using Contracts.Auth;
 using Contracts.Caching;
-using Contracts.Media.Metadata;
-using Contracts.Media.Search;
-using Contracts.Media.Trending;
 using Contracts.Settings;
 using DB.Data.Config;
 using Domain.Providers;
@@ -33,7 +29,7 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		var providerSettings = await _testee.GetAsync();
 
 		await Assert.That(providerSettings).IsNotNull();
-		await Assert.That(providerSettings!.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
+		await Assert.That(providerSettings.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
 		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(TrendingProvider.Tmdb);
 		await Assert.That(providerSettings.SearchProvider).IsEqualTo(SearchProvider.Plex);
 		await Assert.That(providerSettings.AuthProvider).IsEqualTo(AuthProvider.Plex);

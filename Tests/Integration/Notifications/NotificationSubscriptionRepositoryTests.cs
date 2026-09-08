@@ -2,7 +2,6 @@ using Contracts.Notifications;
 using DB.Data.Notifications;
 using Domain.Notifications;
 using Harness;
-using Shared;
 using TestInfrastructure;
 
 namespace Integration.Tests.Notifications;
@@ -64,7 +63,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 		);
 
 		var created = (await _testee.GetForTargetAsync(targetId)).Single();
-		await Assert.That(created.Template.Body.Match(value => value, () => null)).IsEqualTo("{{ title }}");
+		await Assert.That(created.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ title }}");
 		await Assert.That(created.Template.Priority.Match(value => (int?)value, () => null)).IsEqualTo(1);
 
 		await _testee.UpdateAsync(
@@ -74,7 +73,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 		);
 
 		var updated = (await _testee.GetForTargetAsync(targetId)).Single();
-		await Assert.That(updated.Template.Body.Match(value => value, () => null)).IsEqualTo("{{ summary }}");
+		await Assert.That(updated.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ summary }}");
 		await Assert.That(updated.Template.Priority.Match(value => (int?)value, () => null)).IsNull();
 	}
 

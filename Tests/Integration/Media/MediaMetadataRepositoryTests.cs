@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using Domain.Media;
@@ -89,7 +88,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, Movie>();
-		await Assert.That(row.Stored.Identity.Externals).Contains((IExternalMediaId)plexId);
+		await Assert.That(row.Stored.Identity.Externals).Contains(plexId);
 		await Assert.That(row.FetchedAt).IsNotNull();
 	}
 

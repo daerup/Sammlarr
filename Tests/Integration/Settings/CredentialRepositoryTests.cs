@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Auth;
 using Contracts.Caching;
 using DB.Data.Access;

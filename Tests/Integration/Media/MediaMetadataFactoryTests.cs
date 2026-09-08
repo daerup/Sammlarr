@@ -1,7 +1,4 @@
 using Contracts;
-using Contracts.Media;
-using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using Domain.Media;
@@ -207,10 +204,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 
 		using var _ = Assert.Multiple();
 		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>();
-		await Assert
-			.That(stored)
-			.IsOfUnionType<IdentifiedMedia, Movie>()
-			.And.Multiple(async movie => await Assert.That(movie.Identity.Externals).Contains((IExternalMediaId)imdbId));
+		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Identity.Externals).Contains(imdbId));
 		await Assert.That(stored).IsOfUnionType<IdentifiedMedia, Movie>().And.Multiple(async movie => await Assert.That(movie.Rating.Sources.Count).IsEqualTo(1));
 		await Assert
 			.That(stored)

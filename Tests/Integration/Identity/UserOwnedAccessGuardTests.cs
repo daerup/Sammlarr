@@ -36,7 +36,7 @@ public class UserOwnedAccessGuardTests(SammlarrTestHost fixture) : IAsyncDisposa
 		await Assert.That(userOwned).IsNotEmpty();
 		foreach (var entityType in userOwned)
 		{
-			await Assert.That(entityType.GetQueryFilter()).IsNotNull();
+			await Assert.That(entityType.GetDeclaredQueryFilters()).IsNotEmpty();
 		}
 	}
 }
