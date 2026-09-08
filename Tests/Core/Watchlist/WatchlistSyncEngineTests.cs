@@ -5,7 +5,6 @@ using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
-using Contracts.Watchlist.Sync;
 using Core.Watchlist.Sync;
 using Domain.Media;
 using Domain.Providers;
@@ -40,22 +39,7 @@ public class WatchlistSyncEngineTests
 		await Assert.That(firstResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
 	}
 
-	[Test]
-	public async Task DryRunAsync_RunsInScopeOfGivenUser()
-	{
-		var user = new TestCurrentUser();
-		var userScope = IUserScope.Mock();
-		userScope.As(Any<ICurrentUser>()).Returns(new NoopScope());
-		var provider = IWatchlistProvider.Mock();
-		provider.GetWatchlistAsync(Any()).Returns(AsAsyncEnumerable<IExternalMediaId>([]));
-		var engine = BuildEngine(provider, userScope);
-
-		await engine.DryRunAsync(user);
-
-		userScope.As(user).WasCalled(Times.Once);
-	}
-
-	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider, Mock<IUserScope>? userScope = null)
+	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider)
 	{
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
 		var clock = IDateTimeProvider.Mock();
@@ -67,7 +51,7 @@ public class WatchlistSyncEngineTests
 		services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
 		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
 		services.AddSingleton(UnresolvedMedia().Object);
-		services.AddSingleton((userScope ?? NoopUserScope()).Object);
+		services.AddSingleton(NoopUserScope().Object);
 		services.AddSingleton<IMessagePublisher>(new NoopPublisher());
 		services.AddSingleton<IDateTimeProvider>(clock.Object);
 

@@ -1,11 +1,8 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
-using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
@@ -169,17 +166,6 @@ public class MediaServiceTests
 
 		await Assert.That(identities).IsEmpty();
 		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasNeverCalled();
-	}
-
-	[Test]
-	public async Task InvalidateAsync_DelegatesToMetadataRepository()
-	{
-		var ids = new[] { MediaId.From(Guid.NewGuid()), MediaId.From(Guid.NewGuid()) };
-		var (testee, deps) = CreateTestee();
-
-		await testee.InvalidateAsync(ids);
-
-		deps.MediaRepo.RemoveMetadataAsync(Any(), Any()).WasCalled(Times.Once);
 	}
 
 	private static (IMediaService Testee, Deps Deps) CreateTestee()

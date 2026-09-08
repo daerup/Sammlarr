@@ -1,5 +1,4 @@
 using Contracts.Watchlist;
-using DB;
 using DB.Data.Watchlist;
 using Domain.Media;
 using Domain.Providers;
@@ -97,5 +96,35 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 				await Assert.That(movie.PosterUrl).IsNotNullOrEmpty();
 				await Assert.That(movie.Rating.Sources.Any(source => source.Source == RatingProvider.Tmdb)).IsTrue();
 			});
+	}
+
+	[Test]
+	public async Task Getting_watchlist_items_with_removed_includes_pending_removals()
+	{
+		var service = host.Resolve<IWatchlistService>();
+		var removed = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().OnWatchlist(origin: Manual);
+		var active = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().OnWatchlist(origin: Manual);
+
+		await service.RemoveFromWatchlistAsync([removed]);
+
+		var items = await service.GetWatchlistItemsAsync(WatchlistQueryOptions.WithRemoved).ToListAsync();
+
+		await Assert.That(items.Select(item => item.Media.Id)).Contains(active);
+		await Assert.That(items.Select(item => item.Media.Id)).Contains(removed);
+	}
+
+	[Test]
+	public async Task Getting_watchlist_items_by_default_excludes_pending_removals()
+	{
+		var service = host.Resolve<IWatchlistService>();
+		var removed = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().OnWatchlist(origin: Manual);
+		var active = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().OnWatchlist(origin: Manual);
+
+		await service.RemoveFromWatchlistAsync([removed]);
+
+		var items = await service.GetWatchlistItemsAsync(WatchlistQueryOptions.Default).ToListAsync();
+
+		await Assert.That(items.Select(item => item.Media.Id)).Contains(active);
+		await Assert.That(items.Select(item => item.Media.Id)).DoesNotContain(removed);
 	}
 }
