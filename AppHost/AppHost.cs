@@ -1,18 +1,21 @@
 using AppHost;
-using Aspire.Hosting;
 using Shared.Options;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 if (builder.ExecutionContext.IsRunMode)
 {
-	builder
+	var ui = builder
 		.AddProject<Projects.Web>("blazor-ui")
 		.WithHttpEndpoint(port: 6769, name: "http")
 		.WithExternalHttpEndpoints()
 		.WithHttpHealthCheck("/health")
-		.WithEnvironment((ObservabilityOptions o) => o.LogLevel, LogVerbosity.Verbose)
-		.WithBrowserLaunch();
+		.WithEnvironment((ObservabilityOptions o) => o.LogLevel, LogVerbosity.Verbose);
+
+	if (builder.Configuration["LaunchSammlarr"] == "true")
+	{
+		ui.WithBrowserLaunch();
+	}
 }
 else
 {
