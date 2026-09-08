@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net11.0</TargetFramework>
+		<LangVersion>preview</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="TUnit" />
+		<PackageReference Include="TUnit.Playwright" />
+		<PackageReference Include="Aspire.Hosting.Testing" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\AppHost\AppHost.csproj" />
+	</ItemGroup>
+</Project>

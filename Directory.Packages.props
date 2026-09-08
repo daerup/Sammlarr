@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.Docker" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="BlazorBlueprint.Components" Version="3.9.2" />
     <PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.0" />
@@ -50,6 +51,7 @@
     <PackageVersion Include="TUnit.Mocks.Http" Version="1.66.10" />
     <PackageVersion Include="TUnit" Version="1.66.10" />
     <PackageVersion Include="TUnit.Assertions" Version="1.66.10" />
+    <PackageVersion Include="TUnit.Playwright" Version="1.66.10" />
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="bunit" Version="2.10.3" />
     <PackageVersion Include="CsCheck" Version="4.8.0" />
