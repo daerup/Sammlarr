@@ -8,11 +8,15 @@
 		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Playwright" />
 		<PackageReference Include="Aspire.Hosting.Testing" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\AppHost\AppHost.csproj" />
+		<ProjectReference Include="..\Harness\Harness.csproj" />
 	</ItemGroup>
 </Project>

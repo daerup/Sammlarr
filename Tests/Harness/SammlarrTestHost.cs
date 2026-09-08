@@ -517,6 +517,26 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return connection;
 	}
 
+	public static (Guid Id, string DisplayName, UserRole Role) SeedDatabaseFile(string path)
+	{
+		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
+		connection.Open();
+		using var provider = BuildDbOnlyProvider();
+		var user = new TestCurrentUser();
+		using var context = BuildContext(provider, user, connection);
+		context.Database.Migrate();
+		SeedUser(context, user);
+		EnableWriteAheadLogging(connection);
+		return (user.Id.Value, user.DisplayName, user.Role);
+	}
+
+	private static void EnableWriteAheadLogging(SqliteConnection connection)
+	{
+		using var command = connection.CreateCommand();
+		command.CommandText = "PRAGMA journal_mode=WAL;";
+		command.ExecuteNonQuery();
+	}
+
 	private static void SeedUser(SammlarrDbContext context, TestCurrentUser user)
 	{
 		context.Users.Add(
