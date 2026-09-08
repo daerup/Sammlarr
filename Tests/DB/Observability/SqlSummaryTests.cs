@@ -1,5 +1,4 @@
 using DB.Observability;
-using Domain.Media;
 
 namespace DB.Tests.Observability;
 

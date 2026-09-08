@@ -348,6 +348,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal IReadOnlyList<UserId> InvalidatedSessions => _sessionInvalidator.Invalidated;
 
+	internal async Task<bool> HasStoredCredential(AuthProvider provider)
+	{
+		ScopedDbContext.ChangeTracker.Clear();
+		return await ScopedDbContext.Credentials.IgnoreQueryFilters().AnyAsync(credential => credential.Provider == provider);
+	}
+
 	internal async Task SetDatabaseRole(UserId userId, UserRole role)
 	{
 		var context = ScopedDbContext;

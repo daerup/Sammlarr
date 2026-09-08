@@ -1,6 +1,4 @@
-using Contracts.Auth;
 using Contracts.Feed;
-using Contracts.Media;
 using DB.Data.Feed;
 using DB.Data.Media;
 using DB.Data.Watchlist;

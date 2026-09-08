@@ -1,4 +1,3 @@
-using Contracts.Media;
 using DB.Data.Media;
 using DB.Data.Watchlist.Outbox;
 using Domain.Media;

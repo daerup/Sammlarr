@@ -1,5 +1,4 @@
 using Contracts.Identity;
-using Contracts.Media;
 using DB.Data.Access;
 using DB.Data.Blacklist;
 using DB.Data.Feed;
