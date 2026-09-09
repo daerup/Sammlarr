@@ -11,6 +11,7 @@ using Contracts.Identity;
 using Contracts.Messaging;
 using Core;
 using DB;
+using DB.Data.Access;
 using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Metadata;
@@ -32,6 +33,8 @@ namespace Harness;
 
 public sealed class SammlarrTestHost : IAsyncDisposable
 {
+	public const string TmdbApiKey = "e2e-tmdb-key";
+
 	private const int DefaultYear = 2024;
 
 	private static readonly SqliteConnection Template = BuildTemplate();
@@ -452,12 +455,16 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			new FixedClock()
 		);
 
-	private static ServiceProvider BuildDbOnlyProvider()
+	private static ServiceProvider BuildDbOnlyProvider(bool ephemeralDataProtection = true)
 	{
 		var services = new ServiceCollection();
 		services.AddLogging();
 		services.AddModule<DbModule>();
-		services.AddDataProtection().UseEphemeralDataProtectionProvider();
+		if (ephemeralDataProtection)
+		{
+			services.AddDataProtection().UseEphemeralDataProtectionProvider();
+		}
+
 		return services.BuildServiceProvider();
 	}
 
@@ -517,17 +524,103 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return connection;
 	}
 
-	public static (Guid Id, string DisplayName, UserRole Role) SeedDatabaseFile(string path)
+	public static (Guid Id, string DisplayName, UserRole Role) SeedDatabaseFile(string path, string keyRingPath, string trendingTmdbId, string trendingTitle) =>
+		SeedFile(
+			path,
+			keyRingPath,
+			context =>
+			{
+				SeedApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
+				SeedTrendingMedia(context, trendingTmdbId, trendingTitle);
+			}
+		);
+
+	public static (Guid Id, string DisplayName, UserRole Role) SeedRecordingDatabase(
+		string path,
+		string keyRingPath,
+		IReadOnlyDictionary<ApiKeyProvider, string> apiKeys,
+		IReadOnlyDictionary<AuthProvider, string> tokens
+	) =>
+		SeedFile(
+			path,
+			keyRingPath,
+			context =>
+			{
+				foreach (var (provider, apiKey) in apiKeys)
+				{
+					SeedApiKey(context, provider, apiKey);
+				}
+
+				foreach (var (provider, token) in tokens)
+				{
+					SeedCredential(context, provider, token);
+				}
+			}
+		);
+
+	private static (Guid Id, string DisplayName, UserRole Role) SeedFile(string path, string keyRingPath, Action<SammlarrDbContext> seed)
 	{
+		Environment.SetEnvironmentVariable("Sammlarr__DataProtection__KeyRingPath", keyRingPath);
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
-		using var provider = BuildDbOnlyProvider();
+		using var provider = BuildDbOnlyProvider(ephemeralDataProtection: false);
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
 		SeedUser(context, user);
+		seed(context);
 		EnableWriteAheadLogging(connection);
 		return (user.Id.Value, user.DisplayName, user.Role);
+	}
+
+	private static void SeedApiKey(SammlarrDbContext context, ApiKeyProvider provider, string apiKey)
+	{
+		context.Set<ApiKeyConfigRow>().Add(new ApiKeyConfigRow { Provider = provider, ApiKey = apiKey });
+		context.SaveChanges();
+		context.ChangeTracker.Clear();
+	}
+
+	private static void SeedCredential(SammlarrDbContext context, AuthProvider provider, string token)
+	{
+		context
+			.Set<CredentialRow>()
+			.Add(
+				new CredentialRow
+				{
+					Provider = provider,
+					ClientId = Guid.NewGuid(),
+					AccessToken = token,
+					ExpiresAt = new DateTimeOffset(2030, 1, 1, 0, 0, 0, TimeSpan.Zero),
+				}
+			);
+		context.SaveChanges();
+		context.ChangeTracker.Clear();
+	}
+
+	private static void SeedTrendingMedia(SammlarrDbContext context, string tmdbId, string title)
+	{
+		var media = new MediaRow();
+		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Tmdb, tmdbId).ToExternal(MediaType.Movie).ToExternalIdEntity(media));
+		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Plex, $"plex-{tmdbId}").ToExternal(MediaType.Movie).ToExternalIdEntity(media));
+		context.SaveChanges();
+
+		context.MediaMetadata.Add(
+			new MovieMetadataRow
+			{
+				MediaId = media.Id,
+				Title = title,
+				Tagline = string.Empty,
+				Summary = "A stubbed trending movie for the E2E smoke test.",
+				PosterUrl = "/poster.jpg",
+				BackdropUrl = "/backdrop.jpg",
+				ReleaseDate = new DateOnly(2024, 1, 15),
+				Genres = ["Action"],
+				LastFetchedAt = new DateTimeOffset(2026, 9, 9, 0, 0, 0, TimeSpan.Zero),
+				Runtime = TimeSpan.FromHours(2),
+			}
+		);
+		context.SaveChanges();
+		context.ChangeTracker.Clear();
 	}
 
 	private static void EnableWriteAheadLogging(SqliteConnection connection)
