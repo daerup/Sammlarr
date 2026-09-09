@@ -1,0 +1,453 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/wE6syT1vv6W24iLGfhR4kQHnIDN.jpg",
+      "id": 1302904,
+      "title": "Practical Magic 2",
+      "original_title": "Practical Magic 2",
+      "overview": "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all.",
+      "poster_path": "/ogwQOLbCfncjvBhFb5l0OmQH8KC.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        10749,
+        14,
+        35
+      ],
+      "popularity": 37.882,
+      "release_date": "2026-09-09",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.5,
+      "vote_count": 12
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jzBWExXacS33rMQ2zLBrqIVweyG.jpg",
+      "id": 1386315,
+      "title": "The Runner",
+      "original_title": "The Runner",
+      "overview": "Maia Marten, a brilliant London lawyer, has her life shattered by a single call on her morning run: her son has been taken. To get him back, she must keep running, obey every ruthless command, and trust no one-each second a test of how far a mother will go to save her child.",
+      "poster_path": "/uxCaBoYXsDC4A0SqTm3SISj0OwK.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        53,
+        28
+      ],
+      "popularity": 284.4272,
+      "release_date": "2026-09-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.72,
+      "vote_count": 350
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/dmwb15BCkqjoXA9dXIsoY2Hn10F.jpg",
+      "id": 1108427,
+      "title": "Moana",
+      "original_title": "Moana",
+      "overview": "Teenage Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with infamous demigod Maui on an unforgettable journey to restore prosperity to her people.",
+      "poster_path": "/gaet1xQ2nxrG0V1Ep9T20ZMNEIC.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        10751,
+        14,
+        35,
+        12
+      ],
+      "popularity": 260.8674,
+      "release_date": "2026-07-08",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.8,
+      "vote_count": 395
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qeQJx07rK2xm8SD2sJxFKhE7gs0.jpg",
+      "id": 969681,
+      "title": "Spider-Man: Brand New Day",
+      "original_title": "Spider-Man: Brand New Day",
+      "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
+      "poster_path": "/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        878,
+        28,
+        12
+      ],
+      "popularity": 839.8698,
+      "release_date": "2026-07-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.861,
+      "vote_count": 2535
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
+      "id": 125988,
+      "name": "Silo",
+      "original_name": "Silo",
+      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
+      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "popularity": 334.8337,
+      "first_air_date": "2023-05-04",
+      "softcore": false,
+      "vote_average": 8.204,
+      "vote_count": 2619,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6gqezQJ2mkm4jreWwLyOZy2Vf6i.jpg",
+      "id": 95350,
+      "name": "Lanterns",
+      "original_name": "Lanterns",
+      "overview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
+      "poster_path": "/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18,
+        9648,
+        10765
+      ],
+      "popularity": 253.5113,
+      "first_air_date": "2026-08-16",
+      "softcore": false,
+      "vote_average": 8.267,
+      "vote_count": 295,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+      "id": 30984,
+      "name": "Bleach",
+      "original_name": "BLEACH",
+      "overview": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
+      "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+      "media_type": "tv",
+      "original_language": "ja",
+      "genre_ids": [
+        10759,
+        16,
+        10765
+      ],
+      "popularity": 129.2525,
+      "first_air_date": "2004-10-05",
+      "softcore": false,
+      "vote_average": 8.4,
+      "vote_count": 2264,
+      "origin_country": [
+        "JP"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/RMXG8myu1aGlNUsRjtxzmpdMK0.jpg",
+      "id": 1368337,
+      "title": "The Odyssey",
+      "original_title": "The Odyssey",
+      "overview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
+      "poster_path": "/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        12,
+        28,
+        14
+      ],
+      "popularity": 437.8516,
+      "release_date": "2026-07-15",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.999,
+      "vote_count": 3564
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/xSJJQeAp9GBFmiKusysTRG6jQjt.jpg",
+      "id": 860508,
+      "title": "The Whisper Man",
+      "original_title": "The Whisper Man",
+      "overview": "When his young son vanishes, a widower enlists help from his estranged father, a retired detective who put away the serial killer now linked to the case.",
+      "poster_path": "/6UqflU8Qqkz7Dq4swJPqs0ZJjY4.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        80,
+        18,
+        53
+      ],
+      "popularity": 118.3923,
+      "release_date": "2026-08-27",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.791,
+      "vote_count": 550
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
+      "id": 37854,
+      "name": "One Piece",
+      "original_name": "ワンピース",
+      "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
+      "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
+      "media_type": "tv",
+      "original_language": "ja",
+      "genre_ids": [
+        10759,
+        35,
+        16
+      ],
+      "popularity": 56.4663,
+      "first_air_date": "1999-10-20",
+      "softcore": false,
+      "vote_average": 8.7,
+      "vote_count": 5527,
+      "origin_country": [
+        "JP"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
+      "id": 236235,
+      "name": "The Gentlemen",
+      "original_name": "The Gentlemen",
+      "overview": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
+      "poster_path": "/tw3tzfXaSpmUZIB8ZNqNEGzMBCy.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        35,
+        18,
+        80
+      ],
+      "popularity": 245.1087,
+      "first_air_date": "2024-03-07",
+      "softcore": false,
+      "vote_average": 7.842,
+      "vote_count": 888,
+      "origin_country": [
+        "GB"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/g7Ccid5kuD7A8hXWlsQiNfwOxaD.jpg",
+      "id": 1137844,
+      "title": "Mayday",
+      "original_title": "Mayday",
+      "overview": "When a U.S. Navy pilot on a top-secret mission during the Cold War gets trapped behind enemy lines, his only chance at survival is to form an alliance with an eccentric ex-KGB agent.",
+      "poster_path": "/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        35
+      ],
+      "popularity": 237.6288,
+      "release_date": "2026-09-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.996,
+      "vote_count": 336
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/l9mFW9HQnAZ4r1ChZJHoOT3jaal.jpg",
+      "id": 1204680,
+      "title": "Coyote vs. Acme",
+      "original_title": "Coyote vs. Acme",
+      "overview": "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation.",
+      "poster_path": "/orkLtdgMGiO9rTVMqJ1kKwrnup1.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        35,
+        12,
+        10751
+      ],
+      "popularity": 643.9483,
+      "release_date": "2026-08-20",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.691,
+      "vote_count": 256
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/yBDxqDB29kpH9VojTytjGWBgmdJ.jpg",
+      "id": 1101412,
+      "title": "Fall 2: Deadpoint",
+      "original_title": "Fall 2: Deadpoint",
+      "overview": "On a perilous climb across Thailand's Mount Kwan, two climbers become trapped thousands of feet above the ground, where vertigo-inducing heights, sheer exposure, and impossible odds turn every moment into a fight for survival.",
+      "poster_path": "/fgSm5ylwiXbIHn8UbUXDjk9RRu4.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        53
+      ],
+      "popularity": 91.8535,
+      "release_date": "2026-09-01",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.9,
+      "vote_count": 21
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "id": 1339713,
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "poster_path": "/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        53
+      ],
+      "popularity": 194.6239,
+      "release_date": "2026-05-13",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.194,
+      "vote_count": 5389
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+      "id": 108978,
+      "name": "Reacher",
+      "original_name": "Reacher",
+      "overview": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest of essentials as he travels the country and explores the nation he once served.",
+      "poster_path": "/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        10759,
+        80
+      ],
+      "popularity": 583.5827,
+      "first_air_date": "2022-02-03",
+      "softcore": false,
+      "vote_average": 8.11,
+      "vote_count": 3248,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4X2YSe8PaYbsBqX3TDmmIU4vOju.jpg",
+      "id": 1081003,
+      "title": "Supergirl",
+      "original_title": "Supergirl",
+      "overview": "When an unexpected and ruthless adversary strikes too close to home, Kara Zor-El, aka Supergirl, reluctantly joins forces with an unlikely companion on an epic, interstellar journey of vengeance and justice.",
+      "poster_path": "/uhzRnTW4DM13UQBvZP3eVNzQTuz.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        12,
+        878
+      ],
+      "popularity": 79.033,
+      "release_date": "2026-06-24",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.71,
+      "vote_count": 2199
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/e2QAGrEmbpmZpMymDRkDisJkvg9.jpg",
+      "id": 1288445,
+      "title": "Mutiny",
+      "original_title": "Mutiny",
+      "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
+      "poster_path": "/pu2VxGlpGwffOx292w18b1tv96j.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "popularity": 394.5615,
+      "release_date": "2026-08-19",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.363,
+      "vote_count": 333
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/bpll0oy6gHwLvypfFNfT2QI4VkT.jpg",
+      "id": 1433367,
+      "title": "One Night Only",
+      "original_title": "One Night Only",
+      "overview": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
+      "poster_path": "/46q8z1TbbVcF8uhRHsvt5s0h2SH.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        35,
+        10749
+      ],
+      "popularity": 71.2824,
+      "release_date": "2026-07-28",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.892,
+      "vote_count": 83
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/kkcwhgSFd81QDlXo8ytrpHPQjhy.jpg",
+      "id": 1315772,
+      "title": "Minions & Monsters",
+      "original_title": "Minions & Monsters",
+      "overview": "This is the rambunctious, ridiculous and totally true story of how the Minions conquered Hollywood, became movie stars, lost everything, unleashed monsters onto the world and then banded together to try and save the planet from the mayhem they had just created.",
+      "poster_path": "/4LwvU9SZc8QQzW1X1FAPhNbXnEU.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        12,
+        16,
+        35,
+        10751,
+        14
+      ],
+      "popularity": 141.8469,
+      "release_date": "2026-06-24",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.554,
+      "vote_count": 1060
+    }
+  ],
+  "total_pages": 500,
+  "total_results": 10000
+}

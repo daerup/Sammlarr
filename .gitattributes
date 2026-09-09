@@ -2,3 +2,5 @@
 # Verify snapshots: never line-ending-convert (keeps CRLF/LF stable for the comparer)
 *.verified.txt -text
 *.received.txt -text
+*.verified.json text eol=lf working-tree-encoding=UTF-8
+*.received.json text eol=lf working-tree-encoding=UTF-8
