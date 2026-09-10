@@ -110,10 +110,11 @@ public class PlexWatchListProviderTests
 		await Assert.That(results[0].Success).IsFalse();
 	}
 
-	private static PlexWatchListProvider CreateWatchListService(string json) => new(CreatePlexClient(json), NullLogger<PlexWatchListProvider>.Instance);
+	private static PlexWatchListProvider CreateWatchListService(string json) =>
+		new(CreatePlexClient(json), PlexTestUrls.Instance, NullLogger<PlexWatchListProvider>.Instance);
 
 	private static PlexWatchListProvider CreateWatchListService(HttpStatusCode statusCode) =>
-		new(CreatePlexClient(statusCode), NullLogger<PlexWatchListProvider>.Instance);
+		new(CreatePlexClient(statusCode), PlexTestUrls.Instance, NullLogger<PlexWatchListProvider>.Instance);
 
 	private static PlexClient CreatePlexClient(string json)
 	{

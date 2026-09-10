@@ -138,7 +138,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
+		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 
 	private static PlexApi CreatePlexApiWithEmptySearch()
@@ -150,7 +150,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
+		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 
 	private static PlexApi CreatePlexApiWithSearch(PlexByIdPayload payload)
@@ -163,7 +163,7 @@ public class PlexIdConverterTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
+		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 
 	private static string BuildEmptySearchJson()

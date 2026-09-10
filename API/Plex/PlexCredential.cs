@@ -31,7 +31,7 @@ internal sealed class PlexCredential : ICredential
 		CancellationToken cancellationToken = default
 	)
 	{
-		using var request = new HttpRequestMessage(HttpMethod.Get, PlexEndpoints.User);
+		using var request = new HttpRequestMessage(HttpMethod.Get, PlexEndpoints.UserPath);
 		request.Headers.Add("X-Plex-Token", accessToken);
 		request.Headers.Add("X-Plex-Client-Identifier", clientId.ToString());
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
