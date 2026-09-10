@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net11.0</TargetFramework>
 		<LangVersion>preview</LangVersion>
@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<IsTestProject>true</IsTestProject>
 		<OutputType>Exe</OutputType>
+		<UserSecretsId>c2b860a4-38b3-426b-a453-be7854249bcd</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -14,6 +15,7 @@
 		<PackageReference Include="TUnit" />
 		<PackageReference Include="TUnit.Playwright" />
 		<PackageReference Include="Aspire.Hosting.Testing" />
+		<PackageReference Include="Verify.TUnit" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\AppHost\AppHost.csproj" />
