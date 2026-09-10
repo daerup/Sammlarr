@@ -9,7 +9,7 @@ public class SignInPageTests
 	{
 		var page = await E2EApp.OpenPageAsync();
 
-		await page.GotoAsync("/");
+		await page.VisitAsync("/");
 		await page.WaitForURLAsync(new Regex("/signin"));
 
 		await Assert.That(await page.TitleAsync()).Contains("Sign in");

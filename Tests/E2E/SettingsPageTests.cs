@@ -9,7 +9,7 @@ public class SettingsPageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/settings");
+		await page.VisitAsync("/settings");
 		var heading = page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Settings" });
 		await heading.WaitForAsync();
 
@@ -23,7 +23,7 @@ public class SettingsPageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/settings?section=users");
+		await page.VisitAsync("/settings?section=users");
 		var usersSection = page.GetByText("People with access to this Sammlarr instance.");
 		await usersSection.WaitForAsync();
 

@@ -9,7 +9,7 @@ public class BlacklistPageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/blacklist");
+		await page.VisitAsync("/blacklist");
 		var emptyState = page.GetByText("Nothing blacklisted.");
 		await emptyState.WaitForAsync();
 

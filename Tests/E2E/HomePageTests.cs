@@ -9,7 +9,7 @@ public class HomePageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/");
+		await page.VisitAsync("/");
 
 		await Assert.That(page.Url).DoesNotContain("/signin");
 	}
@@ -19,7 +19,7 @@ public class HomePageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/");
+		await page.VisitAsync("/");
 		var heading = page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Your library" });
 		await heading.WaitForAsync();
 
@@ -31,7 +31,7 @@ public class HomePageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/");
+		await page.VisitAsync("/");
 		var accountMenu = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "signed in as Test User" });
 		await accountMenu.WaitForAsync();
 
