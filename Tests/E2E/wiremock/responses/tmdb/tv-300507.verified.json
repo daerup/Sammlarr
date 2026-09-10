@@ -1,0 +1,100 @@
+﻿{
+  "adult": false,
+  "backdrop_path": "/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg",
+  "created_by": [],
+  "episode_run_time": [],
+  "first_air_date": "2026-09-10",
+  "genres": [
+    {
+      "id": 18,
+      "name": "Drama"
+    }
+  ],
+  "homepage": "https://www.netflix.com/title/81991578",
+  "id": 300507,
+  "in_production": true,
+  "languages": [
+    "en"
+  ],
+  "last_air_date": null,
+  "last_episode_to_air": null,
+  "name": "Crew Girl",
+  "next_episode_to_air": {
+    "id": 6524056,
+    "name": "Episode 1",
+    "overview": "A female rower becomes the coxswain of a dysfunctional all-boys rowing team.",
+    "vote_average": 0.0,
+    "vote_count": 0,
+    "air_date": "2026-09-10",
+    "episode_number": 1,
+    "episode_type": "standard",
+    "production_code": "",
+    "runtime": null,
+    "season_number": 1,
+    "show_id": 300507,
+    "still_path": null
+  },
+  "networks": [
+    {
+      "id": 213,
+      "logo_path": "/wwemzKWzjKYJFfCeiB57q3r4Bcm.png",
+      "name": "Netflix",
+      "origin_country": ""
+    }
+  ],
+  "number_of_episodes": 8,
+  "number_of_seasons": 1,
+  "origin_country": [
+    "CA"
+  ],
+  "original_language": "en",
+  "original_name": "Crew Girl",
+  "overview": "16-year-old rower Teagan becomes coxswain of a troubled boys' crew at an elite prep school. She navigates team drama, romance, rival crews, and a complex relationship with her mom while trying to lead them to victory.",
+  "popularity": 9.6894,
+  "poster_path": "/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
+  "production_companies": [
+    {
+      "id": 81242,
+      "logo_path": "/qDqp143aZVXkykSiqivXfkSmX0b.png",
+      "name": "Great Pacific Media",
+      "origin_country": "CA"
+    },
+    {
+      "id": 78028,
+      "logo_path": "/sTFcDFfJaSVT3sv3DoaZDE4SlGB.png",
+      "name": "Thunderbird Entertainment",
+      "origin_country": "CA"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "CA",
+      "name": "Canada"
+    }
+  ],
+  "seasons": [
+    {
+      "air_date": "2026-09-10",
+      "episode_count": 8,
+      "id": 474867,
+      "name": "Season 1",
+      "overview": "",
+      "poster_path": "/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
+      "season_number": 1,
+      "vote_average": 0.0
+    }
+  ],
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Returning Series",
+  "tagline": "",
+  "type": "Scripted",
+  "vote_average": 0.0,
+  "vote_count": 0
+}
