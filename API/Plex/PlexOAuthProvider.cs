@@ -7,12 +7,12 @@ using Shared.Options;
 
 namespace API.Plex;
 
-internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options) : IOAuthProvider
+internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptions options, PlexUrls urls) : IOAuthProvider
 {
 	public async Task<string> BeginLoginAsync(string callbackUrl, CancellationToken cancellationToken = default)
 	{
 		var clientId = Guid.NewGuid();
-		using var request = new HttpRequestMessage(HttpMethod.Post, PlexEndpoints.Pins);
+		using var request = new HttpRequestMessage(HttpMethod.Post, urls.Pins);
 		request.Headers.AddClientId(clientId);
 		request.Content = new FormUrlEncodedContent(new Dictionary<string, string> { ["strong"] = "true" });
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
@@ -32,7 +32,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 			["context%5Bdevice%5D%5Bproduct%5D"] = options.Authentication.ProductName,
 			["forwardUrl"] = forwardUrl,
 		};
-		return QueryHelpers.AddQueryString(PlexEndpoints.AuthApp, queryParams).Replace("?", "#?");
+		return QueryHelpers.AddQueryString(urls.AuthApp, queryParams).Replace("?", "#?");
 	}
 
 	public async Task<Result<ExternalLogin>> CompleteLoginAsync(string callbackQuery, CancellationToken cancellationToken = default)
@@ -48,7 +48,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 			return Error.From("The login callback is missing its pin or client id.");
 		}
 
-		using var request = new HttpRequestMessage(HttpMethod.Get, $"{PlexEndpoints.Pins}/{pinId}");
+		using var request = new HttpRequestMessage(HttpMethod.Get, urls.Pin(pinId));
 		request.Headers.AddClientId(clientId);
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);
 		response.EnsureSuccessStatusCode();
@@ -67,7 +67,7 @@ internal class PlexOAuthProvider(IHttpClientFactory httpClientFactory, PlexOptio
 
 	private async Task<Result<ExternalLogin>> FetchAccountAsync(string accessToken, Guid clientId, DateTimeOffset expiresAt, CancellationToken cancellationToken)
 	{
-		using var request = new HttpRequestMessage(HttpMethod.Get, PlexEndpoints.User);
+		using var request = new HttpRequestMessage(HttpMethod.Get, urls.User);
 		request.Headers.Add("X-Plex-Token", accessToken);
 		request.Headers.AddClientId(clientId);
 		var response = await httpClientFactory.CreateClient(PlexClient.Unauthenticated).SendAsync(request, cancellationToken);

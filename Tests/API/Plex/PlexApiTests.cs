@@ -43,10 +43,8 @@ public class PlexApiTests
 		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
 		var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialRepository.Mock();
-		credentialStore
-			.GetAsync(AuthProvider.Plex, Any())
-			.Returns(new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue));
-		var testee = new PlexApi(new PlexClient(httpClient, credentialStore), NullLogger<PlexApi>.Instance);
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue));
+		var testee = new PlexApi(new PlexClient(httpClient, credentialStore), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 
 		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<HttpRequestException>();
 	}
@@ -99,6 +97,6 @@ public class PlexApiTests
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient, NullLogger<PlexApi>.Instance);
+		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 }

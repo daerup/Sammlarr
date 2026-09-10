@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaSearchProvider
+internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider
 {
 	private void LogIfDegraded(HttpResponseMessage response, string endpoint)
 	{
@@ -31,7 +31,7 @@ internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaS
 	)
 	{
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
-		var endpoint = string.Format(CultureInfo.InvariantCulture, PlexEndpoints.Search, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title));
+		var endpoint = urls.Search(searchTypes, title);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		LogIfDegraded(response, endpoint);
 		response.EnsureSuccessStatusCode();
@@ -56,7 +56,7 @@ internal class PlexApi(PlexClient plexClient, ILogger<PlexApi> logger) : IMediaS
 
 	internal async Task<Result<MediaLookup>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
 	{
-		var endpoint = string.Format(PlexEndpoints.RatingKeyMetadata, Uri.EscapeDataString(plexId.Value));
+		var endpoint = urls.RatingKeyMetadata(plexId.Value);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
 		LogIfDegraded(response, endpoint);
 		response.EnsureSuccessStatusCode();
