@@ -7,7 +7,7 @@ public class SignInPageTests
 	[Test]
 	public async Task Visit_WhenUnauthenticated_ShowsSignInPage()
 	{
-		var page = await AspireApp.OpenPageAsync();
+		var page = await E2EApp.OpenPageAsync();
 
 		await page.GotoAsync("/");
 		await page.WaitForURLAsync(new Regex("/signin"));

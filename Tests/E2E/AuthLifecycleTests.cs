@@ -7,9 +7,9 @@ public class AuthLifecycleTests
 	[Test]
 	public async Task SignOut_WhenAuthenticated_EndsTheSession()
 	{
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await page.GotoAsync("/");
+		await E2EApp.GotoAsync(page, "/");
 		await Assert.That(page.Url).DoesNotContain("/signin");
 
 		await page.GotoAsync("/auth/logout");

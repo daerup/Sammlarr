@@ -8,9 +8,9 @@ public class BrowsePageTests
 	[Test]
 	public async Task Browse_WhenAuthenticatedWithStubbedTrending_ShowsTheStubbedTitle()
 	{
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await page.GotoAsync("/browse");
+		await E2EApp.GotoAsync(page, "/browse");
 
 		await Expect(page.GetByText(WireMockStubs.ExpectedTrendingTitle())).ToBeVisibleAsync();
 	}
@@ -18,11 +18,10 @@ public class BrowsePageTests
 	[Test]
 	public async Task Browse_WhenAddingATrendingItem_ItAppearsInTheWatchlist()
 	{
-		var title = WireMockStubs.ExpectedTrendingTitle();
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await page.GotoAsync("/browse");
-		await page.GetByText(title).First.ClickAsync();
+		await E2EApp.GotoAsync(page, "/browse");
+		await page.GetByText(WireMockStubs.ExpectedTrendingTitle()).First.ClickAsync();
 		var addButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add to Watchlist" });
 		await addButton.ClickAsync();
 		await addButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });

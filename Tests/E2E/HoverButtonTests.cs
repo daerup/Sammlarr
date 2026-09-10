@@ -7,8 +7,9 @@ public class HoverButtonTests
 	[Test]
 	public async Task SignOutButton_OnHover_InvertsToTheDestructiveFill()
 	{
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
-		await page.GotoAsync("/");
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+
+		await E2EApp.GotoAsync(page, "/");
 
 		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "signed in as Test User" }).ClickAsync();
 		var signOut = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign out" });
