@@ -7,9 +7,9 @@ public class BlacklistPageTests
 	[Test]
 	public async Task Blacklist_WhenAuthenticatedAndEmpty_ShowsEmptyState()
 	{
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await page.GotoAsync("/blacklist");
+		await E2EApp.GotoAsync(page, "/blacklist");
 		var emptyState = page.GetByText("Nothing blacklisted.");
 		await emptyState.WaitForAsync();
 

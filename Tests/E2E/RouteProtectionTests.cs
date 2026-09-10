@@ -12,7 +12,7 @@ public class RouteProtectionTests
 	[Arguments("/settings")]
 	public async Task Visit_WhenUnauthenticated_RedirectsToSignIn(string route)
 	{
-		var page = await AspireApp.OpenPageAsync();
+		var page = await E2EApp.OpenPageAsync();
 
 		await page.GotoAsync(route);
 		await page.WaitForURLAsync(new Regex("/signin"));

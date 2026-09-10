@@ -7,9 +7,9 @@ public class SettingsPageTests
 	[Test]
 	public async Task Settings_WhenAuthenticatedAdmin_IsReachable()
 	{
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await page.GotoAsync("/settings");
+		await E2EApp.GotoAsync(page, "/settings");
 		var heading = page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Settings" });
 		await heading.WaitForAsync();
 
@@ -21,9 +21,9 @@ public class SettingsPageTests
 	[Test]
 	public async Task UsersSection_WhenAuthenticatedAdmin_IsRendered()
 	{
-		var page = await AspireApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await page.GotoAsync("/settings?section=users");
+		await E2EApp.GotoAsync(page, "/settings?section=users");
 		var usersSection = page.GetByText("People with access to this Sammlarr instance.");
 		await usersSection.WaitForAsync();
 
