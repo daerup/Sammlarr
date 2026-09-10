@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -62,12 +63,33 @@ public static class E2EApp
 				}
 			}
 
-			await Verify(response.Body, "json")
-				.UseDirectory(Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider))
-				.UseFileName(response.Slug)
-				.DontScrubGuids()
-				.DontScrubDateTimes();
+			if (WireMockStubs.IsVolatile(response.Path))
+			{
+				await ValidateContractAsync(response);
+			}
+			else
+			{
+				await Verify(response.Body, "json")
+					.UseDirectory(Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider))
+					.UseFileName(response.Slug)
+					.DontScrubGuids()
+					.DontScrubDateTimes();
+			}
 		}
+	}
+
+	private static async Task ValidateContractAsync(RecordedResponse response)
+	{
+		var fixturePath = Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider, $"{response.Slug}.verified.json");
+		if (!File.Exists(fixturePath))
+		{
+			Directory.CreateDirectory(Path.GetDirectoryName(fixturePath)!);
+			await File.WriteAllTextAsync(fixturePath, response.Body);
+			return;
+		}
+
+		var problems = JsonContract.Incompatibilities(response.Body, await File.ReadAllTextAsync(fixturePath));
+		await Assert.That(problems).IsEmpty();
 	}
 
 	[After(TestSession)]
@@ -76,6 +98,11 @@ public static class E2EApp
 		if (!_started)
 		{
 			return;
+		}
+
+		if (IsRecording)
+		{
+			await PruneUncapturedFixturesAsync();
 		}
 
 		_wiremock?.Dispose();
@@ -93,6 +120,32 @@ public static class E2EApp
 		if (Directory.Exists(_workDir))
 		{
 			Directory.Delete(_workDir, recursive: true);
+		}
+	}
+
+	private static async Task PruneUncapturedFixturesAsync()
+	{
+		HashSet<string> captured;
+		lock (CaptureGate)
+		{
+			captured = [.. Captured];
+		}
+
+		var capturedProviders = captured.Select(key => key.Split('/')[0]).ToHashSet();
+		foreach (var mappingFile in Directory.EnumerateFiles(WireMockStubs.MappingsDirectory, "*.json", SearchOption.AllDirectories))
+		{
+			var provider = Path.GetFileName(Path.GetDirectoryName(mappingFile)!);
+			if (provider == "mappings" || !capturedProviders.Contains(provider) || captured.Contains($"{provider}/{Path.GetFileNameWithoutExtension(mappingFile)}"))
+			{
+				continue;
+			}
+
+			var mapping = JsonNode.Parse(await File.ReadAllTextAsync(mappingFile));
+			File.Delete(mappingFile);
+			if (mapping?["response"]?["bodyFileName"]?.GetValue<string>() is { } bodyFileName)
+			{
+				File.Delete(Path.Combine(WireMockStubs.ResponsesDirectory, bodyFileName));
+			}
 		}
 	}
 

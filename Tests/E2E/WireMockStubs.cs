@@ -6,9 +6,22 @@ internal static class WireMockStubs
 {
 	private static readonly string Root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "wiremock"));
 
+	private static readonly IReadOnlyList<string> VolatilePaths = LoadVolatilePaths();
+
 	internal static string MappingsDirectory => Path.Combine(Root, "mappings");
 
 	internal static string ResponsesDirectory => Path.Combine(Root, "responses");
+
+	internal static bool IsVolatile(string path) =>
+		VolatilePaths.Any(pattern =>
+			pattern.EndsWith('*') ? path.StartsWith(pattern[..^1], StringComparison.Ordinal) : string.Equals(path, pattern, StringComparison.Ordinal)
+		);
+
+	private static IReadOnlyList<string> LoadVolatilePaths()
+	{
+		var file = Path.Combine(Root, "volatile.json");
+		return File.Exists(file) ? JsonSerializer.Deserialize<List<string>>(File.ReadAllText(file)) ?? [] : [];
+	}
 
 	internal static string ExpectedTrendingTitle()
 	{
