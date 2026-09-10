@@ -13,7 +13,7 @@ namespace E2E.Tests;
 
 public static class E2EApp
 {
-	internal static bool IsRecording { get; } = Environment.GetEnvironmentVariable("E2E_LIVE") is "true";
+	internal static bool IsLive { get; } = Environment.GetEnvironmentVariable("E2E_LIVE") is "true";
 
 	private static readonly SemaphoreSlim StartGate = new(1, 1);
 	private static readonly Lock CaptureGate = new();
@@ -100,7 +100,7 @@ public static class E2EApp
 			return;
 		}
 
-		if (IsRecording)
+		if (IsLive)
 		{
 			await PruneUncapturedFixturesAsync();
 		}
@@ -180,7 +180,7 @@ public static class E2EApp
 		var keyRing = Path.Combine(_workDir, "keys");
 		Directory.CreateDirectory(keyRing);
 
-		var (userId, displayName, role) = IsRecording
+		var (userId, displayName, role) = IsLive
 			? SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"))
 			: SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing, WireMockStubs.ExpectedTrendingTmdbId(), WireMockStubs.ExpectedTrendingTitle());
 		_authCookie = AuthCookie.Forge(keyRing, userId, displayName, role);
@@ -191,7 +191,7 @@ public static class E2EApp
 		);
 		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080);
 		var wiremockHttp = wiremock.GetEndpoint("http");
-		if (!IsRecording)
+		if (!IsLive)
 		{
 			wiremock
 				.WithBindMount(WireMockStubs.MappingsDirectory, "/home/wiremock/mappings", isReadOnly: true)
@@ -206,7 +206,7 @@ public static class E2EApp
 			.WaitFor(wiremock);
 		foreach (var provider in ProviderRecording.All)
 		{
-			var baseUrl = IsRecording ? ReferenceExpression.Create($"{wiremockHttp}{provider.Prefix}") : ReferenceExpression.Create($"{wiremockHttp}");
+			var baseUrl = IsLive ? ReferenceExpression.Create($"{wiremockHttp}{provider.Prefix}") : ReferenceExpression.Create($"{wiremockHttp}");
 			webBuilder.WithEnvironment($"{provider.Section}__BaseUrl", baseUrl);
 		}
 
@@ -215,7 +215,7 @@ public static class E2EApp
 		await _app.ResourceNotifications.WaitForResourceHealthyAsync("blazor-ui");
 		_baseUrl = _app.GetEndpoint("blazor-ui", "http").ToString();
 		_wiremock = _app.CreateHttpClient("wiremock", "http");
-		if (IsRecording)
+		if (IsLive)
 		{
 			await ConfigureProxiesAsync();
 		}
