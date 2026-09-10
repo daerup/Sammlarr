@@ -6,5 +6,5 @@ namespace E2E.Tests;
 
 public sealed class E2EParallelLimit : IParallelLimit
 {
-	public int Limit => 4;
+	public int Limit => E2EApp.IsLive ? 1 : 8;
 }
