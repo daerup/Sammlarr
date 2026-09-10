@@ -12,7 +12,7 @@ namespace E2E.Tests;
 
 public static class E2EApp
 {
-	internal static bool IsRecording { get; } = Environment.GetEnvironmentVariable("E2E_LIVE") is "true" && ProviderRecording.AnyCredentialPresent;
+	internal static bool IsRecording { get; } = Environment.GetEnvironmentVariable("E2E_LIVE") is "true";
 
 	private static readonly SemaphoreSlim StartGate = new(1, 1);
 	private static readonly Lock CaptureGate = new();
@@ -48,16 +48,7 @@ public static class E2EApp
 		return await context.NewPageAsync();
 	}
 
-	internal static async Task GotoAsync(IPage page, string route)
-	{
-		await page.GotoAsync(route);
-		if (IsRecording)
-		{
-			await CaptureAsync(page);
-		}
-	}
-
-	private static async Task CaptureAsync(IPage page)
+	internal static async Task CaptureAsync(IPage page)
 	{
 		await page.WaitForTimeoutAsync(5000);
 		var snapshot = await SnapshotAsync();

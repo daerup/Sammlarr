@@ -14,7 +14,7 @@ public class RouteProtectionTests
 	{
 		var page = await E2EApp.OpenPageAsync();
 
-		await page.GotoAsync(route);
+		await page.VisitAsync(route);
 		await page.WaitForURLAsync(new Regex("/signin"));
 
 		await Assert.That(page.Url).Contains("/signin");

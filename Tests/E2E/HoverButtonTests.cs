@@ -9,7 +9,7 @@ public class HoverButtonTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/");
+		await page.VisitAsync("/");
 
 		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "signed in as Test User" }).ClickAsync();
 		var signOut = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign out" });

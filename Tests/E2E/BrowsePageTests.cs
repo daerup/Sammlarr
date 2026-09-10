@@ -10,7 +10,7 @@ public class BrowsePageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/browse");
+		await page.VisitAsync("/browse");
 
 		await Expect(page.GetByText(WireMockStubs.ExpectedTrendingTitle())).ToBeVisibleAsync();
 	}
@@ -20,13 +20,13 @@ public class BrowsePageTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
-		await E2EApp.GotoAsync(page, "/browse");
+		await page.VisitAsync("/browse");
 		await page.GetByText(WireMockStubs.ExpectedTrendingTitle()).First.ClickAsync();
 		var addButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add to Watchlist" });
 		await addButton.ClickAsync();
 		await addButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
 
-		await page.GotoAsync("/watchlist");
+		await page.VisitAsync("/watchlist");
 
 		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Bulk edit" }))
 			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
