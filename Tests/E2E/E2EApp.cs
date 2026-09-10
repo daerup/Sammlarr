@@ -49,6 +49,12 @@ public static class E2EApp
 		return await context.NewPageAsync();
 	}
 
+	internal static async Task<string> RequestJournalAsync()
+	{
+		await EnsureStartedAsync();
+		return await _wiremock!.GetStringAsync("/__admin/requests");
+	}
+
 	internal static async Task CaptureAsync(IPage page)
 	{
 		await page.WaitForTimeoutAsync(5000);
@@ -63,34 +69,64 @@ public static class E2EApp
 				}
 			}
 
-			if (WireMockStubs.IsVolatile(response.Path))
+			switch (WireMockStubs.PolicyFor(response.Path))
 			{
-				await ValidateContractAsync(response);
-			}
-			else
-			{
-				await Verify(response.Body, "json")
-					.UseDirectory(Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider))
-					.UseFileName(response.Slug)
-					.DontScrubGuids()
-					.DontScrubDateTimes();
+				case FixturePolicy.Frozen:
+					await AssertContractAsync(response);
+					break;
+				case FixturePolicy.Contract:
+					await ValidateContractAsync(response);
+					break;
+				case FixturePolicy.Value:
+					await Verify(response.Body, "json")
+						.UseDirectory(Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider))
+						.UseFileName(response.Slug)
+						.DontScrubGuids()
+						.DontScrubDateTimes();
+					break;
 			}
 		}
 	}
 
 	private static async Task ValidateContractAsync(RecordedResponse response)
 	{
-		var fixturePath = Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider, $"{response.Slug}.verified.json");
+		if (await BootstrapAsync(response))
+		{
+			return;
+		}
+
+		await AssertContractAsync(response);
+	}
+
+	private static async Task AssertContractAsync(RecordedResponse response)
+	{
+		var fixturePath = FixturePath(response);
 		if (!File.Exists(fixturePath))
 		{
-			Directory.CreateDirectory(Path.GetDirectoryName(fixturePath)!);
-			await File.WriteAllTextAsync(fixturePath, response.Body);
 			return;
 		}
 
 		var problems = JsonContract.Incompatibilities(response.Body, await File.ReadAllTextAsync(fixturePath));
 		await Assert.That(problems).IsEmpty();
 	}
+
+	private static async Task<bool> BootstrapAsync(RecordedResponse response)
+	{
+		var fixturePath = FixturePath(response);
+		if (File.Exists(fixturePath))
+		{
+			return false;
+		}
+
+		Directory.CreateDirectory(Path.GetDirectoryName(fixturePath)!);
+		await WriteFixtureAsync(fixturePath, response.Body);
+		return true;
+	}
+
+	private static Task WriteFixtureAsync(string path, string body) => File.WriteAllTextAsync(path, body.ReplaceLineEndings("\n"));
+
+	private static string FixturePath(RecordedResponse response) =>
+		Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider, $"{response.Slug}.verified.json");
 
 	[After(TestSession)]
 	public static async Task StopAsync()
@@ -101,6 +137,11 @@ public static class E2EApp
 		}
 
 		if (IsLive)
+		{
+			await CaptureRemainingAsync();
+		}
+
+		if (IsLive && Environment.GetEnvironmentVariable("E2E_PRUNE") is "true")
 		{
 			await PruneUncapturedFixturesAsync();
 		}
@@ -120,6 +161,45 @@ public static class E2EApp
 		if (Directory.Exists(_workDir))
 		{
 			Directory.Delete(_workDir, recursive: true);
+		}
+	}
+
+	private static async Task CaptureRemainingAsync()
+	{
+		foreach (var response in RecordedStubs.Write(await SnapshotAsync(), WireMockStubs.MappingsDirectory))
+		{
+			lock (CaptureGate)
+			{
+				if (!Captured.Add($"{response.Provider}/{response.Slug}"))
+				{
+					continue;
+				}
+			}
+
+			var policy = WireMockStubs.PolicyFor(response.Path);
+			var fixturePath = FixturePath(response);
+			if (!File.Exists(fixturePath))
+			{
+				if (policy is not FixturePolicy.Frozen)
+				{
+					await BootstrapAsync(response);
+				}
+
+				continue;
+			}
+
+			var committed = await File.ReadAllTextAsync(fixturePath);
+			var drifted = policy switch
+			{
+				FixturePolicy.Frozen => JsonContract.Incompatibilities(response.Body, committed).Count > 0,
+				FixturePolicy.Contract => JsonContract.Incompatibilities(response.Body, committed).Count > 0,
+				FixturePolicy.Value => committed != response.Body,
+			};
+
+			if (drifted)
+			{
+				await WriteFixtureAsync($"{fixturePath[..^".verified.json".Length]}.received.json", response.Body);
+			}
 		}
 	}
 
@@ -206,8 +286,11 @@ public static class E2EApp
 			.WaitFor(wiremock);
 		foreach (var provider in ProviderRecording.All)
 		{
-			var baseUrl = IsLive ? ReferenceExpression.Create($"{wiremockHttp}{provider.Prefix}") : ReferenceExpression.Create($"{wiremockHttp}");
-			webBuilder.WithEnvironment($"{provider.Section}__BaseUrl", baseUrl);
+			foreach (var endpoint in provider.Endpoints)
+			{
+				var baseUrl = IsLive ? ReferenceExpression.Create($"{wiremockHttp}{endpoint.Prefix}/") : ReferenceExpression.Create($"{wiremockHttp}/");
+				webBuilder.WithEnvironment($"{provider.Section}__{endpoint.ConfigKey}", baseUrl);
+			}
 		}
 
 		_app = await builder.BuildAsync();
@@ -227,13 +310,13 @@ public static class E2EApp
 
 	private static async Task ConfigureProxiesAsync()
 	{
-		foreach (var provider in ProviderRecording.All)
+		foreach (var endpoint in ProviderRecording.AllEndpoints)
 		{
 			var mapping = new
 			{
 				priority = 5,
-				request = new { urlPathPattern = $"{provider.Prefix}/.*" },
-				response = new { proxyBaseUrl = provider.RealBaseUrl, proxyUrlPrefixToRemove = provider.Prefix },
+				request = new { urlPathPattern = $"{endpoint.Prefix}/.*" },
+				response = new { proxyBaseUrl = endpoint.RealBaseUrl, proxyUrlPrefixToRemove = endpoint.Prefix },
 			};
 			await PostWithRetryAsync("/__admin/mappings", mapping);
 		}
@@ -241,7 +324,7 @@ public static class E2EApp
 
 	private static async Task<string> SnapshotAsync()
 	{
-		var prefixes = string.Join('|', ProviderRecording.All.Select(provider => provider.Name));
+		var prefixes = string.Join('|', ProviderRecording.AllEndpoints.Select(endpoint => endpoint.Name));
 		var spec = new
 		{
 			persist = false,
