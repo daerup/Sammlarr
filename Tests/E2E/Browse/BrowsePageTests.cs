@@ -1,7 +1,7 @@
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
-namespace E2E.Tests;
+namespace E2E.Tests.Browse;
 
 public class BrowsePageTests
 {

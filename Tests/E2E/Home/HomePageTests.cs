@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace E2E.Tests;
+namespace E2E.Tests.Home;
 
 public class HomePageTests
 {

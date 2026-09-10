@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace E2E.Tests;
+namespace E2E.Tests.Auth;
 
 public class SignInPageTests
 {
