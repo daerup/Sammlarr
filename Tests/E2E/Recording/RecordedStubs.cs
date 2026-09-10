@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace E2E.Tests.Recording;
 
-internal sealed record RecordedResponse(string Provider, string Slug, string Body);
+internal sealed record RecordedResponse(string Provider, string Slug, string Path, string Body);
 
 internal static class RecordedStubs
 {
@@ -50,7 +50,7 @@ internal static class RecordedStubs
 			};
 			File.WriteAllText(Path.Combine(mappingsDirectory, provider.Name, $"{slug}.json"), clean.ToJsonString(Pretty));
 
-			recorded.Add(new RecordedResponse(provider.Name, slug, Body(response)));
+			recorded.Add(new RecordedResponse(provider.Name, slug, replayPath, Body(response)));
 		}
 
 		return recorded;
