@@ -22,7 +22,9 @@ internal static class RecordedStubs
 				continue;
 			}
 
-			var provider = ProviderRecording.All.FirstOrDefault(candidate => urlPath.StartsWith(candidate.Prefix, StringComparison.Ordinal));
+			var provider = ProviderRecording
+				.AllEndpoints.OrderByDescending(candidate => candidate.Prefix.Length)
+				.FirstOrDefault(candidate => urlPath.StartsWith($"{candidate.Prefix}/", StringComparison.Ordinal));
 			if (provider is null)
 			{
 				continue;

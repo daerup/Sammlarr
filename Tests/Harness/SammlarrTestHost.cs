@@ -35,6 +35,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 {
 	public const string TmdbApiKey = "e2e-tmdb-key";
 
+	public const string MdblistApiKey = "e2e-mdblist-key";
+
+	public const string PlexToken = "e2e-plex-token";
+
 	private const int DefaultYear = 2024;
 
 	private static readonly SqliteConnection Template = BuildTemplate();
@@ -531,6 +535,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			context =>
 			{
 				SeedApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
+				SeedApiKey(context, ApiKeyProvider.Mdblist, MdblistApiKey);
+				SeedCredential(context, AuthProvider.Plex, PlexToken);
 				SeedTrendingMedia(context, trendingTmdbId, trendingTitle);
 			}
 		);
