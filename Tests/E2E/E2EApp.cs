@@ -7,7 +7,6 @@ using Domain.Providers;
 using E2E.Tests.Recording;
 using Harness;
 using Microsoft.Playwright;
-using static VerifyTUnit.Verifier;
 
 namespace E2E.Tests;
 
@@ -49,65 +48,24 @@ public static class E2EApp
 		return await context.NewPageAsync();
 	}
 
+	internal static async Task<string> UnmatchedAsync()
+	{
+		await EnsureStartedAsync();
+		return await _wiremock!.GetStringAsync("/__admin/requests/unmatched");
+	}
+
 	internal static async Task<string> RequestJournalAsync()
 	{
 		await EnsureStartedAsync();
 		return await _wiremock!.GetStringAsync("/__admin/requests");
 	}
 
-	internal static async Task CaptureAsync(IPage page)
+	internal static async Task<string> ServedBodyAsync(string urlPath)
 	{
-		await page.WaitForTimeoutAsync(5000);
-		var snapshot = await SnapshotAsync();
-		foreach (var response in RecordedStubs.Write(snapshot, WireMockStubs.MappingsDirectory))
-		{
-			lock (CaptureGate)
-			{
-				if (!Captured.Add($"{response.Provider}/{response.Slug}"))
-				{
-					continue;
-				}
-			}
-
-			switch (WireMockStubs.PolicyFor(response.Path))
-			{
-				case FixturePolicy.Frozen:
-					await AssertContractAsync(response);
-					break;
-				case FixturePolicy.Contract:
-					await ValidateContractAsync(response);
-					break;
-				case FixturePolicy.Value:
-					await Verify(response.Body, "json")
-						.UseDirectory(Path.Combine(WireMockStubs.ResponsesDirectory, response.Provider))
-						.UseFileName(response.Slug)
-						.DontScrubGuids()
-						.DontScrubDateTimes();
-					break;
-			}
-		}
-	}
-
-	private static async Task ValidateContractAsync(RecordedResponse response)
-	{
-		if (await BootstrapAsync(response))
-		{
-			return;
-		}
-
-		await AssertContractAsync(response);
-	}
-
-	private static async Task AssertContractAsync(RecordedResponse response)
-	{
-		var fixturePath = FixturePath(response);
-		if (!File.Exists(fixturePath))
-		{
-			return;
-		}
-
-		var problems = JsonContract.Incompatibilities(response.Body, await File.ReadAllTextAsync(fixturePath));
-		await Assert.That(problems).IsEmpty();
+		var served = (JsonNode.Parse(await RequestJournalAsync())?["requests"]?.AsArray() ?? []).First(entry =>
+			entry?["request"]?["url"]?.GetValue<string>()?.Split('?')[0].EndsWith(urlPath, StringComparison.Ordinal) is true
+		);
+		return served!["response"]!["body"]!.GetValue<string>();
 	}
 
 	private static async Task<bool> BootstrapAsync(RecordedResponse response)
@@ -136,13 +94,15 @@ public static class E2EApp
 			return;
 		}
 
+		if (Environment.GetEnvironmentVariable("E2E_AUDIT") is "true")
+		{
+			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-served.txt"), Urls(await RequestJournalAsync()));
+			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-unmatched.txt"), Urls(await UnmatchedAsync()));
+		}
+
 		if (IsLive)
 		{
 			await CaptureRemainingAsync();
-		}
-
-		if (IsLive && Environment.GetEnvironmentVariable("E2E_PRUNE") is "true")
-		{
 			await PruneUncapturedFixturesAsync();
 		}
 
@@ -164,44 +124,67 @@ public static class E2EApp
 		}
 	}
 
+	private static IEnumerable<string> Urls(string journalJson) =>
+		(JsonNode.Parse(journalJson)?["requests"]?.AsArray() ?? [])
+			.Select(entry => (entry?["request"] ?? entry)?["url"]?.GetValue<string>())
+			.OfType<string>()
+			.Distinct();
+
 	private static async Task CaptureRemainingAsync()
 	{
-		foreach (var response in RecordedStubs.Write(await SnapshotAsync(), WireMockStubs.MappingsDirectory))
+		var recorded = RecordedStubs.Write(await SnapshotAsync(), WireMockStubs.MappingsDirectory).Where(FirstCapture).ToList();
+		var committed = new List<RecordedResponse>();
+		foreach (var response in recorded)
 		{
-			lock (CaptureGate)
+			if (WireMockStubs.PolicyFor(response.Path) is FixturePolicy.Frozen || !await BootstrapAsync(response))
 			{
-				if (!Captured.Add($"{response.Provider}/{response.Slug}"))
-				{
-					continue;
-				}
-			}
-
-			var policy = WireMockStubs.PolicyFor(response.Path);
-			var fixturePath = FixturePath(response);
-			if (!File.Exists(fixturePath))
-			{
-				if (policy is not FixturePolicy.Frozen)
-				{
-					await BootstrapAsync(response);
-				}
-
-				continue;
-			}
-
-			var committed = await File.ReadAllTextAsync(fixturePath);
-			var drifted = policy switch
-			{
-				FixturePolicy.Frozen => JsonContract.Incompatibilities(response.Body, committed).Count > 0,
-				FixturePolicy.Contract => JsonContract.Incompatibilities(response.Body, committed).Count > 0,
-				FixturePolicy.Value => committed != response.Body,
-			};
-
-			if (drifted)
-			{
-				await WriteFixtureAsync($"{fixturePath[..^".verified.json".Length]}.received.json", response.Body);
+				committed.Add(response);
 			}
 		}
+
+		var drift = new List<string>();
+		foreach (var response in committed.Where(response => File.Exists(FixturePath(response))))
+		{
+			drift.AddRange(await CompareAsync(response));
+		}
+
+		await Assert.That(drift).IsEmpty();
 	}
+
+	private static bool FirstCapture(RecordedResponse response)
+	{
+		lock (CaptureGate)
+		{
+			return Captured.Add($"{response.Provider}/{response.Slug}");
+		}
+	}
+
+	private static async Task<IEnumerable<string>> CompareAsync(RecordedResponse response)
+	{
+		var fixturePath = FixturePath(response);
+		var committed = await File.ReadAllTextAsync(fixturePath);
+		var problems =
+			WireMockStubs.PolicyFor(response.Path) is FixturePolicy.Value
+				? ValueDrift(response.Body, committed)
+				: JsonContract.Incompatibilities(response.Body, committed);
+
+		var receivedPath = $"{fixturePath[..^".verified.json".Length]}.received.json";
+		if (problems.Count > 0)
+		{
+			await WriteFixtureAsync(receivedPath, response.Body);
+		}
+		else
+		{
+			File.Delete(receivedPath);
+		}
+
+		return problems.Select(problem => $"{response.Provider}/{response.Slug}: {problem}");
+	}
+
+	private static IReadOnlyList<string> ValueDrift(string live, string committed) =>
+		string.Equals(live.ReplaceLineEndings("\n"), committed.ReplaceLineEndings("\n"), StringComparison.Ordinal)
+			? []
+			: ["the live response no longer matches the committed value"];
 
 	private static async Task PruneUncapturedFixturesAsync()
 	{
@@ -305,7 +288,7 @@ public static class E2EApp
 
 		var headed = Environment.GetEnvironmentVariable("E2E_HEADED") is "true";
 		_playwright = await Playwright.CreateAsync();
-		_browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed, SlowMo = headed ? 750 : 0 });
+		_browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed, SlowMo = headed ? 2000 : 0 });
 	}
 
 	private static async Task ConfigureProxiesAsync()
