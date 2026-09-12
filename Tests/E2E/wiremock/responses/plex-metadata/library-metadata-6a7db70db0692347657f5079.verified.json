@@ -1,0 +1,265 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/l2LHC8Z1anH8G7xQ46SquQP6sia.jpg",
+        "guid": "plex://show/6a7db70db0692347657f5079",
+        "key": "/library/metadata/6a7db70db0692347657f5079/children",
+        "rating": 1,
+        "ratingKey": "6a7db70db0692347657f5079",
+        "studio": "DC Studios",
+        "summary": "Through interviews with the creators, cast and crew, the podcast goes inside the making of Lanterns, from the murder mystery at the heart of the story to the characters, comic lore, and dive into the worldbuilding, and the relationship between Hal Jordan and John Stewart.",
+        "type": "show",
+        "addedAt": 1786838400,
+        "childCount": 1,
+        "contentRating": "TV-MA",
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-06",
+        "lastSeasonOriginallyAvailableAt": "2026-08-16",
+        "leafCount": 8,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-13",
+        "originallyAvailableAt": "2026-08-16",
+        "publicPagesURL": "https://watch.plex.tv/show/lanterns-the-official-podcast",
+        "ratingImage": "themoviedb://image.rating",
+        "slug": "lanterns-the-official-podcast",
+        "thumb": "https://image.tmdb.org/t/p/original/5nGwcfb6oY5HvSakUqGIlBdserq.jpg",
+        "title": "Lanterns: The Official Podcast",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/l2LHC8Z1anH8G7xQ46SquQP6sia.jpg"
+          },
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0a7ebe0696b40c4e9f4de7b2eb40e69e.jpg"
+          },
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/2/683a142553/20f65825af8af0d37d647edef90c53dd.png"
+          },
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/2/683a142553/20f65825af8af0d37d647edef90c53dd.png"
+          },
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/5/gracenote/5108a3dccfdf414cb1998f68ddda467d.jpg"
+          },
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/5nGwcfb6oY5HvSakUqGIlBdserq.jpg"
+          },
+          {
+            "alt": "Lanterns: The Official Podcast",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/938f2dc32e7107416e204f64dd50da76.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c07e92192ba001f30279b",
+            "id": "5d9c07e92192ba001f30279b",
+            "key": "/library/sections/home/all?genre=5d9c07e92192ba001f30279b",
+            "ratingKey": "genre_5d9c07e92192ba001f30279b",
+            "slug": "talk",
+            "tag": "Talk",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://331555"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 1
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6a0c66f8061ef1ee78c64b5f",
+            "order": 1,
+            "slug": "juju-green-4",
+            "tag": "Juju Green",
+            "thumb": "https://metadata-static.plex.tv/0/people/0d1aa9f95fd8194bafe006d117b45d97.jpg",
+            "role": "Self - Host",
+            "key": "/library/people/6a0c66f8061ef1ee78c64b5f",
+            "type": "person"
+          },
+          {
+            "id": "5e16364e91c20300412109fb",
+            "order": 2,
+            "slug": "chris-mundy",
+            "tag": "Chris Mundy",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7b3631cda7f3acfb619ef24be70fbaa.jpg",
+            "role": "Self",
+            "key": "/library/people/5e16364e91c20300412109fb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768505af944001f1feeae",
+            "order": 3,
+            "slug": "vanessa-baden-kelly",
+            "tag": "Vanessa Baden Kelly",
+            "thumb": "https://metadata-static.plex.tv/8/people/8c11e0703ee73108895e15f11b82bea4.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768505af944001f1feeae",
+            "type": "person"
+          },
+          {
+            "id": "5d77683beb5d26001f1e1f25",
+            "order": 4,
+            "slug": "damon-lindelof",
+            "tag": "Damon Lindelof",
+            "thumb": "https://metadata-static.plex.tv/c/people/cb002f1b953efc94f7fac89edee59db0.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77683beb5d26001f1e1f25",
+            "type": "person"
+          },
+          {
+            "id": "5de03ce1e08eb8001d3d0d66",
+            "order": 5,
+            "slug": "tom-king-13",
+            "tag": "Tom King",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc72be5de9373ad23df8d4bbbfc617f0.jpg",
+            "role": "Self",
+            "key": "/library/people/5de03ce1e08eb8001d3d0d66",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ce6d55c002040b8fb",
+            "order": 6,
+            "slug": "james-hawes",
+            "tag": "James Hawes",
+            "thumb": "https://metadata-static.plex.tv/8/people/8610048083b3e3ff84aaf759ef302943.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77682ce6d55c002040b8fb",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08cd7b5c2e001e661a8d",
+            "order": 7,
+            "slug": "aaron-pierre",
+            "tag": "Aaron Pierre",
+            "thumb": "https://metadata-static.plex.tv/d/people/d41e6c52953d23f5e28f202f072cbb42.jpg",
+            "role": "Self",
+            "key": "/library/people/5d9c08cd7b5c2e001e661a8d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c6f617c900201588f5",
+            "order": 8,
+            "slug": "stephen-williams",
+            "tag": "Stephen Williams",
+            "thumb": "https://metadata-static.plex.tv/9/people/906d3d452349a27fb787dfef80ceff55.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768c6f617c900201588f5",
+            "type": "person"
+          },
+          {
+            "id": "5f402eff52f20000415200b2",
+            "order": 9,
+            "slug": "breannah-gibson",
+            "tag": "Breannah Gibson",
+            "role": "Self",
+            "key": "/library/people/5f402eff52f20000415200b2",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e5af944001f1f865c",
+            "order": 10,
+            "slug": "garret-dillahunt",
+            "tag": "Garret Dillahunt",
+            "thumb": "https://metadata-static.plex.tv/a/people/a3ddb49dccfb973bdc4baa2f3494df62.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77682e5af944001f1f865c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768316f4521001ea9b58d",
+            "order": 11,
+            "slug": "poorna-jagannathan",
+            "tag": "Poorna Jagannathan",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7494f465ff53ad1445d9498070898f6.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768316f4521001ea9b58d",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5e16359920b9e6003e3481df",
+            "slug": "toby-lawless",
+            "tag": "Toby Lawless",
+            "role": "Producer",
+            "key": "/library/people/5e16359920b9e6003e3481df",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "YouTube"
+          },
+          {
+            "tag": "HBO Max"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c081de98e47001eb082c6",
+            "tag": "Talking Dead"
+          },
+          {
+            "guid": "plex://show/5d9c0905ba6eb9001fbae8f0",
+            "tag": "13 Reasons Why: Beyond the Reasons"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "DC Studios"
+          },
+          {
+            "tag": "HBO Max"
+          },
+          {
+            "tag": "OBB Sound"
+          },
+          {
+            "tag": "DC"
+          }
+        ]
+      }
+    ]
+  }
+}

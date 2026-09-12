@@ -1,0 +1,305 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/8jELoQY7JosQaGOtLmlVHJzUzeq.jpg",
+        "guid": "plex://movie/5d776d5d96b655001fe472df",
+        "key": "/library/metadata/5d776d5d96b655001fe472df",
+        "ratingKey": "5d776d5d96b655001fe472df",
+        "studio": "Pixar",
+        "subtype": "short",
+        "summary": "The documentary short of Toy Story of why and how the feature length blockbuster sleeper movie became a success and helps to boost Pixar's popularity of making one of the few animation movie production companies in the world today, especially in North America.",
+        "type": "movie",
+        "addedAt": 850867200,
+        "audienceRating": 7.2,
+        "audienceRatingImage": "imdb://image.rating",
+        "duration": 1620000,
+        "imdbRatingCount": 160,
+        "originallyAvailableAt": "1996-12-18",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-story-behind-toy-story",
+        "slug": "the-story-behind-toy-story",
+        "thumb": "https://image.tmdb.org/t/p/original/ul7sy0m9GPifIgMaEXX8ivENqHP.jpg",
+        "title": "The Story Behind 'Toy Story'",
+        "userState": false,
+        "year": 1996,
+        "Image": [
+          {
+            "alt": "The Story Behind 'Toy Story'",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/8jELoQY7JosQaGOtLmlVHJzUzeq.jpg"
+          },
+          {
+            "alt": "The Story Behind 'Toy Story'",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/a/683a142553/ac8fcf62ab4af27d41bea12850d9e828.png"
+          },
+          {
+            "alt": "The Story Behind 'Toy Story'",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/a/683a142553/ac8fcf62ab4af27d41bea12850d9e828.png"
+          },
+          {
+            "alt": "The Story Behind 'Toy Story'",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/ul7sy0m9GPifIgMaEXX8ivENqHP.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0220070"
+          },
+          {
+            "id": "tmdb://464729"
+          },
+          {
+            "id": "tvdb://76676"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.457
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768256f4521001ea98a04",
+            "order": 1,
+            "slug": "corey-burton",
+            "tag": "Corey Burton",
+            "thumb": "https://metadata-static.plex.tv/3/people/329782adaa4867c4a78adceffc942b2e.jpg",
+            "role": "Narrator (voice)",
+            "key": "/library/people/5d7768256f4521001ea98a04",
+            "type": "person"
+          },
+          {
+            "id": "5d77682654f42c001f8c2650",
+            "order": 2,
+            "slug": "tom-hanks",
+            "tag": "Tom Hanks",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc5e983fa166811db7b1ab584c42df09.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77682654f42c001f8c2650",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e76",
+            "order": 3,
+            "slug": "john-lasseter",
+            "tag": "John Lasseter",
+            "thumb": "https://metadata-static.plex.tv/b/people/b245d71fdef328cab9241904bf3ade4f.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776828880197001ec90e76",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e79",
+            "order": 4,
+            "slug": "tim-allen",
+            "tag": "Tim Allen",
+            "thumb": "https://metadata-static.plex.tv/2/people/2e17bd76bb62964e3a626aa54664e142.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776828880197001ec90e79",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24aaf0",
+            "order": 5,
+            "slug": "pete-docter",
+            "tag": "Pete Docter",
+            "thumb": "https://metadata-static.plex.tv/5/people/5de94b88b667bda1169df53b3184542d.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776827151a60001f24aaf0",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd4dd",
+            "order": 6,
+            "slug": "laurie-metcalf",
+            "tag": "Laurie Metcalf",
+            "thumb": "https://metadata-static.plex.tv/4/people/47cc1cbfe420f65bbccd2cc938504265.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776826eb5d26001f1dd4dd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768338a7581001f12d181",
+            "order": 7,
+            "slug": "randy-newman",
+            "tag": "Randy Newman",
+            "thumb": "https://metadata-static.plex.tv/8/people/82334c891a875d969d5e22019346431f.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768338a7581001f12d181",
+            "type": "person"
+          },
+          {
+            "id": "5d7768273c3c2a001fbcb1c8",
+            "order": 8,
+            "slug": "annie-potts",
+            "tag": "Annie Potts",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e645749ab3c0520b78291ccea1d5c34.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768273c3c2a001fbcb1c8",
+            "type": "person"
+          },
+          {
+            "id": "5d776824961905001eb9097e",
+            "order": 9,
+            "slug": "john-ratzenberger",
+            "tag": "John Ratzenberger",
+            "thumb": "https://metadata-static.plex.tv/d/people/df4288c1598eb9a26649541c93d0ffa7.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776824961905001eb9097e",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c618",
+            "order": 10,
+            "slug": "don-rickles",
+            "tag": "Don Rickles",
+            "thumb": "https://metadata-static.plex.tv/8/people/816108232a49b583ea66fb36df1d6498.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776826999c64001ec2c618",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e7a",
+            "order": 11,
+            "slug": "jim-varney",
+            "tag": "Jim Varney",
+            "thumb": "https://metadata-static.plex.tv/2/people/24d3cbc70721ec071b49db8047a3d2b7.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776828880197001ec90e7a",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab18",
+            "order": 12,
+            "slug": "wallace-shawn",
+            "tag": "Wallace Shawn",
+            "thumb": "https://metadata-static.plex.tv/a/people/a8285fd57cda1effc4119eb9d63aec8f.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776827151a60001f24ab18",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "6a0c25c838ea8575c77fbd11",
+            "slug": "bruce-bailey-20",
+            "tag": "Bruce Bailey",
+            "role": "Producer",
+            "key": "/library/people/6a0c25c838ea8575c77fbd11",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776a6396b655001fded705",
+            "slug": "phil-savenick",
+            "tag": "Phil Savenick",
+            "role": "Writer",
+            "key": "/library/people/5d776a6396b655001fded705",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d776d1896b655001fe3f801",
+            "tag": "Naqoyqatsi"
+          },
+          {
+            "guid": "plex://movie/5d776a9551dd69001fe258ca",
+            "tag": "A Lego Brickumentary"
+          },
+          {
+            "guid": "plex://movie/5d776bf123d5a3001f515ca3",
+            "tag": "One Soldier's Story: The Journey of American Sniper"
+          },
+          {
+            "guid": "plex://movie/5d776d39ad5437001f7d0665",
+            "tag": "Maria By Callas"
+          },
+          {
+            "guid": "plex://movie/5e165afc61c6140040d94aeb",
+            "tag": "The Summers of It ‐ Chapter Two: It Ends"
+          },
+          {
+            "guid": "plex://movie/60bb4c6246aece002d43975f",
+            "tag": "Who Are You, Charlie Brown?"
+          },
+          {
+            "guid": "plex://movie/61323093d93109bf4c005c1a",
+            "tag": "Being James Bond: The Daniel Craig Story"
+          },
+          {
+            "guid": "plex://movie/5f4097025a76a80042e5a04a",
+            "tag": "Unknown Dimension: The Story of Paranormal Activity"
+          },
+          {
+            "guid": "plex://movie/61937902e7e49d3b465c3b4b",
+            "tag": "Embrace the Panda: Making Turning Red"
+          },
+          {
+            "guid": "plex://movie/61937902325ba140b2c2376d",
+            "tag": "Beyond Infinity: Buzz and the Journey to Lightyear"
+          },
+          {
+            "guid": "plex://movie/628cfec9a14c7c34c649ea9d",
+            "tag": "Beyond Infinity: Buzz and the Journey to Lightyear"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Pixar"
+          },
+          {
+            "tag": "Walt Disney Home Video"
+          },
+          {
+            "tag": "TV is OK"
+          }
+        ]
+      }
+    ]
+  }
+}

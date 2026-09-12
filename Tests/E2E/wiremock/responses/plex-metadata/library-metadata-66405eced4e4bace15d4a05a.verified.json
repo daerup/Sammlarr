@@ -1,0 +1,597 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/9/gracenote/9d3255ee817ab84cb13609cd34b3ed51.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/356666/banners/6a891defe3896.jpg",
+        "guid": "plex://movie/66405eced4e4bace15d4a05a",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/66405eced4e4bace15d4a05a",
+        "rating": 5,
+        "ratingKey": "66405eced4e4bace15d4a05a",
+        "studio": "Punch Palace Productions",
+        "summary": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
+        "tagline": "There's blood in the water.",
+        "type": "movie",
+        "addedAt": 1787097600,
+        "audienceRating": 8.6,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 40000000,
+        "contentRating": "R",
+        "duration": 5700000,
+        "imdbRatingCount": 18159,
+        "originallyAvailableAt": "2026-08-19",
+        "publicPagesURL": "https://watch.plex.tv/movie/mutiny-2026",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "revenue": 20824283,
+        "slug": "mutiny-2026",
+        "thumb": "https://metadata-static.plex.tv/6/gracenote/63a5487aa484e93b906f39fa6e65ae0d.jpg",
+        "title": "Mutiny",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/66405eced4e4bace15d4a05a/commonsensemedia",
+            "oneLiner": "Unapologetic, violent, action-packed Jason Statham thriller.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 2,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Mutiny",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/9/gracenote/9d3255ee817ab84cb13609cd34b3ed51.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/567c6d8f3f12c158a72b3e2575fc8ebb.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/356666/banners/6a891defe3896.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/7/683a142553/784a59f7b27e2c76a6618dd70fa7a7b7.png"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/7/683a142553/784a59f7b27e2c76a6618dd70fa7a7b7.png"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7432db17d113d1725dff3055b37f4762.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/6/gracenote/63a5487aa484e93b906f39fa6e65ae0d.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1892368e1d01eb550d6841135c78c3de.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/8/gracenote/87533667270e20dd01ce794926b49fc0.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt32338669"
+          },
+          {
+            "id": "tmdb://1288445"
+          },
+          {
+            "id": "tvdb://356666"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 5
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.439
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          },
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776826e6d55c002040af58",
+            "order": 1,
+            "slug": "jason-statham",
+            "tag": "Jason Statham",
+            "thumb": "https://metadata-static.plex.tv/c/people/c540bdd39873ee8e8612b0af06fc0d4c.jpg",
+            "role": "Cole Reed",
+            "key": "/library/people/5d776826e6d55c002040af58",
+            "type": "person"
+          },
+          {
+            "id": "5d7768387e9a3c0020c6d750",
+            "order": 2,
+            "slug": "annabelle-wallis",
+            "tag": "Annabelle Wallis",
+            "thumb": "https://metadata-static.plex.tv/4/people/45f5684c1bbe43fc8e193dde9a262ad6.jpg",
+            "role": "Angie Ellis",
+            "key": "/library/people/5d7768387e9a3c0020c6d750",
+            "type": "person"
+          },
+          {
+            "id": "5d7768889ab54400214e75cb",
+            "order": 3,
+            "slug": "roland-moller",
+            "tag": "Roland Møller",
+            "thumb": "https://metadata-static.plex.tv/0/people/05f921f993287173e48cdd92942231a5.jpg",
+            "role": "Captain Marko Madsen",
+            "key": "/library/people/5d7768889ab54400214e75cb",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a85719b001f3a1617",
+            "order": 4,
+            "slug": "ramon-tikaram",
+            "tag": "Ramon Tikaram",
+            "thumb": "https://metadata-static.plex.tv/4/people/4db53664485d19375da4503dece45131.jpg",
+            "role": "Tibu Campallo",
+            "key": "/library/people/5d77682a85719b001f3a1617",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ea9ab54400214f87e6",
+            "order": 5,
+            "slug": "arnas-fedaravicius",
+            "tag": "Arnas Fedaravičius",
+            "thumb": "https://metadata-static.plex.tv/7/people/7cd848251c29f5d4d10b5b635bdd31bb.jpg",
+            "role": "Mateo Pineda",
+            "key": "/library/people/5d7769ea9ab54400214f87e6",
+            "type": "person"
+          },
+          {
+            "id": "5d776b097a53e9001e717dd1",
+            "order": 6,
+            "slug": "jason-wong",
+            "tag": "Jason Wong",
+            "thumb": "https://metadata-static.plex.tv/c/people/c6b97d158911c5ffdb448416fbdabb40.jpg",
+            "role": "Taran",
+            "key": "/library/people/5d776b097a53e9001e717dd1",
+            "type": "person"
+          },
+          {
+            "id": "5d776826961905001eb90db9",
+            "order": 7,
+            "slug": "adrian-lester",
+            "tag": "Adrian Lester",
+            "thumb": "https://metadata-static.plex.tv/a/people/adc16ff0c42f0593ac0afb179ce71019.jpg",
+            "role": "Captain Adam Spencer",
+            "key": "/library/people/5d776826961905001eb90db9",
+            "type": "person"
+          },
+          {
+            "id": "5e1651a2bc1372003ea87a37",
+            "order": 8,
+            "slug": "chaneil-kular",
+            "tag": "Chaneil Kular",
+            "thumb": "https://metadata-static.plex.tv/3/people/3025d32454379ea5680cdaa6889167f2.jpg",
+            "role": "Kameron Campallo",
+            "key": "/library/people/5e1651a2bc1372003ea87a37",
+            "type": "person"
+          },
+          {
+            "id": "5e679271f1b04b003f000be4",
+            "order": 9,
+            "slug": "andrew-john-tait",
+            "tag": "Andrew John Tait",
+            "thumb": "https://metadata-static.plex.tv/8/people/826280b5598d230c3f5ee1cf8b11bb84.jpg",
+            "role": "BK Lobby Businessman",
+            "key": "/library/people/5e679271f1b04b003f000be4",
+            "type": "person"
+          },
+          {
+            "id": "5f404e6203883a0040b94ca1",
+            "order": 10,
+            "slug": "simon-kluth",
+            "tag": "Simon Kluth",
+            "thumb": "https://metadata-static.plex.tv/8/people/8e3f942133ca15cfac3a5e50e894ef91.jpg",
+            "role": "Jaran Daniles",
+            "key": "/library/people/5f404e6203883a0040b94ca1",
+            "type": "person"
+          },
+          {
+            "id": "5d776ab0ad5437001f785b63",
+            "order": 11,
+            "slug": "andrei-nova-1",
+            "tag": "Andrei Nova",
+            "thumb": "https://metadata-static.plex.tv/people/5d776ab0ad5437001f785b63.jpg",
+            "role": "BK Party Businessman",
+            "key": "/library/people/5d776ab0ad5437001f785b63",
+            "type": "person"
+          },
+          {
+            "id": "5e6240f3a57b06003ed4eb5e",
+            "order": 12,
+            "slug": "donking-rongavilla",
+            "tag": "Donking Rongavilla",
+            "role": "Employee of Jaran Daniles",
+            "key": "/library/people/5e6240f3a57b06003ed4eb5e",
+            "type": "person"
+          },
+          {
+            "id": "6a86ec565d3e054eb86c7643",
+            "order": 13,
+            "slug": "eugenie-richet",
+            "tag": "Eugénie Richet",
+            "role": "Violette Ellis",
+            "key": "/library/people/6a86ec565d3e054eb86c7643",
+            "type": "person"
+          },
+          {
+            "id": "6a86ec565d3e054eb86c7644",
+            "order": 14,
+            "slug": "tiffany-soithongsuk-1",
+            "tag": "Tiffany Soithongsuk",
+            "role": "Reporter #1",
+            "key": "/library/people/6a86ec565d3e054eb86c7644",
+            "type": "person"
+          },
+          {
+            "id": "5d776af6ad5437001f78e321",
+            "order": 15,
+            "slug": "tayme-thapthimthong",
+            "tag": "Tayme Thapthimthong",
+            "thumb": "https://metadata-static.plex.tv/9/people/99072cd8bfb742fcf4cc73e5541cbf10.jpg",
+            "role": "BK Detective",
+            "key": "/library/people/5d776af6ad5437001f78e321",
+            "type": "person"
+          },
+          {
+            "id": "5f405395cae2c60042f6c921",
+            "order": 16,
+            "slug": "marvin-berrembou-1",
+            "tag": "Marvin Berrembou",
+            "thumb": "https://metadata-static.plex.tv/f/people/fbf59f64dce89dcd6a234dff70091894.jpg",
+            "role": "Josef",
+            "key": "/library/people/5f405395cae2c60042f6c921",
+            "type": "person"
+          },
+          {
+            "id": "5d776835961905001eb93f52",
+            "order": 17,
+            "slug": "marvin-campbell",
+            "tag": "Marvin Campbell",
+            "thumb": "https://metadata-static.plex.tv/people/5d776835961905001eb93f52.jpg",
+            "role": "Simon",
+            "key": "/library/people/5d776835961905001eb93f52",
+            "type": "person"
+          },
+          {
+            "id": "61f4f61b043de88e611e84fa",
+            "order": 18,
+            "slug": "rumi-sutton",
+            "tag": "Rumi Sutton",
+            "thumb": "https://metadata-static.plex.tv/9/people/94cd761f4c7448a0dc421c3900ea1620.jpg",
+            "role": "Seng",
+            "key": "/library/people/61f4f61b043de88e611e84fa",
+            "type": "person"
+          },
+          {
+            "id": "6a86ec565d3e054eb86c7645",
+            "order": 19,
+            "slug": "miryn-phang",
+            "tag": "Miryn Phang",
+            "role": "Boon",
+            "key": "/library/people/6a86ec565d3e054eb86c7645",
+            "type": "person"
+          },
+          {
+            "id": "632091dd4ed9422f7a9f90e8",
+            "order": 20,
+            "slug": "isky-fay-1",
+            "tag": "Isky Fay",
+            "role": "Dara",
+            "key": "/library/people/632091dd4ed9422f7a9f90e8",
+            "type": "person"
+          },
+          {
+            "id": "5d776836880197001ec93696",
+            "order": 21,
+            "slug": "ben-cartwright",
+            "tag": "Ben Cartwright",
+            "thumb": "https://metadata-static.plex.tv/people/5d776836880197001ec93696.jpg",
+            "role": "Lieutenant Underwood",
+            "key": "/library/people/5d776836880197001ec93696",
+            "type": "person"
+          },
+          {
+            "id": "5d777040ad5437001f81d8ed",
+            "order": 22,
+            "slug": "benjamin-sarpong-broni",
+            "tag": "Benjamin Sarpong-Broni",
+            "thumb": "https://metadata-static.plex.tv/8/people/89bbf7a726eccd7ff1621f76fc311de5.jpg",
+            "role": "Petty Officer Yates",
+            "key": "/library/people/5d777040ad5437001f81d8ed",
+            "type": "person"
+          },
+          {
+            "id": "5d77697aad5437001f75e0fe",
+            "order": 23,
+            "slug": "dacio-caballero",
+            "tag": "Dacio Caballero",
+            "thumb": "https://metadata-static.plex.tv/e/people/ebecad22a15383dc3138afe771fe1856.jpg",
+            "role": "Diego",
+            "key": "/library/people/5d77697aad5437001f75e0fe",
+            "type": "person"
+          },
+          {
+            "id": "5d776ab0ad5437001f785cdf",
+            "order": 24,
+            "slug": "lee-charles",
+            "tag": "Lee Charles",
+            "thumb": "https://metadata-static.plex.tv/8/people/8c03d88da50d45c62f2c1f16dcc7521a.jpg",
+            "role": "Padraig",
+            "key": "/library/people/5d776ab0ad5437001f785cdf",
+            "type": "person"
+          },
+          {
+            "id": "5d776e6e96b655001fe672a4",
+            "order": 25,
+            "slug": "steven-blades",
+            "tag": "Steven Blades",
+            "thumb": "https://metadata-static.plex.tv/e/people/e88538d2d15b1b864072800aa7339138.jpg",
+            "role": "Commander Tully",
+            "key": "/library/people/5d776e6e96b655001fe672a4",
+            "type": "person"
+          },
+          {
+            "id": "5d776d94594b2b001e70c9a2",
+            "order": 26,
+            "slug": "tom-christian-2",
+            "tag": "Tom Christian",
+            "thumb": "https://metadata-static.plex.tv/c/people/c739c4cffa4b9b08a92d7871a044eaba.jpg",
+            "role": "Bertus",
+            "key": "/library/people/5d776d94594b2b001e70c9a2",
+            "type": "person"
+          },
+          {
+            "id": "5d776c1f23d5a3001f517d2b",
+            "order": 27,
+            "slug": "matthew-acton",
+            "tag": "Matthew Acton",
+            "role": "Radar Officer Turner",
+            "key": "/library/people/5d776c1f23d5a3001f517d2b",
+            "type": "person"
+          },
+          {
+            "id": "5e164ebe61c6140040d8446b",
+            "order": 28,
+            "slug": "godefroy-ryckewaert-1",
+            "tag": "Godefroy Ryckewaert",
+            "role": "Engineers Mate",
+            "key": "/library/people/5e164ebe61c6140040d8446b",
+            "type": "person"
+          },
+          {
+            "id": "5f40245152f200004151113b",
+            "order": 29,
+            "slug": "dom-dumaresq",
+            "tag": "Dom Dumaresq",
+            "role": "Lead Crewman",
+            "key": "/library/people/5f40245152f200004151113b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe742bf3e560040b31564",
+            "order": 30,
+            "slug": "mark-archer",
+            "tag": "Mark Archer",
+            "thumb": "https://metadata-static.plex.tv/2/people/2cfedb78e32015b3fb9a737891cb73f2.jpg",
+            "role": "Radar Officer Jupiter",
+            "key": "/library/people/5f3fe742bf3e560040b31564",
+            "type": "person"
+          },
+          {
+            "id": "658403a8811779aa7e4d45e0",
+            "order": 31,
+            "slug": "theodore-zammit",
+            "tag": "Theodore Zammit",
+            "thumb": "https://metadata-static.plex.tv/a/people/aba3220009c1cded84cedf01b9ee1f01.jpg",
+            "role": "Navy Seal",
+            "key": "/library/people/658403a8811779aa7e4d45e0",
+            "type": "person"
+          },
+          {
+            "id": "6319a4d3b1d70c5de0987ccd",
+            "order": 32,
+            "slug": "iverson-yabut",
+            "tag": "Iverson Yabut",
+            "role": "Reporter #2",
+            "key": "/library/people/6319a4d3b1d70c5de0987ccd",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776833f54112001f5bd340",
+            "slug": "jean-francois-richet",
+            "tag": "Jean-François Richet",
+            "thumb": "https://metadata-static.plex.tv/a/people/ad178ed4dc2fdff4c3c336e6ccd55823.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776833f54112001f5bd340",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776826e6d55c002040af58",
+            "slug": "jason-statham",
+            "tag": "Jason Statham",
+            "thumb": "https://metadata-static.plex.tv/c/people/c540bdd39873ee8e8612b0af06fc0d4c.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776826e6d55c002040af58",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea9a1a5",
+            "slug": "marc-butan",
+            "tag": "Marc Butan",
+            "thumb": "https://metadata-static.plex.tv/9/people/9695da7422e88fcabe6d0723ccb2e720.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682b6f4521001ea9a1a5",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f405f211ae71000410d389d",
+            "slug": "lindsay-michel",
+            "tag": "Lindsay Michel",
+            "role": "Writer",
+            "key": "/library/people/5f405f211ae71000410d389d",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d7e9a3c0020c6e65a",
+            "slug": "j-p-davis",
+            "tag": "J.P. Davis",
+            "role": "Writer",
+            "key": "/library/people/5d77683d7e9a3c0020c6e65a",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/62d7d0d6c1a861d32b8a9a93",
+            "tag": "Chief of Station"
+          },
+          {
+            "guid": "plex://movie/640638b6e871757018171963",
+            "tag": "One More Shot"
+          },
+          {
+            "guid": "plex://movie/64973f22e570d4e9ffcdf065",
+            "tag": "Take Cover"
+          },
+          {
+            "guid": "plex://movie/6667c13a84420ebfab4959cf",
+            "tag": "Border Hunters"
+          },
+          {
+            "guid": "plex://movie/5d776b357a53e9001e71dfa5",
+            "tag": "Expend4bles"
+          },
+          {
+            "guid": "plex://movie/5d776c437a53e9001e73ea3d",
+            "tag": "The Commuter"
+          },
+          {
+            "guid": "plex://movie/5d777086dd931c001e38eac0",
+            "tag": "Without Remorse"
+          },
+          {
+            "guid": "plex://movie/5f40d613cae2c600420d5d5f",
+            "tag": "The Courier"
+          },
+          {
+            "guid": "plex://movie/5d776ceb96b655001fe3b01f",
+            "tag": "Dangerous"
+          },
+          {
+            "guid": "plex://movie/5d77683261141d001fb14dfa",
+            "tag": "Under Siege"
+          },
+          {
+            "guid": "plex://movie/5f6c93c69aa24a00408fade6",
+            "tag": "Hounds of War"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Punch Palace Productions"
+          },
+          {
+            "tag": "MadRiver Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A vengeful man uncovers an international conspiracy as he battles thugs aboard a cargo ship.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

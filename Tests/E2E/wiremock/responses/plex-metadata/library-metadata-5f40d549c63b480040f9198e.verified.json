@@ -1,0 +1,143 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/5f40d549c63b480040f9198e",
+        "key": "/library/metadata/5f40d549c63b480040f9198e",
+        "ratingKey": "5f40d549c63b480040f9198e",
+        "studio": "BuddyboyFilms",
+        "subtype": "short",
+        "summary": "when the city of Guuntheim has their pizza time stolen by an anonymous figure batman is looking for it until he meets birdman who changes everything.",
+        "type": "movie",
+        "addedAt": 1492905600,
+        "audienceRating": 9.4,
+        "audienceRatingImage": "imdb://image.rating",
+        "duration": 600000,
+        "imdbRatingCount": 10,
+        "originallyAvailableAt": "2017-04-23",
+        "publicPagesURL": "https://watch.plex.tv/movie/batman-and-the-pizza-time-part-1",
+        "slug": "batman-and-the-pizza-time-part-1",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BMzAwYzY0ZWEtMTM0Ni00NzQ3LTk3YmUtYThmMmIzNjE0MjYzXkEyXkFqcGc@._V1_.jpg",
+        "title": "Batman and the Pizza Time part 1",
+        "userState": false,
+        "year": 2017,
+        "Image": [
+          {
+            "alt": "Batman and the Pizza Time part 1",
+            "type": "coverPoster",
+            "url": "https://m.media-amazon.com/images/M/MV5BMzAwYzY0ZWEtMTM0Ni00NzQ3LTk3YmUtYThmMmIzNjE0MjYzXkEyXkFqcGc@._V1_.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt7959470"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 9.4
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Australia"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5f406c243e5306003e5e3e6c",
+            "order": 1,
+            "slug": "augie-berelov",
+            "tag": "Augie Berelov",
+            "role": "Batman",
+            "key": "/library/people/5f406c243e5306003e5e3e6c",
+            "type": "person"
+          },
+          {
+            "id": "5f406c235a76a80042de56ae",
+            "order": 2,
+            "slug": "nico-berelov",
+            "tag": "Nico Berelov",
+            "role": "Birdman",
+            "key": "/library/people/5f406c235a76a80042de56ae",
+            "type": "person"
+          },
+          {
+            "id": "5f406c2502101b0040fe09f5",
+            "order": 3,
+            "slug": "cody-carson-2",
+            "tag": "Cody Carson",
+            "role": "El Blanko",
+            "key": "/library/people/5f406c2502101b0040fe09f5",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f406c235a76a80042de56ae",
+            "slug": "nico-berelov",
+            "tag": "Nico Berelov",
+            "role": "Director",
+            "key": "/library/people/5f406c235a76a80042de56ae",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f406c2502101b0040fe09f5",
+            "slug": "cody-carson-2",
+            "tag": "Cody Carson",
+            "role": "Producer",
+            "key": "/library/people/5f406c2502101b0040fe09f5",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f406c235a76a80042de56ae",
+            "slug": "nico-berelov",
+            "tag": "Nico Berelov",
+            "role": "Writer",
+            "key": "/library/people/5f406c235a76a80042de56ae",
+            "type": "person"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "BuddyboyFilms"
+          }
+        ]
+      }
+    ]
+  }
+}

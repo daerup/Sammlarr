@@ -1,0 +1,466 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/2/gracenote/216d0c2907f2167e9ccebafda49988cf.jpg",
+        "banner": "https://assets.fanart.tv/fanart/coyote-657db198741c1.jpg",
+        "guid": "plex://movie/620540dbaa7b166e0ee3de63",
+        "key": "/library/metadata/620540dbaa7b166e0ee3de63",
+        "ratingKey": "620540dbaa7b166e0ee3de63",
+        "studio": "Addy Films",
+        "summary": "A story of forbidden love in a dystopian future where teleportation technology enables two refugees to escape genocide. When they trust the wrong back-alley teleporter, Ekaterina and Anya are separated. In a desperate attempt to be reunited, our heroines are entwined in an insidious human trafficking ring involving corrupt politicians.",
+        "tagline": "Imagine a future without borders.",
+        "type": "movie",
+        "addedAt": 1687219200,
+        "audienceRating": 3.7,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "TV-14",
+        "duration": 6060000,
+        "imdbRatingCount": 488,
+        "originallyAvailableAt": "2023-06-20",
+        "publicPagesURL": "https://watch.plex.tv/movie/coyote-2023",
+        "slug": "coyote-2023",
+        "thumb": "https://metadata-static.plex.tv/a/gracenote/af532223d57307fb356a80b1178403c9.jpg",
+        "title": "Coyote",
+        "userState": false,
+        "year": 2023,
+        "Image": [
+          {
+            "alt": "Coyote",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/2/gracenote/216d0c2907f2167e9ccebafda49988cf.jpg"
+          },
+          {
+            "alt": "Coyote",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/93444f76681e539938ad60f0007d12a9.jpg"
+          },
+          {
+            "alt": "Coyote",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/coyote-657db198741c1.jpg"
+          },
+          {
+            "alt": "Coyote",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/e/009125463f/e2959df46d35e572a33aa00b7f6523f1.png"
+          },
+          {
+            "alt": "Coyote",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/e/009125463f/e2959df46d35e572a33aa00b7f6523f1.png"
+          },
+          {
+            "alt": "Coyote",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6c05af30ce34aa338451dcb4da23390f.jpg"
+          },
+          {
+            "alt": "Coyote",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/a/gracenote/af532223d57307fb356a80b1178403c9.jpg"
+          },
+          {
+            "alt": "Coyote",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2610d8344c60c071f7cfcb05c827299d.jpg"
+          },
+          {
+            "alt": "Coyote",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d8ab4afd445db71eb87449680d2cbfbf.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f308fddd001f28ee5f",
+            "id": "5d9c07f308fddd001f28ee5f",
+            "key": "/library/sections/home/all?genre=5d9c07f308fddd001f28ee5f",
+            "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+            "slug": "suspense",
+            "tag": "Suspense",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt17592600"
+          },
+          {
+            "id": "tmdb://1094717"
+          },
+          {
+            "id": "tvdb://355495"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5.333
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776c9923d5a3001f51d24c",
+            "order": 1,
+            "slug": "therica-wilson-read",
+            "tag": "Therica Wilson-Read",
+            "thumb": "https://metadata-static.plex.tv/3/people/39839d970986bf110de253032e1480f2.jpg",
+            "role": "Ekaterina",
+            "key": "/library/people/5d776c9923d5a3001f51d24c",
+            "type": "person"
+          },
+          {
+            "id": "5e1648a2cd0850003b770f39",
+            "order": 2,
+            "slug": "borislava-stratieva",
+            "tag": "Borislava Stratieva",
+            "thumb": "https://metadata-static.plex.tv/5/people/561eec70859b80e08e5552f869ad25f8.jpg",
+            "role": "Anya",
+            "key": "/library/people/5e1648a2cd0850003b770f39",
+            "type": "person"
+          },
+          {
+            "id": "6151d194d3ebde0851f02f2e",
+            "order": 3,
+            "slug": "ruhtxjiaih-bellenea-1",
+            "tag": "Ruhtxjiaïh Bèllènéa",
+            "role": "Taraji",
+            "key": "/library/people/6151d194d3ebde0851f02f2e",
+            "type": "person"
+          },
+          {
+            "id": "5d776e5afb0d55001f5be869",
+            "order": 4,
+            "slug": "ailish-symons",
+            "tag": "Ailish Symons",
+            "role": "Orla Miller",
+            "key": "/library/people/5d776e5afb0d55001f5be869",
+            "type": "person"
+          },
+          {
+            "id": "6a0c084984d88b67dae0f762",
+            "order": 5,
+            "slug": "chris-kyriacou-6",
+            "tag": "Chris Kyriacou",
+            "role": "Vas Niko",
+            "key": "/library/people/6a0c084984d88b67dae0f762",
+            "type": "person"
+          },
+          {
+            "id": "63242785f26ffb4da82f725d",
+            "order": 6,
+            "slug": "beruce-khan-1",
+            "tag": "Beruce Khan",
+            "thumb": "https://metadata-static.plex.tv/3/people/3c1df8bcce666870ce43c072020a70ab.jpg",
+            "role": "Richard Baqri",
+            "key": "/library/people/63242785f26ffb4da82f725d",
+            "type": "person"
+          },
+          {
+            "id": "5d776895decfcd001f2ed164",
+            "order": 7,
+            "slug": "richard-glover",
+            "tag": "Richard Glover",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7bc667d3df7604262396aa8539b2b5c.jpg",
+            "role": "Mr. Blue",
+            "key": "/library/people/5d776895decfcd001f2ed164",
+            "type": "person"
+          },
+          {
+            "id": "5f406c4ee065380042f42b0c",
+            "order": 8,
+            "slug": "tian-chaudhry",
+            "tag": "Tian Chaudhry",
+            "thumb": "https://metadata-static.plex.tv/6/people/6234e1647a7ab113d61bee4c7afcddf7.jpg",
+            "role": "Chyou",
+            "key": "/library/people/5f406c4ee065380042f42b0c",
+            "type": "person"
+          },
+          {
+            "id": "5f57c738f5d0440040a1168b",
+            "order": 9,
+            "slug": "sonia-amini",
+            "tag": "Sonia Amini",
+            "role": "Salima",
+            "key": "/library/people/5f57c738f5d0440040a1168b",
+            "type": "person"
+          },
+          {
+            "id": "647dcefce30d563af913f974",
+            "order": 10,
+            "slug": "julian-feria-1",
+            "tag": "Julian Feria",
+            "role": "Anya's Father",
+            "key": "/library/people/647dcefce30d563af913f974",
+            "type": "person"
+          },
+          {
+            "id": "647dcefcd1361aeb94df49fa",
+            "order": 11,
+            "slug": "harry-carr-6",
+            "tag": "Harry Carr",
+            "role": "Dmitri",
+            "key": "/library/people/647dcefcd1361aeb94df49fa",
+            "type": "person"
+          },
+          {
+            "id": "647dcefc7437439098d0e330",
+            "order": 12,
+            "slug": "emily-rose-ambler-1",
+            "tag": "Emily Rose Ambler",
+            "role": "Marzanna",
+            "key": "/library/people/647dcefc7437439098d0e330",
+            "type": "person"
+          },
+          {
+            "id": "60b65b6e99f1fc002dd18b34",
+            "order": 13,
+            "slug": "barney-jones-11",
+            "tag": "Barney Jones",
+            "role": "Peter",
+            "key": "/library/people/60b65b6e99f1fc002dd18b34",
+            "type": "person"
+          },
+          {
+            "id": "5e165ad14c78f7003e81a10e",
+            "order": 14,
+            "slug": "dana-pacheco-2",
+            "tag": "Dana Pacheco",
+            "role": "Janet",
+            "key": "/library/people/5e165ad14c78f7003e81a10e",
+            "type": "person"
+          },
+          {
+            "id": "5f400866e4fc61003703370b",
+            "order": 15,
+            "slug": "tom-lewin",
+            "tag": "Tom Lewin",
+            "thumb": "https://metadata-static.plex.tv/8/people/8854c0644d62fb1a566a371637bcb4a1.jpg",
+            "role": "Hunter",
+            "key": "/library/people/5f400866e4fc61003703370b",
+            "type": "person"
+          },
+          {
+            "id": "5d776e6e594b2b001e723634",
+            "order": 16,
+            "slug": "yinka-awoni",
+            "tag": "Yinka Awoni",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d01cffd354d4de17397fafd865bb1c7.jpg",
+            "role": "Professor Adebiyi Jelani",
+            "key": "/library/people/5d776e6e594b2b001e723634",
+            "type": "person"
+          },
+          {
+            "id": "642c11f877fb95b79e5dce44",
+            "order": 17,
+            "slug": "steve-cassling-1",
+            "tag": "Steve Cassling",
+            "role": "Ambassador Crawford",
+            "key": "/library/people/642c11f877fb95b79e5dce44",
+            "type": "person"
+          },
+          {
+            "id": "5f78a09058ce2e0041ba9c02",
+            "order": 18,
+            "slug": "alexander-dobrev-1",
+            "tag": "Alexander Dobrev",
+            "role": "Volkov's Lover",
+            "key": "/library/people/5f78a09058ce2e0041ba9c02",
+            "type": "person"
+          },
+          {
+            "id": "65df2132f81a91fe4df4c621",
+            "order": 19,
+            "slug": "steve-gaghagen-1",
+            "tag": "Steve Gaghagen",
+            "role": "Clive Beatty",
+            "key": "/library/people/65df2132f81a91fe4df4c621",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "627e6b2f0f7b3effc4e074af",
+            "slug": "dustin-curtis-murphy-1",
+            "tag": "Dustin Curtis Murphy",
+            "role": "Director",
+            "key": "/library/people/627e6b2f0f7b3effc4e074af",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f40169502101b0040f3a64d",
+            "slug": "dustin-curtis-murphy",
+            "tag": "Dustin Curtis Murphy",
+            "role": "Producer",
+            "key": "/library/people/5f40169502101b0040f3a64d",
+            "type": "person"
+          },
+          {
+            "id": "5d7770acf617c9002019f998",
+            "slug": "chris-nicou",
+            "tag": "Chris Nicou",
+            "role": "Producer",
+            "key": "/library/people/5d7770acf617c9002019f998",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbaff52f200004147c30d",
+            "slug": "addy-raja-1",
+            "tag": "Addy Raja",
+            "role": "Producer",
+            "key": "/library/people/5f3fbaff52f200004147c30d",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "627e6b2f0f7b3effc4e074af",
+            "slug": "dustin-curtis-murphy-1",
+            "tag": "Dustin Curtis Murphy",
+            "role": "Writer",
+            "key": "/library/people/627e6b2f0f7b3effc4e074af",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.994,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.993,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.981,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe25e93b86d951fb80fb",
+            "score": 0.874,
+            "tag": "gripping"
+          },
+          {
+            "id": "65afbe25e93b86d951fb81c8",
+            "score": 0.823,
+            "tag": "gritty"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.674,
+            "tag": "mysterious"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/632caab7f58f53a8223651bb",
+            "tag": "Azrael"
+          },
+          {
+            "guid": "plex://movie/5d77683aeb5d26001f1e1cff",
+            "tag": "Doomsday"
+          },
+          {
+            "guid": "plex://movie/5d776d16fb0d55001f5972a3",
+            "tag": "The Resurrected"
+          },
+          {
+            "guid": "plex://movie/5d9f3cc5ca3253001ef30d46",
+            "tag": "Southbound"
+          },
+          {
+            "guid": "plex://movie/5d9f3cffadeb7a0021ce9fb8",
+            "tag": "Daylight's End"
+          },
+          {
+            "guid": "plex://movie/5d9f3587adeb7a0021ce2691",
+            "tag": "Stake Land"
+          },
+          {
+            "guid": "plex://movie/5d77705c594b2b001e749874",
+            "tag": "Darc"
+          },
+          {
+            "guid": "plex://movie/5e35eca8ffc412003db038f4",
+            "tag": "Infinity Pool"
+          },
+          {
+            "guid": "plex://movie/5ee74261a427f500423f063a",
+            "tag": "Books of Blood"
+          },
+          {
+            "guid": "plex://movie/605a29ea5ea98a002c7781d5",
+            "tag": "God Is a Bullet"
+          },
+          {
+            "guid": "plex://movie/605a321caee1af002ca29648",
+            "tag": "God Is A Bullet"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Addy Films"
+          },
+          {
+            "tag": "Streetcat Productions"
+          },
+          {
+            "tag": "Unsolicited Materials"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Two refugees are separated when they trust the wrong back-alley teleporter.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

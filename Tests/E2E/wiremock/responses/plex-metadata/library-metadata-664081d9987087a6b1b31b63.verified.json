@@ -1,0 +1,521 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/b/gracenote/bfa9da96d58b5d15b911809a0c985e66.jpg",
+        "banner": "https://assets.fanart.tv/fanart/batman-knightfall-part-1-knightfall-6a8ed2075e042.jpg",
+        "guid": "plex://movie/664081d9987087a6b1b31b63",
+        "key": "/library/metadata/664081d9987087a6b1b31b63",
+        "ratingKey": "664081d9987087a6b1b31b63",
+        "studio": "Warner Bros. Animation",
+        "summary": "Arkham Asylum has been destroyed, and all its inmates have been unleashed upon Gotham City. As Batman races to round up some of his greatest enemies, he is pushed to his physical and mental limits and into a final confrontation with a new threat: the man called Bane!",
+        "type": "movie",
+        "addedAt": 1787616000,
+        "audienceRating": 9.4,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "contentRating": "R",
+        "duration": 4740000,
+        "imdbRatingCount": 6483,
+        "originallyAvailableAt": "2026-08-25",
+        "publicPagesURL": "https://watch.plex.tv/movie/batman-knightfall-part-1-knightfall",
+        "slug": "batman-knightfall-part-1-knightfall",
+        "thumb": "https://metadata-static.plex.tv/2/gracenote/2221576265d3a840ae15df97b560cd47.jpg",
+        "title": "Batman: Knightfall - Part 1: Knightfall",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/b/gracenote/bfa9da96d58b5d15b911809a0c985e66.jpg"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7c27663d95631f390d388ba7c8b1d980.jpg"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/batman-knightfall-part-1-knightfall-6a8ed2075e042.jpg"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/d/683a142553/d661e1b5e1351d657460a5c0cfe29ac8.png"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/d/683a142553/d661e1b5e1351d657460a5c0cfe29ac8.png"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a7ef0ebe0a1a748da5bbfcf522c132a4.jpg"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2221576265d3a840ae15df97b560cd47.jpg"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f10b5906b78e0da7a660f1a017a02a9f.jpg"
+          },
+          {
+            "alt": "Batman: Knightfall - Part 1: Knightfall",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cb08c4188ecca19a55e8d325b4dc8a90.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt32333324"
+          },
+          {
+            "id": "tmdb://1560520"
+          },
+          {
+            "id": "tvdb://373216"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 9.136
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/lMfPpoLkYxdwZ6ZBiZyW0f1uJjf.jpg",
+            "guid": "plex://collection/68eba3caedf4a05a4738edb8",
+            "key": "/library/collections/68eba3caedf4a05a4738edb8/children",
+            "summary": "Adaptation of the storyline of the same name.",
+            "thumb": "https://image.tmdb.org/t/p/original/cqEmZZlr05YF9oKKEvh54Yh7z6p.jpg",
+            "tag": "Batman: Knightfall Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776833eb5d26001f1e02a7",
+            "order": 1,
+            "slug": "anson-mount",
+            "tag": "Anson Mount",
+            "thumb": "https://metadata-static.plex.tv/2/people/28cbe22261c22769cc73b861c4e96117.jpg",
+            "role": "Batman / Bruce Wayne (voice)",
+            "key": "/library/people/5d776833eb5d26001f1e02a7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b8decfcd001f2f0e76",
+            "order": 2,
+            "slug": "michael-mando",
+            "tag": "Michael Mando",
+            "thumb": "https://metadata-static.plex.tv/8/people/89f67264cf479859138220e0167dd753.jpg",
+            "role": "Bane (voice)",
+            "key": "/library/people/5d7768b8decfcd001f2f0e76",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9ae12",
+            "order": 3,
+            "slug": "pablo-schreiber",
+            "tag": "Pablo Schreiber",
+            "thumb": "https://metadata-static.plex.tv/0/people/04c665fa8afeab83b3e48a416fecf26b.jpg",
+            "role": "Azrael / Jean-Paul Valley (voice)",
+            "key": "/library/people/5d77682f6f4521001ea9ae12",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e2e80df001ebdd858",
+            "order": 4,
+            "slug": "jeff-bennett",
+            "tag": "Jeff Bennett",
+            "thumb": "https://metadata-static.plex.tv/d/people/ddd3945c42a8890523e7a94648425453.jpg",
+            "role": "Ventriloquist / Scarface / Vincent (voice)",
+            "key": "/library/people/5d77682e2e80df001ebdd858",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd01ba4f07a00420f571c",
+            "order": 5,
+            "slug": "luis-bermudez-1",
+            "tag": "Luis Bermudez",
+            "thumb": "https://metadata-static.plex.tv/5/people/56b28256471a145079add423df096994.jpg",
+            "role": "Catman / Doctor / Guard (voice)",
+            "key": "/library/people/5f3fd01ba4f07a00420f571c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768258718ba001e3116e4",
+            "order": 6,
+            "slug": "bruce-boxleitner",
+            "tag": "Bruce Boxleitner",
+            "thumb": "https://metadata-static.plex.tv/5/people/5c510c6b43a90a0f35a8139509261752.jpg",
+            "role": "Commissioner Jim Gordon (voice)",
+            "key": "/library/people/5d7768258718ba001e3116e4",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f796b655001fddf4cd",
+            "order": 7,
+            "slug": "jessica-camacho",
+            "tag": "Jessica Camacho",
+            "thumb": "https://metadata-static.plex.tv/0/people/0c202b008076fe1dda6d95f916f8d25f.jpg",
+            "role": "Renee Montoya (voice)",
+            "key": "/library/people/5d7769f796b655001fddf4cd",
+            "type": "person"
+          },
+          {
+            "id": "5d77682cf54112001f5bc8b8",
+            "order": 8,
+            "slug": "anthony-crivello",
+            "tag": "Anthony Crivello",
+            "thumb": "https://metadata-static.plex.tv/8/people/8234b78fcfe6a2de3e2650455d71198d.jpg",
+            "role": "Franco Bertinelli / Priest / Prisoner (voice)",
+            "key": "/library/people/5d77682cf54112001f5bc8b8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa30",
+            "order": 9,
+            "slug": "david-dastmalchian",
+            "tag": "David Dastmalchian",
+            "thumb": "https://metadata-static.plex.tv/4/people/402299efa1543cb08682f5ec12aa18ff.jpg",
+            "role": "The Riddler (voice)",
+            "key": "/library/people/5d7768267e9a3c0020c6aa30",
+            "type": "person"
+          },
+          {
+            "id": "5d776826e6d55c002040af5e",
+            "order": 10,
+            "slug": "jason-flemyng",
+            "tag": "Jason Flemyng",
+            "thumb": "https://metadata-static.plex.tv/9/people/9d235839c18d005b736e98c90251beed.jpg",
+            "role": "Mad Hatter (voice)",
+            "key": "/library/people/5d776826e6d55c002040af5e",
+            "type": "person"
+          },
+          {
+            "id": "5d776a817a53e9001e7072dd",
+            "order": 11,
+            "slug": "jack-griffo",
+            "tag": "Jack Griffo",
+            "thumb": "https://metadata-static.plex.tv/f/people/ff277ea8a4da5d4df66e98417fe0e71a.jpg",
+            "role": "Robin / Tim Drake (voice)",
+            "key": "/library/people/5d776a817a53e9001e7072dd",
+            "type": "person"
+          },
+          {
+            "id": "5d776c5423d5a3001f51a498",
+            "order": 12,
+            "slug": "jason-hightower",
+            "tag": "Jason Hightower",
+            "thumb": "https://metadata-static.plex.tv/people/5d776c5423d5a3001f51a498.jpg",
+            "role": "The Riddler Henchman / Behemoth / Prisoner (voice)",
+            "key": "/library/people/5d776c5423d5a3001f51a498",
+            "type": "person"
+          },
+          {
+            "id": "6835d59b76b272e2f514fcc7",
+            "order": 13,
+            "slug": "adriana-isabel-2",
+            "tag": "Adriana Isabel",
+            "role": "Bane's Mother (voice)",
+            "key": "/library/people/6835d59b76b272e2f514fcc7",
+            "type": "person"
+          },
+          {
+            "id": "6274d7fda242710b6fcd8f27",
+            "order": 14,
+            "slug": "noah-mendes",
+            "tag": "Noah Mendes",
+            "thumb": "https://metadata-static.plex.tv/2/people/26d14f68436bddc5c6f4cb7fd2c01e62.jpg",
+            "role": "Boy Bane (voice)",
+            "key": "/library/people/6274d7fda242710b6fcd8f27",
+            "type": "person"
+          },
+          {
+            "id": "5d7769a347dd6e001f6c82b8",
+            "order": 15,
+            "slug": "max-mittelman",
+            "tag": "Max Mittelman",
+            "thumb": "https://metadata-static.plex.tv/0/people/0240a7949e9660f0ffa3b7a532b726ae.jpg",
+            "role": "Jason Todd / Cop (voice)",
+            "key": "/library/people/5d7769a347dd6e001f6c82b8",
+            "type": "person"
+          },
+          {
+            "id": "5d776c47fb0d55001f582ed9",
+            "order": 16,
+            "slug": "andrew-morgado",
+            "tag": "Andrew Morgado",
+            "role": "Victor Zsasz / Book Man / Cop (voice)",
+            "key": "/library/people/5d776c47fb0d55001f582ed9",
+            "type": "person"
+          },
+          {
+            "id": "5d776f047a53e9001e789801",
+            "order": 17,
+            "slug": "bayardo-de-murguia",
+            "tag": "Bayardo De Murguia",
+            "thumb": "https://metadata-static.plex.tv/people/5d776f047a53e9001e789801.jpg",
+            "role": "Warden / Henchman (voice)",
+            "key": "/library/people/5d776f047a53e9001e789801",
+            "type": "person"
+          },
+          {
+            "id": "5d776a7e7a53e9001e706d56",
+            "order": 18,
+            "slug": "toks-olagundoye",
+            "tag": "Toks Olagundoye",
+            "thumb": "https://metadata-static.plex.tv/1/people/1448b20aee2ccf5824fe8563ec62d01c.jpg",
+            "role": "Shondra Kingsolving (voice)",
+            "key": "/library/people/5d776a7e7a53e9001e706d56",
+            "type": "person"
+          },
+          {
+            "id": "5d7768861999bc0020dc7e9a",
+            "order": 19,
+            "slug": "stephen-oyoung",
+            "tag": "Stephen Oyoung",
+            "thumb": "https://metadata-static.plex.tv/1/people/104d564c07841310c72c69e2994fab90.jpg",
+            "role": "Chen (voice)",
+            "key": "/library/people/5d7768861999bc0020dc7e9a",
+            "type": "person"
+          },
+          {
+            "id": "5d776860f59e58002189c93d",
+            "order": 20,
+            "slug": "bill-rogers",
+            "tag": "Bill Rogers",
+            "role": "Gino / Tony / Guard (voice)",
+            "key": "/library/people/5d776860f59e58002189c93d",
+            "type": "person"
+          },
+          {
+            "id": "5d776851f59e58002189ba2b",
+            "order": 21,
+            "slug": "simon-templeman",
+            "tag": "Simon Templeman",
+            "thumb": "https://metadata-static.plex.tv/1/people/1230f7236e85b95a503e7c0aed656244.jpg",
+            "role": "Alfred Pennyworth (voice)",
+            "key": "/library/people/5d776851f59e58002189ba2b",
+            "type": "person"
+          },
+          {
+            "id": "5d7769a97a53e9001e6eca4f",
+            "order": 22,
+            "slug": "mick-wingert",
+            "tag": "Mick Wingert",
+            "thumb": "https://metadata-static.plex.tv/9/people/9147b0be33e8f53a415ef0c7d463da8a.jpg",
+            "role": "Harvey Bullock / Prisoner (voice)",
+            "key": "/library/people/5d7769a97a53e9001e6eca4f",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f402229fea1a1003f9ee734",
+            "slug": "jeff-wamester",
+            "tag": "Jeff Wamester",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d0eea0c6f668cfd952460334dda1cf3.jpg",
+            "role": "Director",
+            "key": "/library/people/5f402229fea1a1003f9ee734",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776a0096b655001fde07cb",
+            "slug": "jim-krieg-4",
+            "tag": "Jim Krieg",
+            "role": "Producer",
+            "key": "/library/people/5d776a0096b655001fde07cb",
+            "type": "person"
+          },
+          {
+            "id": "6a1e68956c2dcad79b73f642",
+            "slug": "kimberly-s-moreau-9",
+            "tag": "Kimberly S. Moreau",
+            "role": "Producer",
+            "key": "/library/people/6a1e68956c2dcad79b73f642",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5dce7f1f7ec909001ea9a741",
+            "slug": "jeremy-adams",
+            "tag": "Jeremy Adams",
+            "role": "Writer",
+            "key": "/library/people/5dce7f1f7ec909001ea9a741",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/62dd346998b2dbb3466a770c",
+            "tag": "Justice League: Warworld"
+          },
+          {
+            "guid": "plex://movie/5d77697dfb0d55001f527866",
+            "tag": "Batman: The Dark Knight Returns, Part 1"
+          },
+          {
+            "guid": "plex://movie/5d77683b54c0f0001f3040bb",
+            "tag": "Batman: Gotham Knight"
+          },
+          {
+            "guid": "plex://movie/5d9f3c2106d220001febc02d",
+            "tag": "Son of Batman"
+          },
+          {
+            "guid": "plex://movie/5d776c38594b2b001e6ee0ce",
+            "tag": "Hulk Vs."
+          },
+          {
+            "guid": "plex://movie/5d7769ac9ab54400214f5333",
+            "tag": "Batman: The Dark Knight Returns, Part 2"
+          },
+          {
+            "guid": "plex://movie/5d776d5f23d5a3001f5229c5",
+            "tag": "Batman: The Dark Knight Returns"
+          },
+          {
+            "guid": "plex://movie/5d776d83ad5437001f7d80e3",
+            "tag": "Suicide Squad: Hell to Pay"
+          },
+          {
+            "guid": "plex://movie/5e16330eef1040003f2487ed",
+            "tag": "Batman: Death in the Family"
+          },
+          {
+            "guid": "plex://movie/609d5fbffc2561002c981fe9",
+            "tag": "Untitled Venture Bros. Movie"
+          },
+          {
+            "guid": "plex://movie/609f88e7a656a2002ff8975b",
+            "tag": "The Venture Bros.: Radiant Is the Blood of the Baboon Heart"
+          },
+          {
+            "guid": "plex://movie/5d776e3d96b655001fe60fdd",
+            "tag": "Injustice"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Warner Bros. Animation"
+          },
+          {
+            "tag": "DC"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "After destroying Arkham Asylum and freeing the criminals, Bane takes control of Gotham City.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

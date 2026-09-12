@@ -1,0 +1,500 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/c/gracenote/cfdb3b2574ee2360119af226bdd54445.jpg",
+        "banner": "https://assets.fanart.tv/fanart/moana-567ee4768b3d2.jpg",
+        "guid": "plex://movie/5d776af2ad5437001f78dad6",
+        "key": "/library/metadata/5d776af2ad5437001f78dad6",
+        "rating": 9.6,
+        "ratingKey": "5d776af2ad5437001f78dad6",
+        "studio": "Walt Disney Animation Studios",
+        "summary": "In ancient Polynesia, when a terrible curse incurred by the demigod Maui reaches Moana's island, she answers the Ocean's call to seek out Maui to set things right.",
+        "tagline": "The ocean is calling.",
+        "type": "movie",
+        "addedAt": 1479772800,
+        "audienceRating": 8.9,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 150000000,
+        "contentRating": "PG",
+        "duration": 6420000,
+        "imdbRatingCount": 450127,
+        "originallyAvailableAt": "2016-11-22",
+        "publicPagesURL": "https://watch.plex.tv/movie/moana-2016",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 690860472,
+        "slug": "moana-2016",
+        "thumb": "https://metadata-static.plex.tv/d/gracenote/d8ceef4c612f5b669934a87e86dd59d3.jpg",
+        "title": "Moana",
+        "userState": false,
+        "year": 2016,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d776af2ad5437001f78dad6/commonsensemedia",
+            "oneLiner": "Memorable musical with a Pacific Islander lead, some scares.",
+            "AgeRating": [
+              {
+                "age": 6,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Moana",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cfdb3b2574ee2360119af226bdd54445.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/450f1f06c630a0da1a46ffef0157fa32.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/moana-567ee4768b3d2.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/d/683a142553/d94cc32aadf21481363175c8c744d4ee.png"
+          },
+          {
+            "alt": "Moana",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/d/683a142553/d94cc32aadf21481363175c8c744d4ee.png"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f08d41fcc9c7f01dd1646562c9670315.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d8ceef4c612f5b669934a87e86dd59d3.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/62b538833938360f1001814223c8d5c8.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/2/gracenote/285ebfdb3d6ab7a4669f074c2b98cab7.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+            "id": "5d9c07ebcb3ffa001f1b0903",
+            "key": "/library/sections/home/all?genre=5d9c07ebcb3ffa001f1b0903",
+            "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+            "slug": "children",
+            "tag": "Children",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046d3c3f87001f33fc20",
+            "id": "5d9c046d3c3f87001f33fc20",
+            "key": "/library/sections/home/all?genre=5d9c046d3c3f87001f33fc20",
+            "ratingKey": "genre_5d9c046d3c3f87001f33fc20",
+            "slug": "musical",
+            "tag": "Musical",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt3521164"
+          },
+          {
+            "id": "tmdb://277834"
+          },
+          {
+            "id": "tvdb://9210"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.9
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.566
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Oscar",
+            "category": "Best Animated Feature Film of the Year",
+            "event": "Academy Awards",
+            "id": "643edf135fb7b8a364cc8042",
+            "isWinner": false,
+            "year": 2017
+          },
+          {
+            "award": "Oscar",
+            "category": "Best Achievement in Music Written for Motion Pictures (Original Song)",
+            "event": "Academy Awards",
+            "id": "643edf135fb7b8a364cc8043",
+            "isWinner": false,
+            "year": 2017
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/4OgaftFNqtE1UvfDDb2Eov7A5Rz.jpg",
+            "guid": "plex://collection/65c4f6e775b44f487aa8600b",
+            "key": "/library/collections/65c4f6e775b44f487aa8600b/children",
+            "summary": "The Disney original collection follows in ancient Polynesia and tells the story of Moana, the strong-willed daughter of a chief of a coastal village, who is chosen by the ocean itself to reunite a mystical relic with the goddess Te Fiti.",
+            "thumb": "https://image.tmdb.org/t/p/original/jjlmK4jA7XCFztNlmYkO4u0Mqv4.jpg",
+            "tag": "Moana Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776af2ad5437001f78db11",
+            "order": 1,
+            "slug": "aulii-cravalho",
+            "tag": "Auliʻi Cravalho",
+            "thumb": "https://metadata-static.plex.tv/c/people/cfeb2e5f7f1c2b61e09cfb689ad17916.jpg",
+            "role": "Moana (voice)",
+            "key": "/library/people/5d776af2ad5437001f78db11",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea99f61",
+            "order": 2,
+            "slug": "dwayne-johnson",
+            "tag": "Dwayne Johnson",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e707b4ed5bd292b182183f733e78d77.jpg",
+            "role": "Maui (voice)",
+            "key": "/library/people/5d77682b6f4521001ea99f61",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf2b",
+            "order": 3,
+            "slug": "rachel-house",
+            "tag": "Rachel House",
+            "thumb": "https://metadata-static.plex.tv/7/people/7bfe5f06e7d7d132bd4c214e294f2edc.jpg",
+            "role": "Gramma Tala (voice)",
+            "key": "/library/people/5d776829999c64001ec2cf2b",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c5f3",
+            "order": 4,
+            "slug": "temuera-morrison",
+            "tag": "Temuera Morrison",
+            "thumb": "https://metadata-static.plex.tv/b/people/b6057e29f4b528b559dcf3e73e77a225.jpg",
+            "role": "Chief Tui (voice)",
+            "key": "/library/people/5d776826999c64001ec2c5f3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768322ec6b5001f6bb740",
+            "order": 5,
+            "slug": "jemaine-clement",
+            "tag": "Jemaine Clement",
+            "thumb": "https://metadata-static.plex.tv/3/people/333a3e7a61e3e2a6d906bfd26b1abf5d.jpg",
+            "role": "Tamatoa (voice)",
+            "key": "/library/people/5d7768322ec6b5001f6bb740",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e85719b001f3a242b",
+            "order": 6,
+            "slug": "nicole-scherzinger",
+            "tag": "Nicole Scherzinger",
+            "thumb": "https://metadata-static.plex.tv/7/people/7805e1beeb2a40703c37da3a2b7550aa.jpg",
+            "role": "Sina (voice)",
+            "key": "/library/people/5d77682e85719b001f3a242b",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd578",
+            "order": 7,
+            "slug": "alan-tudyk",
+            "tag": "Alan Tudyk",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f92021d49ee0e6cae1e939480e88e6e.jpg",
+            "role": "Heihei / Villager #3 (voice)",
+            "key": "/library/people/5d776826eb5d26001f1dd578",
+            "type": "person"
+          },
+          {
+            "id": "5d776e18fb0d55001f5b5981",
+            "order": 8,
+            "slug": "louise-bush-1",
+            "tag": "Louise Bush",
+            "role": "Toddler Moana (voice)",
+            "key": "/library/people/5d776e18fb0d55001f5b5981",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b961905001eb95197",
+            "order": 9,
+            "slug": "oscar-kightley",
+            "tag": "Oscar Kightley",
+            "thumb": "https://metadata-static.plex.tv/d/people/d4a589da1418b008aa0c805634bcd157.jpg",
+            "role": "Fisherman (voice)",
+            "key": "/library/people/5d77683b961905001eb95197",
+            "type": "person"
+          },
+          {
+            "id": "5d7768883ab0e7001f503de4",
+            "order": 10,
+            "slug": "troy-polamalu",
+            "tag": "Troy Polamalu",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768883ab0e7001f503de4.jpg",
+            "role": "Villager #1 (voice)",
+            "key": "/library/people/5d7768883ab0e7001f503de4",
+            "type": "person"
+          },
+          {
+            "id": "5d776af2ad5437001f78db13",
+            "order": 11,
+            "slug": "puanani-cravalho",
+            "tag": "Puanani Cravalho",
+            "role": "Villager #2 (voice)",
+            "key": "/library/people/5d776af2ad5437001f78db13",
+            "type": "person"
+          },
+          {
+            "id": "5d77688fd11dd30020227b98",
+            "order": 12,
+            "slug": "lin-manuel-miranda",
+            "tag": "Lin-Manuel Miranda",
+            "thumb": "https://metadata-static.plex.tv/7/people/787511029ba2708f842a8bb59860d5d1.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77688fd11dd30020227b98",
+            "type": "person"
+          },
+          {
+            "id": "5d776868594b2b001e68b1a9",
+            "order": 13,
+            "slug": "christopher-jackson",
+            "tag": "Christopher Jackson",
+            "thumb": "https://metadata-static.plex.tv/d/people/d250e11544ba54d041d1ebcb2ca795dd.jpg",
+            "role": "Chief Tui (singing voice) (uncredited)",
+            "key": "/library/people/5d776868594b2b001e68b1a9",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776828eb5d26001f1ddbae",
+            "slug": "john-musker",
+            "tag": "John Musker",
+            "thumb": "https://metadata-static.plex.tv/2/people/229c262a22bc504893e26e795b5dcabd.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776828eb5d26001f1ddbae",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddbad",
+            "slug": "ron-clements",
+            "tag": "Ron Clements",
+            "thumb": "https://metadata-static.plex.tv/5/people/578b6776d13e324b2bf0b8b48731eb0e.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776828eb5d26001f1ddbad",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776af2ad5437001f78db10",
+            "slug": "osnat-shurer",
+            "tag": "Osnat Shurer",
+            "thumb": "https://metadata-static.plex.tv/1/people/17ed99eb23f396ac21cecba8f402c4ad.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776af2ad5437001f78db10",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f400b69b8a032003d84e88f",
+            "slug": "david-g-derrick-jr",
+            "tag": "David G. Derrick Jr.",
+            "thumb": "https://metadata-static.plex.tv/1/people/1594ce8ecac6d9226ef16827e357008d.jpg",
+            "role": "Story Artist",
+            "key": "/library/people/5f400b69b8a032003d84e88f",
+            "type": "person"
+          },
+          {
+            "id": "5d776ad696b655001fdfb155",
+            "slug": "jared-bush",
+            "tag": "Jared Bush",
+            "thumb": "https://metadata-static.plex.tv/4/people/46b5ac9759b71bad927d1b7b900076f1.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d776ad696b655001fdfb155",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddbad",
+            "slug": "ron-clements",
+            "tag": "Ron Clements",
+            "thumb": "https://metadata-static.plex.tv/5/people/578b6776d13e324b2bf0b8b48731eb0e.jpg",
+            "role": "Story",
+            "key": "/library/people/5d776828eb5d26001f1ddbad",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddbae",
+            "slug": "john-musker",
+            "tag": "John Musker",
+            "thumb": "https://metadata-static.plex.tv/2/people/229c262a22bc504893e26e795b5dcabd.jpg",
+            "role": "Story",
+            "key": "/library/people/5d776828eb5d26001f1ddbae",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b880197001ec94a96",
+            "slug": "chris-williams-2",
+            "tag": "Chris Williams",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683b880197001ec94a96.jpg",
+            "role": "Story",
+            "key": "/library/people/5d77683b880197001ec94a96",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/635acc9265f001742c6aa175",
+            "tag": "Ruby Gillman: Teenage Kraken"
+          },
+          {
+            "guid": "plex://movie/5d7768354de0ee001fccb936",
+            "tag": "Atlantis: The Lost Empire"
+          },
+          {
+            "guid": "plex://movie/5d9f350006d220001feb3f8c",
+            "tag": "The SpongeBob SquarePants Movie"
+          },
+          {
+            "guid": "plex://movie/65c6107cf86bc5a20e095776",
+            "tag": "Moana 2"
+          },
+          {
+            "guid": "plex://movie/5d7769f29ab54400214f8fd9",
+            "tag": "Tinker Bell and the Pirate Fairy"
+          },
+          {
+            "guid": "plex://movie/5d776a62ad5437001f77c525",
+            "tag": "The SpongeBob Movie: Sponge Out of Water"
+          },
+          {
+            "guid": "plex://movie/5d77709a6afb3d002061df55",
+            "tag": "The Sea Beast"
+          },
+          {
+            "guid": "plex://movie/5d77689f1999bc0020dcb891",
+            "tag": "Tom and Jerry in Shiver Me Whiskers"
+          },
+          {
+            "guid": "plex://movie/5d7768b31999bc0020dce526",
+            "tag": "The Pirates! Band of Misfits"
+          },
+          {
+            "guid": "plex://movie/5d7768332ec6b5001f6bba4b",
+            "tag": "Chicken Little"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Walt Disney Animation Studios"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A once-mighty demigod and a spirited teenager embark on an epic adventure across the ocean.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

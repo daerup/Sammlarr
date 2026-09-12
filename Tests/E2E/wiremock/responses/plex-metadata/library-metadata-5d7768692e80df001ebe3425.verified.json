@@ -1,0 +1,385 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/e/gracenote/ee004d642dbbdca6fcd2036ebc4a04a7.jpg",
+        "guid": "plex://movie/5d7768692e80df001ebe3425",
+        "key": "/library/metadata/5d7768692e80df001ebe3425",
+        "ratingKey": "5d7768692e80df001ebe3425",
+        "studio": "Comedy Central",
+        "summary": "When the mystery-solving musician Foxxy Love notices she and her fellow housemates can curse without being bleeped—something they've never been able to do before—she realizes their show has been canceled. Determined to get back on the air, the gang travels to Make-A-Point-Land in order to get a point (and get back on the air).",
+        "tagline": "TV's most f'ed up series... is about to eff up the movies.",
+        "type": "movie",
+        "addedAt": 1268870400,
+        "audienceRating": 4.8,
+        "audienceRatingImage": "rottentomatoes://image.rating.spilled",
+        "budget": 350000,
+        "contentRating": "Not Rated",
+        "duration": 4260000,
+        "imdbRatingCount": 4944,
+        "originallyAvailableAt": "2010-03-18",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-drawn-together-movie-the-movie",
+        "slug": "the-drawn-together-movie-the-movie",
+        "thumb": "https://metadata-static.plex.tv/6/gracenote/6004e2eb14d8b0399fa5abc15242480e.jpg",
+        "title": "The Drawn Together Movie: The Movie!",
+        "userState": false,
+        "year": 2010,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d7768692e80df001ebe3425/commonsensemedia",
+            "oneLiner": "Inappropriate in every way. Wow is this not for kids.",
+            "AgeRating": [
+              {
+                "age": 18,
+                "rating": 1,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "The Drawn Together Movie: The Movie!",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ee004d642dbbdca6fcd2036ebc4a04a7.jpg"
+          },
+          {
+            "alt": "The Drawn Together Movie: The Movie!",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/87b78a09bd72082587e1d567a7f80295.jpg"
+          },
+          {
+            "alt": "The Drawn Together Movie: The Movie!",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/b/gracenote/b6e165129f96a5eae88e70ff6bbad920.jpg"
+          },
+          {
+            "alt": "The Drawn Together Movie: The Movie!",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6004e2eb14d8b0399fa5abc15242480e.jpg"
+          },
+          {
+            "alt": "The Drawn Together Movie: The Movie!",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/99117f6854143fc149df2b67a8fea7c1.jpg"
+          },
+          {
+            "alt": "The Drawn Together Movie: The Movie!",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6262c8ce54616cb4a276ba7242391bd6.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt1546036"
+          },
+          {
+            "id": "tmdb://36736"
+          },
+          {
+            "id": "tvdb://15816"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.1
+          },
+          {
+            "image": "rottentomatoes://image.rating.spilled",
+            "type": "audience",
+            "value": 4.8
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.406
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77683ceb5d26001f1e2627",
+            "order": 1,
+            "slug": "adam-carolla",
+            "tag": "Adam Carolla",
+            "thumb": "https://metadata-static.plex.tv/d/people/da35758d9c65baeebec4a25265e570bd.jpg",
+            "role": "Spanky Ham (voice)",
+            "key": "/library/people/5d77683ceb5d26001f1e2627",
+            "type": "person"
+          },
+          {
+            "id": "5d7768692e80df001ebe361f",
+            "order": 2,
+            "slug": "abbey-digregorio",
+            "tag": "Abbey DiGregorio",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768692e80df001ebe361f.jpg",
+            "role": "Ling-Ling (voice)",
+            "key": "/library/people/5d7768692e80df001ebe361f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682985719b001f3a1318",
+            "order": 3,
+            "slug": "jess-harnell",
+            "tag": "Jess Harnell",
+            "thumb": "https://metadata-static.plex.tv/4/people/4f0c5e626a22a7ae2eeddf933dc9a782.jpg",
+            "role": "Captain Hero / King / Wile E. Coyote (voice)",
+            "key": "/library/people/5d77682985719b001f3a1318",
+            "type": "person"
+          },
+          {
+            "id": "5d776838880197001ec93f06",
+            "order": 4,
+            "slug": "seth-macfarlane",
+            "tag": "Seth MacFarlane",
+            "thumb": "https://metadata-static.plex.tv/3/people/30c683e13d9e37083b532fdc3dc36436.jpg",
+            "role": "I.S.R.A.E.L. (aka Intelligent Smart Robotic Animated Eraser Lady) (voice)",
+            "key": "/library/people/5d776838880197001ec93f06",
+            "type": "person"
+          },
+          {
+            "id": "5d776827103a2d001f56467a",
+            "order": 5,
+            "slug": "jack-plotnick",
+            "tag": "Jack Plotnick",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9cc70e46cd7b64e5b01cf631eaf83da.jpg",
+            "role": "Xandir P. Whifflebottom (voice)",
+            "key": "/library/people/5d776827103a2d001f56467a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea98a05",
+            "order": 6,
+            "slug": "tara-strong",
+            "tag": "Tara Strong",
+            "thumb": "https://metadata-static.plex.tv/3/people/3c45a6363e4ddf1cac548c22cffd8b43.jpg",
+            "role": "Toot Braunstein / Princess Clara (voice)",
+            "key": "/library/people/5d7768256f4521001ea98a05",
+            "type": "person"
+          },
+          {
+            "id": "5d7768337e9a3c0020c6c48c",
+            "order": 7,
+            "slug": "cree-summer",
+            "tag": "Cree Summer",
+            "thumb": "https://metadata-static.plex.tv/0/people/0cc8faaf127129aaafc624b5f8b30617.jpg",
+            "role": "Foxxy Love / Suck My Taint Girl (voice)",
+            "key": "/library/people/5d7768337e9a3c0020c6c48c",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf7b",
+            "order": 8,
+            "slug": "james-arnold-taylor",
+            "tag": "James Arnold Taylor",
+            "thumb": "https://metadata-static.plex.tv/d/people/d8dc750d358c704e54d8c597ca6e7602.jpg",
+            "role": "Wooldoor Sockbat / Jew Producer / Barney Rubble (voice)",
+            "key": "/library/people/5d776829999c64001ec2cf7b",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b4de0ee001fcc99fd",
+            "order": 9,
+            "slug": "vernon-wells",
+            "tag": "Vernon Wells",
+            "thumb": "https://metadata-static.plex.tv/b/people/b5503734a549ffa2920653c10e515a22.jpg",
+            "role": "Network Head (voice)",
+            "key": "/library/people/5d77682b4de0ee001fcc99fd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768692e80df001ebe3620",
+            "order": 10,
+            "slug": "kaitlyn-robrock",
+            "tag": "Kaitlyn Robrock",
+            "thumb": "https://metadata-static.plex.tv/1/people/1cbdcdb64716ae2962d95d08dbe07535.jpg",
+            "role": "Hot Bar Chick / Old Lady #2 / Smurfette (voice) (uncredited)",
+            "key": "/library/people/5d7768692e80df001ebe3620",
+            "type": "person"
+          },
+          {
+            "id": "5d9c081bcb3ffa001f1b230b",
+            "order": 11,
+            "slug": "dave-jeser",
+            "tag": "Dave Jeser",
+            "thumb": "https://metadata-static.plex.tv/1/people/13ab7e09281fb32a65e6275e38b52fe3.jpg",
+            "role": "Himself (voice)",
+            "key": "/library/people/5d9c081bcb3ffa001f1b230b",
+            "type": "person"
+          },
+          {
+            "id": "5e162f2c54420c003c210ce8",
+            "order": 12,
+            "slug": "matthew-silverstein",
+            "tag": "Matthew Silverstein",
+            "thumb": "https://metadata-static.plex.tv/4/people/44c4d5b2de0574ca53172ef1d0965152.jpg",
+            "role": "Himself (voice)",
+            "key": "/library/people/5e162f2c54420c003c210ce8",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768692e80df001ebe361e",
+            "slug": "greg-franklin",
+            "tag": "Greg Franklin",
+            "role": "Director",
+            "key": "/library/people/5d7768692e80df001ebe361e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "666599c2d35cae362db2b00b",
+            "slug": "richard-quan-1",
+            "tag": "Richard Quan",
+            "role": "Producer",
+            "key": "/library/people/666599c2d35cae362db2b00b",
+            "type": "person"
+          },
+          {
+            "id": "5d776a5896b655001fdebd25",
+            "slug": "andy-fiedler",
+            "tag": "Andy Fiedler",
+            "role": "Producer",
+            "key": "/library/people/5d776a5896b655001fdebd25",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d9c081bcb3ffa001f1b230b",
+            "slug": "dave-jeser",
+            "tag": "Dave Jeser",
+            "thumb": "https://metadata-static.plex.tv/1/people/13ab7e09281fb32a65e6275e38b52fe3.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d9c081bcb3ffa001f1b230b",
+            "type": "person"
+          },
+          {
+            "id": "5e162f2c54420c003c210ce8",
+            "slug": "matthew-silverstein",
+            "tag": "Matthew Silverstein",
+            "thumb": "https://metadata-static.plex.tv/4/people/44c4d5b2de0574ca53172ef1d0965152.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e162f2c54420c003c210ce8",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/632de406ffedd45dbd738646",
+            "tag": "Minions & More 1"
+          },
+          {
+            "guid": "plex://movie/6a33e6bdc11f27da9c2d026e",
+            "tag": "Extreme Makeover: Homer Edition"
+          },
+          {
+            "guid": "plex://movie/5d77684d2ec6b5001f6bf46d",
+            "tag": "Killer Bean Forever"
+          },
+          {
+            "guid": "plex://movie/5d776bba96b655001fe1a085",
+            "tag": "Scooby‐Doo! And Kiss: Rock and Roll Mystery"
+          },
+          {
+            "guid": "plex://movie/5d776d3a594b2b001e704457",
+            "tag": "Batman and Harley Quinn"
+          },
+          {
+            "guid": "plex://movie/5d77687a374a5b001fec6d0e",
+            "tag": "Robot Chicken: Star Wars"
+          },
+          {
+            "guid": "plex://movie/5d776d30ad5437001f7cf68a",
+            "tag": "Psych: The Movie"
+          },
+          {
+            "guid": "plex://movie/5d7768a76f6af7001ee59daf",
+            "tag": "Stewie Griffin: The Untold Story"
+          },
+          {
+            "guid": "plex://movie/621086e6bd0f9f0c227bfa97",
+            "tag": "Teen Titans Go! & DC Super Hero Girls: Mayhem in the Multiverse"
+          },
+          {
+            "guid": "plex://movie/62bdf2115c2087fe401e61be",
+            "tag": "South Park: The Streaming Wars Part 2"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Comedy Central"
+          },
+          {
+            "tag": "Six Point Harness"
+          },
+          {
+            "tag": "Paramount Pictures"
+          },
+          {
+            "tag": "Double Hemm"
+          },
+          {
+            "tag": "Comedy Central Films"
+          },
+          {
+            "tag": "Mondo Media"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "The depraved gang from \"Drawn Together\" tries to get its canceled show back on the air.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

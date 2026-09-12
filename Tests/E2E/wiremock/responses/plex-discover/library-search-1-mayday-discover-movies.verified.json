@@ -1,0 +1,491 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1788480000,
+              "art": "https://metadata-static.plex.tv/9/gracenote/95a6d8b93b137ec1b2096652e3fc5043.jpg",
+              "duration": 6660000,
+              "guid": "plex://movie/6488a8b8f542e5c273e5ae08",
+              "key": "/library/metadata/6488a8b8f542e5c273e5ae08",
+              "originallyAvailableAt": "2026-09-04",
+              "ratingKey": "6488a8b8f542e5c273e5ae08",
+              "slug": "mayday-2026",
+              "thumb": "https://metadata-static.plex.tv/8/gracenote/8a6fa98649758c4b90dc9de853fc9510.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.86
+          },
+          {
+            "Metadata": {
+              "addedAt": 1633046400,
+              "art": "https://metadata-static.plex.tv/a/gracenote/acae99c7f31ed23f82bf51ca58c26de3.jpg",
+              "duration": 6000000,
+              "guid": "plex://movie/5e4d25497e245a003e3c5c2e",
+              "key": "/library/metadata/5e4d25497e245a003e3c5c2e",
+              "originallyAvailableAt": "2021-10-01",
+              "ratingKey": "5e4d25497e245a003e3c5c2e",
+              "slug": "mayday-2021",
+              "thumb": "https://metadata-static.plex.tv/8/gracenote/8366d05850db19d122ae548f51285196.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1568073600,
+              "art": "https://metadata-static.plex.tv/a/gracenote/a31beb3546489cc2471c3e6cd8d80420.jpg",
+              "duration": 4560000,
+              "guid": "plex://movie/5e16333f61c6140040d67eb3",
+              "key": "/library/metadata/5e16333f61c6140040d67eb3",
+              "originallyAvailableAt": "2019-09-10",
+              "ratingKey": "5e16333f61c6140040d67eb3",
+              "slug": "mayday-2019",
+              "thumb": "https://metadata-static.plex.tv/0/gracenote/0dcbeb940176a04fcf2512c1516727a0.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1128211200,
+              "art": "https://image.tmdb.org/t/p/original/122bcSe5EutKOFxr8pBZgzQ1uZJ.jpg",
+              "duration": 7200000,
+              "guid": "plex://movie/5d77689651dd69001fe0e66d",
+              "key": "/library/metadata/5d77689651dd69001fe0e66d",
+              "originallyAvailableAt": "2005-10-02",
+              "ratingKey": "5d77689651dd69001fe0e66d",
+              "slug": "mayday",
+              "thumb": "https://metadata-static.plex.tv/1/gracenote/1b5021d1b39cab71ae6ac0a6474f5fa7.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2005,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c04732df347001e3a35be",
+                  "id": "5d9c04732df347001e3a35be",
+                  "key": "/library/categories/tv-movie",
+                  "ratingKey": "genre_5d9c04732df347001e3a35be",
+                  "slug": "tv-movie",
+                  "tag": "TV Movie",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1578614400,
+              "art": "https://image.tmdb.org/t/p/original/2Eb6yC9o0ZxtodQ4jzMHLbTiD11.jpg",
+              "duration": 6840000,
+              "guid": "plex://movie/5e165af1d92d86003d375902",
+              "key": "/library/metadata/5e165af1d92d86003d375902",
+              "originallyAvailableAt": "2020-01-10",
+              "ratingKey": "5e165af1d92d86003d375902",
+              "slug": "mayday-2020",
+              "thumb": "https://metadata-static.plex.tv/3/gracenote/3904f19a07731bdc3e485c49ede13b81.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 795225600,
+              "duration": 4920000,
+              "guid": "plex://movie/5d776a079ab54400214f9f69",
+              "key": "/library/metadata/5d776a079ab54400214f9f69",
+              "originallyAvailableAt": "1995-03-15",
+              "ratingKey": "5d776a079ab54400214f9f69",
+              "slug": "mayday-1995",
+              "thumb": "https://image.tmdb.org/t/p/original/k5QAI7bt5EKdxEeFmALbIQ6EDP1.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 1995,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1420070400,
+              "duration": 720000,
+              "guid": "plex://movie/5f40cba61ae71000411fb105",
+              "key": "/library/metadata/5f40cba61ae71000411fb105",
+              "originallyAvailableAt": "2015-01-01",
+              "ratingKey": "5f40cba61ae71000411fb105",
+              "slug": "mayday-2015",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/oThZ6gkRmT2tBpLHiCgYBAtEDLw.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2015,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1409616000,
+              "duration": 900000,
+              "guid": "plex://movie/5d776fcc51dd69001fe553ac",
+              "key": "/library/metadata/5d776fcc51dd69001fe553ac",
+              "originallyAvailableAt": "2014-09-02",
+              "ratingKey": "5d776fcc51dd69001fe553ac",
+              "slug": "mayday-2014",
+              "subtype": "short",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2014,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "duration": 600000,
+              "guid": "plex://movie/5f40c3b0fea1a1003fb7ddbe",
+              "key": "/library/metadata/5f40c3b0fea1a1003fb7ddbe",
+              "ratingKey": "5f40c3b0fea1a1003fb7ddbe",
+              "slug": "mayday-5",
+              "subtype": "short",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BNWM2YzU3NDctYjY4Yy00MDdkLThhMGMtZGQ5Y2ZiMGUyODlmXkEyXkFqcGc@._V1_.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1492473600,
+              "duration": 600000,
+              "guid": "plex://movie/5f40cd0502101b00400fccf4",
+              "key": "/library/metadata/5f40cd0502101b00400fccf4",
+              "originallyAvailableAt": "2017-04-18",
+              "ratingKey": "5f40cd0502101b00400fccf4",
+              "slug": "mayday-2017",
+              "subtype": "short",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BZmVmMGMwZDMtMDhjZC00MzQyLTk3NGQtZWM1NWYyZDk4YmQ1XkEyXkFqcGc@._V1_.jpg",
+              "title": "Mayday",
+              "type": "movie",
+              "year": 2017,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          }
+        ]
+      }
+    ]
+  }
+}

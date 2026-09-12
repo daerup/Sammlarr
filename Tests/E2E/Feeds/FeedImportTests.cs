@@ -1,11 +1,15 @@
+using System.Globalization;
+using System.Text.Json.Nodes;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
 
+[NotInParallel]
 public class FeedImportTests
 {
 	private const string ListIdentifier = "2236";
+	private const string ResultRow = ".search-result-row";
 
 	[Test]
 	public async Task Save_WhenNameIsMissing_IsNotOffered()
@@ -27,10 +31,61 @@ public class FeedImportTests
 
 		await ConfigureFeedAsync(page, "E2E Preview Feed");
 		await TestAsync(page);
+		await PreviewLoadedAsync(page);
 
-		await Expect(page.GetByText("Mayday").First).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
-		await Expect(page.GetByText("The Runner").First).ToBeVisibleAsync();
+		var listed = await SourceListSizeAsync();
+		await Expect(page.GetByText("Run a test to preview the media items from your list.")).ToBeHiddenAsync();
+		await Expect(page.Locator(".stat-badges-row .preview-filter-badge").First).ToHaveTextAsync(listed.ToString(CultureInfo.InvariantCulture));
+		await Expect(page.Locator(ResultRow)).ToHaveCountAsync(listed);
+		await Expect(page.Locator($"{ResultRow}.is-unresolved")).ToHaveCountAsync(0);
+		await Expect(page.Locator($"{ResultRow} .search-result-poster img")).ToHaveCountAsync(listed);
 	}
+
+	[Test]
+	public async Task Save_WhenPreviewSucceeded_PersistsTheFeedIntoTheList()
+	{
+		var name = $"E2E Feed {Guid.NewGuid().ToString("N")[..6]}";
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await ConfigureFeedAsync(page, name);
+		await TestAsync(page);
+
+		await SaveAsync(page);
+
+		await Expect(page.GetByText(name)).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+	}
+
+	[Test]
+	public async Task Delete_WhenConfirmed_RemovesTheFeedFromTheList()
+	{
+		var name = $"E2E Doomed {Guid.NewGuid().ToString("N")[..6]}";
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await ConfigureFeedAsync(page, name);
+		await TestAsync(page);
+		await SaveAsync(page);
+		await Expect(page.GetByText(name)).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+
+		await page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name }).GetByRole(AriaRole.Button).Last.ClickAsync();
+		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = $"Delete \"{name}\"?" })).ToBeVisibleAsync();
+		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Delete", Exact = true }).Last.ClickAsync();
+
+		await Expect(page.GetByRole(AriaRole.Cell, new PageGetByRoleOptions { Name = name }))
+			.ToBeHiddenAsync(new LocatorAssertionsToBeHiddenOptions { Timeout = 30000 });
+	}
+
+	private static async Task SaveAsync(IPage page)
+	{
+		await PreviewLoadedAsync(page);
+		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).First.ClickAsync();
+	}
+
+	private static async Task PreviewLoadedAsync(IPage page) =>
+		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).First)
+			.ToBeEnabledAsync(new LocatorAssertionsToBeEnabledOptions { Timeout = 60000 });
+
+	private static async Task<int> SourceListSizeAsync() =>
+		JsonNode.Parse(await E2EApp.ServedBodyAsync($"/lists/{ListIdentifier}/items"))!["pagination"]!["total"]!.GetValue<int>();
 
 	private static async Task ConfigureFeedAsync(IPage page, string name)
 	{

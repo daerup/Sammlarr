@@ -1,0 +1,68 @@
+{
+  "adult": false,
+  "backdrop_path": "/e2QAGrEmbpmZpMymDRkDisJkvg9.jpg",
+  "belongs_to_collection": null,
+  "budget": 40000000,
+  "genres": [
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 53,
+      "name": "Thriller"
+    }
+  ],
+  "homepage": "https://www.mutiny.movie",
+  "id": 1288445,
+  "imdb_id": "tt32338669",
+  "origin_country": [
+    "US"
+  ],
+  "original_language": "en",
+  "original_title": "Mutiny",
+  "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
+  "popularity": 343.6508,
+  "poster_path": "/pu2VxGlpGwffOx292w18b1tv96j.jpg",
+  "production_companies": [
+    {
+      "id": 218150,
+      "logo_path": null,
+      "name": "Punch Palace Productions",
+      "origin_country": "GB"
+    },
+    {
+      "id": 73492,
+      "logo_path": "/bQzrYnomE5hIRJMxEy7e2SCYew3.png",
+      "name": "MadRiver Pictures",
+      "origin_country": "US"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "GB",
+      "name": "United Kingdom"
+    },
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "release_date": "2026-08-19",
+  "revenue": 20824283,
+  "runtime": 95,
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Released",
+  "tagline": "There's blood in the water.",
+  "title": "Mutiny",
+  "video": false,
+  "vote_average": 6.439,
+  "vote_count": 362
+}

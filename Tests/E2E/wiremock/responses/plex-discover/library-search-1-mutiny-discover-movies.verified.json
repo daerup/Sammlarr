@@ -1,0 +1,410 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "Mutiny on the Bounty",
+      "The Caine Mutiny",
+      "Space Mutiny",
+      "The Caine Mutiny Court-Martial"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1787097600,
+              "art": "https://metadata-static.plex.tv/9/gracenote/9d3255ee817ab84cb13609cd34b3ed51.jpg",
+              "duration": 5700000,
+              "guid": "plex://movie/66405eced4e4bace15d4a05a",
+              "key": "/library/metadata/66405eced4e4bace15d4a05a",
+              "originallyAvailableAt": "2026-08-19",
+              "ratingKey": "66405eced4e4bace15d4a05a",
+              "slug": "mutiny-2026",
+              "thumb": "https://metadata-static.plex.tv/6/gracenote/63a5487aa484e93b906f39fa6e65ae0d.jpg",
+              "title": "Mutiny",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.86
+          },
+          {
+            "Metadata": {
+              "addedAt": -561340800,
+              "art": "https://metadata-static.plex.tv/3/gracenote/3a705580efbd678fc915f85bf1c01d2f.jpg",
+              "duration": 4612692,
+              "guid": "plex://movie/5d776a60fb0d55001f5445c4",
+              "key": "/library/metadata/5d776a60fb0d55001f5445c4",
+              "originallyAvailableAt": "1952-03-19",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d776a60fb0d55001f5445c4",
+              "ratingKey": "5d776a60fb0d55001f5445c4",
+              "slug": "mutiny-1952",
+              "thumb": "https://metadata-static.plex.tv/3/gracenote/3d685708426e4b156e45dc300de32e24.jpg",
+              "title": "Mutiny",
+              "type": "movie",
+              "year": 1952,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf5af32ed001e0f5563",
+                  "id": "5da05bf5af32ed001e0f5563",
+                  "key": "/library/categories/history",
+                  "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+                  "slug": "history",
+                  "tag": "History",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28aba6",
+                  "id": "5d9c046c08fddd001f28aba6",
+                  "key": "/library/categories/war",
+                  "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+                  "slug": "war",
+                  "tag": "War",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 922579200,
+              "art": "https://artworks.thetvdb.com/banners/movies/55034/backgrounds/55034.jpg",
+              "duration": 5340000,
+              "guid": "plex://movie/5d7768a71999bc0020dcca1b",
+              "key": "/library/metadata/5d7768a71999bc0020dcca1b",
+              "originallyAvailableAt": "1999-03-28",
+              "ratingKey": "5d7768a71999bc0020dcca1b",
+              "slug": "mutiny",
+              "thumb": "https://image.tmdb.org/t/p/original/priCBJQ4eIlqYGawTBhWGZSPPff.jpg",
+              "title": "Mutiny",
+              "type": "movie",
+              "year": 1999,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28aba6",
+                  "id": "5d9c046c08fddd001f28aba6",
+                  "key": "/library/categories/war",
+                  "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+                  "slug": "war",
+                  "tag": "War",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c04732df347001e3a35be",
+                  "id": "5d9c04732df347001e3a35be",
+                  "key": "/library/categories/tv-movie",
+                  "ratingKey": "genre_5d9c04732df347001e3a35be",
+                  "slug": "tv-movie",
+                  "tag": "TV Movie",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "duration": 1620000,
+              "guid": "plex://movie/5f407b955a76a80042e0c54d",
+              "key": "/library/metadata/5f407b955a76a80042e0c54d",
+              "ratingKey": "5f407b955a76a80042e0c54d",
+              "slug": "mutiny-1",
+              "subtype": "short",
+              "title": "Mutiny",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "guid": "plex://movie/5f407c7fbf3e560040c56e3a",
+              "key": "/library/metadata/5f407c7fbf3e560040c56e3a",
+              "ratingKey": "5f407c7fbf3e560040c56e3a",
+              "slug": "mutiny-7",
+              "title": "Mutiny",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 939513600,
+              "art": "https://metadata-static.plex.tv/5/gracenote/57f8d654471ccd6dbcd31d365d81e3d6.jpg",
+              "duration": 3015147,
+              "guid": "plex://movie/5f40d6db86422500429f59ee",
+              "key": "/library/metadata/5f40d6db86422500429f59ee",
+              "originallyAvailableAt": "1999-10-10",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5f40d6db86422500429f59ee",
+              "ratingKey": "5f40d6db86422500429f59ee",
+              "slug": "mutiny-1999-1",
+              "thumb": "https://metadata-static.plex.tv/b/gracenote/bc4262818df3910218a0bcfc0d75e810.jpg",
+              "title": "Mutiny",
+              "type": "movie",
+              "year": 1999,
+              "Genre": [
+                {
+                  "filter": "genre=5da05bf5af32ed001e0f5563",
+                  "id": "5da05bf5af32ed001e0f5563",
+                  "key": "/library/categories/history",
+                  "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+                  "slug": "history",
+                  "tag": "History",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1383264000,
+              "duration": 3240000,
+              "guid": "plex://movie/5d776dc996b655001fe5362f",
+              "key": "/library/metadata/5d776dc996b655001fe5362f",
+              "originallyAvailableAt": "2013-11-01",
+              "ratingKey": "5d776dc996b655001fe5362f",
+              "slug": "mutiny-2013-1",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BMjA2NDc2NzM0OF5BMl5BanBnXkFtZTgwNDY5NjYxNTE@._V1_.jpg",
+              "title": "Mutiny",
+              "type": "movie",
+              "year": 2013,
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1391817600,
+              "art": "https://image.tmdb.org/t/p/original/1EGF19bg6pzalyo1d6JzK7BxL0h.jpg",
+              "duration": 7920000,
+              "guid": "plex://movie/5d7770dc7a53e9001e7acd3c",
+              "key": "/library/metadata/5d7770dc7a53e9001e7acd3c",
+              "originallyAvailableAt": "2014-02-08",
+              "ratingKey": "5d7770dc7a53e9001e7acd3c",
+              "slug": "wsu-mutiny",
+              "subtype": "special",
+              "thumb": "https://image.tmdb.org/t/p/original/ttxtddkUvbF9aF5fBQyUl3L2onN.jpg",
+              "title": "WSU Mutiny",
+              "type": "movie",
+              "year": 2014,
+              "Genre": [
+                {
+                  "filter": "genre=5da05bf9370f98001f4ddd95",
+                  "id": "5da05bf9370f98001f4ddd95",
+                  "key": "/library/categories/sport",
+                  "ratingKey": "genre_5da05bf9370f98001f4ddd95",
+                  "slug": "sport",
+                  "tag": "Sport",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.62
+          },
+          {
+            "Metadata": {
+              "addedAt": -1552176000,
+              "duration": 3600000,
+              "guid": "plex://movie/5d776e567a53e9001e773bc9",
+              "key": "/library/metadata/5d776e567a53e9001e773bc9",
+              "originallyAvailableAt": "1920-10-25",
+              "ratingKey": "5d776e567a53e9001e773bc9",
+              "slug": "the-mutiny-of-the-elsinore",
+              "thumb": "https://image.tmdb.org/t/p/original/i3xFl3VTbIeWcyePyKBoXHsyXdi.jpg",
+              "title": "The Mutiny of the Elsinore",
+              "type": "movie",
+              "year": 1920,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.53
+          },
+          {
+            "Metadata": {
+              "addedAt": -489888000,
+              "art": "https://metadata-static.plex.tv/8/gracenote/8309fff531e07abecffd6f9fe6656c0b.jpg",
+              "duration": 7440000,
+              "guid": "plex://movie/5d9f34fad5fd3f001ee14b83",
+              "key": "/library/metadata/5d9f34fad5fd3f001ee14b83",
+              "originallyAvailableAt": "1954-06-24",
+              "ratingKey": "5d9f34fad5fd3f001ee14b83",
+              "slug": "the-caine-mutiny",
+              "thumb": "https://metadata-static.plex.tv/8/gracenote/860f243d951467b442aeaf6fc71432c9.jpg",
+              "title": "The Caine Mutiny",
+              "type": "movie",
+              "year": 1954,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28aba6",
+                  "id": "5d9c046c08fddd001f28aba6",
+                  "key": "/library/categories/war",
+                  "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+                  "slug": "war",
+                  "tag": "War",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.41
+          }
+        ]
+      }
+    ]
+  }
+}

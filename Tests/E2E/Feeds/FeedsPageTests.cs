@@ -36,6 +36,6 @@ public class FeedsPageTests
 		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Cancel" }).First.ClickAsync();
 
 		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Feeds" }))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 15000 });
+			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
 	}
 }

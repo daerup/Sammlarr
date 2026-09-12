@@ -1,0 +1,1304 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/6/gracenote/675e80dcbfd67db5afd0acf4129afa93.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/301/banners/64f8844256926.jpg",
+        "guid": "plex://movie/5d776d1923d5a3001f52079d",
+        "key": "/library/metadata/5d776d1923d5a3001f52079d",
+        "rating": 9,
+        "ratingKey": "5d776d1923d5a3001f52079d",
+        "studio": "Marvel Enterprises",
+        "summary": "A shy teenager is bitten by a genetically modified spider and uses his new spider-like abilities to fight injustice as a masked superhero.",
+        "tagline": "Go for the ultimate spin.",
+        "type": "movie",
+        "addedAt": 1020211200,
+        "audienceRating": 6.7,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 139000000,
+        "contentRating": "PG-13",
+        "duration": 7260000,
+        "imdbRatingCount": 996923,
+        "originallyAvailableAt": "2002-05-01",
+        "publicPagesURL": "https://watch.plex.tv/movie/spider-man",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 821708551,
+        "slug": "spider-man",
+        "thumb": "https://metadata-static.plex.tv/d/gracenote/d987b19a65dfc7e723d28c22bbe7a75c.jpg",
+        "title": "Spider-Man",
+        "userState": false,
+        "year": 2002,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d776d1923d5a3001f52079d/commonsensemedia",
+            "oneLiner": "Fun superhero movie may be too intense for younger kids.",
+            "AgeRating": [
+              {
+                "age": 11,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Spider-Man",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/6/gracenote/675e80dcbfd67db5afd0acf4129afa93.jpg"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/bccff6b5b7449c94802f00eed419425f.jpg"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/301/banners/64f8844256926.jpg"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/6/683a142553/68e76eca26bee28fbd34bba7b6961c74.png"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/6/683a142553/68e76eca26bee28fbd34bba7b6961c74.png"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/1/gracenote/17f7a63f14df715fb82d60d0d3b30a22.jpg"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d987b19a65dfc7e723d28c22bbe7a75c.jpg"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7550a86d376764cee539a3836e689e40.jpg"
+          },
+          {
+            "alt": "Spider-Man",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0ffe102324d071a88ff3bfca86cd1351.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0145487"
+          },
+          {
+            "id": "tmdb://557"
+          },
+          {
+            "id": "tvdb://301"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 6.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.354
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Oscar",
+            "category": "Best Visual Effects",
+            "event": "Academy Awards",
+            "id": "643ee06dae4db2682cba4e93",
+            "isWinner": false,
+            "year": 2003
+          },
+          {
+            "award": "Oscar",
+            "category": "Best Sound",
+            "event": "Academy Awards",
+            "id": "643ee06dae4db2682cba4e92",
+            "isWinner": false,
+            "year": 2003
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/waZqriYTuBE3WqXI3SDGi3kfDQE.jpg",
+            "guid": "plex://collection/5ec2f63edc40dd0041eaeb04",
+            "key": "/library/collections/5ec2f63edc40dd0041eaeb04/children",
+            "summary": "A superhero film series based on the Marvel Comics character Spider-Man. The series is centered on Peter Parker, an academically gifted but socially inept freelance photographer who gets bitten by a genetically modified spider and gains spider-like abilities, all of which he uses to fight crime as a spider-masked vigilante, learning for himself that with great power comes great responsibility.",
+            "thumb": "https://image.tmdb.org/t/p/original/bp5PqLa06QA1LsELA1SsKZ008H7.jpg",
+            "tag": "Spider-Man Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768244de0ee001fcc80a8",
+            "order": 1,
+            "slug": "tobey-maguire",
+            "tag": "Tobey Maguire",
+            "thumb": "https://metadata-static.plex.tv/f/people/fc2b0443ccaffa5aff5657a1e997bdd3.jpg",
+            "role": "Spider-Man / Peter Parker",
+            "key": "/library/people/5d7768244de0ee001fcc80a8",
+            "type": "person"
+          },
+          {
+            "id": "5d776824961905001eb9096b",
+            "order": 2,
+            "slug": "willem-dafoe",
+            "tag": "Willem Dafoe",
+            "thumb": "https://metadata-static.plex.tv/9/people/97dfb142bbf4311cc841af978798d683.jpg",
+            "role": "Green Goblin / Norman Osborn",
+            "key": "/library/people/5d776824961905001eb9096b",
+            "type": "person"
+          },
+          {
+            "id": "5d776825880197001ec90310",
+            "order": 3,
+            "slug": "kirsten-dunst",
+            "tag": "Kirsten Dunst",
+            "thumb": "https://metadata-static.plex.tv/a/people/af573d370b3da3c94e6c7deffee6b185.jpg",
+            "role": "Mary Jane Watson",
+            "key": "/library/people/5d776825880197001ec90310",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311be9",
+            "order": 4,
+            "slug": "james-franco",
+            "tag": "James Franco",
+            "thumb": "https://metadata-static.plex.tv/a/people/a33649b56a21b955d756fad467e9ebf5.jpg",
+            "role": "Harry Osborn",
+            "key": "/library/people/5d7768268718ba001e311be9",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bea",
+            "order": 5,
+            "slug": "cliff-robertson",
+            "tag": "Cliff Robertson",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d3617931ba8fb29b6105292bf078757.jpg",
+            "role": "Ben Parker",
+            "key": "/library/people/5d7768268718ba001e311bea",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311beb",
+            "order": 6,
+            "slug": "rosemary-harris",
+            "tag": "Rosemary Harris",
+            "thumb": "https://metadata-static.plex.tv/4/people/459921cf07d1b3bceb3d55e491b64a0e.jpg",
+            "role": "May Parker",
+            "key": "/library/people/5d7768268718ba001e311beb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bec",
+            "order": 7,
+            "slug": "j-k-simmons",
+            "tag": "J.K. Simmons",
+            "thumb": "https://metadata-static.plex.tv/7/people/7ec7f7673ef9ae2dccd4e3a3fd98c34e.jpg",
+            "role": "J. Jonah Jameson",
+            "key": "/library/people/5d7768268718ba001e311bec",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bed",
+            "order": 8,
+            "slug": "joe-manganiello",
+            "tag": "Joe Manganiello",
+            "thumb": "https://metadata-static.plex.tv/2/people/24d872defc12de837a94d77cbb638143.jpg",
+            "role": "Flash Thompson",
+            "key": "/library/people/5d7768268718ba001e311bed",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bee",
+            "order": 9,
+            "slug": "gerry-becker",
+            "tag": "Gerry Becker",
+            "thumb": "https://metadata-static.plex.tv/9/people/92eeb2e379475aff2c71bf605b5f8840.jpg",
+            "role": "Maximilian Fargas",
+            "key": "/library/people/5d7768268718ba001e311bee",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd5b5",
+            "order": 10,
+            "slug": "bill-nunn",
+            "tag": "Bill Nunn",
+            "thumb": "https://metadata-static.plex.tv/2/people/2bc44486b8c1e2bb7b46e4957ffb68df.jpg",
+            "role": "Joseph 'Robbie' Robertson",
+            "key": "/library/people/5d776826eb5d26001f1dd5b5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bef",
+            "order": 11,
+            "slug": "jack-betts",
+            "tag": "Jack Betts",
+            "thumb": "https://metadata-static.plex.tv/2/people/2afd60a13b4ddb748b4a8da7551f7f2b.jpg",
+            "role": "Henry Balkan",
+            "key": "/library/people/5d7768268718ba001e311bef",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bf0",
+            "order": 12,
+            "slug": "stanley-anderson",
+            "tag": "Stanley Anderson",
+            "thumb": "https://metadata-static.plex.tv/8/people/86683c775c609ef7b7f1b643aaaec922.jpg",
+            "role": "General Slocum",
+            "key": "/library/people/5d7768268718ba001e311bf0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bf1",
+            "order": 13,
+            "slug": "ron-perkins",
+            "tag": "Ron Perkins",
+            "thumb": "https://metadata-static.plex.tv/e/people/ea748e27a8b938ca6002b040d49e8047.jpg",
+            "role": "Dr. Mendel Stromm",
+            "key": "/library/people/5d7768268718ba001e311bf1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a05f3",
+            "order": 14,
+            "slug": "michael-papajohn",
+            "tag": "Michael Papajohn",
+            "thumb": "https://metadata-static.plex.tv/f/people/fd4f30fd872b33a280eaa39e41bb4397.jpg",
+            "role": "Carjacker",
+            "key": "/library/people/5d77682585719b001f3a05f3",
+            "type": "person"
+          },
+          {
+            "id": "5d776826103a2d001f564288",
+            "order": 15,
+            "slug": "k-k-dodds",
+            "tag": "K.K. Dodds",
+            "thumb": "https://metadata-static.plex.tv/people/5d776826103a2d001f564288.jpg",
+            "role": "Simkins",
+            "key": "/library/people/5d776826103a2d001f564288",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8950",
+            "order": 16,
+            "slug": "ted-raimi",
+            "tag": "Ted Raimi",
+            "thumb": "https://metadata-static.plex.tv/e/people/e70ee77e1617cd221e18d492810068f7.jpg",
+            "role": "Hoffman",
+            "key": "/library/people/5d7768274de0ee001fcc8950",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea98a3f",
+            "order": 17,
+            "slug": "bruce-campbell",
+            "tag": "Bruce Campbell",
+            "thumb": "https://metadata-static.plex.tv/e/people/e6a1184ba22830c7508021592e058ba0.jpg",
+            "role": "Ring Announcer",
+            "key": "/library/people/5d7768256f4521001ea98a3f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc894f",
+            "order": 18,
+            "slug": "elizabeth-banks",
+            "tag": "Elizabeth Banks",
+            "thumb": "https://metadata-static.plex.tv/8/people/88df0705efcd48b794ce0f0933192548.jpg",
+            "role": "Miss Brant",
+            "key": "/library/people/5d7768274de0ee001fcc894f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8958",
+            "order": 19,
+            "slug": "john-paxton",
+            "tag": "John Paxton",
+            "thumb": "https://metadata-static.plex.tv/3/people/332d3752516196ebf0a6b1c1a7283540.jpg",
+            "role": "Houseman",
+            "key": "/library/people/5d7768274de0ee001fcc8958",
+            "type": "person"
+          },
+          {
+            "id": "5d7768275af944001f1f6a70",
+            "order": 20,
+            "slug": "tim-dezarn",
+            "tag": "Tim DeZarn",
+            "thumb": "https://metadata-static.plex.tv/3/people/34664d46faf6ec999c2c6a36e3aa4b65.jpg",
+            "role": "Philip Watson",
+            "key": "/library/people/5d7768275af944001f1f6a70",
+            "type": "person"
+          },
+          {
+            "id": "5d776828a091de001f2e63a8",
+            "order": 21,
+            "slug": "taylor-gilbert",
+            "tag": "Taylor Gilbert",
+            "thumb": "https://metadata-static.plex.tv/4/people/487c9400168c85b650b7f17ca38deaec.jpg",
+            "role": "Madeline Watson",
+            "key": "/library/people/5d776828a091de001f2e63a8",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b880197001ec94a99",
+            "order": 22,
+            "slug": "randy-poffo-1",
+            "tag": "Randy Poffo",
+            "thumb": "https://metadata-static.plex.tv/c/people/c6539a364346fbdd95562db5fa07df3b.jpg",
+            "role": "Bone Saw McGraw",
+            "key": "/library/people/5d77683b880197001ec94a99",
+            "type": "person"
+          },
+          {
+            "id": "5d776828a091de001f2e63f2",
+            "order": 23,
+            "slug": "larry-joshua",
+            "tag": "Larry Joshua",
+            "thumb": "https://metadata-static.plex.tv/1/people/198213fe93605c5e5d01ddfcd18bd2c7.jpg",
+            "role": "Wrestling Promoter",
+            "key": "/library/people/5d776828a091de001f2e63f2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8963",
+            "order": 24,
+            "slug": "timothy-patrick-quill",
+            "tag": "Timothy Patrick Quill",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768274de0ee001fcc8963.jpg",
+            "role": "Wrestling Arena Guard",
+            "key": "/library/people/5d7768274de0ee001fcc8963",
+            "type": "person"
+          },
+          {
+            "id": "5f3fdc06768fc7004051e769",
+            "order": 25,
+            "slug": "lisa-danielle",
+            "tag": "Lisa Danielle",
+            "thumb": "https://metadata-static.plex.tv/0/people/0b5a96f02fe33a765b1c9d126649a9b1.jpg",
+            "role": "Bone-ette",
+            "key": "/library/people/5f3fdc06768fc7004051e769",
+            "type": "person"
+          },
+          {
+            "id": "5e9452b7e72911003f9a93d5",
+            "order": 26,
+            "slug": "natalie-t-yeo-2",
+            "tag": "Natalie T. Yeo",
+            "thumb": "https://metadata-static.plex.tv/people/5e9452b7e72911003f9a93d5.jpg",
+            "role": "Bone-ette",
+            "key": "/library/people/5e9452b7e72911003f9a93d5",
+            "type": "person"
+          },
+          {
+            "id": "5f3fdcb8bf3e560040b24cba",
+            "order": 27,
+            "slug": "erica-d-porter",
+            "tag": "Erica D. Porter",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ef4c830b3d00f07985f71a52288e8bd.jpg",
+            "role": "Bone-ette",
+            "key": "/library/people/5f3fdcb8bf3e560040b24cba",
+            "type": "person"
+          },
+          {
+            "id": "5e9452b640ee6b00413deb31",
+            "order": 28,
+            "slug": "kristen-davidson-2",
+            "tag": "Kristen Davidson",
+            "thumb": "https://metadata-static.plex.tv/people/5e9452b640ee6b00413deb31.jpg",
+            "role": "Bone-ette",
+            "key": "/library/people/5e9452b640ee6b00413deb31",
+            "type": "person"
+          },
+          {
+            "id": "5d7768859ab54400214e7246",
+            "order": 29,
+            "slug": "jason-padgett",
+            "tag": "Jason Padgett",
+            "thumb": "https://metadata-static.plex.tv/b/people/b12fb12a607f7bbf1c7478c6010dc0f3.jpg",
+            "role": "Flash's Crony",
+            "key": "/library/people/5d7768859ab54400214e7246",
+            "type": "person"
+          },
+          {
+            "id": "5d776d169ab544002151b40f",
+            "order": 30,
+            "slug": "shan-omar-huey",
+            "tag": "Shan Omar Huey",
+            "thumb": "https://metadata-static.plex.tv/a/people/af7b85ac5e0f0c67a7b184c7ba004208.jpg",
+            "role": "Teacher",
+            "key": "/library/people/5d776d169ab544002151b40f",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc96cea896a0020a40def",
+            "order": 31,
+            "slug": "sally-levi",
+            "tag": "Sally Levi",
+            "thumb": "https://metadata-static.plex.tv/4/people/455b6bdbcaa29fb487312d9f0a519d2d.jpg",
+            "role": "Girl on Bus",
+            "key": "/library/people/5dcfc96cea896a0020a40def",
+            "type": "person"
+          },
+          {
+            "id": "5d7768334de0ee001fccb1af",
+            "order": 32,
+            "slug": "evan-arnold",
+            "tag": "Evan Arnold",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768334de0ee001fccb1af.jpg",
+            "role": "Doctor",
+            "key": "/library/people/5d7768334de0ee001fccb1af",
+            "type": "person"
+          },
+          {
+            "id": "5d776876eb5d26001f1ec69e",
+            "order": 33,
+            "slug": "jill-sayre",
+            "tag": "Jill Sayre",
+            "thumb": "https://metadata-static.plex.tv/1/people/1b1e38e1ac018a08eb2e2e10d4d561e6.jpg",
+            "role": "Nurse",
+            "key": "/library/people/5d776876eb5d26001f1ec69e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768344de0ee001fccb46e",
+            "order": 34,
+            "slug": "jim-ward",
+            "tag": "Jim Ward",
+            "thumb": "https://metadata-static.plex.tv/2/people/2a419533eb42603b57d0a8bd53e18fa6.jpg",
+            "role": "Project Coordinator",
+            "key": "/library/people/5d7768344de0ee001fccb46e",
+            "type": "person"
+          },
+          {
+            "id": "694398c952a419b1f621bb66",
+            "order": 35,
+            "slug": "david-holcomb-7",
+            "tag": "David Holcomb",
+            "thumb": "https://metadata-static.plex.tv/6/people/6a5ee782b13f8e730dc5aff804f8862e.jpg",
+            "role": "Test Pilot",
+            "key": "/library/people/694398c952a419b1f621bb66",
+            "type": "person"
+          },
+          {
+            "id": "5d776826103a2d001f564285",
+            "order": 36,
+            "slug": "octavia-spencer",
+            "tag": "Octavia Spencer",
+            "thumb": "https://metadata-static.plex.tv/5/people/54b52c6211ed16989495bb758654ebf5.jpg",
+            "role": "Check-In Girl",
+            "key": "/library/people/5d776826103a2d001f564285",
+            "type": "person"
+          },
+          {
+            "id": "5d776828961905001eb9171d",
+            "order": 37,
+            "slug": "brad-grunberg",
+            "tag": "Brad Grunberg",
+            "thumb": "https://image.tmdb.org/t/p/original/as15eilLQlvFHkw0vDSevHoQSXM.jpg",
+            "role": "Heckler",
+            "key": "/library/people/5d776828961905001eb9171d",
+            "type": "person"
+          },
+          {
+            "id": "5d776a12ad5437001f77112b",
+            "order": 38,
+            "slug": "shane-habberstad",
+            "tag": "Shane Habberstad",
+            "role": "Little Billy",
+            "key": "/library/people/5d776a12ad5437001f77112b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f67a53e9001e6dda5b",
+            "order": 39,
+            "slug": "deborah-wakeham",
+            "tag": "Deborah Wakeham",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768f67a53e9001e6dda5b.jpg",
+            "role": "Billy's Mom",
+            "key": "/library/people/5d7768f67a53e9001e6dda5b",
+            "type": "person"
+          },
+          {
+            "id": "5e9452b640ee6b00413deb33",
+            "order": 40,
+            "slug": "rachael-bruce",
+            "tag": "Rachael Bruce",
+            "role": "Times Square Child",
+            "key": "/library/people/5e9452b640ee6b00413deb33",
+            "type": "person"
+          },
+          {
+            "id": "5d776838880197001ec93fb3",
+            "order": 41,
+            "slug": "mackenzie-bryce",
+            "tag": "Mackenzie Bryce",
+            "role": "Times Square Child",
+            "key": "/library/people/5d776838880197001ec93fb3",
+            "type": "person"
+          },
+          {
+            "id": "5d77689e47dd6e001f6bc595",
+            "order": 42,
+            "slug": "julia-barrie",
+            "tag": "Julia Barrie",
+            "thumb": "https://metadata-static.plex.tv/6/people/614f925681fbfbc61419e908a2dd2429.jpg",
+            "role": "Times Square Child",
+            "key": "/library/people/5d77689e47dd6e001f6bc595",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b61141d001fb13ee1",
+            "order": 43,
+            "slug": "macy-gray",
+            "tag": "Macy Gray",
+            "thumb": "https://metadata-static.plex.tv/4/cc68393fae/people/466b210812ee94576059ca10a1b11ba6.jpg",
+            "role": "Macy Gray",
+            "key": "/library/people/5d77682b61141d001fb13ee1",
+            "type": "person"
+          },
+          {
+            "id": "5d7768313c3c2a001fbcd46a",
+            "order": 44,
+            "slug": "myk-watford",
+            "tag": "Myk Watford",
+            "thumb": "https://metadata-static.plex.tv/e/people/e482b0922defa3074551f5a2b1cfcc18.jpg",
+            "role": "Cop at Fire",
+            "key": "/library/people/5d7768313c3c2a001fbcd46a",
+            "type": "person"
+          },
+          {
+            "id": "5d776828a091de001f2e63ae",
+            "order": 45,
+            "slug": "bill-calvert",
+            "tag": "Bill Calvert",
+            "thumb": "https://metadata-static.plex.tv/c/people/c2bf6b1f06dc70444a32de973b763c71.jpg",
+            "role": "Fireman",
+            "key": "/library/people/5d776828a091de001f2e63ae",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f5650ad",
+            "order": 46,
+            "slug": "sylva-kelegian",
+            "tag": "Sylva Kelegian",
+            "thumb": "https://metadata-static.plex.tv/e/people/e7c279969b321746bcf825022e0b0431.jpg",
+            "role": "Mother at Fire",
+            "key": "/library/people/5d77682a103a2d001f5650ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c103a2d001f56c6f2",
+            "order": 47,
+            "slug": "kristen-marie-holly",
+            "tag": "Kristen Marie Holly",
+            "thumb": "https://metadata-static.plex.tv/2/people/241e26ef55227e45bd3097eead458f71.jpg",
+            "role": "Young Lady at Fire",
+            "key": "/library/people/5d77684c103a2d001f56c6f2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768348718ba001e314376",
+            "order": 48,
+            "slug": "ajay-mehta",
+            "tag": "Ajay Mehta",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768348718ba001e314376.jpg",
+            "role": "Cabbie",
+            "key": "/library/people/5d7768348718ba001e314376",
+            "type": "person"
+          },
+          {
+            "id": "5d776825103a2d001f563ef0",
+            "order": 49,
+            "slug": "peter-appel",
+            "tag": "Peter Appel",
+            "thumb": "https://metadata-static.plex.tv/people/5d776825103a2d001f563ef0.jpg",
+            "role": "Cabbie",
+            "key": "/library/people/5d776825103a2d001f563ef0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768275af944001f1f6ec0",
+            "order": 50,
+            "slug": "scott-spiegel",
+            "tag": "Scott Spiegel",
+            "thumb": "https://metadata-static.plex.tv/e/people/e8e18151c3857cd70dffd4ed5719122e.jpg",
+            "role": "Marine Cop",
+            "key": "/library/people/5d7768275af944001f1f6ec0",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cbec77a48bef2eec07d",
+            "order": 51,
+            "slug": "matt-smith-90",
+            "tag": "Matt Smith",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a6fdf751db000ab81423d1b7b6a8338.jpg",
+            "role": "Cop at Carjacking",
+            "key": "/library/people/62fb7cbec77a48bef2eec07d",
+            "type": "person"
+          },
+          {
+            "id": "5d776834eb5d26001f1e0745",
+            "order": 52,
+            "slug": "sara-ramirez",
+            "tag": "Sara Ramirez",
+            "thumb": "https://metadata-static.plex.tv/4/people/43c28cd3bc54b89b53cf3c86f3faa7aa.jpg",
+            "role": "Cop at Carjacking",
+            "key": "/library/people/5d776834eb5d26001f1e0745",
+            "type": "person"
+          },
+          {
+            "id": "5d7768337228e5001f1de32c",
+            "order": 53,
+            "slug": "lucy-lawless",
+            "tag": "Lucy Lawless",
+            "thumb": "https://metadata-static.plex.tv/2/people/2eceb4f5dc27013de7a0b304a5d4979f.jpg",
+            "role": "Punk Rock Girl",
+            "key": "/library/people/5d7768337228e5001f1de32c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682654c0f0001f301bb6",
+            "order": 54,
+            "slug": "jayce-bartok",
+            "tag": "Jayce Bartok",
+            "thumb": "https://metadata-static.plex.tv/5/people/54064565c3aa078255298c806285e584.jpg",
+            "role": "Subway Guitarist",
+            "key": "/library/people/5d77682654c0f0001f301bb6",
+            "type": "person"
+          },
+          {
+            "id": "5d776d32fb0d55001f599bf4",
+            "order": 55,
+            "slug": "maribel-gonzalez",
+            "tag": "Maribel González",
+            "role": "Lady Dogwalker",
+            "key": "/library/people/5d776d32fb0d55001f599bf4",
+            "type": "person"
+          },
+          {
+            "id": "5f3fdc73cae2c60042e99ddb",
+            "order": 56,
+            "slug": "amy-bouril",
+            "tag": "Amy Bouril",
+            "role": "Office Lady",
+            "key": "/library/people/5f3fdc73cae2c60042e99ddb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768282ec6b5001f6ba5ef",
+            "order": 57,
+            "slug": "joseph-donofrio",
+            "tag": "Joseph D'Onofrio",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768282ec6b5001f6ba5ef.jpg",
+            "role": "Opinionated Cop",
+            "key": "/library/people/5d7768282ec6b5001f6ba5ef",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cb52bbf858f2c189ce0",
+            "order": 58,
+            "slug": "jim-norton-1",
+            "tag": "Jim Norton",
+            "thumb": "https://metadata-static.plex.tv/c/people/c1a66f4303b7765fd73c609be22259ac.jpg",
+            "role": "Surly Truck Driver",
+            "key": "/library/people/62fb7cb52bbf858f2c189ce0",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e54f42c001f8c3625",
+            "order": 59,
+            "slug": "corey-mendell-parker",
+            "tag": "Corey Mendell Parker",
+            "thumb": "https://metadata-static.plex.tv/a/people/a981ec9fd30905e457241f4cfb3ff7ed.jpg",
+            "role": "Chaperone in Tram",
+            "key": "/library/people/5d77682e54f42c001f8c3625",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab00",
+            "order": 60,
+            "slug": "ashley-edner",
+            "tag": "Ashley Edner",
+            "thumb": "https://metadata-static.plex.tv/0/people/0642be9d71008442e35483f34ac67f67.jpg",
+            "role": "Girl in Tram",
+            "key": "/library/people/5d776827151a60001f24ab00",
+            "type": "person"
+          },
+          {
+            "id": "5d776c8a594b2b001e6f6504",
+            "order": 61,
+            "slug": "william-joseph-firth",
+            "tag": "William Joseph Firth",
+            "thumb": "https://metadata-static.plex.tv/a/people/a2f56e37cde00e10ba1e6cfda0739ff4.jpg",
+            "role": "Boy in Tram",
+            "key": "/library/people/5d776c8a594b2b001e6f6504",
+            "type": "person"
+          },
+          {
+            "id": "5d7768342ec6b5001f6bbda3",
+            "order": 62,
+            "slug": "alex-black",
+            "tag": "Alex Black",
+            "thumb": "https://metadata-static.plex.tv/3/people/3a3d755ccbb9bb44c7dfc956d70dddef.jpg",
+            "role": "Boy in Tram",
+            "key": "/library/people/5d7768342ec6b5001f6bbda3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768358718ba001e3146dd",
+            "order": 63,
+            "slug": "laura-gray",
+            "tag": "Laura Gray",
+            "role": "Tram Group Mother",
+            "key": "/library/people/5d7768358718ba001e3146dd",
+            "type": "person"
+          },
+          {
+            "id": "6a0bebe13fd5a7c5f9331d04",
+            "order": 64,
+            "slug": "joe-virzi-7",
+            "tag": "Joe Virzi",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e8e754c80980da3be47add1e99ce26a.jpg",
+            "role": "New Yorker on Bridge",
+            "key": "/library/people/6a0bebe13fd5a7c5f9331d04",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb74d04a865004095c04f",
+            "order": 65,
+            "slug": "michael-edward-thomas",
+            "tag": "Michael Edward Thomas",
+            "thumb": "https://metadata-static.plex.tv/3/people/37e8d42b8cf19902eed24d5939db896f.jpg",
+            "role": "New Yorker on Bridge",
+            "key": "/library/people/5f3fb74d04a865004095c04f",
+            "type": "person"
+          },
+          {
+            "id": "5e9452b67c662e0040ec81c0",
+            "order": 66,
+            "slug": "jeanie-fox",
+            "tag": "Jeanie Fox",
+            "role": "New Yorker on Bridge",
+            "key": "/library/people/5e9452b67c662e0040ec81c0",
+            "type": "person"
+          },
+          {
+            "id": "5d776832e6d55c002040c6bd",
+            "order": 67,
+            "slug": "robert-kerman",
+            "tag": "Robert Kerman",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb60d65942f03fde3f55efa9986da77e.jpg",
+            "role": "Tugboat Captain",
+            "key": "/library/people/5d776832e6d55c002040c6bd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8955",
+            "order": 68,
+            "slug": "stan-lee",
+            "tag": "Stan Lee",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab04e310ed927e8d727c77f51ce3bae1.jpg",
+            "role": "Man in Fair (uncredited)",
+            "key": "/library/people/5d7768274de0ee001fcc8955",
+            "type": "person"
+          },
+          {
+            "id": "5d7768285af944001f1f6f15",
+            "order": 69,
+            "slug": "una-damon",
+            "tag": "Una Damon",
+            "thumb": "https://metadata-static.plex.tv/7/people/786597dbf43fe3b23418ea7318b6c0f9.jpg",
+            "role": "Lab Tour Guide (uncredited)",
+            "key": "/library/people/5d7768285af944001f1f6f15",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbcacee",
+            "order": 70,
+            "slug": "rick-avery",
+            "tag": "Rick Avery",
+            "thumb": "https://metadata-static.plex.tv/d/people/d00748c7a0a19666c094e1cd0e4123db.jpg",
+            "role": "Cop (uncredited)",
+            "key": "/library/people/5d7768253c3c2a001fbcacee",
+            "type": "person"
+          },
+          {
+            "id": "5d7768258718ba001e311719",
+            "order": 71,
+            "slug": "peter-aylward",
+            "tag": "Peter Aylward",
+            "role": "Colonel (uncredited)",
+            "key": "/library/people/5d7768258718ba001e311719",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b53ab0e7001f50878a",
+            "order": 72,
+            "slug": "jillian-clare",
+            "tag": "Jillian Clare",
+            "thumb": "https://metadata-static.plex.tv/e/people/ea68167be58f1b3af765583b1af562a1.jpg",
+            "role": "Crying Girl in Tram (uncredited)",
+            "key": "/library/people/5d7768b53ab0e7001f50878a",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d8718ba001e312f71",
+            "order": 73,
+            "slug": "chris-coppola",
+            "tag": "Chris Coppola",
+            "thumb": "https://metadata-static.plex.tv/9/people/9c0030e4348f694b6070643959300df1.jpg",
+            "role": "Kyle (uncredited)",
+            "key": "/library/people/5d77682d8718ba001e312f71",
+            "type": "person"
+          },
+          {
+            "id": "5d7768273c3c2a001fbcb24f",
+            "order": 74,
+            "slug": "jesse-heiman",
+            "tag": "Jesse Heiman",
+            "thumb": "https://metadata-static.plex.tv/9/people/97147ef7b6377385f7567663762da54c.jpg",
+            "role": "Spectator at School Fight (uncredited)",
+            "key": "/library/people/5d7768273c3c2a001fbcb24f",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa79ab5440021501abb",
+            "order": 75,
+            "slug": "leroy-patterson",
+            "tag": "Leroy Patterson",
+            "thumb": "https://metadata-static.plex.tv/people/5d776aa79ab5440021501abb.jpg",
+            "role": "World Unity Festival Attendant (uncredited)",
+            "key": "/library/people/5d776aa79ab5440021501abb",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d8718ba001e31304d",
+            "order": 76,
+            "slug": "benny-urquidez",
+            "tag": "Benny Urquidez",
+            "thumb": "https://metadata-static.plex.tv/5/people/5caa1d751cc46cd9ac18fd59a74994e2.jpg",
+            "role": "Mugger (uncredited)",
+            "key": "/library/people/5d77682d8718ba001e31304d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768243c3c2a001fbca977",
+            "order": 77,
+            "slug": "scott-l-schwartz",
+            "tag": "Scott L. Schwartz",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768243c3c2a001fbca977.jpg",
+            "role": "Screaming Wrestler (uncredited)",
+            "key": "/library/people/5d7768243c3c2a001fbca977",
+            "type": "person"
+          },
+          {
+            "id": "5d7768342e80df001ebde444",
+            "order": 78,
+            "slug": "jophery-c-brown",
+            "tag": "Jophery C. Brown",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768342e80df001ebde444.jpg",
+            "role": "Chef (uncredited)",
+            "key": "/library/people/5d7768342e80df001ebde444",
+            "type": "person"
+          },
+          {
+            "id": "5d7768328718ba001e313dc4",
+            "order": 79,
+            "slug": "brian-j-williams",
+            "tag": "Brian J. Williams",
+            "thumb": "https://metadata-static.plex.tv/9/people/97b1b529fd4ef1b353fa8bff80c0c7a1.jpg",
+            "role": "Young Thug #2 (uncredited)",
+            "key": "/library/people/5d7768328718ba001e313dc4",
+            "type": "person"
+          },
+          {
+            "id": "5d776833961905001eb935cd",
+            "order": 80,
+            "slug": "mark-de-alessandro",
+            "tag": "Mark De Alessandro",
+            "thumb": "https://metadata-static.plex.tv/people/5d776833961905001eb935cd.jpg",
+            "role": "Cop (uncredited)",
+            "key": "/library/people/5d776833961905001eb935cd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c11999bc0020dd051b",
+            "order": 81,
+            "slug": "tia-dionne-hodge",
+            "tag": "Tia Dionne Hodge",
+            "thumb": "https://metadata-static.plex.tv/3/people/3da875ab4a2ec9a6aa0f21dd10cbdb3c.jpg",
+            "role": "Uptown Woman (uncredited)",
+            "key": "/library/people/5d7768c11999bc0020dd051b",
+            "type": "person"
+          },
+          {
+            "id": "5d77682954f42c001f8c2d64",
+            "order": 82,
+            "slug": "loren-janes",
+            "tag": "Loren Janes",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef2317128423172f952848081120d0df.jpg",
+            "role": "Board of Directors Member (uncredited)",
+            "key": "/library/people/5d77682954f42c001f8c2d64",
+            "type": "person"
+          },
+          {
+            "id": "5d77686954c0f0001f308186",
+            "order": 83,
+            "slug": "andray-johnson",
+            "tag": "Andray Johnson",
+            "thumb": "https://metadata-static.plex.tv/a/people/a1245c4ce4c57bd35c2643d38f5f120b.jpg",
+            "role": "Balkan's Aide (uncredited)",
+            "key": "/library/people/5d77686954c0f0001f308186",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a2ec6b5001f6baa21",
+            "order": 84,
+            "slug": "martin-pfefferkorn",
+            "tag": "Martin Pfefferkorn",
+            "thumb": "https://metadata-static.plex.tv/0/people/03193a11f7aa3b289079cfa38f428cd3.jpg",
+            "role": "Thug on 8x10 (uncredited)",
+            "key": "/library/people/5d77682a2ec6b5001f6baa21",
+            "type": "person"
+          },
+          {
+            "id": "5d776855594b2b001e688c84",
+            "order": 85,
+            "slug": "tammi-sutton",
+            "tag": "Tammi Sutton",
+            "thumb": "https://metadata-static.plex.tv/2/people/2a080e7ed02ca52f09fd833e05809516.jpg",
+            "role": "Street Vendor (uncredited)",
+            "key": "/library/people/5d776855594b2b001e688c84",
+            "type": "person"
+          },
+          {
+            "id": "5d776d1923d5a3001f520957",
+            "order": 86,
+            "slug": "lindsay-thompson",
+            "tag": "Lindsay Thompson",
+            "thumb": "https://metadata-static.plex.tv/2/people/27f9c1a715e0d7226946e3a496d9ea15.jpg",
+            "role": "Mary Jane's Friend (uncredited)",
+            "key": "/library/people/5d776d1923d5a3001f520957",
+            "type": "person"
+          },
+          {
+            "id": "5d77698c47dd6e001f6c6e6e",
+            "order": 87,
+            "slug": "sean-valla",
+            "tag": "Sean Valla",
+            "role": "Boat Light Man (uncredited)",
+            "key": "/library/people/5d77698c47dd6e001f6c6e6e",
+            "type": "person"
+          },
+          {
+            "id": "5d776830f59e5800218981a3",
+            "order": 88,
+            "slug": "pete-macnamara",
+            "tag": "Pete Macnamara",
+            "thumb": "https://metadata-static.plex.tv/people/5d776830f59e5800218981a3.jpg",
+            "role": "Pentagon Officer (uncredited)",
+            "key": "/library/people/5d776830f59e5800218981a3",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b54c0f0001f3041e9",
+            "order": 89,
+            "slug": "al-goto",
+            "tag": "Al Goto",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4f381537e79c48176542a1ed5091f47.jpg",
+            "role": "Cop (uncredited)",
+            "key": "/library/people/5d77683b54c0f0001f3041e9",
+            "type": "person"
+          },
+          {
+            "id": "5f3f8f994abd460041ee9940",
+            "order": 90,
+            "slug": "joni-avery",
+            "tag": "Joni Avery",
+            "thumb": "https://metadata-static.plex.tv/c/people/c15195bd1ab1fcb9cde1cc98c3d6943f.jpg",
+            "role": "Cop (uncredited)",
+            "key": "/library/people/5f3f8f994abd460041ee9940",
+            "type": "person"
+          },
+          {
+            "id": "5d7768265af944001f1f666e",
+            "order": 91,
+            "slug": "sam-raimi",
+            "tag": "Sam Raimi",
+            "thumb": "https://metadata-static.plex.tv/9/people/98e339b083e57074888fe6b757067809.jpg",
+            "role": "Popcorn Thrower (uncredited)",
+            "key": "/library/people/5d7768265af944001f1f666e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768285af944001f1f7254",
+            "order": 92,
+            "slug": "craig-radio-man-castaldo",
+            "tag": "Craig 'Radio Man' Castaldo",
+            "thumb": "https://metadata-static.plex.tv/d/people/d24bbbd7656389218bc5dbeb323e66ee.jpg",
+            "role": "Man with Bike (uncredited)",
+            "key": "/library/people/5d7768285af944001f1f7254",
+            "type": "person"
+          },
+          {
+            "id": "5d776837103a2d001f568245",
+            "order": 93,
+            "slug": "lou-torres",
+            "tag": "Lou Torres",
+            "role": "Enrique",
+            "key": "/library/people/5d776837103a2d001f568245",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768265af944001f1f666e",
+            "slug": "sam-raimi",
+            "tag": "Sam Raimi",
+            "thumb": "https://metadata-static.plex.tv/9/people/98e339b083e57074888fe6b757067809.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768265af944001f1f666e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776827961905001eb9146d",
+            "slug": "ian-bryce",
+            "tag": "Ian Bryce",
+            "thumb": "https://metadata-static.plex.tv/3/people/3b4ea84eb2497b3e93751a05039852d1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776827961905001eb9146d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc894a",
+            "slug": "laura-ziskin",
+            "tag": "Laura Ziskin",
+            "thumb": "https://metadata-static.plex.tv/d/people/d831de86636349765e4424d203540918.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768274de0ee001fcc894a",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776825880197001ec90309",
+            "slug": "david-koepp",
+            "tag": "David Koepp",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb2e10afc40b71660c2c0ce3aa9fb45e.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d776825880197001ec90309",
+            "type": "person"
+          },
+          {
+            "id": "5dd2cfe2fb909a00211e238d",
+            "slug": "steve-montal",
+            "tag": "Steve Montal",
+            "role": "Story Editor",
+            "key": "/library/people/5dd2cfe2fb909a00211e238d",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ecad5437001f76c166",
+            "slug": "steve-ditko",
+            "tag": "Steve Ditko",
+            "thumb": "https://metadata-static.plex.tv/f/people/f90276950ec0e7785bade54f3ed46428.jpg",
+            "role": "Comic Book",
+            "key": "/library/people/5d7769ecad5437001f76c166",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8955",
+            "slug": "stan-lee",
+            "tag": "Stan Lee",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab04e310ed927e8d727c77f51ce3bae1.jpg",
+            "role": "Comic Book",
+            "key": "/library/people/5d7768274de0ee001fcc8955",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb821b",
+            "score": 0.94,
+            "tag": "thrilling"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.902,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbf0de93b86d951227a69",
+            "score": 0.789,
+            "tag": "heroic"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.731,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe22e93b86d951faf684",
+            "score": 0.715,
+            "tag": "romantic"
+          },
+          {
+            "id": "65afbe22e93b86d951faf705",
+            "score": 0.701,
+            "tag": "uplifting"
+          },
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.522,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe36e93b86d951fe489a",
+            "score": 0.501,
+            "tag": "adventurous"
+          },
+          {
+            "id": "65afbe30e93b86d951fd2941",
+            "score": 0.448,
+            "tag": "lighthearted"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77690d47dd6e001f6c2871",
+            "tag": "The Amazing Spider‐Man 2"
+          },
+          {
+            "guid": "plex://movie/5d77682a961905001eb91f6c",
+            "tag": "The Amazing Spider‐Man"
+          },
+          {
+            "guid": "plex://movie/5d776b5e7a53e9001e7238e0",
+            "tag": "Spider‐Man: Homecoming"
+          },
+          {
+            "guid": "plex://movie/5d776bf3fb0d55001f5782c4",
+            "tag": "Morbius"
+          },
+          {
+            "guid": "plex://movie/5d776827a091de001f2e62cc",
+            "tag": "Spider‐Man 2"
+          },
+          {
+            "guid": "plex://movie/5d7770acad5437001f8281cf",
+            "tag": "Spider‐Man: Across the Spider‐Verse"
+          },
+          {
+            "guid": "plex://movie/5e16138ce0d3ae001ed11b39",
+            "tag": "Spider‐Man: No Way Home"
+          },
+          {
+            "guid": "plex://movie/60143193ac01ac002bc7d3b6",
+            "tag": "Secret Headquarters"
+          },
+          {
+            "guid": "plex://movie/626fe8c95d976b8cde21ae13",
+            "tag": "Spider‐Man 4"
+          },
+          {
+            "guid": "plex://movie/6328b12fe57cbf75cce17c02",
+            "tag": "Spider‐Man: Brand New Day"
+          },
+          {
+            "guid": "plex://movie/62a353cf41db86d50abc3c8f",
+            "tag": "Thunderbolts"
+          },
+          {
+            "guid": "plex://movie/62aeee70252f044af9c879d6",
+            "tag": "Thunderbolts*"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Marvel Enterprises"
+          },
+          {
+            "tag": "Laura Ziskin Productions"
+          },
+          {
+            "tag": "Columbia Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Peter Parker (Tobey Maguire) battles his archenemy, the Green Goblin (Willem Dafoe).",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

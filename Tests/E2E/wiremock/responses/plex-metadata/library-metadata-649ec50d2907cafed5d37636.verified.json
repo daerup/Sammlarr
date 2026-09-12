@@ -1,0 +1,294 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/0/gracenote/0fd33355d0daf14acf5f7753dfc24de5.jpg",
+        "guid": "plex://movie/649ec50d2907cafed5d37636",
+        "key": "/library/metadata/649ec50d2907cafed5d37636",
+        "ratingKey": "649ec50d2907cafed5d37636",
+        "studio": "Shogun Films",
+        "summary": "MI5 Weapons Tech Ros Knight finds herself unexpectedly called into a Black Ops mission headed up by her Field Agent boyfriend Hugh. When the mission goes fatally wrong, Ros finds herself on the run with a target on her back and must turn to the only man she can trust, her estranged father – legendary retired spy catcher Charles Knight.",
+        "tagline": "Nowhere to run. Except home.",
+        "type": "movie",
+        "addedAt": 1789084800,
+        "duration": 4920000,
+        "originallyAvailableAt": "2026-09-11",
+        "publicPagesURL": "https://watch.plex.tv/movie/knightfall-2026",
+        "slug": "knightfall-2026",
+        "thumb": "https://metadata-static.plex.tv/7/gracenote/727cd309c919eac1a13315c49f95f7fd.jpg",
+        "title": "Knightfall",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Knightfall",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0fd33355d0daf14acf5f7753dfc24de5.jpg"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/33b0f7704ba078942165a1281dcc4900.jpg"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/0/683a142553/0bb537634584819ae133564a513a57bf.png"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/0/683a142553/0bb537634584819ae133564a513a57bf.png"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a764d38154a19fc63b5471154cadde51.jpg"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/7/gracenote/727cd309c919eac1a13315c49f95f7fd.jpg"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4487c1a09189a6fb12e8199eddeacfb8.jpg"
+          },
+          {
+            "alt": "Knightfall",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/9/gracenote/92635a57319c18c950bc9e4a5768a52a.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt28224861"
+          },
+          {
+            "id": "tmdb://1377900"
+          },
+          {
+            "id": "tvdb://376535"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768316f4521001ea9b569",
+            "order": 1,
+            "slug": "ian-ogilvy",
+            "tag": "Ian Ogilvy",
+            "thumb": "https://metadata-static.plex.tv/9/people/96c98dd04bfeb3274badd4c011398234.jpg",
+            "role": "Charles Knight",
+            "key": "/library/people/5d7768316f4521001ea9b569",
+            "type": "person"
+          },
+          {
+            "id": "6a1e675b4201225589b13149",
+            "order": 2,
+            "slug": "jeanine-nerissa-sothcott-8",
+            "tag": "Jeanine Nerissa Sothcott",
+            "thumb": "https://metadata-static.plex.tv/f/people/fbc32ef6e6f49c8c170c877e7df15ccc.jpg",
+            "role": "Ros Knight",
+            "key": "/library/people/6a1e675b4201225589b13149",
+            "type": "person"
+          },
+          {
+            "id": "65e1c7e08859be73772474d1",
+            "order": 3,
+            "slug": "geoffrey-moore-11",
+            "tag": "Geoffrey Moore",
+            "role": "Hugh",
+            "key": "/library/people/65e1c7e08859be73772474d1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682661141d001fb134e1",
+            "order": 4,
+            "slug": "nick-moran",
+            "tag": "Nick Moran",
+            "thumb": "https://metadata-static.plex.tv/0/people/0398bda8fe1a62a9d597b4c188b254b6.jpg",
+            "role": "Carmichael",
+            "key": "/library/people/5d77682661141d001fb134e1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a7e9a3c0020c6b1ad",
+            "order": 5,
+            "slug": "michael-pare",
+            "tag": "Michael Paré",
+            "thumb": "https://metadata-static.plex.tv/3/people/3328e256ddc10d1709bc890a41b5013e.jpg",
+            "role": "Matthew",
+            "key": "/library/people/5d77682a7e9a3c0020c6b1ad",
+            "type": "person"
+          },
+          {
+            "id": "5d7768342e80df001ebde44c",
+            "order": 6,
+            "slug": "rupert-holliday-evans",
+            "tag": "Rupert Holliday-Evans",
+            "thumb": "https://metadata-static.plex.tv/4/people/425af9b38b6cd6f22234bb86b1c79831.jpg",
+            "role": "Julian Pollard",
+            "key": "/library/people/5d7768342e80df001ebde44c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b3c3c2a001fbcc0fa",
+            "order": 7,
+            "slug": "robert-cavanah",
+            "tag": "Robert Cavanah",
+            "thumb": "https://metadata-static.plex.tv/8/people/8c5e5e9c5de746351c8c28d2084c9973.jpg",
+            "role": "Ivan",
+            "key": "/library/people/5d77682b3c3c2a001fbcc0fa",
+            "type": "person"
+          },
+          {
+            "id": "5dce6f09a0db9d00207b5329",
+            "order": 8,
+            "slug": "andy-gatenby",
+            "tag": "Andy Gatenby",
+            "thumb": "https://metadata-static.plex.tv/1/people/13ef6abd0a49ea5926b055bd7c35c36b.jpg",
+            "role": "Collins",
+            "key": "/library/people/5dce6f09a0db9d00207b5329",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776d1cf617c900201866b4",
+            "slug": "ben-mole",
+            "tag": "Ben Mole",
+            "role": "Director",
+            "key": "/library/people/5d776d1cf617c900201866b4",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776884308bca002032c230",
+            "slug": "jonathan-sothcott",
+            "tag": "Jonathan Sothcott",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d26b339f9f48ee40dda40f66fe59109.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776884308bca002032c230",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "62fb7cc1518a7c45581f452f",
+            "slug": "robert-dunn-33",
+            "tag": "Robert Dunn",
+            "role": "Writer",
+            "key": "/library/people/62fb7cc1518a7c45581f452f",
+            "type": "person"
+          },
+          {
+            "id": "5d776ba0f617c900201785aa",
+            "slug": "bob-schultz-1",
+            "tag": "Bob Schultz",
+            "role": "Writer",
+            "key": "/library/people/5d776ba0f617c900201785aa",
+            "type": "person"
+          },
+          {
+            "id": "671e2bfabc2315fa6a5a9dc7",
+            "slug": "james-smy-1",
+            "tag": "James Smy",
+            "role": "Writer",
+            "key": "/library/people/671e2bfabc2315fa6a5a9dc7",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/62d7d0d6c1a861d32b8a9a93",
+            "tag": "Chief of Station"
+          },
+          {
+            "guid": "plex://movie/653e0062f846e5c4af72cddb",
+            "tag": "Levon's Trade"
+          },
+          {
+            "guid": "plex://movie/65422b6ba2e549cd84b254f7",
+            "tag": "A Working Man"
+          },
+          {
+            "guid": "plex://movie/64a9ddc0c62da53a96fa7784",
+            "tag": "Hunting Grounds"
+          },
+          {
+            "guid": "plex://movie/6770032f4d12859dd0b2c51b",
+            "tag": "Sniper: The Last Stand"
+          },
+          {
+            "guid": "plex://movie/5d776ab396b655001fdf6a24",
+            "tag": "Salting the Battlefield"
+          },
+          {
+            "guid": "plex://movie/5f98444e7fb5ed002d9ad24e",
+            "tag": "Shadow Force"
+          },
+          {
+            "guid": "plex://movie/5d776ceb96b655001fe3b01f",
+            "tag": "Dangerous"
+          },
+          {
+            "guid": "plex://movie/60e01c93bc76bc002c038eb7",
+            "tag": "Section 8"
+          },
+          {
+            "guid": "plex://movie/61b5e913bed21cad1bf2ab95",
+            "tag": "Lights Out"
+          },
+          {
+            "guid": "plex://movie/61f3fb8af803de506fec1c0c",
+            "tag": "Lights Out"
+          },
+          {
+            "guid": "plex://movie/5f6c93c69aa24a00408fade6",
+            "tag": "Hounds of War"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Shogun Films"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,561 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/0/gracenote/056edfcc6dbfd0dfd5d96e298044feca.jpg",
+        "banner": "https://assets.fanart.tv/fanart/resident-evil-51c5533b000c7.jpg",
+        "guid": "plex://movie/5d776d16f617c90020185db0",
+        "key": "/library/metadata/5d776d16f617c90020185db0",
+        "rating": 3.6,
+        "ratingKey": "5d776d16f617c90020185db0",
+        "studio": "Impact Pictures",
+        "summary": "When a virus leaks from a top-secret facility, turning all resident researchers into ravenous zombies and their lab animals into mutated hounds from hell, the government sends in an elite military task force to contain the outbreak.",
+        "tagline": "A secret experiment. A deadly virus. A fatal mistake.",
+        "type": "movie",
+        "addedAt": 1016150400,
+        "audienceRating": 6.7,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 33000000,
+        "contentRating": "R",
+        "duration": 6000000,
+        "imdbRatingCount": 314660,
+        "originallyAvailableAt": "2002-03-15",
+        "publicPagesURL": "https://watch.plex.tv/movie/resident-evil",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "revenue": 102984862,
+        "slug": "resident-evil",
+        "thumb": "https://metadata-static.plex.tv/a/plex/aeb01701-ef09-4d98-a7f8-20e30138faf3.jpg",
+        "title": "Resident Evil",
+        "userState": false,
+        "year": 2002,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d776d16f617c90020185db0/commonsensemedia",
+            "oneLiner": "An ultra-gory video game-to-movie disappointment.",
+            "AgeRating": [
+              {
+                "age": 18,
+                "rating": 2,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Resident Evil",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/0/gracenote/056edfcc6dbfd0dfd5d96e298044feca.jpg"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/56ac1aeb587720d0e24a067f8c2cd06a.jpg"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/resident-evil-51c5533b000c7.jpg"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/c/683a142553/c514e103cbd66edd5215eeb0388f344d.png"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/c/683a142553/c514e103cbd66edd5215eeb0388f344d.png"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/6/plex/66e73b0a-ab03-4d22-ad18-4aa7abce2e07.jpg"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/a/plex/aeb01701-ef09-4d98-a7f8-20e30138faf3.jpg"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/530824206000eed469847dab8d401603.jpg"
+          },
+          {
+            "alt": "Resident Evil",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f0f42985325d3cbf0230e0aa1d28c9fa.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0120804"
+          },
+          {
+            "id": "tmdb://1576"
+          },
+          {
+            "id": "tvdb://1659"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 3.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 6.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.669
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/zwSs7PYLAH684qXjducR5TzVOdi.jpg",
+            "guid": "plex://collection/5ec2ebfa1ef0460041f95059",
+            "key": "/library/collections/5ec2ebfa1ef0460041f95059/children",
+            "summary": "Loosely based upon the Capcom video games of the same name, the Resident Evil film series follows the protagonist Alice, a character created for the films. The Umbrella Corporation acts as the main antagonist, a bio-engineering pharmaceutical company responsible for formulating the T-virus, which results in a zombie infection outbreak.",
+            "thumb": "https://image.tmdb.org/t/p/original/bJXqRRb87ObiJZh8dKLFz6DO9TZ.jpg",
+            "tag": "Resident Evil Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Canada"
+          },
+          {
+            "tag": "France"
+          },
+          {
+            "tag": "Germany"
+          },
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776824103a2d001f563ac9",
+            "order": 1,
+            "slug": "milla-jovovich",
+            "tag": "Milla Jovovich",
+            "thumb": "https://metadata-static.plex.tv/c/people/c9cff2974b1ceae133c8fed9996338dc.jpg",
+            "role": "Alice",
+            "key": "/library/people/5d776824103a2d001f563ac9",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd15",
+            "order": 2,
+            "slug": "michelle-rodriguez",
+            "tag": "Michelle Rodriguez",
+            "thumb": "https://metadata-static.plex.tv/e/people/eac50a79f509564b3121b0e219d58112.jpg",
+            "role": "Rain",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd15",
+            "type": "person"
+          },
+          {
+            "id": "5d776828151a60001f24af0f",
+            "order": 3,
+            "slug": "eric-mabius",
+            "tag": "Eric Mabius",
+            "thumb": "https://metadata-static.plex.tv/3/people/3e8ad75ab65d7975977847cb780acc05.jpg",
+            "role": "Matt",
+            "key": "/library/people/5d776828151a60001f24af0f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d54c0f0001f3027a4",
+            "order": 4,
+            "slug": "james-purefoy",
+            "tag": "James Purefoy",
+            "thumb": "https://metadata-static.plex.tv/6/people/65db4b15985275f263668dc5b026b732.jpg",
+            "role": "Spence",
+            "key": "/library/people/5d77682d54c0f0001f3027a4",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd1c",
+            "order": 5,
+            "slug": "martin-crewes",
+            "tag": "Martin Crewes",
+            "thumb": "https://metadata-static.plex.tv/3/people/34d6124f53e65c1b855c581d96dcdff9.jpg",
+            "role": "Kaplan",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd1c",
+            "type": "person"
+          },
+          {
+            "id": "5d776826880197001ec906c3",
+            "order": 6,
+            "slug": "colin-salmon",
+            "tag": "Colin Salmon",
+            "thumb": "https://metadata-static.plex.tv/e/people/e05fd85a41289fbd0375c013fbb6593f.jpg",
+            "role": "One",
+            "key": "/library/people/5d776826880197001ec906c3",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd1d",
+            "order": 7,
+            "slug": "pasquale-aleardi",
+            "tag": "Pasquale Aleardi",
+            "thumb": "https://metadata-static.plex.tv/2/people/249164b77b5c62f9b69bd7686a8fcb45.jpg",
+            "role": "J.D.",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd1d",
+            "type": "person"
+          },
+          {
+            "id": "5d776826961905001eb9111c",
+            "order": 8,
+            "slug": "heike-makatsch",
+            "tag": "Heike Makatsch",
+            "thumb": "https://metadata-static.plex.tv/8/people/85c4ff9910e909e14f3363d1d09200f4.jpg",
+            "role": "Lisa",
+            "key": "/library/people/5d776826961905001eb9111c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd16",
+            "order": 9,
+            "slug": "ryan-mccluskey",
+            "tag": "Ryan McCluskey",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682a3c3c2a001fbcbd16.jpg",
+            "role": "Mr. Grey",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd16",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd17",
+            "order": 10,
+            "slug": "oscar-pearce",
+            "tag": "Oscar Pearce",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682a3c3c2a001fbcbd17.jpg",
+            "role": "Mr. Red",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd17",
+            "type": "person"
+          },
+          {
+            "id": "5d776824103a2d001f563ada",
+            "order": 11,
+            "slug": "indra-ove",
+            "tag": "Indra Ové",
+            "thumb": "https://metadata-static.plex.tv/7/people/777eaa241b0d520c41abf6b75490ec44.jpg",
+            "role": "Ms. Black",
+            "key": "/library/people/5d776824103a2d001f563ada",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd18",
+            "order": 12,
+            "slug": "anna-bolt",
+            "tag": "Anna Bolt",
+            "thumb": "https://metadata-static.plex.tv/d/people/d43022f6b00911ce748bff8946e1b3dd.jpg",
+            "role": "Dr. Green",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd18",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd19",
+            "order": 13,
+            "slug": "joseph-may",
+            "tag": "Joseph May",
+            "thumb": "https://metadata-static.plex.tv/2/people/28641e29467eb3b87e371de0911777db.jpg",
+            "role": "Dr. Blue",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd19",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd1a",
+            "order": 14,
+            "slug": "robert-tannion",
+            "tag": "Robert Tannion",
+            "thumb": "https://metadata-static.plex.tv/8/people/828e1c930a613d536963a6085a9e36a0.jpg",
+            "role": "Dr. Brown",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd1a",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a151a60001f24b47d",
+            "order": 15,
+            "slug": "jaymes-butler",
+            "tag": "Jaymes Butler",
+            "thumb": "https://metadata-static.plex.tv/8/people/8b1847d1922d3e9a4fa89cde26578295.jpg",
+            "role": "Clarence",
+            "key": "/library/people/5d77682a151a60001f24b47d",
+            "type": "person"
+          },
+          {
+            "id": "5d776825eb5d26001f1dd16f",
+            "order": 16,
+            "slug": "stephen-billington",
+            "tag": "Stephen Billington",
+            "thumb": "https://metadata-static.plex.tv/0/people/040d29ac9faa6acaf968079405dcac3c.jpg",
+            "role": "Mr. White",
+            "key": "/library/people/5d776825eb5d26001f1dd16f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd1b",
+            "order": 17,
+            "slug": "fiona-glascott",
+            "tag": "Fiona Glascott",
+            "thumb": "https://metadata-static.plex.tv/e/people/e489d1d9cfc1301e18665424f483f067.jpg",
+            "role": "Ms. Gold",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd1b",
+            "type": "person"
+          },
+          {
+            "id": "5d776826880197001ec906ca",
+            "order": 18,
+            "slug": "liz-may-brice",
+            "tag": "Liz May Brice",
+            "thumb": "https://metadata-static.plex.tv/e/people/e48365a41f5f94f5e6808e6e7218b2ca.jpg",
+            "role": "Medic",
+            "key": "/library/people/5d776826880197001ec906ca",
+            "type": "person"
+          },
+          {
+            "id": "5d776a3351dd69001fe20bf4",
+            "order": 19,
+            "slug": "torsten-jerabek",
+            "tag": "Torsten Jerabek",
+            "thumb": "https://metadata-static.plex.tv/b/people/b143559fa1a126d4e432a3624d2f47c6.jpg",
+            "role": "Commando 1",
+            "key": "/library/people/5d776a3351dd69001fe20bf4",
+            "type": "person"
+          },
+          {
+            "id": "5d776d17f617c90020185e71",
+            "order": 20,
+            "slug": "marc-logan-black",
+            "tag": "Marc Logan-Black",
+            "role": "Commando 2",
+            "key": "/library/people/5d776d17f617c90020185e71",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b23ab0e7001f50816d",
+            "order": 21,
+            "slug": "michaela-dicker",
+            "tag": "Michaela Dicker",
+            "thumb": "https://metadata-static.plex.tv/b/people/b0222aee4e57ce2e81d492b5dccfcb62.jpg",
+            "role": "Red Queen",
+            "key": "/library/people/5d7768b23ab0e7001f50816d",
+            "type": "person"
+          },
+          {
+            "id": "5d776825151a60001f24a3ee",
+            "order": 22,
+            "slug": "jason-isaacs",
+            "tag": "Jason Isaacs",
+            "thumb": "https://metadata-static.plex.tv/a/people/a8e6525a5e6579c5de997030bb182e32.jpg",
+            "role": "Dr. William Birkin (uncredited)",
+            "key": "/library/people/5d776825151a60001f24a3ee",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768262e80df001ebdcce5",
+            "slug": "paul-w-s-anderson",
+            "tag": "Paul W. S. Anderson",
+            "thumb": "https://metadata-static.plex.tv/5/people/556ab786ea5a53384df788d769ae276f.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768262e80df001ebdcce5",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7768262e80df001ebdcce5",
+            "slug": "paul-w-s-anderson",
+            "tag": "Paul W. S. Anderson",
+            "thumb": "https://metadata-static.plex.tv/5/people/556ab786ea5a53384df788d769ae276f.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768262e80df001ebdcce5",
+            "type": "person"
+          },
+          {
+            "id": "5d776826151a60001f24a7ad",
+            "slug": "samuel-hadida",
+            "tag": "Samuel Hadida",
+            "thumb": "https://metadata-static.plex.tv/c/people/c8ae6d8372eab2b8f32214fe5d536480.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776826151a60001f24a7ad",
+            "type": "person"
+          },
+          {
+            "id": "5d776825999c64001ec2bfd2",
+            "slug": "bernd-eichinger",
+            "tag": "Bernd Eichinger",
+            "thumb": "https://metadata-static.plex.tv/4/people/4f1afd42cb2306adf0ecaeda3e240658.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776825999c64001ec2bfd2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768262e80df001ebdcce6",
+            "slug": "jeremy-bolt",
+            "tag": "Jeremy Bolt",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768262e80df001ebdcce6.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768262e80df001ebdcce6",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768262e80df001ebdcce5",
+            "slug": "paul-w-s-anderson",
+            "tag": "Paul W. S. Anderson",
+            "thumb": "https://metadata-static.plex.tv/5/people/556ab786ea5a53384df788d769ae276f.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d7768262e80df001ebdcce5",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 1,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 1,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.999,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe25e93b86d951fb81c8",
+            "score": 0.914,
+            "tag": "gritty"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.423,
+            "tag": "mysterious"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77691c7a53e9001e6e1eaf",
+            "tag": "Re‐Kill"
+          },
+          {
+            "guid": "plex://movie/62ce98318048acf134c88afd",
+            "tag": "Die Alone"
+          },
+          {
+            "guid": "plex://movie/5d776cc1fb0d55001f591e13",
+            "tag": "Land of the Dead"
+          },
+          {
+            "guid": "plex://movie/5d77683aeb5d26001f1e1cff",
+            "tag": "Doomsday"
+          },
+          {
+            "guid": "plex://movie/5d77682961141d001fb139ee",
+            "tag": "Resident Evil: Apocalypse"
+          },
+          {
+            "guid": "plex://movie/5d776b9ead5437001f7a4fa0",
+            "tag": "Extinction"
+          },
+          {
+            "guid": "plex://movie/5d776f4996b655001fe81c3e",
+            "tag": "Resident Evil: Welcome to Raccoon City"
+          },
+          {
+            "guid": "plex://movie/5d7768a66f6af7001ee59bab",
+            "tag": "Total Recall"
+          },
+          {
+            "guid": "plex://movie/5d7768312e80df001ebddd2f",
+            "tag": "Resident Evil: Extinction"
+          },
+          {
+            "guid": "plex://movie/5d7768314de0ee001fccaad6",
+            "tag": "The 6th Day"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Impact Pictures"
+          },
+          {
+            "tag": "Davis Films"
+          },
+          {
+            "tag": "New Legacy Film"
+          },
+          {
+            "tag": "Constantin Film"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Commandos infiltrate a research facility after a deadly virus turns the entire staff into zombies.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

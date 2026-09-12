@@ -1,0 +1,455 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/0/gracenote/0f409b84e094aa8416f685ae13b58177.jpg",
+        "guid": "plex://movie/67f728f097f5a99d6f6ca577",
+        "key": "/library/metadata/67f728f097f5a99d6f6ca577",
+        "ratingKey": "67f728f097f5a99d6f6ca577",
+        "studio": "Pokeepsie Films",
+        "summary": "After her mysterious kidnapping in NYC, Spanish tycoon's daughter Marfil Cortés gets bodyguard Sebastián Moore. Despite clashing personalities, attraction grows as they face escalating threats in Spain, where appearances deceive.",
+        "tagline": "He was hired to protect her. Falling for her was never part of the deal.",
+        "type": "movie",
+        "addedAt": 1788912000,
+        "audienceRating": 5.5,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "TV-MA",
+        "duration": 6240000,
+        "imdbRatingCount": 870,
+        "originalTitle": "Enfrentados: Marfil",
+        "originallyAvailableAt": "2026-09-09",
+        "publicPagesURL": "https://watch.plex.tv/movie/drawn-together-2026-1",
+        "slug": "drawn-together-2026-1",
+        "thumb": "https://metadata-static.plex.tv/2/gracenote/2f451591a8f76d78a189490ddec319b6.jpg",
+        "title": "Drawn Together",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/67f728f097f5a99d6f6ca577/commonsensemedia",
+            "oneLiner": "Sex, language, violence in book-based romantic thriller.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Drawn Together",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0f409b84e094aa8416f685ae13b58177.jpg"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/47cb23cbdf71cb585bc302ced95a78be.jpg"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4acc8b2e0bc2ce6b3bd7321c9e7e21db.png"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4acc8b2e0bc2ce6b3bd7321c9e7e21db.png"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7c385f11f332deebc4f77bb0b76394d7.jpg"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2f451591a8f76d78a189490ddec319b6.jpg"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/21234662ed648fb35d4dff770d06cf6a.jpg"
+          },
+          {
+            "alt": "Drawn Together",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3634950e7d62a12fcc777ba0cc905cfa.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f308fddd001f28ee5f",
+            "id": "5d9c07f308fddd001f28ee5f",
+            "key": "/library/sections/home/all?genre=5d9c07f308fddd001f28ee5f",
+            "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+            "slug": "suspense",
+            "tag": "Suspense",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt36073210"
+          },
+          {
+            "id": "tmdb://1440098"
+          },
+          {
+            "id": "tvdb://368076"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.579
+          }
+        ],
+        "Collection": [
+          {
+            "guid": "plex://collection/67c05dc44c2bebfe5e4b7757",
+            "key": "/library/collections/67c05dc44c2bebfe5e4b7757/children",
+            "summary": "After surviving a kidnapping in New York, Marfil, a wealthy twenty-year-old heiress, is forced to live under the constant watch of Sebastian Moore, a bodyguard as handsome as he is impassive. Despite her reservations, an intense and forbidden attraction develops between them. However, Marfil soon discovers that Sebastian is hiding dark secrets and that her own father is involved in a dangerous criminal underworld. Caught in a web of family betrayals and deadly threats, she must determine whether Sebastian will be her downfall or her only hope for survival.  A high-stakes romance blending bodyguard fiction and dark thriller, told in two volumes.",
+            "thumb": "https://image.tmdb.org/t/p/original/ag36zIJvCzHs9y5KdOfiMdy7wrx.jpg",
+            "tag": "A Saga Marfil"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Spain"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776e58fb0d55001f5be385",
+            "order": 1,
+            "slug": "ester-exposito",
+            "tag": "Ester Expósito",
+            "thumb": "https://metadata-static.plex.tv/a/people/a8b7cd8c7533ec511deb709a7224fde1.jpg",
+            "role": "Marfil Cortés",
+            "key": "/library/people/5d776e58fb0d55001f5be385",
+            "type": "person"
+          },
+          {
+            "id": "5d776c45fb0d55001f582ac6",
+            "order": 2,
+            "slug": "hugo-diego-garcia",
+            "tag": "Hugo Diego Garcia",
+            "thumb": "https://metadata-static.plex.tv/c/people/c8896deba3cdc37f72d54b96eb04580c.jpg",
+            "role": "Sebastian Moore",
+            "key": "/library/people/5d776c45fb0d55001f582ac6",
+            "type": "person"
+          },
+          {
+            "id": "5d776d7796b655001fe49965",
+            "order": 3,
+            "slug": "eric-masip",
+            "tag": "Eric Masip",
+            "thumb": "https://metadata-static.plex.tv/c/people/c86b4624553ad1beaf58572bc8088a7d.jpg",
+            "role": "Iván",
+            "key": "/library/people/5d776d7796b655001fe49965",
+            "type": "person"
+          },
+          {
+            "id": "5d7769a6ad5437001f763960",
+            "order": 4,
+            "slug": "pablo-molinero",
+            "tag": "Pablo Molinero",
+            "thumb": "https://metadata-static.plex.tv/5/people/5acfd0fdfaca11fde073a84886f7a3db.jpg",
+            "role": "Alejandro",
+            "key": "/library/people/5d7769a6ad5437001f763960",
+            "type": "person"
+          },
+          {
+            "id": "629f678af02f4b2abbce404d",
+            "order": 5,
+            "slug": "zoe-bonafonte",
+            "tag": "Zoe Bonafonte",
+            "thumb": "https://metadata-static.plex.tv/3/people/30d3a1104fa4f96d9544f6b3a8d7fdd4.jpg",
+            "role": "Gabriela",
+            "key": "/library/people/629f678af02f4b2abbce404d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea98b27",
+            "order": 6,
+            "slug": "lluis-homar",
+            "tag": "Lluís Homar",
+            "thumb": "https://metadata-static.plex.tv/d/people/d927e0ef2bd454e124f087f3ebdaa3a4.jpg",
+            "role": "Logan",
+            "key": "/library/people/5d7768256f4521001ea98b27",
+            "type": "person"
+          },
+          {
+            "id": "5d776c7ef617c9002018222a",
+            "order": 7,
+            "slug": "joaquin-ferreira",
+            "tag": "Joaquín Ferreira",
+            "thumb": "https://metadata-static.plex.tv/2/people/20d57cf3910599fef05e34ad8c0a960b.jpg",
+            "role": "Ray",
+            "key": "/library/people/5d776c7ef617c9002018222a",
+            "type": "person"
+          },
+          {
+            "id": "65253d786bc3dd1c39f04dec",
+            "order": 8,
+            "slug": "alessia-yoko-fontana-1",
+            "tag": "Alessia Yoko Fontana",
+            "thumb": "https://metadata-static.plex.tv/7/people/76ec8680e504a7b939573ff7665f4187.jpg",
+            "role": "Lucille",
+            "key": "/library/people/65253d786bc3dd1c39f04dec",
+            "type": "person"
+          },
+          {
+            "id": "5fb777d4a56afd002eac2550",
+            "order": 9,
+            "slug": "joao-bettencourt",
+            "tag": "João Bettencourt",
+            "thumb": "https://metadata-static.plex.tv/7/people/7c6e1fd9b639dae02b47483f8da9dac3.jpg",
+            "role": "Liam",
+            "key": "/library/people/5fb777d4a56afd002eac2550",
+            "type": "person"
+          },
+          {
+            "id": "6a0c58b7dd3b523074e503ee",
+            "order": 10,
+            "slug": "jorge-valder-10",
+            "tag": "Jorge Valder",
+            "thumb": "https://metadata-static.plex.tv/a/people/a84f1c3f8356f535fc631d2009875310.jpg",
+            "role": "Agente Rivera",
+            "key": "/library/people/6a0c58b7dd3b523074e503ee",
+            "type": "person"
+          },
+          {
+            "id": "5d776d54fb0d55001f59d70c",
+            "order": 11,
+            "slug": "leander-vyvey",
+            "tag": "Leander Vyvey",
+            "thumb": "https://metadata-static.plex.tv/5/people/5fdad41a4debc716c6915f3b8a5b1162.jpg",
+            "role": "Wilson",
+            "key": "/library/people/5d776d54fb0d55001f59d70c",
+            "type": "person"
+          },
+          {
+            "id": "6aa29bf1d9a8b12d643bd3b6",
+            "order": 12,
+            "slug": "vladimir-borislavov-1",
+            "tag": "Vladimir Borislavov",
+            "role": "Vladimir Hombre de Marcus",
+            "key": "/library/people/6aa29bf1d9a8b12d643bd3b6",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b85719b001f3a4e32",
+            "order": 13,
+            "slug": "molly-malcolm",
+            "tag": "Molly Malcolm",
+            "role": "Médico",
+            "key": "/library/people/5d77683b85719b001f3a4e32",
+            "type": "person"
+          },
+          {
+            "id": "632d19ab157a397eff24864c",
+            "order": 14,
+            "slug": "inge-ladd-1",
+            "tag": "Inge Ladd",
+            "role": "Profesora Fonteyn",
+            "key": "/library/people/632d19ab157a397eff24864c",
+            "type": "person"
+          },
+          {
+            "id": "6aa29bf1d9a8b12d643bd3b7",
+            "order": 15,
+            "slug": "majo-gamez-1",
+            "tag": "Majo Gamez",
+            "role": "Tami",
+            "key": "/library/people/6aa29bf1d9a8b12d643bd3b7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a023d5a3001f4ef191",
+            "order": 16,
+            "slug": "luka-peros",
+            "tag": "Luka Peroš",
+            "thumb": "https://metadata-static.plex.tv/4/people/44574187334273e7d9ccf7d520b5bf87.jpg",
+            "key": "/library/people/5d7768a023d5a3001f4ef191",
+            "type": "person"
+          },
+          {
+            "id": "60f196c7e20062002d156eea",
+            "order": 17,
+            "slug": "pablo-otero-5",
+            "tag": "Pablo Otero",
+            "thumb": "https://image.tmdb.org/t/p/original/lRr61QrdG0RChV8nJ7slAiuvU7j.jpg",
+            "role": "Robert",
+            "key": "/library/people/60f196c7e20062002d156eea",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5e1657614c78f7003e81613c",
+            "slug": "oscar-pedraza-1",
+            "tag": "Óscar Pedraza",
+            "role": "Director",
+            "key": "/library/people/5e1657614c78f7003e81613c",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7768338a7581001f12d373",
+            "slug": "alex-de-la-iglesia",
+            "tag": "Álex de la Iglesia",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb333615b0f07ad1bdfcd1890ce1be75.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768338a7581001f12d373",
+            "type": "person"
+          },
+          {
+            "id": "5d7768cb23d5a3001f4f1829",
+            "slug": "carolina-bang",
+            "tag": "Carolina Bang",
+            "thumb": "https://metadata-static.plex.tv/d/people/d844b625c4cfa483295528ae611d2902.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768cb23d5a3001f4f1829",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5dcfc4c6b10fe5001f43e04c",
+            "slug": "sofia-cuenca",
+            "tag": "Sofía Cuenca",
+            "role": "Screenplay",
+            "key": "/library/people/5dcfc4c6b10fe5001f43e04c",
+            "type": "person"
+          },
+          {
+            "id": "630c74213672f300c79efd0b",
+            "slug": "mercedes-ron",
+            "tag": "Mercedes Ron",
+            "role": "Novel",
+            "key": "/library/people/630c74213672f300c79efd0b",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/653e0062f846e5c4af72cddb",
+            "tag": "Levon's Trade"
+          },
+          {
+            "guid": "plex://movie/65422b6ba2e549cd84b254f7",
+            "tag": "A Working Man"
+          },
+          {
+            "guid": "plex://movie/5d77698a47dd6e001f6c6ced",
+            "tag": "6 Bullets"
+          },
+          {
+            "guid": "plex://movie/5f40c02cce2564003fa67a6f",
+            "tag": "Stolen Girl"
+          },
+          {
+            "guid": "plex://movie/662d7db468c628e05dc48b2c",
+            "tag": "Stolen Girl"
+          },
+          {
+            "guid": "plex://movie/6444698339b14cd38176a513",
+            "tag": "The Housemaid"
+          },
+          {
+            "guid": "plex://movie/672da1b2c043f70f2f2fe40d",
+            "tag": "Protector"
+          },
+          {
+            "guid": "plex://movie/672e4f0ae966ae9ffbf5c6c8",
+            "tag": "Protector"
+          },
+          {
+            "guid": "plex://movie/66f41bbb0973cb13e122f502",
+            "tag": "A Widow's Game"
+          },
+          {
+            "guid": "plex://movie/6753235b8d43ba42da882756",
+            "tag": "La viuda negra"
+          },
+          {
+            "guid": "plex://movie/5d776aac594b2b001e6c2f4d",
+            "tag": "Every Secret Thing"
+          },
+          {
+            "guid": "plex://movie/5d77685d7228e5001f1e3134",
+            "tag": "The Anderson Tapes"
+          },
+          {
+            "guid": "plex://movie/5d776c0851dd69001fe36e26",
+            "tag": "Bad Sister"
+          },
+          {
+            "guid": "plex://movie/5d77704d9ab54400215343a8",
+            "tag": "Breaking In"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Pokeepsie Films"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Following her kidnapping, an attraction develops between Marfil Cortés and her bodyguard.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

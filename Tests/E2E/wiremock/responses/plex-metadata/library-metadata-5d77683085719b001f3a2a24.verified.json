@@ -1,0 +1,635 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/d/gracenote/d278cb7ee1b65085e4af4bbd066362c2.jpg",
+        "banner": "https://assets.fanart.tv/fanart/practical-magic-5e62b93e2408c.jpg",
+        "guid": "plex://movie/5d77683085719b001f3a2a24",
+        "key": "/library/metadata/5d77683085719b001f3a2a24",
+        "rating": 3,
+        "ratingKey": "5d77683085719b001f3a2a24",
+        "studio": "Di Novi Pictures",
+        "summary": "Sally and Gillian Owens, born into a magical family, have mostly avoided witchcraft themselves. But when Gillian's vicious boyfriend, Jimmy Angelov, dies unexpectedly, the Owens sisters give themselves a crash course in hard magic. With policeman Gary Hallet growing suspicious, the girls struggle to resurrect Angelov -- and unwittingly inject his corpse with an evil spirit that threatens to end their family line.",
+        "tagline": "For two sisters from a family of witches, falling in love is the trickiest spell of all.",
+        "type": "movie",
+        "addedAt": 908496000,
+        "audienceRating": 7.3,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 75000000,
+        "contentRating": "PG-13",
+        "duration": 6240000,
+        "imdbRatingCount": 115633,
+        "originallyAvailableAt": "1998-10-16",
+        "publicPagesURL": "https://watch.plex.tv/movie/practical-magic",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "revenue": 94400000,
+        "slug": "practical-magic",
+        "thumb": "https://metadata-static.plex.tv/8/gracenote/8601e5d401d25418c7d69f32756d57be.jpg",
+        "title": "Practical Magic",
+        "userState": false,
+        "year": 1998,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d77683085719b001f3a2a24/commonsensemedia",
+            "oneLiner": "Quirky, uneven romcom with some witchy violence.",
+            "AgeRating": [
+              {
+                "age": 13,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Practical Magic",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d278cb7ee1b65085e4af4bbd066362c2.jpg"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cf4c07659693579815b802f197496553.jpg"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/practical-magic-5e62b93e2408c.jpg"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/43a998f782c14d2ce4513726e3eaff13.png"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/43a998f782c14d2ce4513726e3eaff13.png"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4cfc20ba68caddbf2370f4c113cb2156.jpg"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8601e5d401d25418c7d69f32756d57be.jpg"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7c892e508064f385def07ea50b2e4a36.jpg"
+          },
+          {
+            "alt": "Practical Magic",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/4/gracenote/47ac4c8e7e73dc73d88f07b1c647148a.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0120791"
+          },
+          {
+            "id": "tmdb://6435"
+          },
+          {
+            "id": "tvdb://1946"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 3
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 7.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.787
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/q6MjdonDU8wxzogdFQ2rQNQEWzb.jpg",
+            "guid": "plex://collection/66e03d7c34728a2df3501a4c",
+            "key": "/library/collections/66e03d7c34728a2df3501a4c/children",
+            "summary": "Sally and Gillian Owens, born into a magical family, have mostly avoided witchcraft themselves. But when Gillian's abusive boyfriend dies unexpectedly, the sisters give themselves a crash course in hard magic.",
+            "thumb": "https://image.tmdb.org/t/p/original/1cB3iP3RtNTRRfCKfDQ1JB2AiZL.jpg",
+            "tag": "Practical Magic Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682a999c64001ec2d203",
+            "order": 1,
+            "slug": "sandra-bullock",
+            "tag": "Sandra Bullock",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4219fc018c01155efe2adfc43f71e7c.jpg",
+            "role": "Sally Owens",
+            "key": "/library/people/5d77682a999c64001ec2d203",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a083b",
+            "order": 2,
+            "slug": "nicole-kidman",
+            "tag": "Nicole Kidman",
+            "thumb": "https://metadata-static.plex.tv/0/people/038c53cb04c8196d445ed285bb250c5a.jpg",
+            "role": "Gillian Owens",
+            "key": "/library/people/5d77682585719b001f3a083b",
+            "type": "person"
+          },
+          {
+            "id": "5d776827880197001ec90a2d",
+            "order": 3,
+            "slug": "stockard-channing",
+            "tag": "Stockard Channing",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d1194f13fa08c96d0967d0fcae1f0a0.jpg",
+            "role": "Aunt Frances",
+            "key": "/library/people/5d776827880197001ec90a2d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a0558",
+            "order": 4,
+            "slug": "dianne-wiest",
+            "tag": "Dianne Wiest",
+            "thumb": "https://metadata-static.plex.tv/6/people/67bb48847b675dee173da4c435218207.jpg",
+            "role": "Aunt Jet",
+            "key": "/library/people/5d77682585719b001f3a0558",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd575",
+            "order": 5,
+            "slug": "goran-visnjic",
+            "tag": "Goran Višnjić",
+            "thumb": "https://metadata-static.plex.tv/c/people/c37e744c128a86f31c9bebb699aae8eb.jpg",
+            "role": "Jimmy Angelov",
+            "key": "/library/people/5d776826eb5d26001f1dd575",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c151a60001f24bd34",
+            "order": 6,
+            "slug": "aidan-quinn",
+            "tag": "Aidan Quinn",
+            "thumb": "https://metadata-static.plex.tv/3/people/358441df9d75d779b147de4bb39cb1f2.jpg",
+            "role": "Gary Hallet",
+            "key": "/library/people/5d77682c151a60001f24bd34",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e999c64001ec2df6c",
+            "order": 7,
+            "slug": "evan-rachel-wood",
+            "tag": "Evan Rachel Wood",
+            "thumb": "https://metadata-static.plex.tv/7/people/7b97a7b709a6056ec3fc9c88ed7c5375.jpg",
+            "role": "Kylie Owens",
+            "key": "/library/people/5d77682e999c64001ec2df6c",
+            "type": "person"
+          },
+          {
+            "id": "5d77683185719b001f3a2aab",
+            "order": 8,
+            "slug": "alexandra-artrip",
+            "tag": "Alexandra Artrip",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c1bfc1a61098a354fd1dbbf3c0636a2.jpg",
+            "role": "Antonia Owens",
+            "key": "/library/people/5d77683185719b001f3a2aab",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e880197001ec9233e",
+            "order": 9,
+            "slug": "mark-feuerstein",
+            "tag": "Mark Feuerstein",
+            "thumb": "https://metadata-static.plex.tv/c/people/c1cd9b3cd628197f507c2cc97f007633.jpg",
+            "role": "Michael",
+            "key": "/library/people/5d77682e880197001ec9233e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a7e9a3c0020c6b340",
+            "order": 10,
+            "slug": "caprice-benedetti",
+            "tag": "Caprice Benedetti",
+            "thumb": "https://metadata-static.plex.tv/5/people/5eaca3425463eac2b374b4a950c9636c.jpg",
+            "role": "Maria Owens",
+            "key": "/library/people/5d77682a7e9a3c0020c6b340",
+            "type": "person"
+          },
+          {
+            "id": "5d77683185719b001f3a2aad",
+            "order": 11,
+            "slug": "annabella-price",
+            "tag": "Annabella Price",
+            "thumb": "https://metadata-static.plex.tv/7/people/7556a80161ae97097cb49f8e6dc5b10e.jpg",
+            "role": "Lovelorn Lady",
+            "key": "/library/people/5d77683185719b001f3a2aad",
+            "type": "person"
+          },
+          {
+            "id": "5d7768263c3c2a001fbcadd1",
+            "order": 12,
+            "slug": "camilla-belle",
+            "tag": "Camilla Belle",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd8321915db0cd9cfb2f3758fd5699aa.jpg",
+            "role": "Eleven-Year-Old Sally",
+            "key": "/library/people/5d7768263c3c2a001fbcadd1",
+            "type": "person"
+          },
+          {
+            "id": "5d77683185719b001f3a2aae",
+            "order": 13,
+            "slug": "lora-anne-criswell",
+            "tag": "Lora Anne Criswell",
+            "role": "Ten-Year-Old Gillian",
+            "key": "/library/people/5d77683185719b001f3a2aae",
+            "type": "person"
+          },
+          {
+            "id": "5d776824151a60001f24a322",
+            "order": 14,
+            "slug": "margo-martindale",
+            "tag": "Margo Martindale",
+            "thumb": "https://metadata-static.plex.tv/7/people/7b3398c5adead768572dc0cfffe420f0.jpg",
+            "role": "Linda Bennett",
+            "key": "/library/people/5d776824151a60001f24a322",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c2ec6b5001f6bad74",
+            "order": 15,
+            "slug": "chloe-webb",
+            "tag": "Chloe Webb",
+            "thumb": "https://metadata-static.plex.tv/4/people/4dcb29ebc5a611de9a655b6255a9a509.jpg",
+            "role": "Carla",
+            "key": "/library/people/5d77682c2ec6b5001f6bad74",
+            "type": "person"
+          },
+          {
+            "id": "5d7768346f4521001ea9bdd0",
+            "order": 16,
+            "slug": "martha-gehman",
+            "tag": "Martha Gehman",
+            "thumb": "https://metadata-static.plex.tv/a/people/a701481136e20e22b8ab0e3e131e4d20.jpg",
+            "role": "Patty",
+            "key": "/library/people/5d7768346f4521001ea9bdd0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768265af944001f1f66a8",
+            "order": 17,
+            "slug": "lucinda-jenney",
+            "tag": "Lucinda Jenney",
+            "thumb": "https://metadata-static.plex.tv/e/people/e9fb1a315c2bd98883d0e4c9f762cd0d.jpg",
+            "role": "Adult Sara",
+            "key": "/library/people/5d7768265af944001f1f66a8",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b8718ba001e31273c",
+            "order": 18,
+            "slug": "cordelia-richards",
+            "tag": "Cordelia Richards",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682b8718ba001e31273c.jpg",
+            "role": "Nan",
+            "key": "/library/people/5d77682b8718ba001e31273c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c54c0f0001f3025e2",
+            "order": 19,
+            "slug": "mary-gross",
+            "tag": "Mary Gross",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682c54c0f0001f3025e2.jpg",
+            "role": "Debbie",
+            "key": "/library/people/5d77682c54c0f0001f3025e2",
+            "type": "person"
+          },
+          {
+            "id": "63610ad20d9da681993b4493",
+            "order": 20,
+            "slug": "jack-kirschker",
+            "tag": "Jack Kirschker",
+            "role": "Old Man Wilkes",
+            "key": "/library/people/63610ad20d9da681993b4493",
+            "type": "person"
+          },
+          {
+            "id": "5d776828151a60001f24af15",
+            "order": 21,
+            "slug": "herta-ware",
+            "tag": "Herta Ware",
+            "thumb": "https://metadata-static.plex.tv/c/people/cfa44eb1b1bf16a4e6b305a335993e85.jpg",
+            "role": "Old Lady Wilkes",
+            "key": "/library/people/5d776828151a60001f24af15",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c36b",
+            "order": 22,
+            "slug": "ellen-geer",
+            "tag": "Ellen Geer",
+            "thumb": "https://metadata-static.plex.tv/9/people/9a493e692e4464f3f5328b4ef982bc8f.jpg",
+            "role": "Pharmacist",
+            "key": "/library/people/5d776826999c64001ec2c36b",
+            "type": "person"
+          },
+          {
+            "id": "63610ad36ad395a8113522b8",
+            "order": 23,
+            "slug": "courtney-dettrich-1",
+            "tag": "Courtney Dettrich",
+            "role": "Young Sara",
+            "key": "/library/people/63610ad36ad395a8113522b8",
+            "type": "person"
+          },
+          {
+            "id": "5dcd3a4d76f894001fde4509",
+            "order": 24,
+            "slug": "john-mcleod-17",
+            "tag": "John McLeod",
+            "role": "Puritan Minister",
+            "key": "/library/people/5dcd3a4d76f894001fde4509",
+            "type": "person"
+          },
+          {
+            "id": "5f3fa4f3bf3e560040ae374b",
+            "order": 25,
+            "slug": "trevor-duncan",
+            "tag": "Trevor Duncan",
+            "role": "Sara’s Boy",
+            "key": "/library/people/5f3fa4f3bf3e560040ae374b",
+            "type": "person"
+          },
+          {
+            "id": "63610ad30d9da681993b4497",
+            "order": 26,
+            "slug": "colby-cochran-1",
+            "tag": "Colby Cochran",
+            "role": "Ice Cream Boy",
+            "key": "/library/people/63610ad30d9da681993b4497",
+            "type": "person"
+          },
+          {
+            "id": "63610ad1918f51dbfb2e8720",
+            "order": 27,
+            "slug": "caitlyn-holley-3",
+            "tag": "Caitlyn Holley",
+            "role": "Ice Cream Girl",
+            "key": "/library/people/63610ad1918f51dbfb2e8720",
+            "type": "person"
+          },
+          {
+            "id": "6a0c4bf2990fea61d964e03b",
+            "order": 28,
+            "slug": "ken-serratt-jr-5",
+            "tag": "Ken Serratt Jr.",
+            "role": "Lovelorn’s Lover",
+            "key": "/library/people/6a0c4bf2990fea61d964e03b",
+            "type": "person"
+          },
+          {
+            "id": "5e1635badf4678003f52097b",
+            "order": 29,
+            "slug": "rich-sickler",
+            "tag": "Rich Sickler",
+            "role": "Dwight",
+            "key": "/library/people/5e1635badf4678003f52097b",
+            "type": "person"
+          },
+          {
+            "id": "5e16354abc1372003ea6ad4e",
+            "order": 30,
+            "slug": "jeanne-robinson-6",
+            "tag": "Jeanne Robinson",
+            "role": "PTC Mom #1",
+            "key": "/library/people/5e16354abc1372003ea6ad4e",
+            "type": "person"
+          },
+          {
+            "id": "63610ad2bcd8afd0dde094da",
+            "order": 31,
+            "slug": "deborah-kancher-1",
+            "tag": "Deborah Kancher",
+            "role": "PTC Mom #2",
+            "key": "/library/people/63610ad2bcd8afd0dde094da",
+            "type": "person"
+          },
+          {
+            "id": "5d776825999c64001ec2c068",
+            "order": 32,
+            "slug": "peter-shaw-1",
+            "tag": "Peter Shaw",
+            "role": "Jack",
+            "key": "/library/people/5d776825999c64001ec2c068",
+            "type": "person"
+          },
+          {
+            "id": "5d77683185719b001f3a2aac",
+            "order": 33,
+            "slug": "caralyn-kozlowski",
+            "tag": "Caralyn Kozlowski",
+            "role": "Regina",
+            "key": "/library/people/5d77683185719b001f3a2aac",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768272ec6b5001f6ba447",
+            "slug": "griffin-dunne",
+            "tag": "Griffin Dunne",
+            "thumb": "https://metadata-static.plex.tv/a/people/aa0f14114fa272d56270d1d125a03bec.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768272ec6b5001f6ba447",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682585719b001f3a0556",
+            "slug": "denise-di-novi",
+            "tag": "Denise Di Novi",
+            "thumb": "https://metadata-static.plex.tv/d/people/d9007d23fe1bfee17218031f38aef738.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682585719b001f3a0556",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77682a880197001ec91926",
+            "slug": "robin-swicord",
+            "tag": "Robin Swicord",
+            "thumb": "https://metadata-static.plex.tv/2/people/21696c7b1ec1aa25a8fa075599cce0ff.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77682a880197001ec91926",
+            "type": "person"
+          },
+          {
+            "id": "5d7768265af944001f1f6708",
+            "slug": "akiva-goldsman",
+            "tag": "Akiva Goldsman",
+            "thumb": "https://metadata-static.plex.tv/f/people/f8f7fa7c7b9e0a80f0a8a1bfb20961d0.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d7768265af944001f1f6708",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c2dc",
+            "slug": "adam-brooks",
+            "tag": "Adam Brooks",
+            "thumb": "https://metadata-static.plex.tv/9/people/973883f97f6d1383272a2bcacddaf000.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d776826999c64001ec2c2dc",
+            "type": "person"
+          },
+          {
+            "id": "5dcd37b68d9864001eba5ef9",
+            "slug": "alice-hoffman",
+            "tag": "Alice Hoffman",
+            "role": "Novel",
+            "key": "/library/people/5dcd37b68d9864001eba5ef9",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/6284c9b14ddde3cc4a6a251f",
+            "tag": "Girl Haunts Boy"
+          },
+          {
+            "guid": "plex://movie/5d7768382ec6b5001f6bc844",
+            "tag": "Ghosts of Girlfriends Past"
+          },
+          {
+            "guid": "plex://movie/5d77682ba091de001f2e6c96",
+            "tag": "Stardust"
+          },
+          {
+            "guid": "plex://movie/5d7768246f4521001ea988b6",
+            "tag": "Ghost"
+          },
+          {
+            "guid": "plex://movie/5d77684f8a7581001f1302b2",
+            "tag": "Teen Witch"
+          },
+          {
+            "guid": "plex://movie/5d7768507e9a3c0020c70a20",
+            "tag": "I Married a Witch"
+          },
+          {
+            "guid": "plex://movie/5d9f3562dfd12800208a0fbb",
+            "tag": "Love Potion No. 9"
+          },
+          {
+            "guid": "plex://movie/5d77682ef59e580021897cfe",
+            "tag": "The Brothers Grimm"
+          },
+          {
+            "guid": "plex://movie/5d77688b594b2b001e68f2f0",
+            "tag": "The Twilight Saga: Breaking Dawn ‐ Part 1"
+          },
+          {
+            "guid": "plex://movie/5ed3f1b0991840004054d1b7",
+            "tag": "The School for Good and Evil"
+          },
+          {
+            "guid": "plex://movie/5fe952c5672bb3002da62f66",
+            "tag": "The School for Good and Evil"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Di Novi Pictures"
+          },
+          {
+            "tag": "Fortis Films"
+          },
+          {
+            "tag": "Village Roadshow Pictures"
+          },
+          {
+            "tag": "Warner Bros. Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Two sisters use different means to avoid a legacy of witchcraft.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

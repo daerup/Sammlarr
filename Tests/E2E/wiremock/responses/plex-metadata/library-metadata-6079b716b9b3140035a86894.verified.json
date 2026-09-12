@@ -1,0 +1,131 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://show/6079b716b9b3140035a86894",
+        "key": "/library/metadata/6079b716b9b3140035a86894/children",
+        "ratingKey": "6079b716b9b3140035a86894",
+        "type": "show",
+        "addedAt": 1614816000,
+        "childCount": 1,
+        "contentRating": "TV-G",
+        "lastEpisodeOriginallyAvailableAt": "2021-03-04",
+        "lastSeasonOriginallyAvailableAt": "2021-03-04",
+        "leafCount": 1,
+        "originalTitle": "قنديل الحكايات",
+        "originallyAvailableAt": "2021-03-04",
+        "publicPagesURL": "https://watch.plex.tv/show/lanterns-tales",
+        "slug": "lanterns-tales",
+        "thumb": "https://image.tmdb.org/t/p/original/qIHqUzYgj1kylwarQHCIl5TO3ug.jpg",
+        "title": "Lantern's Tales",
+        "userState": false,
+        "year": 2021,
+        "Image": [
+          {
+            "alt": "Lantern's Tales",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/qIHqUzYgj1kylwarQHCIl5TO3ug.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+            "id": "5d9c07ebcb3ffa001f1b0903",
+            "key": "/library/sections/home/all?genre=5d9c07ebcb3ffa001f1b0903",
+            "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+            "slug": "children",
+            "tag": "Children",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://123323"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Egypt"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f6cccad86b8fd003e24e68f",
+            "tag": "The Wonderful World of Mickey Mouse"
+          },
+          {
+            "guid": "plex://show/5d9c08712192ba001f310c99",
+            "tag": "Adventures of the Gummi Bears"
+          },
+          {
+            "guid": "plex://show/5d9c08603c3f87001f34dc6f",
+            "tag": "Josie and the Pussycats in Outer Space"
+          },
+          {
+            "guid": "plex://show/5d9c0876e264b7001fc4520b",
+            "tag": "Mr. Bean: The Animated Series"
+          },
+          {
+            "guid": "plex://show/5d9c08097b5c2e001e652afe",
+            "tag": "Pinky, Elmyra & the Brain"
+          },
+          {
+            "guid": "plex://show/5d9c08497d06d9001ffd13c2",
+            "tag": "Superbook (2011)"
+          },
+          {
+            "guid": "plex://show/5d9c08137d06d9001ffcf670",
+            "tag": "Alvinnn!!! and The Chipmunks"
+          },
+          {
+            "guid": "plex://show/5d9c07f2e98e47001eb03a99",
+            "tag": "Martha Speaks"
+          },
+          {
+            "guid": "plex://show/5d9c07f22192ba001f30346d",
+            "tag": "Sid the Science Kid"
+          },
+          {
+            "guid": "plex://show/5d9c09187d06d9001ffd7495",
+            "tag": "LEGO Friends: Girls on a Mission"
+          }
+        ]
+      }
+    ]
+  }
+}

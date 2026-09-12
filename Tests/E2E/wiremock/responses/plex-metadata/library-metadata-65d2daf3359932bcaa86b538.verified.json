@@ -1,0 +1,419 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/a/gracenote/a857d82bae66732abcb8cf99016053c9.jpg",
+        "guid": "plex://movie/65d2daf3359932bcaa86b538",
+        "key": "/library/metadata/65d2daf3359932bcaa86b538",
+        "rating": 7.1,
+        "ratingKey": "65d2daf3359932bcaa86b538",
+        "studio": "Broken Road Productions",
+        "summary": "A former soldier and his unlikely partner become the targets of a ruthless cartel while racing to complete a critical medical delivery and save the life of a little girl.",
+        "tagline": "Next-day delivery isn't an option.",
+        "type": "movie",
+        "addedAt": 1788998400,
+        "contentRating": "PG-13",
+        "duration": 5820000,
+        "imdbRatingCount": 215,
+        "originallyAvailableAt": "2026-09-10",
+        "publicPagesURL": "https://watch.plex.tv/movie/runner-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "runner-2026",
+        "thumb": "https://metadata-static.plex.tv/4/gracenote/4647e6682c7d941acd62e6114213ac2d.jpg",
+        "title": "Runner",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Runner",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a857d82bae66732abcb8cf99016053c9.jpg"
+          },
+          {
+            "alt": "Runner",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/f/gracenote/ff4ab0991dd43bed4c68f55801796ba8.jpg"
+          },
+          {
+            "alt": "Runner",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/5/683a142553/5a182d53c0ac2fbb797b4865d732b7ec.png"
+          },
+          {
+            "alt": "Runner",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/5/683a142553/5a182d53c0ac2fbb797b4865d732b7ec.png"
+          },
+          {
+            "alt": "Runner",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3ec44b1a4aeb2dd666544a6c1feb884d.jpg"
+          },
+          {
+            "alt": "Runner",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4647e6682c7d941acd62e6114213ac2d.jpg"
+          },
+          {
+            "alt": "Runner",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/92c98d5417fdc80fc7f456ec1177e026.jpg"
+          },
+          {
+            "alt": "Runner",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c39fc55c72880add8ce6416fa5cf746d.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt31349844"
+          },
+          {
+            "id": "tmdb://1377237"
+          },
+          {
+            "id": "tvdb://364261"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 7.1
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.75
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          },
+          {
+            "tag": "Australia"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768368718ba001e314b4e",
+            "order": 1,
+            "slug": "alan-ritchson",
+            "tag": "Alan Ritchson",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab48b6579d2f770630c002fd08a9357e.jpg",
+            "role": "Hank Malone",
+            "key": "/library/people/5d7768368718ba001e314b4e",
+            "type": "person"
+          },
+          {
+            "id": "5d776825151a60001f24a3e7",
+            "order": 2,
+            "slug": "owen-wilson",
+            "tag": "Owen Wilson",
+            "thumb": "https://metadata-static.plex.tv/d/people/dd7d3b0173173b19d5152edb04a3f5fb.jpg",
+            "role": "Ben",
+            "key": "/library/people/5d776825151a60001f24a3e7",
+            "type": "person"
+          },
+          {
+            "id": "5d776826961905001eb91116",
+            "order": 3,
+            "slug": "rodrigo-santoro",
+            "tag": "Rodrigo Santoro",
+            "thumb": "https://metadata-static.plex.tv/0/people/08165b43ef403ceb4ee876eda1904b0a.jpg",
+            "role": "Damian",
+            "key": "/library/people/5d776826961905001eb91116",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9dfb0d55001f56d3e5",
+            "order": 4,
+            "slug": "leila-george",
+            "tag": "Leila George",
+            "thumb": "https://metadata-static.plex.tv/a/people/a6879715116a9571199e95a6ee0c22d3.jpg",
+            "role": "Kate",
+            "key": "/library/people/5d776b9dfb0d55001f56d3e5",
+            "type": "person"
+          },
+          {
+            "id": "5d77682661141d001fb13432",
+            "order": 5,
+            "slug": "adriana-barraza",
+            "tag": "Adriana Barraza",
+            "thumb": "https://metadata-static.plex.tv/c/people/c2ad344f337d16ba50ccee553fc96c0a.jpg",
+            "role": "Donna",
+            "key": "/library/people/5d77682661141d001fb13432",
+            "type": "person"
+          },
+          {
+            "id": "5d7768356f4521001ea9c1c5",
+            "order": 6,
+            "slug": "peta-sergeant",
+            "tag": "Peta Sergeant",
+            "thumb": "https://metadata-static.plex.tv/2/people/23aae362b0dfde13368deee18783930f.jpg",
+            "role": "Julie",
+            "key": "/library/people/5d7768356f4521001ea9c1c5",
+            "type": "person"
+          },
+          {
+            "id": "66c9e528100c58b3736c77da",
+            "order": 7,
+            "slug": "scarlett-crabtree-1",
+            "tag": "Scarlett Crabtree",
+            "thumb": "https://metadata-static.plex.tv/8/people/8865ac600da0cd353a18f4db27ab4218.jpg",
+            "role": "Ellie Baker",
+            "key": "/library/people/66c9e528100c58b3736c77da",
+            "type": "person"
+          },
+          {
+            "id": "5d77687feb5d26001f1edfa5",
+            "order": 8,
+            "slug": "geraldine-hakewill",
+            "tag": "Geraldine Hakewill",
+            "thumb": "https://metadata-static.plex.tv/8/people/82470382388b2439de6dd2d76f1e62b9.jpg",
+            "role": "Monica",
+            "key": "/library/people/5d77687feb5d26001f1edfa5",
+            "type": "person"
+          },
+          {
+            "id": "5d77688261141d001fb1c465",
+            "order": 9,
+            "slug": "goran-d-kleut",
+            "tag": "Goran D. Kleut",
+            "thumb": "https://metadata-static.plex.tv/3/people/3b7334444488586962536094340e998d.jpg",
+            "role": "Luke",
+            "key": "/library/people/5d77688261141d001fb1c465",
+            "type": "person"
+          },
+          {
+            "id": "658af5ddb65d05868890cea7",
+            "order": 10,
+            "slug": "adam-fraser-9",
+            "tag": "Adam Fraser",
+            "role": "Passerby / Runner",
+            "key": "/library/people/658af5ddb65d05868890cea7",
+            "type": "person"
+          },
+          {
+            "id": "6925cfacdd03b52421fa6633",
+            "order": 11,
+            "slug": "sabelle-morrow-woods-1",
+            "tag": "Sabelle Morrow-Woods",
+            "thumb": "https://metadata-static.plex.tv/3/people/3b1de32aa19d76379cb028c26adb81ba.jpg",
+            "role": "Passerby",
+            "key": "/library/people/6925cfacdd03b52421fa6633",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768356f4521001ea9c165",
+            "slug": "scott-waugh",
+            "tag": "Scott Waugh",
+            "thumb": "https://metadata-static.plex.tv/a/people/acc43633a730d0887aee0536d33ac2bc.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768356f4521001ea9c165",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776835a091de001f2e7e9c",
+            "slug": "todd-garner",
+            "tag": "Todd Garner",
+            "thumb": "https://image.tmdb.org/t/p/original/hRu3nTh08RLwPNFnWlSwE9uu2Pw.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776835a091de001f2e7e9c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314b4e",
+            "slug": "alan-ritchson",
+            "tag": "Alan Ritchson",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab48b6579d2f770630c002fd08a9357e.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768368718ba001e314b4e",
+            "type": "person"
+          },
+          {
+            "id": "5d777096ad5437001f826334",
+            "slug": "mark-fasano",
+            "tag": "Mark Fasano",
+            "thumb": "https://metadata-static.plex.tv/3/people/311d0dacbdedd0daaad8abfe7457c0c1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d777096ad5437001f826334",
+            "type": "person"
+          },
+          {
+            "id": "5d776d38ad5437001f7d0479",
+            "slug": "jeffrey-greenstein",
+            "tag": "Jeffrey Greenstein",
+            "thumb": "https://metadata-static.plex.tv/e/people/e1a3c5fd4fb383b8f7189ea0387155d9.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776d38ad5437001f7d0479",
+            "type": "person"
+          },
+          {
+            "id": "602179eaf357fc002cb80575",
+            "slug": "deborah-glover",
+            "tag": "Deborah Glover",
+            "role": "Producer",
+            "key": "/library/people/602179eaf357fc002cb80575",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "67a89debf9e03fa287094106",
+            "slug": "tommy-white-21",
+            "tag": "Tommy White",
+            "role": "Writer",
+            "key": "/library/people/67a89debf9e03fa287094106",
+            "type": "person"
+          },
+          {
+            "id": "67a89deb286102a256b84cea",
+            "slug": "miles-hubley-1",
+            "tag": "Miles Hubley",
+            "role": "Writer",
+            "key": "/library/people/67a89deb286102a256b84cea",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/65f5fd81757eb6ac8ddcdda5",
+            "tag": "Hostile Takeover"
+          },
+          {
+            "guid": "plex://movie/5d9f351fca3253001ef27f1d",
+            "tag": "The Code"
+          },
+          {
+            "guid": "plex://movie/5d9f34ede4fc29001eb64575",
+            "tag": "Nick of Time"
+          },
+          {
+            "guid": "plex://movie/5d77684d2ec6b5001f6bf46d",
+            "tag": "Killer Bean Forever"
+          },
+          {
+            "guid": "plex://movie/5d776855e870fd001f19e208",
+            "tag": "Gotcha!"
+          },
+          {
+            "guid": "plex://movie/5d776c2296b655001fe27228",
+            "tag": "Fast X"
+          },
+          {
+            "guid": "plex://movie/5d776c5496b655001fe2d3b2",
+            "tag": "Overdrive"
+          },
+          {
+            "guid": "plex://movie/5d77688996b655001fdbaee3",
+            "tag": "In Time"
+          },
+          {
+            "guid": "plex://movie/5d77704981ba41001faec8ac",
+            "tag": "The 355"
+          },
+          {
+            "guid": "plex://movie/5f40d50a5a76a80042f0ee94",
+            "tag": "Indemnity"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Broken Road Productions"
+          },
+          {
+            "tag": "AllyCat Entertainment"
+          },
+          {
+            "tag": "Industry Entertainment Partners"
+          },
+          {
+            "tag": "Nickel City Pictures"
+          },
+          {
+            "tag": "A Higher Standard"
+          },
+          {
+            "tag": "G2 Dispatch"
+          },
+          {
+            "tag": "Angel Studios"
+          },
+          {
+            "tag": "International Media Funds Management"
+          },
+          {
+            "tag": "Bright White Light"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "An ex-soldier becomes the target of a ruthless cartel as he tries to make a medical delivery.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

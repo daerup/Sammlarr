@@ -1,0 +1,894 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/b/gracenote/b60b4e686b74d7f202170774c344e1c3.jpg",
+        "banner": "https://assets.fanart.tv/fanart/spider-man-brand-new-day-6a7209dcc93e7.jpg",
+        "guid": "plex://movie/6328b12fe57cbf75cce17c02",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/6328b12fe57cbf75cce17c02",
+        "rating": 9,
+        "ratingKey": "6328b12fe57cbf75cce17c02",
+        "studio": "Marvel Studios",
+        "summary": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
+        "tagline": "A brand new day starts now.",
+        "type": "movie",
+        "addedAt": 1785283200,
+        "audienceRating": 9.7,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 225000000,
+        "contentRating": "PG-13",
+        "duration": 8700000,
+        "imdbRatingCount": 293406,
+        "originallyAvailableAt": "2026-07-29",
+        "publicPagesURL": "https://watch.plex.tv/movie/spider-man-brand-new-day-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 2412640193,
+        "slug": "spider-man-brand-new-day-2026",
+        "thumb": "https://metadata-static.plex.tv/6/gracenote/6fde793f2d934c94670f10e2c84d51e6.jpg",
+        "title": "Spider-Man: Brand New Day",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/6328b12fe57cbf75cce17c02/commonsensemedia",
+            "oneLiner": "Fourth MCU Spidey movie spins tale of action and emotion.",
+            "AgeRating": [
+              {
+                "age": 11,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/b/gracenote/b60b4e686b74d7f202170774c344e1c3.jpg"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/42569660e1df22e62ffd174d76b62fa6.jpg"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/spider-man-brand-new-day-6a7209dcc93e7.jpg"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/3/683a142553/3bad437b599b2da6db72cd0e4c015d20.png"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/3/683a142553/3bad437b599b2da6db72cd0e4c015d20.png"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2133a25098d005ea0977d902ba9d540d.jpg"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6fde793f2d934c94670f10e2c84d51e6.jpg"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/bf56027ca6290da5f1c49ff9e3a30998.jpg"
+          },
+          {
+            "alt": "Spider-Man: Brand New Day",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/4/gracenote/43120827643c005ffeedd78a390d985b.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt22084616"
+          },
+          {
+            "id": "tmdb://969681"
+          },
+          {
+            "id": "tvdb://135896"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.8
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/AvnqpRwlEaYNVL6wzC4RN94EdSd.jpg",
+            "guid": "plex://collection/5ec2fd518509540041a1627f",
+            "key": "/library/collections/5ec2fd518509540041a1627f/children",
+            "summary": "Peter Parker, an academically gifted but socially inept high school student, fights crime as Spider-Man, a member of The Avengers.",
+            "thumb": "https://image.tmdb.org/t/p/original/yeba3Y820OjApZO9aJevDsNeMEd.jpg",
+            "tag": "Spider-Man (MCU) Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77689033f255001e8599f4",
+            "order": 1,
+            "slug": "tom-holland",
+            "tag": "Tom Holland",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d310a9360a7d4c483ad24ad322ba510.jpg",
+            "role": "Peter Parker / Spider-Man",
+            "key": "/library/people/5d77689033f255001e8599f4",
+            "type": "person"
+          },
+          {
+            "id": "5d7768d2ebdf2200209c916d",
+            "order": 2,
+            "slug": "zendaya",
+            "tag": "Zendaya",
+            "thumb": "https://metadata-static.plex.tv/0/people/09bb753b08d4114417ade1aec80de36a.jpg",
+            "role": "MJ",
+            "key": "/library/people/5d7768d2ebdf2200209c916d",
+            "type": "person"
+          },
+          {
+            "id": "5d776825880197001ec90311",
+            "order": 3,
+            "slug": "mark-ruffalo",
+            "tag": "Mark Ruffalo",
+            "thumb": "https://metadata-static.plex.tv/4/people/446010c3f35389784564445b359414aa.jpg",
+            "role": "Bruce Banner / Hulk",
+            "key": "/library/people/5d776825880197001ec90311",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a2ec6b5001f6baa1c",
+            "order": 4,
+            "slug": "jon-bernthal",
+            "tag": "Jon Bernthal",
+            "thumb": "https://metadata-static.plex.tv/d/people/dd29d8217f54a807036ca26f5f315668.jpg",
+            "role": "Frank Castle / Punisher",
+            "key": "/library/people/5d77682a2ec6b5001f6baa1c",
+            "type": "person"
+          },
+          {
+            "id": "5d776b29ad5437001f795b70",
+            "order": 5,
+            "slug": "jacob-batalon",
+            "tag": "Jacob Batalon",
+            "thumb": "https://metadata-static.plex.tv/2/people/2689f6caf28ce9657cfab936c7f81ff7.jpg",
+            "role": "Ned Leeds",
+            "key": "/library/people/5d776b29ad5437001f795b70",
+            "type": "person"
+          },
+          {
+            "id": "5d776b95f617c90020177d01",
+            "order": 6,
+            "slug": "sadie-sink",
+            "tag": "Sadie Sink",
+            "thumb": "https://metadata-static.plex.tv/2/people/26190bb16c163d6e92b2b79e5b9806d2.jpg",
+            "role": "Jean Grey",
+            "key": "/library/people/5d776b95f617c90020177d01",
+            "type": "person"
+          },
+          {
+            "id": "5d776b88fb0d55001f56a76d",
+            "order": 7,
+            "slug": "florence-pugh",
+            "tag": "Florence Pugh",
+            "thumb": "https://metadata-static.plex.tv/7/people/7826cdfdf9798f504221cd23da8c9860.jpg",
+            "role": "Yelena Belova / Black Widow",
+            "key": "/library/people/5d776b88fb0d55001f56a76d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768343c3c2a001fbce056",
+            "order": 8,
+            "slug": "liza-colon-zayas",
+            "tag": "Liza Colón-Zayas",
+            "thumb": "https://metadata-static.plex.tv/8/people/8746bd6d25e9716c163dbfe1654fe901.jpg",
+            "role": "Detective Jean DeWolff",
+            "key": "/library/people/5d7768343c3c2a001fbce056",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08f702391c001f593199",
+            "order": 9,
+            "slug": "tramell-tillman",
+            "tag": "Tramell Tillman",
+            "thumb": "https://metadata-static.plex.tv/a/people/a2176b938f09e948c5cec69eb3a8c149.jpg",
+            "role": "William 'Bill' Metzger",
+            "key": "/library/people/5d9c08f702391c001f593199",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea98993",
+            "order": 10,
+            "slug": "marisa-tomei",
+            "tag": "Marisa Tomei",
+            "thumb": "https://metadata-static.plex.tv/a/people/ac5c959045d41325042879b1ed69ef52.jpg",
+            "role": "May Parker",
+            "key": "/library/people/5d7768256f4521001ea98993",
+            "type": "person"
+          },
+          {
+            "id": "5d7768263c3c2a001fbcafbe",
+            "order": 11,
+            "slug": "naomi-watts",
+            "tag": "Naomi Watts",
+            "thumb": "https://metadata-static.plex.tv/8/people/8e51f89c31e145fb5fbe778a7cb8950f.jpg",
+            "role": "E.V. (voice)",
+            "key": "/library/people/5d7768263c3c2a001fbcafbe",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b8decfcd001f2f0e76",
+            "order": 12,
+            "slug": "michael-mando",
+            "tag": "Michael Mando",
+            "thumb": "https://metadata-static.plex.tv/8/people/89f67264cf479859138220e0167dd753.jpg",
+            "role": "Mac Gargan / Scorpion",
+            "key": "/library/people/5d7768b8decfcd001f2f0e76",
+            "type": "person"
+          },
+          {
+            "id": "5d776825151a60001f24a3ec",
+            "order": 13,
+            "slug": "keith-david",
+            "tag": "Keith David",
+            "thumb": "https://metadata-static.plex.tv/0/people/02dea2be6a7f2874c2a5430df4928e25.jpg",
+            "role": "Narrator of Spider Video (voice)",
+            "key": "/library/people/5d776825151a60001f24a3ec",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2dfb0d55001f53cf08",
+            "order": 14,
+            "slug": "marvin-jones-iii",
+            "tag": "Marvin Jones III",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7437684c5159ef598710356d425567b.jpg",
+            "role": "Tombstone",
+            "key": "/library/people/5d776a2dfb0d55001f53cf08",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcf0886422500427baef4",
+            "order": 15,
+            "slug": "olivia-booth-ford",
+            "tag": "Olivia Booth-Ford",
+            "thumb": "https://metadata-static.plex.tv/2/people/22a9d538a25dd9b8c47154998ab93d42.jpg",
+            "role": "Sara",
+            "key": "/library/people/5f3fcf0886422500427baef4",
+            "type": "person"
+          },
+          {
+            "id": "6530e50010e7b3e69537837b",
+            "order": 16,
+            "slug": "taryn-marie-butler",
+            "tag": "Taryn Marie Butler",
+            "thumb": "https://metadata-static.plex.tv/0/people/0d4fb8c5e0c234a489b850b4e321c7fa.jpg",
+            "role": "Apartment Girl",
+            "key": "/library/people/6530e50010e7b3e69537837b",
+            "type": "person"
+          },
+          {
+            "id": "5d776835880197001ec935d1",
+            "order": 17,
+            "slug": "johnny-myers",
+            "tag": "Johnny Myers",
+            "thumb": "https://metadata-static.plex.tv/9/people/9bed6f50d76a99989b22b152ad5ecf67.jpg",
+            "role": "Building Manager",
+            "key": "/library/people/5d776835880197001ec935d1",
+            "type": "person"
+          },
+          {
+            "id": "5f3fccc003883a0040ab7b6d",
+            "order": 18,
+            "slug": "billy-clements-1",
+            "tag": "Billy Clements",
+            "thumb": "https://image.tmdb.org/t/p/original/nipJ22DXJBsdM1teQodwop42U6S.jpg",
+            "role": "Ramrod",
+            "key": "/library/people/5f3fccc003883a0040ab7b6d",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c7e9a3c0020c6e3e5",
+            "order": 19,
+            "slug": "zabryna-guevara",
+            "tag": "Zabryna Guevara",
+            "thumb": "https://metadata-static.plex.tv/a/people/a5f8ec634576fd27c989ed8ca68e221b.jpg",
+            "role": "Sheila Rivera",
+            "key": "/library/people/5d77683c7e9a3c0020c6e3e5",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd772e4fc610037010376",
+            "order": 20,
+            "slug": "nina-rose-galano",
+            "tag": "Nina Rose Galano",
+            "thumb": "https://metadata-static.plex.tv/0/people/08f260dcf9346fd4292d51e0fb0a7e64.jpg",
+            "role": "Marley",
+            "key": "/library/people/5f3fd772e4fc610037010376",
+            "type": "person"
+          },
+          {
+            "id": "6a6a1c7cba2b47f9e814aea7",
+            "order": 21,
+            "slug": "maikol-roque",
+            "tag": "Maikol Roque",
+            "thumb": "https://metadata-static.plex.tv/f/people/f70e242ab63264883e85d5f42be6b08f.jpg",
+            "role": "EJ",
+            "key": "/library/people/6a6a1c7cba2b47f9e814aea7",
+            "type": "person"
+          },
+          {
+            "id": "60300e8abf4a99002d226aba",
+            "order": 22,
+            "slug": "jamel-davall-rodriguez",
+            "tag": "Jamel Davall Rodriguez",
+            "thumb": "https://metadata-static.plex.tv/d/people/d77e3bf22cc23ef50c84bf2c941d07b4.jpg",
+            "role": "NYC Street Driver",
+            "key": "/library/people/60300e8abf4a99002d226aba",
+            "type": "person"
+          },
+          {
+            "id": "6a6a1c83a3394949d914dc7f",
+            "order": 23,
+            "slug": "ethan-sokontwe",
+            "tag": "Ethan Sokontwe",
+            "role": "Scooter Kid",
+            "key": "/library/people/6a6a1c83a3394949d914dc7f",
+            "type": "person"
+          },
+          {
+            "id": "5f4044e2ce2564003f91a848",
+            "order": 24,
+            "slug": "tariye-peterside",
+            "tag": "Tariyé Peterside",
+            "role": "Tour Bus Guide",
+            "key": "/library/people/5f4044e2ce2564003f91a848",
+            "type": "person"
+          },
+          {
+            "id": "5f4039af03883a0040b5e0ab",
+            "order": 25,
+            "slug": "phoenix-di-sebastiani",
+            "tag": "Phoenix Di Sebastiani",
+            "thumb": "https://metadata-static.plex.tv/6/people/6140152b2192534e4d4663aae67a63b4.jpg",
+            "role": "DODC Escort Guard",
+            "key": "/library/people/5f4039af03883a0040b5e0ab",
+            "type": "person"
+          },
+          {
+            "id": "5d776a41594b2b001e6b77e5",
+            "order": 26,
+            "slug": "vivien-keene",
+            "tag": "Vivien Keene",
+            "thumb": "https://metadata-static.plex.tv/8/people/80e8939437cc32276b1be760318975e1.jpg",
+            "role": "Female Janitor",
+            "key": "/library/people/5d776a41594b2b001e6b77e5",
+            "type": "person"
+          },
+          {
+            "id": "5d776d3a7a53e9001e754f93",
+            "order": 27,
+            "slug": "kurtis-lowe",
+            "tag": "Kurtis Lowe",
+            "thumb": "https://metadata-static.plex.tv/8/people/83ee9ec10712464351a480c3bb192439.jpg",
+            "role": "DODC Box Guard",
+            "key": "/library/people/5d776d3a7a53e9001e754f93",
+            "type": "person"
+          },
+          {
+            "id": "5d776ba2ad5437001f7a591a",
+            "order": 28,
+            "slug": "marc-small",
+            "tag": "Marc Small",
+            "role": "DODC Box Agent",
+            "key": "/library/people/5d776ba2ad5437001f7a591a",
+            "type": "person"
+          },
+          {
+            "id": "5d776dff594b2b001e7178e9",
+            "order": 29,
+            "slug": "david-hepple",
+            "tag": "David Hepple",
+            "thumb": "https://metadata-static.plex.tv/1/people/15b19fa079e7ce0a97b7302c8673673f.jpg",
+            "role": "Warehouse Worker",
+            "key": "/library/people/5d776dff594b2b001e7178e9",
+            "type": "person"
+          },
+          {
+            "id": "5d77706747dd6e001f709b17",
+            "order": 30,
+            "slug": "jamaal-burcher",
+            "tag": "Jamaal Burcher",
+            "thumb": "https://metadata-static.plex.tv/6/people/69e8f73702d2bd749c34e523b8a82dd8.jpg",
+            "role": "DODC Crew Chief",
+            "key": "/library/people/5d77706747dd6e001f709b17",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe6ee04a86500409a067a",
+            "order": 31,
+            "slug": "lieve-carchon",
+            "tag": "Lieve Carchon",
+            "role": "Bathhouse Attendant",
+            "key": "/library/people/5f3fe6ee04a86500409a067a",
+            "type": "person"
+          },
+          {
+            "id": "5f404153e065380042f12c8d",
+            "order": 32,
+            "slug": "mary-stillwaggon-stewart",
+            "tag": "Mary Stillwaggon Stewart",
+            "thumb": "https://metadata-static.plex.tv/c/people/c25954feda45cbc06961857c87f5df17.jpg",
+            "role": "Female DODC Guard",
+            "key": "/library/people/5f404153e065380042f12c8d",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbf39bf3e560040afb8de",
+            "order": 33,
+            "slug": "luka-hays",
+            "tag": "Luka Hays",
+            "thumb": "https://metadata-static.plex.tv/e/people/e47cdfa8afc5f02a33f63f90d973e2f4.jpg",
+            "role": "DODC Weapons Tech",
+            "key": "/library/people/5f3fbf39bf3e560040afb8de",
+            "type": "person"
+          },
+          {
+            "id": "6a6a1c7caedea07269bcf57c",
+            "order": 34,
+            "slug": "camila-lopez-35",
+            "tag": "Camila López",
+            "role": "Bodega Clerk",
+            "key": "/library/people/6a6a1c7caedea07269bcf57c",
+            "type": "person"
+          },
+          {
+            "id": "5e2b8521391d38003d3bc1ee",
+            "order": 35,
+            "slug": "robert-veng",
+            "tag": "Robert Veng",
+            "thumb": "https://metadata-static.plex.tv/d/people/db0b7aa48dd82db9ad6b02da1377a600.jpg",
+            "role": "Partygoer",
+            "key": "/library/people/5e2b8521391d38003d3bc1ee",
+            "type": "person"
+          },
+          {
+            "id": "650563df1dc4c31a0e8401f8",
+            "order": 36,
+            "slug": "aoife-haakenson",
+            "tag": "Aoife Haakenson",
+            "thumb": "https://metadata-static.plex.tv/8/people/887ac30c16fbad6be307ff0bfe072af9.jpg",
+            "role": "Partygoer",
+            "key": "/library/people/650563df1dc4c31a0e8401f8",
+            "type": "person"
+          },
+          {
+            "id": "663c956158aa573bbd00f716",
+            "order": 37,
+            "slug": "gabriel-blaikie",
+            "tag": "Gabriel Blaikie",
+            "thumb": "https://image.tmdb.org/t/p/original/olsbUaK4AbpJtbKfsSm3m97yqff.jpg",
+            "role": "Partygoer",
+            "key": "/library/people/663c956158aa573bbd00f716",
+            "type": "person"
+          },
+          {
+            "id": "5d7770697a53e9001e7a2239",
+            "order": 38,
+            "slug": "eman-esfandi",
+            "tag": "Eman Esfandi",
+            "thumb": "https://metadata-static.plex.tv/b/people/bcced28a228e9e1a93ffe301a89e4b12.jpg",
+            "role": "The Boyfriend",
+            "key": "/library/people/5d7770697a53e9001e7a2239",
+            "type": "person"
+          },
+          {
+            "id": "664f302507b257617f6959ca",
+            "order": 39,
+            "slug": "shing-moussa-chung",
+            "tag": "Shing Moussa Chung",
+            "thumb": "https://metadata-static.plex.tv/2/people/20111a896ce58b26f49dc39273b41567.jpg",
+            "role": "Building Tenant",
+            "key": "/library/people/664f302507b257617f6959ca",
+            "type": "person"
+          },
+          {
+            "id": "62b5724bcf01f18a1a72bbe5",
+            "order": 40,
+            "slug": "akil-young",
+            "tag": "Akil Young",
+            "thumb": "https://metadata-static.plex.tv/2/people/2489eaa6c9d3f33c0a872e0f021a882b.jpg",
+            "role": "Apartment Girl Boyfriend",
+            "key": "/library/people/62b5724bcf01f18a1a72bbe5",
+            "type": "person"
+          },
+          {
+            "id": "6a6a1c7cba2b47f9e814aea1",
+            "order": 41,
+            "slug": "benedict-cezair-thompson",
+            "tag": "Benedict Cezair-Thompson",
+            "thumb": "https://metadata-static.plex.tv/5/people/59dcc8c170e38d921a45f507a6ae7235.jpg",
+            "role": "DODC Substation Guard",
+            "key": "/library/people/6a6a1c7cba2b47f9e814aea1",
+            "type": "person"
+          },
+          {
+            "id": "60c31a0a3cc8d4002d241edd",
+            "order": 42,
+            "slug": "shannon-young-cho",
+            "tag": "Shannon Young Cho",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd7154f64fc82e9a934fd6cabdfaf179.jpg",
+            "role": "Cindy",
+            "key": "/library/people/60c31a0a3cc8d4002d241edd",
+            "type": "person"
+          },
+          {
+            "id": "5f406b93bf3e560040c28672",
+            "order": 43,
+            "slug": "niyi-akin",
+            "tag": "Niyi Akin",
+            "thumb": "https://metadata-static.plex.tv/9/people/945234fcbf3fa00e7291952c91fd90a4.jpg",
+            "role": "David",
+            "key": "/library/people/5f406b93bf3e560040c28672",
+            "type": "person"
+          },
+          {
+            "id": "65d467ecde225267d1c4e82f",
+            "order": 44,
+            "slug": "carlos-agualusa",
+            "tag": "Carlos Agualusa",
+            "thumb": "https://metadata-static.plex.tv/3/people/3a47f36f8de0598484db2f9418a1a68f.jpg",
+            "role": "Businessman",
+            "key": "/library/people/65d467ecde225267d1c4e82f",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe2fe5a76a80042cff0a7",
+            "order": 45,
+            "slug": "shelley-williams",
+            "tag": "Shelley Williams",
+            "thumb": "https://metadata-static.plex.tv/2/people/247dfaa27cd8864366dd32adc2dbb04a.jpg",
+            "role": "Street Woman",
+            "key": "/library/people/5f3fe2fe5a76a80042cff0a7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768e0fb0d55001f51b7a9",
+            "order": 46,
+            "slug": "jud-charlton",
+            "tag": "Jud Charlton",
+            "thumb": "https://metadata-static.plex.tv/3/people/375430600b79943ccdad77d092259a3a.jpg",
+            "role": "Street Worker",
+            "key": "/library/people/5d7768e0fb0d55001f51b7a9",
+            "type": "person"
+          },
+          {
+            "id": "5d776834103a2d001f5678a8",
+            "order": 47,
+            "slug": "john-moraitis",
+            "tag": "John Moraitis",
+            "thumb": "https://metadata-static.plex.tv/d/people/d32a8c6e93ce11640b099b9ba35c6fe4.jpg",
+            "role": "Balcony Guy",
+            "key": "/library/people/5d776834103a2d001f5678a8",
+            "type": "person"
+          },
+          {
+            "id": "64e1ca696bb049ed47ffb60b",
+            "order": 48,
+            "slug": "beatriz-do-o",
+            "tag": "Beatriz Do O",
+            "role": "Balcony Girl",
+            "key": "/library/people/64e1ca696bb049ed47ffb60b",
+            "type": "person"
+          },
+          {
+            "id": "620cb13e099b9d01f92f90ae",
+            "order": 49,
+            "slug": "daisy-sequerra",
+            "tag": "Daisy Sequerra",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ccdc771dae53d8b6301693f9644754c.jpg",
+            "role": "Lucy (Bride)",
+            "key": "/library/people/620cb13e099b9d01f92f90ae",
+            "type": "person"
+          },
+          {
+            "id": "5d776bcc594b2b001e6e3966",
+            "order": 50,
+            "slug": "nezar-alderazi",
+            "tag": "Nezar Alderazi",
+            "thumb": "https://metadata-static.plex.tv/3/people/3a9d0cea3dadbd429e90a21da4410d21.jpg",
+            "role": "John (Groom)",
+            "key": "/library/people/5d776bcc594b2b001e6e3966",
+            "type": "person"
+          },
+          {
+            "id": "5f93dfb2c02b0b002d1ad5e8",
+            "order": 51,
+            "slug": "daniel-kabanda",
+            "tag": "Daniel Kabanda",
+            "thumb": "https://metadata-static.plex.tv/f/people/f340ba5e2b54ab7b8859dccda6885e59.jpg",
+            "role": "Cater-Waiter",
+            "key": "/library/people/5f93dfb2c02b0b002d1ad5e8",
+            "type": "person"
+          },
+          {
+            "id": "5f4014f5fea1a1003f9dabc5",
+            "order": 52,
+            "slug": "michael-magnet-2",
+            "tag": "Michael Magnet",
+            "role": "Marriage Heli Pilot",
+            "key": "/library/people/5f4014f5fea1a1003f9dabc5",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b54c0f0001f304192",
+            "order": 53,
+            "slug": "simon-schatzberger",
+            "tag": "Simon Schatzberger",
+            "role": "Night Driver",
+            "key": "/library/people/5d77683b54c0f0001f304192",
+            "type": "person"
+          },
+          {
+            "id": "653a1eccfdb5f0a25dd438c6",
+            "order": 54,
+            "slug": "sean-carrington-3",
+            "tag": "Sean Carrington",
+            "thumb": "https://metadata-static.plex.tv/c/people/c24ff9bd018524b090345ffd32dc2509.jpg",
+            "role": "DODC Tech",
+            "key": "/library/people/653a1eccfdb5f0a25dd438c6",
+            "type": "person"
+          },
+          {
+            "id": "61f8ea9a49cee392ed6c5699",
+            "order": 55,
+            "slug": "anthony-nyro",
+            "tag": "Anthony Nyro",
+            "role": "DODC Prison Yard Guard",
+            "key": "/library/people/61f8ea9a49cee392ed6c5699",
+            "type": "person"
+          },
+          {
+            "id": "5f4015bafea1a1003f9dbea5",
+            "order": 56,
+            "slug": "michael-amariah",
+            "tag": "Michael Amariah",
+            "thumb": "https://metadata-static.plex.tv/c/people/c95353a7fd9f53470005ef69a2b0ba8f.jpg",
+            "role": "DODC Containment Guard",
+            "key": "/library/people/5f4015bafea1a1003f9dbea5",
+            "type": "person"
+          },
+          {
+            "id": "5f405d10ce2564003f95a3df",
+            "order": 57,
+            "slug": "fan-xiaoshuang",
+            "tag": "Fan Xiaoshuang",
+            "role": "Snow",
+            "key": "/library/people/5f405d10ce2564003f95a3df",
+            "type": "person"
+          },
+          {
+            "id": "6a6a1c7c619ada6e45fa892d",
+            "order": 58,
+            "slug": "elvis-carlos",
+            "tag": "Elvis Carlos",
+            "role": "Web Kid",
+            "key": "/library/people/6a6a1c7c619ada6e45fa892d",
+            "type": "person"
+          },
+          {
+            "id": "5d776826a091de001f2e612d",
+            "order": 59,
+            "slug": "pat-kiernan",
+            "tag": "Pat Kiernan",
+            "thumb": "https://metadata-static.plex.tv/c/people/c2fea4af6c5df2915bd07397d07265a5.jpg",
+            "role": "Pat Kiernan (uncredited)",
+            "key": "/library/people/5d776826a091de001f2e612d",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768d2ebdf2200209c9281",
+            "slug": "destin-daniel-cretton",
+            "tag": "Destin Daniel Cretton",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc200c3b410b362066bdd11cc2e9ae2e.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768d2ebdf2200209c9281",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682a151a60001f24b54f",
+            "slug": "kevin-feige",
+            "tag": "Kevin Feige",
+            "thumb": "https://metadata-static.plex.tv/3/people/3383a642ba49950b2b07cbcec2a94624.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682a151a60001f24b54f",
+            "type": "person"
+          },
+          {
+            "id": "5d77687b23d5a3001f4ecd9d",
+            "slug": "amy-pascal",
+            "tag": "Amy Pascal",
+            "thumb": "https://metadata-static.plex.tv/5/people/570f9bc6417156e7c45be27735b4c6fa.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77687b23d5a3001f4ecd9d",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc5d477120a001e1a3b6a",
+            "slug": "rachel-oconnor",
+            "tag": "Rachel O'Connor",
+            "role": "Producer",
+            "key": "/library/people/5dcfc5d477120a001e1a3b6a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8949",
+            "slug": "avi-arad",
+            "tag": "Avi Arad",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7e1fa1dafd50ab5d87d0f7794b13ad3.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768274de0ee001fcc8949",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776b759ab544002150bb40",
+            "slug": "erik-sommers",
+            "tag": "Erik Sommers",
+            "thumb": "https://metadata-static.plex.tv/8/people/81944aa1ec5527c2f66a838f1728a1ff.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776b759ab544002150bb40",
+            "type": "person"
+          },
+          {
+            "id": "5d776b759ab544002150bb3f",
+            "slug": "chris-mckenna",
+            "tag": "Chris McKenna",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb82f8b0ff70d74658d2beb442f5df67.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776b759ab544002150bb3f",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77690896b655001fdc8aca",
+            "tag": "Captain America: The Winter Soldier"
+          },
+          {
+            "guid": "plex://movie/5d776834a091de001f2e7cf9",
+            "tag": "Iron Man 2"
+          },
+          {
+            "guid": "plex://movie/5d77690d47dd6e001f6c2871",
+            "tag": "The Amazing Spider‐Man 2"
+          },
+          {
+            "guid": "plex://movie/5d7769aafb0d55001f52c98d",
+            "tag": "Justice League"
+          },
+          {
+            "guid": "plex://movie/5d776adcfb0d55001f553b34",
+            "tag": "Captain America: Civil War"
+          },
+          {
+            "guid": "plex://movie/5d776b057a53e9001e71734b",
+            "tag": "Guardians of the Galaxy: Vol. 2"
+          },
+          {
+            "guid": "plex://movie/5d776b34ad5437001f797675",
+            "tag": "The Flash"
+          },
+          {
+            "guid": "plex://movie/5d776d1bfb0d55001f597ed4",
+            "tag": "Guardians of the Galaxy Vol. 3"
+          },
+          {
+            "guid": "plex://movie/5e16138ce0d3ae001ed11b39",
+            "tag": "Spider‐Man: No Way Home"
+          },
+          {
+            "guid": "plex://movie/5e161a83bea6ac004126e148",
+            "tag": "Ant‐Man and the Wasp: Quantumania"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Marvel Studios"
+          },
+          {
+            "tag": "Columbia Pictures"
+          },
+          {
+            "tag": "Pascal Pictures"
+          },
+          {
+            "tag": "TSG Entertainment"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A new pattern of crimes gives rise to one of the most powerful threats Spider-Man's ever faced.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

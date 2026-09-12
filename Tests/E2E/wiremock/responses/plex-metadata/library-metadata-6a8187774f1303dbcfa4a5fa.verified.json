@@ -1,0 +1,89 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/6a8187774f1303dbcfa4a5fa",
+        "key": "/library/metadata/6a8187774f1303dbcfa4a5fa",
+        "ratingKey": "6a8187774f1303dbcfa4a5fa",
+        "summary": "Oliver is an experimental musician struggling for recognition between his duties at home and at work. Spending more and more time on his strange music, he seems to have discovered an unexpected listener, one who may have a devilish motive.",
+        "type": "movie",
+        "addedAt": 1790640000,
+        "duration": 6000000,
+        "originallyAvailableAt": "2026-09-29",
+        "publicPagesURL": "https://watch.plex.tv/movie/invite-the-devil-to-come-and-play",
+        "slug": "invite-the-devil-to-come-and-play",
+        "title": "Invite the Devil to Come and Play",
+        "userState": false,
+        "year": 2026,
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt44119876"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5f4068f5e065380042f3fe4f",
+            "order": 1,
+            "slug": "carlton-wilson",
+            "tag": "Carlton Wilson",
+            "role": "cast",
+            "key": "/library/people/5f4068f5e065380042f3fe4f",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "66c87ea2d0f6a14ee2e883df",
+            "slug": "l-l-gaddy-iii",
+            "tag": "L.L. Gaddy III",
+            "role": "Director",
+            "key": "/library/people/66c87ea2d0f6a14ee2e883df",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f3fcf3d03883a0040abba2f",
+            "slug": "tyler-mcgee-4",
+            "tag": "Tyler McGee",
+            "role": "Producer",
+            "key": "/library/people/5f3fcf3d03883a0040abba2f",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a8170d9f7fe866c70634d0e",
+            "tag": "Charles Brown",
+            "role": "Writer",
+            "key": "/library/people/6a8170d9f7fe866c70634d0e",
+            "type": "person"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,616 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/8/gracenote/80650de775fd1cc3f75accc7a1964d6d.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/345498/banners/6aa0103bc07ea.jpg",
+        "guid": "plex://movie/642d485ce8b269a4b9c8a4a8",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/642d485ce8b269a4b9c8a4a8",
+        "rating": 3.2,
+        "ratingKey": "642d485ce8b269a4b9c8a4a8",
+        "studio": "Walt Disney Pictures",
+        "summary": "Leaving her island for the first time, young Moana embarks on an epic seafaring adventure to restore prosperity to her people. She is chosen by the ocean to return a stolen mystical heart to the goddess Te Fiti and stop a dark blight in world",
+        "tagline": "The ocean chose her for a reason.",
+        "type": "movie",
+        "addedAt": 1783468800,
+        "audienceRating": 8.8,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 250000000,
+        "contentRating": "PG",
+        "duration": 6900000,
+        "imdbRatingCount": 15298,
+        "originallyAvailableAt": "2026-07-08",
+        "publicPagesURL": "https://watch.plex.tv/movie/moana-2026",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "revenue": 308159595,
+        "slug": "moana-2026",
+        "thumb": "https://metadata-static.plex.tv/c/gracenote/cfd0cf49f898dbf38b8315d21deb0e5f.jpg",
+        "title": "Moana",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/642d485ce8b269a4b9c8a4a8/commonsensemedia",
+            "oneLiner": "Peril feels more intense in charming but unnecessary remake.",
+            "AgeRating": [
+              {
+                "age": 8,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Moana",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/8/gracenote/80650de775fd1cc3f75accc7a1964d6d.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/68b82fcbe1f4ae2b77261b66c3243eaa.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/345498/banners/6aa0103bc07ea.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/0/683a142553/051f94ee09ce1366fc8029ec6694372d.png"
+          },
+          {
+            "alt": "Moana",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/0/683a142553/051f94ee09ce1366fc8029ec6694372d.png"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f2749180e11773f79345eb6d6875584b.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cfd0cf49f898dbf38b8315d21deb0e5f.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/612bf6e5c51ddb20e754440dab8485fa.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/5/gracenote/5df87296330d602e10984198db74bd62.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046d3c3f87001f33fc20",
+            "id": "5d9c046d3c3f87001f33fc20",
+            "key": "/library/sections/home/all?genre=5d9c046d3c3f87001f33fc20",
+            "ratingKey": "genre_5d9c046d3c3f87001f33fc20",
+            "slug": "musical",
+            "tag": "Musical",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt27419466"
+          },
+          {
+            "id": "tmdb://1108427"
+          },
+          {
+            "id": "tvdb://345498"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 3.2
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.8
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.01
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "64bf866be3f1e1a9a4852007",
+            "order": 1,
+            "slug": "catherine-lagaaia",
+            "tag": "Catherine Lagaʻaia",
+            "thumb": "https://metadata-static.plex.tv/2/people/2e4c498974cac4fdb581454fa994d7af.jpg",
+            "role": "Moana",
+            "key": "/library/people/64bf866be3f1e1a9a4852007",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea99f61",
+            "order": 2,
+            "slug": "dwayne-johnson",
+            "tag": "Dwayne Johnson",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e707b4ed5bd292b182183f733e78d77.jpg",
+            "role": "Maui",
+            "key": "/library/people/5d77682b6f4521001ea99f61",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c5f2",
+            "order": 3,
+            "slug": "rena-owen",
+            "tag": "Rena Owen",
+            "thumb": "https://metadata-static.plex.tv/d/people/d1f411afd123539589b7c6978e541115.jpg",
+            "role": "Gramma Tala",
+            "key": "/library/people/5d776826999c64001ec2c5f2",
+            "type": "person"
+          },
+          {
+            "id": "5d776868374a5b001fec4b26",
+            "order": 4,
+            "slug": "john-tui",
+            "tag": "John Tui",
+            "thumb": "https://metadata-static.plex.tv/people/5d776868374a5b001fec4b26.jpg",
+            "role": "Chief Tui",
+            "key": "/library/people/5d776868374a5b001fec4b26",
+            "type": "person"
+          },
+          {
+            "id": "5d776c91f617c90020182fd3",
+            "order": 5,
+            "slug": "frankie-adams",
+            "tag": "Frankie Adams",
+            "thumb": "https://metadata-static.plex.tv/people/5d776c91f617c90020182fd3.jpg",
+            "role": "Sina",
+            "key": "/library/people/5d776c91f617c90020182fd3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768322ec6b5001f6bb740",
+            "order": 6,
+            "slug": "jemaine-clement",
+            "tag": "Jemaine Clement",
+            "thumb": "https://metadata-static.plex.tv/3/people/333a3e7a61e3e2a6d906bfd26b1abf5d.jpg",
+            "role": "Tamatoa (voice)",
+            "key": "/library/people/5d7768322ec6b5001f6bb740",
+            "type": "person"
+          },
+          {
+            "id": "6a50f108ad4ad76d3af6e47f",
+            "order": 7,
+            "slug": "emma-puahi-shapazian-1",
+            "tag": "Emma Puahi-Shapazian",
+            "role": "Moana (4 years old)",
+            "key": "/library/people/6a50f108ad4ad76d3af6e47f",
+            "type": "person"
+          },
+          {
+            "id": "6a50f108ad4ad76d3af6e47e",
+            "order": 8,
+            "slug": "amaya-masoli-1",
+            "tag": "Amaya Masoli",
+            "role": "Moana (8 years old)",
+            "key": "/library/people/6a50f108ad4ad76d3af6e47e",
+            "type": "person"
+          },
+          {
+            "id": "5d776a0b96b655001fde207c",
+            "order": 9,
+            "slug": "sam-puefua",
+            "tag": "Sam Puefua",
+            "thumb": "https://metadata-static.plex.tv/e/people/e5f452806cfab62461726be6d784e699.jpg",
+            "role": "Village Fisherman",
+            "key": "/library/people/5d776a0b96b655001fde207c",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b14c",
+            "order": 10,
+            "slug": "sione-milford-1",
+            "tag": "Sione Milford",
+            "role": "Coconut Farmer",
+            "key": "/library/people/6a5a272d1d6617f0f803b14c",
+            "type": "person"
+          },
+          {
+            "id": "5f4007e552f20000414e9b33",
+            "order": 11,
+            "slug": "kapeneta-teo-tafiti",
+            "tag": "Kapeneta Te'o-Tafiti",
+            "thumb": "https://metadata-static.plex.tv/a/people/a304a05c00a4f4a8af006937ac55720f.jpg",
+            "role": "Coconut Farmer",
+            "key": "/library/people/5f4007e552f20000414e9b33",
+            "type": "person"
+          },
+          {
+            "id": "5de9115ec548be001d1fdb41",
+            "order": 12,
+            "slug": "eric-scanlan",
+            "tag": "Eric Scanlan",
+            "thumb": "https://metadata-static.plex.tv/9/people/960ca7067026bed7162b79fb5de07aef.jpg",
+            "role": "Tulafale",
+            "key": "/library/people/5de9115ec548be001d1fdb41",
+            "type": "person"
+          },
+          {
+            "id": "5d776a07fb0d55001f538282",
+            "order": 13,
+            "slug": "moses-goods",
+            "tag": "Moses Goods",
+            "thumb": "https://metadata-static.plex.tv/d/people/dad41c33ba6ffd86bbd688ccfca7cef5.jpg",
+            "role": "Elder Luaʻiufi",
+            "key": "/library/people/5d776a07fb0d55001f538282",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b14d",
+            "order": 14,
+            "slug": "la-masae-faamausili-siliato-1",
+            "tag": "La Masae Fa‘amausili-Siliato",
+            "role": "Elder Ope",
+            "key": "/library/people/6a5a272d1d6617f0f803b14d",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b14e",
+            "order": 15,
+            "slug": "ehulani-hope-kane",
+            "tag": "Ehulani Hope Kāne",
+            "role": "Village Elder",
+            "key": "/library/people/6a5a272d1d6617f0f803b14e",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b14f",
+            "order": 16,
+            "slug": "hanale-kaanapu-1",
+            "tag": "Hanalē Ka‘anapu",
+            "role": "Village Elder",
+            "key": "/library/people/6a5a272d1d6617f0f803b14f",
+            "type": "person"
+          },
+          {
+            "id": "68209254e88a19cfaf5c3549",
+            "order": 17,
+            "slug": "michael-alisa-3",
+            "tag": "Michael Alisa",
+            "role": "Tautaivasa",
+            "key": "/library/people/68209254e88a19cfaf5c3549",
+            "type": "person"
+          },
+          {
+            "id": "62cc114eb2bf8cb06164e2f1",
+            "order": 18,
+            "slug": "michael-metuakore-1",
+            "tag": "Michael Metuakore",
+            "role": "Younger Navigator",
+            "key": "/library/people/62cc114eb2bf8cb06164e2f1",
+            "type": "person"
+          },
+          {
+            "id": "5dce7578e417fc001fd7d803",
+            "order": 19,
+            "slug": "patricia-faasua",
+            "tag": "Patricia Fa'asua",
+            "thumb": "https://metadata-static.plex.tv/2/people/20bfaaf568b0d7f4cac5cff091606a0f.jpg",
+            "role": "Villager",
+            "key": "/library/people/5dce7578e417fc001fd7d803",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b150",
+            "order": 20,
+            "slug": "malosi-scanlan-1",
+            "tag": "Malosi Scanlan",
+            "role": "Pushy Farmer",
+            "key": "/library/people/6a5a272d1d6617f0f803b150",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b153",
+            "order": 21,
+            "slug": "elijah-fui-1",
+            "tag": "Elijah Fui",
+            "role": "Fale Kid",
+            "key": "/library/people/6a5a272d1d6617f0f803b153",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b151",
+            "order": 22,
+            "slug": "sione-kite-1",
+            "tag": "Sione Kite",
+            "role": "Maivia",
+            "key": "/library/people/6a5a272d1d6617f0f803b151",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b152",
+            "order": 23,
+            "slug": "pisila-kioa-1",
+            "tag": "Pisila Kioa",
+            "role": "Fale Kid",
+            "key": "/library/people/6a5a272d1d6617f0f803b152",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b154",
+            "order": 24,
+            "slug": "huxley-hiko-1",
+            "tag": "Huxley Hiko",
+            "role": "Fale Kid",
+            "key": "/library/people/6a5a272d1d6617f0f803b154",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b155",
+            "order": 25,
+            "slug": "eli-matthew-lauvao-lutali-1",
+            "tag": "Eli Matthew-Lauvao Lutali",
+            "role": "Young Boy",
+            "key": "/library/people/6a5a272d1d6617f0f803b155",
+            "type": "person"
+          },
+          {
+            "id": "6a50f108ad4ad76d3af6e480",
+            "order": 26,
+            "slug": "tealoha-hokulani-carrera-1",
+            "tag": "Tealoha Hokulani Carrera",
+            "role": "Village Kid",
+            "key": "/library/people/6a50f108ad4ad76d3af6e480",
+            "type": "person"
+          },
+          {
+            "id": "6a5a272d1d6617f0f803b156",
+            "order": 27,
+            "slug": "joe-momoa-1",
+            "tag": "Joe Momoa",
+            "role": "Villager on Beach",
+            "key": "/library/people/6a5a272d1d6617f0f803b156",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776c6fad5437001f7be13a",
+            "slug": "thomas-kail",
+            "tag": "Thomas Kail",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ab26220886af295b5ca949637e8b4f0.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776c6fad5437001f7be13a",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682d4de0ee001fcc9ef7",
+            "slug": "beau-flynn",
+            "tag": "Beau Flynn",
+            "thumb": "https://metadata-static.plex.tv/3/people/32f44c5d71bb012cffde6b15d8849665.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682d4de0ee001fcc9ef7",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2c7a53e9001e6fc574",
+            "slug": "hiram-garcia",
+            "tag": "Hiram Garcia",
+            "thumb": "https://metadata-static.plex.tv/7/people/726bcebc67a1f29f630508a8a512a758.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776a2c7a53e9001e6fc574",
+            "type": "person"
+          },
+          {
+            "id": "5d77699c7a53e9001e6eb058",
+            "slug": "dany-garcia",
+            "tag": "Dany Garcia",
+            "thumb": "https://metadata-static.plex.tv/b/people/b345872ca8266df6d739b5aa4a7a7982.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77699c7a53e9001e6eb058",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea99f61",
+            "slug": "dwayne-johnson",
+            "tag": "Dwayne Johnson",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e707b4ed5bd292b182183f733e78d77.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682b6f4521001ea99f61",
+            "type": "person"
+          },
+          {
+            "id": "5d77688fd11dd30020227b98",
+            "slug": "lin-manuel-miranda",
+            "tag": "Lin-Manuel Miranda",
+            "thumb": "https://metadata-static.plex.tv/7/people/787511029ba2708f842a8bb59860d5d1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77688fd11dd30020227b98",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776ad696b655001fdfb155",
+            "slug": "jared-bush",
+            "tag": "Jared Bush",
+            "thumb": "https://metadata-static.plex.tv/4/people/46b5ac9759b71bad927d1b7b900076f1.jpg",
+            "role": "Original Film Writer",
+            "key": "/library/people/5d776ad696b655001fdfb155",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddbad",
+            "slug": "ron-clements",
+            "tag": "Ron Clements",
+            "thumb": "https://metadata-static.plex.tv/5/people/578b6776d13e324b2bf0b8b48731eb0e.jpg",
+            "role": "Original Film Writer",
+            "key": "/library/people/5d776828eb5d26001f1ddbad",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddbae",
+            "slug": "john-musker",
+            "tag": "John Musker",
+            "thumb": "https://metadata-static.plex.tv/2/people/229c262a22bc504893e26e795b5dcabd.jpg",
+            "role": "Original Film Writer",
+            "key": "/library/people/5d776828eb5d26001f1ddbae",
+            "type": "person"
+          },
+          {
+            "id": "5e163e48bc1372003ea7442c",
+            "slug": "dana-ledoux-miller",
+            "tag": "Dana Ledoux Miller",
+            "thumb": "https://metadata-static.plex.tv/3/people/3baa0f6866a04185d38c4f6b5b423907.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5e163e48bc1372003ea7442c",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/635acc9265f001742c6aa175",
+            "tag": "Ruby Gillman: Teenage Kraken"
+          },
+          {
+            "guid": "plex://movie/5d77683585719b001f3a3b46",
+            "tag": "Nim's Island"
+          },
+          {
+            "guid": "plex://movie/65c6107cf86bc5a20e095776",
+            "tag": "Moana 2"
+          },
+          {
+            "guid": "plex://movie/5d77683aeb5d26001f1e1cab",
+            "tag": "Scooby‐Doo! Pirates Ahoy!"
+          },
+          {
+            "guid": "plex://movie/5d776842961905001eb96891",
+            "tag": "Free Willy 3: The Rescue"
+          },
+          {
+            "guid": "plex://movie/5d776af2ad5437001f78dad6",
+            "tag": "Moana"
+          },
+          {
+            "guid": "plex://movie/5d77709a6afb3d002061df55",
+            "tag": "The Sea Beast"
+          },
+          {
+            "guid": "plex://movie/5d7768247228e5001f1dccc9",
+            "tag": "Pirates of the Caribbean: Dead Man's Chest"
+          },
+          {
+            "guid": "plex://movie/5d7768b31999bc0020dce526",
+            "tag": "The Pirates! Band of Misfits"
+          },
+          {
+            "guid": "plex://movie/5f40da09c63b480040f9ef70",
+            "tag": "The Legend of Ochi"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Walt Disney Pictures"
+          },
+          {
+            "tag": "Seven Bucks Productions"
+          },
+          {
+            "tag": "Flynn Picture Company"
+          },
+          {
+            "tag": "5000 Broadway Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Young Moana embarks on an epic seafaring adventure to restore prosperity to her people.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

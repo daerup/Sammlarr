@@ -1,0 +1,514 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "2001: A Space Odyssey",
+      "A Chinese Odyssey: Part 2 - Cinderella",
+      "A Chinese Odyssey: Part One - Pandora's Box",
+      "Lapland Odyssey",
+      "A Writer's Odyssey"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1784073600,
+              "art": "https://metadata-static.plex.tv/5/gracenote/5b047b2e5f565401d53aad5302913905.jpg",
+              "duration": 10380000,
+              "guid": "plex://movie/670cb74204e43056959bd4b3",
+              "key": "/library/metadata/670cb74204e43056959bd4b3",
+              "originallyAvailableAt": "2026-07-15",
+              "ratingKey": "670cb74204e43056959bd4b3",
+              "slug": "the-odyssey-2026",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/f5b1182086ef9d55a1de45b4db74eb97.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.89
+          },
+          {
+            "Metadata": {
+              "addedAt": 1762473600,
+              "art": "https://metadata-static.plex.tv/6/gracenote/605d17c42af7d21c6607814e5200c058.jpg",
+              "duration": 6600000,
+              "guid": "plex://movie/65ca74675a5e5f8928da327c",
+              "key": "/library/metadata/65ca74675a5e5f8928da327c",
+              "originallyAvailableAt": "2025-11-07",
+              "ratingKey": "65ca74675a5e5f8928da327c",
+              "slug": "odyssey-2025",
+              "thumb": "https://metadata-static.plex.tv/4/gracenote/4dcd9a6cdaea289f04c83084c42e6c12.jpg",
+              "title": "Odyssey",
+              "type": "movie",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "duration": 6120000,
+              "guid": "plex://movie/65e3eb0f65ced9d253202db3",
+              "key": "/library/metadata/65e3eb0f65ced9d253202db3",
+              "ratingKey": "65e3eb0f65ced9d253202db3",
+              "slug": "odyssey-13",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BYTgzNDg5OTMtYjZmOC00YWM0LWI2MWEtY2NiZDc5OTI1MzhmXkEyXkFqcGc@._V1_.jpg",
+              "title": "Odyssey",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1605139200,
+              "duration": 960000,
+              "guid": "plex://movie/5faf908fdec625002d4046d3",
+              "key": "/library/metadata/5faf908fdec625002d4046d3",
+              "originallyAvailableAt": "2020-11-12",
+              "ratingKey": "5faf908fdec625002d4046d3",
+              "slug": "odyssey-2020-3",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/fLyuOml8Si3wktC0fjKpcHxVEQr.jpg",
+              "title": "Odyssey",
+              "type": "movie",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1783036800,
+              "art": "https://metadata-static.plex.tv/1/gracenote/145dfc321cd8352c59d7f83cc5625412.jpg",
+              "duration": 5160000,
+              "guid": "plex://movie/69e19c662fe74a9a4164be53",
+              "key": "/library/metadata/69e19c662fe74a9a4164be53",
+              "originallyAvailableAt": "2026-07-03",
+              "ratingKey": "69e19c662fe74a9a4164be53",
+              "slug": "the-odyssey-2026-2",
+              "thumb": "https://metadata-static.plex.tv/e/gracenote/e0d6f5985e1079d426e125b724c5b169.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.63
+          },
+          {
+            "Metadata": {
+              "addedAt": 1476230400,
+              "art": "https://metadata-static.plex.tv/8/gracenote/80725a7048e1d95be7fb61957dfa60c5.jpg",
+              "duration": 7320000,
+              "guid": "plex://movie/5d776b8c9ab544002150cd90",
+              "key": "/library/metadata/5d776b8c9ab544002150cd90",
+              "originallyAvailableAt": "2016-10-12",
+              "ratingKey": "5d776b8c9ab544002150cd90",
+              "slug": "the-odyssey-2016-1",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/ff649270ce88760585307c8701e8f56b.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "year": 2016,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046cd4f2a9001f7faab2",
+                  "id": "5d9c046cd4f2a9001f7faab2",
+                  "key": "/library/categories/biography",
+                  "ratingKey": "genre_5d9c046cd4f2a9001f7faab2",
+                  "slug": "biography",
+                  "tag": "Biography",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.61
+          },
+          {
+            "Metadata": {
+              "addedAt": 1340496000,
+              "duration": 1560000,
+              "guid": "plex://movie/5f036277f7d7010042b650fc",
+              "key": "/library/metadata/5f036277f7d7010042b650fc",
+              "originallyAvailableAt": "2012-06-24",
+              "ratingKey": "5f036277f7d7010042b650fc",
+              "slug": "the-odyssey-2012",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/2DmABLyYVnRIe0UWFSVKhKeI5P5.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "year": 2012,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "duration": 3000000,
+              "guid": "plex://movie/5f40cb9e768fc7004060bbc7",
+              "key": "/library/metadata/5f40cb9e768fc7004060bbc7",
+              "ratingKey": "5f40cb9e768fc7004060bbc7",
+              "slug": "the-odyssey-8",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BODI4MjYxZmItNjZkMC00OGVjLWFkYjUtZTAxM2UyODdhZTVmXkEyXkFqcGc@._V1_.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "addedAt": 1783987200,
+              "art": "https://metadata-static.plex.tv/9/gracenote/95527c6ea24c87eea01e281d1fd43021.jpg",
+              "duration": 5520000,
+              "guid": "plex://movie/69c44e8318d72691506564e1",
+              "key": "/library/metadata/69c44e8318d72691506564e1",
+              "originallyAvailableAt": "2026-07-14",
+              "ratingKey": "69c44e8318d72691506564e1",
+              "slug": "the-odyssey-2026-1",
+              "thumb": "https://metadata-static.plex.tv/6/gracenote/65d9895149b34067cb30ea82d39880d1.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.57
+          },
+          {
+            "Metadata": {
+              "addedAt": 564278400,
+              "art": "https://metadata-static.plex.tv/3/gracenote/3619f2d33c64880a35b73d9478ecaa8d.jpg",
+              "duration": 3300000,
+              "guid": "plex://movie/5d776a5123d5a3001f5033a2",
+              "key": "/library/metadata/5d776a5123d5a3001f5033a2",
+              "originallyAvailableAt": "1987-11-19",
+              "ratingKey": "5d776a5123d5a3001f5033a2",
+              "slug": "the-odyssey-1987",
+              "thumb": "https://metadata-static.plex.tv/b/gracenote/b334157754216c90a0e691104f35e929.jpg",
+              "title": "The Odyssey",
+              "type": "movie",
+              "year": 1987,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf5af32ed001e0f5563",
+                  "id": "5da05bf5af32ed001e0f5563",
+                  "key": "/library/categories/history",
+                  "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+                  "slug": "history",
+                  "tag": "History",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.56
+          }
+        ]
+      }
+    ]
+  }
+}

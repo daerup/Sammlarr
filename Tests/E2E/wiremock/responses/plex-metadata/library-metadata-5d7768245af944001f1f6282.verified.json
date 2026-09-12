@@ -1,0 +1,649 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/f/gracenote/f5a0ba5708057e03cc3c9fa07c1d3812.jpg",
+        "banner": "https://assets.fanart.tv/fanart/blade-runner-52085ac1ee44a.jpg",
+        "guid": "plex://movie/5d7768245af944001f1f6282",
+        "key": "/library/metadata/5d7768245af944001f1f6282",
+        "rating": 8.9,
+        "ratingKey": "5d7768245af944001f1f6282",
+        "studio": "Shaw Brothers",
+        "summary": "In the smog-choked dystopian Los Angeles of 2019, blade runner Rick Deckard is called out of retirement to terminate a quartet of replicants who have escaped to Earth seeking their creator for a way to extend their short life spans.",
+        "tagline": "Man has made his match ...now it's his problem.",
+        "type": "movie",
+        "addedAt": 393811200,
+        "audienceRating": 9.1,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 28000000,
+        "contentRating": "R",
+        "duration": 7080000,
+        "imdbRatingCount": 891062,
+        "originallyAvailableAt": "1982-06-25",
+        "publicPagesURL": "https://watch.plex.tv/movie/blade-runner-1982",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 41722424,
+        "slug": "blade-runner-1982",
+        "thumb": "https://metadata-static.plex.tv/8/gracenote/89fc6370ece4bc6cb9d22c0f040c0b90.jpg",
+        "title": "Blade Runner",
+        "userState": false,
+        "year": 1982,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d7768245af944001f1f6282/commonsensemedia",
+            "oneLiner": "A dark, philosophical sci-fi drama for older teens.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Blade Runner",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f5a0ba5708057e03cc3c9fa07c1d3812.jpg"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/431d06d35bfe7c1bf95df63182b7d12d.jpg"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/blade-runner-52085ac1ee44a.jpg"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1bc39382388a54087e363dff2b9460c1.png"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/5/683a142553/5abe0bc8d1ae7c765171102432ff51fd.png"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/3/gracenote/362e2cc0c9299045eea38199caa5a6d9.jpg"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/8/gracenote/89fc6370ece4bc6cb9d22c0f040c0b90.jpg"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/dc8eff25298ff11fcce10875e544f0e7.jpg"
+          },
+          {
+            "alt": "Blade Runner",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/5/gracenote/507aadb261131dca3deb5322f259986a.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0083658"
+          },
+          {
+            "id": "tmdb://78"
+          },
+          {
+            "id": "tvdb://343"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.1
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.9
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.1
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.936
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Oscar",
+            "category": "Best Art Direction-Set Decoration",
+            "event": "Academy Awards",
+            "id": "643edfcf3aba3ca5fa3d3418",
+            "isWinner": false,
+            "year": 1983
+          },
+          {
+            "award": "Oscar",
+            "category": "Best Effects, Visual Effects",
+            "event": "Academy Awards",
+            "id": "643edfcf3aba3ca5fa3d3419",
+            "isWinner": false,
+            "year": 1983
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/li3buIx57ph3RX5XlbpMzJPewZ0.jpg",
+            "guid": "plex://collection/5ec2fd3ea2bccc004095f236",
+            "key": "/library/collections/5ec2fd3ea2bccc004095f236/children",
+            "summary": "An American neo-noir science-fiction film series set in a dystopian Los Angeles, depicting a future in which synthetic humans known as \"replicants\" are bio-engineered by the powerful Tyrell Corporation, to work on off-world colonies. Based on the novel ‘Do Androids Dream of Electric Sheep?’",
+            "thumb": "https://image.tmdb.org/t/p/original/qTcATCpiFDcgY8snQIfS2j0bFP7.jpg",
+            "tag": "Blade Runner Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          },
+          {
+            "tag": "Hong Kong"
+          },
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768245af944001f1f6354",
+            "order": 1,
+            "slug": "harrison-ford",
+            "tag": "Harrison Ford",
+            "thumb": "https://metadata-static.plex.tv/a/people/af67ead9ff669cacc1fbfd62d893f9cd.jpg",
+            "role": "Deckard",
+            "key": "/library/people/5d7768245af944001f1f6354",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6355",
+            "order": 2,
+            "slug": "rutger-hauer",
+            "tag": "Rutger Hauer",
+            "thumb": "https://metadata-static.plex.tv/b/people/b09b03860c1a001ad29ec9bffa2b6b4d.jpg",
+            "role": "Batty",
+            "key": "/library/people/5d7768245af944001f1f6355",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6356",
+            "order": 3,
+            "slug": "sean-young",
+            "tag": "Sean Young",
+            "thumb": "https://metadata-static.plex.tv/2/people/29e9670223e14fbcf39c0bad6b8c6f9c.jpg",
+            "role": "Rachael",
+            "key": "/library/people/5d7768245af944001f1f6356",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6357",
+            "order": 4,
+            "slug": "edward-james-olmos",
+            "tag": "Edward James Olmos",
+            "thumb": "https://metadata-static.plex.tv/2/people/27dd53066855ce4f760f67c8bf6929d5.jpg",
+            "role": "Gaff",
+            "key": "/library/people/5d7768245af944001f1f6357",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6358",
+            "order": 5,
+            "slug": "m-emmet-walsh",
+            "tag": "M. Emmet Walsh",
+            "thumb": "https://metadata-static.plex.tv/1/people/194500ccded1e20d6be5414abd064e12.jpg",
+            "role": "Bryant",
+            "key": "/library/people/5d7768245af944001f1f6358",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6359",
+            "order": 6,
+            "slug": "daryl-hannah",
+            "tag": "Daryl Hannah",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9d4a94372a7ff2ad3452b1fb56b7ec6.jpg",
+            "role": "Pris",
+            "key": "/library/people/5d7768245af944001f1f6359",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635a",
+            "order": 7,
+            "slug": "william-sanderson",
+            "tag": "William Sanderson",
+            "thumb": "https://metadata-static.plex.tv/9/people/9141a06c5045acfdf661aeae2adc3c32.jpg",
+            "role": "Sebastian",
+            "key": "/library/people/5d7768245af944001f1f635a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635b",
+            "order": 8,
+            "slug": "brion-james",
+            "tag": "Brion James",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c100488bc3dfbd9dea7b77e37632e6b.jpg",
+            "role": "Leon",
+            "key": "/library/people/5d7768245af944001f1f635b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635c",
+            "order": 9,
+            "slug": "joe-turkel",
+            "tag": "Joe Turkel",
+            "thumb": "https://metadata-static.plex.tv/8/people/84fef79d5a2fde052c012645820d59ff.jpg",
+            "role": "Tyrell",
+            "key": "/library/people/5d7768245af944001f1f635c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635d",
+            "order": 10,
+            "slug": "joanna-cassidy",
+            "tag": "Joanna Cassidy",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5eddf1b2867c39573266979e52d2e79.jpg",
+            "role": "Zhora",
+            "key": "/library/people/5d7768245af944001f1f635d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635e",
+            "order": 11,
+            "slug": "james-hong",
+            "tag": "James Hong",
+            "thumb": "https://metadata-static.plex.tv/8/people/8fe5cc1942a0836184be91251c6de0a9.jpg",
+            "role": "Chew",
+            "key": "/library/people/5d7768245af944001f1f635e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6366",
+            "order": 12,
+            "slug": "morgan-paull",
+            "tag": "Morgan Paull",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768245af944001f1f6366.jpg",
+            "role": "Holden",
+            "key": "/library/people/5d7768245af944001f1f6366",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635f",
+            "order": 13,
+            "slug": "kevin-thompson",
+            "tag": "Kevin Thompson",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768245af944001f1f635f.jpg",
+            "role": "Bear",
+            "key": "/library/people/5d7768245af944001f1f635f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6367",
+            "order": 14,
+            "slug": "john-edward-allen",
+            "tag": "John Edward Allen",
+            "role": "Kaiser",
+            "key": "/library/people/5d7768245af944001f1f6367",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6360",
+            "order": 15,
+            "slug": "hy-pyke",
+            "tag": "Hy Pyke",
+            "thumb": "https://metadata-static.plex.tv/f/people/f1b478a051510a7d1c13b6a44f20befa.jpg",
+            "role": "Taffey Lewis",
+            "key": "/library/people/5d7768245af944001f1f6360",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6361",
+            "order": 16,
+            "slug": "kimiko-hiroshige",
+            "tag": "Kimiko Hiroshige",
+            "role": "Cambodian Lady",
+            "key": "/library/people/5d7768245af944001f1f6361",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6365",
+            "order": 17,
+            "slug": "bob-okazaki",
+            "tag": "Bob Okazaki",
+            "thumb": "https://metadata-static.plex.tv/b/people/b8b1ca1ffabfac74add5012e6075c23d.jpg",
+            "role": "Sushi Master",
+            "key": "/library/people/5d7768245af944001f1f6365",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6368",
+            "order": 18,
+            "slug": "carolyn-demirjian",
+            "tag": "Carolyn DeMirjian",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768245af944001f1f6368.jpg",
+            "role": "Saleslady",
+            "key": "/library/people/5d7768245af944001f1f6368",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6362",
+            "order": 19,
+            "slug": "ben-astar",
+            "tag": "Ben Astar",
+            "thumb": "https://metadata-static.plex.tv/d/people/d24228b81ca1c7acbafe5f2757b58ca4.jpg",
+            "role": "Abdul Ben Hassan",
+            "key": "/library/people/5d7768245af944001f1f6362",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6363",
+            "order": 20,
+            "slug": "dawna-lee-heising",
+            "tag": "Dawna Lee Heising",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d06390318a2e0aa7671a75e16ffd291.jpg",
+            "role": "Showgirl (uncredited)",
+            "key": "/library/people/5d7768245af944001f1f6363",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6364",
+            "order": 21,
+            "slug": "alexis-rhee",
+            "tag": "Alexis Rhee",
+            "thumb": "https://metadata-static.plex.tv/4/people/4d276b01d13ffde3af91ad876d284c8b.jpg",
+            "role": "Geisha #1 (uncredited)",
+            "key": "/library/people/5d7768245af944001f1f6364",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6369",
+            "order": 22,
+            "slug": "judith-burnett",
+            "tag": "Judith Burnett",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768245af944001f1f6369.jpg",
+            "role": "Ming-Fa (uncredited)",
+            "key": "/library/people/5d7768245af944001f1f6369",
+            "type": "person"
+          },
+          {
+            "id": "6323c6d3d95f9078376f22e5",
+            "order": 23,
+            "slug": "leo-gorcey-jr-1",
+            "tag": "Leo Gorcey Jr.",
+            "thumb": "https://metadata-static.plex.tv/4/people/4485f2a057d89a0c4724dfe73863729b.jpg",
+            "role": "Louie - Bartender (uncredited)",
+            "key": "/library/people/6323c6d3d95f9078376f22e5",
+            "type": "person"
+          },
+          {
+            "id": "63240965f26ffb4da8250b70",
+            "order": 24,
+            "slug": "sharon-hesky-1",
+            "tag": "Sharon Hesky",
+            "role": "Bar Patron (uncredited)",
+            "key": "/library/people/63240965f26ffb4da8250b70",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f636c",
+            "order": 25,
+            "slug": "kelly-hine",
+            "tag": "Kelly Hine",
+            "role": "Showgirl (uncredited)",
+            "key": "/library/people/5d7768245af944001f1f636c",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc0485a76a80042cd1135",
+            "order": 26,
+            "slug": "tom-hutchinson-3",
+            "tag": "Tom Hutchinson",
+            "role": "Bartender (uncredited)",
+            "key": "/library/people/5f3fc0485a76a80042cd1135",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f636e",
+            "order": 27,
+            "slug": "charles-knapp",
+            "tag": "Charles Knapp",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768245af944001f1f636e.jpg",
+            "role": "Bartender (uncredited)",
+            "key": "/library/people/5d7768245af944001f1f636e",
+            "type": "person"
+          },
+          {
+            "id": "632409e3ce37dd2faa72b60a",
+            "order": 28,
+            "slug": "rose-mascari-1",
+            "tag": "Rose Mascari",
+            "role": "Bar Patron (uncredited)",
+            "key": "/library/people/632409e3ce37dd2faa72b60a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6370",
+            "order": 29,
+            "slug": "jiro-okazaki",
+            "tag": "Jiro Okazaki",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768245af944001f1f6370.jpg",
+            "role": "Policeman (uncredited)",
+            "key": "/library/people/5d7768245af944001f1f6370",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cb4c77a48bef2eec048",
+            "order": 30,
+            "slug": "steve-pope",
+            "tag": "Steve Pope",
+            "role": "Policeman (uncredited)",
+            "key": "/library/people/62fb7cb4c77a48bef2eec048",
+            "type": "person"
+          },
+          {
+            "id": "632409a2ce37dd2faa72b4f3",
+            "order": 31,
+            "slug": "robert-reiter-5",
+            "tag": "Robert Reiter",
+            "role": "Policeman (uncredited)",
+            "key": "/library/people/632409a2ce37dd2faa72b4f3",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b8a7581001f12e15d",
+            "order": 32,
+            "slug": "doug-benson",
+            "tag": "Doug Benson",
+            "thumb": "https://metadata-static.plex.tv/b/people/b029f28d829ad81bc7abe5a6e9eb186d.jpg",
+            "role": "Police Officer (uncredited)",
+            "key": "/library/people/5d77683b8a7581001f12e15d",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768245af944001f1f6352",
+            "slug": "ridley-scott",
+            "tag": "Ridley Scott",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e30e7313879e5fa29332c09d6fd404d.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768245af944001f1f6352",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7768245af944001f1f6353",
+            "slug": "michael-deeley",
+            "tag": "Michael Deeley",
+            "thumb": "https://metadata-static.plex.tv/a/people/af6aea2794f0040c289fb55ddae0da6e.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768245af944001f1f6353",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b961905001eb924fb",
+            "slug": "run-run-shaw",
+            "tag": "Run Run Shaw",
+            "thumb": "https://metadata-static.plex.tv/4/people/4fff84e12bf4742fd3ec560190ad2ec6.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682b961905001eb924fb",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768245af944001f1f6373",
+            "slug": "hampton-fancher",
+            "tag": "Hampton Fancher",
+            "thumb": "https://metadata-static.plex.tv/5/people/5de27626ff97a6d1d38a6bafdd46af95.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d7768245af944001f1f6373",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f6374",
+            "slug": "david-webb-peoples",
+            "tag": "David Webb Peoples",
+            "thumb": "https://metadata-static.plex.tv/5/people/55249eda7b5753d4ad995141748c1c21.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d7768245af944001f1f6374",
+            "type": "person"
+          },
+          {
+            "id": "5d77684b103a2d001f56c401",
+            "slug": "philip-k-dick",
+            "tag": "Philip K. Dick",
+            "thumb": "https://metadata-static.plex.tv/d/people/dd5ceb4a9c5c2a7b7662cf1ba9c4f65e.jpg",
+            "role": "Novel",
+            "key": "/library/people/5d77684b103a2d001f56c401",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/6190c9288046d2cd94bd7559",
+            "tag": "Wifelike"
+          },
+          {
+            "guid": "plex://movie/5d776824151a60001f24a29e",
+            "tag": "The Terminator"
+          },
+          {
+            "guid": "plex://movie/5d7768258718ba001e311845",
+            "tag": "Terminator 2: Judgment Day"
+          },
+          {
+            "guid": "plex://movie/5d77685fe6d55c0020411daf",
+            "tag": "Repo Men"
+          },
+          {
+            "guid": "plex://movie/5d776b95594b2b001e6de3f3",
+            "tag": "Blade Runner 2049"
+          },
+          {
+            "guid": "plex://movie/5d77682d7228e5001f1dd859",
+            "tag": "A Scanner Darkly"
+          },
+          {
+            "guid": "plex://movie/5d776d9fad5437001f7db1b2",
+            "tag": "Upgrade"
+          },
+          {
+            "guid": "plex://movie/5d7768268718ba001e311b66",
+            "tag": "Terminator Salvation"
+          },
+          {
+            "guid": "plex://movie/5d7770eb31d95e001f1acc0b",
+            "tag": "Archive"
+          },
+          {
+            "guid": "plex://movie/5d7768ccfb0d55001f519e19",
+            "tag": "Cloud Atlas"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Shaw Brothers"
+          },
+          {
+            "tag": "The Ladd Company"
+          },
+          {
+            "tag": "Warner Bros. Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A detective (Harrison Ford) hunts obsolete androids (Rutger Hauer, Sean Young) in 2019.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

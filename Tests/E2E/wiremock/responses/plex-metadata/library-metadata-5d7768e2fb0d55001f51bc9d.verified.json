@@ -1,0 +1,575 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/c/gracenote/c9ff04fbe103b3f82cfb1696856663fe.jpg",
+        "banner": "https://assets.fanart.tv/fanart/motor-city-6a8febda6de2e.jpg",
+        "guid": "plex://movie/5d7768e2fb0d55001f51bc9d",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/5d7768e2fb0d55001f51bc9d",
+        "rating": 6.3,
+        "ratingKey": "5d7768e2fb0d55001f51bc9d",
+        "studio": "Stampede Ventures",
+        "summary": "In 1970s Detroit, John Miller falls for a local gangster's girl. In retaliation, the gangster enacts a frame job to send the innocent man to prison. Life ruined, Miller plots a revenge campaign against the man who took his girl away.",
+        "tagline": "Love will drive you mad.",
+        "type": "movie",
+        "addedAt": 1784764800,
+        "audienceRating": 6.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 30000000,
+        "contentRating": "R",
+        "duration": 6240000,
+        "imdbRatingCount": 8891,
+        "originallyAvailableAt": "2026-07-23",
+        "publicPagesURL": "https://watch.plex.tv/movie/motor-city",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "motor-city",
+        "thumb": "https://metadata-static.plex.tv/e/gracenote/e96ccd30cd3706d40c6205d051cb82dd.jpg",
+        "title": "Motor City",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d7768e2fb0d55001f51bc9d/commonsensemedia",
+            "oneLiner": "Violent, dialogue-light revenge thriller packs a punch.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Motor City",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c9ff04fbe103b3f82cfb1696856663fe.jpg"
+          },
+          {
+            "alt": "Motor City",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/41bba5406d97d2497842f89e64bb5ef0.jpg"
+          },
+          {
+            "alt": "Motor City",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/motor-city-6a8febda6de2e.jpg"
+          },
+          {
+            "alt": "Motor City",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/9/683a142553/974d33b59024324a11e72864d46b6833.png"
+          },
+          {
+            "alt": "Motor City",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/9/683a142553/974d33b59024324a11e72864d46b6833.png"
+          },
+          {
+            "alt": "Motor City",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f25321dcfbe6eb638742b445ea5fbeb0.jpg"
+          },
+          {
+            "alt": "Motor City",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e96ccd30cd3706d40c6205d051cb82dd.jpg"
+          },
+          {
+            "alt": "Motor City",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7c16e2941a06f61a55a6fd9beb4267ac.jpg"
+          },
+          {
+            "alt": "Motor City",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e2c69220108b36750b7cffd34509e4ef.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt2012616"
+          },
+          {
+            "id": "tmdb://87513"
+          },
+          {
+            "id": "tvdb://83519"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 6.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 6.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.228
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768368718ba001e314b4e",
+            "order": 1,
+            "slug": "alan-ritchson",
+            "tag": "Alan Ritchson",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab48b6579d2f770630c002fd08a9357e.jpg",
+            "role": "John Miller",
+            "key": "/library/people/5d7768368718ba001e314b4e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a7e9a3c0020c6b41f",
+            "order": 2,
+            "slug": "ben-foster",
+            "tag": "Ben Foster",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e3dc5823183e7f92d0039a340ea337b.jpg",
+            "role": "Reynolds",
+            "key": "/library/people/5d77682a7e9a3c0020c6b41f",
+            "type": "person"
+          },
+          {
+            "id": "5d776840999c64001ec31866",
+            "order": 3,
+            "slug": "shailene-woodley",
+            "tag": "Shailene Woodley",
+            "thumb": "https://metadata-static.plex.tv/c/people/c0d8ae9627c485c161f9a6dcc9cc9fe9.jpg",
+            "role": "Sophia",
+            "key": "/library/people/5d776840999c64001ec31866",
+            "type": "person"
+          },
+          {
+            "id": "5f40213d04a86500409f19fb",
+            "order": 4,
+            "slug": "lionel-boyce",
+            "tag": "Lionel Boyce",
+            "thumb": "https://metadata-static.plex.tv/5/people/5a2c209f49ddd01eaefa3a1f189a3862.jpg",
+            "role": "Youngblood",
+            "key": "/library/people/5f40213d04a86500409f19fb",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c103a2d001f569641",
+            "order": 5,
+            "slug": "amar-chadha-patel",
+            "tag": "Amar Chadha-Patel",
+            "thumb": "https://metadata-static.plex.tv/2/people/2e8c8655ffc80cebff4fa169c0fee8c7.jpg",
+            "role": "Singh",
+            "key": "/library/people/5d77683c103a2d001f569641",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9ae12",
+            "order": 6,
+            "slug": "pablo-schreiber",
+            "tag": "Pablo Schreiber",
+            "thumb": "https://metadata-static.plex.tv/0/people/04c665fa8afeab83b3e48a416fecf26b.jpg",
+            "role": "Lieutenant Savick",
+            "key": "/library/people/5d77682f6f4521001ea9ae12",
+            "type": "person"
+          },
+          {
+            "id": "5d7768d2ebdf2200209c9282",
+            "order": 7,
+            "slug": "dominic-bogart",
+            "tag": "Dominic Bogart",
+            "thumb": "https://metadata-static.plex.tv/d/people/d82e0c5cc285d9c780448964329ce40e.jpg",
+            "role": "Porthos",
+            "key": "/library/people/5d7768d2ebdf2200209c9282",
+            "type": "person"
+          },
+          {
+            "id": "602c25ea978deb002c4fd8a5",
+            "order": 8,
+            "slug": "mister-fitzgerald",
+            "tag": "Mister Fitzgerald",
+            "thumb": "https://metadata-static.plex.tv/2/people/2e3038481c5472b9ab0152874877792a.jpg",
+            "role": "Aramis",
+            "key": "/library/people/602c25ea978deb002c4fd8a5",
+            "type": "person"
+          },
+          {
+            "id": "5d7769df23d5a3001f4fd77d",
+            "order": 9,
+            "slug": "rafael-cebrian",
+            "tag": "Rafael Cebrian",
+            "thumb": "https://metadata-static.plex.tv/8/people/81662a4292490ba78937e7edd89aae7c.jpg",
+            "role": "Athos",
+            "key": "/library/people/5d7769df23d5a3001f4fd77d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a54c0f0001f3022af",
+            "order": 10,
+            "slug": "ben-mckenzie",
+            "tag": "Ben McKenzie",
+            "thumb": "https://metadata-static.plex.tv/f/people/f0d7b18b0bd42bd7a76b45983ee651ed.jpg",
+            "role": "Detective Kent",
+            "key": "/library/people/5d77682a54c0f0001f3022af",
+            "type": "person"
+          },
+          {
+            "id": "5d77682985719b001f3a132b",
+            "order": 11,
+            "slug": "jack-white",
+            "tag": "Jack White",
+            "thumb": "https://metadata-static.plex.tv/4/people/4b9c8c1950a17386deddc71de3d8eb1a.jpg",
+            "role": "Piano Player",
+            "key": "/library/people/5d77682985719b001f3a132b",
+            "type": "person"
+          },
+          {
+            "id": "5d776838f54112001f5bdcfc",
+            "order": 12,
+            "slug": "elliott-mayer",
+            "tag": "Elliott Mayer",
+            "thumb": "https://metadata-static.plex.tv/4/people/4a0b78f9efdaa1b22db2c0e0ddbf8344.jpg",
+            "role": "P. Garrett",
+            "key": "/library/people/5d776838f54112001f5bdcfc",
+            "type": "person"
+          },
+          {
+            "id": "5d776843eb5d26001f1e3eaf",
+            "order": 13,
+            "slug": "frank-rivers",
+            "tag": "Frank Rivers",
+            "thumb": "https://metadata-static.plex.tv/6/people/661f585d44d96219651a33d200c11917.jpg",
+            "role": "Priest",
+            "key": "/library/people/5d776843eb5d26001f1e3eaf",
+            "type": "person"
+          },
+          {
+            "id": "5d776c4096b655001fe2b09c",
+            "order": 14,
+            "slug": "maceo-oliver",
+            "tag": "Maceo Oliver",
+            "thumb": "https://metadata-static.plex.tv/1/people/129610196f335fd19ea1b0845d0e89e4.jpg",
+            "role": "Dad",
+            "key": "/library/people/5d776c4096b655001fe2b09c",
+            "type": "person"
+          },
+          {
+            "id": "5f4000b652f20000414dee08",
+            "order": 15,
+            "slug": "jacqueline-o-rene",
+            "tag": "Jacqueline O. Rene",
+            "thumb": "https://metadata-static.plex.tv/d/people/df227cfaf1bc4256fada332dd8a2d8e4.jpg",
+            "role": "Mom",
+            "key": "/library/people/5f4000b652f20000414dee08",
+            "type": "person"
+          },
+          {
+            "id": "5f3fef8ace2564003f89358a",
+            "order": 16,
+            "slug": "vivia-font",
+            "tag": "Vivia Font",
+            "thumb": "https://metadata-static.plex.tv/2/people/228b88c66230e9a72e48d35ea77577c6.jpg",
+            "role": "Maid",
+            "key": "/library/people/5f3fef8ace2564003f89358a",
+            "type": "person"
+          },
+          {
+            "id": "5f406a41bf3e560040c26679",
+            "order": 17,
+            "slug": "darius-nastyelgic-jackson",
+            "tag": "Darius 'Nastyelgic' Jackson",
+            "thumb": "https://metadata-static.plex.tv/9/people/9d065763efddce986a8d3cbca43b74b0.jpg",
+            "role": "Bouncer",
+            "key": "/library/people/5f406a41bf3e560040c26679",
+            "type": "person"
+          },
+          {
+            "id": "5d7768394de0ee001fccc4a6",
+            "order": 18,
+            "slug": "peter-epstein",
+            "tag": "Peter Epstein",
+            "thumb": "https://metadata-static.plex.tv/0/people/0301061b794893cb7b2aa2ceb69cbad3.jpg",
+            "role": "Dirty Cop",
+            "key": "/library/people/5d7768394de0ee001fccc4a6",
+            "type": "person"
+          },
+          {
+            "id": "5d77689febdf2200209c3fe2",
+            "order": 19,
+            "slug": "oleg-prudius",
+            "tag": "Oleg Prudius",
+            "thumb": "https://metadata-static.plex.tv/b/people/bfacc32e1ddaffadee57b91cbe2d465e.jpg",
+            "role": "The Heavy (uncredited)",
+            "key": "/library/people/5d77689febdf2200209c3fe2",
+            "type": "person"
+          },
+          {
+            "id": "5d77689a1999bc0020dcacb1",
+            "order": 20,
+            "slug": "dennis-jay-funny",
+            "tag": "Dennis Jay Funny",
+            "thumb": "https://metadata-static.plex.tv/people/5d77689a1999bc0020dcacb1.jpg",
+            "role": "Factory Worker (uncredited)",
+            "key": "/library/people/5d77689a1999bc0020dcacb1",
+            "type": "person"
+          },
+          {
+            "id": "61c878702f6e1f20f964b144",
+            "order": 21,
+            "slug": "james-blake-carrington-1",
+            "tag": "James Blake Carrington",
+            "role": "Cop (uncredited)",
+            "key": "/library/people/61c878702f6e1f20f964b144",
+            "type": "person"
+          },
+          {
+            "id": "5e1e5e48abc77e003ece6442",
+            "order": 22,
+            "slug": "bob-leszczak",
+            "tag": "Bob Leszczak",
+            "role": "Funeral Attendee (uncredited)",
+            "key": "/library/people/5e1e5e48abc77e003ece6442",
+            "type": "person"
+          },
+          {
+            "id": "685ac4cd8690bacdb298be61",
+            "order": 23,
+            "slug": "neil-schleifer-1",
+            "tag": "Neil Schleifer",
+            "role": "Prison Guard (uncredited)",
+            "key": "/library/people/685ac4cd8690bacdb298be61",
+            "type": "person"
+          },
+          {
+            "id": "62729078a67285e1c67be367",
+            "order": 24,
+            "slug": "scott-vogel-12",
+            "tag": "Scott Vogel",
+            "thumb": "https://image.tmdb.org/t/p/original/sbO7QcFnekhBNzD20wwy57NmKxP.jpg",
+            "role": "Pedestrian (uncredited)",
+            "key": "/library/people/62729078a67285e1c67be367",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776d1bad5437001f7cd6a8",
+            "slug": "potsy-ponciroli",
+            "tag": "Potsy Ponciroli",
+            "thumb": "https://metadata-static.plex.tv/7/people/7775f02c402fe6ec472e3c9f80eedf3b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776d1bad5437001f7cd6a8",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776836f59e580021898bd7",
+            "slug": "jon-berg",
+            "tag": "Jon Berg",
+            "role": "Producer",
+            "key": "/library/people/5d776836f59e580021898bd7",
+            "type": "person"
+          },
+          {
+            "id": "5ef153d511f7b600413a10ac",
+            "slug": "cliff-roberts-3",
+            "tag": "Cliff Roberts",
+            "role": "Producer",
+            "key": "/library/people/5ef153d511f7b600413a10ac",
+            "type": "person"
+          },
+          {
+            "id": "5d776f187a53e9001e78b47b",
+            "slug": "greg-silverman",
+            "tag": "Greg Silverman",
+            "thumb": "https://metadata-static.plex.tv/b/people/b42ad53da1bfa5137bf19673e95f6655.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776f187a53e9001e78b47b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768e2fb0d55001f51bcd0",
+            "slug": "chad-st-john",
+            "tag": "Chad St. John",
+            "role": "Producer",
+            "key": "/library/people/5d7768e2fb0d55001f51bcd0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314b4e",
+            "slug": "alan-ritchson",
+            "tag": "Alan Ritchson",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab48b6579d2f770630c002fd08a9357e.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768368718ba001e314b4e",
+            "type": "person"
+          },
+          {
+            "id": "63d235b839b4397cde3e9598",
+            "slug": "joshua-harris-2",
+            "tag": "Joshua Harris",
+            "thumb": "https://metadata-static.plex.tv/5/people/57529275248b7df0111393b241f0f74f.jpg",
+            "role": "Producer",
+            "key": "/library/people/63d235b839b4397cde3e9598",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768e2fb0d55001f51bcd0",
+            "slug": "chad-st-john",
+            "tag": "Chad St. John",
+            "role": "Writer",
+            "key": "/library/people/5d7768e2fb0d55001f51bcd0",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/605a4570dc95af002d0e4888",
+            "tag": "The System"
+          },
+          {
+            "guid": "plex://movie/5d7768374de0ee001fccc06a",
+            "tag": "The Quick and the Dead"
+          },
+          {
+            "guid": "plex://movie/5d9f3513d5fd3f001ee157b3",
+            "tag": "Shade"
+          },
+          {
+            "guid": "plex://movie/5d776a12ad5437001f7712c8",
+            "tag": "Blood Ties"
+          },
+          {
+            "guid": "plex://movie/5d776d169ab544002151b3cf",
+            "tag": "Code of Silence"
+          },
+          {
+            "guid": "plex://movie/5d776a8096b655001fdf050b",
+            "tag": "Run All Night"
+          },
+          {
+            "guid": "plex://movie/5d9f3552e4fc29001eb66594",
+            "tag": "State Property"
+          },
+          {
+            "guid": "plex://movie/5d776ab1ad5437001f785dc9",
+            "tag": "Live by Night"
+          },
+          {
+            "guid": "plex://movie/5d776bc4ad5437001f7a9726",
+            "tag": "12 Rounds 3: Lockdown"
+          },
+          {
+            "guid": "plex://movie/5f40d778cae2c600420d9dbd",
+            "tag": "Absolution"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Stampede Ventures"
+          },
+          {
+            "tag": "Gramercy Park Media"
+          },
+          {
+            "tag": "Peachtree Media Partners"
+          },
+          {
+            "tag": "Ace of Spades"
+          },
+          {
+            "tag": "Syndicate Entertainment"
+          },
+          {
+            "tag": "Third Man Records"
+          },
+          {
+            "tag": "Black Bear Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A wrongfully imprisoned man hatches a plan for revenge against a local gangster in 1970s Detroit.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

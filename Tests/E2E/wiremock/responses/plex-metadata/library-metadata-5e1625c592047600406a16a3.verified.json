@@ -1,0 +1,216 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/5e1625c592047600406a16a3",
+        "key": "/library/metadata/5e1625c592047600406a16a3",
+        "ratingKey": "5e1625c592047600406a16a3",
+        "studio": "First Sight Productions",
+        "subtype": "short",
+        "summary": "Two girls meet as one shows the other to her new locker and gives her the combination. The locker has been stuck with super-glue, a classic practical joke, one girl explains. They stand at the locker while the other complains about how she is tired of having simple information flickering around in her head, and wants to have a real, emotional experience. They kiss, and the other says, \"Isn't this a real experience?\".",
+        "type": "movie",
+        "addedAt": 1384214400,
+        "audienceRating": 6.4,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "Not Rated",
+        "duration": 300000,
+        "imdbRatingCount": 48,
+        "originallyAvailableAt": "2013-11-12",
+        "publicPagesURL": "https://watch.plex.tv/movie/practical-things",
+        "slug": "practical-things",
+        "thumb": "https://image.tmdb.org/t/p/original/p2RiRsAkFAJEtgCkS8UokzzgRpl.jpg",
+        "title": "Practical Things",
+        "userState": false,
+        "year": 2013,
+        "Image": [
+          {
+            "alt": "Practical Things",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/p2RiRsAkFAJEtgCkS8UokzzgRpl.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt2991538"
+          },
+          {
+            "id": "tmdb://656438"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "62fb7cda2bbf858f2c189df3",
+            "order": 1,
+            "slug": "madeline-anderson-6",
+            "tag": "Madeline Anderson",
+            "role": "cast",
+            "key": "/library/people/62fb7cda2bbf858f2c189df3",
+            "type": "person"
+          },
+          {
+            "id": "5ec4237743d47400431fe379",
+            "order": 2,
+            "slug": "emi-schwartz",
+            "tag": "Emi Schwartz",
+            "role": "cast",
+            "key": "/library/people/5ec4237743d47400431fe379",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7769bd47dd6e001f6c9db8",
+            "slug": "kris-boustedt",
+            "tag": "Kris Boustedt",
+            "role": "Director",
+            "key": "/library/people/5d7769bd47dd6e001f6c9db8",
+            "type": "person"
+          },
+          {
+            "id": "5d7769bd47dd6e001f6c9db9",
+            "slug": "lindy-boustedt",
+            "tag": "Lindy Boustedt",
+            "role": "Director",
+            "key": "/library/people/5d7769bd47dd6e001f6c9db9",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7769bd47dd6e001f6c9db8",
+            "slug": "kris-boustedt",
+            "tag": "Kris Boustedt",
+            "role": "Producer",
+            "key": "/library/people/5d7769bd47dd6e001f6c9db8",
+            "type": "person"
+          },
+          {
+            "id": "5d7769bd47dd6e001f6c9db9",
+            "slug": "lindy-boustedt",
+            "tag": "Lindy Boustedt",
+            "role": "Producer",
+            "key": "/library/people/5d7769bd47dd6e001f6c9db9",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7769bd47dd6e001f6c9db8",
+            "slug": "kris-boustedt",
+            "tag": "Kris Boustedt",
+            "role": "Writer",
+            "key": "/library/people/5d7769bd47dd6e001f6c9db8",
+            "type": "person"
+          },
+          {
+            "id": "5d7769bd47dd6e001f6c9db9",
+            "slug": "lindy-boustedt",
+            "tag": "Lindy Boustedt",
+            "role": "Writer",
+            "key": "/library/people/5d7769bd47dd6e001f6c9db9",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/613c7a6b92d089d57482fabf",
+            "tag": "Out of the Blue"
+          },
+          {
+            "guid": "plex://movie/5d77695f7a53e9001e6e457b",
+            "tag": "Safe Haven"
+          },
+          {
+            "guid": "plex://movie/6284c9b6ab0d04608522b12b",
+            "tag": "June and John"
+          },
+          {
+            "guid": "plex://movie/5d7768416f4521001ea9e531",
+            "tag": "The Secret of Moonacre"
+          },
+          {
+            "guid": "plex://movie/5d776d3bfb0d55001f59ad8d",
+            "tag": "Every Day"
+          },
+          {
+            "guid": "plex://movie/5d77702f7a53e9001e79cfc0",
+            "tag": "The Matchmaker's Playbook"
+          },
+          {
+            "guid": "plex://movie/5e161a82773aa20040961553",
+            "tag": "Holiday Date"
+          },
+          {
+            "guid": "plex://movie/5d7768a851dd69001fe0f37d",
+            "tag": "Attraction"
+          },
+          {
+            "guid": "plex://movie/5e4d254aedf865003f94dfac",
+            "tag": "The Map of Tiny Perfect Things"
+          },
+          {
+            "guid": "plex://movie/60ef0c548fa387002c2181f3",
+            "tag": "Gabriel's Rapture"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "First Sight Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "First love, super glue and Robert Frost.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

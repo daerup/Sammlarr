@@ -1,0 +1,73 @@
+{
+  "adult": false,
+  "backdrop_path": "/iuylzRSllrGn7YB322kwKoOVMcq.jpg",
+  "belongs_to_collection": null,
+  "budget": 250000000,
+  "genres": [
+    {
+      "id": 12,
+      "name": "Adventure"
+    },
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 14,
+      "name": "Fantasy"
+    }
+  ],
+  "homepage": "https://www.universalpictures.com/movies/the-odyssey",
+  "id": 1368337,
+  "imdb_id": "tt33764258",
+  "origin_country": [
+    "GB",
+    "US"
+  ],
+  "original_language": "en",
+  "original_title": "The Odyssey",
+  "overview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
+  "popularity": 386.7119,
+  "poster_path": "/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+  "production_companies": [
+    {
+      "id": 33,
+      "logo_path": "/8lvHyhjr8oUKOOy2dKXoALWKdp0.png",
+      "name": "Universal Pictures",
+      "origin_country": "US"
+    },
+    {
+      "id": 9996,
+      "logo_path": "/3tvBqYsBhxWeHlu62SIJ1el93O7.png",
+      "name": "Syncopy",
+      "origin_country": "GB"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "GB",
+      "name": "United Kingdom"
+    },
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "release_date": "2026-07-15",
+  "revenue": 1631536965,
+  "runtime": 173,
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Released",
+  "tagline": "Defy the gods.",
+  "title": "The Odyssey",
+  "video": false,
+  "vote_average": 8.007,
+  "vote_count": 3623
+}

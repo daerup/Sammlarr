@@ -1,0 +1,318 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/tbm3FO54Pnsf8iZWIL6FHLT97QQ.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/5bb2b47f1d0ee.jpg",
+        "guid": "plex://show/5d9c0816ba6eb9001fb9b71b",
+        "key": "/library/metadata/5d9c0816ba6eb9001fb9b71b/children",
+        "ratingKey": "5d9c0816ba6eb9001fb9b71b",
+        "studio": "B-Reel Films",
+        "subtype": "miniSeries",
+        "summary": "Bruised, the author Klas barricades himself in the eccentric Henry Morgan's huge apartment in Stockholm. It all started a year ago when Klas met Henry at the boxing Club Europe and was pulled into his improbable world. Henry, who fearlessly shares a mistress with bashful businessman Wilhelm Sterner, is now missing without a trace. Klas fears for his life. Desperately he compiles the chronicle of Henry Morgan's fascinating life and adventure.",
+        "type": "show",
+        "addedAt": 1451606400,
+        "audienceRating": 7,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "duration": 5400000,
+        "imdbRatingCount": 379,
+        "lastEpisodeOriginallyAvailableAt": "2016-01-07",
+        "lastSeasonOriginallyAvailableAt": "2016-01-01",
+        "leafCount": 4,
+        "originallyAvailableAt": "2016-01-01",
+        "publicPagesURL": "https://watch.plex.tv/show/gentlemen-and-gangsters",
+        "skipChildren": true,
+        "slug": "gentlemen-and-gangsters",
+        "thumb": "https://image.tmdb.org/t/p/original/xVVanaLvnv6klEUOT05vrMZ5aHY.jpg",
+        "title": "Gentlemen & Gangsters",
+        "userState": false,
+        "year": 2016,
+        "Image": [
+          {
+            "alt": "Gentlemen & Gangsters",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/tbm3FO54Pnsf8iZWIL6FHLT97QQ.jpg"
+          },
+          {
+            "alt": "Gentlemen & Gangsters",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/da958e5c1a19dab242be0f905c1dcb3c.jpg"
+          },
+          {
+            "alt": "Gentlemen & Gangsters",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/5bb2b47f1d0ee.jpg"
+          },
+          {
+            "alt": "Gentlemen & Gangsters",
+            "type": "coverArt",
+            "url": "https://artworks.thetvdb.com/banners/fanart/original/314483-1.jpg"
+          },
+          {
+            "alt": "Gentlemen & Gangsters",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/xVVanaLvnv6klEUOT05vrMZ5aHY.jpg"
+          },
+          {
+            "alt": "Gentlemen & Gangsters",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c74ad9927dece9973892ee800d9c49af.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt4600502"
+          },
+          {
+            "id": "tmdb://65117"
+          },
+          {
+            "id": "tvdb://314483"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5.5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Sweden"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77683d8a7581001f12e8c3",
+            "order": 1,
+            "slug": "david-dencik",
+            "tag": "David Dencik",
+            "thumb": "https://metadata-static.plex.tv/7/people/706491feb0fd4656a43b8b676961413e.jpg",
+            "key": "/library/people/5d77683d8a7581001f12e8c3",
+            "type": "person"
+          },
+          {
+            "id": "5d776a197a53e9001e6fa056",
+            "order": 2,
+            "slug": "david-fukamachi-regnfors",
+            "tag": "David Fukamachi Regnfors",
+            "thumb": "https://metadata-static.plex.tv/7/people/7530223d305b5a2af975f05ead39b173.jpg",
+            "key": "/library/people/5d776a197a53e9001e6fa056",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d880197001ec977db",
+            "order": 3,
+            "slug": "ruth-vega-fernandez",
+            "tag": "Ruth Vega Fernandez",
+            "thumb": "https://metadata-static.plex.tv/people/5d77684d880197001ec977db.jpg",
+            "key": "/library/people/5d77684d880197001ec977db",
+            "type": "person"
+          },
+          {
+            "id": "5d77684f0ea56a001e2a2e72",
+            "order": 4,
+            "slug": "sverrir-gudnason",
+            "tag": "Sverrir Gudnason",
+            "thumb": "https://metadata-static.plex.tv/6/people/64976b987aa05fcdbb899606a2461e32.jpg",
+            "key": "/library/people/5d77684f0ea56a001e2a2e72",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77685285719b001f3a8c14",
+            "slug": "mikael-marcimain",
+            "tag": "Mikael Marcimain",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab75896478f0638a6f77549296d70531.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77685285719b001f3a8c14",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77684fe6d55c0020410a57",
+            "slug": "fredrik-heinig",
+            "tag": "Fredrik Heinig",
+            "thumb": "https://metadata-static.plex.tv/4/people/4a104f255f9179ec634f41d5a56086cc.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77684fe6d55c0020410a57",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a06f6af7001ee59117",
+            "slug": "gabija-siurbyte",
+            "tag": "Gabija Siurbyte",
+            "thumb": "https://metadata-static.plex.tv/c/people/c25bccb5b4c8ee1941e8fbe3dd2b8735.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768a06f6af7001ee59117",
+            "type": "person"
+          },
+          {
+            "id": "5dce6c0d4288ee001eb61313",
+            "slug": "johannes-ahlund",
+            "tag": "Johannes Åhlund",
+            "role": "Producer",
+            "key": "/library/people/5dce6c0d4288ee001eb61313",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776a64f617c9002016ca2a",
+            "slug": "klas-ostergren",
+            "tag": "Klas Östergren",
+            "thumb": "https://metadata-static.plex.tv/8/people/8e573ba524ae3243f7178b36f16d108b.jpg",
+            "role": "Novels",
+            "key": "/library/people/5d776a64f617c9002016ca2a",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "SVT1"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c086be98e47001eb0f13f",
+            "tag": "The Young and the Restless"
+          },
+          {
+            "guid": "plex://show/610c066f563dab002c35a56f",
+            "tag": "Tell Me Lies"
+          },
+          {
+            "guid": "plex://show/606eec4f7fb740002cf3665a",
+            "tag": "The Newsreader"
+          },
+          {
+            "guid": "plex://show/629cb89d120d1e7e6d15f4da",
+            "tag": "Sullivan's Crossing"
+          },
+          {
+            "guid": "plex://show/64266464a5d11e9bba420539",
+            "tag": "The Couple Next Door"
+          },
+          {
+            "guid": "plex://show/64df3bfa2d8aafc7ca3dfd66",
+            "tag": "The Couple Next Door"
+          },
+          {
+            "guid": "plex://show/670d3d01ea35b28bf307201f",
+            "tag": "Off Campus"
+          },
+          {
+            "guid": "plex://show/5d9c09042192ba001f31a32c",
+            "tag": "Driven (2018)"
+          },
+          {
+            "guid": "plex://show/5d9c09143c3f87001f35bc60",
+            "tag": "Bloom (2019)"
+          },
+          {
+            "guid": "plex://show/5d9c0924ba6eb9001fbb07e0",
+            "tag": "Ambitions"
+          },
+          {
+            "guid": "plex://show/5e1618f44f2292003e909f9e",
+            "tag": "Swagger"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "B-Reel Films"
+          },
+          {
+            "tag": "Sveriges Television (SVT)"
+          },
+          {
+            "tag": "Nordisk Film & TV-Fond"
+          }
+        ]
+      }
+    ]
+  }
+}

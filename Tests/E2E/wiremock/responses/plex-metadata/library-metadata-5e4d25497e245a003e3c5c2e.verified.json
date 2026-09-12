@@ -1,0 +1,448 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/a/gracenote/acae99c7f31ed23f82bf51ca58c26de3.jpg",
+        "banner": "https://assets.fanart.tv/fanart/mayday-618457cf8c19e.jpg",
+        "guid": "plex://movie/5e4d25497e245a003e3c5c2e",
+        "key": "/library/metadata/5e4d25497e245a003e3c5c2e",
+        "rating": 5.4,
+        "ratingKey": "5e4d25497e245a003e3c5c2e",
+        "studio": "Complementary Colors",
+        "summary": "Ana is transported to a dreamlike and dangerous land where she joins an army of girls engaged in a never-ending war. Though she finds strength in this exhilarating world, she realizes that she's not the killer they want her to be.",
+        "tagline": "Time to wake up.",
+        "type": "movie",
+        "addedAt": 1633046400,
+        "audienceRating": 3.6,
+        "audienceRatingImage": "rottentomatoes://image.rating.spilled",
+        "contentRating": "Not Rated",
+        "duration": 6000000,
+        "imdbRatingCount": 2486,
+        "originallyAvailableAt": "2021-10-01",
+        "publicPagesURL": "https://watch.plex.tv/movie/mayday-2021",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "revenue": 3660,
+        "slug": "mayday-2021",
+        "thumb": "https://metadata-static.plex.tv/8/gracenote/8366d05850db19d122ae548f51285196.jpg",
+        "title": "Mayday",
+        "userState": false,
+        "year": 2021,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5e4d25497e245a003e3c5c2e/commonsensemedia",
+            "oneLiner": "Female fantasy about overcoming trauma; suicide, smoking.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Mayday",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/a/gracenote/acae99c7f31ed23f82bf51ca58c26de3.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/9fff29cd630ee25434cf57cd38b58a0a.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/mayday-618457cf8c19e.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/49a03d8da184484e2c2d037509bfa71f.png"
+          },
+          {
+            "alt": "Mayday",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/49a03d8da184484e2c2d037509bfa71f.png"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/3/gracenote/30ca0f3557748f8d7c8d986f93c2bfc0.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8366d05850db19d122ae548f51285196.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/703d9c14b7b8ac54a0ebc1f4281d8034.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e590f23cb75cf2c4169fb6f8d8cffd90.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt11271800"
+          },
+          {
+            "id": "tmdb://672521"
+          },
+          {
+            "id": "tvdb://287416"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 4.5
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 5.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.spilled",
+            "type": "audience",
+            "value": 3.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 4.986
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776bb3594b2b001e6e15d2",
+            "order": 1,
+            "slug": "grace-van-patten",
+            "tag": "Grace Van Patten",
+            "thumb": "https://metadata-static.plex.tv/3/people/35184380244f12abadbe9cf5d24a41be.jpg",
+            "role": "Ana",
+            "key": "/library/people/5d776bb3594b2b001e6e15d2",
+            "type": "person"
+          },
+          {
+            "id": "5d776a919ab544002150081f",
+            "order": 2,
+            "slug": "mia-goth",
+            "tag": "Mia Goth",
+            "thumb": "https://metadata-static.plex.tv/9/people/90b36e6e302e9f73d28f7fb604e8ad1f.jpg",
+            "role": "Marsha",
+            "key": "/library/people/5d776a919ab544002150081f",
+            "type": "person"
+          },
+          {
+            "id": "5e165650a71f54003dbb93de",
+            "order": 3,
+            "slug": "havana-rose-liu",
+            "tag": "Havana Rose Liu",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e17f58352da3bd2f7d21bf48282df35.jpg",
+            "role": "Bea",
+            "key": "/library/people/5e165650a71f54003dbb93de",
+            "type": "person"
+          },
+          {
+            "id": "5d7768867a53e9001e6d194e",
+            "order": 4,
+            "slug": "soko",
+            "tag": "Soko",
+            "thumb": "https://metadata-static.plex.tv/0/people/04b6adba55d231babe567fa34c532485.jpg",
+            "role": "Gert",
+            "key": "/library/people/5d7768867a53e9001e6d194e",
+            "type": "person"
+          },
+          {
+            "id": "5d776825880197001ec90513",
+            "order": 5,
+            "slug": "juliette-lewis",
+            "tag": "Juliette Lewis",
+            "thumb": "https://metadata-static.plex.tv/3/people/3a063394c036e7009ab411cdc8174125.jpg",
+            "role": "June",
+            "key": "/library/people/5d776825880197001ec90513",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9d47dd6e001f6e11ca",
+            "order": 6,
+            "slug": "theodore-pellerin",
+            "tag": "Théodore Pellerin",
+            "thumb": "https://metadata-static.plex.tv/8/people/8bf8a6db5a7fc8599711b1060ed109a1.jpg",
+            "role": "Dimitri",
+            "key": "/library/people/5d776b9d47dd6e001f6e11ca",
+            "type": "person"
+          },
+          {
+            "id": "5d77696e47dd6e001f6c562c",
+            "order": 7,
+            "slug": "frano-maskovic",
+            "tag": "Frano Mašković",
+            "thumb": "https://metadata-static.plex.tv/f/people/f512ee551babe4776f4a46e6d8e70807.jpg",
+            "role": "Head Waiter",
+            "key": "/library/people/5d77696e47dd6e001f6c562c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a54f42c001f8c31c4",
+            "order": 8,
+            "slug": "zlatko-buric",
+            "tag": "Zlatko Burić",
+            "thumb": "https://metadata-static.plex.tv/4/people/4a3048ec7e867aaa39e60f55480f77e8.jpg",
+            "role": "Max",
+            "key": "/library/people/5d77682a54f42c001f8c31c4",
+            "type": "person"
+          },
+          {
+            "id": "6a0c13383fd5a7c5f9347270",
+            "order": 9,
+            "slug": "nathaniel-allen-5",
+            "tag": "Nathaniel Allen",
+            "role": "Photographer",
+            "key": "/library/people/6a0c13383fd5a7c5f9347270",
+            "type": "person"
+          },
+          {
+            "id": "5fe0da55e55234002df325a8",
+            "order": 10,
+            "slug": "hyoie-ogrady",
+            "tag": "Hyoie O'Grady",
+            "thumb": "https://image.tmdb.org/t/p/original/atxWpBkyOeSzecKld6raFj6s84a.jpg",
+            "role": "Groom",
+            "key": "/library/people/5fe0da55e55234002df325a8",
+            "type": "person"
+          },
+          {
+            "id": "5e166bcc61c6140040d9f06b",
+            "order": 11,
+            "slug": "adrian-pezdirc",
+            "tag": "Adrian Pezdirc",
+            "thumb": "https://metadata-static.plex.tv/f/people/f6fc2aa9cac6d247640d47e257eda0fc.jpg",
+            "role": "Waiter",
+            "key": "/library/people/5e166bcc61c6140040d9f06b",
+            "type": "person"
+          },
+          {
+            "id": "5e4d3457aad209003e5ca1d4",
+            "order": 12,
+            "slug": "francesco-piacentini-smith",
+            "tag": "Francesco Piacentini-Smith",
+            "thumb": "https://metadata-static.plex.tv/f/people/f4e6ba030ea5108300282f5b1b9b9116.jpg",
+            "role": "Pilot",
+            "key": "/library/people/5e4d3457aad209003e5ca1d4",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b233f255001e85d47f",
+            "order": 13,
+            "slug": "blake-delong",
+            "tag": "Blake DeLong",
+            "thumb": "https://metadata-static.plex.tv/6/people/65f9b7ceb017014e9ac9b74bd7649537.jpg",
+            "role": "Victory Captain (voice)",
+            "key": "/library/people/5d7768b233f255001e85d47f",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f27a53e9001e6f57d1",
+            "order": 14,
+            "slug": "redd-ochoa",
+            "tag": "Redd Ochoa",
+            "thumb": "https://metadata-static.plex.tv/2/people/276bb6ffef0a5ac3a7f798be3ec2be84.jpg",
+            "role": "Terminal Controller",
+            "key": "/library/people/5d7769f27a53e9001e6f57d1",
+            "type": "person"
+          },
+          {
+            "id": "5fe0da55e55234002df325aa",
+            "order": 15,
+            "slug": "noel-dusman-1",
+            "tag": "Noel Dusman",
+            "role": "Soldier",
+            "key": "/library/people/5fe0da55e55234002df325aa",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776ad09ab5440021503df6",
+            "slug": "karen-cinorre",
+            "tag": "Karen Cinorre",
+            "thumb": "https://metadata-static.plex.tv/e/people/e31136619c88f3eb3da258572851c641.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776ad09ab5440021503df6",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5e163000316a39003ef79837",
+            "slug": "sam-levy",
+            "tag": "Sam Levy",
+            "thumb": "https://metadata-static.plex.tv/a/people/a0677d38e7d4ab12332c150034240135.jpg",
+            "role": "Producer",
+            "key": "/library/people/5e163000316a39003ef79837",
+            "type": "person"
+          },
+          {
+            "id": "5d776ad09ab5440021503df6",
+            "slug": "karen-cinorre",
+            "tag": "Karen Cinorre",
+            "thumb": "https://metadata-static.plex.tv/e/people/e31136619c88f3eb3da258572851c641.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776ad09ab5440021503df6",
+            "type": "person"
+          },
+          {
+            "id": "5fdd5bf467640f002dec5cb6",
+            "slug": "jonah-disend",
+            "tag": "Jonah Disend",
+            "role": "Producer",
+            "key": "/library/people/5fdd5bf467640f002dec5cb6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768d2594b2b001e696011",
+            "slug": "lucas-joaquin",
+            "tag": "Lucas Joaquin",
+            "thumb": "https://metadata-static.plex.tv/e/people/e8b5f9326b71530c4bc98be217186f6a.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768d2594b2b001e696011",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776ad09ab5440021503df6",
+            "slug": "karen-cinorre",
+            "tag": "Karen Cinorre",
+            "thumb": "https://metadata-static.plex.tv/e/people/e31136619c88f3eb3da258572851c641.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776ad09ab5440021503df6",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d9f38e6d5fd3f001ee19245",
+            "tag": "Jesse Stone: Benefit of the Doubt"
+          },
+          {
+            "guid": "plex://movie/5d7769be51dd69001fe1b01c",
+            "tag": "Horns"
+          },
+          {
+            "guid": "plex://movie/5d7768628718ba001e31a695",
+            "tag": "Triage"
+          },
+          {
+            "guid": "plex://movie/5d7768743ab0e7001f501982",
+            "tag": "Endless Night"
+          },
+          {
+            "guid": "plex://movie/5d77704a9ab54400215342ae",
+            "tag": "Mona Lisa and the Blood Moon"
+          },
+          {
+            "guid": "plex://movie/5e1625597c6c730040bb1311",
+            "tag": "Nine Days"
+          },
+          {
+            "guid": "plex://movie/5d7768a8fb0d55001f516d47",
+            "tag": "The Good Doctor"
+          },
+          {
+            "guid": "plex://movie/60a69a74ba9733002ddf78f6",
+            "tag": "Tuesday"
+          },
+          {
+            "guid": "plex://movie/5f6cd5d59825a3003f1a6cea",
+            "tag": "The Ritual Killer"
+          },
+          {
+            "guid": "plex://movie/6283bd8f9fe0ae6dcc2feaf1",
+            "tag": "Vesper"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Complementary Colors"
+          },
+          {
+            "tag": "Queen's Army"
+          },
+          {
+            "tag": "Secret Engine"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A woman finds herself transported to a world at war, where young women lure men to their deaths.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

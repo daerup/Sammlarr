@@ -1,0 +1,436 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/i2RTw513RzkQLoombXXj5RNrocF.jpg",
+        "guid": "plex://movie/6a2aa39861dd0be111f9c07d",
+        "key": "/library/metadata/6a2aa39861dd0be111f9c07d",
+        "rating": 10,
+        "ratingKey": "6a2aa39861dd0be111f9c07d",
+        "summary": "A young drug dealer has to evade two police officers whilst getting ready to have dinner with his girlfriend's parents for the first time",
+        "tagline": "You can't run from your mistakes - but you can from the police",
+        "type": "movie",
+        "addedAt": 1780531200,
+        "budget": 750,
+        "duration": 660000,
+        "originallyAvailableAt": "2026-06-04",
+        "publicPagesURL": "https://watch.plex.tv/movie/runner-2026-2",
+        "ratingImage": "themoviedb://image.rating",
+        "slug": "runner-2026-2",
+        "thumb": "https://image.tmdb.org/t/p/original/v0u6Qmx3KbQb5G2RqnjRxdsLlcB.jpg",
+        "title": "Runner",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Runner",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/i2RTw513RzkQLoombXXj5RNrocF.jpg"
+          },
+          {
+            "alt": "Runner",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/v0u6Qmx3KbQb5G2RqnjRxdsLlcB.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://1712475"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 10
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Australia"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6a2bf5138f27d4fa02ef7867",
+            "order": 1,
+            "slug": "haydon-swetnam",
+            "tag": "Haydon Swetnam",
+            "role": "Liam",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7867",
+            "type": "person"
+          },
+          {
+            "id": "69c413baf78a71adeb626d6b",
+            "order": 2,
+            "slug": "glen-mcbride-2",
+            "tag": "Glen McBride",
+            "role": "Officer Freeman",
+            "key": "/library/people/69c413baf78a71adeb626d6b",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7868",
+            "order": 3,
+            "slug": "ellese-dockerill",
+            "tag": "Ellese Dockerill",
+            "role": "Officer Maurice",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7868",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7869",
+            "order": 4,
+            "slug": "anabel-bel-hindson",
+            "tag": "Anabel 'Bel' Hindson",
+            "role": "Amy",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7869",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef786a",
+            "order": 5,
+            "slug": "josie-carrigg",
+            "tag": "Josie Carrigg",
+            "role": "Lauren",
+            "key": "/library/people/6a2bf5138f27d4fa02ef786a",
+            "type": "person"
+          },
+          {
+            "id": "68a5e1a58dbc494599a84917",
+            "order": 6,
+            "slug": "charlie-bruno-3",
+            "tag": "Charlie Bruno",
+            "thumb": "https://image.tmdb.org/t/p/original/y9lBS1SAIqnnionwH8iPr6LWWIS.jpg",
+            "role": "Rick the Manager",
+            "key": "/library/people/68a5e1a58dbc494599a84917",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef786b",
+            "order": 7,
+            "slug": "aki-kimura-3",
+            "tag": "Aki Kimura",
+            "role": "Hitomi",
+            "key": "/library/people/6a2bf5138f27d4fa02ef786b",
+            "type": "person"
+          },
+          {
+            "id": "69246e66aa04a81deaaa65f2",
+            "order": 8,
+            "slug": "bowie-kobayashi",
+            "tag": "Bowie Kobayashi",
+            "role": "Bowie",
+            "key": "/library/people/69246e66aa04a81deaaa65f2",
+            "type": "person"
+          },
+          {
+            "id": "69246e655b65d4e63c42534c",
+            "order": 9,
+            "slug": "jack-phillips-perring",
+            "tag": "Jack Phillips Perring",
+            "role": "Tommy",
+            "key": "/library/people/69246e655b65d4e63c42534c",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef786c",
+            "order": 10,
+            "slug": "susan-hindson",
+            "tag": "Susan Hindson",
+            "role": "Nicole",
+            "key": "/library/people/6a2bf5138f27d4fa02ef786c",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef786f",
+            "order": 11,
+            "slug": "billy-beros",
+            "tag": "Billy Beros",
+            "role": "Black Puffer #2",
+            "key": "/library/people/6a2bf5138f27d4fa02ef786f",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7871",
+            "order": 12,
+            "slug": "carlos-maciel-pizzorno-bazzo",
+            "tag": "Carlos  Maciel Pizzorno Bazzo",
+            "role": "Black Puffer #4",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7871",
+            "type": "person"
+          },
+          {
+            "id": "69246e660be39ca8ab53a339",
+            "order": 13,
+            "slug": "dylan-russo-1",
+            "tag": "Dylan Russo",
+            "role": "Black Puffer #5",
+            "key": "/library/people/69246e660be39ca8ab53a339",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7872",
+            "order": 14,
+            "slug": "elyse-campbell",
+            "tag": "Elyse Campbell",
+            "role": "Black Puffer #6",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7872",
+            "type": "person"
+          },
+          {
+            "id": "684b034cb29d8b2c1231b5ec",
+            "order": 15,
+            "slug": "jackson-robinson-8",
+            "tag": "Jackson Robinson",
+            "thumb": "https://metadata-static.plex.tv/1/people/1b34fd52b36f0dc97dbab31fe114115b.jpg",
+            "role": "Black Puffer #7",
+            "key": "/library/people/684b034cb29d8b2c1231b5ec",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7873",
+            "order": 16,
+            "slug": "lucy-robertson-reid-1",
+            "tag": "Lucy Robertson-Reid",
+            "role": "Black Puffer #8",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7873",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7875",
+            "order": 17,
+            "slug": "tess-sutherland-1",
+            "tag": "Tess Sutherland",
+            "role": "Black Puffer #9",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7875",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7874",
+            "order": 18,
+            "slug": "otto-grodach",
+            "tag": "Otto Grodach",
+            "role": "Black Puffer #10",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7874",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7876",
+            "order": 19,
+            "slug": "tess-poon",
+            "tag": "Tess Poon",
+            "role": "Black Puffer #11",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7876",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7877",
+            "order": 20,
+            "slug": "nova-kayvee",
+            "tag": "Nova Kayvee",
+            "role": "Black Puffer #12",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7877",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7878",
+            "order": 21,
+            "slug": "kallum-quiroga",
+            "tag": "Kallum Quiroga",
+            "role": "Black Puffer #13",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7878",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7879",
+            "order": 22,
+            "slug": "tyler-connolly-9",
+            "tag": "Tyler Connolly",
+            "role": "Black Puffer #14",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7879",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef787a",
+            "order": 23,
+            "slug": "jesse-reed-6",
+            "tag": "Jesse Reed",
+            "role": "Black Puffer #15",
+            "key": "/library/people/6a2bf5138f27d4fa02ef787a",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef787b",
+            "order": 24,
+            "slug": "daniel-cookson-3",
+            "tag": "Daniel Cookson",
+            "role": "Black Puffer #16",
+            "key": "/library/people/6a2bf5138f27d4fa02ef787b",
+            "type": "person"
+          },
+          {
+            "id": "69246e69bfea8ae3a6d25e16",
+            "order": 25,
+            "slug": "tom-fitzsimons-6",
+            "tag": "Tom Fitzsimons",
+            "role": "Black Puffer #17",
+            "key": "/library/people/69246e69bfea8ae3a6d25e16",
+            "type": "person"
+          },
+          {
+            "id": "69246e655b65d4e63c42534e",
+            "order": 26,
+            "slug": "orlando-oakley",
+            "tag": "Orlando Oakley",
+            "role": "Black Puffer #18",
+            "key": "/library/people/69246e655b65d4e63c42534e",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7870",
+            "order": 27,
+            "slug": "dotty-carrigg",
+            "tag": "Dotty Carrigg",
+            "role": "Black Puffer #19",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7870",
+            "type": "person"
+          },
+          {
+            "id": "69fdd084fea01e1b9b070212",
+            "order": 28,
+            "slug": "lucas-karvonidis-2",
+            "tag": "Lucas Karvonidis",
+            "role": "Black Puffer #67",
+            "key": "/library/people/69fdd084fea01e1b9b070212",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "69246e655b65d4e63c42534e",
+            "slug": "orlando-oakley",
+            "tag": "Orlando Oakley",
+            "role": "Director",
+            "key": "/library/people/69246e655b65d4e63c42534e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "69246e66aa04a81deaaa65f2",
+            "slug": "bowie-kobayashi",
+            "tag": "Bowie Kobayashi",
+            "role": "Production Assistant",
+            "key": "/library/people/69246e66aa04a81deaaa65f2",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef786f",
+            "slug": "billy-beros",
+            "tag": "Billy Beros",
+            "role": "Production Assistant",
+            "key": "/library/people/6a2bf5138f27d4fa02ef786f",
+            "type": "person"
+          },
+          {
+            "id": "69246e660be39ca8ab53a339",
+            "slug": "dylan-russo-1",
+            "tag": "Dylan Russo",
+            "role": "Production Assistant",
+            "key": "/library/people/69246e660be39ca8ab53a339",
+            "type": "person"
+          },
+          {
+            "id": "6a2bf5138f27d4fa02ef7870",
+            "slug": "dotty-carrigg",
+            "tag": "Dotty Carrigg",
+            "role": "Production Assistant",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7870",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a2bf5138f27d4fa02ef7870",
+            "slug": "dotty-carrigg",
+            "tag": "Dotty Carrigg",
+            "role": "Writer",
+            "key": "/library/people/6a2bf5138f27d4fa02ef7870",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d776e287a53e9001e76ea9c",
+            "tag": "The Naked Gun"
+          },
+          {
+            "guid": "plex://movie/5d9f3501d74e6700200205c2",
+            "tag": "The Pink Panther Strikes Again"
+          },
+          {
+            "guid": "plex://movie/65f5fd81757eb6ac8ddcdda5",
+            "tag": "Hostile Takeover"
+          },
+          {
+            "guid": "plex://movie/5d77684c6f4521001eaa060f",
+            "tag": "Fun with Dick and Jane"
+          },
+          {
+            "guid": "plex://movie/5d77684d2ec6b5001f6bf46d",
+            "tag": "Killer Bean Forever"
+          },
+          {
+            "guid": "plex://movie/5d9f3561e4fc29001eb666a1",
+            "tag": "Excess Baggage"
+          },
+          {
+            "guid": "plex://movie/5d776855e870fd001f19e208",
+            "tag": "Gotcha!"
+          },
+          {
+            "guid": "plex://movie/5d776b717a53e9001e72612b",
+            "tag": "Ride Along 2"
+          },
+          {
+            "guid": "plex://movie/5f324f7f7ae0e0003ed2de13",
+            "tag": "The Paper Tigers"
+          },
+          {
+            "guid": "plex://movie/5f8e9a9014823f002d484241",
+            "tag": "Double Threat"
+          }
+        ]
+      }
+    ]
+  }
+}

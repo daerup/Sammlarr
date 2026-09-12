@@ -1,0 +1,125 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/641c04c3853357d3f0fe5fc5",
+        "key": "/library/metadata/641c04c3853357d3f0fe5fc5",
+        "ratingKey": "641c04c3853357d3f0fe5fc5",
+        "studio": "6th & Idaho Productions",
+        "summary": "Sequel to The Batman Part II (2026).",
+        "type": "movie",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-batman-part-iii",
+        "slug": "the-batman-part-iii",
+        "thumb": "https://artworks.thetvdb.com/banners/v4/movie/359072/posters/66b23d8679f9a.jpg",
+        "title": "The Batman: Part III",
+        "userState": false,
+        "Image": [
+          {
+            "alt": "The Batman: Part III",
+            "type": "coverPoster",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/359072/posters/66b23d8679f9a.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt27180044"
+          },
+          {
+            "id": "tvdb://359072"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682785719b001f3a0f6e",
+            "order": 1,
+            "slug": "robert-pattinson",
+            "tag": "Robert Pattinson",
+            "thumb": "https://metadata-static.plex.tv/b/people/bc3a6487ab2e75b1fd9646718ea8a1cf.jpg",
+            "role": "Bruce Wayne",
+            "key": "/library/people/5d77682785719b001f3a0f6e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682a880197001ec913eb",
+            "slug": "dylan-clark",
+            "tag": "Dylan Clark",
+            "thumb": "https://metadata-static.plex.tv/7/people/7217a336231094bb8377b081f213d5b9.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682a880197001ec913eb",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776857880197001ec9981f",
+            "slug": "bill-finger",
+            "tag": "Bill Finger",
+            "thumb": "https://metadata-static.plex.tv/8/people/88d1c5cf2f3da67446c9ac03ccbeea06.jpg",
+            "role": "Based On Characters By",
+            "key": "/library/people/5d776857880197001ec9981f",
+            "type": "person"
+          },
+          {
+            "id": "5d77698396b655001fdd0cff",
+            "slug": "bob-kane",
+            "tag": "Bob Kane",
+            "thumb": "https://metadata-static.plex.tv/people/5d77698396b655001fdd0cff.jpg",
+            "role": "Based On Characters By",
+            "key": "/library/people/5d77698396b655001fdd0cff",
+            "type": "person"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "6th & Idaho Productions"
+          },
+          {
+            "tag": "DC Entertainment"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Sequel to The Batman Part II (2026).",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

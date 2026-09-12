@@ -1,0 +1,2284 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/74796-g6.jpg",
+        "guid": "plex://show/5d9c084902391c001f58594b",
+        "key": "/library/metadata/5d9c084902391c001f58594b/children",
+        "ratingKey": "5d9c084902391c001f58594b",
+        "studio": "Pierrot",
+        "summary": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
+        "tagline": "Possessed!",
+        "type": "show",
+        "addedAt": 1096934400,
+        "audienceRating": 8.1,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 2,
+        "contentRating": "TV-MA",
+        "duration": 1440000,
+        "imdbRatingCount": 98997,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-12",
+        "lastSeasonOriginallyAvailableAt": "2022-10-11",
+        "leafCount": 420,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-19",
+        "originalTitle": "BLEACH",
+        "originallyAvailableAt": "2004-10-05",
+        "publicPagesURL": "https://watch.plex.tv/show/bleach",
+        "slug": "bleach",
+        "theme": "https://tvthemes.plexapp.com/74796.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+        "title": "Bleach",
+        "userState": false,
+        "year": 2004,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c084902391c001f58594b/commonsensemedia",
+            "oneLiner": "Mature anime series is spooky and violent.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Bleach",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg"
+          },
+          {
+            "alt": "Bleach",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/91869b3e2a265bcd8a0a06523f843700.jpg"
+          },
+          {
+            "alt": "Bleach",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/74796-g6.jpg"
+          },
+          {
+            "alt": "Bleach",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/7/683a142553/76f9444c66d725badb4e7778ae36a4a7.png"
+          },
+          {
+            "alt": "Bleach",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/7/683a142553/76f9444c66d725badb4e7778ae36a4a7.png"
+          },
+          {
+            "alt": "Bleach",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/4/gracenote/467e59ab5ae732bcd9e0fb938723d4ab.jpg"
+          },
+          {
+            "alt": "Bleach",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg"
+          },
+          {
+            "alt": "Bleach",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3aff5d45fd4a76b64affe95e1316d47f.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+            "id": "5d9c07f0ba2e21001f18c7f8",
+            "key": "/library/sections/home/all?genre=5d9c07f0ba2e21001f18c7f8",
+            "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+            "slug": "anime",
+            "tag": "Anime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5df5b93281e1a7001f946b57",
+            "id": "5df5b93281e1a7001f946b57",
+            "key": "/library/sections/home/all?genre=5df5b93281e1a7001f946b57",
+            "ratingKey": "genre_5df5b93281e1a7001f946b57",
+            "slug": "martial-arts",
+            "tag": "Martial Arts",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0434665"
+          },
+          {
+            "id": "tmdb://30984"
+          },
+          {
+            "id": "tvdb://74796"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.1
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.3
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768662e80df001ebe3144",
+            "order": 1,
+            "slug": "masakazu-morita",
+            "tag": "Masakazu Morita",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb37d0aa98d1732c6ef5adb456d75cbb.jpg",
+            "role": "Ichigo Kurosaki (voice)",
+            "key": "/library/people/5d7768662e80df001ebe3144",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f6f4521001ea9dc79",
+            "order": 2,
+            "slug": "fumiko-orikasa",
+            "tag": "Fumiko Orikasa",
+            "thumb": "https://metadata-static.plex.tv/3/people/333d19595638a0928d32c7c7913d10c7.jpg",
+            "role": "Rukia Kuchiki (voice)",
+            "key": "/library/people/5d77683f6f4521001ea9dc79",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f6f4521001ea9dc7a",
+            "order": 3,
+            "slug": "hiroki-yasumoto",
+            "tag": "Hiroki Yasumoto",
+            "thumb": "https://metadata-static.plex.tv/6/people/6ac5b35f766e26dd2bee929e9e3ac50b.jpg",
+            "role": "Yasutora Sado (voice)",
+            "key": "/library/people/5d77683f6f4521001ea9dc7a",
+            "type": "person"
+          },
+          {
+            "id": "5d776837f59e580021898dc3",
+            "order": 4,
+            "slug": "yuki-matsuoka",
+            "tag": "Yuki Matsuoka",
+            "thumb": "https://metadata-static.plex.tv/4/people/49b25f7420f53c49f83622cf018f7264.jpg",
+            "role": "Orihime Inoue (voice)",
+            "key": "/library/people/5d776837f59e580021898dc3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768406f4521001ea9e3f8",
+            "order": 5,
+            "slug": "noriaki-sugiyama",
+            "tag": "Noriaki Sugiyama",
+            "thumb": "https://metadata-static.plex.tv/2/people/202918bc14052ac6177d3fb9ed9bd891.jpg",
+            "role": "Uryu Ishida (voice)",
+            "key": "/library/people/5d7768406f4521001ea9e3f8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768406f4521001ea9e3fd",
+            "order": 6,
+            "slug": "kentaro-ito",
+            "tag": "Kentaro Ito",
+            "thumb": "https://metadata-static.plex.tv/4/people/4712e79281bc9928b5e6f2e58b05dd9f.jpg",
+            "role": "Renji Abarai (voice)",
+            "key": "/library/people/5d7768406f4521001ea9e3fd",
+            "type": "person"
+          },
+          {
+            "id": "5d77684de870fd001f19dc46",
+            "order": 7,
+            "slug": "ryotaro-okiayu",
+            "tag": "Ryotaro Okiayu",
+            "thumb": "https://metadata-static.plex.tv/b/people/b0e2b8a773d5041895f9dc4073489ece.jpg",
+            "role": "Byakuya Kuchki (voice)",
+            "key": "/library/people/5d77684de870fd001f19dc46",
+            "type": "person"
+          },
+          {
+            "id": "5d77684f54c0f0001f306218",
+            "order": 8,
+            "slug": "mitsuaki-madono",
+            "tag": "Mitsuaki Madono",
+            "thumb": "https://metadata-static.plex.tv/4/people/4299cfd76c81045398cf43cda48be5d8.jpg",
+            "role": "Kon (voice)",
+            "key": "/library/people/5d77684f54c0f0001f306218",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb9143d",
+            "order": 9,
+            "slug": "toshiyuki-morikawa",
+            "tag": "Toshiyuki Morikawa",
+            "thumb": "https://metadata-static.plex.tv/6/people/60f64ba12996b80e617f0f6a79b8ee01.jpg",
+            "role": "Kaname Tōsen (voice)",
+            "key": "/library/people/5d776827961905001eb9143d",
+            "type": "person"
+          },
+          {
+            "id": "5d77685e8718ba001e319f5b",
+            "order": 10,
+            "slug": "masaya-onosaka",
+            "tag": "Masaya Onosaka",
+            "thumb": "https://metadata-static.plex.tv/3/people/320befdb567c992c26af5bd8f8be6c40.jpg",
+            "role": "Shinji Hirako (voice)",
+            "key": "/library/people/5d77685e8718ba001e319f5b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683785719b001f3a4142",
+            "order": 11,
+            "slug": "kiyoyuki-yanada",
+            "tag": "Kiyoyuki Yanada",
+            "thumb": "https://metadata-static.plex.tv/8/people/8e1046ac69a546a54855b6306cdc2ee7.jpg",
+            "role": "Tessai Tsukabishi (voice)",
+            "key": "/library/people/5d77683785719b001f3a4142",
+            "type": "person"
+          },
+          {
+            "id": "5d7768377228e5001f1ded30",
+            "order": 12,
+            "slug": "katsuyuki-konishi",
+            "tag": "Katsuyuki Konishi",
+            "thumb": "https://metadata-static.plex.tv/f/people/faed7508cf9a40b50ce27403e66c13d6.jpg",
+            "role": "Shuhei Hisagi (voice)",
+            "key": "/library/people/5d7768377228e5001f1ded30",
+            "type": "person"
+          },
+          {
+            "id": "5d77683aa091de001f2e8ae6",
+            "order": 13,
+            "slug": "takayuki-sugo",
+            "tag": "Takayuki Sugo",
+            "thumb": "https://metadata-static.plex.tv/8/people/80fb50af0c5ec6769574b0f19acd7e46.jpg",
+            "role": "Yhwach (voice)",
+            "key": "/library/people/5d77683aa091de001f2e8ae6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768357e9a3c0020c6cbcb",
+            "order": 14,
+            "slug": "shin-ichiro-miki",
+            "tag": "Shin-ichiro Miki",
+            "thumb": "https://metadata-static.plex.tv/f/people/fdc94990ecfe494140ed42ae040cd5b4.jpg",
+            "role": "Kisuke Urahara (voice)",
+            "key": "/library/people/5d7768357e9a3c0020c6cbcb",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f6f4521001ea9dc8c",
+            "order": 15,
+            "slug": "ryusei-nakao",
+            "tag": "Ryusei Nakao",
+            "thumb": "https://metadata-static.plex.tv/8/people/8fbed6747b2822543265e193828d4ce0.jpg",
+            "role": "Mayuri Kurotsuchi (voice)",
+            "key": "/library/people/5d77683f6f4521001ea9dc8c",
+            "type": "person"
+          },
+          {
+            "id": "5d9c091408fddd001f2a7214",
+            "order": 16,
+            "slug": "yuuichirou-umehara",
+            "tag": "Yuuichirou Umehara",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb1e695f9c4568d918c6ac0e584a78ab.jpg",
+            "role": "Jugram Haschwalth (voice)",
+            "key": "/library/people/5d9c091408fddd001f2a7214",
+            "type": "person"
+          },
+          {
+            "id": "5d77697551dd69001fe1747a",
+            "order": 17,
+            "slug": "ayana-taketatsu",
+            "tag": "Ayana Taketatsu",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f9571b47a8973acadba46755eebd07d.jpg",
+            "role": "Bambietta Basterbine (voice)",
+            "key": "/library/people/5d77697551dd69001fe1747a",
+            "type": "person"
+          },
+          {
+            "id": "5d776c4351dd69001fe3977d",
+            "order": 18,
+            "slug": "binbin-takaoka",
+            "tag": "Binbin Takaoka",
+            "thumb": "https://metadata-static.plex.tv/f/people/fe24c6d438169938a8288399410e9ea5.jpg",
+            "role": "Genryusai Shigekuni Yamamoto (voice)",
+            "key": "/library/people/5d776c4351dd69001fe3977d",
+            "type": "person"
+          },
+          {
+            "id": "5d9c0846e264b7001fc40158",
+            "order": 19,
+            "slug": "keijin-okuda",
+            "tag": "Keijin Okuda",
+            "thumb": "https://metadata-static.plex.tv/b/people/b6d102d25012ec86a14c975ee2a33396.jpg",
+            "role": "Akon (voice)",
+            "key": "/library/people/5d9c0846e264b7001fc40158",
+            "type": "person"
+          },
+          {
+            "id": "5d776a06f617c90020167e8a",
+            "order": 20,
+            "slug": "asami-seto",
+            "tag": "Asami Seto",
+            "thumb": "https://metadata-static.plex.tv/e/people/ee96b345c14d1de12dac966a05fe39da.jpg",
+            "role": "Shino Madarame (voice)",
+            "key": "/library/people/5d776a06f617c90020167e8a",
+            "type": "person"
+          },
+          {
+            "id": "5d776d4a594b2b001e705999",
+            "order": 21,
+            "slug": "kumi-sakuma",
+            "tag": "Kumi Sakuma",
+            "thumb": "https://metadata-static.plex.tv/1/people/16f59b34a48311edd3f0f65f51595042.jpg",
+            "role": "Emilou Apacci (voice)",
+            "key": "/library/people/5d776d4a594b2b001e705999",
+            "type": "person"
+          },
+          {
+            "id": "5d776825999c64001ec2bfcf",
+            "order": 22,
+            "slug": "koichi-yamadera",
+            "tag": "Koichi Yamadera",
+            "thumb": "https://metadata-static.plex.tv/d/people/d5c726be96f77f7df7620fabdfecca12.jpg",
+            "role": "Quilge Opie (voice)",
+            "key": "/library/people/5d776825999c64001ec2bfcf",
+            "type": "person"
+          },
+          {
+            "id": "5d77696ead5437001f75cb3b",
+            "order": 23,
+            "slug": "tsuguo-mogami",
+            "tag": "Tsuguo Mogami",
+            "thumb": "https://metadata-static.plex.tv/people/5d77696ead5437001f75cb3b.jpg",
+            "role": "Technology Development Bureau Staff (voice)",
+            "key": "/library/people/5d77696ead5437001f75cb3b",
+            "type": "person"
+          },
+          {
+            "id": "5d776d55ad5437001f7d350f",
+            "order": 24,
+            "slug": "shouto-kashii",
+            "tag": "Shouto Kashii",
+            "thumb": "https://metadata-static.plex.tv/5/people/55550cf6ac44096e648431b4e9f5611f.jpg",
+            "role": "Marechiyo Ōmaeda (voice)",
+            "key": "/library/people/5d776d55ad5437001f7d350f",
+            "type": "person"
+          },
+          {
+            "id": "5d77686a5af944001f202779",
+            "order": 25,
+            "slug": "tomoko-kaneda",
+            "tag": "Tomoko Kaneda",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e0614221e8a9743a04c39daaaf6f607.jpg",
+            "role": "Nel Tu (voice)",
+            "key": "/library/people/5d77686a5af944001f202779",
+            "type": "person"
+          },
+          {
+            "id": "5d7768418a7581001f12f00d",
+            "order": 26,
+            "slug": "nobuyuki-hiyama",
+            "tag": "Nobuyuki Hiyama",
+            "thumb": "https://metadata-static.plex.tv/9/people/9dda15eb3892c3e0370d6f3bccfa5d8b.jpg",
+            "role": "Ikkaku Madarame (voice)",
+            "key": "/library/people/5d7768418a7581001f12f00d",
+            "type": "person"
+          },
+          {
+            "id": "5d776baa51dd69001fe32d4c",
+            "order": 27,
+            "slug": "daiki-yamashita",
+            "tag": "Daiki Yamashita",
+            "thumb": "https://metadata-static.plex.tv/3/people/33c7f8769445da54663e9b13e80c7949.jpg",
+            "role": "Ryunosuke Yuki (voice)",
+            "key": "/library/people/5d776baa51dd69001fe32d4c",
+            "type": "person"
+          },
+          {
+            "id": "5e2b85b91b1b18003ec282f4",
+            "order": 28,
+            "slug": "wataru-komada",
+            "tag": "Wataru Komada",
+            "thumb": "https://metadata-static.plex.tv/6/people/68b0eb84129524235bc62cded59f9eb2.jpg",
+            "role": "Asguiaro Ebern (voice)",
+            "key": "/library/people/5e2b85b91b1b18003ec282f4",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9acdd",
+            "order": 29,
+            "slug": "akio-otsuka",
+            "tag": "Akio Otsuka",
+            "thumb": "https://metadata-static.plex.tv/9/people/95ecc6db4c9cad9361f282750abb6d4a.jpg",
+            "role": "Shunsui Kyoraku\u2009(voice)",
+            "key": "/library/people/5d77682f6f4521001ea9acdd",
+            "type": "person"
+          },
+          {
+            "id": "5d776a557a53e9001e702049",
+            "order": 30,
+            "slug": "yuki-ono",
+            "tag": "Yuki Ono",
+            "thumb": "https://metadata-static.plex.tv/c/people/c961099225acfdf7694bd2d44994aaee.jpg",
+            "role": "Bazz-B (voice)",
+            "key": "/library/people/5d776a557a53e9001e702049",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe7e3cae2c60042ea9a75",
+            "order": 31,
+            "slug": "ayumi-sena",
+            "tag": "Ayumi Sena",
+            "thumb": "https://metadata-static.plex.tv/f/people/f60bcc68228e304ee527fa9af7603d00.jpg",
+            "role": "Cyan Sung-Sun (voice)",
+            "key": "/library/people/5f3fe7e3cae2c60042ea9a75",
+            "type": "person"
+          },
+          {
+            "id": "5d77684feb5d26001f1e59c1",
+            "order": 32,
+            "slug": "junko-noda",
+            "tag": "Junko Noda",
+            "thumb": "https://metadata-static.plex.tv/5/people/5376aef44309cfb7dde8cb4254ce1dcc.jpg",
+            "role": "Tatsuki Arisawa (voice)",
+            "key": "/library/people/5d77684feb5d26001f1e59c1",
+            "type": "person"
+          },
+          {
+            "id": "5d77684feb5d26001f1e59c8",
+            "order": 33,
+            "slug": "tetsu-inada",
+            "tag": "Tetsu Inada",
+            "thumb": "https://metadata-static.plex.tv/0/people/01c1499238924d05469268b566f5ae7c.jpg",
+            "role": "Sajin Komamura (voice)",
+            "key": "/library/people/5d77684feb5d26001f1e59c8",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08242df347001e3abd0c",
+            "order": 34,
+            "slug": "sayori-ishizuka",
+            "tag": "Sayori Ishizuka",
+            "thumb": "https://metadata-static.plex.tv/9/people/9313fdaf8601e4aeaa3337499ee795da.jpg",
+            "role": "Franceska Mila Rose (voice)",
+            "key": "/library/people/5d9c08242df347001e3abd0c",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ce6d55c002040e3fd",
+            "order": 35,
+            "slug": "houko-kuwashima",
+            "tag": "Houko Kuwashima",
+            "thumb": "https://metadata-static.plex.tv/6/people/6bb8939dc19c828a8858dd4a438293c4.jpg",
+            "role": "Soifon (voice)",
+            "key": "/library/people/5d77683ce6d55c002040e3fd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768357e9a3c0020c6cbc8",
+            "order": 36,
+            "slug": "yuji-ueda",
+            "tag": "Yuji Ueda",
+            "thumb": "https://metadata-static.plex.tv/7/people/76bb8d877892cf9737b2525df95317ce.jpg",
+            "role": "Sora Inoue (voice)",
+            "key": "/library/people/5d7768357e9a3c0020c6cbc8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768432ec6b5001f6be6e4",
+            "order": 37,
+            "slug": "taro-yamaguchi",
+            "tag": "Taro Yamaguchi",
+            "thumb": "https://metadata-static.plex.tv/b/people/b99278b6684940c0c68ed141eb8e83d6.jpg",
+            "role": "Chojiro Sasakibe (voice)",
+            "key": "/library/people/5d7768432ec6b5001f6be6e4",
+            "type": "person"
+          },
+          {
+            "id": "5d77708fcfbb56001fb89a56",
+            "order": 38,
+            "slug": "daiki-hamano",
+            "tag": "Daiki Hamano",
+            "thumb": "https://metadata-static.plex.tv/7/people/7b149f1ec231c7d43c79eb1f48046ba0.jpg",
+            "role": "Lüdaas Friegen (voice)",
+            "key": "/library/people/5d77708fcfbb56001fb89a56",
+            "type": "person"
+          },
+          {
+            "id": "5d77683961141d001fb1624e",
+            "order": 39,
+            "slug": "daisuke-gori",
+            "tag": "Daisuke Gori",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683961141d001fb1624e.jpg",
+            "role": "Dondochakka Birstanne (voice)",
+            "key": "/library/people/5d77683961141d001fb1624e",
+            "type": "person"
+          },
+          {
+            "id": "5d776837f59e580021898dc7",
+            "order": 40,
+            "slug": "takehito-koyasu",
+            "tag": "Takehito Koyasu",
+            "thumb": "https://metadata-static.plex.tv/d/people/d6cb46553967a303f017788501295de5.jpg",
+            "role": "Pesche Guatiche (voice)",
+            "key": "/library/people/5d776837f59e580021898dc7",
+            "type": "person"
+          },
+          {
+            "id": "5d7769e57a53e9001e6f3dea",
+            "order": 41,
+            "slug": "wataru-hatano",
+            "tag": "Wataru Hatano",
+            "thumb": "https://metadata-static.plex.tv/2/people/2229cb802e329bcff3327d2a3aa77d38.jpg",
+            "role": "Hidetomo Kajomaru (voice)",
+            "key": "/library/people/5d7769e57a53e9001e6f3dea",
+            "type": "person"
+          },
+          {
+            "id": "5d77683aa091de001f2e8aeb",
+            "order": 42,
+            "slug": "romi-park",
+            "tag": "Romi Park",
+            "thumb": "https://metadata-static.plex.tv/b/people/b081d230224dc9efa1069bced12388a2.jpg",
+            "role": "Toshiro Hitsugaya (voice)",
+            "key": "/library/people/5d77683aa091de001f2e8aeb",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb9144b",
+            "order": 43,
+            "slug": "hideo-ishikawa",
+            "tag": "Hideo Ishikawa",
+            "thumb": "https://metadata-static.plex.tv/a/people/a39e983ba9556fb60d964e457d691dfd.jpg",
+            "role": "Jushiro Ukitake (voice)",
+            "key": "/library/people/5d776827961905001eb9144b",
+            "type": "person"
+          },
+          {
+            "id": "5d776ae0594b2b001e6c85c4",
+            "order": 44,
+            "slug": "rintaro-nishi",
+            "tag": "Rintaro Nishi",
+            "thumb": "https://metadata-static.plex.tv/f/people/f274ce1e3679f01d96a20e09f81dfa9b.jpg",
+            "role": "Tetsuzaemon Iba (voice)",
+            "key": "/library/people/5d776ae0594b2b001e6c85c4",
+            "type": "person"
+          },
+          {
+            "id": "5d77687f33f255001e85829b",
+            "order": 45,
+            "slug": "kaya-matsutani",
+            "tag": "Kaya Matsutani",
+            "thumb": "https://metadata-static.plex.tv/5/people/553e2ce617c685818bb4acc13fd82100.jpg",
+            "role": "Rangiku Matsumoto (voice)",
+            "key": "/library/people/5d77687f33f255001e85829b",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffe8d86422500427ff07e",
+            "order": 46,
+            "slug": "kohei-matsumoto",
+            "tag": "Kohei Matsumoto",
+            "thumb": "https://metadata-static.plex.tv/a/people/ae02aa4d4a4ecec3841755e1eb5b41bb.jpg",
+            "role": "Hiyosu (voice)",
+            "key": "/library/people/5f3ffe8d86422500427ff07e",
+            "type": "person"
+          },
+          {
+            "id": "6a0bfb1e3fd5a7c5f933e63c",
+            "order": 47,
+            "slug": "miho-saiki-3",
+            "tag": "Miho Saiki",
+            "thumb": "https://metadata-static.plex.tv/d/people/deb762b469f08dd8939a72ed04979964.jpg",
+            "role": "Rin Tsubokura (voice)",
+            "key": "/library/people/6a0bfb1e3fd5a7c5f933e63c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768332ec6b5001f6bb9f5",
+            "order": 48,
+            "slug": "takaya-hashi",
+            "tag": "Takaya Hashi",
+            "thumb": "https://metadata-static.plex.tv/0/people/0374c7e4869b134d94bf850a8eddc1d8.jpg",
+            "role": "Robert Accutrone (voice)",
+            "key": "/library/people/5d7768332ec6b5001f6bb9f5",
+            "type": "person"
+          },
+          {
+            "id": "5d776af796b655001fdff0a0",
+            "order": 49,
+            "slug": "yasuhiro-mamiya",
+            "tag": "Yasuhiro Mamiya",
+            "thumb": "https://metadata-static.plex.tv/7/people/738520d6108178fcca0cc220422b990b.jpg",
+            "role": "Mask De Masculine (voice)",
+            "key": "/library/people/5d776af796b655001fdff0a0",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa77a53e9001e70b783",
+            "order": 50,
+            "slug": "reina-ueda",
+            "tag": "Reina Ueda",
+            "thumb": "https://metadata-static.plex.tv/6/people/6adea53623455e7ba867badb5b6ed586.jpg",
+            "role": "Meninas McAllon (voice)",
+            "key": "/library/people/5d776aa77a53e9001e70b783",
+            "type": "person"
+          },
+          {
+            "id": "5d77684385719b001f3a6499",
+            "order": 51,
+            "slug": "ken-narita",
+            "tag": "Ken Narita",
+            "thumb": "https://metadata-static.plex.tv/people/5d77684385719b001f3a6499.jpg",
+            "role": "Ryūken Ishida (voice)",
+            "key": "/library/people/5d77684385719b001f3a6499",
+            "type": "person"
+          },
+          {
+            "id": "5d776c0e7a53e9001e7383a3",
+            "order": 52,
+            "slug": "shunsuke-takeuchi",
+            "tag": "Shunsuke Takeuchi",
+            "thumb": "https://metadata-static.plex.tv/5/people/5dc6115b451a584492e109fe5a4c3387.jpg",
+            "role": "Askin Nakk Le Vaar (voice)",
+            "key": "/library/people/5d776c0e7a53e9001e7383a3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6a9e0",
+            "order": 53,
+            "slug": "bin-shimada",
+            "tag": "Bin Shimada",
+            "thumb": "https://metadata-static.plex.tv/0/people/0072e5c5a93ba5dfafa4996c687e53d7.jpg",
+            "role": "Pernida Parnkgjas",
+            "key": "/library/people/5d7768267e9a3c0020c6a9e0",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb9144c",
+            "order": 54,
+            "slug": "junichi-suwabe",
+            "tag": "Junichi Suwabe",
+            "thumb": "https://image.tmdb.org/t/p/original/4S7c3n3r07A83HvkLrnWZGVhiHg.jpg",
+            "role": "Grimmjow Jaegerjaquez (voice)",
+            "key": "/library/people/5d776827961905001eb9144c",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb91449",
+            "order": 55,
+            "slug": "taiten-kusunoki",
+            "tag": "Taiten Kusunoki",
+            "thumb": "https://metadata-static.plex.tv/6/people/62f36d68d5bab154c7baf040d8162b2a.jpg",
+            "role": "Zommari Rureaux (voice)",
+            "key": "/library/people/5d776827961905001eb91449",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ceb5d26001f1e24cb",
+            "order": 56,
+            "slug": "fumihiko-tachiki",
+            "tag": "Fumihiko Tachiki",
+            "thumb": "https://metadata-static.plex.tv/f/people/ff668ec54d35a110f5da9b6a764325ea.jpg",
+            "role": "Kenpachi Zaraki (voice)",
+            "key": "/library/people/5d77683ceb5d26001f1e24cb",
+            "type": "person"
+          },
+          {
+            "id": "5d776848880197001ec96e6f",
+            "order": 57,
+            "slug": "daisuke-ono",
+            "tag": "Daisuke Ono",
+            "thumb": "https://metadata-static.plex.tv/8/people/84a21c460ab5af71ab41c5e804de75af.jpg",
+            "role": "Shūkurō Tsukishima (voice)",
+            "key": "/library/people/5d776848880197001ec96e6f",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d298480001f4ac155",
+            "order": 58,
+            "slug": "koji-yusa",
+            "tag": "Koji Yusa",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e67074a569b3a39509f1e3e8a9a47e1.jpg",
+            "role": "Gin Ichimaru (voice)",
+            "key": "/library/people/5d77684d298480001f4ac155",
+            "type": "person"
+          },
+          {
+            "id": "5d77686e23d5a3001f4ec29f",
+            "order": 59,
+            "slug": "jun-fukuyama",
+            "tag": "Jun Fukuyama",
+            "thumb": "https://metadata-static.plex.tv/1/people/12041bb4bf6c4a462712e1065c2a165a.jpg",
+            "role": "Yumichika Ayasegawa (voice)",
+            "key": "/library/people/5d77686e23d5a3001f4ec29f",
+            "type": "person"
+          },
+          {
+            "id": "5d776a0b7a53e9001e6f891f",
+            "order": 60,
+            "slug": "masahito-yabe",
+            "tag": "Masahito Yabe",
+            "thumb": "https://metadata-static.plex.tv/8/people/823c85326d530b0d8060ecbf8c08eacd.jpg",
+            "role": "Zennosuke Kurumatani (voice)",
+            "key": "/library/people/5d776a0b7a53e9001e6f891f",
+            "type": "person"
+          },
+          {
+            "id": "5f404cb05a76a80042da331d",
+            "order": 61,
+            "slug": "kazumasa-fukagawa",
+            "tag": "Kazumasa Fukagawa",
+            "thumb": "https://metadata-static.plex.tv/b/people/b26a6e98ec97886fa0d39bdd4d10e195.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5f404cb05a76a80042da331d",
+            "type": "person"
+          },
+          {
+            "id": "5f404591768fc7004057d5fc",
+            "order": 62,
+            "slug": "sho-nogami",
+            "tag": "Sho Nogami",
+            "thumb": "https://metadata-static.plex.tv/d/people/d60cb42aaebf6a0ff85465e5f146de18.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5f404591768fc7004057d5fc",
+            "type": "person"
+          },
+          {
+            "id": "5d9c080d08fddd001f2911ca",
+            "order": 63,
+            "slug": "tomohiro-yamaguchi",
+            "tag": "Tomohiro Yamaguchi",
+            "thumb": "https://metadata-static.plex.tv/7/people/76bf1a4abe8bad0f815cdabc6a6bcede.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5d9c080d08fddd001f2911ca",
+            "type": "person"
+          },
+          {
+            "id": "5f40474fc63b480040e24e78",
+            "order": 64,
+            "slug": "yuji-kameyama",
+            "tag": "Yuji Kameyama",
+            "thumb": "https://metadata-static.plex.tv/8/people/8ca1fa181d7a1d3ea575d2a4d4638928.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5f40474fc63b480040e24e78",
+            "type": "person"
+          },
+          {
+            "id": "5d776c31594b2b001e6ed3fb",
+            "order": 65,
+            "slug": "hitomi-harada",
+            "tag": "Hitomi Harada",
+            "thumb": "https://metadata-static.plex.tv/6/people/6311a8e3d8f7e1045447c76298e36052.jpg",
+            "role": "Menoly Mallia (voice)",
+            "key": "/library/people/5d776c31594b2b001e6ed3fb",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d54f42c001f8c5d0f",
+            "order": 66,
+            "slug": "megumi-ogata",
+            "tag": "Megumi Ogata",
+            "thumb": "https://metadata-static.plex.tv/9/people/953bcaada2f35657b54b4c4ad6724895.jpg",
+            "role": "Halibel (voice)",
+            "key": "/library/people/5d77683d54f42c001f8c5d0f",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc9e61ae7100041fd8050",
+            "order": 67,
+            "slug": "yu-oomoto",
+            "tag": "Yu Oomoto",
+            "thumb": "https://metadata-static.plex.tv/e/people/e4f8c5c697130b63f39e19d70e3386fd.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5f3fc9e61ae7100041fd8050",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffd5d04a86500409bf0d6",
+            "order": 68,
+            "slug": "yuuto-suzuki",
+            "tag": "Yuuto Suzuki",
+            "thumb": "https://metadata-static.plex.tv/6/people/648fd99644f646baebf362cb86cc8edb.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5f3ffd5d04a86500409bf0d6",
+            "type": "person"
+          },
+          {
+            "id": "5d776e10ad5437001f7e97f8",
+            "order": 69,
+            "slug": "toshinari-fukamachi",
+            "tag": "Toshinari Fukamachi",
+            "thumb": "https://metadata-static.plex.tv/7/people/79438ff5881d68376710174b401ce5db.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5d776e10ad5437001f7e97f8",
+            "type": "person"
+          },
+          {
+            "id": "5f3fee36bf3e560040b39d61",
+            "order": 70,
+            "slug": "mahito-funaki-1",
+            "tag": "Mahito Funaki",
+            "thumb": "https://metadata-static.plex.tv/0/people/0ec0c9b1bc6a5616999e8f1d24a1315f.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5f3fee36bf3e560040b39d61",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcad85a76a80042cdf3ec",
+            "order": 71,
+            "slug": "yuichi-jose",
+            "tag": "Yuichi Jose",
+            "thumb": "https://metadata-static.plex.tv/1/people/10c344a066e14a514cdd4a8de1670401.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5f3fcad85a76a80042cdf3ec",
+            "type": "person"
+          },
+          {
+            "id": "5f404912c63b480040e270ce",
+            "order": 72,
+            "slug": "jun-yokoyama-1",
+            "tag": "Jun Yokoyama",
+            "thumb": "https://metadata-static.plex.tv/0/people/0ead1c831e56973088fccc49bd7a547a.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5f404912c63b480040e270ce",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb9143c",
+            "order": 73,
+            "slug": "takahiro-sakurai",
+            "tag": "Takahiro Sakurai",
+            "thumb": "https://metadata-static.plex.tv/0/people/0375562f7451679cbedf13fcf98b999f.jpg",
+            "role": "Izuru Kira (voice)",
+            "key": "/library/people/5d776827961905001eb9143c",
+            "type": "person"
+          },
+          {
+            "id": "5d776bfaad5437001f7b0094",
+            "order": 74,
+            "slug": "kaito-ishikawa",
+            "tag": "Kaito Ishikawa",
+            "thumb": "https://metadata-static.plex.tv/4/people/4252aa25e0b33adc96a9fcc84b282161.jpg",
+            "role": "Riku Togakushi (voice)",
+            "key": "/library/people/5d776bfaad5437001f7b0094",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff1545a76a80042d0ff9c",
+            "order": 75,
+            "slug": "makoto-furukawa",
+            "tag": "Makoto Furukawa",
+            "thumb": "https://metadata-static.plex.tv/b/people/b4777293646b217ab86ba2349703bd33.jpg",
+            "role": "Asuka Katakura (voice)",
+            "key": "/library/people/5f3ff1545a76a80042d0ff9c",
+            "type": "person"
+          },
+          {
+            "id": "6a086193c406f89e704236e1",
+            "order": 76,
+            "slug": "masashi-igarashi-7",
+            "tag": "Masashi Igarashi",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/6a086193c406f89e704236e1",
+            "type": "person"
+          },
+          {
+            "id": "5d776e02fb0d55001f5b24a0",
+            "order": 77,
+            "slug": "shuta-morishima",
+            "tag": "Shuta Morishima",
+            "thumb": "https://metadata-static.plex.tv/e/people/e2435ff94a80f84405ef5baa94f1b9f6.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5d776e02fb0d55001f5b24a0",
+            "type": "person"
+          },
+          {
+            "id": "5eb12352e2cecb0040eea9a0",
+            "order": 78,
+            "slug": "keiichi-nakagawa",
+            "tag": "Keiichi Nakagawa",
+            "thumb": "https://metadata-static.plex.tv/4/people/4a317c66254fa3db67af80a454e97884.jpg",
+            "role": "Quincy (voice)",
+            "key": "/library/people/5eb12352e2cecb0040eea9a0",
+            "type": "person"
+          },
+          {
+            "id": "5f40415b8642250042869587",
+            "order": 79,
+            "slug": "kenta-sasa",
+            "tag": "Kenta Sasa",
+            "thumb": "https://metadata-static.plex.tv/6/people/67091b62748e2c5be5e7d54e35566c11.jpg",
+            "role": "Spirit Researcher (voice)",
+            "key": "/library/people/5f40415b8642250042869587",
+            "type": "person"
+          },
+          {
+            "id": "5d7768402ec6b5001f6bda9a",
+            "order": 80,
+            "slug": "aya-hisakawa",
+            "tag": "Aya Hisakawa",
+            "thumb": "https://metadata-static.plex.tv/c/people/c170e11bd38c2977b5b68d8646f9a188.jpg",
+            "role": "Retsu Unohana (voice)",
+            "key": "/library/people/5d7768402ec6b5001f6bda9a",
+            "type": "person"
+          },
+          {
+            "id": "5d7769e4f617c90020166481",
+            "order": 81,
+            "slug": "tomoaki-maeno",
+            "tag": "Tomoaki Maeno",
+            "thumb": "https://metadata-static.plex.tv/c/people/c15f8806eab75246c7f3d9016d57a697.jpg",
+            "role": "NaNaNa Najahkoop (voice)",
+            "key": "/library/people/5d7769e4f617c90020166481",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc45b52f20000414892f3",
+            "order": 82,
+            "slug": "kenichi-inoue",
+            "tag": "Kenichi Inoue",
+            "thumb": "https://metadata-static.plex.tv/8/people/84df28bdcc52c7dd037dbd22185a9cb2.jpg",
+            "role": "Technology Development Bureau Staff (voice)",
+            "key": "/library/people/5f3fc45b52f20000414892f3",
+            "type": "person"
+          },
+          {
+            "id": "5f404c43864225004288079f",
+            "order": 83,
+            "slug": "kentaro-kumagai",
+            "tag": "Kentaro Kumagai",
+            "thumb": "https://metadata-static.plex.tv/6/people/6c8334f7f3bb88374cb8ba8f2b6425ad.jpg",
+            "role": "Technology Development Bureau Staff (voice)",
+            "key": "/library/people/5f404c43864225004288079f",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ce6d55c002040e3f0",
+            "order": 84,
+            "slug": "rie-kugimiya",
+            "tag": "Rie Kugimiya",
+            "thumb": "https://metadata-static.plex.tv/4/people/49dd422b7cfd75a8e0b33c533a4507cc.jpg",
+            "role": "Karin Kurosaki (voice)",
+            "key": "/library/people/5d77683ce6d55c002040e3f0",
+            "type": "person"
+          },
+          {
+            "id": "5d776976fb0d55001f527026",
+            "order": 85,
+            "slug": "tomoe-hanba",
+            "tag": "Tomoe Hanba",
+            "thumb": "https://metadata-static.plex.tv/b/people/bafca5a96602b65fce92f4c09d85dbd0.jpg",
+            "role": "Pigtailed Ghost (voice)",
+            "key": "/library/people/5d776976fb0d55001f527026",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cdb2bbf858f2c189e0f",
+            "order": 86,
+            "slug": "yutaka-aoyama-1",
+            "tag": "Yutaka Aoyama",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f192a86ff49a03d19631d0993a83c9f.jpg",
+            "role": "Toshirin (voice)",
+            "key": "/library/people/62fb7cdb2bbf858f2c189e0f",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff1381ae710004100e6fe",
+            "order": 87,
+            "slug": "koichi-kuriyama",
+            "tag": "Koichi Kuriyama",
+            "thumb": "https://metadata-static.plex.tv/3/people/34d9e57628430710ea225d8975112d61.jpg",
+            "role": "Citizen (voice)",
+            "key": "/library/people/5f3ff1381ae710004100e6fe",
+            "type": "person"
+          },
+          {
+            "id": "5ec409a4e72b600040100f31",
+            "order": 88,
+            "slug": "yasuhiro",
+            "tag": "Yasuhiro",
+            "thumb": "https://metadata-static.plex.tv/d/people/d6608784621186f4dc9d345335e39c06.jpg",
+            "role": "Citizen (voice)",
+            "key": "/library/people/5ec409a4e72b600040100f31",
+            "type": "person"
+          },
+          {
+            "id": "5d9c090f02391c001f594bc3",
+            "order": 89,
+            "slug": "ryota-suzuki",
+            "tag": "Ryota Suzuki",
+            "thumb": "https://metadata-static.plex.tv/6/people/610d2fdf85b99f940f5c79fce11b2949.jpg",
+            "role": "Young Chojiro Sasakibe (voice)",
+            "key": "/library/people/5d9c090f02391c001f594bc3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a133f255001e85b5f5",
+            "order": 90,
+            "slug": "yoshitsugu-matsuoka",
+            "tag": "Yoshitsugu Matsuoka",
+            "thumb": "https://metadata-static.plex.tv/2/people/299e9612ada944c02af9132ac3ee2b02.jpg",
+            "role": "Äs Nödt (voice)",
+            "key": "/library/people/5d7768a133f255001e85b5f5",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff98686422500427f73e1",
+            "order": 91,
+            "slug": "ryu-yamaguchi",
+            "tag": "Ryu Yamaguchi",
+            "role": "PePe Waccabrada (voice)",
+            "key": "/library/people/5f3ff98686422500427f73e1",
+            "type": "person"
+          },
+          {
+            "id": "5d776ada594b2b001e6c7d9e",
+            "order": 92,
+            "slug": "nobuaki-kanemitsu",
+            "tag": "Nobuaki Kanemitsu",
+            "thumb": "https://metadata-static.plex.tv/4/people/4eb39bbaae822b18ea8b22b478a1f575.jpg",
+            "role": "Driscoll Berci (voice)",
+            "key": "/library/people/5d776ada594b2b001e6c7d9e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b3431c830024c139db",
+            "order": 93,
+            "slug": "kenn-1",
+            "tag": "KENN",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768b3431c830024c139db.jpg",
+            "role": "Berenice Gabrielli",
+            "key": "/library/people/5d7768b3431c830024c139db",
+            "type": "person"
+          },
+          {
+            "id": "5d77695f594b2b001e69f379",
+            "order": 94,
+            "slug": "takahiro-fujiwara",
+            "tag": "Takahiro Fujiwara",
+            "thumb": "https://metadata-static.plex.tv/people/5d77695f594b2b001e69f379.jpg",
+            "role": "Jerome Guizbatt (voice)",
+            "key": "/library/people/5d77695f594b2b001e69f379",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d298480001f4ac128",
+            "order": 95,
+            "slug": "kenji-takahashi-20",
+            "tag": "Kenji Takahashi",
+            "thumb": "https://metadata-static.plex.tv/5/people/5134eb8afc7370885bc9400b20d3ef64.jpg",
+            "role": "Technology Development Bureau Staff (voice)",
+            "key": "/library/people/5d77684d298480001f4ac128",
+            "type": "person"
+          },
+          {
+            "id": "5f404b71b8a032003d88a31d",
+            "order": 96,
+            "slug": "kento-hama",
+            "tag": "Kento Hama",
+            "thumb": "https://metadata-static.plex.tv/b/people/bef9c8939c82bf2bddb0a036c9799589.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5f404b71b8a032003d88a31d",
+            "type": "person"
+          },
+          {
+            "id": "5d776e9196b655001fe6c077",
+            "order": 97,
+            "slug": "daisuke-hirose",
+            "tag": "Daisuke Hirose",
+            "thumb": "https://metadata-static.plex.tv/4/people/497ea61c3f56393b5a2e8ed8a0dd92ca.jpg",
+            "role": "Shinigami (voice)",
+            "key": "/library/people/5d776e9196b655001fe6c077",
+            "type": "person"
+          },
+          {
+            "id": "5d77686e23d5a3001f4ec2a3",
+            "order": 98,
+            "slug": "hisayo-mochizuki",
+            "tag": "Hisayo Mochizuki",
+            "thumb": "https://metadata-static.plex.tv/6/people/68f04c513dabc66b86ca338458d51e9c.jpg",
+            "role": "Yachiru Kusajishi (voice)",
+            "key": "/library/people/5d77686e23d5a3001f4ec2a3",
+            "type": "person"
+          },
+          {
+            "id": "5d776844880197001ec96226",
+            "order": 99,
+            "slug": "yukana",
+            "tag": "Yukana",
+            "thumb": "https://metadata-static.plex.tv/4/people/486498cadbe13d24eb44393515cc2018.jpg",
+            "role": "Isane Kotetsu (voice)",
+            "key": "/library/people/5d776844880197001ec96226",
+            "type": "person"
+          },
+          {
+            "id": "5d776837103a2d001f5681db",
+            "order": 100,
+            "slug": "tadashi-miyazawa",
+            "tag": "Tadashi Miyazawa",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ecea2d916f4f29060f5e9356f67cf40.jpg",
+            "role": "Guenael Lee (voice)",
+            "key": "/library/people/5d776837103a2d001f5681db",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa79ab5440021501ac8",
+            "order": 101,
+            "slug": "natsuki-hanae",
+            "tag": "Natsuki Hanae",
+            "thumb": "https://metadata-static.plex.tv/1/people/1389be21fb6aa62e8cd0bef6f3bc460d.jpg",
+            "role": "Gremmy Thoumeaux (voice)",
+            "key": "/library/people/5d776aa79ab5440021501ac8",
+            "type": "person"
+          },
+          {
+            "id": "5d776e3b96b655001fe60ce4",
+            "order": 102,
+            "slug": "yusuke-kobayashi",
+            "tag": "Yusuke Kobayashi",
+            "thumb": "https://metadata-static.plex.tv/c/people/c5849c59f7953c7de85e1b7b774d4f12.jpg",
+            "role": "Royd Lloyd (Voice)",
+            "key": "/library/people/5d776e3b96b655001fe60ce4",
+            "type": "person"
+          },
+          {
+            "id": "5d776a65f617c9002016cabc",
+            "order": 103,
+            "slug": "ayumi-tsunematsu",
+            "tag": "Ayumi Tsunematsu",
+            "thumb": "https://metadata-static.plex.tv/2/people/265e031af6942497257a68eb61fddb08.jpg",
+            "role": "Kirio Hikifune",
+            "key": "/library/people/5d776a65f617c9002016cabc",
+            "type": "person"
+          },
+          {
+            "id": "5d7768332ec6b5001f6bb9fb",
+            "order": 104,
+            "slug": "tomoyuki-shimura",
+            "tag": "Tomoyuki Shimura",
+            "thumb": "https://metadata-static.plex.tv/6/people/6057be512f85190f2aeec2993e6cf1fa.jpg",
+            "role": "Tenjirō Kirinji",
+            "key": "/library/people/5d7768332ec6b5001f6bb9fb",
+            "type": "person"
+          },
+          {
+            "id": "5d77690df617c9002015c848",
+            "order": 105,
+            "slug": "rina-sato",
+            "tag": "Rina Sato",
+            "thumb": "https://metadata-static.plex.tv/6/people/6c078813033b64c63a80f13525fbf428.jpg",
+            "role": "Senjumaru Shutara",
+            "key": "/library/people/5d77690df617c9002015c848",
+            "type": "person"
+          },
+          {
+            "id": "5d776a7dad5437001f77f3de",
+            "order": 106,
+            "slug": "yoji-ueda",
+            "tag": "Yoji Ueda",
+            "thumb": "https://metadata-static.plex.tv/7/people/70a5358fafff9a62a9047fcad41c4030.jpg",
+            "role": "Ōetsu Nimaiya (voice)",
+            "key": "/library/people/5d776a7dad5437001f77f3de",
+            "type": "person"
+          },
+          {
+            "id": "5d776bf6f617c9002017c284",
+            "order": 107,
+            "slug": "jin-urayama",
+            "tag": "Jin Urayama",
+            "thumb": "https://metadata-static.plex.tv/1/people/177ff5b87eaadcc7049a9d2483058fe3.jpg",
+            "role": "Wolfman Clan Elder (voice)",
+            "key": "/library/people/5d776bf6f617c9002017c284",
+            "type": "person"
+          },
+          {
+            "id": "5d7769c323d5a3001f4fc133",
+            "order": 108,
+            "slug": "aoi-yuuki-1",
+            "tag": "Aoi Yuuki",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e62a311aaf5e2638164b3e7fa70a2ac.jpg",
+            "role": "Liltotto Lamperd (voice)",
+            "key": "/library/people/5d7769c323d5a3001f4fc133",
+            "type": "person"
+          },
+          {
+            "id": "5d776ada594b2b001e6c7d9a",
+            "order": 109,
+            "slug": "yumi-uchiyama",
+            "tag": "Yumi Uchiyama",
+            "thumb": "https://metadata-static.plex.tv/a/people/a071cd8907b8f4a6ccc71f17a05f39af.jpg",
+            "role": "Candice Catnipp (voice)",
+            "key": "/library/people/5d776ada594b2b001e6c7d9a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c3ad5437001f74efa7",
+            "order": 110,
+            "slug": "nao-toyama",
+            "tag": "Nao Toyama",
+            "thumb": "https://metadata-static.plex.tv/0/people/0c0ca359d85954979e0501cd8b7918c8.jpg",
+            "role": "Giselle Gewelle (voice)",
+            "key": "/library/people/5d7768c3ad5437001f74efa7",
+            "type": "person"
+          },
+          {
+            "id": "5d77684ae6d55c00204100e7",
+            "order": 111,
+            "slug": "hideyuki-tanaka",
+            "tag": "Hideyuki Tanaka",
+            "thumb": "https://metadata-static.plex.tv/1/people/13d5380173ad2cff285ec92ffe41d67f.jpg",
+            "role": "BG9 (voice)",
+            "key": "/library/people/5d77684ae6d55c00204100e7",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2196b655001fde4271",
+            "order": 112,
+            "slug": "ryo-kuratomi",
+            "tag": "Ryo Kuratomi",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d353dbd5d319c4680595b1c248ab523.jpg",
+            "role": "Cang Du (voice)",
+            "key": "/library/people/5d776a2196b655001fde4271",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267228e5001f1dcf56",
+            "order": 113,
+            "slug": "naomi-kusumi",
+            "tag": "Naomi Kusumi",
+            "thumb": "https://metadata-static.plex.tv/2/people/2fc35873c29bf56cb3e139c8108d68fd.jpg",
+            "role": "Ichibē Hyōsube (Voice)",
+            "key": "/library/people/5d7768267228e5001f1dcf56",
+            "type": "person"
+          },
+          {
+            "id": "5d776888ad5437001f748fc2",
+            "order": 114,
+            "slug": "kenta-miyake",
+            "tag": "Kenta Miyake",
+            "thumb": "https://metadata-static.plex.tv/5/people/50c86af36f6a6f8fba9f51b4f875dc4f.jpg",
+            "role": "Charlotte Chuhlhourne (Voice)",
+            "key": "/library/people/5d776888ad5437001f748fc2",
+            "type": "person"
+          },
+          {
+            "id": "5d776837103a2d001f5681d8",
+            "order": 115,
+            "slug": "koji-ishii",
+            "tag": "Koji Ishii",
+            "thumb": "https://metadata-static.plex.tv/3/people/3f8c72fef36a28122c84dd37963972af.jpg",
+            "role": "Dordoni Alessandro Del Socaccio (Voice)",
+            "key": "/library/people/5d776837103a2d001f5681d8",
+            "type": "person"
+          },
+          {
+            "id": "5d776848880197001ec96e6e",
+            "order": 116,
+            "slug": "daisuke-kishio",
+            "tag": "Daisuke Kishio",
+            "thumb": "https://metadata-static.plex.tv/7/people/77603336804f190d68309a05273927db.jpg",
+            "role": "Luppi Antenor (Voice)",
+            "key": "/library/people/5d776848880197001ec96e6e",
+            "type": "person"
+          },
+          {
+            "id": "5d77689e1999bc0020dcb543",
+            "order": 117,
+            "slug": "tsuyoshi-koyama",
+            "tag": "Tsuyoshi Koyama",
+            "thumb": "https://metadata-static.plex.tv/2/people/2858ea8fd22d3eb788ad7b97e60f280b.jpg",
+            "role": "Gerard Valkyrie (Voice)",
+            "key": "/library/people/5d77689e1999bc0020dcb543",
+            "type": "person"
+          },
+          {
+            "id": "5d7768406f4521001ea9e3fb",
+            "order": 118,
+            "slug": "satoshi-hino",
+            "tag": "Satoshi Hino",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768406f4521001ea9e3fb.jpg",
+            "role": "Lille Barro (Voice)",
+            "key": "/library/people/5d7768406f4521001ea9e3fb",
+            "type": "person"
+          },
+          {
+            "id": "5d77683785719b001f3a4150",
+            "order": 119,
+            "slug": "soichiro-hoshi",
+            "tag": "Soichiro Hoshi",
+            "thumb": "https://metadata-static.plex.tv/e/people/e4a5f2e135ab47c4b35c6be789e6e2b5.jpg",
+            "role": "Nianzol Weizol (Voice)",
+            "key": "/library/people/5d77683785719b001f3a4150",
+            "type": "person"
+          },
+          {
+            "id": "5d77684ee870fd001f19dc74",
+            "order": 120,
+            "slug": "hiroki-touchi",
+            "tag": "Hiroki Touchi",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e9f56e04ed2fbb024843de59005649e.jpg",
+            "role": "Kūgo Ginjō (voice)",
+            "key": "/library/people/5d77684ee870fd001f19dc74",
+            "type": "person"
+          },
+          {
+            "id": "5d7768418a7581001f12ef94",
+            "order": 121,
+            "slug": "yuhko-kaida",
+            "tag": "Yuhko Kaida",
+            "thumb": "https://metadata-static.plex.tv/7/people/75a7d7e8d968e8722435f53fd45b7324.jpg",
+            "role": "Ikumi Unagiya (voice)",
+            "key": "/library/people/5d7768418a7581001f12ef94",
+            "type": "person"
+          },
+          {
+            "id": "5d77686e23d5a3001f4ec29e",
+            "order": 122,
+            "slug": "sayaka-ohara",
+            "tag": "Sayaka Ohara",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd69ce856a93b47e35468f2f8f2c7a9b.jpg",
+            "role": "Masaki Kurosaki (voice)",
+            "key": "/library/people/5d77686e23d5a3001f4ec29e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768505af944001f1fef6d",
+            "order": 123,
+            "slug": "marina-inoue",
+            "tag": "Marina Inoue",
+            "thumb": "https://metadata-static.plex.tv/3/people/39da023709804eba9d613645027aa178.jpg",
+            "role": "Jugo (voice)",
+            "key": "/library/people/5d7768505af944001f1fef6d",
+            "type": "person"
+          },
+          {
+            "id": "5d77684f85719b001f3a83f2",
+            "order": 124,
+            "slug": "hiroshi-kamiya",
+            "tag": "Hiroshi Kamiya",
+            "thumb": "https://metadata-static.plex.tv/2/people/22ac6149c7d3367b693554cda9a6522e.jpg",
+            "role": "Huburt Alexander Kleich (voice)",
+            "key": "/library/people/5d77684f85719b001f3a83f2",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbbcabf3e560040af755d",
+            "order": 125,
+            "slug": "chiaki-kobayashi",
+            "tag": "Chiaki Kobayashi",
+            "thumb": "https://metadata-static.plex.tv/2/people/269c0e7df9d3d7016c9dbaa70c1882f9.jpg",
+            "role": "Bazz (voice)",
+            "key": "/library/people/5f3fbbcabf3e560040af755d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768377228e5001f1ded2d",
+            "order": 126,
+            "slug": "hiroshi-naka",
+            "tag": "Hiroshi Naka",
+            "thumb": "https://metadata-static.plex.tv/e/people/e048af90d292119faf719ccd70a0b5bc.jpg",
+            "role": "Johann Seydlitz (voice)",
+            "key": "/library/people/5d7768377228e5001f1ded2d",
+            "type": "person"
+          },
+          {
+            "id": "5d776c9f51dd69001fe3d676",
+            "order": 127,
+            "slug": "ryota-takeuchi-1",
+            "tag": "Ryota Takeuchi",
+            "thumb": "https://metadata-static.plex.tv/b/people/bce57417d5fa7840613f0c6dc2670814.jpg",
+            "role": "Algora Lallau (voice)",
+            "key": "/library/people/5d776c9f51dd69001fe3d676",
+            "type": "person"
+          },
+          {
+            "id": "5d776844880197001ec96227",
+            "order": 128,
+            "slug": "daisuke-namikawa",
+            "tag": "Daisuke Namikawa",
+            "thumb": "https://metadata-static.plex.tv/5/people/56355587f16e5f241dda830dfcd1a8a1.jpg",
+            "role": "Ulquiorra Cifer (voice)",
+            "key": "/library/people/5d776844880197001ec96227",
+            "type": "person"
+          },
+          {
+            "id": "5d77683cf59e5800218996f0",
+            "order": 129,
+            "slug": "show-hayami-1",
+            "tag": "Show Hayami",
+            "thumb": "https://image.tmdb.org/t/p/original/HU9LZJdb4H8coHiSaHiUprcFm1.jpg",
+            "role": "Sōsuke Aizen (voice)",
+            "key": "/library/people/5d77683cf59e5800218996f0",
+            "type": "person"
+          },
+          {
+            "id": "5d776869594b2b001e68b3e8",
+            "order": 130,
+            "slug": "kohsuke-toriumi",
+            "tag": "Kohsuke Toriumi",
+            "thumb": "https://metadata-static.plex.tv/0/people/0eb7a2f293c4147f7737fcd7b37b61c7.jpg",
+            "role": "Szayelaporro Granz (voice)",
+            "key": "/library/people/5d776869594b2b001e68b3e8",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb91447",
+            "order": 131,
+            "slug": "kenji-nomura",
+            "tag": "Kenji Nomura",
+            "thumb": "https://metadata-static.plex.tv/d/people/db3099b60f615aa1f48939003b0831a8.jpg",
+            "role": "Yammy Llargo (voice)",
+            "key": "/library/people/5d776827961905001eb91447",
+            "type": "person"
+          },
+          {
+            "id": "5d77683961141d001fb16247",
+            "order": 132,
+            "slug": "shozo-iizuka",
+            "tag": "Shozo Iizuka",
+            "thumb": "https://metadata-static.plex.tv/4/people/47fc2be25728d3c73503fe4e3fdf4753.jpg",
+            "role": "Baraggan Louisenbairn (voice)",
+            "key": "/library/people/5d77683961141d001fb16247",
+            "type": "person"
+          },
+          {
+            "id": "5d77685d103a2d001f56f07a",
+            "order": 133,
+            "slug": "nobutoshi-canna",
+            "tag": "Nobutoshi Canna",
+            "thumb": "https://metadata-static.plex.tv/6/people/62247aaec61629d7c488d1add5dc8d4c.jpg",
+            "role": "Nnoitra Gilga (voice)",
+            "key": "/library/people/5d77685d103a2d001f56f07a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b7ad5437001f74e07d",
+            "order": 134,
+            "slug": "takashi-kondo-10",
+            "tag": "Takashi Kondo",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768b7ad5437001f74e07d.jpg",
+            "role": "Di Roy Rinker (voice)",
+            "key": "/library/people/5d7768b7ad5437001f74e07d",
+            "type": "person"
+          },
+          {
+            "id": "5d776a30fb0d55001f53d4b2",
+            "order": 135,
+            "slug": "koichi-tochika",
+            "tag": "Koichi Tochika",
+            "thumb": "https://metadata-static.plex.tv/9/people/90a666a57ed4292b37f60b60cbfec366.jpg",
+            "role": "Yylfordt Granz (voice)",
+            "key": "/library/people/5d776a30fb0d55001f53d4b2",
+            "type": "person"
+          },
+          {
+            "id": "5d776841eb5d26001f1e373b",
+            "order": 136,
+            "slug": "jouji-nakata",
+            "tag": "Jouji Nakata",
+            "thumb": "https://metadata-static.plex.tv/4/people/4785efa7ba52b996a153c5926feaa21c.jpg",
+            "role": "Ayon (voice)",
+            "key": "/library/people/5d776841eb5d26001f1e373b",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f947dd6e001f6cd0d5",
+            "order": 137,
+            "slug": "nobuhiko-okamoto",
+            "tag": "Nobuhiko Okamoto",
+            "thumb": "https://metadata-static.plex.tv/e/people/ed7ca423df1cef8c2c73516191aefaf1.jpg",
+            "role": "Narunosuke (voice)",
+            "key": "/library/people/5d7769f947dd6e001f6cd0d5",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d298480001f4ac129",
+            "order": 138,
+            "slug": "yuichi-nakamura",
+            "tag": "Yuichi Nakamura",
+            "thumb": "https://metadata-static.plex.tv/4/people/401d84dca9757cbcc8e9ab26544e95e0.jpg",
+            "role": "Tesla Lindocruz (voice)",
+            "key": "/library/people/5d77684d298480001f4ac129",
+            "type": "person"
+          },
+          {
+            "id": "5d77695f594b2b001e69f378",
+            "order": 139,
+            "slug": "yuki-kaji",
+            "tag": "Yuki Kaji",
+            "thumb": "https://metadata-static.plex.tv/people/5d77695f594b2b001e69f378.jpg",
+            "role": "Toshiro Hitsugaya adult (voice)",
+            "key": "/library/people/5d77695f594b2b001e69f378",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5ec42496f2cb120039b1f4cd",
+            "slug": "mitsutaka-noshitani",
+            "tag": "Mitsutaka Noshitani",
+            "role": "Director",
+            "key": "/library/people/5ec42496f2cb120039b1f4cd",
+            "type": "person"
+          },
+          {
+            "id": "608d83c9291cb8002c5886e8",
+            "slug": "junya-koshida",
+            "tag": "Junya Koshida",
+            "role": "Director",
+            "key": "/library/people/608d83c9291cb8002c5886e8",
+            "type": "person"
+          },
+          {
+            "id": "5f3fec1002101b0040eff2ed",
+            "slug": "kazunori-mizuno",
+            "tag": "Kazunori Mizuno",
+            "role": "Director",
+            "key": "/library/people/5f3fec1002101b0040eff2ed",
+            "type": "person"
+          },
+          {
+            "id": "5f401b13c63b480040ddf3b8",
+            "slug": "hodaka-kuramoto",
+            "tag": "Hodaka Kuramoto",
+            "role": "Director",
+            "key": "/library/people/5f401b13c63b480040ddf3b8",
+            "type": "person"
+          },
+          {
+            "id": "5d7770356afb3d0020614b86",
+            "slug": "yasuto-nishikata",
+            "tag": "Yasuto Nishikata",
+            "thumb": "https://metadata-static.plex.tv/6/people/6ceb9ac043acadc6de452e34e80c8f8b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7770356afb3d0020614b86",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff515ce2564003f89c1ba",
+            "slug": "hiroaki-nishimura",
+            "tag": "Hiroaki Nishimura",
+            "role": "Director",
+            "key": "/library/people/5f3ff515ce2564003f89c1ba",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc2e6bf3e560040b00430",
+            "slug": "akira-shimizu",
+            "tag": "Akira Shimizu",
+            "role": "Director",
+            "key": "/library/people/5f3fc2e6bf3e560040b00430",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffbe7cae2c60042ec567f",
+            "slug": "rokou-ogiwara-1",
+            "tag": "Rokou Ogiwara",
+            "role": "Director",
+            "key": "/library/people/5f3ffbe7cae2c60042ec567f",
+            "type": "person"
+          },
+          {
+            "id": "608d83cd291cb8002c58871b",
+            "slug": "akane-inoue-1",
+            "tag": "Akane Inoue",
+            "role": "Director",
+            "key": "/library/people/608d83cd291cb8002c58871b",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff12204a86500409ad86a",
+            "slug": "kazunobu-shimizu-1",
+            "tag": "Kazunobu Shimizu",
+            "role": "Director",
+            "key": "/library/people/5f3ff12204a86500409ad86a",
+            "type": "person"
+          },
+          {
+            "id": "5ec4249490c7f6004081a95b",
+            "slug": "tomoko-hiramuki",
+            "tag": "Tomoko Hiramuki",
+            "role": "Director",
+            "key": "/library/people/5ec4249490c7f6004081a95b",
+            "type": "person"
+          },
+          {
+            "id": "5f401b7803883a0040b2de0e",
+            "slug": "taiji-kawanishi",
+            "tag": "Taiji Kawanishi",
+            "role": "Director",
+            "key": "/library/people/5f401b7803883a0040b2de0e",
+            "type": "person"
+          },
+          {
+            "id": "5f40167b1ae7100041042e54",
+            "slug": "kazuo-nogami",
+            "tag": "Kazuo Nogami",
+            "role": "Director",
+            "key": "/library/people/5f40167b1ae7100041042e54",
+            "type": "person"
+          },
+          {
+            "id": "5f4019e3cae2c60042ef160b",
+            "slug": "shigeki-hatakeyama",
+            "tag": "Shigeki Hatakeyama",
+            "role": "Director",
+            "key": "/library/people/5f4019e3cae2c60042ef160b",
+            "type": "person"
+          },
+          {
+            "id": "5f40178386422500428238be",
+            "slug": "mitsutoshi-sato",
+            "tag": "Mitsutoshi Sato",
+            "role": "Director",
+            "key": "/library/people/5f40178386422500428238be",
+            "type": "person"
+          },
+          {
+            "id": "5f3fee0cce2564003f8911c1",
+            "slug": "yukio-okazaki",
+            "tag": "Yukio Okazaki",
+            "role": "Director",
+            "key": "/library/people/5f3fee0cce2564003f8911c1",
+            "type": "person"
+          },
+          {
+            "id": "5e1646c410faa500400ebace",
+            "slug": "eiko-nishi-1",
+            "tag": "Eiko Nishi",
+            "role": "Director",
+            "key": "/library/people/5e1646c410faa500400ebace",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbceebe690b00430d57f9",
+            "slug": "koji-aritomi",
+            "tag": "Koji Aritomi",
+            "role": "Director",
+            "key": "/library/people/5f3fbceebe690b00430d57f9",
+            "type": "person"
+          },
+          {
+            "id": "608d842c291cb8002c588cc7",
+            "slug": "takushi-kimura-2",
+            "tag": "Takushi Kimura",
+            "role": "Director",
+            "key": "/library/people/608d842c291cb8002c588cc7",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cef93c44770842d876c",
+            "slug": "kiyomu-fukuda",
+            "tag": "Kiyomu Fukuda",
+            "role": "Director",
+            "key": "/library/people/62fb7cef93c44770842d876c",
+            "type": "person"
+          },
+          {
+            "id": "5d776a1c96b655001fde3c37",
+            "slug": "yasuhiro-matsumura-1",
+            "tag": "Yasuhiro Matsumura",
+            "role": "Director",
+            "key": "/library/people/5d776a1c96b655001fde3c37",
+            "type": "person"
+          },
+          {
+            "id": "608d8411291cb8002c588bab",
+            "slug": "eitarou-ano",
+            "tag": "Eitarou Ano",
+            "role": "Director",
+            "key": "/library/people/608d8411291cb8002c588bab",
+            "type": "person"
+          },
+          {
+            "id": "66eebfe28693dbe3e334a421",
+            "slug": "itoko-nagai-1",
+            "tag": "Itoko Nagai",
+            "role": "Director",
+            "key": "/library/people/66eebfe28693dbe3e334a421",
+            "type": "person"
+          },
+          {
+            "id": "5f400422ce2564003f8b3578",
+            "slug": "mitsue-yamasaki",
+            "tag": "Mitsue Yamasaki",
+            "role": "Director",
+            "key": "/library/people/5f400422ce2564003f8b3578",
+            "type": "person"
+          },
+          {
+            "id": "5f4022dcc63b480040dea287",
+            "slug": "chen-dali-1",
+            "tag": "Chen Dali",
+            "role": "Director",
+            "key": "/library/people/5f4022dcc63b480040dea287",
+            "type": "person"
+          },
+          {
+            "id": "68bc5645df50ad9edbbe2be2",
+            "slug": "takeshi-shirai-1",
+            "tag": "Takeshi Shirai",
+            "role": "Director",
+            "key": "/library/people/68bc5645df50ad9edbbe2be2",
+            "type": "person"
+          },
+          {
+            "id": "5eaa8b3e91c43200400c121e",
+            "slug": "tadahito-matsubayashi",
+            "tag": "Tadahito Matsubayashi",
+            "role": "Director",
+            "key": "/library/people/5eaa8b3e91c43200400c121e",
+            "type": "person"
+          },
+          {
+            "id": "5d9c0807705e7a001e6d06f6",
+            "slug": "junya-koshiba",
+            "tag": "Junya Koshiba",
+            "role": "Director",
+            "key": "/library/people/5d9c0807705e7a001e6d06f6",
+            "type": "person"
+          },
+          {
+            "id": "63f36149ae146bb5a2eeb9f8",
+            "slug": "shintaro-matsui-1",
+            "tag": "Shintaro Matsui",
+            "role": "Director",
+            "key": "/library/people/63f36149ae146bb5a2eeb9f8",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff68b52f20000414cfc18",
+            "slug": "yoshifumi-sueda",
+            "tag": "Yoshifumi Sueda",
+            "role": "Director",
+            "key": "/library/people/5f3ff68b52f20000414cfc18",
+            "type": "person"
+          },
+          {
+            "id": "5d776c6b594b2b001e6f34dc",
+            "slug": "takeshi-yamaguchi",
+            "tag": "Takeshi Yamaguchi",
+            "role": "Director",
+            "key": "/library/people/5d776c6b594b2b001e6f34dc",
+            "type": "person"
+          },
+          {
+            "id": "5d776a09f617c90020168098",
+            "slug": "yuzuru-tachikawa",
+            "tag": "Yuzuru Tachikawa",
+            "thumb": "https://metadata-static.plex.tv/a/people/a8f8cb0c6e7d9af28459855e770d2630.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776a09f617c90020168098",
+            "type": "person"
+          },
+          {
+            "id": "5d9c0807705e7a001e6d06fa",
+            "slug": "yasuo-iwamoto",
+            "tag": "Yasuo Iwamoto",
+            "role": "Director",
+            "key": "/library/people/5d9c0807705e7a001e6d06fa",
+            "type": "person"
+          },
+          {
+            "id": "5d776d4396b655001fe44426",
+            "slug": "chiaki-kon",
+            "tag": "Chiaki Kon",
+            "thumb": "https://metadata-static.plex.tv/7/people/7e6244d13a2e7e11896d531cddaf5ab1.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776d4396b655001fe44426",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb71a427eeb0041e40e9d",
+            "slug": "hiroki-takagi",
+            "tag": "Hiroki Takagi",
+            "role": "Director",
+            "key": "/library/people/5f3fb71a427eeb0041e40e9d",
+            "type": "person"
+          },
+          {
+            "id": "607b0ed6378bfa00350aacd8",
+            "slug": "takahiro-otsuka",
+            "tag": "Takahiro Otsuka",
+            "role": "Director",
+            "key": "/library/people/607b0ed6378bfa00350aacd8",
+            "type": "person"
+          },
+          {
+            "id": "6a0c3ccd9bf36b1f69e71136",
+            "slug": "ema-saito-7",
+            "tag": "Ema Saito",
+            "role": "Director",
+            "key": "/library/people/6a0c3ccd9bf36b1f69e71136",
+            "type": "person"
+          },
+          {
+            "id": "5f401b05537293003d3a5f34",
+            "slug": "geisei-morita",
+            "tag": "Geisei Morita",
+            "role": "Director",
+            "key": "/library/people/5f401b05537293003d3a5f34",
+            "type": "person"
+          },
+          {
+            "id": "5d776b51594b2b001e6d65d1",
+            "slug": "akira-iwanaga",
+            "tag": "Akira Iwanaga",
+            "role": "Director",
+            "key": "/library/people/5d776b51594b2b001e6d65d1",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff5d986422500427f0d93",
+            "slug": "minoru-yamaoka",
+            "tag": "Minoru Yamaoka",
+            "role": "Director",
+            "key": "/library/people/5f3ff5d986422500427f0d93",
+            "type": "person"
+          },
+          {
+            "id": "5d7768e623d5a3001f4f2cbe",
+            "slug": "yasuhiro-kuroda",
+            "tag": "Yasuhiro Kuroda",
+            "role": "Director",
+            "key": "/library/people/5d7768e623d5a3001f4f2cbe",
+            "type": "person"
+          },
+          {
+            "id": "5f4034a102101b0040f665ab",
+            "slug": "kazuma-satou",
+            "tag": "Kazuma Satou",
+            "role": "Director",
+            "key": "/library/people/5f4034a102101b0040f665ab",
+            "type": "person"
+          },
+          {
+            "id": "5fcb3e63f6ec67002d8929c1",
+            "slug": "kazuya-fujishiro",
+            "tag": "Kazuya Fujishiro",
+            "role": "Director",
+            "key": "/library/people/5fcb3e63f6ec67002d8929c1",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd84acae2c60042e94c9b",
+            "slug": "ouri-yasukawa",
+            "tag": "Ouri Yasukawa",
+            "role": "Director",
+            "key": "/library/people/5f3fd84acae2c60042e94c9b",
+            "type": "person"
+          },
+          {
+            "id": "62bc5f021ffd4649131abd0f",
+            "slug": "takahiro-enokida-1",
+            "tag": "Takahiro Enokida",
+            "role": "Director",
+            "key": "/library/people/62bc5f021ffd4649131abd0f",
+            "type": "person"
+          },
+          {
+            "id": "5e16457261c6140040d7b740",
+            "slug": "tetsuo-ichimura-1",
+            "tag": "Tetsuo Ichimura",
+            "role": "Director",
+            "key": "/library/people/5e16457261c6140040d7b740",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc2321ae7100041fcc1da",
+            "slug": "takumi-ishikawa",
+            "tag": "Takumi Ishikawa",
+            "role": "Director",
+            "key": "/library/people/5f3fc2321ae7100041fcc1da",
+            "type": "person"
+          },
+          {
+            "id": "6048ee1c6cb57f002c760e3b",
+            "slug": "takeshi-tomita-1",
+            "tag": "Takeshi Tomita",
+            "role": "Director",
+            "key": "/library/people/6048ee1c6cb57f002c760e3b",
+            "type": "person"
+          },
+          {
+            "id": "608ed2220c0f12002dc4fc95",
+            "slug": "yuji-sekimoto-1",
+            "tag": "Yuji Sekimoto",
+            "role": "Director",
+            "key": "/library/people/608ed2220c0f12002dc4fc95",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffbaec63b480040db0ae9",
+            "slug": "masaya-sasaki",
+            "tag": "Masaya Sasaki",
+            "role": "Director",
+            "key": "/library/people/5f3ffbaec63b480040db0ae9",
+            "type": "person"
+          },
+          {
+            "id": "5ec426200d2c2c0040be51dc",
+            "slug": "harume-kosaka",
+            "tag": "Harume Kosaka",
+            "role": "Director",
+            "key": "/library/people/5ec426200d2c2c0040be51dc",
+            "type": "person"
+          },
+          {
+            "id": "5d77688bebdf2200209c21b8",
+            "slug": "keizo-kusakawa",
+            "tag": "Keizo Kusakawa",
+            "thumb": "https://image.tmdb.org/t/p/original/fEGNi4brc9r41E7HKX0syqEtizK.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77688bebdf2200209c21b8",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff1f6fea1a1003f9a9f1c",
+            "slug": "matsuo-asami",
+            "tag": "Matsuo Asami",
+            "role": "Director",
+            "key": "/library/people/5f3ff1f6fea1a1003f9a9f1c",
+            "type": "person"
+          },
+          {
+            "id": "5e1651e5d92d86003d36bf8c",
+            "slug": "ryo-miyata",
+            "tag": "Ryo Miyata",
+            "role": "Director",
+            "key": "/library/people/5e1651e5d92d86003d36bf8c",
+            "type": "person"
+          },
+          {
+            "id": "5d776d4aad5437001f7d244e",
+            "slug": "shigeru-ueda",
+            "tag": "Shigeru Ueda",
+            "role": "Director",
+            "key": "/library/people/5d776d4aad5437001f7d244e",
+            "type": "person"
+          },
+          {
+            "id": "66bb4b924127e4aa48c31c2e",
+            "slug": "yoshiyuki-mitsui",
+            "tag": "Yoshiyuki Mitsui",
+            "role": "Director",
+            "key": "/library/people/66bb4b924127e4aa48c31c2e",
+            "type": "person"
+          },
+          {
+            "id": "5f4064b102101b0040fd51c2",
+            "slug": "kaito-asakura",
+            "tag": "Kaito Asakura",
+            "role": "Director",
+            "key": "/library/people/5f4064b102101b0040fd51c2",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "6251961f3f4439529c0688b6",
+            "slug": "genki-negishi",
+            "tag": "Genki Negishi",
+            "role": "Producer",
+            "key": "/library/people/6251961f3f4439529c0688b6",
+            "type": "person"
+          },
+          {
+            "id": "5f404f9f427eeb0041ec3fe6",
+            "slug": "makoto-hijikata",
+            "tag": "Makoto Hijikata",
+            "role": "Producer",
+            "key": "/library/people/5f404f9f427eeb0041ec3fe6",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff78f04a86500409b6c15",
+            "slug": "yoshihiko-tominaga",
+            "tag": "Yoshihiko Tominaga",
+            "role": "Producer",
+            "key": "/library/people/5f3ff78f04a86500409b6c15",
+            "type": "person"
+          },
+          {
+            "id": "6412e2382415954e88e6af21",
+            "slug": "tasuku-honda",
+            "tag": "Tasuku Honda",
+            "role": "Producer",
+            "key": "/library/people/6412e2382415954e88e6af21",
+            "type": "person"
+          },
+          {
+            "id": "6412e2386c0089370bdb22bc",
+            "slug": "momoko-asahara",
+            "tag": "Momoko Asahara",
+            "role": "Producer",
+            "key": "/library/people/6412e2386c0089370bdb22bc",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5dce7f51964b6b001e954835",
+            "slug": "masahiro-okubo",
+            "tag": "Masahiro Okubo",
+            "role": "Writer",
+            "key": "/library/people/5dce7f51964b6b001e954835",
+            "type": "person"
+          },
+          {
+            "id": "5d776873374a5b001fec5dcb",
+            "slug": "genki-yoshimura",
+            "tag": "Genki Yoshimura",
+            "thumb": "https://metadata-static.plex.tv/5/people/5be684c17bf73be5199e2f4b0fa31817.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776873374a5b001fec5dcb",
+            "type": "person"
+          },
+          {
+            "id": "5e624d595dd74b003de875b2",
+            "slug": "kazuyuki-fudeyasu",
+            "tag": "Kazuyuki Fudeyasu",
+            "role": "Writer",
+            "key": "/library/people/5e624d595dd74b003de875b2",
+            "type": "person"
+          },
+          {
+            "id": "5e164057cd0850003b769b70",
+            "slug": "rika-sogo",
+            "tag": "Rika Sogo",
+            "role": "Writer",
+            "key": "/library/people/5e164057cd0850003b769b70",
+            "type": "person"
+          },
+          {
+            "id": "5d776847961905001eb979eb",
+            "slug": "michiko-yokote",
+            "tag": "Michiko Yokote",
+            "role": "Writer",
+            "key": "/library/people/5d776847961905001eb979eb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a433f255001e85bbc3",
+            "slug": "natsuko-takahashi",
+            "tag": "Natsuko Takahashi",
+            "role": "Writer",
+            "key": "/library/people/5d7768a433f255001e85bbc3",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2b96b655001fde5481",
+            "slug": "kento-shimoyama",
+            "tag": "Kento Shimoyama",
+            "thumb": "https://metadata-static.plex.tv/people/5d776a2b96b655001fde5481.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776a2b96b655001fde5481",
+            "type": "person"
+          },
+          {
+            "id": "608d83c5291cb8002c5886ad",
+            "slug": "mio-imamura",
+            "tag": "Mio Imamura",
+            "role": "Writer",
+            "key": "/library/people/608d83c5291cb8002c5886ad",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "TV Tokyo"
+          },
+          {
+            "tag": "TV Aichi"
+          },
+          {
+            "tag": "TVQ"
+          },
+          {
+            "tag": "TV Osaka"
+          },
+          {
+            "tag": "TVh"
+          },
+          {
+            "tag": "TSC"
+          },
+          {
+            "tag": "BS TV Tokyo"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5fc2758b3395a5002e4e77a4",
+            "tag": "Seirei Gensouki: Spirit Chronicles"
+          },
+          {
+            "guid": "plex://show/656559673cdc9021485a92f2",
+            "tag": "DAN DA DAN"
+          },
+          {
+            "guid": "plex://show/65c615d4762cd1fb515aed53",
+            "tag": "Wistoria: Wand and Sword"
+          },
+          {
+            "guid": "plex://show/65d7034a577e11423fafcc61",
+            "tag": "Wistoria: Wand and Sword"
+          },
+          {
+            "guid": "plex://show/5d9c0813705e7a001e6d1afb",
+            "tag": "Yu Yu Hakusho"
+          },
+          {
+            "guid": "plex://show/5d9c08042df347001e3a892b",
+            "tag": "Mob Psycho 100"
+          },
+          {
+            "guid": "plex://show/5d9c0805ec357c001f9a92bc",
+            "tag": "Chivalry of a Failed Knight"
+          },
+          {
+            "guid": "plex://show/5d9c0815e98e47001eb07102",
+            "tag": "Natsume's Book of Friends"
+          },
+          {
+            "guid": "plex://show/5d9c09161cae62001f750e5c",
+            "tag": "Arifureta: From Commonplace to World's Strongest"
+          },
+          {
+            "guid": "plex://show/5df5b930578f84001d2a0262",
+            "tag": "Toilet‐bound Hanako‐kun"
+          },
+          {
+            "guid": "plex://show/5e1622a5124ae9003e3ccd14",
+            "tag": "JUJUTSU KAISEN"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Pierrot"
+          },
+          {
+            "tag": "Aniplex"
+          },
+          {
+            "tag": "Shueisha"
+          },
+          {
+            "tag": "TV Tokyo"
+          },
+          {
+            "tag": "dentsu"
+          },
+          {
+            "tag": "Zack Promotion"
+          },
+          {
+            "tag": "PIERROT FILMS"
+          }
+        ]
+      }
+    ]
+  }
+}

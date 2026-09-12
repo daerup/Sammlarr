@@ -1,0 +1,578 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1788912000,
+              "art": "https://metadata-static.plex.tv/0/gracenote/0f409b84e094aa8416f685ae13b58177.jpg",
+              "duration": 6240000,
+              "guid": "plex://movie/67f728f097f5a99d6f6ca577",
+              "key": "/library/metadata/67f728f097f5a99d6f6ca577",
+              "originallyAvailableAt": "2026-09-09",
+              "ratingKey": "67f728f097f5a99d6f6ca577",
+              "slug": "drawn-together-2026-1",
+              "thumb": "https://metadata-static.plex.tv/2/gracenote/2f451591a8f76d78a189490ddec319b6.jpg",
+              "title": "Drawn Together",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.93
+          },
+          {
+            "Metadata": {
+              "addedAt": 1268870400,
+              "art": "https://metadata-static.plex.tv/e/gracenote/ee004d642dbbdca6fcd2036ebc4a04a7.jpg",
+              "duration": 4260000,
+              "guid": "plex://movie/5d7768692e80df001ebe3425",
+              "key": "/library/metadata/5d7768692e80df001ebe3425",
+              "originallyAvailableAt": "2010-03-18",
+              "ratingKey": "5d7768692e80df001ebe3425",
+              "slug": "the-drawn-together-movie-the-movie",
+              "thumb": "https://metadata-static.plex.tv/6/gracenote/6004e2eb14d8b0399fa5abc15242480e.jpg",
+              "title": "The Drawn Together Movie: The Movie!",
+              "type": "movie",
+              "year": 2010,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.76
+          },
+          {
+            "Metadata": {
+              "addedAt": 1753833600,
+              "art": "https://metadata-static.plex.tv/f/gracenote/f39f989d294e76f8e1614b1804764de9.jpg",
+              "duration": 6120000,
+              "guid": "plex://movie/65cc295216bb4db33e2cfef6",
+              "key": "/library/metadata/65cc295216bb4db33e2cfef6",
+              "originallyAvailableAt": "2025-07-30",
+              "ratingKey": "65cc295216bb4db33e2cfef6",
+              "slug": "together-2025-1",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/f7058c4b50abde385010adec026e9cf4.jpg",
+              "title": "Together",
+              "type": "movie",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.25
+          },
+          {
+            "Metadata": {
+              "addedAt": 1697068800,
+              "art": "https://metadata-static.plex.tv/c/gracenote/c358a6752a28fc801e8a5b319e5aa368.jpg",
+              "duration": 5460000,
+              "guid": "plex://movie/60670591a4950e002d635094",
+              "key": "/library/metadata/60670591a4950e002d635094",
+              "originallyAvailableAt": "2023-10-12",
+              "ratingKey": "60670591a4950e002d635094",
+              "slug": "trolls-band-together",
+              "thumb": "https://metadata-static.plex.tv/b/gracenote/b718f34ac545306969e7bc249bac8910.jpg",
+              "title": "Trolls Band Together",
+              "type": "movie",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046d3c3f87001f33fc20",
+                  "id": "5d9c046d3c3f87001f33fc20",
+                  "key": "/library/categories/musical",
+                  "ratingKey": "genre_5d9c046d3c3f87001f33fc20",
+                  "slug": "musical",
+                  "tag": "Musical",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf556341e001e11b8ee",
+                  "id": "5da05bf556341e001e11b8ee",
+                  "key": "/library/categories/music",
+                  "ratingKey": "genre_5da05bf556341e001e11b8ee",
+                  "slug": "music",
+                  "tag": "Music",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.24
+          },
+          {
+            "Metadata": {
+              "addedAt": 310089600,
+              "duration": 3420000,
+              "guid": "plex://movie/5d776db5fb0d55001f5a83e6",
+              "key": "/library/metadata/5d776db5fb0d55001f5a83e6",
+              "originallyAvailableAt": "1979-10-30",
+              "ratingKey": "5d776db5fb0d55001f5a83e6",
+              "slug": "boys-and-girls-together",
+              "thumb": "https://image.tmdb.org/t/p/original/eikC9iPHRdtDzZT5k9GFOCPV7h.jpg",
+              "title": "Boys and Girls Together",
+              "type": "movie",
+              "year": 1979,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "addedAt": 1697673600,
+              "art": "https://image.tmdb.org/t/p/original/yfRaZxUqrb0SrTesKkZdGB6Gy2G.jpg",
+              "duration": 1500000,
+              "guid": "plex://movie/657525729f2692796173e40a",
+              "key": "/library/metadata/657525729f2692796173e40a",
+              "originallyAvailableAt": "2023-10-19",
+              "ratingKey": "657525729f2692796173e40a",
+              "slug": "drawn-2023",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/2hcC4yWAxTumy0pHO3rYSWbYHYK.jpg",
+              "title": "Drawn",
+              "type": "movie",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.22
+          },
+          {
+            "Metadata": {
+              "addedAt": 1417392000,
+              "duration": 2520000,
+              "guid": "plex://movie/5d776bd823d5a3001f514bc5",
+              "key": "/library/metadata/5d776bd823d5a3001f514bc5",
+              "originallyAvailableAt": "2014-12-01",
+              "ratingKey": "5d776bd823d5a3001f514bc5",
+              "slug": "drawn",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/6mitannfmLHmGDDyKZ5snVkmuBl.jpg",
+              "title": "Drawn",
+              "type": "movie",
+              "year": 2014,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf9370f98001f4ddd95",
+                  "id": "5da05bf9370f98001f4ddd95",
+                  "key": "/library/categories/sport",
+                  "ratingKey": "genre_5da05bf9370f98001f4ddd95",
+                  "slug": "sport",
+                  "tag": "Sport",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.22
+          },
+          {
+            "Metadata": {
+              "addedAt": 1723766400,
+              "duration": 5280000,
+              "guid": "plex://movie/6735b7212e494f56bcb7e48e",
+              "key": "/library/metadata/6735b7212e494f56bcb7e48e",
+              "originallyAvailableAt": "2024-08-16",
+              "ratingKey": "6735b7212e494f56bcb7e48e",
+              "slug": "yall-drawn-2024-1",
+              "thumb": "https://image.tmdb.org/t/p/original/r7Xj44YDSYCQQmIsQOLkprOimtN.jpg",
+              "title": "Yall Drawn",
+              "type": "movie",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          },
+          {
+            "Metadata": {
+              "addedAt": 1765756800,
+              "art": "https://image.tmdb.org/t/p/original/sgfUTK5QT05R9EuigR49pVy75HV.jpg",
+              "duration": 360000,
+              "guid": "plex://movie/67c24a34ac21c6cf5aebcc00",
+              "key": "/library/metadata/67c24a34ac21c6cf5aebcc00",
+              "originallyAvailableAt": "2025-12-15",
+              "ratingKey": "67c24a34ac21c6cf5aebcc00",
+              "slug": "drawn-out-2025",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/rpnvmo7mi8qWj4vlo4AYd7SHWRu.jpg",
+              "title": "Drawn Out",
+              "type": "movie",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          },
+          {
+            "Metadata": {
+              "addedAt": 1811808000,
+              "art": "https://image.tmdb.org/t/p/original/wd5ho0OVE6q9mPEN59yVshyi1in.jpg",
+              "duration": 540000,
+              "guid": "plex://movie/69e97035aaee452cd1672338",
+              "key": "/library/metadata/69e97035aaee452cd1672338",
+              "originallyAvailableAt": "2027-06-01",
+              "ratingKey": "69e97035aaee452cd1672338",
+              "slug": "hand-drawn-2027",
+              "thumb": "https://image.tmdb.org/t/p/original/l4QqbN3QWpPOM9D5Lql5or6LUrB.jpg",
+              "title": "Hand Drawn",
+              "type": "movie",
+              "year": 2027,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          }
+        ]
+      }
+    ]
+  }
+}

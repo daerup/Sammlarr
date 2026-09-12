@@ -1,0 +1,203 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/c/gracenote/c0e07dfe2b6c4be4c810d8ec3ab38b6f.jpg",
+        "guid": "plex://movie/5f40c5ba9774a2003a180377",
+        "key": "/library/metadata/5f40c5ba9774a2003a180377",
+        "ratingKey": "5f40c5ba9774a2003a180377",
+        "studio": "Spud Headz Entertainment, L.B. Productions",
+        "summary": "After seeing their father get sent to prison, two brothers (Howard Patterson, Christopher Watkins) struggle to survive living in the Motor City.",
+        "type": "movie",
+        "addedAt": 1452643200,
+        "audienceRating": 6.2,
+        "audienceRatingImage": "imdb://image.rating",
+        "budget": 10000,
+        "contentRating": "PG-13",
+        "duration": 5280000,
+        "imdbRatingCount": 10,
+        "originallyAvailableAt": "2016-01-13",
+        "publicPagesURL": "https://watch.plex.tv/movie/motor-city-living",
+        "slug": "motor-city-living",
+        "thumb": "https://metadata-static.plex.tv/6/gracenote/670f557a86201a89188e3298e3b48a09.jpg",
+        "title": "Motor City Living",
+        "userState": false,
+        "year": 2016,
+        "Image": [
+          {
+            "alt": "Motor City Living",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c0e07dfe2b6c4be4c810d8ec3ab38b6f.jpg"
+          },
+          {
+            "alt": "Motor City Living",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8d1c6102032f64f965b71aacb19aeea6.jpg"
+          },
+          {
+            "alt": "Motor City Living",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/9/gracenote/9c8d1376077b39e2b0d29af620fbc400.jpg"
+          },
+          {
+            "alt": "Motor City Living",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/6/gracenote/670f557a86201a89188e3298e3b48a09.jpg"
+          },
+          {
+            "alt": "Motor City Living",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/94d5792608feb44f49da09c954b8b935.jpg"
+          },
+          {
+            "alt": "Motor City Living",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d1c5a9894a441f30ec5bc1558924f073.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt5564448"
+          },
+          {
+            "id": "tmdb://980070"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.2
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6290e6003bb3e24d4d7a52fa",
+            "order": 1,
+            "slug": "nona-malone-1",
+            "tag": "Nona Malone",
+            "role": "The Mother",
+            "key": "/library/people/6290e6003bb3e24d4d7a52fa",
+            "type": "person"
+          },
+          {
+            "id": "5d7768358a7581001f12d764",
+            "order": 2,
+            "slug": "howard-jay-patterson",
+            "tag": "Howard Jay Patterson",
+            "role": "Tim",
+            "key": "/library/people/5d7768358a7581001f12d764",
+            "type": "person"
+          },
+          {
+            "id": "6290e600935515c5fee31227",
+            "order": 3,
+            "slug": "christopher-watkins-17",
+            "tag": "Christopher Watkins",
+            "role": "Mike",
+            "key": "/library/people/6290e600935515c5fee31227",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7770e6bbb697001f6542c0",
+            "slug": "wil-lewis",
+            "tag": "Wil Lewis",
+            "thumb": "https://metadata-static.plex.tv/9/people/98eb080dd6d7db7054814b77422b5ff3.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7770e6bbb697001f6542c0",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768358a7581001f12d764",
+            "slug": "howard-jay-patterson",
+            "tag": "Howard Jay Patterson",
+            "role": "Writer",
+            "key": "/library/people/5d7768358a7581001f12d764",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d776843f59e58002189a422",
+            "tag": "Above the Rim"
+          },
+          {
+            "guid": "plex://movie/5d776a12ad5437001f7712c8",
+            "tag": "Blood Ties"
+          },
+          {
+            "guid": "plex://movie/5d77684d8718ba001e3186f9",
+            "tag": "The Safety of Objects"
+          },
+          {
+            "guid": "plex://movie/5d776a9bf617c9002016f0cb",
+            "tag": "Imperial Dreams"
+          },
+          {
+            "guid": "plex://movie/5d776875eb5d26001f1ec389",
+            "tag": "Bastard Out of Carolina"
+          },
+          {
+            "guid": "plex://movie/5d77706f96b655001fe961f2",
+            "tag": "Finestkind"
+          },
+          {
+            "guid": "plex://movie/5d777045594b2b001e747f27",
+            "tag": "The Kindness of Strangers"
+          },
+          {
+            "guid": "plex://movie/5d77707bdd931c001e38dfbe",
+            "tag": "The Nest"
+          },
+          {
+            "guid": "plex://movie/5d777081cfbb56001fb893ee",
+            "tag": "El Chicano"
+          },
+          {
+            "guid": "plex://movie/606432cf5606b3002c2b2bf6",
+            "tag": "The Good Neighbor"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Spud Headz Entertainment, L.B. Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "After seeing their father go to prison, two brothers struggle to survive on the streets of Detroit.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

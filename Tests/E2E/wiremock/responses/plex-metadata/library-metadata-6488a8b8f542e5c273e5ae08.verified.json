@@ -1,0 +1,985 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/9/gracenote/95a6d8b93b137ec1b2096652e3fc5043.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/358754/banners/6a9acb636e5c0.jpg",
+        "guid": "plex://movie/6488a8b8f542e5c273e5ae08",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/6488a8b8f542e5c273e5ae08",
+        "rating": 8.2,
+        "ratingKey": "6488a8b8f542e5c273e5ae08",
+        "studio": "Skydance Media",
+        "summary": "Lieutenant Troy Brennan takes part in a top secret surveillance mission over Soviet airspace. Things take a sharp turn, however, when he is forced to eject from his plane over the Russian wilderness. He is rescued by a paradoxical Russian native and the two begin to appreciate both their differences and commonalities.",
+        "tagline": "A friendship with major red flags.",
+        "type": "movie",
+        "addedAt": 1788480000,
+        "audienceRating": 6.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 25000000,
+        "contentRating": "PG-13",
+        "duration": 6660000,
+        "imdbRatingCount": 20309,
+        "originallyAvailableAt": "2026-09-04",
+        "publicPagesURL": "https://watch.plex.tv/movie/mayday-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "mayday-2026",
+        "thumb": "https://metadata-static.plex.tv/8/gracenote/8a6fa98649758c4b90dc9de853fc9510.jpg",
+        "title": "Mayday",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/6488a8b8f542e5c273e5ae08/commonsensemedia",
+            "oneLiner": "Cold War buddy action comedy with violence, language.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Mayday",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/9/gracenote/95a6d8b93b137ec1b2096652e3fc5043.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/f/gracenote/ffee2149183d70e21f6ce4db3a176b00.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/358754/banners/6a9acb636e5c0.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1dd18c275fe69a2339dc14243a3ad57d.png"
+          },
+          {
+            "alt": "Mayday",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1dd18c275fe69a2339dc14243a3ad57d.png"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/1/gracenote/13689b3fdc65a75d63b10a615434b4ca.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8a6fa98649758c4b90dc9de853fc9510.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/5c3b936bd20e6ad4fcacf65042fb029b.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d727cecf480c9e639501039b44d7144a.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt28014327"
+          },
+          {
+            "id": "tmdb://1137844"
+          },
+          {
+            "id": "tvdb://358754"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.2
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 6.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.898
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682b3c3c2a001fbcc358",
+            "order": 1,
+            "slug": "ryan-reynolds",
+            "tag": "Ryan Reynolds",
+            "thumb": "https://metadata-static.plex.tv/6/people/6717fdba033294baac3c7fa313fc2017.jpg",
+            "role": "Troy Kelly",
+            "key": "/library/people/5d77682b3c3c2a001fbcc358",
+            "type": "person"
+          },
+          {
+            "id": "5d7768278718ba001e311e43",
+            "order": 2,
+            "slug": "kenneth-branagh",
+            "tag": "Kenneth Branagh",
+            "thumb": "https://metadata-static.plex.tv/2/people/2d69a85dce75bfc3d8b48ee9f4091779.jpg",
+            "role": "Nikolai Ustinov",
+            "key": "/library/people/5d7768278718ba001e311e43",
+            "type": "person"
+          },
+          {
+            "id": "5d776867374a5b001fec492f",
+            "order": 3,
+            "slug": "marcin-dorocinski",
+            "tag": "Marcin Dorociński",
+            "thumb": "https://metadata-static.plex.tv/6/people/62f99dbc1a9718dd813333ec44c82cf1.jpg",
+            "role": "Alexander Volkov",
+            "key": "/library/people/5d776867374a5b001fec492f",
+            "type": "person"
+          },
+          {
+            "id": "5e16575161c6140040d8ecec",
+            "order": 4,
+            "slug": "maria-bakalova",
+            "tag": "Maria Bakalova",
+            "thumb": "https://metadata-static.plex.tv/1/people/1a1161e3f6d28b35256971f459d43467.jpg",
+            "role": "Anna Ustinov",
+            "key": "/library/people/5e16575161c6140040d8ecec",
+            "type": "person"
+          },
+          {
+            "id": "5d7768254de0ee001fcc81b2",
+            "order": 5,
+            "slug": "david-morse",
+            "tag": "David Morse",
+            "thumb": "https://metadata-static.plex.tv/4/people/4556f4e51e93ca0a8bd15a22e868e8d1.jpg",
+            "role": "Harold Kelly",
+            "key": "/library/people/5d7768254de0ee001fcc81b2",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9adc5",
+            "order": 6,
+            "slug": "clark-johnson",
+            "tag": "Clark Johnson",
+            "thumb": "https://metadata-static.plex.tv/b/people/ba1738812d1edc4cfa59306c5414b7dd.jpg",
+            "role": "CDR Keith Hardwick",
+            "key": "/library/people/5d77682f6f4521001ea9adc5",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a61141d001fb13c26",
+            "order": 7,
+            "slug": "wendy-crewson",
+            "tag": "Wendy Crewson",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb1d520e9c4ebe14604a06c96fee51fd.jpg",
+            "role": "Assistant Director Karen Meadows",
+            "key": "/library/people/5d77682a61141d001fb13c26",
+            "type": "person"
+          },
+          {
+            "id": "5d7768bbdecfcd001f2f1479",
+            "order": 8,
+            "slug": "louis-cancelmi",
+            "tag": "Louis Cancelmi",
+            "thumb": "https://metadata-static.plex.tv/2/people/29db0955d8f6c4dd8488ac0da2c52c78.jpg",
+            "role": "Maj Pete Sanders",
+            "key": "/library/people/5d7768bbdecfcd001f2f1479",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd57d",
+            "order": 9,
+            "slug": "josh-hamilton",
+            "tag": "Josh Hamilton",
+            "thumb": "https://metadata-static.plex.tv/1/people/155c22270b5a39f947678e6f41bff5a0.jpg",
+            "role": "Consul General Dan Hennessy",
+            "key": "/library/people/5d776826eb5d26001f1dd57d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c4fb0d55001f5191ac",
+            "order": 10,
+            "slug": "alex-mallari-jr",
+            "tag": "Alex Mallari Jr.",
+            "thumb": "https://metadata-static.plex.tv/c/people/c65d4bfc130881be1a4e1fc8ab290a57.jpg",
+            "role": "Danny 'Longshot' Bowers",
+            "key": "/library/people/5d7768c4fb0d55001f5191ac",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ae594b2b001e692ac4",
+            "order": 11,
+            "slug": "alden-adair",
+            "tag": "Alden Adair",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768ae594b2b001e692ac4.jpg",
+            "role": "James 'Mullet' Mullen",
+            "key": "/library/people/5d7768ae594b2b001e692ac4",
+            "type": "person"
+          },
+          {
+            "id": "5d7770887a53e9001e7a5162",
+            "order": 12,
+            "slug": "lovell-adams-gray",
+            "tag": "Lovell Adams-Gray",
+            "thumb": "https://metadata-static.plex.tv/8/people/8ce7f540750b1270c6f2d12af7ce29d0.jpg",
+            "role": "Tomas 'Boomer' Garcia",
+            "key": "/library/people/5d7770887a53e9001e7a5162",
+            "type": "person"
+          },
+          {
+            "id": "5d776831103a2d001f566c6d",
+            "order": 13,
+            "slug": "john-francis-daley",
+            "tag": "John Francis Daley",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5e08cb01aeaae75c2c5539c49eb1b10.jpg",
+            "role": "LSO",
+            "key": "/library/people/5d776831103a2d001f566c6d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768342ec6b5001f6bbc63",
+            "order": 14,
+            "slug": "robert-crooks",
+            "tag": "Robert Crooks",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768342ec6b5001f6bbc63.jpg",
+            "role": "Air Boss #1",
+            "key": "/library/people/5d7768342ec6b5001f6bbc63",
+            "type": "person"
+          },
+          {
+            "id": "5d776c5ffb0d55001f585fdc",
+            "order": 15,
+            "slug": "lorrie-odom",
+            "tag": "Lorrie Odom",
+            "thumb": "https://metadata-static.plex.tv/people/5d776c5ffb0d55001f585fdc.jpg",
+            "role": "Nurse",
+            "key": "/library/people/5d776c5ffb0d55001f585fdc",
+            "type": "person"
+          },
+          {
+            "id": "5f402cae8642250042842032",
+            "order": 16,
+            "slug": "jean-bernard",
+            "tag": "Jean Bernard",
+            "role": "Bouncer",
+            "key": "/library/people/5f402cae8642250042842032",
+            "type": "person"
+          },
+          {
+            "id": "5d776b7423d5a3001f510acf",
+            "order": 17,
+            "slug": "vadim-kroll",
+            "tag": "Vadim Kroll",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b7423d5a3001f510acf.jpg",
+            "role": "Belsky",
+            "key": "/library/people/5d776b7423d5a3001f510acf",
+            "type": "person"
+          },
+          {
+            "id": "5d776ca096b655001fe369bf",
+            "order": 18,
+            "slug": "andrei-kovski",
+            "tag": "Andrei Kovski",
+            "thumb": "https://metadata-static.plex.tv/people/5d776ca096b655001fe369bf.jpg",
+            "role": "Yuri",
+            "key": "/library/people/5d776ca096b655001fe369bf",
+            "type": "person"
+          },
+          {
+            "id": "5fbbddbd5adba8002d3f30e1",
+            "order": 19,
+            "slug": "alexander-drojjine",
+            "tag": "Alexander Drojjine",
+            "role": "Lev",
+            "key": "/library/people/5fbbddbd5adba8002d3f30e1",
+            "type": "person"
+          },
+          {
+            "id": "5d7768bb6f6af7001ee5c0c5",
+            "order": 20,
+            "slug": "patrick-kerton",
+            "tag": "Patrick Kerton",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768bb6f6af7001ee5c0c5.jpg",
+            "role": "Ivan",
+            "key": "/library/people/5d7768bb6f6af7001ee5c0c5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768296f4521001ea99a57",
+            "order": 21,
+            "slug": "arthur-holden",
+            "tag": "Arthur Holden",
+            "thumb": "https://metadata-static.plex.tv/7/people/7fd40e56367517a32499919073b52ba2.jpg",
+            "role": "Barkeep",
+            "key": "/library/people/5d7768296f4521001ea99a57",
+            "type": "person"
+          },
+          {
+            "id": "5d77698c47dd6e001f6c6e46",
+            "order": 22,
+            "slug": "alex-ozerov-meyer",
+            "tag": "Alex Ozerov-Meyer",
+            "thumb": "https://metadata-static.plex.tv/4/people/4f10d7a5a9e066fa0599b79608a0a029.jpg",
+            "role": "Viktor",
+            "key": "/library/people/5d77698c47dd6e001f6c6e46",
+            "type": "person"
+          },
+          {
+            "id": "5d7768dddecfcd001f2f3e1b",
+            "order": 23,
+            "slug": "david-mckeown",
+            "tag": "David McKeown",
+            "role": "Train Car Attendant",
+            "key": "/library/people/5d7768dddecfcd001f2f3e1b",
+            "type": "person"
+          },
+          {
+            "id": "5f402139c63b480040de7fd8",
+            "order": 24,
+            "slug": "alexandre-sazonov",
+            "tag": "Alexandre Sazonov",
+            "role": "Train Announcer / General Ternovyh",
+            "key": "/library/people/5f402139c63b480040de7fd8",
+            "type": "person"
+          },
+          {
+            "id": "5f40088f52f20000414ea980",
+            "order": 25,
+            "slug": "elbina-oulmacheva",
+            "tag": "Elbina Oulmacheva",
+            "role": "Yelena",
+            "key": "/library/people/5f40088f52f20000414ea980",
+            "type": "person"
+          },
+          {
+            "id": "5d776832880197001ec92ad1",
+            "order": 26,
+            "slug": "leonid-citer",
+            "tag": "Leonid Citer",
+            "thumb": "https://image.tmdb.org/t/p/original/unXcr87OEHaQ4FPbrSiJzMOZWJw.jpg",
+            "role": "Yevgeniy",
+            "key": "/library/people/5d776832880197001ec92ad1",
+            "type": "person"
+          },
+          {
+            "id": "664862ac5a62df3557bc9c27",
+            "order": 27,
+            "slug": "jacob-hanlon",
+            "tag": "Jacob Hanlon",
+            "role": "Gorgo",
+            "key": "/library/people/664862ac5a62df3557bc9c27",
+            "type": "person"
+          },
+          {
+            "id": "5d776834961905001eb93b36",
+            "order": 28,
+            "slug": "mark-antony-krupa",
+            "tag": "Mark Antony Krupa",
+            "thumb": "https://metadata-static.plex.tv/people/5d776834961905001eb93b36.jpg",
+            "role": "Dacha Guard #1",
+            "key": "/library/people/5d776834961905001eb93b36",
+            "type": "person"
+          },
+          {
+            "id": "5d7770827a53e9001e7a45fc",
+            "order": 29,
+            "slug": "niko-nikolov",
+            "tag": "Niko Nikolov",
+            "thumb": "https://metadata-static.plex.tv/1/people/1386f6bec0655f643bfba6b724817d63.jpg",
+            "role": "Dacha Guard #2",
+            "key": "/library/people/5d7770827a53e9001e7a45fc",
+            "type": "person"
+          },
+          {
+            "id": "5d7768358a7581001f12d797",
+            "order": 30,
+            "slug": "raphael-kepinski",
+            "tag": "Raphael Kepinski",
+            "thumb": "https://metadata-static.plex.tv/3/people/36c338acb5ef9488f94cbb093e8e6d83.jpg",
+            "role": "Eduard Dukhov",
+            "key": "/library/people/5d7768358a7581001f12d797",
+            "type": "person"
+          },
+          {
+            "id": "5d777049f617c9002019ce24",
+            "order": 31,
+            "slug": "aleksandra-kimaeva",
+            "tag": "Aleksandra Kimaeva",
+            "thumb": "https://metadata-static.plex.tv/people/5d777049f617c9002019ce24.jpg",
+            "role": "Julia",
+            "key": "/library/people/5d777049f617c9002019ce24",
+            "type": "person"
+          },
+          {
+            "id": "6410303cc25ca79c51a581c4",
+            "order": 32,
+            "slug": "roksana-olsinskaya",
+            "tag": "Roksana Olsinskaya",
+            "role": "Nadia Dukhov",
+            "key": "/library/people/6410303cc25ca79c51a581c4",
+            "type": "person"
+          },
+          {
+            "id": "6a9c0463df619f88d0092288",
+            "order": 33,
+            "slug": "nikita-olsinskiy",
+            "tag": "Nikita Olsinskiy",
+            "role": "Boris Dukhov",
+            "key": "/library/people/6a9c0463df619f88d0092288",
+            "type": "person"
+          },
+          {
+            "id": "67f68357fda899c845ccef10",
+            "order": 34,
+            "slug": "veronica-gorbov",
+            "tag": "Veronica Gorbov",
+            "role": "Mila Dukhov",
+            "key": "/library/people/67f68357fda899c845ccef10",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcf0404a865004097e61f",
+            "order": 35,
+            "slug": "chanel-mings",
+            "tag": "Chanel Mings",
+            "thumb": "https://metadata-static.plex.tv/f/people/f4f70bd266d7aa09196319c118712943.jpg",
+            "role": "US Embassy Staffer",
+            "key": "/library/people/5f3fcf0404a865004097e61f",
+            "type": "person"
+          },
+          {
+            "id": "6a9c0463df619f88d0092289",
+            "order": 36,
+            "slug": "jurij-kekalo",
+            "tag": "Jurij Kekalo",
+            "role": "KGB Agent #1",
+            "key": "/library/people/6a9c0463df619f88d0092289",
+            "type": "person"
+          },
+          {
+            "id": "5d77698cfb0d55001f528fa4",
+            "order": 37,
+            "slug": "janos-timko",
+            "tag": "János Timkó",
+            "thumb": "https://metadata-static.plex.tv/7/people/749ffd49da1da5638e95e68f27304e6b.jpg",
+            "role": "KGB Agent #2",
+            "key": "/library/people/5d77698cfb0d55001f528fa4",
+            "type": "person"
+          },
+          {
+            "id": "62bc5cb8034bef2dd26bc339",
+            "order": 38,
+            "slug": "attila-halasz-5",
+            "tag": "Attila Halász",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec49d222d5b47daf46c3cf02e1ceab5a.jpg",
+            "role": "KGB Agent #3",
+            "key": "/library/people/62bc5cb8034bef2dd26bc339",
+            "type": "person"
+          },
+          {
+            "id": "5ec410b5568c330043198745",
+            "order": 39,
+            "slug": "gabor-maday",
+            "tag": "Gábor Maday",
+            "role": "KGB Agent #4",
+            "key": "/library/people/5ec410b5568c330043198745",
+            "type": "person"
+          },
+          {
+            "id": "609cdec1f2dd7d002dfd99ec",
+            "order": 40,
+            "slug": "roland-imre",
+            "tag": "Roland Imre",
+            "role": "MAZ Driver",
+            "key": "/library/people/609cdec1f2dd7d002dfd99ec",
+            "type": "person"
+          },
+          {
+            "id": "5fd78c56741c48002df0e6f4",
+            "order": 41,
+            "slug": "elek-kori",
+            "tag": "Elek Kőri",
+            "role": "MAZ Driver",
+            "key": "/library/people/5fd78c56741c48002df0e6f4",
+            "type": "person"
+          },
+          {
+            "id": "5f1362e0bce55800433e178d",
+            "order": 42,
+            "slug": "sandor-qpa-bencze",
+            "tag": "Sándor Qpa Bencze",
+            "role": "Volkov's Police Driver",
+            "key": "/library/people/5f1362e0bce55800433e178d",
+            "type": "person"
+          },
+          {
+            "id": "5d9f3577d74e670020022257",
+            "order": 43,
+            "slug": "janos-fuzi",
+            "tag": "János Füzi",
+            "role": "Russian Policeman",
+            "key": "/library/people/5d9f3577d74e670020022257",
+            "type": "person"
+          },
+          {
+            "id": "5d77687661141d001fb1b3d0",
+            "order": 44,
+            "slug": "peter-fancsikai",
+            "tag": "Péter Fancsikai",
+            "thumb": "https://metadata-static.plex.tv/people/5d77687661141d001fb1b3d0.jpg",
+            "role": "Airport Gate Guard",
+            "key": "/library/people/5d77687661141d001fb1b3d0",
+            "type": "person"
+          },
+          {
+            "id": "5d776cad9ab54400215198b2",
+            "order": 45,
+            "slug": "erniel-baez",
+            "tag": "Erniel Baez",
+            "thumb": "https://metadata-static.plex.tv/e/people/e95aab88be5bbc87daf3e471c61cf4e0.jpg",
+            "role": "TAO Price",
+            "key": "/library/people/5d776cad9ab54400215198b2",
+            "type": "person"
+          },
+          {
+            "id": "5e17c265cd0850003b81ae36",
+            "order": 46,
+            "slug": "donald-sales",
+            "tag": "Donald Sales",
+            "thumb": "https://metadata-static.plex.tv/1/people/1b97f2ad68cdedb4e94ab30c75d14745.jpg",
+            "role": "Capt S. Anderton",
+            "key": "/library/people/5e17c265cd0850003b81ae36",
+            "type": "person"
+          },
+          {
+            "id": "5d776b83fb0d55001f56a083",
+            "order": 47,
+            "slug": "christian-jadah",
+            "tag": "Christian Jadah",
+            "thumb": "https://metadata-static.plex.tv/4/people/43d21509de24d8d9ab3f632639e83119.jpg",
+            "role": "Operations Officer Tyler",
+            "key": "/library/people/5d776b83fb0d55001f56a083",
+            "type": "person"
+          },
+          {
+            "id": "62bc73692e9ba7f3174ebafb",
+            "order": 48,
+            "slug": "sophie-therese-stone-richards",
+            "tag": "Sophie-Thérèse Stone-Richards",
+            "thumb": "https://metadata-static.plex.tv/3/people/31609986340ab1bf841106b0efeed141.jpg",
+            "role": "Air Boss #2",
+            "key": "/library/people/62bc73692e9ba7f3174ebafb",
+            "type": "person"
+          },
+          {
+            "id": "5d776be3ad5437001f7ad555",
+            "order": 49,
+            "slug": "joey-coleman",
+            "tag": "Joey Coleman",
+            "thumb": "https://metadata-static.plex.tv/c/people/c604f230b18030feaaf06de7564da118.jpg",
+            "role": "F/A-18 Pilot",
+            "key": "/library/people/5d776be3ad5437001f7ad555",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cd1db96116682e81573",
+            "order": 50,
+            "slug": "jonathan-goldstein-1",
+            "tag": "Jonathan Goldstein",
+            "thumb": "https://metadata-static.plex.tv/3/people/34510cb3b9c69415d9cc246576124bc4.jpg",
+            "role": "LT Jack Stebbins",
+            "key": "/library/people/62fb7cd1db96116682e81573",
+            "type": "person"
+          },
+          {
+            "id": "5d7768be594b2b001e694909",
+            "order": 51,
+            "slug": "r-f-daley",
+            "tag": "R.F. Daley",
+            "thumb": "https://metadata-static.plex.tv/b/people/b8a9e87daf6bd09984c11a63c61be464.jpg",
+            "role": "Congressman J. Parks",
+            "key": "/library/people/5d7768be594b2b001e694909",
+            "type": "person"
+          },
+          {
+            "id": "6a9c0463df619f88d009228a",
+            "order": 52,
+            "slug": "brendan-gray-3",
+            "tag": "Brendan Gray",
+            "role": "Aircraft Handling Officer",
+            "key": "/library/people/6a9c0463df619f88d009228a",
+            "type": "person"
+          },
+          {
+            "id": "685d65832e281f2354849ce4",
+            "order": 53,
+            "slug": "charlie-agadjanian-1",
+            "tag": "Charlie Ågadjanian",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/685d65832e281f2354849ce4",
+            "type": "person"
+          },
+          {
+            "id": "60085443fb2b0a002c0771de",
+            "order": 54,
+            "slug": "vassif-aliev",
+            "tag": "Vassif Aliev",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/60085443fb2b0a002c0771de",
+            "type": "person"
+          },
+          {
+            "id": "69b8ad1aa7417e5e4dd13948",
+            "order": 55,
+            "slug": "valentyn-colton-1",
+            "tag": "Valentyn Colton",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/69b8ad1aa7417e5e4dd13948",
+            "type": "person"
+          },
+          {
+            "id": "65b8b0f7d4e57d95d03dfd8d",
+            "order": 56,
+            "slug": "luis-escobar-12",
+            "tag": "Luis Escobar",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/65b8b0f7d4e57d95d03dfd8d",
+            "type": "person"
+          },
+          {
+            "id": "6866b1d63c4054804c8233aa",
+            "order": 57,
+            "slug": "nichita-ghidulean-1",
+            "tag": "Nichita Ghidulean",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/6866b1d63c4054804c8233aa",
+            "type": "person"
+          },
+          {
+            "id": "5de02a8a9c33c8001d7dc56a",
+            "order": 58,
+            "slug": "alexander-peganov",
+            "tag": "Alexander Peganov",
+            "thumb": "https://metadata-static.plex.tv/0/people/03c015ecef29418dda1ca64b125c972f.jpg",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/5de02a8a9c33c8001d7dc56a",
+            "type": "person"
+          },
+          {
+            "id": "6a9c0463df619f88d009228c",
+            "order": 59,
+            "slug": "jonathan-pariente-1",
+            "tag": "Jonathan Pariente",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/6a9c0463df619f88d009228c",
+            "type": "person"
+          },
+          {
+            "id": "68cd812e5b54297ccd54ac6e",
+            "order": 60,
+            "slug": "rhys-alexander-phillips",
+            "tag": "Rhys Alexander Phillips",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/68cd812e5b54297ccd54ac6e",
+            "type": "person"
+          },
+          {
+            "id": "639d7e57c906ab349e147f2a",
+            "order": 61,
+            "slug": "antoine-nicolas",
+            "tag": "Antoine Nicolas",
+            "thumb": "https://metadata-static.plex.tv/5/people/5229035d790638d9245fc9a4df94e317.jpg",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/639d7e57c906ab349e147f2a",
+            "type": "person"
+          },
+          {
+            "id": "69bfda4e398f23cc0b7755dd",
+            "order": 62,
+            "slug": "alex-rykov-1",
+            "tag": "Alex Rykov",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/69bfda4e398f23cc0b7755dd",
+            "type": "person"
+          },
+          {
+            "id": "6a9c0463df619f88d009228d",
+            "order": 63,
+            "slug": "fedor-pastoukhov",
+            "tag": "Fedor Pastoukhov",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/6a9c0463df619f88d009228d",
+            "type": "person"
+          },
+          {
+            "id": "6a9c0463df619f88d009228e",
+            "order": 64,
+            "slug": "richard-wesley-montgomery",
+            "tag": "Richard Wesley Montgomery",
+            "role": "Singing Russian Soldier",
+            "key": "/library/people/6a9c0463df619f88d009228e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768640ab244002006cd4f",
+            "slug": "jonathan-goldstein",
+            "tag": "Jonathan Goldstein",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e7f551376a0fc14f1fe2f622a0c202d.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768640ab244002006cd4f",
+            "type": "person"
+          },
+          {
+            "id": "5d776831103a2d001f566c6d",
+            "slug": "john-francis-daley",
+            "tag": "John Francis Daley",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5e08cb01aeaae75c2c5539c49eb1b10.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776831103a2d001f566c6d",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776832151a60001f24d32e",
+            "slug": "don-granger",
+            "tag": "Don Granger",
+            "thumb": "https://metadata-static.plex.tv/9/people/92f5965bdcee20a4de4532a3386e5fd9.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776832151a60001f24d32e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768338718ba001e31415a",
+            "slug": "david-ellison",
+            "tag": "David Ellison",
+            "thumb": "https://metadata-static.plex.tv/f/people/f6e087ce839448d2487899162b4f1bd3.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768338718ba001e31415a",
+            "type": "person"
+          },
+          {
+            "id": "5f40191004a86500409e601f",
+            "slug": "johnny-pariseau",
+            "tag": "Johnny Pariseau",
+            "role": "Producer",
+            "key": "/library/people/5f40191004a86500409e601f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768e19ab54400214ecb1d",
+            "slug": "dana-goldberg",
+            "tag": "Dana Goldberg",
+            "thumb": "https://metadata-static.plex.tv/5/people/55d9fc831355001104388ba7a448c3d1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768e19ab54400214ecb1d",
+            "type": "person"
+          },
+          {
+            "id": "5e4d2507edf865003f94d61f",
+            "slug": "ashley-fox-14",
+            "tag": "Ashley Fox",
+            "thumb": "https://metadata-static.plex.tv/a/people/a9446c9bfcc61f9bf0ba3b7f4a82a64d.jpg",
+            "role": "Producer",
+            "key": "/library/people/5e4d2507edf865003f94d61f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768640ab244002006cd4f",
+            "slug": "jonathan-goldstein",
+            "tag": "Jonathan Goldstein",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e7f551376a0fc14f1fe2f622a0c202d.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768640ab244002006cd4f",
+            "type": "person"
+          },
+          {
+            "id": "5d776831103a2d001f566c6d",
+            "slug": "john-francis-daley",
+            "tag": "John Francis Daley",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5e08cb01aeaae75c2c5539c49eb1b10.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776831103a2d001f566c6d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768576f4521001eaa292c",
+            "slug": "howard-ellis",
+            "tag": "Howard Ellis",
+            "role": "Producer",
+            "key": "/library/people/5d7768576f4521001eaa292c",
+            "type": "person"
+          },
+          {
+            "id": "5d776c01fb0d55001f579e7b",
+            "slug": "adam-goodman",
+            "tag": "Adam Goodman",
+            "thumb": "https://metadata-static.plex.tv/4/people/4bd2223918703bd97cbd0196f9d67a22.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776c01fb0d55001f579e7b",
+            "type": "person"
+          },
+          {
+            "id": "5d776c01fb0d55001f579e7d",
+            "slug": "gergo-balika",
+            "tag": "Gergö Balika",
+            "role": "Producer",
+            "key": "/library/people/5d776c01fb0d55001f579e7d",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768640ab244002006cd4f",
+            "slug": "jonathan-goldstein",
+            "tag": "Jonathan Goldstein",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e7f551376a0fc14f1fe2f622a0c202d.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d7768640ab244002006cd4f",
+            "type": "person"
+          },
+          {
+            "id": "5d776831103a2d001f566c6d",
+            "slug": "john-francis-daley",
+            "tag": "John Francis Daley",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5e08cb01aeaae75c2c5539c49eb1b10.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776831103a2d001f566c6d",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d7768353c3c2a001fbce4bb",
+            "tag": "Firefox"
+          },
+          {
+            "guid": "plex://movie/5d776835999c64001ec2f6fa",
+            "tag": "Major Payne"
+          },
+          {
+            "guid": "plex://movie/5d776a319ab54400214fbf4b",
+            "tag": "The Man from U.N.C.L.E."
+          },
+          {
+            "guid": "plex://movie/5d77687b7a53e9001e6d0331",
+            "tag": "Attack Force Z"
+          },
+          {
+            "guid": "plex://movie/5d77687e0ab244002006efb4",
+            "tag": "Real Men"
+          },
+          {
+            "guid": "plex://movie/5d77687f61141d001fb1c083",
+            "tag": "Battleship"
+          },
+          {
+            "guid": "plex://movie/5d776833f59e580021898657",
+            "tag": "Down Periscope"
+          },
+          {
+            "guid": "plex://movie/5d9f34f7d74e67002001fcf4",
+            "tag": "Hot Shots! Part Deux"
+          },
+          {
+            "guid": "plex://movie/5d7768297228e5001f1dd173",
+            "tag": "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb"
+          },
+          {
+            "guid": "plex://movie/5d776833103a2d001f567348",
+            "tag": "Hot Shots!"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Skydance Media"
+          },
+          {
+            "tag": "Maximum Effort"
+          },
+          {
+            "tag": "GoldDay"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "The only chance at survival for a U.S. Navy pilot is to form an alliance with an ex-KGB agent.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

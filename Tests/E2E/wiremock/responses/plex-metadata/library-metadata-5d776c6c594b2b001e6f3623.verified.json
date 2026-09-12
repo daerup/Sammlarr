@@ -1,0 +1,407 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/c/gracenote/c2a8b8895e4ce4984537805f5d0819b5.jpg",
+        "guid": "plex://movie/5d776c6c594b2b001e6f3623",
+        "key": "/library/metadata/5d776c6c594b2b001e6f3623",
+        "rating": 5.7,
+        "ratingKey": "5d776c6c594b2b001e6f3623",
+        "studio": "S&C Pictures",
+        "summary": "Having lost all his fortune and loved ones from gambling, Gao Ye walks out from prison to a even more cruel world. Intrigued by a beautiful hooker who approaches him for unknown reason, he comes up a master plan to redeem everything he once had. But things immediately spin wildly out of control as they found themselves fallen into a bigger scheme set up by the underground. Will they survive this one night to see another sunrise?",
+        "type": "movie",
+        "addedAt": 1469145600,
+        "audienceRating": 2.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.spilled",
+        "duration": 5400000,
+        "imdbRatingCount": 377,
+        "originalTitle": "天亮之前",
+        "originallyAvailableAt": "2016-07-22",
+        "publicPagesURL": "https://watch.plex.tv/movie/one-night-only-2016",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "revenue": 5350348,
+        "slug": "one-night-only-2016",
+        "thumb": "https://metadata-static.plex.tv/6/gracenote/6eafdafc571f2ccb1211a2d530e1ab34.jpg",
+        "title": "One Night Only",
+        "userState": false,
+        "year": 2016,
+        "Image": [
+          {
+            "alt": "One Night Only",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c2a8b8895e4ce4984537805f5d0819b5.jpg"
+          },
+          {
+            "alt": "One Night Only",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/9f86897c47c49d87c78b4a77aebcf4ec.jpg"
+          },
+          {
+            "alt": "One Night Only",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/9/gracenote/95a3d782a7a5a415a0d9e6a965ba6995.jpg"
+          },
+          {
+            "alt": "One Night Only",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6eafdafc571f2ccb1211a2d530e1ab34.jpg"
+          },
+          {
+            "alt": "One Night Only",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/97c4e1014097a35da9888d892b08b1b5.jpg"
+          },
+          {
+            "alt": "One Night Only",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/5/gracenote/523dbf83270243adee8e1df03053391d.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt5843056"
+          },
+          {
+            "id": "tmdb://413745"
+          },
+          {
+            "id": "tvdb://41851"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.1
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 5.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.spilled",
+            "type": "audience",
+            "value": 2.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6
+          }
+        ],
+        "Country": [
+          {
+            "tag": "China"
+          },
+          {
+            "tag": "Thailand"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682b961905001eb92486",
+            "order": 1,
+            "slug": "aaron-kwok-fu-shing",
+            "tag": "Aaron Kwok Fu-Shing",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9afc40ecad11cab107d56adca0a4c1a.jpg",
+            "role": "Gao Ye",
+            "key": "/library/people/5d77682b961905001eb92486",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc9dbed6505001f693bd1",
+            "order": 2,
+            "slug": "yang-zishan-1",
+            "tag": "Yang Zishan",
+            "thumb": "https://metadata-static.plex.tv/2/people/20d8a6848a9c0bdd5b285f2503cd7093.jpg",
+            "role": "Momo",
+            "key": "/library/people/5dcfc9dbed6505001f693bd1",
+            "type": "person"
+          },
+          {
+            "id": "5d77683585719b001f3a39ed",
+            "order": 3,
+            "slug": "andy-on-chi-kit",
+            "tag": "Andy On Chi-Kit",
+            "thumb": "https://metadata-static.plex.tv/6/people/6d9b5d94d37fbf935e5ac475bdcd0e2e.jpg",
+            "role": "Mathew",
+            "key": "/library/people/5d77683585719b001f3a39ed",
+            "type": "person"
+          },
+          {
+            "id": "5d776840eb5d26001f1e36d7",
+            "order": 4,
+            "slug": "hao-lei-1",
+            "tag": "Hao Lei",
+            "thumb": "https://metadata-static.plex.tv/people/5d776840eb5d26001f1e36d7.jpg",
+            "role": "Yu Qing",
+            "key": "/library/people/5d776840eb5d26001f1e36d7",
+            "type": "person"
+          },
+          {
+            "id": "5d776832eb5d26001f1e0017",
+            "order": 5,
+            "slug": "jack-kao",
+            "tag": "Jack Kao",
+            "thumb": "https://metadata-static.plex.tv/c/people/c6add0f277868c538431358753df32f0.jpg",
+            "role": "Bart",
+            "key": "/library/people/5d776832eb5d26001f1e0017",
+            "type": "person"
+          },
+          {
+            "id": "5d776c6d594b2b001e6f3667",
+            "order": 6,
+            "slug": "zhou-yutong",
+            "tag": "Zhou Yutong",
+            "thumb": "https://metadata-static.plex.tv/7/people/77a6ae2aff46b126508bf715e651c857.jpg",
+            "role": "Ah Xue",
+            "key": "/library/people/5d776c6d594b2b001e6f3667",
+            "type": "person"
+          },
+          {
+            "id": "5d776bd0f617c9002017a753",
+            "order": 7,
+            "slug": "li-haofei-1",
+            "tag": "Li Haofei",
+            "thumb": "https://metadata-static.plex.tv/b/people/b44a11c0d5920dddaf4c513a7027c97a.jpg",
+            "role": "Young Xiao Min",
+            "key": "/library/people/5d776bd0f617c9002017a753",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9123d5a3001f511d46",
+            "order": 8,
+            "slug": "jessie-li",
+            "tag": "Jessie Li",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b9123d5a3001f511d46.jpg",
+            "role": "Young Yu Qin",
+            "key": "/library/people/5d776b9123d5a3001f511d46",
+            "type": "person"
+          },
+          {
+            "id": "5d776f0751dd69001fe51661",
+            "order": 9,
+            "slug": "fan-tiantian",
+            "tag": "Fan Tiantian",
+            "thumb": "https://metadata-static.plex.tv/4/people/4871e33e16a3a5fadf859ec2728b7074.jpg",
+            "role": "Li Jie",
+            "key": "/library/people/5d776f0751dd69001fe51661",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea99ffc",
+            "order": 10,
+            "slug": "wang-deshun",
+            "tag": "Wang Deshun",
+            "thumb": "https://metadata-static.plex.tv/9/people/9d13d68f50d637d389459623eae55c65.jpg",
+            "role": "Store Owner",
+            "key": "/library/people/5d77682b6f4521001ea99ffc",
+            "type": "person"
+          },
+          {
+            "id": "5d776a13fb0d55001f539a48",
+            "order": 11,
+            "slug": "zhang-yao-11",
+            "tag": "Zhang Yao",
+            "thumb": "https://metadata-static.plex.tv/e/people/eada6500af37cc8e79343155fa32bc0c.jpg",
+            "role": "Adult Xiao Min",
+            "key": "/library/people/5d776a13fb0d55001f539a48",
+            "type": "person"
+          },
+          {
+            "id": "5d77708735102a0020ed7dc4",
+            "order": 12,
+            "slug": "yu-mingjia",
+            "tag": "Yu Mingjia",
+            "thumb": "https://metadata-static.plex.tv/1/people/13a34256c49a065a0ce42f5d8cbf11c7.jpg",
+            "role": "Xiao Min's Aunt",
+            "key": "/library/people/5d77708735102a0020ed7dc4",
+            "type": "person"
+          },
+          {
+            "id": "5d7768e647dd6e001f6c0427",
+            "order": 13,
+            "slug": "kao-meng-chieh",
+            "tag": "Kao Meng-Chieh",
+            "thumb": "https://metadata-static.plex.tv/2/people/25308d301ff24cecd370925d47d3e9e2.jpg",
+            "role": "Yi Long",
+            "key": "/library/people/5d7768e647dd6e001f6c0427",
+            "type": "person"
+          },
+          {
+            "id": "5e85ed201d41900042364367",
+            "order": 14,
+            "slug": "hao-xuankai-1",
+            "tag": "Hao Xuankai",
+            "thumb": "https://metadata-static.plex.tv/0/people/0ed9710c8abd5644c12263a41b15173d.jpg",
+            "role": "Mathew's Sidekick",
+            "key": "/library/people/5e85ed201d41900042364367",
+            "type": "person"
+          },
+          {
+            "id": "5d776c029ab5440021511d77",
+            "order": 15,
+            "slug": "song-jiateng",
+            "tag": "Song Jiateng",
+            "thumb": "https://metadata-static.plex.tv/3/people/32fce5908bc935b2e3bcbf0d413c1ae1.jpg",
+            "role": "Croupier",
+            "key": "/library/people/5d776c029ab5440021511d77",
+            "type": "person"
+          },
+          {
+            "id": "6a0be84a04e137f15b94f15e",
+            "order": 16,
+            "slug": "cady-yang-3",
+            "tag": "Cady Yang",
+            "thumb": "https://metadata-static.plex.tv/1/people/147462053a9686a8f5e7bab8b6c41a36.jpg",
+            "role": "Cady",
+            "key": "/library/people/6a0be84a04e137f15b94f15e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768a5594b2b001e691aaa",
+            "slug": "matt-wu",
+            "tag": "Matt Wu",
+            "thumb": "https://image.tmdb.org/t/p/original/8Tn8YjPErsvJ1EBMOvEaQuU1siX.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768a5594b2b001e691aaa",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77689afb0d55001f515171",
+            "slug": "leste-chen",
+            "tag": "Leste Chen",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd2de36d0b6feb38193c9f224da42263.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77689afb0d55001f515171",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5dce6f4cf4b82c0020658761",
+            "slug": "ren-peng-1",
+            "tag": "Ren Peng",
+            "thumb": "https://metadata-static.plex.tv/9/people/9f7eb002526c35e439caa2c49b3f0896.jpg",
+            "role": "Writer",
+            "key": "/library/people/5dce6f4cf4b82c0020658761",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d9f3504e4fc29001eb657c9",
+            "tag": "The Air I Breathe"
+          },
+          {
+            "guid": "plex://movie/5d776824e6d55c002040ae64",
+            "tag": "Lucky Number Slevin"
+          },
+          {
+            "guid": "plex://movie/5d7768526f4521001eaa1789",
+            "tag": "House of Games"
+          },
+          {
+            "guid": "plex://movie/5d776b7e9ab544002150c344",
+            "tag": "Skin Trade"
+          },
+          {
+            "guid": "plex://movie/5d776d2d96b655001fe41a14",
+            "tag": "A Prayer Before Dawn"
+          },
+          {
+            "guid": "plex://movie/5d776d9d594b2b001e70d831",
+            "tag": "SuperFly"
+          },
+          {
+            "guid": "plex://movie/5d77706081ba41001faeeab3",
+            "tag": "Animal World"
+          },
+          {
+            "guid": "plex://movie/5d776830f59e580021898132",
+            "tag": "The Good Thief"
+          },
+          {
+            "guid": "plex://movie/5d7768ad7e5fa10020bf3adc",
+            "tag": "The King of the Kickboxers"
+          },
+          {
+            "guid": "plex://movie/5d7768bd33f255001e85e55e",
+            "tag": "Only God Forgives"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "S&C Pictures"
+          },
+          {
+            "tag": "Perfect Sky Pictures"
+          },
+          {
+            "tag": "Fujian Hangye Film Distribution"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A gambler and a hooker are thrust together in an underground scheme that's spinning out of control.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

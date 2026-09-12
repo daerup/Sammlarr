@@ -1,0 +1,12 @@
+{
+  "contract": [
+    "/trending/all/week",
+    "/movie/*",
+    "/tv/*"
+  ],
+  "frozen": [
+    "/library/sections/watchlist/all",
+    "/api/v2/user",
+    "/user"
+  ]
+}

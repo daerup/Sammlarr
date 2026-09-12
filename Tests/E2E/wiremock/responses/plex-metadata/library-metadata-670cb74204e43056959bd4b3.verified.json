@@ -1,0 +1,951 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/5/gracenote/5b047b2e5f565401d53aad5302913905.jpg",
+        "banner": "https://assets.fanart.tv/fanart/the-odyssey-6a92208402302.jpg",
+        "guid": "plex://movie/670cb74204e43056959bd4b3",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/670cb74204e43056959bd4b3",
+        "rating": 9.4,
+        "ratingKey": "670cb74204e43056959bd4b3",
+        "studio": "Universal Pictures",
+        "summary": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
+        "tagline": "Defy the gods.",
+        "type": "movie",
+        "addedAt": 1784073600,
+        "audienceRating": 9.6,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 250000000,
+        "contentRating": "R",
+        "duration": 10380000,
+        "imdbRatingCount": 485912,
+        "originallyAvailableAt": "2026-07-15",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-odyssey-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 1631536965,
+        "slug": "the-odyssey-2026",
+        "thumb": "https://metadata-static.plex.tv/f/gracenote/f5b1182086ef9d55a1de45b4db74eb97.jpg",
+        "title": "The Odyssey",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/670cb74204e43056959bd4b3/commonsensemedia",
+            "oneLiner": "Impressive take on ancient epic has intense violence.",
+            "AgeRating": [
+              {
+                "age": 15,
+                "rating": 5,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "The Odyssey",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/5/gracenote/5b047b2e5f565401d53aad5302913905.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/f/gracenote/ff47074dc662cc26d9f8e8068205605e.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/the-odyssey-6a92208402302.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/3/683a142553/321ea14806ea389a6e77027ec870ce49.png"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/e/683a142553/e5111cc5c347db449a98333adaeae8e1.png"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cb1dd1409ea8ef188be9c04e8d1faad6.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f5b1182086ef9d55a1de45b4db74eb97.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/16be21a69a5e855b889a76465059e80a.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1c2156423c57bc35cf8a7d481dc667bb.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt33764258"
+          },
+          {
+            "id": "tmdb://1368337"
+          },
+          {
+            "id": "tvdb://362547"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.007
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          },
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768243c3c2a001fbca96c",
+            "order": 1,
+            "slug": "matt-damon",
+            "tag": "Matt Damon",
+            "thumb": "https://metadata-static.plex.tv/4/people/4825dfdd51ebd0a00bae74f9f7b1e4d7.jpg",
+            "role": "Odysseus",
+            "key": "/library/people/5d7768243c3c2a001fbca96c",
+            "type": "person"
+          },
+          {
+            "id": "5d77689033f255001e8599f4",
+            "order": 2,
+            "slug": "tom-holland",
+            "tag": "Tom Holland",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d310a9360a7d4c483ad24ad322ba510.jpg",
+            "role": "Telemachus",
+            "key": "/library/people/5d77689033f255001e8599f4",
+            "type": "person"
+          },
+          {
+            "id": "5d776825eb5d26001f1dd128",
+            "order": 3,
+            "slug": "anne-hathaway",
+            "tag": "Anne Hathaway",
+            "thumb": "https://metadata-static.plex.tv/0/people/0bf60167ad034e98cb131192a3990c28.jpg",
+            "role": "Penelope",
+            "key": "/library/people/5d776825eb5d26001f1dd128",
+            "type": "person"
+          },
+          {
+            "id": "5d77682785719b001f3a0f6e",
+            "order": 4,
+            "slug": "robert-pattinson",
+            "tag": "Robert Pattinson",
+            "thumb": "https://metadata-static.plex.tv/b/people/bc3a6487ab2e75b1fd9646718ea8a1cf.jpg",
+            "role": "Antinous",
+            "key": "/library/people/5d77682785719b001f3a0f6e",
+            "type": "person"
+          },
+          {
+            "id": "5d776cd6fb0d55001f592787",
+            "order": 5,
+            "slug": "himesh-patel",
+            "tag": "Himesh Patel",
+            "thumb": "https://metadata-static.plex.tv/e/people/ea3ca116966a62a7f72c7006e082102a.jpg",
+            "role": "Eurylochus",
+            "key": "/library/people/5d776cd6fb0d55001f592787",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c65f",
+            "order": 6,
+            "slug": "charlize-theron",
+            "tag": "Charlize Theron",
+            "thumb": "https://metadata-static.plex.tv/1/people/1ce550b93a6246536cf9e2b9a14b424a.jpg",
+            "role": "Calypso",
+            "key": "/library/people/5d776826999c64001ec2c65f",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd574",
+            "order": 7,
+            "slug": "john-leguizamo",
+            "tag": "John Leguizamo",
+            "thumb": "https://metadata-static.plex.tv/6/people/63cf771b1b21f2e2220100b43cd947b3.jpg",
+            "role": "Eumaeus",
+            "key": "/library/people/5d776826eb5d26001f1dd574",
+            "type": "person"
+          },
+          {
+            "id": "5d77703096b655001fe9039c",
+            "order": 8,
+            "slug": "travis-scott",
+            "tag": "Travis Scott",
+            "thumb": "https://metadata-static.plex.tv/a/people/a5a196c652d997af020e9a3d6f23b3db.jpg",
+            "role": "Bard",
+            "key": "/library/people/5d77703096b655001fe9039c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ad3ab0e7001f5078ea",
+            "order": 9,
+            "slug": "corey-hawkins",
+            "tag": "Corey Hawkins",
+            "thumb": "https://metadata-static.plex.tv/4/people/44b083b62cc1732faa52f3697a270a01.jpg",
+            "role": "Polybus",
+            "key": "/library/people/5d7768ad3ab0e7001f5078ea",
+            "type": "person"
+          },
+          {
+            "id": "5d776827999c64001ec2c962",
+            "order": 10,
+            "slug": "jarreth-j-merz",
+            "tag": "Jarreth J. Merz",
+            "thumb": "https://metadata-static.plex.tv/people/5d776827999c64001ec2c962.jpg",
+            "role": "Leodes",
+            "key": "/library/people/5d776827999c64001ec2c962",
+            "type": "person"
+          },
+          {
+            "id": "5d77683e103a2d001f569dfc",
+            "order": 11,
+            "slug": "niko-nicotera",
+            "tag": "Niko Nicotera",
+            "thumb": "https://metadata-static.plex.tv/a/people/a51daa2c02a765dd4f625eb191f08172.jpg",
+            "role": "Peisander",
+            "key": "/library/people/5d77683e103a2d001f569dfc",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c85719b001f3a1c35",
+            "order": 12,
+            "slug": "elliot-page",
+            "tag": "Elliot Page",
+            "thumb": "https://metadata-static.plex.tv/b/people/b604c3072d28a8c15abce9739c34f1eb.jpg",
+            "role": "Sinon",
+            "key": "/library/people/5d77682c85719b001f3a1c35",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c7e9a3c0020c6e3bc",
+            "order": 13,
+            "slug": "shiloh-fernandez",
+            "tag": "Shiloh Fernandez",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd2c236ef2522f2ee9da11b325c1818e.jpg",
+            "role": "First Trojan",
+            "key": "/library/people/5d77683c7e9a3c0020c6e3bc",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf15",
+            "order": 14,
+            "slug": "rafi-gavron",
+            "tag": "Rafi Gavron",
+            "thumb": "https://metadata-static.plex.tv/1/people/17e89bbdfe28e3b8157ff01649bd960f.jpg",
+            "role": "Second Trojan",
+            "key": "/library/people/5d776829999c64001ec2cf15",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d85719b001f3a5327",
+            "order": 15,
+            "slug": "elyes-gabel",
+            "tag": "Elyes Gabel",
+            "thumb": "https://metadata-static.plex.tv/7/people/714992821e1848f6f80b0d8fe73fcc11.jpg",
+            "role": "Elatus",
+            "key": "/library/people/5d77683d85719b001f3a5327",
+            "type": "person"
+          },
+          {
+            "id": "5d776831103a2d001f566e00",
+            "order": 16,
+            "slug": "iddo-goldberg",
+            "tag": "Iddo Goldberg",
+            "thumb": "https://metadata-static.plex.tv/c/people/c976ea3a9904772e761a9c14e5e2ed08.jpg",
+            "role": "Amphimedon",
+            "key": "/library/people/5d776831103a2d001f566e00",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cefc",
+            "order": 17,
+            "slug": "jamie-harris",
+            "tag": "Jamie Harris",
+            "thumb": "https://metadata-static.plex.tv/c/people/cf2a67ffe7883f42def6c476a7eae2f4.jpg",
+            "role": "Agelus",
+            "key": "/library/people/5d776829999c64001ec2cefc",
+            "type": "person"
+          },
+          {
+            "id": "5d7768344de0ee001fccb55a",
+            "order": 18,
+            "slug": "john-ales",
+            "tag": "John Ales",
+            "thumb": "https://metadata-static.plex.tv/5/people/5475d3d4db5aeb39f3d7a8857c0d29d3.jpg",
+            "role": "Beggar in Ithaca",
+            "key": "/library/people/5d7768344de0ee001fccb55a",
+            "type": "person"
+          },
+          {
+            "id": "68a743d2f7655ecb42960a5e",
+            "order": 19,
+            "slug": "raimy-lang",
+            "tag": "Raimy Lang",
+            "thumb": "https://metadata-static.plex.tv/d/people/d2fcba848d6325cd3a633ae88f7b0d5e.jpg",
+            "role": "Teenage Antinous",
+            "key": "/library/people/68a743d2f7655ecb42960a5e",
+            "type": "person"
+          },
+          {
+            "id": "5ec42429e72b600040120c34",
+            "order": 20,
+            "slug": "mason-cufari",
+            "tag": "Mason Cufari",
+            "thumb": "https://metadata-static.plex.tv/c/people/cbc07bdd5036cae1c5cc6662ccb89fd7.jpg",
+            "role": "Teenage Sinon",
+            "key": "/library/people/5ec42429e72b600040120c34",
+            "type": "person"
+          },
+          {
+            "id": "5d776a919ab544002150081f",
+            "order": 21,
+            "slug": "mia-goth",
+            "tag": "Mia Goth",
+            "thumb": "https://metadata-static.plex.tv/9/people/90b36e6e302e9f73d28f7fb604e8ad1f.jpg",
+            "role": "Melantho",
+            "key": "/library/people/5d776a919ab544002150081f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768286f4521001ea9945f",
+            "order": 22,
+            "slug": "ryan-hurst",
+            "tag": "Ryan Hurst",
+            "thumb": "https://metadata-static.plex.tv/0/people/0c8cc334fb6c791266441ed288efd84b.jpg",
+            "role": "Mentor",
+            "key": "/library/people/5d7768286f4521001ea9945f",
+            "type": "person"
+          },
+          {
+            "id": "5d776ad5fb0d55001f552c61",
+            "order": 23,
+            "slug": "kate-fuglei",
+            "tag": "Kate Fuglei",
+            "thumb": "https://metadata-static.plex.tv/1/people/13e588c036ef0de04cf438767c118b4c.jpg",
+            "role": "Eurycleia",
+            "key": "/library/people/5d776ad5fb0d55001f552c61",
+            "type": "person"
+          },
+          {
+            "id": "5d77689c374a5b001fecaac7",
+            "order": 24,
+            "slug": "benny-safdie",
+            "tag": "Benny Safdie",
+            "thumb": "https://metadata-static.plex.tv/3/people/34534d05bc14b4b857bf12813fff7660.jpg",
+            "role": "Agamemnon",
+            "key": "/library/people/5d77689c374a5b001fecaac7",
+            "type": "person"
+          },
+          {
+            "id": "5d776834f54112001f5bd748",
+            "order": 25,
+            "slug": "adam-croasdell",
+            "tag": "Adam Croasdell",
+            "thumb": "https://metadata-static.plex.tv/1/people/11746f3df409e183cbeb1b99a41302fb.jpg",
+            "role": "Antinous' Father",
+            "key": "/library/people/5d776834f54112001f5bd748",
+            "type": "person"
+          },
+          {
+            "id": "6a53b3e1f9817112c42b1651",
+            "order": 26,
+            "slug": "mickey-shilowich",
+            "tag": "Mickey Shilowich",
+            "role": "Infant Telemachus",
+            "key": "/library/people/6a53b3e1f9817112c42b1651",
+            "type": "person"
+          },
+          {
+            "id": "6a53b3e1f9817112c42b1652",
+            "order": 27,
+            "slug": "katerina-antemel",
+            "tag": "Katerina Antemel",
+            "role": "Iphigenia",
+            "key": "/library/people/6a53b3e1f9817112c42b1652",
+            "type": "person"
+          },
+          {
+            "id": "5d776c17594b2b001e6ead37",
+            "order": 28,
+            "slug": "jovan-adepo",
+            "tag": "Jovan Adepo",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd90661cf4b6fec1e16cfe322c7f0c37.jpg",
+            "role": "Elpenor",
+            "key": "/library/people/5d776c17594b2b001e6ead37",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c880197001ec91dcf",
+            "order": 29,
+            "slug": "andrew-howard",
+            "tag": "Andrew Howard",
+            "thumb": "https://metadata-static.plex.tv/4/people/4d97a270aa02682b3ba8c14590862a71.jpg",
+            "role": "Polites",
+            "key": "/library/people/5d77682c880197001ec91dcf",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9ad02",
+            "order": 30,
+            "slug": "josh-stewart",
+            "tag": "Josh Stewart",
+            "thumb": "https://metadata-static.plex.tv/9/people/9c23379d4b305c62966c5c4b864b36c5.jpg",
+            "role": "Antiphates",
+            "key": "/library/people/5d77682f6f4521001ea9ad02",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e999c64001ec2df80",
+            "order": 31,
+            "slug": "logan-marshall-green",
+            "tag": "Logan Marshall-Green",
+            "thumb": "https://metadata-static.plex.tv/2/people/23da71a71d7b8440884d6be643a024fa.jpg",
+            "role": "Melanthius",
+            "key": "/library/people/5d77682e999c64001ec2df80",
+            "type": "person"
+          },
+          {
+            "id": "5d77689533f255001e85a25a",
+            "order": 32,
+            "slug": "nick-e-tarabay",
+            "tag": "Nick E. Tarabay",
+            "thumb": "https://metadata-static.plex.tv/f/people/f82622f40a3381bc82aad40da67e22cb.jpg",
+            "role": "Pilot",
+            "key": "/library/people/5d77689533f255001e85a25a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768d2ebdf2200209c916d",
+            "order": 33,
+            "slug": "zendaya",
+            "tag": "Zendaya",
+            "thumb": "https://metadata-static.plex.tv/0/people/09bb753b08d4114417ade1aec80de36a.jpg",
+            "role": "Athena",
+            "key": "/library/people/5d7768d2ebdf2200209c916d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a2ec6b5001f6baa1c",
+            "order": 34,
+            "slug": "jon-bernthal",
+            "tag": "Jon Bernthal",
+            "thumb": "https://metadata-static.plex.tv/d/people/dd29d8217f54a807036ca26f5f315668.jpg",
+            "role": "Menelaus",
+            "key": "/library/people/5d77682a2ec6b5001f6baa1c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768254de0ee001fcc8165",
+            "order": 35,
+            "slug": "jimmy-gonzales",
+            "tag": "Jimmy Gonzales",
+            "thumb": "https://metadata-static.plex.tv/4/people/44015f453b0472244cd62b110cc4bfa1.jpg",
+            "role": "Cepheus",
+            "key": "/library/people/5d7768254de0ee001fcc8165",
+            "type": "person"
+          },
+          {
+            "id": "5d77683661141d001fb15ac6",
+            "order": 36,
+            "slug": "jesse-garcia",
+            "tag": "Jesse Garcia",
+            "thumb": "https://metadata-static.plex.tv/e/people/effac6242ed4e22b35e36e917f5c79ef.jpg",
+            "role": "Menetus",
+            "key": "/library/people/5d77683661141d001fb15ac6",
+            "type": "person"
+          },
+          {
+            "id": "5d776ae5ad5437001f78c3aa",
+            "order": 37,
+            "slug": "ryan-de-quintal",
+            "tag": "Ryan de Quintal",
+            "thumb": "https://metadata-static.plex.tv/8/people/8b1457348e9fd9af9471f2ebe29fad44.jpg",
+            "role": "Ilus",
+            "key": "/library/people/5d776ae5ad5437001f78c3aa",
+            "type": "person"
+          },
+          {
+            "id": "5d77683454f42c001f8c42cf",
+            "order": 38,
+            "slug": "will-yun-lee",
+            "tag": "Will Yun Lee",
+            "thumb": "https://metadata-static.plex.tv/b/people/b20977a024647236305d21366582ea12.jpg",
+            "role": "Anchialus",
+            "key": "/library/people/5d77683454f42c001f8c42cf",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a9594b2b001e69229c",
+            "order": 39,
+            "slug": "anthony-molinari",
+            "tag": "Anthony Molinari",
+            "thumb": "https://metadata-static.plex.tv/2/people/26826fefd4275d95f53cdb6826d9019a.jpg",
+            "role": "Perimedes",
+            "key": "/library/people/5d7768a9594b2b001e69229c",
+            "type": "person"
+          },
+          {
+            "id": "632410ebc0260e8d2088a731",
+            "order": 40,
+            "slug": "stephen-murphy-18",
+            "tag": "Stephen Murphy",
+            "thumb": "https://metadata-static.plex.tv/f/people/fbf0d5fb6cf0967440c1ede1d52b7749.jpg",
+            "role": "Phemius",
+            "key": "/library/people/632410ebc0260e8d2088a731",
+            "type": "person"
+          },
+          {
+            "id": "5d776857880197001ec997fc",
+            "order": 41,
+            "slug": "matt-lasky",
+            "tag": "Matt Lasky",
+            "thumb": "https://metadata-static.plex.tv/f/people/fe905120364a46a68db912afc3908501.jpg",
+            "role": "Peisenor",
+            "key": "/library/people/5d776857880197001ec997fc",
+            "type": "person"
+          },
+          {
+            "id": "5d7769b5fb0d55001f52d984",
+            "order": 42,
+            "slug": "ian-casselberry",
+            "tag": "Ian Casselberry",
+            "thumb": "https://metadata-static.plex.tv/c/people/c10ed613344802928bc54e864330a328.jpg",
+            "role": "Dolios",
+            "key": "/library/people/5d7769b5fb0d55001f52d984",
+            "type": "person"
+          },
+          {
+            "id": "5d77688933f255001e858fab",
+            "order": 43,
+            "slug": "sean-avery",
+            "tag": "Sean Avery",
+            "thumb": "https://metadata-static.plex.tv/5/people/591afa374e4341d40ad3e6cdc674071c.jpg",
+            "role": "Laodamas",
+            "key": "/library/people/5d77688933f255001e858fab",
+            "type": "person"
+          },
+          {
+            "id": "5d77688b1999bc0020dc8d04",
+            "order": 44,
+            "slug": "yannis-kokiasmenos",
+            "tag": "Yannis Kokiasmenos",
+            "thumb": "https://metadata-static.plex.tv/7/people/719069237f277ed39a0a2dc9aa14fb3e.jpg",
+            "role": "Old Man at Coastal Village",
+            "key": "/library/people/5d77688b1999bc0020dc8d04",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e999c64001ec2df79",
+            "order": 45,
+            "slug": "bill-irwin",
+            "tag": "Bill Irwin",
+            "thumb": "https://metadata-static.plex.tv/7/people/77005c9bd69613f305501e28aad82696.jpg",
+            "role": "Cyclops",
+            "key": "/library/people/5d77682e999c64001ec2df79",
+            "type": "person"
+          },
+          {
+            "id": "5d7768303c3c2a001fbccfd0",
+            "order": 46,
+            "slug": "maurice-compte",
+            "tag": "Maurice Compte",
+            "thumb": "https://metadata-static.plex.tv/2/people/258149aa2ff1104520814a33a5661054.jpg",
+            "role": "Steward of Menelaus",
+            "key": "/library/people/5d7768303c3c2a001fbccfd0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ba0ea56a001e2a972f",
+            "order": 47,
+            "slug": "lupita-nyongo",
+            "tag": "Lupita Nyong'o",
+            "thumb": "https://metadata-static.plex.tv/7/people/7c87c7ad696a4d0c1b2b0cb933f9d90a.jpg",
+            "role": "Helen / Clytemnestra",
+            "key": "/library/people/5d7768ba0ea56a001e2a972f",
+            "type": "person"
+          },
+          {
+            "id": "6a5a27907fbc2e1dfccd51cb",
+            "order": 48,
+            "slug": "xavier-brown-9",
+            "tag": "Xavier Brown",
+            "thumb": "https://metadata-static.plex.tv/f/people/f60d51a6c4afe0bece71ec67812afb15.jpg",
+            "role": "Trojan Civilian",
+            "key": "/library/people/6a5a27907fbc2e1dfccd51cb",
+            "type": "person"
+          },
+          {
+            "id": "5d776b16ad5437001f792afd",
+            "order": 49,
+            "slug": "jessie-cohen",
+            "tag": "Jessie Cohen",
+            "thumb": "https://metadata-static.plex.tv/e/people/ee2d62448d2cd7fbc04b0def6b40403a.jpg",
+            "role": "Trojan Civilian",
+            "key": "/library/people/5d776b16ad5437001f792afd",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcf9802101b0040ed6311",
+            "order": 50,
+            "slug": "chess-lopez",
+            "tag": "Chess Lopez",
+            "thumb": "https://metadata-static.plex.tv/6/people/6549f8323632df567e0f539befb47da0.jpg",
+            "role": "Trojan Civilian",
+            "key": "/library/people/5f3fcf9802101b0040ed6311",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c7e9a3c0020c6e1fe",
+            "order": 51,
+            "slug": "craig-gellis",
+            "tag": "Craig Gellis",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683c7e9a3c0020c6e1fe.jpg",
+            "role": "Trojan Civilian",
+            "key": "/library/people/5d77683c7e9a3c0020c6e1fe",
+            "type": "person"
+          },
+          {
+            "id": "5f405001cc4920003b32ac52",
+            "order": 52,
+            "slug": "artoun-nazareth",
+            "tag": "Artoun Nazareth",
+            "thumb": "https://metadata-static.plex.tv/8/people/8a271cafb7dc2594b9ff0f384ceb4767.jpg",
+            "role": "Trojan Civilian",
+            "key": "/library/people/5f405001cc4920003b32ac52",
+            "type": "person"
+          },
+          {
+            "id": "5d7768608a7581001f13189b",
+            "order": 53,
+            "slug": "chris-riggi",
+            "tag": "Chris Riggi",
+            "thumb": "https://metadata-static.plex.tv/4/people/41a4d074e186f9d0f96d40b6e3dc4c4f.jpg",
+            "role": "Trojan Civilian",
+            "key": "/library/people/5d7768608a7581001f13189b",
+            "type": "person"
+          },
+          {
+            "id": "5d77704cdd931c001e38acfe",
+            "order": 54,
+            "slug": "tyler-beardsley",
+            "tag": "Tyler Beardsley",
+            "thumb": "https://metadata-static.plex.tv/6/people/663cb36896a0f21732f96a5e2f462fc3.jpg",
+            "role": "Third Trojan",
+            "key": "/library/people/5d77704cdd931c001e38acfe",
+            "type": "person"
+          },
+          {
+            "id": "5e1648de4c78f7003e807722",
+            "order": 55,
+            "slug": "daniel-dorr",
+            "tag": "Daniel Dorr",
+            "thumb": "https://metadata-static.plex.tv/people/5e1648de4c78f7003e807722.jpg",
+            "role": "Fourth Trojan",
+            "key": "/library/people/5e1648de4c78f7003e807722",
+            "type": "person"
+          },
+          {
+            "id": "6a5a27907fbc2e1dfccd51cc",
+            "order": 56,
+            "slug": "barnaby-nolan-1",
+            "tag": "Barnaby Nolan",
+            "role": "Laestrygonian Child",
+            "key": "/library/people/6a5a27907fbc2e1dfccd51cc",
+            "type": "person"
+          },
+          {
+            "id": "63e4af947008fe691dc77345",
+            "order": 57,
+            "slug": "john-king-154",
+            "tag": "John King",
+            "thumb": "https://image.tmdb.org/t/p/original/3ET5QgKWcDp3ZuiAytK8Ho1uzph.jpg",
+            "role": "Laestrygonian Child",
+            "key": "/library/people/63e4af947008fe691dc77345",
+            "type": "person"
+          },
+          {
+            "id": "5d776827f54112001f5bc066",
+            "order": 58,
+            "slug": "samantha-morton",
+            "tag": "Samantha Morton",
+            "thumb": "https://metadata-static.plex.tv/f/people/feaf117e0ec745ce5f06d131497b4f7d.jpg",
+            "role": "Circe",
+            "key": "/library/people/5d776827f54112001f5bc066",
+            "type": "person"
+          },
+          {
+            "id": "5d776825999c64001ec2bf71",
+            "order": 59,
+            "slug": "james-remar",
+            "tag": "James Remar",
+            "thumb": "https://metadata-static.plex.tv/8/people/86adb89cb266ab709e59664915e5f5c7.jpg",
+            "role": "Tiresias",
+            "key": "/library/people/5d776825999c64001ec2bf71",
+            "type": "person"
+          },
+          {
+            "id": "5d77697b9ab54400214f26c8",
+            "order": 60,
+            "slug": "brian-vernel",
+            "tag": "Brian Vernel",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a366c96fe1f3b169aeb9196ae7a25c7.jpg",
+            "role": "Irus",
+            "key": "/library/people/5d77697b9ab54400214f26c8",
+            "type": "person"
+          },
+          {
+            "id": "5d77703047dd6e001f70820a",
+            "order": 61,
+            "slug": "michael-vlamis",
+            "tag": "Michael Vlamis",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f275ad68bce4fe4edf27f918c680405.jpg",
+            "role": "Bandit / Priest in Pylos",
+            "key": "/library/people/5d77703047dd6e001f70820a",
+            "type": "person"
+          },
+          {
+            "id": "640c6deca2f266bd7a301733",
+            "order": 62,
+            "slug": "kamden-riley-1",
+            "tag": "Kamden Riley",
+            "thumb": "https://metadata-static.plex.tv/6/people/6a92dc68e1406460d2b04fe5d8d9b480.jpg",
+            "role": "Young Farmhand",
+            "key": "/library/people/640c6deca2f266bd7a301733",
+            "type": "person"
+          },
+          {
+            "id": "5f4020465a76a80042d52b9f",
+            "order": 63,
+            "slug": "andrei-lenart",
+            "tag": "Andrei Lenart",
+            "thumb": "https://metadata-static.plex.tv/c/people/c6ffc510d55643bb17301bbafd513359.jpg",
+            "role": "Rower (uncredited)",
+            "key": "/library/people/5f4020465a76a80042d52b9f",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f87a53e9001e6f638e",
+            "order": 64,
+            "slug": "jorge-leon-25",
+            "tag": "Jorge Leon",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769f87a53e9001e6f638e.jpg",
+            "role": "Odysseus Crew (uncredited)",
+            "key": "/library/people/5d7769f87a53e9001e6f638e",
+            "type": "person"
+          },
+          {
+            "id": "5d776827103a2d001f56467f",
+            "order": 65,
+            "slug": "j-p-manoux",
+            "tag": "J.P. Manoux",
+            "thumb": "https://metadata-static.plex.tv/4/people/48d515df07e7954ad7bd291acba622d2.jpg",
+            "role": "Beggar (uncredited)",
+            "key": "/library/people/5d776827103a2d001f56467f",
+            "type": "person"
+          },
+          {
+            "id": "5d776b4796b655001fe0af1c",
+            "order": 66,
+            "slug": "douglas-rouillard",
+            "tag": "Douglas Rouillard",
+            "role": "Suitor (uncredited)",
+            "key": "/library/people/5d776b4796b655001fe0af1c",
+            "type": "person"
+          },
+          {
+            "id": "5d77687a7a53e9001e6d00dc",
+            "order": 67,
+            "slug": "evan-shafran",
+            "tag": "Evan Shafran",
+            "thumb": "https://metadata-static.plex.tv/5/people/5ac65e6c3cdfad474b3c4577d4ecb13d.jpg",
+            "role": "Suitor (uncredited)",
+            "key": "/library/people/5d77687a7a53e9001e6d00dc",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe86a86422500427de736",
+            "order": 68,
+            "slug": "gudmundur-karl-sigurdorsson",
+            "tag": "Guðmundur Karl Sigurdórsson",
+            "thumb": "https://metadata-static.plex.tv/f/people/fe10e55acbbfbf5daf8a3b3a13331f2f.jpg",
+            "role": "Shade (uncredited)",
+            "key": "/library/people/5f3fe86a86422500427de736",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776825880197001ec9038e",
+            "slug": "christopher-nolan",
+            "tag": "Christopher Nolan",
+            "thumb": "https://metadata-static.plex.tv/8/people/8342cce177f97a63c515614487c12933.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776825880197001ec9038e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776825880197001ec9038e",
+            "slug": "christopher-nolan",
+            "tag": "Christopher Nolan",
+            "thumb": "https://metadata-static.plex.tv/8/people/8342cce177f97a63c515614487c12933.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776825880197001ec9038e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa1e",
+            "slug": "emma-thomas",
+            "tag": "Emma Thomas",
+            "thumb": "https://metadata-static.plex.tv/9/people/99b9b3d7a3845fe0a64b1d6b878963a1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768267e9a3c0020c6aa1e",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776825880197001ec9038e",
+            "slug": "christopher-nolan",
+            "tag": "Christopher Nolan",
+            "thumb": "https://metadata-static.plex.tv/8/people/8342cce177f97a63c515614487c12933.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776825880197001ec9038e",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d776a0396b655001fde0cef",
+            "tag": "Hercules"
+          },
+          {
+            "guid": "plex://movie/5d77682a103a2d001f565035",
+            "tag": "The 13th Warrior"
+          },
+          {
+            "guid": "plex://movie/5d77682a151a60001f24b5c0",
+            "tag": "Alexander"
+          },
+          {
+            "guid": "plex://movie/5d77686c23d5a3001f4ebeb3",
+            "tag": "Immortals"
+          },
+          {
+            "guid": "plex://movie/5d776c2996b655001fe28046",
+            "tag": "Mythica: The Iron Crown"
+          },
+          {
+            "guid": "plex://movie/5e16335d91c203004120d3b2",
+            "tag": "The Legion"
+          },
+          {
+            "guid": "plex://movie/5e16598c61c6140040d9245d",
+            "tag": "The Northman"
+          },
+          {
+            "guid": "plex://movie/5d7768276f4521001ea98f76",
+            "tag": "Troy"
+          },
+          {
+            "guid": "plex://movie/5d776832eb5d26001f1e0072",
+            "tag": "Conan the Barbarian"
+          },
+          {
+            "guid": "plex://movie/5d7768333c3c2a001fbcdc4d",
+            "tag": "Conan the Destroyer"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Universal Pictures"
+          },
+          {
+            "tag": "Syncopy"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Odysseus, king of Ithaca, embarks on a perilous journey to return home after the Trojan War.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

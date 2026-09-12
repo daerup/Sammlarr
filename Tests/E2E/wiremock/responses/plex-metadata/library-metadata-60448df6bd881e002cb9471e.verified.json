@@ -1,0 +1,390 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/f/gracenote/f7d77e0fd75441e35f7450aa386974d6.jpg",
+        "banner": "https://assets.fanart.tv/fanart/the-invite-6a8365deadafb.jpg",
+        "guid": "plex://movie/60448df6bd881e002cb9471e",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/60448df6bd881e002cb9471e",
+        "rating": 9.6,
+        "ratingKey": "60448df6bd881e002cb9471e",
+        "studio": "Annapurna Pictures",
+        "summary": "Joe and Angela’s (Seth Rogen & Olivia Wilde) marriage is on thin ice. When their upstairs neighbors visit for a dinner party, the night spirals into unexpected places. Have they reignited the spark or lit the match that burns it all down?",
+        "tagline": "It'll be fun.",
+        "type": "movie",
+        "addedAt": 1782345600,
+        "audienceRating": 8.9,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 12000000,
+        "contentRating": "R",
+        "duration": 6420000,
+        "imdbRatingCount": 65639,
+        "originallyAvailableAt": "2026-06-25",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-invite-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 55505476,
+        "slug": "the-invite-2026",
+        "thumb": "https://metadata-static.plex.tv/f/plex/f1803f0a-a82c-4900-be4f-d1744989d51f.jpg",
+        "title": "The Invite",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/60448df6bd881e002cb9471e/commonsensemedia",
+            "oneLiner": "Wilde's sex comedy is wedded hiss; explicit language, pot.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "The Invite",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f7d77e0fd75441e35f7450aa386974d6.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/0/gracenote/085b44b1b6bc7207ed37c9f3b4a66330.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/the-invite-6a8365deadafb.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/e/683a142553/ebd98116997dd1d6dc7027e1fd5a872b.png"
+          },
+          {
+            "alt": "The Invite",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/e/683a142553/ebd98116997dd1d6dc7027e1fd5a872b.png"
+          },
+          {
+            "alt": "The Invite",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d3df9d69cadaa122a54fec29ef73a949.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/f/plex/f1803f0a-a82c-4900-be4f-d1744989d51f.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1611ef0b703e5e3f75fdbdfb114e5285.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1a9c7897c71758096cb98339af5a1ef2.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt14173636"
+          },
+          {
+            "id": "tmdb://950028"
+          },
+          {
+            "id": "tvdb://356147"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.5
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.9
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.3
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776825103a2d001f563c1e",
+            "order": 1,
+            "slug": "seth-rogen",
+            "tag": "Seth Rogen",
+            "thumb": "https://metadata-static.plex.tv/1/people/136ae1d23b961770f9aa674b7ef7ea0d.jpg",
+            "role": "Joe",
+            "key": "/library/people/5d776825103a2d001f563c1e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768325af944001f1f91b7",
+            "order": 2,
+            "slug": "olivia-wilde",
+            "tag": "Olivia Wilde",
+            "thumb": "https://metadata-static.plex.tv/3/people/3d55f378157d0c2780c337dbebef30f3.jpg",
+            "role": "Angela",
+            "key": "/library/people/5d7768325af944001f1f91b7",
+            "type": "person"
+          },
+          {
+            "id": "5d776824103a2d001f563a91",
+            "order": 3,
+            "slug": "penelope-cruz",
+            "tag": "Penélope Cruz",
+            "thumb": "https://metadata-static.plex.tv/6/people/6be04fa4d6c5d1f99ace2650be858140.jpg",
+            "role": "Piña",
+            "key": "/library/people/5d776824103a2d001f563a91",
+            "type": "person"
+          },
+          {
+            "id": "5d7768262ec6b5001f6ba201",
+            "order": 4,
+            "slug": "edward-norton",
+            "tag": "Edward Norton",
+            "thumb": "https://metadata-static.plex.tv/4/people/4261ed655879be97649140ec433aca04.jpg",
+            "role": "Hawk",
+            "key": "/library/people/5d7768262ec6b5001f6ba201",
+            "type": "person"
+          },
+          {
+            "id": "5f3fccadfea1a1003f974ff1",
+            "order": 5,
+            "slug": "skip-howland",
+            "tag": "Skip Howland",
+            "thumb": "https://metadata-static.plex.tv/2/people/2844f5da7ce67f6cbf2458840cf3e6ce.jpg",
+            "role": "Doorman (uncredited)",
+            "key": "/library/people/5f3fccadfea1a1003f974ff1",
+            "type": "person"
+          },
+          {
+            "id": "5e566bcb7126ec00412a4122",
+            "order": 6,
+            "slug": "mel-powell",
+            "tag": "Mel Powell",
+            "thumb": "https://metadata-static.plex.tv/1/people/1de012031328f719b145693e0a1b4a03.jpg",
+            "role": "Bartender (uncredited)",
+            "key": "/library/people/5e566bcb7126ec00412a4122",
+            "type": "person"
+          },
+          {
+            "id": "5f404e5702101b0040fa4249",
+            "order": 7,
+            "slug": "rachel-thurow",
+            "tag": "Rachel Thurow",
+            "thumb": "https://metadata-static.plex.tv/b/people/b5ed2aff8e5c9972c82e124852cff34e.jpg",
+            "role": "Subway Goer (uncredited)",
+            "key": "/library/people/5f404e5702101b0040fa4249",
+            "type": "person"
+          },
+          {
+            "id": "6a5bbe28d7cfc25195456a02",
+            "order": 8,
+            "slug": "mario-valdez-25",
+            "tag": "Mario Valdez",
+            "thumb": "https://metadata-static.plex.tv/9/people/90dbcd070bbe76e1264327bff5633bff.jpg",
+            "role": "Subway Goer (uncredited)",
+            "key": "/library/people/6a5bbe28d7cfc25195456a02",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768325af944001f1f91b7",
+            "slug": "olivia-wilde",
+            "tag": "Olivia Wilde",
+            "thumb": "https://metadata-static.plex.tv/3/people/3d55f378157d0c2780c337dbebef30f3.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768325af944001f1f91b7",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776828151a60001f24ae55",
+            "slug": "david-permut",
+            "tag": "David Permut",
+            "thumb": "https://metadata-static.plex.tv/6/people/6c66870d520eed42be2f9e0c79253465.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776828151a60001f24ae55",
+            "type": "person"
+          },
+          {
+            "id": "5d77686fe6d55c0020412e66",
+            "slug": "megan-ellison",
+            "tag": "Megan Ellison",
+            "thumb": "https://metadata-static.plex.tv/8/people/87c28fd42184397808a3252d462ae779.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77686fe6d55c0020412e66",
+            "type": "person"
+          },
+          {
+            "id": "5d77687d7a53e9001e6d07bf",
+            "slug": "ben-browning",
+            "tag": "Ben Browning",
+            "thumb": "https://metadata-static.plex.tv/people/5d77687d7a53e9001e6d07bf.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77687d7a53e9001e6d07bf",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77683a103a2d001f568d7b",
+            "slug": "cesc-gay",
+            "tag": "Cesc Gay",
+            "thumb": "https://metadata-static.plex.tv/3/people/3456ec646932fd470ecbb531951187b6.jpg",
+            "role": "Original Film Writer",
+            "key": "/library/people/5d77683a103a2d001f568d7b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a8a7581001f12dfe6",
+            "slug": "rashida-jones",
+            "tag": "Rashida Jones",
+            "thumb": "https://metadata-static.plex.tv/a/people/aa0c420505afff767fa6972dfdc4fb08.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77683a8a7581001f12dfe6",
+            "type": "person"
+          },
+          {
+            "id": "5d776836f59e580021898be6",
+            "slug": "will-mccormack",
+            "tag": "Will McCormack",
+            "thumb": "https://metadata-static.plex.tv/d/people/ddbb95e9725c5ca3bb6b3b2047ba26b8.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d776836f59e580021898be6",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/6563a7f76a74c8d14e9527ca",
+            "tag": "The Best You Can"
+          },
+          {
+            "guid": "plex://movie/660bf372f319bf10c52d45c5",
+            "tag": "The Roses"
+          },
+          {
+            "guid": "plex://movie/660e382527d47f946df7577d",
+            "tag": "The Roses"
+          },
+          {
+            "guid": "plex://movie/5d776839999c64001ec301fa",
+            "tag": "YPF"
+          },
+          {
+            "guid": "plex://movie/5d77683954f42c001f8c5214",
+            "tag": "In the Land of Women"
+          },
+          {
+            "guid": "plex://movie/66b2803d9d9c98ba4550ace3",
+            "tag": "The Drama"
+          },
+          {
+            "guid": "plex://movie/66b2b37ea96123f25e363a1f",
+            "tag": "The Drama"
+          },
+          {
+            "guid": "plex://movie/5d77683a8718ba001e315ec0",
+            "tag": "Heartburn"
+          },
+          {
+            "guid": "plex://movie/5d7768686f4521001eaa5c9e",
+            "tag": "Carnal Knowledge"
+          },
+          {
+            "guid": "plex://movie/5d9f3d7f4441b1001fa16b5c",
+            "tag": "Band Aid"
+          },
+          {
+            "guid": "plex://movie/5e1632fcef1040003f24861a",
+            "tag": "Voicemails for Isabelle"
+          },
+          {
+            "guid": "plex://movie/5d776d1796b655001fe3f31f",
+            "tag": "Manhattan"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Annapurna Pictures"
+          },
+          {
+            "tag": "FilmNation Entertainment"
+          },
+          {
+            "tag": "Permut Presentations"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A dinner party spirals into unexpected places when a couple on thin ice invite their neighbors over.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

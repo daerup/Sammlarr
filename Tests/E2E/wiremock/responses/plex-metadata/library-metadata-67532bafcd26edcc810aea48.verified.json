@@ -1,0 +1,456 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/5yUF8mQlT8JT82dDfSkmLAGUiJh.jpg",
+        "guid": "plex://show/67532bafcd26edcc810aea48",
+        "key": "/library/metadata/67532bafcd26edcc810aea48/children",
+        "ratingKey": "67532bafcd26edcc810aea48",
+        "studio": "Insight Entertainment",
+        "summary": "A strict police officer with a painful past forms an unexpected bond with a young man struggling to raise a child alone.",
+        "type": "show",
+        "addedAt": 1776988800,
+        "audienceRating": 7.8,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "duration": 3900000,
+        "imdbRatingCount": 319,
+        "lastEpisodeOriginallyAvailableAt": "2026-06-26",
+        "lastSeasonOriginallyAvailableAt": "2026-04-24",
+        "leafCount": 12,
+        "originalTitle": "รักแห่งสีลม",
+        "originallyAvailableAt": "2026-04-24",
+        "publicPagesURL": "https://watch.plex.tv/show/love-of-silom",
+        "slug": "love-of-silom",
+        "thumb": "https://image.tmdb.org/t/p/original/5oc5QFYrlPmGlJZWBo9DwyynlUw.jpg",
+        "title": "Love of Silom",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Love of Silom",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/5yUF8mQlT8JT82dDfSkmLAGUiJh.jpg"
+          },
+          {
+            "alt": "Love of Silom",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/8/683a142553/8f91e2c8b72bdd88e987ddf404833414.png"
+          },
+          {
+            "alt": "Love of Silom",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/8/683a142553/8f91e2c8b72bdd88e987ddf404833414.png"
+          },
+          {
+            "alt": "Love of Silom",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/gWCV0kyHhdFfYhZyzEJI44uL5Vl.jpg"
+          },
+          {
+            "alt": "Love of Silom",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/5oc5QFYrlPmGlJZWBo9DwyynlUw.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt38856645"
+          },
+          {
+            "id": "tmdb://278850"
+          },
+          {
+            "id": "tvdb://457516"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.8
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.25
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Thailand"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5f3fba4fcc4920003b2a55d4",
+            "order": 1,
+            "slug": "poompat-iam-samang",
+            "tag": "Poompat Iam-samang",
+            "thumb": "https://image.tmdb.org/t/p/original/42uohhyBUeTZSmWW6ds3RQMFKJ5.jpg",
+            "role": "Krit",
+            "key": "/library/people/5f3fba4fcc4920003b2a55d4",
+            "type": "person"
+          },
+          {
+            "id": "62d1230a9c70d86d2f317cf2",
+            "order": 2,
+            "slug": "phuripan-sapsangsawat",
+            "tag": "Phuripan Sapsangsawat",
+            "thumb": "https://metadata-static.plex.tv/e/people/ed97bf4fde4c4af677ec6cb63ee6741b.jpg",
+            "role": "Wayu",
+            "key": "/library/people/62d1230a9c70d86d2f317cf2",
+            "type": "person"
+          },
+          {
+            "id": "69552a883e5e9bd39728065b",
+            "order": 3,
+            "slug": "supakit-phuengpradach",
+            "tag": "Supakit Phuengpradach",
+            "thumb": "https://image.tmdb.org/t/p/original/8qJSalFNDUBbtkaTDQQlaHtisyB.jpg",
+            "role": "Tai",
+            "key": "/library/people/69552a883e5e9bd39728065b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fca921ae7100041fd8c1e",
+            "order": 4,
+            "slug": "talay-sanguandikul",
+            "tag": "Talay Sanguandikul",
+            "thumb": "https://metadata-static.plex.tv/c/people/c8b9e7da555a8f39c982fec7a440020e.jpg",
+            "role": "Mind",
+            "key": "/library/people/5f3fca921ae7100041fd8c1e",
+            "type": "person"
+          },
+          {
+            "id": "6367a258f6861da4cddd551d",
+            "order": 5,
+            "slug": "yanissa-diratorn-1",
+            "tag": "Yanissa Diratorn",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ede49d43e45c055bfaa524a967928e6.jpg",
+            "role": "Rose",
+            "key": "/library/people/6367a258f6861da4cddd551d",
+            "type": "person"
+          },
+          {
+            "id": "5f406db3cae2c60042f970f4",
+            "order": 6,
+            "slug": "siravitch-kamonworawut",
+            "tag": "Siravitch Kamonworawut",
+            "thumb": "https://metadata-static.plex.tv/4/people/48010cb437ac5827afeb34128e7a54fa.jpg",
+            "role": "Fei",
+            "key": "/library/people/5f406db3cae2c60042f970f4",
+            "type": "person"
+          },
+          {
+            "id": "5fd2510f9d08ef002dc09065",
+            "order": 7,
+            "slug": "chanakan-poonsiriwong-1",
+            "tag": "Chanakan Poonsiriwong",
+            "thumb": "https://metadata-static.plex.tv/9/people/95c28dad9cbbfac7b3aecf6066440158.jpg",
+            "role": "Boss",
+            "key": "/library/people/5fd2510f9d08ef002dc09065",
+            "type": "person"
+          },
+          {
+            "id": "682df5b9b989077ae7b49579",
+            "order": 8,
+            "slug": "perawitch-chotimanon",
+            "tag": "Perawitch Chotimanon",
+            "thumb": "https://metadata-static.plex.tv/5/people/51075f8777b3b76157fed31806ded418.jpg",
+            "role": "Richie",
+            "key": "/library/people/682df5b9b989077ae7b49579",
+            "type": "person"
+          },
+          {
+            "id": "64c10b545edbd645af3fba3c",
+            "order": 9,
+            "slug": "intouch-kooramasuwan",
+            "tag": "Intouch Kooramasuwan",
+            "thumb": "https://metadata-static.plex.tv/c/people/cb99c50d3e7c6cd05d5e3dab456936a8.jpg",
+            "role": "Kenji",
+            "key": "/library/people/64c10b545edbd645af3fba3c",
+            "type": "person"
+          },
+          {
+            "id": "667026344bc7dfd5fc7e3cff",
+            "order": 10,
+            "slug": "tanapon-hathaidachadusadee-1",
+            "tag": "Tanapon Hathaidachadusadee",
+            "thumb": "https://metadata-static.plex.tv/9/people/9f9405bb7fbaf67c1e7020aabcf631a2.jpg",
+            "role": "Henry",
+            "key": "/library/people/667026344bc7dfd5fc7e3cff",
+            "type": "person"
+          },
+          {
+            "id": "5f406d1386422500428c5e63",
+            "order": 11,
+            "slug": "phollawat-manuprasert",
+            "tag": "Phollawat Manuprasert",
+            "thumb": "https://metadata-static.plex.tv/e/people/ed9a5780565574744d6f1c84e018d346.jpg",
+            "role": "Phithak",
+            "key": "/library/people/5f406d1386422500428c5e63",
+            "type": "person"
+          },
+          {
+            "id": "66893483503c287710ef889d",
+            "order": 12,
+            "slug": "wacharin-anantapong-1",
+            "tag": "Wacharin Anantapong",
+            "thumb": "https://image.tmdb.org/t/p/original/A7q496VURHpE9yX0gPo7v9N7HAR.jpg",
+            "role": "Pimjit",
+            "key": "/library/people/66893483503c287710ef889d",
+            "type": "person"
+          },
+          {
+            "id": "64c3ae5d3432ebbaaf283948",
+            "order": 13,
+            "slug": "nujthanicha-rojjanajarunun-1",
+            "tag": "Nujthanicha Rojjanajarunun",
+            "thumb": "https://metadata-static.plex.tv/d/people/d53dcee77af52de083db7965b7573b59.jpg",
+            "role": "Wai",
+            "key": "/library/people/64c3ae5d3432ebbaaf283948",
+            "type": "person"
+          },
+          {
+            "id": "5d776b8f96b655001fe1528d",
+            "order": 14,
+            "slug": "ingkarat-damrongsakkul",
+            "tag": "Ingkarat Damrongsakkul",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd3726a7414dd1118130c959aae69ade.jpg",
+            "role": "Pete",
+            "key": "/library/people/5d776b8f96b655001fe1528d",
+            "type": "person"
+          },
+          {
+            "id": "66225d81c8a93fa5efab662d",
+            "order": 15,
+            "slug": "khanatsanan-naktakhe-1",
+            "tag": "Khanatsanan Naktakhe",
+            "role": "Nut",
+            "key": "/library/people/66225d81c8a93fa5efab662d",
+            "type": "person"
+          },
+          {
+            "id": "64524d933efe2397af851b02",
+            "order": 16,
+            "slug": "taofa-maneeprasopchok",
+            "tag": "Taofa Maneeprasopchok",
+            "thumb": "https://metadata-static.plex.tv/f/people/fc7264aac59b604dc54162f9797db794.jpg",
+            "role": "Ice",
+            "key": "/library/people/64524d933efe2397af851b02",
+            "type": "person"
+          },
+          {
+            "id": "69ecb2f1d79c2f3ce77f9870",
+            "order": 17,
+            "slug": "nonnarat-weeraratsuphakul",
+            "tag": "Nonnarat Weeraratsuphakul",
+            "role": "Singto",
+            "key": "/library/people/69ecb2f1d79c2f3ce77f9870",
+            "type": "person"
+          },
+          {
+            "id": "6544e194b67228408e654ba2",
+            "order": 18,
+            "slug": "natsakan-chairote",
+            "tag": "Natsakan Chairote",
+            "thumb": "https://metadata-static.plex.tv/4/people/4603eeb53a68cf6d93a2744c578196a9.jpg",
+            "role": "Chen",
+            "key": "/library/people/6544e194b67228408e654ba2",
+            "type": "person"
+          },
+          {
+            "id": "680e22f903a470afa49d4800",
+            "order": 19,
+            "slug": "pornthiphat-lertwuthanon",
+            "tag": "Pornthiphat Lertwuthanon",
+            "thumb": "https://metadata-static.plex.tv/3/people/332b5a3e603e0cc804d7b096bcb7160f.jpg",
+            "role": "Mint",
+            "key": "/library/people/680e22f903a470afa49d4800",
+            "type": "person"
+          },
+          {
+            "id": "63ea26a7914cd94c3cf05ed8",
+            "order": 20,
+            "slug": "pasakorn-saisombut",
+            "tag": "Pasakorn Saisombut",
+            "key": "/library/people/63ea26a7914cd94c3cf05ed8",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "624315fd7d2b339a12c80276",
+            "slug": "banchorn-vorasataree",
+            "tag": "Banchorn Vorasataree",
+            "thumb": "https://metadata-static.plex.tv/5/people/526a5c71e3c14e147d8d19065991ed57.jpg",
+            "role": "Director",
+            "key": "/library/people/624315fd7d2b339a12c80276",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "649589d971a9879ff0efda37",
+            "slug": "issaraporn-kuntisuk-1",
+            "tag": "Issaraporn Kuntisuk",
+            "role": "Screenplay",
+            "key": "/library/people/649589d971a9879ff0efda37",
+            "type": "person"
+          },
+          {
+            "id": "63e38fa5450797411319d1fb",
+            "slug": "kanokphan-ornrattanasakul-1",
+            "tag": "Kanokphan Ornrattanasakul",
+            "role": "Screenplay",
+            "key": "/library/people/63e38fa5450797411319d1fb",
+            "type": "person"
+          },
+          {
+            "id": "6313421be133f96f3fdcd4ea",
+            "slug": "irene-insot",
+            "tag": "Irene Insot",
+            "role": "Screenplay",
+            "key": "/library/people/6313421be133f96f3fdcd4ea",
+            "type": "person"
+          },
+          {
+            "id": "6397185ddb2ba10f43468084",
+            "slug": "natthakit-fungcharoen",
+            "tag": "Natthakit Fungcharoen",
+            "role": "Screenplay",
+            "key": "/library/people/6397185ddb2ba10f43468084",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "WeTV"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c086bd4f2a9001f800bad",
+            "tag": "T.J. Hooker"
+          },
+          {
+            "guid": "plex://show/6047a5bfcfcbfe002ca08f3e",
+            "tag": "Grace (2021)"
+          },
+          {
+            "guid": "plex://show/60cc7143c66097002c67509f",
+            "tag": "The Tower (2021)"
+          },
+          {
+            "guid": "plex://show/5d9c086ce264b7001fc4398e",
+            "tag": "Starsky & Hutch"
+          },
+          {
+            "guid": "plex://show/657b8fca9fc8d35ffdabe3ae",
+            "tag": "Murder in a Small Town (2024)"
+          },
+          {
+            "guid": "plex://show/5d9c087208fddd001f29b38b",
+            "tag": "The Streets of San Francisco"
+          },
+          {
+            "guid": "plex://show/5d9c07ee46115600200a5c94",
+            "tag": "Rookie Blue"
+          },
+          {
+            "guid": "plex://show/5d9c08722192ba001f311148",
+            "tag": "Baretta"
+          },
+          {
+            "guid": "plex://show/5d9c0800e98e47001eb05163",
+            "tag": "Hill Street Blues"
+          },
+          {
+            "guid": "plex://show/5d9c083a3c3f87001f34aaf8",
+            "tag": "Jack Irish"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Insight Entertainment"
+          },
+          {
+            "tag": "YYDS Entertainment"
+          },
+          {
+            "tag": "WeTV"
+          }
+        ]
+      }
+    ]
+  }
+}

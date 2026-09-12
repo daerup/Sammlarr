@@ -1,0 +1,153 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://artworks.thetvdb.com/banners/fanart/original/5c858c8662761.jpg",
+        "guid": "plex://show/5d9c091ce9d5a1001f4de854",
+        "key": "/library/metadata/5d9c091ce9d5a1001f4de854/children",
+        "ratingKey": "5d9c091ce9d5a1001f4de854",
+        "type": "show",
+        "addedAt": 1412899200,
+        "childCount": 4,
+        "contentRating": "TV-MA",
+        "duration": 720000,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2025-06-13",
+        "leafCount": 34,
+        "originallyAvailableAt": "2014-10-10",
+        "publicPagesURL": "https://watch.plex.tv/show/bleach-s-abridged",
+        "slug": "bleach-s-abridged",
+        "thumb": "https://artworks.thetvdb.com/banners/posters/5cb2be45d356c.jpg",
+        "title": "Bleach (S) Abridged",
+        "userState": false,
+        "year": 2014,
+        "Image": [
+          {
+            "alt": "Bleach (S) Abridged",
+            "type": "coverArt",
+            "url": "https://artworks.thetvdb.com/banners/fanart/original/5c858c8662761.jpg"
+          },
+          {
+            "alt": "Bleach (S) Abridged",
+            "type": "coverPoster",
+            "url": "https://artworks.thetvdb.com/banners/posters/5cb2be45d356c.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tvdb://360846"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6142192426fe54605e966e40",
+            "order": 1,
+            "slug": "logan-laidlaw-1",
+            "tag": "Logan Laidlaw",
+            "role": "Ichigo Kurosaki",
+            "key": "/library/people/6142192426fe54605e966e40",
+            "type": "person"
+          },
+          {
+            "id": "6142192426fe54605e966e41",
+            "order": 2,
+            "slug": "cassandra-cavalli-1",
+            "tag": "Cassandra Cavalli",
+            "role": "Rukia Kutchiki",
+            "key": "/library/people/6142192426fe54605e966e41",
+            "type": "person"
+          },
+          {
+            "id": "6142192426fe54605e966e42",
+            "order": 3,
+            "slug": "aaron-robert-parnell-1",
+            "tag": "Aaron Robert Parnell",
+            "role": "Josh \"Aizen\" Groban",
+            "key": "/library/people/6142192426fe54605e966e42",
+            "type": "person"
+          },
+          {
+            "id": "6142192426fe54605e966e43",
+            "order": 4,
+            "slug": "bryan-garces-1",
+            "tag": "Bryan Garces",
+            "role": "Various",
+            "key": "/library/people/6142192426fe54605e966e43",
+            "type": "person"
+          },
+          {
+            "id": "6141b98c1ef8b4c9d8ea86e7",
+            "order": 5,
+            "slug": "sarah-harris-51",
+            "tag": "Sarah Harris",
+            "role": "Various",
+            "key": "/library/people/6141b98c1ef8b4c9d8ea86e7",
+            "type": "person"
+          },
+          {
+            "id": "6142192426fe54605e966e44",
+            "order": 6,
+            "slug": "katrina-salisbury-1",
+            "tag": "Katrina Salisbury",
+            "role": "Orihime Inoue",
+            "key": "/library/people/6142192426fe54605e966e44",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "YouTube"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ]
+      }
+    ]
+  }
+}

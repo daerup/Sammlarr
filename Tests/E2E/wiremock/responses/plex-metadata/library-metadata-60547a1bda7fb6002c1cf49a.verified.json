@@ -1,0 +1,746 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/7/gracenote/7a2366f972714ce1fa596550dda6ef88.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/397991/banners/685fdf9f88def.jpg",
+        "guid": "plex://show/60547a1bda7fb6002c1cf49a",
+        "key": "/library/metadata/60547a1bda7fb6002c1cf49a/children",
+        "ratingKey": "60547a1bda7fb6002c1cf49a",
+        "studio": "Ochre Moving Pictures",
+        "summary": "A woman loses her children, her lover and her freedom when she is framed for fraud committed by her husband before his death.",
+        "tagline": "Backing down is not in her nature.",
+        "type": "show",
+        "addedAt": 1611792000,
+        "audienceRating": 7.5,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 2,
+        "duration": 2820000,
+        "imdbRatingCount": 759,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2023-03-30",
+        "lastSeasonOriginallyAvailableAt": "2023-01-26",
+        "leafCount": 20,
+        "originallyAvailableAt": "2021-01-28",
+        "publicPagesURL": "https://watch.plex.tv/show/lioness-2021",
+        "slug": "lioness-2021",
+        "thumb": "https://image.tmdb.org/t/p/original/jzxFaqQYGt2FOzVygxL9IHu0jne.jpg",
+        "title": "Lioness (2021)",
+        "userState": false,
+        "year": 2021,
+        "Image": [
+          {
+            "alt": "Lioness (2021)",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7a2366f972714ce1fa596550dda6ef88.jpg"
+          },
+          {
+            "alt": "Lioness (2021)",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6fac69940e0b5099ca4b3881d342adf3.jpg"
+          },
+          {
+            "alt": "Lioness (2021)",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/397991/banners/685fdf9f88def.jpg"
+          },
+          {
+            "alt": "Lioness (2021)",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8d3a03035e1022986d7004ed1684ea8e.jpg"
+          },
+          {
+            "alt": "Lioness (2021)",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/jzxFaqQYGt2FOzVygxL9IHu0jne.jpg"
+          },
+          {
+            "alt": "Lioness (2021)",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1786805141b35da8547543c349d292d2.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt13760268"
+          },
+          {
+            "id": "tmdb://232553"
+          },
+          {
+            "id": "tvdb://397991"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.2
+          }
+        ],
+        "Country": [
+          {
+            "tag": "South Africa"
+          }
+        ],
+        "Role": [
+          {
+            "id": "693c33f5106cd0a0e0fc0ca2",
+            "order": 1,
+            "slug": "shannon-esra-4",
+            "tag": "Shannon Esra",
+            "thumb": "https://metadata-static.plex.tv/c/people/c3c585e72a56f8f2268fb1586ae9a0c7.jpg",
+            "role": "Samantha Hugo",
+            "key": "/library/people/693c33f5106cd0a0e0fc0ca2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768aa96b655001fdbe88f",
+            "order": 2,
+            "slug": "natasha-sutherland",
+            "tag": "Natasha Sutherland",
+            "role": "Megan Hugo",
+            "key": "/library/people/5d7768aa96b655001fdbe88f",
+            "type": "person"
+          },
+          {
+            "id": "6a0c3cfa061ef1ee78c4f86d",
+            "order": 3,
+            "slug": "gerald-steyn-6",
+            "tag": "Gerald Steyn",
+            "thumb": "https://metadata-static.plex.tv/5/people/580c5ddfee1b0769f4d221fc2083dfe1.jpg",
+            "role": "Anton Marais",
+            "key": "/library/people/6a0c3cfa061ef1ee78c4f86d",
+            "type": "person"
+          },
+          {
+            "id": "5e16362161c6140040d6b27f",
+            "order": 4,
+            "slug": "nokuthula-ledwaba",
+            "tag": "Nokuthula Ledwaba",
+            "thumb": "https://metadata-static.plex.tv/3/people/31e672a3f0a638389715499b8ddb6d68.jpg",
+            "role": "Amo Twala",
+            "key": "/library/people/5e16362161c6140040d6b27f",
+            "type": "person"
+          },
+          {
+            "id": "5d77684b8718ba001e318370",
+            "order": 5,
+            "slug": "frank-rautenbach",
+            "tag": "Frank Rautenbach",
+            "thumb": "https://metadata-static.plex.tv/e/people/e521f895485ca2ede3056143e13fc478.jpg",
+            "role": "Jason Hugo",
+            "key": "/library/people/5d77684b8718ba001e318370",
+            "type": "person"
+          },
+          {
+            "id": "5d776c5b96b655001fe2dfe7",
+            "order": 6,
+            "slug": "jazzara-jaslyn",
+            "tag": "Jazzara Jaslyn",
+            "thumb": "https://metadata-static.plex.tv/e/people/edeb785c0c8a6d0f97c0e3adbf31de51.jpg",
+            "role": "Miranda Hugo",
+            "key": "/library/people/5d776c5b96b655001fe2dfe7",
+            "type": "person"
+          },
+          {
+            "id": "64e4a3bcf1323e151c96892a",
+            "order": 7,
+            "slug": "terrence-ngwila-1",
+            "tag": "Terrence Ngwila",
+            "role": "Sifiso Twala",
+            "key": "/library/people/64e4a3bcf1323e151c96892a",
+            "type": "person"
+          },
+          {
+            "id": "5f9ae7441d01cd002da36b33",
+            "order": 8,
+            "slug": "avianah-abrahams-1",
+            "tag": "Avianah Abrahams",
+            "role": "Caitlyn Hugo",
+            "key": "/library/people/5f9ae7441d01cd002da36b33",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ee6d55c002040bf45",
+            "order": 9,
+            "slug": "fiona-ramsay",
+            "tag": "Fiona Ramsay",
+            "thumb": "https://metadata-static.plex.tv/d/people/d843956770a48c714eb81ef679b18843.jpg",
+            "role": "Charlotte Lawson",
+            "key": "/library/people/5d77682ee6d55c002040bf45",
+            "type": "person"
+          },
+          {
+            "id": "5d77704ead5437001f81ebe7",
+            "order": 10,
+            "slug": "joshua-daniel-eady",
+            "tag": "Joshua Daniel Eady",
+            "thumb": "https://metadata-static.plex.tv/e/people/e1e1f18a39a22509535269c13d420e41.jpg",
+            "role": "Liam Hugo",
+            "key": "/library/people/5d77704ead5437001f81ebe7",
+            "type": "person"
+          },
+          {
+            "id": "5d776f7a96b655001fe850e1",
+            "order": 11,
+            "slug": "ilana-cilliers-1",
+            "tag": "Ilana Cilliers",
+            "role": "Yvette Smith",
+            "key": "/library/people/5d776f7a96b655001fe850e1",
+            "type": "person"
+          },
+          {
+            "id": "5d776df17a53e9001e767f0d",
+            "order": 12,
+            "slug": "evan-hengst",
+            "tag": "Evan Hengst",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd3ea825153350b1b4e2bb78a45d0cc7.jpg",
+            "role": "Brian Sutton",
+            "key": "/library/people/5d776df17a53e9001e767f0d",
+            "type": "person"
+          },
+          {
+            "id": "5d77706a81ba41001faefc3a",
+            "order": 13,
+            "slug": "ditebogo-ledwaba",
+            "tag": "Ditebogo Ledwaba",
+            "thumb": "https://metadata-static.plex.tv/5/people/51e100302601ce79e072adc906fc6132.jpg",
+            "role": "Lesedi Twala",
+            "key": "/library/people/5d77706a81ba41001faefc3a",
+            "type": "person"
+          },
+          {
+            "id": "64e4a3bd1ad72c8f0a0f5237",
+            "order": 14,
+            "slug": "pulane-rampoana-1",
+            "tag": "Pulane Rampoana",
+            "role": "Bonolo Mahlaba",
+            "key": "/library/people/64e4a3bd1ad72c8f0a0f5237",
+            "type": "person"
+          },
+          {
+            "id": "5f4925d868efe6004050f7d3",
+            "order": 15,
+            "slug": "carla-classen-1",
+            "tag": "Carla Classen",
+            "thumb": "https://metadata-static.plex.tv/e/people/e5ceef18c5c9c0274e072f12e6268c46.jpg",
+            "role": "Bianca Curtis",
+            "key": "/library/people/5f4925d868efe6004050f7d3",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ea594b2b001e6adc26",
+            "order": 16,
+            "slug": "jacques-bessenger",
+            "tag": "Jacques Bessenger",
+            "thumb": "https://metadata-static.plex.tv/2/people/2645619de4fb612b0902a4a64132f5d9.jpg",
+            "role": "Adrian Hugo",
+            "key": "/library/people/5d7769ea594b2b001e6adc26",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe1f8cae2c60042ea1741",
+            "order": 17,
+            "slug": "vinette-ebrahim",
+            "tag": "Vinette Ebrahim",
+            "thumb": "https://metadata-static.plex.tv/a/people/aef8c42141852dc3c97bbf5cad431fe7.jpg",
+            "role": "Vera",
+            "key": "/library/people/5f3fe1f8cae2c60042ea1741",
+            "type": "person"
+          },
+          {
+            "id": "5d77685d594b2b001e689d72",
+            "order": 18,
+            "slug": "carl-beukes",
+            "tag": "Carl Beukes",
+            "thumb": "https://metadata-static.plex.tv/5/people/542c32bbc42e6bb3c5339d6b3fa4d091.jpg",
+            "role": "Max",
+            "key": "/library/people/5d77685d594b2b001e689d72",
+            "type": "person"
+          },
+          {
+            "id": "607e8c11c3e90f0035c092fa",
+            "order": 19,
+            "slug": "ayden-croy",
+            "tag": "Ayden Croy",
+            "thumb": "https://metadata-static.plex.tv/2/people/288078ebeb820019e9ca2dbeb57f7a92.jpg",
+            "role": "Kevin",
+            "key": "/library/people/607e8c11c3e90f0035c092fa",
+            "type": "person"
+          },
+          {
+            "id": "5d77683454f42c001f8c42a0",
+            "order": 20,
+            "slug": "theo-landey",
+            "tag": "Theo Landey",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683454f42c001f8c42a0.jpg",
+            "role": "Thomas Fletcher",
+            "key": "/library/people/5d77683454f42c001f8c42a0",
+            "type": "person"
+          },
+          {
+            "id": "64d4d1b42c72392116963378",
+            "order": 21,
+            "slug": "sanli-jooste-1",
+            "tag": "Sanli Jooste",
+            "role": "Emma Marais",
+            "key": "/library/people/64d4d1b42c72392116963378",
+            "type": "person"
+          },
+          {
+            "id": "5d776837e6d55c002040d902",
+            "order": 22,
+            "slug": "jack-devnarain",
+            "tag": "Jack Devnarain",
+            "thumb": "https://metadata-static.plex.tv/a/people/ae9ca65f24b4f8e622ff25663fe40f95.jpg",
+            "role": "Howard Chetty",
+            "key": "/library/people/5d776837e6d55c002040d902",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad715bae7c5c54a1cde",
+            "order": 23,
+            "slug": "xolani-xaba-1",
+            "tag": "Xolani Xaba",
+            "role": "Scelo Twala",
+            "key": "/library/people/68c2fad715bae7c5c54a1cde",
+            "type": "person"
+          },
+          {
+            "id": "6a0c28a99bf36b1f69e6a2bd",
+            "order": 24,
+            "slug": "caleb-payne-10",
+            "tag": "Caleb Payne",
+            "thumb": "https://metadata-static.plex.tv/0/people/0cb81f296c41d9e272974db24720fc33.jpg",
+            "role": "Boy Liam",
+            "key": "/library/people/6a0c28a99bf36b1f69e6a2bd",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad71d480f2a4051fff9",
+            "order": 25,
+            "slug": "itumeleng-morobela",
+            "tag": "Itumeleng Morobela",
+            "role": "Sergeant Mmolawa",
+            "key": "/library/people/68c2fad71d480f2a4051fff9",
+            "type": "person"
+          },
+          {
+            "id": "68c2fadb5d5559cb521621b9",
+            "order": 26,
+            "slug": "kutlwano-sibekwane",
+            "tag": "Kutlwano Sibekwane",
+            "role": "Girl Lesedi Twala",
+            "key": "/library/people/68c2fadb5d5559cb521621b9",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad64e0e73f63aceed65",
+            "order": 27,
+            "slug": "melania-camilla-niemand",
+            "tag": "Melania Camilla Niemand",
+            "role": "Todler Caitlyn",
+            "key": "/library/people/68c2fad64e0e73f63aceed65",
+            "type": "person"
+          },
+          {
+            "id": "68c2fadab62dda6fa080d9e4",
+            "order": 28,
+            "slug": "joshua-crerar",
+            "tag": "Joshua Crerar",
+            "role": "Louis Marais",
+            "key": "/library/people/68c2fadab62dda6fa080d9e4",
+            "type": "person"
+          },
+          {
+            "id": "5fafff4fc87969002d2c444f",
+            "order": 29,
+            "slug": "paige-bonnin-1",
+            "tag": "Paige Bonnin",
+            "thumb": "https://metadata-static.plex.tv/6/people/68fc62f0464cb30830efa989537d1e79.jpg",
+            "role": "Felicity",
+            "key": "/library/people/5fafff4fc87969002d2c444f",
+            "type": "person"
+          },
+          {
+            "id": "64ef2ff60f5e417d0243a5ca",
+            "order": 30,
+            "slug": "jock-kleynhans-1",
+            "tag": "Jock Kleynhans",
+            "role": "Jake Dison",
+            "key": "/library/people/64ef2ff60f5e417d0243a5ca",
+            "type": "person"
+          },
+          {
+            "id": "6627a5daf4027a6efde28869",
+            "order": 31,
+            "slug": "perebo-george",
+            "tag": "Perebo George",
+            "role": "Sergeant Dlamini",
+            "key": "/library/people/6627a5daf4027a6efde28869",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad8060ea093e23978cc",
+            "order": 32,
+            "slug": "moira-mckie",
+            "tag": "Moira Mckie",
+            "role": "Erica Sutton",
+            "key": "/library/people/68c2fad8060ea093e23978cc",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad8fc91b5ef91d1b909",
+            "order": 33,
+            "slug": "itumeleng-morobela-1",
+            "tag": "Itumeleng Morobela",
+            "role": "Sergeant Mmolawa",
+            "key": "/library/people/68c2fad8fc91b5ef91d1b909",
+            "type": "person"
+          },
+          {
+            "id": "694382668b1176e795aaf6fd",
+            "order": 34,
+            "slug": "charlotte-butler-7",
+            "tag": "Charlotte Butler",
+            "thumb": "https://metadata-static.plex.tv/6/people/64fddc93e23108e9f2bacb8b75423f7d.jpg",
+            "role": "Mrs Grant",
+            "key": "/library/people/694382668b1176e795aaf6fd",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad7385fa4c21a982211",
+            "order": 35,
+            "slug": "cynthia-makhubela-1",
+            "tag": "Cynthia Makhubela",
+            "role": "Mary",
+            "key": "/library/people/68c2fad7385fa4c21a982211",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad6b62dda6fa080d7ee",
+            "order": 36,
+            "slug": "emily-mokhupi",
+            "tag": "Emily Mokhupi",
+            "role": "Hlubi",
+            "key": "/library/people/68c2fad6b62dda6fa080d7ee",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad63b8dfdc574a34a5a",
+            "order": 37,
+            "slug": "sofia-cicoria",
+            "tag": "Sofia Cicoria",
+            "role": "Lulu",
+            "key": "/library/people/68c2fad63b8dfdc574a34a5a",
+            "type": "person"
+          },
+          {
+            "id": "651ff760cc4ef2bfe889602e",
+            "order": 38,
+            "slug": "ameera-patel-6",
+            "tag": "Ameera Patel",
+            "role": "Advocate Azeera",
+            "key": "/library/people/651ff760cc4ef2bfe889602e",
+            "type": "person"
+          },
+          {
+            "id": "5d776cac7a53e9001e749e2c",
+            "order": 39,
+            "slug": "lesego-molotsi",
+            "tag": "Lesego Molotsi",
+            "thumb": "https://metadata-static.plex.tv/8/people/86bdaea994722d28b8f171609922edfd.jpg",
+            "role": "Advocate Daniels",
+            "key": "/library/people/5d776cac7a53e9001e749e2c",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad6925ba886b2ca4292",
+            "order": 40,
+            "slug": "faith-kekana-1",
+            "tag": "Faith Kekana",
+            "role": "Judge Moshidi",
+            "key": "/library/people/68c2fad6925ba886b2ca4292",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad742aa92bf0e28845e",
+            "order": 41,
+            "slug": "sammy-t-1",
+            "tag": "Sammy T",
+            "role": "Abe",
+            "key": "/library/people/68c2fad742aa92bf0e28845e",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad881d0cde75a2c8bf6",
+            "order": 42,
+            "slug": "ashton-mitchell-2",
+            "tag": "Ashton Mitchell",
+            "role": "Rory",
+            "key": "/library/people/68c2fad881d0cde75a2c8bf6",
+            "type": "person"
+          },
+          {
+            "id": "68c2fad69548b1d562908ef0",
+            "order": 43,
+            "slug": "khwezi-foss",
+            "tag": "Khwezi Foss",
+            "role": "Busi",
+            "key": "/library/people/68c2fad69548b1d562908ef0",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7769ea594b2b001e6adc24",
+            "slug": "jozua-malherbe",
+            "tag": "Jozua Malherbe",
+            "role": "Director",
+            "key": "/library/people/5d7769ea594b2b001e6adc24",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b5ad5437001f74dab4",
+            "slug": "morne-du-toit",
+            "tag": "Morné du Toit",
+            "thumb": "https://metadata-static.plex.tv/0/people/07d2dcf28c2f2138a3f9fdeb81f172e4.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768b5ad5437001f74dab4",
+            "type": "person"
+          },
+          {
+            "id": "64a7feeae03565f95578fbd6",
+            "slug": "ilse-van-hemert-1",
+            "tag": "Ilse van Hemert",
+            "role": "Director",
+            "key": "/library/people/64a7feeae03565f95578fbd6",
+            "type": "person"
+          },
+          {
+            "id": "5d776a5a96b655001fdec134",
+            "slug": "rolie-nikiwe",
+            "tag": "Rolie Nikiwe",
+            "role": "Director",
+            "key": "/library/people/5d776a5a96b655001fdec134",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f3ffa741ae710004101ad69",
+            "slug": "ilse-van-hemert",
+            "tag": "Ilse Van Hemert",
+            "role": "Producer",
+            "key": "/library/people/5f3ffa741ae710004101ad69",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "64e4a3bd1d844be787111d56",
+            "slug": "rosalind-butler-1",
+            "tag": "Rosalind Butler",
+            "role": "Writer",
+            "key": "/library/people/64e4a3bd1d844be787111d56",
+            "type": "person"
+          },
+          {
+            "id": "64c8f454f3253046ef0bdd7b",
+            "slug": "mitzi-booysen-1",
+            "tag": "Mitzi Booysen",
+            "role": "Writer",
+            "key": "/library/people/64c8f454f3253046ef0bdd7b",
+            "type": "person"
+          },
+          {
+            "id": "64e4a3bc1ad72c8f0a0f522d",
+            "slug": "thomas-hall-47",
+            "tag": "Thomas Hall",
+            "role": "Writer",
+            "key": "/library/people/64e4a3bc1ad72c8f0a0f522d",
+            "type": "person"
+          },
+          {
+            "id": "64e4a3bdd2136ad0de3f776a",
+            "slug": "david-gordon-106",
+            "tag": "David Gordon",
+            "role": "Writer",
+            "key": "/library/people/64e4a3bdd2136ad0de3f776a",
+            "type": "person"
+          },
+          {
+            "id": "64a7feeae03565f95578fbd6",
+            "slug": "ilse-van-hemert-1",
+            "tag": "Ilse van Hemert",
+            "role": "Writer",
+            "key": "/library/people/64a7feeae03565f95578fbd6",
+            "type": "person"
+          },
+          {
+            "id": "5e164689bc1372003ea7bae3",
+            "slug": "trish-malone-1",
+            "tag": "Trish Malone",
+            "role": "Writer",
+            "key": "/library/people/5e164689bc1372003ea7bae3",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.994,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.99,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.976,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe25e93b86d951fb80fb",
+            "score": 0.806,
+            "tag": "gripping"
+          },
+          {
+            "id": "65afbe25e93b86d951fb81c8",
+            "score": 0.745,
+            "tag": "gritty"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.74,
+            "tag": "mysterious"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "M-Net"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/6047a5bfcfcbfe002ca08f3e",
+            "tag": "Grace (2021)"
+          },
+          {
+            "guid": "plex://show/6050e82dafb703002d858fd7",
+            "tag": "Smother"
+          },
+          {
+            "guid": "plex://show/614c9cf0e59ead342702fbb5",
+            "tag": "The Endgame"
+          },
+          {
+            "guid": "plex://show/60cc7143c66097002c67509f",
+            "tag": "The Tower (2021)"
+          },
+          {
+            "guid": "plex://show/636ffb6913983f483af2056d",
+            "tag": "Joan"
+          },
+          {
+            "guid": "plex://show/64063efa1cca12423a333346",
+            "tag": "White Lies (2024)"
+          },
+          {
+            "guid": "plex://show/5d9c0800e98e47001eb05163",
+            "tag": "Hill Street Blues"
+          },
+          {
+            "guid": "plex://show/5d9c083a3c3f87001f34aaf8",
+            "tag": "Jack Irish"
+          },
+          {
+            "guid": "plex://show/5d9c0876cb3ffa001f1b5aab",
+            "tag": "Agatha Christie's Marple"
+          },
+          {
+            "guid": "plex://show/5d9c09120aaccd001f8f3f48",
+            "tag": "Carl Weber's The Family Business"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Ochre Moving Pictures"
+          }
+        ]
+      }
+    ]
+  }
+}

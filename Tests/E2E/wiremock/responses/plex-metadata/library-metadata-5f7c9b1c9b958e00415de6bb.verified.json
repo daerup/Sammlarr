@@ -1,0 +1,1992 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/qD211Hb5XwFxrszzBBe5EUYJerh.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/392276/banners/64f03e2609d69.jpg",
+        "guid": "plex://show/5f7c9b1c9b958e00415de6bb",
+        "key": "/library/metadata/5f7c9b1c9b958e00415de6bb/children",
+        "rating": 9.3,
+        "ratingKey": "5f7c9b1c9b958e00415de6bb",
+        "studio": "Tomorrow Studios",
+        "subtype": "miniSeries",
+        "summary": "With his straw hat and ragtag crew, young pirate Monkey D. Luffy goes on an epic voyage for treasure.",
+        "tagline": "Come on board and bring along all your hopes and dreams",
+        "type": "show",
+        "addedAt": 1693440000,
+        "audienceRating": 9.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 3,
+        "contentRating": "TV-14",
+        "duration": 3600000,
+        "imdbRatingCount": 210906,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-03-10",
+        "lastSeasonOriginallyAvailableAt": "2026-03-10",
+        "leafCount": 17,
+        "originallyAvailableAt": "2023-08-31",
+        "publicPagesURL": "https://watch.plex.tv/show/one-piece-2023",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "one-piece-2023",
+        "thumb": "https://image.tmdb.org/t/p/original/blWCPEqDGLBuLB9u89CxP9ORQP4.jpg",
+        "title": "ONE PIECE (2023)",
+        "userState": false,
+        "year": 2023,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5f7c9b1c9b958e00415de6bb/commonsensemedia",
+            "oneLiner": "Fun pirate romp has positive themes, some violence.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/qD211Hb5XwFxrszzBBe5EUYJerh.jpg"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/44ed57b20373bf6e3502ff0d011d5c65.jpg"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/392276/banners/64f03e2609d69.jpg"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/6/683a142553/6634177f22e8456cd7afc4febb660703.png"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/6/683a142553/6634177f22e8456cd7afc4febb660703.png"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/d/gracenote/dffd81ea6bdf25c71b06453bc81b4d2d.jpg"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/blWCPEqDGLBuLB9u89CxP9ORQP4.jpg"
+          },
+          {
+            "alt": "ONE PIECE (2023)",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/caec1f4bcef1a18f07ca2954deeb2afa.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt11737520"
+          },
+          {
+            "id": "tmdb://111110"
+          },
+          {
+            "id": "tvdb://392276"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.113
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7770a06afb3d002061e54c",
+            "order": 1,
+            "slug": "inaki-godoy",
+            "tag": "Iñaki Godoy",
+            "thumb": "https://metadata-static.plex.tv/b/people/b97f2dff14a6e23c21913e56f7756b53.jpg",
+            "role": "Monkey D. Luffy",
+            "key": "/library/people/5d7770a06afb3d002061e54c",
+            "type": "person"
+          },
+          {
+            "id": "5d776f02ad5437001f80825a",
+            "order": 2,
+            "slug": "emily-rudd",
+            "tag": "Emily Rudd",
+            "thumb": "https://metadata-static.plex.tv/1/people/1865b0adf30184a39646f49571999234.jpg",
+            "role": "Nami",
+            "key": "/library/people/5d776f02ad5437001f80825a",
+            "type": "person"
+          },
+          {
+            "id": "5d776ad57a53e9001e7110e2",
+            "order": 3,
+            "slug": "mackenyu",
+            "tag": "Mackenyu",
+            "thumb": "https://metadata-static.plex.tv/c/people/c8fee277f03f462aa7cc0809d624e3cf.jpg",
+            "role": "Roronoa Zoro",
+            "key": "/library/people/5d776ad57a53e9001e7110e2",
+            "type": "person"
+          },
+          {
+            "id": "5e624d9aedfb02003ecdd04d",
+            "order": 4,
+            "slug": "jacob-gibson",
+            "tag": "Jacob Gibson",
+            "thumb": "https://metadata-static.plex.tv/3/people/385a3ba89fff2ddb87420e069ad0fd31.jpg",
+            "role": "Usopp",
+            "key": "/library/people/5e624d9aedfb02003ecdd04d",
+            "type": "person"
+          },
+          {
+            "id": "5d7770ec31d95e001f1acdb3",
+            "order": 5,
+            "slug": "taz-skylar",
+            "tag": "Taz Skylar",
+            "thumb": "https://metadata-static.plex.tv/0/people/02edfcb4b5d795f9d788cf37899cf376.jpg",
+            "role": "Sanji",
+            "key": "/library/people/5d7770ec31d95e001f1acdb3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768276f4521001ea990cc",
+            "order": 6,
+            "slug": "vincent-regan",
+            "tag": "Vincent Regan",
+            "thumb": "https://metadata-static.plex.tv/e/people/e6c227415cb5865c2d27ae7e147c6de6.jpg",
+            "role": "Vice-Admiral Garp",
+            "key": "/library/people/5d7768276f4521001ea990cc",
+            "type": "person"
+          },
+          {
+            "id": "5d7769727a53e9001e6e6c0d",
+            "order": 7,
+            "slug": "jeff-ward-2",
+            "tag": "Jeff Ward",
+            "thumb": "https://metadata-static.plex.tv/b/people/bc6f419a7c180a39b2c951e2fff74da0.jpg",
+            "role": "Buggy the Clown",
+            "key": "/library/people/5d7769727a53e9001e6e6c0d",
+            "type": "person"
+          },
+          {
+            "id": "6024e43bad99f8002c3a5a45",
+            "order": 8,
+            "slug": "charithra-chandran",
+            "tag": "Charithra Chandran",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7b85d9dde25af367b1ea117f9f2b691.jpg",
+            "role": "Miss Wednesday / Nefertari Vivi",
+            "key": "/library/people/6024e43bad99f8002c3a5a45",
+            "type": "person"
+          },
+          {
+            "id": "5d7770659ab5440021534dfd",
+            "order": 9,
+            "slug": "morgan-davies",
+            "tag": "Morgan Davies",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9811251d664aed70698a8688de55ff2.jpg",
+            "role": "Koby",
+            "key": "/library/people/5d7770659ab5440021534dfd",
+            "type": "person"
+          },
+          {
+            "id": "5d776d2b594b2b001e702c7b",
+            "order": 10,
+            "slug": "aidan-scott",
+            "tag": "Aidan Scott",
+            "thumb": "https://metadata-static.plex.tv/6/people/61c50247ca5f8b446c4699165f930ad3.jpg",
+            "role": "Helmeppo",
+            "key": "/library/people/5d776d2b594b2b001e702c7b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768bb3ab0e7001f5091aa",
+            "order": 11,
+            "slug": "armand-aucamp",
+            "tag": "Armand Aucamp",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc633201427e415a061ff6596a802d87.jpg",
+            "role": "Bogard",
+            "key": "/library/people/5d7768bb3ab0e7001f5091aa",
+            "type": "person"
+          },
+          {
+            "id": "5d776d74ad5437001f7d64d5",
+            "order": 12,
+            "slug": "lera-abova",
+            "tag": "Lera Abova",
+            "thumb": "https://metadata-static.plex.tv/0/people/09eeaaa2f0e4408046d6d1184d584a51.jpg",
+            "role": "Miss All Sunday",
+            "key": "/library/people/5d776d74ad5437001f7d64d5",
+            "type": "person"
+          },
+          {
+            "id": "5d77685885719b001f3a9b0e",
+            "order": 13,
+            "slug": "mikaela-hoover",
+            "tag": "Mikaela Hoover",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e8bce475a54b380cbc4fef5b8a8aa32.jpg",
+            "role": "Tony Tony Chopper (voice)",
+            "key": "/library/people/5d77685885719b001f3a9b0e",
+            "type": "person"
+          },
+          {
+            "id": "5d776ca1f617c90020183aec",
+            "order": 14,
+            "slug": "mckinley-belcher-iii",
+            "tag": "McKinley Belcher III",
+            "thumb": "https://metadata-static.plex.tv/1/people/135a2a71abc578a7e44fff27e55fe0e4.jpg",
+            "role": "Captain Arlong",
+            "key": "/library/people/5d776ca1f617c90020183aec",
+            "type": "person"
+          },
+          {
+            "id": "5f4047898642250042875193",
+            "order": 15,
+            "slug": "jandre-le-roux",
+            "tag": "Jandre le Roux",
+            "thumb": "https://metadata-static.plex.tv/5/people/505e37843cc82e61afb92178051d0b11.jpg",
+            "role": "Kuroobi",
+            "key": "/library/people/5f4047898642250042875193",
+            "type": "person"
+          },
+          {
+            "id": "5d7768315af944001f1f8e5c",
+            "order": 16,
+            "slug": "craig-fairbrass",
+            "tag": "Craig Fairbrass",
+            "thumb": "https://metadata-static.plex.tv/e/people/e14ed48f1bd50982b4efefada708f161.jpg",
+            "role": "Zeff",
+            "key": "/library/people/5d7768315af944001f1f8e5c",
+            "type": "person"
+          },
+          {
+            "id": "5d776d1996b655001fe3f9a5",
+            "order": 17,
+            "slug": "steven-john-ward",
+            "tag": "Steven John Ward",
+            "thumb": "https://metadata-static.plex.tv/f/people/f4c364bfbfaa9da9272e463c960c5c1c.jpg",
+            "role": "Dracule Mihawk",
+            "key": "/library/people/5d776d1996b655001fe3f9a5",
+            "type": "person"
+          },
+          {
+            "id": "5d776d45594b2b001e70544f",
+            "order": 18,
+            "slug": "camrus-johnson",
+            "tag": "Camrus Johnson",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd036b606e8d313d1e9b500fcd17dc75.jpg",
+            "role": "Mr. 5",
+            "key": "/library/people/5d776d45594b2b001e70544f",
+            "type": "person"
+          },
+          {
+            "id": "5d776c5b96b655001fe2dfe7",
+            "order": 19,
+            "slug": "jazzara-jaslyn",
+            "tag": "Jazzara Jaslyn",
+            "thumb": "https://metadata-static.plex.tv/e/people/edeb785c0c8a6d0f97c0e3adbf31de51.jpg",
+            "role": "Miss Valentine",
+            "key": "/library/people/5d776c5b96b655001fe2dfe7",
+            "type": "person"
+          },
+          {
+            "id": "5f4063ad427eeb0041ed9108",
+            "order": 20,
+            "slug": "callum-kerr",
+            "tag": "Callum Kerr",
+            "thumb": "https://metadata-static.plex.tv/7/people/7f0eedfe7c1336390e44a68ddb119134.jpg",
+            "role": "Captain Smoker",
+            "key": "/library/people/5f4063ad427eeb0041ed9108",
+            "type": "person"
+          },
+          {
+            "id": "5d7770cc31d95e001f1aa091",
+            "order": 21,
+            "slug": "julia-rehwald",
+            "tag": "Julia Rehwald",
+            "thumb": "https://metadata-static.plex.tv/2/people/232144f6ab6ec4e4fe2ae57a4080796b.jpg",
+            "role": "Tashigi",
+            "key": "/library/people/5d7770cc31d95e001f1aa091",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bed",
+            "order": 22,
+            "slug": "joe-manganiello",
+            "tag": "Joe Manganiello",
+            "thumb": "https://metadata-static.plex.tv/2/people/24d872defc12de837a94d77cbb638143.jpg",
+            "role": "Mr. 0",
+            "key": "/library/people/5d7768268718ba001e311bed",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2f96b655001fde5c8f",
+            "order": 23,
+            "slug": "stevel-marc",
+            "tag": "Stevel Marc",
+            "thumb": "https://metadata-static.plex.tv/0/people/032cc29909c0e3a8c013d5c84242d7f1.jpg",
+            "role": "Yasopp the Great",
+            "key": "/library/people/5d776a2f96b655001fde5c8f",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd2cab8a032003d821225",
+            "order": 24,
+            "slug": "ntlanhla-morgan-kutu",
+            "tag": "Ntlanhla Morgan Kutu",
+            "thumb": "https://metadata-static.plex.tv/2/people/2836ab5bcad3fd88dfb3cb4ecdafde26.jpg",
+            "role": "Lucky Roux",
+            "key": "/library/people/5f3fd2cab8a032003d821225",
+            "type": "person"
+          },
+          {
+            "id": "5f4032261ae710004106d795",
+            "order": 25,
+            "slug": "ilia-isorelys-paulino",
+            "tag": "Ilia Isorelýs Paulino",
+            "thumb": "https://metadata-static.plex.tv/3/people/3055d18a472b2a12bbbf1b65701a5a84.jpg",
+            "role": "Captain Alvida",
+            "key": "/library/people/5f4032261ae710004106d795",
+            "type": "person"
+          },
+          {
+            "id": "5d776f17594b2b001e736d54",
+            "order": 26,
+            "slug": "colton-osorio",
+            "tag": "Colton Osorio",
+            "thumb": "https://metadata-static.plex.tv/9/people/91d386bffde61db22e9c49af571f1755.jpg",
+            "role": "Young Luffy",
+            "key": "/library/people/5d776f17594b2b001e736d54",
+            "type": "person"
+          },
+          {
+            "id": "5f4072e604a8650040a91a98",
+            "order": 27,
+            "slug": "kathleen-stephens-1",
+            "tag": "Kathleen Stephens",
+            "role": "Makino",
+            "key": "/library/people/5f4072e604a8650040a91a98",
+            "type": "person"
+          },
+          {
+            "id": "6323c9b77b2cae296fd0bd6d",
+            "order": 28,
+            "slug": "laudo-liebenberg-1",
+            "tag": "Laudo Liebenberg",
+            "thumb": "https://metadata-static.plex.tv/0/people/0447ba6257b583a09d140e9256a778a8.jpg",
+            "role": "Benn Beckman",
+            "key": "/library/people/6323c9b77b2cae296fd0bd6d",
+            "type": "person"
+          },
+          {
+            "id": "5e62472675440e0041faf8ae",
+            "order": 29,
+            "slug": "richard-wright-firth",
+            "tag": "Richard Wright-Firth",
+            "thumb": "https://metadata-static.plex.tv/a/people/a3ecdecb30a25d13aa0d73183833adbd.jpg",
+            "role": "Petty Officer Ukkari",
+            "key": "/library/people/5e62472675440e0041faf8ae",
+            "type": "person"
+          },
+          {
+            "id": "60bdd401eb6f14002d6e7a9f",
+            "order": 30,
+            "slug": "celeste-loots",
+            "tag": "Celeste Loots",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb8c965716baf130bfa16ff539a3e4ee.jpg",
+            "role": "Kaya",
+            "key": "/library/people/60bdd401eb6f14002d6e7a9f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f29ab54400214edc2a",
+            "order": 31,
+            "slug": "royston-stoffels",
+            "tag": "Royston Stoffels",
+            "thumb": "https://metadata-static.plex.tv/f/people/f195afccb3b02dcfb26a4818fed42a6e.jpg",
+            "role": "Maître d'",
+            "key": "/library/people/5d7768f29ab54400214edc2a",
+            "type": "person"
+          },
+          {
+            "id": "6008544a5e2996002b94c046",
+            "order": 32,
+            "slug": "len-barry-simons-1",
+            "tag": "Len-Barry Simons",
+            "role": "Chew",
+            "key": "/library/people/6008544a5e2996002b94c046",
+            "type": "person"
+          },
+          {
+            "id": "5d77688696b655001fdbaa61",
+            "order": 33,
+            "slug": "peter-gadiot",
+            "tag": "Peter Gadiot",
+            "thumb": "https://metadata-static.plex.tv/f/people/fda301ac29dd7224156200584a215f64.jpg",
+            "role": "Captain Shanks",
+            "key": "/library/people/5d77688696b655001fdbaa61",
+            "type": "person"
+          },
+          {
+            "id": "6a0c2bf538ea8575c77fc438",
+            "order": 34,
+            "slug": "rob-colletti-3",
+            "tag": "Rob Colletti",
+            "role": "Wapol",
+            "key": "/library/people/6a0c2bf538ea8575c77fc438",
+            "type": "person"
+          },
+          {
+            "id": "5d77684485719b001f3a6865",
+            "order": 35,
+            "slug": "katey-sagal",
+            "tag": "Katey Sagal",
+            "thumb": "https://metadata-static.plex.tv/c/people/c0a6c0204992938fe969b9191e81d8d2.jpg",
+            "role": "Dr. Kureha",
+            "key": "/library/people/5d77684485719b001f3a6865",
+            "type": "person"
+          },
+          {
+            "id": "5e4fd7ef891fe3003c5f57b6",
+            "order": 36,
+            "slug": "anton-david-jeftha",
+            "tag": "Anton David Jeftha",
+            "thumb": "https://metadata-static.plex.tv/0/people/07dbd653bb7ab23fa96ee7a1ab2b938e.jpg",
+            "role": "K.M.",
+            "key": "/library/people/5e4fd7ef891fe3003c5f57b6",
+            "type": "person"
+          },
+          {
+            "id": "5d77682aa091de001f2e677d",
+            "order": 37,
+            "slug": "tyrone-keogh",
+            "tag": "Tyrone Keogh",
+            "role": "Dalton",
+            "key": "/library/people/5d77682aa091de001f2e677d",
+            "type": "person"
+          },
+          {
+            "id": "6336dab94f1a3d1d234ab866",
+            "order": 38,
+            "slug": "mark-penwill-2",
+            "tag": "Mark Penwill",
+            "role": "Chess",
+            "key": "/library/people/6336dab94f1a3d1d234ab866",
+            "type": "person"
+          },
+          {
+            "id": "5f404a6504a8650040a39929",
+            "order": 39,
+            "slug": "gavin-gomes",
+            "tag": "Gavin Gomes",
+            "role": "Heavy Point Chopper",
+            "key": "/library/people/5f404a6504a8650040a39929",
+            "type": "person"
+          },
+          {
+            "id": "65c34bea731960e7c1a09343",
+            "order": 40,
+            "slug": "nkone-mametja",
+            "tag": "N’kone Mametja",
+            "thumb": "https://metadata-static.plex.tv/a/people/aad704280f881ad817458b406a870aff.jpg",
+            "role": "On Set Proxy Chopper",
+            "key": "/library/people/65c34bea731960e7c1a09343",
+            "type": "person"
+          },
+          {
+            "id": "647708c6144a2d06cecce740",
+            "order": 41,
+            "slug": "gareth-ehret",
+            "tag": "Gareth Ehret",
+            "role": "Guardsman",
+            "key": "/library/people/647708c6144a2d06cecce740",
+            "type": "person"
+          },
+          {
+            "id": "5d776877103a2d001f572642",
+            "order": 42,
+            "slug": "sendhil-ramamurthy",
+            "tag": "Sendhil Ramamurthy",
+            "thumb": "https://metadata-static.plex.tv/1/people/1105015981ef9e9e579027479c8e1be4.jpg",
+            "role": "Nefertari Cobra",
+            "key": "/library/people/5d776877103a2d001f572642",
+            "type": "person"
+          },
+          {
+            "id": "5d776abd7a53e9001e70e423",
+            "order": 43,
+            "slug": "rory-acton-burnell",
+            "tag": "Rory Acton Burnell",
+            "thumb": "https://metadata-static.plex.tv/4/people/46eb2281cc2401fe54c254a0e78a35d0.jpg",
+            "role": "Captain Nezumi",
+            "key": "/library/people/5d776abd7a53e9001e70e423",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b8718ba001e31616c",
+            "order": 44,
+            "slug": "michael-dorman",
+            "tag": "Michael Dorman",
+            "thumb": "https://metadata-static.plex.tv/e/people/e54a6e51cfc7c806e0b4b96adf01de63.jpg",
+            "role": "Gold Roger",
+            "key": "/library/people/5d77683b8718ba001e31616c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ee6d55c002040bf41",
+            "order": 45,
+            "slug": "langley-kirkwood",
+            "tag": "Langley Kirkwood",
+            "thumb": "https://metadata-static.plex.tv/9/people/99eb2ffb8d79a6da378b50bb4872a433.jpg",
+            "role": "Axe-Hand Morgan",
+            "key": "/library/people/5d77682ee6d55c002040bf41",
+            "type": "person"
+          },
+          {
+            "id": "5d77688807c4a5001e6795da",
+            "order": 46,
+            "slug": "tamer-burjaq",
+            "tag": "Tamer Burjaq",
+            "thumb": "https://metadata-static.plex.tv/0/people/0d5072789c5a05e8cd381abf9dc6e8a1.jpg",
+            "role": "Higuma",
+            "key": "/library/people/5d77688807c4a5001e6795da",
+            "type": "person"
+          },
+          {
+            "id": "647494e32dff6a1a53ffd2e6",
+            "order": 47,
+            "slug": "claire-glover-2",
+            "tag": "Claire Glover",
+            "role": "Warrant Officer Sada",
+            "key": "/library/people/647494e32dff6a1a53ffd2e6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a17a53e9001e6d4a49",
+            "order": 48,
+            "slug": "sven-ruygrok",
+            "tag": "Sven Ruygrok",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec5265c99f2c4fe4c56ad199d1d1ec3b.jpg",
+            "role": "Cabaji",
+            "key": "/library/people/5d7768a17a53e9001e6d4a49",
+            "type": "person"
+          },
+          {
+            "id": "5f40046902101b0040f21469",
+            "order": 49,
+            "slug": "alexander-maniatis",
+            "tag": "Alexander Maniatis",
+            "thumb": "https://metadata-static.plex.tv/9/people/9564e9f80bca517856240b1ebdb07cd1.jpg",
+            "role": "Klahadore",
+            "key": "/library/people/5f40046902101b0040f21469",
+            "type": "person"
+          },
+          {
+            "id": "60f5339fe372d2002dbeb9ab",
+            "order": 50,
+            "slug": "bianca-oosthuizen",
+            "tag": "Bianca Oosthuizen",
+            "thumb": "https://metadata-static.plex.tv/f/people/fab98e932dd8f0ce3d04a65753042b54.jpg",
+            "role": "Sham",
+            "key": "/library/people/60f5339fe372d2002dbeb9ab",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ebfb0d55001f534864",
+            "order": 51,
+            "slug": "albert-pretorius",
+            "tag": "Albert Pretorius",
+            "thumb": "https://metadata-static.plex.tv/0/people/07b270f90730172846fdf7eba1e38f1c.jpg",
+            "role": "Buchi",
+            "key": "/library/people/5d7769ebfb0d55001f534864",
+            "type": "person"
+          },
+          {
+            "id": "5d77685585719b001f3a92ce",
+            "order": 52,
+            "slug": "brett-williams",
+            "tag": "Brett Williams",
+            "thumb": "https://metadata-static.plex.tv/2/people/2eae3ef55cc3c8d23f19e0ff152b7880.jpg",
+            "role": "Merry",
+            "key": "/library/people/5d77685585719b001f3a92ce",
+            "type": "person"
+          },
+          {
+            "id": "64f475c8454163a87b638039",
+            "order": 53,
+            "slug": "matt-von-zweigbergk-1",
+            "tag": "Matt von Zweigbergk",
+            "role": "Bartender",
+            "key": "/library/people/64f475c8454163a87b638039",
+            "type": "person"
+          },
+          {
+            "id": "5d776bdb23d5a3001f514e6d",
+            "order": 54,
+            "slug": "brashaad-mayweather",
+            "tag": "Brashaad Mayweather",
+            "thumb": "https://metadata-static.plex.tv/8/people/8508c93d12e8e63f38098bfb6e89ed72.jpg",
+            "role": "Patty",
+            "key": "/library/people/5d776bdb23d5a3001f514e6d",
+            "type": "person"
+          },
+          {
+            "id": "602a883767b392002c0062dd",
+            "order": 55,
+            "slug": "chioma-antoinette-umeala",
+            "tag": "Chioma Antoinette Umeala",
+            "thumb": "https://metadata-static.plex.tv/0/people/01c67ab52150a4ba923ab8a535152878.jpg",
+            "role": "Nojiko",
+            "key": "/library/people/602a883767b392002c0062dd",
+            "type": "person"
+          },
+          {
+            "id": "5e1643ce61c6140040d7a32f",
+            "order": 56,
+            "slug": "lily-fisher-1",
+            "tag": "Lily Fisher",
+            "thumb": "https://metadata-static.plex.tv/b/people/b43435e128bf99f1354accd7f975c56a.jpg",
+            "role": "Young Nami",
+            "key": "/library/people/5e1643ce61c6140040d7a32f",
+            "type": "person"
+          },
+          {
+            "id": "6a0c0a35b4a9c6967ce82880",
+            "order": 57,
+            "slug": "grant-ross-13",
+            "tag": "Grant Ross",
+            "thumb": "https://metadata-static.plex.tv/5/people/552f6c8c69e3a817efcefc28c175019b.jpg",
+            "role": "Genzo",
+            "key": "/library/people/6a0c0a35b4a9c6967ce82880",
+            "type": "person"
+          },
+          {
+            "id": "5f40648a52f200004158e975",
+            "order": 58,
+            "slug": "daniel-lasker",
+            "tag": "Daniel Lasker",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f3ddf42bd99cb0afea0d813929d5bd4.jpg",
+            "role": "Mr. 9",
+            "key": "/library/people/5f40648a52f200004158e975",
+            "type": "person"
+          },
+          {
+            "id": "5e624df1f188ac003a8dfdd0",
+            "order": 59,
+            "slug": "yonda-thomas",
+            "tag": "Yonda Thomas",
+            "thumb": "https://metadata-static.plex.tv/a/people/a5d8ca2b04e481420a5efd21ba276d54.jpg",
+            "role": "Igaram",
+            "key": "/library/people/5e624df1f188ac003a8dfdd0",
+            "type": "person"
+          },
+          {
+            "id": "5d776ba9594b2b001e6e04a6",
+            "order": 60,
+            "slug": "sophia-anne-caruso",
+            "tag": "Sophia Anne Caruso",
+            "thumb": "https://metadata-static.plex.tv/8/people/8f6fa295fe993f5ba82d1bbfb755527a.jpg",
+            "role": "Miss Goldenweek",
+            "key": "/library/people/5d776ba9594b2b001e6e04a6",
+            "type": "person"
+          },
+          {
+            "id": "5d776bb7f617c90020179572",
+            "order": 61,
+            "slug": "brendan-sean-murray",
+            "tag": "Brendan Sean Murray",
+            "thumb": "https://metadata-static.plex.tv/c/people/c22f26caf4e1d9b5263106d19264c725.jpg",
+            "role": "Brogy",
+            "key": "/library/people/5d776bb7f617c90020179572",
+            "type": "person"
+          },
+          {
+            "id": "5d7769e523d5a3001f4fdd30",
+            "order": 62,
+            "slug": "werner-coetser-1",
+            "tag": "Werner Coetser",
+            "thumb": "https://metadata-static.plex.tv/9/people/9f71fa45c9b659d653bf8bf2ae8e8fec.jpg",
+            "role": "Dorry",
+            "key": "/library/people/5d7769e523d5a3001f4fdd30",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa30",
+            "order": 63,
+            "slug": "david-dastmalchian",
+            "tag": "David Dastmalchian",
+            "thumb": "https://metadata-static.plex.tv/4/people/402299efa1543cb08682f5ec12aa18ff.jpg",
+            "role": "Mr. 3",
+            "key": "/library/people/5d7768267e9a3c0020c6aa30",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc7c803883a0040ab070a",
+            "order": 64,
+            "slug": "candice-van-litsenborgh",
+            "tag": "Candice van Litsenborgh",
+            "thumb": "https://metadata-static.plex.tv/0/people/0dec192cb5d83c6722c18818c3fecbbf.jpg",
+            "role": "Maria",
+            "key": "/library/people/5f3fc7c803883a0040ab070a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768264de0ee001fcc8528",
+            "order": 65,
+            "slug": "mark-harelik",
+            "tag": "Mark Harelik",
+            "thumb": "https://metadata-static.plex.tv/d/people/d899bfd0772d77adae421f73f5182fb1.jpg",
+            "role": "Dr. Hiriluk (archive footage)",
+            "key": "/library/people/5d7768264de0ee001fcc8528",
+            "type": "person"
+          },
+          {
+            "id": "5d77689f308bca002032e2ef",
+            "order": 66,
+            "slug": "pierre-malherbe",
+            "tag": "Pierre Malherbe",
+            "thumb": "https://metadata-static.plex.tv/6/people/685369d9957c3341532f0c8668ec83de.jpg",
+            "role": "Doctor",
+            "key": "/library/people/5d77689f308bca002032e2ef",
+            "type": "person"
+          },
+          {
+            "id": "5d776826151a60001f24aa47",
+            "order": 67,
+            "slug": "ian-mcshane",
+            "tag": "Ian McShane",
+            "thumb": "https://metadata-static.plex.tv/8/people/8535078ad3bf6ddb673e4e38a76065e9.jpg",
+            "role": "Narrator (voice)",
+            "key": "/library/people/5d776826151a60001f24aa47",
+            "type": "person"
+          },
+          {
+            "id": "6a0c51a1f61e850fccc5b0a6",
+            "order": 68,
+            "slug": "kamdynn-gary-7",
+            "tag": "Kamdynn Gary",
+            "thumb": "https://metadata-static.plex.tv/f/people/fec8bb5a9fe095b7cc0cd90d32deaf2e.jpg",
+            "role": "Rika",
+            "key": "/library/people/6a0c51a1f61e850fccc5b0a6",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2dee6cb4671bdafe59a",
+            "order": 69,
+            "slug": "ben-kgosimore-1",
+            "tag": "Ben Kgosimore",
+            "role": "Mr. 7",
+            "key": "/library/people/64f1d2dee6cb4671bdafe59a",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2de0485ae1f96d80add",
+            "order": 70,
+            "slug": "sven-ruygrok-1",
+            "tag": "Sven Ruygrok",
+            "role": "Cabaji",
+            "key": "/library/people/64f1d2de0485ae1f96d80add",
+            "type": "person"
+          },
+          {
+            "id": "5d776c5b96b655001fe2dfe8",
+            "order": 71,
+            "slug": "nicole-fortuin",
+            "tag": "Nicole Fortuin",
+            "thumb": "https://metadata-static.plex.tv/d/people/d66fac25856d1b74448d9ea5dbd005b4.jpg",
+            "role": "Ririka",
+            "key": "/library/people/5d776c5b96b655001fe2dfe8",
+            "type": "person"
+          },
+          {
+            "id": "64c3ae526a35c8e1802f8449",
+            "order": 72,
+            "slug": "dale-lourens-1",
+            "tag": "Dale Lourens",
+            "role": "Midshipman X",
+            "key": "/library/people/64c3ae526a35c8e1802f8449",
+            "type": "person"
+          },
+          {
+            "id": "5d776a52594b2b001e6b974d",
+            "order": 73,
+            "slug": "paul-snodgrass",
+            "tag": "Paul Snodgrass",
+            "thumb": "https://metadata-static.plex.tv/people/5d776a52594b2b001e6b974d.jpg",
+            "role": "Salvage Captain Wier",
+            "key": "/library/people/5d776a52594b2b001e6b974d",
+            "type": "person"
+          },
+          {
+            "id": "5de03c88c00448001fcdb283",
+            "order": 74,
+            "slug": "sizo-mahlangu",
+            "tag": "Sizo Mahlangu",
+            "thumb": "https://metadata-static.plex.tv/9/people/948e28573049a4b2556e4d90e957822d.jpg",
+            "role": "Stripped Overalls",
+            "key": "/library/people/5de03c88c00448001fcdb283",
+            "type": "person"
+          },
+          {
+            "id": "5e164e307c6c730040bc3977",
+            "order": 75,
+            "slug": "greg-parvess",
+            "tag": "Greg Parvess",
+            "role": "Red Suspenders",
+            "key": "/library/people/5e164e307c6c730040bc3977",
+            "type": "person"
+          },
+          {
+            "id": "63a9d0fe668f5abcbe87cd19",
+            "order": 76,
+            "slug": "rendani-mufamadi-1",
+            "tag": "Rendani Mufamadi",
+            "thumb": "https://metadata-static.plex.tv/8/people/89f42c6a9ab90b9c007bc5ae6208c9b7.jpg",
+            "role": "Heppoko",
+            "key": "/library/people/63a9d0fe668f5abcbe87cd19",
+            "type": "person"
+          },
+          {
+            "id": "63ecb108eb33a3f0f382e49b",
+            "order": 77,
+            "slug": "ruari-mckee",
+            "tag": "Ruari McKee",
+            "role": "Salvage Crew #1",
+            "key": "/library/people/63ecb108eb33a3f0f382e49b",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2dec6bf81d3812cef04",
+            "order": 78,
+            "slug": "charl-atkinson-1",
+            "tag": "Charl Atkinson",
+            "role": "Salvage Crew #2",
+            "key": "/library/people/64f1d2dec6bf81d3812cef04",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2de661682cff097fc66",
+            "order": 79,
+            "slug": "apolinalho-antonio",
+            "tag": "Apolinalho Antonio",
+            "role": "Alvida Pirate #1",
+            "key": "/library/people/64f1d2de661682cff097fc66",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2de2dc579c2ef9e3f78",
+            "order": 80,
+            "slug": "steffan-stevens-1",
+            "tag": "Steffan Stevens",
+            "role": "Alvida Pirate #2",
+            "key": "/library/people/64f1d2de2dc579c2ef9e3f78",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2dec6bf81d3812cef05",
+            "order": 81,
+            "slug": "martin-coetzee-1",
+            "tag": "Martin Coetzee",
+            "role": "Alvida Pirate #3",
+            "key": "/library/people/64f1d2dec6bf81d3812cef05",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2dec5ca87e705e4339c",
+            "order": 82,
+            "slug": "theo-le-ray-1",
+            "tag": "Theo Le Ray",
+            "role": "Young Mihawk",
+            "key": "/library/people/64f1d2dec5ca87e705e4339c",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2de661682cff097fc67",
+            "order": 83,
+            "slug": "matt-herrington-1",
+            "tag": "Matt Herrington",
+            "role": "Young Shanks",
+            "key": "/library/people/64f1d2de661682cff097fc67",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2de0485ae1f96d80ae9",
+            "order": 84,
+            "slug": "matthew-leck-1",
+            "tag": "Matthew Leck",
+            "role": "Young Smoker",
+            "key": "/library/people/64f1d2de0485ae1f96d80ae9",
+            "type": "person"
+          },
+          {
+            "id": "5e164f7bfef2d4003e8b0c6c",
+            "order": 85,
+            "slug": "tara-zulu",
+            "tag": "Tara Zulu",
+            "role": "Loguetown Crowd Person #5",
+            "key": "/library/people/5e164f7bfef2d4003e8b0c6c",
+            "type": "person"
+          },
+          {
+            "id": "5d776af396b655001fdfe789",
+            "order": 86,
+            "slug": "sean-black-5",
+            "tag": "Sean Black",
+            "role": "Loguetown Crowd Person #10",
+            "key": "/library/people/5d776af396b655001fdfe789",
+            "type": "person"
+          },
+          {
+            "id": "6323dcb324eace258e6f24c8",
+            "order": 87,
+            "slug": "lindsay-reardon-1",
+            "tag": "Lindsay Reardon",
+            "role": "Mayor Boodle",
+            "key": "/library/people/6323dcb324eace258e6f24c8",
+            "type": "person"
+          },
+          {
+            "id": "64db81acc8d075f7066203a1",
+            "order": 88,
+            "slug": "tiaan-visser-1",
+            "tag": "Tiaan Visser",
+            "role": "Buggy's Captive #2",
+            "key": "/library/people/64db81acc8d075f7066203a1",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2e695cc70889750868c",
+            "order": 89,
+            "slug": "sam-pegg-1",
+            "tag": "Sam Pegg",
+            "role": "Buggy's Captive #3",
+            "key": "/library/people/64f1d2e695cc70889750868c",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2e59b1e343aac90ab2c",
+            "order": 90,
+            "slug": "abigail-martheze-1",
+            "tag": "Abigail Martheze",
+            "role": "Buggy's Captive #4",
+            "key": "/library/people/64f1d2e59b1e343aac90ab2c",
+            "type": "person"
+          },
+          {
+            "id": "5d776bf0fb0d55001f577dac",
+            "order": 91,
+            "slug": "jacobus-kriel",
+            "tag": "Jacobus Kriel",
+            "role": "Buggy's Captive #5",
+            "key": "/library/people/5d776bf0fb0d55001f577dac",
+            "type": "person"
+          },
+          {
+            "id": "6256e01dcdd497f3753227b2",
+            "order": 92,
+            "slug": "wendy-acton-1",
+            "tag": "Wendy Acton",
+            "role": "Buggy's Captive #6",
+            "key": "/library/people/6256e01dcdd497f3753227b2",
+            "type": "person"
+          },
+          {
+            "id": "5f3fca8402101b0040ece083",
+            "order": 93,
+            "slug": "zwelakhe-moni",
+            "tag": "Zwelakhe Moni",
+            "role": "Buggy's Captive #7",
+            "key": "/library/people/5f3fca8402101b0040ece083",
+            "type": "person"
+          },
+          {
+            "id": "5d776832a091de001f2e77b3",
+            "order": 94,
+            "slug": "farouk-valley-omar",
+            "tag": "Farouk Valley-Omar",
+            "thumb": "https://metadata-static.plex.tv/7/people/75e4af918ac8bf0ba43df6fe135178c7.jpg",
+            "role": "Buggy's Captive #8",
+            "key": "/library/people/5d776832a091de001f2e77b3",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2e402424f9d52d62a1c",
+            "order": 95,
+            "slug": "nolufefe-lujabe-1",
+            "tag": "Nolufefe Lujabe",
+            "role": "Buggy's Captive #9",
+            "key": "/library/people/64f1d2e402424f9d52d62a1c",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2e402424f9d52d62a1b",
+            "order": 96,
+            "slug": "nolan-africa-1",
+            "tag": "Nolan Africa",
+            "role": "Buggy's Captive #10",
+            "key": "/library/people/64f1d2e402424f9d52d62a1b",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2e502424f9d52d62a23",
+            "order": 97,
+            "slug": "derek-van-niekerk-1",
+            "tag": "Derek Van Niekerk",
+            "role": "Buggy's Captive #11",
+            "key": "/library/people/64f1d2e502424f9d52d62a23",
+            "type": "person"
+          },
+          {
+            "id": "5d776d44ad5437001f7d190c",
+            "order": 98,
+            "slug": "geoffrey-downes",
+            "tag": "Geoffrey Downes",
+            "role": "Buggy's Captive #12",
+            "key": "/library/people/5d776d44ad5437001f7d190c",
+            "type": "person"
+          },
+          {
+            "id": "64f1d2e57d03681a908c5f99",
+            "order": 99,
+            "slug": "kim-yang-6",
+            "tag": "Kim Yang",
+            "role": "Buggy's Captive #13",
+            "key": "/library/people/64f1d2e57d03681a908c5f99",
+            "type": "person"
+          },
+          {
+            "id": "64db81aec8d075f706620485",
+            "order": 100,
+            "slug": "chante-grainger-1",
+            "tag": "Chanté Grainger",
+            "role": "Banchina",
+            "key": "/library/people/64db81aec8d075f706620485",
+            "type": "person"
+          },
+          {
+            "id": "632314077b2acac6ccbf5b63",
+            "order": 101,
+            "slug": "nicky-rebelo",
+            "tag": "Nicky Rebelo",
+            "thumb": "https://metadata-static.plex.tv/7/people/79eaf86a46e788b875e1e46f30047677.jpg",
+            "role": "Mornin",
+            "key": "/library/people/632314077b2acac6ccbf5b63",
+            "type": "person"
+          },
+          {
+            "id": "6118cef21e7b83002de2b86f",
+            "order": 102,
+            "slug": "maximilian-lee-piazza",
+            "tag": "Maximilian Lee Piazza",
+            "thumb": "https://metadata-static.plex.tv/1/people/14e25befcf113976900866e650b0c515.jpg",
+            "role": "Young Zoro",
+            "key": "/library/people/6118cef21e7b83002de2b86f",
+            "type": "person"
+          },
+          {
+            "id": "6a0c30a99bf36b1f69e6c674",
+            "order": 103,
+            "slug": "audrey-cymone-3",
+            "tag": "Audrey Cymone",
+            "thumb": "https://metadata-static.plex.tv/e/people/e6badd93c59cb0fe7e18737a77958f19.jpg",
+            "role": "Shimotsuki Kuina",
+            "key": "/library/people/6a0c30a99bf36b1f69e6c674",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc5411ae7100041fd0f9c",
+            "order": 104,
+            "slug": "nathan-castle",
+            "tag": "Nathan Castle",
+            "thumb": "https://metadata-static.plex.tv/7/people/74ab9732090472ccf67a87f705ecd782.jpg",
+            "role": "Koushirou",
+            "key": "/library/people/5f3fc5411ae7100041fd0f9c",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f0ad5437001f76c9d7",
+            "order": 105,
+            "slug": "milton-schorr",
+            "tag": "Milton Schorr",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769f0ad5437001f76c9d7.jpg",
+            "role": "Don Krieg",
+            "key": "/library/people/5d7769f0ad5437001f76c9d7",
+            "type": "person"
+          },
+          {
+            "id": "5f57bc58e6a53e0040ec5878",
+            "order": 106,
+            "slug": "litha-bam",
+            "tag": "Litha Bam",
+            "thumb": "https://metadata-static.plex.tv/5/people/586ad677af2e9076f9a352d53167b46f.jpg",
+            "role": "Gin",
+            "key": "/library/people/5f57bc58e6a53e0040ec5878",
+            "type": "person"
+          },
+          {
+            "id": "64f475c8d0c85232bc39c422",
+            "order": 107,
+            "slug": "nkululeko-chunky-phiri",
+            "tag": "Nkululeko Chunky Phiri",
+            "role": "Gully (Patron at Baratie)",
+            "key": "/library/people/64f475c8d0c85232bc39c422",
+            "type": "person"
+          },
+          {
+            "id": "5d776c1c47dd6e001f6e70f4",
+            "order": 108,
+            "slug": "christian-convery",
+            "tag": "Christian Convery",
+            "thumb": "https://metadata-static.plex.tv/4/people/42e9e02676202161c986dea97eb0828c.jpg",
+            "role": "Young Sanji",
+            "key": "/library/people/5d776c1c47dd6e001f6e70f4",
+            "type": "person"
+          },
+          {
+            "id": "5d9f3c59adeb7a0021ce85d2",
+            "order": 109,
+            "slug": "andrew-roux",
+            "tag": "Andrew Roux",
+            "thumb": "https://metadata-static.plex.tv/people/5d9f3c59adeb7a0021ce85d2.jpg",
+            "role": "Meshi",
+            "key": "/library/people/5d9f3c59adeb7a0021ce85d2",
+            "type": "person"
+          },
+          {
+            "id": "5d776843e6d55c002040f30e",
+            "order": 110,
+            "slug": "david-muller",
+            "tag": "David Muller",
+            "thumb": "https://metadata-static.plex.tv/5/people/5a5291366919e92dfe57e694ffe5afeb.jpg",
+            "role": "Motzel",
+            "key": "/library/people/5d776843e6d55c002040f30e",
+            "type": "person"
+          },
+          {
+            "id": "64f475c734f81cc4500b8e68",
+            "order": 111,
+            "slug": "patricia-sanqela-1",
+            "tag": "Patricia Sanqela",
+            "role": "Baratie Patron #1",
+            "key": "/library/people/64f475c734f81cc4500b8e68",
+            "type": "person"
+          },
+          {
+            "id": "64dcbca841643a864c3faa49",
+            "order": 112,
+            "slug": "huram-louw",
+            "tag": "Huram Louw",
+            "role": "Baratie Patron #2",
+            "key": "/library/people/64dcbca841643a864c3faa49",
+            "type": "person"
+          },
+          {
+            "id": "64f475c8454163a87b638038",
+            "order": 113,
+            "slug": "khaya-sihamba-1",
+            "tag": "Khaya Sihamba",
+            "role": "Baratie Patron #3",
+            "key": "/library/people/64f475c8454163a87b638038",
+            "type": "person"
+          },
+          {
+            "id": "64f475c75c3ea85553a9d4b5",
+            "order": 114,
+            "slug": "hennie-kotze-1",
+            "tag": "Hennie Kotze",
+            "role": "Baratie Patron #4",
+            "key": "/library/people/64f475c75c3ea85553a9d4b5",
+            "type": "person"
+          },
+          {
+            "id": "64f475c7ab2cfe5f524cfbdc",
+            "order": 115,
+            "slug": "kyra-swart-1",
+            "tag": "Kyra Swart",
+            "role": "Baratie Patron #5",
+            "key": "/library/people/64f475c7ab2cfe5f524cfbdc",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbef4c63b480040d617ab",
+            "order": 116,
+            "slug": "ross-van-leeve",
+            "tag": "Ross Van Leeve",
+            "role": "Baratie Patron #6",
+            "key": "/library/people/5f3fbef4c63b480040d617ab",
+            "type": "person"
+          },
+          {
+            "id": "64f475c7dcf6420931da537e",
+            "order": 117,
+            "slug": "ellen-nel-1",
+            "tag": "Ellen Nel",
+            "role": "Baratie Patron #7",
+            "key": "/library/people/64f475c7dcf6420931da537e",
+            "type": "person"
+          },
+          {
+            "id": "5d776841e6d55c002040ef22",
+            "order": 118,
+            "slug": "sharon-waugh",
+            "tag": "Sharon Waugh",
+            "role": "Baratie Patron #8",
+            "key": "/library/people/5d776841e6d55c002040ef22",
+            "type": "person"
+          },
+          {
+            "id": "64f475c8bf93ea59349916d5",
+            "order": 119,
+            "slug": "lynette-ou-tim-1",
+            "tag": "Lynette Ou Tim",
+            "role": "Baratie Patron #9",
+            "key": "/library/people/64f475c8bf93ea59349916d5",
+            "type": "person"
+          },
+          {
+            "id": "5f40719d427eeb0041ee690a",
+            "order": 120,
+            "slug": "genna-galloway",
+            "tag": "Genna Galloway",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c6073cdb3fc69fe4a5d32afd5b26a2a.jpg",
+            "role": "Bell-mère",
+            "key": "/library/people/5f40719d427eeb0041ee690a",
+            "type": "person"
+          },
+          {
+            "id": "64f475c7ab2cfe5f524cfbe0",
+            "order": 121,
+            "slug": "kylie-ashfield-1",
+            "tag": "Kylie Ashfield",
+            "thumb": "https://metadata-static.plex.tv/c/people/caf1acea6bd29d4e058b48e4ef255c29.jpg",
+            "role": "Young Nojiko",
+            "key": "/library/people/64f475c7ab2cfe5f524cfbe0",
+            "type": "person"
+          },
+          {
+            "id": "64f475c734f81cc4500b8e67",
+            "order": 122,
+            "slug": "jarid-norman-1",
+            "tag": "Jarid Norman",
+            "role": "Hachi / Angry Fishman",
+            "key": "/library/people/64f475c734f81cc4500b8e67",
+            "type": "person"
+          },
+          {
+            "id": "5f0458a7110f99003f078be1",
+            "order": 123,
+            "slug": "danielle-bitton-1",
+            "tag": "Danielle Bitton",
+            "role": "Villager",
+            "key": "/library/people/5f0458a7110f99003f078be1",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f0ad5437001f76c9de",
+            "order": 124,
+            "slug": "stephanie-hough-1",
+            "tag": "Stephanie Hough",
+            "role": "Villager #1",
+            "key": "/library/people/5d7769f0ad5437001f76c9de",
+            "type": "person"
+          },
+          {
+            "id": "5e16513cfef2d4003e8b2364",
+            "order": 125,
+            "slug": "godfrey-johnson-3",
+            "tag": "Godfrey Johnson",
+            "role": "Villager #2",
+            "key": "/library/people/5e16513cfef2d4003e8b2364",
+            "type": "person"
+          },
+          {
+            "id": "64f475c8d0c85232bc39c428",
+            "order": 126,
+            "slug": "sophie-ellenbogen-1",
+            "tag": "Sophie Ellenbogen",
+            "role": "Toddler Nami",
+            "key": "/library/people/64f475c8d0c85232bc39c428",
+            "type": "person"
+          },
+          {
+            "id": "64f475c7d0c85232bc39c41c",
+            "order": 127,
+            "slug": "elihle-modise-1",
+            "tag": "Elihle Modise",
+            "role": "Toddler Nojiko",
+            "key": "/library/people/64f475c7d0c85232bc39c41c",
+            "type": "person"
+          },
+          {
+            "id": "66fbe54a93e408fc61636730",
+            "order": 128,
+            "slug": "jean-henry-11",
+            "tag": "Jean Henry",
+            "thumb": "https://metadata-static.plex.tv/0/people/01cd598ea5ce76605deb293af4749e25.jpg",
+            "role": "Full Body (Patron at Baratie)",
+            "key": "/library/people/66fbe54a93e408fc61636730",
+            "type": "person"
+          },
+          {
+            "id": "5d7768332e80df001ebde0db",
+            "order": 129,
+            "slug": "james-hiroyuki-liao",
+            "tag": "James Hiroyuki Liao",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768332e80df001ebde0db.jpg",
+            "role": "Ipponmatsu",
+            "key": "/library/people/5d7768332e80df001ebde0db",
+            "type": "person"
+          },
+          {
+            "id": "5d7768952d18a4001ff0ee20",
+            "order": 130,
+            "slug": "rigo-sanchez",
+            "tag": "Rigo Sanchez",
+            "thumb": "https://metadata-static.plex.tv/9/people/93ef930035b6344240672500002efcd6.jpg",
+            "role": "Dragon",
+            "key": "/library/people/5d7768952d18a4001ff0ee20",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f56541b",
+            "order": 131,
+            "slug": "clive-russell",
+            "tag": "Clive Russell",
+            "thumb": "https://metadata-static.plex.tv/1/people/1383a9ad99991135f8d2e603b2260739.jpg",
+            "role": "Crocus",
+            "key": "/library/people/5d77682a103a2d001f56541b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc366cae2c60042e76bf5",
+            "order": 132,
+            "slug": "martial-batchamen-tchana",
+            "tag": "Martial Batchamen Tchana",
+            "thumb": "https://metadata-static.plex.tv/0/people/093362263a6ec2264f85b658b4cc87dd.jpg",
+            "role": "Brook",
+            "key": "/library/people/5f3fc366cae2c60042e76bf5",
+            "type": "person"
+          },
+          {
+            "id": "5f40018152f20000414e00e8",
+            "order": 133,
+            "slug": "richard-gau",
+            "tag": "Richard Gau",
+            "role": "Calico Yorki",
+            "key": "/library/people/5f40018152f20000414e00e8",
+            "type": "person"
+          },
+          {
+            "id": "68fac1104d880fc40cd96924",
+            "order": 134,
+            "slug": "chi-mhende-7",
+            "tag": "Chi Mhende",
+            "role": "Miss Monday",
+            "key": "/library/people/68fac1104d880fc40cd96924",
+            "type": "person"
+          },
+          {
+            "id": "6309d4bf4377860787d6f022",
+            "order": 135,
+            "slug": "deoudone-pretorius",
+            "tag": "Deoudoné Pretorius",
+            "thumb": "https://metadata-static.plex.tv/1/people/129c3a0639d0ca332f490c162adce7f5.jpg",
+            "role": "Misty",
+            "key": "/library/people/6309d4bf4377860787d6f022",
+            "type": "person"
+          },
+          {
+            "id": "5d776844103a2d001f56b691",
+            "order": 136,
+            "slug": "natalie-walsh",
+            "tag": "Natalie Walsh",
+            "thumb": "https://metadata-static.plex.tv/1/people/1adea2012e3f8502f025a08c3b2b29c9.jpg",
+            "role": "Love",
+            "key": "/library/people/5d776844103a2d001f56b691",
+            "type": "person"
+          },
+          {
+            "id": "5d77683beb5d26001f1e2083",
+            "order": 137,
+            "slug": "riaz-solker",
+            "tag": "Riaz Solker",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e5005381fe286d5a844c5f38624e0e6.jpg",
+            "role": "Grave Digger",
+            "key": "/library/people/5d77683beb5d26001f1e2083",
+            "type": "person"
+          },
+          {
+            "id": "69b159eb4ee58263bc4fbb64",
+            "order": 138,
+            "slug": "rachel-mertens-1",
+            "tag": "Rachel Mertens",
+            "role": "Miss Catherina",
+            "key": "/library/people/69b159eb4ee58263bc4fbb64",
+            "type": "person"
+          },
+          {
+            "id": "6993f0eb3caf4f29d77d14df",
+            "order": 139,
+            "slug": "christiaan-visagie-1",
+            "tag": "Christiaan Visagie",
+            "role": "Hercules",
+            "key": "/library/people/6993f0eb3caf4f29d77d14df",
+            "type": "person"
+          },
+          {
+            "id": "69b159ed84faf5ad3f872199",
+            "order": 140,
+            "slug": "sanchia-davids-1",
+            "tag": "Sanchia Davids",
+            "role": "Miss Thursday",
+            "key": "/library/people/69b159ed84faf5ad3f872199",
+            "type": "person"
+          },
+          {
+            "id": "64a52f27c24ca5862c679065",
+            "order": 141,
+            "slug": "alan-foulis",
+            "tag": "Alan Foulis",
+            "role": "Mr. Eleven",
+            "key": "/library/people/64a52f27c24ca5862c679065",
+            "type": "person"
+          },
+          {
+            "id": "5f404c041ae71000410a1191",
+            "order": 142,
+            "slug": "nahum-hughes",
+            "tag": "Nahum Hughes",
+            "thumb": "https://metadata-static.plex.tv/7/people/712b8994e664168b27a1c69268e86049.jpg",
+            "role": "Bartolomeo",
+            "key": "/library/people/5f404c041ae71000410a1191",
+            "type": "person"
+          },
+          {
+            "id": "5d776ab27a53e9001e70d07a",
+            "order": 143,
+            "slug": "anthony-oseyemi",
+            "tag": "Anthony Oseyemi",
+            "thumb": "https://metadata-static.plex.tv/a/people/ac2dbacc1e5562cf8553948d87d602e8.jpg",
+            "role": "Commander Ripper",
+            "key": "/library/people/5d776ab27a53e9001e70d07a",
+            "type": "person"
+          },
+          {
+            "id": "5f5ba97c6941bb0042a72584",
+            "order": 144,
+            "slug": "fadzai-simango-2",
+            "tag": "Fadzai Simango",
+            "thumb": "https://metadata-static.plex.tv/5/people/5bd9021ab873c8bb089fffdace179821.jpg",
+            "role": "Officer Mashikaku",
+            "key": "/library/people/5f5ba97c6941bb0042a72584",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff91cbf3e560040b4a44e",
+            "order": 145,
+            "slug": "pierre-van-heerden-1",
+            "tag": "Pierre van Heerden",
+            "thumb": "https://metadata-static.plex.tv/6/people/67d8df6383891b190eacea7829315214.jpg",
+            "role": "Busker",
+            "key": "/library/people/5f3ff91cbf3e560040b4a44e",
+            "type": "person"
+          },
+          {
+            "id": "694cae9def65c103bf52e3a0",
+            "order": 146,
+            "slug": "daniel-barnett-22",
+            "tag": "Daniel Barnett",
+            "thumb": "https://metadata-static.plex.tv/f/people/fd9ce732b014ae3e754a0b054e0e682d.jpg",
+            "role": "Sapi",
+            "key": "/library/people/694cae9def65c103bf52e3a0",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b4de0ee001fcccbd9",
+            "order": 147,
+            "slug": "lara-robinson",
+            "tag": "Lara Robinson",
+            "thumb": "https://metadata-static.plex.tv/a/people/a87e383a0a1dcc4dea6b974d60319a68.jpg",
+            "role": "Yu",
+            "key": "/library/people/5d77683b4de0ee001fcccbd9",
+            "type": "person"
+          },
+          {
+            "id": "69b159ed438562ff98079a20",
+            "order": 148,
+            "slug": "daniel-robinson-65",
+            "tag": "Daniel Robinson",
+            "role": "Yu's Father",
+            "key": "/library/people/69b159ed438562ff98079a20",
+            "type": "person"
+          },
+          {
+            "id": "5f405529cc4920003b331503",
+            "order": 149,
+            "slug": "rebaone-kgosimore",
+            "tag": "Rebaone Kgosimore",
+            "role": "Mr. 7",
+            "key": "/library/people/5f405529cc4920003b331503",
+            "type": "person"
+          },
+          {
+            "id": "60fbcaa2a17771002dba8865",
+            "order": 150,
+            "slug": "aroop-shergill",
+            "tag": "Aroop Shergill",
+            "role": "Young Vivi",
+            "key": "/library/people/60fbcaa2a17771002dba8865",
+            "type": "person"
+          },
+          {
+            "id": "5d776834880197001ec931d9",
+            "order": 151,
+            "slug": "peter-butler",
+            "tag": "Peter Butler",
+            "thumb": "https://metadata-static.plex.tv/people/5d776834880197001ec931d9.jpg",
+            "role": "Thalassa Lucas",
+            "key": "/library/people/5d776834880197001ec931d9",
+            "type": "person"
+          },
+          {
+            "id": "5d776878f59e58002189e129",
+            "order": 152,
+            "slug": "rob-van-vuuren",
+            "tag": "Rob van Vuuren",
+            "thumb": "https://metadata-static.plex.tv/b/people/b683b5a877ae9f383410f6560ea179a3.jpg",
+            "role": "King Seki",
+            "key": "/library/people/5d776878f59e58002189e129",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a07a53e9001e6d4556",
+            "order": 153,
+            "slug": "mark-elderkin",
+            "tag": "Mark Elderkin",
+            "thumb": "https://metadata-static.plex.tv/f/people/f971db02bb0d332308c40e1f54489c43.jpg",
+            "role": "Ham Burger",
+            "key": "/library/people/5d7768a07a53e9001e6d4556",
+            "type": "person"
+          },
+          {
+            "id": "69c2b395661b5df2d6203528",
+            "order": 154,
+            "slug": "anton-revell",
+            "tag": "Anton Revell",
+            "role": "King Tacos",
+            "key": "/library/people/69c2b395661b5df2d6203528",
+            "type": "person"
+          },
+          {
+            "id": "69b159ed458aad339ec90957",
+            "order": 155,
+            "slug": "lauren-hawker-jehring",
+            "tag": "Lauren Hawker-Jehring",
+            "role": "Queen Morollon",
+            "key": "/library/people/69b159ed458aad339ec90957",
+            "type": "person"
+          },
+          {
+            "id": "5d9f35246fc551001ef809f9",
+            "order": 156,
+            "slug": "natasha-reese-davies",
+            "tag": "Natasha Reese-Davies",
+            "role": "Buggy's Captive #1",
+            "key": "/library/people/5d9f35246fc551001ef809f9",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5e624751bad2ed003f182662",
+            "slug": "emma-sullivan",
+            "tag": "Emma Sullivan",
+            "thumb": "https://metadata-static.plex.tv/9/people/90fc4a1e306e42370b8dc153fb82661b.jpg",
+            "role": "Director",
+            "key": "/library/people/5e624751bad2ed003f182662",
+            "type": "person"
+          },
+          {
+            "id": "5d776ab696b655001fdf710e",
+            "slug": "josef-kubota-wladyka",
+            "tag": "Josef Kubota Wladyka",
+            "thumb": "https://metadata-static.plex.tv/5/people/536bcc1973bbfe0c31bc04cbef39f1b1.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776ab696b655001fdf710e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768375af944001f1fa650",
+            "slug": "christoph-schrewe",
+            "tag": "Christoph Schrewe",
+            "thumb": "https://metadata-static.plex.tv/4/people/4df710074fa9becad0b192940984e1b7.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768375af944001f1fa650",
+            "type": "person"
+          },
+          {
+            "id": "5ddba96f572c3a001d515740",
+            "slug": "lukas-ettlin",
+            "tag": "Lukas Ettlin",
+            "role": "Director",
+            "key": "/library/people/5ddba96f572c3a001d515740",
+            "type": "person"
+          },
+          {
+            "id": "5ec40aff24bfc80041c29971",
+            "slug": "marc-jobst",
+            "tag": "Marc Jobst",
+            "thumb": "https://metadata-static.plex.tv/c/people/cdebd03aecd53dd8065a9fe6bb425254.jpg",
+            "role": "Director",
+            "key": "/library/people/5ec40aff24bfc80041c29971",
+            "type": "person"
+          },
+          {
+            "id": "5d7769d9594b2b001e6abe97",
+            "slug": "tim-southam",
+            "tag": "Tim Southam",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e477e2bc07f914666e876236f1dc899.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7769d9594b2b001e6abe97",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "6411832298bec82a72c33066",
+            "slug": "takuma-naito-1",
+            "tag": "Takuma Naito",
+            "role": "Producer",
+            "key": "/library/people/6411832298bec82a72c33066",
+            "type": "person"
+          },
+          {
+            "id": "5dcfd1367a42e6001fd546b1",
+            "slug": "rudi-van-as",
+            "tag": "Rudi Van As",
+            "role": "Producer",
+            "key": "/library/people/5dcfd1367a42e6001fd546b1",
+            "type": "person"
+          },
+          {
+            "id": "5d7768910ea56a001e2a72c4",
+            "slug": "taro-goto",
+            "tag": "Taro Goto",
+            "role": "Producer",
+            "key": "/library/people/5d7768910ea56a001e2a72c4",
+            "type": "person"
+          },
+          {
+            "id": "6a0c06963fd5a7c5f9342e6d",
+            "slug": "tom-hyndman-6",
+            "tag": "Tom Hyndman",
+            "role": "Producer",
+            "key": "/library/people/6a0c06963fd5a7c5f9342e6d",
+            "type": "person"
+          },
+          {
+            "id": "5e163adbfef2d4003e89de8c",
+            "slug": "marisa-sonemann-turner",
+            "tag": "Marisa Sonemann-Turner",
+            "role": "Producer",
+            "key": "/library/people/5e163adbfef2d4003e89de8c",
+            "type": "person"
+          },
+          {
+            "id": "69b159ec2fb2a7ea66208032",
+            "slug": "tom-yoda-1",
+            "tag": "Tom Yoda",
+            "role": "Producer",
+            "key": "/library/people/69b159ec2fb2a7ea66208032",
+            "type": "person"
+          },
+          {
+            "id": "64f04cb5dfea43c83f72d01a",
+            "slug": "amie-horiuchi",
+            "tag": "Amie Horiuchi",
+            "role": "Producer",
+            "key": "/library/people/64f04cb5dfea43c83f72d01a",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a0c06963fd5a7c5f9342e6d",
+            "slug": "tom-hyndman-6",
+            "tag": "Tom Hyndman",
+            "role": "Writer",
+            "key": "/library/people/6a0c06963fd5a7c5f9342e6d",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cfac77a48bef2eec253",
+            "slug": "matt-owens-1",
+            "tag": "Matt Owens",
+            "thumb": "https://metadata-static.plex.tv/a/people/a481b121886cb0deb13cddd7770c0cee.jpg",
+            "role": "Writer",
+            "key": "/library/people/62fb7cfac77a48bef2eec253",
+            "type": "person"
+          },
+          {
+            "id": "5f4002bb03883a0040b0827f",
+            "slug": "ian-stokes",
+            "tag": "Ian Stokes",
+            "role": "Writer",
+            "key": "/library/people/5f4002bb03883a0040b0827f",
+            "type": "person"
+          },
+          {
+            "id": "5d9f356dadeb7a0021ce1cd4",
+            "slug": "allison-weintraub",
+            "tag": "Allison Weintraub",
+            "role": "Writer",
+            "key": "/library/people/5d9f356dadeb7a0021ce1cd4",
+            "type": "person"
+          },
+          {
+            "id": "5e163c71ef1040003f25268b",
+            "slug": "tiffany-greshler",
+            "tag": "Tiffany Greshler",
+            "role": "Writer",
+            "key": "/library/people/5e163c71ef1040003f25268b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe4e752f20000414b7374",
+            "slug": "lindsay-gelfand",
+            "tag": "Lindsay Gelfand",
+            "role": "Writer",
+            "key": "/library/people/5f3fe4e752f20000414b7374",
+            "type": "person"
+          },
+          {
+            "id": "5e16379661c6140040d6c91e",
+            "slug": "ashley-wigfield",
+            "tag": "Ashley Wigfield",
+            "role": "Writer",
+            "key": "/library/people/5e16379661c6140040d6c91e",
+            "type": "person"
+          },
+          {
+            "id": "5d7770b17a53e9001e7a9057",
+            "slug": "joe-tracz",
+            "tag": "Joe Tracz",
+            "thumb": "https://metadata-static.plex.tv/9/people/9e62ace70af620a23e476d79798c0c78.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d7770b17a53e9001e7a9057",
+            "type": "person"
+          },
+          {
+            "id": "5f403d5858b26e004261cea0",
+            "slug": "laura-jacqmin",
+            "tag": "Laura Jacqmin",
+            "role": "Writer",
+            "key": "/library/people/5f403d5858b26e004261cea0",
+            "type": "person"
+          },
+          {
+            "id": "5dcd4344f6c44a00201a2b39",
+            "slug": "diego-gutierrez",
+            "tag": "Diego Gutierrez",
+            "role": "Writer",
+            "key": "/library/people/5dcd4344f6c44a00201a2b39",
+            "type": "person"
+          },
+          {
+            "id": "5e164de1d92d86003d3673f4",
+            "slug": "damani-johnson",
+            "tag": "Damani Johnson",
+            "role": "Writer",
+            "key": "/library/people/5e164de1d92d86003d3673f4",
+            "type": "person"
+          },
+          {
+            "id": "5dcd4c0742f528001ff3a499",
+            "slug": "elizabeth-hunter",
+            "tag": "Elizabeth Hunter",
+            "role": "Writer",
+            "key": "/library/people/5dcd4c0742f528001ff3a499",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Netflix"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f1e6cdf4de80e004280f759",
+            "tag": "Fena: Pirate Princess"
+          },
+          {
+            "guid": "plex://show/5f662baeb6aca0003ed06316",
+            "tag": "Our Flag Means Death"
+          },
+          {
+            "guid": "plex://show/6213a4baa51abfed07ed2dc8",
+            "tag": "Supacell"
+          },
+          {
+            "guid": "plex://show/65fa21c9cd09f4c4d9d766dd",
+            "tag": "Supacell"
+          },
+          {
+            "guid": "plex://show/66a5478c0c90a0bd5f11c802",
+            "tag": "The War Between the Land and the Sea"
+          },
+          {
+            "guid": "plex://show/5d9c08562df347001e3affeb",
+            "tag": "Black Sails"
+          },
+          {
+            "guid": "plex://show/5d9c086708fddd001f299698",
+            "tag": "Legends of Tomorrow"
+          },
+          {
+            "guid": "plex://show/5d9c08183c3f87001f34742b",
+            "tag": "Marvel's Cloak & Dagger"
+          },
+          {
+            "guid": "plex://show/5d9c08cd7b5c2e001e661a00",
+            "tag": "Krypton"
+          },
+          {
+            "guid": "plex://show/5d9c08e92df347001e3b9fe8",
+            "tag": "Titans (2018)"
+          },
+          {
+            "guid": "plex://show/5d9c09230aaccd001f8f4554",
+            "tag": "Star Trek: Picard"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Tomorrow Studios"
+          },
+          {
+            "tag": "Kaji Productions"
+          },
+          {
+            "tag": "Film Afrika"
+          },
+          {
+            "tag": "Netflix"
+          },
+          {
+            "tag": "Boy Detective"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "adult": false,
+  "backdrop_path": "/4gyx49ibwQslyrwuUS1c58PJEEd.jpg",
+  "belongs_to_collection": null,
+  "budget": 25000000,
+  "genres": [
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 35,
+      "name": "Comedy"
+    }
+  ],
+  "homepage": "https://tv.apple.com/movie/umc.cmc.shin43vzfoz3h4ggx41z8rf",
+  "id": 1137844,
+  "imdb_id": "tt28014327",
+  "origin_country": [
+    "US"
+  ],
+  "original_language": "en",
+  "original_title": "Mayday",
+  "overview": "When a U.S. Navy pilot on a top-secret mission during the Cold War gets trapped behind enemy lines, his only chance at survival is to form an alliance with an eccentric ex-KGB agent.",
+  "popularity": 212.8735,
+  "poster_path": "/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg",
+  "production_companies": [
+    {
+      "id": 82819,
+      "logo_path": "/gXfFl9pRPaoaq14jybEn1pHeldr.png",
+      "name": "Skydance Media",
+      "origin_country": "US"
+    },
+    {
+      "id": 104228,
+      "logo_path": "/hx0C1XcSxGgat8N62GpxoJGTkCk.png",
+      "name": "Maximum Effort",
+      "origin_country": "US"
+    },
+    {
+      "id": 129200,
+      "logo_path": null,
+      "name": "GoldDay",
+      "origin_country": "US"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "release_date": "2026-09-03",
+  "revenue": 0,
+  "runtime": 111,
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    },
+    {
+      "english_name": "Russian",
+      "iso_639_1": "ru",
+      "name": "Pусский"
+    }
+  ],
+  "status": "Released",
+  "tagline": "A friendship with major red flags.",
+  "title": "Mayday",
+  "video": false,
+  "vote_average": 7.898,
+  "vote_count": 425
+}

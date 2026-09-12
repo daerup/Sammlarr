@@ -1,0 +1,90 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/6a4e0f79c2a91e123e4d9198",
+        "key": "/library/metadata/6a4e0f79c2a91e123e4d9198",
+        "ratingKey": "6a4e0f79c2a91e123e4d9198",
+        "subtype": "short",
+        "summary": "Peter Parker is sitting quietly in a cafe before he is starstruck by the arrival of the footballing icon Lionel Messi, who reveals he is using a tracking device to find Spider-Man, prompting Parker to become the masked arachnid and take the GOAT flying up to the city skyline.",
+        "type": "movie",
+        "addedAt": 1782777600,
+        "audienceRating": 6.8,
+        "audienceRatingImage": "imdb://image.rating",
+        "duration": 60000,
+        "imdbRatingCount": 817,
+        "originallyAvailableAt": "2026-06-30",
+        "publicPagesURL": "https://watch.plex.tv/movie/spider-man-brand-new-day-messi-super-fan",
+        "slug": "spider-man-brand-new-day-messi-super-fan",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BYTY2NzE1MGMtZmFmMi00Y2JjLTgyYTEtMmI3ZGQ2YmJlYjEzXkEyXkFqcGc@._V1_.jpg",
+        "title": "Spider-Man Brand New Day: Messi Super Fan",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Spider-Man Brand New Day: Messi Super Fan",
+            "type": "coverPoster",
+            "url": "https://m.media-amazon.com/images/M/MV5BYTY2NzE1MGMtZmFmMi00Y2JjLTgyYTEtMmI3ZGQ2YmJlYjEzXkEyXkFqcGc@._V1_.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt43633533"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.8
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77689033f255001e8599f4",
+            "order": 1,
+            "slug": "tom-holland",
+            "tag": "Tom Holland",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d310a9360a7d4c483ad24ad322ba510.jpg",
+            "role": "Peter Parker",
+            "key": "/library/people/5d77689033f255001e8599f4",
+            "type": "person"
+          },
+          {
+            "id": "5d776b037a53e9001e716da1",
+            "order": 2,
+            "slug": "lionel-messi",
+            "tag": "Lionel Messi",
+            "thumb": "https://metadata-static.plex.tv/3/people/30139fe0b2ff0a0d2d649bd1baee5152.jpg",
+            "role": "Lionel Messi",
+            "key": "/library/people/5d776b037a53e9001e716da1",
+            "type": "person"
+          }
+        ]
+      }
+    ]
+  }
+}

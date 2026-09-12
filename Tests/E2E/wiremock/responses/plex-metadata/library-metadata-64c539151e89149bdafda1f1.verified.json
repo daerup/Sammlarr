@@ -1,0 +1,227 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://show/64c539151e89149bdafda1f1",
+        "key": "/library/metadata/64c539151e89149bdafda1f1/children",
+        "ratingKey": "64c539151e89149bdafda1f1",
+        "summary": "Men, particularly those who have lost their youth and are in middle age, also have issues. The series centres around men and their midlife crises.",
+        "type": "show",
+        "addedAt": 1684454400,
+        "audienceRating": 7.4,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "duration": 2100000,
+        "imdbRatingCount": 41,
+        "lastEpisodeOriginallyAvailableAt": "2023-05-20",
+        "lastSeasonOriginallyAvailableAt": "2023-05-20",
+        "leafCount": 9,
+        "originallyAvailableAt": "2023-05-19",
+        "publicPagesURL": "https://watch.plex.tv/show/gentlemen-3",
+        "slug": "gentlemen-3",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BZGQxYmIyNmYtZmEyZi00NDdlLTg1N2YtZTNmMzFlMDVlZjViXkEyXkFqcGc@._V1_.jpg",
+        "title": "Gentlemen",
+        "userState": false,
+        "year": 2023,
+        "Image": [
+          {
+            "alt": "Gentlemen",
+            "type": "coverPoster",
+            "url": "https://m.media-amazon.com/images/M/MV5BZGQxYmIyNmYtZmEyZi00NDdlLTg1N2YtZTNmMzFlMDVlZjViXkEyXkFqcGc@._V1_.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt27704253"
+          },
+          {
+            "id": "tvdb://437692"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.4
+          }
+        ],
+        "Country": [
+          {
+            "tag": "India"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77686d5af944001f202e4d",
+            "order": 1,
+            "slug": "rudranil-ghosh",
+            "tag": "Rudranil Ghosh",
+            "thumb": "https://metadata-static.plex.tv/3/people/332ce0efa72998988cc912bde7309140.jpg",
+            "role": "Megh",
+            "key": "/library/people/5d77686d5af944001f202e4d",
+            "type": "person"
+          },
+          {
+            "id": "5d776986fb0d55001f528680",
+            "order": 2,
+            "slug": "mir-afsar-ali",
+            "tag": "Mir Afsar Ali",
+            "thumb": "https://metadata-static.plex.tv/4/people/423d9d118b5495ecdbc1e0d83820a7a3.jpg",
+            "role": "Andy",
+            "key": "/library/people/5d776986fb0d55001f528680",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d61141d001fb167dc",
+            "order": 3,
+            "slug": "joy-sengupta",
+            "tag": "Joy Sengupta",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d39422fcfad59341d1647d70d8f555e.jpg",
+            "role": "Shilajit",
+            "key": "/library/people/5d77683d61141d001fb167dc",
+            "type": "person"
+          },
+          {
+            "id": "6198ad79b2ed34277b9d608f",
+            "order": 4,
+            "slug": "korak-samanta",
+            "tag": "Korak Samanta",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5c8d3da0462c54e879d92b7e93c6ae2.jpg",
+            "role": "Peter",
+            "key": "/library/people/6198ad79b2ed34277b9d608f",
+            "type": "person"
+          },
+          {
+            "id": "5f4061e452f200004158a8b2",
+            "order": 5,
+            "slug": "madhurima-basak",
+            "tag": "Madhurima Basak",
+            "thumb": "https://metadata-static.plex.tv/a/people/a7fc9fc5fef262c5f884abdc68c8fecd.jpg",
+            "role": "Mona",
+            "key": "/library/people/5f4061e452f200004158a8b2",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc04086422500427a616e",
+            "order": 6,
+            "slug": "sritama-dey",
+            "tag": "Sritama Dey",
+            "thumb": "https://metadata-static.plex.tv/c/people/c04b7883be6fa4b21a872d1e52cf7fad.jpg",
+            "role": "Jhuma",
+            "key": "/library/people/5f3fc04086422500427a616e",
+            "type": "person"
+          },
+          {
+            "id": "615c081782f4a6c27361ecbf",
+            "order": 7,
+            "slug": "payel-roy-7",
+            "tag": "Payel Roy",
+            "role": "Preeti",
+            "key": "/library/people/615c081782f4a6c27361ecbf",
+            "type": "person"
+          },
+          {
+            "id": "5f3fdd6bbf3e560040b25ec4",
+            "order": 8,
+            "slug": "tannistha-biswas",
+            "tag": "Tannistha Biswas",
+            "role": "Rani",
+            "key": "/library/people/5f3fdd6bbf3e560040b25ec4",
+            "type": "person"
+          },
+          {
+            "id": "645a11a9f7c1f03694028f9c",
+            "order": 9,
+            "slug": "bharat-kal",
+            "tag": "Bharat Kal",
+            "role": "cast",
+            "key": "/library/people/645a11a9f7c1f03694028f9c",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f3fc077cae2c60042e723b6",
+            "slug": "korok-murmu-1",
+            "tag": "Korok Murmu",
+            "role": "Director",
+            "key": "/library/people/5f3fc077cae2c60042e723b6",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f3fc3de1ae7100041fce9e9",
+            "slug": "riddhi-barua",
+            "tag": "Riddhi Barua",
+            "role": "Producer",
+            "key": "/library/people/5f3fc3de1ae7100041fce9e9",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f3fc3de1ae7100041fce9e9",
+            "slug": "riddhi-barua",
+            "tag": "Riddhi Barua",
+            "role": "Screenplay, Story & Dialogue",
+            "key": "/library/people/5f3fc3de1ae7100041fce9e9",
+            "type": "person"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ]
+      }
+    ]
+  }
+}
