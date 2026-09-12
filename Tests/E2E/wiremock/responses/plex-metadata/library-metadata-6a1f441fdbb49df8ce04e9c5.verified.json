@@ -1,0 +1,245 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/kfKgkLkEFmUPpyXCSYAACtz7Mto.jpg",
+        "guid": "plex://movie/6a1f441fdbb49df8ce04e9c5",
+        "key": "/library/metadata/6a1f441fdbb49df8ce04e9c5",
+        "rating": 8,
+        "ratingKey": "6a1f441fdbb49df8ce04e9c5",
+        "studio": "Ssunshine Studios",
+        "type": "movie",
+        "addedAt": 1776470400,
+        "originallyAvailableAt": "2026-04-18",
+        "publicPagesURL": "https://watch.plex.tv/movie/acme-air",
+        "ratingImage": "themoviedb://image.rating",
+        "slug": "acme-air",
+        "thumb": "https://image.tmdb.org/t/p/original/8sfHmTMBaktKcR5lQML2a51FWt1.jpg",
+        "title": "Acme Air",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Acme Air",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/kfKgkLkEFmUPpyXCSYAACtz7Mto.jpg"
+          },
+          {
+            "alt": "Acme Air",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/8sfHmTMBaktKcR5lQML2a51FWt1.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28aba6",
+            "id": "5d9c046c08fddd001f28aba6",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28aba6",
+            "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+            "slug": "war",
+            "tag": "War",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://1706198"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Brazil"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6a1f0b1415883ff6a2797dee",
+            "order": 1,
+            "slug": "francis-jr",
+            "tag": "Francis Jr.",
+            "role": "Jovem Péter",
+            "key": "/library/people/6a1f0b1415883ff6a2797dee",
+            "type": "person"
+          },
+          {
+            "id": "6a1f441fdbb49df8ce04e9ca",
+            "order": 2,
+            "slug": "anthony-algues",
+            "tag": "Anthony Algues",
+            "role": "Capitão John",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9ca",
+            "type": "person"
+          },
+          {
+            "id": "6a1f441fdbb49df8ce04e9c9",
+            "order": 3,
+            "slug": "guilherme-campos-7",
+            "tag": "Guilherme Campos",
+            "role": "Capitão Bob Pé-Torto",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9c9",
+            "type": "person"
+          },
+          {
+            "id": "6a1f0b1418af18617f9676dd",
+            "order": 4,
+            "slug": "soyanne-ribeiro",
+            "tag": "Soyanne Ribeiro",
+            "role": "Willie Scott",
+            "key": "/library/people/6a1f0b1418af18617f9676dd",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "6a1f441fdbb49df8ce04e9c9",
+            "slug": "guilherme-campos-7",
+            "tag": "Guilherme Campos",
+            "role": "Director",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9c9",
+            "type": "person"
+          },
+          {
+            "id": "6a1f441fdbb49df8ce04e9ca",
+            "slug": "anthony-algues",
+            "tag": "Anthony Algues",
+            "role": "Director",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9ca",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "6a1f441fdbb49df8ce04e9ca",
+            "slug": "anthony-algues",
+            "tag": "Anthony Algues",
+            "role": "Producer",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9ca",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a1f441fdbb49df8ce04e9c9",
+            "slug": "guilherme-campos-7",
+            "tag": "Guilherme Campos",
+            "role": "Story",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9c9",
+            "type": "person"
+          },
+          {
+            "id": "6a1f441fdbb49df8ce04e9ca",
+            "slug": "anthony-algues",
+            "tag": "Anthony Algues",
+            "role": "Story",
+            "key": "/library/people/6a1f441fdbb49df8ce04e9ca",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/632de406ffedd45dbd738646",
+            "tag": "Minions & More 1"
+          },
+          {
+            "guid": "plex://movie/5d77683a85719b001f3a4bbf",
+            "tag": "The Invincible Iron Man"
+          },
+          {
+            "guid": "plex://movie/5d77682a7e9a3c0020c6b423",
+            "tag": "Final Fantasy: The Spirits Within"
+          },
+          {
+            "guid": "plex://movie/5d776adb594b2b001e6c7ecc",
+            "tag": "Daredevil vs. Spider‐Man"
+          },
+          {
+            "guid": "plex://movie/5d776b6f51dd69001fe303a5",
+            "tag": "Justice League: Gods and Monsters"
+          },
+          {
+            "guid": "plex://movie/5d776d3a594b2b001e704457",
+            "tag": "Batman and Harley Quinn"
+          },
+          {
+            "guid": "plex://movie/5d77687a374a5b001fec6d0e",
+            "tag": "Robot Chicken: Star Wars"
+          },
+          {
+            "guid": "plex://movie/5d776d8e594b2b001e70c068",
+            "tag": "Johnny English Strikes Again"
+          },
+          {
+            "guid": "plex://movie/5d776833103a2d001f567348",
+            "tag": "Hot Shots!"
+          },
+          {
+            "guid": "plex://movie/5f8e9a9014823f002d484241",
+            "tag": "Double Threat"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Ssunshine Studios"
+          },
+          {
+            "tag": "Rodrigo's Entertainment"
+          }
+        ]
+      }
+    ]
+  }
+}

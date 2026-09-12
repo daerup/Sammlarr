@@ -1,0 +1,341 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/9OSzsxquEfjrQy8CRAdUstERsWf.jpg",
+        "guid": "plex://movie/619a3851c7f1117e4f0003e9",
+        "key": "/library/metadata/619a3851c7f1117e4f0003e9",
+        "ratingKey": "619a3851c7f1117e4f0003e9",
+        "studio": "Glaziam Films",
+        "summary": "Selena trains the weak and vulnerable to defend themselves from the predators that lurk in the shadows. She never imagined that she would have to become one of those very same predators in hopes of saving her husband from a terminal illness.",
+        "type": "movie",
+        "addedAt": 1664582400,
+        "audienceRating": 4.8,
+        "audienceRatingImage": "imdb://image.rating",
+        "budget": 10000,
+        "duration": 5880000,
+        "imdbRatingCount": 28,
+        "originallyAvailableAt": "2022-10-01",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-invite-2022-1",
+        "slug": "the-invite-2022-1",
+        "thumb": "https://image.tmdb.org/t/p/original/drYGjsH1qp6eBWjqhoTjWAX9Rtm.jpg",
+        "title": "The Invite",
+        "userState": false,
+        "year": 2022,
+        "Image": [
+          {
+            "alt": "The Invite",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/9OSzsxquEfjrQy8CRAdUstERsWf.jpg"
+          },
+          {
+            "alt": "The Invite",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/drYGjsH1qp6eBWjqhoTjWAX9Rtm.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt16159038"
+          },
+          {
+            "id": "tmdb://1011436"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 4.8
+          }
+        ],
+        "Role": [
+          {
+            "id": "65311b0b63ca87060205e289",
+            "order": 1,
+            "slug": "j-m-pozon-1",
+            "tag": "J.M. Pozon",
+            "role": "Selena",
+            "key": "/library/people/65311b0b63ca87060205e289",
+            "type": "person"
+          },
+          {
+            "id": "63aed330bb6c3b10658cf198",
+            "order": 2,
+            "slug": "jasmine-cherelle",
+            "tag": "Jasmine Cherelle",
+            "thumb": "https://image.tmdb.org/t/p/original/hgWVLxkdrjOTRl1UYRQ5Pvls4CA.jpg",
+            "role": "Jewell",
+            "key": "/library/people/63aed330bb6c3b10658cf198",
+            "type": "person"
+          },
+          {
+            "id": "64cb9766668f7c81165ba1d6",
+            "order": 3,
+            "slug": "zakiyyah-bg",
+            "tag": "Zakiyyah BG",
+            "thumb": "https://metadata-static.plex.tv/1/people/1050caa4b93e114539c75f574bc99023.jpg",
+            "role": "Tonya",
+            "key": "/library/people/64cb9766668f7c81165ba1d6",
+            "type": "person"
+          },
+          {
+            "id": "6a0c0b1c90394bd999413e5d",
+            "order": 4,
+            "slug": "starleesha-turnbull-5",
+            "tag": "Starleesha Turnbull",
+            "role": "Cynthia",
+            "key": "/library/people/6a0c0b1c90394bd999413e5d",
+            "type": "person"
+          },
+          {
+            "id": "62f64115d6142d6bfb4e9e16",
+            "order": 5,
+            "slug": "ericka-gomez-1",
+            "tag": "Ericka Gomez",
+            "role": "Kiesha",
+            "key": "/library/people/62f64115d6142d6bfb4e9e16",
+            "type": "person"
+          },
+          {
+            "id": "6a5ecabf3b3b747f17bf2617",
+            "order": 6,
+            "slug": "eriyon-adams-1",
+            "tag": "Eriyon Adams",
+            "role": "Masked Man",
+            "key": "/library/people/6a5ecabf3b3b747f17bf2617",
+            "type": "person"
+          },
+          {
+            "id": "6a5ecabf6821a271d6144640",
+            "order": 7,
+            "slug": "carlissa-andrews-1",
+            "tag": "Carlissa Andrews",
+            "role": "Woman in motel room",
+            "key": "/library/people/6a5ecabf6821a271d6144640",
+            "type": "person"
+          },
+          {
+            "id": "6a0c40bc98175b27ea66e060",
+            "order": 8,
+            "slug": "marietta-elliott-4",
+            "tag": "Marietta Elliott",
+            "role": "Tanisha",
+            "key": "/library/people/6a0c40bc98175b27ea66e060",
+            "type": "person"
+          },
+          {
+            "id": "659d360d73bcbb4ccb67b071",
+            "order": 9,
+            "slug": "dadreana-davis-3",
+            "tag": "Dadreana Davis",
+            "role": "Young Woman",
+            "key": "/library/people/659d360d73bcbb4ccb67b071",
+            "type": "person"
+          },
+          {
+            "id": "64bfb9b82e9bbbdc54e383bd",
+            "order": 10,
+            "slug": "arri-ferrari-1",
+            "tag": "Arri Ferrari",
+            "role": "Teesha",
+            "key": "/library/people/64bfb9b82e9bbbdc54e383bd",
+            "type": "person"
+          },
+          {
+            "id": "6a5ecac185ea37b2c0b076c9",
+            "order": 11,
+            "slug": "aleayah-embry-3",
+            "tag": "Aleayah Embry",
+            "role": "LaLa",
+            "key": "/library/people/6a5ecac185ea37b2c0b076c9",
+            "type": "person"
+          },
+          {
+            "id": "6a5ecac5e5e777474635538b",
+            "order": 12,
+            "slug": "deangelo-gomez-1",
+            "tag": "DeAngelo Gomez",
+            "role": "Homeless Guy",
+            "key": "/library/people/6a5ecac5e5e777474635538b",
+            "type": "person"
+          },
+          {
+            "id": "6a5ecac2148de2478f936acc",
+            "order": 13,
+            "slug": "marvin-gaines-1",
+            "tag": "Marvin Gaines",
+            "role": "Darnell",
+            "key": "/library/people/6a5ecac2148de2478f936acc",
+            "type": "person"
+          },
+          {
+            "id": "634d44505d4fa558d28d94bf",
+            "order": 14,
+            "slug": "tiffany-hawkins-5",
+            "tag": "Tiffany Hawkins",
+            "role": "Alice",
+            "key": "/library/people/634d44505d4fa558d28d94bf",
+            "type": "person"
+          },
+          {
+            "id": "67b5d048b37a9e34b608c2a4",
+            "order": 15,
+            "slug": "helayna-gomez-1",
+            "tag": "Helayna Gomez",
+            "role": "Young Selena",
+            "key": "/library/people/67b5d048b37a9e34b608c2a4",
+            "type": "person"
+          },
+          {
+            "id": "671cda88bc2315fa6a2fcddb",
+            "order": 16,
+            "slug": "darius-henry-jr-1",
+            "tag": "Darius Henry Jr.",
+            "role": "Homeless Man",
+            "key": "/library/people/671cda88bc2315fa6a2fcddb",
+            "type": "person"
+          },
+          {
+            "id": "67b5d048b37a9e34b608c2ad",
+            "order": 17,
+            "slug": "broden-lord-1",
+            "tag": "Broden Lord",
+            "role": "Street Guy",
+            "key": "/library/people/67b5d048b37a9e34b608c2ad",
+            "type": "person"
+          },
+          {
+            "id": "6a5ecac485ea37b2c0b076cf",
+            "order": 18,
+            "slug": "richie-merrill-1",
+            "tag": "Richie Merrill",
+            "role": "Raven",
+            "key": "/library/people/6a5ecac485ea37b2c0b076cf",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "62f6411508d9c25074f484a8",
+            "slug": "sean-gilliam-1",
+            "tag": "Sean Gilliam",
+            "role": "Director",
+            "key": "/library/people/62f6411508d9c25074f484a8",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "62f64115c692639e25e74414",
+            "slug": "darius-henry-sr",
+            "tag": "Darius Henry Sr",
+            "role": "Executive Producer",
+            "key": "/library/people/62f64115c692639e25e74414",
+            "type": "person"
+          },
+          {
+            "id": "62f6411508d9c25074f484a8",
+            "slug": "sean-gilliam-1",
+            "tag": "Sean Gilliam",
+            "role": "Executive Producer",
+            "key": "/library/people/62f6411508d9c25074f484a8",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "62f64115d6142d6bfb4e9e16",
+            "slug": "ericka-gomez-1",
+            "tag": "Ericka Gomez",
+            "role": "Writer",
+            "key": "/library/people/62f64115d6142d6bfb4e9e16",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/623ee1bd45ccf188b7edacfd",
+            "tag": "The Nightman"
+          },
+          {
+            "guid": "plex://movie/62d2c0449b19c3824a511f6a",
+            "tag": "The Night Man"
+          },
+          {
+            "guid": "plex://movie/63122fdefe3a2c10fd3924cc",
+            "tag": "The Wasp"
+          },
+          {
+            "guid": "plex://movie/6313985726ff8a4e58c0f8db",
+            "tag": "The Wasp"
+          },
+          {
+            "guid": "plex://movie/63f1b5eae5e4d59c97908b91",
+            "tag": "Compulsion"
+          },
+          {
+            "guid": "plex://movie/63da966e4b927ece533c56ed",
+            "tag": "The Jester"
+          },
+          {
+            "guid": "plex://movie/5d776d16ad5437001f7ccbac",
+            "tag": "Black Widow"
+          },
+          {
+            "guid": "plex://movie/5d776cc196b655001fe3a653",
+            "tag": "Infidelity in Suburbia"
+          },
+          {
+            "guid": "plex://movie/5d77708b7a53e9001e7a5630",
+            "tag": "The Shed"
+          },
+          {
+            "guid": "plex://movie/5f38efd58aa044003f9c552d",
+            "tag": "Sightless"
+          },
+          {
+            "guid": "plex://movie/5f40beb6427eeb0041f38ccd",
+            "tag": "Frank and Penelope"
+          },
+          {
+            "guid": "plex://movie/5d776e8c7a53e9001e77a310",
+            "tag": "The Deliverance"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Glaziam Films"
+          },
+          {
+            "tag": "SeanVan Productions"
+          },
+          {
+            "tag": "Stockhouse"
+          },
+          {
+            "tag": "iMedia Films"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/7/gracenote/7bbb3fb266c6611fb2f321e6d3103ae8.jpg",
+        "guid": "plex://movie/5d7768f6ad5437001f75426f",
+        "key": "/library/metadata/5d7768f6ad5437001f75426f",
+        "rating": 8.7,
+        "ratingKey": "5d7768f6ad5437001f75426f",
+        "studio": "Robert Flaherty Productions Inc.",
+        "summary": "Robert J. Flaherty’s follow-up to Nanook of the North shifts from the Arctic to the South Seas, portraying Samoan village life with a painterly eye. Blending ethnographic detail with a romanticized “Gauguin idyll,” the film celebrates daily rituals, communal traditions, and the passage into adulthood, suffused with what Flaherty called “pride of beauty, pride of strength.”",
+        "tagline": "See MOANA and let the rest of the world go by (Print Ad- Sunday Herald, ((Provo Utah)) 7 March 1926)",
+        "type": "movie",
+        "addedAt": -1388016000,
+        "audienceRating": 5.7,
+        "audienceRatingImage": "rottentomatoes://image.rating.spilled",
+        "contentRating": "Not Rated",
+        "duration": 5880000,
+        "imdbRatingCount": 906,
+        "originallyAvailableAt": "1926-01-07",
+        "publicPagesURL": "https://watch.plex.tv/movie/moana-1926",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 2993,
+        "slug": "moana-1926",
+        "thumb": "https://metadata-static.plex.tv/b/gracenote/ba57aba4e238551de3f01d643f66d297.jpg",
+        "title": "Moana",
+        "userState": false,
+        "year": 1926,
+        "Image": [
+          {
+            "alt": "Moana",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7bbb3fb266c6611fb2f321e6d3103ae8.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c216253983e2343c96bec4116df08a1a.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/7/gracenote/77c2e3b8b980c2b2d2fa20223b5ce5de.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/b/gracenote/ba57aba4e238551de3f01d643f66d297.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/33d39e9ee824a99b3b7afe99dcc3be91.jpg"
+          },
+          {
+            "alt": "Moana",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2225e5c93229b9d02fa55e9284b2cb03.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0017162"
+          },
+          {
+            "id": "tmdb://94727"
+          },
+          {
+            "id": "tvdb://68425"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.spilled",
+            "type": "audience",
+            "value": 5.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.7
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          },
+          {
+            "tag": "Samoa"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768f6ad5437001f7542a7",
+            "order": 1,
+            "slug": "taavale",
+            "tag": "Ta'avale",
+            "role": "Moana",
+            "key": "/library/people/5d7768f6ad5437001f7542a7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f6ad5437001f7542a8",
+            "order": 2,
+            "slug": "faamgase",
+            "tag": "Fa'amgase",
+            "role": "Moana's Fiancé",
+            "key": "/library/people/5d7768f6ad5437001f7542a8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f6ad5437001f7542a9",
+            "order": 3,
+            "slug": "tama",
+            "tag": "Tama",
+            "role": "Moana's Father",
+            "key": "/library/people/5d7768f6ad5437001f7542a9",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f6ad5437001f7542aa",
+            "order": 4,
+            "slug": "tugaita",
+            "tag": "T'ugaita",
+            "role": "Moana's Mother",
+            "key": "/library/people/5d7768f6ad5437001f7542aa",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f6ad5437001f7542ab",
+            "order": 5,
+            "slug": "pea",
+            "tag": "Pe'a",
+            "role": "Moana's Younger Brother",
+            "key": "/library/people/5d7768f6ad5437001f7542ab",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f6ad5437001f7542ac",
+            "order": 6,
+            "slug": "leupenga",
+            "tag": "Leupenga",
+            "role": "Moana's Older Brother",
+            "key": "/library/people/5d7768f6ad5437001f7542ac",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776827961905001eb913fb",
+            "slug": "robert-flaherty-1",
+            "tag": "Robert Flaherty",
+            "thumb": "https://metadata-static.plex.tv/9/people/95f4d40e31539496978e6c4c0b6a9f21.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776827961905001eb913fb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768f6ad5437001f7542a6",
+            "slug": "frances-h-flaherty",
+            "tag": "Frances H. Flaherty",
+            "role": "Director",
+            "key": "/library/people/5d7768f6ad5437001f7542a6",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7768f6ad5437001f7542a6",
+            "slug": "frances-h-flaherty",
+            "tag": "Frances H. Flaherty",
+            "role": "Producer",
+            "key": "/library/people/5d7768f6ad5437001f7542a6",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb913fb",
+            "slug": "robert-flaherty-1",
+            "tag": "Robert Flaherty",
+            "thumb": "https://metadata-static.plex.tv/9/people/95f4d40e31539496978e6c4c0b6a9f21.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776827961905001eb913fb",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77690b23d5a3001f4f4e86",
+            "slug": "julian-johnson-3",
+            "tag": "Julian Johnson",
+            "role": "Writer",
+            "key": "/library/people/5d77690b23d5a3001f4f4e86",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d9f3505dfd128002089fea7",
+            "tag": "Baraka"
+          },
+          {
+            "guid": "plex://movie/68f5c741701ecd9045dda48c",
+            "tag": "Taylor Swift | The Eras Tour | The Final Show"
+          },
+          {
+            "guid": "plex://movie/68f7f693f53814679ae83802",
+            "tag": "Taylor Swift: The Eras Tour ‐ The Final Show"
+          },
+          {
+            "guid": "plex://movie/5d7769eead5437001f76c62e",
+            "tag": "Girl Rising"
+          },
+          {
+            "guid": "plex://movie/5d776d1896b655001fe3f801",
+            "tag": "Naqoyqatsi"
+          },
+          {
+            "guid": "plex://movie/5d77684d103a2d001f56c9d9",
+            "tag": "Powaqqatsi"
+          },
+          {
+            "guid": "plex://movie/5d776bb596b655001fe197ce",
+            "tag": "Daft Punk Unchained"
+          },
+          {
+            "guid": "plex://movie/5d776870fb0d55001f5101b3",
+            "tag": "180 Degrees South"
+          },
+          {
+            "guid": "plex://movie/5d776d80fb0d55001f5a2079",
+            "tag": "Dolphin Reef"
+          },
+          {
+            "guid": "plex://movie/60bb4c6246aece002d43975f",
+            "tag": "Who Are You, Charlie Brown?"
+          },
+          {
+            "guid": "plex://movie/5d9f35dddfd12800208a241a",
+            "tag": "Samsara"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Robert Flaherty Productions Inc."
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Filmmaker Robert J. Flaherty spends a year living in a village in Samoa.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

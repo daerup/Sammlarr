@@ -1,0 +1,828 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/6gqezQJ2mkm4jreWwLyOZy2Vf6i.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/376098/banners/69f77c0145ab7.jpg",
+        "guid": "plex://show/6475f4e274668225adb2c0e0",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/6475f4e274668225adb2c0e0/children",
+        "rating": 9.2,
+        "ratingKey": "6475f4e274668225adb2c0e0",
+        "studio": "DC Studios",
+        "summary": "Lanterns follows new recruit John Stewart and Lantern legend Hal Jordan, two intergalactic cops drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
+        "tagline": "Are you afraid?",
+        "type": "show",
+        "addedAt": 1786838400,
+        "audienceRating": 7.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 1,
+        "contentRating": "TV-MA",
+        "duration": 3600000,
+        "imdbRatingCount": 28699,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-06",
+        "lastSeasonOriginallyAvailableAt": "2026-08-16",
+        "leafCount": 8,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-13",
+        "originallyAvailableAt": "2026-08-16",
+        "publicPagesURL": "https://watch.plex.tv/show/lanterns-1",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "lanterns-1",
+        "thumb": "https://metadata-static.plex.tv/a/gracenote/a44afa812060112da41ed7db7f26c9db.jpg",
+        "title": "Lanterns",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/6475f4e274668225adb2c0e0/commonsensemedia",
+            "oneLiner": "Language, bloody violence in fresh DC superhero drama.",
+            "AgeRating": [
+              {
+                "age": 15,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Lanterns",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/6gqezQJ2mkm4jreWwLyOZy2Vf6i.jpg"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4717f8af9c0bb154398488802f2fb7e3.jpg"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/376098/banners/69f77c0145ab7.jpg"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/b/683a142553/b41c93300119be0a2cb7a3a92eb2a0c6.png"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/b/683a142553/b41c93300119be0a2cb7a3a92eb2a0c6.png"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/5/gracenote/500b3f2361186603ebadbb01943024e0.jpg"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a44afa812060112da41ed7db7f26c9db.jpg"
+          },
+          {
+            "alt": "Lanterns",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/deb4cce44ff5ab76f0a4cabd7049e993.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt26545992"
+          },
+          {
+            "id": "tmdb://95350"
+          },
+          {
+            "id": "tvdb://376098"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.2
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 7.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.28
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682ea091de001f2e7350",
+            "order": 1,
+            "slug": "kyle-chandler",
+            "tag": "Kyle Chandler",
+            "thumb": "https://metadata-static.plex.tv/f/people/fc0fe63d45f6a821d69b614eb23afeca.jpg",
+            "role": "Hal Jordan",
+            "key": "/library/people/5d77682ea091de001f2e7350",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08cd7b5c2e001e661a8d",
+            "order": 2,
+            "slug": "aaron-pierre",
+            "tag": "Aaron Pierre",
+            "thumb": "https://metadata-static.plex.tv/d/people/d41e6c52953d23f5e28f202f072cbb42.jpg",
+            "role": "John Stewart",
+            "key": "/library/people/5d9c08cd7b5c2e001e661a8d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768276f4521001ea990aa",
+            "order": 3,
+            "slug": "kelly-macdonald",
+            "tag": "Kelly Macdonald",
+            "thumb": "https://metadata-static.plex.tv/d/people/d60e480058f3319db4bdd878f6e1285e.jpg",
+            "role": "Sheriff Kerry Kane",
+            "key": "/library/people/5d7768276f4521001ea990aa",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e5af944001f1f865c",
+            "order": 4,
+            "slug": "garret-dillahunt",
+            "tag": "Garret Dillahunt",
+            "thumb": "https://metadata-static.plex.tv/a/people/a3ddb49dccfb973bdc4baa2f3494df62.jpg",
+            "role": "William 'Will' Macon",
+            "key": "/library/people/5d77682e5af944001f1f865c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768316f4521001ea9b58d",
+            "order": 5,
+            "slug": "poorna-jagannathan",
+            "tag": "Poorna Jagannathan",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7494f465ff53ad1445d9498070898f6.jpg",
+            "role": "Zoe Macon",
+            "key": "/library/people/5d7768316f4521001ea9b58d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768263c3c2a001fbcaded",
+            "order": 6,
+            "slug": "ulrich-thomsen",
+            "tag": "Ulrich Thomsen",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd551891d8eef31462be01620c817beb.jpg",
+            "role": "Sinestro",
+            "key": "/library/people/5d7768263c3c2a001fbcaded",
+            "type": "person"
+          },
+          {
+            "id": "5d776b2b7a53e9001e71c8e9",
+            "order": 7,
+            "slug": "j-alphonse-nicholson",
+            "tag": "J. Alphonse Nicholson",
+            "thumb": "https://metadata-static.plex.tv/3/people/3d8b0d92a74b414504cc0be50724ff2f.jpg",
+            "role": "John Stewart Sr.",
+            "key": "/library/people/5d776b2b7a53e9001e71c8e9",
+            "type": "person"
+          },
+          {
+            "id": "5d77683185719b001f3a2b78",
+            "order": 8,
+            "slug": "jason-ritter",
+            "tag": "Jason Ritter",
+            "thumb": "https://metadata-static.plex.tv/f/people/faacc3333faef59e2f727e60c95ae03d.jpg",
+            "role": "William 'Billy' Macon",
+            "key": "/library/people/5d77683185719b001f3a2b78",
+            "type": "person"
+          },
+          {
+            "id": "5e166bdb2d4d84003e4bec72",
+            "order": 9,
+            "slug": "cary-christopher",
+            "tag": "Cary Christopher",
+            "thumb": "https://metadata-static.plex.tv/6/people/68b3d8b6a18869a5d6b003980ac7d8c1.jpg",
+            "role": "Young Noah Macon",
+            "key": "/library/people/5e166bdb2d4d84003e4bec72",
+            "type": "person"
+          },
+          {
+            "id": "6a82f8580687eaba55847fe7",
+            "order": 10,
+            "slug": "cairo-cash-lee",
+            "tag": "Cairo Cash Lee",
+            "thumb": "https://metadata-static.plex.tv/f/people/f10e4419f95a89ab6f7952127d075651.jpg",
+            "role": "Adolescent John",
+            "key": "/library/people/6a82f8580687eaba55847fe7",
+            "type": "person"
+          },
+          {
+            "id": "614ed9715a225a5da40d8dcc",
+            "order": 11,
+            "slug": "noah-gibson-slates",
+            "tag": "Noah Gibson Slates",
+            "thumb": "https://metadata-static.plex.tv/e/people/e1a5c7a48c1d521c768ca21c59cd0162.jpg",
+            "role": "Adolescent Marcus",
+            "key": "/library/people/614ed9715a225a5da40d8dcc",
+            "type": "person"
+          },
+          {
+            "id": "6a82f859a1c53dae5ad75efd",
+            "order": 12,
+            "slug": "jaylen-lyndon-hunter-1",
+            "tag": "Jaylen Lyndon Hunter",
+            "thumb": "https://metadata-static.plex.tv/5/people/5bdaa49061977e14a18380f609348a30.jpg",
+            "role": "Adolescent Aaron",
+            "key": "/library/people/6a82f859a1c53dae5ad75efd",
+            "type": "person"
+          },
+          {
+            "id": "5e054fd23154f9001dd134ff",
+            "order": 13,
+            "slug": "michael-ocampo",
+            "tag": "Michael Ocampo",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd80242dd58dee16a9484f99571213f4.jpg",
+            "role": "Deputy Lopez",
+            "key": "/library/people/5e054fd23154f9001dd134ff",
+            "type": "person"
+          },
+          {
+            "id": "5d7768254de0ee001fcc8198",
+            "order": 14,
+            "slug": "laura-linney",
+            "tag": "Laura Linney",
+            "thumb": "https://metadata-static.plex.tv/5/people/571e083c8f922743a6b1590e18c68c03.jpg",
+            "role": "Lianna",
+            "key": "/library/people/5d7768254de0ee001fcc8198",
+            "type": "person"
+          },
+          {
+            "id": "5d776826151a60001f24a7bd",
+            "order": 15,
+            "slug": "paul-ben-victor",
+            "tag": "Paul Ben-Victor",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ba85064e81ec992a9b307315aa53270.jpg",
+            "role": "Antaan",
+            "key": "/library/people/5d776826151a60001f24a7bd",
+            "type": "person"
+          },
+          {
+            "id": "5d776a9a7a53e9001e70a141",
+            "order": 16,
+            "slug": "jasmine-cephas-jones",
+            "tag": "Jasmine Cephas Jones",
+            "thumb": "https://metadata-static.plex.tv/3/people/334a9233d4e9f292046314fbbe1abc9c.jpg",
+            "role": "Bernadette Stewart (voice)",
+            "key": "/library/people/5d776a9a7a53e9001e70a141",
+            "type": "person"
+          },
+          {
+            "id": "5d776855e6d55c0020410f4d",
+            "order": 17,
+            "slug": "chris-coy",
+            "tag": "Chris Coy",
+            "thumb": "https://metadata-static.plex.tv/3/people/3cc78265ce6460eb128d4ef209ffce99.jpg",
+            "role": "Waylon Sanders",
+            "key": "/library/people/5d776855e6d55c0020410f4d",
+            "type": "person"
+          },
+          {
+            "id": "5d776e0afb0d55001f5b3b76",
+            "order": 18,
+            "slug": "cristina-frias",
+            "tag": "Cristina Frias",
+            "thumb": "https://metadata-static.plex.tv/e/people/e872aae88ee6e32cb96847a087a68647.jpg",
+            "role": "Judge",
+            "key": "/library/people/5d776e0afb0d55001f5b3b76",
+            "type": "person"
+          },
+          {
+            "id": "5d7770527a53e9001e7a00f2",
+            "order": 19,
+            "slug": "bella-shaw",
+            "tag": "Bella Shaw",
+            "thumb": "https://metadata-static.plex.tv/people/5d7770527a53e9001e7a00f2.jpg",
+            "role": "60 Minutes Anchor",
+            "key": "/library/people/5d7770527a53e9001e7a00f2",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff8e852f20000414d39cb",
+            "order": 20,
+            "slug": "shirl-boe",
+            "tag": "Shirl Boe",
+            "thumb": "https://metadata-static.plex.tv/d/people/d29554220f9e57f632a59a355950c08d.jpg",
+            "role": "Nice Woman",
+            "key": "/library/people/5f3ff8e852f20000414d39cb",
+            "type": "person"
+          },
+          {
+            "id": "60b66606da07df002c893d97",
+            "order": 21,
+            "slug": "doug-long",
+            "tag": "Doug Long",
+            "thumb": "https://metadata-static.plex.tv/3/people/37aef7a7786c639c4e46c44cc89fb7d8.jpg",
+            "role": "Thick Neck",
+            "key": "/library/people/60b66606da07df002c893d97",
+            "type": "person"
+          },
+          {
+            "id": "5f402821537293003d3aff4d",
+            "order": 22,
+            "slug": "tony-taboada",
+            "tag": "Tony Taboada",
+            "thumb": "https://metadata-static.plex.tv/2/people/2c6bd1a8e069ebe037cd60081b2dfb66.jpg",
+            "role": "Sheriff Everett",
+            "key": "/library/people/5f402821537293003d3aff4d",
+            "type": "person"
+          },
+          {
+            "id": "5f406a1ac63b480040e6c5cd",
+            "order": 23,
+            "slug": "juliette-hourani",
+            "tag": "Juliette Hourani",
+            "thumb": "https://metadata-static.plex.tv/c/people/c6c523978aea2b8241fd1d916d7cc805.jpg",
+            "role": "Mother",
+            "key": "/library/people/5f406a1ac63b480040e6c5cd",
+            "type": "person"
+          },
+          {
+            "id": "6a82f859e246269699b8d406",
+            "order": 24,
+            "slug": "zosia-rinderle",
+            "tag": "Zosia Rinderle",
+            "thumb": "https://metadata-static.plex.tv/8/people/8a16052ba921df6dd54a20ce02b071a3.jpg",
+            "role": "Young Girl (Taco Stand)",
+            "key": "/library/people/6a82f859e246269699b8d406",
+            "type": "person"
+          },
+          {
+            "id": "5d7768da594b2b001e696836",
+            "order": 25,
+            "slug": "jaime-alvarez",
+            "tag": "Jaime Alvarez",
+            "thumb": "https://image.tmdb.org/t/p/original/haPpV9Bo21UhArdZoaJc8CEIITv.jpg",
+            "role": "Taco Stand Owner",
+            "key": "/library/people/5d7768da594b2b001e696836",
+            "type": "person"
+          },
+          {
+            "id": "5d7769a896b655001fdd58fb",
+            "order": 26,
+            "slug": "nick-epper",
+            "tag": "Nick Epper",
+            "thumb": "https://metadata-static.plex.tv/f/people/f783cfd148930f3f89ed3928bff845db.jpg",
+            "role": "Rushville Civilian 9",
+            "key": "/library/people/5d7769a896b655001fdd58fb",
+            "type": "person"
+          },
+          {
+            "id": "6a841389bdcaddf09f5a18ae",
+            "order": 27,
+            "slug": "ben-strickler",
+            "tag": "Ben Strickler",
+            "role": "Sheriff Simpson",
+            "key": "/library/people/6a841389bdcaddf09f5a18ae",
+            "type": "person"
+          },
+          {
+            "id": "5d776874fb0d55001f510a30",
+            "order": 28,
+            "slug": "john-venable",
+            "tag": "John Venable",
+            "thumb": "https://metadata-static.plex.tv/7/people/7410764e8ba02082549b0543e2e0d07b.jpg",
+            "role": "Coach",
+            "key": "/library/people/5d776874fb0d55001f510a30",
+            "type": "person"
+          },
+          {
+            "id": "5d77697f9ab54400214f2a6e",
+            "order": 29,
+            "slug": "jonney-ahmanson",
+            "tag": "Jonney Ahmanson",
+            "thumb": "https://metadata-static.plex.tv/people/5d77697f9ab54400214f2a6e.jpg",
+            "role": "Guard Ben",
+            "key": "/library/people/5d77697f9ab54400214f2a6e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a7594b2b001e691e30",
+            "order": 30,
+            "slug": "craig-baxley-jr",
+            "tag": "Craig Baxley Jr.",
+            "thumb": "https://metadata-static.plex.tv/3/people/3e00a7300104741d7bc85714ae2c24e7.jpg",
+            "role": "Van Driver",
+            "key": "/library/people/5d7768a7594b2b001e691e30",
+            "type": "person"
+          },
+          {
+            "id": "66868fb2d32c599d337f31b7",
+            "order": 31,
+            "slug": "kamy-bruder",
+            "tag": "Kamy Bruder",
+            "thumb": "https://metadata-static.plex.tv/c/people/cb6d00da5f210a3c51fda31b272e3e0a.jpg",
+            "role": "Surly Guy",
+            "key": "/library/people/66868fb2d32c599d337f31b7",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f2ec6b5001f6bb186",
+            "order": 32,
+            "slug": "mark-d-espinoza",
+            "tag": "Mark D. Espinoza",
+            "thumb": "https://metadata-static.plex.tv/9/people/9bcbc964b7345d443d0c19fb420e3a60.jpg",
+            "role": "General Chavez",
+            "key": "/library/people/5d77682f2ec6b5001f6bb186",
+            "type": "person"
+          },
+          {
+            "id": "6a96becd25e9132ac2527181",
+            "order": 33,
+            "slug": "jayce-eiland-1",
+            "tag": "Jayce Eiland",
+            "role": "Child John",
+            "key": "/library/people/6a96becd25e9132ac2527181",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcb7952f2000041493584",
+            "order": 34,
+            "slug": "richard-gardenhire-jr",
+            "tag": "Richard Gardenhire Jr.",
+            "role": "Child Marcus",
+            "key": "/library/people/5f3fcb7952f2000041493584",
+            "type": "person"
+          },
+          {
+            "id": "6962697bd396ff48057344ef",
+            "order": 35,
+            "slug": "lumi-oniyide",
+            "tag": "Lumi Oniyide",
+            "role": "Child Aaron",
+            "key": "/library/people/6962697bd396ff48057344ef",
+            "type": "person"
+          },
+          {
+            "id": "60d9f2e3dc6fbf002cdc319e",
+            "order": 36,
+            "slug": "sergio-lanza-1",
+            "tag": "Sergio Lanza",
+            "role": "Recruiter",
+            "key": "/library/people/60d9f2e3dc6fbf002cdc319e",
+            "type": "person"
+          },
+          {
+            "id": "5d776832e6d55c002040c5ec",
+            "order": 37,
+            "slug": "kent-shocknek",
+            "tag": "Kent Shocknek",
+            "thumb": "https://metadata-static.plex.tv/7/people/7cbe8944c75324026297ebe048ce4562.jpg",
+            "role": "News Anchor",
+            "key": "/library/people/5d776832e6d55c002040c5ec",
+            "type": "person"
+          },
+          {
+            "id": "5e1643dbd92d86003d35f06b",
+            "order": 38,
+            "slug": "joel-berg-5",
+            "tag": "Joel Berg",
+            "role": "Marine",
+            "key": "/library/people/5e1643dbd92d86003d35f06b",
+            "type": "person"
+          },
+          {
+            "id": "607e8c190b70860036d6d08f",
+            "order": 39,
+            "slug": "jerry-gureghian",
+            "tag": "Jerry Gureghian",
+            "role": "Gray Wolf",
+            "key": "/library/people/607e8c190b70860036d6d08f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768266f4521001ea98c9d",
+            "order": 40,
+            "slug": "jason-manuel-olazabal",
+            "tag": "Jason Manuel Olazabal",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768266f4521001ea98c9d.jpg",
+            "role": "Hector Gutierrez",
+            "key": "/library/people/5d7768266f4521001ea98c9d",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9bad5437001f7a4b5f",
+            "order": 41,
+            "slug": "eric-staves",
+            "tag": "Eric Staves",
+            "thumb": "https://metadata-static.plex.tv/6/people/6279aa786c6f887738e3a0c65b3f3767.jpg",
+            "role": "Owner Phil",
+            "key": "/library/people/5d776b9bad5437001f7a4b5f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b21999bc0020dce1b2",
+            "order": 42,
+            "slug": "brian-sutherland",
+            "tag": "Brian Sutherland",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768b21999bc0020dce1b2.jpg",
+            "role": "Buddy",
+            "key": "/library/people/5d7768b21999bc0020dce1b2",
+            "type": "person"
+          },
+          {
+            "id": "5e16526ad92d86003d36cf8d",
+            "order": 43,
+            "slug": "jim-charmatz",
+            "tag": "Jim Charmatz",
+            "role": "Earl Puppeteer",
+            "key": "/library/people/5e16526ad92d86003d36cf8d",
+            "type": "person"
+          },
+          {
+            "id": "5f4003c003883a0040b09f7e",
+            "order": 44,
+            "slug": "victor-broadley",
+            "tag": "Victor Broadley",
+            "thumb": "https://metadata-static.plex.tv/3/people/3c9877a0ca830be2922b46bfe177fcb0.jpg",
+            "role": "Earl Puppeteer",
+            "key": "/library/people/5f4003c003883a0040b09f7e",
+            "type": "person"
+          },
+          {
+            "id": "5f3faa0ffea1a1003f94b95e",
+            "order": 45,
+            "slug": "roderick-khachatoorian",
+            "tag": "Roderick Khachatoorian",
+            "role": "Earl Puppeteer",
+            "key": "/library/people/5f3faa0ffea1a1003f94b95e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77682ce6d55c002040b8fb",
+            "slug": "james-hawes",
+            "tag": "James Hawes",
+            "thumb": "https://metadata-static.plex.tv/8/people/8610048083b3e3ff84aaf759ef302943.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77682ce6d55c002040b8fb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c6f617c900201588f5",
+            "slug": "stephen-williams",
+            "tag": "Stephen Williams",
+            "thumb": "https://metadata-static.plex.tv/9/people/906d3d452349a27fb787dfef80ceff55.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768c6f617c900201588f5",
+            "type": "person"
+          },
+          {
+            "id": "5d776acd51dd69001fe287c3",
+            "slug": "geeta-patel",
+            "tag": "Geeta Patel",
+            "role": "Director",
+            "key": "/library/people/5d776acd51dd69001fe287c3",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5e164ababc1372003ea7fd4f",
+            "slug": "kiegan-downs-1",
+            "tag": "Kiegan Downs",
+            "role": "Producer",
+            "key": "/library/people/5e164ababc1372003ea7fd4f",
+            "type": "person"
+          },
+          {
+            "id": "5f402eff52f20000415200b2",
+            "slug": "breannah-gibson",
+            "tag": "Breannah Gibson",
+            "role": "Producer",
+            "key": "/library/people/5f402eff52f20000415200b2",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5e16364e91c20300412109fb",
+            "slug": "chris-mundy",
+            "tag": "Chris Mundy",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7b3631cda7f3acfb619ef24be70fbaa.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e16364e91c20300412109fb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768505af944001f1feeae",
+            "slug": "vanessa-baden-kelly",
+            "tag": "Vanessa Baden Kelly",
+            "thumb": "https://metadata-static.plex.tv/8/people/8c11e0703ee73108895e15f11b82bea4.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d7768505af944001f1feeae",
+            "type": "person"
+          },
+          {
+            "id": "5f402eff52f20000415200b2",
+            "slug": "breannah-gibson",
+            "tag": "Breannah Gibson",
+            "role": "Writer",
+            "key": "/library/people/5f402eff52f20000415200b2",
+            "type": "person"
+          },
+          {
+            "id": "5d77683beb5d26001f1e1f25",
+            "slug": "damon-lindelof",
+            "tag": "Damon Lindelof",
+            "thumb": "https://metadata-static.plex.tv/c/people/cb002f1b953efc94f7fac89edee59db0.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d77683beb5d26001f1e1f25",
+            "type": "person"
+          },
+          {
+            "id": "5de03ce1e08eb8001d3d0d66",
+            "slug": "tom-king-13",
+            "tag": "Tom King",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc72be5de9373ad23df8d4bbbfc617f0.jpg",
+            "role": "Writer",
+            "key": "/library/people/5de03ce1e08eb8001d3d0d66",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "HBO"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c086c46115600200aa2f6",
+            "tag": "Marvel's Agents of S.H.I.E.L.D."
+          },
+          {
+            "guid": "plex://show/5d9c086c08fddd001f29a56c",
+            "tag": "21 Jump Street"
+          },
+          {
+            "guid": "plex://show/5d9c086e08fddd001f29abb5",
+            "tag": "Grimm"
+          },
+          {
+            "guid": "plex://show/5d9c08282192ba001f308de1",
+            "tag": "Powers (2015)"
+          },
+          {
+            "guid": "plex://show/5d9c0826e264b7001fc3d329",
+            "tag": "Sleepy Hollow"
+          },
+          {
+            "guid": "plex://show/5d9c08390aaccd001f8ee512",
+            "tag": "Gotham"
+          },
+          {
+            "guid": "plex://show/5d9c08e92df347001e3b9fe8",
+            "tag": "Titans (2018)"
+          },
+          {
+            "guid": "plex://show/5d9c08ffe264b7001fc4d479",
+            "tag": "Doom Patrol"
+          },
+          {
+            "guid": "plex://show/5d9c0900705e7a001e6e81c3",
+            "tag": "Watchmen"
+          },
+          {
+            "guid": "plex://show/5d9c091a2192ba001f31bdad",
+            "tag": "Locke & Key"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "DC Studios"
+          },
+          {
+            "tag": "HBO"
+          },
+          {
+            "tag": "Warner Bros. Television"
+          },
+          {
+            "tag": "Man, Woman & Child Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Follows intergalactic cops John Stewart and Hal Jordan as they uncover a dark mystery.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

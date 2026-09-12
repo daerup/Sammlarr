@@ -1,0 +1,97 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://artworks.thetvdb.com/banners/fanart/original/5c946a846a2f3.jpg",
+        "guid": "plex://show/5d9c08c108fddd001f2a0f7a",
+        "key": "/library/metadata/5d9c08c108fddd001f2a0f7a/children",
+        "ratingKey": "5d9c08c108fddd001f2a0f7a",
+        "summary": "Garrett and Quinn are just your average gentlemen lobsters. They Instagram their shoes (@gentlemenlobsters), feign expertise in high art and culture, watch the World Cup, and play the occasional video game. Most importantly, they always look sharp. They’re bros. And lobsters",
+        "type": "show",
+        "addedAt": 1405036800,
+        "childCount": 3,
+        "contentRating": "TV-14",
+        "duration": 300000,
+        "leafCount": 21,
+        "originallyAvailableAt": "2014-07-11",
+        "publicPagesURL": "https://watch.plex.tv/show/gentlemen-lobsters",
+        "slug": "gentlemen-lobsters",
+        "theme": "https://tvthemes.plexapp.com/314084.mp3",
+        "thumb": "https://artworks.thetvdb.com/banners/posters/5c9469d734fab.jpg",
+        "title": "Gentlemen Lobsters",
+        "userState": false,
+        "year": 2014,
+        "Image": [
+          {
+            "alt": "Gentlemen Lobsters",
+            "type": "coverArt",
+            "url": "https://artworks.thetvdb.com/banners/fanart/original/5c946a846a2f3.jpg"
+          },
+          {
+            "alt": "Gentlemen Lobsters",
+            "type": "coverPoster",
+            "url": "https://artworks.thetvdb.com/banners/posters/5c9469d734fab.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tvdb://314084"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Seeso"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,322 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/3sE6bs8YsxJEtwVFokAt5TezPl7.jpg",
+        "guid": "plex://show/657ecccaa698374a7a524274",
+        "key": "/library/metadata/657ecccaa698374a7a524274/children",
+        "ratingKey": "657ecccaa698374a7a524274",
+        "studio": "WIT STUDIO",
+        "summary": "A remake of \"One Piece\", one of the most influential and beloved Anime/Manga of the century, The One Piece follows a kid named Monkey D. Luffy and his crew on a grand adventure to find the treasure called the One Piece.",
+        "tagline": "The adventure starts here!",
+        "type": "show",
+        "childCount": 1,
+        "contentRating": "TV-14",
+        "duration": 1440000,
+        "leafCount": 7,
+        "originalTitle": "THE ONE PIECE",
+        "publicPagesURL": "https://watch.plex.tv/show/the-one-piece",
+        "slug": "the-one-piece",
+        "thumb": "https://image.tmdb.org/t/p/original/tcBHXNxz62RaAiDRbkm6DEwiXbJ.jpg",
+        "title": "The One Piece",
+        "userState": false,
+        "Image": [
+          {
+            "alt": "THE ONE PIECE",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/3sE6bs8YsxJEtwVFokAt5TezPl7.jpg"
+          },
+          {
+            "alt": "THE ONE PIECE",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8e5238518b998abb7c38d356940851b8.jpg"
+          },
+          {
+            "alt": "THE ONE PIECE",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/7/009125463f/7efeb78e9611cd50f5bf89d158e060cd.png"
+          },
+          {
+            "alt": "THE ONE PIECE",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/7/009125463f/7efeb78e9611cd50f5bf89d158e060cd.png"
+          },
+          {
+            "alt": "THE ONE PIECE",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/wrV9hbOH3pYAsNZcQ609cjnlXt5.jpg"
+          },
+          {
+            "alt": "THE ONE PIECE",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/tcBHXNxz62RaAiDRbkm6DEwiXbJ.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5da05f6e4b438d001f2b8808",
+            "id": "5da05f6e4b438d001f2b8808",
+            "key": "/library/sections/home/all?genre=5da05f6e4b438d001f2b8808",
+            "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+            "slug": "travel",
+            "tag": "Travel",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+            "id": "5d9c07f0ba2e21001f18c7f8",
+            "key": "/library/sections/home/all?genre=5d9c07f0ba2e21001f18c7f8",
+            "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+            "slug": "anime",
+            "tag": "Anime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt30476502"
+          },
+          {
+            "id": "tmdb://241709"
+          },
+          {
+            "id": "tvdb://464521"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776835999c64001ec2f4ae",
+            "order": 1,
+            "slug": "mayumi-tanaka",
+            "tag": "Mayumi Tanaka",
+            "thumb": "https://metadata-static.plex.tv/c/people/c50c1a967de84b1ad14975d7e3a2f4fc.jpg",
+            "role": "Monkey D. Luffy (voice)",
+            "key": "/library/people/5d776835999c64001ec2f4ae",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776d9e96b655001fe4dcac",
+            "slug": "masashi-koizuka",
+            "tag": "Masashi Koizuka",
+            "thumb": "https://metadata-static.plex.tv/people/5d776d9e96b655001fe4dcac.jpg",
+            "role": "Series Director",
+            "key": "/library/people/5d776d9e96b655001fe4dcac",
+            "type": "person"
+          },
+          {
+            "id": "5e165b24bc1372003ea95a57",
+            "slug": "hideaki-abe",
+            "tag": "Hideaki Abe",
+            "role": "Assistant Director",
+            "key": "/library/people/5e165b24bc1372003ea95a57",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d9c081ce264b7001fc3c7fb",
+            "slug": "tetsuya-nakatake",
+            "tag": "Tetsuya Nakatake",
+            "thumb": "https://metadata-static.plex.tv/7/people/7a50620a3a2e470ac0451679cbd5ed1a.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d9c081ce264b7001fc3c7fb",
+            "type": "person"
+          },
+          {
+            "id": "5e53c89c344e67003f09ea37",
+            "slug": "george-wada-2",
+            "tag": "George Wada",
+            "role": "Producer",
+            "key": "/library/people/5e53c89c344e67003f09ea37",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776f41fb0d55001f5daf34",
+            "slug": "eiichiro-oda",
+            "tag": "Eiichiro Oda",
+            "thumb": "https://metadata-static.plex.tv/8/people/8fea04658f2e9e19ae85d1f0726bca29.jpg",
+            "role": "Original Story",
+            "key": "/library/people/5d776f41fb0d55001f5daf34",
+            "type": "person"
+          },
+          {
+            "id": "5d776e3b96b655001fe60ce0",
+            "slug": "taku-kishimoto",
+            "tag": "Taku Kishimoto",
+            "role": "Series Composition",
+            "key": "/library/people/5d776e3b96b655001fe60ce0",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Netflix"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f1e6cdf4de80e004280f759",
+            "tag": "Fena: Pirate Princess"
+          },
+          {
+            "guid": "plex://show/5f7c9b1c9b958e00415de6bb",
+            "tag": "ONE PIECE (2023)"
+          },
+          {
+            "guid": "plex://show/61d17a3a7bbf0f7c110ea567",
+            "tag": "Urusei Yatsura (2022)"
+          },
+          {
+            "guid": "plex://show/61fd3ab439419933daeb3f9d",
+            "tag": "Bastard!! ‐Heavy Metal, Dark Fantasy‐"
+          },
+          {
+            "guid": "plex://show/666b617d8e424828556e01cf",
+            "tag": "Gachiakuta"
+          },
+          {
+            "guid": "plex://show/5d9c08252df347001e3abfe9",
+            "tag": "Galaxy Express 999"
+          },
+          {
+            "guid": "plex://show/5d9c08263c3f87001f3489ac",
+            "tag": "Space Pirate Captain Harlock"
+          },
+          {
+            "guid": "plex://show/5d9c0869ba2e21001f1903c2",
+            "tag": "Jake and the Never Land Pirates"
+          },
+          {
+            "guid": "plex://show/61b1514a99f0122611599688",
+            "tag": "Space Adventure Cobra"
+          },
+          {
+            "guid": "plex://show/5e269a8b619e33003efe0578",
+            "tag": "Tower of God"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "WIT STUDIO"
+          },
+          {
+            "tag": "Fuji Television Network"
+          },
+          {
+            "tag": "Toei Animation"
+          },
+          {
+            "tag": "Shueisha"
+          }
+        ]
+      }
+    ]
+  }
+}

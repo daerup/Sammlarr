@@ -1,0 +1,130 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 2,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1690070400,
+              "art": "https://image.tmdb.org/t/p/original/4NBYDOnEjAzyuP7CMkD5s7fs44K.jpg",
+              "childCount": 3,
+              "duration": 2520000,
+              "guid": "plex://show/62ac863c44b73ea95829962c",
+              "key": "/library/metadata/62ac863c44b73ea95829962c/children",
+              "leafCount": 24,
+              "originallyAvailableAt": "2023-07-23",
+              "ratingKey": "62ac863c44b73ea95829962c",
+              "slug": "lioness-1",
+              "thumb": "https://image.tmdb.org/t/p/original/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
+              "title": "Lioness",
+              "type": "show",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ea46115600200a5b2c",
+                  "id": "5d9c07ea46115600200a5b2c",
+                  "key": "/library/categories/war-and-politics",
+                  "ratingKey": "genre_5d9c07ea46115600200a5b2c",
+                  "slug": "war-and-politics",
+                  "tag": "War & Politics",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.91
+          },
+          {
+            "Metadata": {
+              "addedAt": 1611792000,
+              "art": "https://metadata-static.plex.tv/7/gracenote/7a2366f972714ce1fa596550dda6ef88.jpg",
+              "childCount": 2,
+              "duration": 2820000,
+              "guid": "plex://show/60547a1bda7fb6002c1cf49a",
+              "key": "/library/metadata/60547a1bda7fb6002c1cf49a/children",
+              "leafCount": 20,
+              "originallyAvailableAt": "2021-01-28",
+              "ratingKey": "60547a1bda7fb6002c1cf49a",
+              "slug": "lioness-2021",
+              "thumb": "https://image.tmdb.org/t/p/original/jzxFaqQYGt2FOzVygxL9IHu0jne.jpg",
+              "title": "Lioness (2021)",
+              "type": "show",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.7
+          }
+        ]
+      }
+    ]
+  }
+}

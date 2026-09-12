@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/tv/58957"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json;charset=utf-8"
+    },
+    "bodyFileName": "tmdb/tv-58957.verified.json"
+  }
+}

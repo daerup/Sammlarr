@@ -1,0 +1,110 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/69e45c61d0388daa90568313",
+        "key": "/library/metadata/69e45c61d0388daa90568313",
+        "ratingKey": "69e45c61d0388daa90568313",
+        "studio": "Killer Bean Studios",
+        "type": "movie",
+        "contentRating": "TV-MA",
+        "duration": 6120000,
+        "publicPagesURL": "https://watch.plex.tv/movie/toy-story-9",
+        "slug": "toy-story-9",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BYzMzNzIzYTYtMzNkZS00MjZkLTljMjEtZWNlYmQ1MjVmMjczXkEyXkFqcGc@._V1_.jpg",
+        "title": "Toy Story 9",
+        "userState": false,
+        "Image": [
+          {
+            "alt": "Toy Story 9",
+            "type": "coverPoster",
+            "url": "https://m.media-amazon.com/images/M/MV5BYzMzNzIzYTYtMzNkZS00MjZkLTljMjEtZWNlYmQ1MjVmMjczXkEyXkFqcGc@._V1_.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt41669569"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "69207b45fb7cb4f089e9477e",
+            "order": 1,
+            "slug": "michele-waymack",
+            "tag": "Michele Waymack",
+            "role": "Mom",
+            "key": "/library/people/69207b45fb7cb4f089e9477e",
+            "type": "person"
+          },
+          {
+            "id": "692dd86c66dda0ff9f6e3ab4",
+            "order": 2,
+            "slug": "brandon-waymack-1",
+            "tag": "Brandon Waymack",
+            "role": "Woody",
+            "key": "/library/people/692dd86c66dda0ff9f6e3ab4",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "69c2b1840cbe244bcec3bb47",
+            "slug": "kenneth-w-fisher",
+            "tag": "Kenneth W. Fisher",
+            "role": "Director",
+            "key": "/library/people/69c2b1840cbe244bcec3bb47",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "69207b45c3222f63660f6d70",
+            "slug": "brandon-waymack",
+            "tag": "Brandon Waymack",
+            "role": "Producer",
+            "key": "/library/people/69207b45c3222f63660f6d70",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "692f127a44caa3f0dd7c99c3",
+            "slug": "kenny-bean-3",
+            "tag": "Kenny Bean",
+            "role": "Written By",
+            "key": "/library/people/692f127a44caa3f0dd7c99c3",
+            "type": "person"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Killer Bean Studios"
+          }
+        ]
+      }
+    ]
+  }
+}

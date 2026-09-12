@@ -1,0 +1,458 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1785974400,
+              "art": "https://metadata-static.plex.tv/5/gracenote/50d1889a229764bc02ba403dd5e7934f.jpg",
+              "duration": 6180000,
+              "guid": "plex://movie/67ae386f3c22b1734388d86c",
+              "key": "/library/metadata/67ae386f3c22b1734388d86c",
+              "originallyAvailableAt": "2026-08-06",
+              "ratingKey": "67ae386f3c22b1734388d86c",
+              "slug": "one-night-only-2026",
+              "thumb": "https://metadata-static.plex.tv/2/gracenote/28bfff6fc6797576c2bc3083e74c598e.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.93
+          },
+          {
+            "Metadata": {
+              "addedAt": 1469145600,
+              "art": "https://metadata-static.plex.tv/c/gracenote/c2a8b8895e4ce4984537805f5d0819b5.jpg",
+              "duration": 5400000,
+              "guid": "plex://movie/5d776c6c594b2b001e6f3623",
+              "key": "/library/metadata/5d776c6c594b2b001e6f3623",
+              "originallyAvailableAt": "2016-07-22",
+              "ratingKey": "5d776c6c594b2b001e6f3623",
+              "slug": "one-night-only-2016",
+              "thumb": "https://metadata-static.plex.tv/6/gracenote/6eafdafc571f2ccb1211a2d530e1ab34.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2016,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 505353600,
+              "art": "https://image.tmdb.org/t/p/original/i8vV8lzIbwYsor4bKQld052batO.jpg",
+              "duration": 5220000,
+              "guid": "plex://movie/5d7768b36f6af7001ee5b31f",
+              "key": "/library/metadata/5d7768b36f6af7001ee5b31f",
+              "originallyAvailableAt": "1986-01-06",
+              "ratingKey": "5d7768b36f6af7001ee5b31f",
+              "slug": "one-night-only",
+              "thumb": "https://image.tmdb.org/t/p/original/8EG9jDCJbdgWs9heExElTP00TwZ.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 1986,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1404345600,
+              "art": "https://metadata-static.plex.tv/8/gracenote/84df86d89ef7a63013baeba5bc50b1d1.jpg",
+              "duration": 4020000,
+              "guid": "plex://movie/5d776bd6fb0d55001f57473f",
+              "key": "/library/metadata/5d776bd6fb0d55001f57473f",
+              "originallyAvailableAt": "2014-07-03",
+              "ratingKey": "5d776bd6fb0d55001f57473f",
+              "slug": "one-night-only-2014",
+              "thumb": "https://image.tmdb.org/t/p/original/vAGcQ04tic19fnwRXKSYqea1Doc.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2014,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1500768000,
+              "art": "https://image.tmdb.org/t/p/original/6W1OsLXjiWHlDHQmRMw37iaiH6q.jpg",
+              "duration": 600000,
+              "guid": "plex://movie/5e163300bc1372003ea6784f",
+              "key": "/library/metadata/5e163300bc1372003ea6784f",
+              "originallyAvailableAt": "2017-07-23",
+              "ratingKey": "5e163300bc1372003ea6784f",
+              "slug": "one-night-only-2017",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/iRtRtrJ8juaj5yG4R9f8035AToC.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2017,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1230163200,
+              "duration": 5880000,
+              "guid": "plex://movie/5d776bc6ad5437001f7a9b56",
+              "key": "/library/metadata/5d776bc6ad5437001f7a9b56",
+              "originallyAvailableAt": "2008-12-25",
+              "ratingKey": "5d776bc6ad5437001f7a9b56",
+              "slug": "one-night-only-2008",
+              "thumb": "https://image.tmdb.org/t/p/original/n4kVxgTpjQOpVi91VPjv58ImqC9.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2008,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "duration": 1140000,
+              "guid": "plex://movie/5f40a558fea1a1003fb21cc3",
+              "key": "/library/metadata/5f40a558fea1a1003fb21cc3",
+              "ratingKey": "5f40a558fea1a1003fb21cc3",
+              "slug": "one-night-only-15",
+              "subtype": "short",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BN2EzZTE4YmItNWNkOS00YjM5LWI3YjMtMmYzZGU5NDg0M2Y4XkEyXkFqcGc@._V1_.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1778544000,
+              "art": "https://image.tmdb.org/t/p/original/esIDrOv4l40jHeIfeBF6pVIWAMa.jpg",
+              "duration": 600000,
+              "guid": "plex://movie/69fc7f0fb4af52ecd2f9a428",
+              "key": "/library/metadata/69fc7f0fb4af52ecd2f9a428",
+              "originallyAvailableAt": "2026-05-12",
+              "ratingKey": "69fc7f0fb4af52ecd2f9a428",
+              "slug": "one-night-only-2026-1",
+              "thumb": "https://image.tmdb.org/t/p/original/4acAp9fDdolmpEJOUqWtbqaw99k.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2026,
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "duration": 600000,
+              "guid": "plex://movie/5f40d75604a8650040bc2388",
+              "key": "/library/metadata/5f40d75604a8650040bc2388",
+              "ratingKey": "5f40d75604a8650040bc2388",
+              "slug": "one-night-only-16",
+              "subtype": "short",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BMWM1MjYwOTMtY2JlNy00OTI5LTgxYzgtYTc0ODFiYzI2MThiXkEyXkFqcGc@._V1_.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1594598400,
+              "art": "https://artworks.thetvdb.com/banners/movies/136760/panels/5f0d3302cec13.jpg",
+              "duration": 2820000,
+              "guid": "plex://movie/5f0d5a31b3b3170042a52e8c",
+              "key": "/library/metadata/5f0d5a31b3b3170042a52e8c",
+              "originallyAvailableAt": "2020-07-13",
+              "ratingKey": "5f0d5a31b3b3170042a52e8c",
+              "slug": "one-night-only-the-beatles-in-oz",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BMzIwOTRmZGYtYjI3OC00MjJiLTliYzUtNWE3YTI2ZWM0YmEwXkEyXkFqcGc@._V1_.jpg",
+              "title": "One Night Only: The Beatles in Oz",
+              "type": "movie",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046cd4f2a9001f7faab2",
+                  "id": "5d9c046cd4f2a9001f7faab2",
+                  "key": "/library/categories/biography",
+                  "ratingKey": "genre_5d9c046cd4f2a9001f7faab2",
+                  "slug": "biography",
+                  "tag": "Biography",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf5af32ed001e0f5563",
+                  "id": "5da05bf5af32ed001e0f5563",
+                  "key": "/library/categories/history",
+                  "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+                  "slug": "history",
+                  "tag": "History",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf556341e001e11b8ee",
+                  "id": "5da05bf556341e001e11b8ee",
+                  "key": "/library/categories/music",
+                  "ratingKey": "genre_5da05bf556341e001e11b8ee",
+                  "slug": "music",
+                  "tag": "Music",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05c2a4b438d001f2b5eaa",
+                  "id": "5da05c2a4b438d001f2b5eaa",
+                  "key": "/library/categories/news",
+                  "ratingKey": "genre_5da05c2a4b438d001f2b5eaa",
+                  "slug": "news",
+                  "tag": "News",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.67
+          }
+        ]
+      }
+    ]
+  }
+}

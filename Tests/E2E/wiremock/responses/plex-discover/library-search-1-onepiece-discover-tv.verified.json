@@ -1,0 +1,684 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "ONE PIECE (2023)",
+      "One Piece Log: Fish-Man Island Saga"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 940377600,
+              "art": "https://image.tmdb.org/t/p/original/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
+              "childCount": 23,
+              "duration": 1440000,
+              "guid": "plex://show/5d9c084fec357c001f9ab4d8",
+              "key": "/library/metadata/5d9c084fec357c001f9ab4d8/children",
+              "leafCount": 1220,
+              "originallyAvailableAt": "1999-10-20",
+              "ratingKey": "5d9c084fec357c001f9ab4d8",
+              "slug": "one-piece",
+              "thumb": "https://image.tmdb.org/t/p/original/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
+              "title": "One Piece",
+              "type": "show",
+              "year": 1999,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+                  "id": "5d9c07f0ba2e21001f18c7f8",
+                  "key": "/library/categories/anime",
+                  "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+                  "slug": "anime",
+                  "tag": "Anime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.91
+          },
+          {
+            "Metadata": {
+              "addedAt": 1693440000,
+              "art": "https://image.tmdb.org/t/p/original/qD211Hb5XwFxrszzBBe5EUYJerh.jpg",
+              "childCount": 3,
+              "duration": 3600000,
+              "guid": "plex://show/5f7c9b1c9b958e00415de6bb",
+              "key": "/library/metadata/5f7c9b1c9b958e00415de6bb/children",
+              "leafCount": 17,
+              "originallyAvailableAt": "2023-08-31",
+              "ratingKey": "5f7c9b1c9b958e00415de6bb",
+              "slug": "one-piece-2023",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/blWCPEqDGLBuLB9u89CxP9ORQP4.jpg",
+              "title": "ONE PIECE (2023)",
+              "type": "show",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e808fddd001f28de45",
+                  "id": "5d9c07e808fddd001f28de45",
+                  "key": "/library/categories/sci-fi-and-fantasy",
+                  "ratingKey": "genre_5d9c07e808fddd001f28de45",
+                  "slug": "sci-fi-and-fantasy",
+                  "tag": "Sci-Fi & Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.9
+          },
+          {
+            "Metadata": {
+              "art": "https://image.tmdb.org/t/p/original/3sE6bs8YsxJEtwVFokAt5TezPl7.jpg",
+              "childCount": 1,
+              "duration": 1440000,
+              "guid": "plex://show/657ecccaa698374a7a524274",
+              "key": "/library/metadata/657ecccaa698374a7a524274/children",
+              "leafCount": 7,
+              "ratingKey": "657ecccaa698374a7a524274",
+              "slug": "the-one-piece",
+              "thumb": "https://image.tmdb.org/t/p/original/tcBHXNxz62RaAiDRbkm6DEwiXbJ.jpg",
+              "title": "The One Piece",
+              "type": "show",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e808fddd001f28de45",
+                  "id": "5d9c07e808fddd001f28de45",
+                  "key": "/library/categories/sci-fi-and-fantasy",
+                  "ratingKey": "genre_5d9c07e808fddd001f28de45",
+                  "slug": "sci-fi-and-fantasy",
+                  "tag": "Sci-Fi & Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+                  "id": "5d9c07f0ba2e21001f18c7f8",
+                  "key": "/library/categories/anime",
+                  "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+                  "slug": "anime",
+                  "tag": "Anime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.63
+          },
+          {
+            "Metadata": {
+              "addedAt": 1783209600,
+              "art": "https://artworks.thetvdb.com/banners/v4/series/466748/backgrounds/6985247c03b2f.jpg",
+              "childCount": 1,
+              "duration": 1380000,
+              "guid": "plex://show/698e9eb626fe68a5b3222b38",
+              "key": "/library/metadata/698e9eb626fe68a5b3222b38/children",
+              "leafCount": 1,
+              "originallyAvailableAt": "2026-07-05",
+              "ratingKey": "698e9eb626fe68a5b3222b38",
+              "slug": "one-piece-heroines",
+              "thumb": "https://artworks.thetvdb.com/banners/v4/series/466748/posters/69f10cbf18cbe.jpg",
+              "title": "One Piece: Heroines",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.45
+          },
+          {
+            "Metadata": {
+              "addedAt": 1790640000,
+              "art": "https://image.tmdb.org/t/p/original/1ftqNLph1CxcXxSXJsijjlw7ZkX.jpg",
+              "childCount": 1,
+              "guid": "plex://show/69d7218e8d07470143708357",
+              "key": "/library/metadata/69d7218e8d07470143708357/children",
+              "leafCount": 2,
+              "originallyAvailableAt": "2026-09-29",
+              "ratingKey": "69d7218e8d07470143708357",
+              "skipChildren": true,
+              "slug": "lego-one-piece",
+              "subtype": "miniSeries",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BNjhjZDY5YWMtYjA5Yi00ZGVlLTliOTctODQ2MmU4YmUzNDNlXkEyXkFqcGc@._V1_.jpg",
+              "title": "LEGO ONE PIECE",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e808fddd001f28de45",
+                  "id": "5d9c07e808fddd001f28de45",
+                  "key": "/library/categories/sci-fi-and-fantasy",
+                  "ratingKey": "genre_5d9c07e808fddd001f28de45",
+                  "slug": "sci-fi-and-fantasy",
+                  "tag": "Sci-Fi & Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0904",
+                  "id": "5d9c07ebcb3ffa001f1b0904",
+                  "key": "/library/categories/mini-series",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0904",
+                  "slug": "mini-series",
+                  "tag": "Mini-Series",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.43
+          },
+          {
+            "Metadata": {
+              "addedAt": 1466380800,
+              "art": "https://image.tmdb.org/t/p/original/d53feRiMKVabw9LH6vWy0cDmAKU.jpg",
+              "childCount": 1,
+              "duration": 1800000,
+              "guid": "plex://show/65a1e055ba67d4c215fc39a9",
+              "key": "/library/metadata/65a1e055ba67d4c215fc39a9/children",
+              "leafCount": 9,
+              "originallyAvailableAt": "2016-06-20",
+              "ratingKey": "65a1e055ba67d4c215fc39a9",
+              "slug": "one-piece-characters-log",
+              "thumb": "https://image.tmdb.org/t/p/original/aHRHoWK4fSItzAoQO6uz3gm0OYl.jpg",
+              "title": "One Piece Characters Log",
+              "type": "show",
+              "year": 2016,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5f17675407012c0040e5804e",
+                  "id": "5f17675407012c0040e5804e",
+                  "key": "/library/categories/action-adventure",
+                  "ratingKey": "genre_5f17675407012c0040e5804e",
+                  "slug": "action-adventure",
+                  "tag": "Action/Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.43
+          },
+          {
+            "Metadata": {
+              "addedAt": 714700800,
+              "childCount": 1,
+              "duration": 480000,
+              "guid": "plex://show/630ec491ef84515ed69b08cf",
+              "key": "/library/metadata/630ec491ef84515ed69b08cf/children",
+              "leafCount": 3,
+              "originallyAvailableAt": "1992-08-25",
+              "ratingKey": "630ec491ef84515ed69b08cf",
+              "slug": "cursed-one-piece",
+              "thumb": "https://artworks.thetvdb.com/banners/v4/series/422877/posters/630e4a4044f7c.jpg",
+              "title": "Cursed One-Piece",
+              "type": "show",
+              "year": 1992,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+                  "id": "5d9c07f0ba2e21001f18c7f8",
+                  "key": "/library/categories/anime",
+                  "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+                  "slug": "anime",
+                  "tag": "Anime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.42
+          },
+          {
+            "Metadata": {
+              "addedAt": 1773705600,
+              "art": "https://image.tmdb.org/t/p/original/qzwXSpoYHSDya64HMhs8I1iBKj8.jpg",
+              "childCount": 1,
+              "guid": "plex://show/69b94812f421b137d5a16e69",
+              "key": "/library/metadata/69b94812f421b137d5a16e69/children",
+              "leafCount": 5,
+              "originallyAvailableAt": "2026-03-17",
+              "ratingKey": "69b94812f421b137d5a16e69",
+              "slug": "one-piece-bonus-content",
+              "thumb": "https://image.tmdb.org/t/p/original/vsa5qAIgtSHPgXdf32RRjyyphkg.jpg",
+              "title": "ONE PIECE BONUS CONTENT",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.4
+          },
+          {
+            "Metadata": {
+              "addedAt": 1729987200,
+              "art": "https://image.tmdb.org/t/p/original/5ASHMeo4ZvRm7a4LeAor0CgvbCe.jpg",
+              "childCount": 1,
+              "guid": "plex://show/6aa2a19954cde6235464be42",
+              "key": "/library/metadata/6aa2a19954cde6235464be42/children",
+              "leafCount": 21,
+              "originallyAvailableAt": "2024-10-27",
+              "ratingKey": "6aa2a19954cde6235464be42",
+              "slug": "one-piece-log-fish-man-island-saga-18",
+              "thumb": "https://image.tmdb.org/t/p/original/5pdBg9PvI4NX78i1ZvRKdciPIJC.jpg",
+              "title": "One Piece Log: Fish-Man Island Saga",
+              "type": "show",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.37
+          },
+          {
+            "Metadata": {
+              "addedAt": 1773360000,
+              "art": "https://image.tmdb.org/t/p/original/wS1xB9um2hEtzXBKqwaghHHiy9x.jpg",
+              "childCount": 1,
+              "guid": "plex://show/69cfbeedc6e0d15f938441a5",
+              "key": "/library/metadata/69cfbeedc6e0d15f938441a5/children",
+              "leafCount": 6,
+              "originallyAvailableAt": "2026-03-13",
+              "ratingKey": "69cfbeedc6e0d15f938441a5",
+              "slug": "one-piece-into-the-grand-line-official-podcast",
+              "thumb": "https://image.tmdb.org/t/p/original/sF94dv9FYrBdoYrVGiSV2Qx8pvg.jpg",
+              "title": "ONE PIECE: Into the Grand Line: Official Podcast",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c07e92192ba001f30279b",
+                  "id": "5d9c07e92192ba001f30279b",
+                  "key": "/library/categories/talk",
+                  "ratingKey": "genre_5d9c07e92192ba001f30279b",
+                  "slug": "talk",
+                  "tag": "Talk",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.36
+          }
+        ]
+      }
+    ]
+  }
+}

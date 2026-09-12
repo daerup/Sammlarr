@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/trending/all/week"
+    "urlPath": "/trending/all/week",
+    "queryParameters": {
+      "page": {
+        "equalTo": "1"
+      }
+    }
   },
   "response": {
     "status": 200,

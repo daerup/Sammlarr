@@ -1,0 +1,331 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/1/gracenote/145dfc321cd8352c59d7f83cc5625412.jpg",
+        "guid": "plex://movie/69e19c662fe74a9a4164be53",
+        "key": "/library/metadata/69e19c662fe74a9a4164be53",
+        "ratingKey": "69e19c662fe74a9a4164be53",
+        "studio": "The Asylum",
+        "summary": "After a decade of battle, a Greek king embarks on a perilous voyage home to his wife and kingdom. He must navigate supernatural threats and divine wrath that prove far more dangerous than any war he's fought.",
+        "tagline": "The most epic voyage of all time!",
+        "type": "movie",
+        "addedAt": 1783036800,
+        "audienceRating": 1.8,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "Not Rated",
+        "duration": 5160000,
+        "imdbRatingCount": 747,
+        "originallyAvailableAt": "2026-07-03",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-odyssey-2026-2",
+        "slug": "the-odyssey-2026-2",
+        "thumb": "https://metadata-static.plex.tv/e/gracenote/e0d6f5985e1079d426e125b724c5b169.jpg",
+        "title": "The Odyssey",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "The Odyssey",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/1/gracenote/145dfc321cd8352c59d7f83cc5625412.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/13f7076eacdae4fd7c42c1a8de97eac4.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/b/683a142553/bde68cbf0c766e14ab0f40fc119aa5f3.png"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/b/683a142553/bde68cbf0c766e14ab0f40fc119aa5f3.png"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c9ea7be280f54991a37a6591bee7c496.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e0d6f5985e1079d426e125b724c5b169.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1055a15869998a3f3ff418d82df6f37b.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/b/gracenote/b52cd45ccc8fefc30359084df40fcf03.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt41605854"
+          },
+          {
+            "id": "tmdb://1698863"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 1.8
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 3.997
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776b9923d5a3001f512368",
+            "order": 1,
+            "slug": "myrom-kingery",
+            "tag": "Myrom Kingery",
+            "thumb": "https://metadata-static.plex.tv/4/people/4568628975eecad756a47df3596900ca.jpg",
+            "role": "Odysseus",
+            "key": "/library/people/5d776b9923d5a3001f512368",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc46386422500427abb12",
+            "order": 2,
+            "slug": "morgan-flanagan",
+            "tag": "Morgan Flanagan",
+            "thumb": "https://metadata-static.plex.tv/c/people/c864ad625ec9cc1c4d44751744e03d83.jpg",
+            "role": "Penelope",
+            "key": "/library/people/5f3fc46386422500427abb12",
+            "type": "person"
+          },
+          {
+            "id": "608836b517ae8e002c498205",
+            "order": 3,
+            "slug": "patrick-byrnes-7",
+            "tag": "Patrick Byrnes",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ac31b94c701d1b94128c6c827c38fb6.jpg",
+            "role": "Telemachus",
+            "key": "/library/people/608836b517ae8e002c498205",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c61141d001fb1425f",
+            "order": 4,
+            "slug": "dominic-keating",
+            "tag": "Dominic Keating",
+            "thumb": "https://metadata-static.plex.tv/c/people/cada5433fd28291dc39169eae8d54445.jpg",
+            "role": "Antinous",
+            "key": "/library/people/5d77682c61141d001fb1425f",
+            "type": "person"
+          },
+          {
+            "id": "5dce6e38877e61001fc87edf",
+            "order": 5,
+            "slug": "llana-barron",
+            "tag": "Llana Barron",
+            "thumb": "https://metadata-static.plex.tv/6/people/6e3038bd6ab3838c342b63930ef2deea.jpg",
+            "role": "Athena",
+            "key": "/library/people/5dce6e38877e61001fc87edf",
+            "type": "person"
+          },
+          {
+            "id": "602a883928de13002cb63c1f",
+            "order": 6,
+            "slug": "jordan-iverach",
+            "tag": "Jordan Iverach",
+            "thumb": "https://metadata-static.plex.tv/5/people/5c64d4a6dcafb4ed4eaaff4f5f85145c.jpg",
+            "role": "Polites",
+            "key": "/library/people/602a883928de13002cb63c1f",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc0bf52f2000041484017",
+            "order": 7,
+            "slug": "tony-wood-17",
+            "tag": "Tony Wood",
+            "thumb": "https://metadata-static.plex.tv/3/people/3ac692d630c75918b65b0922f7b1aa93.jpg",
+            "role": "Alkimos",
+            "key": "/library/people/5f3fc0bf52f2000041484017",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcae1cae2c60042e7fc0b",
+            "order": 8,
+            "slug": "ashton-rogers",
+            "tag": "Ashton Rogers",
+            "thumb": "https://metadata-static.plex.tv/7/people/78e3ee81b109b1487c20e3fd1244127a.jpg",
+            "role": "Eurylochus",
+            "key": "/library/people/5f3fcae1cae2c60042e7fc0b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbac01ae7100041fc22af",
+            "order": 9,
+            "slug": "angelo-kern",
+            "tag": "Angelo Kern",
+            "thumb": "https://metadata-static.plex.tv/2/people/2bbbb8b30359f2a8af5acbfef84f6ca6.jpg",
+            "role": "Lycaon",
+            "key": "/library/people/5f3fbac01ae7100041fc22af",
+            "type": "person"
+          },
+          {
+            "id": "5f3f93b3b981640042c914f4",
+            "order": 10,
+            "slug": "martin-richard-chappell",
+            "tag": "Martin Richard Chappell",
+            "role": "Narrator",
+            "key": "/library/people/5f3f93b3b981640042c914f4",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77689f308bca002032e21b",
+            "slug": "marcel-walz",
+            "tag": "Marcel Walz",
+            "thumb": "https://metadata-static.plex.tv/4/people/4d6908337ebd86f253f6d6fbc1bd306d.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77689f308bca002032e21b",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682cf54112001f5bc7f4",
+            "slug": "david-michael-latt",
+            "tag": "David Michael Latt",
+            "thumb": "https://metadata-static.plex.tv/5/people/59ce94dc071e135ba5b788996921b793.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682cf54112001f5bc7f4",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5e164bc3316a39003ef95d13",
+            "slug": "joshua-pruett",
+            "tag": "Joshua Pruett",
+            "role": "Writer",
+            "key": "/library/people/5e164bc3316a39003ef95d13",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d776aad7a53e9001e70c385",
+            "tag": "The Legend of Tarzan"
+          },
+          {
+            "guid": "plex://movie/5d77682454c0f0001f301a49",
+            "tag": "Pirates of the Caribbean: At World's End"
+          },
+          {
+            "guid": "plex://movie/5d776b6bfb0d55001f5676aa",
+            "tag": "Mythica: A Quest for Heroes"
+          },
+          {
+            "guid": "plex://movie/5d77688147dd6e001f6badf1",
+            "tag": "Jack Hunter and the Lost Treasure of Ugarit"
+          },
+          {
+            "guid": "plex://movie/5d776d34fb0d55001f59a121",
+            "tag": "Monster Hunter"
+          },
+          {
+            "guid": "plex://movie/5d7768247228e5001f1dccc9",
+            "tag": "Pirates of the Caribbean: Dead Man's Chest"
+          },
+          {
+            "guid": "plex://movie/5e2d3ca5297f0f003ff3f30e",
+            "tag": "Dragonheart Vengeance"
+          },
+          {
+            "guid": "plex://movie/5d7768c507c4a5001e67c638",
+            "tag": "Jack the Giant Slayer"
+          },
+          {
+            "guid": "plex://movie/5d7768333c3c2a001fbcdc4d",
+            "tag": "Conan the Destroyer"
+          },
+          {
+            "guid": "plex://movie/5f8e9a9014823f002d484241",
+            "tag": "Double Threat"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "The Asylum"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "King Odysseus faces deadly monsters and vengeful gods as he sails home to Ithaca.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

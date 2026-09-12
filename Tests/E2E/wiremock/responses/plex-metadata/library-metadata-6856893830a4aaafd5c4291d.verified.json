@@ -1,0 +1,752 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/e/gracenote/e960c3f19c83a8301f6e688a5473616d.jpg",
+        "banner": "https://assets.fanart.tv/fanart/obsession-6a52c6077a935.jpg",
+        "guid": "plex://movie/6856893830a4aaafd5c4291d",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/6856893830a4aaafd5c4291d",
+        "rating": 9.3,
+        "ratingKey": "6856893830a4aaafd5c4291d",
+        "studio": "Tea Shop Productions",
+        "summary": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+        "tagline": "Be careful who you wish for…",
+        "type": "movie",
+        "addedAt": 1778630400,
+        "audienceRating": 9.4,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 750000,
+        "contentRating": "R",
+        "duration": 6540000,
+        "imdbRatingCount": 361675,
+        "originallyAvailableAt": "2026-05-13",
+        "publicPagesURL": "https://watch.plex.tv/movie/obsession-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 512624636,
+        "slug": "obsession-2026",
+        "thumb": "https://metadata-static.plex.tv/c/gracenote/cb095e3f4b00009e43bf06bd9cca7105.jpg",
+        "title": "Obsession",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/6856893830a4aaafd5c4291d/commonsensemedia",
+            "oneLiner": "Vicious, bloody story of a wish gone very, very wrong.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Obsession",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e960c3f19c83a8301f6e688a5473616d.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3756a7602aef06919df60d5365988d24.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/obsession-6a52c6077a935.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4ec1b4e84b7ca50217bab2df781d93c6.png"
+          },
+          {
+            "alt": "Obsession",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4ec1b4e84b7ca50217bab2df781d93c6.png"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2b1af6b118148a9dbcea232f99f92852.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cb095e3f4b00009e43bf06bd9cca7105.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8cdfa1b77f800bd0aee0ba69ef3828b7.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/3/gracenote/30e34c8273826ceba9fe18687fb0da0f.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f308fddd001f28ee5f",
+            "id": "5d9c07f308fddd001f28ee5f",
+            "key": "/library/sections/home/all?genre=5d9c07f308fddd001f28ee5f",
+            "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+            "slug": "suspense",
+            "tag": "Suspense",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt37287335"
+          },
+          {
+            "id": "tmdb://1339713"
+          },
+          {
+            "id": "tvdb://369536"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.192
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          },
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776bbbad5437001f7a866b",
+            "order": 1,
+            "slug": "michael-johnston-2",
+            "tag": "Michael Johnston",
+            "thumb": "https://metadata-static.plex.tv/3/people/30ea8abdd6ff76b0c66bb8cd0911fd6b.jpg",
+            "role": "Bear",
+            "key": "/library/people/5d776bbbad5437001f7a866b",
+            "type": "person"
+          },
+          {
+            "id": "5fd5ca6f0985b5002d49cd62",
+            "order": 2,
+            "slug": "inde-navarrette",
+            "tag": "Inde Navarrette",
+            "thumb": "https://metadata-static.plex.tv/b/people/baf9115173c4c85a2ccb6651049e03ec.jpg",
+            "role": "Nikki",
+            "key": "/library/people/5fd5ca6f0985b5002d49cd62",
+            "type": "person"
+          },
+          {
+            "id": "5f404d8952f200004155d463",
+            "order": 3,
+            "slug": "cooper-tomlinson",
+            "tag": "Cooper Tomlinson",
+            "thumb": "https://metadata-static.plex.tv/4/people/44def32f2e21158e40d41167e86dc31d.jpg",
+            "role": "Ian",
+            "key": "/library/people/5f404d8952f200004155d463",
+            "type": "person"
+          },
+          {
+            "id": "5d776bc923d5a3001f514150",
+            "order": 4,
+            "slug": "megan-lawless",
+            "tag": "Megan Lawless",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a9acab9e8e9474bb7354406aa7ccf1b.jpg",
+            "role": "Sarah",
+            "key": "/library/people/5d776bc923d5a3001f514150",
+            "type": "person"
+          },
+          {
+            "id": "5d776828961905001eb91ab0",
+            "order": 5,
+            "slug": "andy-richter",
+            "tag": "Andy Richter",
+            "thumb": "https://metadata-static.plex.tv/2/people/27b8dac97769043a90e51b68a9e33389.jpg",
+            "role": "Carter",
+            "key": "/library/people/5d776828961905001eb91ab0",
+            "type": "person"
+          },
+          {
+            "id": "5f407121c63b480040e770a6",
+            "order": 6,
+            "slug": "haley-fitzgerald",
+            "tag": "Haley Fitzgerald",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd8bec09c6938526f2829e12eb60975e.jpg",
+            "role": "Viola",
+            "key": "/library/people/5f407121c63b480040e770a6",
+            "type": "person"
+          },
+          {
+            "id": "5d776c52594b2b001e6f0efe",
+            "order": 7,
+            "slug": "darin-toonder",
+            "tag": "Darin Toonder",
+            "thumb": "https://metadata-static.plex.tv/2/people/26d5cda25b16b7ae6bc6e4e404d84371.jpg",
+            "role": "Harry",
+            "key": "/library/people/5d776c52594b2b001e6f0efe",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd60403883a0040ac5e01",
+            "order": 8,
+            "slug": "anthony-pavone",
+            "tag": "Anthony Pavone",
+            "thumb": "https://metadata-static.plex.tv/c/people/c96b459cfd7b04e82e3393ef3ffecfda.jpg",
+            "role": "Reggie",
+            "key": "/library/people/5f3fd60403883a0040ac5e01",
+            "type": "person"
+          },
+          {
+            "id": "5f4043b35a76a80042d8e785",
+            "order": 9,
+            "slug": "justice",
+            "tag": "Justice",
+            "thumb": "https://metadata-static.plex.tv/1/people/102044bc1ffff0cd59c9780e984c12b3.jpg",
+            "role": "Joe",
+            "key": "/library/people/5f4043b35a76a80042d8e785",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd40604a8650040985cf5",
+            "order": 10,
+            "slug": "anthony-casabianca-1",
+            "tag": "Anthony Casabianca",
+            "thumb": "https://metadata-static.plex.tv/b/people/b2c48bc0a1fa1824497d6ae8792d513d.jpg",
+            "role": "Chris",
+            "key": "/library/people/5f3fd40604a8650040985cf5",
+            "type": "person"
+          },
+          {
+            "id": "5f4073c61ae71000410f29e0",
+            "order": 11,
+            "slug": "chloe-breen",
+            "tag": "Chloe Breen",
+            "thumb": "https://metadata-static.plex.tv/d/people/d4353199f7174198392c5b69970ff29a.jpg",
+            "role": "Ruthie",
+            "key": "/library/people/5f4073c61ae71000410f29e0",
+            "type": "person"
+          },
+          {
+            "id": "5f404d8b8642250042886a97",
+            "order": 12,
+            "slug": "malcolm-kelner",
+            "tag": "Malcolm Kelner",
+            "thumb": "https://metadata-static.plex.tv/1/people/11cdb003da684cb537fa1e5bf7bd8949.jpg",
+            "role": "Bartender",
+            "key": "/library/people/5f404d8b8642250042886a97",
+            "type": "person"
+          },
+          {
+            "id": "5f4044ea52f20000415480a4",
+            "order": 13,
+            "slug": "charles-santa-cruz",
+            "tag": "Charles Santa Cruz",
+            "role": "Background",
+            "key": "/library/people/5f4044ea52f20000415480a4",
+            "type": "person"
+          },
+          {
+            "id": "6799a2f24c68b7ec7cb2ddb1",
+            "order": 14,
+            "slug": "alex-maystrik",
+            "tag": "Alex Maystrik",
+            "role": "Background",
+            "key": "/library/people/6799a2f24c68b7ec7cb2ddb1",
+            "type": "person"
+          },
+          {
+            "id": "69ea355ce7d0ac6899097a9a",
+            "order": 15,
+            "slug": "mariana-silva-50",
+            "tag": "Mariana Silva",
+            "role": "Background",
+            "key": "/library/people/69ea355ce7d0ac6899097a9a",
+            "type": "person"
+          },
+          {
+            "id": "68b31d84c1d42ae920867561",
+            "order": 16,
+            "slug": "kyle-blumenthal-1",
+            "tag": "Kyle Blumenthal",
+            "role": "Background",
+            "key": "/library/people/68b31d84c1d42ae920867561",
+            "type": "person"
+          },
+          {
+            "id": "661d17bac6893b90d2bc6172",
+            "order": 17,
+            "slug": "jorge-luquin-3",
+            "tag": "Jorge Luquin",
+            "role": "Background",
+            "key": "/library/people/661d17bac6893b90d2bc6172",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8ed",
+            "order": 18,
+            "slug": "jose-herrera-65",
+            "tag": "Jose Herrera",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8ed",
+            "type": "person"
+          },
+          {
+            "id": "63d26bbaeec2686e167d9e75",
+            "order": 19,
+            "slug": "emilio-flores-7",
+            "tag": "Emilio Flores",
+            "thumb": "https://metadata-static.plex.tv/d/people/d6d0af69b941c91124a6d31d1dc38658.jpg",
+            "role": "Background",
+            "key": "/library/people/63d26bbaeec2686e167d9e75",
+            "type": "person"
+          },
+          {
+            "id": "5f401acc1ae7100041049714",
+            "order": 20,
+            "slug": "manny-liotta",
+            "tag": "Manny Liotta",
+            "thumb": "https://metadata-static.plex.tv/3/people/3b49449af589ef615ffb28e07da707b7.jpg",
+            "role": "Background",
+            "key": "/library/people/5f401acc1ae7100041049714",
+            "type": "person"
+          },
+          {
+            "id": "6a16dcf513e9e6edce33e749",
+            "order": 21,
+            "slug": "mai-chi-nguyen-4",
+            "tag": "Mai Chi Nguyen",
+            "role": "Background",
+            "key": "/library/people/6a16dcf513e9e6edce33e749",
+            "type": "person"
+          },
+          {
+            "id": "6a43d135644b500341f03460",
+            "order": 22,
+            "slug": "tim-robinson-58",
+            "tag": "Tim Robinson",
+            "role": "Background",
+            "key": "/library/people/6a43d135644b500341f03460",
+            "type": "person"
+          },
+          {
+            "id": "6a16dcf513e9e6edce33e748",
+            "order": 23,
+            "slug": "evan-brown-74",
+            "tag": "Evan Brown",
+            "role": "Background",
+            "key": "/library/people/6a16dcf513e9e6edce33e748",
+            "type": "person"
+          },
+          {
+            "id": "6a16dcf513e9e6edce33e747",
+            "order": 24,
+            "slug": "maddi-hulburt-1",
+            "tag": "Maddi Hulburt",
+            "role": "Background",
+            "key": "/library/people/6a16dcf513e9e6edce33e747",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff8bbfea1a1003f9b3b45",
+            "order": 25,
+            "slug": "jacob-stephens-3",
+            "tag": "Jacob Stephens",
+            "role": "Background",
+            "key": "/library/people/5f3ff8bbfea1a1003f9b3b45",
+            "type": "person"
+          },
+          {
+            "id": "5f40544302101b0040fba1bd",
+            "order": 26,
+            "slug": "skyler-zurn",
+            "tag": "Skyler Zurn",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f0d181929e077f2daaccc1465c7fd95.jpg",
+            "role": "Background",
+            "key": "/library/people/5f40544302101b0040fba1bd",
+            "type": "person"
+          },
+          {
+            "id": "6a0c0076452e12b6aaa9c5b1",
+            "order": 27,
+            "slug": "danielle-krett-5",
+            "tag": "Danielle Krett",
+            "role": "Background",
+            "key": "/library/people/6a0c0076452e12b6aaa9c5b1",
+            "type": "person"
+          },
+          {
+            "id": "5e165b0a20b9e6003e35a45b",
+            "order": 28,
+            "slug": "dylan-michael-searle",
+            "tag": "Dylan Michael Searle",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd986ca7ce574a201bfeeb108ad1f8ac.jpg",
+            "role": "Background",
+            "key": "/library/people/5e165b0a20b9e6003e35a45b",
+            "type": "person"
+          },
+          {
+            "id": "67a17d12c364c543048ee444",
+            "order": 29,
+            "slug": "matthew-jackson-55",
+            "tag": "Matthew Jackson",
+            "role": "Background",
+            "key": "/library/people/67a17d12c364c543048ee444",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8ee",
+            "order": 30,
+            "slug": "itzel-ximena-gonzalez-1",
+            "tag": "Itzel Ximena Gonzalez",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8ee",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8ef",
+            "order": 31,
+            "slug": "evan-lugo-3",
+            "tag": "Evan Lugo",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8ef",
+            "type": "person"
+          },
+          {
+            "id": "689b6fb62cb85908d3635781",
+            "order": 32,
+            "slug": "kevin-kim-66",
+            "tag": "Kevin Kim",
+            "role": "Background",
+            "key": "/library/people/689b6fb62cb85908d3635781",
+            "type": "person"
+          },
+          {
+            "id": "61bd9708bbaecd52f2fc5603",
+            "order": 33,
+            "slug": "dannell-brown",
+            "tag": "Dannell Brown",
+            "role": "Background",
+            "key": "/library/people/61bd9708bbaecd52f2fc5603",
+            "type": "person"
+          },
+          {
+            "id": "69da3d2a778f54407dc41f4d",
+            "order": 34,
+            "slug": "dario-ramos-7",
+            "tag": "Dario Ramos",
+            "role": "Background",
+            "key": "/library/people/69da3d2a778f54407dc41f4d",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8f0",
+            "order": 35,
+            "slug": "gabriel-rubalcava-1",
+            "tag": "Gabriel Rubalcava",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8f0",
+            "type": "person"
+          },
+          {
+            "id": "661d17baebf00da3a7139a67",
+            "order": 36,
+            "slug": "sabina-tenorio",
+            "tag": "Sabina Tenorio",
+            "thumb": "https://metadata-static.plex.tv/8/people/858469e26ade351e17707437312c8463.jpg",
+            "role": "Background",
+            "key": "/library/people/661d17baebf00da3a7139a67",
+            "type": "person"
+          },
+          {
+            "id": "5d77704181ba41001faebe0a",
+            "order": 37,
+            "slug": "claudio-parrone-jr",
+            "tag": "Claudio Parrone Jr.",
+            "role": "Background",
+            "key": "/library/people/5d77704181ba41001faebe0a",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8f1",
+            "order": 38,
+            "slug": "max-maher-1",
+            "tag": "Max Maher",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8f1",
+            "type": "person"
+          },
+          {
+            "id": "6739dbab71d25db695874c87",
+            "order": 39,
+            "slug": "travis-beck",
+            "tag": "Travis Beck",
+            "role": "Background",
+            "key": "/library/people/6739dbab71d25db695874c87",
+            "type": "person"
+          },
+          {
+            "id": "6a4371ea60d3dd532d47d559",
+            "order": 40,
+            "slug": "ben-scattone-9",
+            "tag": "Ben Scattone",
+            "role": "Background",
+            "key": "/library/people/6a4371ea60d3dd532d47d559",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8f2",
+            "order": 41,
+            "tag": "Ian Brown",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8f2",
+            "type": "person"
+          },
+          {
+            "id": "6a451372afae03c9e802f8f3",
+            "order": 42,
+            "slug": "chelsey-kaye-1",
+            "tag": "Chelsey Kaye",
+            "role": "Background",
+            "key": "/library/people/6a451372afae03c9e802f8f3",
+            "type": "person"
+          },
+          {
+            "id": "6913bb0b59063e5e6f944109",
+            "order": 43,
+            "slug": "cydney-jenks-1",
+            "tag": "Cydney Jenks",
+            "role": "Background",
+            "key": "/library/people/6913bb0b59063e5e6f944109",
+            "type": "person"
+          },
+          {
+            "id": "661e3cc40b7e0f078f891107",
+            "order": 44,
+            "slug": "michael-brockmann",
+            "tag": "Michael Brockmann",
+            "thumb": "https://metadata-static.plex.tv/2/people/2cfd0af761bc0b42e0b0be07295d7046.jpg",
+            "role": "Background",
+            "key": "/library/people/661e3cc40b7e0f078f891107",
+            "type": "person"
+          },
+          {
+            "id": "672381537fede5a14fd914cc",
+            "order": 45,
+            "slug": "iyana-fawcett",
+            "tag": "Iyana Fawcett",
+            "thumb": "https://metadata-static.plex.tv/1/people/1cb0b2646a4a69341a9c59648891a26d.jpg",
+            "role": "Background",
+            "key": "/library/people/672381537fede5a14fd914cc",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc3ec427eeb0041e49c61",
+            "order": 46,
+            "slug": "curry-barker",
+            "tag": "Curry Barker",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f60b65ffae82c26e8ed1016bf6a2bcc.jpg",
+            "role": "Customer Service Representative (voice) (uncredited)",
+            "key": "/library/people/5f3fc3ec427eeb0041e49c61",
+            "type": "person"
+          },
+          {
+            "id": "67e5cb580cbfceb7982b47eb",
+            "order": 47,
+            "slug": "jeff-barker-18",
+            "tag": "Jeff Barker",
+            "thumb": "https://metadata-static.plex.tv/5/people/5b2292988a1706e8629f2501a063690c.jpg",
+            "role": "Trivia Bar Host (uncredited)",
+            "key": "/library/people/67e5cb580cbfceb7982b47eb",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f3fc3ec427eeb0041e49c61",
+            "slug": "curry-barker",
+            "tag": "Curry Barker",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f60b65ffae82c26e8ed1016bf6a2bcc.jpg",
+            "role": "Director",
+            "key": "/library/people/5f3fc3ec427eeb0041e49c61",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dce6b7ef625c2001f03bb35",
+            "slug": "james-harris-3",
+            "tag": "James Harris",
+            "thumb": "https://metadata-static.plex.tv/3/people/3def0de326af88caa92ecce86657e398.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dce6b7ef625c2001f03bb35",
+            "type": "person"
+          },
+          {
+            "id": "5dce6af22e9802001ff40a7e",
+            "slug": "christian-mercuri",
+            "tag": "Christian Mercuri",
+            "thumb": "https://metadata-static.plex.tv/6/people/6020b54d4b4adef50a940731e2f3574b.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dce6af22e9802001ff40a7e",
+            "type": "person"
+          },
+          {
+            "id": "5f406c341ae71000410e8685",
+            "slug": "haley-nicole-johnson",
+            "tag": "Haley Nicole Johnson",
+            "thumb": "https://metadata-static.plex.tv/4/people/404a6bdf4cfd46b06cc8e8d9210a0699.jpg",
+            "role": "Producer",
+            "key": "/library/people/5f406c341ae71000410e8685",
+            "type": "person"
+          },
+          {
+            "id": "5dce6c94e6c9110020824502",
+            "slug": "roman-viaris-de-lesegno",
+            "tag": "Roman Viaris-de-Lesegno",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb2e4fc55a5475df4b21a2ed3b38da7f.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dce6c94e6c9110020824502",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f3fc3ec427eeb0041e49c61",
+            "slug": "curry-barker",
+            "tag": "Curry Barker",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f60b65ffae82c26e8ed1016bf6a2bcc.jpg",
+            "role": "Writer",
+            "key": "/library/people/5f3fc3ec427eeb0041e49c61",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/63750e3352fa90dfd6fbd281",
+            "tag": "Night of the Hunted"
+          },
+          {
+            "guid": "plex://movie/5d776d149ab544002151b31f",
+            "tag": "Begotten"
+          },
+          {
+            "guid": "plex://movie/5d77684c8a7581001f130023",
+            "tag": "Paranormal Activity"
+          },
+          {
+            "guid": "plex://movie/5d77684e103a2d001f56cbc1",
+            "tag": "The Entity"
+          },
+          {
+            "guid": "plex://movie/5d776c8cad5437001f7c17f0",
+            "tag": "Nosferatu"
+          },
+          {
+            "guid": "plex://movie/5d7770b0b2739400200e96c4",
+            "tag": "Come Play"
+          },
+          {
+            "guid": "plex://movie/5e1622c4a304a6004142ac42",
+            "tag": "The Unholy"
+          },
+          {
+            "guid": "plex://movie/606dd956886ea70035f9cb5f",
+            "tag": "Never Let Go"
+          },
+          {
+            "guid": "plex://movie/5d7768ee51dd69001fe129a6",
+            "tag": "Insidious: Chapter 2"
+          },
+          {
+            "guid": "plex://movie/5d776e8c7a53e9001e77a310",
+            "tag": "The Deliverance"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Tea Shop Productions"
+          },
+          {
+            "tag": "Under the Shell"
+          },
+          {
+            "tag": "Capstone Pictures"
+          },
+          {
+            "tag": "Blumhouse Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Desire comes at a dark and sinister price when a man makes a wish to win his crush's heart.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

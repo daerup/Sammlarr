@@ -1,0 +1,628 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/4/gracenote/48ff8500c0e9ab7f07d9fd5e6c83d347.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/365739/banners/67ecf4723437a.jpg",
+        "guid": "plex://movie/5d77707b81ba41001faf1629",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/5d77707b81ba41001faf1629",
+        "rating": 9.6,
+        "ratingKey": "5d77707b81ba41001faf1629",
+        "studio": "Troll Court Entertainment",
+        "summary": "After enduring years of malfunctioning products, Wile E. Coyote teams up with a local personal injury attorney to take on ACME, the manufacturer of anything and everything used by the Looney Tunes characters.",
+        "tagline": "The movie ACME doesn't want you to see.",
+        "type": "movie",
+        "addedAt": 1787184000,
+        "audienceRating": 9.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 72000000,
+        "contentRating": "PG",
+        "duration": 6180000,
+        "imdbRatingCount": 20657,
+        "originallyAvailableAt": "2026-08-20",
+        "publicPagesURL": "https://watch.plex.tv/movie/coyote-vs-acme",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 44274089,
+        "slug": "coyote-vs-acme",
+        "thumb": "https://metadata-static.plex.tv/a/gracenote/a1edc33d34ff1f6bb1bb13a017a9cc22.jpg",
+        "title": "Coyote vs. Acme",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d77707b81ba41001faf1629/commonsensemedia",
+            "oneLiner": "Great messages in chaotic, hilarious, touching 'toon mashup.",
+            "AgeRating": [
+              {
+                "age": 7,
+                "rating": 5,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/4/gracenote/48ff8500c0e9ab7f07d9fd5e6c83d347.jpg"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cdff89da6b895e5e469fbcf46bef6610.jpg"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/365739/banners/67ecf4723437a.jpg"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/3/683a142553/3a6a1d0d9dfd95d1d4d18f9acfdd0823.png"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/3/683a142553/3a6a1d0d9dfd95d1d4d18f9acfdd0823.png"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/f/gracenote/fd3335eac24f7369db4b66417f240a96.jpg"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a1edc33d34ff1f6bb1bb13a017a9cc22.jpg"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e02627c43fe3e0cbf7e2f1f35d4f05f2.jpg"
+          },
+          {
+            "alt": "Coyote vs. Acme",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1c91f8305f42a5bda45e226fd573a5a0.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt1756855"
+          },
+          {
+            "id": "tmdb://1204680"
+          },
+          {
+            "id": "tvdb://365739"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.5
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.587
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768322ec6b5001f6bb737",
+            "order": 1,
+            "slug": "will-forte",
+            "tag": "Will Forte",
+            "thumb": "https://metadata-static.plex.tv/c/people/ca627d58c139bf10900c92d41a194cea.jpg",
+            "role": "Kevin Avery",
+            "key": "/library/people/5d7768322ec6b5001f6bb737",
+            "type": "person"
+          },
+          {
+            "id": "5d776a8c47dd6e001f6d3f64",
+            "order": 2,
+            "slug": "lana-condor",
+            "tag": "Lana Condor",
+            "thumb": "https://metadata-static.plex.tv/d/people/db1acf2deb3d39eff74ad346e336ff5f.jpg",
+            "role": "Paige Avery",
+            "key": "/library/people/5d776a8c47dd6e001f6d3f64",
+            "type": "person"
+          },
+          {
+            "id": "5d7768327228e5001f1de2ab",
+            "order": 3,
+            "slug": "john-cena",
+            "tag": "John Cena",
+            "thumb": "https://metadata-static.plex.tv/3/people/3cf4681843a569217601dc2691cc5c03.jpg",
+            "role": "Buddy Crane",
+            "key": "/library/people/5d7768327228e5001f1de2ab",
+            "type": "person"
+          },
+          {
+            "id": "5d7769b1fb0d55001f52d595",
+            "order": 4,
+            "slug": "tone-bell",
+            "tag": "Tone Bell",
+            "thumb": "https://metadata-static.plex.tv/d/people/d0b5194ac2b554a9fd2c4088bc01533b.jpg",
+            "role": "Sal Maltese",
+            "key": "/library/people/5d7769b1fb0d55001f52d595",
+            "type": "person"
+          },
+          {
+            "id": "5d776b5f7a53e9001e723974",
+            "order": 5,
+            "slug": "martha-kelly",
+            "tag": "Martha Kelly",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b5f7a53e9001e723974.jpg",
+            "role": "Dottie Jones",
+            "key": "/library/people/5d776b5f7a53e9001e723974",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbcac6b",
+            "order": 6,
+            "slug": "luis-guzman",
+            "tag": "Luis Guzmán",
+            "thumb": "https://metadata-static.plex.tv/f/people/f4f9382bf29c1be79e597eca4ae81f3b.jpg",
+            "role": "Judge Troppogrosso",
+            "key": "/library/people/5d7768253c3c2a001fbcac6b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768264de0ee001fcc85ed",
+            "order": 7,
+            "slug": "p-j-byrne",
+            "tag": "P.J. Byrne",
+            "thumb": "https://metadata-static.plex.tv/c/people/c0990681028c231ff5df7166c76aba38.jpg",
+            "role": "Bill Pellicanos",
+            "key": "/library/people/5d7768264de0ee001fcc85ed",
+            "type": "person"
+          },
+          {
+            "id": "5d776a9c594b2b001e6c0e80",
+            "order": 8,
+            "slug": "john-early",
+            "tag": "John Early",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd5cd2600f87175828be32bbd34e4469.jpg",
+            "role": "Henry Heslop",
+            "key": "/library/people/5d776a9c594b2b001e6c0e80",
+            "type": "person"
+          },
+          {
+            "id": "5d776827f54112001f5bc0a9",
+            "order": 9,
+            "slug": "nancy-linehan-charles",
+            "tag": "Nancy Linehan Charles",
+            "thumb": "https://metadata-static.plex.tv/7/people/7fe0f4155d84f14fe6ba7f09d16c24a7.jpg",
+            "role": "Cherry",
+            "key": "/library/people/5d776827f54112001f5bc0a9",
+            "type": "person"
+          },
+          {
+            "id": "5d776827eb5d26001f1dd88c",
+            "order": 10,
+            "slug": "kenneth-choi",
+            "tag": "Kenneth Choi",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e00f7ba84ccccb43feddf45b73b1181.jpg",
+            "role": "Oscar Jeon",
+            "key": "/library/people/5d776827eb5d26001f1dd88c",
+            "type": "person"
+          },
+          {
+            "id": "5d776e887a53e9001e779c23",
+            "order": 11,
+            "slug": "ernie-vigil",
+            "tag": "Ernie Vigil",
+            "thumb": "https://metadata-static.plex.tv/9/people/9038581b5c2c1866ae7c1be6166fe943.jpg",
+            "role": "Talon",
+            "key": "/library/people/5d776e887a53e9001e779c23",
+            "type": "person"
+          },
+          {
+            "id": "5d776850e870fd001f19df2b",
+            "order": 12,
+            "slug": "eric-bauza",
+            "tag": "Eric Bauza",
+            "thumb": "https://metadata-static.plex.tv/7/people/71a24cff2a95495a57e4aa5dbe17bb92.jpg",
+            "role": "Foghorn Leghorn / Bugs Bunny / Daffy Duck / Porky Pig / Elmer Fudd / Tweety / Road Runner / Dr. Lorre (voice)",
+            "key": "/library/people/5d776850e870fd001f19df2b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a2ec6b5001f6bcc35",
+            "order": 13,
+            "slug": "candi-milo",
+            "tag": "Candi Milo",
+            "thumb": "https://metadata-static.plex.tv/8/people/83dc4d0e5875f08a3b59dca251ae264b.jpg",
+            "role": "Granny / Miss Prissy / Witch Hazel (voice)",
+            "key": "/library/people/5d77683a2ec6b5001f6bcc35",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddbb7",
+            "order": 14,
+            "slug": "jim-cummings",
+            "tag": "Jim Cummings",
+            "thumb": "https://metadata-static.plex.tv/8/people/86d6b589fcbd7f035587ff04a3ac1873.jpg",
+            "role": "Tasmanian Devil (voice)",
+            "key": "/library/people/5d776828eb5d26001f1ddbb7",
+            "type": "person"
+          },
+          {
+            "id": "5d776993594b2b001e6a43b4",
+            "order": 15,
+            "slug": "hayes-hargrove",
+            "tag": "Hayes Hargrove",
+            "thumb": "https://metadata-static.plex.tv/c/people/cf2616a8f72ff14ec12683394b04f34a.jpg",
+            "role": "Big Time Reporter #1",
+            "key": "/library/people/5d776993594b2b001e6a43b4",
+            "type": "person"
+          },
+          {
+            "id": "5d776e107a53e9001e76bc0e",
+            "order": 16,
+            "slug": "phuong-kubacki",
+            "tag": "Phuong Kubacki",
+            "thumb": "https://metadata-static.plex.tv/0/people/0ce024503a6ab65be2e03dd65bd04d83.jpg",
+            "role": "Big Time Reporter #2",
+            "key": "/library/people/5d776e107a53e9001e76bc0e",
+            "type": "person"
+          },
+          {
+            "id": "5d7770c323d5a3001f53bb75",
+            "order": 17,
+            "slug": "dani-payne",
+            "tag": "Dani Payne",
+            "thumb": "https://metadata-static.plex.tv/7/people/7e21180542d0780e953126a8952d7dba.jpg",
+            "role": "Big Time Reporter #3",
+            "key": "/library/people/5d7770c323d5a3001f53bb75",
+            "type": "person"
+          },
+          {
+            "id": "5f405ebab8a032003d8a21e7",
+            "order": 18,
+            "slug": "eddie-garcia-5",
+            "tag": "Eddie Garcia",
+            "role": "Local Reporter #1",
+            "key": "/library/people/5f405ebab8a032003d8a21e7",
+            "type": "person"
+          },
+          {
+            "id": "5f40281d864225004283aad7",
+            "order": 19,
+            "slug": "amy-rauch",
+            "tag": "Amy Rauch",
+            "thumb": "https://metadata-static.plex.tv/2/people/2794b805f83874d6683e8d89b00705e7.jpg",
+            "role": "Nurse",
+            "key": "/library/people/5f40281d864225004283aad7",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffdc1768fc7004053a264",
+            "order": 20,
+            "slug": "laura-love-tode",
+            "tag": "Laura Love Tode",
+            "thumb": "https://metadata-static.plex.tv/3/people/3488b4c975beab5cd3c5e44ba65bfe66.jpg",
+            "role": "Stenographer",
+            "key": "/library/people/5f3ffdc1768fc7004053a264",
+            "type": "person"
+          },
+          {
+            "id": "5eb90d80556e5300421b781e",
+            "order": 21,
+            "slug": "aimee-mcguire",
+            "tag": "Aimee McGuire",
+            "thumb": "https://metadata-static.plex.tv/d/people/d2944c75bf64c2783814b6b90fcb4958.jpg",
+            "role": "Assistant #1",
+            "key": "/library/people/5eb90d80556e5300421b781e",
+            "type": "person"
+          },
+          {
+            "id": "695d1fdcaa270405483b4d4c",
+            "order": 22,
+            "slug": "doug-montoya-10",
+            "tag": "Doug Montoya",
+            "thumb": "https://metadata-static.plex.tv/2/people/200e6a617dd47ddfb448b7b915299b05.jpg",
+            "role": "Assistant #2",
+            "key": "/library/people/695d1fdcaa270405483b4d4c",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb72ebf3e560040af22a8",
+            "order": 23,
+            "slug": "bennie-taylor",
+            "tag": "Bennie Taylor",
+            "thumb": "https://metadata-static.plex.tv/8/people/8edca2e60409b398391ea267ff322b35.jpg",
+            "role": "Piano & Boulder Mover",
+            "key": "/library/people/5f3fb72ebf3e560040af22a8",
+            "type": "person"
+          },
+          {
+            "id": "5d77685785719b001f3a992b",
+            "order": 24,
+            "slug": "crista-benavidez",
+            "tag": "Crista Benavidez",
+            "role": "Congresswoman Hokum",
+            "key": "/library/people/5d77685785719b001f3a992b",
+            "type": "person"
+          },
+          {
+            "id": "5d77685133f255001e852af3",
+            "order": 25,
+            "slug": "carl-savering",
+            "tag": "Carl Savering",
+            "thumb": "https://metadata-static.plex.tv/b/people/beb40e8e524a90a63a887942bdaa3f46.jpg",
+            "role": "Congressman Bluffer",
+            "key": "/library/people/5d77685133f255001e852af3",
+            "type": "person"
+          },
+          {
+            "id": "5d776875fb0d55001f510e0b",
+            "order": 26,
+            "slug": "rachel-hroncich",
+            "tag": "Rachel Hroncich",
+            "role": "Forensics Expert",
+            "key": "/library/people/5d776875fb0d55001f510e0b",
+            "type": "person"
+          },
+          {
+            "id": "5d776a40fb0d55001f53f922",
+            "order": 27,
+            "slug": "ryan-begay",
+            "tag": "Ryan Begay",
+            "thumb": "https://metadata-static.plex.tv/3/people/3488e0397ebb27754059711d1cef3f1e.jpg",
+            "role": "Metal Detector Security Guard",
+            "key": "/library/people/5d776a40fb0d55001f53f922",
+            "type": "person"
+          },
+          {
+            "id": "6323c9017ced2ab196aa3526",
+            "order": 28,
+            "slug": "kelsey-leos-montoya-1",
+            "tag": "Kelsey Leos Montoya",
+            "thumb": "https://metadata-static.plex.tv/9/people/97d6da1d5b74fc441603a28931efaea6.jpg",
+            "role": "Screaming ACME Employee",
+            "key": "/library/people/6323c9017ced2ab196aa3526",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9ead5437001f7a5086",
+            "order": 29,
+            "slug": "kristin-k-berg",
+            "tag": "Kristin K. Berg",
+            "thumb": "https://metadata-static.plex.tv/0/people/03a1a55f1674da9fcd7e4979ed557843.jpg",
+            "role": "Courtroom Reporter",
+            "key": "/library/people/5d776b9ead5437001f7a5086",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77699e96b655001fdd4282",
+            "slug": "dave-green",
+            "tag": "Dave Green",
+            "thumb": "https://metadata-static.plex.tv/c/people/ce79397f6abe33753405f34b88353a7d.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77699e96b655001fdd4282",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776836f59e580021898beb",
+            "slug": "christopher-defaria",
+            "tag": "Christopher DeFaria",
+            "thumb": "https://metadata-static.plex.tv/b/people/b17e4cf7e201e5114d5b5aac27598420.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776836f59e580021898beb",
+            "type": "person"
+          },
+          {
+            "id": "5d776832999c64001ec2ec1b",
+            "slug": "james-gunn",
+            "tag": "James Gunn",
+            "thumb": "https://metadata-static.plex.tv/1/people/1c86d062c17ce77f1f94946dcb30701c.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776832999c64001ec2ec1b",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f3fed7852f20000414c2e1a",
+            "slug": "samy-burch",
+            "tag": "Samy Burch",
+            "thumb": "https://metadata-static.plex.tv/f/people/f42db18e15c76f3f1940590a4de41895.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5f3fed7852f20000414c2e1a",
+            "type": "person"
+          },
+          {
+            "id": "5d776832999c64001ec2ec1b",
+            "slug": "james-gunn",
+            "tag": "James Gunn",
+            "thumb": "https://metadata-static.plex.tv/1/people/1c86d062c17ce77f1f94946dcb30701c.jpg",
+            "role": "Screenstory",
+            "key": "/library/people/5d776832999c64001ec2ec1b",
+            "type": "person"
+          },
+          {
+            "id": "5d7769e1fb0d55001f533233",
+            "slug": "jeremy-slater",
+            "tag": "Jeremy Slater",
+            "thumb": "https://metadata-static.plex.tv/3/people/316edaacf24f521a24817d7511914989.jpg",
+            "role": "Screenstory",
+            "key": "/library/people/5d7769e1fb0d55001f533233",
+            "type": "person"
+          },
+          {
+            "id": "5f40268c52f2000041513865",
+            "slug": "ian-frazier",
+            "tag": "Ian Frazier",
+            "thumb": "https://metadata-static.plex.tv/5/people/5c5e1a2af2a31b46ea7470c548c97d79.jpg",
+            "role": "Other",
+            "key": "/library/people/5f40268c52f2000041513865",
+            "type": "person"
+          },
+          {
+            "id": "5f3f91efe065380042e8fd7d",
+            "slug": "andrew-brooks-26",
+            "tag": "Andrew Brooks",
+            "role": "Story Artist",
+            "key": "/library/people/5f3f91efe065380042e8fd7d",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/63d15b0b38992be08a0efa6f",
+            "tag": "Zootopia 2"
+          },
+          {
+            "guid": "plex://movie/63e52aa54a94bb5003cc6b66",
+            "tag": "Zootopia 2"
+          },
+          {
+            "guid": "plex://movie/65ca74542a579be7181f8f69",
+            "tag": "Zootopia 2"
+          },
+          {
+            "guid": "plex://movie/5d7768386f4521001ea9ca0c",
+            "tag": "Mulan II"
+          },
+          {
+            "guid": "plex://movie/5d7768626f4521001eaa499e",
+            "tag": "Hey There, It's Yogi Bear"
+          },
+          {
+            "guid": "plex://movie/5d776bf096b655001fe20c72",
+            "tag": "Paws of Fury: The Legend of Hank"
+          },
+          {
+            "guid": "plex://movie/5d776c76ad5437001f7bed2a",
+            "tag": "Puss in Boots"
+          },
+          {
+            "guid": "plex://movie/5d77706edd931c001e38cebd",
+            "tag": "Maya the Bee 2"
+          },
+          {
+            "guid": "plex://movie/5d776e4e594b2b001e71fce5",
+            "tag": "Tom and Jerry"
+          },
+          {
+            "guid": "plex://movie/5f92fe5898a852002ecf4ede",
+            "tag": "Hitpig!"
+          },
+          {
+            "guid": "plex://movie/5d7768c26f6af7001ee5cc9b",
+            "tag": "Madagascar 3: Europe's Most Wanted"
+          },
+          {
+            "guid": "plex://movie/5d776833151a60001f24d617",
+            "tag": "Barnyard"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Troll Court Entertainment"
+          },
+          {
+            "tag": "Keylight Pictures"
+          },
+          {
+            "tag": "Warner Animation Group"
+          },
+          {
+            "tag": "Warner Bros. Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Fed up with ACME products, Wile E. Coyote hires a down-on-his-luck lawyer to sue the corporation.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

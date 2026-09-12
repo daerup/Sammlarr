@@ -1,0 +1,694 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "Resident Evil: The Final Chapter",
+      "Resident Evil: Retribution",
+      "Resident Evil: Apocalypse",
+      "Resident Evil: Extinction",
+      "Resident Evil: Afterlife",
+      "Resident Evil: Welcome to Raccoon City",
+      "Resident Evil: Degeneration",
+      "Resident Evil: Damnation",
+      "Resident Evil: Vendetta",
+      "Resident Evil: Death Island"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1789516800,
+              "art": "https://metadata-static.plex.tv/1/gracenote/1b039282918d4b96c7e61e1ffa48fe43.jpg",
+              "duration": 5460000,
+              "guid": "plex://movie/67a23f4861078f9079534716",
+              "key": "/library/metadata/67a23f4861078f9079534716",
+              "originallyAvailableAt": "2026-09-16",
+              "ratingKey": "67a23f4861078f9079534716",
+              "slug": "resident-evil-2026",
+              "thumb": "https://metadata-static.plex.tv/b/gracenote/b43e2fd4f63b82239a2bd3ffbb850314.jpg",
+              "title": "Resident Evil",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.93
+          },
+          {
+            "Metadata": {
+              "addedAt": 1016150400,
+              "art": "https://metadata-static.plex.tv/0/gracenote/056edfcc6dbfd0dfd5d96e298044feca.jpg",
+              "duration": 6000000,
+              "guid": "plex://movie/5d776d16f617c90020185db0",
+              "key": "/library/metadata/5d776d16f617c90020185db0",
+              "originallyAvailableAt": "2002-03-15",
+              "ratingKey": "5d776d16f617c90020185db0",
+              "slug": "resident-evil",
+              "thumb": "https://metadata-static.plex.tv/a/plex/aeb01701-ef09-4d98-a7f8-20e30138faf3.jpg",
+              "title": "Resident Evil",
+              "type": "movie",
+              "year": 2002,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.91
+          },
+          {
+            "Metadata": {
+              "addedAt": 1698364800,
+              "duration": 720000,
+              "guid": "plex://movie/695093b15358a38ef3b6aa45",
+              "key": "/library/metadata/695093b15358a38ef3b6aa45",
+              "originallyAvailableAt": "2023-10-27",
+              "ratingKey": "695093b15358a38ef3b6aa45",
+              "slug": "resident-evil-2023-1",
+              "thumb": "https://image.tmdb.org/t/p/original/hQDJD86nQNUTxXx222mZ1vqQH8K.jpg",
+              "title": "Resident Evil",
+              "type": "movie",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1637712000,
+              "art": "https://metadata-static.plex.tv/9/gracenote/921d31c7e5aa7fc6a40cb3135806c06a.jpg",
+              "duration": 6420000,
+              "guid": "plex://movie/5d776f4996b655001fe81c3e",
+              "key": "/library/metadata/5d776f4996b655001fe81c3e",
+              "originallyAvailableAt": "2021-11-24",
+              "ratingKey": "5d776f4996b655001fe81c3e",
+              "slug": "resident-evil-welcome-to-raccoon-city",
+              "thumb": "https://metadata-static.plex.tv/3/gracenote/3f3fbb2d3e581ae07bc45b7915f6638b.jpg",
+              "title": "Resident Evil: Welcome to Raccoon City",
+              "type": "movie",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.66
+          },
+          {
+            "Metadata": {
+              "addedAt": 1094774400,
+              "art": "https://metadata-static.plex.tv/7/gracenote/7bd7e55bcb1acc1ff276b27447c526fb.jpg",
+              "duration": 5640000,
+              "guid": "plex://movie/5d77682961141d001fb139ee",
+              "key": "/library/metadata/5d77682961141d001fb139ee",
+              "originallyAvailableAt": "2004-09-10",
+              "ratingKey": "5d77682961141d001fb139ee",
+              "slug": "resident-evil-apocalypse",
+              "thumb": "https://metadata-static.plex.tv/f/plex/ffb795f7-2d08-42c8-96a7-f335ecc28713.jpg",
+              "title": "Resident Evil: Apocalypse",
+              "type": "movie",
+              "year": 2004,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.56
+          },
+          {
+            "Metadata": {
+              "addedAt": 1593561600,
+              "duration": 3240000,
+              "guid": "plex://movie/604368966bf1e3002de9e098",
+              "key": "/library/metadata/604368966bf1e3002de9e098",
+              "originallyAvailableAt": "2020-07-01",
+              "ratingKey": "604368966bf1e3002de9e098",
+              "slug": "resident-evil-childhood-2020",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BNThkNTQ0MjAtYjM1YS00NGUyLWFlNmUtMmE4YmUxMDQwOGQ4XkEyXkFqcGc@._V1_.jpg",
+              "title": "Resident Evil: Childhood",
+              "type": "movie",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.53
+          },
+          {
+            "Metadata": {
+              "addedAt": 1190246400,
+              "art": "https://metadata-static.plex.tv/a/gracenote/a0f394f6656c3037c618f007deee01e2.jpg",
+              "duration": 5640000,
+              "guid": "plex://movie/5d7768312e80df001ebddd2f",
+              "key": "/library/metadata/5d7768312e80df001ebddd2f",
+              "originallyAvailableAt": "2007-09-20",
+              "ratingKey": "5d7768312e80df001ebddd2f",
+              "slug": "resident-evil-extinction",
+              "thumb": "https://metadata-static.plex.tv/2/plex/259205e6-abb8-46b0-b13a-c7d0b8cd30f2.jpg",
+              "title": "Resident Evil: Extinction",
+              "type": "movie",
+              "year": 2007,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.52
+          },
+          {
+            "Metadata": {
+              "addedAt": 1224288000,
+              "art": "https://metadata-static.plex.tv/b/gracenote/b2a6bbbe035e736522eda522536a13ec.jpg",
+              "duration": 5820000,
+              "guid": "plex://movie/5d9f3504d74e670020020891",
+              "key": "/library/metadata/5d9f3504d74e670020020891",
+              "originallyAvailableAt": "2008-10-18",
+              "ratingKey": "5d9f3504d74e670020020891",
+              "slug": "resident-evil-degeneration",
+              "thumb": "https://metadata-static.plex.tv/4/gracenote/4b674ead1a86066574c5db61d0849742.jpg",
+              "title": "Resident Evil: Degeneration",
+              "type": "movie",
+              "year": 2008,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+                  "id": "5d9c07f0ba2e21001f18c7f8",
+                  "key": "/library/categories/anime",
+                  "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+                  "slug": "anime",
+                  "tag": "Anime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.52
+          },
+          {
+            "Metadata": {
+              "addedAt": 1351296000,
+              "art": "https://metadata-static.plex.tv/0/gracenote/02d5aaba6a7cb1619bf733b267cdade1.jpg",
+              "duration": 6000000,
+              "guid": "plex://movie/5d77699996b655001fdd3925",
+              "key": "/library/metadata/5d77699996b655001fdd3925",
+              "originallyAvailableAt": "2012-10-27",
+              "ratingKey": "5d77699996b655001fdd3925",
+              "slug": "resident-evil-damnation",
+              "thumb": "https://metadata-static.plex.tv/5/gracenote/5bd9fa6f2742df5cff108a3c09588d5b.jpg",
+              "title": "Resident Evil: Damnation",
+              "type": "movie",
+              "year": 2012,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+                  "id": "5d9c07f0ba2e21001f18c7f8",
+                  "key": "/library/categories/anime",
+                  "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+                  "slug": "anime",
+                  "tag": "Anime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.52
+          },
+          {
+            "Metadata": {
+              "addedAt": 1495843200,
+              "art": "https://metadata-static.plex.tv/4/gracenote/48272658e55abef3580a549186ba5ffc.jpg",
+              "duration": 5820000,
+              "guid": "plex://movie/5d9f3cff9dd5f4001e84d5ea",
+              "key": "/library/metadata/5d9f3cff9dd5f4001e84d5ea",
+              "originallyAvailableAt": "2017-05-27",
+              "ratingKey": "5d9f3cff9dd5f4001e84d5ea",
+              "slug": "resident-evil-vendetta",
+              "thumb": "https://metadata-static.plex.tv/a/gracenote/a6a7b306c85d760ae74c8ebdbab3795e.jpg",
+              "title": "Resident Evil: Vendetta",
+              "type": "movie",
+              "year": 2017,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+                  "id": "5d9c07f0ba2e21001f18c7f8",
+                  "key": "/library/categories/anime",
+                  "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+                  "slug": "anime",
+                  "tag": "Anime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.52
+          }
+        ]
+      }
+    ]
+  }
+}

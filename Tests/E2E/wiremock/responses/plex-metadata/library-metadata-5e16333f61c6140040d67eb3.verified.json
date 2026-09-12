@@ -1,0 +1,446 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/a/gracenote/a31beb3546489cc2471c3e6cd8d80420.jpg",
+        "guid": "plex://movie/5e16333f61c6140040d67eb3",
+        "key": "/library/metadata/5e16333f61c6140040d67eb3",
+        "ratingKey": "5e16333f61c6140040d67eb3",
+        "studio": "Grindstone Entertainment Group",
+        "summary": "During a flight from Los Angeles to London, frequent power outages lead to passengers mysteriously disappearing one by one. With the remaining passengers lives on the line, an Air Marshal (Michael Pare) jumps into action while he tries to determine what is going on.",
+        "tagline": "There's Something Evil. Onboard.",
+        "type": "movie",
+        "addedAt": 1568073600,
+        "audienceRating": 3.1,
+        "audienceRatingImage": "imdb://image.rating",
+        "budget": 1000000,
+        "contentRating": "R",
+        "duration": 4560000,
+        "imdbRatingCount": 1262,
+        "originallyAvailableAt": "2019-09-10",
+        "publicPagesURL": "https://watch.plex.tv/movie/mayday-2019",
+        "slug": "mayday-2019",
+        "thumb": "https://metadata-static.plex.tv/0/gracenote/0dcbeb940176a04fcf2512c1516727a0.jpg",
+        "title": "Mayday",
+        "userState": false,
+        "year": 2019,
+        "Image": [
+          {
+            "alt": "Mayday",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a31beb3546489cc2471c3e6cd8d80420.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/85055d614b2741cb82f474947c869209.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/0/gracenote/08334cc1d8a18b7218963b5e1f2c447c.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0dcbeb940176a04fcf2512c1516727a0.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2dec67aed6537346ef6b1cfcb1e2e32d.jpg"
+          },
+          {
+            "alt": "Mayday",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0748a4d4234eefc8044700c8422c62ae.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt6977470"
+          },
+          {
+            "id": "tmdb://626576"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3.1
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5.188
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682a7e9a3c0020c6b1ad",
+            "order": 1,
+            "slug": "michael-pare",
+            "tag": "Michael Paré",
+            "thumb": "https://metadata-static.plex.tv/3/people/3328e256ddc10d1709bc890a41b5013e.jpg",
+            "role": "Air Marshall Adam Anderson",
+            "key": "/library/people/5d77682a7e9a3c0020c6b1ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77686ee6d55c0020412e55",
+            "order": 2,
+            "slug": "crystal-santos",
+            "tag": "Crystal Santos",
+            "thumb": "https://metadata-static.plex.tv/people/5d77686ee6d55c0020412e55.jpg",
+            "role": "Rochelle",
+            "key": "/library/people/5d77686ee6d55c0020412e55",
+            "type": "person"
+          },
+          {
+            "id": "5d77689d1999bc0020dcb2f4",
+            "order": 3,
+            "slug": "chanel-ryan",
+            "tag": "Chanel Ryan",
+            "thumb": "https://metadata-static.plex.tv/9/people/974dda0bcb7e66a44f69ceb2c7a6f9a0.jpg",
+            "role": "Lynn",
+            "key": "/library/people/5d77689d1999bc0020dcb2f4",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cf92166c917875a6178",
+            "order": 4,
+            "slug": "michael-wainwright-1",
+            "tag": "Michael Wainwright",
+            "thumb": "https://metadata-static.plex.tv/7/people/7ff85cd03530b446355e4afec2301880.jpg",
+            "role": "Simms",
+            "key": "/library/people/62fb7cf92166c917875a6178",
+            "type": "person"
+          },
+          {
+            "id": "5d77683054c0f0001f302e76",
+            "order": 5,
+            "slug": "elise-muller",
+            "tag": "Elise Muller",
+            "thumb": "https://metadata-static.plex.tv/6/people/66062090fd52578fa17f0f6a7549a053.jpg",
+            "role": "Penny Tillman",
+            "key": "/library/people/5d77683054c0f0001f302e76",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f21493cd003f0fffc8",
+            "order": 6,
+            "slug": "jack-waggon-1",
+            "tag": "Jack Waggon",
+            "thumb": "https://metadata-static.plex.tv/2/people/20c1c0e6891916ee6950814bc523592c.jpg",
+            "role": "Ace",
+            "key": "/library/people/5e1656f21493cd003f0fffc8",
+            "type": "person"
+          },
+          {
+            "id": "5d7769eb594b2b001e6ae0a6",
+            "order": 7,
+            "slug": "raj-kala",
+            "tag": "Raj Kala",
+            "role": "Dr. Singh",
+            "key": "/library/people/5d7769eb594b2b001e6ae0a6",
+            "type": "person"
+          },
+          {
+            "id": "5d7769c1fb0d55001f52f008",
+            "order": 8,
+            "slug": "sadie-katz",
+            "tag": "Sadie Katz",
+            "thumb": "https://metadata-static.plex.tv/2/people/26ff47fc97e1b679252092169a1ac7c3.jpg",
+            "role": "Aeryn",
+            "key": "/library/people/5d7769c1fb0d55001f52f008",
+            "type": "person"
+          },
+          {
+            "id": "6a1e5c3f61046ce2e50f7780",
+            "order": 9,
+            "slug": "scott-engrotti-13",
+            "tag": "Scott Engrotti",
+            "role": "Clem \"Smokey\" Williams",
+            "key": "/library/people/6a1e5c3f61046ce2e50f7780",
+            "type": "person"
+          },
+          {
+            "id": "5ec411dad9160d00419f444b",
+            "order": 10,
+            "slug": "carlos-mendez-38",
+            "tag": "Carlos Méndez",
+            "thumb": "https://metadata-static.plex.tv/8/people/8cf68bd4e729732db0e0cc8a471293b7.jpg",
+            "role": "Co-Pilot Ryan Esparza",
+            "key": "/library/people/5ec411dad9160d00419f444b",
+            "type": "person"
+          },
+          {
+            "id": "6a1e77886c238dccc0da9445",
+            "order": 11,
+            "slug": "larry-fleming-9",
+            "tag": "Larry Fleming",
+            "role": "Mr. Chase",
+            "key": "/library/people/6a1e77886c238dccc0da9445",
+            "type": "person"
+          },
+          {
+            "id": "6a0bfd3f98175b27ea64e214",
+            "order": 12,
+            "slug": "christopher-drummond-7",
+            "tag": "Christopher Drummond",
+            "role": "Mark Tillman",
+            "key": "/library/people/6a0bfd3f98175b27ea64e214",
+            "type": "person"
+          },
+          {
+            "id": "5d7768325af944001f1f91cc",
+            "order": 13,
+            "slug": "bernadette-perez-1",
+            "tag": "Bernadette Pérez",
+            "thumb": "https://metadata-static.plex.tv/7/people/7c6428f09b8646307325633af07229b5.jpg",
+            "role": "Susan",
+            "key": "/library/people/5d7768325af944001f1f91cc",
+            "type": "person"
+          },
+          {
+            "id": "5d776ae823d5a3001f50a656",
+            "order": 14,
+            "slug": "thomas-longo",
+            "tag": "Thomas Longo",
+            "role": "Richard",
+            "key": "/library/people/5d776ae823d5a3001f50a656",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f261c6140040d8e354",
+            "order": 15,
+            "slug": "maurice-quintero",
+            "tag": "Maurice Quintero",
+            "role": "Anthony",
+            "key": "/library/people/5e1656f261c6140040d8e354",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f346aceb003cef0706",
+            "order": 16,
+            "slug": "raimonda-kara",
+            "tag": "Raimonda Kara",
+            "role": "Carla",
+            "key": "/library/people/5e1656f346aceb003cef0706",
+            "type": "person"
+          },
+          {
+            "id": "6a0c02b84954a2b797000c6d",
+            "order": 17,
+            "slug": "naz-nagi-3",
+            "tag": "Naz Nagi",
+            "role": "Amir",
+            "key": "/library/people/6a0c02b84954a2b797000c6d",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f310faa500400fd28e",
+            "order": 18,
+            "slug": "erik-landreth-1",
+            "tag": "Erik Landreth",
+            "role": "Roscoe",
+            "key": "/library/people/5e1656f310faa500400fd28e",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f31493cd003f0fffca",
+            "order": 19,
+            "slug": "dania-priya-bella",
+            "tag": "Dania Priya Bella",
+            "role": "Amanda",
+            "key": "/library/people/5e1656f31493cd003f0fffca",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f3d92d86003d37171a",
+            "order": 20,
+            "slug": "molly-mccormick",
+            "tag": "Molly McCormick",
+            "role": "Molly",
+            "key": "/library/people/5e1656f3d92d86003d37171a",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f391c20300412343ee",
+            "order": 21,
+            "slug": "daniel-giovanni-fleming-1",
+            "tag": "Daniel Giovanni Fleming",
+            "role": "Hank",
+            "key": "/library/people/5e1656f391c20300412343ee",
+            "type": "person"
+          },
+          {
+            "id": "6a0c01ee0920c26c5177a397",
+            "order": 22,
+            "slug": "wilfred-lopez-16",
+            "tag": "Wilfred Lopez",
+            "role": "Benjamin",
+            "key": "/library/people/6a0c01ee0920c26c5177a397",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776859eb5d26001f1e74ba",
+            "slug": "massimiliano-cerchi",
+            "tag": "Massimiliano Cerchi",
+            "role": "Director",
+            "key": "/library/people/5d776859eb5d26001f1e74ba",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776859eb5d26001f1e74ba",
+            "slug": "massimiliano-cerchi",
+            "tag": "Massimiliano Cerchi",
+            "role": "Producer",
+            "key": "/library/people/5d776859eb5d26001f1e74ba",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776859eb5d26001f1e74ba",
+            "slug": "massimiliano-cerchi",
+            "tag": "Massimiliano Cerchi",
+            "role": "Story",
+            "key": "/library/people/5d776859eb5d26001f1e74ba",
+            "type": "person"
+          },
+          {
+            "id": "5e1656f210faa500400fd28c",
+            "slug": "rod-smith-8",
+            "tag": "Rod Smith",
+            "role": "Screenplay",
+            "key": "/library/people/5e1656f210faa500400fd28c",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/627b6fd7800a4679f7184531",
+            "tag": "Shadow Master"
+          },
+          {
+            "guid": "plex://movie/62ce98318048acf134c88afd",
+            "tag": "Die Alone"
+          },
+          {
+            "guid": "plex://movie/663f0d8908eee4e5469efea8",
+            "tag": "Black Box"
+          },
+          {
+            "guid": "plex://movie/5e397bd3192f7e003d89d5d2",
+            "tag": "Whisper"
+          },
+          {
+            "guid": "plex://movie/5d9f3cbc4441b1001fa15a32",
+            "tag": "Containment"
+          },
+          {
+            "guid": "plex://movie/5d777032fb0d55001f5ea74a",
+            "tag": "Body Cam"
+          },
+          {
+            "guid": "plex://movie/5d77704a9ab54400215342ae",
+            "tag": "Mona Lisa and the Blood Moon"
+          },
+          {
+            "guid": "plex://movie/5e5d3afc01f65d003eca60d8",
+            "tag": "Dark Harvest"
+          },
+          {
+            "guid": "plex://movie/5f590e20ba1e9c00418f9c51",
+            "tag": "The Unhealer"
+          },
+          {
+            "guid": "plex://movie/5f40960d8642250042934ce4",
+            "tag": "Nocebo"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Grindstone Entertainment Group"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Airline passengers mysteriously start to disappear without a trace.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

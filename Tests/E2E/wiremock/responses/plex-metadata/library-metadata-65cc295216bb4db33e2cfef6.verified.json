@@ -1,0 +1,555 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/f/gracenote/f39f989d294e76f8e1614b1804764de9.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/362634/banners/68a69689f31e3.jpg",
+        "guid": "plex://movie/65cc295216bb4db33e2cfef6",
+        "key": "/library/metadata/65cc295216bb4db33e2cfef6",
+        "rating": 8.9,
+        "ratingKey": "65cc295216bb4db33e2cfef6",
+        "studio": "Picturestart",
+        "summary": "Years into their relationship, Tim and Millie find themselves at a crossroads as they move to the country. With tensions already flaring, an encounter with an unnatural force threatens to corrupt their lives, their love and their flesh.",
+        "tagline": "Join us.",
+        "type": "movie",
+        "addedAt": 1753833600,
+        "audienceRating": 7.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 17000000,
+        "contentRating": "R",
+        "duration": 6120000,
+        "imdbRatingCount": 88960,
+        "originallyAvailableAt": "2025-07-30",
+        "publicPagesURL": "https://watch.plex.tv/movie/together-2025-1",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 34747399,
+        "slug": "together-2025-1",
+        "thumb": "https://metadata-static.plex.tv/f/gracenote/f7058c4b50abde385010adec026e9cf4.jpg",
+        "title": "Together",
+        "userState": false,
+        "year": 2025,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/65cc295216bb4db33e2cfef6/commonsensemedia",
+            "oneLiner": "Commitment is scary in body horror with nudity, swearing.",
+            "AgeRating": [
+              {
+                "age": 17,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Together",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f39f989d294e76f8e1614b1804764de9.jpg"
+          },
+          {
+            "alt": "Together",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/819262e169f81430de189a39a0499d60.jpg"
+          },
+          {
+            "alt": "Together",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/362634/banners/68a69689f31e3.jpg"
+          },
+          {
+            "alt": "Together",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/b/683a142553/b3fb833d202a7279b5978711a8ce9f48.png"
+          },
+          {
+            "alt": "Together",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/b/683a142553/b3fb833d202a7279b5978711a8ce9f48.png"
+          },
+          {
+            "alt": "Together",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/9/gracenote/9cface096a3bdec5c753a80901216da0.jpg"
+          },
+          {
+            "alt": "Together",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f7058c4b50abde385010adec026e9cf4.jpg"
+          },
+          {
+            "alt": "Together",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d759c8ce7a623d92e735afc64ffbe929.jpg"
+          },
+          {
+            "alt": "Together",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8e225abb6b0084d152c193b9b2569c49.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt31184028"
+          },
+          {
+            "id": "tmdb://1242011"
+          },
+          {
+            "id": "tvdb://362634"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.9
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 7.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.9
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Australia"
+          },
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768327228e5001f1de14f",
+            "order": 1,
+            "slug": "dave-franco",
+            "tag": "Dave Franco",
+            "thumb": "https://metadata-static.plex.tv/7/people/7bd5fa3a81a2fcfaf4a8db19b24583ed.jpg",
+            "role": "Tim",
+            "key": "/library/people/5d7768327228e5001f1de14f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768447228e5001f1e0c19",
+            "order": 2,
+            "slug": "alison-brie",
+            "tag": "Alison Brie",
+            "thumb": "https://metadata-static.plex.tv/c/people/c16b6d56f3979183afd3cf3f9398daa1.jpg",
+            "role": "Millie",
+            "key": "/library/people/5d7768447228e5001f1e0c19",
+            "type": "person"
+          },
+          {
+            "id": "5d776835e6d55c002040d108",
+            "order": 3,
+            "slug": "damon-herriman",
+            "tag": "Damon Herriman",
+            "thumb": "https://metadata-static.plex.tv/3/people/3d6cde6987dc0c3684528f6bcba88cc1.jpg",
+            "role": "Jamie",
+            "key": "/library/people/5d776835e6d55c002040d108",
+            "type": "person"
+          },
+          {
+            "id": "5d776d5b7a53e9001e7581f9",
+            "order": 4,
+            "slug": "mia-morrissey",
+            "tag": "Mia Morrissey",
+            "thumb": "https://metadata-static.plex.tv/8/people/82f22a2e5281580b38f9f52eaddd53dc.jpg",
+            "role": "Cath",
+            "key": "/library/people/5d776d5b7a53e9001e7581f9",
+            "type": "person"
+          },
+          {
+            "id": "5f3ce37597226100407f5581",
+            "order": 5,
+            "slug": "karl-richmond",
+            "tag": "Karl Richmond",
+            "thumb": "https://metadata-static.plex.tv/0/people/09201de301252274182ca8a1556eaeb1.jpg",
+            "role": "Jordy",
+            "key": "/library/people/5f3ce37597226100407f5581",
+            "type": "person"
+          },
+          {
+            "id": "5f405f03fea1a1003fa676d1",
+            "order": 6,
+            "slug": "jack-kenny-3",
+            "tag": "Jack Kenny",
+            "thumb": "https://metadata-static.plex.tv/d/people/d9fd383fd0ca0fe7dcb235e35e931668.jpg",
+            "role": "Luke",
+            "key": "/library/people/5f405f03fea1a1003fa676d1",
+            "type": "person"
+          },
+          {
+            "id": "5d776ade594b2b001e6c8378",
+            "order": 7,
+            "slug": "francesca-waters",
+            "tag": "Francesca Waters",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ec4b313c0d3e60a24ff023ae62c7f04.jpg",
+            "role": "Carol",
+            "key": "/library/people/5d776ade594b2b001e6c8378",
+            "type": "person"
+          },
+          {
+            "id": "5d77688351dd69001fe0d692",
+            "order": 8,
+            "slug": "aljin-abella",
+            "tag": "Aljin Abella",
+            "thumb": "https://metadata-static.plex.tv/1/people/17981b107aa586c212f98aa68361299c.jpg",
+            "role": "Doctor Mendoza",
+            "key": "/library/people/5d77688351dd69001fe0d692",
+            "type": "person"
+          },
+          {
+            "id": "5e164ae92d4d84003e4a306a",
+            "order": 9,
+            "slug": "sarah-lang-2",
+            "tag": "Sarah Lang",
+            "role": "Keri",
+            "key": "/library/people/5e164ae92d4d84003e4a306a",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcd2f86422500427b7fdb",
+            "order": 10,
+            "slug": "rob-brown-2",
+            "tag": "Rob Brown",
+            "role": "Chaplin",
+            "key": "/library/people/5f3fcd2f86422500427b7fdb",
+            "type": "person"
+          },
+          {
+            "id": "681362b32ce14bf793447746",
+            "order": 11,
+            "slug": "ellora-iris-1",
+            "tag": "Ellora Iris",
+            "role": "Anna",
+            "key": "/library/people/681362b32ce14bf793447746",
+            "type": "person"
+          },
+          {
+            "id": "679a21b61fbbce93cbb912b6",
+            "order": 12,
+            "slug": "charlie-lees-5",
+            "tag": "Charlie Lees",
+            "role": "Groom 1",
+            "key": "/library/people/679a21b61fbbce93cbb912b6",
+            "type": "person"
+          },
+          {
+            "id": "679a21b667c01768291f0c2b",
+            "order": 13,
+            "slug": "mj-dorning-1",
+            "tag": "MJ Dorning",
+            "role": "Groom 2",
+            "key": "/library/people/679a21b667c01768291f0c2b",
+            "type": "person"
+          },
+          {
+            "id": "5f3f942cb981640042c919dc",
+            "order": 14,
+            "slug": "tom-considine",
+            "tag": "Tom Considine",
+            "role": "Millie's Father",
+            "key": "/library/people/5f3f942cb981640042c919dc",
+            "type": "person"
+          },
+          {
+            "id": "5d7768692e80df001ebe35e3",
+            "order": 15,
+            "slug": "melanie-beddie",
+            "tag": "Melanie Beddie",
+            "role": "Millie's Mother",
+            "key": "/library/people/5d7768692e80df001ebe35e3",
+            "type": "person"
+          },
+          {
+            "id": "644b7f7cb04255538e3d2af6",
+            "order": 16,
+            "slug": "flynn-wandin",
+            "tag": "Flynn Wandin",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c261ecebad34595ca3ad36df73e850b.jpg",
+            "role": "Student",
+            "key": "/library/people/644b7f7cb04255538e3d2af6",
+            "type": "person"
+          },
+          {
+            "id": "681362b32ce14bf793447747",
+            "order": 17,
+            "slug": "nancy-finn-3",
+            "tag": "Nancy Finn",
+            "role": "Tim's Mother",
+            "key": "/library/people/681362b32ce14bf793447747",
+            "type": "person"
+          },
+          {
+            "id": "5edbb0a78fb34a0041bd9698",
+            "order": 18,
+            "slug": "mark-robinson-13",
+            "tag": "Mark Robinson",
+            "role": "Tim's Father",
+            "key": "/library/people/5edbb0a78fb34a0041bd9698",
+            "type": "person"
+          },
+          {
+            "id": "5d776b4dad5437001f79ac04",
+            "order": 19,
+            "slug": "michael-shanks-1",
+            "tag": "Michael Shanks",
+            "thumb": "https://metadata-static.plex.tv/7/people/79304b4ed73ba346878a3f2a768375c2.jpg",
+            "role": "Simon",
+            "key": "/library/people/5d776b4dad5437001f79ac04",
+            "type": "person"
+          },
+          {
+            "id": "5e17c280dd619f003d656cf3",
+            "order": 20,
+            "slug": "sunny-s-walia",
+            "tag": "Sunny S. Walia",
+            "thumb": "https://metadata-static.plex.tv/a/people/ae62c9d55a08f80fca02efbf08dbf4cb.jpg",
+            "role": "Farmer",
+            "key": "/library/people/5e17c280dd619f003d656cf3",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776b4dad5437001f79ac04",
+            "slug": "michael-shanks-1",
+            "tag": "Michael Shanks",
+            "thumb": "https://metadata-static.plex.tv/7/people/79304b4ed73ba346878a3f2a768375c2.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776b4dad5437001f79ac04",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7768447228e5001f1e0c19",
+            "slug": "alison-brie",
+            "tag": "Alison Brie",
+            "thumb": "https://metadata-static.plex.tv/c/people/c16b6d56f3979183afd3cf3f9398daa1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768447228e5001f1e0c19",
+            "type": "person"
+          },
+          {
+            "id": "5d7768327228e5001f1de14f",
+            "slug": "dave-franco",
+            "tag": "Dave Franco",
+            "thumb": "https://metadata-static.plex.tv/7/people/7bd5fa3a81a2fcfaf4a8db19b24583ed.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768327228e5001f1de14f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ee6d55c002040bc02",
+            "slug": "erik-feig",
+            "tag": "Erik Feig",
+            "thumb": "https://metadata-static.plex.tv/e/people/e33c17c2f5f5dced3222bb57a714d6b1.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682ee6d55c002040bc02",
+            "type": "person"
+          },
+          {
+            "id": "5de03c9ec76f13001d5273ae",
+            "slug": "max-silva",
+            "tag": "Max Silva",
+            "role": "Producer",
+            "key": "/library/people/5de03c9ec76f13001d5273ae",
+            "type": "person"
+          },
+          {
+            "id": "5dce73c1e2bf56001ec532d9",
+            "slug": "andrew-mittman",
+            "tag": "Andrew Mittman",
+            "thumb": "https://metadata-static.plex.tv/1/people/1a80e2e1ae37de0e11916edcd8d5f4d5.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dce73c1e2bf56001ec532d9",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc078c63b480040d6367b",
+            "slug": "julia-hammer",
+            "tag": "Julia Hammer",
+            "thumb": "https://metadata-static.plex.tv/c/people/c2e36eaee8b72bcba8b1f08ecc98506d.jpg",
+            "role": "Producer",
+            "key": "/library/people/5f3fc078c63b480040d6367b",
+            "type": "person"
+          },
+          {
+            "id": "5f2e582d684902004303e333",
+            "slug": "mike-cowap-1",
+            "tag": "Mike Cowap",
+            "role": "Producer",
+            "key": "/library/people/5f2e582d684902004303e333",
+            "type": "person"
+          },
+          {
+            "id": "5d7768394de0ee001fccc497",
+            "slug": "tim-headington",
+            "tag": "Tim Headington",
+            "thumb": "https://metadata-static.plex.tv/d/people/d49bd7d50d93c1b29b513d2535e0704b.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768394de0ee001fccc497",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776b4dad5437001f79ac04",
+            "slug": "michael-shanks-1",
+            "tag": "Michael Shanks",
+            "thumb": "https://metadata-static.plex.tv/7/people/79304b4ed73ba346878a3f2a768375c2.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776b4dad5437001f79ac04",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/66cf3e2a419ab007dba8b2ba",
+            "tag": "Honey Bunch"
+          },
+          {
+            "guid": "plex://movie/66d148183c621a24c88fab6a",
+            "tag": "Honey Bunch"
+          },
+          {
+            "guid": "plex://movie/66d125a3cd3455d71d1c87e7",
+            "tag": "Obsession"
+          },
+          {
+            "guid": "plex://movie/6856893830a4aaafd5c4291d",
+            "tag": "Obsession"
+          },
+          {
+            "guid": "plex://movie/670b6dd9fb5cda66a9a6eb3c",
+            "tag": "Passenger"
+          },
+          {
+            "guid": "plex://movie/670d289e793d5e29967babce",
+            "tag": "Passenger"
+          },
+          {
+            "guid": "plex://movie/5d776ca07a53e9001e748845",
+            "tag": "The Ritual"
+          },
+          {
+            "guid": "plex://movie/5ed8a6299fe081003d4295d0",
+            "tag": "They Reach"
+          },
+          {
+            "guid": "plex://movie/5fed11260a708b002d1431be",
+            "tag": "Men"
+          },
+          {
+            "guid": "plex://movie/606dd956886ea70035f9cb5f",
+            "tag": "Never Let Go"
+          },
+          {
+            "guid": "plex://movie/5ee34bbe7ee221003e5f1486",
+            "tag": "The Invitation"
+          },
+          {
+            "guid": "plex://movie/613c7a8122f6fb2ff34e2161",
+            "tag": "Significant Other"
+          },
+          {
+            "guid": "plex://movie/5d776d1051dd69001fe3f9e4",
+            "tag": "The Descent"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Picturestart"
+          },
+          {
+            "tag": "Tango Entertainment"
+          },
+          {
+            "tag": "30WEST"
+          },
+          {
+            "tag": "Princess Pictures"
+          },
+          {
+            "tag": "1.21 Entertainment"
+          },
+          {
+            "tag": "Project Foxtrot"
+          },
+          {
+            "tag": "VicScreen"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A mysterious, unnatural force threatens to corrupt a couple's life, love and flesh.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

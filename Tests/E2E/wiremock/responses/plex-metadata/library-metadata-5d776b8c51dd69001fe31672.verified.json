@@ -1,0 +1,492 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/9/gracenote/95671356d2375ad411a536c2eb31ad6c.jpg",
+        "guid": "plex://movie/5d776b8c51dd69001fe31672",
+        "key": "/library/metadata/5d776b8c51dd69001fe31672",
+        "ratingKey": "5d776b8c51dd69001fe31672",
+        "studio": "Millstreet Films",
+        "summary": "Simone dreamed of a happy family in a countryside house but she falls for the lust of a forbidden affair that will put her family and future at risk.",
+        "type": "movie",
+        "addedAt": 1433376000,
+        "audienceRating": 5.6,
+        "audienceRatingImage": "imdb://image.rating",
+        "availabilityId": "62c71962700e44e586ec3a02",
+        "contentRating": "TV-MA",
+        "duration": 5996124,
+        "imdbRatingCount": 2696,
+        "originalTitle": "Rendez-Vous",
+        "originallyAvailableAt": "2015-06-04",
+        "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d776b8c51dd69001fe31672",
+        "publicPagesURL": "https://watch.plex.tv/movie/obsession-2015-1",
+        "slug": "obsession-2015-1",
+        "streamingMediaId": "62ed410edcb5068ab16112ec",
+        "thumb": "https://metadata-static.plex.tv/a/gracenote/a4ac910bc2dc5167bffdb86832a9102d.jpg",
+        "title": "Obsession",
+        "userState": false,
+        "year": 2015,
+        "Media": [
+          {
+            "bitrate": 2512,
+            "container": "mp4",
+            "protocol": "hls",
+            "url": "https://vod-content.plexvideos.com/streams/62ed410edcb5068ab16112ec/7158803e-dbef-4271-90f4-1e29c965180d/main.m3u8",
+            "height": 1080,
+            "width": 1920,
+            "optimizedForStreaming": true,
+            "videoCodec": "h264",
+            "videoResolution": "1080",
+            "Part": [
+              {
+                "container": "mp4",
+                "id": "62ed410edcb5068ab16112ec",
+                "key": "/library/parts/62ed410edcb5068ab16112ec-hls",
+                "Stream": [
+                  {
+                    "bitrate": 2320,
+                    "codec": "h264",
+                    "height": 1080,
+                    "streamType": 1,
+                    "width": 1920,
+                    "id": "5d776b8c51dd69001fe31672-638035b0b2d47a248dc6ccfe",
+                    "displayTitle": "HD",
+                    "selected": true
+                  },
+                  {
+                    "audioTrackId": "637dcbc83bfbcb2e469625f7",
+                    "bitrate": 192,
+                    "codec": "aac",
+                    "language": "French",
+                    "streamType": 2,
+                    "variant": "main",
+                    "id": "5d776b8c51dd69001fe31672-638035b0b2d47a248dc6ccfd",
+                    "languageCode": "fr",
+                    "displayTitle": "French (Stereo)",
+                    "selected": true
+                  },
+                  {
+                    "language": "English",
+                    "streamType": 3,
+                    "key": "/library/streams/62ed410edcb5068ab16112ec-eng",
+                    "id": "eng",
+                    "languageCode": "eng",
+                    "displayTitle": "English",
+                    "formats": "ass,itt,srt,vtt"
+                  },
+                  {
+                    "language": "French",
+                    "streamType": 3,
+                    "key": "/library/streams/62ed410edcb5068ab16112ec-fra",
+                    "id": "fra",
+                    "languageCode": "fra",
+                    "displayTitle": "French",
+                    "formats": "ass,itt,srt,vtt"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Obsession",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/9/gracenote/95671356d2375ad411a536c2eb31ad6c.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/28670b16ac6ad506acad7e96c712c08e.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0f16c6a525d333f70ed2d2a902b43f71.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/8/gracenote/82d9aed4b4fbb90bea3020d0f942276f.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/352bcafd143c98ca9b7e3604ed5630a2.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/4/gracenote/49b5ae4efafbed19076cc3044bc85caf.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt3755362"
+          },
+          {
+            "id": "tmdb://332672"
+          },
+          {
+            "id": "tvdb://39040"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.3
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Netherlands"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77689c96b655001fdbcecd",
+            "order": 1,
+            "slug": "loes-haverkort",
+            "tag": "Loes Haverkort",
+            "thumb": "https://metadata-static.plex.tv/5/people/5196c69a7a9bed8c7d1d77040b3d8a49.jpg",
+            "role": "Simone",
+            "key": "/library/people/5d77689c96b655001fdbcecd",
+            "type": "person"
+          },
+          {
+            "id": "5d776825151a60001f24a6a7",
+            "order": 2,
+            "slug": "pierre-boulanger",
+            "tag": "Pierre Boulanger",
+            "thumb": "https://metadata-static.plex.tv/f/people/fd9b173934a737c7f0f1eeb51962e5e9.jpg",
+            "role": "Michel",
+            "key": "/library/people/5d776825151a60001f24a6a7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a2431c830024c11847",
+            "order": 3,
+            "slug": "mark-van-eeuwen",
+            "tag": "Mark van Eeuwen",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e6322236b3d5b6888089cb7d51f341c.jpg",
+            "role": "Eric",
+            "key": "/library/people/5d7768a2431c830024c11847",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c7228e5001f1dd684",
+            "order": 4,
+            "slug": "peter-paul-muller",
+            "tag": "Peter Paul Muller",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682c7228e5001f1dd684.jpg",
+            "role": "Peter",
+            "key": "/library/people/5d77682c7228e5001f1dd684",
+            "type": "person"
+          },
+          {
+            "id": "5d776b8c51dd69001fe31686",
+            "order": 5,
+            "slug": "evi-van-der-laken",
+            "tag": "Evi van der Laken",
+            "role": "Suzanne",
+            "key": "/library/people/5d776b8c51dd69001fe31686",
+            "type": "person"
+          },
+          {
+            "id": "5d776b8c51dd69001fe31687",
+            "order": 6,
+            "slug": "bobby-van-vleuten",
+            "tag": "Bobby van Vleuten",
+            "role": "Bastian",
+            "key": "/library/people/5d776b8c51dd69001fe31687",
+            "type": "person"
+          },
+          {
+            "id": "5d77683e54c0f0001f3046d9",
+            "order": 7,
+            "slug": "jennifer-hoffman",
+            "tag": "Jennifer Hoffman",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683e54c0f0001f3046d9.jpg",
+            "role": "Lian",
+            "key": "/library/people/5d77683e54c0f0001f3046d9",
+            "type": "person"
+          },
+          {
+            "id": "5d77696f96b655001fdcee3b",
+            "order": 8,
+            "slug": "tamar-baruch",
+            "tag": "Tamar Baruch",
+            "thumb": "https://metadata-static.plex.tv/2/people/252da0b78368ebe1e600b1688ccd6232.jpg",
+            "role": "Schoolmistress",
+            "key": "/library/people/5d77696f96b655001fdcee3b",
+            "type": "person"
+          },
+          {
+            "id": "5d77687d1999bc0020dc6a71",
+            "order": 9,
+            "slug": "corentin-lobet",
+            "tag": "Corentin Lobet",
+            "thumb": "https://metadata-static.plex.tv/b/people/bffa76deddf2ca348c631b7a65717d54.jpg",
+            "role": "Man in bricolage",
+            "key": "/library/people/5d77687d1999bc0020dc6a71",
+            "type": "person"
+          },
+          {
+            "id": "5d776844880197001ec96382",
+            "order": 10,
+            "slug": "eva-duijvestein",
+            "tag": "Eva Duijvestein",
+            "thumb": "https://metadata-static.plex.tv/people/5d776844880197001ec96382.jpg",
+            "role": "Rita",
+            "key": "/library/people/5d776844880197001ec96382",
+            "type": "person"
+          },
+          {
+            "id": "5d77682deb5d26001f1df215",
+            "order": 11,
+            "slug": "rosa-reuten",
+            "tag": "Rosa Reuten",
+            "thumb": "https://metadata-static.plex.tv/e/people/e1503d5160df0c1814bf03d7a6628ebc.jpg",
+            "role": "Helena",
+            "key": "/library/people/5d77682deb5d26001f1df215",
+            "type": "person"
+          },
+          {
+            "id": "5d776a3c7a53e9001e6fe9d6",
+            "order": 12,
+            "slug": "francois-neycken",
+            "tag": "François Neycken",
+            "thumb": "https://metadata-static.plex.tv/7/people/7328d5ceab67fe04da85a6d78e99423b.jpg",
+            "role": "Antoine 1",
+            "key": "/library/people/5d776a3c7a53e9001e6fe9d6",
+            "type": "person"
+          },
+          {
+            "id": "5d776b2296b655001fe0568e",
+            "order": 13,
+            "slug": "benjamin-boutboul",
+            "tag": "Benjamin Boutboul",
+            "thumb": "https://image.tmdb.org/t/p/original/sp1jsxrDxCYBwBnkuaNJiDCbKic.jpg",
+            "role": "Antoine 2",
+            "key": "/library/people/5d776b2296b655001fe0568e",
+            "type": "person"
+          },
+          {
+            "id": "5d776b8c51dd69001fe31689",
+            "order": 14,
+            "slug": "gijs-nollen",
+            "tag": "Gijs Nollen",
+            "role": "Mike",
+            "key": "/library/people/5d776b8c51dd69001fe31689",
+            "type": "person"
+          },
+          {
+            "id": "5d776a78594b2b001e6bd8e0",
+            "order": 15,
+            "slug": "pieter-van-terheijden",
+            "tag": "Pieter van Terheijden",
+            "role": "Bernard",
+            "key": "/library/people/5d776a78594b2b001e6bd8e0",
+            "type": "person"
+          },
+          {
+            "id": "5d77685b5af944001f200964",
+            "order": 16,
+            "slug": "eric-larcin",
+            "tag": "Eric Larcin",
+            "thumb": "https://metadata-static.plex.tv/0/people/04f381c93330325c1c1e84ebcc9b4986.jpg",
+            "role": "Doctor",
+            "key": "/library/people/5d77685b5af944001f200964",
+            "type": "person"
+          },
+          {
+            "id": "5d776b8c51dd69001fe3168a",
+            "order": 17,
+            "slug": "oliver-gregoir",
+            "tag": "Oliver Gregoir",
+            "role": "Police Officer",
+            "key": "/library/people/5d776b8c51dd69001fe3168a",
+            "type": "person"
+          },
+          {
+            "id": "5d776b8c51dd69001fe3168b",
+            "order": 18,
+            "slug": "stephane-rimbert",
+            "tag": "Stéphane Rimbert",
+            "role": "Mayor",
+            "key": "/library/people/5d776b8c51dd69001fe3168b",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77683ee6d55c002040e9cc",
+            "slug": "antoinette-beumer",
+            "tag": "Antoinette Beumer",
+            "thumb": "https://metadata-static.plex.tv/8/people/8cea82e10e90a4e8e096c332bacd8098.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77683ee6d55c002040e9cc",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77689aad5437001f74a862",
+            "slug": "rachel-van-bommel",
+            "tag": "Rachel van Bommel",
+            "thumb": "https://metadata-static.plex.tv/b/people/beddc23b3948ccd4a8084b4766ad88ba.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77689aad5437001f74a862",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5dcfc65a70b2e6001d8330c6",
+            "slug": "dorien-goertzen",
+            "tag": "Dorien Goertzen",
+            "role": "Writer",
+            "key": "/library/people/5dcfc65a70b2e6001d8330c6",
+            "type": "person"
+          },
+          {
+            "id": "5d77685a8a7581001f13107f",
+            "slug": "marjolein-beumer",
+            "tag": "Marjolein Beumer",
+            "role": "Writer",
+            "key": "/library/people/5d77685a8a7581001f13107f",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.92,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.902,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.689,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe22e93b86d951faf705",
+            "score": 0.68,
+            "tag": "uplifting"
+          },
+          {
+            "id": "65afbe22e93b86d951faf6eb",
+            "score": 0.566,
+            "tag": "heartwarming"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77683a999c64001ec3032f",
+            "tag": "Shattered"
+          },
+          {
+            "guid": "plex://movie/5d776d14ad5437001f7cc80f",
+            "tag": "Dream Lover"
+          },
+          {
+            "guid": "plex://movie/5d776a3fad5437001f777107",
+            "tag": "Gone Girl"
+          },
+          {
+            "guid": "plex://movie/5d77682b54c0f0001f3023ef",
+            "tag": "Unfaithful"
+          },
+          {
+            "guid": "plex://movie/5d7768c796b655001fdc178a",
+            "tag": "Nocturnal Animals"
+          },
+          {
+            "guid": "plex://movie/5d776c08594b2b001e6e9827",
+            "tag": "Adulterers"
+          },
+          {
+            "guid": "plex://movie/5d77682deb5d26001f1df180",
+            "tag": "Revolutionary Road"
+          },
+          {
+            "guid": "plex://movie/5d7770806afb3d002061ba21",
+            "tag": "Shirley"
+          },
+          {
+            "guid": "plex://movie/5e833bb5d78d060041e46d8c",
+            "tag": "Deep Water"
+          },
+          {
+            "guid": "plex://movie/5d776832e6d55c002040c82b",
+            "tag": "Derailed"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Millstreet Films"
+          },
+          {
+            "tag": "FBO"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A married woman begins a torrid affair while pursuing her dream of opening a bed and breakfast.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

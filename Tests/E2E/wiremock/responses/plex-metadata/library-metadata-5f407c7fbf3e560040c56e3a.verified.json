@@ -1,0 +1,129 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/5f407c7fbf3e560040c56e3a",
+        "key": "/library/metadata/5f407c7fbf3e560040c56e3a",
+        "ratingKey": "5f407c7fbf3e560040c56e3a",
+        "studio": "George Clark Productions",
+        "summary": "An escaped convict joins the crew of a the yacht of a Lord who framed him, and saves his daughter from shipwreck.",
+        "type": "movie",
+        "audienceRating": 7,
+        "audienceRatingImage": "imdb://image.rating",
+        "imdbRatingCount": 10,
+        "publicPagesURL": "https://watch.plex.tv/movie/mutiny-7",
+        "slug": "mutiny-7",
+        "title": "Mutiny",
+        "userState": false,
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0200881"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7769da7a53e9001e6f265b",
+            "order": 1,
+            "slug": "nigel-barrie",
+            "tag": "Nigel Barrie",
+            "thumb": "https://metadata-static.plex.tv/5/people/5f468193453e6fe6d40a5bc84687e3a1.jpg",
+            "role": "John England",
+            "key": "/library/people/5d7769da7a53e9001e6f265b",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9923d5a3001f51233a",
+            "order": 2,
+            "slug": "doris-lytton",
+            "tag": "Doris Lytton",
+            "role": "Diana",
+            "key": "/library/people/5d776b9923d5a3001f51233a",
+            "type": "person"
+          },
+          {
+            "id": "5d776b1647dd6e001f6daff2",
+            "order": 3,
+            "slug": "walter-tennyson",
+            "tag": "Walter Tennyson",
+            "role": "cast",
+            "key": "/library/people/5d776b1647dd6e001f6daff2",
+            "type": "person"
+          },
+          {
+            "id": "5d776a9cfb0d55001f54b68a",
+            "order": 4,
+            "slug": "clifton-boyne",
+            "tag": "Clifton Boyne",
+            "role": "cast",
+            "key": "/library/people/5d776a9cfb0d55001f54b68a",
+            "type": "person"
+          },
+          {
+            "id": "5d7769aff617c90020163562",
+            "order": 5,
+            "slug": "donald-searle",
+            "tag": "Donald Searle",
+            "role": "cast",
+            "key": "/library/people/5d7769aff617c90020163562",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776b7dfb0d55001f569482",
+            "slug": "f-martin-thornton",
+            "tag": "F. Martin Thornton",
+            "role": "Director",
+            "key": "/library/people/5d776b7dfb0d55001f569482",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f3f917efea1a1003f93e10b",
+            "slug": "ben-bolt-2",
+            "tag": "Ben Bolt",
+            "role": "Novel \"Diana Of The Islands\"",
+            "key": "/library/people/5f3f917efea1a1003f93e10b",
+            "type": "person"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "George Clark Productions"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,335 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/433CAt94W7vd2O3JOMZbb4Rkf8h.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/408345/banners/6282723c0314d.jpg",
+        "guid": "plex://show/610e99deeabc61002cb1ef1c",
+        "key": "/library/metadata/610e99deeabc61002cb1ef1c/children",
+        "rating": 10,
+        "ratingKey": "610e99deeabc61002cb1ef1c",
+        "studio": "TV Tokyo",
+        "summary": "Due to her husband's work, Maiko moves with her husband to Tokyo from Hiroshima. They live in an apartment offered by her husband's company. Her husband is busy with work and comes home late every night. Maiko beings to talk with Futaba, who lives next door to her. Futaba is her husband's boss. They talk with each other from their porches. One day, Maiko learns that her husband is having an affair. She becomes closer to Futaba.",
+        "type": "show",
+        "addedAt": 1628467200,
+        "childCount": 1,
+        "duration": 2280000,
+        "lastEpisodeOriginallyAvailableAt": "2021-09-01",
+        "lastSeasonOriginallyAvailableAt": "2021-08-09",
+        "leafCount": 16,
+        "originalTitle": "うきわ ―友達以上、不倫未満―",
+        "originallyAvailableAt": "2021-08-09",
+        "publicPagesURL": "https://watch.plex.tv/show/more-than-a-friend-less-than-a-lover",
+        "ratingImage": "themoviedb://image.rating",
+        "slug": "more-than-a-friend-less-than-a-lover",
+        "thumb": "https://image.tmdb.org/t/p/original/c9wO05kXXDPdsvI88rgQ9GUh9tR.jpg",
+        "title": "Ukiwa: Tomodachi ijō, furin miman",
+        "userState": false,
+        "year": 2021,
+        "Image": [
+          {
+            "alt": "More than a friend, less than a lover",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/433CAt94W7vd2O3JOMZbb4Rkf8h.jpg"
+          },
+          {
+            "alt": "More than a friend, less than a lover",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/b39684dbb0a7943dc932bdcc06e95e18.jpg"
+          },
+          {
+            "alt": "More than a friend, less than a lover",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/408345/banners/6282723c0314d.jpg"
+          },
+          {
+            "alt": "More than a friend, less than a lover",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/q3IBNGM98ltqNVd7pWVB6Se2TCo.jpg"
+          },
+          {
+            "alt": "More than a friend, less than a lover",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/c9wO05kXXDPdsvI88rgQ9GUh9tR.jpg"
+          },
+          {
+            "alt": "More than a friend, less than a lover",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/38c4a9b59a4a771842a1eb0f3997c8ba.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://130604"
+          },
+          {
+            "id": "tvdb://408345"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 10
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776a537a53e9001e701bd8",
+            "order": 1,
+            "slug": "mugi-kadowaki",
+            "tag": "Mugi Kadowaki",
+            "thumb": "https://metadata-static.plex.tv/4/people/4312a62f5a9f855ada70ae3b269f5674.jpg",
+            "key": "/library/people/5d776a537a53e9001e701bd8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768688718ba001e31b154",
+            "order": 2,
+            "slug": "misako-renbutsu",
+            "tag": "Misako Renbutsu",
+            "thumb": "https://metadata-static.plex.tv/1/people/14eb2ea0b777fbff250cdf4f16dd53cc.jpg",
+            "key": "/library/people/5d7768688718ba001e31b154",
+            "type": "person"
+          },
+          {
+            "id": "5d7770d9cfbb56001fb8b7f3",
+            "order": 3,
+            "slug": "sakurako-konishi",
+            "tag": "Sakurako Konishi",
+            "thumb": "https://metadata-static.plex.tv/e/people/e55a6c4905f97f0bf16bc2c5e7395fdc.jpg",
+            "key": "/library/people/5d7770d9cfbb56001fb8b7f3",
+            "type": "person"
+          },
+          {
+            "id": "5d77683785719b001f3a442b",
+            "order": 4,
+            "slug": "naomi-nishida",
+            "tag": "Naomi Nishida",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ceeb695879d0ebb59a5e7021de3ff0c.jpg",
+            "key": "/library/people/5d77683785719b001f3a442b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d54f42c001f8c5bd2",
+            "order": 5,
+            "slug": "shunsuke-daitoh",
+            "tag": "Shunsuke Daitoh",
+            "thumb": "https://metadata-static.plex.tv/6/people/6940160b703f1dc024ca0130d0627302.jpg",
+            "key": "/library/people/5d77683d54f42c001f8c5bd2",
+            "type": "person"
+          },
+          {
+            "id": "5f40075352f20000414e8e8e",
+            "order": 6,
+            "slug": "naotaro-moriyama",
+            "tag": "Naotaro Moriyama",
+            "thumb": "https://metadata-static.plex.tv/d/people/d790259f5df9faf74f325c93bb791fec.jpg",
+            "key": "/library/people/5f40075352f20000414e8e8e",
+            "type": "person"
+          },
+          {
+            "id": "5e1656ab1493cd003f0ff8d7",
+            "order": 7,
+            "slug": "fumiya-takahashi",
+            "tag": "Fumiya Takahashi",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e3c47cb936befdd0658d37ece07a1a4.jpg",
+            "key": "/library/people/5e1656ab1493cd003f0ff8d7",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "6270e329c31d85725e0bbe1f",
+            "slug": "natsuki-takahashi-4",
+            "tag": "Natsuki Takahashi",
+            "thumb": "https://metadata-static.plex.tv/a/people/ade8041ff341f6f2e2609ec3f3ba0ea7.jpg",
+            "role": "Director",
+            "key": "/library/people/6270e329c31d85725e0bbe1f",
+            "type": "person"
+          },
+          {
+            "id": "5eea574903d8d0004106de0b",
+            "slug": "hiroki-kazama",
+            "tag": "Hiroki Kazama",
+            "thumb": "https://metadata-static.plex.tv/f/people/ffdd585a8a7c23e10787ebd228cd76c5.jpg",
+            "role": "Director",
+            "key": "/library/people/5eea574903d8d0004106de0b",
+            "type": "person"
+          },
+          {
+            "id": "617fa0adb42f81aeda7e307b",
+            "slug": "ryo-ota-3",
+            "tag": "Ryō Ōta",
+            "role": "Director",
+            "key": "/library/people/617fa0adb42f81aeda7e307b",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d777046b2739400200e6b37",
+            "slug": "yuho-tadano",
+            "tag": "Yuho Tadano",
+            "role": "Producer",
+            "key": "/library/people/5d777046b2739400200e6b37",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "61e2d6ebda35c57acc625f9c",
+            "slug": "munehiro-nomura-1",
+            "tag": "Munehiro Nomura",
+            "role": "Comic Book",
+            "key": "/library/people/61e2d6ebda35c57acc625f9c",
+            "type": "person"
+          },
+          {
+            "id": "5d9c083c7b5c2e001e65784a",
+            "slug": "yasuko-kuramitsu",
+            "tag": "Yasuko Kuramitsu",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f3b6c84ba79319bf17e1eea5ceaffb9.jpg",
+            "role": "Teleplay",
+            "key": "/library/people/5d9c083c7b5c2e001e65784a",
+            "type": "person"
+          },
+          {
+            "id": "5f404002ce2564003f90f7cc",
+            "slug": "yu-kanda",
+            "tag": "Yu Kanda",
+            "role": "Teleplay",
+            "key": "/library/people/5f404002ce2564003f90f7cc",
+            "type": "person"
+          },
+          {
+            "id": "5eea574903d8d0004106de0b",
+            "slug": "hiroki-kazama",
+            "tag": "Hiroki Kazama",
+            "thumb": "https://metadata-static.plex.tv/f/people/ffdd585a8a7c23e10787ebd228cd76c5.jpg",
+            "role": "Teleplay",
+            "key": "/library/people/5eea574903d8d0004106de0b",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "TV Osaka"
+          },
+          {
+            "tag": "TV Tokyo"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5e7362fcd5195100407aa672",
+            "tag": "Tyler Perry's Ruthless"
+          },
+          {
+            "guid": "plex://show/61b17f17a0f200438422504c",
+            "tag": "Bel‐Air"
+          },
+          {
+            "guid": "plex://show/606eec4f7fb740002cf3665a",
+            "tag": "The Newsreader"
+          },
+          {
+            "guid": "plex://show/5d9c086c705e7a001e6dc08f",
+            "tag": "Hero"
+          },
+          {
+            "guid": "plex://show/61d840600f4bfc111c941c84",
+            "tag": "Fishbowl Wives"
+          },
+          {
+            "guid": "plex://show/5d9c08637d06d9001ffd20b7",
+            "tag": "Tokyo Love Story"
+          },
+          {
+            "guid": "plex://show/6733b5377ed74808b73991f2",
+            "tag": "The House of the Spirits"
+          },
+          {
+            "guid": "plex://show/5d9c08382df347001e3adff7",
+            "tag": "The Haves and the Have Nots"
+          },
+          {
+            "guid": "plex://show/5d9c0924ba6eb9001fbb07e0",
+            "tag": "Ambitions"
+          },
+          {
+            "guid": "plex://show/5d9c090fef619b0020483c34",
+            "tag": "Wu‐Tang: An American Saga"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "TV Tokyo"
+          },
+          {
+            "tag": "AOI Pro."
+          }
+        ]
+      }
+    ]
+  }
+}

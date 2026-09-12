@@ -1,0 +1,83 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/68c603d838abf280042fcdb8",
+        "key": "/library/metadata/68c603d838abf280042fcdb8",
+        "ratingKey": "68c603d838abf280042fcdb8",
+        "type": "movie",
+        "duration": 3180000,
+        "publicPagesURL": "https://watch.plex.tv/movie/stairways-to-heaven-the-practical-magic-of-sacred-space-1",
+        "slug": "stairways-to-heaven-the-practical-magic-of-sacred-space-1",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BNTdmZTZiM2QtYmEzNi00ZjE5LTgxOGUtZDMwYzVhZmYwM2U1XkEyXkFqcGc@._V1_.jpg",
+        "title": "Stairways to Heaven: The Practical Magic of Sacred Space",
+        "userState": false,
+        "Image": [
+          {
+            "alt": "Stairways to Heaven: The Practical Magic of Sacred Space",
+            "type": "coverPoster",
+            "url": "https://m.media-amazon.com/images/M/MV5BNTdmZTZiM2QtYmEzNi00ZjE5LTgxOGUtZDMwYzVhZmYwM2U1XkEyXkFqcGc@._V1_.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt37986099"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f403171cae2c60042f151df",
+            "slug": "freddy-silva",
+            "tag": "Freddy Silva",
+            "role": "Director",
+            "key": "/library/people/5f403171cae2c60042f151df",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f403171cae2c60042f151df",
+            "slug": "freddy-silva",
+            "tag": "Freddy Silva",
+            "role": "Producer",
+            "key": "/library/people/5f403171cae2c60042f151df",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f403171cae2c60042f151df",
+            "slug": "freddy-silva",
+            "tag": "Freddy Silva",
+            "role": "Writer",
+            "key": "/library/people/5f403171cae2c60042f151df",
+            "type": "person"
+          }
+        ]
+      }
+    ]
+  }
+}

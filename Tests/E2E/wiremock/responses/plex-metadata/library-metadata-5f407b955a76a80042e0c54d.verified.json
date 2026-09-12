@@ -1,0 +1,108 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/5f407b955a76a80042e0c54d",
+        "key": "/library/metadata/5f407b955a76a80042e0c54d",
+        "ratingKey": "5f407b955a76a80042e0c54d",
+        "subtype": "short",
+        "type": "movie",
+        "audienceRating": 8.1,
+        "audienceRatingImage": "imdb://image.rating",
+        "duration": 1620000,
+        "imdbRatingCount": 20,
+        "publicPagesURL": "https://watch.plex.tv/movie/mutiny-1",
+        "slug": "mutiny-1",
+        "title": "Mutiny",
+        "userState": false,
+        "Genre": [
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0194187"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.1
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776b40ad5437001f799280",
+            "order": 1,
+            "slug": "henry-griffin",
+            "tag": "Henry Griffin",
+            "role": "Arthur",
+            "key": "/library/people/5d776b40ad5437001f799280",
+            "type": "person"
+          },
+          {
+            "id": "5d7768263c3c2a001fbcad21",
+            "order": 2,
+            "slug": "nicky-katt",
+            "tag": "Nicky Katt",
+            "thumb": "https://metadata-static.plex.tv/c/people/c031679af557c103941ecd57f1f313be.jpg",
+            "role": "cast",
+            "key": "/library/people/5d7768263c3c2a001fbcad21",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776b40ad5437001f799280",
+            "slug": "henry-griffin",
+            "tag": "Henry Griffin",
+            "role": "Director",
+            "key": "/library/people/5d776b40ad5437001f799280",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d7768263c3c2a001fbcad21",
+            "slug": "nicky-katt",
+            "tag": "Nicky Katt",
+            "thumb": "https://metadata-static.plex.tv/c/people/c031679af557c103941ecd57f1f313be.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768263c3c2a001fbcad21",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776b40ad5437001f799280",
+            "slug": "henry-griffin",
+            "tag": "Henry Griffin",
+            "role": "Writer",
+            "key": "/library/people/5d776b40ad5437001f799280",
+            "type": "person"
+          }
+        ]
+      }
+    ]
+  }
+}

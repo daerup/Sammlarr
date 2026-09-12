@@ -1,0 +1,489 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/3/gracenote/3a705580efbd678fc915f85bf1c01d2f.jpg",
+        "guid": "plex://movie/5d776a60fb0d55001f5445c4",
+        "key": "/library/metadata/5d776a60fb0d55001f5445c4",
+        "ratingKey": "5d776a60fb0d55001f5445c4",
+        "studio": "King Brothers Productions",
+        "summary": "During the War of 1812, the U.S. tasks Captain James Marshall to sail through the British blockade and bring back a French loan in gold but the secret leaks out and many greedy hands, including the mutinous crew's, are after the gold.",
+        "tagline": "A mighty epic of the sea thunders to the screen !",
+        "type": "movie",
+        "addedAt": -561340800,
+        "audienceRating": 1.4,
+        "audienceRatingImage": "rottentomatoes://image.rating.spilled",
+        "availabilityId": "6102d21a077e7151c20df53f",
+        "contentRating": "Not Rated",
+        "duration": 4612692,
+        "imdbRatingCount": 612,
+        "originallyAvailableAt": "1952-03-19",
+        "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d776a60fb0d55001f5445c4",
+        "publicPagesURL": "https://watch.plex.tv/movie/mutiny-1952",
+        "slug": "mutiny-1952",
+        "streamingMediaId": "62be2c5d5e5872e950a6766a",
+        "thumb": "https://metadata-static.plex.tv/3/gracenote/3d685708426e4b156e45dc300de32e24.jpg",
+        "title": "Mutiny",
+        "userState": false,
+        "year": 1952,
+        "Media": [
+          {
+            "bitrate": 2849,
+            "container": "mp4",
+            "protocol": "hls",
+            "url": "https://vod-content.plexvideos.com/streams/62be2c5d5e5872e950a6766a/a61e2e4b-2af0-489c-ac8e-e6b232c78a67/main.m3u8",
+            "height": 480,
+            "width": 720,
+            "optimizedForStreaming": true,
+            "videoCodec": "h264",
+            "videoResolution": "480",
+            "Part": [
+              {
+                "container": "mp4",
+                "id": "62be2c5d5e5872e950a6766a",
+                "key": "/library/parts/62be2c5d5e5872e950a6766a-hls",
+                "Stream": [
+                  {
+                    "bitrate": 2657,
+                    "codec": "h264",
+                    "height": 480,
+                    "streamType": 1,
+                    "width": 720,
+                    "id": "5d776a60fb0d55001f5445c4-637bf86ef1a7256d1e745a4e",
+                    "displayTitle": "SD",
+                    "selected": true
+                  },
+                  {
+                    "audioTrackId": "63797cc10a2e184a25513ae1",
+                    "bitrate": 192,
+                    "codec": "aac",
+                    "language": "English",
+                    "streamType": 2,
+                    "variant": "main",
+                    "id": "5d776a60fb0d55001f5445c4-637bf86ef1a7256d1e745a4d",
+                    "languageCode": "en",
+                    "displayTitle": "English (Stereo)",
+                    "selected": true
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Mutiny",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3a705580efbd678fc915f85bf1c01d2f.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/45800821181df7b19ab5aff2bca36956.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/8/683a142553/8bf86fff0221086926314a6eeae279bc.png"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/8/683a142553/8bf86fff0221086926314a6eeae279bc.png"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/4/gracenote/46612fa0b3cc4c55c2d29e943661b8c5.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3d685708426e4b156e45dc300de32e24.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6b9c9b97c340470e0fe2959dec1cb630.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4944cd8eaf666862adfd0aff5b5a8a03.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5da05bf5af32ed001e0f5563",
+            "id": "5da05bf5af32ed001e0f5563",
+            "key": "/library/sections/home/all?genre=5da05bf5af32ed001e0f5563",
+            "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+            "slug": "history",
+            "tag": "History",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28aba6",
+            "id": "5d9c046c08fddd001f28aba6",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28aba6",
+            "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+            "slug": "war",
+            "tag": "War",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0044936"
+          },
+          {
+            "id": "tmdb://227296"
+          },
+          {
+            "id": "tvdb://50931"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.spilled",
+            "type": "audience",
+            "value": 1.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5.2
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776842880197001ec95ef8",
+            "order": 1,
+            "slug": "mark-stevens",
+            "tag": "Mark Stevens",
+            "thumb": "https://metadata-static.plex.tv/3/people/3e6128aee26449c6615d3685ade37ad6.jpg",
+            "role": "Capt. James Marshall",
+            "key": "/library/people/5d776842880197001ec95ef8",
+            "type": "person"
+          },
+          {
+            "id": "5d776829f54112001f5bc283",
+            "order": 2,
+            "slug": "angela-lansbury",
+            "tag": "Angela Lansbury",
+            "thumb": "https://metadata-static.plex.tv/4/people/4557ab33087467c92b5c43bd0b6a890c.jpg",
+            "role": "Leslie Waldridge",
+            "key": "/library/people/5d776829f54112001f5bc283",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c999c64001ec2d8a1",
+            "order": 3,
+            "slug": "patric-knowles",
+            "tag": "Patric Knowles",
+            "thumb": "https://metadata-static.plex.tv/f/people/f6f88e7a826ae358fbd24a15898d4b44.jpg",
+            "role": "Capt. Ben Waldridge",
+            "key": "/library/people/5d77682c999c64001ec2d8a1",
+            "type": "person"
+          },
+          {
+            "id": "5d77683061141d001fb149ad",
+            "order": 4,
+            "slug": "gene-evans",
+            "tag": "Gene Evans",
+            "thumb": "https://metadata-static.plex.tv/4/people/40a5501aee39a85546aca9bd67fe8f9c.jpg",
+            "role": "Hook",
+            "key": "/library/people/5d77683061141d001fb149ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a2ec6b5001f6bcb8b",
+            "order": 5,
+            "slug": "rhys-williams-2",
+            "tag": "Rhys Williams",
+            "thumb": "https://metadata-static.plex.tv/6/people/67d73b8132b15bfe38e27706cd22e850.jpg",
+            "role": "Redlegs",
+            "key": "/library/people/5d77683a2ec6b5001f6bcb8b",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddb90",
+            "order": 6,
+            "slug": "robert-osterloh",
+            "tag": "Robert Osterloh",
+            "thumb": "https://metadata-static.plex.tv/e/people/e47d3fa3a4d78c0fc4c478e8850c81bd.jpg",
+            "role": "Feversham, Gunner",
+            "key": "/library/people/5d776828eb5d26001f1ddb90",
+            "type": "person"
+          },
+          {
+            "id": "5d776826961905001eb910a7",
+            "order": 7,
+            "slug": "peter-brocco",
+            "tag": "Peter Brocco",
+            "thumb": "https://metadata-static.plex.tv/7/people/7755986e6482cdc90229efcb8e23d80e.jpg",
+            "role": "Sykes, Gunner",
+            "key": "/library/people/5d776826961905001eb910a7",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddc2d",
+            "order": 8,
+            "slug": "emerson-treacy",
+            "tag": "Emerson Treacy",
+            "thumb": "https://metadata-static.plex.tv/3/people/3ee377576795b195d8aa9d1d8756ee3b.jpg",
+            "role": "Council Speaker",
+            "key": "/library/people/5d776828eb5d26001f1ddc2d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ae6d55c002040b5aa",
+            "order": 9,
+            "slug": "morris-ankrum",
+            "tag": "Morris Ankrum",
+            "thumb": "https://metadata-static.plex.tv/5/people/563e48ebe08dc21613032ff11a61593d.jpg",
+            "role": "Capt. Radford",
+            "key": "/library/people/5d77682ae6d55c002040b5aa",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f564f09",
+            "order": 10,
+            "slug": "todd-karns",
+            "tag": "Todd Karns",
+            "thumb": "https://image.tmdb.org/t/p/original/cFOmcsJpxQ8fbVgocWiWRvIA2Fx.jpg",
+            "role": "Andrews",
+            "key": "/library/people/5d77682a103a2d001f564f09",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9aeef",
+            "order": 11,
+            "slug": "norman-leavitt",
+            "tag": "Norman Leavitt",
+            "thumb": "https://metadata-static.plex.tv/d/people/d5e368b5f65d147f72f6d0f3344bd3fd.jpg",
+            "role": "Hackett (uncredited)",
+            "key": "/library/people/5d77682f6f4521001ea9aeef",
+            "type": "person"
+          },
+          {
+            "id": "5d776825103a2d001f563ba6",
+            "order": 12,
+            "slug": "michael-mark",
+            "tag": "Michael Mark",
+            "thumb": "https://metadata-static.plex.tv/5/people/5a51fb0880f47173049166fc2fa9db5f.jpg",
+            "role": "Fisherman (uncredited)",
+            "key": "/library/people/5d776825103a2d001f563ba6",
+            "type": "person"
+          },
+          {
+            "id": "5d77682beb5d26001f1de9fb",
+            "order": 13,
+            "slug": "gene-roth",
+            "tag": "Gene Roth",
+            "thumb": "https://metadata-static.plex.tv/9/people/978e4b95042c1aff8ef38d9273999e4f.jpg",
+            "role": "Mr. Potter (uncredited)",
+            "key": "/library/people/5d77682beb5d26001f1de9fb",
+            "type": "person"
+          },
+          {
+            "id": "5d77682685719b001f3a0b54",
+            "order": 14,
+            "slug": "denver-pyle",
+            "tag": "Denver Pyle",
+            "thumb": "https://metadata-static.plex.tv/b/people/bd06e8be1c1a64dd167fda838ec49078.jpg",
+            "role": "Gunner / Mutineer (uncredited)",
+            "key": "/library/people/5d77682685719b001f3a0b54",
+            "type": "person"
+          },
+          {
+            "id": "5d776825f54112001f5bbeea",
+            "order": 15,
+            "slug": "byron-foulger",
+            "tag": "Byron Foulger",
+            "thumb": "https://metadata-static.plex.tv/4/people/4aed8ae256f80db4938e4693a4496ff9.jpg",
+            "role": "Chairman Parson's Secretary (uncredited)",
+            "key": "/library/people/5d776825f54112001f5bbeea",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77682a961905001eb91fc2",
+            "slug": "edward-dmytryk",
+            "tag": "Edward Dmytryk",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec10c7ccb45ce4bba75c3a8264f869dc.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77682a961905001eb91fc2",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682a7e9a3c0020c6b301",
+            "slug": "frank-king",
+            "tag": "Frank King",
+            "role": "Producer",
+            "key": "/library/people/5d77682a7e9a3c0020c6b301",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a7e9a3c0020c6b302",
+            "slug": "maurice-king",
+            "tag": "Maurice King",
+            "role": "Producer",
+            "key": "/library/people/5d77682a7e9a3c0020c6b302",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77683b961905001eb9522d",
+            "slug": "philip-yordan",
+            "tag": "Philip Yordan",
+            "thumb": "https://metadata-static.plex.tv/7/people/7bf9626f4981a7b96f4abc54ddd1608b.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d77683b961905001eb9522d",
+            "type": "person"
+          },
+          {
+            "id": "5d776849999c64001ec32ac7",
+            "slug": "sidney-harmon",
+            "tag": "Sidney Harmon",
+            "role": "Writer",
+            "key": "/library/people/5d776849999c64001ec32ac7",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe22e93b86d951faf684",
+            "score": 0.986,
+            "tag": "romantic"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.975,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.966,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbf0de93b86d951227a69",
+            "score": 0.936,
+            "tag": "heroic"
+          },
+          {
+            "id": "65afbe25e93b86d951fb821b",
+            "score": 0.887,
+            "tag": "thrilling"
+          },
+          {
+            "id": "65afbe36e93b86d951fe489a",
+            "score": 0.769,
+            "tag": "adventurous"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.587,
+            "tag": "mysterious"
+          },
+          {
+            "id": "65afbe25e93b86d951fb81c8",
+            "score": 0.404,
+            "tag": "gritty"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d7768352ec6b5001f6bc17a",
+            "tag": "The Guns of Navarone"
+          },
+          {
+            "guid": "plex://movie/5d776838f59e580021898fad",
+            "tag": "Mutiny on the Bounty"
+          },
+          {
+            "guid": "plex://movie/5d77684c7e9a3c0020c70495",
+            "tag": "Captain Horatio Hornblower"
+          },
+          {
+            "guid": "plex://movie/5d7768508718ba001e318a20",
+            "tag": "Gunga Din"
+          },
+          {
+            "guid": "plex://movie/5d776d01594b2b001e6ff120",
+            "tag": "Dark of the Sun"
+          },
+          {
+            "guid": "plex://movie/5d77686951dd69001fe0ba6b",
+            "tag": "Beau Geste"
+          },
+          {
+            "guid": "plex://movie/5d77687ae6d55c0020413f7d",
+            "tag": "Damn the Defiant!"
+          },
+          {
+            "guid": "plex://movie/5d77687c431c830024c0d58c",
+            "tag": "Northwest Passage"
+          },
+          {
+            "guid": "plex://movie/5d77682e2e80df001ebdd8b8",
+            "tag": "The Buccaneer"
+          },
+          {
+            "guid": "plex://movie/5d776e80fb0d55001f5c3a5d",
+            "tag": "True Spirit"
+          },
+          {
+            "guid": "plex://movie/61b0f9f799f012261156a439",
+            "tag": "True Spirit"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "King Brothers Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Americans (Mark Stevens, Patric Knowles) smuggle gold in War of 1812.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

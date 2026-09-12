@@ -1,0 +1,105 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/5d776ec9594b2b001e72e638",
+        "key": "/library/metadata/5d776ec9594b2b001e72e638",
+        "ratingKey": "5d776ec9594b2b001e72e638",
+        "studio": "Fondo para la Producción Cinematográfica de Calidad (FOPROCINE)",
+        "type": "movie",
+        "audienceRating": 5.4,
+        "audienceRatingImage": "imdb://image.rating",
+        "duration": 5520000,
+        "imdbRatingCount": 9,
+        "publicPagesURL": "https://watch.plex.tv/movie/acme-and-co",
+        "slug": "acme-and-co",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BODRhOTBkMGQtOGZkMy00ZjFhLWIzYWYtOTFkMzliYWEyZmZmXkEyXkFqcGc@._V1_.jpg",
+        "title": "Acme & Co.",
+        "userState": false,
+        "Image": [
+          {
+            "alt": "Acme & Co.",
+            "type": "coverPoster",
+            "url": "https://m.media-amazon.com/images/M/MV5BODRhOTBkMGQtOGZkMy00ZjFhLWIzYWYtOTFkMzliYWEyZmZmXkEyXkFqcGc@._V1_.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0786910"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.4
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Mexico"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776a35fb0d55001f53de1f",
+            "slug": "gregorio-rocha",
+            "tag": "Gregorio Rocha",
+            "thumb": "https://metadata-static.plex.tv/a/people/a735cc5d5fcf9456e61b64890c73a2d5.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776a35fb0d55001f53de1f",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776a35fb0d55001f53de1f",
+            "slug": "gregorio-rocha",
+            "tag": "Gregorio Rocha",
+            "thumb": "https://metadata-static.plex.tv/a/people/a735cc5d5fcf9456e61b64890c73a2d5.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776a35fb0d55001f53de1f",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776a35fb0d55001f53de1f",
+            "slug": "gregorio-rocha",
+            "tag": "Gregorio Rocha",
+            "thumb": "https://metadata-static.plex.tv/a/people/a735cc5d5fcf9456e61b64890c73a2d5.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776a35fb0d55001f53de1f",
+            "type": "person"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Fondo para la Producción Cinematográfica de Calidad (FOPROCINE)"
+          },
+          {
+            "tag": "Instituto Mexicano de Cinematografía (IMCINE)"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,435 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/0/gracenote/0826c4afa8935844c670c88008747769.jpg",
+        "guid": "plex://movie/5d77682eeb5d26001f1df4fe",
+        "key": "/library/metadata/5d77682eeb5d26001f1df4fe",
+        "rating": 10,
+        "ratingKey": "5d77682eeb5d26001f1df4fe",
+        "studio": "Industrie Cinematografiche Italiane (ICI)",
+        "summary": "Gino, a young and handsome tramp, stops at a small roadside inn run by Giovanna. She is unsatisfied with her older husband Bragana, whom she only married for money. Gino and Giovanna fall in love. But Bragana is inhibiting their passion, and Giovanna refuses to run away with Gino.",
+        "type": "movie",
+        "addedAt": -840412800,
+        "audienceRating": 8.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "availabilityId": "6525f616955723440cb84689",
+        "contentRating": "TV-14",
+        "duration": 8079125,
+        "imdbRatingCount": 9133,
+        "originalTitle": "Ossessione",
+        "originallyAvailableAt": "1943-05-16",
+        "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d77682eeb5d26001f1df4fe",
+        "publicPagesURL": "https://watch.plex.tv/movie/obsession-1943",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "obsession-1943",
+        "streamingMediaId": "6525f4c80d5a0c4118fe32da",
+        "thumb": "https://metadata-static.plex.tv/d/gracenote/dabbd77a8e448d571e0c52fec0449632.jpg",
+        "title": "Obsession",
+        "userState": false,
+        "year": 1943,
+        "Media": [
+          {
+            "bitrate": 2443,
+            "container": "mp4",
+            "height": 720,
+            "protocol": "hls",
+            "url": "https://vod-content.plexvideos.com/streams/6525f4c80d5a0c4118fe32da/c06b46de-4b2f-49fc-bbfe-867a8f88d837/main.m3u8",
+            "width": 1280,
+            "optimizedForStreaming": true,
+            "videoCodec": "h264",
+            "videoResolution": "720",
+            "Part": [
+              {
+                "container": "mp4",
+                "id": "6525f4c80d5a0c4118fe32da",
+                "key": "/library/parts/6525f4c80d5a0c4118fe32da-hls",
+                "Stream": [
+                  {
+                    "bitrate": 2251,
+                    "codec": "h264",
+                    "height": 720,
+                    "streamType": 1,
+                    "width": 1280,
+                    "id": "5d77682eeb5d26001f1df4fe-6525f616955723440cb84687",
+                    "displayTitle": "HD",
+                    "selected": true
+                  },
+                  {
+                    "audioTrackId": "6525f4c89a9362abbb008a98",
+                    "bitrate": 192,
+                    "codec": "aac",
+                    "language": "Italian",
+                    "streamType": 2,
+                    "variant": "main",
+                    "id": "5d77682eeb5d26001f1df4fe-6525f615955723440cb84685",
+                    "languageCode": "it",
+                    "displayTitle": "Italian (Stereo)",
+                    "selected": true
+                  },
+                  {
+                    "key": "/library/streams/6525f4c80d5a0c4118fe32da-ita",
+                    "language": "Italian",
+                    "streamType": 3,
+                    "id": "ita",
+                    "languageCode": "ita",
+                    "displayTitle": "Italian",
+                    "formats": "ass,itt,srt,vtt"
+                  },
+                  {
+                    "key": "/library/streams/6525f4c80d5a0c4118fe32da-eng",
+                    "language": "English",
+                    "streamType": 3,
+                    "id": "eng",
+                    "languageCode": "eng",
+                    "displayTitle": "English",
+                    "formats": "ass,itt,srt,vtt"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Obsession",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0826c4afa8935844c670c88008747769.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c368636047373104ce1c475898c88794.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1599aad98a945f933c62e2fbdc7b04b7.png"
+          },
+          {
+            "alt": "Obsession",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1599aad98a945f933c62e2fbdc7b04b7.png"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/8/gracenote/83dbeba954e50c40c4e79a6376bea873.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/d/gracenote/dabbd77a8e448d571e0c52fec0449632.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2c12db9942cc79cf2f21e1fcb9a0b7fc.jpg"
+          },
+          {
+            "alt": "Obsession",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8146b5e96cf8da8dd77ec4b97bcf1683.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0035160"
+          },
+          {
+            "id": "tmdb://5155"
+          },
+          {
+            "id": "tvdb://11192"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.5
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 10
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Italy"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682feb5d26001f1df719",
+            "order": 1,
+            "slug": "clara-calamai",
+            "tag": "Clara Calamai",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7f8d646784311413541c5848388e30d.jpg",
+            "role": "Giovanna Bragana",
+            "key": "/library/people/5d77682feb5d26001f1df719",
+            "type": "person"
+          },
+          {
+            "id": "5d77682aeb5d26001f1de40f",
+            "order": 2,
+            "slug": "massimo-girotti",
+            "tag": "Massimo Girotti",
+            "thumb": "https://metadata-static.plex.tv/8/people/83013bc8278d826a33c3742ab7a2769f.jpg",
+            "role": "Gino Costa",
+            "key": "/library/people/5d77682aeb5d26001f1de40f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df71a",
+            "order": 3,
+            "slug": "dhia-cristiani",
+            "tag": "Dhia Cristiani",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682feb5d26001f1df71a.jpg",
+            "role": "Anita",
+            "key": "/library/people/5d77682feb5d26001f1df71a",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df71b",
+            "order": 4,
+            "slug": "elio-marcuzzo",
+            "tag": "Elio Marcuzzo",
+            "role": "The Spaniard",
+            "key": "/library/people/5d77682feb5d26001f1df71b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267228e5001f1dcde7",
+            "order": 5,
+            "slug": "vittorio-duse",
+            "tag": "Vittorio Duse",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c1c3092ef3a0ff48c26b97584a4e6c3.jpg",
+            "role": "Police Officer",
+            "key": "/library/people/5d7768267228e5001f1dcde7",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df71c",
+            "order": 6,
+            "slug": "michele-riccardini",
+            "tag": "Michele Riccardini",
+            "role": "Don Remigio",
+            "key": "/library/people/5d77682feb5d26001f1df71c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df71d",
+            "order": 7,
+            "slug": "juan-de-landa",
+            "tag": "Juan de Landa",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d5e04e6c597134c2e015369f5c5835a.jpg",
+            "role": "Giuseppe Bragana",
+            "key": "/library/people/5d77682feb5d26001f1df71d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df721",
+            "order": 8,
+            "slug": "michele-sakara",
+            "tag": "Michele Sakara",
+            "role": "Il Bambino (uncredited)",
+            "key": "/library/people/5d77682feb5d26001f1df721",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776829eb5d26001f1ddf96",
+            "slug": "luchino-visconti",
+            "tag": "Luchino Visconti",
+            "thumb": "https://metadata-static.plex.tv/c/people/cec19a7eb34f0aa1065e088e4ac1e57a.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776829eb5d26001f1ddf96",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682feb5d26001f1df718",
+            "slug": "libero-solaroli",
+            "tag": "Libero Solaroli",
+            "role": "Producer",
+            "key": "/library/people/5d77682feb5d26001f1df718",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776829eb5d26001f1ddf96",
+            "slug": "luchino-visconti",
+            "tag": "Luchino Visconti",
+            "thumb": "https://metadata-static.plex.tv/c/people/cec19a7eb34f0aa1065e088e4ac1e57a.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d776829eb5d26001f1ddf96",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df71e",
+            "slug": "giuseppe-de-santis",
+            "tag": "Giuseppe De Santis",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682feb5d26001f1df71e.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77682feb5d26001f1df71e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df71f",
+            "slug": "mario-alicata",
+            "tag": "Mario Alicata",
+            "role": "Screenplay",
+            "key": "/library/people/5d77682feb5d26001f1df71f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682feb5d26001f1df720",
+            "slug": "alberto-moravia",
+            "tag": "Alberto Moravia",
+            "thumb": "https://metadata-static.plex.tv/f/people/f46d0a3f4bca0d9088a7a84f82a96308.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77682feb5d26001f1df720",
+            "type": "person"
+          },
+          {
+            "id": "5d77687b103a2d001f572ffa",
+            "slug": "antonio-pietrangeli",
+            "tag": "Antonio Pietrangeli",
+            "thumb": "https://metadata-static.plex.tv/a/people/ad62278389192a156256e2a80583bbbd.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77687b103a2d001f572ffa",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.863,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb829e",
+            "score": 0.817,
+            "tag": "bittersweet"
+          },
+          {
+            "id": "65afbe22e93b86d951faf705",
+            "score": 0.554,
+            "tag": "uplifting"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d9f34fcdfd128002089fb16",
+            "tag": "The Postman Always Rings Twice"
+          },
+          {
+            "guid": "plex://movie/642d485e76b6e34a6b5b66b9",
+            "tag": "Killer Heat"
+          },
+          {
+            "guid": "plex://movie/642e4b885c3ea85609976fd3",
+            "tag": "Killer Heat"
+          },
+          {
+            "guid": "plex://movie/5d776828151a60001f24b083",
+            "tag": "The Talented Mr. Ripley"
+          },
+          {
+            "guid": "plex://movie/5d776828151a60001f24b07f",
+            "tag": "Notes on a Scandal"
+          },
+          {
+            "guid": "plex://movie/5d7769ecfb0d55001f534919",
+            "tag": "In Secret"
+          },
+          {
+            "guid": "plex://movie/5d776a15594b2b001e6b2bcc",
+            "tag": "Third Person"
+          },
+          {
+            "guid": "plex://movie/5d77682b54c0f0001f3023ef",
+            "tag": "Unfaithful"
+          },
+          {
+            "guid": "plex://movie/5d7768508a7581001f1304b4",
+            "tag": "The Postman Always Rings Twice"
+          },
+          {
+            "guid": "plex://movie/5d776853eb5d26001f1e65ed",
+            "tag": "The Voyeur"
+          },
+          {
+            "guid": "plex://movie/5d77682deb5d26001f1df180",
+            "tag": "Revolutionary Road"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Industrie Cinematografiche Italiane (ICI)"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Drifter (Massimo Girotti) helps beauty (Clara Calamai) kill husband (Juan de Landa) in Italy.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

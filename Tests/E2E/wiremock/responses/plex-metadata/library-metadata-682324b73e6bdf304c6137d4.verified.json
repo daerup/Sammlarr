@@ -1,0 +1,320 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/682324b73e6bdf304c6137d4",
+        "key": "/library/metadata/682324b73e6bdf304c6137d4",
+        "ratingKey": "682324b73e6bdf304c6137d4",
+        "studio": "Miss Hannah Productions",
+        "summary": "Three guys seeking romance and relaxation on the water encounter an unexpected situation.",
+        "type": "movie",
+        "addedAt": 1741392000,
+        "audienceRating": 3.1,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "NC-17",
+        "duration": 3660000,
+        "imdbRatingCount": 36,
+        "originallyAvailableAt": "2025-03-08",
+        "publicPagesURL": "https://watch.plex.tv/movie/motor-city-waves",
+        "slug": "motor-city-waves",
+        "thumb": "https://image.tmdb.org/t/p/original/dtiU8rHroLF3xdnl9sz7RAOTE2l.jpg",
+        "title": "Motor City Waves",
+        "userState": false,
+        "year": 2025,
+        "Image": [
+          {
+            "alt": "Motor City Waves",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/dtiU8rHroLF3xdnl9sz7RAOTE2l.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt36839800"
+          },
+          {
+            "id": "tmdb://1565882"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3.1
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 1
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7770aa7a53e9001e7a8577",
+            "order": 1,
+            "slug": "alphonso-settles",
+            "tag": "Alphonso Settles",
+            "thumb": "https://metadata-static.plex.tv/8/people/89cf09d9c14ea1119ac519bb7c7979b6.jpg",
+            "role": "Jaxon",
+            "key": "/library/people/5d7770aa7a53e9001e7a8577",
+            "type": "person"
+          },
+          {
+            "id": "68f7aeb199db9c67abe6216f",
+            "order": 2,
+            "slug": "india-ahjania-campbell-1",
+            "tag": "India Ahjania Campbell",
+            "role": "Lisa",
+            "key": "/library/people/68f7aeb199db9c67abe6216f",
+            "type": "person"
+          },
+          {
+            "id": "64c7a2c51004c7ebc37c0fd2",
+            "order": 3,
+            "slug": "shadow-milan-1",
+            "tag": "Shadow Milan",
+            "role": "Kelly",
+            "key": "/library/people/64c7a2c51004c7ebc37c0fd2",
+            "type": "person"
+          },
+          {
+            "id": "68f7aeb21627dee6a73e64b4",
+            "order": 4,
+            "slug": "james-petty-iii-1",
+            "tag": "James Petty III",
+            "role": "J.R.",
+            "key": "/library/people/68f7aeb21627dee6a73e64b4",
+            "type": "person"
+          },
+          {
+            "id": "67d575021c8c76c229667fbe",
+            "order": 5,
+            "slug": "tamika-scott-kilgo-3",
+            "tag": "Tamika Scott Kilgo",
+            "role": "Sasha",
+            "key": "/library/people/67d575021c8c76c229667fbe",
+            "type": "person"
+          },
+          {
+            "id": "6a8d84330f06ad230ed003f3",
+            "order": 6,
+            "slug": "keno-livingston-1",
+            "tag": "Keno Livingston",
+            "role": "Angelica",
+            "key": "/library/people/6a8d84330f06ad230ed003f3",
+            "type": "person"
+          },
+          {
+            "id": "6a8d8433be5fdf44ff5dd851",
+            "order": 7,
+            "slug": "mia-hardrick-1",
+            "tag": "Mia Hardrick",
+            "role": "Captain Treasure's friend",
+            "key": "/library/people/6a8d8433be5fdf44ff5dd851",
+            "type": "person"
+          },
+          {
+            "id": "6a8d843317752dfce931114e",
+            "order": 8,
+            "slug": "tai-dorsette-1",
+            "tag": "Tai Dorsette",
+            "role": "Beach Girl",
+            "key": "/library/people/6a8d843317752dfce931114e",
+            "type": "person"
+          },
+          {
+            "id": "6a8d84345fd10d2f15d192ab",
+            "order": 9,
+            "slug": "dawn-bowens-1",
+            "tag": "Dawn Bowens",
+            "role": "Auntie Kim",
+            "key": "/library/people/6a8d84345fd10d2f15d192ab",
+            "type": "person"
+          },
+          {
+            "id": "64bfb9b16692a26c3829137c",
+            "order": 10,
+            "slug": "delano-anderson-1",
+            "tag": "Delano Anderson",
+            "role": "Tyrone",
+            "key": "/library/people/64bfb9b16692a26c3829137c",
+            "type": "person"
+          },
+          {
+            "id": "6a8d8434c539f5196a90a06c",
+            "order": 11,
+            "slug": "lucky-the-dancer-1",
+            "tag": "Lucky the Dancer",
+            "role": "Beach girl",
+            "key": "/library/people/6a8d8434c539f5196a90a06c",
+            "type": "person"
+          },
+          {
+            "id": "6a8d843217752dfce931114c",
+            "order": 12,
+            "slug": "bre-nicole-j-1",
+            "tag": "Bre Nicole J",
+            "role": "Beach girl",
+            "key": "/library/people/6a8d843217752dfce931114c",
+            "type": "person"
+          },
+          {
+            "id": "69ac1394e29c2216b5f36f1a",
+            "order": 13,
+            "slug": "noelle-frye-3",
+            "tag": "Noelle Frye",
+            "role": "Beach gir",
+            "key": "/library/people/69ac1394e29c2216b5f36f1a",
+            "type": "person"
+          },
+          {
+            "id": "5ed90ba8da1bff003f7ee423",
+            "order": 14,
+            "slug": "cameron-cottrell-1",
+            "tag": "Cameron Cottrell",
+            "thumb": "https://metadata-static.plex.tv/0/people/0bca7807206e6a84282c7bab69c6744b.jpg",
+            "role": "Stacy",
+            "key": "/library/people/5ed90ba8da1bff003f7ee423",
+            "type": "person"
+          },
+          {
+            "id": "6a8d84334dcf599bd171cbc4",
+            "order": 15,
+            "slug": "chanel-bonds-1",
+            "tag": "Chanel Bonds",
+            "role": "Ciara",
+            "key": "/library/people/6a8d84334dcf599bd171cbc4",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "6a8d8433da8597a56cc4f46d",
+            "slug": "monique-1mo-hannah-1",
+            "tag": "Monique 1Mo Hannah",
+            "role": "Director",
+            "key": "/library/people/6a8d8433da8597a56cc4f46d",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "602c20f112c5f1002ca7b14c",
+            "slug": "monique-1mo-hannah",
+            "tag": "Monique 1Mo Hannah",
+            "role": "Executive Producer",
+            "key": "/library/people/602c20f112c5f1002ca7b14c",
+            "type": "person"
+          },
+          {
+            "id": "6838cab51ffe2c47fe2bd186",
+            "slug": "archana-sodha-1",
+            "tag": "Archana Sodha",
+            "role": "Associate Producer",
+            "key": "/library/people/6838cab51ffe2c47fe2bd186",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a8d8433da8597a56cc4f46d",
+            "slug": "monique-1mo-hannah-1",
+            "tag": "Monique 1Mo Hannah",
+            "role": "Writer",
+            "key": "/library/people/6a8d8433da8597a56cc4f46d",
+            "type": "person"
+          },
+          {
+            "id": "6a8d84330f06ad230ed003f3",
+            "slug": "keno-livingston-1",
+            "tag": "Keno Livingston",
+            "role": "Writer",
+            "key": "/library/people/6a8d84330f06ad230ed003f3",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/655e534c32a608a47085897b",
+            "tag": "Ricky Gervais: Armageddon"
+          },
+          {
+            "guid": "plex://movie/65f5fd7ae5a4d2133c1f7511",
+            "tag": "Jimmy Carr: Natural Born Killer"
+          },
+          {
+            "guid": "plex://movie/6680c8882b068de1786c15e2",
+            "tag": "Ricky Gervais: Mortality"
+          },
+          {
+            "guid": "plex://movie/6685a2072ab1a34f2b165542",
+            "tag": "Ricky Gervais: Mortality"
+          },
+          {
+            "guid": "plex://movie/5d77683b151a60001f24f12d",
+            "tag": "Pretty Persuasion"
+          },
+          {
+            "guid": "plex://movie/674d7cb6c0e593bc4b9d7f36",
+            "tag": "Bill Burr: Drop Dead Years"
+          },
+          {
+            "guid": "plex://movie/5d9f352906d220001feb478c",
+            "tag": "Ali G, Aiii"
+          },
+          {
+            "guid": "plex://movie/5d776a24fb0d55001f53b9a5",
+            "tag": "Fame"
+          },
+          {
+            "guid": "plex://movie/5d7768567e9a3c0020c712d8",
+            "tag": "Hard to Die"
+          },
+          {
+            "guid": "plex://movie/5d9f3ce1d5fd3f001ee1f105",
+            "tag": "68 Kill"
+          },
+          {
+            "guid": "plex://movie/5d776d2196b655001fe40682",
+            "tag": "Accident Man"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Miss Hannah Productions"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Three guys seeking romance and relaxation on the water encounter an unexpected situation.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

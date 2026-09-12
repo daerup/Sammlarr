@@ -1,0 +1,1142 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/c/gracenote/caf1e30bf0532a091ec1079d8727fb58.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/33/banners/64f8859af289d.jpg",
+        "guid": "plex://movie/5d9f3c9badeb7a0021ce9100",
+        "isTopRated": true,
+        "key": "/library/metadata/5d9f3c9badeb7a0021ce9100",
+        "rating": 9.7,
+        "ratingKey": "5d9f3c9badeb7a0021ce9100",
+        "studio": "Columbia Pictures",
+        "summary": "Phil Lord and Christopher Miller, the creative minds behind The Lego Movie and 21 Jump Street, bring their unique talents to a fresh vision of a different Spider-Man Universe, with a groundbreaking visual style that's the first of its kind. \"Spider-Man(TM): Into the Spider-Verse\" introduces Brooklyn teen Miles Morales (Shameik Moore), and the limitless possibilities of the Spider-Verse, where more than one can wear the mask.",
+        "tagline": "Enter a universe where more than one wears the mask.",
+        "type": "movie",
+        "addedAt": 1544572800,
+        "audienceRating": 9.3,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 90000000,
+        "contentRating": "PG",
+        "duration": 7020000,
+        "imdbRatingCount": 815726,
+        "originallyAvailableAt": "2018-12-12",
+        "publicPagesURL": "https://watch.plex.tv/movie/spider-man-into-the-spider-verse",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 394884133,
+        "slug": "spider-man-into-the-spider-verse",
+        "thumb": "https://metadata-static.plex.tv/c/gracenote/c353b7ead691f0808f4df23f2095aadd.jpg",
+        "title": "Spider-Man: Into the Spider-Verse",
+        "userState": false,
+        "year": 2018,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9f3c9badeb7a0021ce9100/commonsensemedia",
+            "oneLiner": "Excellent, intense adventure has thrills, humor, heart.",
+            "AgeRating": [
+              {
+                "age": 9,
+                "rating": 5,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/c/gracenote/caf1e30bf0532a091ec1079d8727fb58.jpg"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d4d8b6851f2e6a14e8bc60e20d3390c0.jpg"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/33/banners/64f8859af289d.jpg"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/5/683a142553/54bea32522c18fcb32064c3e87038fb8.png"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/5/683a142553/54bea32522c18fcb32064c3e87038fb8.png"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/5/gracenote/57338942dadd9db3545ac67593e5032b.jpg"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c353b7ead691f0808f4df23f2095aadd.jpg"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/a/gracenote/aacea65215025c2042088cbffed48985.jpg"
+          },
+          {
+            "alt": "Spider-Man: Into the Spider-Verse",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/5/gracenote/535d32efbd766454344d9fbd767460bd.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt4633694"
+          },
+          {
+            "id": "tmdb://324857"
+          },
+          {
+            "id": "tvdb://33"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.399
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Oscar",
+            "category": "Best Animated Feature Film",
+            "event": "Academy Awards",
+            "id": "643ee0c4cfe820d621a8bd9b",
+            "isWinner": true,
+            "year": 2019
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/oC5S5pdfzPiQC4us05uDMT7v5Ng.jpg",
+            "guid": "plex://collection/5ec2fd4f623af7003f9cb3b9",
+            "key": "/library/collections/5ec2fd4f623af7003f9cb3b9/children",
+            "summary": "An animated trilogy of Spider-Man films helmed by writers Phil Lord and Christopher Miller. The films follow Miles Morales and Gwen Stacy as they deal with various iterations of Spider-Man throughout the vast and infinite multiverse.",
+            "thumb": "https://image.tmdb.org/t/p/original/eD4bGQNfmqExIAzKdvX5gDHhI2.jpg",
+            "tag": "Spider-Man: Spider-Verse Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768a52d18a4001ff1012e",
+            "order": 1,
+            "slug": "shameik-moore",
+            "tag": "Shameik Moore",
+            "thumb": "https://metadata-static.plex.tv/2/people/2e8af3457dd675a7c62bf02eb3a0f1aa.jpg",
+            "role": "Miles Morales (voice)",
+            "key": "/library/people/5d7768a52d18a4001ff1012e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768348718ba001e3144cf",
+            "order": 2,
+            "slug": "jake-johnson",
+            "tag": "Jake Johnson",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef0d77cbc2eac1d0373eb9def4429509.jpg",
+            "role": "Peter B. Parker (voice)",
+            "key": "/library/people/5d7768348718ba001e3144cf",
+            "type": "person"
+          },
+          {
+            "id": "5d7768809ab54400214e6ccf",
+            "order": 3,
+            "slug": "hailee-steinfeld",
+            "tag": "Hailee Steinfeld",
+            "thumb": "https://metadata-static.plex.tv/e/people/e5c1c85874ab52b9941e478215df857e.jpg",
+            "role": "Gwen Stacy (voice)",
+            "key": "/library/people/5d7768809ab54400214e6ccf",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9ad07",
+            "order": 4,
+            "slug": "mahershala-ali",
+            "tag": "Mahershala Ali",
+            "thumb": "https://metadata-static.plex.tv/2/people/26f148916794340db762f183c4ce0aff.jpg",
+            "role": "Uncle Aaron (voice)",
+            "key": "/library/people/5d77682f6f4521001ea9ad07",
+            "type": "person"
+          },
+          {
+            "id": "5d776afa96b655001fdff7a0",
+            "order": 5,
+            "slug": "brian-tyree-henry",
+            "tag": "Brian Tyree Henry",
+            "thumb": "https://metadata-static.plex.tv/2/people/284192af3eed363c6291d504eaaba8db.jpg",
+            "role": "Jefferson Davis (voice)",
+            "key": "/library/people/5d776afa96b655001fdff7a0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768278718ba001e311e8a",
+            "order": 6,
+            "slug": "lily-tomlin",
+            "tag": "Lily Tomlin",
+            "thumb": "https://metadata-static.plex.tv/f/people/f8bea7c99aaf7beeba39ecdd1125b2b5.jpg",
+            "role": "Aunt May (voice)",
+            "key": "/library/people/5d7768278718ba001e311e8a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768367e9a3c0020c6d0e4",
+            "order": 7,
+            "slug": "luna-lauren-velez",
+            "tag": "Luna Lauren Vélez",
+            "thumb": "https://metadata-static.plex.tv/7/people/7686d790f762d53171ec72ba0045e99c.jpg",
+            "role": "Rio Morales (voice)",
+            "key": "/library/people/5d7768367e9a3c0020c6d0e4",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ee6d55c002040bc49",
+            "order": 8,
+            "slug": "zoe-kravitz",
+            "tag": "Zoë Kravitz",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd7e73cc7ebfe2518b67308987f4d9e4.jpg",
+            "role": "Mary Jane (voice)",
+            "key": "/library/people/5d77682ee6d55c002040bc49",
+            "type": "person"
+          },
+          {
+            "id": "5d77689c374a5b001fecaa9b",
+            "order": 9,
+            "slug": "john-mulaney",
+            "tag": "John Mulaney",
+            "thumb": "https://metadata-static.plex.tv/9/people/9b9b90628d9bbfe39c2555d0b0d71eec.jpg",
+            "role": "Spider-Ham (voice)",
+            "key": "/library/people/5d77689c374a5b001fecaa9b",
+            "type": "person"
+          },
+          {
+            "id": "5d776b7f7a53e9001e727ae0",
+            "order": 10,
+            "slug": "kimiko-glenn",
+            "tag": "Kimiko Glenn",
+            "thumb": "https://metadata-static.plex.tv/0/people/080a1a63485a869069c0344b0a46d353.jpg",
+            "role": "Peni Parker (voice)",
+            "key": "/library/people/5d776b7f7a53e9001e727ae0",
+            "type": "person"
+          },
+          {
+            "id": "5d776825eb5d26001f1dd2ac",
+            "order": 11,
+            "slug": "nicolas-cage",
+            "tag": "Nicolas Cage",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e089763f0b61fad7ed6f5e594e6ca15.jpg",
+            "role": "Spider-Man Noir (voice)",
+            "key": "/library/people/5d776825eb5d26001f1dd2ac",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd51",
+            "order": 12,
+            "slug": "kathryn-hahn",
+            "tag": "Kathryn Hahn",
+            "thumb": "https://metadata-static.plex.tv/0/people/0fa6ab4c68ec9bcd3ff24b00b089dbd5.jpg",
+            "role": "Doc Ock (voice)",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd51",
+            "type": "person"
+          },
+          {
+            "id": "5d77682685719b001f3a0907",
+            "order": 13,
+            "slug": "liev-schreiber",
+            "tag": "Liev Schreiber",
+            "thumb": "https://metadata-static.plex.tv/a/people/a7459721d2768b6af55ccd96a8de5447.jpg",
+            "role": "Wilson Fisk (voice)",
+            "key": "/library/people/5d77682685719b001f3a0907",
+            "type": "person"
+          },
+          {
+            "id": "5d7768347e9a3c0020c6caa5",
+            "order": 14,
+            "slug": "chris-pine",
+            "tag": "Chris Pine",
+            "thumb": "https://metadata-static.plex.tv/8/people/8fb39dc3892f82b7d2a79d573ef7e6e9.jpg",
+            "role": "Peter Parker (voice)",
+            "key": "/library/people/5d7768347e9a3c0020c6caa5",
+            "type": "person"
+          },
+          {
+            "id": "5d776864eb5d26001f1e92ac",
+            "order": 15,
+            "slug": "natalie-morales",
+            "tag": "Natalie Morales",
+            "thumb": "https://metadata-static.plex.tv/f/people/f91efb37c227766a586379c6379e3d74.jpg",
+            "role": "Miss Calleros (voice)",
+            "key": "/library/people/5d776864eb5d26001f1e92ac",
+            "type": "person"
+          },
+          {
+            "id": "5d7769d3fb0d55001f531530",
+            "order": 16,
+            "slug": "edwin-h-bravo",
+            "tag": "Edwin H. Bravo",
+            "thumb": "https://metadata-static.plex.tv/8/people/89b3304a8e02bdfa126eb241825dcb4b.jpg",
+            "role": "Brooklyn Visions Security Guard (voice)",
+            "key": "/library/people/5d7769d3fb0d55001f531530",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b5af944001f1f7ba0",
+            "order": 17,
+            "slug": "oscar-isaac",
+            "tag": "Oscar Isaac",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec0a1b7ff68206a58b50c7466d033a6f.jpg",
+            "role": "Interesting Person #1 (voice)",
+            "key": "/library/people/5d77682b5af944001f1f7ba0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768d3ebdf2200209c9384",
+            "order": 18,
+            "slug": "greta-lee",
+            "tag": "Greta Lee",
+            "thumb": "https://metadata-static.plex.tv/9/people/9f8f0af7870be78b7fb3412ff9144de0.jpg",
+            "role": "Interesting Person #2 (voice)",
+            "key": "/library/people/5d7768d3ebdf2200209c9384",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8955",
+            "order": 19,
+            "slug": "stan-lee",
+            "tag": "Stan Lee",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab04e310ed927e8d727c77f51ce3bae1.jpg",
+            "role": "Stan (voice)",
+            "key": "/library/people/5d7768274de0ee001fcc8955",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d61141d001fb16775",
+            "order": 20,
+            "slug": "jorma-taccone",
+            "tag": "Jorma Taccone",
+            "thumb": "https://metadata-static.plex.tv/a/people/ac4f1c8fdea3b78b6243b0bf6832af11.jpg",
+            "role": "Green Goblin / Last Dude (voice)",
+            "key": "/library/people/5d77683d61141d001fb16775",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e3c3c2a001fbccb0f",
+            "order": 21,
+            "slug": "joaquin-cosio",
+            "tag": "Joaquín Cosío",
+            "thumb": "https://metadata-static.plex.tv/6/people/63fd7cd8be00da9a5db6d3b626bec6c6.jpg",
+            "role": "Scorpion (voice)",
+            "key": "/library/people/5d77682e3c3c2a001fbccb0f",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2dfb0d55001f53cf08",
+            "order": 22,
+            "slug": "marvin-jones-iii",
+            "tag": "Marvin Jones III",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7437684c5159ef598710356d425567b.jpg",
+            "role": "Tombstone (voice)",
+            "key": "/library/people/5d776a2dfb0d55001f53cf08",
+            "type": "person"
+          },
+          {
+            "id": "5d77691796b655001fdca42c",
+            "order": 23,
+            "slug": "kim-yarbrough",
+            "tag": "Kim Yarbrough",
+            "thumb": "https://metadata-static.plex.tv/f/people/f8c805c59f2ec78bfc59687b50d5b6af.jpg",
+            "role": "Scientist in Cafeteria (voice)",
+            "key": "/library/people/5d77691796b655001fdca42c",
+            "type": "person"
+          },
+          {
+            "id": "5d776832151a60001f24d339",
+            "order": 24,
+            "slug": "lake-bell",
+            "tag": "Lake Bell",
+            "thumb": "https://metadata-static.plex.tv/c/people/cdd282434950659f619d7feac49c4ba3.jpg",
+            "role": "Vanessa Fisk (voice)",
+            "key": "/library/people/5d776832151a60001f24d339",
+            "type": "person"
+          },
+          {
+            "id": "5d776c87fb0d55001f58a442",
+            "order": 25,
+            "slug": "jessica-mikayla-adams",
+            "tag": "Jessica Mikayla Adams",
+            "thumb": "https://metadata-static.plex.tv/a/people/a4feb7989cc2a25f625eb6a9b57b8fad.jpg",
+            "role": "Brooklyn Friend (voice)",
+            "key": "/library/people/5d776c87fb0d55001f58a442",
+            "type": "person"
+          },
+          {
+            "id": "5e164bf07c6c730040bc2b6d",
+            "order": 26,
+            "slug": "gredel-berrios-calladine",
+            "tag": "Gredel Berrios Calladine",
+            "role": "Brooklyn Friend (voice)",
+            "key": "/library/people/5e164bf07c6c730040bc2b6d",
+            "type": "person"
+          },
+          {
+            "id": "5dcfcf28a0db9d0020858fc1",
+            "order": 27,
+            "slug": "sarah-d-cole",
+            "tag": "Sarah D. Cole",
+            "thumb": "https://metadata-static.plex.tv/2/people/2847708b257dd9fe4be27f0120705510.jpg",
+            "role": "Brooklyn Friend (voice)",
+            "key": "/library/people/5dcfcf28a0db9d0020858fc1",
+            "type": "person"
+          },
+          {
+            "id": "5e9452ac3cd2be00406472dd",
+            "order": 28,
+            "slug": "kelby-joseph",
+            "tag": "Kelby Joseph",
+            "role": "Brooklyn Friend (voice)",
+            "key": "/library/people/5e9452ac3cd2be00406472dd",
+            "type": "person"
+          },
+          {
+            "id": "5d776d21ad5437001f7cde02",
+            "order": 29,
+            "slug": "mimi-davila",
+            "tag": "Mimi Davila",
+            "thumb": "https://metadata-static.plex.tv/5/people/5b34ed3ca57c0d6d436355001371ebaf.jpg",
+            "role": "Brooklyn Visions Student (voice)",
+            "key": "/library/people/5d776d21ad5437001f7cde02",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ae6d55c002040b59b",
+            "order": 30,
+            "slug": "claudia-choi",
+            "tag": "Claudia Choi",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d167dc43e881bc0b63a16c4f85b04fb.jpg",
+            "role": "Brooklyn Visions Teacher (voice)",
+            "key": "/library/people/5d77682ae6d55c002040b59b",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9f7a53e9001e72b186",
+            "order": 31,
+            "slug": "melanie-haynes",
+            "tag": "Melanie Haynes",
+            "thumb": "https://metadata-static.plex.tv/6/people/626b22205acdd26da5bf44756e103cab.jpg",
+            "role": "Brooklyn Visions Teacher (voice)",
+            "key": "/library/people/5d776b9f7a53e9001e72b186",
+            "type": "person"
+          },
+          {
+            "id": "5d776889431c830024c0ea77",
+            "order": 32,
+            "slug": "joseph-izzo",
+            "tag": "Joseph Izzo",
+            "thumb": "https://metadata-static.plex.tv/people/5d776889431c830024c0ea77.jpg",
+            "role": "Brooklyn Visions Teacher (voice)",
+            "key": "/library/people/5d776889431c830024c0ea77",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ed9ab54400214f8b06",
+            "order": 33,
+            "slug": "nick-jaine",
+            "tag": "Nick Jaine",
+            "thumb": "https://metadata-static.plex.tv/c/cc68393fae/people/cdf77830844cee0409d90ecadfb1d641.jpg",
+            "role": "Brooklyn Visions Teacher (voice)",
+            "key": "/library/people/5d7769ed9ab54400214f8b06",
+            "type": "person"
+          },
+          {
+            "id": "5d777064dd931c001e38c64d",
+            "order": 34,
+            "slug": "muneeb-rehman",
+            "tag": "Muneeb Rehman",
+            "thumb": "https://metadata-static.plex.tv/6/people/69228a27f98810cc1f6d86ecf8a8fe90.jpg",
+            "role": "Brooklyn Visions Teacher (voice)",
+            "key": "/library/people/5d777064dd931c001e38c64d",
+            "type": "person"
+          },
+          {
+            "id": "5dce6daee2bf56001ec50eb9",
+            "order": 35,
+            "slug": "carlos-zaragoza",
+            "tag": "Carlos Zaragoza",
+            "thumb": "https://metadata-static.plex.tv/3/people/3863e1c09c49b6576482f929419da023.jpg",
+            "role": "Brooklyn Visions Teacher (voice)",
+            "key": "/library/people/5dce6daee2bf56001ec50eb9",
+            "type": "person"
+          },
+          {
+            "id": "5d776bd5594b2b001e6e4aca",
+            "order": 36,
+            "slug": "post-malone",
+            "tag": "Post Malone",
+            "thumb": "https://metadata-static.plex.tv/1/people/1a9003d90aa1b43b81e20ee5a15dacf8.jpg",
+            "role": "Brooklyn Bystander (voice)",
+            "key": "/library/people/5d776bd5594b2b001e6e4aca",
+            "type": "person"
+          },
+          {
+            "id": "5d776e3796b655001fe6036b",
+            "order": 37,
+            "slug": "david-applebee",
+            "tag": "David Applebee",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776e3796b655001fe6036b",
+            "type": "person"
+          },
+          {
+            "id": "5d776b6c9ab544002150b437",
+            "order": 38,
+            "slug": "juan-carlos-arvelo",
+            "tag": "Juan Carlos Arvelo",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b6c9ab544002150b437.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776b6c9ab544002150b437",
+            "type": "person"
+          },
+          {
+            "id": "62fb7ceaaa71b877e94f7b2d",
+            "order": 39,
+            "slug": "qiang-chen-7",
+            "tag": "Adam Brown",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/62fb7ceaaa71b877e94f7b2d",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab63",
+            "order": 40,
+            "slug": "jon-bruno",
+            "tag": "Jon Bruno",
+            "thumb": "https://metadata-static.plex.tv/people/5d776827151a60001f24ab63.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776827151a60001f24ab63",
+            "type": "person"
+          },
+          {
+            "id": "5d7768817e5fa10020bf0e33",
+            "order": 41,
+            "slug": "darcy-rose-byrnes",
+            "tag": "Darcy Rose Byrnes",
+            "thumb": "https://metadata-static.plex.tv/7/people/7a06eba36a9011a1156e38c5f01a36ea.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768817e5fa10020bf0e33",
+            "type": "person"
+          },
+          {
+            "id": "5d776c1696b655001fe258d2",
+            "order": 42,
+            "slug": "oscar-camacho",
+            "tag": "Oscar Camacho",
+            "thumb": "https://metadata-static.plex.tv/f/people/f72de9c4e99239f1114cd9c9fb44f02c.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776c1696b655001fe258d2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768265af944001f1f66c4",
+            "order": 43,
+            "slug": "june-christopher",
+            "tag": "June Christopher",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768265af944001f1f66c4.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768265af944001f1f66c4",
+            "type": "person"
+          },
+          {
+            "id": "5d776dcd96b655001fe53cb4",
+            "order": 44,
+            "slug": "alycia-cooper",
+            "tag": "Alycia Cooper",
+            "thumb": "https://metadata-static.plex.tv/9/people/9d77428a8998814993a33c9e69040267.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776dcd96b655001fe53cb4",
+            "type": "person"
+          },
+          {
+            "id": "5d776c48ad5437001f7b9649",
+            "order": 45,
+            "slug": "michelle-jubilee-gonzalez",
+            "tag": "Michelle Jubilee Gonzalez",
+            "thumb": "https://metadata-static.plex.tv/people/5d776c48ad5437001f7b9649.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776c48ad5437001f7b9649",
+            "type": "person"
+          },
+          {
+            "id": "5d776834961905001eb93be1",
+            "order": 46,
+            "slug": "terrence-hardy-jr",
+            "tag": "Terrence Hardy Jr.",
+            "thumb": "https://metadata-static.plex.tv/people/5d776834961905001eb93be1.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776834961905001eb93be1",
+            "type": "person"
+          },
+          {
+            "id": "5d7768326f4521001ea9ba07",
+            "order": 47,
+            "slug": "bridget-hoffman",
+            "tag": "Bridget Hoffman",
+            "thumb": "https://metadata-static.plex.tv/a/people/a4e268685ec6cdb86d83d8f8af2a115a.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768326f4521001ea9ba07",
+            "type": "person"
+          },
+          {
+            "id": "5d7768293c3c2a001fbcb9f4",
+            "order": 48,
+            "slug": "rif-hutton",
+            "tag": "Rif Hutton",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768293c3c2a001fbcb9f4.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768293c3c2a001fbcb9f4",
+            "type": "person"
+          },
+          {
+            "id": "5d7770bbf617c9002019ffea",
+            "order": 49,
+            "slug": "miguel-jiron",
+            "tag": "Miguel Jiron",
+            "thumb": "https://metadata-static.plex.tv/6/people/6735bc69d8c1117a2ca1191faef71c3c.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7770bbf617c9002019ffea",
+            "type": "person"
+          },
+          {
+            "id": "5d776a5e47dd6e001f6d2091",
+            "order": 50,
+            "slug": "harrison-knight",
+            "tag": "Harrison Knight",
+            "thumb": "https://metadata-static.plex.tv/people/5d776a5e47dd6e001f6d2091.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776a5e47dd6e001f6d2091",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b7228e5001f1df859",
+            "order": 51,
+            "slug": "lex-lang",
+            "tag": "Lex Lang",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683b7228e5001f1df859.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683b7228e5001f1df859",
+            "type": "person"
+          },
+          {
+            "id": "5d776834961905001eb93be8",
+            "order": 52,
+            "slug": "donna-lynn-leavy",
+            "tag": "Donna Lynn Leavy",
+            "thumb": "https://metadata-static.plex.tv/a/people/aed33dcc159e8be539b837ab3c4a6bed.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776834961905001eb93be8",
+            "type": "person"
+          },
+          {
+            "id": "5f4004005a76a80042d2900b",
+            "order": 53,
+            "slug": "andrew-leviton",
+            "tag": "Andrew Leviton",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5f4004005a76a80042d2900b",
+            "type": "person"
+          },
+          {
+            "id": "5dce6b07964b6b001e927d7f",
+            "order": 54,
+            "slug": "caitlin-mckenna",
+            "tag": "Caitlin McKenna",
+            "thumb": "https://metadata-static.plex.tv/people/5dce6b07964b6b001e927d7f.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5dce6b07964b6b001e927d7f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768337e9a3c0020c6c72a",
+            "order": 55,
+            "slug": "scott-menville",
+            "tag": "Scott Menville",
+            "thumb": "https://metadata-static.plex.tv/5/people/53d22b6b39d9bd485f8426a027133703.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768337e9a3c0020c6c72a",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2afd",
+            "order": 56,
+            "slug": "christopher-miller",
+            "tag": "Christopher Miller",
+            "thumb": "https://metadata-static.plex.tv/8/people/847a4c739af6edab0fd2a628aa388d5b.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77684c0ea56a001e2a2afd",
+            "type": "person"
+          },
+          {
+            "id": "5d776a637a53e9001e703e3d",
+            "order": 57,
+            "slug": "arthur-ortiz",
+            "tag": "Arthur Ortiz",
+            "thumb": "https://metadata-static.plex.tv/c/people/cad37aa87473a8c0b257ea4c7142fade.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776a637a53e9001e703e3d",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a54f42c001f8c5458",
+            "order": 58,
+            "slug": "juan-pacheco",
+            "tag": "Juan Pacheco",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683a54f42c001f8c5458.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683a54f42c001f8c5458",
+            "type": "person"
+          },
+          {
+            "id": "5d776828961905001eb91ab3",
+            "order": 59,
+            "slug": "devika-parikh",
+            "tag": "Devika Parikh",
+            "thumb": "https://metadata-static.plex.tv/8/people/86f6460c57f0977890d80d0c855b3171.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776828961905001eb91ab3",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ba96b655001fdd7c2f",
+            "order": 60,
+            "slug": "shakira-janai-paye",
+            "tag": "Shakira Ja'nai Paye",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769ba96b655001fdd7c2f.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7769ba96b655001fdd7c2f",
+            "type": "person"
+          },
+          {
+            "id": "5d776888d11dd30020227566",
+            "order": 61,
+            "slug": "courtney-peldon",
+            "tag": "Courtney Peldon",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4476f8c6762815ff5be8d35cab61bbb.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776888d11dd30020227566",
+            "type": "person"
+          },
+          {
+            "id": "5d7768476f4521001ea9fa47",
+            "order": 62,
+            "slug": "chrystee-pharris",
+            "tag": "Chrystee Pharris",
+            "thumb": "https://metadata-static.plex.tv/8/people/86522c596dc3b345d5dc5294ac70a638.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768476f4521001ea9fa47",
+            "type": "person"
+          },
+          {
+            "id": "5d7768487228e5001f1e13bb",
+            "order": 63,
+            "slug": "jacqueline-pinol",
+            "tag": "Jacqueline Pinol",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768487228e5001f1e13bb.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768487228e5001f1e13bb",
+            "type": "person"
+          },
+          {
+            "id": "5d776834961905001eb93bea",
+            "order": 64,
+            "slug": "juan-pope",
+            "tag": "Juan Pope",
+            "thumb": "https://metadata-static.plex.tv/people/5d776834961905001eb93bea.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776834961905001eb93bea",
+            "type": "person"
+          },
+          {
+            "id": "5d7768462e80df001ebe0737",
+            "order": 65,
+            "slug": "al-rodrigo",
+            "tag": "Al Rodrigo",
+            "thumb": "https://metadata-static.plex.tv/4/people/439bb73db9571f266022bde815d68943.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768462e80df001ebe0737",
+            "type": "person"
+          },
+          {
+            "id": "5ec4165a4c5e17003eb8bbfe",
+            "order": 66,
+            "slug": "joseph-sanfelippo",
+            "tag": "Joseph Sanfelippo",
+            "thumb": "https://metadata-static.plex.tv/6/people/689ab371c1afd4336d0590e4bf682d07.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5ec4165a4c5e17003eb8bbfe",
+            "type": "person"
+          },
+          {
+            "id": "5d776841961905001eb96557",
+            "order": 67,
+            "slug": "justin-shenkarow",
+            "tag": "Justin Shenkarow",
+            "thumb": "https://metadata-static.plex.tv/5/people/5bc7a1fd5ddc08dcf3a09017a8de9930.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776841961905001eb96557",
+            "type": "person"
+          },
+          {
+            "id": "5e16511510faa500400f59d7",
+            "order": 68,
+            "slug": "dennis-singletary",
+            "tag": "Dennis Singletary",
+            "thumb": "https://metadata-static.plex.tv/2/people/24e86933e51173dcd12d330ec78d6cfd.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5e16511510faa500400f59d7",
+            "type": "person"
+          },
+          {
+            "id": "5d776c38fb0d55001f580b3b",
+            "order": 69,
+            "slug": "warren-sroka",
+            "tag": "Warren Sroka",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a81443759992c3313f65a44bdcc3d94.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776c38fb0d55001f580b3b",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2b04",
+            "order": 70,
+            "slug": "melissa-sturm",
+            "tag": "Melissa Sturm",
+            "thumb": "https://metadata-static.plex.tv/9/people/9c2415adce7edfc32f0e4cddec16351b.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77684c0ea56a001e2a2b04",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ac7a53e9001e6d5d57",
+            "order": 71,
+            "slug": "holly-walker",
+            "tag": "Holly Walker",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768ac7a53e9001e6d5d57.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768ac7a53e9001e6d5d57",
+            "type": "person"
+          },
+          {
+            "id": "5f4032b45a76a80042d6d88f",
+            "order": 72,
+            "slug": "jason-linere-white",
+            "tag": "Jason Linere-White",
+            "thumb": "https://metadata-static.plex.tv/e/people/ee73e659916d7f2678f4289e04b23314.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5f4032b45a76a80042d6d88f",
+            "type": "person"
+          },
+          {
+            "id": "5d776a637a53e9001e703e3a",
+            "order": 73,
+            "slug": "ruth-zalduondo",
+            "tag": "Ruth Zalduondo",
+            "thumb": "https://metadata-static.plex.tv/people/5d776a637a53e9001e703e3a.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776a637a53e9001e703e3a",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776b5451dd69001fe2ee66",
+            "slug": "bob-persichetti",
+            "tag": "Bob Persichetti",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d7fdef19922932388704ca5520731b2.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776b5451dd69001fe2ee66",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c5fb0d55001f5192ce",
+            "slug": "peter-ramsey",
+            "tag": "Peter Ramsey",
+            "thumb": "https://metadata-static.plex.tv/5/people/5b796bc9f8a12219a7521e91cf7953a1.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768c5fb0d55001f5192ce",
+            "type": "person"
+          },
+          {
+            "id": "5d7768617e9a3c0020c721e4",
+            "slug": "rodney-rothman",
+            "tag": "Rodney Rothman",
+            "thumb": "https://metadata-static.plex.tv/a/people/a43820854d24d974f78e615f2d8d79c3.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768617e9a3c0020c721e4",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77684c0ea56a001e2a2afc",
+            "slug": "phil-lord",
+            "tag": "Phil Lord",
+            "thumb": "https://metadata-static.plex.tv/9/people/9235e494b79665f4f2a8769d6476d5ca.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77684c0ea56a001e2a2afc",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8949",
+            "slug": "avi-arad",
+            "tag": "Avi Arad",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7e1fa1dafd50ab5d87d0f7794b13ad3.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768274de0ee001fcc8949",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2afd",
+            "slug": "christopher-miller",
+            "tag": "Christopher Miller",
+            "thumb": "https://metadata-static.plex.tv/8/people/847a4c739af6edab0fd2a628aa388d5b.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77684c0ea56a001e2a2afd",
+            "type": "person"
+          },
+          {
+            "id": "5d776830103a2d001f566742",
+            "slug": "christina-steinberg",
+            "tag": "Christina Steinberg",
+            "thumb": "https://metadata-static.plex.tv/5/people/52ce1482a25a77ce0b04cacb7741e107.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776830103a2d001f566742",
+            "type": "person"
+          },
+          {
+            "id": "5d77687b23d5a3001f4ecd9d",
+            "slug": "amy-pascal",
+            "tag": "Amy Pascal",
+            "thumb": "https://metadata-static.plex.tv/5/people/570f9bc6417156e7c45be27735b4c6fa.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77687b23d5a3001f4ecd9d",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77684c0ea56a001e2a2afc",
+            "slug": "phil-lord",
+            "tag": "Phil Lord",
+            "thumb": "https://metadata-static.plex.tv/9/people/9235e494b79665f4f2a8769d6476d5ca.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77684c0ea56a001e2a2afc",
+            "type": "person"
+          },
+          {
+            "id": "65e31516d785720787c131a9",
+            "slug": "katie-smith-76",
+            "tag": "Katie Smith",
+            "role": "Story Artist",
+            "key": "/library/people/65e31516d785720787c131a9",
+            "type": "person"
+          },
+          {
+            "id": "5e5fd932d8aa8f003e3149b3",
+            "slug": "kasey-fagerquist",
+            "tag": "Kasey Fagerquist",
+            "role": "Story Artist",
+            "key": "/library/people/5e5fd932d8aa8f003e3149b3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768617e9a3c0020c721e4",
+            "slug": "rodney-rothman",
+            "tag": "Rodney Rothman",
+            "thumb": "https://metadata-static.plex.tv/a/people/a43820854d24d974f78e615f2d8d79c3.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d7768617e9a3c0020c721e4",
+            "type": "person"
+          },
+          {
+            "id": "647f20350b8239208c600f11",
+            "slug": "ryan-gaffney-4",
+            "tag": "Ryan Gaffney",
+            "role": "Story Artist",
+            "key": "/library/people/647f20350b8239208c600f11",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/62dd346ac28bfd2f743ba60e",
+            "tag": "Legion of Super‐Heroes"
+          },
+          {
+            "guid": "plex://movie/634f2b35e0bcce0febbfc1a7",
+            "tag": "Legion of Super‐Heroes"
+          },
+          {
+            "guid": "plex://movie/5d7769aafb0d55001f52c98d",
+            "tag": "Justice League"
+          },
+          {
+            "guid": "plex://movie/5d776a0096b655001fde0795",
+            "tag": "Justice League: The Flashpoint Paradox"
+          },
+          {
+            "guid": "plex://movie/5d776b05fb0d55001f559234",
+            "tag": "Black Panther"
+          },
+          {
+            "guid": "plex://movie/5d776ca79ab544002151945c",
+            "tag": "Black Adam"
+          },
+          {
+            "guid": "plex://movie/5d776d4796b655001fe44b28",
+            "tag": "Doctor Strange in the Multiverse of Madness"
+          },
+          {
+            "guid": "plex://movie/5d776d6d47dd6e001f6f316d",
+            "tag": "Teen Titans GO! To the Movies"
+          },
+          {
+            "guid": "plex://movie/5d777070594b2b001e74ae74",
+            "tag": "DC League of Super‐Pets"
+          },
+          {
+            "guid": "plex://movie/5d7770b9594b2b001e750506",
+            "tag": "Batman vs Teenage Mutant Ninja Turtles"
+          },
+          {
+            "guid": "plex://movie/5e161a83bea6ac004126e148",
+            "tag": "Ant‐Man and the Wasp: Quantumania"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Columbia Pictures"
+          },
+          {
+            "tag": "Lord Miller"
+          },
+          {
+            "tag": "Pascal Pictures"
+          },
+          {
+            "tag": "Sony Pictures Animation"
+          },
+          {
+            "tag": "Arad Productions"
+          },
+          {
+            "tag": "Marvel Entertainment"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Spider-Man battles the evil Kingpin, a hulking madman who can open portals to other universes.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

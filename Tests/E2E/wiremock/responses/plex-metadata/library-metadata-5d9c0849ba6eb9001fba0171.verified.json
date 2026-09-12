@@ -1,0 +1,1087 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/5ix5qtVlLR2O0sgAJp5urHLbGZe.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/267002-g.jpg",
+        "guid": "plex://show/5d9c0849ba6eb9001fba0171",
+        "key": "/library/metadata/5d9c0849ba6eb9001fba0171/children",
+        "rating": 9.7,
+        "ratingKey": "5d9c0849ba6eb9001fba0171",
+        "studio": "W.D.M. Productions",
+        "summary": "In this docu-reality comedy, Nathan Fielder uses his business degree and life experiences to help real small businesses turn a profit. But because of his unorthodox approach, Nathan's genuine efforts to do good often draw real people into an experience far beyond what they signed up for.",
+        "type": "show",
+        "addedAt": 1362009600,
+        "audienceRating": 9.2,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 4,
+        "contentRating": "TV-14",
+        "duration": 1260000,
+        "imdbRatingCount": 50814,
+        "lastEpisodeOriginallyAvailableAt": "2017-11-09",
+        "lastSeasonOriginallyAvailableAt": "2017-09-28",
+        "leafCount": 32,
+        "originallyAvailableAt": "2013-02-28",
+        "publicPagesURL": "https://watch.plex.tv/show/nathan-for-you",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "nathan-for-you",
+        "theme": "https://tvthemes.plexapp.com/267002.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/6tGXlz61c44onUg6EdRkbhjcaPA.jpg",
+        "title": "Nathan for You",
+        "userState": false,
+        "year": 2013,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c0849ba6eb9001fba0171/commonsensemedia",
+            "oneLiner": "Hilariously deadpan spoof with some sexual and racial humor.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Nathan for You",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/5ix5qtVlLR2O0sgAJp5urHLbGZe.jpg"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d447833feef7a20540cc0c37d431ceff.jpg"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/267002-g.jpg"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/2/683a142553/2fb0d8e01dc4d2503e137bb737c97f01.png"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/2/683a142553/2fb0d8e01dc4d2503e137bb737c97f01.png"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1ff123e2e6d3ff9264cc1ba0d405a055.jpg"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/6tGXlz61c44onUg6EdRkbhjcaPA.jpg"
+          },
+          {
+            "alt": "Nathan for You",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/ba588da31ee5efbfaadd31fbe820accb.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt2297757"
+          },
+          {
+            "id": "tmdb://58957"
+          },
+          {
+            "id": "tvdb://267002"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.9
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.2
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776b2cfb0d55001f55eb9f",
+            "order": 1,
+            "slug": "nathan-fielder",
+            "tag": "Nathan Fielder",
+            "thumb": "https://metadata-static.plex.tv/9/people/9b29778247a643e08559066fb06ca92e.jpg",
+            "role": "Nathan Fielder",
+            "key": "/library/people/5d776b2cfb0d55001f55eb9f",
+            "type": "person"
+          },
+          {
+            "id": "5d776be2f617c9002017b382",
+            "order": 2,
+            "slug": "william-heath",
+            "tag": "William Heath",
+            "thumb": "https://metadata-static.plex.tv/7/people/74528498e3642785a8b085d77ab50267.jpg",
+            "role": "Self - Bill Gates Impersonator",
+            "key": "/library/people/5d776be2f617c9002017b382",
+            "type": "person"
+          },
+          {
+            "id": "5f4039f2bf3e560040bb20a7",
+            "order": 3,
+            "slug": "brian-s-wolfe",
+            "tag": "Brian S. Wolfe",
+            "role": "Self",
+            "key": "/library/people/5f4039f2bf3e560040bb20a7",
+            "type": "person"
+          },
+          {
+            "id": "5f402b8c5a76a80042d6477e",
+            "order": 4,
+            "slug": "anthony-filosa",
+            "tag": "Anthony Filosa",
+            "thumb": "https://metadata-static.plex.tv/1/people/19ce8482a46468fdc8d1d344f2c61762.jpg",
+            "role": "Self - Ret. Judicial Commissioner",
+            "key": "/library/people/5f402b8c5a76a80042d6477e",
+            "type": "person"
+          },
+          {
+            "id": "5d776a49ad5437001f778883",
+            "order": 5,
+            "slug": "victoria-hogan",
+            "tag": "Victoria Hogan",
+            "thumb": "https://metadata-static.plex.tv/people/5d776a49ad5437001f778883.jpg",
+            "role": "Female in Couple",
+            "key": "/library/people/5d776a49ad5437001f778883",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b999c64001ec2d4f1",
+            "order": 6,
+            "slug": "h-jon-benjamin",
+            "tag": "H. Jon Benjamin",
+            "thumb": "https://metadata-static.plex.tv/f/people/f255dab129d56407061d2bb5154c60bf.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77682b999c64001ec2d4f1",
+            "type": "person"
+          },
+          {
+            "id": "5d77688cdecfcd001f2ec334",
+            "order": 7,
+            "slug": "trisha-paytas",
+            "tag": "Trisha Paytas",
+            "thumb": "https://metadata-static.plex.tv/6/people/6b624234b7c804d560b77f2a18f19428.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77688cdecfcd001f2ec334",
+            "type": "person"
+          },
+          {
+            "id": "5d77684261141d001fb171d4",
+            "order": 8,
+            "slug": "anthony-napoli-8",
+            "tag": "Anthony Napoli",
+            "thumb": "https://metadata-static.plex.tv/f/people/f950a7de38686abc9e388b8b6a504e6d.jpg",
+            "role": "Self - Host",
+            "key": "/library/people/5d77684261141d001fb171d4",
+            "type": "person"
+          },
+          {
+            "id": "62e27aa96400b884a26edcb7",
+            "order": 9,
+            "slug": "ronnie-rodriguez-8",
+            "tag": "Ronnie Rodriguez",
+            "role": "Self - Johnny Depp Impersonator",
+            "key": "/library/people/62e27aa96400b884a26edcb7",
+            "type": "person"
+          },
+          {
+            "id": "62e27aa91d91fc888fd76fa8",
+            "order": 10,
+            "slug": "john-kim-84",
+            "tag": "John Kim",
+            "role": "Self - Manager, LA Fame",
+            "key": "/library/people/62e27aa91d91fc888fd76fa8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ad431c830024c12c81",
+            "order": 11,
+            "slug": "jessee-foudray",
+            "tag": "Jessee Foudray",
+            "thumb": "https://metadata-static.plex.tv/2/people/2aab7d7d1b1f50a23f81cce76ee3f3e8.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768ad431c830024c12c81",
+            "type": "person"
+          },
+          {
+            "id": "5f4016bb03883a0040b256a4",
+            "order": 12,
+            "slug": "cesar-davila",
+            "tag": "Cesar Davila",
+            "role": "Self",
+            "key": "/library/people/5f4016bb03883a0040b256a4",
+            "type": "person"
+          },
+          {
+            "id": "5dcfd1cb4288ee001ec33645",
+            "order": 13,
+            "slug": "tessa-freberg",
+            "tag": "Tessa Freberg",
+            "role": "Self",
+            "key": "/library/people/5dcfd1cb4288ee001ec33645",
+            "type": "person"
+          },
+          {
+            "id": "5d776f54ad5437001f80f44e",
+            "order": 14,
+            "slug": "mark-paskell",
+            "tag": "Mark Paskell",
+            "role": "Self - Escape Artist",
+            "key": "/library/people/5d776f54ad5437001f80f44e",
+            "type": "person"
+          },
+          {
+            "id": "5f4005c6cae2c60042ed3348",
+            "order": 15,
+            "slug": "jakob-skrzypa",
+            "tag": "Jakob Skrzypa",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4e7b5ab7b666180bf866c6ed998140e.jpg",
+            "role": "Office Worker",
+            "key": "/library/people/5f4005c6cae2c60042ed3348",
+            "type": "person"
+          },
+          {
+            "id": "5e164babcd0850003b7744f2",
+            "order": 16,
+            "slug": "gabriel-guillen-1",
+            "tag": "Gabriel Guillen",
+            "thumb": "https://metadata-static.plex.tv/3/people/36091d27c9c05adfb8780240ff6b7ae2.jpg",
+            "role": "Male in Couple",
+            "key": "/library/people/5e164babcd0850003b7744f2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a0431c830024c112b2",
+            "order": 17,
+            "slug": "shannon-freyer",
+            "tag": "Shannon Freyer",
+            "thumb": "https://metadata-static.plex.tv/4/people/4cd305e9c5e6e828f90da85246a10c47.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768a0431c830024c112b2",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9ead5437001f7a5090",
+            "order": 18,
+            "slug": "amy-tolsky",
+            "tag": "Amy Tolsky",
+            "thumb": "https://metadata-static.plex.tv/c/people/ca6c1c459c6eabf3f480548ac153a76e.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776b9ead5437001f7a5090",
+            "type": "person"
+          },
+          {
+            "id": "5d7768971999bc0020dca514",
+            "order": 19,
+            "slug": "healy-lange",
+            "tag": "Healy Lange",
+            "thumb": "https://metadata-static.plex.tv/2/people/263bfbb75bc2df3eb733722d800a9715.jpg",
+            "role": "Self - Pizza Customer",
+            "key": "/library/people/5d7768971999bc0020dca514",
+            "type": "person"
+          },
+          {
+            "id": "5d776a73594b2b001e6bd46d",
+            "order": 20,
+            "slug": "brianna-kellum",
+            "tag": "Brianna Kellum",
+            "thumb": "https://metadata-static.plex.tv/people/5d776a73594b2b001e6bd46d.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776a73594b2b001e6bd46d",
+            "type": "person"
+          },
+          {
+            "id": "6234a9c7659bb12e1c1e17dc",
+            "order": 21,
+            "slug": "jamario-mcclain-1",
+            "tag": "Jamario McClain",
+            "role": "Self",
+            "key": "/library/people/6234a9c7659bb12e1c1e17dc",
+            "type": "person"
+          },
+          {
+            "id": "5d776c057a53e9001e737263",
+            "order": 22,
+            "slug": "tanner-gill",
+            "tag": "Tanner Gill",
+            "thumb": "https://metadata-static.plex.tv/9/people/935f19f2cb1a9a41b9e654b06b0c22c0.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776c057a53e9001e737263",
+            "type": "person"
+          },
+          {
+            "id": "5d77683661141d001fb15afa",
+            "order": 23,
+            "slug": "don-scribner",
+            "tag": "Don Scribner",
+            "thumb": "https://metadata-static.plex.tv/c/people/c33ccbb80bfc5c37d019cfc90af85f38.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77683661141d001fb15afa",
+            "type": "person"
+          },
+          {
+            "id": "5f401422fea1a1003f9da14a",
+            "order": 24,
+            "slug": "vicki-jo-costanzo",
+            "tag": "Vicki Jo Costanzo",
+            "role": "Funeral Home Manager",
+            "key": "/library/people/5f401422fea1a1003f9da14a",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe09f5a76a80042cfb3d4",
+            "order": 25,
+            "slug": "tim-hodgin",
+            "tag": "Tim Hodgin",
+            "thumb": "https://metadata-static.plex.tv/1/people/1f7e9ed7939ac3a59bf1aa7c7db8a17e.jpg",
+            "role": "Self",
+            "key": "/library/people/5f3fe09f5a76a80042cfb3d4",
+            "type": "person"
+          },
+          {
+            "id": "5d77685a999c64001ec34089",
+            "order": 26,
+            "slug": "caren-l-larkey",
+            "tag": "Caren L. Larkey",
+            "thumb": "https://metadata-static.plex.tv/8/people/84cdf75ac583de44936e967c2a31b313.jpg",
+            "role": "Self",
+            "key": "/library/people/5d77685a999c64001ec34089",
+            "type": "person"
+          },
+          {
+            "id": "5d776a8a47dd6e001f6d3de0",
+            "order": 27,
+            "slug": "jax-malcolm-1",
+            "tag": "Jax Malcolm",
+            "thumb": "https://metadata-static.plex.tv/5/people/5973729ce3f76150da54bf5217b8e3ac.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776a8a47dd6e001f6d3de0",
+            "type": "person"
+          },
+          {
+            "id": "682b5d174f92622f9d32c729",
+            "order": 28,
+            "slug": "anthony-armentano-1",
+            "tag": "Anthony Armentano",
+            "role": "Nathan Decoy",
+            "key": "/library/people/682b5d174f92622f9d32c729",
+            "type": "person"
+          },
+          {
+            "id": "5f401d4902101b0040f4372d",
+            "order": 29,
+            "slug": "dan-lipsman",
+            "tag": "Dan Lipsman",
+            "role": "Nathan Decoy",
+            "key": "/library/people/5f401d4902101b0040f4372d",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9947dd6e001f6e0f1a",
+            "order": 30,
+            "slug": "marcos-mateo-ochoa",
+            "tag": "Marcos Mateo Ochoa",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ae3f6b7c45aa93948ec3950f60b70b2.jpg",
+            "role": "Nathan Decoy",
+            "key": "/library/people/5d776b9947dd6e001f6e0f1a",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffe6903883a0040b0124e",
+            "order": 31,
+            "slug": "robert-mosca",
+            "tag": "Robert Mosca",
+            "role": "Nathan Decoy",
+            "key": "/library/people/5f3ffe6903883a0040b0124e",
+            "type": "person"
+          },
+          {
+            "id": "65a670ba2de23d5a22687b7f",
+            "order": 32,
+            "slug": "ron-bard-1",
+            "tag": "Ron Bard",
+            "role": "Self - Psychic",
+            "key": "/library/people/65a670ba2de23d5a22687b7f",
+            "type": "person"
+          },
+          {
+            "id": "5d776a85fb0d55001f548754",
+            "order": 33,
+            "slug": "eric-ruff",
+            "tag": "Eric Ruff",
+            "role": "Self",
+            "key": "/library/people/5d776a85fb0d55001f548754",
+            "type": "person"
+          },
+          {
+            "id": "5f403a4c86422500428584fe",
+            "order": 34,
+            "slug": "karter-kaplan",
+            "tag": "Karter Kaplan",
+            "role": "Self",
+            "key": "/library/people/5f403a4c86422500428584fe",
+            "type": "person"
+          },
+          {
+            "id": "5f403a4bce2564003f902629",
+            "order": 35,
+            "slug": "michael-andolini-1",
+            "tag": "Michael Andolini",
+            "role": "Self",
+            "key": "/library/people/5f403a4bce2564003f902629",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9cfb0d55001f56d135",
+            "order": 36,
+            "slug": "crayton-smith",
+            "tag": "Crayton Smith",
+            "role": "Self",
+            "key": "/library/people/5d776b9cfb0d55001f56d135",
+            "type": "person"
+          },
+          {
+            "id": "5d776be2f617c9002017b38f",
+            "order": 37,
+            "slug": "heather-geisler",
+            "tag": "Heather Geisler",
+            "role": "Customer (uncredited)",
+            "key": "/library/people/5d776be2f617c9002017b38f",
+            "type": "person"
+          },
+          {
+            "id": "5d776bad47dd6e001f6e1da8",
+            "order": 38,
+            "slug": "joe-chacon",
+            "tag": "Joe Chacon",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9ed8529460c002beb3765e6d67c815d.jpg",
+            "role": "Self",
+            "key": "/library/people/5d776bad47dd6e001f6e1da8",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ecfb0d55001f534a89",
+            "order": 39,
+            "slug": "stephen-todt",
+            "tag": "Stephen Todt",
+            "role": "Liquor Store Customer (uncredited)",
+            "key": "/library/people/5d7769ecfb0d55001f534a89",
+            "type": "person"
+          },
+          {
+            "id": "5e1654db46aceb003ceeee62",
+            "order": 40,
+            "slug": "amber-boone-1",
+            "tag": "Amber Boone",
+            "role": "Self",
+            "key": "/library/people/5e1654db46aceb003ceeee62",
+            "type": "person"
+          },
+          {
+            "id": "5ef1541085666c0041c093bb",
+            "order": 41,
+            "slug": "gina-m-dobson-1",
+            "tag": "Gina M. Dobson",
+            "role": "Self",
+            "key": "/library/people/5ef1541085666c0041c093bb",
+            "type": "person"
+          },
+          {
+            "id": "5fe319cb5789fb002d41bb3c",
+            "order": 42,
+            "slug": "helena-claussen",
+            "tag": "Helena Claussen",
+            "thumb": "https://metadata-static.plex.tv/d/people/db990a780b8b91799b476c881f790e4b.jpg",
+            "role": "Girl on Santa's Lap #1",
+            "key": "/library/people/5fe319cb5789fb002d41bb3c",
+            "type": "person"
+          },
+          {
+            "id": "5d776857880197001ec997fe",
+            "order": 43,
+            "slug": "matt-lagan",
+            "tag": "Matt Lagan",
+            "thumb": "https://metadata-static.plex.tv/8/people/8ccd747d0bcd46d4cfd8b18d4b69a276.jpg",
+            "role": "Doink-it Spokesman",
+            "key": "/library/people/5d776857880197001ec997fe",
+            "type": "person"
+          },
+          {
+            "id": "694378089516c53287634775",
+            "order": 44,
+            "slug": "brant-pinvidic-9",
+            "tag": "Brant Pinvidic",
+            "role": "Self - Reality Producer",
+            "key": "/library/people/694378089516c53287634775",
+            "type": "person"
+          },
+          {
+            "id": "5d776c1cf617c9002017dd0e",
+            "order": 45,
+            "slug": "krischelle-delgado",
+            "tag": "Krischelle Delgado",
+            "thumb": "https://metadata-static.plex.tv/8/people/866a1d1f55d7fe2f3864a62b9ff76769.jpg",
+            "role": "Model (uncredited)",
+            "key": "/library/people/5d776c1cf617c9002017dd0e",
+            "type": "person"
+          },
+          {
+            "id": "5d776e989ab544002152a007",
+            "order": 46,
+            "slug": "shannon-barney",
+            "tag": "Shannon Barney",
+            "role": "Woman in Jewelry Store (uncredited)",
+            "key": "/library/people/5d776e989ab544002152a007",
+            "type": "person"
+          },
+          {
+            "id": "5d776b71594b2b001e6da48b",
+            "order": 47,
+            "slug": "cameron-barsanti",
+            "tag": "Cameron Barsanti",
+            "role": "Summit Ice Model",
+            "key": "/library/people/5d776b71594b2b001e6da48b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b999c64001ec3069d",
+            "order": 48,
+            "slug": "frank-gerrish",
+            "tag": "Frank Gerrish",
+            "thumb": "https://metadata-static.plex.tv/5/people/56881607f25e418849673157c18cdb4c.jpg",
+            "role": "Moving Man",
+            "key": "/library/people/5d77683b999c64001ec3069d",
+            "type": "person"
+          },
+          {
+            "id": "5d7770496afb3d0020616bda",
+            "order": 49,
+            "slug": "amy-goddard",
+            "tag": "Amy Goddard",
+            "thumb": "https://metadata-static.plex.tv/7/people/735cea2059dad4a59088d75a8a361044.jpg",
+            "role": "Female Bar Owner",
+            "key": "/library/people/5d7770496afb3d0020616bda",
+            "type": "person"
+          },
+          {
+            "id": "624468290adf4a7b676f57e0",
+            "order": 50,
+            "slug": "doug-presley-1",
+            "tag": "Doug Presley",
+            "role": "Skateboard Guy",
+            "key": "/library/people/624468290adf4a7b676f57e0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768505af944001f1fef77",
+            "order": 51,
+            "slug": "nina-kripas",
+            "tag": "Nina Kripas",
+            "thumb": "https://metadata-static.plex.tv/7/people/761d830c8c05deb2ee45f5be32247616.jpg",
+            "role": "Bar Patron #7",
+            "key": "/library/people/5d7768505af944001f1fef77",
+            "type": "person"
+          },
+          {
+            "id": "652a838c7f982c7bc4905532",
+            "order": 52,
+            "slug": "laura-najera-1",
+            "tag": "Laura Najera",
+            "role": "Glasses Girl",
+            "key": "/library/people/652a838c7f982c7bc4905532",
+            "type": "person"
+          },
+          {
+            "id": "644a64800fb2b436b1b57524",
+            "order": 53,
+            "slug": "prince-jordan-tyson-1",
+            "tag": "Prince Jordan Tyson",
+            "role": "Blond Bar Guy",
+            "key": "/library/people/644a64800fb2b436b1b57524",
+            "type": "person"
+          },
+          {
+            "id": "5fe4d60725011d002eb52aa6",
+            "order": 54,
+            "slug": "dustin-christenson",
+            "tag": "Dustin Christenson",
+            "role": "Glasses Guy",
+            "key": "/library/people/5fe4d60725011d002eb52aa6",
+            "type": "person"
+          },
+          {
+            "id": "5d77686cfb0d55001f50fe8d",
+            "order": 55,
+            "slug": "marilyn-monrovia",
+            "tag": "Marilyn Monrovia",
+            "thumb": "https://metadata-static.plex.tv/3/people/3fe1e5586f6cdc67d884df99c0a3d8fa.jpg",
+            "role": "Bar Patron #12",
+            "key": "/library/people/5d77686cfb0d55001f50fe8d",
+            "type": "person"
+          },
+          {
+            "id": "5ec4171537cda30040904c19",
+            "order": 56,
+            "slug": "benson-simmonds",
+            "tag": "Benson Simmonds",
+            "role": "Other Bartender",
+            "key": "/library/people/5ec4171537cda30040904c19",
+            "type": "person"
+          },
+          {
+            "id": "5f400f491ae7100041038410",
+            "order": 57,
+            "slug": "suzanne-birrell-jones",
+            "tag": "Suzanne Birrell-Jones",
+            "role": "The Reviewer",
+            "key": "/library/people/5f400f491ae7100041038410",
+            "type": "person"
+          },
+          {
+            "id": "5d776d41fb0d55001f59b793",
+            "order": 58,
+            "slug": "holly-heart",
+            "tag": "Holly Heart",
+            "thumb": "https://metadata-static.plex.tv/people/5d776d41fb0d55001f59b793.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5d776d41fb0d55001f59b793",
+            "type": "person"
+          },
+          {
+            "id": "5d776b0251dd69001fe2af1a",
+            "order": 59,
+            "slug": "tony-martinez",
+            "tag": "Tony Martinez",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e22de42215fff7f0091a26cdfaf1649.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5d776b0251dd69001fe2af1a",
+            "type": "person"
+          },
+          {
+            "id": "5d776f1e7a53e9001e78bcc0",
+            "order": 60,
+            "slug": "mia-austin",
+            "tag": "Mia Austin",
+            "thumb": "https://metadata-static.plex.tv/0/people/03bbf5f9218ff9d05954261918d5727e.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5d776f1e7a53e9001e78bcc0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a1decfcd001f2ee721",
+            "order": 61,
+            "slug": "jack-vegas",
+            "tag": "Jack Vegas",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768a1decfcd001f2ee721.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5d7768a1decfcd001f2ee721",
+            "type": "person"
+          },
+          {
+            "id": "5d776bdcad5437001f7ac742",
+            "order": 62,
+            "slug": "mia-li",
+            "tag": "Mia Li",
+            "thumb": "https://metadata-static.plex.tv/2/people/290e27a3ee8cd193e2f27d418f88a216.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5d776bdcad5437001f7ac742",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c7f617c90020158969",
+            "order": 63,
+            "slug": "nikki-daniels",
+            "tag": "Nikki Daniels",
+            "thumb": "https://metadata-static.plex.tv/3/people/32d93d891edbf7824927ec72a72f3346.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5d7768c7f617c90020158969",
+            "type": "person"
+          },
+          {
+            "id": "5ea9448353a9c3004193972a",
+            "order": 64,
+            "slug": "romeo-price",
+            "tag": "Romeo Price",
+            "thumb": "https://image.tmdb.org/t/p/original/82GhLC6qw3tomRAw9zsW9YxmHDO.jpg",
+            "role": "Self - Adult Entertainment Model",
+            "key": "/library/people/5ea9448353a9c3004193972a",
+            "type": "person"
+          },
+          {
+            "id": "5f4040318642250042866e61",
+            "order": 65,
+            "slug": "bradley-van-vugt",
+            "tag": "Bradley Van Vugt",
+            "role": "Self - Child Actor",
+            "key": "/library/people/5f4040318642250042866e61",
+            "type": "person"
+          },
+          {
+            "id": "5d776a61594b2b001e6bb23b",
+            "order": 66,
+            "slug": "tanner-berney",
+            "tag": "Tanner Berney",
+            "role": "Son",
+            "key": "/library/people/5d776a61594b2b001e6bb23b",
+            "type": "person"
+          },
+          {
+            "id": "68616589c29ae1783baf65f9",
+            "order": 67,
+            "slug": "matthew-saddler-1",
+            "tag": "Matthew Saddler",
+            "role": "Son",
+            "key": "/library/people/68616589c29ae1783baf65f9",
+            "type": "person"
+          },
+          {
+            "id": "5d7768332ec6b5001f6bba2e",
+            "order": 68,
+            "slug": "verena-mei",
+            "tag": "Verena Mei",
+            "thumb": "https://metadata-static.plex.tv/6/people/6c23b4a444dae161ab40e7e1d7b7bdfe.jpg",
+            "role": "Self - Stunt Driver",
+            "key": "/library/people/5d7768332ec6b5001f6bba2e",
+            "type": "person"
+          },
+          {
+            "id": "5f4066aa86422500428bbf88",
+            "order": 69,
+            "slug": "corey-calderwood",
+            "tag": "Corey Calderwood",
+            "thumb": "https://metadata-static.plex.tv/2/people/24e4ffb939446aaa895acf9abfcb880e.jpg",
+            "role": "Self - Part-Time Arcade Attendant",
+            "key": "/library/people/5f4066aa86422500428bbf88",
+            "type": "person"
+          },
+          {
+            "id": "6a0c7795b5b4031fea39fd2b",
+            "order": 70,
+            "slug": "vincent-van-dyke-7",
+            "tag": "Vincent Van Dyke",
+            "thumb": "https://metadata-static.plex.tv/9/people/932ede9bc062baf6febf8e50b1bdb4f1.jpg",
+            "role": "Self - Emmy Nominated Makeup Artist",
+            "key": "/library/people/6a0c7795b5b4031fea39fd2b",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff8e852f20000414d39cb",
+            "order": 71,
+            "slug": "shirl-boe",
+            "tag": "Shirl Boe",
+            "thumb": "https://metadata-static.plex.tv/d/people/d29554220f9e57f632a59a355950c08d.jpg",
+            "role": "Hotel Manager",
+            "key": "/library/people/5f3ff8e852f20000414d39cb",
+            "type": "person"
+          },
+          {
+            "id": "5d7768318718ba001e313c5a",
+            "order": 72,
+            "slug": "richie-gaona-1",
+            "tag": "Richie Gaona",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768318718ba001e313c5a.jpg",
+            "role": "Self",
+            "key": "/library/people/5d7768318718ba001e313c5a",
+            "type": "person"
+          },
+          {
+            "id": "5d77688623d5a3001f4ed9f4",
+            "order": 73,
+            "slug": "steve-ostrow",
+            "tag": "Steve Ostrow",
+            "role": "Self - Michael Richards Impersonator",
+            "key": "/library/people/5d77688623d5a3001f4ed9f4",
+            "type": "person"
+          },
+          {
+            "id": "5d7768262ec6b5001f6ba22b",
+            "order": 74,
+            "slug": "allie-moss",
+            "tag": "Allie Moss",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768262ec6b5001f6ba22b.jpg",
+            "role": "Impersonator",
+            "key": "/library/people/5d7768262ec6b5001f6ba22b",
+            "type": "person"
+          },
+          {
+            "id": "69246f1d2de3c677435d61d1",
+            "order": 75,
+            "slug": "mabelynn-capeluj-1",
+            "tag": "Mabelynn Capeluj",
+            "role": "Self - Miss California USA 2013",
+            "key": "/library/people/69246f1d2de3c677435d61d1",
+            "type": "person"
+          },
+          {
+            "id": "5d776bb37a53e9001e72dba0",
+            "order": 76,
+            "slug": "stewart-strauss",
+            "tag": "Stewart Strauss",
+            "role": "Self",
+            "key": "/library/people/5d776bb37a53e9001e72dba0",
+            "type": "person"
+          },
+          {
+            "id": "62c579bfbc66cfa953dc6de6",
+            "order": 77,
+            "slug": "chris-thigpen-5",
+            "tag": "Chris Thigpen",
+            "role": "Self - Drummer, The Banzai Predicament",
+            "key": "/library/people/62c579bfbc66cfa953dc6de6",
+            "type": "person"
+          },
+          {
+            "id": "5d776859961905001eb99b5c",
+            "order": 78,
+            "slug": "al-burke",
+            "tag": "Al Burke",
+            "thumb": "https://metadata-static.plex.tv/2/people/2c4c3f594b52b84a548da60864f83300.jpg",
+            "role": "Police Officer",
+            "key": "/library/people/5d776859961905001eb99b5c",
+            "type": "person"
+          },
+          {
+            "id": "5ec41eb6df7e8e004121d607",
+            "order": 79,
+            "slug": "kevin-burney",
+            "tag": "Kevin Burney",
+            "thumb": "https://metadata-static.plex.tv/1/people/11b0b3bdbaba528e26f1527821e4210b.jpg",
+            "role": "Repair Customer",
+            "key": "/library/people/5ec41eb6df7e8e004121d607",
+            "type": "person"
+          },
+          {
+            "id": "5d776d8051dd69001fe43288",
+            "order": 80,
+            "slug": "june-conniff-1",
+            "tag": "June Conniff",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb5535eea99f6fda70ce3a87b58db223.jpg",
+            "role": "Self - Actress",
+            "key": "/library/people/5d776d8051dd69001fe43288",
+            "type": "person"
+          },
+          {
+            "id": "6a0bf1c2700cfe8ec60c2c13",
+            "order": 81,
+            "slug": "richard-ledbetter-5",
+            "tag": "Richard Ledbetter",
+            "thumb": "https://metadata-static.plex.tv/c/people/cbf67e1f4f5608eb35ae1eed1c3b90ab.jpg",
+            "role": "Self - 'Mud' Actor",
+            "key": "/library/people/6a0bf1c2700cfe8ec60c2c13",
+            "type": "person"
+          },
+          {
+            "id": "5d776f1951dd69001fe51d01",
+            "order": 82,
+            "slug": "mary-hollis-inboden",
+            "tag": "Mary Hollis Inboden",
+            "thumb": "https://metadata-static.plex.tv/0/people/0d0156f0966a9c9f73569ea31ac7518a.jpg",
+            "role": "Young Frances (voice)",
+            "key": "/library/people/5d776f1951dd69001fe51d01",
+            "type": "person"
+          },
+          {
+            "id": "5e1635ae61c6140040d6a605",
+            "order": 83,
+            "slug": "michael-koman",
+            "tag": "Michael Koman",
+            "thumb": "https://metadata-static.plex.tv/3/people/35d5507ec9df30c05129004fb7ad3c7e.jpg",
+            "role": "Self",
+            "key": "/library/people/5e1635ae61c6140040d6a605",
+            "type": "person"
+          },
+          {
+            "id": "5d77699b7a53e9001e6eae71",
+            "order": 84,
+            "slug": "paul-rosenblum",
+            "tag": "Paul Rosenblum",
+            "role": "Old Man",
+            "key": "/library/people/5d77699b7a53e9001e6eae71",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776a2b51dd69001fe20498",
+            "slug": "tim-banning",
+            "tag": "Tim Banning",
+            "thumb": "https://metadata-static.plex.tv/2/people/28dd844773001c42ddf8c81fcf760d2c.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776a2b51dd69001fe20498",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dfc18d60104aa001d9387c9",
+            "slug": "clark-baker",
+            "tag": "Clark Baker",
+            "role": "Producer",
+            "key": "/library/people/5dfc18d60104aa001d9387c9",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776b2cfb0d55001f55eb9f",
+            "slug": "nathan-fielder",
+            "tag": "Nathan Fielder",
+            "thumb": "https://metadata-static.plex.tv/9/people/9b29778247a643e08559066fb06ca92e.jpg",
+            "role": "Creator",
+            "key": "/library/people/5d776b2cfb0d55001f55eb9f",
+            "type": "person"
+          },
+          {
+            "id": "5e1635ae61c6140040d6a605",
+            "slug": "michael-koman",
+            "tag": "Michael Koman",
+            "thumb": "https://metadata-static.plex.tv/3/people/35d5507ec9df30c05129004fb7ad3c7e.jpg",
+            "role": "Creator",
+            "key": "/library/people/5e1635ae61c6140040d6a605",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Comedy Central"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5eb6b5ff1bcfdc003f65eae2",
+            "tag": "History 101"
+          },
+          {
+            "guid": "plex://show/5f79f6e04b05270041deb5ff",
+            "tag": "How To with John Wilson"
+          },
+          {
+            "guid": "plex://show/5fd1567ecf9615002d3ea5f8",
+            "tag": "History of Swear Words"
+          },
+          {
+            "guid": "plex://show/5d9c08212192ba001f308481",
+            "tag": "Angry Video Game Nerd"
+          },
+          {
+            "guid": "plex://show/5d9c083508fddd001f295449",
+            "tag": "1000 Ways to Die"
+          },
+          {
+            "guid": "plex://show/60e0368a3c3bb7002cfca9e8",
+            "tag": "The Rehearsal"
+          },
+          {
+            "guid": "plex://show/645afeee08b1cc604f8e2074",
+            "tag": "Arnold"
+          },
+          {
+            "guid": "plex://show/5d9c08017b5c2e001e651bbd",
+            "tag": "Penn & Teller: Bullshit!"
+          },
+          {
+            "guid": "plex://show/69bd888a7ab07ecca2a770b6",
+            "tag": "Trust Me: The False Prophet"
+          },
+          {
+            "guid": "plex://show/65f8ffc3decc764c616a07cd",
+            "tag": "MOURINHO"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "W.D.M. Productions"
+          },
+          {
+            "tag": "Abso Lutely Productions"
+          },
+          {
+            "tag": "Blow Out Productions"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,413 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/d/gracenote/d8d441a5ccff38da38e8f40302011041.jpg",
+        "guid": "plex://movie/66696dfc15c356a548795164",
+        "key": "/library/metadata/66696dfc15c356a548795164",
+        "rating": 3.6,
+        "ratingKey": "66696dfc15c356a548795164",
+        "studio": "Di Novi Pictures",
+        "summary": "A multi generational family of witches, cursed to be loveless for centuries, attempts to break the spell by confronting dark secrets and sacrificing for each other.",
+        "tagline": "Everything you've witched for.",
+        "type": "movie",
+        "addedAt": 1788912000,
+        "audienceRating": 9.3,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 75000000,
+        "contentRating": "PG-13",
+        "duration": 7800000,
+        "imdbRatingCount": 736,
+        "originallyAvailableAt": "2026-09-09",
+        "publicPagesURL": "https://watch.plex.tv/movie/practical-magic-2-2026",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "slug": "practical-magic-2-2026",
+        "thumb": "https://metadata-static.plex.tv/3/gracenote/39cabb4003e387a504bef809292d967e.jpg",
+        "title": "Practical Magic 2",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Practical Magic 2",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d8d441a5ccff38da38e8f40302011041.jpg"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/460583f4ecc344e382da95464945609c.jpg"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1f5574a90615efc26af07411fa5317f6.png"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/1/683a142553/1f5574a90615efc26af07411fa5317f6.png"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a0b49615ae119f8773d1ef8121ebea30.jpg"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/3/gracenote/39cabb4003e387a504bef809292d967e.jpg"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1d8016efbc7c7ea00d21603d5533fc00.jpg"
+          },
+          {
+            "alt": "Practical Magic 2",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/8/gracenote/87bbcd825c6f77f0a6f2ad1f81a226d5.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt32588798"
+          },
+          {
+            "id": "tmdb://1302904"
+          },
+          {
+            "id": "tvdb://357469"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.4
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 3.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.3
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/q6MjdonDU8wxzogdFQ2rQNQEWzb.jpg",
+            "guid": "plex://collection/66e03d7c34728a2df3501a4c",
+            "key": "/library/collections/66e03d7c34728a2df3501a4c/children",
+            "summary": "Sally and Gillian Owens, born into a magical family, have mostly avoided witchcraft themselves. But when Gillian's abusive boyfriend dies unexpectedly, the sisters give themselves a crash course in hard magic.",
+            "thumb": "https://image.tmdb.org/t/p/original/1cB3iP3RtNTRRfCKfDQ1JB2AiZL.jpg",
+            "tag": "Practical Magic Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682a999c64001ec2d203",
+            "order": 1,
+            "slug": "sandra-bullock",
+            "tag": "Sandra Bullock",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4219fc018c01155efe2adfc43f71e7c.jpg",
+            "role": "Sally Owens",
+            "key": "/library/people/5d77682a999c64001ec2d203",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a083b",
+            "order": 2,
+            "slug": "nicole-kidman",
+            "tag": "Nicole Kidman",
+            "thumb": "https://metadata-static.plex.tv/0/people/038c53cb04c8196d445ed285bb250c5a.jpg",
+            "role": "Gillian Owens",
+            "key": "/library/people/5d77682585719b001f3a083b",
+            "type": "person"
+          },
+          {
+            "id": "5d776832f59e58002189845e",
+            "order": 3,
+            "slug": "joey-king",
+            "tag": "Joey King",
+            "thumb": "https://metadata-static.plex.tv/f/people/f58327155aff1fc43034539efb572cb9.jpg",
+            "role": "Kylie Owens",
+            "key": "/library/people/5d776832f59e58002189845e",
+            "type": "person"
+          },
+          {
+            "id": "5d776a2b96b655001fde5474",
+            "order": 4,
+            "slug": "maisie-williams",
+            "tag": "Maisie Williams",
+            "thumb": "https://metadata-static.plex.tv/1/people/1269adb8a56f16dd13116be20fbb237a.jpg",
+            "role": "Antonia Owens",
+            "key": "/library/people/5d776a2b96b655001fde5474",
+            "type": "person"
+          },
+          {
+            "id": "5d776a317a53e9001e6fd15d",
+            "order": 5,
+            "slug": "xolo-mariduena",
+            "tag": "Xolo Maridueña",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef8e392aea42b499cf2140d4dcfb5130.jpg",
+            "role": "Gideon",
+            "key": "/library/people/5d776a317a53e9001e6fd15d",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf59",
+            "order": 6,
+            "slug": "lee-pace",
+            "tag": "Lee Pace",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a3bfda399c690993cf372e317fe1381.jpg",
+            "role": "Ian Wright",
+            "key": "/library/people/5d776829999c64001ec2cf59",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a0558",
+            "order": 7,
+            "slug": "dianne-wiest",
+            "tag": "Dianne Wiest",
+            "thumb": "https://metadata-static.plex.tv/6/people/67bb48847b675dee173da4c435218207.jpg",
+            "role": "Aunt Jet",
+            "key": "/library/people/5d77682585719b001f3a0558",
+            "type": "person"
+          },
+          {
+            "id": "5d776827880197001ec90a2d",
+            "order": 8,
+            "slug": "stockard-channing",
+            "tag": "Stockard Channing",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d1194f13fa08c96d0967d0fcae1f0a0.jpg",
+            "role": "Aunt Frances",
+            "key": "/library/people/5d776827880197001ec90a2d",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd3bfc63b480040d7d07b",
+            "order": 9,
+            "slug": "solly-mcleod",
+            "tag": "Solly McLeod",
+            "thumb": "https://metadata-static.plex.tv/d/people/ddca388b39f94095bc8a39428058c3e7.jpg",
+            "role": "Thomas Lockland",
+            "key": "/library/people/5f3fd3bfc63b480040d7d07b",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768255af944001f1f63f3",
+            "slug": "susanne-bier",
+            "tag": "Susanne Bier",
+            "thumb": "https://metadata-static.plex.tv/f/people/f01280c1f49d49812e5a2c0b10c292e4.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768255af944001f1f63f3",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682585719b001f3a0556",
+            "slug": "denise-di-novi",
+            "tag": "Denise Di Novi",
+            "thumb": "https://metadata-static.plex.tv/d/people/d9007d23fe1bfee17218031f38aef738.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682585719b001f3a0556",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a999c64001ec2d203",
+            "slug": "sandra-bullock",
+            "tag": "Sandra Bullock",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4219fc018c01155efe2adfc43f71e7c.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682a999c64001ec2d203",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a083b",
+            "slug": "nicole-kidman",
+            "tag": "Nicole Kidman",
+            "thumb": "https://metadata-static.plex.tv/0/people/038c53cb04c8196d445ed285bb250c5a.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682585719b001f3a083b",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768265af944001f1f6708",
+            "slug": "akiva-goldsman",
+            "tag": "Akiva Goldsman",
+            "thumb": "https://metadata-static.plex.tv/f/people/f8f7fa7c7b9e0a80f0a8a1bfb20961d0.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d7768265af944001f1f6708",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a880197001ec91926",
+            "slug": "robin-swicord",
+            "tag": "Robin Swicord",
+            "thumb": "https://metadata-static.plex.tv/2/people/21696c7b1ec1aa25a8fa075599cce0ff.jpg",
+            "role": "Characters",
+            "key": "/library/people/5d77682a880197001ec91926",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c2dc",
+            "slug": "adam-brooks",
+            "tag": "Adam Brooks",
+            "thumb": "https://metadata-static.plex.tv/9/people/973883f97f6d1383272a2bcacddaf000.jpg",
+            "role": "Characters",
+            "key": "/library/people/5d776826999c64001ec2c2dc",
+            "type": "person"
+          },
+          {
+            "id": "5dcd37da2c0777001e940ba3",
+            "slug": "georgia-pritchett",
+            "tag": "Georgia Pritchett",
+            "thumb": "https://metadata-static.plex.tv/a/people/ac31d96b4d65509bcd6698b8a36ddb33.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5dcd37da2c0777001e940ba3",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77682ba091de001f2e6c96",
+            "tag": "Stardust"
+          },
+          {
+            "guid": "plex://movie/5d77684e5af944001f1fe97b",
+            "tag": "The Gnome‐Mobile"
+          },
+          {
+            "guid": "plex://movie/5d77684f8a7581001f1302b2",
+            "tag": "Teen Witch"
+          },
+          {
+            "guid": "plex://movie/5d7768507e9a3c0020c70a20",
+            "tag": "I Married a Witch"
+          },
+          {
+            "guid": "plex://movie/5d77688b594b2b001e68f2f0",
+            "tag": "The Twilight Saga: Breaking Dawn ‐ Part 1"
+          },
+          {
+            "guid": "plex://movie/5d7770bb47dd6e001f70bffb",
+            "tag": "The Kissing Booth 2"
+          },
+          {
+            "guid": "plex://movie/5f409b8452f200004161e126",
+            "tag": "Hocus Pocus 2"
+          },
+          {
+            "guid": "plex://movie/5d77683085719b001f3a2a24",
+            "tag": "Practical Magic"
+          },
+          {
+            "guid": "plex://movie/5ed3f1b0991840004054d1b7",
+            "tag": "The School for Good and Evil"
+          },
+          {
+            "guid": "plex://movie/5fe952c5672bb3002da62f66",
+            "tag": "The School for Good and Evil"
+          },
+          {
+            "guid": "plex://movie/5d776c787a53e9001e743c4e",
+            "tag": "Beetlejuice Beetlejuice"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Di Novi Pictures"
+          },
+          {
+            "tag": "Warner Bros. Pictures"
+          },
+          {
+            "tag": "Blossom Films"
+          },
+          {
+            "tag": "Fortis Films"
+          },
+          {
+            "tag": "Domain Entertainment"
+          },
+          {
+            "tag": "Alcon Entertainment"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Two witches must confront the dark curse that threatens to unravel their family once and for all.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

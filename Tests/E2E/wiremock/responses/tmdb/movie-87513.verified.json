@@ -1,0 +1,98 @@
+{
+  "adult": false,
+  "backdrop_path": "/l7asYmqOad01F2u0oCMM8nQjoEP.jpg",
+  "belongs_to_collection": null,
+  "budget": 30000000,
+  "genres": [
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 53,
+      "name": "Thriller"
+    },
+    {
+      "id": 80,
+      "name": "Crime"
+    }
+  ],
+  "homepage": "https://www.independentfilmco.com/films/motor-city",
+  "id": 87513,
+  "imdb_id": "tt2012616",
+  "origin_country": [
+    "US"
+  ],
+  "original_language": "en",
+  "original_title": "Motor City",
+  "overview": "In 1970s Detroit, John Miller falls for a local gangster's girl and lands in prison for a crime he didn't commit. With his life ruined, Miller plots revenge against the man who took his girl away.",
+  "popularity": 33.2879,
+  "poster_path": "/dx2dblJL3GAKcXXXPjC2FSaMTWW.jpg",
+  "production_companies": [
+    {
+      "id": 118472,
+      "logo_path": "/vafYjvjZwK4JaV5Hcm9vSzw6f9G.png",
+      "name": "Stampede Ventures",
+      "origin_country": "US"
+    },
+    {
+      "id": 215935,
+      "logo_path": "/pYh0UKZbx8WGKLDZuBkq7WwvGSH.png",
+      "name": "Gramercy Park Media",
+      "origin_country": "US"
+    },
+    {
+      "id": 233099,
+      "logo_path": null,
+      "name": "Peachtree Media Partners",
+      "origin_country": "US"
+    },
+    {
+      "id": 74330,
+      "logo_path": null,
+      "name": "Ace of Spades",
+      "origin_country": "US"
+    },
+    {
+      "id": 251829,
+      "logo_path": null,
+      "name": "Syndicate Entertainment",
+      "origin_country": "US"
+    },
+    {
+      "id": 51083,
+      "logo_path": "/8QBMjrhxiXcZ9J0QmXUHK9s8euF.png",
+      "name": "Third Man Records",
+      "origin_country": "US"
+    },
+    {
+      "id": 22146,
+      "logo_path": "/v37N1mFeXNQfvPankg3feBhVvM7.png",
+      "name": "Black Bear Pictures",
+      "origin_country": "US"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "release_date": "2026-07-23",
+  "revenue": 0,
+  "runtime": 104,
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Released",
+  "tagline": "Love will drive you mad.",
+  "title": "Motor City",
+  "video": false,
+  "vote_average": 6.269,
+  "vote_count": 106
+}

@@ -1,0 +1,350 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://artworks.thetvdb.com/banners/movies/55034/backgrounds/55034.jpg",
+        "guid": "plex://movie/5d7768a71999bc0020dcca1b",
+        "key": "/library/metadata/5d7768a71999bc0020dcca1b",
+        "ratingKey": "5d7768a71999bc0020dcca1b",
+        "studio": "Revelations Entertainment",
+        "summary": "Fact-based story about 300 predominantly black sailors who were killed on July 17, 1944 while loading munitions on a ship in San Francisco. Three weeks later, 50 survivors were court-martialed for refusing to load another shipment. The men cited the Navy's lack of care for their safety.",
+        "tagline": "In 1944 200 black soldiers were willing to give up their lives. But not their dignity.",
+        "type": "movie",
+        "addedAt": 922579200,
+        "audienceRating": 2.7,
+        "audienceRatingImage": "rottentomatoes://image.rating.spilled",
+        "contentRating": "PG-13",
+        "duration": 5340000,
+        "imdbRatingCount": 318,
+        "originallyAvailableAt": "1999-03-28",
+        "publicPagesURL": "https://watch.plex.tv/movie/mutiny",
+        "slug": "mutiny",
+        "thumb": "https://image.tmdb.org/t/p/original/priCBJQ4eIlqYGawTBhWGZSPPff.jpg",
+        "title": "Mutiny",
+        "userState": false,
+        "year": 1999,
+        "Image": [
+          {
+            "alt": "Mutiny",
+            "type": "background",
+            "url": "https://artworks.thetvdb.com/banners/movies/55034/backgrounds/55034.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2880ccb63a955ad05104063a483fa2bd.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/priCBJQ4eIlqYGawTBhWGZSPPff.jpg"
+          },
+          {
+            "alt": "Mutiny",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/9/gracenote/95753a7fb5a3df8d388ecb82663b1103.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28aba6",
+            "id": "5d9c046c08fddd001f28aba6",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28aba6",
+            "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+            "slug": "war",
+            "tag": "War",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c04732df347001e3a35be",
+            "id": "5d9c04732df347001e3a35be",
+            "key": "/library/sections/home/all?genre=5d9c04732df347001e3a35be",
+            "ratingKey": "genre_5d9c04732df347001e3a35be",
+            "slug": "tv-movie",
+            "tag": "TV Movie",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0181769"
+          },
+          {
+            "id": "tmdb://65278"
+          },
+          {
+            "id": "tvdb://55034"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.spilled",
+            "type": "audience",
+            "value": 2.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 4.9
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Music Composition for a Miniseries or a Movie (Dramatic Underscore)",
+            "event": "Emmys",
+            "id": "643f2d36e2eb90d0ebbcc351",
+            "isWinner": false,
+            "year": 1999
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768267e9a3c0020c6aa2a",
+            "order": 1,
+            "slug": "michael-jai-white",
+            "tag": "Michael Jai White",
+            "thumb": "https://metadata-static.plex.tv/c/people/c9f6ad45dfd9078bcd9d1bf4b9caacbc.jpg",
+            "role": "Ben Cooper",
+            "key": "/library/people/5d7768267e9a3c0020c6aa2a",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e54f42c001f8c35fa",
+            "order": 2,
+            "slug": "duane-martin",
+            "tag": "Duane Martin",
+            "thumb": "https://metadata-static.plex.tv/4/people/439c8687e7bd30254f63ffdaad9354da.jpg",
+            "role": "B.J. Teach",
+            "key": "/library/people/5d77682e54f42c001f8c35fa",
+            "type": "person"
+          },
+          {
+            "id": "5d77682aa091de001f2e696b",
+            "order": 3,
+            "slug": "david-ramsey",
+            "tag": "David Ramsey",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c54defbd8d79a5edf14aa07922d2d72.jpg",
+            "role": "Vernon Nettles",
+            "key": "/library/people/5d77682aa091de001f2e696b",
+            "type": "person"
+          },
+          {
+            "id": "5d776837a091de001f2e848e",
+            "order": 4,
+            "slug": "matthew-glave",
+            "tag": "Matthew Glave",
+            "thumb": "https://metadata-static.plex.tv/d/people/daf33433fe1874eef51d86a6c01ca77e.jpg",
+            "role": "Lt. Kirby",
+            "key": "/library/people/5d776837a091de001f2e848e",
+            "type": "person"
+          },
+          {
+            "id": "5d776851f59e58002189ba33",
+            "order": 5,
+            "slug": "david-barry-gray",
+            "tag": "David Barry Gray",
+            "thumb": "https://metadata-static.plex.tv/people/5d776851f59e58002189ba33.jpg",
+            "role": "Ens. Norris",
+            "key": "/library/people/5d776851f59e58002189ba33",
+            "type": "person"
+          },
+          {
+            "id": "5d77685785719b001f3a97c0",
+            "order": 6,
+            "slug": "lark-voorhies",
+            "tag": "Lark Voorhies",
+            "thumb": "https://metadata-static.plex.tv/3/people/30ef9cfd43478ed26b97dcee0542961a.jpg",
+            "key": "/library/people/5d77685785719b001f3a97c0",
+            "type": "person"
+          },
+          {
+            "id": "5d77696f23d5a3001f4f7c67",
+            "order": 7,
+            "slug": "tanya-wright",
+            "tag": "Tanya Wright",
+            "thumb": "https://metadata-static.plex.tv/4/people/431f8b9006c14a2fa086646dd87b044b.jpg",
+            "key": "/library/people/5d77696f23d5a3001f4f7c67",
+            "type": "person"
+          },
+          {
+            "id": "5d776827f54112001f5bbfef",
+            "order": 8,
+            "slug": "james-b-sikking",
+            "tag": "James B. Sikking",
+            "thumb": "https://metadata-static.plex.tv/b/people/be8c5d44f56313e60954be6b2db71a98.jpg",
+            "role": "Lt. Cmdr. Tynan",
+            "key": "/library/people/5d776827f54112001f5bbfef",
+            "type": "person"
+          },
+          {
+            "id": "5d7768313c3c2a001fbcd414",
+            "order": 9,
+            "slug": "troy-winbush",
+            "tag": "Troy Winbush",
+            "thumb": "https://metadata-static.plex.tv/a/people/a9c790848ac57c75975abed22a5d7cf1.jpg",
+            "role": "Leroy Wallis",
+            "key": "/library/people/5d7768313c3c2a001fbcd414",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b4de0ee001fcccac3",
+            "order": 10,
+            "slug": "patrick-malone",
+            "tag": "Patrick Malone",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683b4de0ee001fcccac3.jpg",
+            "role": "Jersey",
+            "key": "/library/people/5d77683b4de0ee001fcccac3",
+            "type": "person"
+          },
+          {
+            "id": "5d77685d6f4521001eaa3a3d",
+            "order": 11,
+            "slug": "j-august-richards",
+            "tag": "J. August Richards",
+            "thumb": "https://metadata-static.plex.tv/7/people/77708b018b5bc8a0697bed8569fb4fa8.jpg",
+            "role": "Reece Johnson",
+            "key": "/library/people/5d77685d6f4521001eaa3a3d",
+            "type": "person"
+          },
+          {
+            "id": "5d7770c76afb3d0020621c9d",
+            "order": 12,
+            "slug": "walter-jones-27",
+            "tag": "Walter Jones",
+            "thumb": "https://metadata-static.plex.tv/c/people/ce9cea5443bcb7c022a7ca0865a5e37a.jpg",
+            "role": "Shorty",
+            "key": "/library/people/5d7770c76afb3d0020621c9d",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77682b4de0ee001fcc9a02",
+            "slug": "kevin-hooks",
+            "tag": "Kevin Hooks",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef8fb55183f7822f3df1bc74d2dcbcbf.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77682b4de0ee001fcc9a02",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77686cfb0d55001f50fdb3",
+            "slug": "anthony-santa-croce",
+            "tag": "Anthony Santa Croce",
+            "role": "Producer",
+            "key": "/library/people/5d77686cfb0d55001f50fdb3",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776a8d96b655001fdf200e",
+            "slug": "james-s-henerson",
+            "tag": "James S. Henerson",
+            "role": "Writer",
+            "key": "/library/people/5d776a8d96b655001fdf200e",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d7769d3ad5437001f768eaf",
+            "tag": "TalhotBlond"
+          },
+          {
+            "guid": "plex://movie/5d77683eeb5d26001f1e2eb3",
+            "tag": "The Big Red One"
+          },
+          {
+            "guid": "plex://movie/5d77684f880197001ec97f7f",
+            "tag": "Taking Chance"
+          },
+          {
+            "guid": "plex://movie/5d77685d594b2b001e689ce1",
+            "tag": "Taking Sides"
+          },
+          {
+            "guid": "plex://movie/5d77685ff59e58002189c7f5",
+            "tag": "Battleground"
+          },
+          {
+            "guid": "plex://movie/5d776c887a53e9001e7458f3",
+            "tag": "The Immortal Life of Henrietta Lacks"
+          },
+          {
+            "guid": "plex://movie/5d77687e103a2d001f573699",
+            "tag": "The Scarlet and the Black"
+          },
+          {
+            "guid": "plex://movie/5e1625635551ad0041feb6b5",
+            "tag": "Devotion"
+          },
+          {
+            "guid": "plex://movie/5ef2ab470dc7a800405a5f6b",
+            "tag": "Shepherd: The Story of a Hero Dog"
+          },
+          {
+            "guid": "plex://movie/5f409408cae2c60042008ebf",
+            "tag": "The War Below"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Revelations Entertainment"
+          },
+          {
+            "tag": "NBC"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "An ammunition depot explosion prompts a mutiny that forces the U.S. military to fully integrate.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

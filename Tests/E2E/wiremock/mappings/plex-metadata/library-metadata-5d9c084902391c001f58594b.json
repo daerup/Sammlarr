@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/library/metadata/5d9c084902391c001f58594b",
+    "queryParameters": {
+      "includeExternalMedia": {
+        "equalTo": "1"
+      },
+      "includeGuids": {
+        "equalTo": "1"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "bodyFileName": "plex-metadata/library-metadata-5d9c084902391c001f58594b.verified.json"
+  }
+}

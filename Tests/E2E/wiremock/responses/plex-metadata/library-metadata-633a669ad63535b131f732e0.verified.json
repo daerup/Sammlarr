@@ -1,0 +1,262 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/A6V0jLoC01a7ceiIG9MYZgkLQrS.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/427836/banners/646438a44d47b.jpg",
+        "guid": "plex://show/633a669ad63535b131f732e0",
+        "key": "/library/metadata/633a669ad63535b131f732e0/children",
+        "ratingKey": "633a669ad63535b131f732e0",
+        "studio": "Blind Nil",
+        "summary": "Home bakers compete in groups, making 3 identical items in 2 hours for judges to score on presentation, creativity, and taste. Group winners advance to finals, where Silos Bakery compatibility counts. Winner gets cash and menu feature.",
+        "type": "show",
+        "addedAt": 1654992000,
+        "audienceRating": 5.5,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "contentRating": "TV-G",
+        "duration": 2700000,
+        "imdbRatingCount": 53,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2023-06-25",
+        "lastSeasonOriginallyAvailableAt": "2023-05-28",
+        "leafCount": 6,
+        "originallyAvailableAt": "2022-06-12",
+        "publicPagesURL": "https://watch.plex.tv/show/silos-baking-competition",
+        "slug": "silos-baking-competition",
+        "thumb": "https://image.tmdb.org/t/p/original/vBsWQ5zNMcF7UVkSvMuwB1YzQn9.jpg",
+        "title": "Silos Baking Competition",
+        "userState": false,
+        "year": 2022,
+        "Image": [
+          {
+            "alt": "Silos Baking Competition",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/A6V0jLoC01a7ceiIG9MYZgkLQrS.jpg"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e422a37d684a485a1dd2448405b8a04c.jpg"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/427836/banners/646438a44d47b.jpg"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/1/683a142553/112580a3d2fd5ff8cc31c286c4afeef4.png"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/1/683a142553/112580a3d2fd5ff8cc31c286c4afeef4.png"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f296a1afb11825e7b1ec526c6067ff9d.jpg"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/vBsWQ5zNMcF7UVkSvMuwB1YzQn9.jpg"
+          },
+          {
+            "alt": "Silos Baking Competition",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/ba8c670d4c8c24d0c986f4fd504b7a9c.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+            "id": "5d9c07e8705e7a001e6cc4f9",
+            "key": "/library/sections/home/all?genre=5d9c07e8705e7a001e6cc4f9",
+            "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+            "slug": "reality",
+            "tag": "Reality",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07ec4eefaa001f5d16ac",
+            "id": "5d9c07ec4eefaa001f5d16ac",
+            "key": "/library/sections/home/all?genre=5d9c07ec4eefaa001f5d16ac",
+            "ratingKey": "genre_5d9c07ec4eefaa001f5d16ac",
+            "slug": "food",
+            "tag": "Food",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt21613984"
+          },
+          {
+            "id": "tmdb://228726"
+          },
+          {
+            "id": "tvdb://427836"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7770d223d5a3001f53c18f",
+            "order": 1,
+            "slug": "joanna-gaines",
+            "tag": "Joanna Gaines",
+            "thumb": "https://metadata-static.plex.tv/5/people/55093f087bf4f39f5263d160577fe611.jpg",
+            "role": "Self - Host",
+            "key": "/library/people/5d7770d223d5a3001f53c18f",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f4062eb04a8650040a78495",
+            "slug": "elizabeth-winfrey",
+            "tag": "Elizabeth Winfrey",
+            "role": "Producer",
+            "key": "/library/people/5f4062eb04a8650040a78495",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe28e93b86d951fbd512",
+            "score": 0.981,
+            "tag": "inspiring"
+          },
+          {
+            "id": "65afbe22e93b86d951faf705",
+            "score": 0.978,
+            "tag": "uplifting"
+          },
+          {
+            "id": "65afbe22e93b86d951faf6eb",
+            "score": 0.838,
+            "tag": "heartwarming"
+          },
+          {
+            "id": "65afbe36e93b86d951fe489a",
+            "score": 0.702,
+            "tag": "adventurous"
+          },
+          {
+            "id": "65afbe30e93b86d951fd2941",
+            "score": 0.67,
+            "tag": "lighthearted"
+          },
+          {
+            "id": "65afbe22e93b86d951faf8a9",
+            "score": 0.585,
+            "tag": "charming"
+          },
+          {
+            "id": "65afbe22e93b86d951faf7a8",
+            "score": 0.584,
+            "tag": "funny"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Magnolia Network"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f2c542a52037b003fc20f05",
+            "tag": "Selena + Chef"
+          },
+          {
+            "guid": "plex://show/621cdc5b95aa921c7068d445",
+            "tag": "Is It Cake?"
+          },
+          {
+            "guid": "plex://show/5d9c0867e98e47001eb0e8ea",
+            "tag": "Chopped"
+          },
+          {
+            "guid": "plex://show/5d9c083d08fddd001f295c83",
+            "tag": "Cake Boss"
+          },
+          {
+            "guid": "plex://show/6646a039edaf7511f5557e8a",
+            "tag": "Harry Potter: Wizards of Baking"
+          },
+          {
+            "guid": "plex://show/66472d53d2b7492ad1c5101a",
+            "tag": "Harry Potter: Wizards of Baking"
+          },
+          {
+            "guid": "plex://show/5d9c08097b5c2e001e652a87",
+            "tag": "The Great British Baking Show"
+          },
+          {
+            "guid": "plex://show/5d9c0826e9d5a1001f4d7ee7",
+            "tag": "Cutthroat Kitchen"
+          },
+          {
+            "guid": "plex://show/5d9c08523c3f87001f34cad1",
+            "tag": "Beat Bobby Flay"
+          },
+          {
+            "guid": "plex://show/5d9c08f508fddd001f2a4c2c",
+            "tag": "Nailed It!"
+          },
+          {
+            "guid": "plex://show/5d9c09207b5c2e001e6677c1",
+            "tag": "The Great British Bake Off"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Blind Nil"
+          }
+        ]
+      }
+    ]
+  }
+}

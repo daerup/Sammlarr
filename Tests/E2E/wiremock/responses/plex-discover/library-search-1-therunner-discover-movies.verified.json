@@ -1,0 +1,531 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "Maze Runner: The Scorch Trials",
+      "Maze Runner: The Death Cure",
+      "Blade Runner 2049",
+      "Blade Runner",
+      "The Maze Runner",
+      "The Kite Runner",
+      "Runner Runner",
+      "runners",
+      "The Maze Runner: Finding the Gang",
+      "The Front Runner"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1780531200,
+              "art": "https://image.tmdb.org/t/p/original/i2RTw513RzkQLoombXXj5RNrocF.jpg",
+              "duration": 660000,
+              "guid": "plex://movie/6a2aa39861dd0be111f9c07d",
+              "key": "/library/metadata/6a2aa39861dd0be111f9c07d",
+              "originallyAvailableAt": "2026-06-04",
+              "ratingKey": "6a2aa39861dd0be111f9c07d",
+              "slug": "runner-2026-2",
+              "thumb": "https://image.tmdb.org/t/p/original/v0u6Qmx3KbQb5G2RqnjRxdsLlcB.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.78
+          },
+          {
+            "Metadata": {
+              "addedAt": 1788998400,
+              "art": "https://metadata-static.plex.tv/a/gracenote/a857d82bae66732abcb8cf99016053c9.jpg",
+              "duration": 5820000,
+              "guid": "plex://movie/65d2daf3359932bcaa86b538",
+              "key": "/library/metadata/65d2daf3359932bcaa86b538",
+              "originallyAvailableAt": "2026-09-10",
+              "ratingKey": "65d2daf3359932bcaa86b538",
+              "slug": "runner-2026",
+              "thumb": "https://metadata-static.plex.tv/4/gracenote/4647e6682c7d941acd62e6114213ac2d.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.73
+          },
+          {
+            "Metadata": {
+              "addedAt": 1788307200,
+              "art": "https://metadata-static.plex.tv/c/gracenote/cfbff09da264d8b866838e888fbb6a9b.jpg",
+              "duration": 5160000,
+              "guid": "plex://movie/6738e193d70f01a8cec05ff0",
+              "key": "/library/metadata/6738e193d70f01a8cec05ff0",
+              "originallyAvailableAt": "2026-09-02",
+              "ratingKey": "6738e193d70f01a8cec05ff0",
+              "slug": "the-runner-2026-1",
+              "thumb": "https://metadata-static.plex.tv/1/gracenote/142bd704c189fabb869dc7f6ad470cd3.jpg",
+              "title": "The Runner",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.7
+          },
+          {
+            "Metadata": {
+              "addedAt": 393811200,
+              "art": "https://metadata-static.plex.tv/f/gracenote/f5a0ba5708057e03cc3c9fa07c1d3812.jpg",
+              "duration": 7080000,
+              "guid": "plex://movie/5d7768245af944001f1f6282",
+              "key": "/library/metadata/5d7768245af944001f1f6282",
+              "originallyAvailableAt": "1982-06-25",
+              "ratingKey": "5d7768245af944001f1f6282",
+              "slug": "blade-runner-1982",
+              "thumb": "https://metadata-static.plex.tv/8/gracenote/89fc6370ece4bc6cb9d22c0f040c0b90.jpg",
+              "title": "Blade Runner",
+              "type": "movie",
+              "year": 1982,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.61
+          },
+          {
+            "Metadata": {
+              "addedAt": 1507075200,
+              "art": "https://metadata-static.plex.tv/a/gracenote/a0ecf098e5d69ea6ed05316de4914606.jpg",
+              "duration": 9840000,
+              "guid": "plex://movie/5d776b95594b2b001e6de3f3",
+              "key": "/library/metadata/5d776b95594b2b001e6de3f3",
+              "originallyAvailableAt": "2017-10-04",
+              "ratingKey": "5d776b95594b2b001e6de3f3",
+              "slug": "blade-runner-2049",
+              "thumb": "https://metadata-static.plex.tv/8/plex/8f70f460-09f3-4736-831b-b52adc959016.jpg",
+              "title": "Blade Runner 2049",
+              "type": "movie",
+              "year": 2017,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "addedAt": 1410393600,
+              "art": "https://metadata-static.plex.tv/9/gracenote/9c1555269b98ac63bcc406d913cb415e.jpg",
+              "duration": 6780000,
+              "guid": "plex://movie/5d776a2651dd69001fe20006",
+              "key": "/library/metadata/5d776a2651dd69001fe20006",
+              "originallyAvailableAt": "2014-09-11",
+              "ratingKey": "5d776a2651dd69001fe20006",
+              "slug": "the-maze-runner",
+              "thumb": "https://metadata-static.plex.tv/6/gracenote/64f345c3fd8bc41bb216ed4b49cbfee5.jpg",
+              "title": "The Maze Runner",
+              "type": "movie",
+              "year": 2014,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "addedAt": 1635724800,
+              "art": "https://image.tmdb.org/t/p/original/87AtFh0GwQpileg1jitkXd6St5Z.jpg",
+              "duration": 5280000,
+              "guid": "plex://movie/5f40dc62fea1a1003fbc0817",
+              "key": "/library/metadata/5f40dc62fea1a1003fbc0817",
+              "originallyAvailableAt": "2021-11-01",
+              "ratingKey": "5f40dc62fea1a1003fbc0817",
+              "slug": "runner-2021-1",
+              "thumb": "https://metadata-static.plex.tv/7/gracenote/7a1c00afd1dc506bcef83f41a5476f75.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "addedAt": 1534809600,
+              "art": "https://metadata-static.plex.tv/a/gracenote/aa80f1b91a9c5fbb8c79bf97be75b8ae.jpg",
+              "duration": 5580000,
+              "guid": "plex://movie/5d77708396b655001fe9802b",
+              "key": "/library/metadata/5d77708396b655001fe9802b",
+              "originallyAvailableAt": "2018-08-21",
+              "ratingKey": "5d77708396b655001fe9802b",
+              "slug": "runner-2018-2",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/f0662b8069ebc18d2f204fecf2d9963e.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2018,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "addedAt": 1556755200,
+              "art": "https://metadata-static.plex.tv/8/gracenote/8259d3a0d8b7c224ca6656a1809830df.jpg",
+              "duration": 5233280,
+              "guid": "plex://movie/5ef1542385666c0041c09480",
+              "key": "/library/metadata/5ef1542385666c0041c09480",
+              "originallyAvailableAt": "2019-05-02",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5ef1542385666c0041c09480",
+              "ratingKey": "5ef1542385666c0041c09480",
+              "slug": "runner-2019-2",
+              "thumb": "https://metadata-static.plex.tv/0/gracenote/0cbe982f2a549e0216aeb37c6c3b2f7f.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          },
+          {
+            "Metadata": {
+              "addedAt": 1707350400,
+              "art": "https://image.tmdb.org/t/p/original/9Dsu03F0muV1DYknViwS2cliShG.jpg",
+              "duration": 5400000,
+              "guid": "plex://movie/63da96694b927ece533c56d4",
+              "key": "/library/metadata/63da96694b927ece533c56d4",
+              "originallyAvailableAt": "2024-02-08",
+              "ratingKey": "63da96694b927ece533c56d4",
+              "slug": "runner-2024-1",
+              "thumb": "https://image.tmdb.org/t/p/original/xNaHENguLcVDNYVyWaxVji6uzol.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.6
+          }
+        ]
+      }
+    ]
+  }
+}

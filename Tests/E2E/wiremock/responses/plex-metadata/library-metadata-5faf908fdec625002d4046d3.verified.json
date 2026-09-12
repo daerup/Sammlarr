@@ -1,0 +1,165 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/5faf908fdec625002d4046d3",
+        "key": "/library/metadata/5faf908fdec625002d4046d3",
+        "ratingKey": "5faf908fdec625002d4046d3",
+        "subtype": "short",
+        "summary": "The love story between Eduardo and Ícaro, a gay couple who met right before Eduardo traveled abroad. A film that seeks to explore the debate between virtual relationships and the virtualization of romance.",
+        "type": "movie",
+        "addedAt": 1605139200,
+        "duration": 960000,
+        "originalTitle": "Odisseia",
+        "originallyAvailableAt": "2020-11-12",
+        "publicPagesURL": "https://watch.plex.tv/movie/odyssey-2020-3",
+        "slug": "odyssey-2020-3",
+        "thumb": "https://image.tmdb.org/t/p/original/fLyuOml8Si3wktC0fjKpcHxVEQr.jpg",
+        "title": "Odyssey",
+        "userState": false,
+        "year": 2020,
+        "Image": [
+          {
+            "alt": "Odyssey",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/fLyuOml8Si3wktC0fjKpcHxVEQr.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt13448870"
+          },
+          {
+            "id": "tmdb://763679"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Brazil"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5ff61a3ac6dec2002d2509a1",
+            "order": 1,
+            "slug": "felipe-paes-1",
+            "tag": "Felipe Paes",
+            "role": "Eduardo",
+            "key": "/library/people/5ff61a3ac6dec2002d2509a1",
+            "type": "person"
+          },
+          {
+            "id": "5ff61a3ac6dec2002d2509a2",
+            "order": 2,
+            "slug": "philipe-philippsen-1",
+            "tag": "Philipe Philippsen",
+            "role": "Ícaro",
+            "key": "/library/people/5ff61a3ac6dec2002d2509a2",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776d52fb0d55001f59d3b4",
+            "slug": "william-mayer-4",
+            "tag": "William Mayer",
+            "thumb": "https://metadata-static.plex.tv/people/5d776d52fb0d55001f59d3b4.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776d52fb0d55001f59d3b4",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f3fbfd502101b0040ebf66c",
+            "slug": "william-mayer-5",
+            "tag": "William Mayer",
+            "role": "Writer",
+            "key": "/library/people/5f3fbfd502101b0040ebf66c",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77683c7e9a3c0020c6e4ca",
+            "tag": "Not Easily Broken"
+          },
+          {
+            "guid": "plex://movie/5d9f352ad74e6700200211eb",
+            "tag": "Dot the I"
+          },
+          {
+            "guid": "plex://movie/5d78b9cd47dd6e001f7698bb",
+            "tag": "The Yellow Handkerchief"
+          },
+          {
+            "guid": "plex://movie/5d776a60fb0d55001f54442d",
+            "tag": "Endless Love"
+          },
+          {
+            "guid": "plex://movie/5d776be0594b2b001e6e561b",
+            "tag": "Departure"
+          },
+          {
+            "guid": "plex://movie/5d776d2e96b655001fe41d5d",
+            "tag": "Life in a Year"
+          },
+          {
+            "guid": "plex://movie/5d776885103a2d001f5744d5",
+            "tag": "The Fugitive Kind"
+          },
+          {
+            "guid": "plex://movie/5f40bd1702101b00400d0a5b",
+            "tag": "Hello, Goodbye and Everything in Between"
+          },
+          {
+            "guid": "plex://movie/5f40bfcf9774a2003a17af81",
+            "tag": "Purple Hearts"
+          },
+          {
+            "guid": "plex://movie/5f40966f5a76a80042e58ad9",
+            "tag": "Nobody Has to Know"
+          }
+        ]
+      }
+    ]
+  }
+}

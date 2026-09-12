@@ -1,0 +1,643 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/a/gracenote/aa79f9fbfdc119b2fdb740748a9b5031.jpg",
+        "banner": "https://assets.fanart.tv/fanart/project-hail-mary-69b45e2aeb034.jpg",
+        "guid": "plex://movie/5e91843e9bec79003fe50ffb",
+        "isTopRated": true,
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/5e91843e9bec79003fe50ffb",
+        "rating": 9.5,
+        "ratingKey": "5e91843e9bec79003fe50ffb",
+        "studio": "Lord Miller",
+        "summary": "A science teacher wakes up alone on a spaceship. As his memory returns, he uncovers a mission to stop a mysterious substance killing Earth's sun, and realizes that an unexpected friendship may be the key.",
+        "tagline": "Believe in the Hail Mary.",
+        "type": "movie",
+        "addedAt": 1773792000,
+        "audienceRating": 9.5,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 200000000,
+        "contentRating": "PG-13",
+        "duration": 9420000,
+        "imdbRatingCount": 542195,
+        "originallyAvailableAt": "2026-03-18",
+        "publicPagesURL": "https://watch.plex.tv/movie/project-hail-mary",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 684234722,
+        "slug": "project-hail-mary",
+        "thumb": "https://metadata-static.plex.tv/c/plex/cbb2547d-1ce2-4cea-a668-665ce34c4937.jpg",
+        "title": "Project Hail Mary",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5e91843e9bec79003fe50ffb/commonsensemedia",
+            "oneLiner": "Crowd-pleasing sci-fi adaptation mixes peril and humor.",
+            "AgeRating": [
+              {
+                "age": 12,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Project Hail Mary",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/a/gracenote/aa79f9fbfdc119b2fdb740748a9b5031.jpg"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/48dca49b1b500b8d063578510d2d8eb2.jpg"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/project-hail-mary-69b45e2aeb034.jpg"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/f/683a142553/fb2ef3886123c377c6e0297c378eb0aa.png"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/f/683a142553/fb2ef3886123c377c6e0297c378eb0aa.png"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/a/plex/ab4a4e0e-798b-42dc-bc10-65219fdc54d7.jpg"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/c/plex/cbb2547d-1ce2-4cea-a668-665ce34c4937.jpg"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/3d7760afbf30112003caa9be9c437d95.jpg"
+          },
+          {
+            "alt": "Project Hail Mary",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/b/gracenote/b4cebd96b272f04a2512a66d2ab81d4f.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt12042730"
+          },
+          {
+            "id": "tmdb://687163"
+          },
+          {
+            "id": "tvdb://346729"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.2
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.5
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.5
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.642
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682c7228e5001f1dd74f",
+            "order": 1,
+            "slug": "ryan-gosling",
+            "tag": "Ryan Gosling",
+            "thumb": "https://metadata-static.plex.tv/8/people/8b266af248284d992d30290c189036e7.jpg",
+            "role": "Ryland Grace",
+            "key": "/library/people/5d77682c7228e5001f1dd74f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311bf9",
+            "order": 2,
+            "slug": "sandra-huller",
+            "tag": "Sandra Hüller",
+            "thumb": "https://metadata-static.plex.tv/8/people/8e8d522a0810c49125f5a06632c43f09.jpg",
+            "role": "Eva Stratt",
+            "key": "/library/people/5d7768268718ba001e311bf9",
+            "type": "person"
+          },
+          {
+            "id": "5f400be7ce2564003f8bd66b",
+            "order": 3,
+            "slug": "james-ortiz",
+            "tag": "James Ortiz",
+            "thumb": "https://metadata-static.plex.tv/f/people/f0c7e02bdc05887119dbb7bcbe0eb206.jpg",
+            "role": "Rocky (voice)",
+            "key": "/library/people/5f400be7ce2564003f8bd66b",
+            "type": "person"
+          },
+          {
+            "id": "5f40213d04a86500409f19fb",
+            "order": 4,
+            "slug": "lionel-boyce",
+            "tag": "Lionel Boyce",
+            "thumb": "https://metadata-static.plex.tv/5/people/5a2c209f49ddd01eaefa3a1f189a3862.jpg",
+            "role": "Carl",
+            "key": "/library/people/5f40213d04a86500409f19fb",
+            "type": "person"
+          },
+          {
+            "id": "5d776846103a2d001f56bbf5",
+            "order": 5,
+            "slug": "milana-vayntrub",
+            "tag": "Milana Vayntrub",
+            "thumb": "https://metadata-static.plex.tv/b/people/b78913de5f23593073ddcfd54fdb8243.jpg",
+            "role": "Olesya Ilyukhina",
+            "key": "/library/people/5d776846103a2d001f56bbf5",
+            "type": "person"
+          },
+          {
+            "id": "5d776826a091de001f2e60ed",
+            "order": 6,
+            "slug": "ken-leung",
+            "tag": "Ken Leung",
+            "thumb": "https://metadata-static.plex.tv/9/people/975654d84b24c21de1d13c3b364f5a3b.jpg",
+            "role": "Yao",
+            "key": "/library/people/5d776826a091de001f2e60ed",
+            "type": "person"
+          },
+          {
+            "id": "617bac136e18b5a436681f75",
+            "order": 7,
+            "slug": "priya-kansara",
+            "tag": "Priya Kansara",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4044685df01610c038e194acf38183e.jpg",
+            "role": "Mary (voice)",
+            "key": "/library/people/617bac136e18b5a436681f75",
+            "type": "person"
+          },
+          {
+            "id": "5d776836eb5d26001f1e0f75",
+            "order": 8,
+            "slug": "mia-soteriou",
+            "tag": "Mia Soteriou",
+            "thumb": "https://metadata-static.plex.tv/8/people/8c668a2359be7f1775cead0edd5c2c3d.jpg",
+            "role": "Dr. Browne",
+            "key": "/library/people/5d776836eb5d26001f1e0f75",
+            "type": "person"
+          },
+          {
+            "id": "608d8364480ad5002c2dd5ef",
+            "order": 9,
+            "slug": "annelle-olaleye",
+            "tag": "Annelle Olaleye",
+            "thumb": "https://metadata-static.plex.tv/8/cc68393fae/people/8d045a396ae042fb6f31e97598a36b61.jpg",
+            "role": "Olivia",
+            "key": "/library/people/608d8364480ad5002c2dd5ef",
+            "type": "person"
+          },
+          {
+            "id": "69c2b46d41c0289a61fe1e50",
+            "order": 10,
+            "slug": "maya-eva-hosein",
+            "tag": "Maya Eva Hosein",
+            "thumb": "https://metadata-static.plex.tv/c/people/c13c2febb5b68805f4dad8f2b5354573.jpg",
+            "role": "Rekha",
+            "key": "/library/people/69c2b46d41c0289a61fe1e50",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbae3cae2c60042e6a37e",
+            "order": 11,
+            "slug": "bastian-antonio-fuentes",
+            "tag": "Bastian Antonio Fuentes",
+            "thumb": "https://metadata-static.plex.tv/7/people/78a58b91e43151094900de46fd94233f.jpg",
+            "role": "Parker",
+            "key": "/library/people/5f3fbae3cae2c60042e6a37e",
+            "type": "person"
+          },
+          {
+            "id": "5f404950fea1a1003fa307a1",
+            "order": 12,
+            "slug": "alice-brittain",
+            "tag": "Alice Brittain",
+            "thumb": "https://metadata-static.plex.tv/0/people/0402363a6aae726ae4927bc7808e6cc2.jpg",
+            "role": "Hardware Store Cashier",
+            "key": "/library/people/5f404950fea1a1003fa307a1",
+            "type": "person"
+          },
+          {
+            "id": "5d776d75ad5437001f7d67c5",
+            "order": 13,
+            "slug": "michael-akinsulire",
+            "tag": "Michael Akinsulire",
+            "thumb": "https://metadata-static.plex.tv/9/people/98e28177a25b7fa75c3faf0ed04a9635.jpg",
+            "role": "Air Force Officer",
+            "key": "/library/people/5d776d75ad5437001f7d67c5",
+            "type": "person"
+          },
+          {
+            "id": "5f4061d252f200004158a761",
+            "order": 14,
+            "slug": "travis-jay",
+            "tag": "Travis Jay",
+            "thumb": "https://metadata-static.plex.tv/5/people/5fc6410e11d38d3328ba7f549f2b8dec.jpg",
+            "role": "Tilt-A-Whirl",
+            "key": "/library/people/5f4061d252f200004158a761",
+            "type": "person"
+          },
+          {
+            "id": "5f4009d0ce2564003f8ba6bd",
+            "order": 15,
+            "slug": "geoffrey-lumb",
+            "tag": "Geoffrey Lumb",
+            "thumb": "https://metadata-static.plex.tv/d/people/db8dcbe7cd83961d7617561d23a21ba0.jpg",
+            "role": "Aircraft Carrier Officer",
+            "key": "/library/people/5f4009d0ce2564003f8ba6bd",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb97103883a0040a9ac75",
+            "order": 16,
+            "slug": "paul-lambert-1",
+            "tag": "Paul Lambert",
+            "thumb": "https://image.tmdb.org/t/p/original/5P60pgSQTOtZLHMVcL2Wkaf7Oyx.jpg",
+            "role": "Dr. Scyther",
+            "key": "/library/people/5f3fb97103883a0040a9ac75",
+            "type": "person"
+          },
+          {
+            "id": "5d77686c2e80df001ebe3950",
+            "order": 17,
+            "slug": "orion-lee",
+            "tag": "Orion Lee",
+            "thumb": "https://metadata-static.plex.tv/a/people/a2bbc79309926abc193992134a8675c5.jpg",
+            "role": "Dr. Li",
+            "key": "/library/people/5d77686c2e80df001ebe3950",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa6fb0d55001f54cb52",
+            "order": 18,
+            "slug": "aaron-neil",
+            "tag": "Aaron Neil",
+            "thumb": "https://metadata-static.plex.tv/people/5d776aa6fb0d55001f54cb52.jpg",
+            "role": "Narender",
+            "key": "/library/people/5d776aa6fb0d55001f54cb52",
+            "type": "person"
+          },
+          {
+            "id": "5e0e8acaa0dfd6001e85d983",
+            "order": 19,
+            "slug": "michelle-greenidge",
+            "tag": "Michelle Greenidge",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb0c9ef30a63eaf11b27a09ed476ba57.jpg",
+            "role": "Chimamanda",
+            "key": "/library/people/5e0e8acaa0dfd6001e85d983",
+            "type": "person"
+          },
+          {
+            "id": "5d77683361141d001fb151f4",
+            "order": 20,
+            "slug": "bernhard-schutz",
+            "tag": "Bernhard Schütz",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ed4c39f161e71fa7473df6abd2772de.jpg",
+            "role": "Voigt",
+            "key": "/library/people/5d77683361141d001fb151f4",
+            "type": "person"
+          },
+          {
+            "id": "5d776aca594b2b001e6c612b",
+            "order": 21,
+            "slug": "amira-ghazalla",
+            "tag": "Amira Ghazalla",
+            "thumb": "https://metadata-static.plex.tv/8/people/87d151ebe1b4e3fe0dcc7538de02bace.jpg",
+            "role": "Dr. Lokken",
+            "key": "/library/people/5d776aca594b2b001e6c612b",
+            "type": "person"
+          },
+          {
+            "id": "5d77697b9ab54400214f26c4",
+            "order": 22,
+            "slug": "malachi-kirby",
+            "tag": "Malachi Kirby",
+            "thumb": "https://metadata-static.plex.tv/d/people/ddef14b0b185655c0fea8b8561c06488.jpg",
+            "role": "DuBois",
+            "key": "/library/people/5d77697b9ab54400214f26c4",
+            "type": "person"
+          },
+          {
+            "id": "5f4043d304a8650040a2e4f5",
+            "order": 23,
+            "slug": "liz-kingsman",
+            "tag": "Liz Kingsman",
+            "thumb": "https://metadata-static.plex.tv/9/cc68393fae/people/989639f0fb6047dc202baaa38e34634b.jpg",
+            "role": "Shapiro",
+            "key": "/library/people/5f4043d304a8650040a2e4f5",
+            "type": "person"
+          },
+          {
+            "id": "5d776a0c594b2b001e6b1c5c",
+            "order": 24,
+            "slug": "piotr-baumann",
+            "tag": "Piotr Baumann",
+            "thumb": "https://metadata-static.plex.tv/f/people/f057218eb509f53152e1c554c2f20f11.jpg",
+            "role": "Piotr",
+            "key": "/library/people/5d776a0c594b2b001e6b1c5c",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08784eefaa001f5df043",
+            "order": 25,
+            "slug": "eunice-huthart",
+            "tag": "Eunice Huthart",
+            "thumb": "https://metadata-static.plex.tv/2/people/210ce83b32c47e67638dd6f3e8f8868e.jpg",
+            "role": "Rejected Rocky Voice (voice)",
+            "key": "/library/people/5d9c08784eefaa001f5df043",
+            "type": "person"
+          },
+          {
+            "id": "5dce71c88659cb002016aaeb",
+            "order": 26,
+            "slug": "damien-de-froberville",
+            "tag": "Damien de Froberville",
+            "thumb": "https://metadata-static.plex.tv/6/people/6ab5ddaa20c6923cd929c63b19c1804f.jpg",
+            "role": "Rejected Rocky Voice (voice)",
+            "key": "/library/people/5dce71c88659cb002016aaeb",
+            "type": "person"
+          },
+          {
+            "id": "5d776829e6d55c002040b36e",
+            "order": 27,
+            "slug": "ray-porter",
+            "tag": "Ray Porter",
+            "thumb": "https://metadata-static.plex.tv/d/people/d299b4eca787216bdffe4c5a581bdbe3.jpg",
+            "role": "Rejected Rocky Voice (voice)",
+            "key": "/library/people/5d776829e6d55c002040b36e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768265af944001f1f6688",
+            "order": 28,
+            "slug": "meryl-streep",
+            "tag": "Meryl Streep",
+            "thumb": "https://metadata-static.plex.tv/5/people/5f4758b7a494c62d12f4180bc52c3817.jpg",
+            "role": "Rejected Rocky Voice (voice)",
+            "key": "/library/people/5d7768265af944001f1f6688",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77684c0ea56a001e2a2afc",
+            "slug": "phil-lord",
+            "tag": "Phil Lord",
+            "thumb": "https://metadata-static.plex.tv/9/people/9235e494b79665f4f2a8769d6476d5ca.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77684c0ea56a001e2a2afc",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2afd",
+            "slug": "christopher-miller",
+            "tag": "Christopher Miller",
+            "thumb": "https://metadata-static.plex.tv/8/people/847a4c739af6edab0fd2a628aa388d5b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77684c0ea56a001e2a2afd",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dcfc5d477120a001e1a3b6a",
+            "slug": "rachel-oconnor",
+            "tag": "Rachel O'Connor",
+            "role": "Producer",
+            "key": "/library/people/5dcfc5d477120a001e1a3b6a",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c7228e5001f1dd74f",
+            "slug": "ryan-gosling",
+            "tag": "Ryan Gosling",
+            "thumb": "https://metadata-static.plex.tv/8/people/8b266af248284d992d30290c189036e7.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682c7228e5001f1dd74f",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2afc",
+            "slug": "phil-lord",
+            "tag": "Phil Lord",
+            "thumb": "https://metadata-static.plex.tv/9/people/9235e494b79665f4f2a8769d6476d5ca.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77684c0ea56a001e2a2afc",
+            "type": "person"
+          },
+          {
+            "id": "5d776ca0ad5437001f7c402d",
+            "slug": "andy-weir",
+            "tag": "Andy Weir",
+            "thumb": "https://metadata-static.plex.tv/9/people/9a3faa8e3395ab9a683fa046481abcee.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776ca0ad5437001f7c402d",
+            "type": "person"
+          },
+          {
+            "id": "5d776dd051dd69001fe45cd7",
+            "slug": "aditya-sood",
+            "tag": "Aditya Sood",
+            "thumb": "https://metadata-static.plex.tv/9/people/9f9c9ec16ea6374eac88935ed4654fef.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776dd051dd69001fe45cd7",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2afd",
+            "slug": "christopher-miller",
+            "tag": "Christopher Miller",
+            "thumb": "https://metadata-static.plex.tv/8/people/847a4c739af6edab0fd2a628aa388d5b.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77684c0ea56a001e2a2afd",
+            "type": "person"
+          },
+          {
+            "id": "5d77687b23d5a3001f4ecd9d",
+            "slug": "amy-pascal",
+            "tag": "Amy Pascal",
+            "thumb": "https://metadata-static.plex.tv/5/people/570f9bc6417156e7c45be27735b4c6fa.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77687b23d5a3001f4ecd9d",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776ca0ad5437001f7c402d",
+            "slug": "andy-weir",
+            "tag": "Andy Weir",
+            "thumb": "https://metadata-static.plex.tv/9/people/9a3faa8e3395ab9a683fa046481abcee.jpg",
+            "role": "Novel",
+            "key": "/library/people/5d776ca0ad5437001f7c402d",
+            "type": "person"
+          },
+          {
+            "id": "5d77683154c0f0001f30301a",
+            "slug": "drew-goddard",
+            "tag": "Drew Goddard",
+            "thumb": "https://metadata-static.plex.tv/8/people/86ed1588e8e267002b58bd7e0aded104.jpg",
+            "role": "Screenplay",
+            "key": "/library/people/5d77683154c0f0001f30301a",
+            "type": "person"
+          },
+          {
+            "id": "5d776d68ad5437001f7d526a",
+            "slug": "richard-phelan",
+            "tag": "Richard Phelan",
+            "role": "Head Of Story",
+            "key": "/library/people/5d776d68ad5437001f7d526a",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d77696ef617c9002015f700",
+            "tag": "Guardians of the Galaxy"
+          },
+          {
+            "guid": "plex://movie/5d7769cefb0d55001f530acd",
+            "tag": "Interstellar"
+          },
+          {
+            "guid": "plex://movie/5d776a0ef617c90020168471",
+            "tag": "Star Trek Beyond"
+          },
+          {
+            "guid": "plex://movie/5d77682a3c3c2a001fbcbff4",
+            "tag": "Solaris"
+          },
+          {
+            "guid": "plex://movie/5d77688833f255001e858e7b",
+            "tag": "Gravity"
+          },
+          {
+            "guid": "plex://movie/5d77688996b655001fdbaee0",
+            "tag": "John Carter"
+          },
+          {
+            "guid": "plex://movie/5d777099f617c9002019f1f6",
+            "tag": "Stowaway"
+          },
+          {
+            "guid": "plex://movie/5d7770c296b655001fe9df32",
+            "tag": "Cosmos"
+          },
+          {
+            "guid": "plex://movie/5eb8f26137ccbe0041724471",
+            "tag": "The Adam Project"
+          },
+          {
+            "guid": "plex://movie/5d776cc1ad5437001f7c8422",
+            "tag": "War of the Worlds"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Lord Miller"
+          },
+          {
+            "tag": "Amazon MGM Studios"
+          },
+          {
+            "tag": "Pascal Pictures"
+          },
+          {
+            "tag": "Open Invite Entertainment"
+          },
+          {
+            "tag": "Waypoint Entertainment"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A science teacher embarks on an otherworldly mission to find out why the sun is dying out.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

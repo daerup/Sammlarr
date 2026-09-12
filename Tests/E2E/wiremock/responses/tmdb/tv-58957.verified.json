@@ -1,0 +1,169 @@
+{
+  "adult": false,
+  "backdrop_path": "/5ix5qtVlLR2O0sgAJp5urHLbGZe.jpg",
+  "created_by": [
+    {
+      "id": 1212667,
+      "credit_id": "56071849925141306400295e",
+      "name": "Nathan Fielder",
+      "original_name": "Nathan Fielder",
+      "gender": 2,
+      "profile_path": "/eHJEoEck6eFEVaumhCMWpIHtIIr.jpg"
+    },
+    {
+      "id": 1236869,
+      "credit_id": "5607184fc3a3681205002a97",
+      "name": "Michael Koman",
+      "original_name": "Michael Koman",
+      "gender": 2,
+      "profile_path": "/bwChY5lXRMy3HXMxNMlSZ28clSg.jpg"
+    }
+  ],
+  "episode_run_time": [
+    21
+  ],
+  "first_air_date": "2013-02-28",
+  "genres": [
+    {
+      "id": 35,
+      "name": "Comedy"
+    },
+    {
+      "id": 99,
+      "name": "Documentary"
+    }
+  ],
+  "homepage": "http://www.cc.com/shows/nathan-for-you",
+  "id": 58957,
+  "in_production": false,
+  "languages": [
+    "en"
+  ],
+  "last_air_date": "2017-11-09",
+  "last_episode_to_air": {
+    "id": 1388583,
+    "name": "Finding Frances",
+    "overview": "Nathan attempts to help a Bill Gates impersonator reunite with his long-lost love.",
+    "vote_average": 9.353,
+    "vote_count": 17,
+    "air_date": "2017-11-09",
+    "episode_number": 7,
+    "episode_type": "finale",
+    "production_code": "",
+    "runtime": 84,
+    "season_number": 4,
+    "show_id": 58957,
+    "still_path": "/rDTHtTa91q9dGz4EW3WTD1YSa7e.jpg"
+  },
+  "name": "Nathan for You",
+  "next_episode_to_air": null,
+  "networks": [
+    {
+      "id": 47,
+      "logo_path": "/6ooPjtXufjsoskdJqj6pxuvHEno.png",
+      "name": "Comedy Central",
+      "origin_country": "US"
+    }
+  ],
+  "number_of_episodes": 31,
+  "number_of_seasons": 4,
+  "origin_country": [
+    "US"
+  ],
+  "original_language": "en",
+  "original_name": "Nathan for You",
+  "overview": "Self-proclaimed business expert, writer, director and comedian Nathan Fielder helps real small businesses turn a profit with marketing tactics that no ordinary consultant would dare to attempt. From driving foot traffic to an off-the-strip souvenir shop by using Hollywood flair and a Johnny Depp impersonator, to creating a rebate that can only be redeemed by climbing a mountain, to founding a coffee shop called \"Dumb Starbucks,” Nathan has always gone to the limit to make his ideas come to life. With his unorthodox approach to problem solving, Nathan’s genuine efforts to do good often draw the real people he encounters into an experience far beyond what they signed up for.",
+  "popularity": 6.7091,
+  "poster_path": "/6tGXlz61c44onUg6EdRkbhjcaPA.jpg",
+  "production_companies": [
+    {
+      "id": 64263,
+      "logo_path": null,
+      "name": "W.D.M. Productions",
+      "origin_country": "US"
+    },
+    {
+      "id": 64264,
+      "logo_path": "/AgKhE4VyVeFLRWVlerhDUWGKeKH.png",
+      "name": "Abso Lutely Productions",
+      "origin_country": "US"
+    },
+    {
+      "id": 64265,
+      "logo_path": null,
+      "name": "Blow Out Productions",
+      "origin_country": "US"
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "seasons": [
+    {
+      "air_date": "2017-09-21",
+      "episode_count": 1,
+      "id": 121803,
+      "name": "Specials",
+      "overview": "",
+      "poster_path": "/qaNkOdWN1Fo2AeqLNXlX9QLie1w.jpg",
+      "season_number": 0,
+      "vote_average": 0.0
+    },
+    {
+      "air_date": "2013-02-28",
+      "episode_count": 8,
+      "id": 62356,
+      "name": "Season 1",
+      "overview": "An unconventional yogurt flavor. Speedier pizza delivery. A department-store Santa harboring a dark secret. A teen nabbed for doing graffiti. Attractive customers shoplifting from a store. Publicizing diner bathrooms. The world's greatest rebate. A newly famous caricature artist. An even more haunted haunted house. Dating several women at once. A struggling funeral home. The best burgers in Los Angeles. Going skydiving. A daring escape from something worse than death. Failed business ideas. A private investigator. A solution for shy customers at a taxi company. And finally, forced product placement.",
+      "poster_path": "/yxsH3BIEgiO4feFsjkBwdHXDInF.jpg",
+      "season_number": 1,
+      "vote_average": 8.1
+    },
+    {
+      "air_date": "2014-07-01",
+      "episode_count": 8,
+      "id": 62357,
+      "name": "Season 2",
+      "overview": "A polygraph test verification. A rebranding as a Ghost Realtor. A fake film shoot that turns into accidental fraud. A controversial ad in a pet cemetery. Taking tips from a focus group. Helping a liquor store sell to underage customers. A discrete exterminator. Making use of the parody law. A system to protect women on first dates. A radical new weight-loss program. Helping a party planner reduce \"guest list\" anxiety. A way to get a failing taxi company some much needed press. A new risky line-cutting policy in a hot dog stand. Marketing an unappealing children's toy. Shaming people who share their movie snacks. A reality show staring Simon the security guard.",
+      "poster_path": "/j9LF7lNGelcuegjF71oF99DnfLU.jpg",
+      "season_number": 2,
+      "vote_average": 8.3
+    },
+    {
+      "air_date": "2015-10-15",
+      "episode_count": 8,
+      "id": 70990,
+      "name": "Season 3",
+      "overview": "Clashing with a giant corporation while trying to help a struggling electronics store. A ranch accommodating for overweight riders. Appeasing male customers by creating a \"man zone\". A holocaust-awareness themed clothing company. An exercising fad known as \"The Movement\". Recruiting promising young athletes to promote a struggling sporting goods store. An antique shop being open 24/7. Allowing smoking at a bar. A hotel marketing itself to sexually active parents. A travel agent concentrating on older clients. A solution for tardiness. Protecting women's nail polish from chipping. Addressing the topic of personality. Turning a stranger into a humanitarian hero.",
+      "poster_path": "/vZLGWhCF2dGj6vvPeYE3Gg2FN7y.jpg",
+      "season_number": 3,
+      "vote_average": 8.2
+    },
+    {
+      "air_date": "2017-09-28",
+      "episode_count": 7,
+      "id": 91677,
+      "name": "Season 4",
+      "overview": "An elaborate stunt to make it seem like comedian Michael Richards left a $10,000 tip at a deli. A method of selling chili in secret. A charity to help a massage parlor upsell its clients. Meeting an old friend in the hopes of sabotaging Uber's business from the inside. Honing storytelling skills. Teaches an international exporter how to ship smoke alarms tax-free. Helping a computer repair shop earn public trust. Marketing becoming personal for a psychic. Helping a Bill Gates impersonator reunite with his long lost love.",
+      "poster_path": "/wR6lIIaqmZPOdtnQrvQV9XjbzDq.jpg",
+      "season_number": 4,
+      "vote_average": 8.2
+    }
+  ],
+  "softcore": false,
+  "spoken_languages": [
+    {
+      "english_name": "English",
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Ended",
+  "tagline": "",
+  "type": "Reality",
+  "vote_average": 8.2,
+  "vote_count": 326
+}

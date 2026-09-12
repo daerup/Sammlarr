@@ -1,0 +1,384 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/1ftqNLph1CxcXxSXJsijjlw7ZkX.jpg",
+        "guid": "plex://show/69d7218e8d07470143708357",
+        "key": "/library/metadata/69d7218e8d07470143708357/children",
+        "ratingKey": "69d7218e8d07470143708357",
+        "studio": "Netflix",
+        "subtype": "miniSeries",
+        "summary": "Follows a Lego animated retelling of the first two seasons of One Piece with brick-building comedy and action.",
+        "tagline": "Pirates assemble.",
+        "type": "show",
+        "addedAt": 1790640000,
+        "childCount": 1,
+        "contentRating": "TV-Y7",
+        "isContinuingSeries": true,
+        "leafCount": 2,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-29",
+        "nextSeasonOriginallyAvailableAt": "2026-09-29",
+        "originallyAvailableAt": "2026-09-29",
+        "publicPagesURL": "https://watch.plex.tv/show/lego-one-piece",
+        "skipChildren": true,
+        "slug": "lego-one-piece",
+        "thumb": "https://m.media-amazon.com/images/M/MV5BNjhjZDY5YWMtYjA5Yi00ZGVlLTliOTctODQ2MmU4YmUzNDNlXkEyXkFqcGc@._V1_.jpg",
+        "title": "LEGO ONE PIECE",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "LEGO ONE PIECE",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/1ftqNLph1CxcXxSXJsijjlw7ZkX.jpg"
+          },
+          {
+            "alt": "LEGO ONE PIECE",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/d/683a142553/d342b02b95b0ad932b818ec6da49199e.png"
+          },
+          {
+            "alt": "LEGO ONE PIECE",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/d/683a142553/d342b02b95b0ad932b818ec6da49199e.png"
+          },
+          {
+            "alt": "LEGO ONE PIECE",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/j3aJ4BtFC29nOdV7FsEYD8kQk35.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07ebcb3ffa001f1b0904",
+            "id": "5d9c07ebcb3ffa001f1b0904",
+            "key": "/library/sections/home/all?genre=5d9c07ebcb3ffa001f1b0904",
+            "ratingKey": "genre_5d9c07ebcb3ffa001f1b0904",
+            "slug": "mini-series",
+            "tag": "Mini-Series",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt41538904"
+          },
+          {
+            "id": "tmdb://318918"
+          },
+          {
+            "id": "tvdb://476514"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Canada"
+          },
+          {
+            "tag": "United States of America"
+          },
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7770a06afb3d002061e54c",
+            "order": 1,
+            "slug": "inaki-godoy",
+            "tag": "Iñaki Godoy",
+            "thumb": "https://metadata-static.plex.tv/b/people/b97f2dff14a6e23c21913e56f7756b53.jpg",
+            "role": "Monkey D. Luffy (voice)",
+            "key": "/library/people/5d7770a06afb3d002061e54c",
+            "type": "person"
+          },
+          {
+            "id": "5d776f02ad5437001f80825a",
+            "order": 2,
+            "slug": "emily-rudd",
+            "tag": "Emily Rudd",
+            "thumb": "https://metadata-static.plex.tv/1/people/1865b0adf30184a39646f49571999234.jpg",
+            "role": "Nami (voice)",
+            "key": "/library/people/5d776f02ad5437001f80825a",
+            "type": "person"
+          },
+          {
+            "id": "5d776ad57a53e9001e7110e2",
+            "order": 3,
+            "slug": "mackenyu",
+            "tag": "Mackenyu",
+            "thumb": "https://metadata-static.plex.tv/c/people/c8fee277f03f462aa7cc0809d624e3cf.jpg",
+            "role": "Roronoa Zoro (voice)",
+            "key": "/library/people/5d776ad57a53e9001e7110e2",
+            "type": "person"
+          },
+          {
+            "id": "5e624d9aedfb02003ecdd04d",
+            "order": 4,
+            "slug": "jacob-gibson",
+            "tag": "Jacob Gibson",
+            "thumb": "https://metadata-static.plex.tv/3/people/385a3ba89fff2ddb87420e069ad0fd31.jpg",
+            "role": "Usopp (voice)",
+            "key": "/library/people/5e624d9aedfb02003ecdd04d",
+            "type": "person"
+          },
+          {
+            "id": "5d7770ec31d95e001f1acdb3",
+            "order": 5,
+            "slug": "taz-skylar",
+            "tag": "Taz Skylar",
+            "thumb": "https://metadata-static.plex.tv/0/people/02edfcb4b5d795f9d788cf37899cf376.jpg",
+            "role": "Sanji (voice)",
+            "key": "/library/people/5d7770ec31d95e001f1acdb3",
+            "type": "person"
+          },
+          {
+            "id": "6024e43bad99f8002c3a5a45",
+            "order": 6,
+            "slug": "charithra-chandran",
+            "tag": "Charithra Chandran",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7b85d9dde25af367b1ea117f9f2b691.jpg",
+            "role": "Miss Wednesday (voice)",
+            "key": "/library/people/6024e43bad99f8002c3a5a45",
+            "type": "person"
+          },
+          {
+            "id": "5d77685885719b001f3a9b0e",
+            "order": 7,
+            "slug": "mikaela-hoover",
+            "tag": "Mikaela Hoover",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e8bce475a54b380cbc4fef5b8a8aa32.jpg",
+            "role": "Chopper (voice)",
+            "key": "/library/people/5d77685885719b001f3a9b0e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5e16509ecd0850003b778763",
+            "slug": "chelsea-ker",
+            "tag": "Chelsea Ker",
+            "role": "Director",
+            "key": "/library/people/5e16509ecd0850003b778763",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5e16509e91c203004122d258",
+            "slug": "lars-danielsen-1",
+            "tag": "Lars Danielsen",
+            "role": "Executive Producer",
+            "key": "/library/people/5e16509e91c203004122d258",
+            "type": "person"
+          },
+          {
+            "id": "5e6248fcbbd78b003df8eaf9",
+            "slug": "becky-clements",
+            "tag": "Becky Clements",
+            "thumb": "https://metadata-static.plex.tv/d/people/d0fcb3b4a3aa122414a69ff06b383b32.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5e6248fcbbd78b003df8eaf9",
+            "type": "person"
+          },
+          {
+            "id": "5d77688b47dd6e001f6bb66a",
+            "slug": "marty-adelstein",
+            "tag": "Marty Adelstein",
+            "thumb": "https://metadata-static.plex.tv/a/people/a067acd158f43a606cb917577c5344f0.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5d77688b47dd6e001f6bb66a",
+            "type": "person"
+          },
+          {
+            "id": "6a0c06963fd5a7c5f9342e6d",
+            "slug": "tom-hyndman-6",
+            "tag": "Tom Hyndman",
+            "role": "Executive Producer",
+            "key": "/library/people/6a0c06963fd5a7c5f9342e6d",
+            "type": "person"
+          },
+          {
+            "id": "5dce6b5577120a001e0f8d29",
+            "slug": "keith-malone-2",
+            "tag": "Keith Malone",
+            "role": "Executive Producer",
+            "key": "/library/people/5dce6b5577120a001e0f8d29",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a0c06963fd5a7c5f9342e6d",
+            "slug": "tom-hyndman-6",
+            "tag": "Tom Hyndman",
+            "role": "Writer",
+            "key": "/library/people/6a0c06963fd5a7c5f9342e6d",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Netflix"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c07f67b5c2e001e6505d3",
+            "tag": "Kid vs. Kat"
+          },
+          {
+            "guid": "plex://show/5d9c08737d06d9001ffd317c",
+            "tag": "The Adventures of Jimmy Neutron: Boy Genius"
+          },
+          {
+            "guid": "plex://show/5d9c07f7ba2e21001f18cace",
+            "tag": "Yin Yang Yo!"
+          },
+          {
+            "guid": "plex://show/5d9c0847e264b7001fc40211",
+            "tag": "Pac‐Man and the Ghostly Adventures"
+          },
+          {
+            "guid": "plex://show/5d9c0815e98e47001eb07268",
+            "tag": "Captain Planet and the Planeteers"
+          },
+          {
+            "guid": "plex://show/5d9c0851e98e47001eb0cb06",
+            "tag": "Sonic Boom"
+          },
+          {
+            "guid": "plex://show/5d9c08523c3f87001f34cac6",
+            "tag": "Harvey Beaks"
+          },
+          {
+            "guid": "plex://show/5d9c087508fddd001f29c099",
+            "tag": "Earthworm Jim"
+          },
+          {
+            "guid": "plex://show/5d9c0879e9d5a1001f4dae6a",
+            "tag": "The Marvelous Misadventures of Flapjack"
+          },
+          {
+            "guid": "plex://show/5d9c0907d4f2a9001f804f8f",
+            "tag": "Amphibia"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Netflix"
+          },
+          {
+            "tag": "Shueisha"
+          },
+          {
+            "tag": "Atomic Cartoons"
+          },
+          {
+            "tag": "Tomorrow Studios"
+          },
+          {
+            "tag": "The LEGO Group"
+          }
+        ]
+      }
+    ]
+  }
+}

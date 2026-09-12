@@ -1,0 +1,565 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1787184000,
+              "art": "https://metadata-static.plex.tv/4/gracenote/48ff8500c0e9ab7f07d9fd5e6c83d347.jpg",
+              "duration": 6180000,
+              "guid": "plex://movie/5d77707b81ba41001faf1629",
+              "key": "/library/metadata/5d77707b81ba41001faf1629",
+              "originallyAvailableAt": "2026-08-20",
+              "ratingKey": "5d77707b81ba41001faf1629",
+              "slug": "coyote-vs-acme",
+              "thumb": "https://metadata-static.plex.tv/a/gracenote/a1edc33d34ff1f6bb1bb13a017a9cc22.jpg",
+              "title": "Coyote vs. Acme",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.93
+          },
+          {
+            "Metadata": {
+              "duration": 5520000,
+              "guid": "plex://movie/5d776ec9594b2b001e72e638",
+              "key": "/library/metadata/5d776ec9594b2b001e72e638",
+              "ratingKey": "5d776ec9594b2b001e72e638",
+              "slug": "acme-and-co",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BODRhOTBkMGQtOGZkMy00ZjFhLWIzYWYtOTFkMzliYWEyZmZmXkEyXkFqcGc@._V1_.jpg",
+              "title": "Acme & Co.",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          },
+          {
+            "Metadata": {
+              "addedAt": 1776470400,
+              "art": "https://image.tmdb.org/t/p/original/kfKgkLkEFmUPpyXCSYAACtz7Mto.jpg",
+              "guid": "plex://movie/6a1f441fdbb49df8ce04e9c5",
+              "key": "/library/metadata/6a1f441fdbb49df8ce04e9c5",
+              "originallyAvailableAt": "2026-04-18",
+              "ratingKey": "6a1f441fdbb49df8ce04e9c5",
+              "slug": "acme-air",
+              "thumb": "https://image.tmdb.org/t/p/original/8sfHmTMBaktKcR5lQML2a51FWt1.jpg",
+              "title": "Acme Air",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28aba6",
+                  "id": "5d9c046c08fddd001f28aba6",
+                  "key": "/library/categories/war",
+                  "ratingKey": "genre_5d9c046c08fddd001f28aba6",
+                  "slug": "war",
+                  "tag": "War",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          },
+          {
+            "Metadata": {
+              "addedAt": 1487203200,
+              "art": "https://metadata-static.plex.tv/e/gracenote/e2a57b6e2295b66f9f056febdf6c7170.jpg",
+              "duration": 7913216,
+              "guid": "plex://movie/5d776cb551dd69001fe3e656",
+              "key": "/library/metadata/5d776cb551dd69001fe3e656",
+              "originallyAvailableAt": "2017-02-16",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d776cb551dd69001fe3e656",
+              "ratingKey": "5d776cb551dd69001fe3e656",
+              "slug": "coyote-2017-1",
+              "thumb": "https://metadata-static.plex.tv/a/gracenote/ac9fbf67ec678a481ec25878ebbed8bd.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 2017,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": 1687219200,
+              "art": "https://metadata-static.plex.tv/2/gracenote/216d0c2907f2167e9ccebafda49988cf.jpg",
+              "duration": 6060000,
+              "guid": "plex://movie/620540dbaa7b166e0ee3de63",
+              "key": "/library/metadata/620540dbaa7b166e0ee3de63",
+              "originallyAvailableAt": "2023-06-20",
+              "ratingKey": "620540dbaa7b166e0ee3de63",
+              "slug": "coyote-2023",
+              "thumb": "https://metadata-static.plex.tv/a/gracenote/af532223d57307fb356a80b1178403c9.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": 709516800,
+              "art": "https://image.tmdb.org/t/p/original/dqrHa1uMqKyMEc7tZbsQfkqHBiW.jpg",
+              "duration": 5940000,
+              "guid": "plex://movie/5d776aa3594b2b001e6c1df9",
+              "key": "/library/metadata/5d776aa3594b2b001e6c1df9",
+              "originallyAvailableAt": "1992-06-26",
+              "ratingKey": "5d776aa3594b2b001e6c1df9",
+              "slug": "coyote-1992",
+              "thumb": "https://metadata-static.plex.tv/0/gracenote/02cc9260926fe60f5946b9f3eef799aa.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 1992,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": 1214179200,
+              "art": "https://vod-static.plex.tv/thumbnails/62cf2f99700e44e586a8d9d1/fa5a5a22-42ba-40a0-8344-363f6d18d6d6/thumb2.jpg",
+              "duration": 5640000,
+              "guid": "plex://movie/5d776874374a5b001fec61cf",
+              "key": "/library/metadata/5d776874374a5b001fec61cf",
+              "originallyAvailableAt": "2008-06-23",
+              "ratingKey": "5d776874374a5b001fec61cf",
+              "slug": "coyote",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/f47d50f431ce6483a618ff1cfc79ab95.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 2008,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": 1518739200,
+              "duration": 600000,
+              "guid": "plex://movie/5d776f09ad5437001f808cd9",
+              "key": "/library/metadata/5d776f09ad5437001f808cd9",
+              "originallyAvailableAt": "2018-02-16",
+              "ratingKey": "5d776f09ad5437001f808cd9",
+              "slug": "coyote-2018",
+              "subtype": "short",
+              "thumb": "https://image.tmdb.org/t/p/original/aWeCZTHENiAKIEAcpepXyTnsXAa.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 2018,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": 1418688000,
+              "art": "https://metadata-static.plex.tv/d/gracenote/d1b7652160cf61c5b993184f4d623696.jpg",
+              "duration": 4480875,
+              "guid": "plex://movie/5d776a6a23d5a3001f5046ee",
+              "key": "/library/metadata/5d776a6a23d5a3001f5046ee",
+              "originallyAvailableAt": "2014-12-16",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d776a6a23d5a3001f5046ee",
+              "ratingKey": "5d776a6a23d5a3001f5046ee",
+              "slug": "coyote-2014",
+              "thumb": "https://metadata-static.plex.tv/1/gracenote/1fe5fb8aeda8819f14c98b0938f2bb90.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 2014,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": 1370476800,
+              "art": "https://metadata-static.plex.tv/d/gracenote/de2b99ce4f2696cb686df6a9ab1589e6.jpg",
+              "duration": 5520000,
+              "guid": "plex://movie/5d776b1fad5437001f79400e",
+              "key": "/library/metadata/5d776b1fad5437001f79400e",
+              "originallyAvailableAt": "2013-06-06",
+              "ratingKey": "5d776b1fad5437001f79400e",
+              "slug": "coyote-2013-3",
+              "thumb": "https://metadata-static.plex.tv/a/gracenote/ae9fa36393a22f5875c338618254f3ab.jpg",
+              "title": "Coyote",
+              "type": "movie",
+              "year": 2013,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          }
+        ]
+      }
+    ]
+  }
+}

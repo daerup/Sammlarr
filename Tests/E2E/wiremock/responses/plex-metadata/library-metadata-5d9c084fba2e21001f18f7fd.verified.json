@@ -1,0 +1,508 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/4asTdWijaj9HRfxg1pVneWTfQMG.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/261862-g.jpg",
+        "guid": "plex://show/5d9c084fba2e21001f18f7fd",
+        "key": "/library/metadata/5d9c084fba2e21001f18f7fd/children",
+        "ratingKey": "5d9c084fba2e21001f18f7fd",
+        "studio": "Kyoto Animation",
+        "summary": "Yuuta suffered from \"chuunibyou\" while he was in middle school. When he graduated, he try to forgot about it but he accidentally got into a contract with Rikka and disrupts his desperately ordinary life.",
+        "type": "show",
+        "addedAt": 1349308800,
+        "audienceRating": 7.4,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 2,
+        "contentRating": "TV-14",
+        "duration": 1440000,
+        "imdbRatingCount": 6708,
+        "lastEpisodeOriginallyAvailableAt": "2014-03-27",
+        "lastSeasonOriginallyAvailableAt": "2014-01-09",
+        "leafCount": 58,
+        "originalTitle": "中二病でも恋がしたい!",
+        "originallyAvailableAt": "2012-10-04",
+        "publicPagesURL": "https://watch.plex.tv/show/love-chunibyo-and-other-delusions",
+        "slug": "love-chunibyo-and-other-delusions",
+        "theme": "https://tvthemes.plexapp.com/261862.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/1IapEqydEiGO0gCgBPVexTFbUCS.jpg",
+        "title": "Love, Chunibyo & Other Delusions!",
+        "userState": false,
+        "year": 2012,
+        "Image": [
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/4asTdWijaj9HRfxg1pVneWTfQMG.jpg"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8e1502b7a9083138fa28ac7b673d0e87.jpg"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/261862-g.jpg"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/009125463f/4aa8cf668e8f91367eccbb7759ee3936.png"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/009125463f/4aa8cf668e8f91367eccbb7759ee3936.png"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6473179b646416298c4321f1f02c5729.jpg"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/1IapEqydEiGO0gCgBPVexTFbUCS.jpg"
+          },
+          {
+            "alt": "Love, Chunibyo & Other Delusions!",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cde0af8d9ea1dc84d760801034dbe539.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+            "id": "5d9c07f0ba2e21001f18c7f8",
+            "key": "/library/sections/home/all?genre=5d9c07f0ba2e21001f18c7f8",
+            "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+            "slug": "anime",
+            "tag": "Anime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt2321542"
+          },
+          {
+            "id": "tmdb://45501"
+          },
+          {
+            "id": "tvdb://261862"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.068
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77686e23d5a3001f4ec29f",
+            "order": 1,
+            "slug": "jun-fukuyama",
+            "tag": "Jun Fukuyama",
+            "thumb": "https://metadata-static.plex.tv/1/people/12041bb4bf6c4a462712e1065c2a165a.jpg",
+            "role": "Yuta Togashi (voice)",
+            "key": "/library/people/5d77686e23d5a3001f4ec29f",
+            "type": "person"
+          },
+          {
+            "id": "5d776a4296b655001fde8a47",
+            "order": 2,
+            "slug": "maaya-uchida",
+            "tag": "Maaya Uchida",
+            "thumb": "https://metadata-static.plex.tv/5/people/5890866690eafcd36a1061b4a7b76dc0.jpg",
+            "role": "Rikka Takanashi (voice)",
+            "key": "/library/people/5d776a4296b655001fde8a47",
+            "type": "person"
+          },
+          {
+            "id": "5d7769ff96b655001fde05c8",
+            "order": 3,
+            "slug": "chinatsu-akasaki",
+            "tag": "Chinatsu Akasaki",
+            "thumb": "https://image.tmdb.org/t/p/original/nYYs30FgGrgr3uOiQ4ASmRpFca2.jpg",
+            "role": "Shinka Nibutani (voice)",
+            "key": "/library/people/5d7769ff96b655001fde05c8",
+            "type": "person"
+          },
+          {
+            "id": "5d776a487a53e9001e7002fe",
+            "order": 4,
+            "slug": "sumire-uesaka",
+            "tag": "Sumire Uesaka",
+            "thumb": "https://metadata-static.plex.tv/0/people/099dace9997be5e0b56e57a92e8c74fa.jpg",
+            "role": "Sanae Dekomori (voice)",
+            "key": "/library/people/5d776a487a53e9001e7002fe",
+            "type": "person"
+          },
+          {
+            "id": "5d776a487a53e9001e7002ff",
+            "order": 5,
+            "slug": "azumi-asakura",
+            "tag": "Azumi Asakura",
+            "thumb": "https://metadata-static.plex.tv/6/people/640d7a015620845e4a99e9950cac2ba7.jpg",
+            "role": "Kumin Tsuyuri (voice)",
+            "key": "/library/people/5d776a487a53e9001e7002ff",
+            "type": "person"
+          },
+          {
+            "id": "5d776a487a53e9001e700300",
+            "order": 6,
+            "slug": "juri-nagatsuma",
+            "tag": "Juri Nagatsuma",
+            "thumb": "https://metadata-static.plex.tv/c/people/c4cb521a7e0f9415f2d7a80d1c84ec24.jpg",
+            "role": "Satone Shichimiya (voice)",
+            "key": "/library/people/5d776a487a53e9001e700300",
+            "type": "person"
+          },
+          {
+            "id": "5d776840e6d55c002040ed57",
+            "order": 7,
+            "slug": "kikuko-inoue",
+            "tag": "Kikuko Inoue",
+            "thumb": "https://metadata-static.plex.tv/8/people/8ba6c74840cc3f573486ea1a205b3f4a.jpg",
+            "role": "Nanase Tsukumo (voice)",
+            "key": "/library/people/5d776840e6d55c002040ed57",
+            "type": "person"
+          },
+          {
+            "id": "5d77683785719b001f3a4150",
+            "order": 8,
+            "slug": "soichiro-hoshi",
+            "tag": "Soichiro Hoshi",
+            "thumb": "https://metadata-static.plex.tv/e/people/e4a5f2e135ab47c4b35c6be789e6e2b5.jpg",
+            "role": "Makoto Isshiki (voice)",
+            "key": "/library/people/5d77683785719b001f3a4150",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77686a33f255001e8556e8",
+            "slug": "tatsuya-ishihara",
+            "tag": "Tatsuya Ishihara",
+            "thumb": "https://metadata-static.plex.tv/2/people/2eaf45909ec9b594f4e815feacdbfb36.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77686a33f255001e8556e8",
+            "type": "person"
+          },
+          {
+            "id": "5d776d5196b655001fe45bae",
+            "slug": "eisaku-kawanami",
+            "tag": "Eisaku Kawanami",
+            "thumb": "https://metadata-static.plex.tv/6/people/6dcca04524dc227de5d796a16dd47fce.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776d5196b655001fe45bae",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff37ccae2c60042eb92c3",
+            "slug": "noriyuki-kitanohara",
+            "tag": "Noriyuki Kitanohara",
+            "role": "Director",
+            "key": "/library/people/5f3ff37ccae2c60042eb92c3",
+            "type": "person"
+          },
+          {
+            "id": "5d77686a33f255001e8556e7",
+            "slug": "yasuhiro-takemoto",
+            "tag": "Yasuhiro Takemoto",
+            "thumb": "https://metadata-static.plex.tv/people/5d77686a33f255001e8556e7.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77686a33f255001e8556e7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a433f255001e85bba8",
+            "slug": "yoshiji-kigami",
+            "tag": "Yoshiji Kigami",
+            "thumb": "https://metadata-static.plex.tv/3/people/30c580b4b70fbe5c4d5701cd0519fcc3.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768a433f255001e85bba8",
+            "type": "person"
+          },
+          {
+            "id": "5f4020355a76a80042d52a9d",
+            "slug": "ai-yukimura",
+            "tag": "Ai Yukimura",
+            "role": "Director",
+            "key": "/library/people/5f4020355a76a80042d52a9d",
+            "type": "person"
+          },
+          {
+            "id": "5e164266ef1040003f2579f2",
+            "slug": "haruka-fujita",
+            "tag": "Haruka Fujita",
+            "thumb": "https://metadata-static.plex.tv/7/people/7cf286adf502a2efab228c6988c5a553.jpg",
+            "role": "Director",
+            "key": "/library/people/5e164266ef1040003f2579f2",
+            "type": "person"
+          },
+          {
+            "id": "5d776d4d9ab544002151d76d",
+            "slug": "taichi-ogawa",
+            "tag": "Taichi Ogawa",
+            "thumb": "https://image.tmdb.org/t/p/original/AnjExAzhocjwSWxQpwrmwn40H5k.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776d4d9ab544002151d76d",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff4855a76a80042d13317",
+            "slug": "hiroko-utsumi",
+            "tag": "Hiroko Utsumi",
+            "role": "Director",
+            "key": "/library/people/5f3ff4855a76a80042d13317",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbabfbf3e560040af5e93",
+            "slug": "kazuya-sakamoto",
+            "tag": "Kazuya Sakamoto",
+            "thumb": "https://metadata-static.plex.tv/d/people/d882b2d34a78ec510c88168d136e31c9.jpg",
+            "role": "Director",
+            "key": "/library/people/5f3fbabfbf3e560040af5e93",
+            "type": "person"
+          },
+          {
+            "id": "5d776b557a53e9001e72232e",
+            "slug": "taichi-ishidate",
+            "tag": "Taichi Ishidate",
+            "thumb": "https://metadata-static.plex.tv/f/people/fbfbc397f904e511bbfbca1ca39197f5.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776b557a53e9001e72232e",
+            "type": "person"
+          },
+          {
+            "id": "5e16562b91c203004123318c",
+            "slug": "rika-ota",
+            "tag": "Rika Ota",
+            "role": "Director",
+            "key": "/library/people/5e16562b91c203004123318c",
+            "type": "person"
+          },
+          {
+            "id": "5e16426661c6140040d791ea",
+            "slug": "takuya-yamamura",
+            "tag": "Takuya Yamamura",
+            "role": "Director",
+            "key": "/library/people/5e16426661c6140040d791ea",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776a487a53e9001e7002fb",
+            "slug": "shinichi-nakamura",
+            "tag": "Shinichi Nakamura",
+            "role": "Producer",
+            "key": "/library/people/5d776a487a53e9001e7002fb",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc2b9eb43ea001f4a78d6",
+            "slug": "shigeru-saito",
+            "tag": "Shigeru Saito",
+            "thumb": "https://metadata-static.plex.tv/1/people/169df4ba6754fd2049145c4ea0ee1b72.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dcfc2b9eb43ea001f4a78d6",
+            "type": "person"
+          },
+          {
+            "id": "5d776a487a53e9001e7002fc",
+            "slug": "eharu-ohashi-1",
+            "tag": "Eharu Ohashi",
+            "role": "Producer",
+            "key": "/library/people/5d776a487a53e9001e7002fc",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776a487a53e9001e700304",
+            "slug": "jukki-hanada",
+            "tag": "Jukki Hanada",
+            "role": "Series Composition",
+            "key": "/library/people/5d776a487a53e9001e700304",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc2b9eb43ea001f4a78d8",
+            "slug": "torako",
+            "tag": "Torako",
+            "role": "Novel",
+            "key": "/library/people/5dcfc2b9eb43ea001f4a78d8",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Tokyo MX"
+          },
+          {
+            "tag": "Sun TV"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5ff0880f8cdd46002d35e8d6",
+            "tag": "Miss Shikimori Is Not Just Cute"
+          },
+          {
+            "guid": "plex://show/5d9c08021cae62001f748c4a",
+            "tag": "Azumanga Daioh"
+          },
+          {
+            "guid": "plex://show/627fec81acd636c5b982a94a",
+            "tag": "Kubo Won't Let Me Be Invisible"
+          },
+          {
+            "guid": "plex://show/62e95e8bea28b47e5bb46218",
+            "tag": "The Dangers in My Heart"
+          },
+          {
+            "guid": "plex://show/638ef90a92bb2fdc322d2db2",
+            "tag": "The Dangers in My Heart"
+          },
+          {
+            "guid": "plex://show/6414757425871b1c05c6d574",
+            "tag": "Alya Sometimes Hides Her Feelings in Russian"
+          },
+          {
+            "guid": "plex://show/6644a7a0b7faf0b923c1dfed",
+            "tag": "Hana‐Kimi"
+          },
+          {
+            "guid": "plex://show/6745cc419b783bf0880c593f",
+            "tag": "You and I Are Polar Opposites"
+          },
+          {
+            "guid": "plex://show/5d9c0848ec357c001f9ab17a",
+            "tag": "Monthly Girls' Nozaki‐kun"
+          },
+          {
+            "guid": "plex://show/5d9c0818ec357c001f9a9c1b",
+            "tag": "Tanaka‐kun Is Always Listless"
+          },
+          {
+            "guid": "plex://show/5d9c080f705e7a001e6d1377",
+            "tag": "The Disappearance of Nagato Yuki‐chan"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Kyoto Animation"
+          },
+          {
+            "tag": "Pony Canyon"
+          },
+          {
+            "tag": "Lantis"
+          },
+          {
+            "tag": "TBS"
+          }
+        ]
+      }
+    ]
+  }
+}

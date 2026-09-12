@@ -1,0 +1,388 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/3/gracenote/32e2593da1da2c86298aa25b5c5d9fdd.jpg",
+        "guid": "plex://movie/69e305ee317ecf07393f1a9b",
+        "key": "/library/metadata/69e305ee317ecf07393f1a9b",
+        "ratingKey": "69e305ee317ecf07393f1a9b",
+        "studio": "The Asylum",
+        "summary": "When a new action figure accidentally knocks a princess doll over the backyard fence, a group of mismatched toys must work together to bring her home before dark.",
+        "tagline": "Heroes come in all sizes.",
+        "type": "movie",
+        "addedAt": 1781222400,
+        "audienceRating": 2,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "TV-G",
+        "duration": 4680000,
+        "imdbRatingCount": 54,
+        "originallyAvailableAt": "2026-06-12",
+        "publicPagesURL": "https://watch.plex.tv/movie/new-toy-story",
+        "slug": "new-toy-story",
+        "thumb": "https://metadata-static.plex.tv/e/gracenote/ece41eb61569ff3ec740cc55826e5824.jpg",
+        "title": "New Toy Story",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "New Toy Story",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/3/gracenote/32e2593da1da2c86298aa25b5c5d9fdd.jpg"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6e7a96edf96f32370a84ecb154877514.jpg"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/e/683a142553/ea4ec9c3e7ead0bfc3c7f9ae326284a3.png"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/e/683a142553/ea4ec9c3e7ead0bfc3c7f9ae326284a3.png"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/b/gracenote/bc89c8c0de002bfb5466ff6673909240.jpg"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ece41eb61569ff3ec740cc55826e5824.jpg"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/0/gracenote/0c0a9f431e0f147c3587fe43aa3321ed.jpg"
+          },
+          {
+            "alt": "New Toy Story",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a0667c787bcc08bfffe36071c4db9d39.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt41635253"
+          },
+          {
+            "id": "tmdb://1698874"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 1
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768282ec6b5001f6ba5d8",
+            "order": 1,
+            "slug": "tom-arnold",
+            "tag": "Tom Arnold",
+            "thumb": "https://metadata-static.plex.tv/4/people/464a0d3dae0e2df9bb47a15d20c101cd.jpg",
+            "role": "Ozzie (voice)",
+            "key": "/library/people/5d7768282ec6b5001f6ba5d8",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b961905001eb92588",
+            "order": 2,
+            "slug": "d-c-douglas",
+            "tag": "D. C. Douglas",
+            "thumb": "https://metadata-static.plex.tv/2/people/2a5280fb7e9618660f56352044af6384.jpg",
+            "role": "Action Mack (voice)",
+            "key": "/library/people/5d77682b961905001eb92588",
+            "type": "person"
+          },
+          {
+            "id": "5d777069fb0d55001f5efa3a",
+            "order": 3,
+            "slug": "jared-rivet",
+            "tag": "Jared Rivet",
+            "thumb": "https://metadata-static.plex.tv/2/people/2972ecc4bed5bb6c39579228f3afc053.jpg",
+            "role": "Calico Joe (voice)",
+            "key": "/library/people/5d777069fb0d55001f5efa3a",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07ebd977a1dcaea06b28",
+            "order": 4,
+            "slug": "diamond-marie-buckley-1",
+            "tag": "Diamond Marie Buckley",
+            "role": "Pixel (voice)",
+            "key": "/library/people/6a5d07ebd977a1dcaea06b28",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07e4e96a3a6a88940cd2",
+            "order": 5,
+            "slug": "amber-jones-47",
+            "tag": "Amber Jones",
+            "role": "Princess Marisol (voice)",
+            "key": "/library/people/6a5d07e4e96a3a6a88940cd2",
+            "type": "person"
+          },
+          {
+            "id": "5d7770b37a53e9001e7a9363",
+            "order": 6,
+            "slug": "courtney-shaffer",
+            "tag": "Courtney Shaffer",
+            "thumb": "https://metadata-static.plex.tv/6/people/6897952c986ca1e86b1f50c3c97a7858.jpg",
+            "role": "Coco (voice)",
+            "key": "/library/people/5d7770b37a53e9001e7a9363",
+            "type": "person"
+          },
+          {
+            "id": "6a0c0328aaf75168d20a327b",
+            "order": 7,
+            "slug": "daniel-tolbert-9",
+            "tag": "Daniel Tolbert",
+            "role": "BB (voice)",
+            "key": "/library/people/6a0c0328aaf75168d20a327b",
+            "type": "person"
+          },
+          {
+            "id": "5d776d5a96b655001fe46bbb",
+            "order": 8,
+            "slug": "chris-levine",
+            "tag": "Chris Levine",
+            "thumb": "https://metadata-static.plex.tv/9/people/9c6a3f862ac590e4a20c7b7556a94cdc.jpg",
+            "role": "Squeaks (voice)",
+            "key": "/library/people/5d776d5a96b655001fe46bbb",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07f21dee1f3d8243189a",
+            "order": 9,
+            "slug": "arthur-kohn-5",
+            "tag": "Arthur Kohn",
+            "role": "Grubs (voice)",
+            "key": "/library/people/6a5d07f21dee1f3d8243189a",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07effa2fa360822139c7",
+            "order": 10,
+            "slug": "parker-six-rimawi-1",
+            "tag": "Parker Six Rimawi",
+            "role": "Rolie (voice)",
+            "key": "/library/people/6a5d07effa2fa360822139c7",
+            "type": "person"
+          },
+          {
+            "id": "690b58865991bc752c27e109",
+            "order": 11,
+            "slug": "calvin-rimawi-1",
+            "tag": "Calvin Rimawi",
+            "role": "Polie (voice)",
+            "key": "/library/people/690b58865991bc752c27e109",
+            "type": "person"
+          },
+          {
+            "id": "63c299abb30681c3bfb050e8",
+            "order": 12,
+            "slug": "jaclynn-cherry-1",
+            "tag": "Jaclynn Cherry",
+            "role": "Mom (voice)",
+            "key": "/library/people/63c299abb30681c3bfb050e8",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07ee0867051a227becc8",
+            "order": 13,
+            "slug": "bobby-beauchamp-1",
+            "tag": "Bobby Beauchamp",
+            "role": "Louie (voice)",
+            "key": "/library/people/6a5d07ee0867051a227becc8",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07e4fa2fa360822139bd",
+            "order": 14,
+            "slug": "emily-tonge-chappell-1",
+            "tag": "Emily Tonge-chappell",
+            "role": "Florence (voice)",
+            "key": "/library/people/6a5d07e4fa2fa360822139bd",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07e5af46c9a8727d9baa",
+            "order": 15,
+            "slug": "isla-tonge-chappell-1",
+            "tag": "Isla Tonge-chappell",
+            "role": "Carolina (voice)",
+            "key": "/library/people/6a5d07e5af46c9a8727d9baa",
+            "type": "person"
+          },
+          {
+            "id": "6a5d07e5db752822b060d7ca",
+            "order": 16,
+            "slug": "bronwyn-robertson-1",
+            "tag": "Bronwyn Robertson",
+            "role": "Grandma (voice)",
+            "key": "/library/people/6a5d07e5db752822b060d7ca",
+            "type": "person"
+          },
+          {
+            "id": "5f3f93b3b981640042c914f4",
+            "order": 17,
+            "slug": "martin-richard-chappell",
+            "tag": "Martin Richard Chappell",
+            "role": "Rambo (voice)",
+            "key": "/library/people/5f3f93b3b981640042c914f4",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "6a0c0244f61e850fccc3a667",
+            "slug": "alex-heerman-9",
+            "tag": "Alex Heerman",
+            "role": "Director",
+            "key": "/library/people/6a0c0244f61e850fccc3a667",
+            "type": "person"
+          },
+          {
+            "id": "69c12c5a30876ecea730d832",
+            "slug": "monroe-robertson-1",
+            "tag": "Monroe Robertson",
+            "role": "Director",
+            "key": "/library/people/69c12c5a30876ecea730d832",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682cf54112001f5bc7f6",
+            "slug": "david-rimawi",
+            "tag": "David Rimawi",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef1dd7c8f769e6d68d2e65bf50be21a8.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682cf54112001f5bc7f6",
+            "type": "person"
+          },
+          {
+            "id": "6113dcabf4ac20002d1fb182",
+            "slug": "david-michael-30",
+            "tag": "David Michael",
+            "role": "Producer",
+            "key": "/library/people/6113dcabf4ac20002d1fb182",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6a0c0244f61e850fccc3a667",
+            "slug": "alex-heerman-9",
+            "tag": "Alex Heerman",
+            "role": "Writer",
+            "key": "/library/people/6a0c0244f61e850fccc3a667",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/632de406ffedd45dbd738646",
+            "tag": "Minions & More 1"
+          },
+          {
+            "guid": "plex://movie/6467b7b17d4c0b2207131e56",
+            "tag": "Snoopy Presents: Welcome Home, Franklin"
+          },
+          {
+            "guid": "plex://movie/5d7768633ab0e7001f4ffba3",
+            "tag": "Once Upon a Forest"
+          },
+          {
+            "guid": "plex://movie/5d776c077a53e9001e7375c2",
+            "tag": "Duck Duck Goose"
+          },
+          {
+            "guid": "plex://movie/5d776c72fb0d55001f5882ea",
+            "tag": "Arctic Dogs"
+          },
+          {
+            "guid": "plex://movie/5d77689f7a53e9001e6d4475",
+            "tag": "Legends of Oz: Dorothy's Return"
+          },
+          {
+            "guid": "plex://movie/5e1625bdd92d86003d346f43",
+            "tag": "Pets United"
+          },
+          {
+            "guid": "plex://movie/5e23e64f270445003f7a5a63",
+            "tag": "Extinct"
+          },
+          {
+            "guid": "plex://movie/5f409f6f1ae7100041175b8f",
+            "tag": "Chickenhare and the Hamster of Darkness"
+          },
+          {
+            "guid": "plex://movie/608ae605e1f578002c81c9a0",
+            "tag": "Monster Family 2"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "The Asylum"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,393 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/w71MIVVJwJ80v97RRnP4thj9raF.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/455064/banners/6a6fece6a76aa.jpg",
+        "guid": "plex://show/6995dd6b96c7221de9313980",
+        "key": "/library/metadata/6995dd6b96c7221de9313980/children",
+        "rating": 5.5,
+        "ratingKey": "6995dd6b96c7221de9313980",
+        "studio": "Amazon MGM Studios",
+        "summary": "Frances Neagley is a private investigator in Chicago. When she learns that a beloved friend from her past has been killed in a suspicious accident, she becomes hell bent on justice. Using everything she's learned from Jack Reacher and her time as a member of the 110 Special Investigators, Neagley puts herself on a dangerous path to uncover a menacing evil.",
+        "type": "show",
+        "addedAt": 1789516800,
+        "childCount": 1,
+        "isContinuingSeries": true,
+        "leafCount": 8,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-16",
+        "nextSeasonOriginallyAvailableAt": "2026-09-16",
+        "originallyAvailableAt": "2026-09-16",
+        "publicPagesURL": "https://watch.plex.tv/show/neagley",
+        "ratingImage": "themoviedb://image.rating",
+        "slug": "neagley",
+        "thumb": "https://image.tmdb.org/t/p/original/1m6CxPAuGv2oHc1ahERrcVWnk2J.jpg",
+        "title": "Neagley",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Neagley",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/w71MIVVJwJ80v97RRnP4thj9raF.jpg"
+          },
+          {
+            "alt": "Neagley",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/a/gracenote/aacffb448a8233517c818d5eb1a0d99c.jpg"
+          },
+          {
+            "alt": "Neagley",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/455064/banners/6a6fece6a76aa.jpg"
+          },
+          {
+            "alt": "Neagley",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4124bfee0d99399dc4069b888bdeb97b.png"
+          },
+          {
+            "alt": "Neagley",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4124bfee0d99399dc4069b888bdeb97b.png"
+          },
+          {
+            "alt": "Neagley",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/4/gracenote/425506f538bc62dfc1ff8eaf74384089.jpg"
+          },
+          {
+            "alt": "Neagley",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/1m6CxPAuGv2oHc1ahERrcVWnk2J.jpg"
+          },
+          {
+            "alt": "Neagley",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e488c08e8137234715e52d21866ef2b2.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt33539520"
+          },
+          {
+            "id": "tmdb://273207"
+          },
+          {
+            "id": "tvdb://455064"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5.5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776af07a53e9001e71438e",
+            "order": 1,
+            "slug": "maria-sten",
+            "tag": "Maria Sten",
+            "thumb": "https://metadata-static.plex.tv/people/5d776af07a53e9001e71438e.jpg",
+            "role": "Frances Neagley",
+            "key": "/library/people/5d776af07a53e9001e71438e",
+            "type": "person"
+          },
+          {
+            "id": "5d77687edecfcd001f2eaaec",
+            "order": 2,
+            "slug": "greyston-holt",
+            "tag": "Greyston Holt",
+            "thumb": "https://metadata-static.plex.tv/2/people/26a5477fc933a6c3266a0963483048b8.jpg",
+            "role": "Detective Hudson Riley",
+            "key": "/library/people/5d77687edecfcd001f2eaaec",
+            "type": "person"
+          },
+          {
+            "id": "5d7770a9fb0d55001f5f5f01",
+            "order": 3,
+            "slug": "adeline-rudolph",
+            "tag": "Adeline Rudolph",
+            "thumb": "https://metadata-static.plex.tv/0/people/0fdb94eafe2d5db2e9396769a2fa88d6.jpg",
+            "role": "Renee",
+            "key": "/library/people/5d7770a9fb0d55001f5f5f01",
+            "type": "person"
+          },
+          {
+            "id": "5d776846e6d55c002040fcae",
+            "order": 4,
+            "slug": "matthew-del-negro",
+            "tag": "Matthew Del Negro",
+            "thumb": "https://metadata-static.plex.tv/1/people/118c169d854f2cec577b22237d3a2be0.jpg",
+            "role": "Pierce Woodrow",
+            "key": "/library/people/5d776846e6d55c002040fcae",
+            "type": "person"
+          },
+          {
+            "id": "5d776835e6d55c002040d108",
+            "order": 5,
+            "slug": "damon-herriman",
+            "tag": "Damon Herriman",
+            "thumb": "https://metadata-static.plex.tv/3/people/3d6cde6987dc0c3684528f6bcba88cc1.jpg",
+            "role": "Lawrence Cole",
+            "key": "/library/people/5d776835e6d55c002040d108",
+            "type": "person"
+          },
+          {
+            "id": "619f4518b252eccc5afe26ba",
+            "order": 6,
+            "slug": "jasper-jones-7",
+            "tag": "Jasper Jones",
+            "thumb": "https://metadata-static.plex.tv/f/people/f159e24468314d35c16e9136c35bde84.jpg",
+            "role": "Keno",
+            "key": "/library/people/619f4518b252eccc5afe26ba",
+            "type": "person"
+          },
+          {
+            "id": "5d776b127a53e9001e71928e",
+            "order": 7,
+            "slug": "jhaleil-swaby",
+            "tag": "Jhaleil Swaby",
+            "thumb": "https://metadata-static.plex.tv/c/people/c6311438faa9d1f7e37396d181f77e67.jpg",
+            "role": "Tommy Crane",
+            "key": "/library/people/5d776b127a53e9001e71928e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7770e46afb3d0020624551",
+            "slug": "phil-abraham",
+            "tag": "Phil Abraham",
+            "thumb": "https://metadata-static.plex.tv/7/people/78062dd3dee60d12b31a6e1ce6c66cc5.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7770e46afb3d0020624551",
+            "type": "person"
+          },
+          {
+            "id": "5d7768385af944001f1faa2b",
+            "slug": "mj-bassett",
+            "tag": "MJ Bassett",
+            "thumb": "https://metadata-static.plex.tv/3/people/35bc12aa87a9bf157cb4600bba266622.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768385af944001f1faa2b",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd5b3",
+            "slug": "gary-fleder",
+            "tag": "Gary Fleder",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ab247cbe3c4915d3888282a7e21dc1b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776826eb5d26001f1dd5b3",
+            "type": "person"
+          },
+          {
+            "id": "5e1637dbef1040003f24d93e",
+            "slug": "sam-hill",
+            "tag": "Sam Hill",
+            "thumb": "https://metadata-static.plex.tv/3/people/314eebfd6981115aa79e6b00c3fbd937.jpg",
+            "role": "Director",
+            "key": "/library/people/5e1637dbef1040003f24d93e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5ec422e8df7e8e00412203ea",
+            "slug": "agatha-barnes",
+            "tag": "Agatha Barnes",
+            "role": "Producer",
+            "key": "/library/people/5ec422e8df7e8e00412203ea",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768b91999bc0020dcf3de",
+            "slug": "lee-child",
+            "tag": "Lee Child",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768b91999bc0020dcf3de.jpg",
+            "role": "Based On The Characters Created By",
+            "key": "/library/people/5d7768b91999bc0020dcf3de",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b4de0ee001fccca01",
+            "slug": "nick-santora",
+            "tag": "Nick Santora",
+            "thumb": "https://metadata-static.plex.tv/8/people/8cd63f59510f957606cdafc9e395119a.jpg",
+            "role": "Created For Television By",
+            "key": "/library/people/5d77683b4de0ee001fccca01",
+            "type": "person"
+          },
+          {
+            "id": "5d9c0819e264b7001fc3c0b9",
+            "slug": "nicholas-wootton",
+            "tag": "Nicholas Wootton",
+            "role": "Created For Television By",
+            "key": "/library/people/5d9c0819e264b7001fc3c0b9",
+            "type": "person"
+          },
+          {
+            "id": "5e16439f91c203004121eedd",
+            "slug": "adam-higgs",
+            "tag": "Adam Higgs",
+            "role": "Written By",
+            "key": "/library/people/5e16439f91c203004121eedd",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcb58ce2564003f85fdb7",
+            "slug": "lacey-herbert",
+            "tag": "Lacey Herbert",
+            "role": "Written By",
+            "key": "/library/people/5f3fcb58ce2564003f85fdb7",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Prime Video"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c086e08fddd001f29aaaa",
+            "tag": "Matt Houston"
+          },
+          {
+            "guid": "plex://show/61b8ce4db4f4a18c3095fbf4",
+            "tag": "Shining Girls"
+          },
+          {
+            "guid": "plex://show/61bdf298ea1408cc3d50b6f2",
+            "tag": "Bosch: Legacy"
+          },
+          {
+            "guid": "plex://show/5d9c086dcb3ffa001f1b4cab",
+            "tag": "CSI: Miami"
+          },
+          {
+            "guid": "plex://show/5d9c08712192ba001f310cb1",
+            "tag": "Baywatch Nights"
+          },
+          {
+            "guid": "plex://show/5d9c08482df347001e3aed3c",
+            "tag": "Chicago P.D."
+          },
+          {
+            "guid": "plex://show/5d9c080bba6eb9001fb9a5ef",
+            "tag": "Chicago Justice"
+          },
+          {
+            "guid": "plex://show/5d9c082208fddd001f293286",
+            "tag": "77 Sunset Strip"
+          },
+          {
+            "guid": "plex://show/5d9c08276c3e37001ecd50d4",
+            "tag": "The Rockford Files"
+          },
+          {
+            "guid": "plex://show/5d9c0830ec357c001f9aa7e7",
+            "tag": "Spenser: For Hire"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Amazon MGM Studios"
+          },
+          {
+            "tag": "Paramount Television Studios"
+          }
+        ]
+      }
+    ]
+  }
+}

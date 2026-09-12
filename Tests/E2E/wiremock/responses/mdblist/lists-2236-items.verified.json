@@ -1,0 +1,218 @@
+{
+  "movies": [
+    {
+      "id": 1137844,
+      "mediatype": "movie",
+      "imdb_id": "tt28014327",
+      "tvdb_id": 358754,
+      "ids": {
+        "mdblist": "33368",
+        "imdb": "tt28014327",
+        "tmdb": 1137844,
+        "tvdb": 358754
+      },
+      "title": "Mayday",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-09-03",
+      "status": "Released",
+      "runtime": 111,
+      "added_at": "2026-09-08T05:14:11",
+      "rank": 5
+    },
+    {
+      "id": 1386315,
+      "mediatype": "movie",
+      "imdb_id": "tt34564059",
+      "tvdb_id": 368344,
+      "ids": {
+        "mdblist": "3ou37",
+        "imdb": "tt34564059",
+        "tmdb": 1386315,
+        "tvdb": 368344
+      },
+      "title": "The Runner",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "gb",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-09-03",
+      "status": "Released",
+      "runtime": 86,
+      "added_at": "2026-09-08T05:14:11",
+      "rank": 10
+    },
+    {
+      "id": 1288445,
+      "mediatype": "movie",
+      "imdb_id": "tt32338669",
+      "tvdb_id": 356666,
+      "ids": {
+        "mdblist": "3g6un",
+        "imdb": "tt32338669",
+        "tmdb": 1288445,
+        "tvdb": 356666
+      },
+      "title": "Mutiny",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-08-19",
+      "status": "Released",
+      "runtime": 95,
+      "added_at": "2026-08-24T18:58:13",
+      "rank": 15
+    },
+    {
+      "id": 87513,
+      "mediatype": "movie",
+      "imdb_id": "tt2012616",
+      "tvdb_id": 83519,
+      "ids": {
+        "mdblist": "n80k",
+        "imdb": "tt2012616",
+        "tmdb": 87513,
+        "tvdb": 83519
+      },
+      "title": "Motor City",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-07-23",
+      "status": "released",
+      "runtime": 104,
+      "added_at": "2026-09-02T00:54:17",
+      "rank": 46
+    },
+    {
+      "id": 1368337,
+      "mediatype": "movie",
+      "imdb_id": "tt33764258",
+      "tvdb_id": 362547,
+      "ids": {
+        "mdblist": "3ngta",
+        "imdb": "tt33764258",
+        "tmdb": 1368337,
+        "tvdb": 362547
+      },
+      "title": "The Odyssey",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "gb",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-07-15",
+      "status": "Released",
+      "runtime": 173,
+      "added_at": "2026-07-28T04:58:23",
+      "rank": 62
+    },
+    {
+      "id": 950028,
+      "mediatype": "movie",
+      "imdb_id": "tt14173636",
+      "tvdb_id": 356147,
+      "ids": {
+        "mdblist": "2vwgf",
+        "imdb": "tt14173636",
+        "tmdb": 950028,
+        "tvdb": 356147
+      },
+      "title": "The Invite",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-06-25",
+      "status": "Released",
+      "runtime": 107,
+      "added_at": "2026-08-24T18:58:13",
+      "rank": 73
+    },
+    {
+      "id": 1560520,
+      "mediatype": "movie",
+      "imdb_id": "tt32333324",
+      "tvdb_id": 373216,
+      "ids": {
+        "mdblist": "432rh",
+        "imdb": "tt32333324",
+        "tmdb": 1560520,
+        "tvdb": 373216
+      },
+      "title": "Batman: Knightfall Part 1: Knightfall",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-06-23",
+      "status": "released",
+      "runtime": 79,
+      "added_at": "2026-09-08T05:14:11",
+      "rank": 90
+    },
+    {
+      "id": 1084244,
+      "mediatype": "movie",
+      "imdb_id": "tt29355505",
+      "tvdb_id": 344106,
+      "ids": {
+        "mdblist": "2z2cy",
+        "imdb": "tt29355505",
+        "tmdb": 1084244,
+        "tvdb": 344106
+      },
+      "title": "Toy Story 5",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-06-17",
+      "status": "Released",
+      "runtime": 102,
+      "added_at": "2026-08-24T18:58:13",
+      "rank": 108
+    },
+    {
+      "id": 1339713,
+      "mediatype": "movie",
+      "imdb_id": "tt37287335",
+      "tvdb_id": 369536,
+      "ids": {
+        "mdblist": "3lhr0",
+        "imdb": "tt37287335",
+        "tmdb": 1339713,
+        "tvdb": 369536
+      },
+      "title": "Obsession",
+      "language": "en",
+      "spoken_language": "en",
+      "country": "us",
+      "release_year": 2026,
+      "adult": 0,
+      "release_date": "2026-05-13",
+      "status": "Released",
+      "runtime": 109,
+      "added_at": "2026-06-24T07:02:15",
+      "rank": 750
+    }
+  ],
+  "shows": [],
+  "pagination": {
+    "limit": 1000,
+    "offset": 0,
+    "total": 9,
+    "has_more": false
+  }
+}
