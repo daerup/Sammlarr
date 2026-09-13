@@ -6,7 +6,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Auth;
 
-[NotInParallel]
 public class SessionTests
 {
 	private const string DeepLink = "/feeds";

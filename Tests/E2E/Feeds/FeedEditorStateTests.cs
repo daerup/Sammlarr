@@ -3,7 +3,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
 
-[NotInParallel]
 public class FeedEditorStateTests
 {
 	private const string OptionalSection = "Filters, Sorting & Limits";

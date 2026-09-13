@@ -3,7 +3,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
 
-[NotInParallel]
 public class NotificationTargetTests
 {
 	private const string NameInput = "input[placeholder='My webhook']";

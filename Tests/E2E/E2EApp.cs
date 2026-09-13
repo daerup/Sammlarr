@@ -1,13 +1,8 @@
+using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
-using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
-using Aspire.Hosting.Testing;
-using Domain.Providers;
+using System.Threading.Channels;
 using E2E.Tests.Recording;
-using Harness;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 
 namespace E2E.Tests;
@@ -16,37 +11,28 @@ public static class E2EApp
 {
 	internal static bool IsLive { get; } = Environment.GetEnvironmentVariable("E2E_LIVE") is "true";
 
-	private static readonly SemaphoreSlim StartGate = new(1, 1);
+	internal static int StackCount { get; } = IsLive ? 1 : 8;
+
+	private static readonly Lazy<Task> Boot = new(StartAsync);
 	private static readonly Lock CaptureGate = new();
 	private static readonly HashSet<string> Captured = [];
 	private static readonly HashSet<string> Stubbed = [];
 	private static readonly List<string> CircuitFailures = [];
+	private static readonly ConcurrentDictionary<string, Lazy<Task<Lease>>> Leases = [];
+	private static readonly Channel<E2EStack> Idle = Channel.CreateUnbounded<E2EStack>();
 
-	private const string CircuitFailure = "Unhandled exception in circuit";
-
-	private const string CircuitLogCategory = "AppHost.Resources.blazor-ui";
-	private static DistributedApplication? _app;
+	private static E2EStack[] _stacks = [];
 	private static IPlaywright? _playwright;
 	private static IBrowser? _browser;
-	private static HttpClient? _wiremock;
-	private static string _baseUrl = "";
-	private static string _authCookie = "";
-	private static string _memberCookie = "";
-	private static string _workDir = "";
-	private static bool _started;
+	private static string _keyRing = "";
 
-	internal static async Task<IPage> OpenPageAsync()
-	{
-		await EnsureStartedAsync();
-		var context = await _browser!.NewContextAsync(new BrowserNewContextOptions { BaseURL = _baseUrl });
-		return await context.NewPageAsync();
-	}
+	internal static Task<IPage> OpenPageAsync() => NewPageAsync(_ => null);
 
-	internal static Task<IPage> OpenAuthenticatedPageAsync() => OpenSignedInPageAsync(() => _authCookie);
+	internal static Task<IPage> OpenAuthenticatedPageAsync() => NewPageAsync(stack => stack.AdminCookie);
 
-	internal static Task<IPage> OpenMemberPageAsync() => OpenSignedInPageAsync(() => _memberCookie);
+	internal static Task<IPage> OpenMemberPageAsync() => NewPageAsync(stack => stack.MemberCookie);
 
-	internal static Task<IPage> OpenPageWithAuthCookieAsync(string value) => OpenSignedInPageAsync(() => value);
+	internal static Task<IPage> OpenPageWithAuthCookieAsync(string value) => NewPageAsync(_ => value);
 
 	internal static Task<IPage> AdminAt(string route) => OpenAtAsync(OpenAuthenticatedPageAsync, route);
 
@@ -59,39 +45,36 @@ public static class E2EApp
 		return page;
 	}
 
-	private static async Task<IPage> OpenSignedInPageAsync(Func<string> cookie)
+	private static async Task<IPage> NewPageAsync(Func<E2EStack, string?> cookie)
 	{
-		await EnsureStartedAsync();
-		var context = await _browser!.NewContextAsync(new BrowserNewContextOptions { BaseURL = _baseUrl });
-		await context.AddCookiesAsync([
-			new Cookie
-			{
-				Name = AuthCookie.Name,
-				Value = cookie(),
-				Url = _baseUrl,
-			},
-		]);
+		var lease = await LeaseAsync();
+		var context = await _browser!.NewContextAsync(new BrowserNewContextOptions { BaseURL = lease.Stack.BaseUrl });
+		lease.Contexts.Add(context);
+		if (cookie(lease.Stack) is { } value)
+		{
+			await context.AddCookiesAsync([
+				new Cookie
+				{
+					Name = AuthCookie.Name,
+					Value = value,
+					Url = lease.Stack.BaseUrl,
+				},
+			]);
+		}
+
 		return await context.NewPageAsync();
 	}
 
-	internal static async Task<string> UnmatchedAsync()
-	{
-		await EnsureStartedAsync();
-		return await _wiremock!.GetStringAsync("/__admin/requests/unmatched");
-	}
+	internal static async Task<string> UnmatchedAsync() => await (await StackAsync()).UnmatchedAsync();
 
-	internal static async Task<string> RequestJournalAsync()
-	{
-		await EnsureStartedAsync();
-		return await _wiremock!.GetStringAsync("/__admin/requests");
-	}
+	internal static async Task<string> RequestJournalAsync() => await (await StackAsync()).RequestJournalAsync();
 
 	internal static Task<IAsyncDisposable> StubAsync(string urlPath, int status, string body, string method = "GET") =>
 		StubAsync(new StubSpec(urlPath, status, body) { Method = method });
 
 	internal static async Task<IAsyncDisposable> StubAsync(StubSpec spec)
 	{
-		await EnsureStartedAsync();
+		var stack = await StackAsync();
 		lock (CaptureGate)
 		{
 			Stubbed.Add(spec.UrlPath);
@@ -100,12 +83,12 @@ public static class E2EApp
 		var ids = new List<string>();
 		foreach (var path in StubPaths(spec.UrlPath))
 		{
-			var response = await _wiremock!.PostAsJsonAsync("/__admin/mappings", Mapping(spec, path));
+			var response = await stack.WireMock.PostAsJsonAsync("/__admin/mappings", Mapping(spec, path));
 			response.EnsureSuccessStatusCode();
 			ids.Add(JsonNode.Parse(await response.Content.ReadAsStringAsync())!["id"]!.GetValue<string>());
 		}
 
-		return new StubRegistration(ids);
+		return new StubRegistration(stack, ids);
 	}
 
 	private static JsonObject Mapping(StubSpec spec, string path)
@@ -147,18 +130,16 @@ public static class E2EApp
 		};
 	}
 
-	private static string Forge(string keyRingPath, SeededUser user) => AuthCookie.Forge(keyRingPath, user.Id, user.DisplayName, user.Role);
-
 	private static IEnumerable<string> StubPaths(string urlPath) =>
 		IsLive ? ProviderRecording.AllEndpoints.Select(endpoint => $"{endpoint.Prefix}{urlPath}") : [urlPath];
 
-	private sealed class StubRegistration(IReadOnlyList<string> ids) : IAsyncDisposable
+	private sealed class StubRegistration(E2EStack stack, IReadOnlyList<string> ids) : IAsyncDisposable
 	{
 		public async ValueTask DisposeAsync()
 		{
 			foreach (var id in ids)
 			{
-				(await _wiremock!.DeleteAsync($"/__admin/mappings/{id}")).EnsureSuccessStatusCode();
+				(await stack.WireMock.DeleteAsync($"/__admin/mappings/{id}")).EnsureSuccessStatusCode();
 			}
 		}
 	}
@@ -213,15 +194,23 @@ public static class E2EApp
 	[After(TestSession)]
 	public static async Task StopAsync()
 	{
-		if (!_started)
+		if (!Boot.IsValueCreated || !Boot.Value.IsCompletedSuccessfully)
 		{
 			return;
 		}
 
+		var served = new List<string>();
+		var unmatched = new List<string>();
+		foreach (var stack in _stacks)
+		{
+			served.AddRange(Urls(await stack.RequestJournalAsync()));
+			unmatched.AddRange(Urls(await stack.UnmatchedAsync()));
+		}
+
 		if (Environment.GetEnvironmentVariable("E2E_AUDIT") is "true")
 		{
-			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-served.txt"), Urls(await RequestJournalAsync()));
-			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-unmatched.txt"), Urls(await UnmatchedAsync()));
+			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-served.txt"), served.Distinct());
+			await File.WriteAllLinesAsync(Path.Combine(Path.GetTempPath(), "e2e-unmatched.txt"), unmatched.Distinct());
 		}
 
 		if (IsLive)
@@ -233,24 +222,14 @@ public static class E2EApp
 			}
 		}
 
-		var unmatched = Urls(await UnmatchedAsync()).ToList();
-
-		_wiremock?.Dispose();
-		if (_browser is not null)
+		await _browser!.DisposeAsync();
+		_playwright!.Dispose();
+		foreach (var stack in _stacks)
 		{
-			await _browser.DisposeAsync();
+			await stack.StopAsync();
 		}
 
-		_playwright?.Dispose();
-		if (_app is not null)
-		{
-			await _app.DisposeAsync();
-		}
-
-		if (Directory.Exists(_workDir))
-		{
-			Directory.Delete(_workDir, recursive: true);
-		}
+		Directory.Delete(_keyRing, recursive: true);
 
 		List<string> crashed;
 		lock (CaptureGate)
@@ -258,7 +237,7 @@ public static class E2EApp
 			crashed = [.. CircuitFailures];
 		}
 
-		await Assert.That(unmatched).IsEmpty();
+		await Assert.That(unmatched.Distinct()).IsEmpty();
 		await Assert.That(crashed).IsEmpty();
 	}
 
@@ -270,7 +249,8 @@ public static class E2EApp
 
 	private static async Task CaptureRemainingAsync()
 	{
-		var recorded = RecordedStubs.Write(await SnapshotAsync(), WireMockStubs.MappingsDirectory, IsStubbed).Where(FirstCapture).ToList();
+		var snapshot = await _stacks[0].SnapshotAsync();
+		var recorded = RecordedStubs.Write(snapshot, WireMockStubs.MappingsDirectory, IsStubbed).Where(FirstCapture).ToList();
 		var committed = new List<RecordedResponse>();
 		foreach (var response in recorded)
 		{
@@ -367,91 +347,58 @@ public static class E2EApp
 		}
 	}
 
-	private static async Task EnsureStartedAsync()
+	private static async Task<E2EStack> StackAsync() => (await LeaseAsync()).Stack;
+
+	private static Task<Lease> LeaseAsync() => Leases.GetOrAdd(TestContext.Current!.Id, _ => new Lazy<Task<Lease>>(AcquireAsync)).Value;
+
+	private static async Task<Lease> AcquireAsync()
 	{
-		if (_started)
+		await Boot.Value;
+		return new Lease(await Idle.Reader.ReadAsync());
+	}
+
+	[AfterEvery(Test)]
+	public static async Task ReleaseAsync(TestContext context)
+	{
+		if (!Leases.TryRemove(context.Id, out var pending) || !pending.IsValueCreated)
 		{
 			return;
 		}
 
-		await StartGate.WaitAsync();
+		var lease = await pending.Value;
 		try
 		{
-			if (_started)
+			foreach (var browserContext in lease.Contexts)
 			{
-				return;
+				await browserContext.CloseAsync();
 			}
-
-			await StartAsync();
-			_started = true;
 		}
 		finally
 		{
-			StartGate.Release();
+			Idle.Writer.TryWrite(lease.Stack);
 		}
+	}
+
+	private sealed class Lease(E2EStack stack)
+	{
+		internal E2EStack Stack { get; } = stack;
+
+		internal ConcurrentBag<IBrowserContext> Contexts { get; } = [];
 	}
 
 	private static async Task StartAsync()
 	{
-		_workDir = Directory.CreateTempSubdirectory("sammlarr-e2e-").FullName;
-		var dbPath = Path.Combine(_workDir, "sammlarr.db");
-		var keyRing = Path.Combine(_workDir, "keys");
-		Directory.CreateDirectory(keyRing);
-
-		var admin = IsLive
-			? SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"))
-			: SammlarrTestHost.SeedDatabaseFile(
-				dbPath,
-				keyRing,
-				WireMockStubs.ExpectedTrendingTmdbId(),
-				WireMockStubs.ExpectedTrendingPlexId(),
-				WireMockStubs.ExpectedTrendingTitle()
-			);
-		_authCookie = Forge(keyRing, admin);
-		_memberCookie = Forge(keyRing, SammlarrTestHost.SeededMember);
-
-		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
-			["--LaunchSammlarr=false"],
-			(options, _) => options.DisableDashboard = true
-		);
-		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, RecordCircuitFailure)));
-		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080);
-		var wiremockHttp = wiremock.GetEndpoint("http");
-		if (!IsLive)
-		{
-			wiremock
-				.WithBindMount(WireMockStubs.MappingsDirectory, "/home/wiremock/mappings", isReadOnly: true)
-				.WithBindMount(WireMockStubs.ResponsesDirectory, "/home/wiremock/__files", isReadOnly: true);
-		}
-
-		var web = builder.Resources.OfType<ProjectResource>().Single(resource => resource.Name == "blazor-ui");
-		var webBuilder = builder
-			.CreateResourceBuilder(web)
-			.WithEnvironment("Sammlarr__ConnectionString", $"Data Source={dbPath}")
-			.WithEnvironment("Sammlarr__DataProtection__KeyRingPath", keyRing)
-			.WaitFor(wiremock);
-		foreach (var provider in ProviderRecording.All)
-		{
-			foreach (var endpoint in provider.Endpoints)
-			{
-				var baseUrl = IsLive ? ReferenceExpression.Create($"{wiremockHttp}{endpoint.Prefix}/") : ReferenceExpression.Create($"{wiremockHttp}/");
-				webBuilder.WithEnvironment($"{provider.Section}__{endpoint.ConfigKey}", baseUrl);
-			}
-		}
-
-		_app = await builder.BuildAsync();
-		await _app.StartAsync();
-		await _app.ResourceNotifications.WaitForResourceHealthyAsync("blazor-ui");
-		_baseUrl = _app.GetEndpoint("blazor-ui", "http").ToString();
-		_wiremock = _app.CreateHttpClient("wiremock", "http");
-		if (IsLive)
-		{
-			await ConfigureProxiesAsync();
-		}
-
 		var headed = Environment.GetEnvironmentVariable("E2E_HEADED") is "true";
 		_playwright = await Playwright.CreateAsync();
 		_browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed, SlowMo = headed ? 2000 : 0 });
+
+		_keyRing = Directory.CreateTempSubdirectory("sammlarr-e2e-keys-").FullName;
+		var seeds = Enumerable.Range(0, StackCount).Select(_ => E2EStack.Seed(IsLive, _keyRing)).ToList();
+		_stacks = await Task.WhenAll(seeds.Select((seed, index) => E2EStack.LaunchAsync(seed, index, IsLive, RecordCircuitFailure)));
+		foreach (var stack in _stacks)
+		{
+			Idle.Writer.TryWrite(stack);
+		}
 	}
 
 	private static void RecordCircuitFailure(string message)
@@ -461,56 +408,4 @@ public static class E2EApp
 			CircuitFailures.Add(message);
 		}
 	}
-
-	private static async Task ConfigureProxiesAsync()
-	{
-		foreach (var endpoint in ProviderRecording.AllEndpoints)
-		{
-			var mapping = new
-			{
-				priority = 5,
-				request = new { urlPathPattern = $"{endpoint.Prefix}/.*" },
-				response = new { proxyBaseUrl = endpoint.RealBaseUrl, proxyUrlPrefixToRemove = endpoint.Prefix },
-			};
-			await PostWithRetryAsync("/__admin/mappings", mapping);
-		}
-	}
-
-	private static async Task<string> SnapshotAsync()
-	{
-		var prefixes = string.Join('|', ProviderRecording.AllEndpoints.Select(endpoint => endpoint.Name));
-		var spec = new
-		{
-			persist = false,
-			repeatsAsScenarios = false,
-			filters = new { urlPathPattern = $"/({prefixes})/.*" },
-		};
-		var response = await _wiremock!.PostAsJsonAsync("/__admin/recordings/snapshot", spec);
-		response.EnsureSuccessStatusCode();
-		return await response.Content.ReadAsStringAsync();
-	}
-
-	private static async Task PostWithRetryAsync(string path, object body)
-	{
-		for (var attempt = 0; ; attempt++)
-		{
-			try
-			{
-				var response = await _wiremock!.PostAsJsonAsync(path, body);
-				response.EnsureSuccessStatusCode();
-				return;
-			}
-			catch (HttpRequestException) when (attempt < 20)
-			{
-				await Task.Delay(500);
-			}
-		}
-	}
-
-	private static Dictionary<TProvider, string> Credentials<TProvider>(string suffix)
-		where TProvider : struct, Enum =>
-		Enum.GetValues<TProvider>()
-			.Select(provider => (provider, secret: RecordingConfiguration.Value($"{provider.ToString()!.ToUpperInvariant()}{suffix}")))
-			.Where(entry => !string.IsNullOrEmpty(entry.secret))
-			.ToDictionary(entry => entry.provider, entry => entry.secret!);
 }

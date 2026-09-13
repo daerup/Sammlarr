@@ -3,9 +3,13 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace E2E.Tests;
 
-internal sealed class CircuitFailureSink(string category, string marker, Action<string> capture) : ILoggerProvider
+internal sealed class CircuitFailureSink(string category, string marker, int stack, Action<string> capture) : ILoggerProvider
 {
 	private const int TrailingLines = 15;
+
+	private static readonly string? TraceDirectory = Environment.GetEnvironmentVariable("E2E_RESOURCE_LOG");
+
+	private static readonly Lock TraceGate = new();
 
 	private int _remaining;
 
@@ -15,6 +19,7 @@ internal sealed class CircuitFailureSink(string category, string marker, Action<
 
 	private void Observe(string message)
 	{
+		Trace(message);
 		if (message.Contains(marker, StringComparison.Ordinal))
 		{
 			_remaining = TrailingLines;
@@ -26,6 +31,20 @@ internal sealed class CircuitFailureSink(string category, string marker, Action<
 		{
 			_remaining--;
 			capture(message);
+		}
+	}
+
+	private void Trace(string message)
+	{
+		if (TraceDirectory is null)
+		{
+			return;
+		}
+
+		Directory.CreateDirectory(TraceDirectory);
+		lock (TraceGate)
+		{
+			File.AppendAllText(Path.Combine(TraceDirectory, $"stack-{stack}.log"), $"{message}{Environment.NewLine}");
 		}
 	}
 

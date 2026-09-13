@@ -3,7 +3,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Identity;
 
-[NotInParallel]
 public class UserIsolationTests
 {
 	[Test]

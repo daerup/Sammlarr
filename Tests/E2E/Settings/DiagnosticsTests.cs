@@ -3,7 +3,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
 
-[NotInParallel]
 public class DiagnosticsTests
 {
 	private const string FilterInput = "input[placeholder='Filter by message, category, or trace id…']";

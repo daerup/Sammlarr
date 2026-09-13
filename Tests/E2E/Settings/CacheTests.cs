@@ -4,7 +4,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
 
-[NotInParallel]
 public class CacheTests
 {
 	private const string MetadataRequests = "/movie/";
