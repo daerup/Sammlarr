@@ -30,7 +30,7 @@
                 </BbFieldContent>
             </BbField>
 
-            <BbField IsInvalid="@NameIsInvalid">
+            <BbField>
                 <BbFieldLabel For="name" Class="flex items-center leading-none">
                     Name <span class="text-destructive ml-0.5">*</span>
                     <BbTooltipProvider>
@@ -46,13 +46,8 @@
                     <BbInput id="name" Placeholder="e.g. My Top Movies"
                              Value="@_name" ValueChanged="@ChangeName"
                              Class="bg-accent" Required="true"
-                             AriaInvalid="@NameIsInvalid"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </BbFieldContent>
-                @if (NameIsInvalid)
-                {
-                    <BbFieldError>Name is required.</BbFieldError>
-                }
             </BbField>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -120,7 +115,7 @@
                 </BbField>
             </div>
 
-            <BbField IsInvalid="@IdentifierIsInvalid">
+            <BbField>
                 <BbFieldLabel For="list-identifier" Class="flex items-center leading-none">
                     List identifier <span class="text-destructive ml-0.5">*</span>
                     <BbTooltipProvider>
@@ -138,15 +133,10 @@
                     <BbInput id="list-identifier" Placeholder="@GetIdentifierPlaceholder(_provider)"
                              Value="@_identifier" ValueChanged="@ChangeIdentifier"
                              Class="bg-accent" Required="true"
-                             AriaInvalid="@IdentifierIsInvalid"
                              Disabled="@IsLoading"
                              UpdateTiming="UpdateTiming.Immediate"/>
                 </BbFieldContent>
                 <BbFieldDescription>@RenderIdentifierDescription()</BbFieldDescription>
-                @if (IdentifierIsInvalid)
-                {
-                    <BbFieldError>List identifier is required.</BbFieldError>
-                }
             </BbField>
 
         </div>
@@ -357,7 +347,7 @@
 
                     @if (_scheduleMode == ScheduleMode.Scheduled)
                     {
-                        <BbField IsInvalid="@(ShowValidation && ScheduleIsInvalid)">
+                        <BbField>
                             <BbFieldLabel Class="flex items-center leading-none">
                                 Schedule
                                 <BbTooltipProvider>
@@ -373,10 +363,6 @@
                                 <SchedulePicker CronExpression="@_scheduleCronExpression"
                                                 CronExpressionChanged="@ChangeSchedule"/>
                             </BbFieldContent>
-                            @if (ShowValidation && ScheduleIsInvalid)
-                            {
-                                <BbFieldError>A valid schedule is required.</BbFieldError>
-                            }
                         </BbField>
                     }
                 </div>
@@ -389,7 +375,6 @@
 @code {
 
     [Parameter] public required FeedConfig Value { get; set; }
-    [Parameter] public required bool ShowValidation { get; set; }
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
 
@@ -416,8 +401,6 @@
     private ScheduleMode _scheduleMode;
     private string? _scheduleCronExpression;
 
-    private bool NameIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_name);
-    private bool IdentifierIsInvalid => ShowValidation && string.IsNullOrWhiteSpace(_identifier);
     private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
