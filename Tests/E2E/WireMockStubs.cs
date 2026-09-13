@@ -54,19 +54,28 @@ internal static class WireMockStubs
 	internal static string ExpectedTrendingPlexId()
 	{
 		var title = ExpectedTrendingTitle();
+		var tmdbId = ExpectedTrendingTmdbId();
 		foreach (var file in Directory.EnumerateFiles(Path.Combine(ResponsesDirectory, "plex-discover"), "library-search-*.verified.json"))
 		{
 			using var document = JsonDocument.Parse(File.ReadAllText(file));
 			foreach (var key in RatingKeys(document.RootElement, title))
 			{
-				if (File.Exists(Path.Combine(MappingsDirectory, "plex-metadata", $"library-metadata-{key}.json")))
+				if (DescribesTmdbId(key, tmdbId))
 				{
 					return key;
 				}
 			}
 		}
 
-		throw new InvalidOperationException($"No recorded Plex metadata fixture backs the trending title '{title}'.");
+		throw new InvalidOperationException($"No recorded Plex metadata fixture backs the trending title '{title}' as tmdb://{tmdbId}.");
+	}
+
+	private static bool DescribesTmdbId(string ratingKey, string tmdbId)
+	{
+		var fixture = Path.Combine(ResponsesDirectory, "plex-metadata", $"library-metadata-{ratingKey}.verified.json");
+		return File.Exists(Path.Combine(MappingsDirectory, "plex-metadata", $"library-metadata-{ratingKey}.json"))
+			&& File.Exists(fixture)
+			&& File.ReadAllText(fixture).Contains($"tmdb://{tmdbId}", StringComparison.Ordinal);
 	}
 
 	private static IEnumerable<string> RatingKeys(JsonElement root, string title) =>
