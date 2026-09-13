@@ -69,13 +69,62 @@ public class MediaMergerTests
 	public async Task MergeWith_PrefersExistingValueOverOther()
 	{
 		var identity = MediaFakes.MovieIdentity();
-		IPartialMedia first = new PartialMovie { Identity = identity, Title = "Dune" };
+		IPartialMedia first = new PartialMovie
+		{
+			Identity = identity,
+			Title = "Dune",
+			Tagline = "Fear is the mind-killer",
+		};
 		IPartialMedia second = new PartialMovie
 		{
 			Identity = identity,
 			Title = "Wrong",
+			Tagline = "Wrong tagline",
 			Summary = "Paul Atreides.",
 		};
+
+		var merged = first.MergeWith(second);
+
+		await Assert
+			.That(merged)
+			.IsOfUnionType<IdentifiedMedia, PartialMovie>()
+			.And.Multiple(async movie =>
+			{
+				await Assert.That(movie.Title).IsEqualTo("Dune");
+				await Assert.That(movie.Tagline).IsEqualTo("Fear is the mind-killer");
+			});
+	}
+
+	[Test]
+	public async Task MergeWith_WhenBothSidesCarryEveryField_PrefersThePartialOnAllOfThem()
+	{
+		var source = MediaFakes.CompletePartialMovie();
+		IPartialMedia partial = source;
+		IMedia complete = MediaFakes.CompleteMovie();
+
+		var merged = partial.MergeWith(complete);
+
+		await Assert
+			.That(merged)
+			.IsOfUnionType<IdentifiedMedia, Movie>()
+			.And.Multiple(async movie =>
+			{
+				await Assert.That(movie.Title).IsEqualTo(source.Title);
+				await Assert.That(movie.Tagline).IsEqualTo(source.Tagline);
+				await Assert.That(movie.Summary).IsEqualTo(source.Summary);
+				await Assert.That(movie.PosterUrl).IsEqualTo(source.PosterUrl);
+				await Assert.That(movie.BackdropUrl).IsEqualTo(source.BackdropUrl);
+				await Assert.That(movie.ReleaseDate).IsEqualTo(source.ReleaseDate);
+				await Assert.That(movie.Runtime).IsEqualTo(source.Runtime);
+			});
+	}
+
+	[Test]
+	public async Task MergeWith_WhenThePartialLacksTheTitle_TakesItFromTheOther()
+	{
+		var identity = MediaFakes.MovieIdentity();
+		IPartialMedia first = new PartialMovie { Identity = identity, Summary = "Paul Atreides." };
+		IPartialMedia second = new PartialMovie { Identity = identity, Title = "Dune" };
 
 		var merged = first.MergeWith(second);
 

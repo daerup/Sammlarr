@@ -212,6 +212,97 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			.And.Multiple(async movie => await Assert.That(movie.Rating.Sources.Single().Source).IsEqualTo(RatingProvider.Tmdb));
 	}
 
+	[Test]
+	public async Task BuildFrom_WhenPartialMovie_WritesItsValuesRatherThanTheDefaults()
+	{
+		var plexId = PlexId.From("plex-420", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		IdentifiedMedia partial = new PartialMovie
+		{
+			Identity = new MediaIdentity(mediaId, [plexId]),
+			Title = "Partial Title",
+			Tagline = "Partial Tagline",
+			Summary = "Partial Summary",
+			PosterUrl = "https://example.com/partial-poster.jpg",
+			ReleaseDate = new DateOnly(2019, 5, 4),
+			Runtime = TimeSpan.FromMinutes(95),
+		};
+
+		var entity = await PersistAsync(partial, mediaId);
+
+		using var _ = Assert.Multiple();
+		await Assert.That(entity.Title).IsEqualTo("Partial Title");
+		await Assert.That(entity.Tagline).IsEqualTo("Partial Tagline");
+		await Assert.That(entity.Summary).IsEqualTo("Partial Summary");
+		await Assert.That(entity.PosterUrl).IsEqualTo("https://example.com/partial-poster.jpg");
+		await Assert.That(entity.ReleaseDate).IsEqualTo(new DateOnly(2019, 5, 4));
+		await Assert.That(((MovieMetadataRow)entity).Runtime).IsEqualTo(TimeSpan.FromMinutes(95));
+	}
+
+	[Test]
+	public async Task ToStored_WhenTheMovieEntityHoldsSentinels_ReadsThemBackAsMissing()
+	{
+		var plexId = PlexId.From("plex-421", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		IdentifiedMedia partial = new PartialMovie { Identity = new MediaIdentity(mediaId, [plexId]), Title = "Only a title" };
+
+		var entity = await PersistAsync(partial, mediaId);
+		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
+
+		await Assert
+			.That(stored)
+			.IsOfUnionType<IdentifiedMedia, PartialMovie>()
+			.And.Multiple(async movie =>
+			{
+				await Assert.That(movie.ReleaseDate).IsNull();
+				await Assert.That(movie.Runtime).IsNull();
+			});
+	}
+
+	[Test]
+	public async Task ToStored_WhenTheShowEntityHoldsSentinels_ReadsThemBackAsMissing()
+	{
+		var plexId = PlexId.From("plex-422", MediaType.Show);
+		var mediaId = await SeedMediaAsync([plexId]);
+		IdentifiedMedia partial = new PartialShow { Identity = new MediaIdentity(mediaId, [plexId]), Title = "Only a title" };
+
+		var entity = await PersistAsync(partial, mediaId);
+		var stored = _testee.ToStored(entity, new MediaIdentity(mediaId, [plexId]));
+
+		await Assert
+			.That(stored)
+			.IsOfUnionType<IdentifiedMedia, PartialShow>()
+			.And.Multiple(async show =>
+			{
+				await Assert.That(show.ReleaseDate).IsNull();
+				await Assert.That(show.Seasons).IsNull();
+				await Assert.That(show.Episodes).IsNull();
+				await Assert.That(show.RuntimePerEpisode).IsNull();
+			});
+	}
+
+	[Test]
+	public async Task BuildFrom_WhenPartialShow_WritesItsCounts()
+	{
+		var plexId = PlexId.From("plex-423", MediaType.Show);
+		var mediaId = await SeedMediaAsync([plexId]);
+		IdentifiedMedia partial = new PartialShow
+		{
+			Identity = new MediaIdentity(mediaId, [plexId]),
+			Title = "Partial Show",
+			Seasons = 4,
+			Episodes = 40,
+			RuntimePerEpisode = TimeSpan.FromMinutes(22),
+		};
+
+		var entity = (ShowMetadataRow)await PersistAsync(partial, mediaId);
+
+		using var _ = Assert.Multiple();
+		await Assert.That(entity.Seasons).IsEqualTo(4);
+		await Assert.That(entity.Episodes).IsEqualTo(40);
+		await Assert.That(entity.RuntimePerEpisode).IsEqualTo(TimeSpan.FromMinutes(22));
+	}
+
 	private async Task<MediaMetadataRow> PersistAsync(IdentifiedMedia details, MediaId mediaId)
 	{
 		var entity = _testee.BuildFrom(details, mediaId.Value);

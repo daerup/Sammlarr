@@ -1,0 +1,11 @@
+{
+	"stryker-config": {
+		"test-projects": ["../Tests/Shared/Shared.Tests.csproj"],
+		"mutate": [
+			"Logging/SensitiveDataDestructuringPolicy.cs"
+		],
+		"test-runner": "mtp",
+		"reporters": ["progress", "html", "json"],
+		"concurrency": 4
+	}
+}

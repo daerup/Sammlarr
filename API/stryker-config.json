@@ -1,0 +1,11 @@
+{
+	"stryker-config": {
+		"test-projects": ["../Tests/API/API.Tests.csproj"],
+		"mutate": [
+			"Notifications/WebhookConnect.cs"
+		],
+		"test-runner": "mtp",
+		"reporters": ["progress", "html", "json"],
+		"concurrency": 4
+	}
+}
