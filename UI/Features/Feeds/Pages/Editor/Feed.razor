@@ -90,7 +90,6 @@
 
                 <FeedConfigPanel @key="_configKey"
                                  Value="@_config"
-                                 ShowValidation="@_showValidation"
                                  IsLoading="@(_previewStatus.IsLoading || _isApplying)"
                                  OnChange="@OnConfigChanged"/>
 
@@ -128,7 +127,6 @@
     private int _appliedHash;
     private FeedId? _savedFeedId;
 
-    private bool _showValidation;
     private bool _isSaving;
     private bool _isApplying;
     private bool _pendingAutoApply;
@@ -252,11 +250,7 @@
         return Task.CompletedTask;
     }
 
-    private Task HandleSaveAsync()
-    {
-        _showValidation = true;
-        return CanSave ? SaveAsync() : Task.CompletedTask;
-    }
+    private Task HandleSaveAsync() => CanSave ? SaveAsync() : Task.CompletedTask;
 
     private async Task SaveAsync()
     {
