@@ -15,6 +15,8 @@ public class UsersManagementTests
 
 	private const int PinId = 515151;
 
+	private const string AccessChanged = "Your access changed";
+
 	[Test]
 	public async Task RoleChange_WhenAppliedToMember_Persists()
 	{
@@ -39,6 +41,32 @@ public class UsersManagementTests
 		await restored.VisitAsync("/settings");
 
 		await Assert.That(restored.Url).DoesNotContain("/signin");
+	}
+
+	[Test]
+	public async Task RoleChange_WhileTheMemberHasTheAppOpen_ForcesThemToSignInAgain()
+	{
+		var member = await E2EApp.MemberAt("/feeds");
+		await Expect(member.Heading("Feeds")).ToBeVisibleAsync();
+		await Expect(member.Text(AccessChanged)).ToBeHiddenAsync();
+
+		var admin = await E2EApp.AdminAt("/settings?section=users");
+		await ChangeRoleAsync(admin, "Make admin");
+
+		await Expect(member.Text(AccessChanged)).ToBeVisibleAsync(Wait.Settle);
+
+		await member.Keyboard.PressAsync("Escape");
+
+		await Expect(member.Text(AccessChanged)).ToBeVisibleAsync();
+		await member.ShouldBeAtAsync(Routes.Feeds);
+
+		await member.GotoAsync(Routes.Browse);
+
+		await member.ShouldBeAtAsync(Routes.SignIn);
+		await Expect(member.Heading("Browse")).ToBeHiddenAsync();
+
+		await ChangeRoleAsync(admin, "Make member");
+		await Expect(Badge(admin, MemberName, "Member")).ToBeVisibleAsync();
 	}
 
 	[Test]
