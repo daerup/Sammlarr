@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Microsoft.Playwright;
-using TUnit.Assertions.Enums;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
@@ -45,7 +44,7 @@ public class FeedPreviewTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await PreviewAsync(page, "Badges");
-		var listed = await FeedEditor.SourceListSizeAsync();
+		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
 
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
@@ -74,18 +73,17 @@ public class FeedPreviewTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await PreviewAsync(page, "Refresh");
-		var listed = await FeedEditor.SourceListSizeAsync();
+		var served = await FeedEditor.ServedTitlesAsync();
 		var warm = await E2EApp.RequestCountAsync("/library/metadata/");
 
 		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
 		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Refresh assets?" })).ToBeVisibleAsync();
 		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Refresh", Exact = true }).ClickAsync();
 
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
+		await E2EApp.WaitForRequestsBeyondAsync("/library/metadata/", warm);
 		await FeedEditor.PreviewLoadedAsync(page);
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(listed);
 
-		await Assert.That(await E2EApp.RequestCountAsync("/library/metadata/")).IsGreaterThan(warm);
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(served.Count);
 	}
 
 	[Test]

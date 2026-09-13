@@ -95,8 +95,7 @@ internal static class FeedEditor
 		await page.WaitForTimeoutAsync(500);
 	}
 
-	internal static async Task<int> SourceListSizeAsync() =>
-		JsonNode.Parse(await E2EApp.ServedBodyAsync($"/lists/{ListIdentifier}/items"))!["pagination"]!["total"]!.GetValue<int>();
+	internal static Task<IReadOnlyList<string>> ServedTitlesAsync() => MdblistFeed.ServedTitlesAsync(ListIdentifier);
 
 	private static Task Click(IPage page, string name) => page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = name, Exact = true }).ClickAsync();
 
