@@ -18,7 +18,4 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Roslyn\Roslyn.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\..\Roslyn\Roslyn.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
 </Project>

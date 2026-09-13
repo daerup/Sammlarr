@@ -14,7 +14,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task A_member_cannot_list_the_users()
+	public async Task ListUsersAsync_WhenTheCallerIsAMember_IsRejected()
 	{
 		await host.SignInAs("member");
 
@@ -22,7 +22,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_admin_lists_every_user()
+	public async Task ListUsersAsync_WhenTheCallerIsAnAdmin_ReturnsEveryUser()
 	{
 		var member = await host.SeedExistingUser("member-1", UserRole.Member, "Bob");
 
@@ -33,7 +33,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Promoting_a_member_persists_the_new_role_and_invalidates_their_session()
+	public async Task SetRoleAsync_WhenPromotingAMember_PersistsTheRoleAndInvalidatesTheirSession()
 	{
 		var member = await host.SeedExistingUser("member-1", UserRole.Member, "Bob");
 
@@ -45,7 +45,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_a_member_deletes_them_and_invalidates_their_session()
+	public async Task RemoveUserAsync_WhenRemovingAMember_DeletesThemAndInvalidatesTheirSession()
 	{
 		var member = await host.SeedExistingUser("member-1", UserRole.Member, "Bob");
 
@@ -57,19 +57,19 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Demoting_the_last_admin_is_rejected()
+	public async Task SetRoleAsync_WhenDemotingTheLastAdmin_IsRejected()
 	{
 		await Assert.That(async () => await Testee.ChangeRoleAsync(TestCurrentUser.DefaultId, UserRole.Member)).Throws<InvalidOperationException>();
 	}
 
 	[Test]
-	public async Task Removing_the_last_admin_is_rejected()
+	public async Task RemoveUserAsync_WhenRemovingTheLastAdmin_IsRejected()
 	{
 		await Assert.That(async () => await Testee.RemoveAsync(TestCurrentUser.DefaultId)).Throws<InvalidOperationException>();
 	}
 
 	[Test]
-	public async Task A_caller_who_lost_admin_in_the_database_is_rejected_despite_an_admin_cookie()
+	public async Task ListUsersAsync_WhenTheCallerLostAdminInTheDatabase_IsRejectedDespiteTheCookie()
 	{
 		await host.SetDatabaseRole(TestCurrentUser.DefaultId, UserRole.Member);
 		var member = await host.SeedExistingUser("member-1", UserRole.Member, "Bob");
@@ -78,7 +78,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_admin_changes_the_registration_mode()
+	public async Task SetRegistrationModeAsync_WhenTheCallerIsAnAdmin_ChangesIt()
 	{
 		await Testee.SetRegistrationModeAsync(RegistrationMode.Closed);
 
@@ -86,7 +86,7 @@ public class UserManagementTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_member_cannot_change_the_registration_mode()
+	public async Task SetRegistrationModeAsync_WhenTheCallerIsAMember_IsRejected()
 	{
 		await host.SignInAs("member");
 

@@ -6,7 +6,7 @@ namespace UI.Tests.Settings;
 public class NotificationTemplateVariablesTests
 {
 	[Test]
-	public async Task Feed_run_failed_shows_reason_and_feed_but_not_media()
+	public async Task Variables_ForAFailedFeedRun_ShowReasonAndFeedButNotMedia()
 	{
 		var tokens = Tokens(NotificationEventType.FeedRunFailed);
 
@@ -17,7 +17,7 @@ public class NotificationTemplateVariablesTests
 	}
 
 	[Test]
-	public async Task Watchlist_synced_shows_media_item_fields_with_descriptor()
+	public async Task Variables_ForAWatchlistSync_ShowMediaItemFieldsWithDescriptor()
 	{
 		var tokens = Tokens(NotificationEventType.WatchlistSynced);
 
@@ -28,13 +28,13 @@ public class NotificationTemplateVariablesTests
 	}
 
 	[Test]
-	public async Task Top_level_variables_are_always_present()
+	public async Task Variables_ForAnyEvent_AlwaysIncludeTheTopLevelOnes()
 	{
 		await Assert.That(Tokens(NotificationEventType.FeedRunCompleted)).Contains("{{ title }}");
 	}
 
 	[Test]
-	public async Task Multiple_events_show_the_union_of_their_variables()
+	public async Task Variables_ForMultipleEvents_ShowTheUnionOfTheirs()
 	{
 		var tokens = Tokens(NotificationEventType.FeedRunFailed, NotificationEventType.WatchlistSynced);
 

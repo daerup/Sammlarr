@@ -15,7 +15,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task The_first_user_to_sign_in_becomes_an_admin()
+	public async Task SignInAsync_WhenItIsTheFirstUser_MakesThemAnAdmin()
 	{
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");
@@ -33,7 +33,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_later_user_signs_in_as_a_member()
+	public async Task SignInAsync_WhenALaterUserSignsIn_MakesThemAMember()
 	{
 		host.OAuthReturns("plex-uuid", "Jane");
 
@@ -43,7 +43,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Registration_being_closed_rejects_a_new_user()
+	public async Task SignInAsync_WhenRegistrationIsClosed_RejectsANewUser()
 	{
 		await host.RegistrationClosed();
 		host.OAuthReturns("plex-uuid", "Zoe");
@@ -55,7 +55,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Registration_being_closed_still_admits_the_first_user()
+	public async Task SignInAsync_WhenRegistrationIsClosed_StillAdmitsTheFirstUser()
 	{
 		await host.NoUsers();
 		await host.RegistrationClosed();
@@ -67,7 +67,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_existing_login_returns_the_same_user_without_creating_another()
+	public async Task SignInAsync_WhenTheLoginAlreadyExists_ReturnsTheSameUser()
 	{
 		var existing = await host.SeedExistingUser("plex-uuid", UserRole.Admin, "John");
 		host.OAuthReturns("plex-uuid", "John");
@@ -78,7 +78,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_failed_provider_login_is_reported_as_an_error()
+	public async Task SignInAsync_WhenTheProviderLoginFails_ReportsAnError()
 	{
 		host.OAuthFails("Authentication was not completed.");
 
@@ -88,7 +88,7 @@ public class SignInTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_successful_sign_in_stores_the_provider_credential()
+	public async Task SignInAsync_WhenItSucceeds_StoresTheProviderCredential()
 	{
 		await host.NoUsers();
 		host.OAuthReturns("plex-uuid", "John");

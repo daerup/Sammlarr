@@ -5,7 +5,7 @@ namespace UI.Tests.Settings;
 public class WebhookSecretTests
 {
 	[Test]
-	public async Task Generate_is_whsec_prefixed_and_decodes_to_32_bytes()
+	public async Task Generate_WhenCalled_IsWhsecPrefixedAndDecodesTo32Bytes()
 	{
 		var secret = WebhookSecret.Generate();
 
@@ -14,7 +14,7 @@ public class WebhookSecretTests
 	}
 
 	[Test]
-	public async Task Generate_produces_a_fresh_secret_each_call()
+	public async Task Generate_WhenCalledRepeatedly_ProducesAFreshSecret()
 	{
 		await Assert.That(WebhookSecret.Generate()).IsNotEqualTo(WebhookSecret.Generate());
 	}

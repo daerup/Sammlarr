@@ -25,7 +25,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 		await _targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig("token", "key")));
 
 	[Test]
-	public async Task Subscription_is_readable_by_target_and_by_event_type()
+	public async Task GetAsync_WhenASubscriptionExists_IsReadableByTargetAndEventType()
 	{
 		var targetId = await CreateTargetAsync();
 
@@ -41,7 +41,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	}
 
 	[Test]
-	public async Task A_bundled_subscription_matches_each_of_its_events()
+	public async Task GetByEventTypeAsync_WhenASubscriptionIsBundled_MatchesEachOfItsEvents()
 	{
 		var targetId = await CreateTargetAsync();
 
@@ -53,7 +53,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	}
 
 	[Test]
-	public async Task Subscription_template_and_priority_round_trip_and_update()
+	public async Task UpsertAsync_WhenTemplateAndPriorityChange_RoundTripAndUpdate()
 	{
 		var targetId = await CreateTargetAsync();
 		var id = await _testee.AddAsync(
@@ -78,7 +78,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	}
 
 	[Test]
-	public async Task Deleting_a_target_cascades_its_subscriptions()
+	public async Task DeleteAsync_WhenATargetIsDeleted_CascadesItsSubscriptions()
 	{
 		var targetId = await CreateTargetAsync();
 		await _testee.AddAsync(targetId, [NotificationEventType.WatchlistSynced], NotificationTemplate.None);

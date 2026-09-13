@@ -19,7 +19,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Loading_a_feed_without_an_api_key_throws()
+	public async Task GetFeedItemsAsync_WithoutAnApiKey_Throws()
 	{
 		host.MdblistFeedContains("top-250", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
@@ -27,7 +27,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_that_returns_a_server_error_surfaces_the_failure()
+	public async Task GetFeedItemsAsync_WhenTheProviderReturnsAServerError_SurfacesTheFailure()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedReturnsStatus("broken-list", System.Net.HttpStatusCode.InternalServerError);
@@ -36,7 +36,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_that_returns_a_malformed_body_fails_to_load()
+	public async Task GetFeedItemsAsync_WhenTheBodyIsMalformed_FailsToLoad()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedReturnsInvalidJson("corrupt-list");
@@ -45,7 +45,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_whose_provider_circuit_is_open_surfaces_a_typed_failure()
+	public async Task GetFeedItemsAsync_WhenTheProviderCircuitIsOpen_SurfacesATypedFailure()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedUnavailable("storm-list");
@@ -54,7 +54,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_that_becomes_unavailable_mid_load_still_yields_the_items_fetched_before_the_failure()
+	public async Task GetFeedItemsAsync_WhenTheProviderFailsMidLoad_StillYieldsTheItemsFetchedBefore()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedPartialThenUnavailable("partial-list", Item("Item1", MediaType.Movie), Item("Item2", MediaType.Movie));
@@ -73,7 +73,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_that_returns_no_movies_or_shows_loads_no_items()
+	public async Task GetFeedItemsAsync_WhenTheFeedIsEmpty_LoadsNoItems()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedEmpty("empty-list");
@@ -82,7 +82,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_multi_page_feed_loads_every_page()
+	public async Task GetFeedItemsAsync_WhenTheFeedIsPaged_LoadsEveryPage()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedPaginated("big-list", Page(0, hasMore: true, "Item1", "Item2"), Page(1000, hasMore: false, "Item3"));
@@ -91,7 +91,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Duplicate_feed_entries_are_preserved_in_order()
+	public async Task GetFeedItemsAsync_WhenEntriesAreDuplicated_PreservesThemInOrder()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();
@@ -101,7 +101,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_whose_items_all_fail_strict_validation_returns_them_as_unresolved()
+	public async Task GetFeedItemsAsync_WhenEveryItemFailsStrictValidation_ReturnsThemAsUnresolved()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("loose-list", Item("No Ids One", MediaType.Movie), Item("No Ids Two", MediaType.Movie));
@@ -113,7 +113,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_feed_item_whose_metadata_cannot_be_resolved_is_returned_as_unresolved()
+	public async Task GetFeedItemsAsync_WhenMetadataCannotBeResolved_ReturnsTheItemAsUnresolved()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.WithPlexAccount("plex-token");
@@ -128,7 +128,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_item_with_no_known_ids_at_all_is_still_returned()
+	public async Task GetFeedItemsAsync_WhenAnItemHasNoKnownIds_StillReturnsIt()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("mystery-list", Item("Unknown Movie", MediaType.Movie));
@@ -139,7 +139,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_item_missing_release_year_is_tolerated()
+	public async Task GetFeedItemsAsync_WhenAnItemHasNoReleaseYear_ToleratesIt()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("no-year-list", Item("Orphaned", MediaType.Movie));
@@ -150,7 +150,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_item_with_explicit_null_title_is_tolerated()
+	public async Task GetFeedItemsAsync_WhenAnItemHasANullTitle_ToleratesIt()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("null-title-list", Item(null, MediaType.Movie, Tmdb("4242")));
@@ -159,7 +159,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_item_known_only_by_imdb_id_is_still_returned()
+	public async Task GetFeedItemsAsync_WhenAnItemIsKnownOnlyByImdbId_StillReturnsIt()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.PlexHolds(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205")));
@@ -172,7 +172,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Loaded_feed_item_is_enriched_with_metadata_and_rating()
+	public async Task GetFeedItemsAsync_WhenAnItemLoads_EnrichesItWithMetadataAndRating()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
@@ -184,7 +184,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_with_multiple_movies_resolves_all_items()
+	public async Task GetFeedItemsAsync_WithMultipleMovies_ResolvesEveryItem()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
@@ -197,7 +197,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Loading_a_feed_caches_the_items_metadata()
+	public async Task GetFeedItemsAsync_WhenItemsLoad_CachesTheirMetadata()
 	{
 		await host.WithMdblistAccount("test-key");
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();
@@ -211,7 +211,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_item_with_additional_ids_merges_new_identifiers_into_existing_entry()
+	public async Task GetFeedItemsAsync_WhenAnItemAddsIds_MergesThemIntoTheExistingEntry()
 	{
 		await host.WithMdblistAccount("test-key");
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();
@@ -223,7 +223,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_tmdb_id_conflicting_with_the_resolved_row_is_overridden_by_the_provider()
+	public async Task GetFeedItemsAsync_WhenTheFeedTmdbIdConflictsWithTheRow_PrefersTheProvider()
 	{
 		await host.WithMdblistAccount("test-key");
 		var inception = await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).SeedAsync();
@@ -237,7 +237,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Mixed_type_feed_surfaces_movies_and_shows()
+	public async Task GetFeedItemsAsync_WhenTheFeedMixesTypes_SurfacesMoviesAndShows()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).ServedByPlex().ServedByTmdb().SeedAsync();
@@ -248,7 +248,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Feed_item_title_differs_from_cached_row_title()
+	public async Task GetFeedItemsAsync_WhenTheItemTitleDiffersFromTheCachedRow_StillMatchesByExternalId()
 	{
 		await host.WithMdblistAccount("test-key");
 		var inception = await host.Movie(Spec("Inception", Tmdb("27205"), Imdb("tt1375666"), Plex("27205"))).ServedByPlex().ServedByTmdb().SeedAsync();

@@ -15,7 +15,7 @@ public class NotificationDeliveryHandlerTests
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task Successful_delivery_sends_once_and_records_delivered()
+	public async Task Handle_WhenDeliverySucceeds_SendsOnceAndRecordsDelivered()
 	{
 		var channel = new RecordingChannel(new DeliverySucceeded());
 
@@ -26,7 +26,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	[Test]
-	public async Task Successful_delivery_on_a_later_attempt_still_records_delivered()
+	public async Task Handle_WhenDeliverySucceedsOnALaterAttempt_StillRecordsDelivered()
 	{
 		var outcomes = await Handle(Guid.NewGuid(), WebhookTarget(enabled: true), new RecordingChannel(new DeliverySucceeded()), attempts: 3);
 
@@ -34,7 +34,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	[Test]
-	public async Task Retryable_result_records_retrying_and_throws()
+	public async Task Handle_WhenTheResultIsRetryable_RecordsRetryingAndThrows()
 	{
 		var outcomes = new CapturingOutcomes();
 		var threw = false;
@@ -52,7 +52,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	[Test]
-	public async Task Retryable_on_the_final_attempt_records_failed_and_does_not_throw()
+	public async Task Handle_WhenRetryableOnTheFinalAttempt_RecordsFailedWithoutThrowing()
 	{
 		var channel = new RecordingChannel(new DeliveryRetryable("still down"));
 
@@ -62,7 +62,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	[Test]
-	public async Task Unrecoverable_result_records_failed_without_throwing()
+	public async Task Handle_WhenTheResultIsUnrecoverable_RecordsFailedWithoutThrowing()
 	{
 		var channel = new RecordingChannel(new DeliveryUnrecoverable("401"));
 
@@ -73,7 +73,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	[Test]
-	public async Task Missing_target_is_skipped_without_a_send_or_record()
+	public async Task Handle_WhenTheTargetIsMissing_SkipsWithoutSendingOrRecording()
 	{
 		var channel = new RecordingChannel(new DeliverySucceeded());
 
@@ -84,7 +84,7 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	[Test]
-	public async Task Disabled_target_is_skipped_without_a_send_or_record()
+	public async Task Handle_WhenTheTargetIsDisabled_SkipsWithoutSendingOrRecording()
 	{
 		var channel = new RecordingChannel(new DeliverySucceeded());
 

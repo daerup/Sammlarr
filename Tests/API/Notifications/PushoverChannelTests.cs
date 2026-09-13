@@ -14,7 +14,7 @@ public class PushoverChannelTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
 
 	[Test]
-	public async Task Posts_the_rendered_template_form_fields_to_the_pushover_endpoint()
+	public async Task SendAsync_WhenSending_PostsTheRenderedFormFieldsToPushover()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -32,7 +32,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Empty_message_template_is_sent_as_an_empty_placeholder()
+	public async Task SendAsync_WhenTheMessageTemplateIsEmpty_SendsAnEmptyPlaceholder()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -45,7 +45,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Blank_message_template_is_sent_as_an_empty_placeholder()
+	public async Task SendAsync_WhenTheMessageTemplateIsBlank_SendsAnEmptyPlaceholder()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -55,7 +55,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Templates_override_the_title_and_message()
+	public async Task SendAsync_WhenTemplatesAreSet_OverrideTheTitleAndMessage()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -67,7 +67,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Feed_run_failed_maps_to_high_priority()
+	public async Task SendAsync_WhenAFeedRunFailed_MapsToHighPriority()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -77,7 +77,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Configured_priority_overrides_the_derived_one()
+	public async Task SendAsync_WhenPriorityIsConfigured_OverridesTheDerivedOne()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -87,7 +87,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Monthly_limit_is_unrecoverable()
+	public async Task SendAsync_WhenTheMonthlyLimitIsReached_IsUnrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
 			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
@@ -96,7 +96,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Bad_request_is_unrecoverable()
+	public async Task SendAsync_WhenBadRequest_IsUnrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.BadRequest))
 			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
@@ -105,7 +105,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Server_error_is_retryable()
+	public async Task SendAsync_WhenTheServerErrors_IsRetryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
 			.SendAsync(Context(), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
@@ -114,7 +114,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Invalid_template_is_unrecoverable_and_sends_nothing()
+	public async Task SendAsync_WhenTheTemplateIsInvalid_IsUnrecoverableAndSendsNothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -125,7 +125,7 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task Non_pushover_target_is_unrecoverable_and_sends_nothing()
+	public async Task SendAsync_WhenTheTargetIsNotPushover_IsUnrecoverableAndSendsNothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 

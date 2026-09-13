@@ -15,7 +15,7 @@ public class WatchlistToggleIconTests : BunitContext
 	}
 
 	[Test]
-	public async Task Clicking_the_icon_invokes_the_toggle_callback_with_its_media()
+	public async Task Click_WhenTheIconIsPressed_InvokesTheToggleCallbackWithItsMedia()
 	{
 		var media = Lookup();
 		MediaLookup? toggled = null;
@@ -27,7 +27,7 @@ public class WatchlistToggleIconTests : BunitContext
 	}
 
 	[Test]
-	public async Task A_toggled_icon_is_marked()
+	public async Task Render_WhenToggled_MarksTheIcon()
 	{
 		var cut = Render<WatchlistToggleIcon>(parameters => parameters.Add(icon => icon.Result, Lookup()).Add(icon => icon.IsToggled, true));
 
@@ -35,7 +35,7 @@ public class WatchlistToggleIconTests : BunitContext
 	}
 
 	[Test]
-	public async Task An_untoggled_icon_is_not_marked()
+	public async Task Render_WhenNotToggled_LeavesTheIconUnmarked()
 	{
 		var cut = Render<WatchlistToggleIcon>(parameters => parameters.Add(icon => icon.Result, Lookup()).Add(icon => icon.IsToggled, false));
 

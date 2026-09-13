@@ -6,7 +6,7 @@ namespace UI.Tests.Settings;
 public class NotificationConfigBuilderTests
 {
 	[Test]
-	public async Task Webhook_trims_the_url()
+	public async Task Webhook_WhenTheUrlIsPadded_TrimsIt()
 	{
 		var config = NotificationConfigBuilder.Webhook("  https://example.test/hook  ", "whsec_x");
 
@@ -15,7 +15,7 @@ public class NotificationConfigBuilderTests
 	}
 
 	[Test]
-	public async Task Pushover_trims_the_entered_values()
+	public async Task Pushover_WhenValuesArePadded_TrimsThem()
 	{
 		var config = NotificationConfigBuilder.Pushover("  new-token ", " new-key ");
 

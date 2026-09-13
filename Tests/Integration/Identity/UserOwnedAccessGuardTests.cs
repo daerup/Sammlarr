@@ -10,7 +10,7 @@ public class UserOwnedAccessGuardTests(SammlarrTestHost fixture) : IAsyncDisposa
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Test]
-	public async Task Querying_owned_data_without_an_authenticated_user_throws()
+	public async Task QueryFilter_WhenNoUserIsAuthenticated_Throws()
 	{
 		_ = fixture.Context;
 		fixture.CurrentUser.IsAuthenticated = false;
@@ -29,7 +29,7 @@ public class UserOwnedAccessGuardTests(SammlarrTestHost fixture) : IAsyncDisposa
 	}
 
 	[Test]
-	public async Task Every_user_owned_entity_has_the_user_query_filter()
+	public async Task QueryFilter_ForEveryUserOwnedEntity_IsApplied()
 	{
 		var userOwned = fixture.Context.Model.GetEntityTypes().Where(entityType => typeof(IUserOwned).IsAssignableFrom(entityType.ClrType)).ToList();
 

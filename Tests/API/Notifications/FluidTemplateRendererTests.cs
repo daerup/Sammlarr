@@ -10,7 +10,7 @@ public class FluidTemplateRendererTests
 	private readonly FluidTemplateRenderer _testee = new();
 
 	[Test]
-	public async Task Renders_top_level_and_nested_media_fields_camelCase()
+	public async Task Render_ForMediaFields_EmitsTopLevelAndNestedCamelCase()
 	{
 		var context = new NotificationContext(
 			Guid.NewGuid(),
@@ -27,7 +27,7 @@ public class FluidTemplateRendererTests
 	}
 
 	[Test]
-	public async Task Invalid_template_returns_error()
+	public async Task Render_WhenTheTemplateIsInvalid_ReturnsAnError()
 	{
 		var context = new NotificationContext(Guid.NewGuid(), NotificationEventType.TestPing, DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
 
@@ -37,7 +37,7 @@ public class FluidTemplateRendererTests
 	}
 
 	[Test]
-	public async Task Render_exceeding_the_step_limit_returns_an_error()
+	public async Task Render_WhenTheStepLimitIsExceeded_ReturnsAnError()
 	{
 		var context = new NotificationContext(Guid.NewGuid(), NotificationEventType.TestPing, DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
 

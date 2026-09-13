@@ -19,7 +19,7 @@ public class WatchlistPushRequestHandlerTests
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task Pending_add_that_pushes_successfully_is_dropped()
+	public async Task Handle_WhenAPendingAddPushesSuccessfully_DropsIt()
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-1", MediaType.Movie);
@@ -37,7 +37,7 @@ public class WatchlistPushRequestHandlerTests
 	}
 
 	[Test]
-	public async Task No_pending_op_is_a_no_op()
+	public async Task Handle_WhenNoOperationIsPending_DoesNothing()
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 
@@ -51,7 +51,7 @@ public class WatchlistPushRequestHandlerTests
 	}
 
 	[Test]
-	public async Task Op_with_no_external_id_is_marked_failed_without_a_push()
+	public async Task Handle_WhenTheOperationHasNoExternalId_MarksItFailedWithoutPushing()
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 
@@ -65,7 +65,7 @@ public class WatchlistPushRequestHandlerTests
 	}
 
 	[Test]
-	public async Task Failed_push_below_max_attempts_records_failure_and_throws_for_retry()
+	public async Task Handle_WhenAPushFailsBelowMaxAttempts_RecordsFailureAndThrowsForRetry()
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-2", MediaType.Movie);
@@ -88,7 +88,7 @@ public class WatchlistPushRequestHandlerTests
 	}
 
 	[Test]
-	public async Task Failed_push_at_max_attempts_is_marked_failed_without_throwing()
+	public async Task Handle_WhenAPushFailsAtMaxAttempts_MarksItFailedWithoutThrowing()
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-3", MediaType.Movie);
@@ -103,7 +103,7 @@ public class WatchlistPushRequestHandlerTests
 	}
 
 	[Test]
-	public async Task Handler_establishes_the_user_scope_for_the_message_user()
+	public async Task Handle_WhenAMessageArrives_EstablishesTheUserScope()
 	{
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var external = PlexId.From("plex-9", MediaType.Movie);

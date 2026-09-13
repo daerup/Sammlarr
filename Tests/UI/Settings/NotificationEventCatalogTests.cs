@@ -11,7 +11,7 @@ public class NotificationEventCatalogTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch;
 
 	[Test]
-	public async Task Catalog_covers_the_watchlist_sync_event()
+	public async Task Catalog_ForTheWatchlistSyncEvent_IncludesIt()
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
@@ -19,7 +19,7 @@ public class NotificationEventCatalogTests
 	}
 
 	[Test]
-	public async Task Catalog_excludes_granular_and_internal_events()
+	public async Task Catalog_ForGranularAndInternalEvents_ExcludesThem()
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
@@ -27,7 +27,7 @@ public class NotificationEventCatalogTests
 	}
 
 	[Test]
-	public async Task Catalog_options_all_have_labels()
+	public async Task Catalog_ForEveryOption_ProvidesALabel()
 	{
 		await Assert.That(NotificationEventCatalog.Subscribable).IsNotEmpty();
 		await Assert.That(NotificationEventCatalog.Subscribable.All(option => !string.IsNullOrWhiteSpace(option.Label))).IsTrue();

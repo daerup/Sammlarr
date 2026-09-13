@@ -9,7 +9,7 @@ public class MigrationsTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	[Test]
-	public async Task Model_has_no_pending_changes_beyond_the_latest_migration()
+	public async Task Model_WhenComparedToTheLatestMigration_HasNoPendingChanges()
 	{
 		await Assert.That(fixture.Context.Database.HasPendingModelChanges()).IsFalse();
 	}

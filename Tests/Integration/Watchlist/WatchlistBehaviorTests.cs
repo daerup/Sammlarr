@@ -18,7 +18,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Adding_media_with_manual_origin_persists_the_entry()
+	public async Task AddToWatchlistAsync_WithAManualOrigin_PersistsTheEntry()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 
@@ -30,7 +30,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_an_entry_that_is_already_present_keeps_its_original_origin()
+	public async Task AddToWatchlistAsync_WhenTheEntryAlreadyExists_KeepsItsOriginalOrigin()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 
@@ -42,7 +42,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_an_entry_hard_deletes_it()
+	public async Task RemoveFromWatchlistAsync_WhenAnEntryIsRemoved_HardDeletesIt()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 
@@ -52,7 +52,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Getting_watchlist_ids_returns_ids_of_all_watchlisted_items()
+	public async Task GetIdsAsync_WhenItemsAreWatchlisted_ReturnsAllOfTheirIds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnWatchlist(origin: Remote);
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
@@ -64,7 +64,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_media_without_the_watchlist_providers_id_is_rejected()
+	public async Task AddToWatchlistAsync_WhenTheWatchlistProviderIdIsMissing_IsRejected()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").SeedAsync();
 
@@ -72,7 +72,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_media_without_the_watchlist_providers_id_is_rejected()
+	public async Task RemoveFromWatchlistAsync_WhenTheWatchlistProviderIdIsMissing_IsRejected()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").OnWatchlist(origin: Manual);
 
@@ -80,7 +80,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Getting_watchlist_items_enriches_entries_with_metadata_and_rating()
+	public async Task GetItemsAsync_WhenEntriesExist_EnrichesThemWithMetadataAndRating()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnWatchlist(origin: Remote);
 
@@ -99,7 +99,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Getting_watchlist_items_with_removed_includes_pending_removals()
+	public async Task GetItemsAsync_WhenRemovedAreRequested_IncludesPendingRemovals()
 	{
 		var service = host.Resolve<IWatchlistService>();
 		var removed = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().OnWatchlist(origin: Manual);
@@ -114,7 +114,7 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Getting_watchlist_items_by_default_excludes_pending_removals()
+	public async Task GetItemsAsync_ByDefault_ExcludesPendingRemovals()
 	{
 		var service = host.Resolve<IWatchlistService>();
 		var removed = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().OnWatchlist(origin: Manual);
