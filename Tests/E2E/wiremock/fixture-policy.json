@@ -2,7 +2,10 @@
   "contract": [
     "/trending/all/week",
     "/movie/*",
-    "/tv/*"
+    "/tv/*",
+    "/lists/*",
+    "/library/search",
+    "/library/metadata/*"
   ],
   "frozen": [
     "/library/sections/watchlist/all",

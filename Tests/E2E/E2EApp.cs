@@ -17,12 +17,14 @@ public static class E2EApp
 	private static readonly SemaphoreSlim StartGate = new(1, 1);
 	private static readonly Lock CaptureGate = new();
 	private static readonly HashSet<string> Captured = [];
+	private static readonly HashSet<string> Stubbed = [];
 	private static DistributedApplication? _app;
 	private static IPlaywright? _playwright;
 	private static IBrowser? _browser;
 	private static HttpClient? _wiremock;
 	private static string _baseUrl = "";
 	private static string _authCookie = "";
+	private static string _memberCookie = "";
 	private static string _workDir = "";
 	private static bool _started;
 
@@ -33,7 +35,13 @@ public static class E2EApp
 		return await context.NewPageAsync();
 	}
 
-	internal static async Task<IPage> OpenAuthenticatedPageAsync()
+	internal static Task<IPage> OpenAuthenticatedPageAsync() => OpenSignedInPageAsync(() => _authCookie);
+
+	internal static Task<IPage> OpenMemberPageAsync() => OpenSignedInPageAsync(() => _memberCookie);
+
+	internal static Task<IPage> OpenPageWithAuthCookieAsync(string value) => OpenSignedInPageAsync(() => value);
+
+	private static async Task<IPage> OpenSignedInPageAsync(Func<string> cookie)
 	{
 		await EnsureStartedAsync();
 		var context = await _browser!.NewContextAsync(new BrowserNewContextOptions { BaseURL = _baseUrl });
@@ -41,7 +49,7 @@ public static class E2EApp
 			new Cookie
 			{
 				Name = AuthCookie.Name,
-				Value = _authCookie,
+				Value = cookie(),
 				Url = _baseUrl,
 			},
 		]);
@@ -59,6 +67,88 @@ public static class E2EApp
 		await EnsureStartedAsync();
 		return await _wiremock!.GetStringAsync("/__admin/requests");
 	}
+
+	internal static Task<IAsyncDisposable> StubAsync(string urlPath, int status, string body, string method = "GET") =>
+		StubAsync(new StubSpec(urlPath, status, body) { Method = method });
+
+	internal static async Task<IAsyncDisposable> StubAsync(StubSpec spec)
+	{
+		await EnsureStartedAsync();
+		lock (CaptureGate)
+		{
+			Stubbed.Add(spec.UrlPath);
+		}
+
+		var ids = new List<string>();
+		foreach (var path in StubPaths(spec.UrlPath))
+		{
+			var response = await _wiremock!.PostAsJsonAsync("/__admin/mappings", Mapping(spec, path));
+			response.EnsureSuccessStatusCode();
+			ids.Add(JsonNode.Parse(await response.Content.ReadAsStringAsync())!["id"]!.GetValue<string>());
+		}
+
+		return new StubRegistration(ids);
+	}
+
+	private static JsonObject Mapping(StubSpec spec, string path)
+	{
+		var request = new JsonObject { ["method"] = spec.Method, ["urlPath"] = path };
+		if (spec.Query.Count > 0)
+		{
+			var matchers = new JsonObject();
+			foreach (var (key, value) in spec.Query)
+			{
+				matchers[key] = new JsonObject { ["equalTo"] = value };
+			}
+
+			request["queryParameters"] = matchers;
+		}
+
+		var headers = new JsonObject { ["Content-Type"] = "application/json" };
+		foreach (var (key, value) in spec.Headers)
+		{
+			headers[key] = value;
+		}
+
+		var response = new JsonObject
+		{
+			["status"] = spec.Status,
+			["headers"] = headers,
+			["body"] = spec.Body,
+		};
+		if (spec.DelayMs > 0)
+		{
+			response["fixedDelayMilliseconds"] = spec.DelayMs;
+		}
+
+		return new JsonObject
+		{
+			["priority"] = 1,
+			["request"] = request,
+			["response"] = response,
+		};
+	}
+
+	private static string Forge(string keyRingPath, SeededUser user) => AuthCookie.Forge(keyRingPath, user.Id, user.DisplayName, user.Role);
+
+	private static IEnumerable<string> StubPaths(string urlPath) =>
+		IsLive ? ProviderRecording.AllEndpoints.Select(endpoint => $"{endpoint.Prefix}{urlPath}") : [urlPath];
+
+	private sealed class StubRegistration(IReadOnlyList<string> ids) : IAsyncDisposable
+	{
+		public async ValueTask DisposeAsync()
+		{
+			foreach (var id in ids)
+			{
+				(await _wiremock!.DeleteAsync($"/__admin/mappings/{id}")).EnsureSuccessStatusCode();
+			}
+		}
+	}
+
+	internal static async Task<int> RequestCountAsync(string urlPathSegment) =>
+		(JsonNode.Parse(await RequestJournalAsync())?["requests"]?.AsArray() ?? []).Count(entry =>
+			entry?["request"]?["url"]?.GetValue<string>()?.Contains(urlPathSegment, StringComparison.Ordinal) is true
+		);
 
 	internal static async Task<string> ServedBodyAsync(string urlPath)
 	{
@@ -103,8 +193,13 @@ public static class E2EApp
 		if (IsLive)
 		{
 			await CaptureRemainingAsync();
-			await PruneUncapturedFixturesAsync();
+			if (Environment.GetEnvironmentVariable("E2E_PRUNE") is "true")
+			{
+				await PruneUncapturedFixturesAsync();
+			}
 		}
+
+		var unmatched = Urls(await UnmatchedAsync()).ToList();
 
 		_wiremock?.Dispose();
 		if (_browser is not null)
@@ -122,6 +217,8 @@ public static class E2EApp
 		{
 			Directory.Delete(_workDir, recursive: true);
 		}
+
+		await Assert.That(unmatched).IsEmpty();
 	}
 
 	private static IEnumerable<string> Urls(string journalJson) =>
@@ -132,7 +229,7 @@ public static class E2EApp
 
 	private static async Task CaptureRemainingAsync()
 	{
-		var recorded = RecordedStubs.Write(await SnapshotAsync(), WireMockStubs.MappingsDirectory).Where(FirstCapture).ToList();
+		var recorded = RecordedStubs.Write(await SnapshotAsync(), WireMockStubs.MappingsDirectory, IsStubbed).Where(FirstCapture).ToList();
 		var committed = new List<RecordedResponse>();
 		foreach (var response in recorded)
 		{
@@ -151,6 +248,14 @@ public static class E2EApp
 		await Assert.That(drift).IsEmpty();
 	}
 
+	private static bool IsStubbed(string replayPath)
+	{
+		lock (CaptureGate)
+		{
+			return Stubbed.Contains(replayPath);
+		}
+	}
+
 	private static bool FirstCapture(RecordedResponse response)
 	{
 		lock (CaptureGate)
@@ -163,10 +268,8 @@ public static class E2EApp
 	{
 		var fixturePath = FixturePath(response);
 		var committed = await File.ReadAllTextAsync(fixturePath);
-		var problems =
-			WireMockStubs.PolicyFor(response.Path) is FixturePolicy.Value
-				? ValueDrift(response.Body, committed)
-				: JsonContract.Incompatibilities(response.Body, committed);
+		var policy = WireMockStubs.PolicyFor(response.Path);
+		var problems = policy is FixturePolicy.Value ? ValueDrift(response.Body, committed) : JsonContract.Incompatibilities(response.Body, committed);
 
 		var receivedPath = $"{fixturePath[..^".verified.json".Length]}.received.json";
 		if (problems.Count > 0)
@@ -176,6 +279,10 @@ public static class E2EApp
 		else
 		{
 			File.Delete(receivedPath);
+			if (policy is FixturePolicy.Contract)
+			{
+				await WriteFixtureAsync(fixturePath, response.Body);
+			}
 		}
 
 		return problems.Select(problem => $"{response.Provider}/{response.Slug}: {problem}");
@@ -198,7 +305,14 @@ public static class E2EApp
 		foreach (var mappingFile in Directory.EnumerateFiles(WireMockStubs.MappingsDirectory, "*.json", SearchOption.AllDirectories))
 		{
 			var provider = Path.GetFileName(Path.GetDirectoryName(mappingFile)!);
-			if (provider == "mappings" || !capturedProviders.Contains(provider) || captured.Contains($"{provider}/{Path.GetFileNameWithoutExtension(mappingFile)}"))
+			var slug = Path.GetFileNameWithoutExtension(mappingFile);
+			if (provider == "mappings" || !capturedProviders.Contains(provider) || captured.Contains($"{provider}/{slug}"))
+			{
+				continue;
+			}
+
+			var mapped = JsonNode.Parse(await File.ReadAllTextAsync(mappingFile))?["request"]?["urlPath"]?.GetValue<string>();
+			if (mapped is not null && WireMockStubs.PolicyFor(mapped) is FixturePolicy.Frozen)
 			{
 				continue;
 			}
@@ -243,10 +357,17 @@ public static class E2EApp
 		var keyRing = Path.Combine(_workDir, "keys");
 		Directory.CreateDirectory(keyRing);
 
-		var (userId, displayName, role) = IsLive
+		var admin = IsLive
 			? SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"))
-			: SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing, WireMockStubs.ExpectedTrendingTmdbId(), WireMockStubs.ExpectedTrendingTitle());
-		_authCookie = AuthCookie.Forge(keyRing, userId, displayName, role);
+			: SammlarrTestHost.SeedDatabaseFile(
+				dbPath,
+				keyRing,
+				WireMockStubs.ExpectedTrendingTmdbId(),
+				WireMockStubs.ExpectedTrendingPlexId(),
+				WireMockStubs.ExpectedTrendingTitle()
+			);
+		_authCookie = Forge(keyRing, admin);
+		_memberCookie = Forge(keyRing, SammlarrTestHost.SeededMember);
 
 		var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AppHost>(
 			["--LaunchSammlarr=false"],

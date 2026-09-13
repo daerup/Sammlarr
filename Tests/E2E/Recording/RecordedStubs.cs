@@ -27,9 +27,9 @@ internal static class RecordedStubs
 		internal string Discriminator => string.Join('-', Query.Values.Select(Sanitize));
 	}
 
-	internal static IReadOnlyList<RecordedResponse> Write(string snapshotJson, string mappingsDirectory)
+	internal static IReadOnlyList<RecordedResponse> Write(string snapshotJson, string mappingsDirectory, Func<string, bool> isStubbed)
 	{
-		var entries = Parse(snapshotJson);
+		var entries = Parse(snapshotJson).Where(entry => !isStubbed(entry.ReplayPath)).ToList();
 		var ambiguous = entries
 			.GroupBy(entry => entry.Route, StringComparer.Ordinal)
 			.Where(group => group.Select(entry => entry.Discriminator).Distinct(StringComparer.Ordinal).Count() > 1)

@@ -51,6 +51,33 @@ internal static class WireMockStubs
 		return id.ValueKind is JsonValueKind.String ? id.GetString()! : id.GetRawText();
 	}
 
+	internal static string ExpectedTrendingPlexId()
+	{
+		var title = ExpectedTrendingTitle();
+		foreach (var file in Directory.EnumerateFiles(Path.Combine(ResponsesDirectory, "plex-discover"), "library-search-*.verified.json"))
+		{
+			using var document = JsonDocument.Parse(File.ReadAllText(file));
+			foreach (var key in RatingKeys(document.RootElement, title))
+			{
+				if (File.Exists(Path.Combine(MappingsDirectory, "plex-metadata", $"library-metadata-{key}.json")))
+				{
+					return key;
+				}
+			}
+		}
+
+		throw new InvalidOperationException($"No recorded Plex metadata fixture backs the trending title '{title}'.");
+	}
+
+	private static IEnumerable<string> RatingKeys(JsonElement root, string title) =>
+		root.GetProperty("MediaContainer")
+			.GetProperty("SearchResults")
+			.EnumerateArray()
+			.SelectMany(group => group.TryGetProperty("SearchResult", out var results) ? results.EnumerateArray() : [])
+			.Select(result => result.GetProperty("Metadata"))
+			.Where(metadata => metadata.TryGetProperty("title", out var found) && found.GetString() == title)
+			.Select(metadata => metadata.GetProperty("ratingKey").GetString()!);
+
 	private static JsonElement FirstTrendingResult()
 	{
 		using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(ResponsesDirectory, "tmdb", "trending-all-week.verified.json")));
