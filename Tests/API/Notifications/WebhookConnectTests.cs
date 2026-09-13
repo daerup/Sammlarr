@@ -21,6 +21,7 @@ public class WebhookConnectTests
 	[Arguments("64:ff9b::7f00:1", true)]
 	[Arguments("::7f00:1", true)]
 	[Arguments("100.64.0.1", true)]
+	[Arguments("100.127.255.255", true)]
 	[Arguments("100.63.255.255", false)]
 	[Arguments("100.128.0.1", false)]
 	[Arguments("8.8.8.8", false)]

@@ -29,6 +29,46 @@ public class FilterEvaluatorTests
 	}
 
 	[Test]
+	public async Task Build_WhenDateComparison_ComparesByDayNumber()
+	{
+		var date = new DateOnly(2020, 1, 1);
+
+		var result = FilterEvaluator.Build(Filter(Group(Date("ReleaseDate", FilterPredicateOperator.GreaterThan, date))));
+
+		await Assert.That(result).IsEqualTo($"(ReleaseDate.HasValue && ReleaseDate.Value.DayNumber > {date.DayNumber})");
+	}
+
+	[Test]
+	public async Task Build_WhenADatePredicateHasNoValue_FallsBackToDayZero()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "ReleaseDate",
+			Operator = FilterPredicateOperator.GreaterThan,
+			ValueKind = FilterValueKind.Date,
+		};
+
+		var result = FilterEvaluator.Build(Filter(Group(predicate)));
+
+		await Assert.That(result).IsEqualTo("(ReleaseDate.HasValue && ReleaseDate.Value.DayNumber > 0)");
+	}
+
+	[Test]
+	public async Task Build_WhenIsNotEmptyOnText_ChecksNullAndEmptyString()
+	{
+		var predicate = new FilterPredicate
+		{
+			Field = "Tagline",
+			Operator = FilterPredicateOperator.IsNotEmpty,
+			ValueKind = FilterValueKind.String,
+		};
+
+		var result = FilterEvaluator.Build(Filter(Group(predicate)));
+
+		await Assert.That(result).IsEqualTo("(Tagline != null && Tagline != \"\")");
+	}
+
+	[Test]
 	public async Task Build_WhenMultipleAndPredicates_ReturnsAndExpression()
 	{
 		var result = FilterEvaluator.Build(

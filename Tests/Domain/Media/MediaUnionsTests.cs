@@ -6,6 +6,16 @@ namespace Domain.Tests.Media;
 public class MediaUnionsTests
 {
 	[Test]
+	public async Task CombineIdentity_WhenNeitherSideHasExternals_StaysUnmatched()
+	{
+		MediaLookup media = new UnmatchedMedia { Externals = [] };
+
+		var combined = media.CombineIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), []));
+
+		await Assert.That(combined).IsOfUnionType<MediaLookup, UnmatchedMedia>();
+	}
+
+	[Test]
 	public async Task CombineIdentity_StampsCanonicalId()
 	{
 		MediaLookup media = MediaFakes.CompleteMovie().ToMatch();
