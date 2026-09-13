@@ -4,7 +4,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
 
-[NotInParallel]
 public class FeedQuickSaveTests
 {
 	private const string Identifier = "e2e-quicksave";

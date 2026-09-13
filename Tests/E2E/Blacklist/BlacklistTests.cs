@@ -5,7 +5,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Blacklist;
 
-[NotInParallel]
 public class BlacklistTests
 {
 	[Test]

@@ -5,7 +5,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
 
-[NotInParallel]
 public class FeedConfigurationTests
 {
 	private const string OptionalSection = "Filters, Sorting & Limits";

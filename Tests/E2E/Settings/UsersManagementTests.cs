@@ -5,7 +5,6 @@ using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
 
-[NotInParallel]
 public class UsersManagementTests
 {
 	private static readonly string MemberName = SammlarrTestHost.SeededMember.DisplayName;
