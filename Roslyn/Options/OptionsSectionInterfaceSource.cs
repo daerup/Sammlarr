@@ -1,4 +1,4 @@
-namespace Generators.Options;
+namespace Roslyn.Options;
 
 internal static class OptionsSectionInterfaceSource
 {

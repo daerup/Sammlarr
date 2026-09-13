@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shared.Options;
 
-namespace Generators.Tests;
+namespace Roslyn.Tests;
 
 public class GeneratedOptionsRegistrationIntegrationTests
 {
