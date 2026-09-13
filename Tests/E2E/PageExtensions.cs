@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 
 namespace E2E.Tests;
@@ -18,4 +19,12 @@ internal static class PageExtensions
 
 	internal static Task WaitForCircuitAsync(this IPage page) =>
 		page.WaitForFunctionAsync(CircuitReady, null, new PageWaitForFunctionOptions { Timeout = 30000 });
+
+	internal static async Task ShouldBeAtAsync(this IPage page, string route, float timeout = Wait.Settle)
+	{
+		await page.WaitForURLAsync(new Regex(Regex.Escape(route)), new PageWaitForURLOptions { Timeout = timeout });
+		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo(route);
+	}
+
+	internal static async Task ShouldNotBeAtAsync(this IPage page, string route) => await Assert.That(page.Url).DoesNotContain(route);
 }
