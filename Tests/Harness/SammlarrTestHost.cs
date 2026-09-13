@@ -52,6 +52,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private static readonly SqliteConnection Template = BuildTemplate();
 	private static readonly Lock BackupGate = new();
 
+	private const string DataProtectionApplicationName = "Sammlarr";
+
 	private readonly SqliteConnection _connection = RestoreFromTemplate();
 	private ServiceProvider? _dbOnlyProvider;
 	private ServiceProvider? _fullGraphProvider;
@@ -467,14 +469,18 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			new FixedClock()
 		);
 
-	private static ServiceProvider BuildDbOnlyProvider(bool ephemeralDataProtection = true)
+	private static ServiceProvider BuildDbOnlyProvider(string? keyRingPath = null)
 	{
 		var services = new ServiceCollection();
 		services.AddLogging();
 		services.AddModule<DbModule>();
-		if (ephemeralDataProtection)
+		if (keyRingPath is null)
 		{
 			services.AddDataProtection().UseEphemeralDataProtectionProvider();
+		}
+		else
+		{
+			services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keyRingPath)).SetApplicationName(DataProtectionApplicationName);
 		}
 
 		return services.BuildServiceProvider();
@@ -574,10 +580,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	private static SeededUser SeedFile(string path, string keyRingPath, Action<SammlarrDbContext> seed)
 	{
-		Environment.SetEnvironmentVariable("Sammlarr__DataProtection__KeyRingPath", keyRingPath);
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
 		connection.Open();
-		using var provider = BuildDbOnlyProvider(ephemeralDataProtection: false);
+		using var provider = BuildDbOnlyProvider(keyRingPath);
 		var user = new TestCurrentUser();
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
