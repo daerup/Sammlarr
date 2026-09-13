@@ -1,6 +1,6 @@
 {
   "adult": false,
-  "backdrop_path": "/4gyx49ibwQslyrwuUS1c58PJEEd.jpg",
+  "backdrop_path": "/g7Ccid5kuD7A8hXWlsQiNfwOxaD.jpg",
   "belongs_to_collection": null,
   "budget": 25000000,
   "genres": [
@@ -22,7 +22,7 @@
   "original_language": "en",
   "original_title": "Mayday",
   "overview": "When a U.S. Navy pilot on a top-secret mission during the Cold War gets trapped behind enemy lines, his only chance at survival is to form an alliance with an eccentric ex-KGB agent.",
-  "popularity": 212.8735,
+  "popularity": 205.8726,
   "poster_path": "/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg",
   "production_companies": [
     {
@@ -70,6 +70,6 @@
   "tagline": "A friendship with major red flags.",
   "title": "Mayday",
   "video": false,
-  "vote_average": 7.898,
-  "vote_count": 425
+  "vote_average": 7.914,
+  "vote_count": 498
 }

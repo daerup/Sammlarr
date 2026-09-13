@@ -1,0 +1,342 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/0/gracenote/01548a22a1bc0f98d9c1d441a539f2e8.jpg",
+        "guid": "plex://movie/5ec75f87e515a5003f69597d",
+        "key": "/library/metadata/5ec75f87e515a5003f69597d",
+        "ratingKey": "5ec75f87e515a5003f69597d",
+        "studio": "Lazy Cat Films",
+        "summary": "After inheriting an ominous painting, a family soon becomes disturbed by a demonic presence known as The Whispering Man.",
+        "tagline": "Don't let him out",
+        "type": "movie",
+        "addedAt": 1575158400,
+        "audienceRating": 3.2,
+        "audienceRatingImage": "imdb://image.rating",
+        "availabilityId": "668ee42c3aa342b67a28b63b",
+        "budget": 7000,
+        "contentRating": "Not Rated",
+        "duration": 4410112,
+        "imdbRatingCount": 271,
+        "originalTitle": "The Surreal Project",
+        "originallyAvailableAt": "2019-12-01",
+        "playableKey": "provider://tv.plex.provider.vod/library/metadata/5ec75f87e515a5003f69597d",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-whispering-man",
+        "slug": "the-whispering-man",
+        "streamingMediaId": "668ee310aa9e396befc34e34",
+        "thumb": "https://metadata-static.plex.tv/d/gracenote/d77ebee8d04db9f9fa9a13edd10f59a9.jpg",
+        "title": "The Whispering Man",
+        "userState": false,
+        "year": 2019,
+        "Image": [
+          {
+            "alt": "The Whispering Man",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/0/gracenote/01548a22a1bc0f98d9c1d441a539f2e8.jpg"
+          },
+          {
+            "alt": "The Whispering Man",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/42d3a089703069e1d41be11071d81160.jpg"
+          },
+          {
+            "alt": "The Whispering Man",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/5/gracenote/58f4e21081f65144266051e1b5ebff45.jpg"
+          },
+          {
+            "alt": "The Whispering Man",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/d/gracenote/d77ebee8d04db9f9fa9a13edd10f59a9.jpg"
+          },
+          {
+            "alt": "The Whispering Man",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/95b9e84e314cdd1a55e5db26c660dc29.jpg"
+          },
+          {
+            "alt": "The Whispering Man",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/f/gracenote/fd3969427e36179fb7247732defe8a83.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt8787834"
+          },
+          {
+            "id": "tmdb://706677"
+          },
+          {
+            "id": "tvdb://179812"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3.2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5.2
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Hungary"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7770b523d5a3001f53b587",
+            "order": 1,
+            "slug": "david-fecske",
+            "tag": "Dávid Fecske",
+            "thumb": "https://metadata-static.plex.tv/f/people/f0f0f609fc5208445e3346568307b3e7.jpg",
+            "role": "Mark",
+            "key": "/library/people/5d7770b523d5a3001f53b587",
+            "type": "person"
+          },
+          {
+            "id": "5d7768bff617c90020158463",
+            "order": 2,
+            "slug": "andras-korcsmaros",
+            "tag": "András Korcsmáros",
+            "thumb": "https://metadata-static.plex.tv/9/people/9109117df430e9168287187949a22525.jpg",
+            "role": "Tommy",
+            "key": "/library/people/5d7768bff617c90020158463",
+            "type": "person"
+          },
+          {
+            "id": "5d7770b4fb0d55001f5f70f7",
+            "order": 3,
+            "slug": "agota-dunai",
+            "tag": "Ágota Dunai",
+            "thumb": "https://metadata-static.plex.tv/3/people/3732225fe17b596dcd38d3fec4c7069b.jpg",
+            "role": "Dora",
+            "key": "/library/people/5d7770b4fb0d55001f5f70f7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ae47dd6e001f6bd5ed",
+            "order": 4,
+            "slug": "rob-oldfield",
+            "tag": "Rob Oldfield",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768ae47dd6e001f6bd5ed.jpg",
+            "role": "Peter",
+            "key": "/library/people/5d7768ae47dd6e001f6bd5ed",
+            "type": "person"
+          },
+          {
+            "id": "5ddba963223520001da3866a",
+            "order": 5,
+            "slug": "david-kiss-1",
+            "tag": "Dávid Kiss",
+            "role": "Abel",
+            "key": "/library/people/5ddba963223520001da3866a",
+            "type": "person"
+          },
+          {
+            "id": "5fda64eb4a6d91002d905227",
+            "order": 6,
+            "slug": "marcsi-nagy-1",
+            "tag": "Marcsi Nagy",
+            "role": "Anna",
+            "key": "/library/people/5fda64eb4a6d91002d905227",
+            "type": "person"
+          },
+          {
+            "id": "5fda64eba17e8b002d835779",
+            "order": 7,
+            "slug": "gyorgy-boldog-1",
+            "tag": "György Boldog",
+            "role": "Security Guard",
+            "key": "/library/people/5fda64eba17e8b002d835779",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776c8896b655001fe34063",
+            "slug": "jozsef-gallai",
+            "tag": "József Gallai",
+            "thumb": "https://metadata-static.plex.tv/people/5d776c8896b655001fe34063.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776c8896b655001fe34063",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "602de553f4e80f002cf8ce33",
+            "slug": "enrico-daniello",
+            "tag": "Enrico D'Aniello",
+            "role": "Producer",
+            "key": "/library/people/602de553f4e80f002cf8ce33",
+            "type": "person"
+          },
+          {
+            "id": "5fb545966f668a002d7bc750",
+            "slug": "q-fortier",
+            "tag": "Q Fortier",
+            "role": "Producer",
+            "key": "/library/people/5fb545966f668a002d7bc750",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5ddba963223520001da38666",
+            "slug": "balint-szanto-1",
+            "tag": "Bálint Szántó",
+            "role": "Writer",
+            "key": "/library/people/5ddba963223520001da38666",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.992,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe4ce93b86d9510206ce",
+            "score": 0.985,
+            "tag": "creepy"
+          },
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.975,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe22e93b86d951faf75c",
+            "score": 0.76,
+            "tag": "haunting"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.744,
+            "tag": "mysterious"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.545,
+            "tag": "intense"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d776d13fb0d55001f596897",
+            "tag": "Peeping Tom"
+          },
+          {
+            "guid": "plex://movie/5d7768392e80df001ebded1c",
+            "tag": "Scooby‐Doo on Zombie Island"
+          },
+          {
+            "guid": "plex://movie/5d77699a9ab54400214f42f7",
+            "tag": "The Conspiracy"
+          },
+          {
+            "guid": "plex://movie/5d9f3504d5fd3f001ee15535",
+            "tag": "Dead of Night"
+          },
+          {
+            "guid": "plex://movie/5d78b9cd594b2b001e7b8bc0",
+            "tag": "The Watcher in the Woods"
+          },
+          {
+            "guid": "plex://movie/5d776b4cfb0d55001f563016",
+            "tag": "The Invitation"
+          },
+          {
+            "guid": "plex://movie/5d776860eb5d26001f1e86a9",
+            "tag": "Race with the Devil"
+          },
+          {
+            "guid": "plex://movie/5d776d58ad5437001f7d37a5",
+            "tag": "Pyewacket"
+          },
+          {
+            "guid": "plex://movie/5d77708b7a53e9001e7a5630",
+            "tag": "The Shed"
+          },
+          {
+            "guid": "plex://movie/5eb00334f82b97003fba1a8a",
+            "tag": "Z"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Lazy Cat Films"
+          },
+          {
+            "tag": "Hepifilms"
+          },
+          {
+            "tag": "Elekes Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "After inheriting an ominous painting, a family becomes disturbed by a demonic presence.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

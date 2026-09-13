@@ -226,45 +226,6 @@
           },
           {
             "Metadata": {
-              "addedAt": 1561939200,
-              "art": "https://image.tmdb.org/t/p/original/mSEwcHeTyHh4WNXh4Y4fE1EfgZv.jpg",
-              "guid": "plex://movie/5e16333391c203004120cd9b",
-              "key": "/library/metadata/5e16333391c203004120cd9b",
-              "originallyAvailableAt": "2019-07-01",
-              "ratingKey": "5e16333391c203004120cd9b",
-              "slug": "playmobil-magic-2",
-              "thumb": "https://image.tmdb.org/t/p/original/Ak9NI0ZOPAuklxzNRiVwhb4bt1L.jpg",
-              "title": "Playmobil: Magic 2",
-              "type": "movie",
-              "year": 2019,
-              "Genre": [
-                {
-                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
-                  "id": "5d9c046c3c3f87001f33fbfc",
-                  "key": "/library/categories/animation",
-                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
-                  "slug": "animation",
-                  "tag": "Animation",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c08fddd001f28ab9e",
-                  "id": "5d9c046c08fddd001f28ab9e",
-                  "key": "/library/categories/family",
-                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
-                  "slug": "family",
-                  "tag": "Family",
-                  "type": "hub",
-                  "context": "tag.genre"
-                }
-              ],
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.19
-          },
-          {
-            "Metadata": {
               "addedAt": 1377648000,
               "art": "https://metadata-static.plex.tv/8/gracenote/87f101fdc550db3b000abd6b15179485.jpg",
               "duration": 5820000,
@@ -295,6 +256,45 @@
                   "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
                   "slug": "thriller",
                   "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          },
+          {
+            "Metadata": {
+              "addedAt": 1561939200,
+              "art": "https://image.tmdb.org/t/p/original/mSEwcHeTyHh4WNXh4Y4fE1EfgZv.jpg",
+              "guid": "plex://movie/5e16333391c203004120cd9b",
+              "key": "/library/metadata/5e16333391c203004120cd9b",
+              "originallyAvailableAt": "2019-07-01",
+              "ratingKey": "5e16333391c203004120cd9b",
+              "slug": "playmobil-magic-2",
+              "thumb": "https://image.tmdb.org/t/p/original/Ak9NI0ZOPAuklxzNRiVwhb4bt1L.jpg",
+              "title": "Playmobil: Magic 2",
+              "type": "movie",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
                   "type": "hub",
                   "context": "tag.genre"
                 }

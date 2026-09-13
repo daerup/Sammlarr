@@ -1,0 +1,495 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/vvbIW2xspYigrgTHTmTSzVDgfKl.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/471878/banners/6a46a6639cd2a.jpg",
+        "guid": "plex://show/694c84339383ca4163c4ba38",
+        "key": "/library/metadata/694c84339383ca4163c4ba38/children",
+        "ratingKey": "694c84339383ca4163c4ba38",
+        "studio": "LIDENFILMS",
+        "summary": "Suffering from a rare, incurable illness that causes frightening changes to her body, loner Kuroe Akaishi spends her high school days avoiding all her classmates, especially class idol Arata Minami and his groupies. But when Arata starts making her heart skip a beat with irritating regularity, Kuroe discovers that her illness actually has a big,make that MONSTER secret: Romance turns her into Love-zilla...literally.",
+        "type": "show",
+        "addedAt": 1782950400,
+        "audienceRating": 7.3,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "contentRating": "TV-14",
+        "duration": 1500000,
+        "imdbRatingCount": 406,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-11",
+        "lastSeasonOriginallyAvailableAt": "2026-07-03",
+        "leafCount": 12,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-18",
+        "originalTitle": "乙女怪獣キャラメリゼ",
+        "originallyAvailableAt": "2026-07-02",
+        "publicPagesURL": "https://watch.plex.tv/show/kaiju-girl-caramelise",
+        "slug": "kaiju-girl-caramelise",
+        "thumb": "https://image.tmdb.org/t/p/original/jnzPR4Pb8T8zwOl6k5ekuW3MSBa.jpg",
+        "title": "KAIJU GIRL CARAMELISE",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/vvbIW2xspYigrgTHTmTSzVDgfKl.jpg"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/19a7d31a5d25bc9c723060cf76378eb6.jpg"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/471878/banners/6a46a6639cd2a.jpg"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/f/683a142553/fd3ae5aa84e368747b3eb0febd02265b.png"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/f/683a142553/fd3ae5aa84e368747b3eb0febd02265b.png"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/1/gracenote/14942b878b0c4a7a0ec0c193601095aa.jpg"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/jnzPR4Pb8T8zwOl6k5ekuW3MSBa.jpg"
+          },
+          {
+            "alt": "KAIJU GIRL CARAMELISE",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ee26e3bc77c01b078087d7cece15bfac.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f0ba2e21001f18c7f8",
+            "id": "5d9c07f0ba2e21001f18c7f8",
+            "key": "/library/sections/home/all?genre=5d9c07f0ba2e21001f18c7f8",
+            "ratingKey": "genre_5d9c07f0ba2e21001f18c7f8",
+            "slug": "anime",
+            "tag": "Anime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt39246964"
+          },
+          {
+            "id": "tmdb://308874"
+          },
+          {
+            "id": "tvdb://471878"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.7
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6925bfde36e4e0acea6e6f57",
+            "order": 1,
+            "slug": "hikari-senga",
+            "tag": "Hikari Senga",
+            "thumb": "https://metadata-static.plex.tv/5/people/523e5d95949edec65d45a1c9c8af39c5.jpg",
+            "role": "Kuroe Akaishi (voice)",
+            "key": "/library/people/6925bfde36e4e0acea6e6f57",
+            "type": "person"
+          },
+          {
+            "id": "61a73aaf5e96f5368b7ecfa7",
+            "order": 2,
+            "slug": "daishi-kajita",
+            "tag": "Daishi Kajita",
+            "thumb": "https://metadata-static.plex.tv/3/people/304639cbea533477ad82a5ab02fd2801.jpg",
+            "role": "Arata Minami (voice)",
+            "key": "/library/people/61a73aaf5e96f5368b7ecfa7",
+            "type": "person"
+          },
+          {
+            "id": "5d777075594b2b001e74b5b5",
+            "order": 3,
+            "slug": "akira-sekine",
+            "tag": "Akira Sekine",
+            "thumb": "https://metadata-static.plex.tv/4/people/438cf0329ac7791546122a88138ec2b9.jpg",
+            "role": "Manatsu Tomosato (voice)",
+            "key": "/library/people/5d777075594b2b001e74b5b5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768cc47dd6e001f6bedcc",
+            "order": 4,
+            "slug": "haruka-shiraishi",
+            "tag": "Haruka Shiraishi",
+            "thumb": "https://metadata-static.plex.tv/5/people/5ebba953a97106b39722d3e816db6acd.jpg",
+            "role": "Raimu Kono (voice)",
+            "key": "/library/people/5d7768cc47dd6e001f6bedcc",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ce6d55c002040e3fe",
+            "order": 5,
+            "slug": "kotono-mitsuishi",
+            "tag": "Kotono Mitsuishi",
+            "thumb": "https://metadata-static.plex.tv/9/people/9e431662aacb7573d2f8c84e46f268fe.jpg",
+            "role": "Rinko Akaishi (voice)",
+            "key": "/library/people/5d77683ce6d55c002040e3fe",
+            "type": "person"
+          },
+          {
+            "id": "5d7768377228e5001f1ded30",
+            "order": 6,
+            "slug": "katsuyuki-konishi",
+            "tag": "Katsuyuki Konishi",
+            "thumb": "https://metadata-static.plex.tv/f/people/faed7508cf9a40b50ce27403e66c13d6.jpg",
+            "role": "Kotaro Hibino (voice)",
+            "key": "/library/people/5d7768377228e5001f1ded30",
+            "type": "person"
+          },
+          {
+            "id": "5ec412ca3173800041d45bb3",
+            "order": 7,
+            "slug": "eriko-matsui",
+            "tag": "Eriko Matsui",
+            "thumb": "https://metadata-static.plex.tv/e/people/e075ca27caea9ba9ac8337a04fc411e9.jpg",
+            "role": "Jumbo King (voice)",
+            "key": "/library/people/5ec412ca3173800041d45bb3",
+            "type": "person"
+          },
+          {
+            "id": "5d9c090f02391c001f594bc3",
+            "order": 8,
+            "slug": "ryota-suzuki",
+            "tag": "Ryota Suzuki",
+            "thumb": "https://metadata-static.plex.tv/6/people/610d2fdf85b99f940f5c79fce11b2949.jpg",
+            "role": "Daichi Yoneyama (voice)",
+            "key": "/library/people/5d9c090f02391c001f594bc3",
+            "type": "person"
+          },
+          {
+            "id": "5d77708f6afb3d002061cf0c",
+            "order": 9,
+            "slug": "ayumu-murase",
+            "tag": "Ayumu Murase",
+            "thumb": "https://metadata-static.plex.tv/d/people/d46fd3691a239734b1f8547a8b09ef4c.jpg",
+            "role": "Alex (voice)",
+            "key": "/library/people/5d77708f6afb3d002061cf0c",
+            "type": "person"
+          },
+          {
+            "id": "5d776d55fb0d55001f59d7cd",
+            "order": 10,
+            "slug": "kentaro-tone",
+            "tag": "Kentaro Tone",
+            "thumb": "https://metadata-static.plex.tv/3/people/37e52dca532f08e19dcfaccdd9c65b14.jpg",
+            "role": "Fried (voice)",
+            "key": "/library/people/5d776d55fb0d55001f59d7cd",
+            "type": "person"
+          },
+          {
+            "id": "5f40451a04a8650040a30968",
+            "order": 11,
+            "slug": "natsue-sasamoto",
+            "tag": "Natsue Sasamoto",
+            "thumb": "https://metadata-static.plex.tv/8/people/859cb2a646acfbfb95b6e703260ec1f8.jpg",
+            "role": "Girl",
+            "key": "/library/people/5f40451a04a8650040a30968",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f406a3ac63b480040e6c838",
+            "slug": "teruyuki-omine",
+            "tag": "Teruyuki Omine",
+            "role": "Director",
+            "key": "/library/people/5f406a3ac63b480040e6c838",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbceebe690b00430d57f9",
+            "slug": "koji-aritomi",
+            "tag": "Koji Aritomi",
+            "role": "Director",
+            "key": "/library/people/5f3fbceebe690b00430d57f9",
+            "type": "person"
+          },
+          {
+            "id": "5e85a59776bdf1003ecab2cb",
+            "slug": "kenji-takahashi-21",
+            "tag": "Kenji Takahashi",
+            "thumb": "https://image.tmdb.org/t/p/original/ikyp6vxu0611V2D0xuBmnKihRTm.jpg",
+            "role": "Director",
+            "key": "/library/people/5e85a59776bdf1003ecab2cb",
+            "type": "person"
+          },
+          {
+            "id": "6a550af7f3999678ac3886f6",
+            "slug": "moe-onishi",
+            "tag": "Moe Ōnishi",
+            "role": "Director",
+            "key": "/library/people/6a550af7f3999678ac3886f6",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5ec4189db7f4f7003ea21ddf",
+            "slug": "shinji-horikiri",
+            "tag": "Shinji Horikiri",
+            "role": "Producer",
+            "key": "/library/people/5ec4189db7f4f7003ea21ddf",
+            "type": "person"
+          },
+          {
+            "id": "67cae5545009a5f5656fded2",
+            "slug": "xiao-fan-jing-zhi-lang",
+            "tag": "小幡敬志朗",
+            "role": "Producer",
+            "key": "/library/people/67cae5545009a5f5656fded2",
+            "type": "person"
+          },
+          {
+            "id": "60d19a94bccb99002cb54b36",
+            "slug": "goro-ishida",
+            "tag": "Goro Ishida",
+            "role": "Producer",
+            "key": "/library/people/60d19a94bccb99002cb54b36",
+            "type": "person"
+          },
+          {
+            "id": "5f401e3403883a0040b32ff4",
+            "slug": "tomoyuki-ohwada",
+            "tag": "Tomoyuki Ohwada",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d0295e5791ded33b7fb890554cb6bca.jpg",
+            "role": "Producer",
+            "key": "/library/people/5f401e3403883a0040b32ff4",
+            "type": "person"
+          },
+          {
+            "id": "6180f270ef7650b9dd16789b",
+            "slug": "shinichi-itoh",
+            "tag": "Shinichi Itoh",
+            "role": "Producer",
+            "key": "/library/people/6180f270ef7650b9dd16789b",
+            "type": "person"
+          },
+          {
+            "id": "6960f0aa69a2da2ec59750e0",
+            "slug": "youjin-fukushima",
+            "tag": "Youjin Fukushima",
+            "role": "Producer",
+            "key": "/library/people/6960f0aa69a2da2ec59750e0",
+            "type": "person"
+          },
+          {
+            "id": "6513eb52c2e3dbf96ec541e3",
+            "slug": "hinako-watanabe-1",
+            "tag": "Hinako Watanabe",
+            "role": "Producer",
+            "key": "/library/people/6513eb52c2e3dbf96ec541e3",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d9c08af7b5c2e001e65fc88",
+            "slug": "yuniko-ayana",
+            "tag": "Yuniko Ayana",
+            "role": "Series Composition",
+            "key": "/library/people/5d9c08af7b5c2e001e65fc88",
+            "type": "person"
+          },
+          {
+            "id": "694acaf78819bfd6b3110b24",
+            "slug": "spica-aoki",
+            "tag": "Spica Aoki",
+            "role": "Original Story",
+            "key": "/library/people/694acaf78819bfd6b3110b24",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "TBS"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/618d33f4dab20154aa63c517",
+            "tag": "Call of the Night"
+          },
+          {
+            "guid": "plex://show/64c3deae804a384fae21ec7f",
+            "tag": "The Foolish Angel Dances With the Devil"
+          },
+          {
+            "guid": "plex://show/6581c88dd44394798fbb0636",
+            "tag": "Puniru Is a Cute Slime"
+          },
+          {
+            "guid": "plex://show/6644a7a0b7faf0b923c1dfed",
+            "tag": "Hana‐Kimi"
+          },
+          {
+            "guid": "plex://show/5d9c08407b5c2e001e657c10",
+            "tag": "xxxHOLiC"
+          },
+          {
+            "guid": "plex://show/5d9c07fa2192ba001f303c37",
+            "tag": "The \"Hentai\" Prince and the Stony Cat."
+          },
+          {
+            "guid": "plex://show/5d9c0833ba6eb9001fb9e579",
+            "tag": "Ranma ½"
+          },
+          {
+            "guid": "plex://show/5d9c08177b5c2e001e654284",
+            "tag": "The Morose Mononokean"
+          },
+          {
+            "guid": "plex://show/5d9c08143c3f87001f346b2c",
+            "tag": "Seiren"
+          },
+          {
+            "guid": "plex://show/5d9c07fa3c3f87001f343db0",
+            "tag": "Kimagure Orange Road"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "LIDENFILMS"
+          },
+          {
+            "tag": "Good Smile Film"
+          },
+          {
+            "tag": "TBS"
+          },
+          {
+            "tag": "Pony Canyon"
+          },
+          {
+            "tag": "KADOKAWA"
+          },
+          {
+            "tag": "BS11"
+          },
+          {
+            "tag": "SANKYO"
+          },
+          {
+            "tag": "THE KLOCKWORX"
+          },
+          {
+            "tag": "Contents Seed"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,528 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/467896/banners/6aa2cb8ed74a6.jpg",
+        "guid": "plex://show/68cfce1b0b4018f67c550e1d",
+        "key": "/library/metadata/68cfce1b0b4018f67c550e1d/children",
+        "rating": 7.7,
+        "ratingKey": "68cfce1b0b4018f67c550e1d",
+        "studio": "Great Pacific Media",
+        "summary": "Teagan, a 16-year-old female rower, becomes the coxswain of a dysfunctional all-male rowing team at an elite East Coast prep school. Warring rivals, messy romantic entanglements, and betrayed friendships spell drama both on and off the water, not to mention her complicated relationship with her mom Ella. The team's a mess, her life's a mess. Can she fix both and win?",
+        "type": "show",
+        "addedAt": 1788998400,
+        "childCount": 1,
+        "contentRating": "TV-14",
+        "duration": 3300000,
+        "imdbRatingCount": 409,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-10",
+        "lastSeasonOriginallyAvailableAt": "2026-09-10",
+        "leafCount": 8,
+        "originallyAvailableAt": "2026-09-10",
+        "publicPagesURL": "https://watch.plex.tv/show/crew-girl",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "crew-girl",
+        "thumb": "https://image.tmdb.org/t/p/original/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
+        "title": "Crew Girl",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Crew Girl",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a5162384ee13191ca767bdf109a4f464.jpg"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/467896/banners/6aa2cb8ed74a6.jpg"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/0/683a142553/0a6ff771de365e43739eebca8cf87eb3.png"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/0/683a142553/0a6ff771de365e43739eebca8cf87eb3.png"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/6/gracenote/6140c6d120c3d689e772b5b17adbecbb.jpg"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/jkPZW1iHNvlI6077NxSxwITa1tj.jpg"
+          },
+          {
+            "alt": "Crew Girl",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/395bfaef9f9ef64b48c393c34ee9a4e8.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5da05bf9370f98001f4ddd95",
+            "id": "5da05bf9370f98001f4ddd95",
+            "key": "/library/sections/home/all?genre=5da05bf9370f98001f4ddd95",
+            "ratingKey": "genre_5da05bf9370f98001f4ddd95",
+            "slug": "sport",
+            "tag": "Sport",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt38218082"
+          },
+          {
+            "id": "tmdb://300507"
+          },
+          {
+            "id": "tvdb://467896"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 7.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.75
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Canada"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5de03e9a05ab68001d9d427d",
+            "order": 1,
+            "slug": "miku-martineau",
+            "tag": "Miku Martineau",
+            "thumb": "https://metadata-static.plex.tv/6/people/66d4e7a599832aafcfa4f9690c198263.jpg",
+            "role": "Teagan Tao",
+            "key": "/library/people/5de03e9a05ab68001d9d427d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a080e",
+            "order": 2,
+            "slug": "jessica-pare",
+            "tag": "Jessica Paré",
+            "thumb": "https://metadata-static.plex.tv/0/people/07d4f9a40b2d96b5d909ea86933a532f.jpg",
+            "role": "Ella Emerson-Tao",
+            "key": "/library/people/5d77682585719b001f3a080e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ba9ab54400214eabaf",
+            "order": 3,
+            "slug": "samuel-braun",
+            "tag": "Samuel Braun",
+            "thumb": "https://metadata-static.plex.tv/e/people/e4c76eb9932fe000cc2572e3f880f53a.jpg",
+            "role": "Josh Regis",
+            "key": "/library/people/5d7768ba9ab54400214eabaf",
+            "type": "person"
+          },
+          {
+            "id": "6a0c5fceb5b4031fea394d5d",
+            "order": 4,
+            "slug": "kyle-clark-85",
+            "tag": "Kyle Clark",
+            "thumb": "https://metadata-static.plex.tv/4/people/4f3d2da4a45cb0849ba07646fad60422.jpg",
+            "role": "Cam Dillinger",
+            "key": "/library/people/6a0c5fceb5b4031fea394d5d",
+            "type": "person"
+          },
+          {
+            "id": "5d776a0ef617c900201684d6",
+            "order": 5,
+            "slug": "thomas-cadrot",
+            "tag": "Thomas Cadrot",
+            "thumb": "https://metadata-static.plex.tv/c/people/c03ece99320a530822f3c2c2def8147d.jpg",
+            "role": "Coach Matt Hayden",
+            "key": "/library/people/5d776a0ef617c900201684d6",
+            "type": "person"
+          },
+          {
+            "id": "6a0c5fc43fd5a7c5f93704a6",
+            "order": 6,
+            "slug": "olga-petsa-7",
+            "tag": "Olga Petsa",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7eab058c109ec886d51217bc803bf1c.jpg",
+            "role": "Juliet",
+            "key": "/library/people/6a0c5fc43fd5a7c5f93704a6",
+            "type": "person"
+          },
+          {
+            "id": "5e1651e4fef2d4003e8b2e6a",
+            "order": 7,
+            "slug": "riley-davis",
+            "tag": "Riley Davis",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c4b55bce1c983c36d438c4cb4ba0c5b.jpg",
+            "role": "Noah",
+            "key": "/library/people/5e1651e4fef2d4003e8b2e6a",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcc5186422500427b6a4e",
+            "order": 8,
+            "slug": "connor-wong",
+            "tag": "Connor Wong",
+            "thumb": "https://metadata-static.plex.tv/3/people/37eef0da7b6770eb079295393092bcef.jpg",
+            "role": "Perry",
+            "key": "/library/people/5f3fcc5186422500427b6a4e",
+            "type": "person"
+          },
+          {
+            "id": "60b0a52fe39be2002c645505",
+            "order": 9,
+            "slug": "vincent-muller-5",
+            "tag": "Vincent Muller",
+            "thumb": "https://metadata-static.plex.tv/0/people/06986806b7fa6d4872398259c783ae85.jpg",
+            "role": "Damon",
+            "key": "/library/people/60b0a52fe39be2002c645505",
+            "type": "person"
+          },
+          {
+            "id": "5d776b51f617c90020174a9c",
+            "order": 10,
+            "slug": "connor-paton",
+            "tag": "Connor Paton",
+            "thumb": "https://metadata-static.plex.tv/3/people/3fc4a2307cff6fabf83e069cd55c1156.jpg",
+            "role": "Ryder",
+            "key": "/library/people/5d776b51f617c90020174a9c",
+            "type": "person"
+          },
+          {
+            "id": "5e43f7ce19bdda003d3a70e0",
+            "order": 11,
+            "slug": "jude-wilson",
+            "tag": "Jude Wilson",
+            "thumb": "https://metadata-static.plex.tv/a/people/a8a712027960ce53a3ee0a1a957e05a8.jpg",
+            "role": "Baloo",
+            "key": "/library/people/5e43f7ce19bdda003d3a70e0",
+            "type": "person"
+          },
+          {
+            "id": "5f404323fea1a1003fa26418",
+            "order": 12,
+            "slug": "tyler-roberge",
+            "tag": "Tyler Roberge",
+            "thumb": "https://metadata-static.plex.tv/0/people/0b604b349b398e6e0ebe09f312139271.jpg",
+            "role": "Logan",
+            "key": "/library/people/5f404323fea1a1003fa26418",
+            "type": "person"
+          },
+          {
+            "id": "5fb69723676035002f44d5f0",
+            "order": 13,
+            "slug": "alaska-leigh",
+            "tag": "Alaska Leigh",
+            "thumb": "https://metadata-static.plex.tv/d/people/d828dde26e819f70cae55726ef13d631.jpg",
+            "role": "Amber",
+            "key": "/library/people/5fb69723676035002f44d5f0",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a8a7581001f12e011",
+            "order": 14,
+            "slug": "niall-matter",
+            "tag": "Niall Matter",
+            "thumb": "https://metadata-static.plex.tv/a/people/a19433a3195717d0f275a4e015a0ed2b.jpg",
+            "role": "Richard",
+            "key": "/library/people/5d77683a8a7581001f12e011",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e85719b001f3a243d",
+            "order": 15,
+            "slug": "michael-teigen",
+            "tag": "Michael Teigen",
+            "thumb": "https://metadata-static.plex.tv/6/people/65276420008b64563848274c61e4605e.jpg",
+            "role": "Oren",
+            "key": "/library/people/5d77682e85719b001f3a243d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768335af944001f1f9823",
+            "order": 16,
+            "slug": "byron-lawson",
+            "tag": "Byron Lawson",
+            "thumb": "https://metadata-static.plex.tv/6/people/68fb8a5c8b3477dc8628d250727ae2d5.jpg",
+            "role": "David Tao",
+            "key": "/library/people/5d7768335af944001f1f9823",
+            "type": "person"
+          },
+          {
+            "id": "60828094404320002c0247ae",
+            "order": 17,
+            "slug": "river-codack",
+            "tag": "River Codack",
+            "thumb": "https://metadata-static.plex.tv/5/people/5dae91618e33951a8b067b8344f36019.jpg",
+            "role": "Damon",
+            "key": "/library/people/60828094404320002c0247ae",
+            "type": "person"
+          },
+          {
+            "id": "5ee34bbad5e05b0043f31cd3",
+            "order": 18,
+            "slug": "sage-linder",
+            "tag": "Sage Linder",
+            "thumb": "https://image.tmdb.org/t/p/original/unJav3w9EJapyumwBlQerzeyJ5M.jpg",
+            "role": "Britney",
+            "key": "/library/people/5ee34bbad5e05b0043f31cd3",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc40c5a76a80042cd5e78",
+            "order": 19,
+            "slug": "aiden-howard",
+            "tag": "Aiden Howard",
+            "thumb": "https://metadata-static.plex.tv/5/people/5d5f883ec7eef41b3e8b8e3146b3c6ac.jpg",
+            "role": "Liam",
+            "key": "/library/people/5f3fc40c5a76a80042cd5e78",
+            "type": "person"
+          },
+          {
+            "id": "5f405b7586422500428ab8b0",
+            "order": 20,
+            "slug": "paolina-van-kleef",
+            "tag": "Paolina van Kleef",
+            "thumb": "https://metadata-static.plex.tv/5/people/54c7aa5626c00092e997b7300ac2dabb.jpg",
+            "role": "Maya",
+            "key": "/library/people/5f405b7586422500428ab8b0",
+            "type": "person"
+          },
+          {
+            "id": "5ec4231a568c3300431ad6b8",
+            "order": 21,
+            "slug": "lauren-bradley",
+            "tag": "Lauren Bradley",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d302f1f138bbb90eeb1fb1a40dba81f.jpg",
+            "role": "Gwendolyn",
+            "key": "/library/people/5ec4231a568c3300431ad6b8",
+            "type": "person"
+          },
+          {
+            "id": "63e4af8ec1e61a3c586bdaa1",
+            "order": 22,
+            "slug": "zac-bellward",
+            "tag": "Zac Bellward",
+            "thumb": "https://metadata-static.plex.tv/c/people/cdb8cf7ec84d1a30c1e4766d1c6655a4.jpg",
+            "role": "Westvale",
+            "key": "/library/people/63e4af8ec1e61a3c586bdaa1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e7e9a3c0020c6ba0d",
+            "order": 23,
+            "slug": "lucia-walters",
+            "tag": "Lucia Walters",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682e7e9a3c0020c6ba0d.jpg",
+            "role": "DeeDee",
+            "key": "/library/people/5d77682e7e9a3c0020c6ba0d",
+            "type": "person"
+          },
+          {
+            "id": "63cf9271500db562cee18572",
+            "order": 24,
+            "slug": "luke-daley-1",
+            "tag": "Luke Daley",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f8de39613c19ebce0f61f8b81dd664e.jpg",
+            "role": "Volunteer",
+            "key": "/library/people/63cf9271500db562cee18572",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77692f7a53e9001e6e3427",
+            "slug": "norman-buckley",
+            "tag": "Norman Buckley",
+            "role": "Director",
+            "key": "/library/people/5d77692f7a53e9001e6e3427",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a447dd6e001f6bcb4f",
+            "slug": "amanda-tapping",
+            "tag": "Amanda Tapping",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb94dcbda9cc5ad144644af8b4a79707.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768a447dd6e001f6bcb4f",
+            "type": "person"
+          },
+          {
+            "id": "5d9f34fe6fc551001ef7ff0b",
+            "slug": "simon-barry",
+            "tag": "Simon Barry",
+            "role": "Director",
+            "key": "/library/people/5d9f34fe6fc551001ef7ff0b",
+            "type": "person"
+          },
+          {
+            "id": "5dce6e9477120a001e0fb1bb",
+            "slug": "jacquie-gould",
+            "tag": "Jacquie Gould",
+            "role": "Director",
+            "key": "/library/people/5dce6e9477120a001e0fb1bb",
+            "type": "person"
+          },
+          {
+            "id": "5e624dccbad2ed003f185a9d",
+            "slug": "alysse-leite-rogers",
+            "tag": "Alysse Leite-Rogers",
+            "role": "Director",
+            "key": "/library/people/5e624dccbad2ed003f185a9d",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dd876a70fbfac002079664b",
+            "slug": "jason-fischer-1",
+            "tag": "Jason Fischer",
+            "role": "Producer",
+            "key": "/library/people/5dd876a70fbfac002079664b",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776be8f617c9002017b973",
+            "slug": "vivian-lin",
+            "tag": "Vivian Lin",
+            "thumb": "https://metadata-static.plex.tv/b/people/bfddf91b649a089d43457e4d12176039.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776be8f617c9002017b973",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Netflix"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/6092c43aefb58e003605aa3d",
+            "tag": "Heartstopper"
+          },
+          {
+            "guid": "plex://show/5d9c08674eefaa001f5dc52b",
+            "tag": "Make It or Break It"
+          },
+          {
+            "guid": "plex://show/5d9c08717d06d9001ffd2da7",
+            "tag": "Degrassi"
+          },
+          {
+            "guid": "plex://show/5d9c082c7b5c2e001e65636f",
+            "tag": "Parenthood (2010)"
+          },
+          {
+            "guid": "plex://show/5d9c0872e98e47001eb10531",
+            "tag": "Dawson's Creek"
+          },
+          {
+            "guid": "plex://show/5d9c0872cb3ffa001f1b54ed",
+            "tag": "The O.C."
+          },
+          {
+            "guid": "plex://show/5d9c08064eefaa001f5d3cfc",
+            "tag": "Brothers & Sisters"
+          },
+          {
+            "guid": "plex://show/5d9c08167b5c2e001e653d6c",
+            "tag": "Degrassi: Next Class"
+          },
+          {
+            "guid": "plex://show/5d9c09114eefaa001f5e7945",
+            "tag": "Looking for Alaska"
+          },
+          {
+            "guid": "plex://show/5d9c092408fddd001f2a87f9",
+            "tag": "Nancy Drew (2019)"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Great Pacific Media"
+          },
+          {
+            "tag": "Thunderbird Entertainment"
+          }
+        ]
+      }
+    ]
+  }
+}

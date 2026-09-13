@@ -1,0 +1,143 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://show/606ee88aaf97d0002de6542b",
+        "key": "/library/metadata/606ee88aaf97d0002de6542b/children",
+        "ratingKey": "606ee88aaf97d0002de6542b",
+        "studio": "Jupiter Entertainment",
+        "summary": "A documentary series featuring the world's most elegant and exclusive resorts.",
+        "type": "show",
+        "addedAt": 873417600,
+        "childCount": 2,
+        "contentRating": "TV-G",
+        "duration": 2700000,
+        "lastEpisodeOriginallyAvailableAt": "2018-02-16",
+        "lastSeasonOriginallyAvailableAt": "2017-12-08",
+        "leafCount": 25,
+        "originallyAvailableAt": "1997-09-05",
+        "publicPagesURL": "https://watch.plex.tv/show/the-grand-tour-1997",
+        "slug": "the-grand-tour-1997",
+        "title": "The Grand Tour (1997)",
+        "userState": false,
+        "year": 1997,
+        "Image": [
+          {
+            "alt": "The Grand Tour (1997)",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/c/009125463f/c4167ea934b579dab1ebb58a28ee090a.png"
+          },
+          {
+            "alt": "The Grand Tour (1997)",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/c/009125463f/c4167ea934b579dab1ebb58a28ee090a.png"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt1081340"
+          },
+          {
+            "id": "tvdb://311932"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f3fe58152f20000414b8428",
+            "slug": "jon-jefferson",
+            "tag": "Jon Jefferson",
+            "role": "Producer",
+            "key": "/library/people/5f3fe58152f20000414b8428",
+            "type": "person"
+          },
+          {
+            "id": "5e6244522bbb96003ebbd916",
+            "slug": "zak-weisfeld",
+            "tag": "Zak Weisfeld",
+            "role": "Producer",
+            "key": "/library/people/5e6244522bbb96003ebbd916",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f3fe58152f20000414b8428",
+            "slug": "jon-jefferson",
+            "tag": "Jon Jefferson",
+            "role": "Writer",
+            "key": "/library/people/5f3fe58152f20000414b8428",
+            "type": "person"
+          },
+          {
+            "id": "5e6244522bbb96003ebbd912",
+            "slug": "geoffrey-proud",
+            "tag": "Geoffrey Proud",
+            "role": "Writer",
+            "key": "/library/people/5e6244522bbb96003ebbd912",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "A&E"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Jupiter Entertainment"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A documentary series featuring the world's most elegant and exclusive resorts.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

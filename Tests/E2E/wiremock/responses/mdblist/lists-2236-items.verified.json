@@ -18,7 +18,7 @@
       "release_year": 2026,
       "adult": 0,
       "release_date": "2026-09-03",
-      "status": "Released",
+      "status": "released",
       "runtime": 111,
       "added_at": "2026-09-08T05:14:11",
       "rank": 5
@@ -41,7 +41,7 @@
       "release_year": 2026,
       "adult": 0,
       "release_date": "2026-09-03",
-      "status": "Released",
+      "status": "released",
       "runtime": 86,
       "added_at": "2026-09-08T05:14:11",
       "rank": 10
@@ -64,7 +64,7 @@
       "release_year": 2026,
       "adult": 0,
       "release_date": "2026-08-19",
-      "status": "Released",
+      "status": "released",
       "runtime": 95,
       "added_at": "2026-08-24T18:58:13",
       "rank": 15
@@ -87,7 +87,7 @@
       "release_year": 2026,
       "adult": 0,
       "release_date": "2026-07-23",
-      "status": "released",
+      "status": "Released",
       "runtime": 104,
       "added_at": "2026-09-02T00:54:17",
       "rank": 46
@@ -133,7 +133,7 @@
       "release_year": 2026,
       "adult": 0,
       "release_date": "2026-06-25",
-      "status": "Released",
+      "status": "released",
       "runtime": 107,
       "added_at": "2026-08-24T18:58:13",
       "rank": 73
@@ -156,7 +156,7 @@
       "release_year": 2026,
       "adult": 0,
       "release_date": "2026-06-23",
-      "status": "released",
+      "status": "Released",
       "runtime": 79,
       "added_at": "2026-09-08T05:14:11",
       "rank": 90
