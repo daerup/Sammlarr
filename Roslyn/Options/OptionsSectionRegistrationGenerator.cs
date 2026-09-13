@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Generators.Options;
+namespace Roslyn.Options;
 
 [Generator]
 public class OptionsSectionRegistrationGenerator : IIncrementalGenerator

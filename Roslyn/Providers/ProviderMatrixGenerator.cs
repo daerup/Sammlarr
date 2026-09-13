@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Generators.Providers;
+namespace Roslyn.Providers;
 
 [Generator]
 public class ProviderMatrixGenerator : IIncrementalGenerator

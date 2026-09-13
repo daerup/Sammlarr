@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace Generators.Options;
+namespace Roslyn.Options;
 
 internal static class OptionsRegistrationSource
 {
