@@ -1,0 +1,602 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/4q49lMJRV5aANjPo2ctnO1pMlPS.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/451782/banners/6a57797687476.jpg",
+        "guid": "plex://show/66c479ce34f7a5fb641c17f4",
+        "key": "/library/metadata/66c479ce34f7a5fb641c17f4/children",
+        "rating": 8.7,
+        "ratingKey": "66c479ce34f7a5fb641c17f4",
+        "studio": "60Forty Films",
+        "summary": "Police dispatcher Ian Ridley's daughter Maggie disappeared years ago. He receives a call, believing it's her, and embarks on a relentless quest to find her and reunite his family, disregarding consequences.",
+        "type": "show",
+        "addedAt": 1788912000,
+        "childCount": 1,
+        "contentRating": "TV-MA",
+        "duration": 2940000,
+        "imdbRatingCount": 303,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-09",
+        "lastSeasonOriginallyAvailableAt": "2026-09-09",
+        "leafCount": 6,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-16",
+        "originallyAvailableAt": "2026-09-09",
+        "publicPagesURL": "https://watch.plex.tv/show/last-seen",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "last-seen",
+        "thumb": "https://image.tmdb.org/t/p/original/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg",
+        "title": "Last Seen",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Last Seen",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/4q49lMJRV5aANjPo2ctnO1pMlPS.jpg"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/20a220ba5a4fcd79437cac835927ca02.jpg"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/451782/banners/6a57797687476.jpg"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/e/683a142553/eff258919bcbb60c39b42b224f5da5a1.png"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/e/683a142553/eff258919bcbb60c39b42b224f5da5a1.png"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2bcb13e7c91d700eb135c03b70ee8cf5.jpg"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg"
+          },
+          {
+            "alt": "Last Seen",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/eac77b324a716f0167d8a3e5a1f7eb58.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt6037988"
+          },
+          {
+            "id": "tmdb://258230"
+          },
+          {
+            "id": "tvdb://451782"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.9
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768aa374a5b001fecc9f3",
+            "order": 1,
+            "slug": "patrick-brammall",
+            "tag": "Patrick Brammall",
+            "thumb": "https://metadata-static.plex.tv/9/people/91c0f0be81853f3bb800c36e0b2e64ec.jpg",
+            "role": "Ian Ridley",
+            "key": "/library/people/5d7768aa374a5b001fecc9f3",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ae6d55c002040b5c0",
+            "order": 2,
+            "slug": "brendan-cowell",
+            "tag": "Brendan Cowell",
+            "thumb": "https://metadata-static.plex.tv/5/people/56384d1719816eaf6c6ad7294c14c307.jpg",
+            "role": "Henry Reid",
+            "key": "/library/people/5d77682ae6d55c002040b5c0",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a5af944001f1fb242",
+            "order": 3,
+            "slug": "maxine-peake",
+            "tag": "Maxine Peake",
+            "thumb": "https://metadata-static.plex.tv/2/people/297089e9852bcbddb9c25bb51acc188b.jpg",
+            "role": "Jenna Reid",
+            "key": "/library/people/5d77683a5af944001f1fb242",
+            "type": "person"
+          },
+          {
+            "id": "5d7768ab6f6af7001ee5a74b",
+            "order": 4,
+            "slug": "daniel-henshall",
+            "tag": "Daniel Henshall",
+            "thumb": "https://metadata-static.plex.tv/7/people/7b66c851457d36ea8a5b33efb5dab40e.jpg",
+            "role": "Donald Reid",
+            "key": "/library/people/5d7768ab6f6af7001ee5a74b",
+            "type": "person"
+          },
+          {
+            "id": "5d776f02f617c90020198256",
+            "order": 5,
+            "slug": "jessica-wren-1",
+            "tag": "Jessica Wren",
+            "thumb": "https://metadata-static.plex.tv/9/people/9a7de5a757e7d697b93e92d367e5e310.jpg",
+            "role": "Debbie Mcguire",
+            "key": "/library/people/5d776f02f617c90020198256",
+            "type": "person"
+          },
+          {
+            "id": "5d776b3a7a53e9001e71ea59",
+            "order": 6,
+            "slug": "zahra-newman",
+            "tag": "Zahra Newman",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b3a7a53e9001e71ea59.jpg",
+            "role": "Isabel 'Izzy' Pena",
+            "key": "/library/people/5d776b3a7a53e9001e71ea59",
+            "type": "person"
+          },
+          {
+            "id": "5f40478e04a8650040a35019",
+            "order": 7,
+            "slug": "tobias-muhafidin",
+            "tag": "Tobias Muhafidin",
+            "thumb": "https://metadata-static.plex.tv/e/people/e07db2fb314108dbc39815f62ae41810.jpg",
+            "role": "Dean Ridley",
+            "key": "/library/people/5f40478e04a8650040a35019",
+            "type": "person"
+          },
+          {
+            "id": "67ebd2de2f8c9a41586ff5e6",
+            "order": 8,
+            "slug": "chloe-jean-lourdes",
+            "tag": "Chloe Jean Lourdes",
+            "thumb": "https://metadata-static.plex.tv/4/people/4d90fc07ef1a645ecdd72011d3d5f052.jpg",
+            "role": "Sarah Reid",
+            "key": "/library/people/67ebd2de2f8c9a41586ff5e6",
+            "type": "person"
+          },
+          {
+            "id": "5f404daba4f07a00421613ca",
+            "order": 9,
+            "slug": "jack-green-9",
+            "tag": "Jack Green",
+            "role": "Constable Steven Lewis",
+            "key": "/library/people/5f404daba4f07a00421613ca",
+            "type": "person"
+          },
+          {
+            "id": "5e16258adf4678003f518f50",
+            "order": 10,
+            "slug": "aly-zhang",
+            "tag": "Aly Zhang",
+            "thumb": "https://metadata-static.plex.tv/a/people/a4fe4a9e6e2dd4ead2c5beb7458deb33.jpg",
+            "role": "Penny",
+            "key": "/library/people/5e16258adf4678003f518f50",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c419e9d8c1033cd1520",
+            "order": 11,
+            "slug": "cooper-housden",
+            "tag": "Cooper Housden",
+            "role": "Young Maggie",
+            "key": "/library/people/6aa29c419e9d8c1033cd1520",
+            "type": "person"
+          },
+          {
+            "id": "5d776890ad5437001f749938",
+            "order": 12,
+            "slug": "fletcher-humphrys",
+            "tag": "Fletcher Humphrys",
+            "thumb": "https://metadata-static.plex.tv/people/5d776890ad5437001f749938.jpg",
+            "role": "Peter Mulligan",
+            "key": "/library/people/5d776890ad5437001f749938",
+            "type": "person"
+          },
+          {
+            "id": "67ecbcc03b1b0657d21685d7",
+            "order": 13,
+            "slug": "justin-bell-31",
+            "tag": "Justin Bell",
+            "role": "Shane Kennedy",
+            "key": "/library/people/67ecbcc03b1b0657d21685d7",
+            "type": "person"
+          },
+          {
+            "id": "5e624db52bbb96003ebc2890",
+            "order": 14,
+            "slug": "charly-thorn",
+            "tag": "Charly Thorn",
+            "thumb": "https://metadata-static.plex.tv/1/people/16cde1b6003bd2dcfc50aba0fb7b9b0f.jpg",
+            "role": "Tyra Kennedy",
+            "key": "/library/people/5e624db52bbb96003ebc2890",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c4200d6678b5304c856",
+            "order": 15,
+            "slug": "bridie-erwin-keirl",
+            "tag": "Bridie Erwin-Keirl",
+            "role": "Teen Girl",
+            "key": "/library/people/6aa29c4200d6678b5304c856",
+            "type": "person"
+          },
+          {
+            "id": "68bc47351e02b491060e81b7",
+            "order": 16,
+            "slug": "paige-joy-ryans",
+            "tag": "Paige Joy Ryans",
+            "role": "Teen Girl",
+            "key": "/library/people/68bc47351e02b491060e81b7",
+            "type": "person"
+          },
+          {
+            "id": "6a4d64fbf3aa996495b52e64",
+            "order": 17,
+            "slug": "nirvani-subedi",
+            "tag": "Nirvani Subedi",
+            "role": "Teen Girl",
+            "key": "/library/people/6a4d64fbf3aa996495b52e64",
+            "type": "person"
+          },
+          {
+            "id": "5f406eea1ae71000410eba53",
+            "order": 18,
+            "slug": "lindsay-fletcher",
+            "tag": "Lindsay Fletcher",
+            "thumb": "https://metadata-static.plex.tv/a/people/a94377899281b7387269426a851bff40.jpg",
+            "role": "Repair Man",
+            "key": "/library/people/5f406eea1ae71000410eba53",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c41742cec6943ce391b",
+            "order": 19,
+            "slug": "cliff-wood-4",
+            "tag": "Cliff Wood",
+            "role": "Les Potter",
+            "key": "/library/people/6aa29c41742cec6943ce391b",
+            "type": "person"
+          },
+          {
+            "id": "644b7f7cff109e2b68a7c0f9",
+            "order": 20,
+            "slug": "spencer-ellis-anderson",
+            "tag": "Spencer Ellis Anderson",
+            "role": "Andy Kennedy",
+            "key": "/library/people/644b7f7cff109e2b68a7c0f9",
+            "type": "person"
+          },
+          {
+            "id": "5f3fa7b4ce2564003f835000",
+            "order": 21,
+            "slug": "jodi-haigh",
+            "tag": "Jodi Haigh",
+            "thumb": "https://metadata-static.plex.tv/f/people/f3349f9ef67ef9e6754f5beccf76e3f3.jpg",
+            "role": "Newsreader",
+            "key": "/library/people/5f3fa7b4ce2564003f835000",
+            "type": "person"
+          },
+          {
+            "id": "5de029f13940d8001d3a0913",
+            "order": 22,
+            "slug": "liam-seymour",
+            "tag": "Liam Seymour",
+            "thumb": "https://metadata-static.plex.tv/a/people/a266e181da35897968b69c1236f1462f.jpg",
+            "role": "Newsreader",
+            "key": "/library/people/5de029f13940d8001d3a0913",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c41c3891c6214f7048e",
+            "order": 23,
+            "slug": "flynn-gurry",
+            "tag": "Flynn Gurry",
+            "role": "Festival Performer",
+            "key": "/library/people/6aa29c41c3891c6214f7048e",
+            "type": "person"
+          },
+          {
+            "id": "669d081053c2035fe435544b",
+            "order": 24,
+            "slug": "rory-vagg-1",
+            "tag": "Rory Vagg",
+            "role": "Festival Performer",
+            "key": "/library/people/669d081053c2035fe435544b",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c4032196e20bbd9ae7e",
+            "order": 25,
+            "slug": "luke-perry-15",
+            "tag": "Luke Perry",
+            "role": "Festival Performer",
+            "key": "/library/people/6aa29c4032196e20bbd9ae7e",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c41735205051df8e329",
+            "order": 26,
+            "slug": "oceane-federow-yemm",
+            "tag": "Océane Federow-Yemm",
+            "role": "Festival Performer",
+            "key": "/library/people/6aa29c41735205051df8e329",
+            "type": "person"
+          },
+          {
+            "id": "6aa29c413f8db0f3dae7fe70",
+            "order": 27,
+            "slug": "days-of-embers",
+            "tag": "Days of Embers",
+            "role": "Festival Performer",
+            "key": "/library/people/6aa29c413f8db0f3dae7fe70",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d298480001f4ac0b3",
+            "order": 28,
+            "slug": "oscar-redding",
+            "tag": "Oscar Redding",
+            "role": "Jack Brenton",
+            "key": "/library/people/5d77684d298480001f4ac0b3",
+            "type": "person"
+          },
+          {
+            "id": "63048f1153b2b14584d1bcd6",
+            "order": 29,
+            "slug": "carlin-monteiro",
+            "tag": "Carlin Monteiro",
+            "thumb": "https://metadata-static.plex.tv/7/people/7cd785a869d7d939be393385446aafde.jpg",
+            "role": "Sam Lynch",
+            "key": "/library/people/63048f1153b2b14584d1bcd6",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc93dfea1a1003f97083a",
+            "order": 30,
+            "slug": "dash-maxwell",
+            "tag": "Dash Maxwell",
+            "role": "Damian 'Damo' Tully",
+            "key": "/library/people/5f3fc93dfea1a1003f97083a",
+            "type": "person"
+          },
+          {
+            "id": "6538cdd60b1a9abb86337f6d",
+            "order": 31,
+            "slug": "zane-blumeris",
+            "tag": "Zane Blumeris",
+            "thumb": "https://metadata-static.plex.tv/d/people/ddd8521b8ba02cb4875389091606ee90.jpg",
+            "role": "Charlie Halloran",
+            "key": "/library/people/6538cdd60b1a9abb86337f6d",
+            "type": "person"
+          },
+          {
+            "id": "5f400a561ae7100041031fab",
+            "order": 32,
+            "slug": "will-crittenden",
+            "tag": "Will Crittenden",
+            "thumb": "https://metadata-static.plex.tv/b/people/b234adff7aa7b9dbc4074b3585cf3da6.jpg",
+            "role": "Jayden Brenton",
+            "key": "/library/people/5f400a561ae7100041031fab",
+            "type": "person"
+          },
+          {
+            "id": "666806bf6b4eb15c83c87e76",
+            "order": 33,
+            "slug": "hasini-walpola",
+            "tag": "Hasini Walpola",
+            "thumb": "https://metadata-static.plex.tv/e/people/e3f66d947b20508248d7ac091752a596.jpg",
+            "role": "Co-Op Worker",
+            "key": "/library/people/666806bf6b4eb15c83c87e76",
+            "type": "person"
+          },
+          {
+            "id": "5d7768387228e5001f1df1f2",
+            "order": 34,
+            "slug": "emma-choy",
+            "tag": "Emma Choy",
+            "thumb": "https://metadata-static.plex.tv/c/people/ce913d3298b2c12dfda22daad7066b79.jpg",
+            "role": "Co-Op Manager",
+            "key": "/library/people/5d7768387228e5001f1df1f2",
+            "type": "person"
+          },
+          {
+            "id": "5d776add96b655001fdfbebe",
+            "order": 35,
+            "slug": "judith-roberts-1",
+            "tag": "Judith Roberts",
+            "role": "Francine",
+            "key": "/library/people/5d776add96b655001fdfbebe",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776839151a60001f24ebda",
+            "slug": "christian-schwochow",
+            "tag": "Christian Schwochow",
+            "thumb": "https://metadata-static.plex.tv/d/people/dcb641a1e89ff65223c7a8c115ab0c3c.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776839151a60001f24ebda",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dce6cdb80a066001fcfbcbf",
+            "slug": "katharina-haase",
+            "tag": "Katharina Haase",
+            "role": "Producer",
+            "key": "/library/people/5dce6cdb80a066001fcfbcbf",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776cfe594b2b001e6fea7d",
+            "slug": "kris-mrksa",
+            "tag": "Kris Mrksa",
+            "thumb": "https://metadata-static.plex.tv/b/people/b918c2976fea6a39fdb2fd779ab78cd2.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776cfe594b2b001e6fea7d",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Apple TV"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5e5fd937c66014003f148d49",
+            "tag": "Big Sky (2020)"
+          },
+          {
+            "guid": "plex://show/613236fb42ad0602f8d7be55",
+            "tag": "Ridley"
+          },
+          {
+            "guid": "plex://show/632dee2fb625a2252ee31bf4",
+            "tag": "Shelter"
+          },
+          {
+            "guid": "plex://show/648c7c2b1342d66a6d422296",
+            "tag": "Harlan Coben's Shelter"
+          },
+          {
+            "guid": "plex://show/635b4366954a508bdbcfd922",
+            "tag": "Cross"
+          },
+          {
+            "guid": "plex://show/6578507605050e5de4b04644",
+            "tag": "56 Days"
+          },
+          {
+            "guid": "plex://show/65b045694d7052e1dc1afc4b",
+            "tag": "Missing You (2025)"
+          },
+          {
+            "guid": "plex://show/6749125e8148e744286155b2",
+            "tag": "I Will Find You"
+          },
+          {
+            "guid": "plex://show/6930253b3655bd5724b9df4e",
+            "tag": "Gone (2026)"
+          },
+          {
+            "guid": "plex://show/5d9c08596c3e37001ecd6933",
+            "tag": "DCI Banks"
+          },
+          {
+            "guid": "plex://show/5d9c08d32192ba001f317213",
+            "tag": "Strike"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "60Forty Films"
+          }
+        ]
+      }
+    ]
+  }
+}

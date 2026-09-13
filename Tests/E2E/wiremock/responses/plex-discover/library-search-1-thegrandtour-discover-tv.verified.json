@@ -1,0 +1,519 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "The Grand Tour (2016)"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1564704000,
+              "art": "https://artworks.thetvdb.com/banners/fanart/original/5d453df37cf90.jpg",
+              "childCount": 1,
+              "duration": 5400000,
+              "guid": "plex://show/6164d5222ec8452b49fdf23e",
+              "key": "/library/metadata/6164d5222ec8452b49fdf23e/children",
+              "leafCount": 4,
+              "originallyAvailableAt": "2019-08-02",
+              "ratingKey": "6164d5222ec8452b49fdf23e",
+              "slug": "grand-tour",
+              "thumb": "https://artworks.thetvdb.com/banners/posters/5d453ee257a7a.jpg",
+              "title": "Grand Tour",
+              "type": "show",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5da05f6ea58d3c001eb813e2",
+                  "id": "5da05f6ea58d3c001eb813e2",
+                  "key": "/library/categories/talk-show",
+                  "ratingKey": "genre_5da05f6ea58d3c001eb813e2",
+                  "slug": "talk-show",
+                  "tag": "Talk Show",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1788393600,
+              "art": "https://image.tmdb.org/t/p/original/40Dx3P1mllQq1jhgN3K8dlti6CS.jpg",
+              "childCount": 1,
+              "duration": 3420000,
+              "guid": "plex://show/6a67dc605eff3a387edc73f8",
+              "key": "/library/metadata/6a67dc605eff3a387edc73f8/children",
+              "leafCount": 6,
+              "originallyAvailableAt": "2026-09-03",
+              "ratingKey": "6a67dc605eff3a387edc73f8",
+              "slug": "the-grand-tour-4",
+              "thumb": "https://image.tmdb.org/t/p/original/kq6XB6xmD86txW4UR32tT2JUiN9.jpg",
+              "title": "The Grand Tour",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+                  "id": "5d9c07e8705e7a001e6cc4f9",
+                  "key": "/library/categories/reality",
+                  "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+                  "slug": "reality",
+                  "tag": "Reality",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.83
+          },
+          {
+            "Metadata": {
+              "addedAt": 1479340800,
+              "art": "https://image.tmdb.org/t/p/original/AvH03Lj5lMYxmlPc7prNQLWw6JY.jpg",
+              "childCount": 6,
+              "duration": 3600000,
+              "guid": "plex://show/5d9c0807cb3ffa001f1b1708",
+              "key": "/library/metadata/5d9c0807cb3ffa001f1b1708/children",
+              "leafCount": 46,
+              "originallyAvailableAt": "2016-11-17",
+              "ratingKey": "5d9c0807cb3ffa001f1b1708",
+              "slug": "the-grand-tour-2016",
+              "thumb": "https://image.tmdb.org/t/p/original/3Pcqu6QliBWJ8vsOVClVLddPnZw.jpg",
+              "title": "The Grand Tour (2016)",
+              "type": "show",
+              "year": 2016,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+                  "id": "5d9c07e8705e7a001e6cc4f9",
+                  "key": "/library/categories/reality",
+                  "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+                  "slug": "reality",
+                  "tag": "Reality",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf9370f98001f4ddd95",
+                  "id": "5da05bf9370f98001f4ddd95",
+                  "key": "/library/categories/sport",
+                  "ratingKey": "genre_5da05bf9370f98001f4ddd95",
+                  "slug": "sport",
+                  "tag": "Sport",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6ea58d3c001eb813e2",
+                  "id": "5da05f6ea58d3c001eb813e2",
+                  "key": "/library/categories/talk-show",
+                  "ratingKey": "genre_5da05f6ea58d3c001eb813e2",
+                  "slug": "talk-show",
+                  "tag": "Talk Show",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e92192ba001f30279b",
+                  "id": "5d9c07e92192ba001f30279b",
+                  "key": "/library/categories/talk",
+                  "ratingKey": "genre_5d9c07e92192ba001f30279b",
+                  "slug": "talk",
+                  "tag": "Talk",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.81
+          },
+          {
+            "Metadata": {
+              "addedAt": 873417600,
+              "childCount": 2,
+              "duration": 2700000,
+              "guid": "plex://show/606ee88aaf97d0002de6542b",
+              "key": "/library/metadata/606ee88aaf97d0002de6542b/children",
+              "leafCount": 25,
+              "originallyAvailableAt": "1997-09-05",
+              "ratingKey": "606ee88aaf97d0002de6542b",
+              "slug": "the-grand-tour-1997",
+              "title": "The Grand Tour (1997)",
+              "type": "show",
+              "year": 1997,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.62
+          },
+          {
+            "Metadata": {
+              "addedAt": 1132012800,
+              "art": "https://image.tmdb.org/t/p/original/gJnvqDKwPMDgLLtTHgcCg2BATbK.jpg",
+              "childCount": 1,
+              "duration": 2700000,
+              "guid": "plex://show/61b14ebaff5fffbe88c9d3ba",
+              "key": "/library/metadata/61b14ebaff5fffbe88c9d3ba/children",
+              "leafCount": 10,
+              "originallyAvailableAt": "2005-11-15",
+              "ratingKey": "61b14ebaff5fffbe88c9d3ba",
+              "skipChildren": true,
+              "slug": "brian-sewells-grand-tour",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/ze8MtmxvPfFL4zAVOphNJ2TMDdU.jpg",
+              "title": "Brian Sewell's Grand Tour",
+              "type": "show",
+              "year": 2005,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0904",
+                  "id": "5d9c07ebcb3ffa001f1b0904",
+                  "key": "/library/categories/mini-series",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0904",
+                  "slug": "mini-series",
+                  "tag": "Mini-Series",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.49
+          },
+          {
+            "Metadata": {
+              "addedAt": 762998400,
+              "art": "https://image.tmdb.org/t/p/original/reFypagx4zPOSNowcOGONc2ZsHt.jpg",
+              "childCount": 1,
+              "duration": 600000,
+              "guid": "plex://show/5d9c08827b5c2e001e65dc76",
+              "key": "/library/metadata/5d9c08827b5c2e001e65dc76/children",
+              "leafCount": 10,
+              "originallyAvailableAt": "1994-03-07",
+              "ratingKey": "5d9c08827b5c2e001e65dc76",
+              "slug": "sister-wendys-grand-tour",
+              "thumb": "https://image.tmdb.org/t/p/original/mzHOa0tAYaCcJAvFU1N18SsuL5i.jpg",
+              "title": "Sister Wendy's Grand Tour",
+              "type": "show",
+              "year": 1994,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.49
+          },
+          {
+            "Metadata": {
+              "addedAt": 1777593600,
+              "art": "https://image.tmdb.org/t/p/original/iOLxzG9TlBUyiDyNWrKtAD9gd5u.jpg",
+              "childCount": 1,
+              "duration": 4860000,
+              "guid": "plex://show/69f5ec789b50bd8c6c0dcd29",
+              "key": "/library/metadata/69f5ec789b50bd8c6c0dcd29/children",
+              "leafCount": 3,
+              "originallyAvailableAt": "2026-05-01",
+              "ratingKey": "69f5ec789b50bd8c6c0dcd29",
+              "skipChildren": true,
+              "slug": "the-grand-ish-tour",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/cPvIgIgysI3S067aA670pMYAjI4.jpg",
+              "title": "The Grand-ish Tour",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+                  "id": "5d9c07e8705e7a001e6cc4f9",
+                  "key": "/library/categories/reality",
+                  "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+                  "slug": "reality",
+                  "tag": "Reality",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.48
+          },
+          {
+            "Metadata": {
+              "addedAt": 1715472000,
+              "art": "https://image.tmdb.org/t/p/original/66CF7BL87gvxHq8wA7NFSL5HjPt.jpg",
+              "childCount": 2,
+              "duration": 3480000,
+              "guid": "plex://show/6633f71579b7440c0229b401",
+              "key": "/library/metadata/6633f71579b7440c0229b401/children",
+              "leafCount": 6,
+              "originallyAvailableAt": "2024-05-12",
+              "ratingKey": "6633f71579b7440c0229b401",
+              "slug": "rob-and-rylans-grand-tour",
+              "thumb": "https://image.tmdb.org/t/p/original/jg8EpWjOUJX1SSC5a99yy9e7jNY.jpg",
+              "title": "Rob & Rylan's Grand Tour",
+              "type": "show",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.47
+          },
+          {
+            "Metadata": {
+              "addedAt": 1678752000,
+              "art": "https://image.tmdb.org/t/p/original/a8UBMbTvH8UyXYBqIU3ZU5YsQS.jpg",
+              "childCount": 1,
+              "duration": 1740000,
+              "guid": "plex://show/64af2de35347076e46d6e46f",
+              "key": "/library/metadata/64af2de35347076e46d6e46f/children",
+              "leafCount": 6,
+              "originallyAvailableAt": "2023-03-14",
+              "ratingKey": "64af2de35347076e46d6e46f",
+              "slug": "grand-tour-viaggio-in-italia-1",
+              "thumb": "https://image.tmdb.org/t/p/original/5EIR1LAmQuKRmqbL5k7DlQdVyZu.jpg",
+              "title": "Grand Tour - Viaggio in Italia",
+              "type": "show",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6e4b438d001f2b8808",
+                  "id": "5da05f6e4b438d001f2b8808",
+                  "key": "/library/categories/travel",
+                  "ratingKey": "genre_5da05f6e4b438d001f2b8808",
+                  "slug": "travel",
+                  "tag": "Travel",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf5af32ed001e0f5563",
+                  "id": "5da05bf5af32ed001e0f5563",
+                  "key": "/library/categories/history",
+                  "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+                  "slug": "history",
+                  "tag": "History",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.46
+          },
+          {
+            "Metadata": {
+              "addedAt": 1744848000,
+              "art": "https://image.tmdb.org/t/p/original/kWjKMtfzxpmfXzhtJVlpBFOGK5s.jpg",
+              "childCount": 1,
+              "guid": "plex://show/67d57505866f7ba94de5a214",
+              "key": "/library/metadata/67d57505866f7ba94de5a214/children",
+              "leafCount": 1,
+              "originallyAvailableAt": "2025-04-17",
+              "ratingKey": "67d57505866f7ba94de5a214",
+              "slug": "the-not-very-grand-tour",
+              "thumb": "https://image.tmdb.org/t/p/original/aKAz1l3x6hYCu2UqBVqiDRhc6Gt.jpg",
+              "title": "The Not Very Grand Tour",
+              "type": "show",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+                  "id": "5d9c07e8705e7a001e6cc4f9",
+                  "key": "/library/categories/reality",
+                  "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+                  "slug": "reality",
+                  "tag": "Reality",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.45
+          }
+        ]
+      }
+    ]
+  }
+}

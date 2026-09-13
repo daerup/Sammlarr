@@ -22,46 +22,6 @@
         "SearchResult": [
           {
             "Metadata": {
-              "addedAt": 1780531200,
-              "art": "https://image.tmdb.org/t/p/original/i2RTw513RzkQLoombXXj5RNrocF.jpg",
-              "duration": 660000,
-              "guid": "plex://movie/6a2aa39861dd0be111f9c07d",
-              "key": "/library/metadata/6a2aa39861dd0be111f9c07d",
-              "originallyAvailableAt": "2026-06-04",
-              "ratingKey": "6a2aa39861dd0be111f9c07d",
-              "slug": "runner-2026-2",
-              "thumb": "https://image.tmdb.org/t/p/original/v0u6Qmx3KbQb5G2RqnjRxdsLlcB.jpg",
-              "title": "Runner",
-              "type": "movie",
-              "year": 2026,
-              "Genre": [
-                {
-                  "filter": "genre=5d9c046c705e7a001e6c8d99",
-                  "id": "5d9c046c705e7a001e6c8d99",
-                  "key": "/library/categories/comedy",
-                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
-                  "slug": "comedy",
-                  "tag": "Comedy",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
-                  "id": "5d9c046c2192ba001f2ff6c2",
-                  "key": "/library/categories/action",
-                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
-                  "slug": "action",
-                  "tag": "Action",
-                  "type": "hub",
-                  "context": "tag.genre"
-                }
-              ],
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.78
-          },
-          {
-            "Metadata": {
               "addedAt": 1788998400,
               "art": "https://metadata-static.plex.tv/a/gracenote/a857d82bae66732abcb8cf99016053c9.jpg",
               "duration": 5820000,
@@ -119,6 +79,46 @@
               "source": "provider://tv.plex.provider.discover"
             },
             "score": 0.73
+          },
+          {
+            "Metadata": {
+              "addedAt": 1780531200,
+              "art": "https://image.tmdb.org/t/p/original/i2RTw513RzkQLoombXXj5RNrocF.jpg",
+              "duration": 660000,
+              "guid": "plex://movie/6a2aa39861dd0be111f9c07d",
+              "key": "/library/metadata/6a2aa39861dd0be111f9c07d",
+              "originallyAvailableAt": "2026-06-04",
+              "ratingKey": "6a2aa39861dd0be111f9c07d",
+              "slug": "runner-2026-2",
+              "thumb": "https://image.tmdb.org/t/p/original/v0u6Qmx3KbQb5G2RqnjRxdsLlcB.jpg",
+              "title": "Runner",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.71
           },
           {
             "Metadata": {

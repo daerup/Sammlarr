@@ -8,7 +8,7 @@
   "locale": null,
   "confirmed": true,
   "joinedAt": 1607959655,
-  "emailOnlyAuth": "e2e-redacted",
+  "emailOnlyAuth": false,
   "hasPassword": true,
   "protected": false,
   "thumb": "e2e-redacted",

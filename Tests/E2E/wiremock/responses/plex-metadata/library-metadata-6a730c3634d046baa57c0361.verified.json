@@ -1,0 +1,179 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/2FLcOR68Q4n4OX5TraAuQ4ZCut8.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/480980/banners/6a82c06cb5f4f.jpg",
+        "guid": "plex://show/6a730c3634d046baa57c0361",
+        "key": "/library/metadata/6a730c3634d046baa57c0361/children",
+        "ratingKey": "6a730c3634d046baa57c0361",
+        "studio": "Crime & Investigation Network",
+        "summary": "Each episode of Last Seen On Holiday takes us deep inside a gripping mystery. A case of a British or American citizen who disappeared when they were away from home, abroad. Whether on holiday or working, each story will reveal the turmoil that families and friends go through when they don't know where their loved one is.",
+        "type": "show",
+        "addedAt": 1785715200,
+        "childCount": 1,
+        "duration": 2640000,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-07",
+        "lastSeasonOriginallyAvailableAt": "2026-08-03",
+        "leafCount": 6,
+        "originallyAvailableAt": "2026-08-03",
+        "publicPagesURL": "https://watch.plex.tv/show/last-seen-on-holiday",
+        "slug": "last-seen-on-holiday",
+        "thumb": "https://image.tmdb.org/t/p/original/3A5SyOJdTJUretqTMfHWwf7rcR8.jpg",
+        "title": "Last Seen On Holiday",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Last Seen On Holiday",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/2FLcOR68Q4n4OX5TraAuQ4ZCut8.jpg"
+          },
+          {
+            "alt": "Last Seen On Holiday",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/defb6778a74b43709d456dcd161b8c08.jpg"
+          },
+          {
+            "alt": "Last Seen On Holiday",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/480980/banners/6a82c06cb5f4f.jpg"
+          },
+          {
+            "alt": "Last Seen On Holiday",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/1/gracenote/18c3cb08b90337f0552561669bff9540.jpg"
+          },
+          {
+            "alt": "Last Seen On Holiday",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/3A5SyOJdTJUretqTMfHWwf7rcR8.jpg"
+          },
+          {
+            "alt": "Last Seen On Holiday",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/c1e3a3f81eb4ce2ed2a9f1063d2ce0c6.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://331729"
+          },
+          {
+            "id": "tvdb://480980"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Crime & Investigation Network (UK)"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f6c8d1a15e066003fc55ecf",
+            "tag": "History's Greatest Mysteries"
+          },
+          {
+            "guid": "plex://show/5d9c087102391c001f589faf",
+            "tag": "America's Most Wanted"
+          },
+          {
+            "guid": "plex://show/65e70d02a2bd004a7e6c10cf",
+            "tag": "Homicide (2024)"
+          },
+          {
+            "guid": "plex://show/69bd888a7ab07ecca2a770b6",
+            "tag": "Trust Me: The False Prophet"
+          },
+          {
+            "guid": "plex://show/6a2ad9376d7ca8ec4d919164",
+            "tag": "Worst Neighbor Ever"
+          },
+          {
+            "guid": "plex://show/6a5a87fa1a76ab3259bfc3d1",
+            "tag": "The Idaho Murders: College Nightmare"
+          },
+          {
+            "guid": "plex://show/6a805e1612c1809d39f787fd",
+            "tag": "Death of the Pastor's Wife"
+          },
+          {
+            "guid": "plex://show/6a81c4d75eb18ffa67945988",
+            "tag": "Death of the Pastor’s Wife"
+          },
+          {
+            "guid": "plex://show/5d9c083f4eefaa001f5d8ef5",
+            "tag": "Drugs, Inc."
+          },
+          {
+            "guid": "plex://show/5d9c08514eefaa001f5da49e",
+            "tag": "Homicide Hunter: Lt. Joe Kenda"
+          },
+          {
+            "guid": "plex://show/5d9c0905e98e47001eb19c8b",
+            "tag": "I Am a Killer"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Crime & Investigation Network"
+          }
+        ]
+      }
+    ]
+  }
+}

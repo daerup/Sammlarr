@@ -1,0 +1,230 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/637161f7799300405ad3632a",
+        "key": "/library/metadata/637161f7799300405ad3632a",
+        "ratingKey": "637161f7799300405ad3632a",
+        "summary": "A young couple, grieving the recent death of their daughter, move to the countryside where they are troubled by their experience of tragedy and the dark past of their new home.",
+        "type": "movie",
+        "addedAt": 1446940800,
+        "duration": 5520000,
+        "originalTitle": "Шёпот",
+        "originallyAvailableAt": "2015-11-08",
+        "publicPagesURL": "https://watch.plex.tv/movie/whisper-2015-1",
+        "slug": "whisper-2015-1",
+        "thumb": "https://image.tmdb.org/t/p/original/fh6E8Gvl9FcsXqmc0vyLeZ22GGE.jpg",
+        "title": "Whisper",
+        "userState": false,
+        "year": 2015,
+        "Image": [
+          {
+            "alt": "Whisper",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/fh6E8Gvl9FcsXqmc0vyLeZ22GGE.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://1047658"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Belarus"
+          },
+          {
+            "tag": "Russian Federation"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7769c1fb0d55001f52effa",
+            "order": 1,
+            "slug": "olga-ivanova",
+            "tag": "Olga Ivanova",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769c1fb0d55001f52effa.jpg",
+            "key": "/library/people/5d7769c1fb0d55001f52effa",
+            "type": "person"
+          },
+          {
+            "id": "5d776bf9594b2b001e6e8007",
+            "order": 2,
+            "slug": "aleksey-demidov-1",
+            "tag": "Aleksey Demidov",
+            "thumb": "https://metadata-static.plex.tv/7/people/73e5eef41a5adc282019bc886ea608e5.jpg",
+            "key": "/library/people/5d776bf9594b2b001e6e8007",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a596b655001fdbdeb8",
+            "order": 3,
+            "slug": "svyatoslav-astramovich",
+            "tag": "Svyatoslav Astramovich",
+            "thumb": "https://metadata-static.plex.tv/3/people/3fc9b04c6aec75c044ecfe2634412215.jpg",
+            "key": "/library/people/5d7768a596b655001fdbdeb8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b5308bca002033095d",
+            "order": 4,
+            "slug": "marina-denisova",
+            "tag": "Marina Denisova",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768b5308bca002033095d.jpg",
+            "key": "/library/people/5d7768b5308bca002033095d",
+            "type": "person"
+          },
+          {
+            "id": "5ddba93a70c0b60021f6687b",
+            "order": 5,
+            "slug": "elizaveta-shukova",
+            "tag": "Elizaveta Shukova",
+            "thumb": "https://metadata-static.plex.tv/d/people/d3fc7540d0580ddbf8da80f1c68b1474.jpg",
+            "key": "/library/people/5ddba93a70c0b60021f6687b",
+            "type": "person"
+          },
+          {
+            "id": "5d776838880197001ec94125",
+            "order": 6,
+            "slug": "irina-narbekova",
+            "tag": "Irina Narbekova",
+            "thumb": "https://metadata-static.plex.tv/0/people/09eccf56250cc7e6b69848e8ac735bc8.jpg",
+            "key": "/library/people/5d776838880197001ec94125",
+            "type": "person"
+          },
+          {
+            "id": "60e5d0d23104cb002df93ebf",
+            "order": 7,
+            "slug": "dmitriy-gurbanovitch",
+            "tag": "Dmitriy Gurbanovitch",
+            "thumb": "https://metadata-static.plex.tv/c/people/c7b6fd87fa6400d53840982d6d69eb3f.jpg",
+            "key": "/library/people/60e5d0d23104cb002df93ebf",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d8a7581001f130127",
+            "order": 8,
+            "slug": "oleg-tkachev",
+            "tag": "Oleg Tkachev",
+            "thumb": "https://metadata-static.plex.tv/c/people/c9b02ef97a95dea1d1a18249aed61548.jpg",
+            "key": "/library/people/5d77684d8a7581001f130127",
+            "type": "person"
+          },
+          {
+            "id": "5d776e14594b2b001e719c31",
+            "order": 9,
+            "slug": "svetlana-kozhemyakina",
+            "tag": "Svetlana Kozhemyakina",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d4b65f3a0262b2e8712fdb01ed02af5.jpg",
+            "key": "/library/people/5d776e14594b2b001e719c31",
+            "type": "person"
+          },
+          {
+            "id": "5d7768cc594b2b001e695b54",
+            "order": 10,
+            "slug": "vera-kavalerova",
+            "tag": "Vera Kavalerova",
+            "thumb": "https://metadata-static.plex.tv/5/people/5464e394b9dd1d00e7768792ed34719a.jpg",
+            "key": "/library/people/5d7768cc594b2b001e695b54",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776ffafb0d55001f5e7042",
+            "slug": "gleb-yakubovskiy-1",
+            "tag": "Gleb Yakubovskiy",
+            "thumb": "https://metadata-static.plex.tv/e/people/e7791a59f94c7a035b79eb5c9a03b522.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776ffafb0d55001f5e7042",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "6370dcd2f96422105d8bc5ae",
+            "slug": "darya-bulatnikova-1",
+            "tag": "Darya Bulatnikova",
+            "role": "Screenplay",
+            "key": "/library/people/6370dcd2f96422105d8bc5ae",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d9f356a6fc551001ef816e0",
+            "tag": "Moonlight Mile"
+          },
+          {
+            "guid": "plex://movie/5d9f3cdee4fc29001eb6fdbc",
+            "tag": "Blind"
+          },
+          {
+            "guid": "plex://movie/5d776ca1594b2b001e6f8d78",
+            "tag": "Newness"
+          },
+          {
+            "guid": "plex://movie/5d777070fb0d55001f5f072f",
+            "tag": "Wander Darkly"
+          },
+          {
+            "guid": "plex://movie/5e1624dc857400003ca002ec",
+            "tag": "See You Soon"
+          },
+          {
+            "guid": "plex://movie/5fad5dc3aabb38002d2a3baa",
+            "tag": "Time Is Up"
+          },
+          {
+            "guid": "plex://movie/5d7768bd7a53e9001e6d7dfc",
+            "tag": "Maria's Lovers"
+          },
+          {
+            "guid": "plex://movie/5d7768c1decfcd001f2f1f45",
+            "tag": "On the Edge"
+          },
+          {
+            "guid": "plex://movie/5d776d0f96b655001fe3e164",
+            "tag": "Fire with Fire"
+          },
+          {
+            "guid": "plex://movie/613f160e71f838aa341905d9",
+            "tag": "Time Is Up 2"
+          },
+          {
+            "guid": "plex://movie/617419032d50da6800b39c4a",
+            "tag": "Time Is Up 2"
+          }
+        ]
+      }
+    ]
+  }
+}

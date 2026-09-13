@@ -1,0 +1,443 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1787875200,
+              "art": "https://metadata-static.plex.tv/a/gracenote/a4ec71f319a9b8edb2d7b2159b3045b7.jpg",
+              "duration": 6660000,
+              "guid": "plex://movie/5f40987e1ae710004115f516",
+              "key": "/library/metadata/5f40987e1ae710004115f516",
+              "originallyAvailableAt": "2026-08-28",
+              "ratingKey": "5f40987e1ae710004115f516",
+              "slug": "the-whisper-man",
+              "thumb": "https://metadata-static.plex.tv/9/gracenote/91109c0c332286bbd0f140e3cf9b6f9d.jpg",
+              "title": "The Whisper Man",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.93
+          },
+          {
+            "Metadata": {
+              "addedAt": 844300800,
+              "art": "https://image.tmdb.org/t/p/original/6LOsst1MWnth86hCxmyqip7MaiH.jpg",
+              "duration": 4920000,
+              "guid": "plex://movie/5d776aa67a53e9001e70b5da",
+              "key": "/library/metadata/5d776aa67a53e9001e70b5da",
+              "originallyAvailableAt": "1996-10-03",
+              "ratingKey": "5d776aa67a53e9001e70b5da",
+              "slug": "whisper-1996",
+              "thumb": "https://image.tmdb.org/t/p/original/pVg4eB2SWmiii9qp7sPZANFmcbB.jpg",
+              "title": "Whisper",
+              "type": "movie",
+              "year": 1996,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "addedAt": 1575158400,
+              "art": "https://metadata-static.plex.tv/0/gracenote/01548a22a1bc0f98d9c1d441a539f2e8.jpg",
+              "duration": 4410112,
+              "guid": "plex://movie/5ec75f87e515a5003f69597d",
+              "key": "/library/metadata/5ec75f87e515a5003f69597d",
+              "originallyAvailableAt": "2019-12-01",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5ec75f87e515a5003f69597d",
+              "ratingKey": "5ec75f87e515a5003f69597d",
+              "slug": "the-whispering-man",
+              "thumb": "https://metadata-static.plex.tv/d/gracenote/d77ebee8d04db9f9fa9a13edd10f59a9.jpg",
+              "title": "The Whispering Man",
+              "type": "movie",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "addedAt": 1655942400,
+              "art": "https://image.tmdb.org/t/p/original/t0qAnq1iOno3Z926Fc1OeKk43Qu.jpg",
+              "duration": 4560000,
+              "guid": "plex://movie/5f40cba65a76a80042ef6405",
+              "key": "/library/metadata/5f40cba65a76a80042ef6405",
+              "originallyAvailableAt": "2022-06-23",
+              "ratingKey": "5f40cba65a76a80042ef6405",
+              "slug": "whisper-2022-1",
+              "thumb": "https://image.tmdb.org/t/p/original/vDph7T3v74pcVzunGQU7y1b0moP.jpg",
+              "title": "Whisper",
+              "type": "movie",
+              "year": 2022,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "addedAt": 1446940800,
+              "duration": 5520000,
+              "guid": "plex://movie/637161f7799300405ad3632a",
+              "key": "/library/metadata/637161f7799300405ad3632a",
+              "originallyAvailableAt": "2015-11-08",
+              "ratingKey": "637161f7799300405ad3632a",
+              "slug": "whisper-2015-1",
+              "thumb": "https://image.tmdb.org/t/p/original/fh6E8Gvl9FcsXqmc0vyLeZ22GGE.jpg",
+              "title": "Whisper",
+              "type": "movie",
+              "year": 2015,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "addedAt": 1626393600,
+              "duration": 3300000,
+              "guid": "plex://movie/60f5505dd486de002ce76d99",
+              "key": "/library/metadata/60f5505dd486de002ce76d99",
+              "originallyAvailableAt": "2021-07-16",
+              "ratingKey": "60f5505dd486de002ce76d99",
+              "slug": "dave-losso-a-careless-whisper-of-a-man",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BMjdhNTRmYmMtNTVmYi00YmQ4LTg5NmYtMTIwYzk2NTE2MTQ4XkEyXkFqcGc@._V1_.jpg",
+              "title": "Dave Losso: A Careless Whisper of a Man",
+              "type": "movie",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "duration": 900000,
+              "guid": "plex://movie/5f40bb7c03883a0040ccc27f",
+              "key": "/library/metadata/5f40bb7c03883a0040ccc27f",
+              "ratingKey": "5f40bb7c03883a0040ccc27f",
+              "slug": "the-whisper-3",
+              "subtype": "short",
+              "thumb": "https://m.media-amazon.com/images/M/MV5BZTViZTA4NDUtNWJlNS00OTRmLThjODYtYjllMGJhNjU2ZGZmXkEyXkFqcGc@._V1_.jpg",
+              "title": "The Whisper",
+              "type": "movie",
+              "Genre": [
+                {
+                  "filter": "genre=5d9c0501ba6eb9001fb9475f",
+                  "id": "5d9c0501ba6eb9001fb9475f",
+                  "key": "/library/categories/short",
+                  "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+                  "slug": "short",
+                  "tag": "Short",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.22
+          },
+          {
+            "Metadata": {
+              "addedAt": 1569801600,
+              "art": "https://metadata-static.plex.tv/1/gracenote/173c0e5f32f85de5a57140b41ccb008a.jpg",
+              "duration": 5100000,
+              "guid": "plex://movie/5d776d82594b2b001e70ae7b",
+              "key": "/library/metadata/5d776d82594b2b001e70ae7b",
+              "originallyAvailableAt": "2019-09-30",
+              "ratingKey": "5d776d82594b2b001e70ae7b",
+              "slug": "devils-whisper",
+              "thumb": "https://metadata-static.plex.tv/7/gracenote/7f0ceed06a6e157a91d6f522f0f23ef3.jpg",
+              "title": "Devil's Whisper",
+              "type": "movie",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          },
+          {
+            "Metadata": {
+              "addedAt": 660528000,
+              "art": "https://metadata-static.plex.tv/8/gracenote/8f5165626bd4aad056dc546a93902277.jpg",
+              "duration": 6000000,
+              "guid": "plex://movie/5d7768e947dd6e001f6c05f4",
+              "key": "/library/metadata/5d7768e947dd6e001f6c05f4",
+              "originallyAvailableAt": "1990-12-07",
+              "ratingKey": "5d7768e947dd6e001f6c05f4",
+              "slug": "whispers",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/fb61fa06515ce22330db4422b4a5e1c9.jpg",
+              "title": "Whispers",
+              "type": "movie",
+              "year": 1990,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          },
+          {
+            "Metadata": {
+              "addedAt": 1720137600,
+              "art": "https://metadata-static.plex.tv/2/gracenote/265d9178dc8b91bdb66f94caf60ab1f1.jpg",
+              "duration": 5400000,
+              "guid": "plex://movie/6352e863d6be1842ead9b820",
+              "key": "/library/metadata/6352e863d6be1842ead9b820",
+              "originallyAvailableAt": "2024-07-05",
+              "ratingKey": "6352e863d6be1842ead9b820",
+              "slug": "dead-whisper-2024",
+              "subtype": "short",
+              "thumb": "https://metadata-static.plex.tv/2/gracenote/24c8c9298f64acd2ee491b4a695879ae.jpg",
+              "title": "Dead Whisper",
+              "type": "movie",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          }
+        ]
+      }
+    ]
+  }
+}

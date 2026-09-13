@@ -1,0 +1,320 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/t0qAnq1iOno3Z926Fc1OeKk43Qu.jpg",
+        "guid": "plex://movie/5f40cba65a76a80042ef6405",
+        "key": "/library/metadata/5f40cba65a76a80042ef6405",
+        "ratingKey": "5f40cba65a76a80042ef6405",
+        "studio": "Greenway Entertainment",
+        "summary": "A young Nurse is assigned to look after a patient in a remote location in the English countryside. As the night continues she finds herself terrorized by an unseen force that is connected with her patient.",
+        "tagline": "Something is alive.",
+        "type": "movie",
+        "addedAt": 1655942400,
+        "audienceRating": 3,
+        "audienceRatingImage": "imdb://image.rating",
+        "budget": 20000,
+        "contentRating": "R",
+        "duration": 4560000,
+        "imdbRatingCount": 147,
+        "originallyAvailableAt": "2022-06-23",
+        "publicPagesURL": "https://watch.plex.tv/movie/whisper-2022-1",
+        "slug": "whisper-2022-1",
+        "thumb": "https://image.tmdb.org/t/p/original/vDph7T3v74pcVzunGQU7y1b0moP.jpg",
+        "title": "Whisper",
+        "userState": false,
+        "year": 2022,
+        "Image": [
+          {
+            "alt": "Whisper",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/t0qAnq1iOno3Z926Fc1OeKk43Qu.jpg"
+          },
+          {
+            "alt": "Whisper",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/vDph7T3v74pcVzunGQU7y1b0moP.jpg"
+          },
+          {
+            "alt": "Whisper",
+            "type": "snapshot",
+            "url": "https://vod-static.plex.tv/thumbnails/6876113e4fd58b1932c982c1/30a09bdf-ba1d-4279-8a7f-51c34e267b7e/thumb2.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt6344890"
+          },
+          {
+            "id": "tmdb://928773"
+          },
+          {
+            "id": "tvdb://338686"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.306
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776b05ad5437001f79032f",
+            "order": 1,
+            "slug": "linda-louise-duan",
+            "tag": "Linda Louise Duan",
+            "thumb": "https://metadata-static.plex.tv/7/people/7d33c249d6a829c317082c1af97e462f.jpg",
+            "role": "Sam",
+            "key": "/library/people/5d776b05ad5437001f79032f",
+            "type": "person"
+          },
+          {
+            "id": "63241095cfdd75677c6e4f8b",
+            "order": 2,
+            "slug": "penelope-read-4",
+            "tag": "Penelope Read",
+            "role": "Dr. Carpenter",
+            "key": "/library/people/63241095cfdd75677c6e4f8b",
+            "type": "person"
+          },
+          {
+            "id": "5d776c877a53e9001e7452b7",
+            "order": 3,
+            "slug": "arron-blake",
+            "tag": "Arron Blake",
+            "thumb": "https://metadata-static.plex.tv/people/5d776c877a53e9001e7452b7.jpg",
+            "role": "Joe",
+            "key": "/library/people/5d776c877a53e9001e7452b7",
+            "type": "person"
+          },
+          {
+            "id": "62b86b4584541cac9c8ef564",
+            "order": 4,
+            "slug": "amy-secker-1",
+            "tag": "Amy Secker",
+            "role": "Gwen",
+            "key": "/library/people/62b86b4584541cac9c8ef564",
+            "type": "person"
+          },
+          {
+            "id": "62b86b459fcd5f4d19d2e3e4",
+            "order": 5,
+            "slug": "richard-conrad-6",
+            "tag": "Richard Conrad",
+            "role": "The Patient",
+            "key": "/library/people/62b86b459fcd5f4d19d2e3e4",
+            "type": "person"
+          },
+          {
+            "id": "61e970eee4980ca2e3e9fc51",
+            "order": 6,
+            "slug": "nadia-nadif-1",
+            "tag": "Nadia Nadif",
+            "thumb": "https://metadata-static.plex.tv/b/people/bf8e003047da636893bec28b6891fe1c.jpg",
+            "role": "The Old Hag",
+            "key": "/library/people/61e970eee4980ca2e3e9fc51",
+            "type": "person"
+          },
+          {
+            "id": "629cbafc4818c287092b70fc",
+            "order": 7,
+            "slug": "carly-jolley-1",
+            "tag": "Carly Jolley",
+            "role": "Clara",
+            "key": "/library/people/629cbafc4818c287092b70fc",
+            "type": "person"
+          },
+          {
+            "id": "62b86b457d3850a28927f070",
+            "order": 8,
+            "slug": "ben-maytham-1",
+            "tag": "Ben Maytham",
+            "role": "Peter",
+            "key": "/library/people/62b86b457d3850a28927f070",
+            "type": "person"
+          },
+          {
+            "id": "62b86b45e1ba45a32bfc49ae",
+            "order": 9,
+            "slug": "roman-wood-1",
+            "tag": "Roman Wood",
+            "role": "Dr. Wright",
+            "key": "/library/people/62b86b45e1ba45a32bfc49ae",
+            "type": "person"
+          },
+          {
+            "id": "62b86b45b25842b11778c614",
+            "order": 10,
+            "slug": "paige-jolley-1",
+            "tag": "Paige Jolley",
+            "role": "Test Subject One",
+            "key": "/library/people/62b86b45b25842b11778c614",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776bc996b655001fe1bf0e",
+            "slug": "christopher-jolley-1",
+            "tag": "Christopher Jolley",
+            "role": "Director",
+            "key": "/library/people/5d776bc996b655001fe1bf0e",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776aa0594b2b001e6c1893",
+            "slug": "steven-m-smith",
+            "tag": "Steven M. Smith",
+            "thumb": "https://metadata-static.plex.tv/d/people/d35e4d903f6b0ef6e4ab1885913889c9.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776aa0594b2b001e6c1893",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776bc996b655001fe1bf0e",
+            "slug": "christopher-jolley-1",
+            "tag": "Christopher Jolley",
+            "role": "Writer",
+            "key": "/library/people/5d776bc996b655001fe1bf0e",
+            "type": "person"
+          },
+          {
+            "id": "61e970eedf82b44d05b6204b",
+            "slug": "robert-dunn-30",
+            "tag": "Robert Dunn",
+            "role": "Writer",
+            "key": "/library/people/61e970eedf82b44d05b6204b",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe25e93b86d951fb7f93",
+            "score": 0.998,
+            "tag": "dark"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8101",
+            "score": 0.965,
+            "tag": "suspenseful"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8181",
+            "score": 0.96,
+            "tag": "intense"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.789,
+            "tag": "mysterious"
+          },
+          {
+            "id": "65afbe4ce93b86d9510206ce",
+            "score": 0.724,
+            "tag": "creepy"
+          },
+          {
+            "id": "65afbe22e93b86d951faf75c",
+            "score": 0.571,
+            "tag": "haunting"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5f40d4d786422500429f05f9",
+            "tag": "The Dogs"
+          },
+          {
+            "guid": "plex://movie/63f1b5eae5e4d59c97908b91",
+            "tag": "Compulsion"
+          },
+          {
+            "guid": "plex://movie/6493b8fe60628ef853a37124",
+            "tag": "Cheat"
+          },
+          {
+            "guid": "plex://movie/675c88340c74da759cbdc0a0",
+            "tag": "Play Dead"
+          },
+          {
+            "guid": "plex://movie/5d776d16fb0d55001f5972a3",
+            "tag": "The Resurrected"
+          },
+          {
+            "guid": "plex://movie/5ee74261a427f500423f063a",
+            "tag": "Books of Blood"
+          },
+          {
+            "guid": "plex://movie/605a29ea5ea98a002c7781d5",
+            "tag": "God Is a Bullet"
+          },
+          {
+            "guid": "plex://movie/605a321caee1af002ca29648",
+            "tag": "God Is A Bullet"
+          },
+          {
+            "guid": "plex://movie/60055292b5f8ef002b11ceb4",
+            "tag": "Candy Land"
+          },
+          {
+            "guid": "plex://movie/5f40beb6427eeb0041f38ccd",
+            "tag": "Frank and Penelope"
+          },
+          {
+            "guid": "plex://movie/64330eacd7bd3bcdb3062e0f",
+            "tag": "Shades of Desire"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Greenway Entertainment"
+          }
+        ]
+      }
+    ]
+  }
+}

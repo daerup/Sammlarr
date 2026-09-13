@@ -1,0 +1,556 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/6LOsst1MWnth86hCxmyqip7MaiH.jpg",
+        "guid": "plex://movie/5d776aa67a53e9001e70b5da",
+        "key": "/library/metadata/5d776aa67a53e9001e70b5da",
+        "ratingKey": "5d776aa67a53e9001e70b5da",
+        "studio": "Negativ",
+        "summary": "Anna, a 16 year-old girl from the sticks, trades her military education for life in the big city Running away to Prague opens a whole new world where she drinks her first cappuccino and meets the kind of people she has only seen in movies.",
+        "tagline": "On the wings of adrenaline, love & imagination.",
+        "type": "movie",
+        "addedAt": 844300800,
+        "audienceRating": 6.3,
+        "audienceRatingImage": "imdb://image.rating",
+        "budget": 12000000,
+        "duration": 4920000,
+        "imdbRatingCount": 338,
+        "originalTitle": "Šeptej",
+        "originallyAvailableAt": "1996-10-03",
+        "publicPagesURL": "https://watch.plex.tv/movie/whisper-1996",
+        "slug": "whisper-1996",
+        "thumb": "https://image.tmdb.org/t/p/original/pVg4eB2SWmiii9qp7sPZANFmcbB.jpg",
+        "title": "Whisper",
+        "userState": false,
+        "year": 1996,
+        "Image": [
+          {
+            "alt": "Whisper",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/6LOsst1MWnth86hCxmyqip7MaiH.jpg"
+          },
+          {
+            "alt": "Whisper",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/pVg4eB2SWmiii9qp7sPZANFmcbB.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0117600"
+          },
+          {
+            "id": "tmdb://256675"
+          },
+          {
+            "id": "tvdb://78102"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 4.6
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Czech Republic"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d776830f54112001f5bcd44",
+            "order": 1,
+            "slug": "tatiana-dykova",
+            "tag": "Tatiana Dyková",
+            "thumb": "https://metadata-static.plex.tv/9/people/976a22072614eed9dfce5a0b5ee59c80.jpg",
+            "role": "Anna",
+            "key": "/library/people/5d776830f54112001f5bcd44",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa67a53e9001e70b5f5",
+            "order": 2,
+            "slug": "jan-p-muchow",
+            "tag": "Jan P. Muchow",
+            "thumb": "https://metadata-static.plex.tv/2/people/29f956d1db6b6be5ce1ac0280c87a23c.jpg",
+            "role": "Filip",
+            "key": "/library/people/5d776aa67a53e9001e70b5f5",
+            "type": "person"
+          },
+          {
+            "id": "5d77688747dd6e001f6bb31f",
+            "order": 3,
+            "slug": "jan-cechticky",
+            "tag": "Jan Čechtický",
+            "role": "Speedy",
+            "key": "/library/people/5d77688747dd6e001f6bb31f",
+            "type": "person"
+          },
+          {
+            "id": "5d77686b374a5b001fec51b2",
+            "order": 4,
+            "slug": "martin-mysicka",
+            "tag": "Martin Myšička",
+            "thumb": "https://metadata-static.plex.tv/people/5d77686b374a5b001fec51b2.jpg",
+            "role": "Kytka",
+            "key": "/library/people/5d77686b374a5b001fec51b2",
+            "type": "person"
+          },
+          {
+            "id": "5d776983ad5437001f75f3b7",
+            "order": 5,
+            "slug": "katerina-winterova",
+            "tag": "Kateřina Winterová",
+            "thumb": "https://metadata-static.plex.tv/people/5d776983ad5437001f75f3b7.jpg",
+            "role": "Irma",
+            "key": "/library/people/5d776983ad5437001f75f3b7",
+            "type": "person"
+          },
+          {
+            "id": "5d77682861141d001fb13792",
+            "order": 6,
+            "slug": "petra-spalkova",
+            "tag": "Petra Špalková",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682861141d001fb13792.jpg",
+            "role": "Laura",
+            "key": "/library/people/5d77682861141d001fb13792",
+            "type": "person"
+          },
+          {
+            "id": "5d7769adad5437001f7648c2",
+            "order": 7,
+            "slug": "zdenek-david",
+            "tag": "Zdeněk David",
+            "role": "Jordi",
+            "key": "/library/people/5d7769adad5437001f7648c2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768853ab0e7001f50369b",
+            "order": 8,
+            "slug": "antonin-brtoun",
+            "tag": "Antonín Brtoun",
+            "role": "Němec",
+            "key": "/library/people/5d7768853ab0e7001f50369b",
+            "type": "person"
+          },
+          {
+            "id": "5d77685e54c0f0001f307493",
+            "order": 9,
+            "slug": "zdenek-suchy",
+            "tag": "Zdeněk Suchý",
+            "thumb": "https://metadata-static.plex.tv/people/5d77685e54c0f0001f307493.jpg",
+            "key": "/library/people/5d77685e54c0f0001f307493",
+            "type": "person"
+          },
+          {
+            "id": "5d77683e54c0f0001f304774",
+            "order": 10,
+            "slug": "borivoj-navratil",
+            "tag": "Bořivoj Navrátil",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683e54c0f0001f304774.jpg",
+            "key": "/library/people/5d77683e54c0f0001f304774",
+            "type": "person"
+          },
+          {
+            "id": "5d776a1d7a53e9001e6fa822",
+            "order": 11,
+            "slug": "vaclav-mares",
+            "tag": "Václav Mareš",
+            "key": "/library/people/5d776a1d7a53e9001e6fa822",
+            "type": "person"
+          },
+          {
+            "id": "5d7768548718ba001e319002",
+            "order": 12,
+            "slug": "petra-lustigova",
+            "tag": "Petra Lustigová",
+            "thumb": "https://metadata-static.plex.tv/9/people/99deb895d36919dee4181ad3c6b9a93a.jpg",
+            "key": "/library/people/5d7768548718ba001e319002",
+            "type": "person"
+          },
+          {
+            "id": "5d776c1896b655001fe25e88",
+            "order": 13,
+            "slug": "mykola-geyko-1",
+            "tag": "Mykola Geyko",
+            "thumb": "https://metadata-static.plex.tv/0/people/0505d98525ff7c31c49a8b41b36733bd.jpg",
+            "key": "/library/people/5d776c1896b655001fe25e88",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa67a53e9001e70b5f6",
+            "order": 14,
+            "slug": "frederika-smetana",
+            "tag": "Frederika Smetana",
+            "key": "/library/people/5d776aa67a53e9001e70b5f6",
+            "type": "person"
+          },
+          {
+            "id": "5d77685e54c0f0001f30748a",
+            "order": 15,
+            "slug": "david-ondricek",
+            "tag": "David Ondříček",
+            "thumb": "https://metadata-static.plex.tv/8/people/8f24c6bc704cb8b1059d974803585a17.jpg",
+            "key": "/library/people/5d77685e54c0f0001f30748a",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d2e80df001ebdf44e",
+            "order": 16,
+            "slug": "jan-hrebejk",
+            "tag": "Jan Hřebejk",
+            "thumb": "https://metadata-static.plex.tv/b/people/b38581ba7db2fec4d6291fe492d41a85.jpg",
+            "key": "/library/people/5d77683d2e80df001ebdf44e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768db23d5a3001f4f21a5",
+            "order": 17,
+            "slug": "rudolf-kubik",
+            "tag": "Rudolf Kubík",
+            "thumb": "https://metadata-static.plex.tv/5/people/5400f099f9de3d45ceebea5ab7643775.jpg",
+            "key": "/library/people/5d7768db23d5a3001f4f21a5",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7810044f60c939b8aa",
+            "order": 18,
+            "slug": "pepino-drexler",
+            "tag": "Pepino Drexler",
+            "key": "/library/people/6829fc7810044f60c939b8aa",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7710044f60c939b8a7",
+            "order": 19,
+            "slug": "zdenek-stropek-1",
+            "tag": "Zdeněk Stropek",
+            "key": "/library/people/6829fc7710044f60c939b8a7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c0594b2b001e694b49",
+            "order": 20,
+            "slug": "lukas-bech",
+            "tag": "Lukáš Bech",
+            "thumb": "https://metadata-static.plex.tv/a/people/a68dcf68d08a631befa097f812072fc0.jpg",
+            "key": "/library/people/5d7768c0594b2b001e694b49",
+            "type": "person"
+          },
+          {
+            "id": "5d77697e7a53e9001e6e7c6e",
+            "order": 21,
+            "slug": "martin-davidek",
+            "tag": "Martin Davídek",
+            "thumb": "https://metadata-static.plex.tv/a/people/afbe2bd0f87172f156bddf5cf1def9de.jpg",
+            "key": "/library/people/5d77697e7a53e9001e6e7c6e",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7c53510b4df53c96fe",
+            "order": 22,
+            "slug": "dalibor-fixa",
+            "tag": "Dalibor Fixa",
+            "key": "/library/people/6829fc7c53510b4df53c96fe",
+            "type": "person"
+          },
+          {
+            "id": "5f400046be690b00431078ad",
+            "order": 23,
+            "slug": "petr-machacek",
+            "tag": "Petr Macháček",
+            "key": "/library/people/5f400046be690b00431078ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77685e7a53e9001e6ce246",
+            "order": 24,
+            "slug": "jan-spanbauer",
+            "tag": "Jan Španbauer",
+            "thumb": "https://metadata-static.plex.tv/2/people/2a897b5fae9f4133b7fdccf9563cec19.jpg",
+            "key": "/library/people/5d77685e7a53e9001e6ce246",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7a074fae439af1fdb5",
+            "order": 25,
+            "slug": "anna-ponertova",
+            "tag": "Anna Ponertová",
+            "key": "/library/people/6829fc7a074fae439af1fdb5",
+            "type": "person"
+          },
+          {
+            "id": "5dcd38ad8484d9001e5da4c7",
+            "order": 26,
+            "slug": "katerina-coufalikova",
+            "tag": "Kateřina Coufalíková",
+            "key": "/library/people/5dcd38ad8484d9001e5da4c7",
+            "type": "person"
+          },
+          {
+            "id": "5d776877103a2d001f57259b",
+            "order": 27,
+            "slug": "bretislav-farsky",
+            "tag": "Břetislav Farský",
+            "key": "/library/people/5d776877103a2d001f57259b",
+            "type": "person"
+          },
+          {
+            "id": "6829fc77d7862d6450dd3c77",
+            "order": 28,
+            "slug": "kamil-kopecek",
+            "tag": "Kamil Kopeček",
+            "key": "/library/people/6829fc77d7862d6450dd3c77",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7bab25efa280b4e136",
+            "order": 29,
+            "slug": "david-machacek-4",
+            "tag": "David Macháček",
+            "key": "/library/people/6829fc7bab25efa280b4e136",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7bb529739b18a714f0",
+            "order": 30,
+            "slug": "greg-jarvis-5",
+            "tag": "Greg Jarvis",
+            "role": "Canadian",
+            "key": "/library/people/6829fc7bb529739b18a714f0",
+            "type": "person"
+          },
+          {
+            "id": "5f3faa6e864225004278f456",
+            "order": 31,
+            "slug": "vaclav-kucera",
+            "tag": "Václav Kučera",
+            "key": "/library/people/5f3faa6e864225004278f456",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7c11c1c65c2ff5b1d6",
+            "order": 32,
+            "slug": "karolina-muchova-1",
+            "tag": "Karolína Muchová",
+            "key": "/library/people/6829fc7c11c1c65c2ff5b1d6",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7979b1ca03398e54ec",
+            "order": 33,
+            "slug": "oldrich-hurych-1",
+            "tag": "Oldřich Hurych",
+            "key": "/library/people/6829fc7979b1ca03398e54ec",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7c10044f60c939b8b7",
+            "order": 34,
+            "slug": "vit-schuster",
+            "tag": "Vít Schuster",
+            "key": "/library/people/6829fc7c10044f60c939b8b7",
+            "type": "person"
+          },
+          {
+            "id": "6829fc7cd2fed56ef4e86170",
+            "order": 35,
+            "slug": "ondrej-nemec-4",
+            "tag": "Ondřej Němec",
+            "key": "/library/people/6829fc7cd2fed56ef4e86170",
+            "type": "person"
+          },
+          {
+            "id": "6829fc79274334883332f729",
+            "order": 36,
+            "slug": "jan-mazac",
+            "tag": "Jan Mazač",
+            "key": "/library/people/6829fc79274334883332f729",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb823c63b480040d5812c",
+            "order": 37,
+            "slug": "dusan-vozary",
+            "tag": "Dušan Vozáry",
+            "key": "/library/people/5f3fb823c63b480040d5812c",
+            "type": "person"
+          },
+          {
+            "id": "5f3fa92552f200004146e41d",
+            "order": 38,
+            "slug": "petr-hosek",
+            "tag": "Petr Hošek",
+            "key": "/library/people/5f3fa92552f200004146e41d",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb6eace2564003f8427e0",
+            "order": 39,
+            "slug": "colin-stuart",
+            "tag": "Colin Stuart",
+            "key": "/library/people/5f3fb6eace2564003f8427e0",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77685e54c0f0001f30748a",
+            "slug": "david-ondricek",
+            "tag": "David Ondříček",
+            "thumb": "https://metadata-static.plex.tv/8/people/8f24c6bc704cb8b1059d974803585a17.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77685e54c0f0001f30748a",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77683f103a2d001f56a3d5",
+            "slug": "petr-oukropec",
+            "tag": "Petr Oukropec",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683f103a2d001f56a3d5.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5d77683f103a2d001f56a3d5",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f103a2d001f56a3d4",
+            "slug": "pavel-strnad",
+            "tag": "Pavel Strnad",
+            "role": "Executive Producer",
+            "key": "/library/people/5d77683f103a2d001f56a3d4",
+            "type": "person"
+          },
+          {
+            "id": "66a74e4ae830b41712d0458e",
+            "slug": "ivana-vondrovicova-1",
+            "tag": "Ivana Vondrovicová",
+            "role": "Production Manager",
+            "key": "/library/people/66a74e4ae830b41712d0458e",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff37552f20000414caf27",
+            "slug": "marek-vocel",
+            "tag": "Marek Vocel",
+            "role": "Production Manager",
+            "key": "/library/people/5f3ff37552f20000414caf27",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77685e54c0f0001f30748a",
+            "slug": "david-ondricek",
+            "tag": "David Ondříček",
+            "thumb": "https://metadata-static.plex.tv/8/people/8f24c6bc704cb8b1059d974803585a17.jpg",
+            "role": "Story",
+            "key": "/library/people/5d77685e54c0f0001f30748a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768821999bc0020dc75dd",
+            "slug": "tomas-masin",
+            "tag": "Tomáš Mašín",
+            "role": "Story",
+            "key": "/library/people/5d7768821999bc0020dc75dd",
+            "type": "person"
+          },
+          {
+            "id": "5d776a6996b655001fdee3ae",
+            "slug": "jan-novak-1",
+            "tag": "Jan Novák",
+            "role": "Screenplay",
+            "key": "/library/people/5d776a6996b655001fdee3ae",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/608f3a0c4b62ea002d9e3d07",
+            "tag": "A Big Bold Beautiful Journey"
+          },
+          {
+            "guid": "plex://movie/5d77683c7e9a3c0020c6e4ca",
+            "tag": "Not Easily Broken"
+          },
+          {
+            "guid": "plex://movie/5d7769d3ad5437001f768eaf",
+            "tag": "TalhotBlond"
+          },
+          {
+            "guid": "plex://movie/5d77683ee6d55c002040e9a2",
+            "tag": "Nine Lives"
+          },
+          {
+            "guid": "plex://movie/5d7768407228e5001f1e0305",
+            "tag": "The Object of My Affection"
+          },
+          {
+            "guid": "plex://movie/5d776a60fb0d55001f54442d",
+            "tag": "Endless Love"
+          },
+          {
+            "guid": "plex://movie/5d776be0594b2b001e6e561b",
+            "tag": "Departure"
+          },
+          {
+            "guid": "plex://movie/5d776d2e96b655001fe41d5d",
+            "tag": "Life in a Year"
+          },
+          {
+            "guid": "plex://movie/5e163223bc1372003ea667d8",
+            "tag": "Turtles All the Way Down"
+          },
+          {
+            "guid": "plex://movie/5f40bd1702101b00400d0a5b",
+            "tag": "Hello, Goodbye and Everything in Between"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Negativ"
+          }
+        ]
+      }
+    ]
+  }
+}

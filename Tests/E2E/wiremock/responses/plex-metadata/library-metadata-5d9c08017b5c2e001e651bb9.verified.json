@@ -1,0 +1,2224 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/7oBGhqJIghRBvOwo5Qe0yM0cnMc.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/28841-g.jpg",
+        "guid": "plex://show/5d9c08017b5c2e001e651bb9",
+        "isTopRated": true,
+        "key": "/library/metadata/5d9c08017b5c2e001e651bb9/children",
+        "rating": 10,
+        "ratingKey": "5d9c08017b5c2e001e651bb9",
+        "studio": "Nickelodeon Animation Studio",
+        "summary": "After a century frozen in ice, young Avatar Aang journeys with friends to master the four elements and bring balance to a world at war with the Fire Nation.",
+        "tagline": "The Avatar Returns",
+        "type": "show",
+        "addedAt": 1108857600,
+        "audienceRating": 9.8,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 3,
+        "contentRating": "TV-Y7",
+        "duration": 1440000,
+        "imdbRatingCount": 455248,
+        "lastEpisodeOriginallyAvailableAt": "2008-07-19",
+        "lastSeasonOriginallyAvailableAt": "2007-09-21",
+        "leafCount": 85,
+        "originallyAvailableAt": "2005-02-20",
+        "publicPagesURL": "https://watch.plex.tv/show/avatar-the-last-airbender",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "avatar-the-last-airbender",
+        "theme": "https://tvthemes.plexapp.com/74852.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/yaGt4GIutpbXHsv48tWceWg6s56.jpg",
+        "title": "Avatar: The Last Airbender",
+        "userState": false,
+        "year": 2005,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c08017b5c2e001e651bb9/commonsensemedia",
+            "oneLiner": "Great characters fight for peace in enduring fantasy series.",
+            "AgeRating": [
+              {
+                "age": 8,
+                "rating": 5,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/7oBGhqJIghRBvOwo5Qe0yM0cnMc.jpg"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/3/gracenote/31375b872e59aeeea12997c64d3cfd6a.jpg"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/28841-g.jpg"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/c/683a142553/c21f8bc7de1b460a1d80cec6164e4ce2.png"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/c/683a142553/c21f8bc7de1b460a1d80cec6164e4ce2.png"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/8/gracenote/86c18313054fa80994ec06ae2f7b0e15.jpg"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/yaGt4GIutpbXHsv48tWceWg6s56.jpg"
+          },
+          {
+            "alt": "Avatar: The Last Airbender",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/206be40be3905a82da1e1334165f6af4.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5df5b93281e1a7001f946b57",
+            "id": "5df5b93281e1a7001f946b57",
+            "key": "/library/sections/home/all?genre=5df5b93281e1a7001f946b57",
+            "ratingKey": "genre_5df5b93281e1a7001f946b57",
+            "slug": "martial-arts",
+            "tag": "Martial Arts",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0417299"
+          },
+          {
+            "id": "tmdb://246"
+          },
+          {
+            "id": "tvdb://74852"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 9.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 10
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.8
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.778
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Individual Achievement in Animation",
+            "event": "Emmys",
+            "id": "643ef0d797e9d59d9a6ba0b0",
+            "isWinner": true,
+            "year": 2007
+          },
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Animated Program (For Programming Less Than One Hour)",
+            "event": "Emmys",
+            "id": "643ef0d797e9d59d9a6ba0af",
+            "isWinner": false,
+            "year": 2007
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768346f4521001ea9bd83",
+            "order": 1,
+            "slug": "zach-tyler-eisen",
+            "tag": "Zach Tyler Eisen",
+            "thumb": "https://metadata-static.plex.tv/a/people/a08c680514316821cbfda306ea5a1017.jpg",
+            "role": "Aang (voice)",
+            "key": "/library/people/5d7768346f4521001ea9bd83",
+            "type": "person"
+          },
+          {
+            "id": "5d776831103a2d001f566b27",
+            "order": 2,
+            "slug": "mae-whitman",
+            "tag": "Mae Whitman",
+            "thumb": "https://metadata-static.plex.tv/3/people/3dac388b462f04214bced361d4d6b433.jpg",
+            "role": "Katara (voice)",
+            "key": "/library/people/5d776831103a2d001f566b27",
+            "type": "person"
+          },
+          {
+            "id": "5d7768348718ba001e3144fe",
+            "order": 3,
+            "slug": "jack-de-sena",
+            "tag": "Jack De Sena",
+            "thumb": "https://metadata-static.plex.tv/3/people/3589acb78b7b5adfffc18e038962e120.jpg",
+            "role": "Sokka (voice)",
+            "key": "/library/people/5d7768348718ba001e3144fe",
+            "type": "person"
+          },
+          {
+            "id": "5d7768298a7581001f12c1f6",
+            "order": 4,
+            "slug": "dante-basco",
+            "tag": "Dante Basco",
+            "thumb": "https://metadata-static.plex.tv/9/people/9f690b8d931a7514944790cf8b107151.jpg",
+            "role": "Zuko (voice)",
+            "key": "/library/people/5d7768298a7581001f12c1f6",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d5af944001f1f8215",
+            "order": 5,
+            "slug": "dee-bradley-baker",
+            "tag": "Dee Bradley Baker",
+            "thumb": "https://metadata-static.plex.tv/7/people/70a275d4944a00cd5a518b998624e3dd.jpg",
+            "role": "Appa / Momo (voice)",
+            "key": "/library/people/5d77682d5af944001f1f8215",
+            "type": "person"
+          },
+          {
+            "id": "5d776829103a2d001f564c11",
+            "order": 6,
+            "slug": "michaela-jill-murphy",
+            "tag": "Michaela Jill Murphy",
+            "thumb": "https://metadata-static.plex.tv/3/people/37295d1aed8b95d335cd6f62b0870c63.jpg",
+            "role": "Toph Beifong (voice)",
+            "key": "/library/people/5d776829103a2d001f564c11",
+            "type": "person"
+          },
+          {
+            "id": "5d77682785719b001f3a0eb6",
+            "order": 7,
+            "slug": "mako-17",
+            "tag": "Mako",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682785719b001f3a0eb6.jpg",
+            "role": "Iroh (voice)",
+            "key": "/library/people/5d77682785719b001f3a0eb6",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a54f42c001f8c544f",
+            "order": 8,
+            "slug": "cricket-leigh",
+            "tag": "Cricket Leigh",
+            "thumb": "https://metadata-static.plex.tv/1/people/1bf3faea66dbeda591debbf0f77bd9ae.jpg",
+            "role": "Mai (voice)",
+            "key": "/library/people/5d77683a54f42c001f8c544f",
+            "type": "person"
+          },
+          {
+            "id": "5d776831999c64001ec2e687",
+            "order": 9,
+            "slug": "grey-delisle",
+            "tag": "Grey DeLisle",
+            "thumb": "https://metadata-static.plex.tv/b/people/bc592fecc2fd2d025c4b921bec82fc2a.jpg",
+            "role": "Azula (voice)",
+            "key": "/library/people/5d776831999c64001ec2e687",
+            "type": "person"
+          },
+          {
+            "id": "5fbd498846dc07002d3c4bfa",
+            "order": 10,
+            "slug": "olivia-hack",
+            "tag": "Olivia Hack",
+            "thumb": "https://metadata-static.plex.tv/c/people/c93d7f3269013f9b5f2a5c738bdf27f2.jpg",
+            "role": "Ty Lee (voice)",
+            "key": "/library/people/5fbd498846dc07002d3c4bfa",
+            "type": "person"
+          },
+          {
+            "id": "5d776825880197001ec90325",
+            "order": 11,
+            "slug": "mark-hamill",
+            "tag": "Mark Hamill",
+            "thumb": "https://metadata-static.plex.tv/6/people/61ef91392c9712ae1abaf13fb745786c.jpg",
+            "role": "Ozai (voice)",
+            "key": "/library/people/5d776825880197001ec90325",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ce6d55c002040e5e2",
+            "order": 12,
+            "slug": "jennie-kwan",
+            "tag": "Jennie Kwan",
+            "thumb": "https://metadata-static.plex.tv/7/people/738a7cebfaacdabef85d940f9c1d2e61.jpg",
+            "role": "Suki (voice)",
+            "key": "/library/people/5d77683ce6d55c002040e5e2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbcac75",
+            "order": 13,
+            "slug": "jim-meskimen",
+            "tag": "Jim Meskimen",
+            "thumb": "https://metadata-static.plex.tv/8/people/8b857d9f5938508a1b121c53fe94ca0f.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768253c3c2a001fbcac75",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9af69",
+            "order": 14,
+            "slug": "andre-sogliuzzo",
+            "tag": "André Sogliuzzo",
+            "thumb": "https://metadata-static.plex.tv/e/people/ee4008a11e6d59048e50ae9eb68ee626.jpg",
+            "role": "Hakoda (voice)",
+            "key": "/library/people/5d77682f6f4521001ea9af69",
+            "type": "person"
+          },
+          {
+            "id": "5d7769a1fb0d55001f52b6db",
+            "order": 15,
+            "slug": "greg-baldwin",
+            "tag": "Greg Baldwin",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769a1fb0d55001f52b6db.jpg",
+            "role": "Iroh (voice)",
+            "key": "/library/people/5d7769a1fb0d55001f52b6db",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cfa93c44770842d87ae",
+            "order": 16,
+            "slug": "james-garrett-33",
+            "tag": "James Garrett",
+            "thumb": "https://metadata-static.plex.tv/c/people/c235dc19c69e5b690bd15c7d4248cd6b.jpg",
+            "role": "Avatar Roku (voice)",
+            "key": "/library/people/62fb7cfa93c44770842d87ae",
+            "type": "person"
+          },
+          {
+            "id": "5d776825151a60001f24a3ee",
+            "order": 17,
+            "slug": "jason-isaacs",
+            "tag": "Jason Isaacs",
+            "thumb": "https://metadata-static.plex.tv/a/people/a8e6525a5e6579c5de997030bb182e32.jpg",
+            "role": "Zhao (voice)",
+            "key": "/library/people/5d776825151a60001f24a3ee",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267228e5001f1dce45",
+            "order": 18,
+            "slug": "james-sie",
+            "tag": "James Sie",
+            "thumb": "https://metadata-static.plex.tv/0/people/0b54945cd7f6a1722daa88ea10871680.jpg",
+            "role": "Cabbage Merchant (voice)",
+            "key": "/library/people/5d7768267228e5001f1dce45",
+            "type": "person"
+          },
+          {
+            "id": "5d7768337e9a3c0020c6c72a",
+            "order": 19,
+            "slug": "scott-menville",
+            "tag": "Scott Menville",
+            "thumb": "https://metadata-static.plex.tv/5/people/53d22b6b39d9bd485f8426a027133703.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768337e9a3c0020c6c72a",
+            "type": "person"
+          },
+          {
+            "id": "5d776862eb5d26001f1e8c3d",
+            "order": 20,
+            "slug": "zachary-throne",
+            "tag": "Zachary Throne",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7cfedaa5fa7347ff66c07058dbebf34.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776862eb5d26001f1e8c3d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea99ec6",
+            "order": 21,
+            "slug": "keone-young",
+            "tag": "Keone Young",
+            "thumb": "https://metadata-static.plex.tv/2/people/232f756591dd785cea267526090227f1.jpg",
+            "role": "High Sage (voice)",
+            "key": "/library/people/5d77682b6f4521001ea99ec6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768285af944001f1f71ba",
+            "order": 22,
+            "slug": "sab-shimono",
+            "tag": "Sab Shimono",
+            "thumb": "https://metadata-static.plex.tv/3/people/322f412869e059d24fdd5fddc985ed40.jpg",
+            "role": "Gyatso (voice)",
+            "key": "/library/people/5d7768285af944001f1f71ba",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf7f",
+            "order": 23,
+            "slug": "kevin-michael-richardson",
+            "tag": "Kevin Michael Richardson",
+            "thumb": "https://metadata-static.plex.tv/2/people/22c120822600c2d039c72b81c9b18560.jpg",
+            "role": "Lion Turtle (voice)",
+            "key": "/library/people/5d776829999c64001ec2cf7f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768288718ba001e3121a9",
+            "order": 24,
+            "slug": "victor-brandt",
+            "tag": "Victor Brandt",
+            "thumb": "https://metadata-static.plex.tv/3/people/32d9b9137f33ddde27747054881c2cbe.jpg",
+            "role": "Master Pakku (voice)",
+            "key": "/library/people/5d7768288718ba001e3121a9",
+            "type": "person"
+          },
+          {
+            "id": "5d77687febdf2200209c08b1",
+            "order": 25,
+            "slug": "crawford-wilson",
+            "tag": "Crawford Wilson",
+            "thumb": "https://metadata-static.plex.tv/1/people/1bc42741edaf1d364eb5b8af39ffd531.jpg",
+            "role": "Jet (voice)",
+            "key": "/library/people/5d77687febdf2200209c08b1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682654c0f0001f301be6",
+            "order": 26,
+            "slug": "takayo-fischer",
+            "tag": "Takayo Fischer",
+            "thumb": "https://metadata-static.plex.tv/1/people/10cb270195df57ea4286eede560533c7.jpg",
+            "role": "Lo / Li (voice)",
+            "key": "/library/people/5d77682654c0f0001f301be6",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a8718ba001e3125e4",
+            "order": 27,
+            "slug": "johanna-braddy",
+            "tag": "Johanna Braddy",
+            "thumb": "https://metadata-static.plex.tv/4/cc68393fae/people/4d3cd459dd68c6f7e08828b09d358216.jpg",
+            "role": "Princess Yue (voice)",
+            "key": "/library/people/5d77682a8718ba001e3125e4",
+            "type": "person"
+          },
+          {
+            "id": "5d7768315af944001f1f90c7",
+            "order": 28,
+            "slug": "nika-futterman",
+            "tag": "Nika Futterman",
+            "thumb": "https://metadata-static.plex.tv/e/people/efa266fb3daaae2eb663a4c1e9a10da9.jpg",
+            "role": "Smellerbee (voice)",
+            "key": "/library/people/5d7768315af944001f1f90c7",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ac14",
+            "order": 29,
+            "slug": "clancy-brown",
+            "tag": "Clancy Brown",
+            "thumb": "https://metadata-static.plex.tv/d/people/d51ed451fab5ad9db6a1b07746fb0716.jpg",
+            "role": "Long Feng (voice)",
+            "key": "/library/people/5d776827151a60001f24ac14",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b4de0ee001fcc9a0c",
+            "order": 30,
+            "slug": "richard-mcgonagle",
+            "tag": "Richard McGonagle",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682b4de0ee001fcc9a0c.jpg",
+            "role": "Bato (voice)",
+            "key": "/library/people/5d77682b4de0ee001fcc9a0c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbcac20",
+            "order": 31,
+            "slug": "rene-auberjonois",
+            "tag": "René Auberjonois",
+            "thumb": "https://metadata-static.plex.tv/3/people/3fbe74115f6755b66b6058d1c3d059e5.jpg",
+            "role": "Mechanist (voice)",
+            "key": "/library/people/5d7768253c3c2a001fbcac20",
+            "type": "person"
+          },
+          {
+            "id": "5d77689f1999bc0020dcb697",
+            "order": 32,
+            "slug": "daniel-samonas",
+            "tag": "Daniel Samonas",
+            "thumb": "https://metadata-static.plex.tv/0/people/03c6a2e0a0f3311c277d554c7ab75bbd.jpg",
+            "role": "Teo (voice)",
+            "key": "/library/people/5d77689f1999bc0020dcb697",
+            "type": "person"
+          },
+          {
+            "id": "5d776826a091de001f2e6122",
+            "order": 33,
+            "slug": "clyde-kusatsu",
+            "tag": "Clyde Kusatsu",
+            "thumb": "https://metadata-static.plex.tv/5/people/57e995a5a1e1f1c2babc6c59f161faaf.jpg",
+            "role": "Calm Man (voice)",
+            "key": "/library/people/5d776826a091de001f2e6122",
+            "type": "person"
+          },
+          {
+            "id": "5d776841eb5d26001f1e37f2",
+            "order": 34,
+            "slug": "jason-charles-miller",
+            "tag": "Jason Charles Miller",
+            "thumb": "https://metadata-static.plex.tv/5/people/5c85b988d5e45810cd14ee08bf17aaf2.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776841eb5d26001f1e37f2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768432ec6b5001f6be730",
+            "order": 35,
+            "slug": "marc-graue",
+            "tag": "Marc Graue",
+            "thumb": "https://metadata-static.plex.tv/3/people/303248b9858a5759b8b191e927a9b7b5.jpg",
+            "role": "Xin Fu / Additional Voices (voice)",
+            "key": "/library/people/5d7768432ec6b5001f6be730",
+            "type": "person"
+          },
+          {
+            "id": "5d7768282ec6b5001f6ba5d1",
+            "order": 36,
+            "slug": "brian-george",
+            "tag": "Brian George",
+            "thumb": "https://metadata-static.plex.tv/8/people/81c7cae479cbc169b6f8bde525743719.jpg",
+            "role": "Guru Pathik (voice)",
+            "key": "/library/people/5d7768282ec6b5001f6ba5d1",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbe4452f2000041480866",
+            "order": 37,
+            "slug": "michael-dow",
+            "tag": "Michael Dow",
+            "role": "Haru (voice)",
+            "key": "/library/people/5f3fbe4452f2000041480866",
+            "type": "person"
+          },
+          {
+            "id": "687d17f49b2034a726373c91",
+            "order": 38,
+            "slug": "sterling-young-11",
+            "tag": "Sterling Young",
+            "role": "Pipsqueak (voice)",
+            "key": "/library/people/687d17f49b2034a726373c91",
+            "type": "person"
+          },
+          {
+            "id": "5d776829f54112001f5bc231",
+            "order": 39,
+            "slug": "kristoffer-tabori",
+            "tag": "Kristoffer Tabori",
+            "thumb": "https://metadata-static.plex.tv/9/people/944544d61cebb930ce14a76d5e419eca.jpg",
+            "role": "War Minister Qin (voice)",
+            "key": "/library/people/5d776829f54112001f5bc231",
+            "type": "person"
+          },
+          {
+            "id": "5d7768275af944001f1f6aa8",
+            "order": 40,
+            "slug": "brian-tochi",
+            "tag": "Brian Tochi",
+            "thumb": "https://metadata-static.plex.tv/7/people/794e15365405cefe6f5625b14e0359a6.jpg",
+            "role": "Ham Ghao (voice)",
+            "key": "/library/people/5d7768275af944001f1f6aa8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea989ce",
+            "order": 41,
+            "slug": "jon-polito",
+            "tag": "Jon Polito",
+            "thumb": "https://metadata-static.plex.tv/0/people/0109440cc19533037d1e07d8748da45d.jpg",
+            "role": "Chief Arnook (voice)",
+            "key": "/library/people/5d7768256f4521001ea989ce",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea98a05",
+            "order": 42,
+            "slug": "tara-strong",
+            "tag": "Tara Strong",
+            "thumb": "https://metadata-static.plex.tv/3/people/3c45a6363e4ddf1cac548c22cffd8b43.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768256f4521001ea98a05",
+            "type": "person"
+          },
+          {
+            "id": "5d77683aeb5d26001f1e1df8",
+            "order": 43,
+            "slug": "kim-mai-guest",
+            "tag": "Kim Mai Guest",
+            "thumb": "https://metadata-static.plex.tv/8/people/8eda0b465c66f31eb920e85daff1e31e.jpg",
+            "role": "Ying (voice)",
+            "key": "/library/people/5d77683aeb5d26001f1e1df8",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d999c64001ec2dc88",
+            "order": 44,
+            "slug": "robin-atkin-downes",
+            "tag": "Robin Atkin Downes",
+            "thumb": "https://metadata-static.plex.tv/6/people/67213e804a950f9127a257c06b4c3b0a.jpg",
+            "role": "Captain / Additional Voices (voice)",
+            "key": "/library/people/5d77682d999c64001ec2dc88",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe7e104a86500409a1999",
+            "order": 45,
+            "slug": "jen-cohn-1",
+            "tag": "Jen Cohn",
+            "thumb": "https://metadata-static.plex.tv/f/people/ffac32c60a0a5b60678f90282751e28b.jpg",
+            "role": "Ursa (voice)",
+            "key": "/library/people/5f3fe7e104a86500409a1999",
+            "type": "person"
+          },
+          {
+            "id": "5fbdc8e3eadbaa002d00a31c",
+            "order": 46,
+            "slug": "bryan-konietzko",
+            "tag": "Bryan Konietzko",
+            "thumb": "https://metadata-static.plex.tv/8/people/85c097e2dcd917aef25e4b9460c4e7d3.jpg",
+            "role": "Pirate Barker (voice)",
+            "key": "/library/people/5fbdc8e3eadbaa002d00a31c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e961905001eb92c8d",
+            "order": 47,
+            "slug": "barbara-goodson",
+            "tag": "Barbara Goodson",
+            "thumb": "https://metadata-static.plex.tv/4/people/413d99fa6c07b3009337f0b9bf9bc003.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77682e961905001eb92c8d",
+            "type": "person"
+          },
+          {
+            "id": "5d776827103a2d001f564619",
+            "order": 48,
+            "slug": "phil-lamarr",
+            "tag": "Phil LaMarr",
+            "thumb": "https://metadata-static.plex.tv/e/people/e37f3a5764a078ff3c3ecbb18b32b5c8.jpg",
+            "role": "Earth King / Additional Voices (voice)",
+            "key": "/library/people/5d776827103a2d001f564619",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b7228e5001f1df859",
+            "order": 49,
+            "slug": "lex-lang",
+            "tag": "Lex Lang",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683b7228e5001f1df859.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683b7228e5001f1df859",
+            "type": "person"
+          },
+          {
+            "id": "5d77683aeb5d26001f1e1cdb",
+            "order": 50,
+            "slug": "jennifer-hale",
+            "tag": "Jennifer Hale",
+            "thumb": "https://metadata-static.plex.tv/7/people/777b6d6d1c650a7c15a4652ce60e75e8.jpg",
+            "role": "Avatar Kyoshi / June (voice)",
+            "key": "/library/people/5d77683aeb5d26001f1e1cdb",
+            "type": "person"
+          },
+          {
+            "id": "5d776825961905001eb909c4",
+            "order": 51,
+            "slug": "wayne-duvall",
+            "tag": "Wayne Duvall",
+            "thumb": "https://metadata-static.plex.tv/d/people/d50a9c6d20471991a23b0c27d6028e4e.jpg",
+            "role": "Warden Poon (voice)",
+            "key": "/library/people/5d776825961905001eb909c4",
+            "type": "person"
+          },
+          {
+            "id": "687d17f49b2034a726373c92",
+            "order": 52,
+            "slug": "nick-swoboda-1",
+            "tag": "Nick Swoboda",
+            "role": "The Duke (voice)",
+            "key": "/library/people/687d17f49b2034a726373c92",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c7e9a3c0020c6e4c7",
+            "order": 53,
+            "slug": "jodi-carlisle",
+            "tag": "Jodi Carlisle",
+            "thumb": "https://metadata-static.plex.tv/e/people/e7a444133c278f40680231a43553ed90.jpg",
+            "role": "Herbalist (voice)",
+            "key": "/library/people/5d77683c7e9a3c0020c6e4c7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768273c3c2a001fbcb219",
+            "order": 54,
+            "slug": "malachi-throne",
+            "tag": "Malachi Throne",
+            "thumb": "https://metadata-static.plex.tv/2/people/28b1f1c7fe716d0c25e11f178e7e31c5.jpg",
+            "role": "Colonel Mongke / Additional Voices (voice)",
+            "key": "/library/people/5d7768273c3c2a001fbcb219",
+            "type": "person"
+          },
+          {
+            "id": "5d77683485719b001f3a3663",
+            "order": 55,
+            "slug": "carlos-alazraqui",
+            "tag": "Carlos Alazraqui",
+            "thumb": "https://metadata-static.plex.tv/c/people/c45b8e23019b67cade287efb4cd14dda.jpg",
+            "role": "Tho / Due (voice)",
+            "key": "/library/people/5d77683485719b001f3a3663",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f5653ad",
+            "order": 56,
+            "slug": "william-bassett",
+            "tag": "William Bassett",
+            "thumb": "https://metadata-static.plex.tv/1/people/141af1b014eb718eeb305daf3963768d.jpg",
+            "role": "Huu (voice)",
+            "key": "/library/people/5d77682a103a2d001f5653ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a051a",
+            "order": 57,
+            "slug": "robert-patrick",
+            "tag": "Robert Patrick",
+            "thumb": "https://metadata-static.plex.tv/d/people/d7aca19b078b81d86941891f4763bdcd.jpg",
+            "role": "Master Piandao (voice)",
+            "key": "/library/people/5d77682585719b001f3a051a",
+            "type": "person"
+          },
+          {
+            "id": "5d776831999c64001ec2e699",
+            "order": 58,
+            "slug": "wade-williams",
+            "tag": "Wade Williams",
+            "thumb": "https://metadata-static.plex.tv/9/people/990080394e2dc2f1d52aae4c4dcc1ece.jpg",
+            "role": "Warden (voice)",
+            "key": "/library/people/5d776831999c64001ec2e699",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea989ff",
+            "order": 59,
+            "slug": "john-dimaggio",
+            "tag": "John DiMaggio",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a945543418d442fea7ae4948b2a2fda.jpg",
+            "role": "Actor Toph / Actor Uncle Iroh (voice)",
+            "key": "/library/people/5d7768256f4521001ea989ff",
+            "type": "person"
+          },
+          {
+            "id": "5d7768437e9a3c0020c6f77d",
+            "order": 60,
+            "slug": "mitch-holleman",
+            "tag": "Mitch Holleman",
+            "thumb": "https://metadata-static.plex.tv/8/people/8071f3cfee4ae87a92253999465de435.jpg",
+            "role": "The Duke (voice)",
+            "key": "/library/people/5d7768437e9a3c0020c6f77d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768342ec6b5001f6bbcd0",
+            "order": 61,
+            "slug": "jillian-henry",
+            "tag": "Jillian Henry",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768342ec6b5001f6bbcd0.jpg",
+            "role": "Koko (voice)",
+            "key": "/library/people/5d7768342ec6b5001f6bbcd0",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c7e9a3c0020c6e412",
+            "order": 62,
+            "slug": "mick-foley",
+            "tag": "Mick Foley",
+            "thumb": "https://metadata-static.plex.tv/c/people/ca4e10a7fcc2a6a25e23577dbe4a5bd2.jpg",
+            "role": "The Boulder (voice)",
+            "key": "/library/people/5d77683c7e9a3c0020c6e412",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b151a60001f24f1b6",
+            "order": 63,
+            "slug": "derek-basco",
+            "tag": "Derek Basco",
+            "thumb": "https://metadata-static.plex.tv/8/people/80c339d857e28e97d610e85991b59339.jpg",
+            "role": "Actor Zuko (voice)",
+            "key": "/library/people/5d77683b151a60001f24f1b6",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab01",
+            "order": 64,
+            "slug": "paul-eiding",
+            "tag": "Paul Eiding",
+            "thumb": "https://metadata-static.plex.tv/2/people/209737f4d2a4e32b7eea4ea01920c0b6.jpg",
+            "role": "Ukano (voice)",
+            "key": "/library/people/5d776827151a60001f24ab01",
+            "type": "person"
+          },
+          {
+            "id": "5d7768287e9a3c0020c6af25",
+            "order": 65,
+            "slug": "barry-dennen",
+            "tag": "Barry Dennen",
+            "thumb": "https://metadata-static.plex.tv/7/people/7ffc33726099c6811c31d02bad50e1a5.jpg",
+            "role": "General Sung (voice)",
+            "key": "/library/people/5d7768287e9a3c0020c6af25",
+            "type": "person"
+          },
+          {
+            "id": "5d77682654f42c001f8c267b",
+            "order": 66,
+            "slug": "joe-alaskey",
+            "tag": "Joe Alaskey",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d80d79113bc666f851472612bb1c580.jpg",
+            "role": "Dealer (voice)",
+            "key": "/library/people/5d77682654f42c001f8c267b",
+            "type": "person"
+          },
+          {
+            "id": "5d776ad47a53e9001e71102c",
+            "order": 67,
+            "slug": "paul-mckinney",
+            "tag": "Paul McKinney",
+            "thumb": "https://metadata-static.plex.tv/people/5d776ad47a53e9001e71102c.jpg",
+            "role": "Ghashiun / Additional Voices (voice)",
+            "key": "/library/people/5d776ad47a53e9001e71102c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768245af944001f1f635e",
+            "order": 68,
+            "slug": "james-hong",
+            "tag": "James Hong",
+            "thumb": "https://metadata-static.plex.tv/8/people/8fe5cc1942a0836184be91251c6de0a9.jpg",
+            "role": "Tashi (voice)",
+            "key": "/library/people/5d7768245af944001f1f635e",
+            "type": "person"
+          },
+          {
+            "id": "5d776836a091de001f2e820f",
+            "order": 69,
+            "slug": "marc-donato",
+            "tag": "Marc Donato",
+            "thumb": "https://metadata-static.plex.tv/8/people/8de2160be3356d5c2b5df2ff5eca5202.jpg",
+            "role": "Longshot (voice)",
+            "key": "/library/people/5d776836a091de001f2e820f",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe606fea1a1003f999629",
+            "order": 70,
+            "slug": "peter-jessop-2",
+            "tag": "Peter Jessop",
+            "thumb": "https://metadata-static.plex.tv/e/people/e772149502c021e771b4596bf59679da.jpg",
+            "role": "Fung / Additional Voices (voice)",
+            "key": "/library/people/5f3fe606fea1a1003f999629",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b6f4521001ea99f77",
+            "order": 71,
+            "slug": "lauren-tom",
+            "tag": "Lauren Tom",
+            "thumb": "https://metadata-static.plex.tv/6/people/6900145e1296a7ff2b082509baf9e43c.jpg",
+            "role": "Joo Dee (voice)",
+            "key": "/library/people/5d77682b6f4521001ea99f77",
+            "type": "person"
+          },
+          {
+            "id": "5d7768283c3c2a001fbcb629",
+            "order": 72,
+            "slug": "george-cheung",
+            "tag": "George Cheung",
+            "thumb": "https://metadata-static.plex.tv/6/people/65184502a52285f41d8479867a8aab43.jpg",
+            "role": "Pao (voice)",
+            "key": "/library/people/5d7768283c3c2a001fbcb629",
+            "type": "person"
+          },
+          {
+            "id": "5ec4207243d47400431fa28d",
+            "order": 73,
+            "slug": "roberta-farkas",
+            "tag": "Roberta Farkas",
+            "thumb": "https://metadata-static.plex.tv/0/people/07ccddfb24996bf00d81275f78ceb61a.jpg",
+            "role": "Zhang Leader (voice)",
+            "key": "/library/people/5ec4207243d47400431fa28d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6ab13",
+            "order": 74,
+            "slug": "tress-macneille",
+            "tag": "Tress MacNeille",
+            "thumb": "https://metadata-static.plex.tv/3/people/35789c0b249ce651330a7ccc5d5e6ec0.jpg",
+            "role": "Avatar Yangchen (voice)",
+            "key": "/library/people/5d7768267e9a3c0020c6ab13",
+            "type": "person"
+          },
+          {
+            "id": "5d776827103a2d001f56462a",
+            "order": 75,
+            "slug": "karen-maruyama",
+            "tag": "Karen Maruyama",
+            "thumb": "https://metadata-static.plex.tv/4/people/448a8a08486c86f98f2bd42135251a2c.jpg",
+            "role": "Bureaucrat (voice)",
+            "key": "/library/people/5d776827103a2d001f56462a",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ee6d55c002040bc97",
+            "order": 76,
+            "slug": "melendy-britt",
+            "tag": "Melendy Britt",
+            "thumb": "https://metadata-static.plex.tv/b/people/bea4d382a7c8a0bbb49eab56120e5008.jpg",
+            "role": "Gran Gran (voice)",
+            "key": "/library/people/5d77682ee6d55c002040bc97",
+            "type": "person"
+          },
+          {
+            "id": "659d3610d9b43a02e197f814",
+            "order": 77,
+            "slug": "luke-zampas-4",
+            "tag": "Luke Zampas",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/659d3610d9b43a02e197f814",
+            "type": "person"
+          },
+          {
+            "id": "5d776834151a60001f24d6dc",
+            "order": 78,
+            "slug": "madeline-lovejoy",
+            "tag": "Madeline Lovejoy",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776834151a60001f24d6dc",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f7e9a3c0020c6ee0b",
+            "order": 79,
+            "slug": "michael-hagiwara",
+            "tag": "Michael Hagiwara",
+            "thumb": "https://metadata-static.plex.tv/1/people/1c94472f79458179133379ecd5403dc7.jpg",
+            "role": "Leader (voice)",
+            "key": "/library/people/5d77683f7e9a3c0020c6ee0b",
+            "type": "person"
+          },
+          {
+            "id": "5d776829103a2d001f564c0e",
+            "order": 80,
+            "slug": "paul-butcher",
+            "tag": "Paul Butcher",
+            "thumb": "https://metadata-static.plex.tv/people/5d776829103a2d001f564c0e.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776829103a2d001f564c0e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c61141d001fb1426b",
+            "order": 81,
+            "slug": "nick-jameson",
+            "tag": "Nick Jameson",
+            "thumb": "https://metadata-static.plex.tv/9/people/934b081bfc02e3d5ebc50dd724b86ae6.jpg",
+            "role": "Colonel Shinu (voice)",
+            "key": "/library/people/5d77682c61141d001fb1426b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768276f4521001ea99092",
+            "order": 82,
+            "slug": "tsai-chin",
+            "tag": "Tsai Chin",
+            "thumb": "https://metadata-static.plex.tv/6/people/6a3dc2d44693fcf6c0fe6b5d699087b7.jpg",
+            "role": "Aunt Wu (voice)",
+            "key": "/library/people/5d7768276f4521001ea99092",
+            "type": "person"
+          },
+          {
+            "id": "5d776824961905001eb90980",
+            "order": 83,
+            "slug": "jack-angel",
+            "tag": "Jack Angel",
+            "thumb": "https://metadata-static.plex.tv/c/people/c481265627779680d9af4b8e618ab636.jpg",
+            "role": "Pirate Captain (voice)",
+            "key": "/library/people/5d776824961905001eb90980",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d8718ba001e31307f",
+            "order": 84,
+            "slug": "erik-dellums",
+            "tag": "Erik Dellums",
+            "thumb": "https://metadata-static.plex.tv/8/people/8ee32cd45904e3d2a04efc31bfaf587a.jpg",
+            "role": "Koh (voice)",
+            "key": "/library/people/5d77682d8718ba001e31307f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682954f42c001f8c2da1",
+            "order": 85,
+            "slug": "ben-diskin",
+            "tag": "Ben Diskin",
+            "thumb": "https://metadata-static.plex.tv/a/people/ad7a0a92560af760c58c09b3a51288b2.jpg",
+            "role": "Hahn (voice)",
+            "key": "/library/people/5d77682954f42c001f8c2da1",
+            "type": "person"
+          },
+          {
+            "id": "5f3ffdc452f20000414dad97",
+            "order": 86,
+            "slug": "ezekial-rollins",
+            "tag": "Ezekial Rollins",
+            "role": "Chit Sang (voice)",
+            "key": "/library/people/5f3ffdc452f20000414dad97",
+            "type": "person"
+          },
+          {
+            "id": "5d776834961905001eb93bfe",
+            "order": 87,
+            "slug": "roger-rose",
+            "tag": "Roger Rose",
+            "thumb": "https://metadata-static.plex.tv/people/5d776834961905001eb93bfe.jpg",
+            "role": "Bully Guard (voice)",
+            "key": "/library/people/5d776834961905001eb93bfe",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b151a60001f24f161",
+            "order": 88,
+            "slug": "courtenay-taylor",
+            "tag": "Courtenay Taylor",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c43189bfec7def5b2b383f79276b7df.jpg",
+            "role": "Guard (voice)",
+            "key": "/library/people/5d77683b151a60001f24f161",
+            "type": "person"
+          },
+          {
+            "id": "5d776850e870fd001f19df2b",
+            "order": 89,
+            "slug": "eric-bauza",
+            "tag": "Eric Bauza",
+            "thumb": "https://metadata-static.plex.tv/7/people/71a24cff2a95495a57e4aa5dbe17bb92.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776850e870fd001f19df2b",
+            "type": "person"
+          },
+          {
+            "id": "5d776836f59e580021898c00",
+            "order": 90,
+            "slug": "rachel-dratch",
+            "tag": "Rachel Dratch",
+            "thumb": "https://metadata-static.plex.tv/e/people/e9ecb99104ba12d51a6de8e842ab996c.jpg",
+            "role": "Actress Aang (voice)",
+            "key": "/library/people/5d776836f59e580021898c00",
+            "type": "person"
+          },
+          {
+            "id": "5d776834151a60001f24d869",
+            "order": 91,
+            "slug": "lucille-bliss",
+            "tag": "Lucille Bliss",
+            "thumb": "https://metadata-static.plex.tv/4/people/41262414522f6bcb45a140920c01dac0.jpg",
+            "role": "Yagoda (voice)",
+            "key": "/library/people/5d776834151a60001f24d869",
+            "type": "person"
+          },
+          {
+            "id": "5d77682cf54112001f5bc8b6",
+            "order": 92,
+            "slug": "john-kassir",
+            "tag": "John Kassir",
+            "thumb": "https://metadata-static.plex.tv/5/people/5f41ca37cf614ab98198eb6a661a4e80.jpg",
+            "role": "Chey (voice)",
+            "key": "/library/people/5d77682cf54112001f5bc8b6",
+            "type": "person"
+          },
+          {
+            "id": "5d77683254c0f0001f3031f1",
+            "order": 93,
+            "slug": "ross-thomas",
+            "tag": "Ross Thomas",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683254c0f0001f3031f1.jpg",
+            "role": "Ruon-Jian (voice)",
+            "key": "/library/people/5d77683254c0f0001f3031f1",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c2f4",
+            "order": 94,
+            "slug": "james-shigeta",
+            "tag": "James Shigeta",
+            "thumb": "https://metadata-static.plex.tv/9/people/9618b6c13e26e1735bc408c0c7d8ecb1.jpg",
+            "role": "Old Wanderer (voice)",
+            "key": "/library/people/5d776826999c64001ec2c2f4",
+            "type": "person"
+          },
+          {
+            "id": "5d776832880197001ec92afb",
+            "order": 95,
+            "slug": "andrew-lewis-caldwell",
+            "tag": "Andrew Lewis Caldwell",
+            "thumb": "https://metadata-static.plex.tv/7/people/70e323289a050eaa09c21f9af1ff60a6.jpg",
+            "role": "Teen Roku (voice)",
+            "key": "/library/people/5d776832880197001ec92afb",
+            "type": "person"
+          },
+          {
+            "id": "5f4048ae8642250042877465",
+            "order": 96,
+            "slug": "matthew-underwood-2",
+            "tag": "Matthew Underwood",
+            "thumb": "https://metadata-static.plex.tv/b/people/b6e028e5eeff7370d0aa39d3c5cb67c0.jpg",
+            "role": "Hide (voice)",
+            "key": "/library/people/5f4048ae8642250042877465",
+            "type": "person"
+          },
+          {
+            "id": "5d776828a091de001f2e6398",
+            "order": 97,
+            "slug": "daniel-dae-kim",
+            "tag": "Daniel Dae Kim",
+            "thumb": "https://metadata-static.plex.tv/4/people/4098e99d8a201a625f16e76ee4e2ed2a.jpg",
+            "role": "General Fong (voice)",
+            "key": "/library/people/5d776828a091de001f2e6398",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a2431c830024c11861",
+            "order": 98,
+            "slug": "quinton-flynn",
+            "tag": "Quinton Flynn",
+            "thumb": "https://metadata-static.plex.tv/c/people/cf96f438e9f47614d24535671519e7b9.jpg",
+            "role": "Mugger (voice)",
+            "key": "/library/people/5d7768a2431c830024c11861",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbcacd7",
+            "order": 99,
+            "slug": "hector-elizondo",
+            "tag": "Héctor Elizondo",
+            "thumb": "https://metadata-static.plex.tv/3/people/31d9201b0cdd710bdeeb2e6b8d4e8d08.jpg",
+            "role": "Wan Shi Tong (voice)",
+            "key": "/library/people/5d7768253c3c2a001fbcacd7",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f3c3c2a001fbcccf1",
+            "order": 100,
+            "slug": "cam-clarke",
+            "tag": "Cam Clarke",
+            "thumb": "https://metadata-static.plex.tv/9/people/9e7383af5ab3839725bd15abb4988b9d.jpg",
+            "role": "Lao / Additional Voices (voice)",
+            "key": "/library/people/5d77682f3c3c2a001fbcccf1",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea989e7",
+            "order": 101,
+            "slug": "dwight-schultz",
+            "tag": "Dwight Schultz",
+            "thumb": "https://metadata-static.plex.tv/5/people/541b575ebfd42e15dd0227b376ade21b.jpg",
+            "role": "Trainer / Additional Voices (voice)",
+            "key": "/library/people/5d7768256f4521001ea989e7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768344de0ee001fccb46e",
+            "order": 102,
+            "slug": "jim-ward",
+            "tag": "Jim Ward",
+            "thumb": "https://metadata-static.plex.tv/2/people/2a419533eb42603b57d0a8bd53e18fa6.jpg",
+            "role": "Headmaster (voice)",
+            "key": "/library/people/5d7768344de0ee001fccb46e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ee6d55c002040bf3d",
+            "order": 103,
+            "slug": "cameron-monaghan",
+            "tag": "Cameron Monaghan",
+            "thumb": "https://metadata-static.plex.tv/a/people/a9f1febd8f9eacc99e774b5177683140.jpg",
+            "role": "Twin 1 (voice)",
+            "key": "/library/people/5d77682ee6d55c002040bf3d",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e7c",
+            "order": 104,
+            "slug": "erik-von-detten",
+            "tag": "Erik von Detten",
+            "thumb": "https://metadata-static.plex.tv/2/people/2febeb780ea13ed59226bf63157f2a48.jpg",
+            "role": "Chan (voice)",
+            "key": "/library/people/5d776828880197001ec90e7c",
+            "type": "person"
+          },
+          {
+            "id": "5d776837a091de001f2e85c2",
+            "order": 105,
+            "slug": "robert-ito",
+            "tag": "Robert Ito",
+            "thumb": "https://metadata-static.plex.tv/1/people/125a6aff02e7786e41353a249a91bed3.jpg",
+            "role": "Sun Warrior Chief (voice)",
+            "key": "/library/people/5d776837a091de001f2e85c2",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab0d",
+            "order": 106,
+            "slug": "laraine-newman",
+            "tag": "Laraine Newman",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ad6a8d89b817cc4027d5fe766626a07.jpg",
+            "role": "Lily (voice)",
+            "key": "/library/people/5d776827151a60001f24ab0d",
+            "type": "person"
+          },
+          {
+            "id": "5d776838880197001ec94159",
+            "order": 107,
+            "slug": "robert-pine",
+            "tag": "Robert Pine",
+            "thumb": "https://metadata-static.plex.tv/7/people/70390c53114879904c825bedf109e43d.jpg",
+            "role": "Fisherman (voice)",
+            "key": "/library/people/5d776838880197001ec94159",
+            "type": "person"
+          },
+          {
+            "id": "5d776840999c64001ec3183c",
+            "order": 108,
+            "slug": "susan-silo",
+            "tag": "Susan Silo",
+            "role": "Fisherman's Wife (voice)",
+            "key": "/library/people/5d776840999c64001ec3183c",
+            "type": "person"
+          },
+          {
+            "id": "5f3feb25bf3e560040b35d7a",
+            "order": 109,
+            "slug": "julianna-rose",
+            "tag": "Julianna Rose",
+            "thumb": "https://metadata-static.plex.tv/5/people/539a88b74c61d5f508a68144b4053324.jpg",
+            "role": "Little Fire Nation Girl (voice)",
+            "key": "/library/people/5f3feb25bf3e560040b35d7a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbca9e7",
+            "order": 110,
+            "slug": "george-takei",
+            "tag": "George Takei",
+            "thumb": "https://metadata-static.plex.tv/7/people/72b18d1aa44e8c03de64d717fb4a213d.jpg",
+            "role": "Warden (voice)",
+            "key": "/library/people/5d7768253c3c2a001fbca9e7",
+            "type": "person"
+          },
+          {
+            "id": "5d776825961905001eb90a69",
+            "order": 111,
+            "slug": "leonard-stone",
+            "tag": "Leonard Stone",
+            "thumb": "https://image.tmdb.org/t/p/original/wjcAfMlcIry9YOdmrlaSCA3F6PQ.jpg",
+            "role": "Canyon Guide (voice)",
+            "key": "/library/people/5d776825961905001eb90a69",
+            "type": "person"
+          },
+          {
+            "id": "5d77697a47dd6e001f6c5ed8",
+            "order": 112,
+            "slug": "serena-williams",
+            "tag": "Serena Williams",
+            "thumb": "https://metadata-static.plex.tv/people/5d77697a47dd6e001f6c5ed8.jpg",
+            "role": "Ming (voice)",
+            "key": "/library/people/5d77697a47dd6e001f6c5ed8",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf80",
+            "order": 113,
+            "slug": "fred-tatasciore",
+            "tag": "Fred Tatasciore",
+            "thumb": "https://metadata-static.plex.tv/0/people/0c74f8f5487d737d7a32299876a1129b.jpg",
+            "role": "Resistance Leader (voice)",
+            "key": "/library/people/5d776829999c64001ec2cf80",
+            "type": "person"
+          },
+          {
+            "id": "65be30945b0bd90116aef87f",
+            "order": 114,
+            "slug": "david-jeremiah-1",
+            "tag": "David Jeremiah",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/65be30945b0bd90116aef87f",
+            "type": "person"
+          },
+          {
+            "id": "5d776846eb5d26001f1e47f7",
+            "order": 115,
+            "slug": "julianne-buescher",
+            "tag": "Julianne Buescher",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd8ca8ad9a4a2e30beb62181784804fc.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776846eb5d26001f1e47f7",
+            "type": "person"
+          },
+          {
+            "id": "5d776832151a60001f24d2a9",
+            "order": 116,
+            "slug": "andre-ware",
+            "tag": "Andre Ware",
+            "thumb": "https://image.tmdb.org/t/p/original/ukimnb2sfaZFSax8XqskWyLgoCc.jpg",
+            "role": "Wealthy Man / Sensitive Ruffian (voice)",
+            "key": "/library/people/5d776832151a60001f24d2a9",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b151a60001f24f19a",
+            "order": 117,
+            "slug": "gabrielle-carteris",
+            "tag": "Gabrielle Carteris",
+            "thumb": "https://metadata-static.plex.tv/3/people/32061a42d59a46a14a940ed8278695e0.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683b151a60001f24f19a",
+            "type": "person"
+          },
+          {
+            "id": "5d776831999c64001ec2e688",
+            "order": 118,
+            "slug": "scott-mosenson",
+            "tag": "Scott Mosenson",
+            "thumb": "https://metadata-static.plex.tv/1/people/1e249af38b1ff82263d7411123137da9.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776831999c64001ec2e688",
+            "type": "person"
+          },
+          {
+            "id": "5d77682954f42c001f8c2d7c",
+            "order": 119,
+            "slug": "adam-wylie",
+            "tag": "Adam Wylie",
+            "thumb": "https://metadata-static.plex.tv/8/people/890b1b86168f9b887a4d0656f39a30d6.jpg",
+            "role": "Academy Student (voice)",
+            "key": "/library/people/5d77682954f42c001f8c2d7c",
+            "type": "person"
+          },
+          {
+            "id": "5d77683e880197001ec954e5",
+            "order": 120,
+            "slug": "gary-anthony-sturgis",
+            "tag": "Gary Anthony Sturgis",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683e880197001ec954e5.jpg",
+            "role": "Gow (voice)",
+            "key": "/library/people/5d77683e880197001ec954e5",
+            "type": "person"
+          },
+          {
+            "id": "5d776dabad5437001f7dc6a8",
+            "order": 121,
+            "slug": "elijah-runcorn",
+            "tag": "Elijah Runcorn",
+            "role": "Young Zuko (voice)",
+            "key": "/library/people/5d776dabad5437001f7dc6a8",
+            "type": "person"
+          },
+          {
+            "id": "5d776855e870fd001f19e281",
+            "order": 122,
+            "slug": "robby-d-bruce",
+            "tag": "Robby D. Bruce",
+            "role": "Lee (voice)",
+            "key": "/library/people/5d776855e870fd001f19e281",
+            "type": "person"
+          },
+          {
+            "id": "5d77682eeb5d26001f1df5ba",
+            "order": 123,
+            "slug": "brian-oneill",
+            "tag": "Brian O'Neill",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682eeb5d26001f1df5ba.jpg",
+            "role": "Gansu (voice)",
+            "key": "/library/people/5d77682eeb5d26001f1df5ba",
+            "type": "person"
+          },
+          {
+            "id": "5d776880308bca002032bcff",
+            "order": 124,
+            "slug": "susan-eisenberg",
+            "tag": "Susan Eisenberg",
+            "thumb": "https://metadata-static.plex.tv/6/people/6ebfb96b6a3bd96753a57a613e554cff.jpg",
+            "role": "Sela (voice)",
+            "key": "/library/people/5d776880308bca002032bcff",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f565415",
+            "order": 125,
+            "slug": "walker-edmiston",
+            "tag": "Walker Edmiston",
+            "thumb": "https://metadata-static.plex.tv/8/people/891a73b76e69073ee430c36134f73bc9.jpg",
+            "role": "Azulon (voice)",
+            "key": "/library/people/5d77682a103a2d001f565415",
+            "type": "person"
+          },
+          {
+            "id": "5d77682785719b001f3a0ec6",
+            "order": 126,
+            "slug": "raphael-sbarge",
+            "tag": "Raphael Sbarge",
+            "thumb": "https://metadata-static.plex.tv/6/people/6c18274e6a8e7182146276e8b33a2bf0.jpg",
+            "role": "Professor Zei / Additional Voices (voice)",
+            "key": "/library/people/5d77682785719b001f3a0ec6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768278a7581001f12bf16",
+            "order": 127,
+            "slug": "bill-bolender",
+            "tag": "Bill Bolender",
+            "role": "Sha-Mo / Additional Voices (voice)",
+            "key": "/library/people/5d7768278a7581001f12bf16",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e80",
+            "order": 128,
+            "slug": "greg-berg",
+            "tag": "Greg Berg",
+            "thumb": "https://metadata-static.plex.tv/f/people/fdc03f46330161e89fa17be9808b4f1d.jpg",
+            "role": "Pong (voice)",
+            "key": "/library/people/5d776828880197001ec90e80",
+            "type": "person"
+          },
+          {
+            "id": "5d776824151a60001f24a390",
+            "order": 129,
+            "slug": "wil-wheaton",
+            "tag": "Wil Wheaton",
+            "thumb": "https://metadata-static.plex.tv/c/people/c1b2efad3a1e7d852256e9002e2fc06f.jpg",
+            "role": "Pet Shop Owner (voice)",
+            "key": "/library/people/5d776824151a60001f24a390",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d961905001eb92985",
+            "order": 130,
+            "slug": "nicholas-guest",
+            "tag": "Nicholas Guest",
+            "thumb": "https://metadata-static.plex.tv/5/people/51ab2840364346ce55d6226d5dc04f6b.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77682d961905001eb92985",
+            "type": "person"
+          },
+          {
+            "id": "5d7768367228e5001f1deb3a",
+            "order": 131,
+            "slug": "melinda-clarke",
+            "tag": "Melinda Clarke",
+            "thumb": "https://metadata-static.plex.tv/d/people/d893dcacdf8e838fb733309b89cacb82.jpg",
+            "role": "Madame Macmu-Ling (voice)",
+            "key": "/library/people/5d7768367228e5001f1deb3a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768327228e5001f1de150",
+            "order": 132,
+            "slug": "marcella-lentz-pope",
+            "tag": "Marcella Lentz-Pope",
+            "thumb": "https://metadata-static.plex.tv/1/people/1b4e64e8e87cd40a1d336f1d81fb3a58.jpg",
+            "role": "Jin (voice)",
+            "key": "/library/people/5d7768327228e5001f1de150",
+            "type": "person"
+          },
+          {
+            "id": "6214f57f0147e090ec28b68e",
+            "order": 133,
+            "slug": "andy-morris-32",
+            "tag": "Andy Morris",
+            "role": "Kenji (voice)",
+            "key": "/library/people/6214f57f0147e090ec28b68e",
+            "type": "person"
+          },
+          {
+            "id": "5ec42461e72b600040120f9a",
+            "order": 134,
+            "slug": "lizzie-murray",
+            "tag": "Lizzie Murray",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5ec42461e72b600040120f9a",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ac29",
+            "order": 135,
+            "slug": "robert-david-hall",
+            "tag": "Robert David Hall",
+            "thumb": "https://metadata-static.plex.tv/people/5d776827151a60001f24ac29.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776827151a60001f24ac29",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d880197001ec95494",
+            "order": 136,
+            "slug": "flo-di-re",
+            "tag": "Flo Di Re",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683d880197001ec95494",
+            "type": "person"
+          },
+          {
+            "id": "5d776828999c64001ec2cc1b",
+            "order": 137,
+            "slug": "kurt-fuller",
+            "tag": "Kurt Fuller",
+            "thumb": "https://metadata-static.plex.tv/8/people/8deda060a57405689b5a0256515f71cd.jpg",
+            "role": "Quon / Additional Voices (voice)",
+            "key": "/library/people/5d776828999c64001ec2cc1b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b54c0f0001f304214",
+            "order": 138,
+            "slug": "andrea-romano",
+            "tag": "Andrea Romano",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683b54c0f0001f304214.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683b54c0f0001f304214",
+            "type": "person"
+          },
+          {
+            "id": "5d776869103a2d001f57103a",
+            "order": 139,
+            "slug": "stu-levin",
+            "tag": "Stu Levin",
+            "role": "Old Man Ding (voice)",
+            "key": "/library/people/5d776869103a2d001f57103a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267228e5001f1dce41",
+            "order": 140,
+            "slug": "bruce-locke",
+            "tag": "Bruce Locke",
+            "thumb": "https://metadata-static.plex.tv/f/people/fc09698534cbbe052bbf4188484713b4.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768267228e5001f1dce41",
+            "type": "person"
+          },
+          {
+            "id": "5d77685c999c64001ec3437e",
+            "order": 141,
+            "slug": "s-marc-jordan",
+            "tag": "S. Marc Jordan",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77685c999c64001ec3437e",
+            "type": "person"
+          },
+          {
+            "id": "687d17f49b2034a726373c90",
+            "order": 142,
+            "slug": "kevin-ng-24",
+            "tag": "Kevin Ng",
+            "role": "Young Bumi (voice)",
+            "key": "/library/people/687d17f49b2034a726373c90",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c103a2d001f5659c0",
+            "order": 143,
+            "slug": "daran-norris",
+            "tag": "Daran Norris",
+            "thumb": "https://metadata-static.plex.tv/7/people/7a1d62f498ce65df065fb85c375a58b2.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77682c103a2d001f5659c0",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e961905001eb92c8a",
+            "order": 144,
+            "slug": "pat-musick",
+            "tag": "Pat Musick",
+            "thumb": "https://metadata-static.plex.tv/a/people/a1f3b4697843fe54394e53da4bb669ea.jpg",
+            "role": "Haru's Mom (voice)",
+            "key": "/library/people/5d77682e961905001eb92c8a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768283c3c2a001fbcb658",
+            "order": 145,
+            "slug": "tom-kane",
+            "tag": "Tom Kane",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768283c3c2a001fbcb658.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768283c3c2a001fbcb658",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa26",
+            "order": 146,
+            "slug": "keith-szarabajka",
+            "tag": "Keith Szarabajka",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9f5a2baaa3740bcd382eacd0939a787.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768267e9a3c0020c6aa26",
+            "type": "person"
+          },
+          {
+            "id": "5d7768258718ba001e311676",
+            "order": 147,
+            "slug": "michael-yama",
+            "tag": "Michael Yama",
+            "thumb": "https://metadata-static.plex.tv/b/people/bbcca4946216a037070d3764f0aafa1a.jpg",
+            "role": "Shyu (voice)",
+            "key": "/library/people/5d7768258718ba001e311676",
+            "type": "person"
+          },
+          {
+            "id": "5d77683261141d001fb14d0f",
+            "order": 148,
+            "slug": "clement-von-franckenstein",
+            "tag": "Clement von Franckenstein",
+            "thumb": "https://metadata-static.plex.tv/e/people/eca72b6072bf765f87030acec9eaa05f.jpg",
+            "role": "Great Sage (voice)",
+            "key": "/library/people/5d77683261141d001fb14d0f",
+            "type": "person"
+          },
+          {
+            "id": "5d776826103a2d001f564290",
+            "order": 149,
+            "slug": "daniel-hansen",
+            "tag": "Daniel Hansen",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef9634fb4061b102f0a2d19ee454479b.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776826103a2d001f564290",
+            "type": "person"
+          },
+          {
+            "id": "5d77683aeb5d26001f1e1e77",
+            "order": 150,
+            "slug": "jamie-alcroft",
+            "tag": "Jamie Alcroft",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683aeb5d26001f1e1e77",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314f21",
+            "order": 151,
+            "slug": "dave-wittenberg",
+            "tag": "Dave Wittenberg",
+            "thumb": "https://metadata-static.plex.tv/2/people/24fc872df97e43259288b974bd20230e.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768368718ba001e314f21",
+            "type": "person"
+          },
+          {
+            "id": "5d77682aeb5d26001f1de578",
+            "order": 152,
+            "slug": "amy-hill",
+            "tag": "Amy Hill",
+            "thumb": "https://metadata-static.plex.tv/b/people/b8741dabc5b4c07416ba80042945d536.jpg",
+            "role": "Mother Superior (voice)",
+            "key": "/library/people/5d77682aeb5d26001f1de578",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a85719b001f3a15fc",
+            "order": 153,
+            "slug": "michael-mcconnohie",
+            "tag": "Michael McConnohie",
+            "thumb": "https://metadata-static.plex.tv/1/people/12b95d01e1874d74dc9c86270d55c97c.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77682a85719b001f3a15fc",
+            "type": "person"
+          },
+          {
+            "id": "5d776829999c64001ec2cf7b",
+            "order": 154,
+            "slug": "james-arnold-taylor",
+            "tag": "James Arnold Taylor",
+            "thumb": "https://metadata-static.plex.tv/d/people/d8dc750d358c704e54d8c597ca6e7602.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776829999c64001ec2cf7b",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e8a",
+            "order": 155,
+            "slug": "scott-mcafee",
+            "tag": "Scott McAfee",
+            "thumb": "https://metadata-static.plex.tv/2/people/2d315c2cb364a3243bc80107f2a6e8d8.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d776828880197001ec90e8a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768258718ba001e311968",
+            "order": 156,
+            "slug": "cameron-bowen",
+            "tag": "Cameron Bowen",
+            "thumb": "https://metadata-static.plex.tv/f/people/f716bc931766cb2a8a7dd0bd24512744.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d7768258718ba001e311968",
+            "type": "person"
+          },
+          {
+            "id": "5d77683361141d001fb15371",
+            "order": 157,
+            "slug": "jeanne-sakata",
+            "tag": "Jeanne Sakata",
+            "thumb": "https://metadata-static.plex.tv/7/people/7a51540abf031ae533216fc2f10694d8.jpg",
+            "role": "Ms. Kwan (voice)",
+            "key": "/library/people/5d77683361141d001fb15371",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9af63",
+            "order": 158,
+            "slug": "tinashe",
+            "tag": "Tinashe",
+            "thumb": "https://metadata-static.plex.tv/5/people/52c595399d8c87ef263b0ca02c04743d.jpg",
+            "role": "On Ji (voice)",
+            "key": "/library/people/5d77682f6f4521001ea9af63",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24aaf9",
+            "order": 159,
+            "slug": "phil-proctor",
+            "tag": "Phil Proctor",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d34bf9a2fbb44b836769d5efd7610a8.jpg",
+            "role": "Music Teacher (voice)",
+            "key": "/library/people/5d776827151a60001f24aaf9",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab0a",
+            "order": 160,
+            "slug": "noah-luke",
+            "tag": "Noah Luke",
+            "thumb": "https://metadata-static.plex.tv/d/people/dae188413100cb80f15bde7e7d5921dc.jpg",
+            "role": "Shoji (voice)",
+            "key": "/library/people/5d776827151a60001f24ab0a",
+            "type": "person"
+          },
+          {
+            "id": "5d776827880197001ec90a88",
+            "order": 161,
+            "slug": "daniel-riordan",
+            "tag": "Daniel Riordan",
+            "thumb": "https://metadata-static.plex.tv/a/people/aa4c137d986d603953af60228a5a9744.jpg",
+            "role": "General Mung (voice)",
+            "key": "/library/people/5d776827880197001ec90a88",
+            "type": "person"
+          },
+          {
+            "id": "5d77683e2ec6b5001f6bd6e8",
+            "order": 162,
+            "slug": "will-shadley",
+            "tag": "Will Shadley",
+            "thumb": "https://metadata-static.plex.tv/9/people/91b91f7eae6fbd4c4b95beb004c60dbd.jpg",
+            "role": "Jang Hui Boy (voice)",
+            "key": "/library/people/5d77683e2ec6b5001f6bd6e8",
+            "type": "person"
+          },
+          {
+            "id": "62fb7ce0c1e63b9c4c89bd4e",
+            "order": 163,
+            "slug": "chris-butler-57",
+            "tag": "Chris Butler",
+            "thumb": "https://metadata-static.plex.tv/2/people/2d9562feadcf66478f992ac7efc4e8fa.jpg",
+            "role": "Fat (voice)",
+            "key": "/library/people/62fb7ce0c1e63b9c4c89bd4e",
+            "type": "person"
+          },
+          {
+            "id": "5f4037768642250042853d19",
+            "order": 164,
+            "slug": "maximillian-roeg-1",
+            "tag": "Maximillian Roeg",
+            "thumb": "https://metadata-static.plex.tv/3/people/3e5c69ba0f8b1aba5d557a282e30309c.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5f4037768642250042853d19",
+            "type": "person"
+          },
+          {
+            "id": "5d776824151a60001f24a38c",
+            "order": 165,
+            "slug": "ron-perlman",
+            "tag": "Ron Perlman",
+            "thumb": "https://metadata-static.plex.tv/3/people/3333d65b7450b7bc33d60ed9d3a7c784.jpg",
+            "role": "Sozin (voice)",
+            "key": "/library/people/5d776824151a60001f24a38c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768342ec6b5001f6bbd9f",
+            "order": 166,
+            "slug": "sean-marquette",
+            "tag": "Sean Marquette",
+            "thumb": "https://metadata-static.plex.tv/9/people/998f3676133276ca9fb093b60358cdbc.jpg",
+            "role": "Teen Sozin (voice)",
+            "key": "/library/people/5d7768342ec6b5001f6bbd9f",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ceb5d26001f1e2636",
+            "order": 167,
+            "slug": "salome-jens",
+            "tag": "Salome Jens",
+            "thumb": "https://metadata-static.plex.tv/6/people/6cf1b609d5a19b606e9183bc7864aa0f.jpg",
+            "role": "Additional Voices (voice)",
+            "key": "/library/people/5d77683ceb5d26001f1e2636",
+            "type": "person"
+          },
+          {
+            "id": "5d77685a5af944001f20054f",
+            "order": 168,
+            "slug": "tim-dang",
+            "tag": "Tim Dang",
+            "thumb": "https://image.tmdb.org/t/p/original/u2Cf0NdPsPYYPXptxVYEMSWlhpi.jpg",
+            "role": "Yon Rha (voice)",
+            "key": "/library/people/5d77685a5af944001f20054f",
+            "type": "person"
+          },
+          {
+            "id": "5d7769fc594b2b001e6afbd3",
+            "order": 169,
+            "slug": "bonnie-mcneil",
+            "tag": "Bonnie McNeil",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769fc594b2b001e6afbd3.jpg",
+            "role": "Yon Rha's Mother (voice)",
+            "key": "/library/people/5d7769fc594b2b001e6afbd3",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776a96ad5437001f782920",
+            "slug": "giancarlo-volpe",
+            "tag": "Giancarlo Volpe",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb4370154480624345a58e2e661fe067.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776a96ad5437001f782920",
+            "type": "person"
+          },
+          {
+            "id": "5d7768819ab54400214e6e15",
+            "slug": "ethan-spaulding",
+            "tag": "Ethan Spaulding",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb9e1269da8c37ac62cdb8aa57a7631b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768819ab54400214e6e15",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c99ab54400214eb829",
+            "slug": "lauren-macmullan",
+            "tag": "Lauren MacMullan",
+            "thumb": "https://metadata-static.plex.tv/1/people/1398e553fb032741759078493a419009.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768c99ab54400214eb829",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a880197001ec9457f",
+            "slug": "dave-filoni",
+            "tag": "Dave Filoni",
+            "thumb": "https://metadata-static.plex.tv/4/people/4e7e9295352b0f10694e67cf855c7341.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77683a880197001ec9457f",
+            "type": "person"
+          },
+          {
+            "id": "5d776850e870fd001f19df2a",
+            "slug": "joaquim-dos-santos",
+            "tag": "Joaquim Dos Santos",
+            "thumb": "https://metadata-static.plex.tv/4/people/42f127795b1802f36ed337d4fee89dbc.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776850e870fd001f19df2a",
+            "type": "person"
+          },
+          {
+            "id": "5e16350fef1040003f24b2d2",
+            "slug": "anthony-lioi",
+            "tag": "Anthony Lioi",
+            "role": "Director",
+            "key": "/library/people/5e16350fef1040003f24b2d2",
+            "type": "person"
+          },
+          {
+            "id": "5e16345410faa500400daf65",
+            "slug": "michael-dante-dimartino",
+            "tag": "Michael Dante DiMartino",
+            "thumb": "https://metadata-static.plex.tv/9/people/95b78271b35c0fc7a0b1f9fff05f1c1e.jpg",
+            "role": "Director",
+            "key": "/library/people/5e16345410faa500400daf65",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d9c08017b5c2e001e651c2a",
+            "slug": "aaron-ehasz",
+            "tag": "Aaron Ehasz",
+            "thumb": "https://metadata-static.plex.tv/people/5d9c08017b5c2e001e651c2a.jpg",
+            "role": "Co-Producer",
+            "key": "/library/people/5d9c08017b5c2e001e651c2a",
+            "type": "person"
+          },
+          {
+            "id": "5e16345410faa500400daf65",
+            "slug": "michael-dante-dimartino",
+            "tag": "Michael Dante DiMartino",
+            "thumb": "https://metadata-static.plex.tv/9/people/95b78271b35c0fc7a0b1f9fff05f1c1e.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5e16345410faa500400daf65",
+            "type": "person"
+          },
+          {
+            "id": "5fbdc8e3eadbaa002d00a31c",
+            "slug": "bryan-konietzko",
+            "tag": "Bryan Konietzko",
+            "thumb": "https://metadata-static.plex.tv/8/people/85c097e2dcd917aef25e4b9460c4e7d3.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5fbdc8e3eadbaa002d00a31c",
+            "type": "person"
+          },
+          {
+            "id": "5e16563229246b0040fcbc00",
+            "slug": "miken-lee-wong",
+            "tag": "Miken Lee Wong",
+            "role": "Line Producer",
+            "key": "/library/people/5e16563229246b0040fcbc00",
+            "type": "person"
+          },
+          {
+            "id": "5e1649f410faa500400eeec6",
+            "slug": "leah-buono",
+            "tag": "Leah Buono",
+            "role": "Casting",
+            "key": "/library/people/5e1649f410faa500400eeec6",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5fbdc8e3eadbaa002d00a31c",
+            "slug": "bryan-konietzko",
+            "tag": "Bryan Konietzko",
+            "thumb": "https://metadata-static.plex.tv/8/people/85c097e2dcd917aef25e4b9460c4e7d3.jpg",
+            "role": "Writer",
+            "key": "/library/people/5fbdc8e3eadbaa002d00a31c",
+            "type": "person"
+          },
+          {
+            "id": "5e16345410faa500400daf65",
+            "slug": "michael-dante-dimartino",
+            "tag": "Michael Dante DiMartino",
+            "thumb": "https://metadata-static.plex.tv/9/people/95b78271b35c0fc7a0b1f9fff05f1c1e.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e16345410faa500400daf65",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08017b5c2e001e651c2a",
+            "slug": "aaron-ehasz",
+            "tag": "Aaron Ehasz",
+            "thumb": "https://metadata-static.plex.tv/people/5d9c08017b5c2e001e651c2a.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d9c08017b5c2e001e651c2a",
+            "type": "person"
+          },
+          {
+            "id": "5e16362adf4678003f520b1a",
+            "slug": "tim-hedrick",
+            "tag": "Tim Hedrick",
+            "thumb": "https://metadata-static.plex.tv/people/5e16362adf4678003f520b1a.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e16362adf4678003f520b1a",
+            "type": "person"
+          },
+          {
+            "id": "604b914c002f2a002c5118cf",
+            "slug": "elizabeth-welch-ehasz-1",
+            "tag": "Elizabeth Welch Ehasz",
+            "role": "Writer",
+            "key": "/library/people/604b914c002f2a002c5118cf",
+            "type": "person"
+          },
+          {
+            "id": "6a0c00d9061ef1ee78c3861c",
+            "slug": "joshua-hamilton-20",
+            "tag": "Joshua Hamilton",
+            "thumb": "https://metadata-static.plex.tv/c/people/c0f96c66800d473d2d44c7eea027acd7.jpg",
+            "role": "Writer",
+            "key": "/library/people/6a0c00d9061ef1ee78c3861c",
+            "type": "person"
+          },
+          {
+            "id": "6a0c0f7204e137f15b96228d",
+            "slug": "katie-mattila-4",
+            "tag": "Katie Mattila",
+            "role": "Writer",
+            "key": "/library/people/6a0c0f7204e137f15b96228d",
+            "type": "person"
+          },
+          {
+            "id": "5e163693d92d86003d353ab4",
+            "slug": "james-eagan",
+            "tag": "James Eagan",
+            "role": "Writer",
+            "key": "/library/people/5e163693d92d86003d353ab4",
+            "type": "person"
+          },
+          {
+            "id": "5d9c0853ba6eb9001fba11f4",
+            "slug": "joann-estoesta",
+            "tag": "Joann Estoesta",
+            "role": "Writer",
+            "key": "/library/people/5d9c0853ba6eb9001fba11f4",
+            "type": "person"
+          },
+          {
+            "id": "62fb7ce218b53138c038d997",
+            "slug": "may-chan-1",
+            "tag": "May Chan",
+            "thumb": "https://metadata-static.plex.tv/1/people/11e7b7ba682ca2a40f5e33b4505cf2eb.jpg",
+            "role": "Writer",
+            "key": "/library/people/62fb7ce218b53138c038d997",
+            "type": "person"
+          },
+          {
+            "id": "604b914c002f2a002c5118c7",
+            "slug": "ian-wilcox-3",
+            "tag": "Ian Wilcox",
+            "role": "Writer",
+            "key": "/library/people/604b914c002f2a002c5118c7",
+            "type": "person"
+          },
+          {
+            "id": "6962d93bd4b8e9855f2b0d27",
+            "slug": "nick-malis-4",
+            "tag": "Nick Malis",
+            "role": "Writer",
+            "key": "/library/people/6962d93bd4b8e9855f2b0d27",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Nickelodeon"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "SkyShowtime",
+            "title": "TheTVDB (SkyShowtime)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/62ac869c16bfd0bb0b6e520f",
+            "tag": "Kung Fu Panda: The Dragon Knight"
+          },
+          {
+            "guid": "plex://show/618fbfc98046d2cd94b0f98c",
+            "tag": "Your Friendly Neighborhood Spider‐Man"
+          },
+          {
+            "guid": "plex://show/5d9c08617b5c2e001e65a378",
+            "tag": "Batman: The Brave and the Bold"
+          },
+          {
+            "guid": "plex://show/650265b9a5730b858333eff6",
+            "tag": "Masters of the Universe: Revolution"
+          },
+          {
+            "guid": "plex://show/5d9c08017d06d9001ffcec95",
+            "tag": "Jackie Chan Adventures"
+          },
+          {
+            "guid": "plex://show/5d9c0862ffd9ef001e993174",
+            "tag": "The Legend of Korra"
+          },
+          {
+            "guid": "plex://show/5d9c0819170e24001f2a799b",
+            "tag": "Teen Titans"
+          },
+          {
+            "guid": "plex://show/5d9c090d7b5c2e001e665fa5",
+            "tag": "Avatar: The Last Airbender (2024)"
+          },
+          {
+            "guid": "plex://show/5d9c082f705e7a001e6d5308",
+            "tag": "Justice League Unlimited"
+          },
+          {
+            "guid": "plex://show/5e1618f5f0bee8003d4f0eba",
+            "tag": "Adventure Time: Distant Lands"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Nickelodeon Animation Studio"
+          },
+          {
+            "tag": "JM Animation"
+          },
+          {
+            "tag": "DR Movie"
+          },
+          {
+            "tag": "Moi Animation"
+          },
+          {
+            "tag": "Nickelodeon Productions"
+          }
+        ]
+      }
+    ]
+  }
+}

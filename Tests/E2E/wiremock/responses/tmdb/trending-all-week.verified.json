@@ -1,9 +1,9 @@
-﻿{
+{
   "page": 1,
   "results": [
     {
       "adult": false,
-      "backdrop_path": "/dmwb15BCkqjoXA9dXIsoY2Hn10F.jpg",
+      "backdrop_path": "/c6BPbkO5Npt1OdwttAxCFo06wtH.jpg",
       "id": 1108427,
       "title": "Moana",
       "original_title": "Moana",
@@ -17,53 +17,76 @@
         35,
         12
       ],
-      "popularity": 277.1939,
+      "popularity": 326.2097,
       "release_date": "2026-07-08",
       "softcore": false,
       "video": false,
-      "vote_average": 6.9,
-      "vote_count": 438
+      "vote_average": 7.097,
+      "vote_count": 560
     },
     {
       "adult": false,
-      "backdrop_path": "/jzBWExXacS33rMQ2zLBrqIVweyG.jpg",
-      "id": 1386315,
-      "title": "The Runner",
-      "original_title": "The Runner",
-      "overview": "Maia Marten, a brilliant London lawyer, has her life shattered by a single call on her morning run: her son has been taken. To get him back, she must keep running, obey every ruthless command, and trust no one-each second a test of how far a mother will go to save her child.",
-      "poster_path": "/uxCaBoYXsDC4A0SqTm3SISj0OwK.jpg",
+      "backdrop_path": "/g7Ccid5kuD7A8hXWlsQiNfwOxaD.jpg",
+      "id": 1137844,
+      "title": "Mayday",
+      "original_title": "Mayday",
+      "overview": "When a U.S. Navy pilot on a top-secret mission during the Cold War gets trapped behind enemy lines, his only chance at survival is to form an alliance with an eccentric ex-KGB agent.",
+      "poster_path": "/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg",
       "media_type": "movie",
       "original_language": "en",
       "genre_ids": [
-        53,
-        28
+        28,
+        35
       ],
-      "popularity": 244.4988,
+      "popularity": 205.8726,
       "release_date": "2026-09-03",
       "softcore": false,
       "video": false,
-      "vote_average": 6.714,
-      "vote_count": 359
+      "vote_average": 7.926,
+      "vote_count": 504
     },
     {
       "adult": false,
-      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
-      "id": 125988,
-      "name": "Silo",
-      "original_name": "Silo",
-      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
-      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+      "backdrop_path": "/l9mFW9HQnAZ4r1ChZJHoOT3jaal.jpg",
+      "id": 1204680,
+      "title": "Coyote vs. Acme",
+      "original_title": "Coyote vs. Acme",
+      "overview": "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation.",
+      "poster_path": "/vhv7lBWYM0DUuNU2a0V7Rhq21dD.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        35,
+        12,
+        10751
+      ],
+      "popularity": 590.1793,
+      "release_date": "2026-08-20",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.623,
+      "vote_count": 333
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/6gqezQJ2mkm4jreWwLyOZy2Vf6i.jpg",
+      "id": 95350,
+      "name": "Lanterns",
+      "original_name": "Lanterns",
+      "overview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
+      "poster_path": "/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
       "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
-        10765,
-        18
+        18,
+        9648,
+        10765
       ],
-      "popularity": 312.9706,
-      "first_air_date": "2023-05-04",
+      "popularity": 213.7486,
+      "first_air_date": "2026-08-16",
       "softcore": false,
-      "vote_average": 8.205,
-      "vote_count": 2624,
+      "vote_average": 8.274,
+      "vote_count": 316,
       "origin_country": [
         "US"
       ]
@@ -83,36 +106,12 @@
         28,
         14
       ],
-      "popularity": 420.4943,
+      "popularity": 408.5067,
       "release_date": "2026-07-15",
       "softcore": false,
       "video": false,
-      "vote_average": 7.999,
-      "vote_count": 3572
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/6gqezQJ2mkm4jreWwLyOZy2Vf6i.jpg",
-      "id": 95350,
-      "name": "Lanterns",
-      "original_name": "Lanterns",
-      "overview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
-      "poster_path": "/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        18,
-        9648,
-        10765
-      ],
-      "popularity": 237.7147,
-      "first_air_date": "2026-08-16",
-      "softcore": false,
-      "vote_average": 8.284,
-      "vote_count": 301,
-      "origin_country": [
-        "US"
-      ]
+      "vote_average": 8.005,
+      "vote_count": 3643
     },
     {
       "adult": false,
@@ -129,56 +128,55 @@
         28,
         12
       ],
-      "popularity": 798.5359,
+      "popularity": 756.7679,
       "release_date": "2026-07-29",
       "softcore": false,
       "video": false,
-      "vote_average": 7.862,
-      "vote_count": 2547
+      "vote_average": 7.845,
+      "vote_count": 2629
     },
     {
       "adult": false,
-      "backdrop_path": "/4gyx49ibwQslyrwuUS1c58PJEEd.jpg",
-      "id": 1137844,
-      "title": "Mayday",
-      "original_title": "Mayday",
-      "overview": "When a U.S. Navy pilot on a top-secret mission during the Cold War gets trapped behind enemy lines, his only chance at survival is to form an alliance with an eccentric ex-KGB agent.",
-      "poster_path": "/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg",
+      "backdrop_path": "/bpll0oy6gHwLvypfFNfT2QI4VkT.jpg",
+      "id": 1433367,
+      "title": "One Night Only",
+      "original_title": "One Night Only",
+      "overview": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
+      "poster_path": "/46q8z1TbbVcF8uhRHsvt5s0h2SH.jpg",
       "media_type": "movie",
       "original_language": "en",
       "genre_ids": [
-        28,
+        10749,
         35
       ],
-      "popularity": 236.9262,
-      "release_date": "2026-09-03",
+      "popularity": 84.0502,
+      "release_date": "2026-08-06",
       "softcore": false,
       "video": false,
-      "vote_average": 7.9,
-      "vote_count": 355
+      "vote_average": 6.705,
+      "vote_count": 112
     },
     {
       "adult": false,
-      "backdrop_path": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
-      "id": 236235,
-      "name": "The Gentlemen",
-      "original_name": "The Gentlemen",
-      "overview": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
-      "poster_path": "/tw3tzfXaSpmUZIB8ZNqNEGzMBCy.jpg",
+      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
+      "id": 125988,
+      "name": "Silo",
+      "original_name": "Silo",
+      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
+      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
       "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
-        35,
-        18,
-        80
+        10765,
+        18
       ],
-      "popularity": 242.3345,
-      "first_air_date": "2024-03-07",
+      "popularity": 262.2487,
+      "first_air_date": "2023-05-04",
       "softcore": false,
-      "vote_average": 7.839,
-      "vote_count": 891,
+      "vote_average": 8.21,
+      "vote_count": 2644,
       "origin_country": [
-        "GB"
+        "US"
       ]
     },
     {
@@ -195,36 +193,57 @@
         10759,
         80
       ],
-      "popularity": 633.2375,
+      "popularity": 598.7406,
       "first_air_date": "2022-02-03",
       "softcore": false,
-      "vote_average": 8.11,
-      "vote_count": 3258,
+      "vote_average": 8.114,
+      "vote_count": 3284,
       "origin_country": [
         "US"
       ]
     },
     {
       "adult": false,
-      "backdrop_path": "/l9mFW9HQnAZ4r1ChZJHoOT3jaal.jpg",
-      "id": 1204680,
-      "title": "Coyote vs. Acme",
-      "original_title": "Coyote vs. Acme",
-      "overview": "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation.",
-      "poster_path": "/orkLtdgMGiO9rTVMqJ1kKwrnup1.jpg",
+      "backdrop_path": "/nUcauJ000dFBYkgGpxyxJ5aWEH2.jpg",
+      "id": 1302904,
+      "title": "Practical Magic 2",
+      "original_title": "Practical Magic 2",
+      "overview": "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all.",
+      "poster_path": "/ogwQOLbCfncjvBhFb5l0OmQH8KC.jpg",
       "media_type": "movie",
       "original_language": "en",
       "genre_ids": [
-        35,
-        12,
-        10751
+        10749,
+        14,
+        35
       ],
-      "popularity": 626.7023,
-      "release_date": "2026-08-20",
+      "popularity": 80.4382,
+      "release_date": "2026-09-09",
       "softcore": false,
       "video": false,
-      "vote_average": 7.667,
-      "vote_count": 269
+      "vote_average": 6.3,
+      "vote_count": 30
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/yeEkiAx9ZqPXBxZAkUXj7XLIyi2.jpg",
+      "id": 1386315,
+      "title": "The Runner",
+      "original_title": "The Runner",
+      "overview": "Maia Marten, a brilliant London lawyer, has her life shattered by a single call on her morning run: her son has been taken. To get him back, she must keep running, obey every ruthless command, and trust no one-each second a test of how far a mother will go to save her child.",
+      "poster_path": "/uxCaBoYXsDC4A0SqTm3SISj0OwK.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        53,
+        28
+      ],
+      "popularity": 195.5425,
+      "release_date": "2026-09-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.733,
+      "vote_count": 416
     },
     {
       "adult": false,
@@ -240,12 +259,126 @@
         27,
         53
       ],
-      "popularity": 176.2001,
+      "popularity": 151.0084,
       "release_date": "2026-05-13",
       "softcore": false,
       "video": false,
-      "vote_average": 8.195,
-      "vote_count": 5396
+      "vote_average": 8.192,
+      "vote_count": 5462
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
+      "id": 236235,
+      "name": "The Gentlemen",
+      "original_name": "The Gentlemen",
+      "overview": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
+      "poster_path": "/tw3tzfXaSpmUZIB8ZNqNEGzMBCy.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        35,
+        18,
+        80
+      ],
+      "popularity": 200.195,
+      "first_air_date": "2024-03-07",
+      "softcore": false,
+      "vote_average": 7.9,
+      "vote_count": 910,
+      "origin_country": [
+        "GB"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/e2QAGrEmbpmZpMymDRkDisJkvg9.jpg",
+      "id": 1288445,
+      "title": "Mutiny",
+      "original_title": "Mutiny",
+      "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
+      "poster_path": "/pu2VxGlpGwffOx292w18b1tv96j.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "popularity": 342.3873,
+      "release_date": "2026-08-19",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.426,
+      "vote_count": 373
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+      "id": 30984,
+      "name": "Bleach",
+      "original_name": "BLEACH",
+      "overview": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
+      "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
+      "media_type": "tv",
+      "original_language": "ja",
+      "genre_ids": [
+        10759,
+        16,
+        10765
+      ],
+      "popularity": 161.7066,
+      "first_air_date": "2004-10-05",
+      "softcore": false,
+      "vote_average": 8.351,
+      "vote_count": 2268,
+      "origin_country": [
+        "JP"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
+      "id": 1440098,
+      "title": "Drawn Together",
+      "original_title": "Enfrentados: Marfil",
+      "overview": "Marfil Cortés, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
+      "poster_path": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
+      "media_type": "movie",
+      "original_language": "es",
+      "genre_ids": [
+        10749,
+        53
+      ],
+      "popularity": 240.8506,
+      "release_date": "2026-09-09",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.573,
+      "vote_count": 48
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/kgaQnDdDaPqvGN7i8LLz1aWJdjP.jpg",
+      "id": 258230,
+      "name": "Last Seen",
+      "original_name": "Last Seen",
+      "overview": "When emergency dispatcher Ian Ridley receives a frantic call from a teenager he believes could be his long-missing daughter, he stops at nothing to find her.",
+      "poster_path": "/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        80,
+        18,
+        9648
+      ],
+      "popularity": 56.9004,
+      "first_air_date": "2026-09-09",
+      "softcore": false,
+      "vote_average": 8.9,
+      "vote_count": 7,
+      "origin_country": [
+        "GB"
+      ]
     },
     {
       "adult": false,
@@ -262,101 +395,14 @@
         35,
         16
       ],
-      "popularity": 52.3804,
+      "popularity": 56.8998,
       "first_air_date": "1999-10-20",
       "softcore": false,
-      "vote_average": 8.748,
-      "vote_count": 5530,
+      "vote_average": 8.7,
+      "vote_count": 5534,
       "origin_country": [
         "JP"
       ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4NBYDOnEjAzyuP7CMkD5s7fs44K.jpg",
-      "id": 113962,
-      "name": "Lioness",
-      "original_name": "Lioness",
-      "overview": "Cruz Manuelos, a rough-around-the-edges but passionate young Marine, is recruited to join the CIA's Lioness Engagement Team to help bring down a terrorist organization from within. Joe, the station chief of the Lioness program, is tasked with training, managing and leading her female undercover operatives.",
-      "poster_path": "/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        18,
-        10768
-      ],
-      "popularity": 381.2124,
-      "first_air_date": "2023-07-23",
-      "softcore": false,
-      "vote_average": 8.149,
-      "vote_count": 1500,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/wE6syT1vv6W24iLGfhR4kQHnIDN.jpg",
-      "id": 1302904,
-      "title": "Practical Magic 2",
-      "original_title": "Practical Magic 2",
-      "overview": "The Owens sisters must confront the dark curse that threatens to unravel their family once and for all.",
-      "poster_path": "/ogwQOLbCfncjvBhFb5l0OmQH8KC.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        10749,
-        14,
-        35
-      ],
-      "popularity": 48.27,
-      "release_date": "2026-09-09",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.5,
-      "vote_count": 12
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/e2QAGrEmbpmZpMymDRkDisJkvg9.jpg",
-      "id": 1288445,
-      "title": "Mutiny",
-      "original_title": "Mutiny",
-      "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
-      "poster_path": "/pu2VxGlpGwffOx292w18b1tv96j.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        53
-      ],
-      "popularity": 373.0022,
-      "release_date": "2026-08-19",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.355,
-      "vote_count": 335
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/bpll0oy6gHwLvypfFNfT2QI4VkT.jpg",
-      "id": 1433367,
-      "title": "One Night Only",
-      "original_title": "One Night Only",
-      "overview": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
-      "poster_path": "/46q8z1TbbVcF8uhRHsvt5s0h2SH.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        35,
-        10749
-      ],
-      "popularity": 89.2192,
-      "release_date": "2026-07-28",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.822,
-      "vote_count": 87
     },
     {
       "adult": false,
@@ -373,76 +419,33 @@
         18,
         53
       ],
-      "popularity": 105.9362,
+      "popularity": 92.0494,
       "release_date": "2026-08-27",
       "softcore": false,
       "video": false,
-      "vote_average": 6.807,
-      "vote_count": 566
+      "vote_average": 6.805,
+      "vote_count": 626
     },
     {
       "adult": false,
-      "backdrop_path": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
-      "id": 1440098,
-      "title": "Drawn Together",
-      "original_title": "Enfrentados: Marfil",
-      "overview": "Marfil Cortés, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
-      "poster_path": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
-      "media_type": "movie",
-      "original_language": "es",
-      "genre_ids": [
-        10749,
-        18,
-        53
-      ],
-      "popularity": 101.7507,
-      "release_date": "2026-09-09",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.9,
-      "vote_count": 16
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/mRM28tIIm8y0gKy9GKYGwotxuPM.jpg",
-      "id": 1423191,
-      "title": "Resident Evil",
-      "original_title": "Resident Evil",
-      "overview": "Medical courier Bryan unwittingly finds himself fighting for survival as one fateful, horrifying night collapses around him in chaos.",
-      "poster_path": "/qku2uWSoJ9amQV5MWo1Eek29iji.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27,
-        878
-      ],
-      "popularity": 43.1746,
-      "release_date": "2026-09-16",
-      "softcore": false,
-      "video": false,
-      "vote_average": 0.0,
-      "vote_count": 0
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/40Dx3P1mllQq1jhgN3K8dlti6CS.jpg",
-      "id": 329471,
-      "name": "The Grand Tour",
-      "original_name": "The Grand Tour",
-      "overview": "Welcome to The Grand Tour. The world's greatest motoring show reboots with new presenters - Thomas Holland, James Engelsman and Francis Bourgeois - and its trademark blend of global adventure, incredible vehicles, epic stunts and strong opinions.",
-      "poster_path": "/kq6XB6xmD86txW4UR32tT2JUiN9.jpg",
+      "backdrop_path": "/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg",
+      "id": 300507,
+      "name": "Crew Girl",
+      "original_name": "Crew Girl",
+      "overview": "After a family scandal, teen rower Teagan Tao moves to a small town and joins an elite prep school's all-boys crew, sparking rivalry and attraction.",
+      "poster_path": "/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
       "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
-        10764
+        18
       ],
-      "popularity": 32.639,
-      "first_air_date": "2026-09-04",
+      "popularity": 84.608,
+      "first_air_date": "2026-09-10",
       "softcore": false,
-      "vote_average": 9.2,
-      "vote_count": 8,
+      "vote_average": 7.9,
+      "vote_count": 13,
       "origin_country": [
-        "GB"
+        "CA"
       ]
     }
   ],

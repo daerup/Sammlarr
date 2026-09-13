@@ -442,35 +442,6 @@
           },
           {
             "Metadata": {
-              "addedAt": 1723766400,
-              "duration": 5280000,
-              "guid": "plex://movie/6735b7212e494f56bcb7e48e",
-              "key": "/library/metadata/6735b7212e494f56bcb7e48e",
-              "originallyAvailableAt": "2024-08-16",
-              "ratingKey": "6735b7212e494f56bcb7e48e",
-              "slug": "yall-drawn-2024-1",
-              "thumb": "https://image.tmdb.org/t/p/original/r7Xj44YDSYCQQmIsQOLkprOimtN.jpg",
-              "title": "Yall Drawn",
-              "type": "movie",
-              "year": 2024,
-              "Genre": [
-                {
-                  "filter": "genre=5d9c046c705e7a001e6c8d99",
-                  "id": "5d9c046c705e7a001e6c8d99",
-                  "key": "/library/categories/comedy",
-                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
-                  "slug": "comedy",
-                  "tag": "Comedy",
-                  "type": "hub",
-                  "context": "tag.genre"
-                }
-              ],
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.21
-          },
-          {
-            "Metadata": {
               "addedAt": 1765756800,
               "art": "https://image.tmdb.org/t/p/original/sgfUTK5QT05R9EuigR49pVy75HV.jpg",
               "duration": 360000,
@@ -563,6 +534,35 @@
                   "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
                   "slug": "drama",
                   "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          },
+          {
+            "Metadata": {
+              "addedAt": 1723766400,
+              "duration": 5280000,
+              "guid": "plex://movie/6735b7212e494f56bcb7e48e",
+              "key": "/library/metadata/6735b7212e494f56bcb7e48e",
+              "originallyAvailableAt": "2024-08-16",
+              "ratingKey": "6735b7212e494f56bcb7e48e",
+              "slug": "yall-drawn-2024-1",
+              "thumb": "https://image.tmdb.org/t/p/original/r7Xj44YDSYCQQmIsQOLkprOimtN.jpg",
+              "title": "Yall Drawn",
+              "type": "movie",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
                   "type": "hub",
                   "context": "tag.genre"
                 }

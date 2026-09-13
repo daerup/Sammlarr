@@ -1,0 +1,405 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "banner": "https://artworks.thetvdb.com/banners/graphical/282128-g.jpg",
+        "guid": "plex://show/5d9c08a9705e7a001e6e1883",
+        "key": "/library/metadata/5d9c08a9705e7a001e6e1883/children",
+        "ratingKey": "5d9c08a9705e7a001e6e1883",
+        "studio": "Cineflix Productions",
+        "summary": "With the chance of finding them decreasing with every minute they're gone, friends and family turn detectives as they try to track down missing loved ones. Whether in Ohio, Arizona, New York City, or San Francisco, aided by a private investigator, families are determined to find answers and bring them home. #MysteryandSuspense",
+        "type": "show",
+        "addedAt": 1401580800,
+        "audienceRating": 7.3,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "contentRating": "TV-PG",
+        "duration": 2640000,
+        "imdbRatingCount": 58,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2014-07-07",
+        "lastSeasonOriginallyAvailableAt": "2014-06-01",
+        "leafCount": 6,
+        "originallyAvailableAt": "2014-06-01",
+        "publicPagesURL": "https://watch.plex.tv/show/last-seen-alive",
+        "slug": "last-seen-alive",
+        "thumb": "https://image.tmdb.org/t/p/original/oLXWmf9vLo3CbzMc9bsmtgTDEu3.jpg",
+        "title": "Last Seen Alive",
+        "userState": false,
+        "year": 2014,
+        "Image": [
+          {
+            "alt": "Last Seen Alive",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/282128-g.jpg"
+          },
+          {
+            "alt": "Last Seen Alive",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/oLXWmf9vLo3CbzMc9bsmtgTDEu3.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+            "id": "5d9c07e8705e7a001e6cc4f9",
+            "key": "/library/sections/home/all?genre=5d9c07e8705e7a001e6cc4f9",
+            "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+            "slug": "reality",
+            "tag": "Reality",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt3729784"
+          },
+          {
+            "id": "tmdb://295455"
+          },
+          {
+            "id": "tvdb://282128"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5f3fe76b427eeb0041e644b1",
+            "order": 1,
+            "slug": "todd-schick",
+            "tag": "Todd Schick",
+            "role": "Self - Narrator",
+            "key": "/library/people/5f3fe76b427eeb0041e644b1",
+            "type": "person"
+          },
+          {
+            "id": "5d776aabfb0d55001f54d6f2",
+            "order": 2,
+            "slug": "avaah-blackwell",
+            "tag": "Avaah Blackwell",
+            "thumb": "https://metadata-static.plex.tv/b/people/b730138b47cf06e6f05747c348a8e300.jpg",
+            "role": "Megan",
+            "key": "/library/people/5d776aabfb0d55001f54d6f2",
+            "type": "person"
+          },
+          {
+            "id": "5d776cb4f617c90020184654",
+            "order": 3,
+            "slug": "sean-rey",
+            "tag": "Sean Rey",
+            "thumb": "https://metadata-static.plex.tv/9/people/9262304546eee0f94a47a00eb956b9f1.jpg",
+            "role": "Shaun Macdonald-McLaughlin",
+            "key": "/library/people/5d776cb4f617c90020184654",
+            "type": "person"
+          },
+          {
+            "id": "621396ebd3892a756b78bec4",
+            "order": 4,
+            "slug": "sean-mcquilian",
+            "tag": "Sean McQuilian",
+            "role": "Shaun MacDonald-McLaughlin",
+            "key": "/library/people/621396ebd3892a756b78bec4",
+            "type": "person"
+          },
+          {
+            "id": "5f4003a8cae2c60042ed07a8",
+            "order": 5,
+            "slug": "david-madwin",
+            "tag": "David Madwin",
+            "role": "Cameron Remmer",
+            "key": "/library/people/5f4003a8cae2c60042ed07a8",
+            "type": "person"
+          },
+          {
+            "id": "5d77703281ba41001faea5b6",
+            "order": 6,
+            "slug": "andrew-markowiak",
+            "tag": "Andrew Markowiak",
+            "role": "Robin Putnam",
+            "key": "/library/people/5d77703281ba41001faea5b6",
+            "type": "person"
+          },
+          {
+            "id": "5d776c55fb0d55001f584dfc",
+            "order": 7,
+            "slug": "blair-anderson-2",
+            "tag": "Blair Anderson",
+            "thumb": "https://metadata-static.plex.tv/8/people/8dd26efffe65f557feea01234989323a.jpg",
+            "role": "Hank",
+            "key": "/library/people/5d776c55fb0d55001f584dfc",
+            "type": "person"
+          },
+          {
+            "id": "5f4037c3537293003d3be8aa",
+            "order": 8,
+            "slug": "christine-burke-3",
+            "tag": "Christine Burke",
+            "role": "Self",
+            "key": "/library/people/5f4037c3537293003d3be8aa",
+            "type": "person"
+          },
+          {
+            "id": "5f4016e702101b0040f3af1c",
+            "order": 9,
+            "slug": "monica-caison",
+            "tag": "Monica Caison",
+            "role": "Self",
+            "key": "/library/people/5f4016e702101b0040f3af1c",
+            "type": "person"
+          },
+          {
+            "id": "5f4037c052f200004152c460",
+            "order": 10,
+            "slug": "amber-cammack",
+            "tag": "Amber Cammack",
+            "role": "Self",
+            "key": "/library/people/5f4037c052f200004152c460",
+            "type": "person"
+          },
+          {
+            "id": "5f4037c702101b0040f6a0d3",
+            "order": 11,
+            "slug": "kelly-townsend",
+            "tag": "Kelly Townsend",
+            "role": "Self",
+            "key": "/library/people/5f4037c702101b0040f6a0d3",
+            "type": "person"
+          },
+          {
+            "id": "5f4037c552f200004152c4af",
+            "order": 12,
+            "slug": "tom-klatt",
+            "tag": "Tom Klatt",
+            "role": "Self",
+            "key": "/library/people/5f4037c552f200004152c4af",
+            "type": "person"
+          },
+          {
+            "id": "5f4049d7cae2c60042f42443",
+            "order": 13,
+            "slug": "samantha-anderson-2",
+            "tag": "Samantha Anderson",
+            "role": "Dokota",
+            "key": "/library/people/5f4049d7cae2c60042f42443",
+            "type": "person"
+          },
+          {
+            "id": "5f40393d04a8650040a16f2b",
+            "order": 14,
+            "slug": "samantha-anderson-10",
+            "tag": "Samantha Anderson",
+            "role": "Dakota",
+            "key": "/library/people/5f40393d04a8650040a16f2b",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776bfb7a53e9001e735d6f",
+            "slug": "alex-mcintosh",
+            "tag": "Alex McIntosh",
+            "role": "Director",
+            "key": "/library/people/5d776bfb7a53e9001e735d6f",
+            "type": "person"
+          },
+          {
+            "id": "5e165035bc1372003ea8648d",
+            "slug": "jeff-vanderwal",
+            "tag": "Jeff Vanderwal",
+            "role": "Director",
+            "key": "/library/people/5e165035bc1372003ea8648d",
+            "type": "person"
+          },
+          {
+            "id": "5dce701dbd64590020de314f",
+            "slug": "nicolas-wilson-6",
+            "tag": "Nicolas Wilson",
+            "role": "Director",
+            "key": "/library/people/5dce701dbd64590020de314f",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5e165035bc1372003ea8648d",
+            "slug": "jeff-vanderwal",
+            "tag": "Jeff Vanderwal",
+            "role": "Series Producer",
+            "key": "/library/people/5e165035bc1372003ea8648d",
+            "type": "person"
+          },
+          {
+            "id": "5dce6bd57a42e6001fc851fe",
+            "slug": "sarah-beckett-2",
+            "tag": "Sarah Beckett",
+            "role": "Associate Producer",
+            "key": "/library/people/5dce6bd57a42e6001fc851fe",
+            "type": "person"
+          },
+          {
+            "id": "5ec41a0937cda300409086b4",
+            "slug": "kim-bondi",
+            "tag": "Kim Bondi",
+            "thumb": "https://metadata-static.plex.tv/4/people/450af80075b190c77d6868b2498cba06.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5ec41a0937cda300409086b4",
+            "type": "person"
+          },
+          {
+            "id": "5ec423230d2c2c0040be0cd0",
+            "slug": "sherri-rufh",
+            "tag": "Sherri Rufh",
+            "role": "Executive Producer",
+            "key": "/library/people/5ec423230d2c2c0040be0cd0",
+            "type": "person"
+          },
+          {
+            "id": "5d9c087f4eefaa001f5df591",
+            "slug": "charles-tremayne",
+            "tag": "Charles Tremayne",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a1007282738b7119ea7a9d52349a38e.jpg",
+            "role": "Executive Producer",
+            "key": "/library/people/5d9c087f4eefaa001f5df591",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5e165035bc1372003ea8648d",
+            "slug": "jeff-vanderwal",
+            "tag": "Jeff Vanderwal",
+            "role": "Writer",
+            "key": "/library/people/5e165035bc1372003ea8648d",
+            "type": "person"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5e21a3bafa5376004190dccc",
+            "tag": "Mare of Easttown"
+          },
+          {
+            "guid": "plex://show/5d9c07ff705e7a001e6cf14d",
+            "tag": "Unsolved Mysteries"
+          },
+          {
+            "guid": "plex://show/5d9c0828705e7a001e6d4541",
+            "tag": "Scooby‐Doo! Mystery Incorporated"
+          },
+          {
+            "guid": "plex://show/62a35be541db86d50abcadfb",
+            "tag": "Sugar (2024)"
+          },
+          {
+            "guid": "plex://show/5d9c087302391c001f58a9b2",
+            "tag": "CSI: NY"
+          },
+          {
+            "guid": "plex://show/5d9c08762192ba001f311eec",
+            "tag": "Without a Trace"
+          },
+          {
+            "guid": "plex://show/66a33f8ece8cbb431d9b47f9",
+            "tag": "His & Hers (2026)"
+          },
+          {
+            "guid": "plex://show/5d9c0872ba6eb9001fba482c",
+            "tag": "Diagnosis Murder"
+          },
+          {
+            "guid": "plex://show/5e1613772b8866001e60d08a",
+            "tag": "Scooby‐Doo and Guess Who?"
+          },
+          {
+            "guid": "plex://show/5d9c082208fddd001f293286",
+            "tag": "77 Sunset Strip"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Cineflix Productions"
+          }
+        ]
+      }
+    ]
+  }
+}

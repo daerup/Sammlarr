@@ -438,98 +438,6 @@
           },
           {
             "Metadata": {
-              "addedAt": 1359417600,
-              "art": "https://metadata-static.plex.tv/3/gracenote/352e22ebd6ddfe5f4db39b631897262f.jpg",
-              "duration": 4680000,
-              "guid": "plex://movie/5d7769ac9ab54400214f5333",
-              "key": "/library/metadata/5d7769ac9ab54400214f5333",
-              "originallyAvailableAt": "2013-01-29",
-              "ratingKey": "5d7769ac9ab54400214f5333",
-              "slug": "batman-the-dark-knight-returns-part-2",
-              "subtype": "video",
-              "thumb": "https://metadata-static.plex.tv/9/gracenote/9c29768f0dc2616167503a3e441e91ed.jpg",
-              "title": "Batman: The Dark Knight Returns, Part 2",
-              "type": "movie",
-              "year": 2013,
-              "Genre": [
-                {
-                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
-                  "id": "5d9c046c2192ba001f2ff6c2",
-                  "key": "/library/categories/action",
-                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
-                  "slug": "action",
-                  "tag": "Action",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
-                  "id": "5d9c046c3c3f87001f33fbfc",
-                  "key": "/library/categories/animation",
-                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
-                  "slug": "animation",
-                  "tag": "Animation",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c08fddd001f28ab90",
-                  "id": "5d9c046c08fddd001f28ab90",
-                  "key": "/library/categories/crime",
-                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
-                  "slug": "crime",
-                  "tag": "Crime",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
-                  "id": "5d9c046c705e7a001e6c8d9a",
-                  "key": "/library/categories/drama",
-                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
-                  "slug": "drama",
-                  "tag": "Drama",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
-                  "id": "5d9c046c705e7a001e6c8d9e",
-                  "key": "/library/categories/mystery",
-                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
-                  "slug": "mystery",
-                  "tag": "Mystery",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
-                  "id": "5d9c046c2192ba001f2ff6c4",
-                  "key": "/library/categories/sci-fi",
-                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
-                  "slug": "sci-fi",
-                  "tag": "Science Fiction",
-                  "originalTag": "Sci-Fi",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
-                  "id": "5d9c046c2192ba001f2ff6c5",
-                  "key": "/library/categories/thriller",
-                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
-                  "slug": "thriller",
-                  "tag": "Thriller",
-                  "type": "hub",
-                  "context": "tag.genre"
-                }
-              ],
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.11
-          },
-          {
-            "Metadata": {
               "addedAt": 1563580800,
               "art": "https://metadata-static.plex.tv/8/gracenote/8beed60402976878c0e1cee49e026374.jpg",
               "duration": 4920000,
@@ -621,6 +529,98 @@
                   "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
                   "slug": "romance",
                   "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.11
+          },
+          {
+            "Metadata": {
+              "addedAt": 1359417600,
+              "art": "https://metadata-static.plex.tv/3/gracenote/352e22ebd6ddfe5f4db39b631897262f.jpg",
+              "duration": 4680000,
+              "guid": "plex://movie/5d7769ac9ab54400214f5333",
+              "key": "/library/metadata/5d7769ac9ab54400214f5333",
+              "originallyAvailableAt": "2013-01-29",
+              "ratingKey": "5d7769ac9ab54400214f5333",
+              "slug": "batman-the-dark-knight-returns-part-2",
+              "subtype": "video",
+              "thumb": "https://metadata-static.plex.tv/9/gracenote/9c29768f0dc2616167503a3e441e91ed.jpg",
+              "title": "Batman: The Dark Knight Returns, Part 2",
+              "type": "movie",
+              "year": 2013,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
                   "type": "hub",
                   "context": "tag.genre"
                 },

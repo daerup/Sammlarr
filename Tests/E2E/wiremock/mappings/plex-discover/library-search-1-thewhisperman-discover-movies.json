@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/library/search",
+    "queryParameters": {
+      "includeMetadata": {
+        "equalTo": "1"
+      },
+      "query": {
+        "equalTo": "The Whisper Man"
+      },
+      "searchProviders": {
+        "equalTo": "discover"
+      },
+      "searchTypes": {
+        "equalTo": "movies"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "bodyFileName": "plex-discover/library-search-1-thewhisperman-discover-movies.verified.json"
+  }
+}
