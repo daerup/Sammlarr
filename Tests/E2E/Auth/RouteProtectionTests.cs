@@ -1,22 +1,19 @@
-using System.Text.RegularExpressions;
-
 namespace E2E.Tests.Auth;
 
 public class RouteProtectionTests
 {
 	[Test]
-	[Arguments("/watchlist")]
-	[Arguments("/blacklist")]
-	[Arguments("/feeds")]
-	[Arguments("/browse")]
-	[Arguments("/settings")]
+	[Arguments(Routes.Watchlist)]
+	[Arguments(Routes.Blacklist)]
+	[Arguments(Routes.Feeds)]
+	[Arguments(Routes.Browse)]
+	[Arguments(Routes.Settings)]
 	public async Task Visit_WhenUnauthenticated_RedirectsToSignIn(string route)
 	{
 		var page = await E2EApp.OpenPageAsync();
 
-		await page.VisitAsync(route);
-		await page.WaitForURLAsync(new Regex("/signin"));
+		await page.GotoAsync(route);
 
-		await Assert.That(page.Url).Contains("/signin");
+		await page.ShouldBeAtAsync(Routes.SignIn);
 	}
 }

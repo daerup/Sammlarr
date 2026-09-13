@@ -12,7 +12,7 @@ public class CacheTests
 	[Test]
 	public async Task PurgeCache_WhenConfirmed_ForcesReResolution()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
 		await PreviewAsync(page);
 		var warm = await E2EApp.RequestCountAsync(MetadataRequests);
 
@@ -29,16 +29,16 @@ public class CacheTests
 
 	private static async Task PreviewAsync(IPage page)
 	{
-		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, $"E2E Cache {Guid.NewGuid().ToString("N")[..6]}");
+		await page.VisitAsync(Routes.CreateFeed);
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Cache"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 	}
 
 	private static async Task PurgeAsync(IPage page)
 	{
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Purge cache", Exact = true }).ClickAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Yes, purge everything", Exact = true }).ClickAsync();
-		await Expect(page.GetByText("Media cache purged.")).ToBeVisibleAsync();
+		await page.Button("Purge cache").ClickAsync();
+		await page.Button("Yes, purge everything").ClickAsync();
+		await Expect(page.Text("Media cache purged.")).ToBeVisibleAsync();
 	}
 }

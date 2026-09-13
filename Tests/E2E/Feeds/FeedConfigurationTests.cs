@@ -17,24 +17,24 @@ public class FeedConfigurationTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Limit"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Limit"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(listed));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(Count(0));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(listed));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(0));
 
 		var limit = listed - 2;
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
-		await FeedEditor.FillAsync(page, "#limit", Count(limit));
+		await FeedEditor.FillAsync(page, "#limit", TestData.Count(limit));
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(Count(listed));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(limit));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(Count(listed - limit));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(listed));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(limit));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - limit));
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
 
@@ -46,7 +46,7 @@ public class FeedConfigurationTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Sort"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Sort"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
@@ -58,7 +58,7 @@ public class FeedConfigurationTests
 		await FeedEditor.PreviewLoadedAsync(page);
 		var descending = await FeedEditor.RowTitlesAsync(page);
 
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Descending", Exact = true }).ClickAsync();
+		await page.Button("Descending").ClickAsync();
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		var ascending = await FeedEditor.RowTitlesAsync(page);
@@ -74,13 +74,13 @@ public class FeedConfigurationTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Filter"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Filter"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
 		var titles = await FeedEditor.RowTitlesAsync(page);
 		var kept = titles[0];
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(Count(0));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(0));
 
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable filters").ClickAsync();
@@ -88,9 +88,9 @@ public class FeedConfigurationTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(Count(titles.Count));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(1));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(Count(titles.Count - 1));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(TestData.Count(titles.Count));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(1));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Filtered)).ToHaveTextAsync(TestData.Count(titles.Count - 1));
 
 		await FeedEditor.Badge(page, PreviewBadge.Included).ClickAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(1);
@@ -101,7 +101,7 @@ public class FeedConfigurationTests
 	[Test]
 	public async Task Strategy_WhenSaved_ShowsInTheFeedList()
 	{
-		var name = Name("Strategy");
+		var name = TestData.Name("Strategy");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
@@ -109,8 +109,8 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
-		await Expect(row).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var row = page.Row(name);
+		await Expect(row).ToBeVisibleAsync(Wait.Settle);
 		await Expect(row.GetByText("Replace", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
 
 		await row.GetByLabel("Edit").ClickAsync();
@@ -124,14 +124,14 @@ public class FeedConfigurationTests
 	{
 		const string hour = "4";
 		const string minute = "30";
-		var name = Name("Schedule");
+		var name = TestData.Name("Schedule");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.OpenOptionalSectionAsync(page, "Sync Frequency");
 		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
 		await page.GetByRole(AriaRole.Combobox).Filter(new LocatorFilterOptions { HasText = "Daily" }).ClickAsync();
-		await page.GetByRole(AriaRole.Option, new PageGetByRoleOptions { Name = "Expression", Exact = true }).ClickAsync();
+		await page.Option("Expression").ClickAsync();
 		await FeedEditor.TestAsync(page);
 
 		await FeedEditor.FillAsync(page, CronField("Hour"), "99");
@@ -142,8 +142,8 @@ public class FeedConfigurationTests
 		await FeedEditor.FillAsync(page, CronField("Hour"), hour);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
-		await Expect(row).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var row = page.Row(name);
+		await Expect(row).ToBeVisibleAsync(Wait.Settle);
 		await row.GetByLabel("Edit").ClickAsync();
 
 		await Expect(FeedEditor.Option(page, "Trigger", "Scheduled")).ToHaveAttributeAsync("aria-pressed", "");
@@ -164,8 +164,8 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var originalRow = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = original });
-		await Expect(originalRow).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var originalRow = page.Row(original);
+		await Expect(originalRow).ToBeVisibleAsync(Wait.Settle);
 		await originalRow.GetByLabel("Duplicate").ClickAsync();
 
 		await Expect(page.GetByText("Clone feed").First).ToBeVisibleAsync();
@@ -176,8 +176,8 @@ public class FeedConfigurationTests
 		await FeedEditor.FillAsync(page, "#name", copy);
 		await FeedEditor.SaveAsync(page);
 
-		var copyRow = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = copy });
-		await Expect(copyRow).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var copyRow = page.Row(copy);
+		await Expect(copyRow).ToBeVisibleAsync(Wait.Settle);
 		await Expect(originalRow).ToBeVisibleAsync();
 		await Expect(copyRow.GetByText("Replace", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
 	}
@@ -185,7 +185,7 @@ public class FeedConfigurationTests
 	[Test]
 	public async Task EnabledToggle_WhenFlipped_RoundTrips()
 	{
-		var name = Name("Toggle");
+		var name = TestData.Name("Toggle");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
@@ -193,8 +193,8 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
-		await Expect(row).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var row = page.Row(name);
+		await Expect(row).ToBeVisibleAsync(Wait.Settle);
 		await Expect(row.GetByText("Disabled", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
 
 		await row.GetByLabel("Edit").ClickAsync();
@@ -202,8 +202,7 @@ public class FeedConfigurationTests
 		await FeedEditor.Toggle(page, "Enabled").ClickAsync();
 		await FeedEditor.SaveAsync(page);
 
-		await Expect(row.GetByText("Enabled", new LocatorGetByTextOptions { Exact = true }))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(row.GetByText("Enabled", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync(Wait.Settle);
 	}
 
 	[Test]
@@ -216,16 +215,11 @@ public class FeedConfigurationTests
 		await FeedEditor.FillAsync(page, "#list-identifier", UnknownIdentifier);
 		await FeedEditor.TestAsync(page);
 
-		await Expect(page.GetByText($"No list found with identifier '{UnknownIdentifier}'."))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 60000 });
+		await Expect(page.GetByText($"No list found with identifier '{UnknownIdentifier}'.")).ToBeVisibleAsync(Wait.Preview);
 		await Expect(page.GetByText("Test failed")).ToBeVisibleAsync();
-		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Retry", Exact = true })).ToBeVisibleAsync();
+		await Expect(page.Button("Retry")).ToBeVisibleAsync();
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
 	}
 
 	private static string CronField(string label) => $"input[aria-label^='{label}']";
-
-	private static string Name(string scenario) => $"E2E {scenario} {Guid.NewGuid().ToString("N")[..6]}";
-
-	private static string Count(int value) => value.ToString(CultureInfo.InvariantCulture);
 }

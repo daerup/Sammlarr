@@ -1,4 +1,4 @@
-using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Home;
 
@@ -7,34 +7,24 @@ public class HomePageTests
 	[Test]
 	public async Task Visit_WhenAuthenticated_IsNotRedirectedToSignIn()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Home);
 
-		await page.VisitAsync("/");
-
-		await Assert.That(page.Url).DoesNotContain("/signin");
+		await page.ShouldNotBeAtAsync(Routes.SignIn);
 	}
 
 	[Test]
 	public async Task Home_WhenAuthenticated_ShowsLibraryHeading()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Home);
 
-		await page.VisitAsync("/");
-		var heading = page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Your library" });
-		await heading.WaitForAsync();
-
-		await Assert.That(await heading.IsVisibleAsync()).IsTrue();
+		await Expect(page.Heading("Your library")).ToBeVisibleAsync();
 	}
 
 	[Test]
 	public async Task Shell_WhenAuthenticated_IdentifiesTheSignedInUser()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Home);
 
-		await page.VisitAsync("/");
-		var accountMenu = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "signed in as Test User" });
-		await accountMenu.WaitForAsync();
-
-		await Assert.That(await accountMenu.IsVisibleAsync()).IsTrue();
+		await Expect(page.ButtonContaining("signed in as Test User")).ToBeVisibleAsync();
 	}
 }

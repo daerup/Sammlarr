@@ -13,7 +13,7 @@ public class BlacklistTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, $"E2E Blacklist {Guid.NewGuid().ToString("N")[..6]}");
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Blacklist"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
@@ -29,14 +29,13 @@ public class BlacklistTests
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync((titles.Count - 1).ToString(CultureInfo.InvariantCulture));
 
 		await page.VisitAsync("/blacklist");
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = target, Exact = true }))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = target, Exact = true })).ToBeVisibleAsync(Wait.Settle);
 
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Bulk edit" }).ClickAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Select all" }).ClickAsync();
+		await page.ButtonContaining("Bulk edit").ClickAsync();
+		await page.ButtonContaining("Select all").ClickAsync();
 		await Expect(page.GetByText("1 of 1 selected")).ToBeVisibleAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Remove from Blacklist (1)" }).ClickAsync();
+		await page.ButtonContaining("Remove from Blacklist (1)").ClickAsync();
 
-		await Expect(page.GetByText("Nothing blacklisted.")).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.GetByText("Nothing blacklisted.")).ToBeVisibleAsync(Wait.Settle);
 	}
 }

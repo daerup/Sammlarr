@@ -17,7 +17,7 @@ public class FeedFilteringTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Slots"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Slots"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
@@ -25,33 +25,33 @@ public class FeedFilteringTests
 		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
-		await FeedEditor.FillAsync(page, "#limit", Count(Limit));
+		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(Count(1));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(Limit - 1));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(Count(listed - Limit));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(1));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit - 1));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 
 		await FeedEditor.Option(page, "Blacklist limit behavior", "Preserved").ClickAsync();
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(Count(1));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(Limit));
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(Count(listed - Limit - 1));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(1));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
 
 		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(Count(0));
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(0));
 	}
 
 	[Test]
 	public async Task Filter_WhenSavedAndReopened_IsRestoredInTheEditor()
 	{
-		var name = Name("Restored");
+		var name = TestData.Name("Restored");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
@@ -65,15 +65,15 @@ public class FeedFilteringTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
-		await Expect(row).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var row = page.Row(name);
+		await Expect(row).ToBeVisibleAsync(Wait.Settle);
 		await row.GetByLabel("Edit").ClickAsync();
 
 		await Expect(FeedEditor.Toggle(page, "Enable filters")).ToHaveAttributeAsync("aria-checked", "true");
 		var condition = page.Locator("[role='group'][aria-label='Filter condition']");
 		await Expect(condition.GetByRole(AriaRole.Combobox).First).ToHaveTextAsync(new Regex("Title"));
 		await Expect(page.Locator("input[placeholder='Enter value...']")).ToHaveValueAsync(kept);
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(1), new LocatorAssertionsToHaveTextOptions { Timeout = 60000 });
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(1), Wait.Preview);
 	}
 
 	[Test]
@@ -81,7 +81,7 @@ public class FeedFilteringTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("NoLimit"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("NoLimit"));
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();
@@ -90,13 +90,9 @@ public class FeedFilteringTests
 		await Expect(page.Locator("#limit")).ToHaveAttributeAsync("aria-invalid", "true");
 		await Expect(FeedEditor.TestButton(page)).ToBeDisabledAsync();
 
-		await FeedEditor.FillAsync(page, "#limit", Count(Limit));
+		await FeedEditor.FillAsync(page, "#limit", TestData.Count(Limit));
 
 		await Expect(page.GetByText("Limit must be a positive whole number.")).ToBeHiddenAsync();
 		await Expect(FeedEditor.TestButton(page)).ToBeEnabledAsync();
 	}
-
-	private static string Name(string scenario) => $"E2E {scenario} {Guid.NewGuid().ToString("N")[..6]}";
-
-	private static string Count(int value) => value.ToString(CultureInfo.InvariantCulture);
 }

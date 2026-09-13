@@ -16,7 +16,7 @@ public class FeedImportTests
 		await FeedEditor.SelectMdblistAsync(page);
 		await page.Locator("#list-identifier").FillAsync(FeedEditor.ListIdentifier);
 
-		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true })).ToBeHiddenAsync();
+		await Expect(page.Button("Save")).ToBeHiddenAsync();
 	}
 
 	[Test]
@@ -40,7 +40,7 @@ public class FeedImportTests
 	[Test]
 	public async Task Save_WhenPreviewSucceeded_PersistsTheFeedIntoTheList()
 	{
-		var name = $"E2E Feed {Guid.NewGuid().ToString("N")[..6]}";
+		var name = TestData.Name("Feed");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
@@ -48,25 +48,24 @@ public class FeedImportTests
 
 		await FeedEditor.SaveAsync(page);
 
-		await Expect(page.GetByText(name)).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.GetByText(name)).ToBeVisibleAsync(Wait.Settle);
 	}
 
 	[Test]
 	public async Task Delete_WhenConfirmed_RemovesTheFeedFromTheList()
 	{
-		var name = $"E2E Doomed {Guid.NewGuid().ToString("N")[..6]}";
+		var name = TestData.Name("Doomed");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
-		await Expect(page.GetByText(name)).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.GetByText(name)).ToBeVisibleAsync(Wait.Settle);
 
-		await page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name }).GetByRole(AriaRole.Button).Last.ClickAsync();
+		await page.Row(name).GetByRole(AriaRole.Button).Last.ClickAsync();
 		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = $"Delete \"{name}\"?" })).ToBeVisibleAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Delete", Exact = true }).Last.ClickAsync();
+		await page.Button("Delete").Last.ClickAsync();
 
-		await Expect(page.GetByRole(AriaRole.Cell, new PageGetByRoleOptions { Name = name }))
-			.ToBeHiddenAsync(new LocatorAssertionsToBeHiddenOptions { Timeout = 30000 });
+		await Expect(page.GetByRole(AriaRole.Cell, new PageGetByRoleOptions { Name = name })).ToBeHiddenAsync(Wait.Settle);
 	}
 }

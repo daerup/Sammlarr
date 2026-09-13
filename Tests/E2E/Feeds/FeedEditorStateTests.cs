@@ -11,15 +11,15 @@ public class FeedEditorStateTests
 	[Test]
 	public async Task Save_WhenNothingChangedOnEdit_IsDisabledUntilAFieldIsEdited()
 	{
-		var name = Name("Unchanged");
+		var name = TestData.Name("Unchanged");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name });
-		await Expect(row).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		var row = page.Row(name);
+		await Expect(row).ToBeVisibleAsync(Wait.Settle);
 		await row.GetByLabel("Edit").ClickAsync();
 
 		await Expect(FeedEditor.SaveButton(page)).ToBeDisabledAsync(new LocatorAssertionsToBeDisabledOptions { Timeout = 60000 });
@@ -34,7 +34,7 @@ public class FeedEditorStateTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Shortcut"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Shortcut"));
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
 
 		await page.Keyboard.PressAsync("Control+Enter");
@@ -48,7 +48,7 @@ public class FeedEditorStateTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Pending"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Pending"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
@@ -65,7 +65,7 @@ public class FeedEditorStateTests
 
 		await FeedEditor.ApplyAsync(page);
 
-		await Expect(FeedEditor.SaveButton(page)).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 60000 });
+		await Expect(FeedEditor.SaveButton(page)).ToBeVisibleAsync(Wait.Preview);
 		await Expect(FeedEditor.ApplyButton(page)).ToBeHiddenAsync();
 	}
 
@@ -74,7 +74,7 @@ public class FeedEditorStateTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
-		await FeedEditor.ConfigureAsync(page, Name("Reset"));
+		await FeedEditor.ConfigureAsync(page, TestData.Name("Reset"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync((await FeedEditor.ServedTitlesAsync()).Count);
@@ -86,6 +86,4 @@ public class FeedEditorStateTests
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
 		await Expect(page.GetByText("Run a test to preview the media items from your list.")).ToBeVisibleAsync();
 	}
-
-	private static string Name(string scenario) => $"E2E {scenario} {Guid.NewGuid().ToString("N")[..6]}";
 }

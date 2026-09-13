@@ -41,10 +41,7 @@ public class SessionTests
 		await Assert.That(page.Url).Contains($"returnUrl={Uri.EscapeDataString(DeepLink)}");
 
 		await page.RouteAsync(LoginRoute, route => route.AbortAsync());
-		var login = await page.RunAndWaitForRequestAsync(
-			() => page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Sign in with Plex" }).ClickAsync(),
-			LoginRoute
-		);
+		var login = await page.RunAndWaitForRequestAsync(() => page.ButtonContaining("Sign in with Plex").ClickAsync(), LoginRoute);
 
 		await Assert.That(login.Url).Contains($"returnUrl={Uri.EscapeDataString(DeepLink)}");
 
@@ -52,7 +49,7 @@ public class SessionTests
 		await page.VisitAsync($"/auth/plex/callback?pinId={PinId}&clientId={Guid.NewGuid()}&returnUrl={Uri.EscapeDataString(DeepLink)}");
 
 		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo(DeepLink);
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Feeds" })).ToBeVisibleAsync();
+		await Expect(page.Heading("Feeds")).ToBeVisibleAsync();
 	}
 
 	private static string PinBody() =>

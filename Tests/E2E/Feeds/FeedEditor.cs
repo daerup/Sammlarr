@@ -1,4 +1,3 @@
-using System.Text.Json.Nodes;
 using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
@@ -33,7 +32,7 @@ internal static class FeedEditor
 
 	internal static async Task SelectMdblistAsync(IPage page)
 	{
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Mdblist", Exact = true }).First.ClickAsync();
+		await page.Button("Mdblist").First.ClickAsync();
 		await page.WaitForTimeoutAsync(500);
 	}
 
@@ -43,12 +42,11 @@ internal static class FeedEditor
 		await page.Locator(selector).PressAsync("Tab");
 	}
 
-	internal static Task TestAsync(IPage page) => Click(page, "Test");
+	internal static Task TestAsync(IPage page) => TestButton(page).ClickAsync();
 
-	internal static Task ApplyAsync(IPage page) => Click(page, "Apply");
+	internal static Task ApplyAsync(IPage page) => ApplyButton(page).ClickAsync();
 
-	internal static async Task PreviewLoadedAsync(IPage page) =>
-		await Expect(SaveButton(page)).ToBeEnabledAsync(new LocatorAssertionsToBeEnabledOptions { Timeout = 60000 });
+	internal static async Task PreviewLoadedAsync(IPage page) => await Expect(SaveButton(page)).ToBeEnabledAsync(Wait.Preview);
 
 	internal static async Task SaveAsync(IPage page)
 	{
@@ -56,13 +54,11 @@ internal static class FeedEditor
 		await SaveButton(page).ClickAsync();
 	}
 
-	internal static ILocator SaveButton(IPage page) => Named(page, "Save");
+	internal static ILocator SaveButton(IPage page) => page.Button("Save").First;
 
-	internal static ILocator ApplyButton(IPage page) => Named(page, "Apply");
+	internal static ILocator ApplyButton(IPage page) => page.Button("Apply").First;
 
-	internal static ILocator TestButton(IPage page) => Named(page, "Test");
-
-	private static ILocator Named(IPage page, string name) => page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = name, Exact = true }).First;
+	internal static ILocator TestButton(IPage page) => page.Button("Test").First;
 
 	internal static ILocator Rows(IPage page) => page.Locator(ResultRow);
 
@@ -71,20 +67,15 @@ internal static class FeedEditor
 
 	internal static ILocator Badge(IPage page, PreviewBadge badge) => page.Locator(".stat-badges-row .preview-filter-badge").Nth(Position(badge));
 
-	internal static ILocator Toggle(IPage page, string label) =>
-		page.Locator("[data-slot='field']").Filter(new LocatorFilterOptions { HasText = label }).GetByRole(AriaRole.Switch);
+	internal static ILocator Toggle(IPage page, string label) => page.Field(label).Switch;
 
-	internal static ILocator Option(IPage page, string label, string value) =>
-		page.Locator("[data-slot='field']")
-			.Filter(new LocatorFilterOptions { HasText = label })
-			.GetByRole(AriaRole.Button, new LocatorGetByRoleOptions { Name = value, Exact = true });
+	internal static ILocator Option(IPage page, string label, string value) => page.Field(label).Button(value);
 
 	internal static async Task AddConditionAsync(IPage page, string field, string value)
 	{
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add condition" }).ClickAsync();
-		var condition = page.Locator("[role='group'][aria-label='Filter condition']");
-		await condition.GetByRole(AriaRole.Combobox).First.ClickAsync();
-		await page.GetByRole(AriaRole.Option, new PageGetByRoleOptions { Name = field, Exact = true }).ClickAsync();
+		await page.ButtonContaining("Add condition").ClickAsync();
+		await page.Locator("[role='group'][aria-label='Filter condition']").Combobox.First.ClickAsync();
+		await page.Option(field).ClickAsync();
 		await FillAsync(page, "input[placeholder='Enter value...']", value);
 		await page.WaitForTimeoutAsync(FilterBuilderDebounceMs * 3);
 	}
@@ -96,8 +87,6 @@ internal static class FeedEditor
 	}
 
 	internal static Task<IReadOnlyList<string>> ServedTitlesAsync() => MdblistFeed.ServedTitlesAsync(ListIdentifier);
-
-	private static Task Click(IPage page, string name) => page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = name, Exact = true }).ClickAsync();
 
 	private static int Position(PreviewBadge badge) =>
 		badge switch
