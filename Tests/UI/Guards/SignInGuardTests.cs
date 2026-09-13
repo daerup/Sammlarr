@@ -6,7 +6,7 @@ namespace UI.Tests.Guards;
 public class SignInGuardTests : BunitContext
 {
 	[Test]
-	public async Task An_authenticated_user_is_reported_as_having_access()
+	public async Task Access_WhenTheUserIsAuthenticated_IsReportedAsGranted()
 	{
 		AddAuthorization().SetAuthorized("alice");
 		bool? access = null;
@@ -17,7 +17,7 @@ public class SignInGuardTests : BunitContext
 	}
 
 	[Test]
-	public async Task An_anonymous_user_is_reported_as_not_having_access()
+	public async Task Access_WhenTheUserIsAnonymous_IsReportedAsDenied()
 	{
 		AddAuthorization().SetNotAuthorized();
 		bool? access = null;
@@ -28,7 +28,7 @@ public class SignInGuardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Access_is_reported_once_while_it_stays_the_same()
+	public async Task Access_WhenUnchanged_IsReportedOnce()
 	{
 		AddAuthorization().SetAuthorized("alice");
 		var reports = 0;

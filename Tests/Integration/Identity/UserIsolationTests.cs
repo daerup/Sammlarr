@@ -20,7 +20,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Feeds_are_private_to_each_user()
+	public async Task Feeds_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Resolve<IFeedRepository>()
@@ -47,7 +47,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Api_keys_are_private_to_each_user()
+	public async Task ApiKeys_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-secret"));
@@ -58,7 +58,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Credentials_are_private_to_each_user()
+	public async Task Credentials_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, "plex-token", DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
@@ -69,7 +69,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Watchlist_entries_are_private_to_each_user()
+	public async Task WatchlistEntries_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
@@ -80,7 +80,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Blacklist_entries_are_private_to_each_user()
+	public async Task BlacklistEntries_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Movie(TestMedia.Inception).OnBlacklist();

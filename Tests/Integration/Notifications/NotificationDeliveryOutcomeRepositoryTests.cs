@@ -28,7 +28,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		(await _testee.GetRecentByTargetAsync(count)).GetValueOrDefault(targetId, []);
 
 	[Test]
-	public async Task Records_and_reads_back_a_delivered_outcome()
+	public async Task RecordAsync_WhenDelivered_RoundTripsTheOutcome()
 	{
 		var targetId = await CreateTargetAsync();
 
@@ -40,7 +40,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	}
 
 	[Test]
-	public async Task Retrying_outcome_round_trips_reason_and_next_attempt()
+	public async Task RecordAsync_WhenRetrying_RoundTripsReasonAndNextAttempt()
 	{
 		var targetId = await CreateTargetAsync();
 		var next = DateTimeOffset.UnixEpoch.AddMinutes(5);
@@ -59,7 +59,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	}
 
 	[Test]
-	public async Task Same_event_and_target_upserts_so_a_retry_then_success_collapses_to_delivered()
+	public async Task RecordAsync_WhenARetryIsFollowedBySuccess_CollapsesToDelivered()
 	{
 		var targetId = await CreateTargetAsync();
 		var eventId = Guid.CreateVersion7();
@@ -73,7 +73,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	}
 
 	[Test]
-	public async Task Get_recent_is_capped_to_the_requested_count()
+	public async Task GetRecentAsync_WhenMoreExistThanRequested_IsCappedToTheCount()
 	{
 		var targetId = await CreateTargetAsync();
 		for (var i = 0; i < 5; i++)
@@ -85,7 +85,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	}
 
 	[Test]
-	public async Task Outcomes_are_pruned_to_the_newest_twenty_per_target()
+	public async Task RecordAsync_WhenOutcomesAccumulate_PrunesToTheNewestTwentyPerTarget()
 	{
 		var targetId = await CreateTargetAsync();
 		for (var i = 0; i < 25; i++)
@@ -97,7 +97,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	}
 
 	[Test]
-	public async Task Outcomes_are_isolated_per_user()
+	public async Task Outcomes_WhenTwoUsersExist_AreIsolatedPerUser()
 	{
 		var targetId = await CreateTargetAsync();
 		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Delivered());
@@ -110,7 +110,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	}
 
 	[Test]
-	public async Task Deleting_a_target_cascades_its_outcomes()
+	public async Task DeleteAsync_WhenATargetIsDeleted_CascadesItsOutcomes()
 	{
 		var targetId = await CreateTargetAsync();
 		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSynced, new Delivered());

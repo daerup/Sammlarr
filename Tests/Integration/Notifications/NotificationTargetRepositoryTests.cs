@@ -18,7 +18,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	public void Setup() => _testee = new NotificationTargetRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task Create_webhook_target_roundtrips_decrypted_config()
+	public async Task CreateAsync_ForAWebhookTarget_RoundTripsTheDecryptedConfig()
 	{
 		var id = await _testee.CreateAsync(
 			new NotificationTarget(Guid.Empty, "My Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_topsecret"))
@@ -41,7 +41,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Create_pushover_target_roundtrips_decrypted_config()
+	public async Task CreateAsync_ForAPushoverTarget_RoundTripsTheDecryptedConfig()
 	{
 		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "My Pushover", true, new PushoverConfig("app-token", "user-key")));
 
@@ -60,7 +60,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Webhook_signing_secret_is_encrypted_at_rest()
+	public async Task CreateAsync_ForAWebhookTarget_EncryptsTheSigningSecretAtRest()
 	{
 		await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_plaintext")));
 
@@ -71,7 +71,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Pushover_secrets_are_encrypted_at_rest()
+	public async Task CreateAsync_ForAPushoverTarget_EncryptsItsSecretsAtRest()
 	{
 		await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Pushover", true, new PushoverConfig("app-token-plain", "user-key-plain")));
 
@@ -85,7 +85,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Channel_is_persisted_as_a_string()
+	public async Task CreateAsync_WhenATargetIsStored_PersistsTheChannelAsAString()
 	{
 		await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Webhook", true, new WebhookConfig("https://example.test/hook", "whsec_x")));
 
@@ -95,7 +95,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Update_changes_name_enabled_and_config()
+	public async Task UpdateAsync_WhenATargetChanges_UpdatesNameEnabledAndConfig()
 	{
 		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Original", true, new WebhookConfig("https://example.test/one", "whsec_one")));
 
@@ -111,7 +111,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Delete_removes_the_target()
+	public async Task DeleteAsync_WhenATargetExists_RemovesIt()
 	{
 		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Doomed", true, new PushoverConfig("token", "key")));
 
@@ -121,7 +121,7 @@ public class NotificationTargetRepositoryTests(SammlarrTestHost fixture) : IAsyn
 	}
 
 	[Test]
-	public async Task Targets_are_isolated_per_user()
+	public async Task Targets_WhenTwoUsersExist_AreIsolatedPerUser()
 	{
 		var id = await _testee.CreateAsync(new NotificationTarget(Guid.Empty, "Owner A", true, new PushoverConfig("token", "key")));
 

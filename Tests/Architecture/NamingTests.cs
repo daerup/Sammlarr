@@ -6,31 +6,31 @@ namespace Architecture.Tests;
 public class NamingTests
 {
 	[Test]
-	public async Task Interfaces_are_prefixed_with_I()
+	public async Task Naming_OfInterfaces_RequiresAnIPrefix()
 	{
 		await Types.InAssemblies(Projects.All).That().AreInterfaces().Should().HaveNameStartingWith("I").GetResult().AssertNone();
 	}
 
 	[Test]
-	public async Task Service_modules_are_suffixed_with_Module()
+	public async Task Naming_OfServiceModules_RequiresAModuleSuffix()
 	{
 		await Types.InAssemblies(Projects.All).That().ImplementInterface<Shared.DI.IServiceModule>().Should().HaveNameEndingWith("Module").GetResult().AssertNone();
 	}
 
 	[Test]
-	public async Task Exceptions_are_suffixed_with_Exception()
+	public async Task Naming_OfExceptions_RequiresAnExceptionSuffix()
 	{
 		await Types.InAssemblies(Projects.All).That().Inherit<Exception>().Should().HaveNameEndingWith("Exception").GetResult().AssertNone();
 	}
 
 	[Test]
-	public async Task Async_methods_have_an_Async_or_Await_suffix()
+	public async Task Naming_OfAsyncMethods_RequiresAnAsyncOrAwaitSuffix()
 	{
 		await Methods.Public.Where(ViolatesAsyncNaming).Select(Methods.Describe).AssertNone();
 	}
 
 	[Test]
-	public async Task Async_suffix_is_only_used_by_async_methods()
+	public async Task Naming_OfTheAsyncSuffix_RestrictsItToAsyncMethods()
 	{
 		await Methods
 			.Public.Where(method => method.Name.EndsWith("Async", StringComparison.Ordinal))

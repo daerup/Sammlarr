@@ -9,7 +9,7 @@ public class MediaMergerSnapshots
 	private static readonly MediaId Id = MediaId.From(Guid.Parse("11111111-1111-1111-1111-111111111111"));
 
 	[Test]
-	public Task Merging_a_plex_base_with_a_tmdb_enrichment_produces_the_expected_movie()
+	public Task MergeWith_WhenATmdbEnrichmentFollowsAPlexBase_ProducesTheExpectedMovie()
 	{
 		var plex = new PartialMovie
 		{

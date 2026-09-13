@@ -14,7 +14,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task A_cached_movie_resolves()
+	public async Task GetTrendingAsync_WhenAMovieIsCached_ResolvesIt()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		await host.Movie(TestMedia.Inception).SeedAsync();
@@ -26,7 +26,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_cached_show_resolves()
+	public async Task GetTrendingAsync_WhenAShowIsCached_ResolvesIt()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.BreakingBad);
 		await host.Show(TestMedia.BreakingBad).SeedAsync();
@@ -38,7 +38,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_uncached_movie_is_resolved_through_plex()
+	public async Task GetTrendingAsync_WhenAMovieIsUncached_ResolvesItThroughPlex()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		host.PlexHolds(TestMedia.Inception);
@@ -51,7 +51,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_uncached_movie_plex_cannot_resolve_stays_unresolved()
+	public async Task GetTrendingAsync_WhenPlexCannotResolveTheMovie_LeavesItUnresolved()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		await host.PlexFindsNothing("Inception");
@@ -63,7 +63,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_unknown_media_type_stays_unresolved()
+	public async Task GetTrendingAsync_WhenTheMediaTypeIsUnknown_LeavesItUnresolved()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Person("Some Person"));
 
@@ -74,7 +74,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_empty_page_returns_no_items()
+	public async Task GetTrendingAsync_WhenThePageIsEmpty_ReturnsNoItems()
 	{
 		await host.TmdbTrendingPage(1);
 
@@ -82,7 +82,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Item_order_is_preserved_across_resolved_and_unresolved()
+	public async Task GetTrendingAsync_WhenItemsMixResolvedAndUnresolved_PreservesTheirOrder()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception, TestMedia.Person("Christopher Nolan"), TestMedia.Interstellar);
 		await host.Movie(TestMedia.Inception).SeedAsync();

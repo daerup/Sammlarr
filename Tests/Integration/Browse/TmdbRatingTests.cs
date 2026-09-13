@@ -16,7 +16,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Arguments(8.4, 23000)]
 	[Arguments(6.5, 0)]
 	[Arguments(0.1, 1)]
-	public async Task A_positive_vote_average_delivers_a_rating(double average, int votes)
+	public async Task GetRatingsAsync_WhenTheVoteAverageIsPositive_DeliversARating(double average, int votes)
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb(rating: average, votes: votes).SeedAsync();
 
@@ -29,7 +29,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_vote_average_of_zero_returns_no_ratings()
+	public async Task GetRatingsAsync_WhenTheVoteAverageIsZero_ReturnsNone()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb(rating: 0, votes: 0).SeedAsync();
 
@@ -37,7 +37,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Missing_vote_data_returns_no_ratings()
+	public async Task GetRatingsAsync_WhenVoteDataIsMissing_ReturnsNone()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb().SeedAsync();
 
@@ -45,10 +45,11 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_non_tmdb_id_returns_no_ratings() => await Assert.That(await FetchTmdbRatings(ImdbId.From("tt0137523", MediaType.Movie))).IsEmpty();
+	public async Task GetRatingsAsync_WhenTheIdIsNotTmdb_ReturnsNone() =>
+		await Assert.That(await FetchTmdbRatings(ImdbId.From("tt0137523", MediaType.Movie))).IsEmpty();
 
 	[Test]
-	public async Task Ratings_are_retrieved_for_a_show()
+	public async Task GetRatingsAsync_ForAShow_RetrievesRatings()
 	{
 		await host.Show(TestMedia.BreakingBad).ServedByTmdb(rating: 9.5, votes: 50000).SeedAsync();
 

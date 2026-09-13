@@ -26,16 +26,17 @@ public class WatchlistSyncPlanProperties
 		.Select(Build);
 
 	[Test]
-	public void A_pull_never_adds_and_removes_the_same_id() => Scenarios.Sample(scenario => !scenario.Plan.Pull.Adds.Intersect(scenario.Plan.Pull.Removes).Any());
+	public void Compute_ForAnyScenario_NeverPullsAnIdAsBothAnAddAndARemove() =>
+		Scenarios.Sample(scenario => !scenario.Plan.Pull.Adds.Intersect(scenario.Plan.Pull.Removes).Any());
 
 	[Test]
-	public void The_plan_never_pushes_an_add_while_pulling_it_as_a_remove() =>
+	public void Compute_ForAnyScenario_NeverPushesAnAddItIsAlsoPullingAsARemove() =>
 		Scenarios.Sample(scenario =>
 			!scenario.Plan.Push.Adds.Intersect(scenario.Plan.Pull.Removes).Any() && !scenario.Plan.Push.Removes.Intersect(scenario.Plan.Pull.Adds).Any()
 		);
 
 	[Test]
-	public void Every_queued_operation_is_classified_exactly_once() =>
+	public void Compute_ForAnyScenario_ClassifiesEveryQueuedOperationExactlyOnce() =>
 		Scenarios.Sample(scenario => scenario.Plan.Push.Adds.Count + scenario.Plan.Push.Removes.Count + scenario.Plan.Redundant.Count == scenario.QueuedCount);
 
 	private static Scenario Build((bool Remote, bool Local, OutboxState Outbox)[] situations)

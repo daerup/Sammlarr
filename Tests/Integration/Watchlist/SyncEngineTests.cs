@@ -29,7 +29,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task A_remote_only_item_is_pulled_into_the_local_watchlist()
+	public async Task SyncAsync_WhenAnItemIsRemoteOnly_PullsItIntoTheLocalWatchlist()
 	{
 		await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.Inception);
@@ -46,7 +46,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_local_item_missing_from_the_remote_is_hard_deleted()
+	public async Task SyncAsync_WhenALocalItemIsMissingRemotely_HardDeletesIt()
 	{
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistEmpty();
@@ -62,7 +62,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task An_item_on_both_the_remote_and_the_local_watchlist_is_left_untouched()
+	public async Task SyncAsync_WhenAnItemIsOnBothSides_LeavesItUntouched()
 	{
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistHas(TestMedia.Inception);
@@ -79,7 +79,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pending_add_is_pushed_to_the_provider_and_cleared_from_the_outbox()
+	public async Task SyncAsync_WhenAnAddIsPending_PushesItAndClearsTheOutbox()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistEmpty();
@@ -96,7 +96,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pending_add_the_provider_already_reflects_is_confirmed_without_re_pushing()
+	public async Task SyncAsync_WhenTheProviderAlreadyReflectsAPendingAdd_ConfirmsWithoutRepushing()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.Inception);
@@ -114,7 +114,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pending_remove_the_provider_already_reflects_is_confirmed_and_the_entry_is_dropped()
+	public async Task SyncAsync_WhenTheProviderAlreadyReflectsAPendingRemove_ConfirmsAndDropsTheEntry()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
@@ -128,7 +128,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pending_remove_for_an_item_still_on_the_remote_is_pushed_but_kept_locally_until_confirmed()
+	public async Task SyncAsync_WhenAPendingRemoveIsStillRemote_PushesItButKeepsItUntilConfirmed()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 		await host.RemoteWatchlistHas(TestMedia.Inception);
@@ -142,7 +142,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_push_the_provider_rejects_is_kept_in_the_outbox()
+	public async Task SyncAsync_WhenTheProviderRejectsAPush_KeepsItInTheOutbox()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistEmpty();
@@ -160,7 +160,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_remove_the_provider_rejects_is_kept_in_the_outbox_and_stays_on_the_remote()
+	public async Task SyncAsync_WhenTheProviderRejectsARemove_KeepsItQueuedAndRemote()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 		await host.RemoteWatchlistHas(TestMedia.Inception);
@@ -179,7 +179,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pending_add_for_media_without_a_pushable_id_is_kept_in_the_outbox()
+	public async Task SyncAsync_WhenAPendingAddHasNoPushableId_KeepsItInTheOutbox()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").SeedAsync();
 		await host.RemoteWatchlistEmpty();
@@ -192,7 +192,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_failed_remote_fetch_aborts_the_sync_without_mutating_local_state()
+	public async Task SyncAsync_WhenTheRemoteFetchFails_AbortsWithoutMutatingLocalState()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
@@ -206,7 +206,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_dry_run_previews_pull_and_push_changes_without_applying_them()
+	public async Task SyncAsync_WhenItIsADryRun_PreviewsChangesWithoutApplyingThem()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
@@ -229,7 +229,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_dry_run_reports_an_error_when_the_remote_is_unavailable_and_leaves_state_untouched()
+	public async Task SyncAsync_WhenADryRunHitsAnUnavailableRemote_ReportsAnErrorAndLeavesStateUntouched()
 	{
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
@@ -241,7 +241,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pull_publishes_a_watchlist_synced_event()
+	public async Task SyncAsync_WhenItPulls_PublishesAWatchlistSyncedEvent()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.Inception);
@@ -254,7 +254,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_push_only_sync_publishes_a_synced_event_reporting_the_pushed_item()
+	public async Task SyncAsync_WhenItOnlyPushes_PublishesASyncedEventReportingThePushedItem()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistEmpty();
@@ -268,7 +268,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_sync_with_no_changes_publishes_no_events()
+	public async Task SyncAsync_WhenNothingChanged_PublishesNoEvents()
 	{
 		await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistEmpty();
@@ -279,7 +279,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_pending_add_republishes_a_push_request_for_the_item()
+	public async Task SyncAsync_WhenAnAddIsPending_RepublishesAPushRequest()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistEmpty();

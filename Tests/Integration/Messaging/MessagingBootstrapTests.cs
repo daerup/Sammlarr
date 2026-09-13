@@ -22,7 +22,7 @@ namespace Integration.Tests.Messaging;
 public class MessagingBootstrapTests
 {
 	[Test]
-	public async Task Published_message_is_handled_through_the_durable_sqlite_store()
+	public async Task Publish_WhenTheMessageIsDurable_IsHandledThroughTheSqliteStore()
 	{
 		await WithHostAsync(async host =>
 		{
@@ -32,7 +32,7 @@ public class MessagingBootstrapTests
 	}
 
 	[Test]
-	public async Task WatchlistPush_handler_compiles_and_runs_through_the_wolverine_runtime()
+	public async Task Handle_ForAWatchlistPush_RunsThroughTheWolverineRuntime()
 	{
 		await WithHostAsync(
 			async host =>

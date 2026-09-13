@@ -25,7 +25,7 @@ public class NotificationDeliveryPipelineTests
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task Published_event_is_delivered_to_each_subscribed_target()
+	public async Task Publish_WhenAnEventIsRaised_DeliversToEachSubscribedTarget()
 	{
 		var channel = new RecordingChannel();
 		await WithHostAsync(
@@ -43,7 +43,7 @@ public class NotificationDeliveryPipelineTests
 	}
 
 	[Test]
-	public async Task Publishing_through_the_message_publisher_seam_delivers()
+	public async Task Publish_ThroughTheMessagePublisherSeam_Delivers()
 	{
 		var channel = new RecordingChannel();
 		await WithHostAsync(

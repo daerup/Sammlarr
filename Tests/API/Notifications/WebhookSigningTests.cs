@@ -7,7 +7,7 @@ namespace API.Tests.Notifications;
 public class WebhookSigningTests
 {
 	[Test]
-	public async Task Sign_matches_an_independent_hmac_over_id_timestamp_and_body()
+	public async Task Sign_OverIdTimestampAndBody_MatchesAnIndependentHmac()
 	{
 		var id = Guid.Parse("11111111-1111-1111-1111-111111111111");
 		var timestamp = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
@@ -22,7 +22,7 @@ public class WebhookSigningTests
 	}
 
 	[Test]
-	public async Task GenerateSecret_is_whsec_prefixed_and_decodes_to_32_bytes()
+	public async Task GenerateSecret_WhenCalled_IsWhsecPrefixedAndDecodesTo32Bytes()
 	{
 		var secret = WebhookSigning.GenerateSecret();
 

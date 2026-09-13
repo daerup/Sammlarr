@@ -17,7 +17,7 @@ public class NotificationDispatchHandlerTests
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task Watchlist_synced_fans_out_one_message_per_matching_subscription()
+	public async Task Handle_WhenAWatchlistSyncs_FansOutOneMessagePerMatchingSubscription()
 	{
 		var targetA = Guid.NewGuid();
 		var targetB = Guid.NewGuid();
@@ -45,7 +45,7 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Watchlist_synced_consolidates_pulled_and_pushed_into_media_sorted_by_descriptor()
+	public async Task Handle_WhenAWatchlistSyncs_ConsolidatesPulledAndPushedSortedByDescriptor()
 	{
 		var pulledAdd = MediaId.From(Guid.NewGuid());
 		var pushedRemove = MediaId.From(Guid.NewGuid());
@@ -76,7 +76,7 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Test_ping_routes_directly_to_its_target_without_a_subscription_lookup()
+	public async Task Handle_WhenItIsATestPing_RoutesDirectlyWithoutASubscriptionLookup()
 	{
 		var targetId = Guid.NewGuid();
 
@@ -93,7 +93,7 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Fan_out_establishes_the_user_scope_for_the_event_owner()
+	public async Task Handle_WhenFanningOut_EstablishesTheUserScopeForTheOwner()
 	{
 		var scope = Scope();
 
@@ -110,7 +110,7 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task No_matching_subscriptions_produces_no_messages()
+	public async Task Handle_WhenNoSubscriptionMatches_ProducesNoMessages()
 	{
 		var media = Media();
 
@@ -128,7 +128,7 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Media_is_resolved_once_and_the_enriched_context_is_shared_across_targets()
+	public async Task Handle_WhenSeveralTargetsMatch_ResolvesMediaOnceAndSharesTheContext()
 	{
 		var id = MediaId.From(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(

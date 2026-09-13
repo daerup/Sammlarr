@@ -12,7 +12,7 @@ public class BlacklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Adding_a_movie_to_the_blacklist_persists_the_entry()
+	public async Task AddAsync_WhenAMovieIsBlacklisted_PersistsTheEntry()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
@@ -23,7 +23,7 @@ public class BlacklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_a_movie_already_on_the_blacklist_is_idempotent()
+	public async Task AddAsync_WhenTheMovieIsAlreadyBlacklisted_IsIdempotent()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlacklist();
 
@@ -34,7 +34,7 @@ public class BlacklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_a_movie_from_the_blacklist_deletes_the_entry()
+	public async Task RemoveAsync_WhenAMovieIsRemoved_DeletesTheEntry()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlacklist();
 
@@ -45,7 +45,7 @@ public class BlacklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Getting_blacklist_ids_returns_ids_of_all_blacklisted_items()
+	public async Task GetIdsAsync_WhenItemsAreBlacklisted_ReturnsAllOfTheirIds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlacklist();
 		var inception = await host.Movie(TestMedia.Inception).OnBlacklist();
@@ -57,7 +57,7 @@ public class BlacklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Getting_blacklist_items_enriches_entries_with_metadata_and_rating()
+	public async Task GetItemsAsync_WhenEntriesExist_EnrichesThemWithMetadataAndRating()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnBlacklist();
 
@@ -76,7 +76,7 @@ public class BlacklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_a_media_that_is_not_in_the_library_is_rejected()
+	public async Task AddAsync_WhenTheMediaIsNotInTheLibrary_IsRejected()
 	{
 		await Assert.That(async () => await host.Resolve<IBlacklistService>().AddToBacklistAsync(MediaId.From(Guid.NewGuid()))).Throws<UnknownMediaException>();
 	}

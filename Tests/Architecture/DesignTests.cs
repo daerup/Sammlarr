@@ -7,7 +7,7 @@ namespace Architecture.Tests;
 public class DesignTests
 {
 	[Test]
-	public async Task Domain_types_are_immutable()
+	public async Task Design_OfDomainTypes_IsImmutable()
 	{
 		var result = Types.InAssembly(Projects.Domain).That().AreClasses().Should().BeImmutable().GetResult();
 
@@ -15,7 +15,7 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Pure_infrastructure_exposes_only_service_modules_publicly()
+	public async Task Design_OfPureInfrastructure_ExposesOnlyServiceModulesPublicly()
 	{
 		await Types
 			.InAssemblies([Projects.Api, Projects.Db])
@@ -34,7 +34,7 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Repositories_and_services_are_internal_and_sealed()
+	public async Task Design_OfRepositoriesAndServices_IsInternalAndSealed()
 	{
 		await new[] { "Repository", "Service" }
 			.SelectMany(suffix =>
@@ -55,7 +55,7 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Repository_and_service_ports_live_in_Contracts()
+	public async Task Design_OfRepositoryAndServicePorts_PlacesThemInContracts()
 	{
 		var outsideContracts = Projects.All.Where(assembly => assembly != Projects.Contracts).ToArray();
 
@@ -65,7 +65,7 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Public_methods_have_no_boolean_parameters()
+	public async Task Design_OfPublicMethods_ForbidsBooleanParameters()
 	{
 		await Methods
 			.Public.Where(method => method.GetParameters().Any(parameter => parameter.ParameterType == typeof(bool)))
@@ -74,7 +74,7 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Public_methods_have_at_most_four_parameters()
+	public async Task Design_OfPublicMethods_AllowsAtMostFourParameters()
 	{
 		await Methods
 			.Public.Where(method => method.GetParameters().Count(parameter => parameter.ParameterType != typeof(CancellationToken)) > 4)
@@ -83,13 +83,13 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Production_does_not_depend_on_test_infrastructure()
+	public async Task Design_OfProduction_ExcludesTestInfrastructure()
 	{
 		await Types.InAssemblies(Projects.All).Should().NotHaveDependencyOnAny("TestInfrastructure", Packages.TUnit, Packages.Bogus).GetResult().AssertNone();
 	}
 
 	[Test]
-	public async Task Source_generators_are_not_referenced_at_runtime()
+	public async Task Design_OfSourceGenerators_ExcludesThemAtRuntime()
 	{
 		await Types.InAssemblies(Projects.All).Should().NotHaveDependencyOnAny(Packages.Roslyn).GetResult().AssertNone();
 	}

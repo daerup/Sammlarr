@@ -21,7 +21,7 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task It_renders_one_button_per_enum_value()
+	public async Task Render_ForAnEnum_EmitsOneButtonPerValue()
 	{
 		var cut = Render<EnumToggleGroup<Choice>>(parameters =>
 			parameters.Add(group => group.Value, Choice.First).Add(group => group.TooltipProvider, null).Add(group => group.OnChange, _ => { })
@@ -31,7 +31,7 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task Clicking_an_option_raises_on_change_with_that_value()
+	public async Task Click_WhenAnOptionIsChosen_RaisesOnChangeWithThatValue()
 	{
 		Choice? chosen = null;
 		var cut = Render<EnumToggleGroup<Choice>>(parameters =>
@@ -44,7 +44,7 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task The_selected_option_is_pressed_and_the_others_are_not()
+	public async Task Render_WhenAnOptionIsSelected_MarksOnlyItPressed()
 	{
 		var cut = Render<EnumToggleGroup<Choice>>(parameters =>
 			parameters.Add(group => group.Value, Choice.Second).Add(group => group.TooltipProvider, null).Add(group => group.OnChange, _ => { })
@@ -56,7 +56,7 @@ public class EnumToggleGroupTests : BunitContext
 	}
 
 	[Test]
-	public async Task A_disabled_value_does_not_raise_on_change()
+	public async Task Click_WhenTheValueIsDisabled_DoesNotRaiseOnChange()
 	{
 		Choice? chosen = null;
 		var cut = Render<EnumToggleGroup<Choice>>(parameters =>

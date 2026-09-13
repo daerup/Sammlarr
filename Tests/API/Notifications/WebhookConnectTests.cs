@@ -28,7 +28,7 @@ public class WebhookConnectTests
 	[Arguments("172.15.0.1", false)]
 	[Arguments("172.32.0.1", false)]
 	[Arguments("2606:4700:4700::1111", false)]
-	public async Task IsBlocked_classifies_addresses(string address, bool blocked)
+	public async Task IsBlocked_ForAnAddress_ClassifiesIt(string address, bool blocked)
 	{
 		await Assert.That(WebhookConnect.IsBlocked(IPAddress.Parse(address))).IsEqualTo(blocked);
 	}

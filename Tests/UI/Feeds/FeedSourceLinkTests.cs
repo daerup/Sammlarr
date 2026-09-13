@@ -17,7 +17,7 @@ public class FeedSourceLinkTests : BunitContext
 	[Test]
 	[Arguments(FeedProvider.Mdblist, "top-250", "https://mdblist.com/lists/top-250")]
 	[Arguments(FeedProvider.Tmdb, "12345", "https://www.themoviedb.org/list/12345")]
-	public async Task It_links_to_the_providers_list_url(FeedProvider provider, string identifier, string expectedUrl)
+	public async Task Render_ForAProvider_LinksToItsListUrl(FeedProvider provider, string identifier, string expectedUrl)
 	{
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, provider).Add(link => link.Identifier, identifier));
 
@@ -27,7 +27,7 @@ public class FeedSourceLinkTests : BunitContext
 	}
 
 	[Test]
-	public async Task External_links_open_safely_in_a_new_tab()
+	public async Task Render_ForAnExternalLink_OpensSafelyInANewTab()
 	{
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list"));
 

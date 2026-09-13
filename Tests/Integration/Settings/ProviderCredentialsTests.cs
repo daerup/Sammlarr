@@ -21,10 +21,10 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Looking_up_a_key_that_was_never_stored_returns_nothing() => await Assert.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsError();
+	public async Task GetApiKeyAsync_WhenNoKeyWasStored_ReturnsNothing() => await Assert.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsError();
 
 	[Test]
-	public async Task A_stored_key_can_be_retrieved()
+	public async Task GetApiKeyAsync_WhenAKeyWasStored_ReturnsIt()
 	{
 		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
 
@@ -35,7 +35,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Storing_a_key_replaces_the_previous_value()
+	public async Task SetApiKeyAsync_WhenAKeyAlreadyExists_ReplacesIt()
 	{
 		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "old-key"));
 
@@ -48,7 +48,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Clearing_a_key_removes_it()
+	public async Task ClearApiKeyAsync_WhenAKeyExists_RemovesIt()
 	{
 		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "secret-key"));
 
@@ -58,7 +58,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Clearing_a_key_that_was_never_stored_is_safe()
+	public async Task ClearApiKeyAsync_WhenNoKeyWasStored_IsSafe()
 	{
 		await ApiKeys.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 
@@ -66,7 +66,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Tmdb_rejects_a_key_it_does_not_recognise()
+	public async Task VerifyAsync_WhenTmdbRejectsTheKey_ReportsItInvalid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
@@ -74,7 +74,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Tmdb_accepts_the_configured_key()
+	public async Task VerifyAsync_WhenTmdbAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
@@ -82,7 +82,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Mdblist_rejects_a_key_it_does_not_recognise()
+	public async Task VerifyAsync_WhenMdblistRejectsTheKey_ReportsItInvalid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
@@ -90,7 +90,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Mdblist_accepts_the_configured_key()
+	public async Task VerifyAsync_WhenMdblistAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
@@ -98,7 +98,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Verifying_a_key_fails_gracefully_when_the_provider_is_unreachable()
+	public async Task VerifyAsync_WhenTheProviderIsUnreachable_FailsGracefully()
 	{
 		host.TmdbUnreachable();
 
@@ -106,7 +106,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Tmdb_ratings_are_unavailable_without_a_key()
+	public async Task GetRatingsAsync_WhenTheTmdbKeyIsMissing_AreUnavailable()
 	{
 		var ratings = (await TmdbRatings.GetRatingsAsync(TmdbId.From("550", MediaType.Movie))).GetValueOr([]);
 
@@ -114,7 +114,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Tmdb_ratings_load_once_the_key_is_configured()
+	public async Task GetRatingsAsync_WhenTheTmdbKeyIsConfigured_LoadsThem()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
@@ -125,7 +125,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Plex_watchlist_pushes_fail_without_a_token()
+	public async Task PushAsync_WhenThePlexTokenIsMissing_Fails()
 	{
 		var results = await PlexWatchlist.AddToWatchlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
 
@@ -133,7 +133,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Plex_watchlist_pushes_succeed_once_the_token_is_configured()
+	public async Task PushAsync_WhenThePlexTokenIsConfigured_Succeeds()
 	{
 		await host.WithPlexAccount("plex-access-token");
 
@@ -143,7 +143,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Clearing_the_tmdb_key_removes_its_cached_ratings()
+	public async Task ClearApiKeyAsync_WhenTheTmdbKeyIsCleared_RemovesItsCachedRatings()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
 		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();

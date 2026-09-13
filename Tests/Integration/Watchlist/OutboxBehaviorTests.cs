@@ -20,7 +20,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Adding_a_new_item_enqueues_an_add_operation()
+	public async Task AddAsync_WhenTheItemIsNew_EnqueuesAnAdd()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 
@@ -30,7 +30,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_an_item_with_a_pending_remove_cancels_the_remove()
+	public async Task AddAsync_WhenARemoveIsPending_CancelsTheRemove()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
@@ -41,7 +41,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_an_empty_collection_leaves_the_outbox_untouched()
+	public async Task AddAsync_WhenTheCollectionIsEmpty_LeavesTheOutboxUntouched()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
@@ -52,7 +52,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_an_already_synced_item_does_not_enqueue_an_add()
+	public async Task AddAsync_WhenTheItemIsAlreadySynced_EnqueuesNothing()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 
@@ -62,7 +62,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_an_item_that_already_has_a_pending_add_does_not_duplicate_it()
+	public async Task AddAsync_WhenAnAddIsAlreadyPending_DoesNotDuplicateIt()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
@@ -73,7 +73,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_a_synced_item_enqueues_a_remove_operation()
+	public async Task RemoveAsync_WhenTheItemIsSynced_EnqueuesARemove()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 
@@ -83,7 +83,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_an_item_with_a_pending_add_cancels_the_add()
+	public async Task RemoveAsync_WhenAnAddIsPending_CancelsTheAdd()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
@@ -94,7 +94,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_an_item_that_already_has_a_pending_remove_does_not_duplicate_it()
+	public async Task RemoveAsync_WhenARemoveIsAlreadyPending_DoesNotDuplicateIt()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
@@ -105,7 +105,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Removing_an_empty_collection_leaves_the_outbox_untouched()
+	public async Task RemoveAsync_WhenTheCollectionIsEmpty_LeavesTheOutboxUntouched()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
@@ -116,7 +116,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Adding_the_same_item_twice_in_one_batch_enqueues_a_single_add()
+	public async Task AddAsync_WhenTheSameItemAppearsTwice_EnqueuesASingleAdd()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 
@@ -126,7 +126,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Mixed_batch_partitions_uncancels_pushes_and_no_ops_correctly()
+	public async Task AddAsync_WhenTheBatchIsMixed_PartitionsCancelsPushesAndNoOps()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();

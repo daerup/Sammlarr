@@ -9,7 +9,7 @@ namespace API.Tests.Http;
 public class ProviderHttpExtensionsTests
 {
 	[Test]
-	public async Task Zero_retry_provider_http_passes_startup_options_validation()
+	public async Task AddProviderHttp_WithZeroRetries_PassesStartupOptionsValidation()
 	{
 		using var host = new HostBuilder()
 			.ConfigureServices(services =>

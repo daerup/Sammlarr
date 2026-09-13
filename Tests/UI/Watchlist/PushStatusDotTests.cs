@@ -19,7 +19,7 @@ public class PushStatusDotTests : BunitContext
 	[Arguments(PushDotState.Failed, 1, "Synchronization failed after 1 attempt")]
 	[Arguments(PushDotState.Failed, 3, "Synchronization failed after 3 attempts")]
 	[Arguments(PushDotState.Pushed, 0, "Synced to the watchlist provider")]
-	public async Task Renders_the_expected_accessibility_label(PushDotState state, int attempts, string expected)
+	public async Task Render_ForAPushStatus_EmitsTheExpectedAccessibilityLabel(PushDotState state, int attempts, string expected)
 	{
 		var cut = Render<PushStatusDot>(parameters => parameters.Add(dot => dot.State, state).Add(dot => dot.Attempts, attempts));
 

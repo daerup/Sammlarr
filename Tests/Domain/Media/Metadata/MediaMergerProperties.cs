@@ -9,7 +9,7 @@ public class MediaMergerProperties
 	private static readonly Gen<PartialMovie> Movies = Gen.Bool.Array[12].Select(Build);
 
 	[Test]
-	public void Merging_two_partials_keeps_every_external_id_from_both() =>
+	public void MergeWith_WhenBothPartialsCarryExternals_KeepsThemAll() =>
 		Gen.Select(Movies, Movies)
 			.Sample(
 				(primary, secondary) =>
@@ -20,7 +20,7 @@ public class MediaMergerProperties
 			);
 
 	[Test]
-	public void Merging_two_partials_only_fills_gaps_and_never_removes_data() =>
+	public void MergeWith_WhenFillingGaps_NeverRemovesData() =>
 		Gen.Select(Movies, Movies)
 			.Sample(
 				(primary, secondary) =>

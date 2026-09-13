@@ -16,7 +16,7 @@ public class WebhookChannelTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
 
 	[Test]
-	public async Task Default_body_is_posted_with_signed_standard_webhooks_headers()
+	public async Task SendAsync_WithTheDefaultBody_PostsSignedStandardWebhooksHeaders()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 		var context = Context();
@@ -33,7 +33,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Default_body_serialises_resolved_media_buckets()
+	public async Task SendAsync_WithTheDefaultBody_SerialisesResolvedMediaBuckets()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 		var context = new NotificationContext(
@@ -53,7 +53,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Custom_body_template_is_rendered_and_becomes_the_signed_body()
+	public async Task SendAsync_WhenABodyTemplateIsSet_RendersItAsTheSignedBody()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -69,7 +69,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Non_https_url_is_unrecoverable_and_sends_nothing()
+	public async Task SendAsync_WhenTheUrlIsNotHttps_IsUnrecoverableAndSendsNothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -81,7 +81,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Invalid_template_is_unrecoverable_and_sends_nothing()
+	public async Task SendAsync_WhenTheTemplateIsInvalid_IsUnrecoverableAndSendsNothing()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
@@ -93,7 +93,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Server_error_is_retryable()
+	public async Task SendAsync_WhenTheServerErrors_IsRetryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.InternalServerError))
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
@@ -102,7 +102,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Unauthorized_is_unrecoverable()
+	public async Task SendAsync_WhenUnauthorized_IsUnrecoverable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.Unauthorized))
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);
@@ -111,7 +111,7 @@ public class WebhookChannelTests
 	}
 
 	[Test]
-	public async Task Rate_limited_is_retryable()
+	public async Task SendAsync_WhenRateLimited_IsRetryable()
 	{
 		var result = await Channel(new CapturingHandler(HttpStatusCode.TooManyRequests))
 			.SendAsync(Context(), WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);

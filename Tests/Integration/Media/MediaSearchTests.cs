@@ -14,7 +14,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task A_known_movie_is_returned_with_its_reconciled_identity()
+	public async Task SearchAsync_WhenTheMovieIsKnown_ReturnsItWithAReconciledIdentity()
 	{
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.PlexSearchReturns("Fight Club", TestMedia.FightClub);
@@ -26,7 +26,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_search_with_no_matches_returns_no_results()
+	public async Task SearchAsync_WhenNothingMatches_ReturnsNoResults()
 	{
 		await host.PlexFindsNothing("Nonexistent");
 
@@ -34,7 +34,7 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_search_returns_both_movies_and_shows()
+	public async Task SearchAsync_WhenResultsMixTypes_ReturnsMoviesAndShows()
 	{
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.Show(TestMedia.BreakingBad).SeedAsync();

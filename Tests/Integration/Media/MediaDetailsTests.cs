@@ -20,7 +20,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task Fresh_cached_metadata_is_served_without_contacting_providers()
+	public async Task GetDetailsAsync_WhenTheCacheIsFresh_ServesItWithoutContactingProviders()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -33,7 +33,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Stale_cached_metadata_is_re_fetched_and_stored()
+	public async Task GetDetailsAsync_WhenTheCacheIsStale_RefetchesAndStoresIt()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -47,7 +47,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Stale_cached_metadata_is_served_when_the_provider_cannot_be_reached()
+	public async Task GetDetailsAsync_WhenTheProviderIsUnreachable_ServesTheStaleCache()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -62,7 +62,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Uncached_media_is_fetched_from_providers_and_stored()
+	public async Task GetDetailsAsync_WhenTheMediaIsUncached_FetchesFromProvidersAndStoresIt()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "").ServedByTmdb(title: "Live Title").SeedAsync();
 
@@ -73,7 +73,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Incomplete_cached_metadata_within_the_cooldown_is_served_from_cache()
+	public async Task GetDetailsAsync_WhenIncompleteWithinTheCooldown_ServesFromCache()
 	{
 		host.SetCurrentTime(At(6, 1, 11, 30));
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -88,7 +88,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Incomplete_cached_metadata_past_the_cooldown_is_re_fetched()
+	public async Task GetDetailsAsync_WhenIncompletePastTheCooldown_RefetchesIt()
 	{
 		host.SetCurrentTime(At(6, 1, 11, 30));
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -103,7 +103,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Cached_metadata_with_an_empty_poster_past_the_cooldown_is_re_fetched()
+	public async Task GetDetailsAsync_WhenThePosterIsEmptyPastTheCooldown_RefetchesIt()
 	{
 		host.SetCurrentTime(At(6, 1, 11, 30));
 		var fightClub = await host.Movie(TestMedia.FightClub)
@@ -117,7 +117,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_batch_request_resolves_each_item_according_to_its_own_cache_state()
+	public async Task GetDetailsAsync_WhenBatched_ResolvesEachItemByItsOwnCacheState()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -135,7 +135,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Uncached_media_is_enriched_across_the_chain_and_the_merged_detail_is_cached()
+	public async Task GetDetailsAsync_WhenUncached_EnrichesAcrossTheChainAndCachesTheMerge()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "An insomniac office worker")
@@ -149,7 +149,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Stale_cached_metadata_is_re_enriched_and_the_refreshed_detail_replaces_it()
+	public async Task GetDetailsAsync_WhenStale_ReenrichesAndReplacesTheDetail()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "An insomniac office worker")
@@ -163,7 +163,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Without_an_id_for_a_provider_the_chain_cannot_enrich_or_rate_from_it()
+	public async Task GetDetailsAsync_WhenAProviderIdIsMissing_SkipsItsEnrichmentAndRating()
 	{
 		var matrix = await host.Movie(Spec("The Matrix", Plex("603"))).ServedByPlex().SeedAsync();
 
@@ -173,7 +173,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task A_zero_vote_average_during_enrichment_applies_no_rating()
+	public async Task GetDetailsAsync_WhenTheVoteAverageIsZero_AppliesNoRating()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "An insomniac office worker")
@@ -186,7 +186,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task When_the_enricher_returns_nothing_the_plex_base_detail_is_still_served_and_cached()
+	public async Task GetDetailsAsync_WhenTheEnricherReturnsNothing_StillServesAndCachesThePlexBase()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "Fight Club", summary: "An insomniac office worker").SeedAsync();
 		host.TmdbHasNoDetail(TestMedia.FightClub);
@@ -198,7 +198,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Plex_metadata_wins_on_fields_it_provides_and_tmdb_does_not_override_it()
+	public async Task GetDetailsAsync_WhenPlexProvidesAField_TmdbDoesNotOverrideIt()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "Plex summary", genres: ["Action", "Crime"])
@@ -211,7 +211,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Tmdb_fills_the_summary_and_genres_that_plex_omits()
+	public async Task GetDetailsAsync_WhenPlexOmitsSummaryAndGenres_TmdbFillsThem()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club")
@@ -224,7 +224,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Fresh_but_incomplete_cached_metadata_is_re_hydrated_to_fill_the_missing_fields()
+	public async Task GetDetailsAsync_WhenFreshButIncomplete_RehydratesTheMissingFields()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "Plex summary")
@@ -238,7 +238,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Invalidated_metadata_is_re_fetched_on_the_next_read()
+	public async Task InvalidateAsync_WhenMetadataIsInvalidated_RefetchesOnTheNextRead()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -254,7 +254,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Invalidating_metadata_preserves_the_media_identity_and_its_external_ids()
+	public async Task InvalidateAsync_WhenMetadataIsInvalidated_PreservesTheIdentityAndExternalIds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedWithMetadataAsync(title: "Cached Text", fetched: At(5, 31));
 
@@ -264,7 +264,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Invalidating_fresh_metadata_still_forces_a_re_fetch_on_the_next_read()
+	public async Task InvalidateAsync_WhenTheMetadataIsFresh_StillForcesARefetch()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
@@ -278,7 +278,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task Several_media_can_be_invalidated_in_a_single_call()
+	public async Task InvalidateAsync_WithSeveralMedia_InvalidatesThemInOneCall()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
