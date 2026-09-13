@@ -51,7 +51,7 @@ The app uses SQLite (`sammlarr.db`) with **EF Core migrations** applied via `Dat
 Tests use **TUnit** (not xUnit/NUnit). Key differences:
 - `[Test]` instead of `[Fact]`, `[Arguments(...)]` instead of `[Theory]/[InlineData]`.
 - Assertions are async: `await Assert.That(x).IsEqualTo(y);`
-- Mocks via `TUnit.Mocks`; HTTP stubs via **Imposter** (`Mock.HttpHandler()`).
+- Mocks via `TUnit.Mocks`; HTTP stubs via **TUnit.Mocks.Http** (`Mock.HttpHandler()`).
 - Fake data via **Bogus** (`new Faker()`).
 
 See the `write-tunit-test` skill for templates.
@@ -121,7 +121,7 @@ These are the source of truth for conventions. Read them when scope is ambiguous
 - `Vogen` — strongly-typed IDs / value objects (used in `Contracts`/`Shared`).
 - `BlazorBlueprint.*` + `timewarp-simple-icons` — UI components and icons.
 - `TUnit` (`.Core`, `.Assertions`, `.Mocks`, `.Mocks.Http`) — test framework.
-- `Bogus`, `Imposter` — test data generation + HTTP stubbing.
+- `Bogus`, `TUnit.Mocks.Http` — test data generation + HTTP stubbing.
 - `Dapper` — lightweight data access in some test projects.
 - `Microsoft.CodeAnalysis.*` — Roslyn, used by `Shared.Options.Generator`.
 
