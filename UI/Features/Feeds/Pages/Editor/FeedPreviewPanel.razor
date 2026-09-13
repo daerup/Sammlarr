@@ -316,13 +316,14 @@
         _ = EmitStatusIfChangedAsync();
     }
 
-    public async Task ApplyAsync()
+    public async Task ApplyAsync(FeedConfig config)
     {
         if (_fetchState == FetchState.Loading)
         {
             return;
         }
 
+        Config = config;
         var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
                          Config.Provider != _appliedConfig?.Provider ||
                          !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
@@ -351,7 +352,7 @@
     private async Task RetryAsync()
     {
         _fetchState = FetchState.Idle;
-        await ApplyAsync();
+        await ApplyAsync(Config);
     }
 
     private async Task OnRefreshConfirmedAsync()

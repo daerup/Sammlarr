@@ -234,7 +234,7 @@
         try
         {
             var applied = _config;
-            await _previewPanel.ApplyAsync();
+            await _previewPanel.ApplyAsync(applied);
             _appliedHash = applied.GetPreviewHash();
         }
         finally
