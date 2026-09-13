@@ -249,8 +249,13 @@ public static class E2EApp
 
 	private static async Task CaptureRemainingAsync()
 	{
-		var snapshot = await _stacks[0].SnapshotAsync();
-		var recorded = RecordedStubs.Write(snapshot, WireMockStubs.MappingsDirectory, IsStubbed).Where(FirstCapture).ToList();
+		var snapshots = new List<string>();
+		foreach (var stack in _stacks)
+		{
+			snapshots.Add(await stack.SnapshotAsync());
+		}
+
+		var recorded = RecordedStubs.Write(RecordedStubs.Merge(snapshots), WireMockStubs.MappingsDirectory, IsStubbed).Where(FirstCapture).ToList();
 		var committed = new List<RecordedResponse>();
 		foreach (var response in recorded)
 		{

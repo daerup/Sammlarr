@@ -220,6 +220,48 @@
           },
           {
             "Metadata": {
+              "addedAt": 1675382400,
+              "art": "https://image.tmdb.org/t/p/original/cfnfHgji4RLe90wIVZGWRptD98b.jpg",
+              "childCount": 5,
+              "duration": 1800000,
+              "guid": "plex://show/637e0b8b3dd0b7cf523ad6ad",
+              "key": "/library/metadata/637e0b8b3dd0b7cf523ad6ad/children",
+              "leafCount": 162,
+              "originallyAvailableAt": "2023-02-03",
+              "ratingKey": "637e0b8b3dd0b7cf523ad6ad",
+              "slug": "rubble-and-crew",
+              "thumb": "https://image.tmdb.org/t/p/original/5MA1tqT0yI57IlPBy0KRN6G2mhN.jpg",
+              "title": "Rubble & Crew",
+              "type": "show",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+                  "id": "5d9c07ebcb3ffa001f1b0903",
+                  "key": "/library/categories/children",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+                  "slug": "children",
+                  "tag": "Children",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.21
+          },
+          {
+            "Metadata": {
               "addedAt": 1733097600,
               "art": "https://image.tmdb.org/t/p/original/fciU7RVyfcdsTeksTnBXGPmkKg2.jpg",
               "childCount": 1,
@@ -290,48 +332,6 @@
               "source": "provider://tv.plex.provider.discover"
             },
             "score": 0.21
-          },
-          {
-            "Metadata": {
-              "addedAt": 1675382400,
-              "art": "https://image.tmdb.org/t/p/original/cfnfHgji4RLe90wIVZGWRptD98b.jpg",
-              "childCount": 5,
-              "duration": 1800000,
-              "guid": "plex://show/637e0b8b3dd0b7cf523ad6ad",
-              "key": "/library/metadata/637e0b8b3dd0b7cf523ad6ad/children",
-              "leafCount": 162,
-              "originallyAvailableAt": "2023-02-03",
-              "ratingKey": "637e0b8b3dd0b7cf523ad6ad",
-              "slug": "rubble-and-crew",
-              "thumb": "https://image.tmdb.org/t/p/original/5MA1tqT0yI57IlPBy0KRN6G2mhN.jpg",
-              "title": "Rubble & Crew",
-              "type": "show",
-              "year": 2023,
-              "Genre": [
-                {
-                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
-                  "id": "5d9c046c3c3f87001f33fbfc",
-                  "key": "/library/categories/animation",
-                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
-                  "slug": "animation",
-                  "tag": "Animation",
-                  "type": "hub",
-                  "context": "tag.genre"
-                },
-                {
-                  "filter": "genre=5d9c07ebcb3ffa001f1b0903",
-                  "id": "5d9c07ebcb3ffa001f1b0903",
-                  "key": "/library/categories/children",
-                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
-                  "slug": "children",
-                  "tag": "Children",
-                  "type": "hub",
-                  "context": "tag.genre"
-                }
-              ],
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.19
           },
           {
             "Metadata": {
@@ -437,22 +437,6 @@
           },
           {
             "Metadata": {
-              "childCount": 1,
-              "duration": 480000,
-              "guid": "plex://show/5d9c08f03c3f87001f3590f5",
-              "key": "/library/metadata/5d9c08f03c3f87001f3590f5/children",
-              "leafCount": 26,
-              "ratingKey": "5d9c08f03c3f87001f3590f5",
-              "slug": "canada-crew",
-              "thumb": "https://artworks.thetvdb.com/banners/series/340614/posters/5e9b3f3eba203.jpg",
-              "title": "Canada Crew",
-              "type": "show",
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.16
-          },
-          {
-            "Metadata": {
               "addedAt": 1736985600,
               "art": "https://image.tmdb.org/t/p/original/qNvL8eup1eTFeKXEG402mjxNAzU.jpg",
               "childCount": 2,
@@ -511,7 +495,23 @@
               ],
               "source": "provider://tv.plex.provider.discover"
             },
-            "score": 0.15
+            "score": 0.16
+          },
+          {
+            "Metadata": {
+              "childCount": 1,
+              "duration": 480000,
+              "guid": "plex://show/5d9c08f03c3f87001f3590f5",
+              "key": "/library/metadata/5d9c08f03c3f87001f3590f5/children",
+              "leafCount": 26,
+              "ratingKey": "5d9c08f03c3f87001f3590f5",
+              "slug": "canada-crew",
+              "thumb": "https://artworks.thetvdb.com/banners/series/340614/posters/5e9b3f3eba203.jpg",
+              "title": "Canada Crew",
+              "type": "show",
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.16
           },
           {
             "Metadata": {

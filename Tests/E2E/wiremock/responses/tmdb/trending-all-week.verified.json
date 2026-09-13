@@ -21,8 +21,8 @@
       "release_date": "2026-07-08",
       "softcore": false,
       "video": false,
-      "vote_average": 7.111,
-      "vote_count": 565
+      "vote_average": 7.105,
+      "vote_count": 566
     },
     {
       "adult": false,
@@ -42,8 +42,30 @@
       "release_date": "2026-09-03",
       "softcore": false,
       "video": false,
-      "vote_average": 7.9,
-      "vote_count": 510
+      "vote_average": 7.936,
+      "vote_count": 515
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qeQJx07rK2xm8SD2sJxFKhE7gs0.jpg",
+      "id": 969681,
+      "title": "Spider-Man: Brand New Day",
+      "original_title": "Spider-Man: Brand New Day",
+      "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
+      "poster_path": "/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        878,
+        28,
+        12
+      ],
+      "popularity": 756.7679,
+      "release_date": "2026-07-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.8,
+      "vote_count": 2642
     },
     {
       "adult": false,
@@ -71,28 +93,6 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/qeQJx07rK2xm8SD2sJxFKhE7gs0.jpg",
-      "id": 969681,
-      "title": "Spider-Man: Brand New Day",
-      "original_title": "Spider-Man: Brand New Day",
-      "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
-      "poster_path": "/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        878,
-        28,
-        12
-      ],
-      "popularity": 756.7679,
-      "release_date": "2026-07-29",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.844,
-      "vote_count": 2641
-    },
-    {
-      "adult": false,
       "backdrop_path": "/RMXG8myu1aGlNUsRjtxzmpdMK0.jpg",
       "id": 1368337,
       "title": "The Odyssey",
@@ -111,11 +111,11 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.005,
-      "vote_count": 3652
+      "vote_count": 3654
     },
     {
       "adult": false,
-      "backdrop_path": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+      "backdrop_path": "/m5CggjJuFc08QCuKz54znHP6spJ.jpg",
       "id": 108978,
       "name": "Reacher",
       "original_name": "Reacher",
@@ -154,8 +154,96 @@
       "release_date": "2026-08-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.713,
-      "vote_count": 115
+      "vote_average": 6.672,
+      "vote_count": 116
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4NBYDOnEjAzyuP7CMkD5s7fs44K.jpg",
+      "id": 113962,
+      "name": "Lioness",
+      "original_name": "Lioness",
+      "overview": "Cruz Manuelos, a rough-around-the-edges but passionate young Marine, is recruited to join the CIA's Lioness Engagement Team to help bring down a terrorist organization from within. Joe, the station chief of the Lioness program, is tasked with training, managing and leading her female undercover operatives.",
+      "poster_path": "/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18,
+        10768
+      ],
+      "popularity": 360.0234,
+      "first_air_date": "2023-07-23",
+      "softcore": false,
+      "vote_average": 8.166,
+      "vote_count": 1521,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/e2QAGrEmbpmZpMymDRkDisJkvg9.jpg",
+      "id": 1288445,
+      "title": "Mutiny",
+      "original_title": "Mutiny",
+      "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
+      "poster_path": "/pu2VxGlpGwffOx292w18b1tv96j.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "popularity": 342.3873,
+      "release_date": "2026-08-19",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.431,
+      "vote_count": 376
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "id": 1339713,
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "poster_path": "/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        53
+      ],
+      "popularity": 151.0084,
+      "release_date": "2026-05-13",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.192,
+      "vote_count": 5467
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
+      "id": 125988,
+      "name": "Silo",
+      "original_name": "Silo",
+      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
+      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        10765,
+        18
+      ],
+      "popularity": 262.2487,
+      "first_air_date": "2023-05-04",
+      "softcore": false,
+      "vote_average": 8.21,
+      "vote_count": 2648,
+      "origin_country": [
+        "US"
+      ]
     },
     {
       "adult": false,
@@ -181,47 +269,27 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
-      "id": 125988,
-      "name": "Silo",
-      "original_name": "Silo",
-      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
-      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
+      "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
+      "id": 30984,
+      "name": "Bleach",
+      "original_name": "BLEACH",
+      "overview": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
+      "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
       "media_type": "tv",
-      "original_language": "en",
+      "original_language": "ja",
       "genre_ids": [
-        10765,
-        18
+        10759,
+        16,
+        10765
       ],
-      "popularity": 262.2487,
-      "first_air_date": "2023-05-04",
+      "popularity": 161.7066,
+      "first_air_date": "2004-10-05",
       "softcore": false,
-      "vote_average": 8.211,
-      "vote_count": 2647,
+      "vote_average": 8.351,
+      "vote_count": 2268,
       "origin_country": [
-        "US"
+        "JP"
       ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/e2QAGrEmbpmZpMymDRkDisJkvg9.jpg",
-      "id": 1288445,
-      "title": "Mutiny",
-      "original_title": "Mutiny",
-      "overview": "After witnessing his billionaire boss' murder and being framed for the crime, Cole Reed boards a cargo ship on a one-man crusade to avenge his boss' death only to discover an international conspiracy.",
-      "poster_path": "/pu2VxGlpGwffOx292w18b1tv96j.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        28,
-        53
-      ],
-      "popularity": 342.3873,
-      "release_date": "2026-08-19",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.432,
-      "vote_count": 375
     },
     {
       "adult": false,
@@ -243,71 +311,6 @@
       "video": false,
       "vote_average": 6.736,
       "vote_count": 420
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
-      "id": 1339713,
-      "title": "Obsession",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "poster_path": "/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27,
-        53
-      ],
-      "popularity": 151.0084,
-      "release_date": "2026-05-13",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.192,
-      "vote_count": 5465
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/4NBYDOnEjAzyuP7CMkD5s7fs44K.jpg",
-      "id": 113962,
-      "name": "Lioness",
-      "original_name": "Lioness",
-      "overview": "Cruz Manuelos, a rough-around-the-edges but passionate young Marine, is recruited to join the CIA's Lioness Engagement Team to help bring down a terrorist organization from within. Joe, the station chief of the Lioness program, is tasked with training, managing and leading her female undercover operatives.",
-      "poster_path": "/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        18,
-        10768
-      ],
-      "popularity": 360.0234,
-      "first_air_date": "2023-07-23",
-      "softcore": false,
-      "vote_average": 8.166,
-      "vote_count": 1522,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
-      "id": 1440098,
-      "title": "Drawn Together",
-      "original_title": "Enfrentados: Marfil",
-      "overview": "Marfil Cortés, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
-      "poster_path": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
-      "media_type": "movie",
-      "original_language": "es",
-      "genre_ids": [
-        10749,
-        53
-      ],
-      "popularity": 240.8506,
-      "release_date": "2026-09-09",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.387,
-      "vote_count": 53
     },
     {
       "adult": false,
@@ -333,27 +336,24 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/o0NsbcIvsllg6CJX0FBFY8wWbsn.jpg",
-      "id": 30984,
-      "name": "Bleach",
-      "original_name": "BLEACH",
-      "overview": "For as long as he can remember, Ichigo Kurosaki has been able to see ghosts. But when he meets Rukia, a Soul Reaper who battles evil spirits known as Hollows, he finds his life is changed forever. Now, with a newfound wealth of spiritual energy, Ichigo discovers his true calling: to protect the living and the dead from evil.",
-      "poster_path": "/2EewmxXe72ogD0EaWM8gqa0ccIw.jpg",
-      "media_type": "tv",
-      "original_language": "ja",
+      "backdrop_path": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
+      "id": 1440098,
+      "title": "Drawn Together",
+      "original_title": "Enfrentados: Marfil",
+      "overview": "Marfil Cortés, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
+      "poster_path": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
+      "media_type": "movie",
+      "original_language": "es",
       "genre_ids": [
-        10759,
-        16,
-        10765
+        10749,
+        53
       ],
-      "popularity": 161.7066,
-      "first_air_date": "2004-10-05",
+      "popularity": 240.8506,
+      "release_date": "2026-09-09",
       "softcore": false,
-      "vote_average": 8.351,
-      "vote_count": 2268,
-      "origin_country": [
-        "JP"
-      ]
+      "video": false,
+      "vote_average": 6.387,
+      "vote_count": 53
     },
     {
       "adult": false,
@@ -405,48 +405,48 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
-      "id": 97546,
-      "name": "Ted Lasso",
-      "original_name": "Ted Lasso",
-      "overview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
-      "poster_path": "/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
+      "backdrop_path": "/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
+      "id": 37854,
+      "name": "One Piece",
+      "original_name": "ワンピース",
+      "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
+      "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
       "media_type": "tv",
-      "original_language": "en",
+      "original_language": "ja",
       "genre_ids": [
-        18,
-        35
+        10759,
+        35,
+        16
       ],
-      "popularity": 251.5668,
-      "first_air_date": "2020-08-14",
+      "popularity": 56.8998,
+      "first_air_date": "1999-10-20",
       "softcore": false,
-      "vote_average": 8.371,
-      "vote_count": 2646,
+      "vote_average": 8.7,
+      "vote_count": 5534,
       "origin_country": [
-        "US"
+        "JP"
       ]
     },
     {
       "adult": false,
-      "backdrop_path": "/572uSrnXM5uPVYMVqsxfNA41cT8.jpg",
-      "id": 196322,
-      "name": "Dark Matter",
-      "original_name": "Dark Matter",
-      "overview": "Jason Dessen is abducted into an alternate version of his life. To get back to his real family, he embarks on a harrowing journey to save them from the most terrifying foe imaginable: himself.",
-      "poster_path": "/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg",
+      "backdrop_path": "/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg",
+      "id": 300507,
+      "name": "Crew Girl",
+      "original_name": "Crew Girl",
+      "overview": "After a family scandal, teen rower Teagan Tao moves to a small town and joins an elite prep school's all-boys crew, sparking rivalry and attraction.",
+      "poster_path": "/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
       "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
-        10765,
         18
       ],
-      "popularity": 69.0342,
-      "first_air_date": "2024-05-07",
+      "popularity": 84.608,
+      "first_air_date": "2026-09-10",
       "softcore": false,
-      "vote_average": 7.804,
-      "vote_count": 773,
+      "vote_average": 7.9,
+      "vote_count": 15,
       "origin_country": [
-        "US"
+        "CA"
       ]
     }
   ],

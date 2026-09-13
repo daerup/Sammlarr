@@ -27,6 +27,20 @@ internal static class RecordedStubs
 		internal string Discriminator => string.Join('-', Query.Values.Select(Sanitize));
 	}
 
+	internal static string Merge(IEnumerable<string> snapshots)
+	{
+		var mappings = new JsonArray();
+		foreach (var snapshot in snapshots)
+		{
+			foreach (var mapping in JsonNode.Parse(snapshot)?["mappings"]?.AsArray() ?? [])
+			{
+				mappings.Add(mapping!.DeepClone());
+			}
+		}
+
+		return new JsonObject { ["mappings"] = mappings }.ToJsonString();
+	}
+
 	internal static IReadOnlyList<RecordedResponse> Write(string snapshotJson, string mappingsDirectory, Func<string, bool> isStubbed)
 	{
 		var entries = Parse(snapshotJson).Where(entry => !isStubbed(entry.ReplayPath)).ToList();
