@@ -16,6 +16,6 @@
     "headers": {
       "Content-Type": "application/json"
     },
-    "bodyFileName": "mdblist/lists-2236-items.verified.json"
+    "bodyFileName": "mdblist/lists-2236-items-1000-0.verified.json"
   }
 }

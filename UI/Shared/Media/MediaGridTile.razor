@@ -1,6 +1,6 @@
 @using Contracts.Media
 @inject IMediaService MediaService
-<div class="cursor-pointer group @(Media.IsUnresolved ? "tile-unresolved" : "")" @onclick="OnClick">
+<div data-testid="media-tile" class="cursor-pointer group @(Media.IsUnresolved ? "tile-unresolved" : "")" @onclick="OnClick">
     <div class="relative overflow-hidden rounded-lg media-card-backdrop @(Dimmed ? "media-card-dimmed" : "")">
         @if (_failed)
         {

@@ -107,9 +107,9 @@ public class FeedPreviewTests
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
 
-		await page.Locator(SearchBox).FillAsync(Guid.NewGuid().ToString("N"));
+		await FeedEditor.FillAsync(page, SearchBox, Guid.NewGuid().ToString("N"));
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0, Wait.Settle);
-		await page.Locator(SearchBox).FillAsync(string.Empty);
+		await FeedEditor.FillAsync(page, SearchBox, string.Empty);
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(3, Wait.Settle);
 	}
 
