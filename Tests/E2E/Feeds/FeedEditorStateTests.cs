@@ -40,7 +40,7 @@ public class FeedEditorStateTests
 		await page.Keyboard.PressAsync("Control+Enter");
 
 		await FeedEditor.PreviewLoadedAsync(page);
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(await FeedEditor.SourceListSizeAsync());
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync((await FeedEditor.ServedTitlesAsync()).Count);
 	}
 
 	[Test]
@@ -77,7 +77,7 @@ public class FeedEditorStateTests
 		await FeedEditor.ConfigureAsync(page, Name("Reset"));
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(await FeedEditor.SourceListSizeAsync());
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync((await FeedEditor.ServedTitlesAsync()).Count);
 
 		await FeedEditor.FillAsync(page, "#list-identifier", $"{FeedEditor.ListIdentifier}-changed");
 

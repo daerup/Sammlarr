@@ -29,12 +29,12 @@ public class FeedImportTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		var listed = await FeedEditor.SourceListSizeAsync();
+		var served = await FeedEditor.ServedTitlesAsync();
 		await Expect(page.GetByText("Run a test to preview the media items from your list.")).ToBeHiddenAsync();
-		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(listed.ToString(CultureInfo.InvariantCulture));
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(listed);
+		await Expect(FeedEditor.Badge(page, PreviewBadge.Total)).ToHaveTextAsync(served.Count.ToString(CultureInfo.InvariantCulture));
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(served.Count);
 		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(0);
-		await Expect(page.Locator($"{FeedEditor.ResultRow} .search-result-poster img")).ToHaveCountAsync(listed);
+		await Expect(page.Locator($"{FeedEditor.ResultRow} .search-result-poster img")).ToHaveCountAsync(served.Count);
 	}
 
 	[Test]

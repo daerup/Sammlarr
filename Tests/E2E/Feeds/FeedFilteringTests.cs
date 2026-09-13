@@ -21,7 +21,7 @@ public class FeedFilteringTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		var listed = await FeedEditor.SourceListSizeAsync();
+		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
 		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
 		await FeedEditor.OpenOptionalSectionAsync(page, OptionalSection);
 		await FeedEditor.Toggle(page, "Enable limit").ClickAsync();

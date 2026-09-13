@@ -21,7 +21,7 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		var listed = await FeedEditor.SourceListSizeAsync();
+		var listed = (await FeedEditor.ServedTitlesAsync()).Count;
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(Count(listed));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(Count(0));
 
