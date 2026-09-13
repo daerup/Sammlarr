@@ -1,0 +1,114 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/zZQXCmJYyZyYXFC9ZHLejUHBtcE.jpg",
+        "guid": "plex://movie/5fd398e7618d00002ddc8a99",
+        "key": "/library/metadata/5fd398e7618d00002ddc8a99",
+        "rating": 8.8,
+        "ratingKey": "5fd398e7618d00002ddc8a99",
+        "summary": "Roar into a prehistoric land with the PAW Patrol in these 6 dino-mite tales including two double-length missions! Join the pups as they roll into Dino Wilds to keep their new friends safe from an erupting volcano and a scheming dino egg thief. Then, the team gears up for a robotic dinosaur adventure!",
+        "tagline": "Paw Patrol",
+        "type": "movie",
+        "addedAt": 1601769600,
+        "contentRating": "G",
+        "originallyAvailableAt": "2020-10-04",
+        "publicPagesURL": "https://watch.plex.tv/movie/paw-patrol-dino-rescue",
+        "ratingImage": "themoviedb://image.rating",
+        "slug": "paw-patrol-dino-rescue",
+        "thumb": "https://image.tmdb.org/t/p/original/qgqYiiuomYGGqds6WP8q4c7pYNv.jpg",
+        "title": "PAW Patrol: Dino Rescue",
+        "userState": false,
+        "year": 2020,
+        "Image": [
+          {
+            "alt": "PAW Patrol: Dino Rescue",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/zZQXCmJYyZyYXFC9ZHLejUHBtcE.jpg"
+          },
+          {
+            "alt": "PAW Patrol: Dino Rescue",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/qgqYiiuomYGGqds6WP8q4c7pYNv.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://774604"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.8
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/632de406ffedd45dbd738646",
+            "tag": "Minions & More 1"
+          },
+          {
+            "guid": "plex://movie/63694fef7c4724f034f2ed43",
+            "tag": "Minions & More 2"
+          },
+          {
+            "guid": "plex://movie/5d7768378718ba001e3152f2",
+            "tag": "Watership Down"
+          },
+          {
+            "guid": "plex://movie/6519a4470dfdf4d7c165c84a",
+            "tag": "PAW Patrol: The Dino Movie"
+          },
+          {
+            "guid": "plex://movie/5d776852880197001ec98795",
+            "tag": "Bugs Bunny's 3rd Movie: 1001 Rabbit Tales"
+          },
+          {
+            "guid": "plex://movie/5d77685f2e80df001ebe272b",
+            "tag": "The Land Before Time XII: The Great Day of the Flyers"
+          },
+          {
+            "guid": "plex://movie/5d77709081ba41001faf32b7",
+            "tag": "Koati"
+          },
+          {
+            "guid": "plex://movie/5f65bb9c3c421100429695ed",
+            "tag": "Paw Patrol: Jet to the Rescue"
+          },
+          {
+            "guid": "plex://movie/5fd4f985357c02002d315018",
+            "tag": "The Ice Age Adventures of Buck Wild"
+          },
+          {
+            "guid": "plex://movie/62b72d448dd23dc36bac907f",
+            "tag": "Cat Pack: A PAW Patrol Exclusive Event"
+          },
+          {
+            "guid": "plex://movie/640ada0c19388a3519bde08f",
+            "tag": "Cat Pack: A PAW Patrol Exclusive Event"
+          }
+        ]
+      }
+    ]
+  }
+}

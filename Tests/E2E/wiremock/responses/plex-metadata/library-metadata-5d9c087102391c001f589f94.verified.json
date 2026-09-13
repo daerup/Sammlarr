@@ -1,0 +1,1308 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/6FqvpxyENYwtX0hnZbBTV6tzILB.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/75842-g3.jpg",
+        "guid": "plex://show/5d9c087102391c001f589f94",
+        "key": "/library/metadata/5d9c087102391c001f589f94/children",
+        "rating": 9.3,
+        "ratingKey": "5d9c087102391c001f589f94",
+        "studio": "Hat Trick Productions",
+        "summary": "Have mercy on poor Father Ted Crilly. He has so much to contend with when it comes to dealing with the folks of Craggy Island, Ireland. There's Father Dougal McGuire, who is as dimwitted as they come; and then there is Father Jack Hackett who lives for the simple pleasures of life (sleeping, drinking, and swearing). Ted tries to bring stability to his congregation as well as the surreal townspeople of Craggy Island.",
+        "type": "show",
+        "addedAt": 798422400,
+        "audienceRating": 9.6,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 3,
+        "contentRating": "TV-MA",
+        "duration": 1440000,
+        "imdbRatingCount": 48383,
+        "lastEpisodeOriginallyAvailableAt": "1998-05-01",
+        "lastSeasonOriginallyAvailableAt": "1998-03-14",
+        "leafCount": 40,
+        "originallyAvailableAt": "1995-04-21",
+        "publicPagesURL": "https://watch.plex.tv/show/father-ted",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "father-ted",
+        "theme": "https://tvthemes.plexapp.com/75842.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/hGgqGTVwZrifBX8T3f6ylqGFSXS.jpg",
+        "title": "Father Ted",
+        "userState": false,
+        "year": 1995,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c087102391c001f589f94/commonsensemedia",
+            "oneLiner": "Edgy Irish comedy is high entertainment for mature viewers.",
+            "AgeRating": [
+              {
+                "age": 16,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Father Ted",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/6FqvpxyENYwtX0hnZbBTV6tzILB.jpg"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f6f02f4b94595a7ef45bf140482e6225.jpg"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/75842-g3.jpg"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/7/683a142553/76d6d78d5b02786e80c91a20dac5a18e.png"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/7/683a142553/76d6d78d5b02786e80c91a20dac5a18e.png"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ecefa80083240f3905570f8d256e263f.jpg"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/hGgqGTVwZrifBX8T3f6ylqGFSXS.jpg"
+          },
+          {
+            "alt": "Father Ted",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7f4890893ca61e9189ff81767967f9b6.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0111958"
+          },
+          {
+            "id": "tmdb://1813"
+          },
+          {
+            "id": "tvdb://75842"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 9.3
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 8.159
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Ireland"
+          },
+          {
+            "tag": "United Kingdom"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768c0374a5b001fecf432",
+            "order": 1,
+            "slug": "dermot-morgan",
+            "tag": "Dermot Morgan",
+            "thumb": "https://metadata-static.plex.tv/f/people/f61288ddf897d85ccbade47dc4aee938.jpg",
+            "role": "Father Ted Crilly",
+            "key": "/library/people/5d7768c0374a5b001fecf432",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b961905001eb9515f",
+            "order": 2,
+            "slug": "ardal-ohanlon",
+            "tag": "Ardal O'Hanlon",
+            "thumb": "https://metadata-static.plex.tv/3/people/394d1d96ed46803614bd9468ae417b31.jpg",
+            "role": "Father Dougal McGuire",
+            "key": "/library/people/5d77683b961905001eb9515f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314db1",
+            "order": 3,
+            "slug": "pauline-mclynn",
+            "tag": "Pauline McLynn",
+            "thumb": "https://metadata-static.plex.tv/7/people/769d98fd7c7b08513a30e51e00f91569.jpg",
+            "role": "Mrs. Doyle",
+            "key": "/library/people/5d7768368718ba001e314db1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f564f81",
+            "order": 4,
+            "slug": "frank-kelly",
+            "tag": "Frank Kelly",
+            "thumb": "https://metadata-static.plex.tv/3/people/3718ff37b8a5a539d200e44eac21a81f.jpg",
+            "role": "Father Jack Hackett",
+            "key": "/library/people/5d77682a103a2d001f564f81",
+            "type": "person"
+          },
+          {
+            "id": "5d776886374a5b001fec80cd",
+            "order": 5,
+            "slug": "tony-guilfoyle",
+            "tag": "Tony Guilfoyle",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd99bb6d1cbec46e4f410c6132a3cab0.jpg",
+            "role": "Father Larry Duff",
+            "key": "/library/people/5d776886374a5b001fec80cd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768352e80df001ebde6ff",
+            "order": 6,
+            "slug": "don-wycherley",
+            "tag": "Don Wycherley",
+            "thumb": "https://metadata-static.plex.tv/5/cc68393fae/people/50622467fba645556267dd3bfc2fbf49.jpg",
+            "role": "Father Cyril MacDuff",
+            "key": "/library/people/5d7768352e80df001ebde6ff",
+            "type": "person"
+          },
+          {
+            "id": "5d776c6651dd69001fe3ae74",
+            "order": 7,
+            "slug": "arthur-mathews",
+            "tag": "Arthur Mathews",
+            "role": "Father Billy Kerrigan",
+            "key": "/library/people/5d776c6651dd69001fe3ae74",
+            "type": "person"
+          },
+          {
+            "id": "5d77683954f42c001f8c5281",
+            "order": 8,
+            "slug": "pat-shortt",
+            "tag": "Pat Shortt",
+            "thumb": "https://metadata-static.plex.tv/f/people/f0a61b3638644fde78f52d71fcebd366.jpg",
+            "role": "Tom",
+            "key": "/library/people/5d77683954f42c001f8c5281",
+            "type": "person"
+          },
+          {
+            "id": "5d776837999c64001ec2faa8",
+            "order": 9,
+            "slug": "rynagh-ogrady",
+            "tag": "Rynagh O'Grady",
+            "role": "Mary O'Leary",
+            "key": "/library/people/5d776837999c64001ec2faa8",
+            "type": "person"
+          },
+          {
+            "id": "5d7768393c3c2a001fbcf3a6",
+            "order": 10,
+            "slug": "graham-norton",
+            "tag": "Graham Norton",
+            "thumb": "https://metadata-static.plex.tv/9/people/9168310e67f7ead7b201cd3581fad3b6.jpg",
+            "role": "Father Noel Furlong",
+            "key": "/library/people/5d7768393c3c2a001fbcf3a6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768262ec6b5001f6ba221",
+            "order": 11,
+            "slug": "jim-norton",
+            "tag": "Jim Norton",
+            "thumb": "https://metadata-static.plex.tv/9/people/9893acb7659fb63b68038d08185d4050.jpg",
+            "role": "Bishop Len Brennan",
+            "key": "/library/people/5d7768262ec6b5001f6ba221",
+            "type": "person"
+          },
+          {
+            "id": "5d7768417e9a3c0020c6f143",
+            "order": 12,
+            "slug": "don-foley",
+            "tag": "Don Foley",
+            "role": "Jim Halpin",
+            "key": "/library/people/5d7768417e9a3c0020c6f143",
+            "type": "person"
+          },
+          {
+            "id": "5d77697e47dd6e001f6c62ab",
+            "order": 13,
+            "slug": "maurice-odonoghue",
+            "tag": "Maurice O'Donoghue",
+            "thumb": "https://metadata-static.plex.tv/4/people/40400ef4b2087e44600fd95e12362bb1.jpg",
+            "role": "Father Dick Byrne",
+            "key": "/library/people/5d77697e47dd6e001f6c62ab",
+            "type": "person"
+          },
+          {
+            "id": "5d776825eb5d26001f1dd189",
+            "order": 14,
+            "slug": "jimmy-keogh",
+            "tag": "Jimmy Keogh",
+            "role": "Father Fintan Fay",
+            "key": "/library/people/5d776825eb5d26001f1dd189",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314dc1",
+            "order": 15,
+            "slug": "jon-kenny",
+            "tag": "Jon Kenny",
+            "thumb": "https://metadata-static.plex.tv/f/people/f9d0870daa8c5c2e179263b02a5bfefd.jpg",
+            "role": "Michael Cocheese",
+            "key": "/library/people/5d7768368718ba001e314dc1",
+            "type": "person"
+          },
+          {
+            "id": "5d77687133f255001e856492",
+            "order": 16,
+            "slug": "patrick-drury",
+            "tag": "Patrick Drury",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab23dd38bcfca240d71d6400e3fff7a8.jpg",
+            "role": "John O'Leary",
+            "key": "/library/people/5d77687133f255001e856492",
+            "type": "person"
+          },
+          {
+            "id": "5d776b9f96b655001fe17277",
+            "order": 17,
+            "slug": "rosemary-henderson",
+            "tag": "Rosemary Henderson",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b9f96b655001fe17277.jpg",
+            "role": "Sister Assumpta",
+            "key": "/library/people/5d776b9f96b655001fe17277",
+            "type": "person"
+          },
+          {
+            "id": "5d7768472e80df001ebe09a7",
+            "order": 18,
+            "slug": "doreen-keogh",
+            "tag": "Doreen Keogh",
+            "thumb": "https://metadata-static.plex.tv/8/people/876ee39914edb74bed0d16bc49d5b0c3.jpg",
+            "role": "Mrs. Doyle's Friend",
+            "key": "/library/people/5d7768472e80df001ebe09a7",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d880197001ec92084",
+            "order": 19,
+            "slug": "denys-hawthorne",
+            "tag": "Denys Hawthorne",
+            "thumb": "https://metadata-static.plex.tv/e/people/e3641626b525079ead0834d30393a979.jpg",
+            "role": "Bishop Facks",
+            "key": "/library/people/5d77682d880197001ec92084",
+            "type": "person"
+          },
+          {
+            "id": "5d77684ee6d55c002041094b",
+            "order": 20,
+            "slug": "declan-mulholland",
+            "tag": "Declan Mulholland",
+            "role": "Shouting Priest",
+            "key": "/library/people/5d77684ee6d55c002041094b",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a61141d001fb13bf6",
+            "order": 21,
+            "slug": "clare-grogan",
+            "tag": "Clare Grogan",
+            "thumb": "https://metadata-static.plex.tv/0/people/0664841a09d018b851dd2fe4c692b9f1.jpg",
+            "role": "Niamh Connolly",
+            "key": "/library/people/5d77682a61141d001fb13bf6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768303c3c2a001fbccf9a",
+            "order": 22,
+            "slug": "richard-wilson",
+            "tag": "Richard Wilson",
+            "thumb": "https://metadata-static.plex.tv/6/people/6c0fe9668076be597bb2402b51ce4a6d.jpg",
+            "role": "Richard Wilson",
+            "key": "/library/people/5d7768303c3c2a001fbccf9a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768258718ba001e31171c",
+            "order": 23,
+            "slug": "vernon-dobtcheff",
+            "tag": "Vernon Dobtcheff",
+            "thumb": "https://metadata-static.plex.tv/0/people/04130811696d0ccb9d776731a4003bb9.jpg",
+            "role": "Old Nazi",
+            "key": "/library/people/5d7768258718ba001e31171c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c2ec6b5001f6bad48",
+            "order": 24,
+            "slug": "jeff-harding",
+            "tag": "Jeff Harding",
+            "thumb": "https://metadata-static.plex.tv/9/people/90b9d5eba350f7a9f2ef09d7bd9ff99a.jpg",
+            "role": "Father Buzz Cagney",
+            "key": "/library/people/5d77682c2ec6b5001f6bad48",
+            "type": "person"
+          },
+          {
+            "id": "5d7768caad5437001f74fdec",
+            "order": 25,
+            "slug": "maggie-shevlin",
+            "tag": "Maggie Shevlin",
+            "thumb": "https://metadata-static.plex.tv/b/people/b4fdf7a6efc0a6624d4af11186830272.jpg",
+            "role": "Mrs. Collins",
+            "key": "/library/people/5d7768caad5437001f74fdec",
+            "type": "person"
+          },
+          {
+            "id": "5d776826103a2d001f56421e",
+            "order": 26,
+            "slug": "gemma-craven",
+            "tag": "Gemma Craven",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc781ea2fdd55fb8948a5537ea241f11.jpg",
+            "role": "Polly Clarke",
+            "key": "/library/people/5d776826103a2d001f56421e",
+            "type": "person"
+          },
+          {
+            "id": "5d776828eb5d26001f1ddcaf",
+            "order": 27,
+            "slug": "tommy-duggan",
+            "tag": "Tommy Duggan",
+            "thumb": "https://metadata-static.plex.tv/c/people/c9b61c328a7041a67042d36f62e06a88.jpg",
+            "role": "Father Paul Cleary",
+            "key": "/library/people/5d776828eb5d26001f1ddcaf",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314dc7",
+            "order": 28,
+            "slug": "mark-oregan",
+            "tag": "Mark O'Regan",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768368718ba001e314dc7.jpg",
+            "role": "Vatican Priest",
+            "key": "/library/people/5d7768368718ba001e314dc7",
+            "type": "person"
+          },
+          {
+            "id": "5d776825880197001ec90398",
+            "order": 29,
+            "slug": "gerard-murphy",
+            "tag": "Gerard Murphy",
+            "thumb": "https://metadata-static.plex.tv/0/people/01d10680ef8a395e3338c068f3931c0e.jpg",
+            "role": "Pilot",
+            "key": "/library/people/5d776825880197001ec90398",
+            "type": "person"
+          },
+          {
+            "id": "5d77682854c0f0001f301f99",
+            "order": 30,
+            "slug": "dermot-crowley",
+            "tag": "Dermot Crowley",
+            "thumb": "https://metadata-static.plex.tv/6/cc68393fae/people/6e66a618d95a44722781d6ce7de2cb60.jpg",
+            "role": "Father Liam Deliverance",
+            "key": "/library/people/5d77682854c0f0001f301f99",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a2ec6b5001f6bcdc5",
+            "order": 31,
+            "slug": "peter-caffrey",
+            "tag": "Peter Caffrey",
+            "role": "Charles Hedges",
+            "key": "/library/people/5d77683a2ec6b5001f6bcdc5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768253c3c2a001fbca9af",
+            "order": 32,
+            "slug": "ozzie-yue",
+            "tag": "Ozzie Yue",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768253c3c2a001fbca9af.jpg",
+            "role": "Mr. Yin",
+            "key": "/library/people/5d7768253c3c2a001fbca9af",
+            "type": "person"
+          },
+          {
+            "id": "5d77685d51dd69001fe0af34",
+            "order": 33,
+            "slug": "brian-eno",
+            "tag": "Brian Eno",
+            "thumb": "https://metadata-static.plex.tv/d/people/dd2cd3663a6035fc69bd62a713641b73.jpg",
+            "role": "Father Brian Eno",
+            "key": "/library/people/5d77685d51dd69001fe0af34",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314de3",
+            "order": 34,
+            "slug": "birdy-sweeney",
+            "tag": "Birdy Sweeney",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768368718ba001e314de3.jpg",
+            "role": "Father Cullen",
+            "key": "/library/people/5d7768368718ba001e314de3",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d8a7581001f12c9f9",
+            "order": 35,
+            "slug": "maria-doyle-kennedy",
+            "tag": "Maria Doyle Kennedy",
+            "thumb": "https://metadata-static.plex.tv/c/people/c2b7f0ed8c1f49f58b341d0469aec15c.jpg",
+            "role": "Patsy",
+            "key": "/library/people/5d77682d8a7581001f12c9f9",
+            "type": "person"
+          },
+          {
+            "id": "5d7769c8594b2b001e6a9b85",
+            "order": 36,
+            "slug": "eamon-morrissey",
+            "tag": "Eamon Morrissey",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a1629187cb3d8d113e1d94bd3032c82.jpg",
+            "role": "Father Beeching",
+            "key": "/library/people/5d7769c8594b2b001e6a9b85",
+            "type": "person"
+          },
+          {
+            "id": "5d7768837a53e9001e6d1412",
+            "order": 37,
+            "slug": "zara-turner",
+            "tag": "Zara Turner",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768837a53e9001e6d1412.jpg",
+            "role": "Laura Sweeney",
+            "key": "/library/people/5d7768837a53e9001e6d1412",
+            "type": "person"
+          },
+          {
+            "id": "5d776836eb5d26001f1e0f64",
+            "order": 38,
+            "slug": "jean-ainslie",
+            "tag": "Jean Ainslie",
+            "role": "Jane",
+            "key": "/library/people/5d776836eb5d26001f1e0f64",
+            "type": "person"
+          },
+          {
+            "id": "5d77705a6afb3d0020618275",
+            "order": 39,
+            "slug": "geoffrey-perkins",
+            "tag": "Geoffrey Perkins",
+            "thumb": "https://metadata-static.plex.tv/1/people/161fe62e25ee17a4da689c727f895e89.jpg",
+            "role": "Voice of Spanish Interpreter",
+            "key": "/library/people/5d77705a6afb3d0020618275",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f564f62",
+            "order": 40,
+            "slug": "charlotte-bradley",
+            "tag": "Charlotte Bradley",
+            "thumb": "https://metadata-static.plex.tv/a/people/a5742ed189335e2d112af9f3c8c86330.jpg",
+            "role": "Picnic Couple",
+            "key": "/library/people/5d77682a103a2d001f564f62",
+            "type": "person"
+          },
+          {
+            "id": "5d776b2dad5437001f796524",
+            "order": 41,
+            "slug": "joe-rooney",
+            "tag": "Joe Rooney",
+            "thumb": "https://metadata-static.plex.tv/e/people/e3b57c0750183a50e88cc6cbb8a570e6.jpg",
+            "role": "Father Damien Lennon",
+            "key": "/library/people/5d776b2dad5437001f796524",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a2ec6b5001f6bcdcd",
+            "order": 42,
+            "slug": "jason-byrne",
+            "tag": "Jason Byrne",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683a2ec6b5001f6bcdcd.jpg",
+            "role": "Referee",
+            "key": "/library/people/5d77683a2ec6b5001f6bcdcd",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a880197001ec91763",
+            "order": 43,
+            "slug": "mairead-mckinley",
+            "tag": "Mairead McKinley",
+            "role": "Sister Monica",
+            "key": "/library/people/5d77682a880197001ec91763",
+            "type": "person"
+          },
+          {
+            "id": "5d776aa7f617c9002016fcd5",
+            "order": 44,
+            "slug": "fergus-okelly",
+            "tag": "Fergus O'Kelly",
+            "role": "Father Barty Dunne",
+            "key": "/library/people/5d776aa7f617c9002016fcd5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768545af944001f1ff957",
+            "order": 45,
+            "slug": "graham-linehan",
+            "tag": "Graham Linehan",
+            "thumb": "https://metadata-static.plex.tv/4/people/48d8f525ff5cbc77058c00ef92e8169f.jpg",
+            "role": "Father Gallagher",
+            "key": "/library/people/5d7768545af944001f1ff957",
+            "type": "person"
+          },
+          {
+            "id": "5d776871fb0d55001f510291",
+            "order": 46,
+            "slug": "noelle-brown",
+            "tag": "Noelle Brown",
+            "role": "Teaching Nun",
+            "key": "/library/people/5d776871fb0d55001f510291",
+            "type": "person"
+          },
+          {
+            "id": "5e1641bed92d86003d35d3ab",
+            "order": 47,
+            "slug": "blanaid-irvine-1",
+            "tag": "Blanaid Irvine",
+            "role": "Tarot Reader",
+            "key": "/library/people/5e1641bed92d86003d35d3ab",
+            "type": "person"
+          },
+          {
+            "id": "5e16460410faa500400eb278",
+            "order": 48,
+            "slug": "mark-murray-17",
+            "tag": "Mark Murray",
+            "role": "Surly Youth",
+            "key": "/library/people/5e16460410faa500400eb278",
+            "type": "person"
+          },
+          {
+            "id": "5e164604fef2d4003e8a817d",
+            "order": 49,
+            "slug": "michael-redmond-4",
+            "tag": "Michael Redmond",
+            "role": "Father Paul Stone",
+            "key": "/library/people/5e164604fef2d4003e8a817d",
+            "type": "person"
+          },
+          {
+            "id": "6323d1b8ba31707eca65522f",
+            "order": 50,
+            "slug": "david-carey-34",
+            "tag": "David Carey",
+            "role": "Doctor",
+            "key": "/library/people/6323d1b8ba31707eca65522f",
+            "type": "person"
+          },
+          {
+            "id": "5d776867374a5b001fec48af",
+            "order": 51,
+            "slug": "kate-binchy",
+            "tag": "Kate Binchy",
+            "role": "Mrs. Stone",
+            "key": "/library/people/5d776867374a5b001fec48af",
+            "type": "person"
+          },
+          {
+            "id": "5d77683561141d001fb157b2",
+            "order": 52,
+            "slug": "james-berwick",
+            "tag": "James Berwick",
+            "role": "Mr. Stone",
+            "key": "/library/people/5d77683561141d001fb157b2",
+            "type": "person"
+          },
+          {
+            "id": "5e164604316a39003ef8f834",
+            "order": 53,
+            "slug": "joane-hall-1",
+            "tag": "Joane Hall",
+            "role": "Granny Stone",
+            "key": "/library/people/5e164604316a39003ef8f834",
+            "type": "person"
+          },
+          {
+            "id": "5d776837103a2d001f5683f3",
+            "order": 54,
+            "slug": "derrick-branche",
+            "tag": "Derrick Branche",
+            "thumb": "https://metadata-static.plex.tv/5/people/50ea8b3e47373086ee143cb8604ec29a.jpg",
+            "role": "Father Jose Fernandez",
+            "key": "/library/people/5d776837103a2d001f5683f3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314de2",
+            "order": 55,
+            "slug": "gerard-lee",
+            "tag": "Gerard Lee",
+            "thumb": "https://metadata-static.plex.tv/0/people/0f7ce1ce2bcafa64b6ccdfb9fe7418e1.jpg",
+            "role": "Terry MacNamee",
+            "key": "/library/people/5d7768368718ba001e314de2",
+            "type": "person"
+          },
+          {
+            "id": "5d7768378a7581001f12db14",
+            "order": 56,
+            "slug": "pat-leavy",
+            "tag": "Pat Leavy",
+            "thumb": "https://metadata-static.plex.tv/2/people/2bbdf602300096977e1674816b535c99.jpg",
+            "role": "Woman at Cinema",
+            "key": "/library/people/5d7768378a7581001f12db14",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9accf",
+            "order": 57,
+            "slug": "niall-buggy",
+            "tag": "Niall Buggy",
+            "thumb": "https://metadata-static.plex.tv/9/people/92487f60c3734226edaa2d0e7212e995.jpg",
+            "role": "Henry Sellers",
+            "key": "/library/people/5d77682f6f4521001ea9accf",
+            "type": "person"
+          },
+          {
+            "id": "6323f3b57b2cae296fd20df9",
+            "order": 58,
+            "slug": "chris-curran-13",
+            "tag": "Chris Curran",
+            "role": "Father Jim Johnson",
+            "key": "/library/people/6323f3b57b2cae296fd20df9",
+            "type": "person"
+          },
+          {
+            "id": "60105292241d1a002b2bc0c0",
+            "order": 59,
+            "slug": "paul-woodfull-1",
+            "tag": "Paul Woodfull",
+            "role": "Father Harry Coyle",
+            "key": "/library/people/60105292241d1a002b2bc0c0",
+            "type": "person"
+          },
+          {
+            "id": "5f3f94f9cae2c60042e4f415",
+            "order": 60,
+            "slug": "edwina-day",
+            "tag": "Edwina Day",
+            "role": "Monica",
+            "key": "/library/people/5f3f94f9cae2c60042e4f415",
+            "type": "person"
+          },
+          {
+            "id": "5d7768368718ba001e314dc0",
+            "order": 61,
+            "slug": "shay-gorman",
+            "tag": "Shay Gorman",
+            "thumb": "https://metadata-static.plex.tv/5/people/5efa7f45632848d70f94d4f6733f04c0.jpg",
+            "role": "Father Jim Sutton",
+            "key": "/library/people/5d7768368718ba001e314dc0",
+            "type": "person"
+          },
+          {
+            "id": "5d776975ad5437001f75d9d1",
+            "order": 62,
+            "slug": "brendan-grace",
+            "tag": "Brendan Grace",
+            "role": "Father Fintan Stack",
+            "key": "/library/people/5d776975ad5437001f75d9d1",
+            "type": "person"
+          },
+          {
+            "id": "5d776c47594b2b001e6efd4b",
+            "order": 63,
+            "slug": "fred-ridgeway",
+            "tag": "Fred Ridgeway",
+            "role": "Father Ken Dillon",
+            "key": "/library/people/5d776c47594b2b001e6efd4b",
+            "type": "person"
+          },
+          {
+            "id": "62ac966f16bfd0bb0b6ef740",
+            "order": 64,
+            "slug": "noel-slattery-1",
+            "tag": "Noel Slattery",
+            "role": "Father Rory Shanahan",
+            "key": "/library/people/62ac966f16bfd0bb0b6ef740",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe799c63b480040d9670e",
+            "order": 65,
+            "slug": "fidelma-meehan",
+            "tag": "Fidelma Meehan",
+            "role": "Sister Monica",
+            "key": "/library/people/5f3fe799c63b480040d9670e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768417e9a3c0020c6f167",
+            "order": 66,
+            "slug": "paddy-joyce",
+            "tag": "Paddy Joyce",
+            "thumb": "https://image.tmdb.org/t/p/original/ojEc0kl9WGuLyR04xQVjGFjBnhP.jpg",
+            "role": "Shouting Priest",
+            "key": "/library/people/5d7768417e9a3c0020c6f167",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c233f255001e85ed34",
+            "order": 67,
+            "slug": "ultan-ely-ocarroll",
+            "tag": "Ultan Ely-O'Carroll",
+            "role": "Shouting Priest",
+            "key": "/library/people/5d7768c233f255001e85ed34",
+            "type": "person"
+          },
+          {
+            "id": "5d7769d7f617c900201659ea",
+            "order": 68,
+            "slug": "claire-cathcart",
+            "tag": "Claire Cathcart",
+            "role": "Sister Margaret",
+            "key": "/library/people/5d7769d7f617c900201659ea",
+            "type": "person"
+          },
+          {
+            "id": "5d9f3d129dd5f4001e84da93",
+            "order": 69,
+            "slug": "patrick-mcdonnell",
+            "tag": "Patrick McDonnell",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a24fa086dfc9d50680f6eaf669f15c0.jpg",
+            "role": "Eoin McLove",
+            "key": "/library/people/5d9f3d129dd5f4001e84da93",
+            "type": "person"
+          },
+          {
+            "id": "626017095844f2a6b4bf64ef",
+            "order": 70,
+            "slug": "elva-crowley-1",
+            "tag": "Elva Crowley",
+            "role": "Mrs. Boyle",
+            "key": "/library/people/626017095844f2a6b4bf64ef",
+            "type": "person"
+          },
+          {
+            "id": "62a2042769dffad827753132",
+            "order": 71,
+            "slug": "rosemary-kennedy-3",
+            "tag": "Rosemary Kennedy",
+            "role": "Mrs. Dunne",
+            "key": "/library/people/62a2042769dffad827753132",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a5af944001f1f788e",
+            "order": 72,
+            "slug": "vincent-marzello",
+            "tag": "Vincent Marzello",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682a5af944001f1f788e.jpg",
+            "role": "Television Psychiatrist",
+            "key": "/library/people/5d77682a5af944001f1f788e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a7228e5001f1dd29e",
+            "order": 73,
+            "slug": "patrick-kavanagh",
+            "tag": "Patrick Kavanagh",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682a7228e5001f1dd29e.jpg",
+            "role": "Father Seamus Fitzpatrick",
+            "key": "/library/people/5d77682a7228e5001f1dd29e",
+            "type": "person"
+          },
+          {
+            "id": "5d7769b27a53e9001e6edd21",
+            "order": 74,
+            "slug": "eamon-rohan",
+            "tag": "Eamon Rohan",
+            "role": "Colm",
+            "key": "/library/people/5d7769b27a53e9001e6edd21",
+            "type": "person"
+          },
+          {
+            "id": "632093ec580698f2075ebdf1",
+            "order": 75,
+            "slug": "ann-callanan-1",
+            "tag": "Ann Callanan",
+            "role": "Mrs. Carberry",
+            "key": "/library/people/632093ec580698f2075ebdf1",
+            "type": "person"
+          },
+          {
+            "id": "6a0bea92b5b4031fea35e80d",
+            "order": 76,
+            "slug": "des-keogh-11",
+            "tag": "Des Keogh",
+            "thumb": "https://metadata-static.plex.tv/0/people/03e0faf408be7637a8cf92eadb1ab69f.jpg",
+            "role": "Older Dublin Priest",
+            "key": "/library/people/6a0bea92b5b4031fea35e80d",
+            "type": "person"
+          },
+          {
+            "id": "62ac966fdfd87959d694984b",
+            "order": 77,
+            "slug": "simon-nelson-3",
+            "tag": "Simon Nelson",
+            "role": "Younger Dublin Priest",
+            "key": "/library/people/62ac966fdfd87959d694984b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe8c804a86500409a2f7c",
+            "order": 78,
+            "slug": "dennis-quilligan",
+            "tag": "Dennis Quilligan",
+            "role": "Parish Accountant",
+            "key": "/library/people/5f3fe8c804a86500409a2f7c",
+            "type": "person"
+          },
+          {
+            "id": "5d77685d5af944001f200e29",
+            "order": 79,
+            "slug": "tommy-tiernan",
+            "tag": "Tommy Tiernan",
+            "thumb": "https://metadata-static.plex.tv/6/people/6ac7ca1cfe6ed67575d6a814b8ec0076.jpg",
+            "role": "Father Kevin",
+            "key": "/library/people/5d77685d5af944001f200e29",
+            "type": "person"
+          },
+          {
+            "id": "5d776a987a53e9001e709c4a",
+            "order": 80,
+            "slug": "neil-hannon",
+            "tag": "Neil Hannon",
+            "thumb": "https://metadata-static.plex.tv/4/people/4114dc64563a21ef50eed0df25f242ae.jpg",
+            "role": "Father Ted Crilly (singing voice)",
+            "key": "/library/people/5d776a987a53e9001e709c4a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768275af944001f1f6ece",
+            "order": 81,
+            "slug": "gail-fitzpatrick",
+            "tag": "Gail Fitzpatrick",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768275af944001f1f6ece.jpg",
+            "role": "Mrs. Millet",
+            "key": "/library/people/5d7768275af944001f1f6ece",
+            "type": "person"
+          },
+          {
+            "id": "5d7768298718ba001e312487",
+            "order": 82,
+            "slug": "pat-laffan",
+            "tag": "Pat Laffan",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768298718ba001e312487.jpg",
+            "role": "Pat Mustard",
+            "key": "/library/people/5d7768298718ba001e312487",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f564f64",
+            "order": 83,
+            "slug": "stephen-brennan",
+            "tag": "Stephen Brennan",
+            "thumb": "https://metadata-static.plex.tv/0/people/0160b770a3b176cdb8eb2e060731b86c.jpg",
+            "role": "Father Niall Haverty",
+            "key": "/library/people/5d77682a103a2d001f564f64",
+            "type": "person"
+          },
+          {
+            "id": "5d77688347dd6e001f6bb02a",
+            "order": 84,
+            "slug": "charles-simon-2",
+            "tag": "Charles Simon",
+            "role": "Father Jim",
+            "key": "/library/people/5d77688347dd6e001f6bb02a",
+            "type": "person"
+          },
+          {
+            "id": "6a0bfbb084ce675343a9305a",
+            "order": 85,
+            "slug": "conor-evans-7",
+            "tag": "Conor Evans",
+            "role": "Father Romeo Sensini",
+            "key": "/library/people/6a0bfbb084ce675343a9305a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768603ab0e7001f4ff8dc",
+            "order": 86,
+            "slug": "peter-dix",
+            "tag": "Peter Dix",
+            "role": "Craggy Island's Goalkeeper",
+            "key": "/library/people/5d7768603ab0e7001f4ff8dc",
+            "type": "person"
+          },
+          {
+            "id": "5d77683961141d001fb161a1",
+            "order": 87,
+            "slug": "miriam-kelly",
+            "tag": "Miriam Kelly",
+            "role": "Mrs. Doyle's Friend",
+            "key": "/library/people/5d77683961141d001fb161a1",
+            "type": "person"
+          },
+          {
+            "id": "5f3fdd63bf3e560040b25e40",
+            "order": 88,
+            "slug": "liam-ocarroll",
+            "tag": "Liam O'Carroll",
+            "role": "Priest with Sunglasses",
+            "key": "/library/people/5f3fdd63bf3e560040b25e40",
+            "type": "person"
+          },
+          {
+            "id": "5d7768660ab244002006cf55",
+            "order": 89,
+            "slug": "jonathan-white",
+            "tag": "Jonathan White",
+            "role": "Father Flynn",
+            "key": "/library/people/5d7768660ab244002006cf55",
+            "type": "person"
+          },
+          {
+            "id": "6323f09f53c331b9fabcbd20",
+            "order": 90,
+            "slug": "kevin-gildea-4",
+            "tag": "Kevin Gildea",
+            "role": "Father Cave",
+            "key": "/library/people/6323f09f53c331b9fabcbd20",
+            "type": "person"
+          },
+          {
+            "id": "5fb3f4ce217c2c002d0134fc",
+            "order": 91,
+            "slug": "nick-wymer",
+            "tag": "Nick Wymer",
+            "role": "Toilet Attendant",
+            "key": "/library/people/5fb3f4ce217c2c002d0134fc",
+            "type": "person"
+          },
+          {
+            "id": "5d77686d33f255001e855e3d",
+            "order": 92,
+            "slug": "john-olohan",
+            "tag": "John Olohan",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec55454b7a1914ba6b89106f70f38ca9.jpg",
+            "role": "Sergeant Hodgins",
+            "key": "/library/people/5d77686d33f255001e855e3d",
+            "type": "person"
+          },
+          {
+            "id": "5d776873374a5b001fec5e5d",
+            "order": 93,
+            "slug": "rio-fanning",
+            "tag": "Rio Fanning",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7ff430b357edfa71d736d01e97f5421.jpg",
+            "role": "Father Frost",
+            "key": "/library/people/5d776873374a5b001fec5e5d",
+            "type": "person"
+          },
+          {
+            "id": "5d776825eb5d26001f1dd18b",
+            "order": 94,
+            "slug": "mal-whyte",
+            "tag": "Mal Whyte",
+            "thumb": "https://metadata-static.plex.tv/9/people/999a5fb41e0d90010fcc4b13f8e02629.jpg",
+            "role": "Benson",
+            "key": "/library/people/5d776825eb5d26001f1dd18b",
+            "type": "person"
+          },
+          {
+            "id": "69439e59abe0ca35afb6a995",
+            "order": 95,
+            "slug": "ann-rowan-6",
+            "tag": "Ann Rowan",
+            "role": "Mrs. Glynn",
+            "key": "/library/people/69439e59abe0ca35afb6a995",
+            "type": "person"
+          },
+          {
+            "id": "6a0bf348b5b4031fea3656ca",
+            "order": 96,
+            "slug": "mary-ann-odonoghue-5",
+            "tag": "Mary Ann O'Donoghue",
+            "role": "Optician",
+            "key": "/library/people/6a0bf348b5b4031fea3656ca",
+            "type": "person"
+          },
+          {
+            "id": "609171775a374f002dee4c58",
+            "order": 97,
+            "slug": "john-henderson-60",
+            "tag": "John Henderson",
+            "role": "Tour Guide",
+            "key": "/library/people/609171775a374f002dee4c58",
+            "type": "person"
+          },
+          {
+            "id": "5f3faab21ae7100041fb417e",
+            "order": 98,
+            "slug": "peter-sakon-lee",
+            "tag": "Peter Sakon Lee",
+            "role": "Son-Yin",
+            "key": "/library/people/5f3faab21ae7100041fb417e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77683ae6d55c002040e156",
+            "slug": "declan-lowney",
+            "tag": "Declan Lowney",
+            "thumb": "https://metadata-static.plex.tv/0/people/059d590febe8d2b308d0c70d0bf95b7b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77683ae6d55c002040e156",
+            "type": "person"
+          },
+          {
+            "id": "5d7768545af944001f1ff957",
+            "slug": "graham-linehan",
+            "tag": "Graham Linehan",
+            "thumb": "https://metadata-static.plex.tv/4/people/48d8f525ff5cbc77058c00ef92e8169f.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768545af944001f1ff957",
+            "type": "person"
+          },
+          {
+            "id": "5d77685f103a2d001f56f734",
+            "slug": "andy-de-emmony",
+            "tag": "Andy De Emmony",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ed4e5614c6d77174f1138f467d45997.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77685f103a2d001f56f734",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d776c6651dd69001fe3ae74",
+            "slug": "arthur-mathews",
+            "tag": "Arthur Mathews",
+            "role": "Producer",
+            "key": "/library/people/5d776c6651dd69001fe3ae74",
+            "type": "person"
+          },
+          {
+            "id": "5d7768545af944001f1ff957",
+            "slug": "graham-linehan",
+            "tag": "Graham Linehan",
+            "thumb": "https://metadata-static.plex.tv/4/people/48d8f525ff5cbc77058c00ef92e8169f.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768545af944001f1ff957",
+            "type": "person"
+          },
+          {
+            "id": "5d776ba247dd6e001f6e15df",
+            "slug": "lissa-evans",
+            "tag": "Lissa Evans",
+            "thumb": "https://metadata-static.plex.tv/people/5d776ba247dd6e001f6e15df.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776ba247dd6e001f6e15df",
+            "type": "person"
+          },
+          {
+            "id": "5d77705a6afb3d0020618275",
+            "slug": "geoffrey-perkins",
+            "tag": "Geoffrey Perkins",
+            "thumb": "https://metadata-static.plex.tv/1/people/161fe62e25ee17a4da689c727f895e89.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77705a6afb3d0020618275",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d776c6651dd69001fe3ae74",
+            "slug": "arthur-mathews",
+            "tag": "Arthur Mathews",
+            "role": "Writer",
+            "key": "/library/people/5d776c6651dd69001fe3ae74",
+            "type": "person"
+          },
+          {
+            "id": "5d7768545af944001f1ff957",
+            "slug": "graham-linehan",
+            "tag": "Graham Linehan",
+            "thumb": "https://metadata-static.plex.tv/4/people/48d8f525ff5cbc77058c00ef92e8169f.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d7768545af944001f1ff957",
+            "type": "person"
+          },
+          {
+            "id": "5d776a987a53e9001e709c4a",
+            "slug": "neil-hannon",
+            "tag": "Neil Hannon",
+            "thumb": "https://metadata-static.plex.tv/4/people/4114dc64563a21ef50eed0df25f242ae.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d776a987a53e9001e709c4a",
+            "type": "person"
+          },
+          {
+            "id": "5e16356461c6140040d6a0e9",
+            "slug": "my-lovely-horse",
+            "tag": "My Lovely Horse",
+            "role": "Writer",
+            "key": "/library/people/5e16356461c6140040d6a0e9",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe22e93b86d951faf7f4",
+            "score": 0.935,
+            "tag": "quirky"
+          },
+          {
+            "id": "65afbe65e93b86d951067743",
+            "score": 0.885,
+            "tag": "satirical"
+          },
+          {
+            "id": "65afbe22e93b86d951faf7a8",
+            "score": 0.87,
+            "tag": "funny"
+          },
+          {
+            "id": "65afbe36e93b86d951fe4948",
+            "score": 0.819,
+            "tag": "whimsical"
+          },
+          {
+            "id": "65afbe22e93b86d951faf75e",
+            "score": 0.814,
+            "tag": "witty"
+          },
+          {
+            "id": "65afbe25e93b86d951fb82a0",
+            "score": 0.805,
+            "tag": "dark humor"
+          },
+          {
+            "id": "65afbe25e93b86d951fb829e",
+            "score": 0.773,
+            "tag": "bittersweet"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Channel 4"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c086be264b7001fc43693",
+            "tag": "I'm Alan Partridge"
+          },
+          {
+            "guid": "plex://show/5d9c08717b5c2e001e65c181",
+            "tag": "The Jeffersons"
+          },
+          {
+            "guid": "plex://show/5d9c0876e98e47001eb1106f",
+            "tag": "Nick Cannon Presents: Wild 'N Out"
+          },
+          {
+            "guid": "plex://show/5d9c0874cb3ffa001f1b582c",
+            "tag": "My Name Is Earl"
+          },
+          {
+            "guid": "plex://show/5d9c087446115600200aae4e",
+            "tag": "The Vicar of Dibley"
+          },
+          {
+            "guid": "plex://show/5d9c07fee98e47001eb04cdc",
+            "tag": "Tyler Perry's House of Payne"
+          },
+          {
+            "guid": "plex://show/5d9c086f2df347001e3b27b0",
+            "tag": "Arrested Development"
+          },
+          {
+            "guid": "plex://show/5d9c0869ba6eb9001fba3230",
+            "tag": "The Real O'Neals"
+          },
+          {
+            "guid": "plex://show/5d9c0804ba6eb9001fb99927",
+            "tag": "American Housewife"
+          },
+          {
+            "guid": "plex://show/5d9c08ade9d5a1001f4dbf3c",
+            "tag": "Decker"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Hat Trick Productions"
+          },
+          {
+            "tag": "Channel 4 Television"
+          }
+        ]
+      }
+    ]
+  }
+}

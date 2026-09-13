@@ -1,0 +1,655 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [
+      "Dark Matter (2024)"
+    ],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1434067200,
+              "art": "https://image.tmdb.org/t/p/original/4wwWDjLfJVMt2hh8DIa2rzEx5VS.jpg",
+              "childCount": 3,
+              "duration": 2580000,
+              "guid": "plex://show/5d9c0852ba6eb9001fba0f22",
+              "key": "/library/metadata/5d9c0852ba6eb9001fba0f22/children",
+              "leafCount": 65,
+              "originallyAvailableAt": "2015-06-12",
+              "ratingKey": "5d9c0852ba6eb9001fba0f22",
+              "slug": "dark-matter",
+              "thumb": "https://image.tmdb.org/t/p/original/oWYOFBvIMkW64n51uD4mdje6k2u.jpg",
+              "title": "Dark Matter",
+              "type": "show",
+              "year": 2015,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e808fddd001f28de45",
+                  "id": "5d9c07e808fddd001f28de45",
+                  "key": "/library/categories/sci-fi-and-fantasy",
+                  "ratingKey": "genre_5d9c07e808fddd001f28de45",
+                  "slug": "sci-fi-and-fantasy",
+                  "tag": "Sci-Fi & Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.87
+          },
+          {
+            "Metadata": {
+              "addedAt": 1715040000,
+              "art": "https://image.tmdb.org/t/p/original/572uSrnXM5uPVYMVqsxfNA41cT8.jpg",
+              "childCount": 2,
+              "duration": 3180000,
+              "guid": "plex://show/5fd2a1b82de5fd002dd4c7b1",
+              "key": "/library/metadata/5fd2a1b82de5fd002dd4c7b1/children",
+              "leafCount": 19,
+              "originallyAvailableAt": "2024-05-07",
+              "ratingKey": "5fd2a1b82de5fd002dd4c7b1",
+              "slug": "dark-matter-2024",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg",
+              "title": "Dark Matter (2024)",
+              "type": "show",
+              "year": 2024,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e808fddd001f28de45",
+                  "id": "5d9c07e808fddd001f28de45",
+                  "key": "/library/categories/sci-fi-and-fantasy",
+                  "ratingKey": "genre_5d9c07e808fddd001f28de45",
+                  "slug": "sci-fi-and-fantasy",
+                  "tag": "Sci-Fi & Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1314748800,
+              "art": "https://artworks.thetvdb.com/banners/fanart/original/250734-6.jpg",
+              "childCount": 2,
+              "duration": 2580000,
+              "guid": "plex://show/5d9c0840cb3ffa001f1b361f",
+              "key": "/library/metadata/5d9c0840cb3ffa001f1b361f/children",
+              "leafCount": 19,
+              "originallyAvailableAt": "2011-08-31",
+              "ratingKey": "5d9c0840cb3ffa001f1b361f",
+              "slug": "dark-matters",
+              "thumb": "https://image.tmdb.org/t/p/original/fz0QmvCqLGIgpTKonMDHASbRqsL.jpg",
+              "title": "Dark Matters",
+              "type": "show",
+              "year": 2011,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c7b5c2e001e64c612",
+                  "id": "5d9c046c7b5c2e001e64c612",
+                  "key": "/library/categories/horror",
+                  "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+                  "slug": "horror",
+                  "tag": "Horror",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e8705e7a001e6cc4f9",
+                  "id": "5d9c07e8705e7a001e6cc4f9",
+                  "key": "/library/categories/reality",
+                  "ratingKey": "genre_5d9c07e8705e7a001e6cc4f9",
+                  "slug": "reality",
+                  "tag": "Reality",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.42
+          },
+          {
+            "Metadata": {
+              "addedAt": 1512086400,
+              "art": "https://image.tmdb.org/t/p/original/3jDXL4Xvj3AzDOF6UH1xeyHW8MH.jpg",
+              "childCount": 3,
+              "duration": 3600000,
+              "guid": "plex://show/5d9c08ccba2e21001f192e95",
+              "key": "/library/metadata/5d9c08ccba2e21001f192e95/children",
+              "leafCount": 31,
+              "originallyAvailableAt": "2017-12-01",
+              "ratingKey": "5d9c08ccba2e21001f192e95",
+              "slug": "dark",
+              "thumb": "https://image.tmdb.org/t/p/original/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg",
+              "title": "Dark",
+              "type": "show",
+              "year": 2017,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07e808fddd001f28de45",
+                  "id": "5d9c07e808fddd001f28de45",
+                  "key": "/library/categories/sci-fi-and-fantasy",
+                  "ratingKey": "genre_5d9c07e808fddd001f28de45",
+                  "slug": "sci-fi-and-fantasy",
+                  "tag": "Sci-Fi & Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.24
+          },
+          {
+            "Metadata": {
+              "addedAt": 1606003200,
+              "art": "https://image.tmdb.org/t/p/original/z4RTuJUr6dehBdXhs89VfMpQoLW.jpg",
+              "childCount": 1,
+              "duration": 3600000,
+              "guid": "plex://show/5fa17f139bfb43002d6e6d65",
+              "key": "/library/metadata/5fa17f139bfb43002d6e6d65/children",
+              "leafCount": 4,
+              "originallyAvailableAt": "2020-11-22",
+              "ratingKey": "5fa17f139bfb43002d6e6d65",
+              "skipChildren": true,
+              "slug": "no-matter-how-dark-the-night-is",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/A1vpGOTMfv37wNQu1Z7T6eGGtEH.jpg",
+              "title": "No Matter How Much the Night is Dark",
+              "type": "show",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.22
+          },
+          {
+            "Metadata": {
+              "addedAt": 1554854400,
+              "art": "https://image.tmdb.org/t/p/original/lQlsV6rW4I5b6wlb94iXY3nmT0P.jpg",
+              "childCount": 7,
+              "duration": 2640000,
+              "guid": "plex://show/5d9c0920ef619b002048452c",
+              "key": "/library/metadata/5d9c0920ef619b002048452c/children",
+              "leafCount": 69,
+              "originallyAvailableAt": "2019-04-10",
+              "ratingKey": "5d9c0920ef619b002048452c",
+              "slug": "dark-side-of-the-ring",
+              "thumb": "https://image.tmdb.org/t/p/original/gHBKjBzCSHdraabjSnAFOMEf4Uf.jpg",
+              "title": "Dark Side of the Ring",
+              "type": "show",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8da3",
+                  "id": "5d9c046c705e7a001e6c8da3",
+                  "key": "/library/categories/documentary",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+                  "slug": "documentary",
+                  "tag": "Documentary",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf5af32ed001e0f5563",
+                  "id": "5da05bf5af32ed001e0f5563",
+                  "key": "/library/categories/history",
+                  "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+                  "slug": "history",
+                  "tag": "History",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05bf9370f98001f4ddd95",
+                  "id": "5da05bf9370f98001f4ddd95",
+                  "key": "/library/categories/sport",
+                  "ratingKey": "genre_5da05bf9370f98001f4ddd95",
+                  "slug": "sport",
+                  "tag": "Sport",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          },
+          {
+            "Metadata": {
+              "addedAt": 1637798400,
+              "art": "https://image.tmdb.org/t/p/original/tnwE237d7g1sRUUls5XvhyLFhsv.jpg",
+              "childCount": 3,
+              "duration": 2700000,
+              "guid": "plex://show/61a4e4cdd6c908cf54cc3b77",
+              "key": "/library/metadata/61a4e4cdd6c908cf54cc3b77/children",
+              "leafCount": 32,
+              "originallyAvailableAt": "2021-11-25",
+              "ratingKey": "61a4e4cdd6c908cf54cc3b77",
+              "slug": "family-matter-1",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/vWCMBOMviVt3lzVQekdhsUfF4Vc.jpg",
+              "title": "Family Matter",
+              "type": "show",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          },
+          {
+            "Metadata": {
+              "addedAt": 1632096000,
+              "art": "https://image.tmdb.org/t/p/original/vI5P5qcnn1on17ZFTvD0mBI6FE7.jpg",
+              "childCount": 1,
+              "duration": 2580000,
+              "guid": "plex://show/619390f83aa571514cf739db",
+              "key": "/library/metadata/619390f83aa571514cf739db/children",
+              "leafCount": 10,
+              "originallyAvailableAt": "2021-09-20",
+              "ratingKey": "619390f83aa571514cf739db",
+              "slug": "family-matter",
+              "thumb": "https://image.tmdb.org/t/p/original/wCQFjZw97JnSeZmbDmiGaRhLYIm.jpg",
+              "title": "Family Matter",
+              "type": "show",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          },
+          {
+            "Metadata": {
+              "addedAt": 1654992000,
+              "art": "https://metadata-static.plex.tv/e/plex/e100def1-1b2a-4d37-91da-db31d90d7b5a.jpg",
+              "childCount": 5,
+              "duration": 3600000,
+              "guid": "plex://show/60eb18afa7a952002d5410d0",
+              "key": "/library/metadata/60eb18afa7a952002d5410d0/children",
+              "leafCount": 36,
+              "originallyAvailableAt": "2022-06-12",
+              "ratingKey": "60eb18afa7a952002d5410d0",
+              "slug": "dark-winds",
+              "thumb": "https://metadata-static.plex.tv/4/plex/4cb741e5-1511-41aa-9a18-105823ef3946.jpg",
+              "title": "Dark Winds",
+              "type": "show",
+              "year": 2022,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046cba6eb9001fb93d49",
+                  "id": "5d9c046cba6eb9001fb93d49",
+                  "key": "/library/categories/western",
+                  "ratingKey": "genre_5d9c046cba6eb9001fb93d49",
+                  "slug": "western",
+                  "tag": "Western",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          },
+          {
+            "Metadata": {
+              "addedAt": -155001600,
+              "childCount": 1,
+              "duration": 1500000,
+              "guid": "plex://show/5d9c086802391c001f588874",
+              "key": "/library/metadata/5d9c086802391c001f588874/children",
+              "leafCount": 7,
+              "originallyAvailableAt": "1965-02-02",
+              "ratingKey": "5d9c086802391c001f588874",
+              "slug": "that-doesnt-matter",
+              "thumb": "https://image.tmdb.org/t/p/original/paa5QMyoTKxnuNLYAqfnel9oKet.jpg",
+              "title": "That Doesn't Matter",
+              "type": "show",
+              "year": 1965,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.17
+          }
+        ]
+      }
+    ]
+  }
+}

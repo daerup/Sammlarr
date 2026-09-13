@@ -1,0 +1,543 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1788998400,
+              "art": "https://image.tmdb.org/t/p/original/vYO9OkYHSNfYuqz6VMS4aCCfRb8.jpg",
+              "childCount": 1,
+              "duration": 3720000,
+              "guid": "plex://show/6a3ae99575acc876df9185c8",
+              "key": "/library/metadata/6a3ae99575acc876df9185c8/children",
+              "leafCount": 7,
+              "originallyAvailableAt": "2026-09-10",
+              "ratingKey": "6a3ae99575acc876df9185c8",
+              "slug": "the-perfect-lie-1",
+              "thumb": "https://image.tmdb.org/t/p/original/a8qjbVX7lo1v7m5Awzhx7Ptk8gO.jpg",
+              "title": "The Perfect Lie",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.87
+          },
+          {
+            "Metadata": {
+              "addedAt": 1791504000,
+              "childCount": 1,
+              "guid": "plex://show/69421171929d5e4fa9152ae4",
+              "key": "/library/metadata/69421171929d5e4fa9152ae4/children",
+              "leafCount": 12,
+              "originallyAvailableAt": "2026-10-09",
+              "ratingKey": "69421171929d5e4fa9152ae4",
+              "slug": "the-perfect-lie",
+              "title": "The Perfect Lie",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1793318400,
+              "childCount": 1,
+              "guid": "plex://show/687dcd95d0905b43b2548515",
+              "key": "/library/metadata/687dcd95d0905b43b2548515/children",
+              "leafCount": 12,
+              "originallyAvailableAt": "2026-10-30",
+              "ratingKey": "687dcd95d0905b43b2548515",
+              "slug": "the-perfect-lie-2",
+              "title": "The Perfect Lie",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1746921600,
+              "art": "https://artworks.thetvdb.com/banners/v4/series/462787/backgrounds/68055e5f4fbaf.jpg",
+              "childCount": 1,
+              "duration": 2160000,
+              "guid": "plex://show/68104ad8aa20a4619c4f5292",
+              "key": "/library/metadata/68104ad8aa20a4619c4f5292/children",
+              "leafCount": 31,
+              "originallyAvailableAt": "2025-05-11",
+              "ratingKey": "68104ad8aa20a4619c4f5292",
+              "slug": "stained-legacy",
+              "thumb": "https://artworks.thetvdb.com/banners/v4/series/462787/posters/68055d3e79ee5.jpg",
+              "title": "Stained Legacy",
+              "type": "show",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c5",
+                  "id": "5d9c046c2192ba001f2ff6c5",
+                  "key": "/library/categories/thriller",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+                  "slug": "thriller",
+                  "tag": "Thriller",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9e",
+                  "id": "5d9c046c705e7a001e6c8d9e",
+                  "key": "/library/categories/mystery",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+                  "slug": "mystery",
+                  "tag": "Mystery",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.39
+          },
+          {
+            "Metadata": {
+              "addedAt": 512092800,
+              "art": "https://image.tmdb.org/t/p/original/e22UKY4x8ldlqPrMZTZXxVpsHyi.jpg",
+              "childCount": 8,
+              "duration": 1800000,
+              "guid": "plex://show/5d9c087108fddd001f29b0e0",
+              "key": "/library/metadata/5d9c087108fddd001f29b0e0/children",
+              "leafCount": 151,
+              "originallyAvailableAt": "1986-03-25",
+              "ratingKey": "5d9c087108fddd001f29b0e0",
+              "slug": "perfect-strangers",
+              "thumb": "https://metadata-static.plex.tv/5/gracenote/51109f8319c3778b9aee90ea5b00fdcc.jpg",
+              "title": "Perfect Strangers",
+              "type": "show",
+              "year": 1986,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.27
+          },
+          {
+            "Metadata": {
+              "addedAt": 1181952000,
+              "art": "https://image.tmdb.org/t/p/original/4YNm4rg9Fu9WHBLhSYyjHLUqAQK.jpg",
+              "childCount": 19,
+              "duration": 1800000,
+              "guid": "plex://show/5d9c0879e264b7001fc4568e",
+              "key": "/library/metadata/5d9c0879e264b7001fc4568e/children",
+              "leafCount": 200,
+              "originallyAvailableAt": "2007-06-16",
+              "ratingKey": "5d9c0879e264b7001fc4568e",
+              "slug": "would-i-lie-to-you",
+              "thumb": "https://image.tmdb.org/t/p/original/cFaW1pAjZpQ90I42Nj4f27tAdS7.jpg",
+              "title": "Would I Lie to You?",
+              "type": "show",
+              "year": 2007,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5da05f6df47764001fd3c1a1",
+                  "id": "5da05f6df47764001fd3c1a1",
+                  "key": "/library/categories/game-show",
+                  "ratingKey": "genre_5da05f6df47764001fd3c1a1",
+                  "slug": "game-show",
+                  "tag": "Game Show",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.19
+          },
+          {
+            "Metadata": {
+              "addedAt": 1775779200,
+              "art": "https://image.tmdb.org/t/p/original/6ekykPwvAywJRjFEnUoCFWTO9O3.jpg",
+              "childCount": 1,
+              "duration": 4140000,
+              "guid": "plex://show/674ea584ad4451090c84fa57",
+              "key": "/library/metadata/674ea584ad4451090c84fa57/children",
+              "leafCount": 12,
+              "originallyAvailableAt": "2026-04-10",
+              "ratingKey": "674ea584ad4451090c84fa57",
+              "skipChildren": true,
+              "slug": "perfect-crown-1",
+              "subtype": "miniSeries",
+              "thumb": "https://image.tmdb.org/t/p/original/uyau9OSO6Je9mfBHPiAlLv97DzD.jpg",
+              "title": "Perfect Crown",
+              "type": "show",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0904",
+                  "id": "5d9c07ebcb3ffa001f1b0904",
+                  "key": "/library/categories/mini-series",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0904",
+                  "slug": "mini-series",
+                  "tag": "Mini-Series",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.19
+          },
+          {
+            "Metadata": {
+              "addedAt": 1599177600,
+              "art": "https://image.tmdb.org/t/p/original/sFtuQvgshxvahqrN9chxEyFyTF7.jpg",
+              "childCount": 1,
+              "duration": 4200000,
+              "guid": "plex://show/5f20151fe01d3600398aeccd",
+              "key": "/library/metadata/5f20151fe01d3600398aeccd/children",
+              "leafCount": 27,
+              "originallyAvailableAt": "2020-09-04",
+              "ratingKey": "5f20151fe01d3600398aeccd",
+              "slug": "lie-after-lie",
+              "thumb": "https://image.tmdb.org/t/p/original/RfWfTECbvLLLNWaAyTFIGNYAOM.jpg",
+              "title": "Lie After Lie",
+              "type": "show",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07f308fddd001f28ee5f",
+                  "id": "5d9c07f308fddd001f28ee5f",
+                  "key": "/library/categories/suspense",
+                  "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+                  "slug": "suspense",
+                  "tag": "Suspense",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.19
+          },
+          {
+            "Metadata": {
+              "addedAt": 1661472000,
+              "art": "https://metadata-static.plex.tv/8/gracenote/8daff27bd3e66e485b6546ea3ba1d4f8.jpg",
+              "childCount": 1,
+              "duration": 1860000,
+              "guid": "plex://show/5d9c08d22192ba001f317101",
+              "key": "/library/metadata/5d9c08d22192ba001f317101/children",
+              "leafCount": 1,
+              "originallyAvailableAt": "2022-08-26",
+              "ratingKey": "5d9c08d22192ba001f317101",
+              "slug": "perfect-1",
+              "thumb": "https://metadata-static.plex.tv/d/gracenote/dc179bd9210f8a45b20a649a71e6f04e.jpg",
+              "title": "Perfect",
+              "type": "show",
+              "year": 2022,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.19
+          },
+          {
+            "Metadata": {
+              "addedAt": 1547942400,
+              "art": "https://image.tmdb.org/t/p/original/4XgtpH4yzyMFf8OJf047iL4PXz7.jpg",
+              "childCount": 1,
+              "duration": 1800000,
+              "guid": "plex://show/5d9c09206c3e37001ecdc3ab",
+              "key": "/library/metadata/5d9c09206c3e37001ecdc3ab/children",
+              "leafCount": 10,
+              "originallyAvailableAt": "2019-01-20",
+              "playableKey": "provider://tv.plex.provider.vod/library/metadata/5d9c09206c3e37001ecdc3ab",
+              "ratingKey": "5d9c09206c3e37001ecdc3ab",
+              "slug": "perfect-crime",
+              "thumb": "https://image.tmdb.org/t/p/original/fdYr2BClYaXFWCxYR1K7olZXzf1.jpg",
+              "title": "Perfect Crime",
+              "type": "show",
+              "year": 2019,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9b",
+                  "id": "5d9c046c705e7a001e6c8d9b",
+                  "key": "/library/categories/romance",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+                  "slug": "romance",
+                  "tag": "Romance",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d9a",
+                  "id": "5d9c046c705e7a001e6c8d9a",
+                  "key": "/library/categories/drama",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+                  "slug": "drama",
+                  "tag": "Drama",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.18
+          }
+        ]
+      }
+    ]
+  }
+}

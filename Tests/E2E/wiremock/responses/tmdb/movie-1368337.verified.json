@@ -1,6 +1,6 @@
 {
   "adult": false,
-  "backdrop_path": "/iuylzRSllrGn7YB322kwKoOVMcq.jpg",
+  "backdrop_path": "/RMXG8myu1aGlNUsRjtxzmpdMK0.jpg",
   "belongs_to_collection": null,
   "budget": 250000000,
   "genres": [
@@ -68,6 +68,6 @@
   "tagline": "Defy the gods.",
   "title": "The Odyssey",
   "video": false,
-  "vote_average": 8.0,
-  "vote_count": 3640
+  "vote_average": 8.005,
+  "vote_count": 3644
 }

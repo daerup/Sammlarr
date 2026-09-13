@@ -1,0 +1,190 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://artworks.thetvdb.com/banners/v4/series/462787/backgrounds/68055e5f4fbaf.jpg",
+        "guid": "plex://show/68104ad8aa20a4619c4f5292",
+        "key": "/library/metadata/68104ad8aa20a4619c4f5292/children",
+        "ratingKey": "68104ad8aa20a4619c4f5292",
+        "summary": "She came back home after years abroad, ready to support her father’s chemical business with her knowledge and passion. But her return uncovers a hidden truth, her own brother-in-law is involved in corruption within the company. With his perfect image and the family's trust shielding him, no one believes her. Even the man who loves her, his own brother is torn between blood and belief.\r\n\r\nStained Legacy is a gripping story of courage, betrayal, and the silent war between truth and deceit. When one woman stands alone against a system designed to silence her, will she be able to protect what truly matters before she’s erased from the picture?",
+        "type": "show",
+        "addedAt": 1746921600,
+        "childCount": 1,
+        "contentRating": "TV-14",
+        "duration": 2160000,
+        "lastEpisodeOriginallyAvailableAt": "2025-09-21",
+        "lastSeasonOriginallyAvailableAt": "2025-05-11",
+        "leafCount": 31,
+        "originalTitle": "پیٹرن",
+        "originallyAvailableAt": "2025-05-11",
+        "publicPagesURL": "https://watch.plex.tv/show/stained-legacy",
+        "slug": "stained-legacy",
+        "thumb": "https://artworks.thetvdb.com/banners/v4/series/462787/posters/68055d3e79ee5.jpg",
+        "title": "Stained Legacy",
+        "userState": false,
+        "year": 2025,
+        "Image": [
+          {
+            "alt": "Stained Legacy",
+            "type": "background",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/462787/backgrounds/68055e5f4fbaf.jpg"
+          },
+          {
+            "alt": "Stained Legacy",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/76dcfd6fb36c3728f974d67dd221fc93.jpg"
+          },
+          {
+            "alt": "Stained Legacy",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8214ea98d3667a755a3473276bd71b1e.jpg"
+          },
+          {
+            "alt": "Stained Legacy",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4e19f97cf9fab3ac4ffb7e9614d6f979.jpg"
+          },
+          {
+            "alt": "Stained Legacy",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/5b0c83a150bd3a5561cbeb765515a45f.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f308fddd001f28ee5f",
+            "id": "5d9c07f308fddd001f28ee5f",
+            "key": "/library/sections/home/all?genre=5d9c07f308fddd001f28ee5f",
+            "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+            "slug": "suspense",
+            "tag": "Suspense",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tvdb://462787"
+          }
+        ],
+        "Role": [
+          {
+            "id": "614218a7ce56fa638c3939a8",
+            "order": 1,
+            "slug": "hina-altaf-khan-1",
+            "tag": "Hina Altaf Khan",
+            "thumb": "https://metadata-static.plex.tv/c/people/cefc75e5d6d0860f81b4912d1fbc8034.jpg",
+            "role": "HUMNA",
+            "key": "/library/people/614218a7ce56fa638c3939a8",
+            "type": "person"
+          },
+          {
+            "id": "6141b44668068e86c80fb4dd",
+            "order": 2,
+            "slug": "sami-khan-16",
+            "tag": "Sami Khan",
+            "thumb": "https://metadata-static.plex.tv/d/people/dd15d5cfc17d7154b3fa17b135125760.jpg",
+            "role": "MEER HUMAYUN",
+            "key": "/library/people/6141b44668068e86c80fb4dd",
+            "type": "person"
+          },
+          {
+            "id": "678218623e47eab91dc19a5a",
+            "order": 3,
+            "slug": "zarrar-khan-4",
+            "tag": "Zarrar Khan",
+            "thumb": "https://metadata-static.plex.tv/7/people/7b6d7bf5a2f63ba6532b164ab19b56cd.jpg",
+            "role": "MEER RAHIM",
+            "key": "/library/people/678218623e47eab91dc19a5a",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Green TV Entertainment"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ]
+      }
+    ]
+  }
+}

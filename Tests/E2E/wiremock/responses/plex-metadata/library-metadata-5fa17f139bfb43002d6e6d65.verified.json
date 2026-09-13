@@ -1,0 +1,358 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/z4RTuJUr6dehBdXhs89VfMpQoLW.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/392593/banners/679d2f1857d1a.jpg",
+        "guid": "plex://show/5fa17f139bfb43002d6e6d65",
+        "key": "/library/metadata/5fa17f139bfb43002d6e6d65/children",
+        "ratingKey": "5fa17f139bfb43002d6e6d65",
+        "studio": "WOWOW",
+        "subtype": "miniSeries",
+        "summary": "Shiga Michinari was a well-respected deputy editor-in-chief of a major publishing company \"Shukan Shuncho\". However, his reputation and happiness hit the bottom when his son Kensuke was involved in a stalker's murder case and later committed suicide. People around Michinari suddenly became cold to him. He was demoted and abused by the company and reporters. In addition, his daughter Nanami became violent while his beloved wife couldn't handle the pressure and left home. Michinari could no longer stand the situation and decided to investigate the incident which Kensuke was involved in.",
+        "type": "show",
+        "addedAt": 1606003200,
+        "audienceRating": 6.2,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "duration": 3600000,
+        "imdbRatingCount": 16,
+        "lastEpisodeOriginallyAvailableAt": "2020-12-13",
+        "lastSeasonOriginallyAvailableAt": "2020-11-22",
+        "leafCount": 4,
+        "originalTitle": "夜がどれほど暗くても",
+        "originallyAvailableAt": "2020-11-22",
+        "publicPagesURL": "https://watch.plex.tv/show/no-matter-how-dark-the-night-is",
+        "skipChildren": true,
+        "slug": "no-matter-how-dark-the-night-is",
+        "thumb": "https://image.tmdb.org/t/p/original/A1vpGOTMfv37wNQu1Z7T6eGGtEH.jpg",
+        "title": "No Matter How Much the Night is Dark",
+        "userState": false,
+        "year": 2020,
+        "Image": [
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/z4RTuJUr6dehBdXhs89VfMpQoLW.jpg"
+          },
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/b57edba94fe67a9ab694f88652440572.jpg"
+          },
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/392593/banners/679d2f1857d1a.jpg"
+          },
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/2/683a142553/28f0a038dac4407857d00c9b8d1b76e9.png"
+          },
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/2/683a142553/28f0a038dac4407857d00c9b8d1b76e9.png"
+          },
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/rULXyEhOF4jL6cI9pJXfpix8lYq.jpg"
+          },
+          {
+            "alt": "No Matter how Dark the Night is",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/A1vpGOTMfv37wNQu1Z7T6eGGtEH.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt13511190"
+          },
+          {
+            "id": "tmdb://112497"
+          },
+          {
+            "id": "tvdb://392593"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.667
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Japan"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5f20151ddf4d8a003f8307ee",
+            "order": 1,
+            "slug": "suzuki-kosuke",
+            "tag": "Suzuki Kosuke",
+            "key": "/library/people/5f20151ddf4d8a003f8307ee",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b007c4a5001e67b568",
+            "order": 2,
+            "slug": "taizo-harada",
+            "tag": "Taizo Harada",
+            "thumb": "https://metadata-static.plex.tv/a/people/aeb62e7f73e955f7512ddbcf7391e664.jpg",
+            "key": "/library/people/5d7768b007c4a5001e67b568",
+            "type": "person"
+          },
+          {
+            "id": "5d77686df59e58002189d460",
+            "order": 3,
+            "slug": "takaya-kamikawa",
+            "tag": "Takaya Kamikawa",
+            "thumb": "https://metadata-static.plex.tv/2/people/237fb17c5b89dfd407be495b95d3de3c.jpg",
+            "key": "/library/people/5d77686df59e58002189d460",
+            "type": "person"
+          },
+          {
+            "id": "5d7768402ec6b5001f6bdc89",
+            "order": 4,
+            "slug": "yui-okada",
+            "tag": "Yui Okada",
+            "thumb": "https://metadata-static.plex.tv/1/people/1d95e9d3e220fbecc9dd9e303324e6eb.jpg",
+            "key": "/library/people/5d7768402ec6b5001f6bdc89",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f2e80df001ebdf69a",
+            "order": 5,
+            "slug": "masanobu-takashima",
+            "tag": "Masanobu Takashima",
+            "thumb": "https://metadata-static.plex.tv/a/people/a0d418e61de47a77def4daabed376a70.jpg",
+            "key": "/library/people/5d77683f2e80df001ebdf69a",
+            "type": "person"
+          },
+          {
+            "id": "5d77683da091de001f2e8f14",
+            "order": 6,
+            "slug": "katsumi-takahashi",
+            "tag": "Katsumi Takahashi",
+            "thumb": "https://metadata-static.plex.tv/5/people/5e1a33066a063af2e9029f523862d157.jpg",
+            "key": "/library/people/5d77683da091de001f2e8f14",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc7b87a42e6001fd2e30d",
+            "order": 7,
+            "slug": "shigeaki-kato",
+            "tag": "Shigeaki Kato",
+            "thumb": "https://metadata-static.plex.tv/0/people/08c3b7e69571b90ef6273611f45d24f7.jpg",
+            "key": "/library/people/5dcfc7b87a42e6001fd2e30d",
+            "type": "person"
+          },
+          {
+            "id": "63ac304503746061422bd1a6",
+            "order": 8,
+            "slug": "tatsumi-yuudai",
+            "tag": "Tatsumi Yuudai",
+            "thumb": "https://metadata-static.plex.tv/5/people/5a1f911490a17d386aff340611f23dbf.jpg",
+            "key": "/library/people/63ac304503746061422bd1a6",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768f051dd69001fe12ad3",
+            "slug": "hajime-hashimoto",
+            "tag": "Hajime Hashimoto",
+            "thumb": "https://metadata-static.plex.tv/a/people/a2e6d686b0b3d014a4944709ec42e350.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768f051dd69001fe12ad3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768953ab0e7001f504f6f",
+            "slug": "masaaki-taniguchi",
+            "tag": "Masaaki Taniguchi",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768953ab0e7001f504f6f.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768953ab0e7001f504f6f",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "654b7d42c14d42f435069bef",
+            "slug": "takehisa-tokuda-1",
+            "tag": "Takehisa Tokuda",
+            "role": "Producer",
+            "key": "/library/people/654b7d42c14d42f435069bef",
+            "type": "person"
+          },
+          {
+            "id": "5f40411f1ae7100041089fdb",
+            "slug": "kenta-noda",
+            "tag": "Kenta Noda",
+            "role": "Producer",
+            "key": "/library/people/5f40411f1ae7100041089fdb",
+            "type": "person"
+          },
+          {
+            "id": "5d7769e3594b2b001e6acf4b",
+            "slug": "jun-kurosawa-2",
+            "tag": "Jun Kurosawa",
+            "role": "Producer",
+            "key": "/library/people/5d7769e3594b2b001e6acf4b",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "67c3812d94ac4ebcb9744e8e",
+            "slug": "tetsuya-oishi-3",
+            "tag": "Tetsuya Oishi",
+            "role": "Writer",
+            "key": "/library/people/67c3812d94ac4ebcb9744e8e",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "WOWOW Prime"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5e7362fcd5195100407aa672",
+            "tag": "Tyler Perry's Ruthless"
+          },
+          {
+            "guid": "plex://show/61b17f17a0f200438422504c",
+            "tag": "Bel‐Air"
+          },
+          {
+            "guid": "plex://show/5d9c086c705e7a001e6dc08f",
+            "tag": "Hero"
+          },
+          {
+            "guid": "plex://show/61d840600f4bfc111c941c84",
+            "tag": "Fishbowl Wives"
+          },
+          {
+            "guid": "plex://show/6324bbf760a0b1fabaac8898",
+            "tag": "Burn the House Down"
+          },
+          {
+            "guid": "plex://show/629cb89d120d1e7e6d15f4da",
+            "tag": "Sullivan's Crossing"
+          },
+          {
+            "guid": "plex://show/5d9c082c7b5c2e001e65636f",
+            "tag": "Parenthood (2010)"
+          },
+          {
+            "guid": "plex://show/66d077f58e425a34ab364caf",
+            "tag": "Unchosen"
+          },
+          {
+            "guid": "plex://show/5d9c07f81cae62001f7486b1",
+            "tag": "Offspring"
+          },
+          {
+            "guid": "plex://show/5d9c0924ba6eb9001fbb07e0",
+            "tag": "Ambitions"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "WOWOW"
+          },
+          {
+            "tag": "TELEPACK"
+          }
+        ]
+      }
+    ]
+  }
+}

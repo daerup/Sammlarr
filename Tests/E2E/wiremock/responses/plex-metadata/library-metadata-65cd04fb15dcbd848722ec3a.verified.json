@@ -1,0 +1,258 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/tYOI0LJizJjLfR5eg6tEnYVfiHs.jpg",
+        "guid": "plex://movie/65cd04fb15dcbd848722ec3a",
+        "key": "/library/metadata/65cd04fb15dcbd848722ec3a",
+        "ratingKey": "65cd04fb15dcbd848722ec3a",
+        "studio": "Студия Паламеда",
+        "summary": "Anna is the daughter of a banker and grew up in a wealthy family with loving parents who have been waiting for grandchildren for a long time. Anna has never considered herself a beauty, but now she believes that luck has finally smiled on her. She marries Egor. But on the day of her wedding Anna learns that the groom has long been cheating on her with another, and decided to marry her only for the sake of her father's money. She runs away from the registry office and gets into the nearest cab. She has nowhere to go, so she offers a casual acquaintance, the cab driver Pasha, to take her in for a week. Pasha urgently needs money, so he agrees, not realizing what surprises await him ahead. It turns out that Anya is a \"walking disaster\", everything in her hands burns and breaks. And here also from the village come Pasha's parents, who take Anya for his long-awaited bride. In order not to traumatize his mother, who has a heart condition, Pasha asks Anya to play along.",
+        "type": "movie",
+        "addedAt": 1482451200,
+        "originalTitle": "Опять замуж",
+        "originallyAvailableAt": "2016-12-23",
+        "publicPagesURL": "https://watch.plex.tv/movie/married-again",
+        "slug": "married-again",
+        "thumb": "https://image.tmdb.org/t/p/original/5bCg9XNbw3F9FrlzGota0VbjO8s.jpg",
+        "title": "Married Again",
+        "userState": false,
+        "year": 2016,
+        "Image": [
+          {
+            "alt": "Married Again",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/tYOI0LJizJjLfR5eg6tEnYVfiHs.jpg"
+          },
+          {
+            "alt": "Married Again",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/5bCg9XNbw3F9FrlzGota0VbjO8s.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://1244476"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Belarus"
+          },
+          {
+            "tag": "Russian Federation"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768428718ba001e317451",
+            "order": 1,
+            "slug": "yana-esipovich",
+            "tag": "Yana Esipovich",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768428718ba001e317451.jpg",
+            "role": "Анна",
+            "key": "/library/people/5d7768428718ba001e317451",
+            "type": "person"
+          },
+          {
+            "id": "5d776bf9594b2b001e6e8007",
+            "order": 2,
+            "slug": "aleksey-demidov-1",
+            "tag": "Aleksey Demidov",
+            "thumb": "https://metadata-static.plex.tv/7/people/73e5eef41a5adc282019bc886ea608e5.jpg",
+            "role": "Павел",
+            "key": "/library/people/5d776bf9594b2b001e6e8007",
+            "type": "person"
+          },
+          {
+            "id": "60fae8dc20c53b002dae4d9d",
+            "order": 3,
+            "slug": "aleksandr-ilin-6",
+            "tag": "Aleksandr Ilin",
+            "thumb": "https://metadata-static.plex.tv/f/people/fc750a96019cfcad1f921db86e5467bc.jpg",
+            "role": "Егор",
+            "key": "/library/people/60fae8dc20c53b002dae4d9d",
+            "type": "person"
+          },
+          {
+            "id": "65ccac203b7fd07ab67ae815",
+            "order": 4,
+            "slug": "marta-golubeva-2",
+            "tag": "Марта Голубева",
+            "thumb": "https://metadata-static.plex.tv/d/people/d182c29196e8a8a6818b98e6432caa08.jpg",
+            "role": "Ирина",
+            "key": "/library/people/65ccac203b7fd07ab67ae815",
+            "type": "person"
+          },
+          {
+            "id": "65ccac1ffa8b22635ba180d3",
+            "order": 5,
+            "slug": "irina-norbekova",
+            "tag": "Ирина Норбекова",
+            "thumb": "https://metadata-static.plex.tv/8/people/8115998415ad7e9d3115e3f6929abcc4.jpg",
+            "role": "Ольга Карловна",
+            "key": "/library/people/65ccac1ffa8b22635ba180d3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b29ab54400214ea39e",
+            "order": 6,
+            "slug": "evgeniy-nikitin",
+            "tag": "Evgeniy Nikitin",
+            "thumb": "https://metadata-static.plex.tv/a/people/a00c5b5a6e06151d72a292c27660a393.jpg",
+            "role": "Матвей Семёнович",
+            "key": "/library/people/5d7768b29ab54400214ea39e",
+            "type": "person"
+          },
+          {
+            "id": "5d77705531d95e001f19f05d",
+            "order": 7,
+            "slug": "anatoliy-golub",
+            "tag": "Anatoliy Golub",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f63036c8e0d46a96c5065ff84c09c24.jpg",
+            "role": "Иван Иванович",
+            "key": "/library/people/5d77705531d95e001f19f05d",
+            "type": "person"
+          },
+          {
+            "id": "5f404c41ce2564003f92bfe1",
+            "order": 8,
+            "slug": "aliena-akulionak",
+            "tag": "Aliena Akulionak",
+            "thumb": "https://metadata-static.plex.tv/5/people/59284a635ba0382bc7173ce9cf3fbef2.jpg",
+            "role": "Ксения Павловна",
+            "key": "/library/people/5f404c41ce2564003f92bfe1",
+            "type": "person"
+          },
+          {
+            "id": "6199028c9713f7cac87a638d",
+            "order": 9,
+            "slug": "aleksandra-komissarova-1",
+            "tag": "Aleksandra Komissarova",
+            "thumb": "https://metadata-static.plex.tv/c/people/cb4734da90ccf3169666eecf09f21730.jpg",
+            "role": "Марина",
+            "key": "/library/people/6199028c9713f7cac87a638d",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776dd67a53e9001e764bcb",
+            "slug": "aleksandr-grabar",
+            "tag": "Александр Грабарь",
+            "thumb": "https://metadata-static.plex.tv/3/people/3d21a9ecf1b63e934f7513ae8f8da506.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776dd67a53e9001e764bcb",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77686d103a2d001f57148c",
+            "slug": "aleksandr-kushaev",
+            "tag": "Aleksandr Kushaev",
+            "thumb": "https://metadata-static.plex.tv/people/5d77686d103a2d001f57148c.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77686d103a2d001f57148c",
+            "type": "person"
+          },
+          {
+            "id": "60e87459d5864a002dfee109",
+            "slug": "egor-juzbashev",
+            "tag": "Egor Juzbashev",
+            "thumb": "https://metadata-static.plex.tv/7/people/762b50ac6107b03a83b6225a886d9ef4.jpg",
+            "role": "Producer",
+            "key": "/library/people/60e87459d5864a002dfee109",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "61225b44737f46002c42fd2b",
+            "slug": "yana-romanenko-1",
+            "tag": "Яна Романенко",
+            "thumb": "https://metadata-static.plex.tv/0/people/0172a82c8b884d0b75073c48869d4b87.jpg",
+            "role": "Writer",
+            "key": "/library/people/61225b44737f46002c42fd2b",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/642a519104026f64772a756c",
+            "tag": "¿Quieres ser mi... hijo?"
+          },
+          {
+            "guid": "plex://movie/6352e84cd6be1842ead9b51a",
+            "tag": "Boot Camp"
+          },
+          {
+            "guid": "plex://movie/69600d964a9e9624c3c86186",
+            "tag": "Yoh! Bestie"
+          },
+          {
+            "guid": "plex://movie/5d776870fb0d55001f51012a",
+            "tag": "Lucky Trouble"
+          },
+          {
+            "guid": "plex://movie/5d7770c990a8de002032aa29",
+            "tag": "Son of a Rich"
+          },
+          {
+            "guid": "plex://movie/5d7770cfdd931c001e3942c7",
+            "tag": "Hotel Belgrade"
+          },
+          {
+            "guid": "plex://movie/5e163340ef1040003f248c13",
+            "tag": "Love, Weddings & Other Disasters"
+          },
+          {
+            "guid": "plex://movie/5e162562bcf94b003f7d219d",
+            "tag": "Dinner in America"
+          },
+          {
+            "guid": "plex://movie/5fae3f2897d713002e4a9a2a",
+            "tag": "What's Love Got to Do with It?"
+          },
+          {
+            "guid": "plex://movie/5f4096195a76a80042e57d61",
+            "tag": "Sex Appeal"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Студия Паламеда"
+          }
+        ]
+      }
+    ]
+  }
+}

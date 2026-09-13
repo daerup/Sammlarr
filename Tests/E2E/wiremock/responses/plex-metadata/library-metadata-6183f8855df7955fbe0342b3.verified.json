@@ -1,0 +1,667 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/b/gracenote/ba8a8ab300435ee4a3e23e282bb4920a.jpg",
+        "banner": "https://assets.fanart.tv/fanart/paw-patrol-the-mighty-movie-6525829b3f059.jpg",
+        "guid": "plex://movie/6183f8855df7955fbe0342b3",
+        "key": "/library/metadata/6183f8855df7955fbe0342b3",
+        "rating": 7.1,
+        "ratingKey": "6183f8855df7955fbe0342b3",
+        "studio": "Nickelodeon Movies",
+        "summary": "A magical meteor falls in Adventure City and gives the PAW Patrol superpowers, transforming them into the Mighty Pups. But they face their most powerful challenge when Humdinger teams up with a mad scientist to steal their powers.",
+        "tagline": "Unleash your powers.",
+        "type": "movie",
+        "addedAt": 1695254400,
+        "audienceRating": 9.3,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 30000000,
+        "contentRating": "PG",
+        "duration": 5280000,
+        "imdbRatingCount": 6852,
+        "originallyAvailableAt": "2023-09-21",
+        "publicPagesURL": "https://watch.plex.tv/movie/paw-patrol-the-mighty-movie",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 202231360,
+        "slug": "paw-patrol-the-mighty-movie",
+        "thumb": "https://metadata-static.plex.tv/e/gracenote/ee07bdd3d66930af3bbe232961a8e8f6.jpg",
+        "title": "PAW Patrol: The Mighty Movie",
+        "userState": false,
+        "year": 2023,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/6183f8855df7955fbe0342b3/commonsensemedia",
+            "oneLiner": "Superpowered pups use teamwork, courage vs. evil scientist.",
+            "AgeRating": [
+              {
+                "age": 5,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/b/gracenote/ba8a8ab300435ee4a3e23e282bb4920a.jpg"
+          },
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/9bce9f83443757b2541f13ea2bb5727b.jpg"
+          },
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "banner",
+            "url": "https://assets.fanart.tv/fanart/paw-patrol-the-mighty-movie-6525829b3f059.jpg"
+          },
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/7/gracenote/777c8ba92013a93743ffb4b0f22b8bbc.jpg"
+          },
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ee07bdd3d66930af3bbe232961a8e8f6.jpg"
+          },
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2d2cd1a24ce04d550a98e43eb7c5f14e.jpg"
+          },
+          {
+            "alt": "PAW Patrol: The Mighty Movie",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/3/gracenote/33b394fa906b8d0ff0ba86ba33ec389b.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+            "id": "5d9c07ebcb3ffa001f1b0903",
+            "key": "/library/sections/home/all?genre=5d9c07ebcb3ffa001f1b0903",
+            "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+            "slug": "children",
+            "tag": "Children",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt15837338"
+          },
+          {
+            "id": "tmdb://893723"
+          },
+          {
+            "id": "tvdb://347378"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.9
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 7.1
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.3
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.921
+          }
+        ],
+        "Collection": [
+          {
+            "art": "https://image.tmdb.org/t/p/original/gjHZbURgyqjBMHQICu3VZQf41gF.jpg",
+            "guid": "plex://collection/6183e9c55a1062dffd031a12",
+            "key": "/library/collections/6183e9c55a1062dffd031a12/children",
+            "summary": "A group of six rescue dogs, led by a tech-savvy boy named Ryder, believe 'no job is too big, no pup is too small', and work together to protect the community. Among the members of the group are firedog Marshall, police pup Chase, and fearless Skye. All of the animals have special skills, gadgets, and vehicles that help them on their rescue missions. Whether rescuing a kitten or saving a train from a rockslide, the PAW Patrol is always up for the challenge while also making sure there's time for a game or a laugh.",
+            "thumb": "https://image.tmdb.org/t/p/original/5nOVo6a1NHyhlh1kn857YHAPapG.jpg",
+            "tag": "PAW Patrol (Theatrical) Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Canada"
+          },
+          {
+            "tag": "France"
+          },
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768861999bc0020dc7e89",
+            "order": 1,
+            "slug": "mckenna-grace",
+            "tag": "Mckenna Grace",
+            "thumb": "https://metadata-static.plex.tv/7/people/79c40dcdafa46960c9929761de3678b4.jpg",
+            "role": "Skye (voice)",
+            "key": "/library/people/5d7768861999bc0020dc7e89",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9ad01",
+            "order": 2,
+            "slug": "taraji-p-henson",
+            "tag": "Taraji P. Henson",
+            "thumb": "https://metadata-static.plex.tv/1/people/118aeea55dd05966beaaebaa0b2a3a67.jpg",
+            "role": "Victoria Vance (voice)",
+            "key": "/library/people/5d77682f6f4521001ea9ad01",
+            "type": "person"
+          },
+          {
+            "id": "5d776c82ad5437001f7c017d",
+            "order": 3,
+            "slug": "marsai-martin",
+            "tag": "Marsai Martin",
+            "thumb": "https://metadata-static.plex.tv/f/people/fe9aac06f487569f6bfb4d8b7f1a5f60.jpg",
+            "role": "Liberty (voice)",
+            "key": "/library/people/5d776c82ad5437001f7c017d",
+            "type": "person"
+          },
+          {
+            "id": "5d776b95f617c90020177d02",
+            "order": 4,
+            "slug": "iain-armitage",
+            "tag": "Iain Armitage",
+            "thumb": "https://metadata-static.plex.tv/9/people/90698fee2d49f2c7f9508fd8584e4b50.jpg",
+            "role": "Chase (voice)",
+            "key": "/library/people/5d776b95f617c90020177d02",
+            "type": "person"
+          },
+          {
+            "id": "5d776c1c47dd6e001f6e70f4",
+            "order": 5,
+            "slug": "christian-convery",
+            "tag": "Christian Convery",
+            "thumb": "https://metadata-static.plex.tv/4/people/42e9e02676202161c986dea97eb0828c.jpg",
+            "role": "Chase (voice)",
+            "key": "/library/people/5d776c1c47dd6e001f6e70f4",
+            "type": "person"
+          },
+          {
+            "id": "5d776ef2ad5437001f806706",
+            "order": 6,
+            "slug": "will-brisbin",
+            "tag": "Will Brisbin",
+            "thumb": "https://metadata-static.plex.tv/a/people/a955ff2fffe8ea8407922ac2477ee84e.jpg",
+            "role": "Ryder (voice)",
+            "key": "/library/people/5d776ef2ad5437001f806706",
+            "type": "person"
+          },
+          {
+            "id": "5fa6c4a0bb8a1d002d4e3bbf",
+            "order": 7,
+            "slug": "finn-lee-epp",
+            "tag": "Finn Lee-Epp",
+            "role": "Ryder (voice)",
+            "key": "/library/people/5fa6c4a0bb8a1d002d4e3bbf",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ceb5d26001f1dee01",
+            "order": 8,
+            "slug": "ron-pardo",
+            "tag": "Ron Pardo",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682ceb5d26001f1dee01.jpg",
+            "role": "Mayor Humdinger / Cap'n Turbot (voice)",
+            "key": "/library/people/5d77682ceb5d26001f1dee01",
+            "type": "person"
+          },
+          {
+            "id": "5d776adc96b655001fdfbc01",
+            "order": 9,
+            "slug": "lil-rel-howery",
+            "tag": "Lil Rel Howery",
+            "thumb": "https://metadata-static.plex.tv/3/people/393bb7b453093c8cac32cb2db4d79821.jpg",
+            "role": "Sam Stinger (voice)",
+            "key": "/library/people/5d776adc96b655001fdfbc01",
+            "type": "person"
+          },
+          {
+            "id": "5d776825eb5d26001f1dd1c0",
+            "order": 10,
+            "slug": "chris-rock",
+            "tag": "Chris Rock",
+            "thumb": "https://metadata-static.plex.tv/f/people/f2c50105c6db5418336732860c25a527.jpg",
+            "role": "Kitty (voice)",
+            "key": "/library/people/5d776825eb5d26001f1dd1c0",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b4de0ee001fcccc52",
+            "order": 11,
+            "slug": "kim-kardashian",
+            "tag": "Kim Kardashian",
+            "thumb": "https://metadata-static.plex.tv/a/people/a95f723d176e749924d05f88f877d7f0.jpg",
+            "role": "Delores (voice)",
+            "key": "/library/people/5d77683b4de0ee001fcccc52",
+            "type": "person"
+          },
+          {
+            "id": "5d77697a47dd6e001f6c5ed8",
+            "order": 12,
+            "slug": "serena-williams",
+            "tag": "Serena Williams",
+            "thumb": "https://metadata-static.plex.tv/people/5d77697a47dd6e001f6c5ed8.jpg",
+            "role": "Yoga Yvette (voice)",
+            "key": "/library/people/5d77697a47dd6e001f6c5ed8",
+            "type": "person"
+          },
+          {
+            "id": "5e16257a3eb30b004152647a",
+            "order": 13,
+            "slug": "alan-kim-2",
+            "tag": "Alan Kim",
+            "thumb": "https://metadata-static.plex.tv/7/people/73b5871f60fddf3e22f9256862467c58.jpg",
+            "role": "Nano (voice)",
+            "key": "/library/people/5e16257a3eb30b004152647a",
+            "type": "person"
+          },
+          {
+            "id": "6a0c399d84ce675343aac83c",
+            "order": 14,
+            "slug": "brice-gonzalez-4",
+            "tag": "Brice González",
+            "role": "Tot (voice)",
+            "key": "/library/people/6a0c399d84ce675343aac83c",
+            "type": "person"
+          },
+          {
+            "id": "5e165531ef1040003f269b76",
+            "order": 15,
+            "slug": "north-west",
+            "tag": "North West",
+            "thumb": "https://metadata-static.plex.tv/1/people/170aa42e3b843aef61c2b40cb9880719.jpg",
+            "role": "Mini (voice)",
+            "key": "/library/people/5e165531ef1040003f269b76",
+            "type": "person"
+          },
+          {
+            "id": "5e16553246aceb003ceef09e",
+            "order": 16,
+            "slug": "saint-west",
+            "tag": "Saint West",
+            "thumb": "https://metadata-static.plex.tv/8/people/828740a8105b9b8de379088b5ae56011.jpg",
+            "role": "Meteor Max (voice)",
+            "key": "/library/people/5e16553246aceb003ceef09e",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a7e9a3c0020c6b199",
+            "order": 17,
+            "slug": "james-marsden",
+            "tag": "James Marsden",
+            "thumb": "https://metadata-static.plex.tv/a/people/a6bd695bfbcb0a95525d341cf36289f6.jpg",
+            "role": "Hank (voice)",
+            "key": "/library/people/5d77682a7e9a3c0020c6b199",
+            "type": "person"
+          },
+          {
+            "id": "5d776833880197001ec92fec",
+            "order": 18,
+            "slug": "kristen-bell",
+            "tag": "Kristen Bell",
+            "thumb": "https://metadata-static.plex.tv/1/people/19f3b93661cfb41811bf590ee0685021.jpg",
+            "role": "Janet (voice)",
+            "key": "/library/people/5d776833880197001ec92fec",
+            "type": "person"
+          },
+          {
+            "id": "605f5820c5da10002cab8373",
+            "order": 19,
+            "slug": "luxton-handspiker",
+            "tag": "Luxton Handspiker",
+            "thumb": "https://metadata-static.plex.tv/0/people/021ce195bac36ad9b6288a8145d1f28f.jpg",
+            "role": "Rubble (voice)",
+            "key": "/library/people/605f5820c5da10002cab8373",
+            "type": "person"
+          },
+          {
+            "id": "694d2af50059aa8f2edb32a7",
+            "order": 20,
+            "slug": "christian-corrao-8",
+            "tag": "Christian Corrao",
+            "thumb": "https://metadata-static.plex.tv/d/people/d81f0ff20dc1823381ce8a6191c9d094.jpg",
+            "role": "Marshall (voice)",
+            "key": "/library/people/694d2af50059aa8f2edb32a7",
+            "type": "person"
+          },
+          {
+            "id": "696517087862a53a1aa391f4",
+            "order": 21,
+            "slug": "nylan-parthipan-9",
+            "tag": "Nylan Parthipan",
+            "thumb": "https://metadata-static.plex.tv/1/people/1eed391267c8dfb63a2130226d397690.jpg",
+            "role": "Zuma (voice)",
+            "key": "/library/people/696517087862a53a1aa391f4",
+            "type": "person"
+          },
+          {
+            "id": "5d776ba07a53e9001e72b3a1",
+            "order": 22,
+            "slug": "callum-shoniker",
+            "tag": "Callum Shoniker",
+            "thumb": "https://metadata-static.plex.tv/9/people/930109ffaf2785b7d5bb9585e916433c.jpg",
+            "role": "Rocky (voice)",
+            "key": "/library/people/5d776ba07a53e9001e72b3a1",
+            "type": "person"
+          },
+          {
+            "id": "5d7768366f4521001ea9c370",
+            "order": 23,
+            "slug": "dan-duran",
+            "tag": "Dan Duran",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768366f4521001ea9c370.jpg",
+            "role": "Radio Announcer (voice)",
+            "key": "/library/people/5d7768366f4521001ea9c370",
+            "type": "person"
+          },
+          {
+            "id": "5d7768262e80df001ebdcd12",
+            "order": 24,
+            "slug": "kim-roberts",
+            "tag": "Kim Roberts",
+            "thumb": "https://metadata-static.plex.tv/6/people/620aa713754c16abebf132ac774bf58f.jpg",
+            "role": "Mayor Goodway (voice)",
+            "key": "/library/people/5d7768262e80df001ebdcd12",
+            "type": "person"
+          },
+          {
+            "id": "6a0c026704e137f15b95c6d3",
+            "order": 25,
+            "slug": "joshua-graham-21",
+            "tag": "Joshua Graham",
+            "thumb": "https://metadata-static.plex.tv/f/people/fb13858c6c336d17da643725e7368d23.jpg",
+            "role": "Computer voice (voice)",
+            "key": "/library/people/6a0c026704e137f15b95c6d3",
+            "type": "person"
+          },
+          {
+            "id": "5d776848880197001ec96eb8",
+            "order": 26,
+            "slug": "sugith-varughese",
+            "tag": "Sugith Varughese",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c809d56a2eee72de7ab6493a02913fb.jpg",
+            "role": "Jail Guard (voice)",
+            "key": "/library/people/5d776848880197001ec96eb8",
+            "type": "person"
+          },
+          {
+            "id": "5d77702cdd931c001e38908c",
+            "order": 27,
+            "slug": "monique-alvarez",
+            "tag": "Monique Alvarez",
+            "role": "Carmen (voice)",
+            "key": "/library/people/5d77702cdd931c001e38908c",
+            "type": "person"
+          },
+          {
+            "id": "5d776826eb5d26001f1dd536",
+            "order": 28,
+            "slug": "neil-crone",
+            "tag": "Neil Crone",
+            "thumb": "https://metadata-static.plex.tv/9/people/9252bcd4411d748093703aa0f17cb3f5.jpg",
+            "role": "Tony (voice)",
+            "key": "/library/people/5d776826eb5d26001f1dd536",
+            "type": "person"
+          },
+          {
+            "id": "683b27e54aa26fe45e15eb5f",
+            "order": 29,
+            "slug": "stephane-belong",
+            "tag": "Stephane Belong",
+            "role": "Computer (voice)",
+            "key": "/library/people/683b27e54aa26fe45e15eb5f",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768acebdf2200209c5b7f",
+            "slug": "cal-brunker",
+            "tag": "Cal Brunker",
+            "thumb": "https://metadata-static.plex.tv/0/people/016dde8ff91d56260d42448853237237.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768acebdf2200209c5b7f",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5e16357491c203004120fc30",
+            "slug": "toni-stevens-2",
+            "tag": "Toni Stevens",
+            "role": "Producer",
+            "key": "/library/people/5e16357491c203004120fc30",
+            "type": "person"
+          },
+          {
+            "id": "6183ec89480b1d6f01e95813",
+            "slug": "laurie-clunie",
+            "tag": "Laurie Clunie",
+            "role": "Producer",
+            "key": "/library/people/6183ec89480b1d6f01e95813",
+            "type": "person"
+          },
+          {
+            "id": "5eabdc5870f8e40041cf49e2",
+            "slug": "jennifer-dodge",
+            "tag": "Jennifer Dodge",
+            "thumb": "https://metadata-static.plex.tv/9/people/97490aebe1aa61dca06fea2458535fd0.jpg",
+            "role": "Producer",
+            "key": "/library/people/5eabdc5870f8e40041cf49e2",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768acebdf2200209c5b7e",
+            "slug": "bob-barlen",
+            "tag": "Bob Barlen",
+            "thumb": "https://metadata-static.plex.tv/2/people/25d4b04eb1a7c8e91f26d2fd9edc6468.jpg",
+            "role": "Story",
+            "key": "/library/people/5d7768acebdf2200209c5b7e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768acebdf2200209c5b7f",
+            "slug": "cal-brunker",
+            "tag": "Cal Brunker",
+            "thumb": "https://metadata-static.plex.tv/0/people/016dde8ff91d56260d42448853237237.jpg",
+            "role": "Story",
+            "key": "/library/people/5d7768acebdf2200209c5b7f",
+            "type": "person"
+          },
+          {
+            "id": "5dcfbff870b2e6001d82fc20",
+            "slug": "shane-morris",
+            "tag": "Shane Morris",
+            "role": "Story",
+            "key": "/library/people/5dcfbff870b2e6001d82fc20",
+            "type": "person"
+          },
+          {
+            "id": "5e163c13fef2d4003e89ed8b",
+            "slug": "joe-giampapa",
+            "tag": "Joe Giampapa",
+            "role": "Head Of Story",
+            "key": "/library/people/5e163c13fef2d4003e89ed8b",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/642096da78f1d291c7569a31",
+            "tag": "Plankton: The Movie"
+          },
+          {
+            "guid": "plex://movie/5d776c67594b2b001e6f2f79",
+            "tag": "The Secret Life of Pets 2"
+          },
+          {
+            "guid": "plex://movie/5d777039b2739400200e6627",
+            "tag": "StarDog and TurboCat"
+          },
+          {
+            "guid": "plex://movie/5d777070594b2b001e74ae74",
+            "tag": "DC League of Super‐Pets"
+          },
+          {
+            "guid": "plex://movie/5d7770d396b655001fe9f515",
+            "tag": "Phineas and Ferb the Movie: Candace Against the Universe"
+          },
+          {
+            "guid": "plex://movie/5e5d3afcb9a265003d012bf8",
+            "tag": "PAW Patrol: The Movie"
+          },
+          {
+            "guid": "plex://movie/5d7768b27a53e9001e6d6826",
+            "tag": "Phineas and Ferb the Movie: Across the 2nd Dimension"
+          },
+          {
+            "guid": "plex://movie/5f4094b35a76a80042e5434a",
+            "tag": "Dog Man"
+          },
+          {
+            "guid": "plex://movie/5fd2548a47ed03002d82b70c",
+            "tag": "Dog Man"
+          },
+          {
+            "guid": "plex://movie/5f409f6f1ae7100041175b8f",
+            "tag": "Chickenhare and the Hamster of Darkness"
+          },
+          {
+            "guid": "plex://movie/627d281f2d4889699ebd4a79",
+            "tag": "200% Wolf"
+          },
+          {
+            "guid": "plex://movie/645e8f63c345e3fb3550f5a1",
+            "tag": "200% Wolf"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Nickelodeon Movies"
+          },
+          {
+            "tag": "Spin Master"
+          },
+          {
+            "tag": "Paramount Pictures"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "The PAW Patrol pups magically gain superpowers after a meteor strikes Adventure City.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}
