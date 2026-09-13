@@ -70,13 +70,19 @@ internal static class RecordedStubs
 
 			var replayPath = url.Split('?')[0][provider.Prefix.Length..];
 			var response = mapping!["response"]!;
+			var status = response["status"]?.GetValue<int>() ?? 200;
+			if (status is < 200 or > 299)
+			{
+				continue;
+			}
+
 			entries.Add(
 				new RecordedEntry(
 					provider,
 					request!["method"]?.GetValue<string>() ?? "GET",
 					replayPath.Length == 0 ? "/" : replayPath,
 					QueryMatchers(request, url),
-					response["status"]?.GetValue<int>() ?? 200,
+					status,
 					ContentType(response["headers"]),
 					Body(response)
 				)
