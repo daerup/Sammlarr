@@ -8,9 +8,7 @@ public class BrowsePageTests
 	[Test]
 	public async Task Browse_WhenAuthenticatedWithStubbedTrending_ShowsTheStubbedTitle()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
-
-		await page.VisitAsync("/browse");
+		var page = await E2EApp.AdminAt(Routes.Browse);
 
 		await Expect(page.GetByText(WireMockStubs.ExpectedTrendingTitle())).ToBeVisibleAsync();
 	}
@@ -19,17 +17,15 @@ public class BrowsePageTests
 	public async Task Browse_WhenAddingATrendingItem_ItAppearsInTheWatchlist()
 	{
 		var title = WireMockStubs.ExpectedTrendingTitle();
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Browse);
 
-		await page.VisitAsync("/browse");
 		await page.GetByText(title).First.ClickAsync();
-		var addButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add to Watchlist" });
+		var addButton = page.ButtonContaining("Add to Watchlist");
 		await addButton.ClickAsync();
 		await addButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
 
-		await page.VisitAsync("/watchlist");
+		await page.VisitAsync(Routes.Watchlist);
 
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = title, Exact = true }))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.Heading(title)).ToBeVisibleAsync(Wait.Settle);
 	}
 }

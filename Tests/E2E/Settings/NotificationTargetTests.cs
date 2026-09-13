@@ -15,8 +15,8 @@ public class NotificationTargetTests
 	[Test]
 	public async Task Webhook_WhenCreated_AppearsAndCanBeEditedAndDeleted()
 	{
-		var name = Name("Hook");
-		var renamed = Name("Rehook");
+		var name = TestData.Name("Hook");
+		var renamed = TestData.Name("Rehook");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await SettingsPage.VisitSectionAsync(page, "notifications");
 
@@ -40,15 +40,15 @@ public class NotificationTargetTests
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await SettingsPage.VisitSectionAsync(page, "notifications");
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add client", Exact = true }).ClickAsync();
-		await FillAsync(page, NameInput, Name("Pushover"));
+		await page.Button("Add client").ClickAsync();
+		await FillAsync(page, NameInput, TestData.Name("Pushover"));
 		await SelectChannelAsync(page, "Pushover");
 
 		await SaveAsync(page);
 
 		await Expect(page.GetByText("App token and user key are required.")).ToBeVisibleAsync();
 
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Cancel", Exact = true }).ClickAsync();
+		await page.Button("Cancel").ClickAsync();
 
 		await Expect(page.GetByText("App token and user key are required.")).ToBeHiddenAsync();
 		await Expect(page.Locator(NameInput)).ToBeHiddenAsync();
@@ -57,29 +57,29 @@ public class NotificationTargetTests
 	[Test]
 	public async Task TestPing_WhenSent_ReportsTheOutcomeInTheDialog()
 	{
-		var name = Name("Ping");
+		var name = TestData.Name("Ping");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await SettingsPage.VisitSectionAsync(page, "notifications");
 		await CreateWebhookAsync(page, name);
 
 		await Client(page, name).GetByRole(AriaRole.Button).First.ClickAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Test connection", Exact = true }).ClickAsync();
+		await page.Button("Test connection").ClickAsync();
 
-		await Expect(page.Locator("p.text-destructive")).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 60000 });
+		await Expect(page.Locator("p.text-destructive")).ToBeVisibleAsync(Wait.Preview);
 
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Cancel", Exact = true }).ClickAsync();
+		await page.Button("Cancel").ClickAsync();
 		await DeleteClientAsync(page, name);
 	}
 
 	[Test]
 	public async Task EventTypes_WhenSelected_Persist()
 	{
-		var name = Name("Alerts");
+		var name = TestData.Name("Alerts");
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await SettingsPage.VisitSectionAsync(page, "notifications");
 		await CreateWebhookAsync(page, name);
 
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add alert", Exact = true }).ClickAsync();
+		await page.Button("Add alert").ClickAsync();
 		await SelectClientAsync(page, name);
 
 		var events = page.Locator("label").Filter(new LocatorFilterOptions { Has = page.GetByRole(AriaRole.Checkbox) });
@@ -88,7 +88,7 @@ public class NotificationTargetTests
 		await SaveAsync(page);
 
 		var alert = page.Locator("div.rounded-lg.border").Filter(new LocatorFilterOptions { HasText = chosen }).First;
-		await Expect(alert).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(alert).ToBeVisibleAsync(Wait.Settle);
 
 		await SettingsPage.VisitSectionAsync(page, "notifications");
 
@@ -96,8 +96,6 @@ public class NotificationTargetTests
 
 		await DeleteClientAsync(page, name);
 	}
-
-	private static string Name(string scenario) => $"E2E {scenario} {Guid.NewGuid().ToString("N")[..6]}";
 
 	private static ILocator Client(IPage page, string name) =>
 		page.Locator("div.items-center.rounded-lg.border").Filter(new LocatorFilterOptions { HasText = name }).Last;
@@ -112,14 +110,14 @@ public class NotificationTargetTests
 
 	private static async Task CreateWebhookAsync(IPage page, string name)
 	{
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add client", Exact = true }).ClickAsync();
+		await page.Button("Add client").ClickAsync();
 		await FillAsync(page, NameInput, name);
 		await FillAsync(page, UrlInput, Unreachable);
 		await SaveAsync(page);
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Done", Exact = true }).ClickAsync();
+		await page.Button("Done").ClickAsync();
 	}
 
-	private static Task SaveAsync(IPage page) => page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).ClickAsync();
+	private static Task SaveAsync(IPage page) => page.Button("Save").ClickAsync();
 
 	private static async Task SelectChannelAsync(IPage page, string channel)
 	{

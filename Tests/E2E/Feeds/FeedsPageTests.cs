@@ -1,4 +1,3 @@
-using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Feeds;
@@ -8,34 +7,28 @@ public class FeedsPageTests
 	[Test]
 	public async Task Feeds_WhenAuthenticated_ShowsTheFeedsHeading()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Feeds);
 
-		await page.VisitAsync("/feeds");
-
-		await Assert.That(page.Url).DoesNotContain("/signin");
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Feeds" })).ToBeVisibleAsync();
+		await page.ShouldNotBeAtAsync(Routes.SignIn);
+		await Expect(page.Heading("Feeds")).ToBeVisibleAsync();
 	}
 
 	[Test]
 	public async Task CreateFeed_WhenOpened_ShowsTheFeedEditor()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
 
-		await page.VisitAsync("/feeds/create");
-
-		await Assert.That(page.Url).DoesNotContain("/signin");
+		await page.ShouldNotBeAtAsync(Routes.SignIn);
 		await Expect(page.GetByText("Create feed")).ToBeVisibleAsync();
 	}
 
 	[Test]
 	public async Task CreateFeed_WhenCancelled_ReturnsToTheFeedList()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
-		await page.VisitAsync("/feeds/create");
+		var page = await E2EApp.AdminAt(Routes.CreateFeed);
 
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Cancel" }).First.ClickAsync();
+		await page.ButtonContaining("Cancel").First.ClickAsync();
 
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Feeds" }))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.Heading("Feeds")).ToBeVisibleAsync(Wait.Settle);
 	}
 }

@@ -77,8 +77,8 @@ public class FeedPreviewTests
 		var warm = await E2EApp.RequestCountAsync("/library/metadata/");
 
 		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Refresh assets?" })).ToBeVisibleAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Refresh", Exact = true }).ClickAsync();
+		await Expect(page.Heading("Refresh assets?")).ToBeVisibleAsync();
+		await page.Button("Refresh").ClickAsync();
 
 		await E2EApp.WaitForRequestsBeyondAsync("/library/metadata/", warm);
 		await FeedEditor.PreviewLoadedAsync(page);
@@ -95,15 +95,15 @@ public class FeedPreviewTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.SelectMdblistAsync(page);
-		await FeedEditor.FillAsync(page, "#name", $"E2E Unmatched {Guid.NewGuid().ToString("N")[..6]}");
+		await FeedEditor.FillAsync(page, "#name", TestData.Name("Unmatched"));
 		await FeedEditor.FillAsync(page, "#list-identifier", identifier);
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
 
 		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Refresh assets?" })).ToBeVisibleAsync();
-		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Refresh", Exact = true }).ClickAsync();
+		await Expect(page.Heading("Refresh assets?")).ToBeVisibleAsync();
+		await page.Button("Refresh").ClickAsync();
 
 		await FeedEditor.PreviewLoadedAsync(page);
 		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);

@@ -12,16 +12,14 @@ public class RoleGatingTests
 	[Arguments("Testing")]
 	public async Task AdminSections_WhenSignedInAsMember_AreHidden(string label)
 	{
-		var page = await E2EApp.OpenMemberPageAsync();
-
-		await page.VisitAsync("/settings");
-		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Settings" })).ToBeVisibleAsync();
-		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = label, Exact = true })).ToBeHiddenAsync();
+		var page = await E2EApp.MemberAt(Routes.Settings);
+		await Expect(page.Heading("Settings")).ToBeVisibleAsync();
+		await Expect(page.Button(label)).ToBeHiddenAsync();
 
 		await SettingsPage.VisitSectionAsync(page, label.ToLowerInvariant());
 
-		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Provider Settings", Exact = true })).ToBeVisibleAsync();
-		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = label, Exact = true })).ToBeHiddenAsync();
+		await Expect(page.Button("Provider Settings")).ToBeVisibleAsync();
+		await Expect(page.Button(label)).ToBeHiddenAsync();
 	}
 
 	[Test]

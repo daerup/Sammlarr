@@ -16,7 +16,7 @@ public class FeedQuickSaveTests
 	[Test]
 	public async Task QuickSave_WhileThePreviewIsStillLoading_PersistsWithoutLeavingTheEditor()
 	{
-		var name = $"E2E Quick {Guid.NewGuid().ToString("N")[..6]}";
+		var name = TestData.Name("Quick");
 		await using var first = await E2EApp.StubAsync(Page(0, EarlySaveMinItems + 20, hasMore: true, delayMs: 0));
 		await using var second = await E2EApp.StubAsync(Page(1000, 5, hasMore: true, delayMs: PageDelayMs));
 		await using var third = await E2EApp.StubAsync(Page(2000, 5, hasMore: true, delayMs: PageDelayMs));
@@ -29,20 +29,19 @@ public class FeedQuickSaveTests
 		await FeedEditor.FillAsync(page, "#list-identifier", Identifier);
 		await FeedEditor.TestAsync(page);
 
-		var quickSave = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Quick save" });
-		await Expect(quickSave).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 60000 });
+		var quickSave = page.ButtonContaining("Quick save");
+		await Expect(quickSave).ToBeVisibleAsync(Wait.Preview);
 		await Expect(FeedEditor.SaveButton(page)).ToBeHiddenAsync();
 
 		await quickSave.ClickAsync();
 
-		await Expect(page.GetByText("Feed saved.")).ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(page.GetByText("Feed saved.")).ToBeVisibleAsync(Wait.Settle);
 		await Assert.That(new Uri(page.Url).AbsolutePath).IsEqualTo("/feeds/create");
 
 		var feeds = await E2EApp.OpenAuthenticatedPageAsync();
 		await feeds.VisitAsync("/feeds");
 
-		await Expect(feeds.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name }))
-			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
+		await Expect(feeds.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name })).ToBeVisibleAsync(Wait.Settle);
 	}
 
 	private static StubSpec Page(int offset, int items, bool hasMore, int delayMs) =>

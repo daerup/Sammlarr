@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace E2E.Tests.Auth;
 
 public class SignInPageTests
@@ -9,8 +7,8 @@ public class SignInPageTests
 	{
 		var page = await E2EApp.OpenPageAsync();
 
-		await page.VisitAsync("/");
-		await page.WaitForURLAsync(new Regex("/signin"));
+		await page.GotoAsync(Routes.Home);
+		await page.ShouldBeAtAsync(Routes.SignIn);
 
 		await Assert.That(await page.TitleAsync()).Contains("Sign in");
 	}

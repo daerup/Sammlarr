@@ -1,4 +1,4 @@
-using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Blacklist;
 
@@ -7,13 +7,9 @@ public class BlacklistPageTests
 	[Test]
 	public async Task Blacklist_WhenAuthenticatedAndEmpty_ShowsEmptyState()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Blacklist);
 
-		await page.VisitAsync("/blacklist");
-		var emptyState = page.GetByText("Nothing blacklisted.");
-		await emptyState.WaitForAsync();
-
-		await Assert.That(page.Url).DoesNotContain("/signin");
-		await Assert.That(await emptyState.IsVisibleAsync()).IsTrue();
+		await page.ShouldNotBeAtAsync(Routes.SignIn);
+		await Expect(page.Text("Nothing blacklisted.")).ToBeVisibleAsync(Wait.Settle);
 	}
 }

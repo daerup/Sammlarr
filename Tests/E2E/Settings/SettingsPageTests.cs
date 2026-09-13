@@ -1,4 +1,4 @@
-using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Settings;
 
@@ -7,26 +7,18 @@ public class SettingsPageTests
 	[Test]
 	public async Task Settings_WhenAuthenticatedAdmin_IsReachable()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(Routes.Settings);
 
-		await page.VisitAsync("/settings");
-		var heading = page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Settings" });
-		await heading.WaitForAsync();
-
-		await Assert.That(page.Url).DoesNotContain("/signin");
+		await page.ShouldNotBeAtAsync(Routes.SignIn);
 		await Assert.That(await page.TitleAsync()).Contains("Settings");
-		await Assert.That(await heading.IsVisibleAsync()).IsTrue();
+		await Expect(page.Heading("Settings")).ToBeVisibleAsync();
 	}
 
 	[Test]
 	public async Task UsersSection_WhenAuthenticatedAdmin_IsRendered()
 	{
-		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var page = await E2EApp.AdminAt(SettingsPage.Section("users"));
 
-		await page.VisitAsync("/settings?section=users");
-		var usersSection = page.GetByText("People with access to this Sammlarr instance.");
-		await usersSection.WaitForAsync();
-
-		await Assert.That(await usersSection.IsVisibleAsync()).IsTrue();
+		await Expect(page.Text("People with access to this Sammlarr instance.")).ToBeVisibleAsync();
 	}
 }
