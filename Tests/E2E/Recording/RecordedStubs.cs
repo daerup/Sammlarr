@@ -44,16 +44,11 @@ internal static class RecordedStubs
 	internal static IReadOnlyList<RecordedResponse> Write(string snapshotJson, string mappingsDirectory, Func<string, bool> isStubbed)
 	{
 		var entries = Parse(snapshotJson).Where(entry => !isStubbed(entry.ReplayPath)).ToList();
-		var ambiguous = entries
-			.GroupBy(entry => entry.Route, StringComparer.Ordinal)
-			.Where(group => group.Select(entry => entry.Discriminator).Distinct(StringComparer.Ordinal).Count() > 1)
-			.Select(group => group.Key)
-			.ToHashSet(StringComparer.Ordinal);
 
 		var recorded = new List<RecordedResponse>();
 		foreach (var entry in entries)
 		{
-			var slug = Slug(entry, ambiguous.Contains(entry.Route));
+			var slug = Slug(entry);
 			Directory.CreateDirectory(Path.Combine(mappingsDirectory, entry.Provider.Name));
 			File.WriteAllText(Path.Combine(mappingsDirectory, entry.Provider.Name, $"{slug}.json"), Mapping(entry, slug).ToJsonString(Pretty));
 			recorded.Add(new RecordedResponse(entry.Provider.Name, slug, entry.ReplayPath, entry.Body));
@@ -173,10 +168,10 @@ internal static class RecordedStubs
 		return node;
 	}
 
-	private static string Slug(RecordedEntry entry, bool disambiguate)
+	private static string Slug(RecordedEntry entry)
 	{
 		var basePart = entry.ReplayPath.Trim('/').Replace('/', '-') is { Length: > 0 } path ? path : "root";
-		return disambiguate && entry.Query.Count > 0 ? $"{basePart}-{entry.Discriminator}" : basePart;
+		return entry.Query.Count > 0 ? $"{basePart}-{entry.Discriminator}" : basePart;
 	}
 
 	private static string Sanitize(string value) =>

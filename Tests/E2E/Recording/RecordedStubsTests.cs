@@ -30,6 +30,16 @@ public class RecordedStubsTests
 	}
 
 	[Test]
+	public async Task Write_WhenOnlyOneQueryVariantWasCaptured_StillDisambiguatesTheSlug()
+	{
+		var directory = Directory.CreateTempSubdirectory("recorded-stubs-").FullName;
+
+		var recorded = RecordedStubs.Write(Snapshot(200, """{"id":1}""", "/tmdb/movie/1?page=2"), directory, _ => false);
+
+		await Assert.That(recorded.Single().Slug).IsEqualTo("movie-1-2");
+	}
+
+	[Test]
 	public async Task Merge_WhenEveryStackRecorded_KeepsAllOfTheirMappings()
 	{
 		var directory = Directory.CreateTempSubdirectory("recorded-stubs-").FullName;
