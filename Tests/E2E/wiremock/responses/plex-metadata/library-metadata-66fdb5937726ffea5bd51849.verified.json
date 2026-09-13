@@ -1,0 +1,121 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/66fdb5937726ffea5bd51849",
+        "key": "/library/metadata/66fdb5937726ffea5bd51849",
+        "ratingKey": "66fdb5937726ffea5bd51849",
+        "summary": "After discovering the myth and legend of the Backrooms, a group of friends enter into Earth's darkest corners to find them - unknown to the danger they'd encounter. Now it's up to them to escape their own prison and avoid a fake reality.",
+        "type": "movie",
+        "addedAt": 1716768000,
+        "audienceRating": 5.6,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "Not Rated",
+        "duration": 3780000,
+        "imdbRatingCount": 160,
+        "originallyAvailableAt": "2024-05-27",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-backrooms-2024-1",
+        "slug": "the-backrooms-2024-1",
+        "title": "The Backrooms",
+        "userState": false,
+        "year": 2024,
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c3",
+            "id": "5d9c046c2192ba001f2ff6c3",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c3",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+            "slug": "adventure",
+            "tag": "Adventure",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt33508453"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.6
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5f4051f18642250042899e9d",
+            "order": 1,
+            "slug": "kyle-godfrey",
+            "tag": "Kyle Godfrey",
+            "role": "Self",
+            "key": "/library/people/5f4051f18642250042899e9d",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f4051f18642250042899e9d",
+            "slug": "kyle-godfrey",
+            "tag": "Kyle Godfrey",
+            "role": "Director",
+            "key": "/library/people/5f4051f18642250042899e9d",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f4051f18642250042899e9d",
+            "slug": "kyle-godfrey",
+            "tag": "Kyle Godfrey",
+            "role": "Producer",
+            "key": "/library/people/5f4051f18642250042899e9d",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f4051f18642250042899e9d",
+            "slug": "kyle-godfrey",
+            "tag": "Kyle Godfrey",
+            "role": "Created By",
+            "key": "/library/people/5f4051f18642250042899e9d",
+            "type": "person"
+          }
+        ]
+      }
+    ]
+  }
+}

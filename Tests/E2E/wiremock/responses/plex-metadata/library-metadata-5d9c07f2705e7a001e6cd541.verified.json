@@ -1,0 +1,1476 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/mpUcBHfzKpSo72rwo2EaaGkeSX1.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/blank/84021.jpg",
+        "guid": "plex://show/5d9c07f2705e7a001e6cd541",
+        "key": "/library/metadata/5d9c07f2705e7a001e6cd541/children",
+        "rating": 8.9,
+        "ratingKey": "5d9c07f2705e7a001e6cd541",
+        "studio": "20th Century Fox Television",
+        "summary": "In an amoral science-based company, a manager tries to keep control of his scientists while being pressured by his shrewd boss.",
+        "tagline": "They're Putting Comedy To Work",
+        "type": "show",
+        "addedAt": 1237334400,
+        "audienceRating": 9.6,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 2,
+        "contentRating": "TV-PG",
+        "duration": 1800000,
+        "imdbRatingCount": 28576,
+        "lastEpisodeOriginallyAvailableAt": "2010-08-24",
+        "lastSeasonOriginallyAvailableAt": "2009-12-08",
+        "leafCount": 26,
+        "originallyAvailableAt": "2009-03-18",
+        "publicPagesURL": "https://watch.plex.tv/show/better-off-ted",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "better-off-ted",
+        "theme": "https://tvthemes.plexapp.com/84021.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/tvmafNGqMFA03fJcbUXxjgzSToX.jpg",
+        "title": "Better Off Ted",
+        "userState": false,
+        "year": 2009,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c07f2705e7a001e6cd541/commonsensemedia",
+            "oneLiner": "Humor in whipsmart workplace satire is aimed at adults.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Better Off Ted",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/mpUcBHfzKpSo72rwo2EaaGkeSX1.jpg"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/d/gracenote/dfd55c65631ca15cef1f94cbf1094696.jpg"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/blank/84021.jpg"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/43deab8390dfa4576a247643c7e97422.png"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/43deab8390dfa4576a247643c7e97422.png"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f968582091d598cd6cb5dea23d67a8cf.jpg"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/tvmafNGqMFA03fJcbUXxjgzSToX.jpg"
+          },
+          {
+            "alt": "Better Off Ted",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ee891fc51d1f278af51d69ab6d11d34f.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt1235547"
+          },
+          {
+            "id": "tmdb://7777"
+          },
+          {
+            "id": "tvdb://84021"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 8.2
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.9
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 9.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.608
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768608a7581001f131888",
+            "order": 1,
+            "slug": "jay-harrington",
+            "tag": "Jay Harrington",
+            "thumb": "https://metadata-static.plex.tv/5/people/5b3e44f412545627677cf80fb3eca84a.jpg",
+            "role": "Ted Crisp",
+            "key": "/library/people/5d7768608a7581001f131888",
+            "type": "person"
+          },
+          {
+            "id": "5d77682e54f42c001f8c35fc",
+            "order": 2,
+            "slug": "portia-de-rossi",
+            "tag": "Portia De Rossi",
+            "thumb": "https://metadata-static.plex.tv/6/people/6381cd7feea22f99bacbcf34f23d798d.jpg",
+            "role": "Veronica Palmer",
+            "key": "/library/people/5d77682e54f42c001f8c35fc",
+            "type": "person"
+          },
+          {
+            "id": "5d7768348718ba001e3144ac",
+            "order": 3,
+            "slug": "andrea-anders",
+            "tag": "Andrea Anders",
+            "thumb": "https://metadata-static.plex.tv/1/people/17221dd6acd6b547d896d8bc72c64ced.jpg",
+            "role": "Linda Zwordling",
+            "key": "/library/people/5d7768348718ba001e3144ac",
+            "type": "person"
+          },
+          {
+            "id": "5d776838103a2d001f56855a",
+            "order": 4,
+            "slug": "jonathan-slavin",
+            "tag": "Jonathan Slavin",
+            "thumb": "https://metadata-static.plex.tv/f/people/f3fbe34f298af01c54f81238fc4f5368.jpg",
+            "role": "Phil Myman",
+            "key": "/library/people/5d776838103a2d001f56855a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768387e9a3c0020c6d7ad",
+            "order": 5,
+            "slug": "malcolm-barrett",
+            "tag": "Malcolm Barrett",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768387e9a3c0020c6d7ad.jpg",
+            "role": "Lem Hewitt",
+            "key": "/library/people/5d7768387e9a3c0020c6d7ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c0ea56a001e2a2b00",
+            "order": 6,
+            "slug": "isabella-acres",
+            "tag": "Isabella Acres",
+            "thumb": "https://metadata-static.plex.tv/b/people/bbbf3dc7fb42e6657f492d9156b2c7b0.jpg",
+            "role": "Rose Crisp",
+            "key": "/library/people/5d77684c0ea56a001e2a2b00",
+            "type": "person"
+          },
+          {
+            "id": "5d776a0cad5437001f7705f5",
+            "order": 7,
+            "slug": "terry-rhoads",
+            "tag": "Terry Rhoads",
+            "thumb": "https://metadata-static.plex.tv/6/people/64e73958d7c64cc4d4f1a7667026cc39.jpg",
+            "role": "Chet",
+            "key": "/library/people/5d776a0cad5437001f7705f5",
+            "type": "person"
+          },
+          {
+            "id": "5d776826a091de001f2e612f",
+            "order": 8,
+            "slug": "maz-jobrani",
+            "tag": "Maz Jobrani",
+            "thumb": "https://metadata-static.plex.tv/5/people/5a5affa34c696e2217b0c0bf23e7d733.jpg",
+            "role": "Dr. Bhamba",
+            "key": "/library/people/5d776826a091de001f2e612f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768603ab0e7001f4ff8c4",
+            "order": 9,
+            "slug": "rizwan-manji",
+            "tag": "Rizwan Manji",
+            "thumb": "https://metadata-static.plex.tv/3/people/36695c0b90564bad8393e0142f9e1795.jpg",
+            "role": "Rick",
+            "key": "/library/people/5d7768603ab0e7001f4ff8c4",
+            "type": "person"
+          },
+          {
+            "id": "5d7768384de0ee001fccc18d",
+            "order": 10,
+            "slug": "bill-stevenson-19",
+            "tag": "Bill Stevenson",
+            "thumb": "https://metadata-static.plex.tv/7/people/7b5e485a924421888da8abafd1cafb4c.jpg",
+            "role": "Lonny",
+            "key": "/library/people/5d7768384de0ee001fccc18d",
+            "type": "person"
+          },
+          {
+            "id": "5d776837103a2d001f5684a7",
+            "order": 11,
+            "slug": "merrin-dungey",
+            "tag": "Merrin Dungey",
+            "thumb": "https://metadata-static.plex.tv/e/cc68393fae/people/e74716250353e23c1ae4aca07bf18df8.jpg",
+            "role": "Sheila",
+            "key": "/library/people/5d776837103a2d001f5684a7",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b996b655001fdc01fc",
+            "order": 12,
+            "slug": "carla-jimenez",
+            "tag": "Carla Jimenez",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768b996b655001fdc01fc.jpg",
+            "role": "Patricia",
+            "key": "/library/people/5d7768b996b655001fdc01fc",
+            "type": "person"
+          },
+          {
+            "id": "5d776b2e7a53e9001e71cf5a",
+            "order": 13,
+            "slug": "stefan-marks",
+            "tag": "Stefan Marks",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b2e7a53e9001e71cf5a.jpg",
+            "role": "Brett",
+            "key": "/library/people/5d776b2e7a53e9001e71cf5a",
+            "type": "person"
+          },
+          {
+            "id": "5f3feb8ccae2c60042eaedca",
+            "order": 14,
+            "slug": "jonna-kae-volz",
+            "tag": "Jonna Kae Volz",
+            "role": "Veronica's Secretary",
+            "key": "/library/people/5f3feb8ccae2c60042eaedca",
+            "type": "person"
+          },
+          {
+            "id": "5d7768766f4521001eaa841f",
+            "order": 15,
+            "slug": "mark-deklin",
+            "tag": "Mark Deklin",
+            "thumb": "https://metadata-static.plex.tv/6/people/6dba04aec981b40a4511797736c4eb4a.jpg",
+            "role": "Mordor",
+            "key": "/library/people/5d7768766f4521001eaa841f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd26",
+            "order": 16,
+            "slug": "patricia-belcher",
+            "tag": "Patricia Belcher",
+            "thumb": "https://metadata-static.plex.tv/3/people/3a0ae36f9420e90dcfc63883510e06f5.jpg",
+            "role": "Janet",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd26",
+            "type": "person"
+          },
+          {
+            "id": "5d77695efb0d55001f524193",
+            "order": 17,
+            "slug": "gary-rubenstein",
+            "tag": "Gary Rubenstein",
+            "thumb": "https://metadata-static.plex.tv/6/people/625903cd9de00bd65491b4729c27746b.jpg",
+            "role": "Dr. Rosenbaum",
+            "key": "/library/people/5d77695efb0d55001f524193",
+            "type": "person"
+          },
+          {
+            "id": "5d776830999c64001ec2e52a",
+            "order": 18,
+            "slug": "chip-chinery",
+            "tag": "Chip Chinery",
+            "thumb": "https://metadata-static.plex.tv/people/5d776830999c64001ec2e52a.jpg",
+            "role": "Ryan",
+            "key": "/library/people/5d776830999c64001ec2e52a",
+            "type": "person"
+          },
+          {
+            "id": "5d776835961905001eb94148",
+            "order": 19,
+            "slug": "vivian-bang",
+            "tag": "Vivian Bang",
+            "thumb": "https://metadata-static.plex.tv/8/people/814d639916379bb353a1840f8045a4e4.jpg",
+            "role": "Debbie",
+            "key": "/library/people/5d776835961905001eb94148",
+            "type": "person"
+          },
+          {
+            "id": "5d776cb8594b2b001e6fbb4a",
+            "order": 20,
+            "slug": "jake-dogias",
+            "tag": "Jake Dogias",
+            "thumb": "https://metadata-static.plex.tv/4/people/482d3c9addb3163448875c35cd8467bb.jpg",
+            "role": "Alvin",
+            "key": "/library/people/5d776cb8594b2b001e6fbb4a",
+            "type": "person"
+          },
+          {
+            "id": "5ddba9c663af99001de447bc",
+            "order": 21,
+            "slug": "martha-boles",
+            "tag": "Martha Boles",
+            "thumb": "https://metadata-static.plex.tv/5/people/5176335ff9c1495ec373ecfbb89bcf80.jpg",
+            "role": "Lisa",
+            "key": "/library/people/5ddba9c663af99001de447bc",
+            "type": "person"
+          },
+          {
+            "id": "5d776843103a2d001f56b263",
+            "order": 22,
+            "slug": "richard-robichaux",
+            "tag": "Richard Robichaux",
+            "thumb": "https://metadata-static.plex.tv/1/people/1bbc333b92163601e2b2653ee6ac421b.jpg",
+            "role": "Mark",
+            "key": "/library/people/5d776843103a2d001f56b263",
+            "type": "person"
+          },
+          {
+            "id": "5d776826e6d55c002040b00c",
+            "order": 23,
+            "slug": "kevin-chamberlin",
+            "tag": "Kevin Chamberlin",
+            "thumb": "https://metadata-static.plex.tv/9/people/939a50dae8e7092799b3877d493faf21.jpg",
+            "role": "Ted's Father",
+            "key": "/library/people/5d776826e6d55c002040b00c",
+            "type": "person"
+          },
+          {
+            "id": "5d776826103a2d001f56428e",
+            "order": 24,
+            "slug": "richard-fancy",
+            "tag": "Richard Fancy",
+            "thumb": "https://metadata-static.plex.tv/3/people/30c4ba28d4686cf3ce63290e215363b8.jpg",
+            "role": "Mr. Campbell",
+            "key": "/library/people/5d776826103a2d001f56428e",
+            "type": "person"
+          },
+          {
+            "id": "5d7769c447dd6e001f6ca230",
+            "order": 25,
+            "slug": "kristoffer-polaha",
+            "tag": "Kristoffer Polaha",
+            "thumb": "https://metadata-static.plex.tv/1/people/11df4922ed1a9b4de0980306f5adb914.jpg",
+            "role": "Don",
+            "key": "/library/people/5d7769c447dd6e001f6ca230",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c620",
+            "order": 26,
+            "slug": "richard-riehle",
+            "tag": "Richard Riehle",
+            "thumb": "https://metadata-static.plex.tv/8/people/82681a304a81bffa24697b7b6f4607a4.jpg",
+            "role": "Bob",
+            "key": "/library/people/5d776826999c64001ec2c620",
+            "type": "person"
+          },
+          {
+            "id": "5d77682aeb5d26001f1de2be",
+            "order": 27,
+            "slug": "taye-diggs",
+            "tag": "Taye Diggs",
+            "thumb": "https://metadata-static.plex.tv/8/people/8645c739da13599c6745fb5b63c69fb9.jpg",
+            "role": "Greg",
+            "key": "/library/people/5d77682aeb5d26001f1de2be",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c60d",
+            "order": 28,
+            "slug": "khandi-alexander",
+            "tag": "Khandi Alexander",
+            "thumb": "https://metadata-static.plex.tv/5/people/5c772a4ecd8e9b0fda946e8e97839d5f.jpg",
+            "role": "Stella",
+            "key": "/library/people/5d776826999c64001ec2c60d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a151a60001f24b46d",
+            "order": 29,
+            "slug": "jeff-doucette",
+            "tag": "Jeff Doucette",
+            "thumb": "https://metadata-static.plex.tv/f/people/f51ed85f452a538ab86d41b095431624.jpg",
+            "role": "Mr. Krebs",
+            "key": "/library/people/5d77682a151a60001f24b46d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c54c0f0001f3025e8",
+            "order": 30,
+            "slug": "stefanie-von-pfetten",
+            "tag": "Stefanie von Pfetten",
+            "thumb": "https://metadata-static.plex.tv/a/people/a00c7bb2c9161b2286801cc0d71d8843.jpg",
+            "role": "Greta",
+            "key": "/library/people/5d77682c54c0f0001f3025e8",
+            "type": "person"
+          },
+          {
+            "id": "5d776831961905001eb931c3",
+            "order": 31,
+            "slug": "chris-parnell",
+            "tag": "Chris Parnell",
+            "thumb": "https://metadata-static.plex.tv/f/people/fb9b3142ef693e7a2ed625732fbe91ef.jpg",
+            "role": "Walter",
+            "key": "/library/people/5d776831961905001eb931c3",
+            "type": "person"
+          },
+          {
+            "id": "5d776864eb5d26001f1e94fa",
+            "order": 32,
+            "slug": "kyle-bornheimer",
+            "tag": "Kyle Bornheimer",
+            "thumb": "https://metadata-static.plex.tv/3/people/3a3b94dedaf34690438905e99da55334.jpg",
+            "role": "Pete",
+            "key": "/library/people/5d776864eb5d26001f1e94fa",
+            "type": "person"
+          },
+          {
+            "id": "5d7768382ec6b5001f6bc765",
+            "order": 33,
+            "slug": "eddie-mcclintock",
+            "tag": "Eddie McClintock",
+            "thumb": "https://metadata-static.plex.tv/1/people/18f43d5f1c4452b5bd6d7730affb26fb.jpg",
+            "role": "Billy",
+            "key": "/library/people/5d7768382ec6b5001f6bc765",
+            "type": "person"
+          },
+          {
+            "id": "5d7768268718ba001e311994",
+            "order": 34,
+            "slug": "janet-varney",
+            "tag": "Janet Varney",
+            "thumb": "https://metadata-static.plex.tv/d/people/d288aecd58215a4c3af8303d98d403d3.jpg",
+            "role": "Female Lawyer",
+            "key": "/library/people/5d7768268718ba001e311994",
+            "type": "person"
+          },
+          {
+            "id": "5d77682d880197001ec921ad",
+            "order": 35,
+            "slug": "geoff-pierson",
+            "tag": "Geoff Pierson",
+            "thumb": "https://metadata-static.plex.tv/6/people/67378feda709e097251fb25ecb6b87d2.jpg",
+            "role": "Elijah Palmer",
+            "key": "/library/people/5d77682d880197001ec921ad",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b4de0ee001fcc9a0c",
+            "order": 36,
+            "slug": "richard-mcgonagle",
+            "tag": "Richard McGonagle",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682b4de0ee001fcc9a0c.jpg",
+            "role": "Manny",
+            "key": "/library/people/5d77682b4de0ee001fcc9a0c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768315af944001f1f8e05",
+            "order": 37,
+            "slug": "jennifer-irwin",
+            "tag": "Jennifer Irwin",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768315af944001f1f8e05.jpg",
+            "role": "Denise",
+            "key": "/library/people/5d7768315af944001f1f8e05",
+            "type": "person"
+          },
+          {
+            "id": "5d776826961905001eb90dc3",
+            "order": 38,
+            "slug": "rick-hoffman",
+            "tag": "Rick Hoffman",
+            "thumb": "https://image.tmdb.org/t/p/original/c9CKBkLtGtW1T8GRNUid0tQHaJY.jpg",
+            "role": "Mr. Page",
+            "key": "/library/people/5d776826961905001eb90dc3",
+            "type": "person"
+          },
+          {
+            "id": "5d77683d8718ba001e316686",
+            "order": 39,
+            "slug": "ernie-grunwald",
+            "tag": "Ernie Grunwald",
+            "thumb": "https://metadata-static.plex.tv/a/people/a9543931d0d7d3a0133398dfb13159ef.jpg",
+            "role": "Clark",
+            "key": "/library/people/5d77683d8718ba001e316686",
+            "type": "person"
+          },
+          {
+            "id": "5d776a88fb0d55001f548e47",
+            "order": 40,
+            "slug": "chris-dotson",
+            "tag": "Chris Dotson",
+            "thumb": "https://metadata-static.plex.tv/c/people/cf23d5eee16345f900a218e6bacc4064.jpg",
+            "role": "Joe",
+            "key": "/library/people/5d776a88fb0d55001f548e47",
+            "type": "person"
+          },
+          {
+            "id": "5d77688bd11dd300202278d9",
+            "order": 41,
+            "slug": "jesse-head",
+            "tag": "Jesse Head",
+            "thumb": "https://metadata-static.plex.tv/people/5d77688bd11dd300202278d9.jpg",
+            "role": "Stu",
+            "key": "/library/people/5d77688bd11dd300202278d9",
+            "type": "person"
+          },
+          {
+            "id": "5d776af996b655001fdff3d0",
+            "order": 42,
+            "slug": "rocky-mcmurray",
+            "tag": "Rocky McMurray",
+            "thumb": "https://metadata-static.plex.tv/1/people/13cb5f055d7784719b6b7c57a9a26416.jpg",
+            "role": "General McMillan",
+            "key": "/library/people/5d776af996b655001fdff3d0",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff16b3e5306003e573c49",
+            "order": 43,
+            "slug": "natalia-reagan",
+            "tag": "Natalia Reagan",
+            "thumb": "https://metadata-static.plex.tv/4/people/478a95203aabb081ecfa114231f35b5f.jpg",
+            "role": "Mindy",
+            "key": "/library/people/5f3ff16b3e5306003e573c49",
+            "type": "person"
+          },
+          {
+            "id": "5d7768274de0ee001fcc8dc7",
+            "order": 44,
+            "slug": "alison-robertson",
+            "tag": "Alison Robertson",
+            "thumb": "https://metadata-static.plex.tv/3/people/3de4efc60a41c6da228ed783dac01d8a.jpg",
+            "role": "Kathy",
+            "key": "/library/people/5d7768274de0ee001fcc8dc7",
+            "type": "person"
+          },
+          {
+            "id": "5d776836f59e580021898c01",
+            "order": 45,
+            "slug": "peter-spruyt",
+            "tag": "Peter Spruyt",
+            "thumb": "https://metadata-static.plex.tv/f/people/fb0b532137e1eb16d071e88ff60c54eb.jpg",
+            "role": "Jerome",
+            "key": "/library/people/5d776836f59e580021898c01",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd4ddc63b480040d7ea9f",
+            "order": 46,
+            "slug": "sean-christopher-davis",
+            "tag": "Sean Christopher Davis",
+            "role": "Jerry",
+            "key": "/library/people/5f3fd4ddc63b480040d7ea9f",
+            "type": "person"
+          },
+          {
+            "id": "5d77687feb5d26001f1edfaf",
+            "order": 47,
+            "slug": "julian-bailey",
+            "tag": "Julian Bailey",
+            "thumb": "https://metadata-static.plex.tv/8/people/813eae2b25e954def670e74e3ed0b104.jpg",
+            "role": "Hal",
+            "key": "/library/people/5d77687feb5d26001f1edfaf",
+            "type": "person"
+          },
+          {
+            "id": "5f40019852f20000414e0325",
+            "order": 48,
+            "slug": "mason-lauderdale",
+            "tag": "Mason Lauderdale",
+            "role": "Little Boy",
+            "key": "/library/people/5f40019852f20000414e0325",
+            "type": "person"
+          },
+          {
+            "id": "5d776aecfb0d55001f555bc5",
+            "order": 49,
+            "slug": "jonathan-t-floyd",
+            "tag": "Jonathan T. Floyd",
+            "thumb": "https://metadata-static.plex.tv/1/people/1ce3347053d6c99c7acea3ac35d6839e.jpg",
+            "role": "Bert",
+            "key": "/library/people/5d776aecfb0d55001f555bc5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a81999bc0020dccc9a",
+            "order": 50,
+            "slug": "roger-narayan",
+            "tag": "Roger Narayan",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768a81999bc0020dccc9a.jpg",
+            "role": "Jim",
+            "key": "/library/people/5d7768a81999bc0020dccc9a",
+            "type": "person"
+          },
+          {
+            "id": "5d776877374a5b001fec6917",
+            "order": 51,
+            "slug": "benjamin-king",
+            "tag": "Benjamin King",
+            "thumb": "https://metadata-static.plex.tv/e/people/ef3b985b9f83db2e389657f3ae279fb8.jpg",
+            "role": "Gil",
+            "key": "/library/people/5d776877374a5b001fec6917",
+            "type": "person"
+          },
+          {
+            "id": "5d77683454f42c001f8c432f",
+            "order": 52,
+            "slug": "abner-genece",
+            "tag": "Abner Genece",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab20c4b4fc1de38ee7c409d2af3ce7d5.jpg",
+            "role": "Francis Groth",
+            "key": "/library/people/5d77683454f42c001f8c432f",
+            "type": "person"
+          },
+          {
+            "id": "5d77684c6f4521001eaa041c",
+            "order": 53,
+            "slug": "joy-osmanski",
+            "tag": "Joy Osmanski",
+            "thumb": "https://metadata-static.plex.tv/3/people/3eec27df85c42d9c7dd960d8aaa7efce.jpg",
+            "role": "Lucy",
+            "key": "/library/people/5d77684c6f4521001eaa041c",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a54f42c001f8c5445",
+            "order": 54,
+            "slug": "ithamar-enriquez",
+            "tag": "Ithamar Enriquez",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683a54f42c001f8c5445.jpg",
+            "role": "Wallace",
+            "key": "/library/people/5d77683a54f42c001f8c5445",
+            "type": "person"
+          },
+          {
+            "id": "5d776db723d5a3001f52596d",
+            "order": 55,
+            "slug": "jordan-murphy",
+            "tag": "Jordan Murphy",
+            "thumb": "https://metadata-static.plex.tv/people/5d776db723d5a3001f52596d.jpg",
+            "role": "Male Lawyer",
+            "key": "/library/people/5d776db723d5a3001f52596d",
+            "type": "person"
+          },
+          {
+            "id": "5e16451027d563003ed60910",
+            "order": 56,
+            "slug": "welton-pitchford",
+            "tag": "Welton Pitchford",
+            "role": "Glenn",
+            "key": "/library/people/5e16451027d563003ed60910",
+            "type": "person"
+          },
+          {
+            "id": "5d776827eb5d26001f1dd8e3",
+            "order": 57,
+            "slug": "yuki-matsuzaki",
+            "tag": "Yuki Matsuzaki",
+            "thumb": "https://metadata-static.plex.tv/2/people/2ffff80b4f1ec1faec83c0c27d620a00.jpg",
+            "role": "Scientist #1",
+            "key": "/library/people/5d776827eb5d26001f1dd8e3",
+            "type": "person"
+          },
+          {
+            "id": "5d77688761141d001fb1cb53",
+            "order": 58,
+            "slug": "keisuke-hoashi",
+            "tag": "Keisuke Hoashi",
+            "thumb": "https://metadata-static.plex.tv/9/people/9a250f976eb32145ccedc315775b57f9.jpg",
+            "role": "Scientist #2",
+            "key": "/library/people/5d77688761141d001fb1cb53",
+            "type": "person"
+          },
+          {
+            "id": "5d77682eeb5d26001f1df5a2",
+            "order": 59,
+            "slug": "rachelle-lefevre",
+            "tag": "Rachelle Lefevre",
+            "thumb": "https://metadata-static.plex.tv/f/people/fd6917f8f314dc020c3b324eefce034d.jpg",
+            "role": "Rebecca",
+            "key": "/library/people/5d77682eeb5d26001f1df5a2",
+            "type": "person"
+          },
+          {
+            "id": "5d776b76ad5437001f7a04cc",
+            "order": 60,
+            "slug": "shantel-wislawski",
+            "tag": "Shantel Wislawski",
+            "thumb": "https://metadata-static.plex.tv/2/people/2fc492e027ed1f2fb77af277542e5539.jpg",
+            "role": "Sabrina",
+            "key": "/library/people/5d776b76ad5437001f7a04cc",
+            "type": "person"
+          },
+          {
+            "id": "5d776855594b2b001e688f43",
+            "order": 61,
+            "slug": "bill-parks",
+            "tag": "Bill Parks",
+            "thumb": "https://metadata-static.plex.tv/people/5d776855594b2b001e688f43.jpg",
+            "role": "Ernie",
+            "key": "/library/people/5d776855594b2b001e688f43",
+            "type": "person"
+          },
+          {
+            "id": "5d77683ce6d55c002040e3e1",
+            "order": 62,
+            "slug": "brady-matthews",
+            "tag": "Brady Matthews",
+            "thumb": "https://metadata-static.plex.tv/1/people/1a6340ba7806e8dd5aa0850093b7cad8.jpg",
+            "role": "Steve",
+            "key": "/library/people/5d77683ce6d55c002040e3e1",
+            "type": "person"
+          },
+          {
+            "id": "5d77686b51dd69001fe0bd1c",
+            "order": 63,
+            "slug": "jennifer-landa",
+            "tag": "Jennifer Landa",
+            "role": "Kristi",
+            "key": "/library/people/5d77686b51dd69001fe0bd1c",
+            "type": "person"
+          },
+          {
+            "id": "5d776e3efb0d55001f5ba581",
+            "order": 64,
+            "slug": "allen-c-liu",
+            "tag": "Allen C. Liu",
+            "role": "I.T. Guy (uncredited)",
+            "key": "/library/people/5d776e3efb0d55001f5ba581",
+            "type": "person"
+          },
+          {
+            "id": "5d776e7dfb0d55001f5c3468",
+            "order": 65,
+            "slug": "stanley-ullman",
+            "tag": "Stanley Ullman",
+            "thumb": "https://metadata-static.plex.tv/1/people/1f4c670bc5413cc5b967ba8bcbf6cadb.jpg",
+            "role": "Coffee Cart Guy",
+            "key": "/library/people/5d776e7dfb0d55001f5c3468",
+            "type": "person"
+          },
+          {
+            "id": "5d776838e6d55c002040dae4",
+            "order": 66,
+            "slug": "virginia-williams",
+            "tag": "Virginia Williams",
+            "thumb": "https://metadata-static.plex.tv/5/people/53b59bce6686b5fd7ee615b9da3c0b90.jpg",
+            "role": "Danielle",
+            "key": "/library/people/5d776838e6d55c002040dae4",
+            "type": "person"
+          },
+          {
+            "id": "5e164486275947003dc64bc0",
+            "order": 67,
+            "slug": "rachel-andersen",
+            "tag": "Rachel Andersen",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb60e3beda3812ea153f9caea2b21fbb.jpg",
+            "role": "Receptionist",
+            "key": "/library/people/5e164486275947003dc64bc0",
+            "type": "person"
+          },
+          {
+            "id": "5d77685b5af944001f2006c9",
+            "order": 68,
+            "slug": "chelsey-crisp",
+            "tag": "Chelsey Crisp",
+            "thumb": "https://metadata-static.plex.tv/4/people/4b2a6fb774fb98c05042bceb1e902685.jpg",
+            "role": "Nadine",
+            "key": "/library/people/5d77685b5af944001f2006c9",
+            "type": "person"
+          },
+          {
+            "id": "5d776bd323d5a3001f5149a3",
+            "order": 69,
+            "slug": "christopher-hoffman",
+            "tag": "Christopher Hoffman",
+            "role": "Jeffrey",
+            "key": "/library/people/5d776bd323d5a3001f5149a3",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c151a60001f24bf3f",
+            "order": 70,
+            "slug": "matt-miller",
+            "tag": "Matt Miller",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682c151a60001f24bf3f.jpg",
+            "role": "Bert",
+            "key": "/library/people/5d77682c151a60001f24bf3f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b151a60001f24ba93",
+            "order": 71,
+            "slug": "brandon-molale",
+            "tag": "Brandon Molale",
+            "thumb": "https://metadata-static.plex.tv/8/people/802e7825107e69fa7991a47e660e1b4a.jpg",
+            "role": "Extraction Guy #1",
+            "key": "/library/people/5d77682b151a60001f24ba93",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cdf2bbf858f2c189e31",
+            "order": 72,
+            "slug": "mike-siegel-1",
+            "tag": "Mike Siegel",
+            "role": "Executive #1",
+            "key": "/library/people/62fb7cdf2bbf858f2c189e31",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f961905001eb95d5f",
+            "order": 73,
+            "slug": "jesse-henecke",
+            "tag": "Jesse Henecke",
+            "thumb": "https://metadata-static.plex.tv/a/people/ae5dec5cba6eccebd865a85af5d50130.jpg",
+            "role": "Guy",
+            "key": "/library/people/5d77683f961905001eb95d5f",
+            "type": "person"
+          },
+          {
+            "id": "5d776834880197001ec931e1",
+            "order": 74,
+            "slug": "jerry-kernion",
+            "tag": "Jerry Kernion",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c95c8d6c4544a4ef237d36cbc3b3814.jpg",
+            "role": "Keith",
+            "key": "/library/people/5d776834880197001ec931e1",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ba091de001f2e6b6a",
+            "order": 75,
+            "slug": "zaid-farid",
+            "tag": "Zaid Farid",
+            "role": "Steve",
+            "key": "/library/people/5d77682ba091de001f2e6b6a",
+            "type": "person"
+          },
+          {
+            "id": "5d7769b67a53e9001e6ee470",
+            "order": 76,
+            "slug": "christina-ferraro",
+            "tag": "Christina Ferraro",
+            "thumb": "https://metadata-static.plex.tv/people/5d7769b67a53e9001e6ee470.jpg",
+            "role": "Gail",
+            "key": "/library/people/5d7769b67a53e9001e6ee470",
+            "type": "person"
+          },
+          {
+            "id": "5d776857103a2d001f56e775",
+            "order": 77,
+            "slug": "kristi-clainos",
+            "tag": "Kristi Clainos",
+            "thumb": "https://metadata-static.plex.tv/6/people/61e6b44c329e3e070671bd764169d5f5.jpg",
+            "role": "Erica",
+            "key": "/library/people/5d776857103a2d001f56e775",
+            "type": "person"
+          },
+          {
+            "id": "5d776834eb5d26001f1e095e",
+            "order": 78,
+            "slug": "wilmer-calderon",
+            "tag": "Wilmer Calderon",
+            "thumb": "https://metadata-static.plex.tv/5/people/5dc51bff3633ca0c3da65fe02d168217.jpg",
+            "role": "Carlos",
+            "key": "/library/people/5d776834eb5d26001f1e095e",
+            "type": "person"
+          },
+          {
+            "id": "5d776847880197001ec96dcf",
+            "order": 79,
+            "slug": "brad-raider",
+            "tag": "Brad Raider",
+            "thumb": "https://metadata-static.plex.tv/4/people/4afe18051c234875898696df27cd31a0.jpg",
+            "role": "Perry",
+            "key": "/library/people/5d776847880197001ec96dcf",
+            "type": "person"
+          },
+          {
+            "id": "5d776a46594b2b001e6b7ecb",
+            "order": 80,
+            "slug": "warren-sweeney",
+            "tag": "Warren Sweeney",
+            "thumb": "https://metadata-static.plex.tv/0/people/0dc442f9337de60aa7af690bdb5085fd.jpg",
+            "role": "Gordon Jenkins",
+            "key": "/library/people/5d776a46594b2b001e6b7ecb",
+            "type": "person"
+          },
+          {
+            "id": "5d776844961905001eb971f1",
+            "order": 81,
+            "slug": "graham-norris",
+            "tag": "Graham Norris",
+            "thumb": "https://metadata-static.plex.tv/f/people/f5b872ab73101518864dfca209d9a6dd.jpg",
+            "role": "Johnny",
+            "key": "/library/people/5d776844961905001eb971f1",
+            "type": "person"
+          },
+          {
+            "id": "5d776bf247dd6e001f6e5232",
+            "order": 82,
+            "slug": "ed-hopkins",
+            "tag": "Ed Hopkins",
+            "role": "Narrator (voice)",
+            "key": "/library/people/5d776bf247dd6e001f6e5232",
+            "type": "person"
+          },
+          {
+            "id": "5e16350cef1040003f24b2c1",
+            "order": 83,
+            "slug": "lydia-blanco-garza",
+            "tag": "Lydia Blanco Garza",
+            "thumb": "https://metadata-static.plex.tv/e/people/eb835fb70a9f4a2192a3a32ee307783b.jpg",
+            "role": "Sarah",
+            "key": "/library/people/5e16350cef1040003f24b2c1",
+            "type": "person"
+          },
+          {
+            "id": "5d776841999c64001ec31a3d",
+            "order": 84,
+            "slug": "leanne-wilson",
+            "tag": "Leanne Wilson",
+            "thumb": "https://metadata-static.plex.tv/3/people/31d6449ce59c2ca49e7d37e1c5acfec6.jpg",
+            "role": "Kathleen",
+            "key": "/library/people/5d776841999c64001ec31a3d",
+            "type": "person"
+          },
+          {
+            "id": "5d7768415af944001f1fc83b",
+            "order": 85,
+            "slug": "omi-vaidya",
+            "tag": "Omi Vaidya",
+            "thumb": "https://metadata-static.plex.tv/0/people/02604e70629116660cad6dd9f2450998.jpg",
+            "role": "William",
+            "key": "/library/people/5d7768415af944001f1fc83b",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a8718ba001e315f34",
+            "order": 86,
+            "slug": "john-hans-tester",
+            "tag": "John Hans Tester",
+            "thumb": "https://metadata-static.plex.tv/3/people/3240ae7cb7ede48deefbe1444a3ece22.jpg",
+            "role": "Hans (as Hans Tester)",
+            "key": "/library/people/5d77683a8718ba001e315f34",
+            "type": "person"
+          },
+          {
+            "id": "5d77702e23d5a3001f537e2b",
+            "order": 87,
+            "slug": "jeffrey-anthony",
+            "tag": "Jeffrey Anthony",
+            "thumb": "https://metadata-static.plex.tv/9/people/94935287ff44e1c672a0b5525e6f3b47.jpg",
+            "role": "Carl",
+            "key": "/library/people/5d77702e23d5a3001f537e2b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768528a7581001f1306c6",
+            "order": 88,
+            "slug": "shirley-jordan",
+            "tag": "Shirley Jordan",
+            "thumb": "https://metadata-static.plex.tv/8/people/8eac3f9408c0f020e281d2d6ce624e47.jpg",
+            "role": "Mrs. Boudreaux",
+            "key": "/library/people/5d7768528a7581001f1306c6",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a103a2d001f5650b7",
+            "order": 89,
+            "slug": "glenn-taranto",
+            "tag": "Glenn Taranto",
+            "thumb": "https://image.tmdb.org/t/p/original/cZlVXtS98hA8X6EOFfwl6bn7WKy.jpg",
+            "role": "Lou",
+            "key": "/library/people/5d77682a103a2d001f5650b7",
+            "type": "person"
+          },
+          {
+            "id": "5f3fef2fbf3e560040b3b278",
+            "order": 90,
+            "slug": "callie-thompson",
+            "tag": "Callie Thompson",
+            "role": "Olivia",
+            "key": "/library/people/5f3fef2fbf3e560040b3b278",
+            "type": "person"
+          },
+          {
+            "id": "5d77683554f42c001f8c46ab",
+            "order": 91,
+            "slug": "danielle-soibelman",
+            "tag": "Danielle Soibelman",
+            "role": "Hannah",
+            "key": "/library/people/5d77683554f42c001f8c46ab",
+            "type": "person"
+          },
+          {
+            "id": "5ec414a943d47400431eea72",
+            "order": 92,
+            "slug": "kaelyn-raye-lustig",
+            "tag": "Kaelyn Raye Lustig",
+            "role": "Ava",
+            "key": "/library/people/5ec414a943d47400431eea72",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f151a60001f24c6a0",
+            "order": 93,
+            "slug": "larry-udy",
+            "tag": "Larry Udy",
+            "thumb": "https://metadata-static.plex.tv/3/people/362e442ce5050f0c70312af81f703a3a.jpg",
+            "role": "Man",
+            "key": "/library/people/5d77682f151a60001f24c6a0",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ae6d55c002040b59b",
+            "order": 94,
+            "slug": "claudia-choi",
+            "tag": "Claudia Choi",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d167dc43e881bc0b63a16c4f85b04fb.jpg",
+            "role": "Employee",
+            "key": "/library/people/5d77682ae6d55c002040b59b",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c54f42c001f8c33cd",
+            "order": 95,
+            "slug": "dakin-matthews",
+            "tag": "Dakin Matthews",
+            "thumb": "https://metadata-static.plex.tv/a/people/a89762a23fe03ad93d647a61272c8057.jpg",
+            "role": "Arthur Wells",
+            "key": "/library/people/5d77682c54f42c001f8c33cd",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a2ec6b5001f6bcdaa",
+            "order": 96,
+            "slug": "rachelle-wood",
+            "tag": "Rachelle Wood",
+            "thumb": "https://metadata-static.plex.tv/1/people/1db0a726b9caf8f5e90119f8dcf9d3b9.jpg",
+            "role": "Susan",
+            "key": "/library/people/5d77683a2ec6b5001f6bcdaa",
+            "type": "person"
+          },
+          {
+            "id": "5d7768313c3c2a001fbcd485",
+            "order": 97,
+            "slug": "donald-li",
+            "tag": "Donald Li",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768313c3c2a001fbcd485.jpg",
+            "role": "Asian Man",
+            "key": "/library/people/5d7768313c3c2a001fbcd485",
+            "type": "person"
+          },
+          {
+            "id": "5d7768447228e5001f1e0c1c",
+            "order": 98,
+            "slug": "malcolm-foster-smith",
+            "tag": "Malcolm Foster Smith",
+            "thumb": "https://metadata-static.plex.tv/a/people/a6847bb3ddf6f23c3012cfcd45d03968.jpg",
+            "role": "Water Guy",
+            "key": "/library/people/5d7768447228e5001f1e0c1c",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a151a60001f24b573",
+            "order": 99,
+            "slug": "adam-harrington",
+            "tag": "Adam Harrington",
+            "thumb": "https://metadata-static.plex.tv/people/5d77682a151a60001f24b573.jpg",
+            "role": "Jimmy",
+            "key": "/library/people/5d77682a151a60001f24b573",
+            "type": "person"
+          },
+          {
+            "id": "5d776870103a2d001f571ad6",
+            "order": 100,
+            "slug": "john-prudhont",
+            "tag": "John Prudhont",
+            "role": "Bob Starks",
+            "key": "/library/people/5d776870103a2d001f571ad6",
+            "type": "person"
+          },
+          {
+            "id": "5d77687c3ab0e7001f50288c",
+            "order": 101,
+            "slug": "tom-hughes-2",
+            "tag": "Tom Hughes",
+            "role": "Brody",
+            "key": "/library/people/5d77687c3ab0e7001f50288c",
+            "type": "person"
+          },
+          {
+            "id": "5d776e9696b655001fe6cce4",
+            "order": 102,
+            "slug": "andy-francess",
+            "tag": "Andy Francess",
+            "role": "Herald",
+            "key": "/library/people/5d776e9696b655001fe6cce4",
+            "type": "person"
+          },
+          {
+            "id": "5f40152a5a76a80042d3ff2b",
+            "order": 103,
+            "slug": "aj-brody",
+            "tag": "Aj Brody",
+            "role": "Willy",
+            "key": "/library/people/5f40152a5a76a80042d3ff2b",
+            "type": "person"
+          },
+          {
+            "id": "5d776af223d5a3001f50ad63",
+            "order": 104,
+            "slug": "samy-camara",
+            "tag": "Samy Camara",
+            "role": "Laura Ortiz",
+            "key": "/library/people/5d776af223d5a3001f50ad63",
+            "type": "person"
+          },
+          {
+            "id": "5d776ed0ad5437001f80193e",
+            "order": 105,
+            "slug": "joel-zaldivar",
+            "tag": "Joel Zaldivar",
+            "role": "Justin Zwordling",
+            "key": "/library/people/5d776ed0ad5437001f80193e",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776b68fb0d55001f566e43",
+            "slug": "michael-fresco",
+            "tag": "Michael Fresco",
+            "thumb": "https://metadata-static.plex.tv/5/people/5161d1912c7b809b585650346d11deb6.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776b68fb0d55001f566e43",
+            "type": "person"
+          },
+          {
+            "id": "5ddba873ca475d001dbe6d7b",
+            "slug": "michael-spiller",
+            "tag": "Michael Spiller",
+            "thumb": "https://metadata-static.plex.tv/5/people/58a6c007c8e978435003145d8dbcef89.jpg",
+            "role": "Director",
+            "key": "/library/people/5ddba873ca475d001dbe6d7b",
+            "type": "person"
+          },
+          {
+            "id": "5d776a61594b2b001e6bb23a",
+            "slug": "marc-buckland",
+            "tag": "Marc Buckland",
+            "thumb": "https://metadata-static.plex.tv/f/people/fbeece501faf1a171800153967a6a58f.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776a61594b2b001e6bb23a",
+            "type": "person"
+          },
+          {
+            "id": "5d776b41ad5437001f79941f",
+            "slug": "lee-shallat-chemel",
+            "tag": "Lee Shallat Chemel",
+            "thumb": "https://metadata-static.plex.tv/7/people/765a2dfbb5142afd254d4d9800893c75.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776b41ad5437001f79941f",
+            "type": "person"
+          },
+          {
+            "id": "5d776834e6d55c002040cd60",
+            "slug": "chris-koch",
+            "tag": "Chris Koch",
+            "thumb": "https://metadata-static.plex.tv/people/5d776834e6d55c002040cd60.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776834e6d55c002040cd60",
+            "type": "person"
+          },
+          {
+            "id": "5d776836999c64001ec2f8ae",
+            "slug": "reginald-hudlin",
+            "tag": "Reginald Hudlin",
+            "thumb": "https://metadata-static.plex.tv/d/people/dc63c342d8173ec36bd26fd76a75d6c4.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776836999c64001ec2f8ae",
+            "type": "person"
+          },
+          {
+            "id": "5d77686deb5d26001f1eaffc",
+            "slug": "paul-lazarus",
+            "tag": "Paul Lazarus",
+            "role": "Director",
+            "key": "/library/people/5d77686deb5d26001f1eaffc",
+            "type": "person"
+          },
+          {
+            "id": "5d77704a81ba41001faeca49",
+            "slug": "gail-mancuso",
+            "tag": "Gail Mancuso",
+            "thumb": "https://metadata-static.plex.tv/8/people/8137a04770b4f3ddc3d5254a0f303492.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77704a81ba41001faeca49",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d9c07f2705e7a001e6cd585",
+            "slug": "marc-solakian",
+            "tag": "Marc Solakian",
+            "role": "Producer",
+            "key": "/library/people/5d9c07f2705e7a001e6cd585",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5e1635561493cd003f0dbdd3",
+            "slug": "audra-sielaff",
+            "tag": "Audra Sielaff",
+            "role": "Writer",
+            "key": "/library/people/5e1635561493cd003f0dbdd3",
+            "type": "person"
+          },
+          {
+            "id": "5e164cb6fef2d4003e8ae322",
+            "slug": "elijah-aron",
+            "tag": "Elijah Aron",
+            "thumb": "https://metadata-static.plex.tv/1/people/1a3a719aeb3f5466db375f4ba1e3e1fe.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e164cb6fef2d4003e8ae322",
+            "type": "person"
+          },
+          {
+            "id": "5e163752bc1372003ea6cdcb",
+            "slug": "jordan-young",
+            "tag": "Jordan Young",
+            "role": "Writer",
+            "key": "/library/people/5e163752bc1372003ea6cdcb",
+            "type": "person"
+          },
+          {
+            "id": "5e164dcfef1040003f262463",
+            "slug": "ingrid-escajeda",
+            "tag": "Ingrid Escajeda",
+            "thumb": "https://metadata-static.plex.tv/4/people/4e20120e909985daa6e9d1d97212761d.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e164dcfef1040003f262463",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb743fbc35f004045d3aa",
+            "slug": "mike-teverbaugh-1",
+            "tag": "Mike Teverbaugh",
+            "role": "Writer",
+            "key": "/library/people/5f3fb743fbc35f004045d3aa",
+            "type": "person"
+          },
+          {
+            "id": "5d77683be6d55c002040e2ae",
+            "slug": "michael-a-ross",
+            "tag": "Michael A. Ross",
+            "role": "Writer",
+            "key": "/library/people/5d77683be6d55c002040e2ae",
+            "type": "person"
+          },
+          {
+            "id": "5dd2cf9a29118500232177f2",
+            "slug": "victor-fresco",
+            "tag": "Victor Fresco",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec4e4b8b5c227ac6f9f1c6e58648f084.jpg",
+            "role": "Writer",
+            "key": "/library/people/5dd2cf9a29118500232177f2",
+            "type": "person"
+          },
+          {
+            "id": "5f40283e5a76a80042d5f171",
+            "slug": "michael-shipley-7",
+            "tag": "Michael Shipley",
+            "thumb": "https://metadata-static.plex.tv/a/people/a3b619da221e85d71d9c169337438036.jpg",
+            "role": "Writer",
+            "key": "/library/people/5f40283e5a76a80042d5f171",
+            "type": "person"
+          },
+          {
+            "id": "5d7768effb0d55001f51d2df",
+            "slug": "tim-doyle",
+            "tag": "Tim Doyle",
+            "role": "Writer",
+            "key": "/library/people/5d7768effb0d55001f51d2df",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08002df347001e3a81a0",
+            "slug": "michael-glouberman",
+            "tag": "Michael Glouberman",
+            "role": "Writer",
+            "key": "/library/people/5d9c08002df347001e3a81a0",
+            "type": "person"
+          },
+          {
+            "id": "5f57bff0c48b9a0042b7d8c5",
+            "slug": "dan-oshannon",
+            "tag": "Dan O'Shannon",
+            "thumb": "https://metadata-static.plex.tv/4/people/4965b3d7e87295be9376781b6232ef9a.jpg",
+            "role": "Writer",
+            "key": "/library/people/5f57bff0c48b9a0042b7d8c5",
+            "type": "person"
+          },
+          {
+            "id": "5e163d6a2d4d84003e498646",
+            "slug": "justin-adler",
+            "tag": "Justin Adler",
+            "role": "Writer",
+            "key": "/library/people/5e163d6a2d4d84003e498646",
+            "type": "person"
+          },
+          {
+            "id": "5e1635361493cd003f0dbbd2",
+            "slug": "john-hoberg",
+            "tag": "John Hoberg",
+            "role": "Writer",
+            "key": "/library/people/5e1635361493cd003f0dbbd2",
+            "type": "person"
+          },
+          {
+            "id": "5e163504bc1372003ea6a5df",
+            "slug": "kat-likkel",
+            "tag": "Kat Likkel",
+            "thumb": "https://metadata-static.plex.tv/c/people/c58e41742361f2834fe70c3818748869.jpg",
+            "role": "Writer",
+            "key": "/library/people/5e163504bc1372003ea6a5df",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "ABC"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c07ff705e7a001e6cee9f",
+            "tag": "Less Than Perfect"
+          },
+          {
+            "guid": "plex://show/5d9c086ce264b7001fc43996",
+            "tag": "My Three Sons"
+          },
+          {
+            "guid": "plex://show/5d9c0873ef619b002047fda0",
+            "tag": "The Office (US)"
+          },
+          {
+            "guid": "plex://show/5d9c08762192ba001f311efc",
+            "tag": "The Office"
+          },
+          {
+            "guid": "plex://show/5d9c07fee98e47001eb04cdc",
+            "tag": "Tyler Perry's House of Payne"
+          },
+          {
+            "guid": "plex://show/5d9c086e3c3f87001f34fcf6",
+            "tag": "Suburgatory"
+          },
+          {
+            "guid": "plex://show/5d9c087508fddd001f29c0a5",
+            "tag": "Drop The Dead Donkey"
+          },
+          {
+            "guid": "plex://show/5d9c08682192ba001f30f2ce",
+            "tag": "Superstore"
+          },
+          {
+            "guid": "plex://show/5d9c08ade9d5a1001f4dbf3c",
+            "tag": "Decker"
+          },
+          {
+            "guid": "plex://show/5d9c082de98e47001eb0989c",
+            "tag": "WKRP in Cincinnati"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "20th Century Fox Television"
+          },
+          {
+            "tag": "Garfield Grove"
+          }
+        ]
+      }
+    ]
+  }
+}

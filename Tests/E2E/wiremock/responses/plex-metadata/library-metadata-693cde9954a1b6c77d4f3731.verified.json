@@ -1,0 +1,127 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/693cde9954a1b6c77d4f3731",
+        "key": "/library/metadata/693cde9954a1b6c77d4f3731",
+        "ratingKey": "693cde9954a1b6c77d4f3731",
+        "studio": "Killer Bean Studios",
+        "summary": "A small-town theorist uncovers a hidden dimension behind reality one tied to years of vanishings. As creatures slip through cracks unseen, he risks everything to expose the truth, rescue the lost, and seal the doorway before his town disappears next.",
+        "type": "movie",
+        "audienceRating": 5.3,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "18+",
+        "duration": 3780000,
+        "imdbRatingCount": 176,
+        "originalTitle": "Backrooms",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-backrooms-movie",
+        "slug": "the-backrooms-movie",
+        "title": "The Backrooms Movie",
+        "userState": false,
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt39070378"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.3
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "67f4a8c2c81c04be6f26cdf5",
+            "order": 1,
+            "slug": "kennyfisher2010",
+            "tag": "Kennyfisher2010",
+            "role": "The recorder",
+            "key": "/library/people/67f4a8c2c81c04be6f26cdf5",
+            "type": "person"
+          },
+          {
+            "id": "69207b45c3222f63660f6d70",
+            "order": 2,
+            "slug": "brandon-waymack",
+            "tag": "Brandon Waymack",
+            "role": "The man on the train",
+            "key": "/library/people/69207b45c3222f63660f6d70",
+            "type": "person"
+          },
+          {
+            "id": "69207b45fb7cb4f089e9477e",
+            "order": 3,
+            "slug": "michele-waymack",
+            "tag": "Michele Waymack",
+            "role": "The killer",
+            "key": "/library/people/69207b45fb7cb4f089e9477e",
+            "type": "person"
+          },
+          {
+            "id": "692f127a44caa3f0dd7c99c3",
+            "order": 4,
+            "slug": "kenny-bean-3",
+            "tag": "Kenny Bean",
+            "role": "The recorder",
+            "key": "/library/people/692f127a44caa3f0dd7c99c3",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "692f127a44caa3f0dd7c99c3",
+            "slug": "kenny-bean-3",
+            "tag": "Kenny Bean",
+            "role": "Director",
+            "key": "/library/people/692f127a44caa3f0dd7c99c3",
+            "type": "person"
+          },
+          {
+            "id": "69c2b1840cbe244bcec3bb47",
+            "slug": "kenneth-w-fisher",
+            "tag": "Kenneth W. Fisher",
+            "role": "Director",
+            "key": "/library/people/69c2b1840cbe244bcec3bb47",
+            "type": "person"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Killer Bean Studios"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Have you ever seen hell? Because you're about to be in it.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

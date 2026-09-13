@@ -1,0 +1,1165 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/572uSrnXM5uPVYMVqsxfNA41cT8.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/393159/banners/66620c3b37597.jpg",
+        "guid": "plex://show/5fd2a1b82de5fd002dd4c7b1",
+        "key": "/library/metadata/5fd2a1b82de5fd002dd4c7b1/children",
+        "rating": 8.6,
+        "ratingKey": "5fd2a1b82de5fd002dd4c7b1",
+        "studio": "Matt Tolmach Productions",
+        "subtype": "miniSeries",
+        "summary": "A man is abducted into an alternate version of his life. Amid the mind-bending landscape of lives he could've lived, he embarks on a harrowing journey to get back to his true family and save them from a most terrifying foe: himself..",
+        "type": "show",
+        "addedAt": 1715040000,
+        "audienceRating": 8.4,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 2,
+        "contentRating": "TV-MA",
+        "duration": 3180000,
+        "imdbRatingCount": 79187,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-10",
+        "lastSeasonOriginallyAvailableAt": "2026-08-27",
+        "leafCount": 19,
+        "nextEpisodeOriginallyAvailableAt": "2026-09-17",
+        "originallyAvailableAt": "2024-05-07",
+        "publicPagesURL": "https://watch.plex.tv/show/dark-matter-2024",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "slug": "dark-matter-2024",
+        "theme": "https://tvthemes.plexapp.com/393159.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg",
+        "title": "Dark Matter (2024)",
+        "userState": false,
+        "year": 2024,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5fd2a1b82de5fd002dd4c7b1/commonsensemedia",
+            "oneLiner": "Moody, sometimes violent sci-fi about alternate realities.",
+            "AgeRating": [
+              {
+                "age": 14,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/572uSrnXM5uPVYMVqsxfNA41cT8.jpg"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/53946af610edf9566c49e6ea2fb144a5.jpg"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/393159/banners/66620c3b37597.jpg"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/f/683a142553/f43e6d34ccc994a4c4eee54cfbe0652c.png"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/f/683a142553/f43e6d34ccc994a4c4eee54cfbe0652c.png"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/5/gracenote/51b70dfdbf89fc3658c7360f80dbe468.jpg"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg"
+          },
+          {
+            "alt": "Dark Matter (2024)",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1511e07caed1512fe302f5058cc5d507.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07e808fddd001f28de45",
+            "id": "5d9c07e808fddd001f28de45",
+            "key": "/library/sections/home/all?genre=5d9c07e808fddd001f28de45",
+            "ratingKey": "genre_5d9c07e808fddd001f28de45",
+            "slug": "sci-fi-and-fantasy",
+            "tag": "Sci-Fi & Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt19231492"
+          },
+          {
+            "id": "tmdb://196322"
+          },
+          {
+            "id": "tvdb://393159"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 8.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.804
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Title Design",
+            "event": "Emmys",
+            "id": "687a49270cf68bb0b9f1e627",
+            "isWinner": false,
+            "year": 2025
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77682a61141d001fb13c65",
+            "order": 1,
+            "slug": "joel-edgerton",
+            "tag": "Joel Edgerton",
+            "thumb": "https://metadata-static.plex.tv/5/people/5837698e932333e6c4242282d8768a92.jpg",
+            "role": "Jason Dessen / Jason2",
+            "key": "/library/people/5d77682a61141d001fb13c65",
+            "type": "person"
+          },
+          {
+            "id": "5d77682585719b001f3a0898",
+            "order": 2,
+            "slug": "jennifer-connelly",
+            "tag": "Jennifer Connelly",
+            "thumb": "https://metadata-static.plex.tv/7/people/783d027cb6dfdd19b4a42e3882cf6318.jpg",
+            "role": "Daniela Dessen",
+            "key": "/library/people/5d77682585719b001f3a0898",
+            "type": "person"
+          },
+          {
+            "id": "5d7768275af944001f1f6b37",
+            "order": 3,
+            "slug": "alice-braga",
+            "tag": "Alice Braga",
+            "thumb": "https://metadata-static.plex.tv/d/people/d0e8ad698ef864be22446664e98784d3.jpg",
+            "role": "Dr. Amanda Lucas",
+            "key": "/library/people/5d7768275af944001f1f6b37",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c5d3",
+            "order": 4,
+            "slug": "jimmi-simpson",
+            "tag": "Jimmi Simpson",
+            "thumb": "https://metadata-static.plex.tv/f/people/f7e0fe1f87f164c6aee795f8a1586351.jpg",
+            "role": "Ryan Holder",
+            "key": "/library/people/5d776826999c64001ec2c5d3",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b051dd69001fe0f9ce",
+            "order": 5,
+            "slug": "dayo-okeniyi",
+            "tag": "Dayo Okeniyi",
+            "thumb": "https://metadata-static.plex.tv/d/people/ddd7717b56c2df06077bf145c0b1a03e.jpg",
+            "role": "Oluko / Leighton Vance",
+            "key": "/library/people/5d7768b051dd69001fe0f9ce",
+            "type": "person"
+          },
+          {
+            "id": "5d776a7c51dd69001fe2400f",
+            "order": 6,
+            "slug": "oakes-fegley",
+            "tag": "Oakes Fegley",
+            "thumb": "https://metadata-static.plex.tv/4/people/476593308e4bfb9e744f163114e1abb9.jpg",
+            "role": "Charlie Dessen",
+            "key": "/library/people/5d776a7c51dd69001fe2400f",
+            "type": "person"
+          },
+          {
+            "id": "5d77684d5af944001f1fe881",
+            "order": 7,
+            "slug": "amanda-brugel",
+            "tag": "Amanda Brugel",
+            "thumb": "https://metadata-static.plex.tv/0/people/0e71c2df5787249eb0dbca9ade814cf8.jpg",
+            "role": "Butterscotch / Blair Caplan",
+            "key": "/library/people/5d77684d5af944001f1fe881",
+            "type": "person"
+          },
+          {
+            "id": "5d776e3296b655001fe5fabb",
+            "order": 8,
+            "slug": "aina-breiyon",
+            "tag": "Aina Brei'Yon",
+            "thumb": "https://image.tmdb.org/t/p/original/AjKcqTIjjaKEQdYbst5rY3bhUJY.jpg",
+            "role": "Dawn Lawrence",
+            "key": "/library/people/5d776e3296b655001fe5fabb",
+            "type": "person"
+          },
+          {
+            "id": "5e92d1667c21b80040dff806",
+            "order": 9,
+            "slug": "bassam-abdelfattah",
+            "tag": "Bassam Abdelfattah",
+            "role": "Anthony",
+            "key": "/library/people/5e92d1667c21b80040dff806",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa33",
+            "order": 10,
+            "slug": "william-smillie",
+            "tag": "William Smillie",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768267e9a3c0020c6aa33.jpg",
+            "role": "Matt",
+            "key": "/library/people/5d7768267e9a3c0020c6aa33",
+            "type": "person"
+          },
+          {
+            "id": "64c0d530876ff3e6364546aa",
+            "order": 11,
+            "slug": "tiff-abreu",
+            "tag": "Tiff Abreu",
+            "thumb": "https://metadata-static.plex.tv/f/people/f10d3c5d0ee63b3fedf6545740c46e60.jpg",
+            "role": "Mindy",
+            "key": "/library/people/64c0d530876ff3e6364546aa",
+            "type": "person"
+          },
+          {
+            "id": "663b6a67c3ca215b10ca3554",
+            "order": 12,
+            "slug": "suzy-dias-4",
+            "tag": "Suzy Dias",
+            "role": "Chloe",
+            "key": "/library/people/663b6a67c3ca215b10ca3554",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd15403883a0040abeeba",
+            "order": 13,
+            "slug": "charlie-holcomb",
+            "tag": "Charlie Holcomb",
+            "role": "Male Student #1",
+            "key": "/library/people/5f3fd15403883a0040abeeba",
+            "type": "person"
+          },
+          {
+            "id": "5d77689e1999bc0020dcb47d",
+            "order": 14,
+            "slug": "jenne-kang",
+            "tag": "Jenne Kang",
+            "thumb": "https://metadata-static.plex.tv/a/people/ab0be9981508359e6a972cebaef5836d.jpg",
+            "role": "Dr. Julianne Springer",
+            "key": "/library/people/5d77689e1999bc0020dcb47d",
+            "type": "person"
+          },
+          {
+            "id": "5d776a3dad5437001f776e27",
+            "order": 15,
+            "slug": "kate-eastman",
+            "tag": "Kate Eastman",
+            "thumb": "https://metadata-static.plex.tv/0/people/09bc5a6f7588b1d5d24fe0d3e6b122e6.jpg",
+            "role": "Detective Jamie Mason",
+            "key": "/library/people/5d776a3dad5437001f776e27",
+            "type": "person"
+          },
+          {
+            "id": "5e204210404c89003d47b810",
+            "order": 16,
+            "slug": "reilly-oh-1",
+            "tag": "Reilly Oh",
+            "thumb": "https://metadata-static.plex.tv/people/5e204210404c89003d47b810.jpg",
+            "role": "Male Student #2 (In The Back)",
+            "key": "/library/people/5e204210404c89003d47b810",
+            "type": "person"
+          },
+          {
+            "id": "5f403a0ec63b480040e0a1a6",
+            "order": 17,
+            "slug": "missy-fierro",
+            "tag": "Missy Fierro",
+            "role": "Female T.A. (Violet)",
+            "key": "/library/people/5f403a0ec63b480040e0a1a6",
+            "type": "person"
+          },
+          {
+            "id": "5d7768618a7581001f131983",
+            "order": 18,
+            "slug": "rolando-boyce",
+            "tag": "Rolando Boyce",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768618a7581001f131983.jpg",
+            "role": "Dr. Joseph Hart",
+            "key": "/library/people/5d7768618a7581001f131983",
+            "type": "person"
+          },
+          {
+            "id": "5e9184acce88f10042aa76bc",
+            "order": 19,
+            "slug": "arti-ishak-1",
+            "tag": "Arti Ishak",
+            "role": "Mara McHenry",
+            "key": "/library/people/5e9184acce88f10042aa76bc",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff76304a86500409b68e2",
+            "order": 20,
+            "slug": "jimmy-styx",
+            "tag": "Jimmy Styx",
+            "role": "Gunter (Nightwatchman)",
+            "key": "/library/people/5f3ff76304a86500409b68e2",
+            "type": "person"
+          },
+          {
+            "id": "5d776832a091de001f2e77a5",
+            "order": 21,
+            "slug": "chris-diamantopoulos",
+            "tag": "Chris Diamantopoulos",
+            "thumb": "https://metadata-static.plex.tv/b/people/bdc54eeb3b03e67b05016594c853dc63.jpg",
+            "role": "Agent Mitchel MacNamara",
+            "key": "/library/people/5d776832a091de001f2e77a5",
+            "type": "person"
+          },
+          {
+            "id": "5f402b03cae2c60042f0b850",
+            "order": 22,
+            "slug": "adrienne-lewis",
+            "tag": "Adrienne Lewis",
+            "thumb": "https://metadata-static.plex.tv/4/people/4f004883bae4df3905396d3f2abaa73c.jpg",
+            "role": "Sandra",
+            "key": "/library/people/5f402b03cae2c60042f0b850",
+            "type": "person"
+          },
+          {
+            "id": "64394e351f0b7c939c886f5a",
+            "order": 23,
+            "slug": "yao-dogbe",
+            "tag": "Yao Dogbe",
+            "role": "Leighton Vance Acting Double",
+            "key": "/library/people/64394e351f0b7c939c886f5a",
+            "type": "person"
+          },
+          {
+            "id": "61e6d173aae641bf60347822",
+            "order": 24,
+            "slug": "matthew-amador-1",
+            "tag": "Matthew Amador",
+            "role": "Slightly Older Man",
+            "key": "/library/people/61e6d173aae641bf60347822",
+            "type": "person"
+          },
+          {
+            "id": "65954c9684438c9b461bcf67",
+            "order": 25,
+            "slug": "sam-cass-3",
+            "tag": "Sam Cass",
+            "role": "Young Man",
+            "key": "/library/people/65954c9684438c9b461bcf67",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c12d18a4001ff11831",
+            "order": 26,
+            "slug": "joe-dioletto",
+            "tag": "Joe Dioletto",
+            "thumb": "https://image.tmdb.org/t/p/original/cfVusFSblLuAeCzZ29rYwY9JQrk.jpg",
+            "role": "Jason Dessen Acting Double",
+            "key": "/library/people/5d7768c12d18a4001ff11831",
+            "type": "person"
+          },
+          {
+            "id": "62e8ddb445ac97edfb9ce954",
+            "order": 27,
+            "slug": "snag-flynn",
+            "tag": "Snag Flynn",
+            "thumb": "https://metadata-static.plex.tv/3/people/3bf1ea69570a4b30c8aa7316e10ca3bc.jpg",
+            "role": "Young Woman",
+            "key": "/library/people/62e8ddb445ac97edfb9ce954",
+            "type": "person"
+          },
+          {
+            "id": "66377517f47260b3d40adf4a",
+            "order": 28,
+            "slug": "john-lister-1",
+            "tag": "John Lister",
+            "role": "Angry Cabbie",
+            "key": "/library/people/66377517f47260b3d40adf4a",
+            "type": "person"
+          },
+          {
+            "id": "5d776c48ad5437001f7b971c",
+            "order": 29,
+            "slug": "elvis-garcia",
+            "tag": "Elvis Garcia",
+            "role": "Cabbie #2",
+            "key": "/library/people/5d776c48ad5437001f7b971c",
+            "type": "person"
+          },
+          {
+            "id": "5d776eb3fb0d55001f5cb478",
+            "order": 30,
+            "slug": "peter-sipla",
+            "tag": "Peter Sipla",
+            "thumb": "https://image.tmdb.org/t/p/original/6XmuxSrg9IsZEXHYqAGu8Gox9v5.jpg",
+            "role": "Dr. Randolph",
+            "key": "/library/people/5d776eb3fb0d55001f5cb478",
+            "type": "person"
+          },
+          {
+            "id": "5ddba9e92fcbed0022d0176a",
+            "order": 31,
+            "slug": "kathryn-acosta",
+            "tag": "Kathryn Acosta",
+            "thumb": "https://metadata-static.plex.tv/people/5ddba9e92fcbed0022d0176a.jpg",
+            "role": "Nurse",
+            "key": "/library/people/5ddba9e92fcbed0022d0176a",
+            "type": "person"
+          },
+          {
+            "id": "65005342b6865b9d3e3fc5a1",
+            "order": 32,
+            "slug": "monica-patankar-1",
+            "tag": "Monica Patankar",
+            "role": "Faculty Woman",
+            "key": "/library/people/65005342b6865b9d3e3fc5a1",
+            "type": "person"
+          },
+          {
+            "id": "5d77704d90a8de0020327713",
+            "order": 33,
+            "slug": "madelyn-deporter",
+            "tag": "Madelyn DePorter",
+            "thumb": "https://metadata-static.plex.tv/people/5d77704d90a8de0020327713.jpg",
+            "role": "Receptionist",
+            "key": "/library/people/5d77704d90a8de0020327713",
+            "type": "person"
+          },
+          {
+            "id": "5f4002e752f20000414e1f3d",
+            "order": 34,
+            "slug": "brenann-stacker",
+            "tag": "Brenann Stacker",
+            "thumb": "https://metadata-static.plex.tv/b/people/b87e18c59905d5d1665446d383bd4f6e.jpg",
+            "role": "Female Greeter",
+            "key": "/library/people/5f4002e752f20000414e1f3d",
+            "type": "person"
+          },
+          {
+            "id": "5f40063804a86500409cc6e1",
+            "order": 35,
+            "slug": "beacon-bowman",
+            "tag": "Beacon Bowman",
+            "thumb": "https://metadata-static.plex.tv/1/people/1110a9a47bf61d1222c869627d7aa8fb.jpg",
+            "role": "Door Woman",
+            "key": "/library/people/5f40063804a86500409cc6e1",
+            "type": "person"
+          },
+          {
+            "id": "5d776ba27a53e9001e72b862",
+            "order": 36,
+            "slug": "tara-mallen",
+            "tag": "Tara Mallen",
+            "thumb": "https://metadata-static.plex.tv/d/people/d7f36c6963e21f771706b267b58a3886.jpg",
+            "role": "Alesia Cheney",
+            "key": "/library/people/5d776ba27a53e9001e72b862",
+            "type": "person"
+          },
+          {
+            "id": "5f4010f21ae710004103a58e",
+            "order": 37,
+            "slug": "kyle-connors-1",
+            "tag": "Kyle Connors",
+            "role": "Executive Assistant",
+            "key": "/library/people/5f4010f21ae710004103a58e",
+            "type": "person"
+          },
+          {
+            "id": "5d776833e6d55c002040cb5b",
+            "order": 38,
+            "slug": "meghan-maureen-mcdonough",
+            "tag": "Meghan Maureen McDonough",
+            "thumb": "https://metadata-static.plex.tv/people/5d776833e6d55c002040cb5b.jpg",
+            "role": "Barbara Underell",
+            "key": "/library/people/5d776833e6d55c002040cb5b",
+            "type": "person"
+          },
+          {
+            "id": "6a0c71fd061ef1ee78c688a8",
+            "order": 39,
+            "slug": "jason-huysman-6",
+            "tag": "Jason Huysman",
+            "role": "Mike Underell",
+            "key": "/library/people/6a0c71fd061ef1ee78c688a8",
+            "type": "person"
+          },
+          {
+            "id": "5f4030bd03883a0040b504b3",
+            "order": 40,
+            "slug": "brandon-dahlquist",
+            "tag": "Brandon Dahlquist",
+            "thumb": "https://metadata-static.plex.tv/7/people/701a87fe8fc7bef366026c8277734f45.jpg",
+            "role": "Marcus Sakey",
+            "key": "/library/people/5f4030bd03883a0040b504b3",
+            "type": "person"
+          },
+          {
+            "id": "5e17c2ac60c5d0003f7966c9",
+            "order": 41,
+            "slug": "callie-johnson",
+            "tag": "Callie Johnson",
+            "thumb": "https://metadata-static.plex.tv/c/people/c2b67b95f9a5560736d71ff643428ac1.jpg",
+            "role": "GG Sakey",
+            "key": "/library/people/5e17c2ac60c5d0003f7966c9",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd6e052f20000414a4876",
+            "order": 42,
+            "slug": "omar-villagomez-1",
+            "tag": "Omar Villagomez",
+            "role": "Hazmat Man",
+            "key": "/library/people/5f3fd6e052f20000414a4876",
+            "type": "person"
+          },
+          {
+            "id": "5d776bdc47dd6e001f6e419d",
+            "order": 43,
+            "slug": "jackie-dallas",
+            "tag": "Jackie Dallas",
+            "thumb": "https://metadata-static.plex.tv/e/people/e94adcaefd2d2388d9715aa52439dc89.jpg",
+            "role": "Hazmat Woman",
+            "key": "/library/people/5d776bdc47dd6e001f6e419d",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cbc18b53138c038d943",
+            "order": 44,
+            "slug": "lance-baker-1",
+            "tag": "Lance Baker",
+            "role": "Alan",
+            "key": "/library/people/62fb7cbc18b53138c038d943",
+            "type": "person"
+          },
+          {
+            "id": "6648629fa9b0acc94f3e35a0",
+            "order": 45,
+            "slug": "austin-nelson-jr",
+            "tag": "Austin Nelson Jr.",
+            "role": "Whiny Student",
+            "key": "/library/people/6648629fa9b0acc94f3e35a0",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc7d3cae2c60042e7c4dd",
+            "order": 46,
+            "slug": "yuchi-chiu",
+            "tag": "Yuchi Chiu",
+            "role": "Naked Man",
+            "key": "/library/people/5f3fc7d3cae2c60042e7c4dd",
+            "type": "person"
+          },
+          {
+            "id": "5f4012d404a86500409ddb61",
+            "order": 47,
+            "slug": "patricia-mario",
+            "tag": "Patricia Mario",
+            "role": "Silvia",
+            "key": "/library/people/5f4012d404a86500409ddb61",
+            "type": "person"
+          },
+          {
+            "id": "5f3fffa104a86500409c2163",
+            "order": 48,
+            "slug": "bamidele-ali",
+            "tag": "Bamidele Ali",
+            "role": "Danny (National Guard Soldier)",
+            "key": "/library/people/5f3fffa104a86500409c2163",
+            "type": "person"
+          },
+          {
+            "id": "665b0e478ab26b98550eefca",
+            "order": 49,
+            "slug": "sean-james-william-parris",
+            "tag": "Sean James William Parris",
+            "role": "Dr. Jay Quayle",
+            "key": "/library/people/665b0e478ab26b98550eefca",
+            "type": "person"
+          },
+          {
+            "id": "5d7770cead5437001f82b6b5",
+            "order": 50,
+            "slug": "dani-deette",
+            "tag": "Dani Deetté",
+            "thumb": "https://metadata-static.plex.tv/people/5d7770cead5437001f82b6b5.jpg",
+            "role": "Annie",
+            "key": "/library/people/5d7770cead5437001f82b6b5",
+            "type": "person"
+          },
+          {
+            "id": "5d7768646f4521001eaa4fca",
+            "order": 51,
+            "slug": "cara-reid",
+            "tag": "Cara Reid",
+            "thumb": "https://metadata-static.plex.tv/e/people/ed227e553779a4ad3e84269c98e70044.jpg",
+            "role": "Ms. Bumgarner",
+            "key": "/library/people/5d7768646f4521001eaa4fca",
+            "type": "person"
+          },
+          {
+            "id": "66698e9938035b79b9aef495",
+            "order": 52,
+            "slug": "vinny-multhaupt-1",
+            "tag": "Vinny Multhaupt",
+            "role": "Toby",
+            "key": "/library/people/66698e9938035b79b9aef495",
+            "type": "person"
+          },
+          {
+            "id": "64e3526a505956da7ed8501d",
+            "order": 53,
+            "slug": "camryn-ray-cavaliero-1",
+            "tag": "Camryn Ray Cavaliero",
+            "role": "Adeline",
+            "key": "/library/people/64e3526a505956da7ed8501d",
+            "type": "person"
+          },
+          {
+            "id": "607481e463b10d002ccbad22",
+            "order": 54,
+            "slug": "angie-shriner",
+            "tag": "Angie Shriner",
+            "role": "Sid (Bartender)",
+            "key": "/library/people/607481e463b10d002ccbad22",
+            "type": "person"
+          },
+          {
+            "id": "6234a9ca115b6d3f41cdca67",
+            "order": 55,
+            "slug": "greg-foster-19",
+            "tag": "Greg Foster",
+            "role": "Chad",
+            "key": "/library/people/6234a9ca115b6d3f41cdca67",
+            "type": "person"
+          },
+          {
+            "id": "5f4045ff02101b0040f883d7",
+            "order": 56,
+            "slug": "michael-a-dean",
+            "tag": "Michael A. Dean",
+            "thumb": "https://metadata-static.plex.tv/c/people/c993cb159644553ceef4bf0350bc1624.jpg",
+            "role": "Rob",
+            "key": "/library/people/5f4045ff02101b0040f883d7",
+            "type": "person"
+          },
+          {
+            "id": "5d776ada7a53e9001e711cd9",
+            "order": 57,
+            "slug": "richard-cotovsky",
+            "tag": "Richard Cotovsky",
+            "role": "Jay",
+            "key": "/library/people/5d776ada7a53e9001e711cd9",
+            "type": "person"
+          },
+          {
+            "id": "5f40550d52f200004157774b",
+            "order": 58,
+            "slug": "maeve-mollaghan",
+            "tag": "Maeve Mollaghan",
+            "thumb": "https://metadata-static.plex.tv/e/people/e4dbb229827cf7ff2b256aaf14e49ecb.jpg",
+            "role": "Server",
+            "key": "/library/people/5f40550d52f200004157774b",
+            "type": "person"
+          },
+          {
+            "id": "5d7768316f4521001ea9b587",
+            "order": 59,
+            "slug": "jennifer-joan-taylor",
+            "tag": "Jennifer Joan Taylor",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768316f4521001ea9b587.jpg",
+            "role": "Cat Hair Jacket Woman",
+            "key": "/library/people/5d7768316f4521001ea9b587",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b61999bc0020dcebfb",
+            "order": 60,
+            "slug": "paul-tavianini",
+            "tag": "Paul Tavianini",
+            "role": "Manager",
+            "key": "/library/people/5d7768b61999bc0020dcebfb",
+            "type": "person"
+          },
+          {
+            "id": "6364cd9add5d9f42ce353c75",
+            "order": 61,
+            "slug": "gabrielle-anne-garza",
+            "tag": "Gabrielle Anne Garza",
+            "role": "Angie",
+            "key": "/library/people/6364cd9add5d9f42ce353c75",
+            "type": "person"
+          },
+          {
+            "id": "5d776855e6d55c0020410f8f",
+            "order": 62,
+            "slug": "sammy-a-publes",
+            "tag": "Sammy A. Publes",
+            "thumb": "https://metadata-static.plex.tv/7/people/75f63eabf6927dec49cec0bee3897156.jpg",
+            "role": "Security Guard",
+            "key": "/library/people/5d776855e6d55c0020410f8f",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa57",
+            "order": 63,
+            "slug": "peter-defaria",
+            "tag": "Peter DeFaria",
+            "thumb": "https://metadata-static.plex.tv/1/people/169ae98f5ecd8a2901d57970005a1736.jpg",
+            "role": "Campus Police Officer",
+            "key": "/library/people/5d7768267e9a3c0020c6aa57",
+            "type": "person"
+          },
+          {
+            "id": "662e500c143a06644221879a",
+            "order": 64,
+            "slug": "elena-victoria-feliz-1",
+            "tag": "Elena Victoria Feliz",
+            "role": "Aliyah",
+            "key": "/library/people/662e500c143a06644221879a",
+            "type": "person"
+          },
+          {
+            "id": "5d776b0396b655001fe00d09",
+            "order": 65,
+            "slug": "michael-b-woods",
+            "tag": "Michael B. Woods",
+            "thumb": "https://metadata-static.plex.tv/people/5d776b0396b655001fe00d09.jpg",
+            "role": "Officer Jay Stringer",
+            "key": "/library/people/5d776b0396b655001fe00d09",
+            "type": "person"
+          },
+          {
+            "id": "5d77685a0ea56a001e2a366b",
+            "order": 66,
+            "slug": "gregory-linington",
+            "tag": "Gregory Linington",
+            "role": "Mayor",
+            "key": "/library/people/5d77685a0ea56a001e2a366b",
+            "type": "person"
+          },
+          {
+            "id": "5ec60552cf192c0040f8cefe",
+            "order": 67,
+            "slug": "arif-yampolsky",
+            "tag": "Arif Yampolsky",
+            "role": "Joel",
+            "key": "/library/people/5ec60552cf192c0040f8cefe",
+            "type": "person"
+          },
+          {
+            "id": "5e16488929246b0040fc4e67",
+            "order": 68,
+            "slug": "justine-c-turner",
+            "tag": "Justine C. Turner",
+            "thumb": "https://metadata-static.plex.tv/people/5e16488929246b0040fc4e67.jpg",
+            "role": "Sheriff Amy Fuller",
+            "key": "/library/people/5e16488929246b0040fc4e67",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcaeb86422500427b5124",
+            "order": 69,
+            "slug": "kidjie-boyer",
+            "tag": "Kidjie Boyer",
+            "role": "Detective Keller",
+            "key": "/library/people/5f3fcaeb86422500427b5124",
+            "type": "person"
+          },
+          {
+            "id": "5d776824151a60001f24a334",
+            "order": 70,
+            "slug": "jim-cantafio",
+            "tag": "Jim Cantafio",
+            "role": "Captain Miller",
+            "key": "/library/people/5d776824151a60001f24a334",
+            "type": "person"
+          },
+          {
+            "id": "6a92ca5bcf5201722761d862",
+            "order": 71,
+            "slug": "javon-van-anderson",
+            "tag": "Javon Van Anderson",
+            "role": "Kai",
+            "key": "/library/people/6a92ca5bcf5201722761d862",
+            "type": "person"
+          },
+          {
+            "id": "5d7770b7fb0d55001f5f75ee",
+            "order": 72,
+            "slug": "kirsten-fitzgerald",
+            "tag": "Kirsten Fitzgerald",
+            "thumb": "https://metadata-static.plex.tv/b/people/ba86cba758f78c394d3064ed38f09b54.jpg",
+            "role": "Mrs. Bumgarner",
+            "key": "/library/people/5d7770b7fb0d55001f5f75ee",
+            "type": "person"
+          },
+          {
+            "id": "5f4000dcbf3e560040b5725a",
+            "order": 73,
+            "slug": "wydetta-carter",
+            "tag": "Wydetta Carter",
+            "role": "Librarian",
+            "key": "/library/people/5f4000dcbf3e560040b5725a",
+            "type": "person"
+          },
+          {
+            "id": "5d776a3cad5437001f776a5c",
+            "order": 74,
+            "slug": "hanna-dworkin",
+            "tag": "Hanna Dworkin",
+            "thumb": "https://metadata-static.plex.tv/d/people/d97a134c67319684ccfa28675034450b.jpg",
+            "role": "Greeley",
+            "key": "/library/people/5d776a3cad5437001f776a5c",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcfde52f2000041499a1e",
+            "order": 75,
+            "slug": "tyler-meredith",
+            "tag": "Tyler Meredith",
+            "role": "Camilla Holder",
+            "key": "/library/people/5f3fcfde52f2000041499a1e",
+            "type": "person"
+          },
+          {
+            "id": "5d777087cfbb56001fb89699",
+            "order": 76,
+            "slug": "tyler-merritt",
+            "tag": "Tyler Merritt",
+            "thumb": "https://metadata-static.plex.tv/0/people/0a85db58410cd038a89cb6efea17950a.jpg",
+            "role": "Dr. Lindley",
+            "key": "/library/people/5d777087cfbb56001fb89699",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776c01fb0d55001f579e79",
+            "slug": "alik-sakharov",
+            "tag": "Alik Sakharov",
+            "thumb": "https://metadata-static.plex.tv/9/people/9d712ee50f928694b22a774bfca31a1c.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776c01fb0d55001f579e79",
+            "type": "person"
+          },
+          {
+            "id": "5d7768c22d18a4001ff119a2",
+            "slug": "jakob-verbruggen",
+            "tag": "Jakob Verbruggen",
+            "thumb": "https://metadata-static.plex.tv/b/people/bfdd8162dd7bf53a5fe99dd4fd379181.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768c22d18a4001ff119a2",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cd33f312e5f41faaaf5",
+            "slug": "amit-gupta-24",
+            "tag": "Amit Gupta",
+            "thumb": "https://metadata-static.plex.tv/c/people/c70d02161373b3c12dad44cd4e33fdfe.jpg",
+            "role": "Director",
+            "key": "/library/people/62fb7cd33f312e5f41faaaf5",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a5af944001f1fb124",
+            "slug": "charlotte-sieling",
+            "tag": "Charlotte Sieling",
+            "thumb": "https://metadata-static.plex.tv/6/people/6dad1062ee6c646ee89b6f749632af77.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77683a5af944001f1fb124",
+            "type": "person"
+          },
+          {
+            "id": "5d776c51fb0d55001f584326",
+            "slug": "logan-george",
+            "tag": "Logan George",
+            "thumb": "https://metadata-static.plex.tv/9/people/9dacb0ed01594358e5434877a5634213.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776c51fb0d55001f584326",
+            "type": "person"
+          },
+          {
+            "id": "5d7768436f4521001ea9ed56",
+            "slug": "roxann-dawson",
+            "tag": "Roxann Dawson",
+            "thumb": "https://metadata-static.plex.tv/f/people/f20a365ee31acbcb6bcf63bd60cff98c.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768436f4521001ea9ed56",
+            "type": "person"
+          },
+          {
+            "id": "5d7768593ab0e7001f4ff120",
+            "slug": "nick-murphy",
+            "tag": "Nick Murphy",
+            "thumb": "https://metadata-static.plex.tv/c/people/c916de9ee78343417ffbd0f7c8200c69.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768593ab0e7001f4ff120",
+            "type": "person"
+          },
+          {
+            "id": "5d776c8cfb0d55001f58b034",
+            "slug": "celine-held",
+            "tag": "Celine Held",
+            "thumb": "https://metadata-static.plex.tv/4/people/477ee44035f6ebe6d61a3e766d2d3644.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776c8cfb0d55001f58b034",
+            "type": "person"
+          },
+          {
+            "id": "5d776d2023d5a3001f520d4f",
+            "slug": "gwyneth-horder-payton",
+            "tag": "Gwyneth Horder-Payton",
+            "thumb": "https://metadata-static.plex.tv/6/people/6a399bdcfd6adddec4d5e527f15775fb.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776d2023d5a3001f520d4f",
+            "type": "person"
+          },
+          {
+            "id": "5d776c44fb0d55001f5828a5",
+            "slug": "guillermo-navarro",
+            "tag": "Guillermo Navarro",
+            "thumb": "https://metadata-static.plex.tv/9/people/9b8959bcfb643e475e48abbb674b0a66.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776c44fb0d55001f5828a5",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dcd37ebd57001001f0d978b",
+            "slug": "dustin-bernard",
+            "tag": "Dustin Bernard",
+            "role": "Producer",
+            "key": "/library/people/5dcd37ebd57001001f0d978b",
+            "type": "person"
+          },
+          {
+            "id": "5f40415803883a0040b7202f",
+            "slug": "camilla-grove",
+            "tag": "Camilla Grove",
+            "role": "Producer",
+            "key": "/library/people/5f40415803883a0040b7202f",
+            "type": "person"
+          },
+          {
+            "id": "60844aa9ac0818002c57a0ff",
+            "slug": "jeffrey-macvittie",
+            "tag": "Jeffrey MacVittie",
+            "role": "Producer",
+            "key": "/library/people/60844aa9ac0818002c57a0ff",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5f40269e04a86500409faa36",
+            "slug": "blake-crouch",
+            "tag": "Blake Crouch",
+            "thumb": "https://metadata-static.plex.tv/e/people/e82caa0a83575d99a2180de07ba80a18.jpg",
+            "role": "Writer",
+            "key": "/library/people/5f40269e04a86500409faa36",
+            "type": "person"
+          },
+          {
+            "id": "64f9b88c1dcaa6500bd8d3e6",
+            "slug": "jacquelyn-ben-zekry",
+            "tag": "Jacquelyn Ben-Zekry",
+            "role": "Writer",
+            "key": "/library/people/64f9b88c1dcaa6500bd8d3e6",
+            "type": "person"
+          },
+          {
+            "id": "5d777057dd931c001e38b744",
+            "slug": "megan-mcdonnell-2",
+            "tag": "Megan McDonnell",
+            "thumb": "https://image.tmdb.org/t/p/original/ceVysIbdgmxDGV3vj63Ji4MYbPv.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d777057dd931c001e38b744",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff2c3537293003d386e60",
+            "slug": "ihuoma-ofordire",
+            "tag": "Ihuoma Ofordire",
+            "role": "Writer",
+            "key": "/library/people/5f3ff2c3537293003d386e60",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Apple TV"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f57bdaf782ab300435487d0",
+            "tag": "3 Body Problem"
+          },
+          {
+            "guid": "plex://show/606ee70889b0ad002df700b6",
+            "tag": "La Brea"
+          },
+          {
+            "guid": "plex://show/5d9c0835170e24001f2a894c",
+            "tag": "Fringe"
+          },
+          {
+            "guid": "plex://show/5d9c0801705e7a001e6cf5a2",
+            "tag": "Kyle XY"
+          },
+          {
+            "guid": "plex://show/663557c545f74b3415b7232d",
+            "tag": "The Institute"
+          },
+          {
+            "guid": "plex://show/5d9c081c3c3f87001f347abf",
+            "tag": "Touch (2012)"
+          },
+          {
+            "guid": "plex://show/5d9c0825e264b7001fc3d22e",
+            "tag": "The Leftovers"
+          },
+          {
+            "guid": "plex://show/5d9c08506c3e37001ecd6327",
+            "tag": "The Man in the High Castle"
+          },
+          {
+            "guid": "plex://show/5d9c08d9ef619b00204823cb",
+            "tag": "Altered Carbon"
+          },
+          {
+            "guid": "plex://show/5d9c091b08fddd001f2a7f64",
+            "tag": "Y: The Last Man"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Matt Tolmach Productions"
+          },
+          {
+            "tag": "Sony Pictures Television"
+          },
+          {
+            "tag": "Mountainside Entertainment"
+          }
+        ]
+      }
+    ]
+  }
+}

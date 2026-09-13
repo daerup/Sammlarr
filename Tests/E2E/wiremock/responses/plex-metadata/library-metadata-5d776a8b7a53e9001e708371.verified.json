@@ -1,0 +1,299 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/pidX38mDb67HeF71hD34ph4AULA.jpg",
+        "guid": "plex://movie/5d776a8b7a53e9001e708371",
+        "key": "/library/metadata/5d776a8b7a53e9001e708371",
+        "ratingKey": "5d776a8b7a53e9001e708371",
+        "studio": "Lionsgate",
+        "subtype": "video",
+        "summary": "From acclaimed and award-winning playwright Tyler Perry comes a sensational new stage play about love, faith and the joys--and trials--of marriage. When a sexy young temptress threatens an already troubled marriage, a close-knit family rallies together to examine their own marriages and to rediscover the precious reason that the one they have is the one they want forever.",
+        "tagline": "You women are so used to losing that you don't even realize when you have won",
+        "type": "movie",
+        "addedAt": 1151366400,
+        "audienceRating": 3.7,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "Not Rated",
+        "duration": 7860000,
+        "imdbRatingCount": 902,
+        "originallyAvailableAt": "2006-06-27",
+        "publicPagesURL": "https://watch.plex.tv/movie/why-did-i-get-married",
+        "slug": "why-did-i-get-married",
+        "thumb": "https://image.tmdb.org/t/p/original/74PJv3lxs3eltMDH9YRVIwP9PMU.jpg",
+        "title": "Why Did I Get Married?",
+        "userState": false,
+        "year": 2006,
+        "Image": [
+          {
+            "alt": "Why Did I Get Married?",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/pidX38mDb67HeF71hD34ph4AULA.jpg"
+          },
+          {
+            "alt": "Why Did I Get Married?",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/74PJv3lxs3eltMDH9YRVIwP9PMU.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046d3c3f87001f33fc20",
+            "id": "5d9c046d3c3f87001f33fc20",
+            "key": "/library/sections/home/all?genre=5d9c046d3c3f87001f33fc20",
+            "ratingKey": "genre_5d9c046d3c3f87001f33fc20",
+            "slug": "musical",
+            "tag": "Musical",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5da05bf556341e001e11b8ee",
+            "id": "5da05bf556341e001e11b8ee",
+            "key": "/library/sections/home/all?genre=5da05bf556341e001e11b8ee",
+            "ratingKey": "genre_5da05bf556341e001e11b8ee",
+            "slug": "music",
+            "tag": "Music",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0840040"
+          },
+          {
+            "id": "tmdb://246381"
+          },
+          {
+            "id": "tvdb://35924"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77685661141d001fb18e84",
+            "order": 1,
+            "slug": "cheryl-pepsii-riley",
+            "tag": "Cheryl Pepsii Riley",
+            "thumb": "https://metadata-static.plex.tv/3/people/34a35be1321158ff8805a0a5cd0504b6.jpg",
+            "role": "Sheila",
+            "key": "/library/people/5d77685661141d001fb18e84",
+            "type": "person"
+          },
+          {
+            "id": "5d77684e6f4521001eaa0994",
+            "order": 2,
+            "slug": "lavan-davis",
+            "tag": "LaVan Davis",
+            "thumb": "https://metadata-static.plex.tv/people/5d77684e6f4521001eaa0994.jpg",
+            "role": "Poppy",
+            "key": "/library/people/5d77684e6f4521001eaa0994",
+            "type": "person"
+          },
+          {
+            "id": "5d7768af1999bc0020dcdc38",
+            "order": 3,
+            "slug": "demetria-mckinney",
+            "tag": "Demetria McKinney",
+            "thumb": "https://metadata-static.plex.tv/8/people/8fb02997c78bfa5d1277765437cef52a.jpg",
+            "role": "Trina",
+            "key": "/library/people/5d7768af1999bc0020dcdc38",
+            "type": "person"
+          },
+          {
+            "id": "6a0bfd7f84d88b67dae09e17",
+            "order": 4,
+            "slug": "donna-stewart-25",
+            "tag": "Donna Stewart",
+            "role": "Diana",
+            "key": "/library/people/6a0bfd7f84d88b67dae09e17",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a9594b2b001e6923ea",
+            "order": 5,
+            "slug": "cordell-moore",
+            "tag": "Cordell Moore",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768a9594b2b001e6923ea.jpg",
+            "role": "Mike",
+            "key": "/library/people/5d7768a9594b2b001e6923ea",
+            "type": "person"
+          },
+          {
+            "id": "5d7768b2594b2b001e6930ed",
+            "order": 6,
+            "slug": "tony-grant-3",
+            "tag": "Tony Grant",
+            "thumb": "https://metadata-static.plex.tv/3/people/37a2fa979095c685b7c9b892b624f86c.jpg",
+            "role": "Troy",
+            "key": "/library/people/5d7768b2594b2b001e6930ed",
+            "type": "person"
+          },
+          {
+            "id": "5d776a8b7a53e9001e7083a8",
+            "order": 7,
+            "slug": "beverly-faulks",
+            "tag": "Beverly Faulks",
+            "role": "Janice",
+            "key": "/library/people/5d776a8b7a53e9001e7083a8",
+            "type": "person"
+          },
+          {
+            "id": "60d8a12d58c333002cbae294",
+            "order": 8,
+            "slug": "greg-stewart-29",
+            "tag": "Greg Stewart",
+            "role": "Terry",
+            "key": "/library/people/60d8a12d58c333002cbae294",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          },
+          {
+            "id": "6a0c6047141002df690d36a6",
+            "slug": "amy-bolton-curley-5",
+            "tag": "Amy Bolton-Curley",
+            "role": "Producer",
+            "key": "/library/people/6a0c6047141002df690d36a6",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d9f3513d74e670020020ae4",
+            "tag": "Roll Bounce"
+          },
+          {
+            "guid": "plex://movie/5f40ce1cbf3e560040d5d45e",
+            "tag": "Camp Rock 3"
+          },
+          {
+            "guid": "plex://movie/684350378a077a99c2450de2",
+            "tag": "Camp Rock 3"
+          },
+          {
+            "guid": "plex://movie/5d7769cdf617c90020165008",
+            "tag": "Better Living Through Chemistry"
+          },
+          {
+            "guid": "plex://movie/5d776a379ab54400214fc47f",
+            "tag": "Grace Unplugged"
+          },
+          {
+            "guid": "plex://movie/5d776a467a53e9001e6fff5c",
+            "tag": "Sunshine on Leith"
+          },
+          {
+            "guid": "plex://movie/5d9f35509dd5f4001e844182",
+            "tag": "Bandslam"
+          },
+          {
+            "guid": "plex://movie/5d776b3723d5a3001f50dede",
+            "tag": "Drumline: A New Beat"
+          },
+          {
+            "guid": "plex://movie/5d77685f0ab244002006cb54",
+            "tag": "Where the Money Is"
+          },
+          {
+            "guid": "plex://movie/5d77687a51dd69001fe0ce89",
+            "tag": "Godspell"
+          },
+          {
+            "guid": "plex://movie/5ecc3bed29d8050042caee5e",
+            "tag": "Feel the Beat"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Lionsgate"
+          },
+          {
+            "tag": "Tyler Perry Studios"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Troy and sheil married with kids living happy life and poppy find a woman.\r\n",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

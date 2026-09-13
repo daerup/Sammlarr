@@ -1,0 +1,365 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/vYO9OkYHSNfYuqz6VMS4aCCfRb8.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/479461/banners/6aa585462fedf.jpg",
+        "guid": "plex://show/6a3ae99575acc876df9185c8",
+        "key": "/library/metadata/6a3ae99575acc876df9185c8/children",
+        "ratingKey": "6a3ae99575acc876df9185c8",
+        "studio": "Fiction Valley",
+        "summary": "Four couples in a tight-knit group enjoy an extravagant lifestyle; their web of lies starts to unravel when the villa of one couple burns down, killing one member.",
+        "type": "show",
+        "addedAt": 1788998400,
+        "audienceRating": 6.2,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 1,
+        "contentRating": "TV-MA",
+        "duration": 3720000,
+        "imdbRatingCount": 217,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-09-10",
+        "lastSeasonOriginallyAvailableAt": "2026-09-10",
+        "leafCount": 7,
+        "originalTitle": "De Eetclub",
+        "originallyAvailableAt": "2026-09-10",
+        "publicPagesURL": "https://watch.plex.tv/show/the-perfect-lie-1",
+        "slug": "the-perfect-lie-1",
+        "thumb": "https://image.tmdb.org/t/p/original/a8qjbVX7lo1v7m5Awzhx7Ptk8gO.jpg",
+        "title": "The Perfect Lie",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "The Perfect Lie",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/vYO9OkYHSNfYuqz6VMS4aCCfRb8.jpg"
+          },
+          {
+            "alt": "The Perfect Lie",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/479461/banners/6aa585462fedf.jpg"
+          },
+          {
+            "alt": "The Perfect Lie",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4350d456db15d228f84d6c9231159469.png"
+          },
+          {
+            "alt": "The Perfect Lie",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/4/683a142553/4350d456db15d228f84d6c9231159469.png"
+          },
+          {
+            "alt": "The Perfect Lie",
+            "type": "coverArt",
+            "url": "https://image.tmdb.org/t/p/original/xU9t22BRPHBWEHrtFYZZeXhlvRS.jpg"
+          },
+          {
+            "alt": "The Perfect Lie",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/a8qjbVX7lo1v7m5Awzhx7Ptk8gO.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07f308fddd001f28ee5f",
+            "id": "5d9c07f308fddd001f28ee5f",
+            "key": "/library/sections/home/all?genre=5d9c07f308fddd001f28ee5f",
+            "ratingKey": "genre_5d9c07f308fddd001f28ee5f",
+            "slug": "suspense",
+            "tag": "Suspense",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt37439410"
+          },
+          {
+            "id": "tmdb://325755"
+          },
+          {
+            "id": "tvdb://479461"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.143
+          }
+        ],
+        "Country": [
+          {
+            "tag": "Netherlands"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77689c96b655001fdbcecd",
+            "order": 1,
+            "slug": "loes-haverkort",
+            "tag": "Loes Haverkort",
+            "thumb": "https://metadata-static.plex.tv/5/people/5196c69a7a9bed8c7d1d77040b3d8a49.jpg",
+            "key": "/library/people/5d77689c96b655001fdbcecd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768455af944001f1fd53d",
+            "order": 2,
+            "slug": "remko-vrijdag",
+            "tag": "Remko Vrijdag",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768455af944001f1fd53d.jpg",
+            "key": "/library/people/5d7768455af944001f1fd53d",
+            "type": "person"
+          },
+          {
+            "id": "5d776b1696b655001fe03c29",
+            "order": 3,
+            "slug": "noortje-herlaar",
+            "tag": "Noortje Herlaar",
+            "thumb": "https://metadata-static.plex.tv/1/people/128cd84260262f82bd22b8e4bd0dbb71.jpg",
+            "key": "/library/people/5d776b1696b655001fe03c29",
+            "type": "person"
+          },
+          {
+            "id": "5d77684961141d001fb17df7",
+            "order": 4,
+            "slug": "edwin-jonker",
+            "tag": "Edwin Jonker",
+            "thumb": "https://metadata-static.plex.tv/9/people/9ec6a6170ef93b947cfac96f97ec05e4.jpg",
+            "key": "/library/people/5d77684961141d001fb17df7",
+            "type": "person"
+          },
+          {
+            "id": "5d776844880197001ec96380",
+            "order": 5,
+            "slug": "rifka-lodeizen",
+            "tag": "Rifka Lodeizen",
+            "thumb": "https://metadata-static.plex.tv/f/people/fa7f8227aa602612c4212bebdfa117d7.jpg",
+            "key": "/library/people/5d776844880197001ec96380",
+            "type": "person"
+          },
+          {
+            "id": "5d77684961141d001fb17dd1",
+            "order": 6,
+            "slug": "matthijs-van-de-sande-bakhuyzen",
+            "tag": "Matthijs van de Sande Bakhuyzen",
+            "thumb": "https://metadata-static.plex.tv/b/people/bcade6bde4f9983187d25a9f30eebc07.jpg",
+            "key": "/library/people/5d77684961141d001fb17dd1",
+            "type": "person"
+          },
+          {
+            "id": "5d77689aad5437001f74a866",
+            "order": 7,
+            "slug": "charlie-dagelet",
+            "tag": "Charlie Dagelet",
+            "thumb": "https://metadata-static.plex.tv/people/5d77689aad5437001f74a866.jpg",
+            "key": "/library/people/5d77689aad5437001f74a866",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff90f03883a0040af935c",
+            "order": 8,
+            "slug": "teun-luijkx",
+            "tag": "Teun Luijkx",
+            "thumb": "https://metadata-static.plex.tv/4/people/4bc2e4c7354e6252c03af5485e18af83.jpg",
+            "key": "/library/people/5f3ff90f03883a0040af935c",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77686e374a5b001fec55aa",
+            "slug": "dana-nechushtan",
+            "tag": "Dana Nechushtan",
+            "thumb": "https://metadata-static.plex.tv/e/people/ec512fab91c734843a91264952c72fe0.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77686e374a5b001fec55aa",
+            "type": "person"
+          },
+          {
+            "id": "5d7768fb96b655001fdc6f7a",
+            "slug": "margien-rogaar",
+            "tag": "Margien Rogaar",
+            "thumb": "https://metadata-static.plex.tv/7/people/7a9cf63e7e4ead1bb0828527a9327317.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768fb96b655001fdc6f7a",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77703c6afb3d0020615779",
+            "slug": "ronald-versteeg",
+            "tag": "Ronald Versteeg",
+            "role": "Producer",
+            "key": "/library/people/5d77703c6afb3d0020615779",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5de03d063967a0001d633d50",
+            "slug": "jop-esmeijer",
+            "tag": "Jop Esmeijer",
+            "role": "Written By",
+            "key": "/library/people/5de03d063967a0001d633d50",
+            "type": "person"
+          },
+          {
+            "id": "5dcfc65a70b2e6001d8330c6",
+            "slug": "dorien-goertzen",
+            "tag": "Dorien Goertzen",
+            "role": "Created By",
+            "key": "/library/people/5dcfc65a70b2e6001d8330c6",
+            "type": "person"
+          },
+          {
+            "id": "5d77689aad5437001f74a865",
+            "slug": "saskia-noort",
+            "tag": "Saskia Noort",
+            "thumb": "https://metadata-static.plex.tv/7/people/7712c341863df55a9596b9925a391f07.jpg",
+            "role": "Based On The Book By",
+            "key": "/library/people/5d77689aad5437001f74a865",
+            "type": "person"
+          },
+          {
+            "id": "5d776baa7a53e9001e72c848",
+            "slug": "ilse-ott",
+            "tag": "Ilse Ott",
+            "thumb": "https://metadata-static.plex.tv/8/people/8b9afe7d7cd34dce0d4a45fea0b99724.jpg",
+            "role": "Written By",
+            "key": "/library/people/5d776baa7a53e9001e72c848",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Netflix"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5e7362f5a109be004000541b",
+            "tag": "Suspicion (2022)"
+          },
+          {
+            "guid": "plex://show/61b17f17a0f200438422504c",
+            "tag": "Bel‐Air"
+          },
+          {
+            "guid": "plex://show/606eec4f7fb740002cf3665a",
+            "tag": "The Newsreader"
+          },
+          {
+            "guid": "plex://show/60ed66108fa387002c0e63d3",
+            "tag": "My Life with the Walter Boys"
+          },
+          {
+            "guid": "plex://show/6578507605050e5de4b04644",
+            "tag": "56 Days"
+          },
+          {
+            "guid": "plex://show/663557c445f74b3415b722b8",
+            "tag": "The Girlfriend"
+          },
+          {
+            "guid": "plex://show/66d077f58e425a34ab364caf",
+            "tag": "Unchosen"
+          },
+          {
+            "guid": "plex://show/5d9c08ee7b5c2e001e663d90",
+            "tag": "Tell Me a Story (US)"
+          },
+          {
+            "guid": "plex://show/5d9c0924ba6eb9001fbb07e0",
+            "tag": "Ambitions"
+          },
+          {
+            "guid": "plex://show/5d9c091c6c3e37001ecdc29a",
+            "tag": "The Twelve"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Fiction Valley"
+          }
+        ]
+      }
+    ]
+  }
+}

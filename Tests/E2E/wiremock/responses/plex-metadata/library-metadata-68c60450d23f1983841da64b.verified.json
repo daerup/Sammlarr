@@ -1,0 +1,464 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/e/gracenote/ea4890fdc2ad30b992f0c2891f1f4843.jpg",
+        "guid": "plex://movie/68c60450d23f1983841da64b",
+        "key": "/library/metadata/68c60450d23f1983841da64b",
+        "ratingKey": "68c60450d23f1983841da64b",
+        "studio": "Tyler Perry Studios",
+        "summary": "Jasmine loves Wesley, and their wedding is near - but her stern father and others disapprove, prompting couples around them to question their own \"perfect\" marriages.",
+        "tagline": "Ring any bells?",
+        "type": "movie",
+        "addedAt": 1788912000,
+        "audienceRating": 5.4,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "PG-13",
+        "duration": 6720000,
+        "imdbRatingCount": 637,
+        "originallyAvailableAt": "2026-09-09",
+        "publicPagesURL": "https://watch.plex.tv/movie/why-did-i-get-married-again-2026",
+        "slug": "why-did-i-get-married-again-2026",
+        "thumb": "https://metadata-static.plex.tv/f/gracenote/f2c20091428f962fe79ac70b2d26812e.jpg",
+        "title": "Why Did I Get Married Again?",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/e/gracenote/ea4890fdc2ad30b992f0c2891f1f4843.jpg"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/bd2e5fc52a309494123bcb5b497860ef.jpg"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/b/683a142553/b1345c7d562605ea90cd90c16ed490e1.png"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/b/683a142553/b1345c7d562605ea90cd90c16ed490e1.png"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/a/gracenote/a68aaed893d67b634ed623f3199d4f66.jpg"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/f/gracenote/f2c20091428f962fe79ac70b2d26812e.jpg"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/c/gracenote/ccda7cd85b3a02be60c4a384213b7520.jpg"
+          },
+          {
+            "alt": "Why Did I Get Married Again?",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/8/gracenote/83972cdc1a063c4e3080fa8d673e3dca.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9a",
+            "id": "5d9c046c705e7a001e6c8d9a",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9a",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9a",
+            "slug": "drama",
+            "tag": "Drama",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9b",
+            "id": "5d9c046c705e7a001e6c8d9b",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9b",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9b",
+            "slug": "romance",
+            "tag": "Romance",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt38061210"
+          },
+          {
+            "id": "tmdb://1522689"
+          },
+          {
+            "id": "tvdb://370120"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 5.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.059
+          }
+        ],
+        "Collection": [
+          {
+            "guid": "plex://collection/5ec3030695bdde003a4a1cfc",
+            "key": "/library/collections/5ec3030695bdde003a4a1cfc/children",
+            "summary": "Why Did I Get Married? Collection",
+            "thumb": "https://image.tmdb.org/t/p/original/m2v48ksQBcMYNX0WFopFfFB7IIw.jpg",
+            "tag": "Why Did I Get Married Collection"
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "order": 1,
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Terry",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f6f4521001ea9ad01",
+            "order": 2,
+            "slug": "taraji-p-henson",
+            "tag": "Taraji P. Henson",
+            "thumb": "https://metadata-static.plex.tv/1/people/118aeea55dd05966beaaebaa0b2a3a67.jpg",
+            "role": "Roselyn",
+            "key": "/library/people/5d77682f6f4521001ea9ad01",
+            "type": "person"
+          },
+          {
+            "id": "5d7768258718ba001e311938",
+            "order": 3,
+            "slug": "jill-scott",
+            "tag": "Jill Scott",
+            "thumb": "https://metadata-static.plex.tv/1/people/1addbcf121a02d91347b6a3cdbe79b64.jpg",
+            "role": "Sheila",
+            "key": "/library/people/5d7768258718ba001e311938",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a85719b001f3a1663",
+            "order": 4,
+            "slug": "richard-t-jones",
+            "tag": "Richard T. Jones",
+            "thumb": "https://metadata-static.plex.tv/4/people/496eff4e70fdf86478e641d6086871cb.jpg",
+            "role": "Mike",
+            "key": "/library/people/5d77682a85719b001f3a1663",
+            "type": "person"
+          },
+          {
+            "id": "5d77682ba091de001f2e6b06",
+            "order": 5,
+            "slug": "tasha-smith",
+            "tag": "Tasha Smith",
+            "thumb": "https://metadata-static.plex.tv/c/people/c591a502380fe0167f9e9c68e534e08f.jpg",
+            "role": "Angela",
+            "key": "/library/people/5d77682ba091de001f2e6b06",
+            "type": "person"
+          },
+          {
+            "id": "5d7768267e9a3c0020c6aa2a",
+            "order": 6,
+            "slug": "michael-jai-white",
+            "tag": "Michael Jai White",
+            "thumb": "https://metadata-static.plex.tv/c/people/c9f6ad45dfd9078bcd9d1bf4b9caacbc.jpg",
+            "role": "Marcus",
+            "key": "/library/people/5d7768267e9a3c0020c6aa2a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768294de0ee001fcc92de",
+            "order": 7,
+            "slug": "sharon-leal",
+            "tag": "Sharon Leal",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768294de0ee001fcc92de.jpg",
+            "role": "Diane",
+            "key": "/library/people/5d7768294de0ee001fcc92de",
+            "type": "person"
+          },
+          {
+            "id": "5d77683f85719b001f3a5945",
+            "order": 8,
+            "slug": "lamman-rucker",
+            "tag": "Lamman Rucker",
+            "thumb": "https://metadata-static.plex.tv/7/people/7035ab72d6ed832681efb4acb8e9b1c7.jpg",
+            "role": "Troy",
+            "key": "/library/people/5d77683f85719b001f3a5945",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd572bf3e560040b1a56a",
+            "order": 9,
+            "slug": "armani-greer",
+            "tag": "Armani Greer",
+            "role": "Jasmine",
+            "key": "/library/people/5f3fd572bf3e560040b1a56a",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd521c63b480040d7f371",
+            "order": 10,
+            "slug": "everett-osborne",
+            "tag": "Everett Osborne",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c5856828b062a1e27e4d9b8d552d2be.jpg",
+            "role": "Wesley",
+            "key": "/library/people/5f3fd521c63b480040d7f371",
+            "type": "person"
+          },
+          {
+            "id": "5d77705a81ba41001faee250",
+            "order": 11,
+            "slug": "davinchi",
+            "tag": "Da'Vinchi",
+            "thumb": "https://metadata-static.plex.tv/5/people/522af5f64e6503d180bc14b546c6c80c.jpg",
+            "role": "Marcus Jr.",
+            "key": "/library/people/5d77705a81ba41001faee250",
+            "type": "person"
+          },
+          {
+            "id": "5d776b4cfb0d55001f563186",
+            "order": 12,
+            "slug": "laya-deleon-hayes",
+            "tag": "Laya DeLeon Hayes",
+            "thumb": "https://metadata-static.plex.tv/f/people/fb76836aea1351164d02a6ae7c0e2025.jpg",
+            "role": "Kenya",
+            "key": "/library/people/5d776b4cfb0d55001f563186",
+            "type": "person"
+          },
+          {
+            "id": "5d7769f751dd69001fe1e4a3",
+            "order": 13,
+            "slug": "jaden-michael",
+            "tag": "Jaden Michael",
+            "thumb": "https://metadata-static.plex.tv/1/people/18fb80dc41acb895f2f58c5ba6f3eb83.jpg",
+            "role": "TJ",
+            "key": "/library/people/5d7769f751dd69001fe1e4a3",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc91152f200004149054d",
+            "order": 14,
+            "slug": "charles-l-smith-ii",
+            "tag": "Charles L. Smith II",
+            "role": "Denver",
+            "key": "/library/people/5f3fc91152f200004149054d",
+            "type": "person"
+          },
+          {
+            "id": "5d776da3594b2b001e70e298",
+            "order": 15,
+            "slug": "derrick-a-king",
+            "tag": "Derrick A. King",
+            "thumb": "https://metadata-static.plex.tv/0/people/06fc1d00cf5aa252ccdbcb696bc77609.jpg",
+            "role": "Nick",
+            "key": "/library/people/5d776da3594b2b001e70e298",
+            "type": "person"
+          },
+          {
+            "id": "5e336bbd3dd22f003d82e071",
+            "order": 16,
+            "slug": "sydney-winbush",
+            "tag": "Sydney Winbush",
+            "thumb": "https://metadata-static.plex.tv/2/people/26c477e5de79af21aa0b3d8dcc784920.jpg",
+            "role": "Regina",
+            "key": "/library/people/5e336bbd3dd22f003d82e071",
+            "type": "person"
+          },
+          {
+            "id": "5d77683b7228e5001f1df93a",
+            "order": 17,
+            "slug": "maya-massar",
+            "tag": "Maya Massar",
+            "thumb": "https://metadata-static.plex.tv/people/5d77683b7228e5001f1df93a.jpg",
+            "role": "Female #1",
+            "key": "/library/people/5d77683b7228e5001f1df93a",
+            "type": "person"
+          },
+          {
+            "id": "6641cb027494082c4f24a1c3",
+            "order": 18,
+            "slug": "herb-magwood",
+            "tag": "Herb Magwood",
+            "role": "Bouncer",
+            "key": "/library/people/6641cb027494082c4f24a1c3",
+            "type": "person"
+          },
+          {
+            "id": "684691b9a84391905235063d",
+            "order": 19,
+            "slug": "alessandra-porcu",
+            "tag": "Alessandra Porcù",
+            "role": "Wedding Coordinator",
+            "key": "/library/people/684691b9a84391905235063d",
+            "type": "person"
+          },
+          {
+            "id": "6aa29bfed9a8b12d643bd423",
+            "order": 20,
+            "slug": "franco-alberto",
+            "tag": "Franco Alberto",
+            "role": "Pastor",
+            "key": "/library/people/6aa29bfed9a8b12d643bd423",
+            "type": "person"
+          },
+          {
+            "id": "5f40569052f200004157901e",
+            "order": 21,
+            "slug": "dacia-stinson",
+            "tag": "Dacia Stinson",
+            "role": "Female #2",
+            "key": "/library/people/5f40569052f200004157901e",
+            "type": "person"
+          },
+          {
+            "id": "5f4043aabf3e560040bc9848",
+            "order": 22,
+            "slug": "camilla-petrocelli",
+            "tag": "Camilla Petrocelli",
+            "role": "Host",
+            "key": "/library/people/5f4043aabf3e560040bc9848",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          },
+          {
+            "id": "5d776d9a96b655001fe4d5db",
+            "slug": "angi-bones",
+            "tag": "Angi Bones",
+            "role": "Producer",
+            "key": "/library/people/5d776d9a96b655001fe4d5db",
+            "type": "person"
+          },
+          {
+            "id": "5f3fe6a5537293003d37ebd6",
+            "slug": "tony-strickland",
+            "tag": "Tony Strickland",
+            "role": "Producer",
+            "key": "/library/people/5f3fe6a5537293003d37ebd6",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d77683beb5d26001f1e1f29",
+            "slug": "tyler-perry",
+            "tag": "Tyler Perry",
+            "thumb": "https://metadata-static.plex.tv/2/people/212c40d04aecbc92197740b9a86cc819.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d77683beb5d26001f1e1f29",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/6563a7f76a74c8d14e9527ca",
+            "tag": "The Best You Can"
+          },
+          {
+            "guid": "plex://movie/5d776839999c64001ec301fa",
+            "tag": "YPF"
+          },
+          {
+            "guid": "plex://movie/5d77683a999c64001ec30600",
+            "tag": "Delirious"
+          },
+          {
+            "guid": "plex://movie/5d77684685719b001f3a6db0",
+            "tag": "Father of the Bride"
+          },
+          {
+            "guid": "plex://movie/5d77684f8a7581001f1302b3",
+            "tag": "Love & Sex"
+          },
+          {
+            "guid": "plex://movie/5d9f3574d74e67002002210f",
+            "tag": "Cyrus"
+          },
+          {
+            "guid": "plex://movie/5d7768782e80df001ebe484c",
+            "tag": "XX/XY"
+          },
+          {
+            "guid": "plex://movie/5d9f3d92d74e67002002a722",
+            "tag": "Madame"
+          },
+          {
+            "guid": "plex://movie/5e163366bc1372003ea6863b",
+            "tag": "The Good House"
+          },
+          {
+            "guid": "plex://movie/5f40d7ff427eeb0041f4d555",
+            "tag": "Sitting in Bars with Cake"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Tyler Perry Studios"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "Jasmine and Wesley plan their wedding despite her father disapproving.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

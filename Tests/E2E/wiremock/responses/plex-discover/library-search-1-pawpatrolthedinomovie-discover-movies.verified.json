@@ -1,0 +1,676 @@
+{
+  "MediaContainer": {
+    "suggestedTerms": [],
+    "identifier": "tv.plex.provider.discover",
+    "size": 1,
+    "SearchResults": [
+      {
+        "id": "external",
+        "title": "More Ways To Watch",
+        "size": 10,
+        "SearchResult": [
+          {
+            "Metadata": {
+              "addedAt": 1785456000,
+              "art": "https://metadata-static.plex.tv/3/gracenote/37390cb1ffcbeb6809062e38297615ab.jpg",
+              "duration": 5280000,
+              "guid": "plex://movie/6519a4470dfdf4d7c165c84a",
+              "key": "/library/metadata/6519a4470dfdf4d7c165c84a",
+              "originallyAvailableAt": "2026-07-31",
+              "ratingKey": "6519a4470dfdf4d7c165c84a",
+              "slug": "paw-patrol-the-dino-movie",
+              "thumb": "https://metadata-static.plex.tv/a/gracenote/a2f1a07ef2d34441a8b4a309419e2975.jpg",
+              "title": "PAW Patrol: The Dino Movie",
+              "type": "movie",
+              "year": 2026,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+                  "id": "5d9c07ebcb3ffa001f1b0903",
+                  "key": "/library/categories/children",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+                  "slug": "children",
+                  "tag": "Children",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.93
+          },
+          {
+            "Metadata": {
+              "addedAt": 1628467200,
+              "art": "https://metadata-static.plex.tv/7/gracenote/7aa92062224cae3b3c6e06ac8f648666.jpg",
+              "duration": 5160000,
+              "guid": "plex://movie/5e5d3afcb9a265003d012bf8",
+              "key": "/library/metadata/5e5d3afcb9a265003d012bf8",
+              "originallyAvailableAt": "2021-08-09",
+              "ratingKey": "5e5d3afcb9a265003d012bf8",
+              "slug": "paw-patrol-the-movie",
+              "thumb": "https://metadata-static.plex.tv/1/gracenote/1df4e0b2389ea1f770a2c63f6e87357d.jpg",
+              "title": "PAW Patrol: The Movie",
+              "type": "movie",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.35
+          },
+          {
+            "Metadata": {
+              "addedAt": 1695254400,
+              "art": "https://metadata-static.plex.tv/b/gracenote/ba8a8ab300435ee4a3e23e282bb4920a.jpg",
+              "duration": 5280000,
+              "guid": "plex://movie/6183f8855df7955fbe0342b3",
+              "key": "/library/metadata/6183f8855df7955fbe0342b3",
+              "originallyAvailableAt": "2023-09-21",
+              "ratingKey": "6183f8855df7955fbe0342b3",
+              "slug": "paw-patrol-the-mighty-movie",
+              "thumb": "https://metadata-static.plex.tv/e/gracenote/ee07bdd3d66930af3bbe232961a8e8f6.jpg",
+              "title": "PAW Patrol: The Mighty Movie",
+              "type": "movie",
+              "year": 2023,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab90",
+                  "id": "5d9c046c08fddd001f28ab90",
+                  "key": "/library/categories/crime",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+                  "slug": "crime",
+                  "tag": "Crime",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8daa",
+                  "id": "5d9c046c705e7a001e6c8daa",
+                  "key": "/library/categories/fantasy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+                  "slug": "fantasy",
+                  "tag": "Fantasy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c4",
+                  "id": "5d9c046c2192ba001f2ff6c4",
+                  "key": "/library/categories/sci-fi",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+                  "slug": "sci-fi",
+                  "tag": "Science Fiction",
+                  "originalTag": "Sci-Fi",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+                  "id": "5d9c07ebcb3ffa001f1b0903",
+                  "key": "/library/categories/children",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+                  "slug": "children",
+                  "tag": "Children",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.34
+          },
+          {
+            "Metadata": {
+              "addedAt": 1601769600,
+              "art": "https://image.tmdb.org/t/p/original/zZQXCmJYyZyYXFC9ZHLejUHBtcE.jpg",
+              "guid": "plex://movie/5fd398e7618d00002ddc8a99",
+              "key": "/library/metadata/5fd398e7618d00002ddc8a99",
+              "originallyAvailableAt": "2020-10-04",
+              "ratingKey": "5fd398e7618d00002ddc8a99",
+              "slug": "paw-patrol-dino-rescue",
+              "thumb": "https://image.tmdb.org/t/p/original/qgqYiiuomYGGqds6WP8q4c7pYNv.jpg",
+              "title": "PAW Patrol: Dino Rescue",
+              "type": "movie",
+              "year": 2020,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.26
+          },
+          {
+            "Metadata": {
+              "addedAt": 1521590400,
+              "art": "https://image.tmdb.org/t/p/original/Atvz0QPBD9WJirfDazIUktQIyFe.jpg",
+              "duration": 4740000,
+              "guid": "plex://movie/5d77704c81ba41001faeccf5",
+              "key": "/library/metadata/5d77704c81ba41001faeccf5",
+              "originallyAvailableAt": "2018-03-21",
+              "ratingKey": "5d77704c81ba41001faeccf5",
+              "slug": "paw-patrol-mission-paw",
+              "thumb": "https://image.tmdb.org/t/p/original/4ySjVdARrCSlrDJb3xdUl821iP.jpg",
+              "title": "PAW Patrol: Mission PAW",
+              "type": "movie",
+              "year": 2018,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c04732df347001e3a35be",
+                  "id": "5d9c04732df347001e3a35be",
+                  "key": "/library/categories/tv-movie",
+                  "ratingKey": "genre_5d9c04732df347001e3a35be",
+                  "slug": "tv-movie",
+                  "tag": "TV Movie",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.25
+          },
+          {
+            "Metadata": {
+              "addedAt": 1623801600,
+              "duration": 5520000,
+              "guid": "plex://movie/61ec22a0f2a2009225cd7d98",
+              "key": "/library/metadata/61ec22a0f2a2009225cd7d98",
+              "originallyAvailableAt": "2021-06-16",
+              "ratingKey": "61ec22a0f2a2009225cd7d98",
+              "slug": "paw-patrol-dino-rescue-roar-to-the-rescue",
+              "thumb": "https://image.tmdb.org/t/p/original/temgbeq29KCSWCUwehPvIyo1LY3.jpg",
+              "title": "PAW Patrol: Dino Rescue: Roar To The Rescue",
+              "type": "movie",
+              "year": 2021,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.25
+          },
+          {
+            "Metadata": {
+              "addedAt": 1761782400,
+              "art": "https://metadata-static.plex.tv/7/gracenote/7e6ab5b105de7d8c5c977a0c553d9fba.jpg",
+              "duration": 2640000,
+              "guid": "plex://movie/689a36efccf235f9f16050f8",
+              "key": "/library/metadata/689a36efccf235f9f16050f8",
+              "originallyAvailableAt": "2025-10-30",
+              "ratingKey": "689a36efccf235f9f16050f8",
+              "slug": "a-paw-patrol-christmas-2025-3",
+              "subtype": "special",
+              "thumb": "https://metadata-static.plex.tv/f/gracenote/ff0300a0b5f21b19e5bc14fd3dca6621.jpg",
+              "title": "A PAW Patrol Christmas",
+              "type": "movie",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+                  "id": "5d9c07ebcb3ffa001f1b0903",
+                  "key": "/library/categories/children",
+                  "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+                  "slug": "children",
+                  "tag": "Children",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.24
+          },
+          {
+            "Metadata": {
+              "addedAt": 1517443200,
+              "guid": "plex://movie/5d777077bbb697001f651771",
+              "key": "/library/metadata/5d777077bbb697001f651771",
+              "originallyAvailableAt": "2018-02-01",
+              "ratingKey": "5d777077bbb697001f651771",
+              "slug": "paw-patrol-sea-patrol",
+              "thumb": "https://image.tmdb.org/t/p/original/sUXVvUG6rQzmMaTIQirhGSYRDnw.jpg",
+              "title": "Paw Patrol: Sea Patrol",
+              "type": "movie",
+              "year": 2018,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.24
+          },
+          {
+            "Metadata": {
+              "addedAt": 1545609600,
+              "art": "https://image.tmdb.org/t/p/original/AseABzwquvPFMpVQUDeDifYjLkF.jpg",
+              "duration": 2640000,
+              "guid": "plex://movie/61aa17f4c20c774371e42669",
+              "key": "/library/metadata/61aa17f4c20c774371e42669",
+              "originallyAvailableAt": "2018-12-24",
+              "ratingKey": "61aa17f4c20c774371e42669",
+              "slug": "paw-patrol-mighty-pups-2018",
+              "thumb": "https://image.tmdb.org/t/p/original/6qIEgqQWao5VcBE3jsXWOSTYZw.jpg",
+              "title": "Paw Patrol: Mighty Pups",
+              "type": "movie",
+              "year": 2018,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c2",
+                  "id": "5d9c046c2192ba001f2ff6c2",
+                  "key": "/library/categories/action",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+                  "slug": "action",
+                  "tag": "Action",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          },
+          {
+            "Metadata": {
+              "addedAt": 1741046400,
+              "art": "https://image.tmdb.org/t/p/original/ZDba7Yye151s5rHc6jgzfX9XA9.jpg",
+              "duration": 8040000,
+              "guid": "plex://movie/67d56c6f0baf0e4981a3b1fb",
+              "key": "/library/metadata/67d56c6f0baf0e4981a3b1fb",
+              "originallyAvailableAt": "2025-03-04",
+              "ratingKey": "67d56c6f0baf0e4981a3b1fb",
+              "slug": "paw-patrol-air-rescue",
+              "thumb": "https://image.tmdb.org/t/p/original/lX0KM1qp417LYTBQDZ3ue9ObpUo.jpg",
+              "title": "PAW Patrol: Air Rescue",
+              "type": "movie",
+              "year": 2025,
+              "Genre": [
+                {
+                  "filter": "genre=5d9c046c3c3f87001f33fbfc",
+                  "id": "5d9c046c3c3f87001f33fbfc",
+                  "key": "/library/categories/animation",
+                  "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+                  "slug": "animation",
+                  "tag": "Animation",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c2192ba001f2ff6c3",
+                  "id": "5d9c046c2192ba001f2ff6c3",
+                  "key": "/library/categories/adventure",
+                  "ratingKey": "genre_5d9c046c2192ba001f2ff6c3",
+                  "slug": "adventure",
+                  "tag": "Adventure",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c705e7a001e6c8d99",
+                  "id": "5d9c046c705e7a001e6c8d99",
+                  "key": "/library/categories/comedy",
+                  "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+                  "slug": "comedy",
+                  "tag": "Comedy",
+                  "type": "hub",
+                  "context": "tag.genre"
+                },
+                {
+                  "filter": "genre=5d9c046c08fddd001f28ab9e",
+                  "id": "5d9c046c08fddd001f28ab9e",
+                  "key": "/library/categories/family",
+                  "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+                  "slug": "family",
+                  "tag": "Family",
+                  "type": "hub",
+                  "context": "tag.genre"
+                }
+              ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.23
+          }
+        ]
+      }
+    ]
+  }
+}

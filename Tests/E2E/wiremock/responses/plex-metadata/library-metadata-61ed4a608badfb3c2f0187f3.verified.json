@@ -1,0 +1,107 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "guid": "plex://movie/61ed4a608badfb3c2f0187f3",
+        "key": "/library/metadata/61ed4a608badfb3c2f0187f3",
+        "ratingKey": "61ed4a608badfb3c2f0187f3",
+        "subtype": "short",
+        "summary": "A cameraman helping to shoot an indie film suddenly finds himself wandering a liminal space.",
+        "tagline": "September 23, 1996",
+        "type": "movie",
+        "addedAt": 1641513600,
+        "audienceRating": 7.8,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "16+",
+        "duration": 540000,
+        "imdbRatingCount": 907,
+        "originallyAvailableAt": "2022-01-07",
+        "publicPagesURL": "https://watch.plex.tv/movie/backrooms-2022",
+        "slug": "backrooms-2022",
+        "title": "Backrooms",
+        "userState": false,
+        "year": 2022,
+        "Genre": [
+          {
+            "filter": "genre=5d9c0501ba6eb9001fb9475f",
+            "id": "5d9c0501ba6eb9001fb9475f",
+            "key": "/library/sections/home/all?genre=5d9c0501ba6eb9001fb9475f",
+            "ratingKey": "genre_5d9c0501ba6eb9001fb9475f",
+            "slug": "short",
+            "tag": "Short",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt17291392"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.8
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.8
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "62a0597d9e293912960c5fd7",
+            "order": 1,
+            "slug": "aakash-18",
+            "tag": "Aakash",
+            "role": "Valdivia",
+            "key": "/library/people/62a0597d9e293912960c5fd7",
+            "type": "person"
+          },
+          {
+            "id": "62a0597d44a076e9211cc374",
+            "order": 2,
+            "slug": "henry-104",
+            "tag": "Henry",
+            "role": "Greber",
+            "key": "/library/people/62a0597d44a076e9211cc374",
+            "type": "person"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,610 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/8/gracenote/8b934371a06a28727ca169d28e146228.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/movie/363177/banners/6a563e9514d7e.jpg",
+        "guid": "plex://movie/63e28b6d774d2d504b6ff241",
+        "isTopWatchlisted": true,
+        "key": "/library/metadata/63e28b6d774d2d504b6ff241",
+        "rating": 8.6,
+        "ratingKey": "63e28b6d774d2d504b6ff241",
+        "studio": "Atomic Monster",
+        "summary": "A strange doorway appears in the basement of a furniture showroom, leading to an endless network of interconnected rooms where time bends and the only thing scarier than getting lost is the sense that something is lying in wait. ",
+        "tagline": "See how far it goes.",
+        "type": "movie",
+        "addedAt": 1779840000,
+        "audienceRating": 7.4,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "budget": 10000000,
+        "contentRating": "R",
+        "duration": 6660000,
+        "imdbRatingCount": 195360,
+        "originallyAvailableAt": "2026-05-27",
+        "publicPagesURL": "https://watch.plex.tv/movie/backrooms-2026",
+        "ratingImage": "rottentomatoes://image.rating.ripe",
+        "revenue": 394122453,
+        "slug": "backrooms-2026",
+        "thumb": "https://metadata-static.plex.tv/7/gracenote/791d18dc9e9959df411115ddfdfd82cf.jpg",
+        "title": "Backrooms",
+        "userState": false,
+        "year": 2026,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/63e28b6d774d2d504b6ff241/commonsensemedia",
+            "oneLiner": "Creepy, unique, unsettling \"liminal space\" horror movie.",
+            "AgeRating": [
+              {
+                "age": 15,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Backrooms",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/8/gracenote/8b934371a06a28727ca169d28e146228.jpg"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4b8934fc51b5e30a170806e26cf532ef.jpg"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/movie/363177/banners/6a563e9514d7e.jpg"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/7/683a142553/73e90927f02eedd3534f7f6a7ca37e3d.png"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/7/683a142553/73e90927f02eedd3534f7f6a7ca37e3d.png"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/c/gracenote/cb11d960d9a094d2de0f7bced3028ab9.jpg"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/7/gracenote/791d18dc9e9959df411115ddfdfd82cf.jpg"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/b/gracenote/bd0f284c58a3ba622ab1163640977a7a.jpg"
+          },
+          {
+            "alt": "Backrooms",
+            "type": "snapshot",
+            "url": "https://metadata-static.plex.tv/9/gracenote/90b72c92a4a5b0d83f69dbd081fbd0e7.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c7b5c2e001e64c612",
+            "id": "5d9c046c7b5c2e001e64c612",
+            "key": "/library/sections/home/all?genre=5d9c046c7b5c2e001e64c612",
+            "ratingKey": "genre_5d9c046c7b5c2e001e64c612",
+            "slug": "horror",
+            "tag": "Horror",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d9e",
+            "id": "5d9c046c705e7a001e6c8d9e",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d9e",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d9e",
+            "slug": "mystery",
+            "tag": "Mystery",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c4",
+            "id": "5d9c046c2192ba001f2ff6c4",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c4",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c4",
+            "slug": "sci-fi",
+            "tag": "Science Fiction",
+            "originalTag": "Sci-Fi",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt26657236"
+          },
+          {
+            "id": "tmdb://1083381"
+          },
+          {
+            "id": "tvdb://363177"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 6.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.ripe",
+            "type": "critic",
+            "value": 8.6
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 7.4
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.051
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          },
+          {
+            "tag": "Canada"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768266f4521001ea98c8f",
+            "order": 1,
+            "slug": "chiwetel-ejiofor",
+            "tag": "Chiwetel Ejiofor",
+            "thumb": "https://metadata-static.plex.tv/d/people/dfa2d466b5c83ecb7e40769d31e95972.jpg",
+            "role": "Clark",
+            "key": "/library/people/5d7768266f4521001ea98c8f",
+            "type": "person"
+          },
+          {
+            "id": "5d776b6e96b655001fe10ba9",
+            "order": 2,
+            "slug": "renate-reinsve",
+            "tag": "Renate Reinsve",
+            "thumb": "https://metadata-static.plex.tv/a/people/a35528e5d009f2160f3681672bb88be1.jpg",
+            "role": "Mary",
+            "key": "/library/people/5d776b6e96b655001fe10ba9",
+            "type": "person"
+          },
+          {
+            "id": "5e624c175dd74b003de865fe",
+            "order": 3,
+            "slug": "finn-bennett",
+            "tag": "Finn Bennett",
+            "thumb": "https://metadata-static.plex.tv/1/people/12c01cbd225df1197f9840f3e3ffa4dd.jpg",
+            "role": "Bobby",
+            "key": "/library/people/5e624c175dd74b003de865fe",
+            "type": "person"
+          },
+          {
+            "id": "5e1643c8bc1372003ea792d2",
+            "order": 4,
+            "slug": "lukita-maxwell",
+            "tag": "Lukita Maxwell",
+            "thumb": "https://metadata-static.plex.tv/b/people/ba9e218c036d9c4b0c58a5ecbd21f621.jpg",
+            "role": "Kat",
+            "key": "/library/people/5e1643c8bc1372003ea792d2",
+            "type": "person"
+          },
+          {
+            "id": "5d77682f961905001eb92ddb",
+            "order": 5,
+            "slug": "mark-duplass",
+            "tag": "Mark Duplass",
+            "thumb": "https://metadata-static.plex.tv/3/people/38e53dac6a1832feb7bd2aead5d40355.jpg",
+            "role": "Phil",
+            "key": "/library/people/5d77682f961905001eb92ddb",
+            "type": "person"
+          },
+          {
+            "id": "5d77683c3c3c2a001fbcf6cf",
+            "order": 6,
+            "slug": "avan-jogia",
+            "tag": "Avan Jogia",
+            "thumb": "https://metadata-static.plex.tv/8/people/8dd510d6adef794197885943a1bdec12.jpg",
+            "role": "Naren Warne",
+            "key": "/library/people/5d77683c3c3c2a001fbcf6cf",
+            "type": "person"
+          },
+          {
+            "id": "66b32cff3f4cccd9e84dddc9",
+            "order": 7,
+            "slug": "robert-bobroczkyi",
+            "tag": "Robert Bobroczkyi",
+            "thumb": "https://metadata-static.plex.tv/d/people/d67bd5ec35a9d9460f122238db70b1aa.jpg",
+            "role": "Pirate Clark",
+            "key": "/library/people/66b32cff3f4cccd9e84dddc9",
+            "type": "person"
+          },
+          {
+            "id": "68936f642d7f8dfbe138ea8f",
+            "order": 8,
+            "slug": "ember-ambrose",
+            "tag": "Ember Ambrose",
+            "thumb": "https://metadata-static.plex.tv/5/people/5cfc06ab9a3d02763387d27b235b76f5.jpg",
+            "role": "Young Mary",
+            "key": "/library/people/68936f642d7f8dfbe138ea8f",
+            "type": "person"
+          },
+          {
+            "id": "5d77686ef59e58002189d67f",
+            "order": 9,
+            "slug": "krista-kosonen",
+            "tag": "Krista Kosonen",
+            "thumb": "https://metadata-static.plex.tv/7/people/7e13ea65f805f5c3c85c7869b68bdd08.jpg",
+            "role": "Nora",
+            "key": "/library/people/5d77686ef59e58002189d67f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682beb5d26001f1de9c0",
+            "order": 10,
+            "slug": "philip-granger",
+            "tag": "Philip Granger",
+            "thumb": "https://metadata-static.plex.tv/8/people/8e3f28349de65a2975c9357ae26f4440.jpg",
+            "role": "Meterman",
+            "key": "/library/people/5d77682beb5d26001f1de9c0",
+            "type": "person"
+          },
+          {
+            "id": "5d7768263c3c2a001fbcad27",
+            "order": 11,
+            "slug": "katharine-isabelle",
+            "tag": "Katharine Isabelle",
+            "thumb": "https://metadata-static.plex.tv/8/people/8dfa393745ae0423652f6d04d14d46bb.jpg",
+            "role": "Robin",
+            "key": "/library/people/5d7768263c3c2a001fbcad27",
+            "type": "person"
+          },
+          {
+            "id": "5d7768364de0ee001fccbb25",
+            "order": 12,
+            "slug": "peter-new",
+            "tag": "Peter New",
+            "thumb": "https://metadata-static.plex.tv/6/people/6bd193a40528fd7e4bb27ec93c47dac4.jpg",
+            "role": "Big Wayne",
+            "key": "/library/people/5d7768364de0ee001fccbb25",
+            "type": "person"
+          },
+          {
+            "id": "5d776aee594b2b001e6c9ea0",
+            "order": 13,
+            "slug": "sarah-hayward",
+            "tag": "Sarah Hayward",
+            "thumb": "https://metadata-static.plex.tv/people/5d776aee594b2b001e6c9ea0.jpg",
+            "role": "Nurse",
+            "key": "/library/people/5d776aee594b2b001e6c9ea0",
+            "type": "person"
+          },
+          {
+            "id": "679b1f8c969b5a167c2854a6",
+            "order": 14,
+            "slug": "natalie-moon-4",
+            "tag": "Natalie Moon",
+            "thumb": "https://metadata-static.plex.tv/a/people/a023a9cc21ed0da78fcf7a4f74883858.jpg",
+            "role": "Phil's Wife",
+            "key": "/library/people/679b1f8c969b5a167c2854a6",
+            "type": "person"
+          },
+          {
+            "id": "5ec423713b12ac0041fb7188",
+            "order": 15,
+            "slug": "calix-fraser",
+            "tag": "Calix Fraser",
+            "thumb": "https://metadata-static.plex.tv/e/people/ed2ee48af0b75dd4ffc93a7142c83208.jpg",
+            "role": "Phil's Child",
+            "key": "/library/people/5ec423713b12ac0041fb7188",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd2d252f200004149e27a",
+            "order": 16,
+            "slug": "sawyer-fraser",
+            "tag": "Sawyer Fraser",
+            "thumb": "https://metadata-static.plex.tv/c/people/cfea9ddb4350e34fcc9221c298876dbf.jpg",
+            "role": "Phil's Child",
+            "key": "/library/people/5f3fd2d252f200004149e27a",
+            "type": "person"
+          },
+          {
+            "id": "5d776836f59e580021898bdc",
+            "order": 17,
+            "slug": "patrick-baynham",
+            "tag": "Patrick Baynham",
+            "thumb": "https://metadata-static.plex.tv/b/people/bb77346dc89adecd0e1dc7e622ad7110.jpg",
+            "role": "Bearded Still Life",
+            "key": "/library/people/5d776836f59e580021898bdc",
+            "type": "person"
+          },
+          {
+            "id": "5f3fd3ebfea1a1003f97f1d7",
+            "order": 18,
+            "slug": "rhiannon-roberts-1",
+            "tag": "Rhiannon Roberts",
+            "thumb": "https://metadata-static.plex.tv/1/people/1762b1dce20105558f237860b536efc7.jpg",
+            "role": "Redheaded Still Life",
+            "key": "/library/people/5f3fd3ebfea1a1003f97f1d7",
+            "type": "person"
+          },
+          {
+            "id": "5d776c47fb0d55001f582ee9",
+            "order": 19,
+            "slug": "dana-mahmood",
+            "tag": "Dana Mahmood",
+            "role": "Archibald Leland Sutter Still Life",
+            "key": "/library/people/5d776c47fb0d55001f582ee9",
+            "type": "person"
+          },
+          {
+            "id": "69fc782d6baaf817a199758b",
+            "order": 20,
+            "slug": "matthew-patrick-savage",
+            "tag": "Matthew Patrick Savage",
+            "role": "Homeless Man",
+            "key": "/library/people/69fc782d6baaf817a199758b",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc84a03883a0040ab177c",
+            "order": 21,
+            "slug": "ramona-kim",
+            "tag": "Ramona Kim",
+            "role": "Party Attendant Mother",
+            "key": "/library/people/5f3fc84a03883a0040ab177c",
+            "type": "person"
+          },
+          {
+            "id": "6325811136295cf953dbe456",
+            "order": 22,
+            "slug": "milana-wan",
+            "tag": "Milana Wan",
+            "role": "Party Attendant Daughter",
+            "key": "/library/people/6325811136295cf953dbe456",
+            "type": "person"
+          },
+          {
+            "id": "62fb7cb82166c917875a5f3f",
+            "order": 23,
+            "slug": "kelly-craig-1",
+            "tag": "Kelly Craig",
+            "thumb": "https://metadata-static.plex.tv/b/people/b11b7ce0cc4f24cdbab6fb84dcf49d3b.jpg",
+            "role": "Barbara",
+            "key": "/library/people/62fb7cb82166c917875a5f3f",
+            "type": "person"
+          },
+          {
+            "id": "69fc782dfe97bd7074b912af",
+            "order": 24,
+            "slug": "mel-kostas",
+            "tag": "Mel Kostas",
+            "role": "Rival Customer",
+            "key": "/library/people/69fc782dfe97bd7074b912af",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5f3fc7e152f200004148e993",
+            "slug": "kane-parsons-1",
+            "tag": "Kane Parsons",
+            "thumb": "https://metadata-static.plex.tv/2/people/2453098f2065cfeb61ecc40118e9fee4.jpg",
+            "role": "Director",
+            "key": "/library/people/5f3fc7e152f200004148e993",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5d77682a151a60001f24b483",
+            "slug": "shawn-levy",
+            "tag": "Shawn Levy",
+            "thumb": "https://metadata-static.plex.tv/6/people/6f7f5113f3f7338a8fc2214768d438b4.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d77682a151a60001f24b483",
+            "type": "person"
+          },
+          {
+            "id": "5dce6f0d7ec909001ea71a2d",
+            "slug": "dan-cohen",
+            "tag": "Dan Cohen",
+            "thumb": "https://metadata-static.plex.tv/b/people/b0cb63a01edebce2bf8cd4b56f17ebb2.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dce6f0d7ec909001ea71a2d",
+            "type": "person"
+          },
+          {
+            "id": "5dcd37b5c2afc4001ee1886b",
+            "slug": "dan-levine",
+            "tag": "Dan Levine",
+            "thumb": "https://metadata-static.plex.tv/c/people/cd9f8533e1135953a2ceb6ef7b597833.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dcd37b5c2afc4001ee1886b",
+            "type": "person"
+          },
+          {
+            "id": "5d776826a091de001f2e60ea",
+            "slug": "james-wan",
+            "tag": "James Wan",
+            "thumb": "https://metadata-static.plex.tv/iva/person/26353/e0198c7718c7c65a475caa34baff24b3.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776826a091de001f2e60ea",
+            "type": "person"
+          },
+          {
+            "id": "5d776f017a53e9001e7893f0",
+            "slug": "michael-clear",
+            "tag": "Michael Clear",
+            "thumb": "https://metadata-static.plex.tv/6/people/65503b5ea5d204263f74971cc84ceba7.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776f017a53e9001e7893f0",
+            "type": "person"
+          },
+          {
+            "id": "5dce71f87ec909001ea72c0f",
+            "slug": "roberto-patino",
+            "tag": "Roberto Patino",
+            "thumb": "https://metadata-static.plex.tv/f/people/f3cb697b634ea888beea894506588df2.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dce71f87ec909001ea72c0f",
+            "type": "person"
+          },
+          {
+            "id": "5dd86ebcedf40c001de92301",
+            "slug": "kori-adelson",
+            "tag": "Kori Adelson",
+            "thumb": "https://metadata-static.plex.tv/6/people/62a785620663e4a1f221b13e98052ae4.jpg",
+            "role": "Producer",
+            "key": "/library/people/5dd86ebcedf40c001de92301",
+            "type": "person"
+          },
+          {
+            "id": "5d776a4023d5a3001f50232c",
+            "slug": "chris-ferguson",
+            "tag": "Chris Ferguson",
+            "thumb": "https://metadata-static.plex.tv/4/people/430d25e76d82e0c1bb254660a74d8924.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776a4023d5a3001f50232c",
+            "type": "person"
+          },
+          {
+            "id": "5d776832f59e580021898626",
+            "slug": "osgood-perkins-1",
+            "tag": "Osgood Perkins",
+            "thumb": "https://metadata-static.plex.tv/d/people/dbe6eea728de152b9c2e7eedb5d8d27f.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776832f59e580021898626",
+            "type": "person"
+          },
+          {
+            "id": "5d776837f59e580021898e33",
+            "slug": "jenno-topping",
+            "tag": "Jenno Topping",
+            "thumb": "https://metadata-static.plex.tv/e/people/eae1d41f0042fad3a6347fe7a589ed7e.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d776837f59e580021898e33",
+            "type": "person"
+          },
+          {
+            "id": "5d7768a3594b2b001e691783",
+            "slug": "peter-chernin",
+            "tag": "Peter Chernin",
+            "thumb": "https://metadata-static.plex.tv/e/people/e7c3e207648846773d5112dcbdadbe99.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d7768a3594b2b001e691783",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5e16437d2d4d84003e49cc99",
+            "slug": "will-soodik",
+            "tag": "Will Soodik",
+            "role": "Writer",
+            "key": "/library/people/5e16437d2d4d84003e49cc99",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/66c06c120572d193e66d3c1b",
+            "tag": "Strange Harvest"
+          },
+          {
+            "guid": "plex://movie/5d77684c8a7581001f130023",
+            "tag": "Paranormal Activity"
+          },
+          {
+            "guid": "plex://movie/5d77684e103a2d001f56cbc1",
+            "tag": "The Entity"
+          },
+          {
+            "guid": "plex://movie/5d776bb37a53e9001e72dae3",
+            "tag": "Lights Out"
+          },
+          {
+            "guid": "plex://movie/5d776c8547dd6e001f6ec1cd",
+            "tag": "The Conjuring: The Devil Made Me Do It"
+          },
+          {
+            "guid": "plex://movie/5d776cb847dd6e001f6ee93a",
+            "tag": "Phoenix Forgotten"
+          },
+          {
+            "guid": "plex://movie/5d776831880197001ec929d6",
+            "tag": "Event Horizon"
+          },
+          {
+            "guid": "plex://movie/5d77683261141d001fb14df8",
+            "tag": "The Cell"
+          },
+          {
+            "guid": "plex://movie/6183d811171184331c8f010b",
+            "tag": "Barbarian"
+          },
+          {
+            "guid": "plex://movie/5d7768286f4521001ea9962b",
+            "tag": "Eraserhead"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Atomic Monster"
+          },
+          {
+            "tag": "21 Laps Entertainment"
+          },
+          {
+            "tag": "A24"
+          },
+          {
+            "tag": "Phobos"
+          },
+          {
+            "tag": "The North Road Company"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A strange basement doorway leads to an endless network of frightening, interconnected rooms.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

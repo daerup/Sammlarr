@@ -1,0 +1,377 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/3JDoDeoCOWZTrAFaE1tm2fcOeVU.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/5c3d4894d7300.jpg",
+        "guid": "plex://show/5d9c09157b5c2e001e6667f3",
+        "key": "/library/metadata/5d9c09157b5c2e001e6667f3/children",
+        "rating": 5.8,
+        "ratingKey": "5d9c09157b5c2e001e6667f3",
+        "studio": "RadicalMedia",
+        "subtype": "miniSeries",
+        "summary": "A unique look inside the mind of an infamous serial killer with this cinematic self-portrait crafted from statements made by Ted Bundy, including present-day interviews, archival footage and audio recordings from death row.",
+        "tagline": "America's most notorious serial killer in his own words.",
+        "type": "show",
+        "addedAt": 1548288000,
+        "audienceRating": 7.7,
+        "audienceRatingImage": "rottentomatoes://image.rating.upright",
+        "childCount": 1,
+        "contentRating": "TV-MA",
+        "duration": 3600000,
+        "imdbRatingCount": 35411,
+        "lastEpisodeOriginallyAvailableAt": "2019-01-24",
+        "lastSeasonOriginallyAvailableAt": "2019-01-24",
+        "leafCount": 4,
+        "originallyAvailableAt": "2019-01-24",
+        "publicPagesURL": "https://watch.plex.tv/show/conversations-with-a-killer-the-ted-bundy-tapes",
+        "ratingImage": "rottentomatoes://image.rating.rotten",
+        "skipChildren": true,
+        "slug": "conversations-with-a-killer-the-ted-bundy-tapes",
+        "theme": "https://tvthemes.plexapp.com/356609.mp3",
+        "thumb": "https://image.tmdb.org/t/p/original/4N6ESz7e88292owYSOYn3Bq3x4q.jpg",
+        "title": "Conversations with a Killer: The Ted Bundy Tapes",
+        "userState": false,
+        "year": 2019,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c09157b5c2e001e6667f3/commonsensemedia",
+            "oneLiner": "Violence, nudity, cursing, smoking in formulaic true crime.",
+            "AgeRating": [
+              {
+                "age": 15,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/3JDoDeoCOWZTrAFaE1tm2fcOeVU.jpg"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4c9536d8509287a9c1bf9377110f2b65.jpg"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/5c3d4894d7300.jpg"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/b/683a142553/bd9eb4b97cc370c4d3989d7c6dfa5cfb.png"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/b/683a142553/bd9eb4b97cc370c4d3989d7c6dfa5cfb.png"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/4/gracenote/4b36c46860faca240eb91b9767e2cde1.jpg"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/4N6ESz7e88292owYSOYn3Bq3x4q.jpg"
+          },
+          {
+            "alt": "Conversations with a Killer: The Ted Bundy Tapes",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/5/gracenote/5c826bcc6be89b68f944fdceb59aa3e0.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8da3",
+            "id": "5d9c046c705e7a001e6c8da3",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8da3",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8da3",
+            "slug": "documentary",
+            "tag": "Documentary",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab90",
+            "id": "5d9c046c08fddd001f28ab90",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab90",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab90",
+            "slug": "crime",
+            "tag": "Crime",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046cd4f2a9001f7faab2",
+            "id": "5d9c046cd4f2a9001f7faab2",
+            "key": "/library/sections/home/all?genre=5d9c046cd4f2a9001f7faab2",
+            "ratingKey": "genre_5d9c046cd4f2a9001f7faab2",
+            "slug": "biography",
+            "tag": "Biography",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07ebcb3ffa001f1b0904",
+            "id": "5d9c07ebcb3ffa001f1b0904",
+            "key": "/library/sections/home/all?genre=5d9c07ebcb3ffa001f1b0904",
+            "ratingKey": "genre_5d9c07ebcb3ffa001f1b0904",
+            "slug": "mini-series",
+            "tag": "Mini-Series",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5da05bf5af32ed001e0f5563",
+            "id": "5da05bf5af32ed001e0f5563",
+            "key": "/library/sections/home/all?genre=5da05bf5af32ed001e0f5563",
+            "ratingKey": "genre_5da05bf5af32ed001e0f5563",
+            "slug": "history",
+            "tag": "History",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt9425132"
+          },
+          {
+            "id": "tmdb://85833"
+          },
+          {
+            "id": "tvdb://356609"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.7
+          },
+          {
+            "image": "rottentomatoes://image.rating.rotten",
+            "type": "critic",
+            "value": 5.8
+          },
+          {
+            "image": "rottentomatoes://image.rating.upright",
+            "type": "audience",
+            "value": 7.7
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.47
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Main Title Design",
+            "event": "Emmys",
+            "id": "643ed524ff78e7fa8cc149c7",
+            "isWinner": false,
+            "year": 2019
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768f7f617c9002015b16c",
+            "order": 1,
+            "slug": "ted-bundy",
+            "tag": "Ted Bundy",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768f7f617c9002015b16c.jpg",
+            "role": "Self (archive footage)",
+            "key": "/library/people/5d7768f7f617c9002015b16c",
+            "type": "person"
+          },
+          {
+            "id": "6a0bfb2a990fea61d962fbe1",
+            "order": 2,
+            "slug": "stephen-michaud-7",
+            "tag": "Stephen Michaud",
+            "role": "Self",
+            "key": "/library/people/6a0bfb2a990fea61d962fbe1",
+            "type": "person"
+          },
+          {
+            "id": "5d776a7cf617c9002016d88e",
+            "order": 3,
+            "slug": "hugh-aynesworth",
+            "tag": "Hugh Aynesworth",
+            "role": "Self",
+            "key": "/library/people/5d776a7cf617c9002016d88e",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc24d52f2000041486253",
+            "order": 4,
+            "slug": "bill-hagmaier",
+            "tag": "Bill Hagmaier",
+            "role": "Self - FBI Special Agent",
+            "key": "/library/people/5f3fc24d52f2000041486253",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d7768402ec6b5001f6bddcc",
+            "slug": "joe-berlinger",
+            "tag": "Joe Berlinger",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768402ec6b5001f6bddcc.jpg",
+            "role": "Director",
+            "key": "/library/people/5d7768402ec6b5001f6bddcc",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5dcfbf24e2bf56001ecefdac",
+            "slug": "sara-enright",
+            "tag": "Sara Enright",
+            "role": "Producer",
+            "key": "/library/people/5dcfbf24e2bf56001ecefdac",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d7768402ec6b5001f6bddcc",
+            "slug": "joe-berlinger",
+            "tag": "Joe Berlinger",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768402ec6b5001f6bddcc.jpg",
+            "role": "Created By",
+            "key": "/library/people/5d7768402ec6b5001f6bddcc",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Netflix"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/630df3d33786a483af494ff0",
+            "tag": "Conversations with a Killer: The Jeffrey Dahmer Tapes"
+          },
+          {
+            "guid": "plex://show/630fa18f42cd3b297ba06817",
+            "tag": "Conversations with a Killer: The Jeffrey Dahmer Tapes"
+          },
+          {
+            "guid": "plex://show/692e8c4eeb358baa34c6b020",
+            "tag": "Sean Combs: The Reckoning"
+          },
+          {
+            "guid": "plex://show/669816fc0c6b22ef2997ffdd",
+            "tag": "Worst Ex Ever"
+          },
+          {
+            "guid": "plex://show/6699f0178b365400e0c3ccc2",
+            "tag": "Worst Ex Ever"
+          },
+          {
+            "guid": "plex://show/685d6d380592dcc8c2e8e4f0",
+            "tag": "Conversations with a Killer: The Son of Sam Tapes"
+          },
+          {
+            "guid": "plex://show/69bd888a7ab07ecca2a770b6",
+            "tag": "Trust Me: The False Prophet"
+          },
+          {
+            "guid": "plex://show/6a2ad9376d7ca8ec4d919164",
+            "tag": "Worst Neighbor Ever"
+          },
+          {
+            "guid": "plex://show/6a5a87fa1a76ab3259bfc3d1",
+            "tag": "The Idaho Murders: College Nightmare"
+          },
+          {
+            "guid": "plex://show/6a805e1612c1809d39f787fd",
+            "tag": "Death of the Pastor's Wife"
+          },
+          {
+            "guid": "plex://show/6a81c4d75eb18ffa67945988",
+            "tag": "Death of the Pastor’s Wife"
+          },
+          {
+            "guid": "plex://show/5d9c08bd170e24001f2acd3d",
+            "tag": "Evil Lives Here"
+          },
+          {
+            "guid": "plex://show/5d9c0905e98e47001eb19c8b",
+            "tag": "I Am a Killer"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "RadicalMedia"
+          },
+          {
+            "tag": "Elastic Productions"
+          },
+          {
+            "tag": "Gigantic Studios"
+          },
+          {
+            "tag": "Outpost Digital"
+          }
+        ],
+        "Summary": [
+          {
+            "size": 100,
+            "tag": "A look inside the mind of serial killer Ted Bundy, featuring interviews with him on death row.",
+            "type": "default"
+          }
+        ]
+      }
+    ]
+  }
+}

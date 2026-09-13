@@ -318,24 +318,6 @@
           },
           {
             "Metadata": {
-              "addedAt": 1778544000,
-              "art": "https://image.tmdb.org/t/p/original/esIDrOv4l40jHeIfeBF6pVIWAMa.jpg",
-              "duration": 600000,
-              "guid": "plex://movie/69fc7f0fb4af52ecd2f9a428",
-              "key": "/library/metadata/69fc7f0fb4af52ecd2f9a428",
-              "originallyAvailableAt": "2026-05-12",
-              "ratingKey": "69fc7f0fb4af52ecd2f9a428",
-              "slug": "one-night-only-2026-1",
-              "thumb": "https://image.tmdb.org/t/p/original/4acAp9fDdolmpEJOUqWtbqaw99k.jpg",
-              "title": "One Night Only",
-              "type": "movie",
-              "year": 2026,
-              "source": "provider://tv.plex.provider.discover"
-            },
-            "score": 0.84
-          },
-          {
-            "Metadata": {
               "duration": 600000,
               "guid": "plex://movie/5f40d75604a8650040bc2388",
               "key": "/library/metadata/5f40d75604a8650040bc2388",
@@ -377,6 +359,24 @@
                   "context": "tag.genre"
                 }
               ],
+              "source": "provider://tv.plex.provider.discover"
+            },
+            "score": 0.84
+          },
+          {
+            "Metadata": {
+              "addedAt": 1778544000,
+              "art": "https://image.tmdb.org/t/p/original/esIDrOv4l40jHeIfeBF6pVIWAMa.jpg",
+              "duration": 600000,
+              "guid": "plex://movie/69fc7f0fb4af52ecd2f9a428",
+              "key": "/library/metadata/69fc7f0fb4af52ecd2f9a428",
+              "originallyAvailableAt": "2026-05-12",
+              "ratingKey": "69fc7f0fb4af52ecd2f9a428",
+              "slug": "one-night-only-2026-1",
+              "thumb": "https://image.tmdb.org/t/p/original/4acAp9fDdolmpEJOUqWtbqaw99k.jpg",
+              "title": "One Night Only",
+              "type": "movie",
+              "year": 2026,
               "source": "provider://tv.plex.provider.discover"
             },
             "score": 0.84

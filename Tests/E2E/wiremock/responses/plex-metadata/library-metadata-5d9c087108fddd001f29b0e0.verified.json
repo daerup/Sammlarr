@@ -1,0 +1,792 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/e22UKY4x8ldlqPrMZTZXxVpsHyi.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/graphical/70570-g.jpg",
+        "guid": "plex://show/5d9c087108fddd001f29b0e0",
+        "key": "/library/metadata/5d9c087108fddd001f29b0e0/children",
+        "ratingKey": "5d9c087108fddd001f29b0e0",
+        "studio": "Lorimar Productions",
+        "summary": "A high-strung and cynical man's life is never the same when his naive but good-natured cousin comes to America to live with him.",
+        "type": "show",
+        "addedAt": 512092800,
+        "audienceRating": 7.2,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 8,
+        "contentRating": "TV-PG",
+        "duration": 1800000,
+        "imdbRatingCount": 12404,
+        "lastEpisodeOriginallyAvailableAt": "1993-08-06",
+        "lastSeasonOriginallyAvailableAt": "1993-07-09",
+        "leafCount": 151,
+        "originallyAvailableAt": "1986-03-25",
+        "publicPagesURL": "https://watch.plex.tv/show/perfect-strangers",
+        "slug": "perfect-strangers",
+        "theme": "https://tvthemes.plexapp.com/70570.mp3",
+        "thumb": "https://metadata-static.plex.tv/5/gracenote/51109f8319c3778b9aee90ea5b00fdcc.jpg",
+        "title": "Perfect Strangers",
+        "userState": false,
+        "year": 1986,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/5d9c087108fddd001f29b0e0/commonsensemedia",
+            "oneLiner": "Cultures clash in upbeat, slapstick '80s classic.",
+            "AgeRating": [
+              {
+                "age": 10,
+                "rating": 3,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Perfect Strangers",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/e22UKY4x8ldlqPrMZTZXxVpsHyi.jpg"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/e/gracenote/e0e2ce54e698c43174e86355ff326d5a.jpg"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/graphical/70570-g.jpg"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/2/683a142553/24fdc4188ca57274d068c35a2b9ae18f.png"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/2/683a142553/24fdc4188ca57274d068c35a2b9ae18f.png"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/2/gracenote/2e3450ed7c0df782949e4eec6eaea0fd.jpg"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/5/gracenote/51109f8319c3778b9aee90ea5b00fdcc.jpg"
+          },
+          {
+            "alt": "Perfect Strangers",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7b7a52cd469cae609fb81b073c3ff41d.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8d99",
+            "id": "5d9c046c705e7a001e6c8d99",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8d99",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8d99",
+            "slug": "comedy",
+            "tag": "Comedy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c08fddd001f28ab9e",
+            "id": "5d9c046c08fddd001f28ab9e",
+            "key": "/library/sections/home/all?genre=5d9c046c08fddd001f28ab9e",
+            "ratingKey": "genre_5d9c046c08fddd001f28ab9e",
+            "slug": "family",
+            "tag": "Family",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt0090501"
+          },
+          {
+            "id": "tmdb://1786"
+          },
+          {
+            "id": "tvdb://70570"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 7.2
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 6.698
+          }
+        ],
+        "AwardNominee": [
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Lead Actor in a Comedy Series",
+            "event": "Emmys",
+            "id": "643ef26162d223f5780cea1f",
+            "isWinner": false,
+            "year": 1987
+          },
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Guest Actress in a Comedy Series",
+            "event": "Emmys",
+            "id": "643ef26162d223f5780cea1e",
+            "isWinner": false,
+            "year": 1989
+          },
+          {
+            "award": "Primetime Emmy",
+            "category": "Outstanding Individual Achievement in Makeup for a Series",
+            "event": "Emmys",
+            "id": "643ef26162d223f5780cea20",
+            "isWinner": false,
+            "year": 1992
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "5d7768253c3c2a001fbcacd9",
+            "order": 1,
+            "slug": "bronson-pinchot",
+            "tag": "Bronson Pinchot",
+            "thumb": "https://metadata-static.plex.tv/f/people/f681ffaf4400facc158bf60a0aade232.jpg",
+            "role": "Balki Bartokomous",
+            "key": "/library/people/5d7768253c3c2a001fbcacd9",
+            "type": "person"
+          },
+          {
+            "id": "5d7768422ec6b5001f6be48a",
+            "order": 2,
+            "slug": "mark-linn-baker",
+            "tag": "Mark Linn-Baker",
+            "thumb": "https://metadata-static.plex.tv/9/people/9296dd12fdd2a0cf797a11a90cd0130b.jpg",
+            "role": "Larry Appleton",
+            "key": "/library/people/5d7768422ec6b5001f6be48a",
+            "type": "person"
+          },
+          {
+            "id": "5d77691a7a53e9001e6e195d",
+            "order": 3,
+            "slug": "melanie-wilson",
+            "tag": "Melanie Wilson",
+            "thumb": "https://metadata-static.plex.tv/8/people/8180f06793759c27702fc6a96840fa60.jpg",
+            "role": "Jennifer Lyons",
+            "key": "/library/people/5d77691a7a53e9001e6e195d",
+            "type": "person"
+          },
+          {
+            "id": "5d77683254c0f0001f3031b3",
+            "order": 4,
+            "slug": "rebeca-arthur",
+            "tag": "Rebeca Arthur",
+            "thumb": "https://metadata-static.plex.tv/a/people/a375659993e039da748152322734ecc4.jpg",
+            "role": "Mary Anne Spencer",
+            "key": "/library/people/5d77683254c0f0001f3031b3",
+            "type": "person"
+          },
+          {
+            "id": "5d77682654f42c001f8c265c",
+            "order": 5,
+            "slug": "sam-anderson",
+            "tag": "Sam Anderson",
+            "thumb": "https://metadata-static.plex.tv/6/people/64079f9fc848fa3206df9613325119a2.jpg",
+            "role": "Sam Gorpley",
+            "key": "/library/people/5d77682654f42c001f8c265c",
+            "type": "person"
+          },
+          {
+            "id": "5d7768337228e5001f1de4d3",
+            "order": 6,
+            "slug": "belita-moreno",
+            "tag": "Belita Moreno",
+            "thumb": "https://metadata-static.plex.tv/f/people/f8d280eb581fba0afd690eba8b4aa8c2.jpg",
+            "role": "Lydia Markham",
+            "key": "/library/people/5d7768337228e5001f1de4d3",
+            "type": "person"
+          },
+          {
+            "id": "5d77684e5af944001f1fe9f3",
+            "order": 7,
+            "slug": "jo-marie-payton",
+            "tag": "Jo Marie Payton",
+            "thumb": "https://metadata-static.plex.tv/8/people/842fb251a296c86559965730a3bf23dd.jpg",
+            "role": "Harriette Winslow",
+            "key": "/library/people/5d77684e5af944001f1fe9f3",
+            "type": "person"
+          },
+          {
+            "id": "5d776828880197001ec90e8e",
+            "order": 8,
+            "slug": "ernie-sabella",
+            "tag": "Ernie Sabella",
+            "thumb": "https://metadata-static.plex.tv/9/people/9aadc02c57b384433717a238d5c8b6c1.jpg",
+            "role": "Donald Twinkacetti",
+            "key": "/library/people/5d776828880197001ec90e8e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768485af944001f1fdf4f",
+            "order": 9,
+            "slug": "lise-cutter",
+            "tag": "Lise Cutter",
+            "thumb": "https://metadata-static.plex.tv/c/people/cbe7817db096e6955908be453c0c58bd.jpg",
+            "role": "Susan Campbell",
+            "key": "/library/people/5d7768485af944001f1fdf4f",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c5af944001f1f7fb0",
+            "order": 10,
+            "slug": "james-noble",
+            "tag": "James Noble",
+            "thumb": "https://metadata-static.plex.tv/0/people/099c30c645d66f5f03c1afb14f12c8cb.jpg",
+            "key": "/library/people/5d77682c5af944001f1f7fb0",
+            "type": "person"
+          },
+          {
+            "id": "5d77683a2ec6b5001f6bcc35",
+            "order": 11,
+            "slug": "candi-milo",
+            "tag": "Candi Milo",
+            "thumb": "https://metadata-static.plex.tv/8/people/83dc4d0e5875f08a3b59dca251ae264b.jpg",
+            "role": "Gina Morelli",
+            "key": "/library/people/5d77683a2ec6b5001f6bcc35",
+            "type": "person"
+          },
+          {
+            "id": "5f3ff2bfcae2c60042eb78a7",
+            "order": 12,
+            "slug": "min-lee",
+            "tag": "Min Lee",
+            "role": "Thug",
+            "key": "/library/people/5f3ff2bfcae2c60042eb78a7",
+            "type": "person"
+          },
+          {
+            "id": "5d77682aeb5d26001f1de578",
+            "order": 13,
+            "slug": "amy-hill",
+            "tag": "Amy Hill",
+            "thumb": "https://metadata-static.plex.tv/b/people/b8741dabc5b4c07416ba80042945d536.jpg",
+            "key": "/library/people/5d77682aeb5d26001f1de578",
+            "type": "person"
+          },
+          {
+            "id": "5d7768375af944001f1fa659",
+            "order": 14,
+            "slug": "ava-cadell",
+            "tag": "Ava Cadell",
+            "thumb": "https://metadata-static.plex.tv/d/people/d391ad1f6850d5d9216eff1343aa22f8.jpg",
+            "key": "/library/people/5d7768375af944001f1fa659",
+            "type": "person"
+          },
+          {
+            "id": "5d77682685719b001f3a0b58",
+            "order": 15,
+            "slug": "patrick-cranshaw",
+            "tag": "Patrick Cranshaw",
+            "thumb": "https://metadata-static.plex.tv/3/people/33a93bbb5cde874baf7d688a2155eacc.jpg",
+            "key": "/library/people/5d77682685719b001f3a0b58",
+            "type": "person"
+          },
+          {
+            "id": "5d77682c151a60001f24bf88",
+            "order": 16,
+            "slug": "lewis-arquette",
+            "tag": "Lewis Arquette",
+            "thumb": "https://metadata-static.plex.tv/9/people/9394f7cdc4c64a725fe938cbfda24222.jpg",
+            "key": "/library/people/5d77682c151a60001f24bf88",
+            "type": "person"
+          },
+          {
+            "id": "5d77682b85719b001f3a1b2e",
+            "order": 17,
+            "slug": "william-cort",
+            "tag": "William Cort",
+            "thumb": "https://metadata-static.plex.tv/d/people/d9717377cc359eafd82be551b7ef642f.jpg",
+            "key": "/library/people/5d77682b85719b001f3a1b2e",
+            "type": "person"
+          },
+          {
+            "id": "5d776827151a60001f24ab01",
+            "order": 18,
+            "slug": "paul-eiding",
+            "tag": "Paul Eiding",
+            "thumb": "https://metadata-static.plex.tv/2/people/209737f4d2a4e32b7eea4ea01920c0b6.jpg",
+            "key": "/library/people/5d776827151a60001f24ab01",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a3c3c2a001fbcbd2e",
+            "order": 19,
+            "slug": "alisan-porter",
+            "tag": "Alisan Porter",
+            "thumb": "https://metadata-static.plex.tv/0/people/0dd13dd8f1486a557ea1ac8ef6c58b7e.jpg",
+            "role": "Tess Holland",
+            "key": "/library/people/5d77682a3c3c2a001fbcbd2e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768256f4521001ea98a20",
+            "order": 20,
+            "slug": "macka-foley",
+            "tag": "Macka Foley",
+            "thumb": "https://metadata-static.plex.tv/7/people/796b77c4bb88d844e826df053d2db1d1.jpg",
+            "role": "Rudy",
+            "key": "/library/people/5d7768256f4521001ea98a20",
+            "type": "person"
+          },
+          {
+            "id": "6012bea850d3be002b51fda4",
+            "order": 21,
+            "slug": "brian-byers",
+            "tag": "Brian Byers",
+            "thumb": "https://metadata-static.plex.tv/f/people/fdccc123e3b9f8a63c662cff3e85b1af.jpg",
+            "role": "Staff Executive (as Bryan Byers)",
+            "key": "/library/people/6012bea850d3be002b51fda4",
+            "type": "person"
+          },
+          {
+            "id": "5d776827961905001eb9140a",
+            "order": 22,
+            "slug": "kenneth-mars",
+            "tag": "Kenneth Mars",
+            "thumb": "https://metadata-static.plex.tv/b/people/b964bd95d358721a3d9128fa34181300.jpg",
+            "role": "Ace Atkins",
+            "key": "/library/people/5d776827961905001eb9140a",
+            "type": "person"
+          },
+          {
+            "id": "5d7768283c3c2a001fbcb623",
+            "order": 23,
+            "slug": "mindy-sterling",
+            "tag": "Mindy Sterling",
+            "thumb": "https://metadata-static.plex.tv/1/people/160f830083e340b441aa6387c067a24f.jpg",
+            "role": "Hostess",
+            "key": "/library/people/5d7768283c3c2a001fbcb623",
+            "type": "person"
+          },
+          {
+            "id": "5d776826999c64001ec2c66e",
+            "order": 24,
+            "slug": "reginald-veljohnson",
+            "tag": "Reginald VelJohnson",
+            "thumb": "https://metadata-static.plex.tv/8/people/8d4bb19799f858e7e54935d2fd1ab4c8.jpg",
+            "role": "Carl Winslow",
+            "key": "/library/people/5d776826999c64001ec2c66e",
+            "type": "person"
+          },
+          {
+            "id": "5d7768308718ba001e313751",
+            "order": 25,
+            "slug": "doris-roberts",
+            "tag": "Doris Roberts",
+            "thumb": "https://metadata-static.plex.tv/0/people/0107eb59125354b3a3153e6985bada02.jpg",
+            "role": "Mrs. Bailey",
+            "key": "/library/people/5d7768308718ba001e313751",
+            "type": "person"
+          },
+          {
+            "id": "5ec409a937cda300408f16ab",
+            "order": 26,
+            "slug": "patricia-m-peters",
+            "tag": "Patricia M. Peters",
+            "thumb": "https://metadata-static.plex.tv/f/people/fe97e912dc95b1edfac83ed7d1acb62a.jpg",
+            "role": "Frenchie",
+            "key": "/library/people/5ec409a937cda300408f16ab",
+            "type": "person"
+          },
+          {
+            "id": "5d776866e6d55c002041256d",
+            "order": 27,
+            "slug": "al-pugliese",
+            "tag": "Al Pugliese",
+            "thumb": "https://metadata-static.plex.tv/d/people/de2d4fc25ae177f37f0cf9884ba487dc.jpg",
+            "role": "Store Manager",
+            "key": "/library/people/5d776866e6d55c002041256d",
+            "type": "person"
+          },
+          {
+            "id": "5d77682a999c64001ec2d26f",
+            "order": 28,
+            "slug": "kimmy-robertson",
+            "tag": "Kimmy Robertson",
+            "thumb": "https://metadata-static.plex.tv/6/people/682272d10981845d95ebcebcabe1f623.jpg",
+            "role": "Clerk",
+            "key": "/library/people/5d77682a999c64001ec2d26f",
+            "type": "person"
+          },
+          {
+            "id": "5d776bc19ab544002150f0c7",
+            "order": 29,
+            "slug": "diane-sainte-marie",
+            "tag": "Diane Sainte-Marie",
+            "role": "Angry Customer",
+            "key": "/library/people/5d776bc19ab544002150f0c7",
+            "type": "person"
+          },
+          {
+            "id": "5d77688a33f255001e859271",
+            "order": 30,
+            "slug": "judy-kain",
+            "tag": "Judy Kain",
+            "thumb": "https://metadata-static.plex.tv/6/people/6585086ae763a383e21929509cb21a69.jpg",
+            "role": "Sample Lady",
+            "key": "/library/people/5d77688a33f255001e859271",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "5d776832f59e580021898432",
+            "slug": "joel-zwick",
+            "tag": "Joel Zwick",
+            "thumb": "https://metadata-static.plex.tv/6/people/60a1e0d08f2ad0b5ecea5803a40b5217.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776832f59e580021898432",
+            "type": "person"
+          },
+          {
+            "id": "5d77684a2ec6b5001f6bf0a9",
+            "slug": "rich-correll",
+            "tag": "Rich Correll",
+            "thumb": "https://metadata-static.plex.tv/c/people/c953ec5bc1804354b8f2e81908d0ab38.jpg",
+            "role": "Director",
+            "key": "/library/people/5d77684a2ec6b5001f6bf0a9",
+            "type": "person"
+          },
+          {
+            "id": "5d776894594b2b001e69017b",
+            "slug": "greg-antonacci",
+            "tag": "Greg Antonacci",
+            "thumb": "https://metadata-static.plex.tv/people/5d776894594b2b001e69017b.jpg",
+            "role": "Director",
+            "key": "/library/people/5d776894594b2b001e69017b",
+            "type": "person"
+          },
+          {
+            "id": "5d9c083708fddd001f29579d",
+            "slug": "jeffrey-ganz",
+            "tag": "Jeffrey Ganz",
+            "role": "Director",
+            "key": "/library/people/5d9c083708fddd001f29579d",
+            "type": "person"
+          },
+          {
+            "id": "5ec409eb37cda300408f1d0b",
+            "slug": "bill-petty",
+            "tag": "Bill Petty",
+            "thumb": "https://metadata-static.plex.tv/4/people/4252f679458ec403a235504dd1772faf.jpg",
+            "role": "Director",
+            "key": "/library/people/5ec409eb37cda300408f1d0b",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5ec4253f37cda300409137d1",
+            "slug": "james-okeefe",
+            "tag": "James O'Keefe",
+            "role": "Producer",
+            "key": "/library/people/5ec4253f37cda300409137d1",
+            "type": "person"
+          },
+          {
+            "id": "5f3fb578ce2564003f84110c",
+            "slug": "paula-a-roth",
+            "tag": "Paula A. Roth",
+            "role": "Producer",
+            "key": "/library/people/5f3fb578ce2564003f84110c",
+            "type": "person"
+          },
+          {
+            "id": "5e1635572d4d84003e490d66",
+            "slug": "tom-devanney",
+            "tag": "Tom Devanney",
+            "role": "Producer",
+            "key": "/library/people/5e1635572d4d84003e490d66",
+            "type": "person"
+          },
+          {
+            "id": "5f3fbaa8fea1a1003f95a127",
+            "slug": "cheryl-alu",
+            "tag": "Cheryl Alu",
+            "role": "Producer",
+            "key": "/library/people/5f3fbaa8fea1a1003f95a127",
+            "type": "person"
+          },
+          {
+            "id": "5d9c08304eefaa001f5d7c20",
+            "slug": "barry-obrien-2",
+            "tag": "Barry O'Brien",
+            "thumb": "https://metadata-static.plex.tv/b/people/b7e1d197c37a16794f0491c163b06cb7.jpg",
+            "role": "Producer",
+            "key": "/library/people/5d9c08304eefaa001f5d7c20",
+            "type": "person"
+          },
+          {
+            "id": "5d777085dd931c001e38e9b3",
+            "slug": "howard-adler",
+            "tag": "Howard Adler",
+            "role": "Producer",
+            "key": "/library/people/5d777085dd931c001e38e9b3",
+            "type": "person"
+          },
+          {
+            "id": "5e16357410faa500400dc19e",
+            "slug": "robert-griffard",
+            "tag": "Robert Griffard",
+            "role": "Producer",
+            "key": "/library/people/5e16357410faa500400dc19e",
+            "type": "person"
+          },
+          {
+            "id": "5f3f941703883a0040a7e108",
+            "slug": "john-b-collins",
+            "tag": "John B. Collins",
+            "role": "Producer",
+            "key": "/library/people/5f3f941703883a0040a7e108",
+            "type": "person"
+          },
+          {
+            "id": "5d776cb9fb0d55001f590d73",
+            "slug": "mark-fink",
+            "tag": "Mark Fink",
+            "role": "Producer",
+            "key": "/library/people/5d776cb9fb0d55001f590d73",
+            "type": "person"
+          },
+          {
+            "id": "5f3faa0dbf3e560040ae7149",
+            "slug": "chip-keyes-2",
+            "tag": "Chip Keyes",
+            "role": "Producer",
+            "key": "/library/people/5f3faa0dbf3e560040ae7149",
+            "type": "person"
+          },
+          {
+            "id": "5f3faa0f04a86500409526a8",
+            "slug": "doug-keyes",
+            "tag": "Doug Keyes",
+            "role": "Producer",
+            "key": "/library/people/5f3faa0f04a86500409526a8",
+            "type": "person"
+          },
+          {
+            "id": "5f3fba35ce2564003f8466f5",
+            "slug": "shari-hearn",
+            "tag": "Shari Hearn",
+            "role": "Producer",
+            "key": "/library/people/5f3fba35ce2564003f8466f5",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5d9c08304eefaa001f5d7c20",
+            "slug": "barry-obrien-2",
+            "tag": "Barry O'Brien",
+            "thumb": "https://metadata-static.plex.tv/b/people/b7e1d197c37a16794f0491c163b06cb7.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d9c08304eefaa001f5d7c20",
+            "type": "person"
+          },
+          {
+            "id": "5d776cb9fb0d55001f590d73",
+            "slug": "mark-fink",
+            "tag": "Mark Fink",
+            "role": "Writer",
+            "key": "/library/people/5d776cb9fb0d55001f590d73",
+            "type": "person"
+          },
+          {
+            "id": "5d7768436f4521001ea9ed2a",
+            "slug": "david-ketchum",
+            "tag": "David Ketchum",
+            "thumb": "https://metadata-static.plex.tv/people/5d7768436f4521001ea9ed2a.jpg",
+            "role": "Writer",
+            "key": "/library/people/5d7768436f4521001ea9ed2a",
+            "type": "person"
+          },
+          {
+            "id": "5e164ddd4c78f7003e80c965",
+            "slug": "bob-keyes",
+            "tag": "Bob Keyes",
+            "role": "Writer",
+            "key": "/library/people/5e164ddd4c78f7003e80c965",
+            "type": "person"
+          },
+          {
+            "id": "5ec408a737cda300408f047b",
+            "slug": "scott-s-gorden",
+            "tag": "Scott S. Gorden",
+            "role": "Writer",
+            "key": "/library/people/5ec408a737cda300408f047b",
+            "type": "person"
+          }
+        ],
+        "MoodTag": [
+          {
+            "id": "65afbe22e93b86d951faf7a8",
+            "score": 0.914,
+            "tag": "funny"
+          },
+          {
+            "id": "65afbe25e93b86d951fb8104",
+            "score": 0.9,
+            "tag": "mysterious"
+          },
+          {
+            "id": "65afbe22e93b86d951faf7f4",
+            "score": 0.877,
+            "tag": "quirky"
+          },
+          {
+            "id": "65afbe64e93b86d95106298d",
+            "score": 0.875,
+            "tag": "campy"
+          },
+          {
+            "id": "65afbe22e93b86d951faf6eb",
+            "score": 0.858,
+            "tag": "heartwarming"
+          },
+          {
+            "id": "65afbe22e93b86d951faf705",
+            "score": 0.853,
+            "tag": "uplifting"
+          },
+          {
+            "id": "65afbe30e93b86d951fd2941",
+            "score": 0.852,
+            "tag": "lighthearted"
+          },
+          {
+            "id": "65afbe65e93b86d9510677ce",
+            "score": 0.842,
+            "tag": "absurd"
+          },
+          {
+            "id": "65afbe36e93b86d951fe4948",
+            "score": 0.834,
+            "tag": "whimsical"
+          },
+          {
+            "id": "65afbe35e93b86d951fe175e",
+            "score": 0.831,
+            "tag": "joyful"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "ABC"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbDvd",
+            "source": "tvdb",
+            "tag": "DVD",
+            "title": "TheTVDB (DVD)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5d9c086c3c3f87001f34f624",
+            "tag": "New Girl"
+          },
+          {
+            "guid": "plex://show/5d9c087308fddd001f29b962",
+            "tag": "The Wayans Bros."
+          },
+          {
+            "guid": "plex://show/5d9c0875705e7a001e6ddf49",
+            "tag": "Family Matters"
+          },
+          {
+            "guid": "plex://show/5d9c0876ba2e21001f1912dd",
+            "tag": "Three's Company"
+          },
+          {
+            "guid": "plex://show/5d9c07f94eefaa001f5d2678",
+            "tag": "Traffic Light (US)"
+          },
+          {
+            "guid": "plex://show/5d9c0858ffd9ef001e99206c",
+            "tag": "Happy Endings"
+          },
+          {
+            "guid": "plex://show/5d9c07fd6c3e37001ecd36b2",
+            "tag": "What I Like About You"
+          },
+          {
+            "guid": "plex://show/5d9c080e3c3f87001f34619f",
+            "tag": "The King of Queens"
+          },
+          {
+            "guid": "plex://show/5d9c0831ffd9ef001e98f233",
+            "tag": "Will & Grace"
+          },
+          {
+            "guid": "plex://show/5d9c084e7b5c2e001e658be5",
+            "tag": "The Odd Couple (2015)"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Lorimar Productions"
+          },
+          {
+            "tag": "Lorimar Telepictures"
+          },
+          {
+            "tag": "Lorimar Television"
+          },
+          {
+            "tag": "Miller/Boyett Productions"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -21,8 +21,8 @@
       "release_date": "2026-07-08",
       "softcore": false,
       "video": false,
-      "vote_average": 7.097,
-      "vote_count": 560
+      "vote_average": 7.111,
+      "vote_count": 565
     },
     {
       "adult": false,
@@ -42,30 +42,8 @@
       "release_date": "2026-09-03",
       "softcore": false,
       "video": false,
-      "vote_average": 7.926,
-      "vote_count": 504
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/l9mFW9HQnAZ4r1ChZJHoOT3jaal.jpg",
-      "id": 1204680,
-      "title": "Coyote vs. Acme",
-      "original_title": "Coyote vs. Acme",
-      "overview": "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation.",
-      "poster_path": "/vhv7lBWYM0DUuNU2a0V7Rhq21dD.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        35,
-        12,
-        10751
-      ],
-      "popularity": 590.1793,
-      "release_date": "2026-08-20",
-      "softcore": false,
-      "video": false,
-      "vote_average": 7.623,
-      "vote_count": 333
+      "vote_average": 7.9,
+      "vote_count": 510
     },
     {
       "adult": false,
@@ -85,11 +63,33 @@
       "popularity": 213.7486,
       "first_air_date": "2026-08-16",
       "softcore": false,
-      "vote_average": 8.274,
-      "vote_count": 316,
+      "vote_average": 8.3,
+      "vote_count": 317,
       "origin_country": [
         "US"
       ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qeQJx07rK2xm8SD2sJxFKhE7gs0.jpg",
+      "id": 969681,
+      "title": "Spider-Man: Brand New Day",
+      "original_title": "Spider-Man: Brand New Day",
+      "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
+      "poster_path": "/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        878,
+        28,
+        12
+      ],
+      "popularity": 756.7679,
+      "release_date": "2026-07-29",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.844,
+      "vote_count": 2641
     },
     {
       "adult": false,
@@ -111,29 +111,30 @@
       "softcore": false,
       "video": false,
       "vote_average": 8.005,
-      "vote_count": 3643
+      "vote_count": 3652
     },
     {
       "adult": false,
-      "backdrop_path": "/qeQJx07rK2xm8SD2sJxFKhE7gs0.jpg",
-      "id": 969681,
-      "title": "Spider-Man: Brand New Day",
-      "original_title": "Spider-Man: Brand New Day",
-      "overview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
-      "poster_path": "/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
-      "media_type": "movie",
+      "backdrop_path": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+      "id": 108978,
+      "name": "Reacher",
+      "original_name": "Reacher",
+      "overview": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest of essentials as he travels the country and explores the nation he once served.",
+      "poster_path": "/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
+      "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
-        878,
-        28,
-        12
+        10759,
+        80
       ],
-      "popularity": 756.7679,
-      "release_date": "2026-07-29",
+      "popularity": 598.7406,
+      "first_air_date": "2022-02-03",
       "softcore": false,
-      "video": false,
-      "vote_average": 7.845,
-      "vote_count": 2629
+      "vote_average": 8.113,
+      "vote_count": 3288,
+      "origin_country": [
+        "US"
+      ]
     },
     {
       "adult": false,
@@ -153,54 +154,8 @@
       "release_date": "2026-08-06",
       "softcore": false,
       "video": false,
-      "vote_average": 6.705,
-      "vote_count": 112
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
-      "id": 125988,
-      "name": "Silo",
-      "original_name": "Silo",
-      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
-      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        10765,
-        18
-      ],
-      "popularity": 262.2487,
-      "first_air_date": "2023-05-04",
-      "softcore": false,
-      "vote_average": 8.21,
-      "vote_count": 2644,
-      "origin_country": [
-        "US"
-      ]
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
-      "id": 108978,
-      "name": "Reacher",
-      "original_name": "Reacher",
-      "overview": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest of essentials as he travels the country and explores the nation he once served.",
-      "poster_path": "/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
-      "media_type": "tv",
-      "original_language": "en",
-      "genre_ids": [
-        10759,
-        80
-      ],
-      "popularity": 598.7406,
-      "first_air_date": "2022-02-03",
-      "softcore": false,
-      "vote_average": 8.114,
-      "vote_count": 3284,
-      "origin_country": [
-        "US"
-      ]
+      "vote_average": 6.713,
+      "vote_count": 115
     },
     {
       "adult": false,
@@ -221,73 +176,30 @@
       "release_date": "2026-09-09",
       "softcore": false,
       "video": false,
-      "vote_average": 6.3,
-      "vote_count": 30
+      "vote_average": 6.4,
+      "vote_count": 31
     },
     {
       "adult": false,
-      "backdrop_path": "/yeEkiAx9ZqPXBxZAkUXj7XLIyi2.jpg",
-      "id": 1386315,
-      "title": "The Runner",
-      "original_title": "The Runner",
-      "overview": "Maia Marten, a brilliant London lawyer, has her life shattered by a single call on her morning run: her son has been taken. To get him back, she must keep running, obey every ruthless command, and trust no one-each second a test of how far a mother will go to save her child.",
-      "poster_path": "/uxCaBoYXsDC4A0SqTm3SISj0OwK.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        53,
-        28
-      ],
-      "popularity": 195.5425,
-      "release_date": "2026-09-03",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.733,
-      "vote_count": 416
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
-      "id": 1339713,
-      "title": "Obsession",
-      "original_title": "Obsession",
-      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-      "poster_path": "/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        27,
-        53
-      ],
-      "popularity": 151.0084,
-      "release_date": "2026-05-13",
-      "softcore": false,
-      "video": false,
-      "vote_average": 8.192,
-      "vote_count": 5462
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
-      "id": 236235,
-      "name": "The Gentlemen",
-      "original_name": "The Gentlemen",
-      "overview": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
-      "poster_path": "/tw3tzfXaSpmUZIB8ZNqNEGzMBCy.jpg",
+      "backdrop_path": "/uTWhbLc7Bj4qNSdW3ZvZKL8cOHv.jpg",
+      "id": 125988,
+      "name": "Silo",
+      "original_name": "Silo",
+      "overview": "In a ruined and toxic future, thousands live in a giant silo deep underground. After its sheriff breaks a cardinal rule and residents die mysteriously, engineer Juliette starts to uncover shocking secrets and the truth about the silo.",
+      "poster_path": "/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
       "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
-        35,
-        18,
-        80
+        10765,
+        18
       ],
-      "popularity": 200.195,
-      "first_air_date": "2024-03-07",
+      "popularity": 262.2487,
+      "first_air_date": "2023-05-04",
       "softcore": false,
-      "vote_average": 7.9,
-      "vote_count": 910,
+      "vote_average": 8.211,
+      "vote_count": 2647,
       "origin_country": [
-        "GB"
+        "US"
       ]
     },
     {
@@ -308,8 +220,116 @@
       "release_date": "2026-08-19",
       "softcore": false,
       "video": false,
-      "vote_average": 6.426,
-      "vote_count": 373
+      "vote_average": 6.432,
+      "vote_count": 375
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jzBWExXacS33rMQ2zLBrqIVweyG.jpg",
+      "id": 1386315,
+      "title": "The Runner",
+      "original_title": "The Runner",
+      "overview": "Maia Marten, a brilliant London lawyer, has her life shattered by a single call on her morning run: her son has been taken. To get him back, she must keep running, obey every ruthless command, and trust no one-each second a test of how far a mother will go to save her child.",
+      "poster_path": "/uxCaBoYXsDC4A0SqTm3SISj0OwK.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        53,
+        28
+      ],
+      "popularity": 195.5425,
+      "release_date": "2026-09-03",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.736,
+      "vote_count": 420
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/rZfmzpixLKLR3Hg2u0WgC7XLFl8.jpg",
+      "id": 1339713,
+      "title": "Obsession",
+      "original_title": "Obsession",
+      "overview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
+      "poster_path": "/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        27,
+        53
+      ],
+      "popularity": 151.0084,
+      "release_date": "2026-05-13",
+      "softcore": false,
+      "video": false,
+      "vote_average": 8.192,
+      "vote_count": 5465
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/4NBYDOnEjAzyuP7CMkD5s7fs44K.jpg",
+      "id": 113962,
+      "name": "Lioness",
+      "original_name": "Lioness",
+      "overview": "Cruz Manuelos, a rough-around-the-edges but passionate young Marine, is recruited to join the CIA's Lioness Engagement Team to help bring down a terrorist organization from within. Joe, the station chief of the Lioness program, is tasked with training, managing and leading her female undercover operatives.",
+      "poster_path": "/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [
+        18,
+        10768
+      ],
+      "popularity": 360.0234,
+      "first_air_date": "2023-07-23",
+      "softcore": false,
+      "vote_average": 8.166,
+      "vote_count": 1522,
+      "origin_country": [
+        "US"
+      ]
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
+      "id": 1440098,
+      "title": "Drawn Together",
+      "original_title": "Enfrentados: Marfil",
+      "overview": "Marfil Cortés, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
+      "poster_path": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
+      "media_type": "movie",
+      "original_language": "es",
+      "genre_ids": [
+        10749,
+        53
+      ],
+      "popularity": 240.8506,
+      "release_date": "2026-09-09",
+      "softcore": false,
+      "video": false,
+      "vote_average": 6.387,
+      "vote_count": 53
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/l9mFW9HQnAZ4r1ChZJHoOT3jaal.jpg",
+      "id": 1204680,
+      "title": "Coyote vs. Acme",
+      "original_title": "Coyote vs. Acme",
+      "overview": "After Acme products fail him one too many times in his dogged pursuit of the Roadrunner, Wile E. Coyote decides to hire a billboard lawyer to sue the Acme Corporation.",
+      "poster_path": "/vhv7lBWYM0DUuNU2a0V7Rhq21dD.jpg",
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [
+        35,
+        12,
+        10751
+      ],
+      "popularity": 590.1793,
+      "release_date": "2026-08-20",
+      "softcore": false,
+      "video": false,
+      "vote_average": 7.637,
+      "vote_count": 342
     },
     {
       "adult": false,
@@ -337,24 +357,27 @@
     },
     {
       "adult": false,
-      "backdrop_path": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
-      "id": 1440098,
-      "title": "Drawn Together",
-      "original_title": "Enfrentados: Marfil",
-      "overview": "Marfil Cortés, a daughter of a wealthy Spanish businessman, is kidnapped and released, leading her father to hire Sebastian Moore as a bodyguard. Despite initial clashes, they form an irremediable attraction, navigating a world where no one is who they say they are.",
-      "poster_path": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
-      "media_type": "movie",
-      "original_language": "es",
+      "backdrop_path": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
+      "id": 236235,
+      "name": "The Gentlemen",
+      "original_name": "The Gentlemen",
+      "overview": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
+      "poster_path": "/tw3tzfXaSpmUZIB8ZNqNEGzMBCy.jpg",
+      "media_type": "tv",
+      "original_language": "en",
       "genre_ids": [
-        10749,
-        53
+        35,
+        18,
+        80
       ],
-      "popularity": 240.8506,
-      "release_date": "2026-09-09",
+      "popularity": 200.195,
+      "first_air_date": "2024-03-07",
       "softcore": false,
-      "video": false,
-      "vote_average": 6.573,
-      "vote_count": 48
+      "vote_average": 7.859,
+      "vote_count": 910,
+      "origin_country": [
+        "GB"
+      ]
     },
     {
       "adult": false,
@@ -374,78 +397,56 @@
       "popularity": 56.9004,
       "first_air_date": "2026-09-09",
       "softcore": false,
-      "vote_average": 8.9,
-      "vote_count": 7,
+      "vote_average": 9.0,
+      "vote_count": 8,
       "origin_country": [
         "GB"
       ]
     },
     {
       "adult": false,
-      "backdrop_path": "/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
-      "id": 37854,
-      "name": "One Piece",
-      "original_name": "ワンピース",
-      "overview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
-      "poster_path": "/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
+      "backdrop_path": "/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
+      "id": 97546,
+      "name": "Ted Lasso",
+      "original_name": "Ted Lasso",
+      "overview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
+      "poster_path": "/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
       "media_type": "tv",
-      "original_language": "ja",
+      "original_language": "en",
       "genre_ids": [
-        10759,
-        35,
-        16
+        18,
+        35
       ],
-      "popularity": 56.8998,
-      "first_air_date": "1999-10-20",
+      "popularity": 251.5668,
+      "first_air_date": "2020-08-14",
       "softcore": false,
-      "vote_average": 8.7,
-      "vote_count": 5534,
+      "vote_average": 8.371,
+      "vote_count": 2646,
       "origin_country": [
-        "JP"
+        "US"
       ]
     },
     {
       "adult": false,
-      "backdrop_path": "/xSJJQeAp9GBFmiKusysTRG6jQjt.jpg",
-      "id": 860508,
-      "title": "The Whisper Man",
-      "original_title": "The Whisper Man",
-      "overview": "When his young son vanishes, a widower enlists help from his estranged father, a retired detective who put away the serial killer now linked to the case.",
-      "poster_path": "/6UqflU8Qqkz7Dq4swJPqs0ZJjY4.jpg",
-      "media_type": "movie",
-      "original_language": "en",
-      "genre_ids": [
-        80,
-        18,
-        53
-      ],
-      "popularity": 92.0494,
-      "release_date": "2026-08-27",
-      "softcore": false,
-      "video": false,
-      "vote_average": 6.805,
-      "vote_count": 626
-    },
-    {
-      "adult": false,
-      "backdrop_path": "/lmtTtOjsIBxwKD7LsAD5eeyhq1g.jpg",
-      "id": 300507,
-      "name": "Crew Girl",
-      "original_name": "Crew Girl",
-      "overview": "After a family scandal, teen rower Teagan Tao moves to a small town and joins an elite prep school's all-boys crew, sparking rivalry and attraction.",
-      "poster_path": "/jkPZW1iHNvlI6077NxSxwITa1tj.jpg",
+      "backdrop_path": "/572uSrnXM5uPVYMVqsxfNA41cT8.jpg",
+      "id": 196322,
+      "name": "Dark Matter",
+      "original_name": "Dark Matter",
+      "overview": "Jason Dessen is abducted into an alternate version of his life. To get back to his real family, he embarks on a harrowing journey to save them from the most terrifying foe imaginable: himself.",
+      "poster_path": "/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg",
       "media_type": "tv",
       "original_language": "en",
       "genre_ids": [
+        10765,
         18
       ],
-      "popularity": 84.608,
-      "first_air_date": "2026-09-10",
+      "popularity": 69.0342,
+      "first_air_date": "2024-05-07",
       "softcore": false,
-      "vote_average": 7.9,
-      "vote_count": 13,
+      "vote_average": 7.804,
+      "vote_count": 773,
       "origin_country": [
-        "CA"
+        "US"
       ]
     }
   ],
