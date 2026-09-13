@@ -18,17 +18,18 @@ public class BrowsePageTests
 	[Test]
 	public async Task Browse_WhenAddingATrendingItem_ItAppearsInTheWatchlist()
 	{
+		var title = WireMockStubs.ExpectedTrendingTitle();
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 
 		await page.VisitAsync("/browse");
-		await page.GetByText(WireMockStubs.ExpectedTrendingTitle()).First.ClickAsync();
+		await page.GetByText(title).First.ClickAsync();
 		var addButton = page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Add to Watchlist" });
 		await addButton.ClickAsync();
 		await addButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
 
 		await page.VisitAsync("/watchlist");
 
-		await Expect(page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Bulk edit" }))
+		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = title, Exact = true }))
 			.ToBeVisibleAsync(new LocatorAssertionsToBeVisibleOptions { Timeout = 30000 });
 	}
 }
