@@ -1,0 +1,534 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/cfnfHgji4RLe90wIVZGWRptD98b.jpg",
+        "banner": "https://artworks.thetvdb.com/banners/v4/series/428524/banners/63cad621b824e.jpg",
+        "guid": "plex://show/637e0b8b3dd0b7cf523ad6ad",
+        "key": "/library/metadata/637e0b8b3dd0b7cf523ad6ad/children",
+        "ratingKey": "637e0b8b3dd0b7cf523ad6ad",
+        "studio": "Spin Master",
+        "summary": "What's more fun than a pup in a construction vehicle? LOTS of pups in LOTS of construction vehicles. Rubble and his family - Aunt, Grandpa, cousins and all - are working hard to make their town, Builder Cove, a ter-ruff-ic place to live.",
+        "type": "show",
+        "addedAt": 1675382400,
+        "audienceRating": 4.6,
+        "audienceRatingImage": "imdb://image.rating",
+        "childCount": 5,
+        "contentRating": "TV-G",
+        "duration": 1800000,
+        "imdbRatingCount": 335,
+        "isContinuingSeries": true,
+        "lastEpisodeOriginallyAvailableAt": "2026-08-21",
+        "lastSeasonOriginallyAvailableAt": "2026-05-11",
+        "leafCount": 162,
+        "originallyAvailableAt": "2023-02-03",
+        "publicPagesURL": "https://watch.plex.tv/show/rubble-and-crew",
+        "slug": "rubble-and-crew",
+        "thumb": "https://image.tmdb.org/t/p/original/5MA1tqT0yI57IlPBy0KRN6G2mhN.jpg",
+        "title": "Rubble & Crew",
+        "userState": false,
+        "year": 2023,
+        "CommonSenseMedia": [
+          {
+            "key": "/library/metadata/637e0b8b3dd0b7cf523ad6ad/commonsensemedia",
+            "oneLiner": "Paw-some, adventurous pups use teamwork to save the day.",
+            "AgeRating": [
+              {
+                "age": 3,
+                "rating": 4,
+                "type": "official"
+              }
+            ]
+          }
+        ],
+        "Image": [
+          {
+            "alt": "Rubble & Crew",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/cfnfHgji4RLe90wIVZGWRptD98b.jpg"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/6/gracenote/65cec3d9280189170eade2dd5a54844b.jpg"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "banner",
+            "url": "https://artworks.thetvdb.com/banners/v4/series/428524/banners/63cad621b824e.jpg"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "clearLogo",
+            "url": "https://metadata-static.plex.tv/c/009125463f/c4a0f9655f7826784f29789e35913181.png"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "clearLogoWide",
+            "url": "https://metadata-static.plex.tv/c/009125463f/c4a0f9655f7826784f29789e35913181.png"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/6/gracenote/60c1ad949d7c6af77f69c31c99218505.jpg"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/5MA1tqT0yI57IlPBy0KRN6G2mhN.jpg"
+          },
+          {
+            "alt": "Rubble & Crew",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/1/gracenote/1e8d683baef701fb884ffab9cac38ec9.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c3c3f87001f33fbfc",
+            "id": "5d9c046c3c3f87001f33fbfc",
+            "key": "/library/sections/home/all?genre=5d9c046c3c3f87001f33fbfc",
+            "ratingKey": "genre_5d9c046c3c3f87001f33fbfc",
+            "slug": "animation",
+            "tag": "Animation",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c07ebcb3ffa001f1b0903",
+            "id": "5d9c07ebcb3ffa001f1b0903",
+            "key": "/library/sections/home/all?genre=5d9c07ebcb3ffa001f1b0903",
+            "ratingKey": "genre_5d9c07ebcb3ffa001f1b0903",
+            "slug": "children",
+            "tag": "Children",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt23858980"
+          },
+          {
+            "id": "tmdb://214875"
+          },
+          {
+            "id": "tvdb://428524"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 4.6
+          },
+          {
+            "image": "themoviedb://image.rating",
+            "type": "audience",
+            "value": 7.1
+          }
+        ],
+        "Country": [
+          {
+            "tag": "United States of America"
+          }
+        ],
+        "Role": [
+          {
+            "id": "605f5820c5da10002cab8373",
+            "order": 1,
+            "slug": "luxton-handspiker",
+            "tag": "Luxton Handspiker",
+            "thumb": "https://metadata-static.plex.tv/0/people/021ce195bac36ad9b6288a8145d1f28f.jpg",
+            "role": "Rubble (voice)",
+            "key": "/library/people/605f5820c5da10002cab8373",
+            "type": "person"
+          },
+          {
+            "id": "5fb001eb040ae4002de65794",
+            "order": 2,
+            "slug": "shazdeh-kapadia",
+            "tag": "Shazdeh Kapadia",
+            "thumb": "https://metadata-static.plex.tv/0/people/0386c962ff5866c9c6913f0dbf428bba.jpg",
+            "role": "Mix (voice)",
+            "key": "/library/people/5fb001eb040ae4002de65794",
+            "type": "person"
+          },
+          {
+            "id": "6389b30e1812c179f9980cbe",
+            "order": 3,
+            "slug": "alessandro-pugiotto",
+            "tag": "Alessandro Pugiotto",
+            "role": "Charger (voice)",
+            "key": "/library/people/6389b30e1812c179f9980cbe",
+            "type": "person"
+          },
+          {
+            "id": "63d3bd37dd7a92ba1cf3b788",
+            "order": 4,
+            "slug": "alberta-bolan",
+            "tag": "Alberta Bolan",
+            "role": "Motor (voice)",
+            "key": "/library/people/63d3bd37dd7a92ba1cf3b788",
+            "type": "person"
+          },
+          {
+            "id": "62d7b8bf7d705cb475d333ac",
+            "order": 5,
+            "slug": "liam-mckenna-7",
+            "tag": "Liam McKenna",
+            "thumb": "https://metadata-static.plex.tv/4/people/4c4365ece538fcced360bb4cae39036d.jpg",
+            "role": "Wheeler (voice)",
+            "key": "/library/people/62d7b8bf7d705cb475d333ac",
+            "type": "person"
+          },
+          {
+            "id": "65d737d933f9e07cbc4198cd",
+            "order": 6,
+            "slug": "housten-daghighi-1",
+            "tag": "Housten Daghighi",
+            "role": "Lucas",
+            "key": "/library/people/65d737d933f9e07cbc4198cd",
+            "type": "person"
+          },
+          {
+            "id": "5d7768266f4521001ea98cf4",
+            "order": 7,
+            "slug": "martin-roach",
+            "tag": "Martin Roach",
+            "thumb": "https://metadata-static.plex.tv/1/people/1964ea19895a066ea3eea35ae31b13fb.jpg",
+            "role": "Grandpa Gravel (voice)",
+            "key": "/library/people/5d7768266f4521001ea98cf4",
+            "type": "person"
+          },
+          {
+            "id": "5f405869c63b480040e50871",
+            "order": 8,
+            "slug": "aaron-judge",
+            "tag": "Aaron Judge",
+            "thumb": "https://metadata-static.plex.tv/2/people/2fa8f38cbf4dba80d841355cee1cec11.jpg",
+            "role": "Self (voice)",
+            "key": "/library/people/5f405869c63b480040e50871",
+            "type": "person"
+          },
+          {
+            "id": "5f3fc5cf52f200004148b4eb",
+            "order": 9,
+            "slug": "ci-hang-ma",
+            "tag": "Ci Hang Ma",
+            "thumb": "https://metadata-static.plex.tv/1/people/1c53637ccdddc55f06ebca5e3ac1acf8.jpg",
+            "role": "River",
+            "key": "/library/people/5f3fc5cf52f200004148b4eb",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "694c8e8c95b8925cc0f17438",
+            "slug": "dianna-basso-8",
+            "tag": "Dianna Basso",
+            "role": "Director",
+            "key": "/library/people/694c8e8c95b8925cc0f17438",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "5f3ffd6fcae2c60042ec7b0b",
+            "slug": "leah-wolfson",
+            "tag": "Leah Wolfson",
+            "role": "Producer",
+            "key": "/library/people/5f3ffd6fcae2c60042ec7b0b",
+            "type": "person"
+          },
+          {
+            "id": "5e16423761c6140040d78c65",
+            "slug": "gillian-pike-1",
+            "tag": "Gillian Pike",
+            "role": "Producer",
+            "key": "/library/people/5e16423761c6140040d78c65",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "5dd2cc39576847001e4e17b4",
+            "slug": "bradley-zweig",
+            "tag": "Bradley Zweig",
+            "role": "Writer",
+            "key": "/library/people/5dd2cc39576847001e4e17b4",
+            "type": "person"
+          },
+          {
+            "id": "5dce6e50b10fe5001f3931b6",
+            "slug": "peter-hunziker",
+            "tag": "Peter Hunziker",
+            "role": "Writer",
+            "key": "/library/people/5dce6e50b10fe5001f3931b6",
+            "type": "person"
+          },
+          {
+            "id": "6a0bf87b593dab57b8bff703",
+            "slug": "eva-konstantopoulos-8",
+            "tag": "Eva Konstantopoulos",
+            "role": "Writer",
+            "key": "/library/people/6a0bf87b593dab57b8bff703",
+            "type": "person"
+          },
+          {
+            "id": "5e163554ef1040003f24b6b0",
+            "slug": "robin-j-stein",
+            "tag": "Robin J. Stein",
+            "role": "Writer",
+            "key": "/library/people/5e163554ef1040003f24b6b0",
+            "type": "person"
+          },
+          {
+            "id": "6127a3e3d54aad002cba5d9b",
+            "slug": "scott-gray-22",
+            "tag": "Scott Gray",
+            "role": "Writer",
+            "key": "/library/people/6127a3e3d54aad002cba5d9b",
+            "type": "person"
+          },
+          {
+            "id": "6a0c3a1e3fd5a7c5f9357099",
+            "slug": "jacob-moffat-6",
+            "tag": "Jacob Moffat",
+            "role": "Writer",
+            "key": "/library/people/6a0c3a1e3fd5a7c5f9357099",
+            "type": "person"
+          },
+          {
+            "id": "5ec408a754de200040156852",
+            "slug": "dan-danko",
+            "tag": "Dan Danko",
+            "role": "Writer",
+            "key": "/library/people/5ec408a754de200040156852",
+            "type": "person"
+          },
+          {
+            "id": "69435f5a196aec9ec8cb140b",
+            "slug": "drew-champion-10",
+            "tag": "Drew Champion",
+            "role": "Writer",
+            "key": "/library/people/69435f5a196aec9ec8cb140b",
+            "type": "person"
+          },
+          {
+            "id": "63e8d520ba30c26ff534f0da",
+            "slug": "nahreen-tarzi-1",
+            "tag": "Nahreen Tarzi",
+            "role": "Writer",
+            "key": "/library/people/63e8d520ba30c26ff534f0da",
+            "type": "person"
+          },
+          {
+            "id": "5e164105316a39003ef8ad08",
+            "slug": "kellie-r-griffin",
+            "tag": "Kellie R. Griffin",
+            "role": "Writer",
+            "key": "/library/people/5e164105316a39003ef8ad08",
+            "type": "person"
+          },
+          {
+            "id": "5e204209b6d7fb003df37978",
+            "slug": "darnell-lamont-walker-1",
+            "tag": "Darnell Lamont Walker",
+            "role": "Writer",
+            "key": "/library/people/5e204209b6d7fb003df37978",
+            "type": "person"
+          },
+          {
+            "id": "6659cfaa4bfdda8cde7f0481",
+            "slug": "diana-aydin-1",
+            "tag": "Diana Aydin",
+            "role": "Writer",
+            "key": "/library/people/6659cfaa4bfdda8cde7f0481",
+            "type": "person"
+          },
+          {
+            "id": "6a0c37f9452e12b6aaaa6dce",
+            "slug": "christopher-j-gentile-8",
+            "tag": "Christopher J. Gentile",
+            "role": "Writer",
+            "key": "/library/people/6a0c37f9452e12b6aaaa6dce",
+            "type": "person"
+          },
+          {
+            "id": "6a0c119e990fea61d9638d71",
+            "slug": "louise-moon-11",
+            "tag": "Louise Moon",
+            "role": "Writer",
+            "key": "/library/people/6a0c119e990fea61d9638d71",
+            "type": "person"
+          },
+          {
+            "id": "630881c7b62ff1b817c80e00",
+            "slug": "michaela-foster",
+            "tag": "Michaela Foster",
+            "role": "Writer",
+            "key": "/library/people/630881c7b62ff1b817c80e00",
+            "type": "person"
+          },
+          {
+            "id": "5e16530c2d4d84003e4ab3fd",
+            "slug": "denise-downer",
+            "tag": "Denise Downer",
+            "role": "Writer",
+            "key": "/library/people/5e16530c2d4d84003e4ab3fd",
+            "type": "person"
+          },
+          {
+            "id": "6a0bf4a30920c26c51772734",
+            "slug": "hugh-duffy-11",
+            "tag": "Hugh Duffy",
+            "role": "Writer",
+            "key": "/library/people/6a0bf4a30920c26c51772734",
+            "type": "person"
+          },
+          {
+            "id": "6a0bfaa0baea1a947d3b4ab1",
+            "slug": "jen-bardekoff-9",
+            "tag": "Jen Bardekoff",
+            "role": "Writer",
+            "key": "/library/people/6a0bfaa0baea1a947d3b4ab1",
+            "type": "person"
+          },
+          {
+            "id": "5f3fcd0cbf3e560040b0e9fa",
+            "slug": "lindz-amer",
+            "tag": "Lindz Amer",
+            "role": "Writer",
+            "key": "/library/people/5f3fcd0cbf3e560040b0e9fa",
+            "type": "person"
+          },
+          {
+            "id": "632c18b7fe67ea1f84fc6f39",
+            "slug": "angela-m-sanchez",
+            "tag": "Angela M. Sánchez",
+            "role": "Writer",
+            "key": "/library/people/632c18b7fe67ea1f84fc6f39",
+            "type": "person"
+          },
+          {
+            "id": "623c6338d96bb9a3f9d3aab3",
+            "slug": "franklin-young-1",
+            "tag": "Franklin Young",
+            "role": "Writer",
+            "key": "/library/people/623c6338d96bb9a3f9d3aab3",
+            "type": "person"
+          },
+          {
+            "id": "62bc6d9e4c97179d0b9f6849",
+            "slug": "tariq-fisher",
+            "tag": "Ta'riq Fisher",
+            "role": "Writer",
+            "key": "/library/people/62bc6d9e4c97179d0b9f6849",
+            "type": "person"
+          },
+          {
+            "id": "5ec4140e508ee60041646122",
+            "slug": "charity-l-miller",
+            "tag": "Charity L. Miller",
+            "role": "Writer",
+            "key": "/library/people/5ec4140e508ee60041646122",
+            "type": "person"
+          },
+          {
+            "id": "5d777086594b2b001e74c719",
+            "slug": "blake-pickens-1",
+            "tag": "Blake Pickens",
+            "role": "Writer",
+            "key": "/library/people/5d777086594b2b001e74c719",
+            "type": "person"
+          }
+        ],
+        "Network": [
+          {
+            "tag": "Nickelodeon"
+          },
+          {
+            "tag": "Nick Jr."
+          },
+          {
+            "tag": "Treehouse TV"
+          }
+        ],
+        "SeasonType": [
+          {
+            "id": "tmdbAiring",
+            "source": "tmdb",
+            "tag": "Aired",
+            "title": "The Movie Database (Aired)"
+          },
+          {
+            "id": "tvdbAiring",
+            "source": "tvdb",
+            "tag": "Aired",
+            "title": "TheTVDB (Aired)"
+          },
+          {
+            "id": "tvdbAbsolute",
+            "source": "tvdb",
+            "tag": "Absolute",
+            "title": "TheTVDB (Absolute)"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://show/5f5b9fc22090cc00399bc5f9",
+            "tag": "Madagascar: A Little Wild"
+          },
+          {
+            "guid": "plex://show/5d9c07fe3c3f87001f3444d2",
+            "tag": "Bob the Builder"
+          },
+          {
+            "guid": "plex://show/5d9c0801e98e47001eb05209",
+            "tag": "I Am Weasel"
+          },
+          {
+            "guid": "plex://show/5d9c0873ba2e21001f190e42",
+            "tag": "101 Dalmatians: The Series"
+          },
+          {
+            "guid": "plex://show/5d9c07ebffd9ef001e98897d",
+            "tag": "Wild Kratts"
+          },
+          {
+            "guid": "plex://show/5d9c08192192ba001f30771f",
+            "tag": "Higglytown Heroes"
+          },
+          {
+            "guid": "plex://show/5d9c0831e264b7001fc3e862",
+            "tag": "Paw Patrol"
+          },
+          {
+            "guid": "plex://show/5d9c08744eefaa001f5de4e1",
+            "tag": "The Busy World of Richard Scarry"
+          },
+          {
+            "guid": "plex://show/5d9c0819705e7a001e6d2a2b",
+            "tag": "Curious George"
+          },
+          {
+            "guid": "plex://show/5d9c07f808fddd001f28f0d0",
+            "tag": "Clifford the Big Red Dog"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Spin Master"
+          }
+        ]
+      }
+    ]
+  }
+}

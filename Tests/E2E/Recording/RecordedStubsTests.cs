@@ -29,12 +29,23 @@ public class RecordedStubsTests
 		await Assert.That(Directory.EnumerateFiles(directory, "*.json", SearchOption.AllDirectories)).IsEmpty();
 	}
 
-	private static string Snapshot(int status, string body) =>
+	[Test]
+	public async Task Merge_WhenEveryStackRecorded_KeepsAllOfTheirMappings()
+	{
+		var directory = Directory.CreateTempSubdirectory("recorded-stubs-").FullName;
+		var merged = RecordedStubs.Merge([Snapshot(200, """{"id":1}"""), Snapshot(200, """{"id":2}""", "/tmdb/movie/2")]);
+
+		var recorded = RecordedStubs.Write(merged, directory, _ => false);
+
+		await Assert.That(recorded.Select(entry => entry.Slug)).IsEquivalentTo(["movie-1", "movie-2"]);
+	}
+
+	private static string Snapshot(int status, string body, string url = "/tmdb/movie/1?api_key=secret") =>
 		$$"""
 			{
 			  "mappings": [
 			    {
-			      "request": { "method": "GET", "url": "/tmdb/movie/1?api_key=secret" },
+			      "request": { "method": "GET", "url": "{{url}}" },
 			      "response": { "status": {{status}}, "headers": { "Content-Type": "application/json" }, "body": {{JsonSerializer.Serialize(body)}} }
 			    }
 			  ]
