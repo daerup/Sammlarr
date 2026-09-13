@@ -39,6 +39,14 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	public const string PlexToken = "e2e-plex-token";
 
+	public static readonly SeededUser SeededAdmin = Project(new TestCurrentUser());
+
+	public static readonly SeededUser SeededMember = new(Guid.Parse("22222222-2222-2222-2222-222222222222"), "Member User", UserRole.Member);
+
+	public static readonly SeededUser SeededRemovable = new(Guid.Parse("33333333-3333-3333-3333-333333333333"), "Removable User", UserRole.Member);
+
+	private static SeededUser Project(TestCurrentUser user) => new(user.Id.Value, user.DisplayName, user.Role);
+
 	private const int DefaultYear = 2024;
 
 	private static readonly SqliteConnection Template = BuildTemplate();
@@ -528,7 +536,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return connection;
 	}
 
-	public static (Guid Id, string DisplayName, UserRole Role) SeedDatabaseFile(string path, string keyRingPath, string trendingTmdbId, string trendingTitle) =>
+	public static SeededUser SeedDatabaseFile(string path, string keyRingPath, string trendingTmdbId, string trendingPlexId, string trendingTitle) =>
 		SeedFile(
 			path,
 			keyRingPath,
@@ -537,11 +545,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				SeedApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
 				SeedApiKey(context, ApiKeyProvider.Mdblist, MdblistApiKey);
 				SeedCredential(context, AuthProvider.Plex, PlexToken);
-				SeedTrendingMedia(context, trendingTmdbId, trendingTitle);
+				SeedTrendingMedia(context, trendingTmdbId, trendingPlexId, trendingTitle);
 			}
 		);
 
-	public static (Guid Id, string DisplayName, UserRole Role) SeedRecordingDatabase(
+	public static SeededUser SeedRecordingDatabase(
 		string path,
 		string keyRingPath,
 		IReadOnlyDictionary<ApiKeyProvider, string> apiKeys,
@@ -564,7 +572,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			}
 		);
 
-	private static (Guid Id, string DisplayName, UserRole Role) SeedFile(string path, string keyRingPath, Action<SammlarrDbContext> seed)
+	private static SeededUser SeedFile(string path, string keyRingPath, Action<SammlarrDbContext> seed)
 	{
 		Environment.SetEnvironmentVariable("Sammlarr__DataProtection__KeyRingPath", keyRingPath);
 		using var connection = new SqliteConnection($"Data Source={path};Pooling=False");
@@ -574,9 +582,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		using var context = BuildContext(provider, user, connection);
 		context.Database.Migrate();
 		SeedUser(context, user);
+		SeedSecondaryUsers(context);
 		seed(context);
 		EnableWriteAheadLogging(connection);
-		return (user.Id.Value, user.DisplayName, user.Role);
+		return Project(user);
 	}
 
 	private static void SeedApiKey(SammlarrDbContext context, ApiKeyProvider provider, string apiKey)
@@ -603,11 +612,11 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		context.ChangeTracker.Clear();
 	}
 
-	private static void SeedTrendingMedia(SammlarrDbContext context, string tmdbId, string title)
+	private static void SeedTrendingMedia(SammlarrDbContext context, string tmdbId, string plexId, string title)
 	{
 		var media = new MediaRow();
 		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Tmdb, tmdbId).ToExternal(MediaType.Movie).ToExternalIdEntity(media));
-		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Plex, $"plex-{tmdbId}").ToExternal(MediaType.Movie).ToExternalIdEntity(media));
+		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Plex, plexId).ToExternal(MediaType.Movie).ToExternalIdEntity(media));
 		context.SaveChanges();
 
 		context.MediaMetadata.Add(
@@ -634,6 +643,28 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		using var command = connection.CreateCommand();
 		command.CommandText = "PRAGMA journal_mode=WAL;";
 		command.ExecuteNonQuery();
+	}
+
+	private static void SeedSecondaryUsers(SammlarrDbContext context)
+	{
+		foreach (var (id, displayName, role) in new[] { SeededMember, SeededRemovable })
+		{
+			context.Users.Add(
+				new UserRow
+				{
+					Id = id,
+					Provider = AuthProvider.Plex,
+					ExternalUserId = id.ToString(),
+					DisplayName = displayName,
+					AvatarUrl = string.Empty,
+					Role = role,
+					JoinedAt = DateTimeOffset.UnixEpoch,
+				}
+			);
+		}
+
+		context.SaveChanges();
+		context.ChangeTracker.Clear();
 	}
 
 	private static void SeedUser(SammlarrDbContext context, TestCurrentUser user)

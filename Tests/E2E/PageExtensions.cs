@@ -13,6 +13,9 @@ internal static class PageExtensions
 	internal static async Task VisitAsync(this IPage page, string route)
 	{
 		await page.GotoAsync(route);
-		await page.WaitForFunctionAsync(CircuitReady, null, new PageWaitForFunctionOptions { Timeout = 30000 });
+		await page.WaitForCircuitAsync();
 	}
+
+	internal static Task WaitForCircuitAsync(this IPage page) =>
+		page.WaitForFunctionAsync(CircuitReady, null, new PageWaitForFunctionOptions { Timeout = 30000 });
 }
