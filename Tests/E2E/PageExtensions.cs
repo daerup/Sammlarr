@@ -17,8 +17,23 @@ internal static class PageExtensions
 		await page.WaitForCircuitAsync();
 	}
 
-	internal static Task WaitForCircuitAsync(this IPage page) =>
-		page.WaitForFunctionAsync(CircuitReady, null, new PageWaitForFunctionOptions { Timeout = Wait.Preview });
+	internal static async Task WaitForCircuitAsync(this IPage page)
+	{
+		try
+		{
+			await page.WaitForFunctionAsync(CircuitReady, null, new PageWaitForFunctionOptions { Timeout = Wait.Preview, PollingInterval = 100 });
+		}
+		catch (TimeoutException)
+		{
+			var blazor = await page.EvaluateAsync<bool>("() => !!window.Blazor");
+			var reconnecting = await page.EvaluateAsync<bool>("() => !!document.querySelector('#components-reconnect-modal.components-reconnect-show')");
+			var handlers = await page.EvaluateAsync<bool>($"() => {HandlersAttached}");
+			var body = (await page.InnerTextAsync("body")).ReplaceLineEndings(" ");
+			throw new TimeoutException(
+				$"circuit never became ready at {page.Url} (blazor={blazor}, reconnecting={reconnecting}, handlers={handlers}), body '{body[..Math.Min(400, body.Length)]}'"
+			);
+		}
+	}
 
 	internal static async Task ShouldBeAtAsync(this IPage page, string route, float timeout = Wait.Settle)
 	{
