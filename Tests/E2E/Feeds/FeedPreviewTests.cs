@@ -88,6 +88,37 @@ public class FeedPreviewTests
 		await Assert.That(await E2EApp.RequestCountAsync("/library/metadata/")).IsGreaterThan(warm);
 	}
 
+	[Test]
+	public async Task RefreshAssets_WhenThePreviewHasUnmatchedItems_StillRefreshes()
+	{
+		const string identifier = "e2e-refresh-unmatched";
+		await using var stub = await E2EApp.StubAsync($"/lists/{identifier}/items", 200, UnmatchedList(3));
+
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		await page.VisitAsync("/feeds/create");
+		await FeedEditor.SelectMdblistAsync(page);
+		await FeedEditor.FillAsync(page, "#name", $"E2E Unmatched {Guid.NewGuid().ToString("N")[..6]}");
+		await FeedEditor.FillAsync(page, "#list-identifier", identifier);
+		await FeedEditor.TestAsync(page);
+		await FeedEditor.PreviewLoadedAsync(page);
+		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
+
+		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
+		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Refresh assets?" })).ToBeVisibleAsync();
+		await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Refresh", Exact = true }).ClickAsync();
+
+		await FeedEditor.PreviewLoadedAsync(page);
+		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
+
+		await page.Locator(SearchBox).FillAsync(Guid.NewGuid().ToString("N"));
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
+		await page.Locator(SearchBox).FillAsync(string.Empty);
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(3);
+	}
+
+	private static string UnmatchedList(int count) =>
+		$"{{\"movies\":[{string.Join(',', Enumerable.Range(0, count).Select(index => $"{{\"title\":\"E2E Unmatched {index}\",\"release_year\":2024}}"))}],\"shows\":[]}}";
+
 	private static async Task PreviewAsync(IPage page, string scenario)
 	{
 		await page.VisitAsync("/feeds/create");

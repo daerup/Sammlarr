@@ -361,7 +361,7 @@
             return;
         }
 
-        var staleIds = _rawResults.Select(r => r.Id).ToList();
+        var staleIds = _rawResults.Where(r => r is not UnmatchedMedia).Select(r => r.Id).ToList();
         _refreshDialogOpen = false;
         _fetchState = FetchState.Loading;
         ClearResults();
