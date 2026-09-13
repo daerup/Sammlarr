@@ -108,9 +108,9 @@ public class FeedPreviewTests
 		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
 
 		await page.Locator(SearchBox).FillAsync(Guid.NewGuid().ToString("N"));
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0, Wait.Settle);
 		await page.Locator(SearchBox).FillAsync(string.Empty);
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(3);
+		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(3, Wait.Settle);
 	}
 
 	private static string UnmatchedList(int count) =>
