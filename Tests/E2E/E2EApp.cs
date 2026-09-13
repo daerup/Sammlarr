@@ -6,6 +6,8 @@ using Aspire.Hosting.Testing;
 using Domain.Providers;
 using E2E.Tests.Recording;
 using Harness;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 
 namespace E2E.Tests;
@@ -18,6 +20,11 @@ public static class E2EApp
 	private static readonly Lock CaptureGate = new();
 	private static readonly HashSet<string> Captured = [];
 	private static readonly HashSet<string> Stubbed = [];
+	private static readonly List<string> CircuitFailures = [];
+
+	private const string CircuitFailure = "Unhandled exception in circuit";
+
+	private const string CircuitLogCategory = "AppHost.Resources.blazor-ui";
 	private static DistributedApplication? _app;
 	private static IPlaywright? _playwright;
 	private static IBrowser? _browser;
@@ -40,6 +47,17 @@ public static class E2EApp
 	internal static Task<IPage> OpenMemberPageAsync() => OpenSignedInPageAsync(() => _memberCookie);
 
 	internal static Task<IPage> OpenPageWithAuthCookieAsync(string value) => OpenSignedInPageAsync(() => value);
+
+	internal static Task<IPage> AdminAt(string route) => OpenAtAsync(OpenAuthenticatedPageAsync, route);
+
+	internal static Task<IPage> MemberAt(string route) => OpenAtAsync(OpenMemberPageAsync, route);
+
+	private static async Task<IPage> OpenAtAsync(Func<Task<IPage>> open, string route)
+	{
+		var page = await open();
+		await page.VisitAsync(route);
+		return page;
+	}
 
 	private static async Task<IPage> OpenSignedInPageAsync(Func<string> cookie)
 	{
@@ -145,6 +163,22 @@ public static class E2EApp
 		}
 	}
 
+	internal static async Task WaitForRequestsBeyondAsync(string urlPathSegment, int baseline, float timeout = 30_000)
+	{
+		var deadline = Environment.TickCount64 + (long)timeout;
+		while (Environment.TickCount64 < deadline)
+		{
+			if (await RequestCountAsync(urlPathSegment) > baseline)
+			{
+				return;
+			}
+
+			await Task.Delay(250);
+		}
+
+		await Assert.That(await RequestCountAsync(urlPathSegment)).IsGreaterThan(baseline);
+	}
+
 	internal static async Task<int> RequestCountAsync(string urlPathSegment) =>
 		(JsonNode.Parse(await RequestJournalAsync())?["requests"]?.AsArray() ?? []).Count(entry =>
 			entry?["request"]?["url"]?.GetValue<string>()?.Contains(urlPathSegment, StringComparison.Ordinal) is true
@@ -218,7 +252,14 @@ public static class E2EApp
 			Directory.Delete(_workDir, recursive: true);
 		}
 
+		List<string> crashed;
+		lock (CaptureGate)
+		{
+			crashed = [.. CircuitFailures];
+		}
+
 		await Assert.That(unmatched).IsEmpty();
+		await Assert.That(crashed).IsEmpty();
 	}
 
 	private static IEnumerable<string> Urls(string journalJson) =>
@@ -373,6 +414,7 @@ public static class E2EApp
 			["--LaunchSammlarr=false"],
 			(options, _) => options.DisableDashboard = true
 		);
+		builder.Services.AddLogging(logging => logging.AddProvider(new CircuitFailureSink(CircuitLogCategory, CircuitFailure, RecordCircuitFailure)));
 		var wiremock = builder.AddContainer("wiremock", "wiremock/wiremock", "latest").WithHttpEndpoint(targetPort: 8080);
 		var wiremockHttp = wiremock.GetEndpoint("http");
 		if (!IsLive)
@@ -410,6 +452,14 @@ public static class E2EApp
 		var headed = Environment.GetEnvironmentVariable("E2E_HEADED") is "true";
 		_playwright = await Playwright.CreateAsync();
 		_browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = !headed, SlowMo = headed ? 2000 : 0 });
+	}
+
+	private static void RecordCircuitFailure(string message)
+	{
+		lock (CaptureGate)
+		{
+			CircuitFailures.Add(message);
+		}
 	}
 
 	private static async Task ConfigureProxiesAsync()
