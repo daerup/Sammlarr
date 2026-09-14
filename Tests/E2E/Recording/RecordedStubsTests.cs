@@ -11,7 +11,7 @@ public class RecordedStubsTests
 
 		var recorded = RecordedStubs.Write(Snapshot(200, """{"id":1}"""), directory, _ => false);
 
-		await Assert.That(recorded).HasCount(1);
+		await Assert.That(recorded).Count().IsEqualTo(1);
 		await Assert.That(File.Exists(Path.Combine(directory, "tmdb", "movie-1.json"))).IsTrue();
 	}
 

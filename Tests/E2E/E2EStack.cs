@@ -45,13 +45,7 @@ internal sealed class E2EStack
 
 		var admin = live
 			? SammlarrTestHost.SeedRecordingDatabase(dbPath, keyRing, Credentials<ApiKeyProvider>("_API_KEY"), Credentials<AuthProvider>("_TOKEN"))
-			: SammlarrTestHost.SeedDatabaseFile(
-				dbPath,
-				keyRing,
-				WireMockStubs.ExpectedTrendingTmdbId(),
-				WireMockStubs.ExpectedTrendingPlexId(),
-				WireMockStubs.ExpectedTrendingTitle()
-			);
+			: SammlarrTestHost.SeedDatabaseFile(dbPath, keyRing);
 
 		return new E2ESeed(workDir, dbPath, keyRing, Forge(keyRing, admin), Forge(keyRing, SammlarrTestHost.SeededMember));
 	}

@@ -13,7 +13,7 @@ attributes that make them concrete and where each is enforced.
 | Correctness of list building | Resolution matches the right title (a title search is confirmed by id); one title yields one library row whether duplicates arrive in one flush or across flushes (identity dedup); a cross-identity collision fails loud, not silent; a bad or empty load never evicts the wrong items | The identity coordinator and media repository (<<section-runtime-view>>, scenario C), keyed by the composite external-id constraint and surfacing collisions as `MediaIdentityConflictException`; the planned Mirror wipe guard (<<section-technical-risks>>)
 | Resilience of provider calls | A 429 storm or outage degrades to partial results, never a failed run; outbound concurrency is bounded; transient faults retry, sustained ones trip a breaker | The shared HTTP pipeline (<<section-concepts>>); scenario R
 | Per-user data isolation | Reads are filtered to the current user; writes are stamped to the owner; the filter fails closed; background work runs under the right user | EF query filters, the ownership stamper and `IUserScope` (<<section-concepts>>); scenario I
-| Maintainability | Strong typing and unions over primitives; strict layer dependencies; provider wiring generated, not hand-written; least visibility | Architecture tests; the module and generator patterns (<<section-concepts>>)
+| Maintainability | Strong typing and unions over primitives; strict layer dependencies; provider wiring generated, not hand-written; least visibility; one test naming convention | Architecture tests; the module and generator patterns (<<section-concepts>>); the `SAM0001` analyzer; the tiers in `testing.md`
 |===
 
 === Quality Scenarios
