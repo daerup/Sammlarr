@@ -17,15 +17,16 @@ snapshots need the native runner).
 | Components                | `Tests/UI`                     | Blazor render logic, event wiring, empty/error states   | bUnit, `.cs` only                 |
 | End to end                | `Tests/E2E`                    | Cross-feature flows through a real browser              | Playwright + Aspire + WireMock    |
 | Conventions               | `Tests/Architecture`           | Dependency direction, naming, design rules              | NetArchTest                       |
+| Roslyn components         | `Tests/Roslyn`                 | Source generators and analyzers                         | in-memory compilation             |
 
 Rule of thumb: wiring more than one or two `.Mock()`s just to construct the subject means it belongs in `Tests/Integration` as a harness scenario, not a unit
 test.
 
-Current suite: **869** non-E2E tests plus **105** E2E.
+Current suite: **880** non-E2E tests plus **106** E2E.
 
-| Domain | Shared | Core | API | DB | Architecture | Generators | Integration | UI | Web |
+| Domain | Shared | Core | API | DB | Architecture | Roslyn | Integration | UI | Web |
 |--------|--------|------|-----|----|--------------|------------|-------------|----|-----|
-| 49     | 153    | 102  | 118 | 21 | 21           | 2          | 314         | 76 | 13  |
+| 49     | 153    | 102  | 118 | 21 | 21           | 13         | 314         | 76 | 13  |
 
 ## Running
 
@@ -72,7 +73,7 @@ Live runs genuinely mutate: they hit the real accounts. After any live run, scan
 |--------------------------|--------------------------------------------------------------------------------|
 | `E2E_LIVE=true`          | Live record mode against the real providers; needs secrets, forces one stack   |
 | `E2E_HEADED=true`        | Headed browser with slow motion, for watching a test run                       |
-| `E2E_PRUNE=true`         | Delete fixtures not captured during a live run; off by default, it over-prunes |
+| `E2E_PRUNE=true`         | Delete fixtures the live run did not capture. Opt-in on purpose: a filtered run only touches some endpoints, so pruning would delete the rest |
 | `E2E_AUDIT=true`         | Dump served and unmatched request URLs to the temp directory                   |
 | `E2E_RESOURCE_LOG=<dir>` | Write each stack's application log to `<dir>/stack-<n>.log`                    |
 

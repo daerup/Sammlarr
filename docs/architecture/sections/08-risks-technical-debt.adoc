@@ -25,7 +25,7 @@ Operational risks in what is built, and deliberately deferred work.
 
 | Feed run engine + scheduler | Not built; feeds are preview plus manual/sync only. `feed-mirror-run-engine` adds the engine, Manual/Scheduled triggers, the `Replace`-to-`Mirror` rename, and the wipe guard. Feed-run notification events are modelled but unemitted until then.
 | Media-sinks redesign | Planned (`arr-sink-and-wantlist-rename`): replace the Wolverine push with inline reconcile plus direct Radarr/Sonarr sinks, rename Watchlist to Wantlist/Sink. Reverses the outbox push in <<section-runtime-view>>.
-| Testing overhaul | Planned: a unified harness, drop Reqnroll/Gherkin for in-code Given/When/Then, add bUnit and Playwright, real-SQLite two-backend.
+| E2E circuit crash | Unexplained: roughly one full E2E run in five trips the session-level circuit-crash guard while all tests pass. Not reproduced with output captured, so no stack trace yet.
 | Result-based error handling | Planned (`retire-control-flow-exceptions-to-result`): replace control-flow exceptions with `Result` at the service boundaries.
 | Metrics | Not implemented; only logs and traces over OTLP.
 | Release pipeline | Not built. CI/CD, the image, GHCR releases (Aspire-driven, Option A) and the in-app version/update footer belong to the release-engineering plan.

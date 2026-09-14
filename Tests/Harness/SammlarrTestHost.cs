@@ -542,7 +542,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return connection;
 	}
 
-	public static SeededUser SeedDatabaseFile(string path, string keyRingPath, string trendingTmdbId, string trendingPlexId, string trendingTitle) =>
+	public static SeededUser SeedDatabaseFile(string path, string keyRingPath) =>
 		SeedFile(
 			path,
 			keyRingPath,
@@ -551,7 +551,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 				SeedApiKey(context, ApiKeyProvider.Tmdb, TmdbApiKey);
 				SeedApiKey(context, ApiKeyProvider.Mdblist, MdblistApiKey);
 				SeedCredential(context, AuthProvider.Plex, PlexToken);
-				SeedTrendingMedia(context, trendingTmdbId, trendingPlexId, trendingTitle);
 			}
 		);
 
@@ -613,32 +612,6 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 					ExpiresAt = new DateTimeOffset(2030, 1, 1, 0, 0, 0, TimeSpan.Zero),
 				}
 			);
-		context.SaveChanges();
-		context.ChangeTracker.Clear();
-	}
-
-	private static void SeedTrendingMedia(SammlarrDbContext context, string tmdbId, string plexId, string title)
-	{
-		var media = new MediaRow();
-		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Tmdb, tmdbId).ToExternal(MediaType.Movie).ToExternalIdEntity(media));
-		context.ExternalMediaIds.Add(new ProviderId(MediaProvider.Plex, plexId).ToExternal(MediaType.Movie).ToExternalIdEntity(media));
-		context.SaveChanges();
-
-		context.MediaMetadata.Add(
-			new MovieMetadataRow
-			{
-				MediaId = media.Id,
-				Title = title,
-				Tagline = string.Empty,
-				Summary = "A stubbed trending movie for the E2E smoke test.",
-				PosterUrl = "/poster.jpg",
-				BackdropUrl = "/backdrop.jpg",
-				ReleaseDate = new DateOnly(2024, 1, 15),
-				Genres = ["Action"],
-				LastFetchedAt = new DateTimeOffset(2026, 9, 9, 0, 0, 0, TimeSpan.Zero),
-				Runtime = TimeSpan.FromHours(2),
-			}
-		);
 		context.SaveChanges();
 		context.ChangeTracker.Clear();
 	}
