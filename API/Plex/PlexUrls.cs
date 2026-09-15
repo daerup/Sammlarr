@@ -15,10 +15,10 @@ internal sealed class PlexUrls(PlexOptions options)
 
 	public string Pin(int pinId) => $"{Pins}/{pinId.ToString(CultureInfo.InvariantCulture)}";
 
-	public string Search(string searchTypes, string title) =>
+	public string Search(string searchTypes, string title, int limit) =>
 		Compose(
 			options.DiscoverUrl,
-			string.Format(CultureInfo.InvariantCulture, PlexEndpoints.SearchQuery, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title))
+			string.Format(CultureInfo.InvariantCulture, PlexEndpoints.SearchQuery, Uri.EscapeDataString(searchTypes), Uri.EscapeDataString(title), limit)
 		);
 
 	public string RatingKeyMetadata(string plexId) =>

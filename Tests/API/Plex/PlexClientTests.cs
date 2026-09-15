@@ -3,6 +3,7 @@ using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Domain.Providers;
+using Polly.CircuitBreaker;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -31,6 +32,19 @@ public class PlexClientTests
 			.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl))
 			.Throws<InvalidOperationException>()
 			.WithMessageContaining("No valid Plex credentials are stored");
+	}
+
+	[Test]
+	public async Task SendAsync_WhenTheResiliencePipelineGivesUp_ThrowsProviderUnavailable()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Throws(new BrokenCircuitException("plex circuit is open"));
+		using var httpClient = handler.CreateClient(PlexBaseUrl);
+		var credentialStore = ICredentialRepository.Mock();
+		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
+		var testee = new PlexClient(httpClient, credentialStore);
+
+		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl)).Throws<ProviderUnavailableException>();
 	}
 
 	[Test]

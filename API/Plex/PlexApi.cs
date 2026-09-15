@@ -7,18 +7,24 @@ using Contracts.Media;
 using Contracts.Media.Search;
 using Domain;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
 internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider
 {
-	private void LogIfDegraded(HttpResponseMessage response, string endpoint)
+	private const int SearchLimit = 30;
+
+	private void EnsureUsable(HttpResponseMessage response, string endpoint)
 	{
-		if (response.StatusCode is HttpStatusCode.TooManyRequests || (int)response.StatusCode >= 500)
+		if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)response.StatusCode >= 500)
 		{
-			logger.LogWarning("Plex lookup degraded ({StatusCode}) on {Endpoint}; treated as no-match downstream", (int)response.StatusCode, endpoint);
+			logger.LogWarning("Plex lookup was rate limited or unavailable ({StatusCode}) on {Endpoint}", (int)response.StatusCode, endpoint);
+			throw new ProviderUnavailableException(MediaProvider.Plex);
 		}
+
+		response.EnsureSuccessStatusCode();
 	}
 
 	public Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId mediaId, CancellationToken cancellationToken = default) =>
@@ -31,10 +37,9 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 	)
 	{
 		var searchTypes = string.Join(",", mediaTypes.Select(ToPlexMediaType));
-		var endpoint = urls.Search(searchTypes, title);
+		var endpoint = urls.Search(searchTypes, title, SearchLimit);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
-		LogIfDegraded(response, endpoint);
-		response.EnsureSuccessStatusCode();
+		EnsureUsable(response, endpoint);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = (await JsonSerializer.DeserializeAsync<PlexTypes.Search.Root>(stream, cancellationToken: cancellationToken))!;
 		if (result.MediaContainer.Size is 1 && result.MediaContainer.SearchResults[0].Size is 0)
@@ -58,8 +63,7 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 	{
 		var endpoint = urls.RatingKeyMetadata(plexId.Value);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);
-		LogIfDegraded(response, endpoint);
-		response.EnsureSuccessStatusCode();
+		EnsureUsable(response, endpoint);
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = await JsonSerializer.DeserializeAsync<PlexTypes.ById.Root>(stream, cancellationToken: cancellationToken);
 		var reason = $"Plex returned no metadata for ratingKey {plexId.Value}.";
@@ -137,7 +141,7 @@ file static class PlexMetadataMappingExtensions
 			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
 			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
 			Runtime = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
@@ -151,7 +155,7 @@ file static class PlexMetadataMappingExtensions
 			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
 			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
 			RuntimePerEpisode = result.Duration is > 0 ? TimeSpan.FromMilliseconds(result.Duration.Value) : null,
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
@@ -174,7 +178,7 @@ file static class PlexMetadataMappingExtensions
 			Title = result.Title.NullIfBlank(),
 			PosterUrl = NormalizePlexImageUrl(result.Thumb).NullIfBlank(),
 			BackdropUrl = NormalizePlexImageUrl(result.Art).NullIfBlank(),
-			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt),
+			ReleaseDate = ParseReleaseDate(result.OriginallyAvailableAt) ?? ReleaseYear(result.Year),
 			Genres = [.. GenreTags(result.Genre?.Select(genre => genre.Tag))],
 		};
 
@@ -208,6 +212,8 @@ file static class PlexMetadataMappingExtensions
 		};
 
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
+
+	private static DateOnly? ReleaseYear(int year) => year > 0 ? new DateOnly(year, 1, 1) : null;
 
 	private static string NormalizePlexImageUrl(string? url)
 	{
