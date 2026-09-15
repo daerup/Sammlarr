@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Net;
 using System.Text.Json;
@@ -15,6 +16,8 @@ namespace API.Plex;
 internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider
 {
 	private const int SearchLimit = 30;
+
+	private readonly ConcurrentDictionary<string, Lazy<Task<Result<MediaLookup>>>> _byRatingKey = new();
 
 	private void EnsureUsable(HttpResponseMessage response, string endpoint)
 	{
@@ -59,7 +62,10 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		return ByIdAsync(plexId, cancellationToken).Map<MediaLookup, IReadOnlyList<IExternalMediaId>>(raw => [.. raw.Externals]);
 	}
 
-	internal async Task<Result<MediaLookup>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default)
+	internal Task<Result<MediaLookup>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default) =>
+		_byRatingKey.GetOrAdd(plexId.Value, _ => new Lazy<Task<Result<MediaLookup>>>(() => FetchByIdAsync(plexId, cancellationToken))).Value;
+
+	private async Task<Result<MediaLookup>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)
 	{
 		var endpoint = urls.RatingKeyMetadata(plexId.Value);
 		using var response = await plexClient.SendAsync(HttpMethod.Get, endpoint, cancellationToken);

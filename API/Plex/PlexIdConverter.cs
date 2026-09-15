@@ -11,7 +11,7 @@ namespace API.Plex;
 internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdConverter
 {
 	private const int LookupConcurrency = 4;
-	private const int MaxCandidateLookups = 5;
+	private const int MaxCandidateLookups = 3;
 
 	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
 		IEnumerable<IExternalMediaId> candidates,
