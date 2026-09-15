@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaMetadataFactory metadataFactory) : IMediaRepository
+internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaMetadataFactory metadataFactory, MediaWriteLock writeLock)
+	: IMediaRepository
 {
 	public async Task<IReadOnlyList<MediaIdentity?>> FindIdentitiesAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
@@ -76,6 +77,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 
 		var rawIds = identities.Select(i => i.Id.Value).ToList();
 		var allExternals = identities.SelectMany(i => i.Externals).Distinct().ToList();
+		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await using var transaction = await ctx.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
@@ -154,6 +156,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 
 		var deduped = media.GroupBy(m => m.Id.Value).Select(g => g.Last()).ToList();
 
+		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rawIds = deduped.Select(m => m.Id.Value).ToList();
 		var existing = await ctx.MediaMetadata.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);

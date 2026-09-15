@@ -24,7 +24,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		_dateTimeProvider = IDateTimeProvider.Mock();
 		_dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
 
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object));
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(_dateTimeProvider.Object), new MediaWriteLock());
 	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
@@ -141,6 +141,17 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		await Assert.That(rating.Source).IsEqualTo(RatingProvider.Tmdb);
 		await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
 		await Assert.That(rating.VoteCount).IsEqualTo(1200);
+	}
+
+	[Test]
+	public async Task UpsertMetadataAsync_WhenConcurrentFlushesShareAMediaId_DoesNotViolateTheUniqueConstraint()
+	{
+		var plexId = PlexId.From("plex-race", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+
+		var flushes = Enumerable.Range(0, 8).Select(_ => Task.Run(() => _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId])])));
+
+		await Assert.That(async () => await Task.WhenAll(flushes)).ThrowsNothing();
 	}
 
 	private static Movie CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
