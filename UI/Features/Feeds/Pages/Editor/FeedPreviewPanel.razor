@@ -23,7 +23,8 @@
                  Class="w-full"
                  Value="@_searchQuery"
                  ValueChanged="OnSearchQueryChanged"
-                 UpdateTiming="UpdateTiming.Immediate"
+                 UpdateTiming="UpdateTiming.Debounced"
+                 DebounceInterval="250"
                  Disabled="IsLoading"/>
         <LucideIcon Name="search" Class="text-muted-foreground shrink-0"/>
         @if (HasResults)
@@ -118,8 +119,10 @@
         {
             @if (_filteredResults.Count > 0)
             {
-                @foreach (var result in _filteredResults)
-                {
+                <div>
+                <Virtualize Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
+                    <ItemContent>
+                    @{
                     var item = GetItem(result);
                     var isCulled = result is Culled<MediaQueryRow>;
                     var isTruncated = result is Truncated<MediaQueryRow>;
@@ -177,14 +180,18 @@
                                 </Icons>
                             </MediaDetailTile>
                         </div>
-                }
+                    }
+                    </ItemContent>
+                </Virtualize>
+                </div>
             }
             @if (_filteredUnresolvedResults.Count > 0)
             {
                 <div class="mt-4">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
-                    @foreach (var item in _filteredUnresolvedResults)
-                    {
+                    <Virtualize Items="_filteredUnresolvedResults" Context="item" ItemSize="215" OverscanCount="6">
+                        <ItemContent>
+                    @{
                             <div class="pb-2">
                                 <MediaDetailTile @key="item"
                                                  Media="item.Media"
@@ -206,6 +213,8 @@
                                 </MediaDetailTile>
                             </div>
                     }
+                        </ItemContent>
+                    </Virtualize>
                 </div>
             }
             @if (IsLoading)
@@ -528,6 +537,7 @@
         _filteredUnresolvedResults = _unresolvedResults
             .Where(r => PreviewResultFilter.IsVisible(r, _activeFilters) && MatchesSearch(r.Media.Title))
             .ToList();
+        RecountBadges();
     }
 
     private bool MatchesSearch(string title) =>
@@ -592,13 +602,61 @@
         }
     }
 
-    private int IncludedCount => _processedResults.Count(r => r is MediaQueryRow);
-    private int BypassedCount => _processedResults.Count(r => r is Bypassed<MediaQueryRow>);
-    private int FilteredCount => _processedResults.Count(r => r is Culled<MediaQueryRow>);
-    private int SkippedCount => _processedResults.Count(r => r is Truncated<MediaQueryRow>);
+    private int IncludedCount { get; set; }
+    private int BypassedCount { get; set; }
+    private int FilteredCount { get; set; }
+    private int SkippedCount { get; set; }
     private int UnresolvedCount => _unresolvedResults.Count;
-    private int WatchlistCount => _processedResults.Count(r => IsWatchlisted(GetItem(r)));
-    private int BlacklistCount => _processedResults.Count(r => IsBlacklisted(GetItem(r)));
+    private int WatchlistCount { get; set; }
+    private int BlacklistCount { get; set; }
+
+    private void RecountBadges()
+    {
+        var included = 0;
+        var bypassed = 0;
+        var filtered = 0;
+        var skipped = 0;
+        var watchlisted = 0;
+        var blacklisted = 0;
+
+        foreach (var result in _processedResults)
+        {
+            if (result is MediaQueryRow)
+            {
+                included++;
+            }
+            else if (result is Bypassed<MediaQueryRow>)
+            {
+                bypassed++;
+            }
+            else if (result is Culled<MediaQueryRow>)
+            {
+                filtered++;
+            }
+            else if (result is Truncated<MediaQueryRow>)
+            {
+                skipped++;
+            }
+
+            var item = GetItem(result);
+            if (IsWatchlisted(item))
+            {
+                watchlisted++;
+            }
+
+            if (IsBlacklisted(item))
+            {
+                blacklisted++;
+            }
+        }
+
+        IncludedCount = included;
+        BypassedCount = bypassed;
+        FilteredCount = filtered;
+        SkippedCount = skipped;
+        WatchlistCount = watchlisted;
+        BlacklistCount = blacklisted;
+    }
 
     private bool IsBlacklisted(MediaLookup item) => _blacklistIds.Contains(item.Id);
     private bool IsWatchlisted(MediaLookup item) => _watchlisted.Contains(item.Id);
@@ -668,6 +726,7 @@
         {
             _togglingBlacklistItem = null;
             _focusedResult = null;
+            RecountBadges();
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -707,6 +766,7 @@
         {
             _togglingWatchlistItem = null;
             _focusedResult = null;
+            RecountBadges();
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }
