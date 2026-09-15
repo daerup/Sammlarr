@@ -8,6 +8,7 @@ internal class MediaModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddSingleton<MediaWriteLock>();
 		services.AddScoped<IMediaRepository, MediaRepository>();
 		services.AddScoped<IModelConfiguration, MediaRowConfiguration>();
 	}

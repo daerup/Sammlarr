@@ -21,7 +21,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(DateTimeOffset.UtcNow);
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(dateTimeProvider.Object));
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(dateTimeProvider.Object), new MediaWriteLock());
 	}
 
 	[Test]
@@ -187,6 +187,20 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var persisted = await fixture.Context.Media.Include(m => m.ExternalIds).ToListAsync();
 		await Assert.That(persisted.Count).IsEqualTo(1);
 		await Assert.That(persisted[0].ExternalIds.Count).IsEqualTo(3);
+	}
+
+	[Test]
+	public async Task UpsertManyAsync_WhenConcurrentCallsShareExternal_CreatesSingleMedia()
+	{
+		var shared = ImdbId.From("tt0321", MediaType.Movie);
+		var calls = Enumerable
+			.Range(0, 8)
+			.Select(i => Task.Run(() => _testee.UpsertIdentitiesAsync([new(MediaId.From(Guid.NewGuid()), [shared, TmdbId.From($"32{i}1", MediaType.Movie)])])));
+
+		await Assert.That(async () => await Task.WhenAll(calls)).ThrowsNothing();
+		var persisted = await fixture.Context.Media.Include(m => m.ExternalIds).ToListAsync();
+		await Assert.That(persisted.Count).IsEqualTo(1);
+		await Assert.That(persisted[0].ExternalIds.Count).IsEqualTo(9);
 	}
 
 	[Test]
