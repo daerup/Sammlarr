@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -30,19 +31,38 @@ internal sealed class MdblistService(
 	{
 		var providerConfig = await configRepository.GetAsync(cancellationToken);
 		var watchlistProvider = providerConfig.WatchlistProvider.AsMediaProvider();
+		var unknowns = new ConcurrentQueue<MdblistTypes.ListItems.UnknownListItem>();
 
+		var requests = BuildRequestsAsync(identifier, watchlistProvider, unknowns, cancellationToken);
+		await foreach (var result in media.ResolveDetailsAsync(requests, cancellationToken))
+		{
+			yield return result;
+		}
+
+		foreach (var unknown in unknowns)
+		{
+			yield return BuildUnknown(unknown);
+		}
+	}
+
+	private async IAsyncEnumerable<ResolveRequest> BuildRequestsAsync(
+		string identifier,
+		MediaProvider watchlistProvider,
+		ConcurrentQueue<MdblistTypes.ListItems.UnknownListItem> unknowns,
+		[EnumeratorCancellation] CancellationToken cancellationToken
+	)
+	{
 		await foreach (var page in FetchPagesAsync(identifier, cancellationToken))
 		{
-			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie)).ToList();
-			var requests = pairs.Select(pair => new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), watchlistProvider, BuildHints(pair)));
-			await foreach (var result in media.ResolveDetailsAsync(requests, cancellationToken))
-			{
-				yield return result;
-			}
-
 			foreach (var unknown in page.unknowns)
 			{
-				yield return BuildUnknown(unknown);
+				unknowns.Enqueue(unknown);
+			}
+
+			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));
+			foreach (var pair in pairs)
+			{
+				yield return new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), watchlistProvider, BuildHints(pair));
 			}
 		}
 	}

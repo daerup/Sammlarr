@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Caching;
 using Contracts.Media;
+using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
@@ -10,6 +11,7 @@ using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Media;
 
@@ -132,10 +134,13 @@ public class MediaServiceTests
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([new CachedMedia(firstDetail, _now), new CachedMedia(secondDetail, _now)]);
 
 		var results = await testee
-			.ResolveDetailsAsync([
-				new ResolveRequest([firstExternal], MediaProvider.Tmdb, new None()),
-				new ResolveRequest([secondExternal], MediaProvider.Tmdb, new None()),
-			])
+			.ResolveDetailsAsync(
+				new List<ResolveRequest>
+				{
+					new([firstExternal], MediaProvider.Tmdb, new None()),
+					new([secondExternal], MediaProvider.Tmdb, new None()),
+				}.ToAsyncEnumerable()
+			)
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
@@ -150,11 +155,178 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.UnresolvedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
 
-		var results = await testee.ResolveDetailsAsync([new ResolveRequest([external], MediaProvider.Tmdb, new None())]).ToListAsync();
+		var results = await testee
+			.ResolveDetailsAsync(new List<ResolveRequest> { new([external], MediaProvider.Tmdb, new None()) }.ToAsyncEnumerable())
+			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
 		await Assert.That(results[0]).IsOfUnionType<MediaLookup, UnmatchedMedia>();
 		deps.MediaRepo.UpsertMetadataAsync(Any(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenManyRequests_RampsBatchSizesFromTen()
+	{
+		var (testee, deps) = CreateTestee();
+		var batches = RecordBatchSizes(deps);
+
+		await testee.ResolveDetailsAsync(BuildRequests(100)).ToListAsync();
+
+		await Assert.That(batches).IsEquivalentTo([10, 20, 40, 30], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenManyRequests_YieldsTheFirstResultBeforeResolvingEverything()
+	{
+		var (testee, deps) = CreateTestee();
+		var batches = RecordBatchSizes(deps);
+
+		await foreach (var _ in testee.ResolveDetailsAsync(BuildRequests(500)))
+		{
+			break;
+		}
+
+		await Assert.That(batches.Sum()).IsEqualTo(10);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenRequestsSpanManyBatches_CapsTheRampAndNeverRestartsIt()
+	{
+		var (testee, deps) = CreateTestee();
+		var batches = RecordBatchSizes(deps);
+
+		await testee.ResolveDetailsAsync(BuildRequests(600)).ToListAsync();
+
+		await Assert.That(batches).IsEquivalentTo([10, 20, 40, 80, 160, 200, 90], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenTheRequestStreamIsLazy_DoesNotDrainItBeforeYielding()
+	{
+		var (testee, deps) = CreateTestee();
+		RecordBatchSizes(deps);
+		var pulled = 0;
+
+		await foreach (var _ in testee.ResolveDetailsAsync(CountingRequests(4000, () => Interlocked.Increment(ref pulled))))
+		{
+			break;
+		}
+
+		await Assert.That(pulled).IsGreaterThanOrEqualTo(10).And.IsLessThan(2000);
+	}
+
+	private static async IAsyncEnumerable<ResolveRequest> CountingRequests(int count, Action onPulled)
+	{
+		foreach (var i in Enumerable.Range(0, count))
+		{
+			onPulled();
+			yield return new ResolveRequest([TmdbId.From(i.ToString(), MediaType.Movie)], MediaProvider.Tmdb, new None());
+			await Task.Yield();
+		}
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenRequestCountIsBelowTheFirstBatch_UsesASingleBatch()
+	{
+		var (testee, deps) = CreateTestee();
+		var batches = RecordBatchSizes(deps);
+
+		var results = await testee.ResolveDetailsAsync(BuildRequests(3)).ToListAsync();
+
+		await Assert.That(batches).IsEquivalentTo([3], CollectionOrdering.Matching);
+		await Assert.That(results.Count).IsEqualTo(3);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenBatchesRamp_StillYieldsOneResultPerRequestInOrder()
+	{
+		var (testee, _) = CreateTestee();
+
+		var results = await testee.ResolveDetailsAsync(BuildRequests(75)).ToListAsync();
+
+		var externals = results.Select(r => r.Externals.OfType<TmdbId>().Single().Value).ToList();
+		await Assert.That(externals).IsEquivalentTo([.. Enumerable.Range(0, 75).Select(i => i.ToString())], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenTwoBatchesShareAnExternalId_YieldsBothUnderOneIdentity()
+	{
+		var shared = TmdbId.From("shared", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		var requests = await BuildRequests(60).ToListAsync();
+		requests[0] = new ResolveRequest([shared], MediaProvider.Tmdb, new None());
+		requests[55] = new ResolveRequest([shared], MediaProvider.Tmdb, new None());
+
+		var results = await testee.ResolveDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+
+		await Assert.That(results[0].Identity.Id).IsEqualTo(results[55].Identity.Id);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenALaterRequestBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
+	{
+		var first = TmdbId.From("bridge-a", MediaType.Movie);
+		var second = ImdbId.From("tt7777777", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		var upserted = RecordUpsertedIdentities(deps);
+
+		var results = await testee
+			.ResolveDetailsAsync(
+				new List<ResolveRequest>
+				{
+					new([first], MediaProvider.Tmdb, new None()),
+					new([second], MediaProvider.Tmdb, new None()),
+					new([first, second], MediaProvider.Tmdb, new None()),
+				}.ToAsyncEnumerable()
+			)
+			.ToListAsync();
+
+		var survivor = results[0].Identity.Id;
+		await Assert.That(results[1].Identity.Id).IsEqualTo(survivor);
+		await Assert.That(results[2].Identity.Id).IsEqualTo(survivor);
+		await Assert.That(upserted.Select(identity => identity.Id).Distinct()).IsEquivalentTo([survivor]);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenALaterBatchBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
+	{
+		var first = TmdbId.From("batch-bridge-a", MediaType.Movie);
+		var second = ImdbId.From("tt8888888", MediaType.Movie);
+		var (testee, deps) = CreateTestee();
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		var upserted = RecordUpsertedIdentities(deps);
+		var requests = await BuildRequests(60).ToListAsync();
+		requests[0] = new ResolveRequest([first], MediaProvider.Tmdb, new None());
+		requests[1] = new ResolveRequest([second], MediaProvider.Tmdb, new None());
+		requests[55] = new ResolveRequest([first, second], MediaProvider.Tmdb, new None());
+
+		var results = await testee.ResolveDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+
+		var survivor = results[55].Identity.Id;
+		await Assert.That(Bridged(upserted, first, second)).IsEquivalentTo([survivor]);
+	}
+
+	[Test]
+	public async Task ResolveDetailsAsync_WhenALaterBatchMatchesAPersistedIdentity_KeepsThePersistedMediaId()
+	{
+		var minted = TmdbId.From("batch-persisted-a", MediaType.Movie);
+		var known = ImdbId.From("tt6666666", MediaType.Movie);
+		var persisted = new MediaIdentity(MediaId.From(Guid.NewGuid()), [known]);
+		var (testee, deps) = CreateTestee();
+		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
+		deps.MediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
+			.Returns((groups, _) => [.. groups.Select(group => group.Contains(known) ? persisted : (MediaIdentity?)null)]);
+		var upserted = RecordUpsertedIdentities(deps);
+		var requests = await BuildRequests(60).ToListAsync();
+		requests[0] = new ResolveRequest([minted], MediaProvider.Tmdb, new None());
+		requests[55] = new ResolveRequest([minted, known], MediaProvider.Tmdb, new None());
+
+		var results = await testee.ResolveDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+
+		await Assert.That(results[55].Identity.Id).IsEqualTo(persisted.Id);
+		await Assert.That(Bridged(upserted, minted, known)).IsEquivalentTo([persisted.Id]);
 	}
 
 	[Test]
@@ -183,6 +355,7 @@ public class MediaServiceTests
 
 		var enricher = IMetadataEnricher.Mock();
 		var rating = IMediaRatingService.Mock();
+		rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("no ratings"));
 		var configRepo = IProviderConfigRepository.Mock();
 		configRepo
 			.GetAsync(Any())
@@ -204,10 +377,14 @@ public class MediaServiceTests
 			.Register(MediaProvider.Tmdb, enricher.Object);
 		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
 
+		var converter = IExternalIdConverter.Mock();
+		converter.ConvertAsync(Any(), Any(), Any()).Returns((candidates, _, _) => Success.Of<IReadOnlyList<IExternalMediaId>>([.. candidates]));
+		var converters = new FakeKeyedServiceIndex<MediaProvider, IExternalIdConverter>().Register(MediaProvider.Tmdb, converter.Object);
+
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
-			new MediaIdResolver(null, unresolvedCache.Object),
+			new MediaIdResolver(converters, unresolvedCache.Object),
 			metadataResolver,
 			coordinator,
 			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
@@ -219,6 +396,43 @@ public class MediaServiceTests
 	}
 
 	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IMediaSearchProvider> Search, Mock<ITypedMemoryCache<string, bool>> UnresolvedCache);
+
+	private static List<MediaIdentity> RecordUpsertedIdentities(Deps deps)
+	{
+		var upserted = new List<MediaIdentity>();
+		deps.MediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any())
+			.Returns(
+				(identities, _) =>
+				{
+					upserted.AddRange(identities);
+					return [.. identities];
+				}
+			);
+		return upserted;
+	}
+
+	private static IEnumerable<MediaId> Bridged(IEnumerable<MediaIdentity> upserted, params IExternalMediaId[] externals) =>
+		upserted.Where(identity => externals.Any(identity.Externals.Contains)).Select(identity => identity.Id).Distinct();
+
+	private static List<int> RecordBatchSizes(Deps deps)
+	{
+		var batches = new List<int>();
+		deps.MediaRepo.GetByExternalsAsync(Any(), Any())
+			.Returns(
+				(ids, _) =>
+				{
+					batches.Add(ids.Count);
+					return [];
+				}
+			);
+		return batches;
+	}
+
+	private static IAsyncEnumerable<ResolveRequest> BuildRequests(int count) =>
+		Enumerable
+			.Range(0, count)
+			.Select(i => new ResolveRequest([TmdbId.From(i.ToString(), MediaType.Movie)], MediaProvider.Tmdb, new None()))
+			.ToAsyncEnumerable();
 
 	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external) => new(new PartialMovie { Identity = new MediaIdentity(id, [external]) }, _now);
 

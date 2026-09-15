@@ -10,7 +10,7 @@ public interface IMediaService
 
 	IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(IEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(IAsyncEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaIdentity>> ResolveIdentitiesAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,

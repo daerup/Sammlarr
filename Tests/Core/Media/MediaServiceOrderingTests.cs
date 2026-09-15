@@ -96,7 +96,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(5);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.ResolveDetailsAsync(builder.AsRequests()).ToListAsync();
+		var results = await testee.ResolveDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -107,7 +107,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(6).FailResolveAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.ResolveDetailsAsync(builder.AsRequests()).ToListAsync();
+		var results = await testee.ResolveDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}
@@ -119,7 +119,7 @@ public class MediaServiceOrderingTests
 		var builder = RequestBuilder.Requests(batchSize);
 		var testee = CreateTestee(builder);
 
-		var results = await testee.ResolveDetailsAsync(builder.AsRequests()).ToListAsync();
+		var results = await testee.ResolveDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results.ExtractMediaIds()).IsEquivalentTo(builder.ExpectedMediaIds, CollectionOrdering.Matching);
 	}

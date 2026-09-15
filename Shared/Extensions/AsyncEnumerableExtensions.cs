@@ -64,6 +64,44 @@ public static class AsyncEnumerableExtensions
 			}
 		}
 
+		public async IAsyncEnumerable<TIn> PrefetchAsync(int capacity, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+		{
+			var anchor = Activity.Current;
+			var channel = Channel.CreateBounded<TIn>(capacity);
+			using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+			var producer = Task.Run(async () =>
+			{
+				Activity.Current = anchor;
+				try
+				{
+					await foreach (var item in source.WithCancellation(abandon.Token))
+					{
+						await channel.Writer.WriteAsync(item, abandon.Token);
+					}
+					channel.Writer.Complete();
+				}
+				catch (Exception ex)
+				{
+					channel.Writer.Complete(ex);
+				}
+			});
+
+			try
+			{
+				await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+				{
+					Activity.Current = anchor;
+					yield return item;
+				}
+			}
+			finally
+			{
+				await abandon.CancelAsync();
+				await producer;
+			}
+		}
+
 		public async IAsyncEnumerable<(TIn First, TOther Second)> ZipAwait<TOther>(
 			IEnumerable<TOther> other,
 			[EnumeratorCancellation] CancellationToken cancellationToken = default
