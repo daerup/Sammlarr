@@ -37,7 +37,8 @@ Completeness:: Whether a partial title has all its fields. A complete partial is
 full `Movie` or `Show` (`MediaCompleteness.IsComplete`, `MissingFields`).
 
 Freshness:: Whether a stored title is recent enough to skip a re-fetch: 7 days for a complete
-title, 1 hour for a partial (`MediaFreshness`).
+title or a partial whose only gaps are `Tagline` and `BackdropUrl`, 1 hour for any other partial
+(`MediaFreshness`).
 
 CachedMedia:: The stored form of a title with the time it was fetched (an `IdentifiedMedia`
 plus `FetchedAt`). Freshness reads `FetchedAt` to decide whether a re-fetch is due.
