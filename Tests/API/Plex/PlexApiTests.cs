@@ -37,16 +37,41 @@ public class PlexApiTests
 	}
 
 	[Test]
-	public async Task SearchAsync_WhenResponseIsNotSuccess_Throws()
+	[Arguments(HttpStatusCode.TooManyRequests)]
+	[Arguments(HttpStatusCode.RequestTimeout)]
+	[Arguments(HttpStatusCode.ServiceUnavailable)]
+	[Arguments(HttpStatusCode.BadGateway)]
+	public async Task SearchAsync_WhenPlexIsUnavailable_ThrowsProviderUnavailable(HttpStatusCode status)
 	{
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
-		var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credentialStore = ICredentialRepository.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue));
-		var testee = new PlexApi(new PlexClient(httpClient, credentialStore), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
+		var testee = CreateFailingPlexApi(status);
+
+		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<ProviderUnavailableException>();
+	}
+
+	[Test]
+	public async Task SearchAsync_WhenResponseFailsPermanently_ThrowsHttpRequest()
+	{
+		var testee = CreateFailingPlexApi(HttpStatusCode.NotFound);
 
 		await Assert.That(async () => await testee.SearchAsync("anything", [MediaType.Movie])).Throws<HttpRequestException>();
+	}
+
+	[Test]
+	public async Task ByIdAsync_WhenPlexIsUnavailable_ThrowsProviderUnavailable()
+	{
+		var testee = CreateFailingPlexApi(HttpStatusCode.TooManyRequests);
+
+		await Assert.That(async () => await testee.ByIdAsync(PlexId.From("plex-1", MediaType.Movie))).Throws<ProviderUnavailableException>();
+	}
+
+	[Test]
+	public async Task ByIdAsync_WhenPlexHasNoMetadata_ReturnsAPermanentError()
+	{
+		var testee = CreatePlexApi(BuildEmptyByIdPayload());
+
+		var result = await testee.ByIdAsync(PlexId.From("plex-1", MediaType.Movie));
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNull());
 	}
 
 	[Test]
@@ -88,15 +113,28 @@ public class PlexApiTests
 		return JsonSerializer.Serialize(new PlexTypes.Search.Root(container));
 	}
 
+	private static string BuildEmptyByIdPayload() =>
+		JsonSerializer.Serialize(new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 0, [])));
+
+	private static PlexApi CreateFailingPlexApi(HttpStatusCode status)
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(status);
+		return BuildPlexApi(handler.CreateClient(PlexBaseUrl));
+	}
+
 	private static PlexApi CreatePlexApi(string json)
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
-		var httpClient = handler.CreateClient(PlexBaseUrl);
+		return BuildPlexApi(handler.CreateClient(PlexBaseUrl));
+	}
+
+	private static PlexApi BuildPlexApi(HttpClient httpClient)
+	{
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		var plexClient = new PlexClient(httpClient, credentialStore);
-		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
+		return new PlexApi(new PlexClient(httpClient, credentialStore), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 }

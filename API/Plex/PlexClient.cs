@@ -2,6 +2,8 @@ using API.Http;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Providers;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
 
 namespace API.Plex;
 
@@ -28,6 +30,13 @@ internal class PlexClient(HttpClient client, ICredentialRepository credentialSto
 		customHeaders.ForEach(header => request.Headers.Add(header.Item1, header.Item2));
 		request.Content = content;
 
-		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentialStore.Invalidate(AuthProvider.Plex));
+		try
+		{
+			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentialStore.Invalidate(AuthProvider.Plex));
+		}
+		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
+		{
+			throw new ProviderUnavailableException(MediaProvider.Plex, ex);
+		}
 	}
 }

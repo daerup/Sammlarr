@@ -38,6 +38,21 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
+	public async Task ResolveAsync_WhenProviderIsUnavailable_DoesNotCacheAndRetriesOnTheNextCall()
+	{
+		var tmdbId = TmdbId.From("321", MediaType.Movie);
+		var (testee, converter, cache) = CreateTestee();
+		converter.ConvertAsync(Any(), Any(), Any()).Throws(new ProviderUnavailableException(MediaProvider.Plex));
+		var request = new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None());
+
+		await Assert.That(await testee.ResolveAsync(request)).IsError();
+		await Assert.That(await testee.ResolveAsync(request)).IsError();
+
+		cache.Set(Any(), Any(), Any()).WasNeverCalled();
+		converter.ConvertAsync(Any(), Any(), Any()).WasCalled(Times.Exactly(2));
+	}
+
+	[Test]
 	public async Task ResolveAsync_WhenUnresolvedCacheHit_ShortCircuitsAndReturnsNone()
 	{
 		var tmdbId = TmdbId.From("456", MediaType.Movie);

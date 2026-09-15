@@ -30,7 +30,7 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyC
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{
-			throw new ProviderUnavailableException(FeedProvider.Mdblist, ex);
+			throw new ProviderUnavailableException(MediaProvider.Mdblist, ex);
 		}
 	}
 }
