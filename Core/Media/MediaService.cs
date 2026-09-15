@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Conversions;
@@ -22,6 +23,10 @@ internal sealed class MediaService(
 	ILogger<MediaService> logger
 ) : IMediaService
 {
+	private const int FirstBatchSize = 10;
+	private const int MaxBatchSize = 200;
+	private const int PrefetchCapacity = 1000;
+
 	public async IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(
 		IEnumerable<ResolveRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
@@ -34,7 +39,8 @@ internal sealed class MediaService(
 		}
 
 		await using var buffer = bufferFactory.Create();
-		var resolutions = await ResolveBatchAsync(materialized, buffer, cancellationToken);
+		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
+		var resolutions = await ResolveBatchAsync(materialized, building, buffer, cancellationToken);
 		foreach (var (request, resolution) in materialized.Zip(resolutions))
 		{
 			yield return ToIdentityResult(resolution);
@@ -66,19 +72,70 @@ internal sealed class MediaService(
 	}
 
 	public async IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(
-		IEnumerable<ResolveRequest> requests,
+		IAsyncEnumerable<ResolveRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var materialized = requests.ToList();
-		if (materialized.Count == 0)
+		await using var buffer = bufferFactory.Create();
+		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
+		var size = FirstBatchSize;
+		var batch = new List<ResolveRequest>(size);
+		await using var source = requests.PrefetchAsync(PrefetchCapacity, cancellationToken).GetAsyncEnumerator(cancellationToken);
+		ExceptionDispatchInfo? failure = null;
+
+		while (true)
 		{
-			yield break;
+			bool moved;
+			try
+			{
+				moved = await source.MoveNextAsync();
+			}
+			catch (Exception ex)
+			{
+				failure = ExceptionDispatchInfo.Capture(ex);
+				break;
+			}
+
+			if (!moved)
+			{
+				break;
+			}
+
+			batch.Add(source.Current);
+			if (batch.Count < size)
+			{
+				continue;
+			}
+
+			await foreach (var result in ResolveAndRealizeAsync(batch, building, buffer, cancellationToken))
+			{
+				yield return result;
+			}
+
+			size = Math.Min(size * 2, MaxBatchSize);
+			batch = new List<ResolveRequest>(size);
 		}
 
-		await using var buffer = bufferFactory.Create();
-		var resolutions = await ResolveBatchAsync(materialized, buffer, cancellationToken);
-		var pipeline = materialized
+		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
+		{
+			await foreach (var result in ResolveAndRealizeAsync(batch, building, buffer, cancellationToken))
+			{
+				yield return result;
+			}
+		}
+
+		failure?.Throw();
+	}
+
+	private async IAsyncEnumerable<MediaLookup> ResolveAndRealizeAsync(
+		IReadOnlyList<ResolveRequest> batch,
+		Dictionary<IExternalMediaId, MediaIdentity> building,
+		MediaResolutionBuffer buffer,
+		[EnumeratorCancellation] CancellationToken cancellationToken
+	)
+	{
+		var resolutions = await ResolveBatchAsync(batch, building, buffer, cancellationToken);
+		var pipeline = batch
 			.Zip(resolutions)
 			.SelectAwait(
 				pair => RealizeFromRequestAsync(pair.First, pair.Second, buffer, cancellationToken),
@@ -112,6 +169,7 @@ internal sealed class MediaService(
 
 	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
 		IReadOnlyList<ResolveRequest> requests,
+		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -121,7 +179,7 @@ internal sealed class MediaService(
 		var preliminary = await requests
 			.SelectAwait(req => ResolveIdentityAsync(req, cached, buffer, cancellationToken), IMediaService.RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
-		return await coordinator.CoordinateResolutionsAsync(preliminary, buffer, cancellationToken);
+		return await coordinator.CoordinateResolutionsAsync(preliminary, building, buffer, cancellationToken);
 	}
 
 	private async ValueTask<Result<ResolvedIdentity>> ResolveIdentityAsync(

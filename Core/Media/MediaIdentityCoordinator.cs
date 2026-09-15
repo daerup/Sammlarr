@@ -6,8 +6,15 @@ namespace Core.Media;
 
 internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 {
+	public Task<IReadOnlyList<MediaIdentity>> CoordinateAsync(
+		IReadOnlyList<MediaIdentity> preliminary,
+		MediaResolutionBuffer buffer,
+		CancellationToken cancellationToken
+	) => CoordinateAsync(preliminary, [], buffer, cancellationToken);
+
 	public async Task<IReadOnlyList<MediaIdentity>> CoordinateAsync(
 		IReadOnlyList<MediaIdentity> preliminary,
+		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -15,34 +22,26 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var groups = preliminary.Select(p => p.Externals.ToList()).ToList();
 		var found = await mediaRepository.FindIdentitiesAsync(groups, cancellationToken);
 
-		var cached = new Dictionary<IExternalMediaId, MediaIdentity>();
+		var persisted = new Dictionary<IExternalMediaId, MediaIdentity>();
 		foreach (var match in found.Where(f => f.HasValue).Select(f => f!.Value))
 		{
 			foreach (var external in match.Externals)
 			{
-				cached[external] = match;
+				persisted[external] = match;
 			}
 		}
 
-		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
-		var order = Enumerable.Range(0, preliminary.Count).OrderByDescending(i => found[i] is not null);
-		foreach (var i in order)
+		foreach (var identity in preliminary)
 		{
-			MergeIntoCanonical(preliminary[i], cached, building);
+			MergeIntoCanonical(identity, persisted, building, buffer);
 		}
 
-		var corrected = preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals.First()] : p).ToArray();
-
-		foreach (var unique in building.Values.DistinctBy(c => c.Id))
-		{
-			buffer.AddIdentity(unique);
-		}
-
-		return corrected;
+		return preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals.First()] : p).ToArray();
 	}
 
 	public async Task<IReadOnlyList<Result<ResolvedIdentity>>> CoordinateResolutionsAsync(
 		List<Result<ResolvedIdentity>> resolutions,
+		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
@@ -61,7 +60,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		{
 			return resolutions;
 		}
-		var corrected = await CoordinateAsync(pendingPreliminary, buffer, cancellationToken);
+		var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
 		for (var i = 0; i < corrected.Count; i++)
 		{
 			resolutions[pendingIndices[i]] = Success.Of(new ResolvedIdentity(corrected[i], null));
@@ -71,19 +70,28 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 
 	private static void MergeIntoCanonical(
 		MediaIdentity preliminary,
-		IReadOnlyDictionary<IExternalMediaId, MediaIdentity> cached,
-		Dictionary<IExternalMediaId, MediaIdentity> building
+		IReadOnlyDictionary<IExternalMediaId, MediaIdentity> persisted,
+		Dictionary<IExternalMediaId, MediaIdentity> building,
+		MediaResolutionBuffer buffer
 	)
 	{
-		var fromBuilding = preliminary.Externals.Select(e => building.TryGetValue(e, out var m) ? (MediaIdentity?)m : null).FirstOrDefault(m => m is not null);
-		var fromCache = preliminary.Externals.Select(e => cached.TryGetValue(e, out var m) ? (MediaIdentity?)m : null).FirstOrDefault(m => m is not null);
+		var touching = Matches(preliminary, persisted).Concat(Matches(preliminary, building)).DistinctBy(match => match.Id).ToList();
+		var anchor = touching.Append(preliminary).First();
+		var canonical = anchor with { Externals = touching.Aggregate(preliminary.Externals, (all, match) => all + match.Externals) };
 
-		var anchor = fromBuilding ?? fromCache ?? preliminary;
-		var canonical = anchor with { Externals = anchor.Externals + preliminary.Externals };
-
-		foreach (var ext in canonical.Externals)
+		foreach (var external in canonical.Externals)
 		{
-			building[ext] = canonical;
+			building[external] = canonical;
 		}
+
+		foreach (var absorbed in touching.Where(match => match.Id != canonical.Id))
+		{
+			buffer.MergeIdentity(absorbed.Id, canonical);
+		}
+
+		buffer.AddIdentity(canonical);
 	}
+
+	private static IEnumerable<MediaIdentity> Matches(MediaIdentity preliminary, IReadOnlyDictionary<IExternalMediaId, MediaIdentity> index) =>
+		preliminary.Externals.Where(index.ContainsKey).Select(external => index[external]);
 }

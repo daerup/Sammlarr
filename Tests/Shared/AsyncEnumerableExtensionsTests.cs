@@ -5,6 +5,81 @@ namespace Shared.Tests;
 public class AsyncEnumerableExtensionsTests
 {
 	[Test]
+	public async Task PrefetchAsync_WhenFullyEnumerated_PreservesEveryItemInOrder()
+	{
+		var results = await CreateAsyncEnumerable(1, 2, 3, 4, 5).PrefetchAsync(2).ToListAsync();
+
+		await Assert.That(results).IsEquivalentTo([1, 2, 3, 4, 5], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task PrefetchAsync_WhenTheConsumerStopsEarly_StopsTheProducer()
+	{
+		var produced = 0;
+		var source = Counting(1000, () => Interlocked.Increment(ref produced));
+
+		await foreach (var _ in source.PrefetchAsync(4))
+		{
+			break;
+		}
+
+		var afterBreak = produced;
+		await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+		await Assert.That(produced).IsEqualTo(afterBreak);
+		await Assert.That(produced).IsLessThan(1000);
+	}
+
+	[Test]
+	public async Task PrefetchAsync_WhenTheSourceThrows_SurfacesTheOriginalExceptionAfterBufferedItems()
+	{
+		var seen = new List<int>();
+
+		var act = async () =>
+		{
+			await foreach (var item in ThrowsAfter(3).PrefetchAsync(8))
+			{
+				seen.Add(item);
+			}
+		};
+
+		await Assert.That(act).Throws<InvalidOperationException>().WithMessageContaining("source failed");
+		await Assert.That(seen).IsEquivalentTo([0, 1, 2], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task PrefetchAsync_WhenTheTokenIsAlreadyCancelled_SurfacesTheCancellationFromTheConsumer()
+	{
+		using var cancellation = new CancellationTokenSource();
+		await cancellation.CancelAsync();
+
+		var act = async () => await Counting(1000, () => { }).PrefetchAsync(4, cancellation.Token).ToListAsync();
+
+		await Assert.That(act).Throws<OperationCanceledException>();
+	}
+
+	private static async IAsyncEnumerable<int> Counting(int count, Action onProduced)
+	{
+		foreach (var i in Enumerable.Range(0, count))
+		{
+			onProduced();
+			yield return i;
+			await Task.Yield();
+		}
+	}
+
+	private static async IAsyncEnumerable<int> ThrowsAfter(int count)
+	{
+		foreach (var i in Enumerable.Range(0, count))
+		{
+			yield return i;
+			await Task.Yield();
+		}
+
+		throw new InvalidOperationException("source failed");
+	}
+
+	[Test]
 	public async Task SelectAwait_WhenSequenceIsNotEnumerated_DoesNotInvokeProjection()
 	{
 		var source = CreateAsyncEnumerable(1, 2, 3);
