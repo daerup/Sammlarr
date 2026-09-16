@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Harness;
-using Microsoft.Playwright;
 using static Microsoft.Playwright.Assertions;
 
 namespace E2E.Tests.Auth;

@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using Contracts.Media;
-using Contracts.Media.Search;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -8,7 +7,6 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
-using Shared;
 
 namespace Core.Watchlist;
 

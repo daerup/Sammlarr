@@ -3,7 +3,6 @@ using API.Mdblist;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
-using Domain.Auth;
 using Domain.Providers;
 using Shared.Options;
 using TestInfrastructure;

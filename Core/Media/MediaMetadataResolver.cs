@@ -1,6 +1,4 @@
-using Contracts;
 using Contracts.DI;
-using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;

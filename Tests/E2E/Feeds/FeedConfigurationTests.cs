@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.Playwright;
 using TUnit.Assertions.Enums;
 using static Microsoft.Playwright.Assertions;

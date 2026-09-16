@@ -1,5 +1,4 @@
 using Core.Processing;
-using Domain.Media;
 using Domain.Processing;
 using static TestInfrastructure.QueryFilterFactory;
 

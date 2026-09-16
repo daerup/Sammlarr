@@ -1,18 +1,14 @@
 using Contracts;
-using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Media;
-using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using Contracts.Media.Trending;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 

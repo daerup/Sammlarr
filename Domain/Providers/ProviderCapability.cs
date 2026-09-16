@@ -1,5 +1,3 @@
-using static Domain.Providers.ProviderCapability;
-
 namespace Domain.Providers;
 
 [Flags]

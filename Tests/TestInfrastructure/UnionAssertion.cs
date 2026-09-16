@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Shared;
 using TUnit.Assertions.Core;
 using TUnit.Assertions.Sources;
 

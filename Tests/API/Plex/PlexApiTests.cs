@@ -5,8 +5,6 @@ using API.Plex.Types;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
-using Contracts.Media;
-using Contracts.Media.Search;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;

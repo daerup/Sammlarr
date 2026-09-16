@@ -7,7 +7,6 @@ using Core.Watchlist;
 using Domain.Media;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
-using TestInfrastructure;
 
 namespace Core.Tests.Watchlist;
 

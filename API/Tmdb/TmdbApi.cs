@@ -1,7 +1,6 @@
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts.Auth;
-using Contracts.Media;
 using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;

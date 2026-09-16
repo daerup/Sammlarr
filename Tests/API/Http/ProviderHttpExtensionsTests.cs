@@ -1,5 +1,4 @@
 using API.Http;
-using API.Notifications;
 using API.Notifications.Webhook;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

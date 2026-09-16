@@ -1,13 +1,9 @@
 using Contracts.Media;
-using Contracts.Media.Search;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Integration.Tests.Assertions;
 using Microsoft.EntityFrameworkCore;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using TUnit.Core;
 using static Harness.Ids;
 
 namespace Integration.Tests.Media;

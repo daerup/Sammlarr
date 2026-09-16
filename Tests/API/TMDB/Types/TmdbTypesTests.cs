@@ -1,5 +1,4 @@
 using API.Tmdb.Types;
-using Contracts.Media;
 using Domain.Media;
 
 namespace API.Tests.TMDB.Types;

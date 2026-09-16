@@ -1,5 +1,3 @@
-@using Microsoft.AspNetCore.Components.Authorization
-
 @code {
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
     [Parameter] public EventCallback<bool> AccessChanged { get; set; }

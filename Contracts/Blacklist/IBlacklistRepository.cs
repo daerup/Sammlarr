@@ -1,4 +1,3 @@
-using Contracts.Media;
 using Domain.Blacklist;
 using Domain.Media;
 

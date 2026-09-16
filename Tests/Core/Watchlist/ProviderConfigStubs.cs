@@ -1,7 +1,3 @@
-using Contracts.Auth;
-using Contracts.Media.Metadata;
-using Contracts.Media.Search;
-using Contracts.Media.Trending;
 using Contracts.Settings;
 using Domain.Providers;
 using Domain.Settings;

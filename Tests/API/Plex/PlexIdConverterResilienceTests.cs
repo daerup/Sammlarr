@@ -3,7 +3,6 @@ using API.Plex;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
-using Shared;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;

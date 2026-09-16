@@ -1,5 +1,4 @@
 using Contracts.Watchlist.Outbox;
-using DB.Data.Media;
 using Domain.Media;
 using Domain.Watchlist.Outbox;
 using Microsoft.EntityFrameworkCore;

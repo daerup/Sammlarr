@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
-using Web;
 
 namespace Web.Tests.Localization;
 

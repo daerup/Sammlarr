@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Globalization;
 using API.Tmdb.Types;
 using Contracts.Media.Metadata;
-using Domain;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;

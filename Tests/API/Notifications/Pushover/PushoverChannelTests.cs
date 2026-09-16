@@ -5,7 +5,6 @@ using API.Notifications.Pushover;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications.Pushover;

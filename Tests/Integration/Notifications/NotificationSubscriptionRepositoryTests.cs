@@ -2,7 +2,6 @@ using Contracts.Notifications;
 using DB.Data.Notifications;
 using Domain.Notifications;
 using Harness;
-using TestInfrastructure;
 
 namespace Integration.Tests.Notifications;
 

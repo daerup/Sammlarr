@@ -1,7 +1,5 @@
 using API.Http;
-using Contracts.Auth;
 using Contracts.Feed;
-using Contracts.Media;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;

@@ -1,7 +1,5 @@
 using System.Text.Json;
 using Contracts.Feed;
-using Contracts.Media.Search;
-using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Harness;

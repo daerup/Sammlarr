@@ -1,4 +1,3 @@
-using Contracts;
 using Domain.Media;
 
 namespace Contracts.Media.Conversions;

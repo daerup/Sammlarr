@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Contracts;
 using Contracts.Caching;
 using Contracts.DI;
 using Contracts.Media;

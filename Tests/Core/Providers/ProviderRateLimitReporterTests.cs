@@ -5,7 +5,6 @@ using Domain.Identity;
 using Domain.Notifications.Events;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
-using TestInfrastructure;
 
 namespace Core.Tests.Providers;
 

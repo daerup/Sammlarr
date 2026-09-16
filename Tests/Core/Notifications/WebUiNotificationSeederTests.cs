@@ -1,7 +1,6 @@
 using Contracts.Notifications;
 using Core.Notifications;
 using Domain.Notifications;
-using TestInfrastructure;
 
 namespace Core.Tests.Notifications;
 

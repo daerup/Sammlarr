@@ -1,6 +1,5 @@
 using Domain.Media;
 using Domain.Media.Metadata;
-using static VerifyTUnit.Verifier;
 
 namespace Domain.Tests.Media.Metadata;
 

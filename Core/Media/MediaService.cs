@@ -1,15 +1,12 @@
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Contracts;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Microsoft.Extensions.Logging;
-using Shared;
 
 namespace Core.Media;
 

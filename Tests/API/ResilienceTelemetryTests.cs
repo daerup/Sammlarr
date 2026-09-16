@@ -1,4 +1,3 @@
-using API;
 using Polly.Telemetry;
 
 namespace API.Tests;
