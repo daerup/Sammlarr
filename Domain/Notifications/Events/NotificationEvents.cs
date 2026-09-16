@@ -8,6 +8,8 @@ namespace Domain.Notifications.Events;
 public abstract record BaseNotification(NotificationEventType Type, UserId UserId, DateTimeOffset OccurredAt)
 {
 	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public abstract string Summary { get; }
 }
 
 public sealed record WatchlistSyncedEvent(
@@ -17,16 +19,31 @@ public sealed record WatchlistSyncedEvent(
 	IReadOnlyList<MediaId> PulledRemoves,
 	IReadOnlyList<MediaId> PushedAdds,
 	IReadOnlyList<MediaId> PushedRemoves
-) : BaseNotification(NotificationEventType.WatchlistSynced, UserId, OccurredAt);
+) : BaseNotification(NotificationEventType.WatchlistSynced, UserId, OccurredAt)
+{
+	public override string Summary => $"Pulled {PulledAdds.Count + PulledRemoves.Count}, queued {PushedAdds.Count + PushedRemoves.Count} for push.";
+}
 
 public sealed record TestPingEvent(UserId UserId, DateTimeOffset OccurredAt, Guid TargetId)
-	: BaseNotification(NotificationEventType.TestPing, UserId, OccurredAt);
+	: BaseNotification(NotificationEventType.TestPing, UserId, OccurredAt)
+{
+	public override string Summary => "This is a test notification from Sammlarr.";
+}
 
 public sealed record FeedRunCompletedEvent(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, int Added, int Removed)
-	: BaseNotification(NotificationEventType.FeedRunCompleted, UserId, OccurredAt);
+	: BaseNotification(NotificationEventType.FeedRunCompleted, UserId, OccurredAt)
+{
+	public override string Summary => $"Added {Added}, removed {Removed}.";
+}
 
 public sealed record FeedRunFailedEvent(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, string Reason)
-	: BaseNotification(NotificationEventType.FeedRunFailed, UserId, OccurredAt);
+	: BaseNotification(NotificationEventType.FeedRunFailed, UserId, OccurredAt)
+{
+	public override string Summary => Reason;
+}
 
 public sealed record ProviderRateLimitedEvent(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter)
-	: BaseNotification(NotificationEventType.ProviderRateLimited, UserId, OccurredAt);
+	: BaseNotification(NotificationEventType.ProviderRateLimited, UserId, OccurredAt)
+{
+	public override string Summary => $"Waiting {(int)Math.Ceiling(RetryAfter.TotalSeconds)}s before retrying.";
+}

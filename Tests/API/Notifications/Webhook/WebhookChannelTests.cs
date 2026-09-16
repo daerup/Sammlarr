@@ -2,14 +2,14 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using API.Notifications;
+using API.Notifications.Webhook;
 using Contracts;
 using Contracts.Notifications;
+using Domain.Media;
 using Domain.Notifications;
+using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared;
 using TestInfrastructure;
-
-using API.Notifications.Webhook;
 
 namespace API.Tests.Notifications.Webhook;
 
@@ -44,7 +44,7 @@ public class WebhookChannelTests
 			Now,
 			"Watchlist synced",
 			"Added 1 item(s).",
-			new NotificationData { Media = [new NotificationMedia("abc", "The Matrix", "Movie")] }
+			new NotificationData { Media = [new NotificationMedia("abc", "The Matrix", MediaType.Movie)] }
 		);
 
 		await Channel(handler).SendAsync(context, WebhookTarget("https://example.test/hook", WebhookSigning.GenerateSecret()), Body(null), CancellationToken.None);

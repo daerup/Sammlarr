@@ -8,7 +8,7 @@ using Domain.Media;
 using Domain.Notifications;
 using Domain.Notifications.Events;
 using Messaging.Notifications;
-using TestInfrastructure;
+using Shared.Extensions;
 
 namespace Integration.Tests.Notifications;
 
@@ -152,6 +152,28 @@ public class NotificationDispatchHandlerTests
 		media.GetAsync(Any<IReadOnlyList<MediaId>>(), Any()).WasCalled(Times.Once);
 		await Assert.That(deliveries[0].Context).IsSameReferenceAs(deliveries[1].Context);
 		await Assert.That(deliveries[0].Context.Data.Media!.Single().Title).IsEqualTo("The Matrix");
+	}
+
+	[Test]
+	public async Task Handle_WhenAWatchlistSyncs_TitlesTheContextFromTheEventTypeDescription()
+	{
+		var subscriptions = SubscriptionsFor(
+			NotificationEventType.WatchlistSynced,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSynced], NotificationTemplate.None)
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []),
+			Scope().Object,
+			subscriptions.Object,
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		var context = messages.OfType<DeliverNotification>().Single().Context;
+		await Assert.That(context.Title).IsEqualTo(NotificationEventType.WatchlistSynced.GetDescription());
+		await Assert.That(context.Summary).IsEqualTo("Pulled 0, queued 0 for push.");
 	}
 
 	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(NotificationEventType eventType, params NotificationSubscription[] subscriptions)
