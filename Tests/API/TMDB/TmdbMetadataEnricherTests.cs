@@ -1,5 +1,6 @@
 using API.Tmdb;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
@@ -21,7 +22,7 @@ public class TmdbMetadataEnricherTests
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
 		var tmdbApi = new TmdbApi(
-			new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore.Object),
+			new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore.Object, ICurrentUser.Mock().Object),
 			apiKeyStore.Object,
 			NullLogger<TmdbApi>.Instance
 		);

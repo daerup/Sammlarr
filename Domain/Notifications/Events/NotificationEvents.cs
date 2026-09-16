@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
+using Domain.Providers;
 
 namespace Domain.Notifications.Events;
 
@@ -26,3 +27,6 @@ public sealed record FeedRunCompletedEvent(UserId UserId, DateTimeOffset Occurre
 
 public sealed record FeedRunFailedEvent(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, string Reason)
 	: BaseNotification(NotificationEventType.FeedRunFailed, UserId, OccurredAt);
+
+public sealed record ProviderRateLimitedEvent(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter)
+	: BaseNotification(NotificationEventType.ProviderRateLimited, UserId, OccurredAt);

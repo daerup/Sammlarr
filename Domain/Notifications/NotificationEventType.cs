@@ -15,4 +15,7 @@ public enum NotificationEventType
 
 	[Description("Feed run failed")]
 	FeedRunFailed,
+
+	[Description("Provider rate limited")]
+	ProviderRateLimited,
 }

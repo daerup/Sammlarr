@@ -36,11 +36,14 @@ internal static class NotificationTemplateVariables
 	private static readonly TemplateVariable Added = new("{{ data.added }}", "Count added");
 	private static readonly TemplateVariable Removed = new("{{ data.removed }}", "Count removed");
 	private static readonly TemplateVariable Reason = new("{{ data.reason }}", "Failure reason");
+	private static readonly TemplateVariable Provider = new("{{ data.provider }}", "Provider that rate limited us");
+	private static readonly TemplateVariable RetryAfter = new("{{ data.retryAfter }}", "Time until the retry");
 
 	private static readonly Dictionary<NotificationEventType, TemplateVariable[]> DataByEvent = new()
 	{
 		[NotificationEventType.FeedRunCompleted] = [FeedName, FeedProvider, FeedIdentifier, Added, Removed],
 		[NotificationEventType.FeedRunFailed] = [FeedName, FeedProvider, FeedIdentifier, Reason],
+		[NotificationEventType.ProviderRateLimited] = [Provider, RetryAfter],
 	};
 
 	private static readonly HashSet<NotificationEventType> HasMediaLists = [NotificationEventType.WatchlistSynced];

@@ -28,6 +28,16 @@ public class NotificationTemplateVariablesTests
 	}
 
 	[Test]
+	public async Task Variables_ForARateLimitedProvider_ShowTheProviderAndRetryDelay()
+	{
+		var tokens = Tokens(NotificationEventType.ProviderRateLimited);
+
+		await Assert.That(tokens).Contains("{{ data.provider }}");
+		await Assert.That(tokens).Contains("{{ data.retryAfter }}");
+		await Assert.That(tokens.Contains("{{ data.reason }}")).IsFalse();
+	}
+
+	[Test]
 	public async Task Variables_ForAnyEvent_AlwaysIncludeTheTopLevelOnes()
 	{
 		await Assert.That(Tokens(NotificationEventType.FeedRunCompleted)).Contains("{{ title }}");

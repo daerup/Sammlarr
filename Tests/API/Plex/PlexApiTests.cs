@@ -4,6 +4,7 @@ using API.Plex;
 using API.Plex.Types;
 using Bogus;
 using Contracts.Auth;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Search;
 using Domain.Media;
@@ -135,6 +136,6 @@ public class PlexApiTests
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		return new PlexApi(new PlexClient(httpClient, credentialStore), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
+		return new PlexApi(new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 }

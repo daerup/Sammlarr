@@ -3,6 +3,7 @@ using System.Text.Json;
 using API.Plex;
 using Bogus;
 using Contracts.Auth;
+using Contracts.Identity;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -124,7 +125,7 @@ public class PlexWatchListProviderTests
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		return new PlexClient(client, credentialStore);
+		return new PlexClient(client, credentialStore, ICurrentUser.Mock().Object);
 	}
 
 	private static PlexClient CreatePlexClient(HttpStatusCode statusCode)
@@ -134,7 +135,7 @@ public class PlexWatchListProviderTests
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		return new PlexClient(client, credentialStore);
+		return new PlexClient(client, credentialStore, ICurrentUser.Mock().Object);
 	}
 
 	private static string BuildWatchlistJson(int totalSize, object metadata)

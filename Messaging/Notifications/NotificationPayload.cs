@@ -17,7 +17,9 @@ internal sealed record NotificationPayload(
 	string? FeedId,
 	int? Added,
 	int? Removed,
-	string? Reason
+	string? Reason,
+	string? Provider,
+	TimeSpan? RetryAfter
 )
 {
 	public IEnumerable<MediaId> AllMediaIds => PulledAdds.Concat(PulledRemoves).Concat(PushedAdds).Concat(PushedRemoves).Concat(Media);

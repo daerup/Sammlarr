@@ -2,6 +2,7 @@ using System.Net;
 using API.Mdblist;
 using Bogus;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
 using Shared.Options;
@@ -18,7 +19,12 @@ public class MdblistClientTests
 	{
 		var apiKey = new Faker().Random.AlphaNumeric(32);
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
-		var testee = new MdblistClient(handler.CreateClient(BaseUrl), new MdblistOptions { BaseUrl = BaseUrl }, IApiKeyConfigRepository.Mock().Object);
+		var testee = new MdblistClient(
+			handler.CreateClient(BaseUrl),
+			new MdblistOptions { BaseUrl = BaseUrl },
+			IApiKeyConfigRepository.Mock().Object,
+			ICurrentUser.Mock().Object
+		);
 
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, apiKey));
 
@@ -30,7 +36,7 @@ public class MdblistClientTests
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
 		var apiKeys = IApiKeyConfigRepository.Mock();
-		var testee = new MdblistClient(handler.CreateClient(BaseUrl), new MdblistOptions { BaseUrl = BaseUrl }, apiKeys.Object);
+		var testee = new MdblistClient(handler.CreateClient(BaseUrl), new MdblistOptions { BaseUrl = BaseUrl }, apiKeys.Object, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, new Faker().Random.AlphaNumeric(32)));
 

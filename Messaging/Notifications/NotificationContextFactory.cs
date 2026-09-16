@@ -53,6 +53,11 @@ internal static class NotificationContextFactory
 				Removed = e.Removed,
 			},
 			FeedRunFailedEvent e => Payload(e, "Feed run failed", e.Reason) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
+			ProviderRateLimitedEvent e => Payload(e, $"{e.Provider} is rate limiting", $"Waiting {Seconds(e.RetryAfter)}s before retrying.") with
+			{
+				Provider = e.Provider.ToString(),
+				RetryAfter = e.RetryAfter,
+			},
 			_ => Payload(message, message.Type.ToString(), string.Empty),
 		};
 
@@ -88,8 +93,12 @@ internal static class NotificationContextFactory
 				Added = payload.Added,
 				Removed = payload.Removed,
 				Reason = payload.Reason,
+				Provider = payload.Provider,
+				RetryAfter = payload.RetryAfter,
 			}
 		);
+
+	private static int Seconds(TimeSpan retryAfter) => (int)Math.Ceiling(retryAfter.TotalSeconds);
 
 	private static readonly IReadOnlyDictionary<MediaId, NotificationMedia> NoMedia = new Dictionary<MediaId, NotificationMedia>();
 
@@ -114,6 +123,8 @@ internal static class NotificationContextFactory
 			pushedAdds ?? [],
 			pushedRemoves ?? [],
 			media ?? [],
+			null,
+			null,
 			null,
 			null,
 			null,

@@ -4,6 +4,7 @@ using System.Text;
 using API.Mdblist;
 using Contracts;
 using Contracts.Auth;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
@@ -56,7 +57,7 @@ public class MdblistServiceTests
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
-		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object);
+		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
 		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => Realize(requests, token));
 		var providerConfig = IProviderConfigRepository.Mock();

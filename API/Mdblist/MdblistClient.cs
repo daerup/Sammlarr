@@ -1,5 +1,6 @@
 using API.Http;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Auth;
 using Domain.Feed;
 using Domain.Providers;
@@ -9,7 +10,7 @@ using Shared.Options;
 
 namespace API.Mdblist;
 
-internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyConfigRepository apiKeys)
+internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyConfigRepository apiKeys, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Mdblist";
 	public const string QueryParam = "apikey";
@@ -23,6 +24,7 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyC
 	)
 	{
 		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
+		request.StampTriggeredBy(currentUser);
 		request.Content = content;
 		try
 		{
