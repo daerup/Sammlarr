@@ -17,9 +17,7 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 			.Map(rendered => Render(template.Body, context).Map(body => rendered with { Body = body }));
 
 	private static Result<Optional<string>> Render(Optional<string> template, NotificationContext context) =>
-		template is Some<string> value
-			? Render(value.Value, context).Map(Optional<string> (rendered) => Some.Of(rendered))
-			: Success.Of<Optional<string>>(new None());
+		template.Match(value => Render(value, context).Map(Optional<string> (rendered) => Some.Of(rendered)), () => Success.Of<Optional<string>>(new None()));
 
 	private static Result<string> Render(string template, NotificationContext context)
 	{
