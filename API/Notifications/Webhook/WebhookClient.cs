@@ -1,7 +1,7 @@
 using System.Net;
 using Contracts.Notifications;
 
-namespace API.Notifications;
+namespace API.Notifications.Webhook;
 
 internal sealed class WebhookClient(HttpClient client)
 {

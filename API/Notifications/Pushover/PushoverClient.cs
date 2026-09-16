@@ -1,7 +1,7 @@
 using System.Net;
 using Contracts.Notifications;
 
-namespace API.Notifications;
+namespace API.Notifications.Pushover;
 
 internal sealed record PushoverMessage(string AppToken, string UserKey, string Title, string Message, int Priority);
 

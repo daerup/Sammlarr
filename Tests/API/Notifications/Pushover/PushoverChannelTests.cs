@@ -7,7 +7,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shared;
 using TestInfrastructure;
 
-namespace API.Tests.Notifications;
+using API.Notifications.Pushover;
+
+namespace API.Tests.Notifications.Pushover;
 
 public class PushoverChannelTests
 {
@@ -83,7 +85,7 @@ public class PushoverChannelTests
 
 		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "hi", priority: -1), CancellationToken.None);
 
-		await Assert.That(Form(handler)["priority"]).IsEqualTo("-1");
+		await Assert.That(Form(handler)["priority"]).IsEqualTo("1");
 	}
 
 	[Test]

@@ -9,7 +9,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shared;
 using TestInfrastructure;
 
-namespace API.Tests.Notifications;
+using API.Notifications.Webhook;
+
+namespace API.Tests.Notifications.Webhook;
 
 public class WebhookChannelTests
 {

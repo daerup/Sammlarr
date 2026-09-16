@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace API.Notifications;
+namespace API.Notifications.Webhook;
 
 internal static class WebhookConnect
 {

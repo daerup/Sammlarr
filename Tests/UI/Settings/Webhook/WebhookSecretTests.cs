@@ -1,6 +1,6 @@
-using UI.Features.Settings.Components.Notifications;
+using UI.Features.Settings.Components.Notifications.Webhook;
 
-namespace UI.Tests.Settings;
+namespace UI.Tests.Settings.Webhook;
 
 public class WebhookSecretTests
 {

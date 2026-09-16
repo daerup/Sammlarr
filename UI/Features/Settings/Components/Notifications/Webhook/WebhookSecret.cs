@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace UI.Features.Settings.Components.Notifications;
+namespace UI.Features.Settings.Components.Notifications.Webhook;
 
 internal static class WebhookSecret
 {
