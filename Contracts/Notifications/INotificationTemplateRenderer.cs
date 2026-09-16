@@ -4,5 +4,5 @@ namespace Contracts.Notifications;
 
 public interface INotificationTemplateRenderer
 {
-	Result<string> Render(string template, NotificationContext context);
+	Result<RenderedNotification> Render(NotificationTemplate template, NotificationContext context);
 }

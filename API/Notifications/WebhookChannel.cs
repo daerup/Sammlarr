@@ -37,15 +37,12 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 			return new DeliveryUnrecoverable("The webhook URL must be an absolute https URI.");
 		}
 
-		var rendered = RenderBody(context, template);
-		if (rendered is not Success<string> body)
-		{
-			var reason = rendered is Error error ? error.Reason : "The webhook body could not be rendered.";
-			logger.LogWarning("Webhook body for {Url} could not be rendered: {Reason}", uri, reason);
-			return new DeliveryUnrecoverable(reason);
-		}
+		return await RenderBody(context, template).Match(body => SendAsync(config, uri, context, body, cancellationToken), error => RenderFailure(error, uri));
+	}
 
-		var payload = Encoding.UTF8.GetBytes(body.Value);
+	private async Task<DeliveryResult> SendAsync(WebhookConfig config, Uri uri, NotificationContext context, string body, CancellationToken cancellationToken)
+	{
+		var payload = Encoding.UTF8.GetBytes(body);
 		var (id, timestamp, signature) = WebhookSigning.Sign(context.Id, clock.Now, payload, config.SigningSecret);
 
 		using var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteArrayContent(payload) };
@@ -62,21 +59,25 @@ internal sealed class WebhookChannel(WebhookClient client, INotificationTemplate
 		return result;
 	}
 
-	private Result<string> RenderBody(NotificationContext context, NotificationTemplate template) =>
-		template.Body is Some<string> body ? renderer.Render(body.Value, context) : DefaultBody(context);
+	private Task<DeliveryResult> RenderFailure(Error error, Uri uri)
+	{
+		logger.LogWarning("Webhook body for {Url} could not be rendered: {Reason}", uri, error.Reason);
+		return Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable(error.Reason));
+	}
 
-	private static Result<string> DefaultBody(NotificationContext context) =>
-		Success.Of(
-			JsonSerializer.Serialize(
-				new
-				{
-					id = context.Id.ToString(),
-					type = context.Type,
-					time = context.OccurredAt,
-					specversion = "1",
-					data = context.Data,
-				},
-				BodyJson
-			)
+	private Result<string> RenderBody(NotificationContext context, NotificationTemplate template) =>
+		renderer.Render(template, context).Map(rendered => rendered.Body.GetValueOr(() => DefaultBody(context)));
+
+	private static string DefaultBody(NotificationContext context) =>
+		JsonSerializer.Serialize(
+			new
+			{
+				id = context.Id.ToString(),
+				type = context.Type,
+				time = context.OccurredAt,
+				specversion = "1",
+				data = context.Data,
+			},
+			BodyJson
 		);
 }

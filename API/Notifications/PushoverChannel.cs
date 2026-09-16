@@ -22,20 +22,23 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 			return new DeliveryUnrecoverable("The target is not a Pushover target.");
 		}
 
-		var titleResult = Render(template.Title, context);
-		if (titleResult is not Success<string> title)
-		{
-			return RenderFailure(titleResult, "title");
-		}
-		var messageResult = Render(template.Message, context);
-		if (messageResult is not Success<string> message)
-		{
-			return RenderFailure(messageResult, "message");
-		}
+		return await renderer.Render(template, context).Match(RenderSuccess, RenderFailure);
 
+		async Task<DeliveryResult> RenderSuccess(RenderedNotification content) => await SendAsync(config, context, template, content, cancellationToken);
+	}
+
+	private async Task<DeliveryResult> SendAsync(
+		PushoverConfig config,
+		NotificationContext context,
+		NotificationTemplate template,
+		RenderedNotification content,
+		CancellationToken cancellationToken
+	)
+	{
 		var priority = template.Priority is Some<int> configured ? configured.Value : DerivedPriority(context.Type);
-		var messageText = string.IsNullOrWhiteSpace(message.Value) ? EmptyMessagePlaceholder : message.Value;
-		var request = new PushoverMessage(config.AppToken, config.UserKey, title.Value, messageText, priority);
+		var message = content.Message.GetValueOr(string.Empty);
+		var messageText = string.IsNullOrWhiteSpace(message) ? EmptyMessagePlaceholder : message;
+		var request = new PushoverMessage(config.AppToken, config.UserKey, content.Title.GetValueOr(string.Empty), messageText, priority);
 		var result = await client.SendAsync(request, cancellationToken);
 		if (result is DeliveryUnrecoverable unrecoverable)
 		{
@@ -44,14 +47,10 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		return result;
 	}
 
-	private Result<string> Render(Optional<string> template, NotificationContext context) =>
-		template is Some<string> value ? renderer.Render(value.Value, context) : Success.Of(string.Empty);
-
-	private DeliveryResult RenderFailure(Result<string> rendered, string field)
+	private Task<DeliveryResult> RenderFailure(Error error)
 	{
-		var reason = rendered is Error error ? error.Reason : $"The Pushover {field} template could not be rendered.";
-		logger.LogWarning("Pushover {Field} template could not be rendered: {Reason}", field, reason);
-		return new DeliveryUnrecoverable(reason);
+		logger.LogWarning("Pushover template could not be rendered: {Reason}", error.Reason);
+		return Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable(error.Reason));
 	}
 
 	private static int DerivedPriority(NotificationEventType type) => type == NotificationEventType.FeedRunFailed ? 1 : 0;
