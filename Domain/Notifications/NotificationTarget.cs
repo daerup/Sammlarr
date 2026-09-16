@@ -7,5 +7,6 @@ public sealed record NotificationTarget(Guid Id, string Name, bool Enabled, Noti
 		{
 			WebhookConfig => NotificationChannel.Webhook,
 			PushoverConfig => NotificationChannel.Pushover,
+			WebUiConfig => NotificationChannel.WebUi,
 		};
 }
