@@ -1,7 +1,9 @@
 using System.Net;
 using API.Notifications;
 
-namespace API.Tests.Notifications;
+using API.Notifications.Webhook;
+
+namespace API.Tests.Notifications.Webhook;
 
 public class WebhookConnectTests
 {

@@ -7,7 +7,7 @@ using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging;
 
-namespace API.Notifications;
+namespace API.Notifications.Webhook;
 
 internal sealed class WebhookChannel(WebhookClient client, INotificationTemplateRenderer renderer, IDateTimeProvider clock, ILogger<WebhookChannel> logger)
 	: INotificationChannel

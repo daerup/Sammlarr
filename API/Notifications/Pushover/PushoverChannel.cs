@@ -2,7 +2,7 @@ using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging;
 
-namespace API.Notifications;
+namespace API.Notifications.Pushover;
 
 internal sealed class PushoverChannel(PushoverClient client, INotificationTemplateRenderer renderer, ILogger<PushoverChannel> logger) : INotificationChannel
 {
@@ -35,7 +35,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		CancellationToken cancellationToken
 	)
 	{
-		var priority = template.Priority is Some<int> configured ? configured.Value : DerivedPriority(context.Type);
+		var priority = template.Priority.GetValueOr(() => DerivedPriority(context.Type));
 		var message = content.Message.GetValueOr(string.Empty);
 		var messageText = string.IsNullOrWhiteSpace(message) ? EmptyMessagePlaceholder : message;
 		var request = new PushoverMessage(config.AppToken, config.UserKey, content.Title.GetValueOr(string.Empty), messageText, priority);

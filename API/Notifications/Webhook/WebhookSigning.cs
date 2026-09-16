@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace API.Notifications;
+namespace API.Notifications.Webhook;
 
 internal static class WebhookSigning
 {
