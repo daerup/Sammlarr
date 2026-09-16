@@ -27,6 +27,7 @@ internal static class NotificationSampleContext
 				Removed = 1,
 			},
 			NotificationEventType.FeedRunFailed => new NotificationData { Feed = Feed, Reason = "Provider timed out" },
+			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = "Tmdb", RetryAfter = TimeSpan.FromSeconds(30) },
 			NotificationEventType.TestPing => new NotificationData(),
 		};
 		return new NotificationContext(
