@@ -35,7 +35,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		CancellationToken cancellationToken
 	)
 	{
-		var priority = template.Priority.GetValueOr(() => DerivedPriority(context.Type));
+		var priority = template.Level.GetValueOr(() => NotificationLevel.For(context.Type)).Priority;
 		var message = content.Message.GetValueOr(string.Empty);
 		var messageText = string.IsNullOrWhiteSpace(message) ? EmptyMessagePlaceholder : message;
 		var request = new PushoverMessage(config.AppToken, config.UserKey, content.Title.GetValueOr(string.Empty), messageText, priority);
@@ -52,6 +52,18 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		logger.LogWarning("Pushover template could not be rendered: {Reason}", error.Reason);
 		return Task.FromResult<DeliveryResult>(new DeliveryUnrecoverable(error.Reason));
 	}
+}
 
-	private static int DerivedPriority(NotificationEventType type) => type == NotificationEventType.FeedRunFailed ? 1 : 0;
+file static class PushoverPriority
+{
+	extension(NotificationLevel level)
+	{
+		public int Priority =>
+			level switch
+			{
+				NotificationLevel.Info => 0,
+				NotificationLevel.Warning => 0,
+				NotificationLevel.Error => 1,
+			};
+	}
 }

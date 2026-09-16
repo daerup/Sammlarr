@@ -62,7 +62,7 @@ public class WebUiChannelTests
 	[Arguments(NotificationEventType.FeedRunCompleted, NotificationLevel.Info)]
 	[Arguments(NotificationEventType.WatchlistSynced, NotificationLevel.Info)]
 	[Arguments(NotificationEventType.TestPing, NotificationLevel.Info)]
-	public async Task SendAsync_WhenNoPriorityIsConfigured_DerivesTheLevelFromTheEventType(NotificationEventType type, NotificationLevel expected)
+	public async Task SendAsync_WhenNoLevelIsConfigured_DerivesTheLevelFromTheEventType(NotificationEventType type, NotificationLevel expected)
 	{
 		await Testee.SendAsync(Context(type), Target(), NotificationTemplate.None);
 
@@ -70,17 +70,16 @@ public class WebUiChannelTests
 	}
 
 	[Test]
-	[Arguments(-1, NotificationLevel.Info)]
-	[Arguments(0, NotificationLevel.Info)]
-	[Arguments(1, NotificationLevel.Warning)]
-	[Arguments(2, NotificationLevel.Error)]
-	public async Task SendAsync_WhenPriorityIsConfigured_OverridesTheDerivedLevel(int priority, NotificationLevel expected)
+	[Arguments(NotificationLevel.Info)]
+	[Arguments(NotificationLevel.Warning)]
+	[Arguments(NotificationLevel.Error)]
+	public async Task SendAsync_WhenALevelIsConfigured_OverridesTheDerivedLevel(NotificationLevel configured)
 	{
-		var template = NotificationTemplate.None with { Priority = Some.Of(priority) };
+		var template = NotificationTemplate.None with { Level = Some.Of(configured) };
 
 		await Testee.SendAsync(Context(NotificationEventType.FeedRunFailed), Target(), template);
 
-		await Assert.That(shown[0].Level).IsEqualTo(expected);
+		await Assert.That(shown[0].Level).IsEqualTo(configured);
 	}
 
 	[Test]

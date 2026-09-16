@@ -380,7 +380,6 @@ namespace DB.Migrations
 
                     b.Property<string>("EventType")
                         .IsRequired()
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Kind")
@@ -432,12 +431,12 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Level")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("MessageTemplate")
                         .HasMaxLength(8192)
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("Priority")
-                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("TargetId")
                         .HasColumnType("TEXT");

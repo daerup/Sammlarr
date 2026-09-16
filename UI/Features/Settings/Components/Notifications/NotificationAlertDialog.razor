@@ -48,7 +48,8 @@
                         <WebhookAlertFields @bind-Body="_body" @bind-Body:after="MarkDirty"/>
                         break;
                     case NotificationChannel.Pushover:
-                        <PushoverAlertFields @bind-Title="_title" @bind-Title:after="MarkDirty" @bind-Message="_message" @bind-Message:after="MarkDirty" @bind-Priority="_priority" @bind-Priority:after="MarkDirty"/>
+                    case NotificationChannel.WebUi:
+                        <LeveledAlertFields @bind-Title="_title" @bind-Title:after="MarkDirty" @bind-Message="_message" @bind-Message:after="MarkDirty" @bind-Level="_level" @bind-Level:after="MarkDirty"/>
                         break;
                 }
 
@@ -94,7 +95,7 @@
                         {
                             <PreviewField Label="Title" Value="@PreviewTitle(context)"/>
                             <PreviewField Label="Message" Value="@PreviewMessage(context)"/>
-                            <PreviewField Label="Priority" Value="@(_priority?.ToString() ?? "default")"/>
+                            <PreviewField Label="Level" Value="@(_level?.ToString() ?? "From the event")"/>
                         }
                     </div>
                 }
@@ -133,7 +134,7 @@
     private string _body = string.Empty;
     private string _title = string.Empty;
     private string _message = string.Empty;
-    private int? _priority;
+    private NotificationLevel? _level;
 
     private bool _previewOpen = true;
     private string? _error;
@@ -153,13 +154,12 @@
             _body = Value(existing.Template.Body);
             _title = Value(existing.Template.Title);
             _message = Value(existing.Template.Message);
-            _priority = existing.Template.Priority.Match(value => (int?)value, () => 0);
+            _level = existing.Template.Level.Match(value => (NotificationLevel?)value, () => null);
         }
         else
         {
             _title = "{{ title }}";
             _message = "{{ summary }}";
-            _priority = 0;
         }
     }
 
@@ -240,7 +240,7 @@
     private NotificationTemplate BuildTemplate() =>
         _client?.Channel == NotificationChannel.Webhook
             ? new NotificationTemplate(Opt(_body), new None(), new None(), new None())
-            : new NotificationTemplate(new None(), Opt(_title), Opt(_message), _priority is { } value ? Some.Of(value) : new None());
+            : new NotificationTemplate(new None(), Opt(_title), Opt(_message), _level is { } value ? Some.Of(value) : new None());
 
     private static Optional<string> Opt(string value) => string.IsNullOrWhiteSpace(value) ? new None() : Some.Of(value);
 

@@ -21,5 +21,5 @@ internal record NotificationSubscriptionRow : Entity<Guid>, IUserOwned
 	[MaxLength(8192)]
 	public string? MessageTemplate { get; set; }
 
-	public int? Priority { get; set; }
+	public NotificationLevel? Level { get; set; }
 }
