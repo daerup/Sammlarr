@@ -3,6 +3,7 @@ using Contracts.Auth;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Settings;
+using Core.Notifications;
 using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
@@ -17,6 +18,7 @@ internal sealed class SignInService(
 	IUserScope userScope,
 	IProviderConfigRepository providerConfig,
 	IDateTimeProvider dateTimeProvider,
+	WebUiNotificationSeeder webUiNotifications,
 	ILogger<SignInService> logger
 ) : ISignInService
 {
@@ -47,6 +49,11 @@ internal sealed class SignInService(
 		var role = isFirstUser ? UserRole.Admin : UserRole.Member;
 		var user = new User(UserId.New(), login.DisplayName, login.AvatarUrl, role, dateTimeProvider.Now);
 		await users.CreateAsync(user, provider, login.ExternalUserId, cancellationToken);
+		using (userScope.As(user))
+		{
+			await webUiNotifications.SeedAsync(cancellationToken);
+		}
+
 		return await CompleteSignInAsync(provider, login, user, isInitialAdmin: isFirstUser, cancellationToken);
 	}
 
