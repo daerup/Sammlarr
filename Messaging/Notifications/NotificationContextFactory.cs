@@ -3,7 +3,6 @@ using Contracts.Media;
 using Contracts.Notifications;
 using Domain.Feed;
 using Domain.Media;
-using Domain.Notifications;
 using Domain.Notifications.Events;
 
 namespace Messaging.Notifications;
@@ -30,35 +29,17 @@ internal static class NotificationContextFactory
 			return null;
 		}
 		var feed = await feedRepository.GetFeedByIdAsync(FeedId.From(guid), cancellationToken);
-		return feed is null ? null : new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider.ToString(), feed.Identifier);
+		return feed is null ? null : new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier);
 	}
 
 	private static NotificationPayload ToPayload(BaseNotification message) =>
 		message switch
 		{
-			WatchlistSyncedEvent e => Payload(
-				e,
-				"Watchlist synced",
-				$"Pulled {e.PulledAdds.Count + e.PulledRemoves.Count}, queued {e.PushedAdds.Count + e.PushedRemoves.Count} for push.",
-				pulledAdds: e.PulledAdds,
-				pulledRemoves: e.PulledRemoves,
-				pushedAdds: e.PushedAdds,
-				pushedRemoves: e.PushedRemoves
-			),
-			TestPingEvent e => Payload(e, "Test notification", "This is a test notification from Sammlarr."),
-			FeedRunCompletedEvent e => Payload(e, "Feed run completed", $"Added {e.Added}, removed {e.Removed}.") with
-			{
-				FeedId = e.FeedId.ToString(),
-				Added = e.Added,
-				Removed = e.Removed,
-			},
-			FeedRunFailedEvent e => Payload(e, "Feed run failed", e.Reason) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
-			ProviderRateLimitedEvent e => Payload(e, $"{e.Provider} is rate limiting", $"Waiting {Seconds(e.RetryAfter)}s before retrying.") with
-			{
-				Provider = e.Provider.ToString(),
-				RetryAfter = e.RetryAfter,
-			},
-			_ => Payload(message, message.Type.ToString(), string.Empty),
+			WatchlistSyncedEvent e => Payload(e, pulledAdds: e.PulledAdds, pulledRemoves: e.PulledRemoves, pushedAdds: e.PushedAdds, pushedRemoves: e.PushedRemoves),
+			FeedRunCompletedEvent e => Payload(e) with { FeedId = e.FeedId.ToString(), Added = e.Added, Removed = e.Removed },
+			FeedRunFailedEvent e => Payload(e) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
+			ProviderRateLimitedEvent e => Payload(e) with { Provider = e.Provider, RetryAfter = e.RetryAfter },
+			_ => Payload(message),
 		};
 
 	private static async Task<IReadOnlyDictionary<MediaId, NotificationMedia>> ResolveAsync(
@@ -75,7 +56,7 @@ internal static class NotificationContextFactory
 		var cached = await mediaRepository.GetAsync(ids, cancellationToken);
 		return cached.ToDictionary(
 			entry => entry.Stored.Id,
-			entry => new NotificationMedia(entry.Stored.Id.ToString(), entry.Stored.Title, entry.Stored.Type.ToString(), entry.Stored.ReleaseDate?.Year)
+			entry => new NotificationMedia(entry.Stored.Id.ToString(), entry.Stored.Title, entry.Stored.Type, entry.Stored.ReleaseDate?.Year)
 		);
 	}
 
@@ -98,14 +79,10 @@ internal static class NotificationContextFactory
 			}
 		);
 
-	private static int Seconds(TimeSpan retryAfter) => (int)Math.Ceiling(retryAfter.TotalSeconds);
-
 	private static readonly IReadOnlyDictionary<MediaId, NotificationMedia> NoMedia = new Dictionary<MediaId, NotificationMedia>();
 
 	private static NotificationPayload Payload(
 		BaseNotification message,
-		string title,
-		string summary,
 		IReadOnlyList<MediaId>? pulledAdds = null,
 		IReadOnlyList<MediaId>? pulledRemoves = null,
 		IReadOnlyList<MediaId>? pushedAdds = null,
@@ -116,8 +93,8 @@ internal static class NotificationContextFactory
 			message.Id,
 			message.Type,
 			message.OccurredAt,
-			title,
-			summary,
+			message.Type.GetDescription(),
+			message.Summary,
 			pulledAdds ?? [],
 			pulledRemoves ?? [],
 			pushedAdds ?? [],
@@ -146,11 +123,5 @@ internal static class NotificationContextFactory
 		IReadOnlyList<MediaId> ids,
 		string? descriptor,
 		IReadOnlyDictionary<MediaId, NotificationMedia> resolved
-	) =>
-		ids.Select(id =>
-			(resolved.GetValueOrDefault(id) ?? new NotificationMedia(id.ToString(), null, MediaType.Unknown.ToString())) with
-			{
-				Descriptor = descriptor,
-			}
-		);
+	) => ids.Select(id => (resolved.GetValueOrDefault(id) ?? new NotificationMedia(id.ToString(), null, MediaType.Unknown)) with { Descriptor = descriptor });
 }

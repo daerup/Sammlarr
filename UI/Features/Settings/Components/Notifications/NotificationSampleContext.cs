@@ -1,5 +1,10 @@
 using Contracts.Notifications;
+using Domain.Feed;
+using Domain.Identity;
+using Domain.Media;
 using Domain.Notifications;
+using Domain.Notifications.Events;
+using Domain.Providers;
 using Shared.Extensions;
 
 namespace UI.Features.Settings.Components.Notifications;
@@ -8,16 +13,31 @@ internal static class NotificationSampleContext
 {
 	private static readonly IReadOnlyList<NotificationMedia> SyncedMedia =
 	[
-		new("sample-1", "The Matrix", "Movie", 1999, "Added locally"),
-		new("sample-2", "Dune", "Movie", 2021, "Added remotely"),
-		new("sample-3", "Breaking Bad", "Show", 2008, "Removed locally"),
+		new("sample-1", "The Matrix", MediaType.Movie, 1999, "Added locally"),
+		new("sample-2", "Dune", MediaType.Movie, 2021, "Added remotely"),
+		new("sample-3", "Breaking Bad", MediaType.Show, 2008, "Removed locally"),
 	];
 
-	private static readonly NotificationFeed Feed = new("sample-feed", "My Feed", "Mdblist", "sample-list");
+	private static readonly NotificationFeed Feed = new("sample-feed", "My Feed", FeedProvider.Mdblist, "sample-list");
 
 	public static NotificationContext For(NotificationEventType eventType)
 	{
-		var data = eventType switch
+		var sample = Sample(eventType);
+		return new NotificationContext(sample.Id, sample.Type, sample.OccurredAt, sample.Type.GetDescription(), sample.Summary, Data(eventType));
+	}
+
+	private static BaseNotification Sample(NotificationEventType eventType) =>
+		eventType switch
+		{
+			NotificationEventType.WatchlistSynced => new WatchlistSyncedEvent(SampleUser, SampleMoment, [SampleMedia, SampleMedia], [], [SampleMedia], []),
+			NotificationEventType.FeedRunCompleted => new FeedRunCompletedEvent(SampleUser, SampleMoment, SampleFeed, 2, 1),
+			NotificationEventType.FeedRunFailed => new FeedRunFailedEvent(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),
+			NotificationEventType.ProviderRateLimited => new ProviderRateLimitedEvent(SampleUser, SampleMoment, MediaProvider.Tmdb, TimeSpan.FromSeconds(30)),
+			NotificationEventType.TestPing => new TestPingEvent(SampleUser, SampleMoment, Guid.Empty),
+		};
+
+	private static NotificationData Data(NotificationEventType eventType) =>
+		eventType switch
 		{
 			NotificationEventType.WatchlistSynced => new NotificationData { Media = SyncedMedia },
 			NotificationEventType.FeedRunCompleted => new NotificationData
@@ -27,16 +47,17 @@ internal static class NotificationSampleContext
 				Removed = 1,
 			},
 			NotificationEventType.FeedRunFailed => new NotificationData { Feed = Feed, Reason = "Provider timed out" },
-			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = "Tmdb", RetryAfter = TimeSpan.FromSeconds(30) },
+			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = MediaProvider.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) },
 			NotificationEventType.TestPing => new NotificationData(),
 		};
-		return new NotificationContext(
-			Guid.CreateVersion7(),
-			eventType,
-			DateTimeOffset.UtcNow,
-			eventType.GetDescription(),
-			"Sample notification for testing.",
-			data
-		);
-	}
+
+	private static readonly Guid SampleId = new("11111111-1111-1111-1111-111111111111");
+
+	private static readonly UserId SampleUser = UserId.From(SampleId);
+
+	private static readonly DateTimeOffset SampleMoment = DateTimeOffset.UnixEpoch;
+
+	private static readonly FeedId SampleFeed = FeedId.From(SampleId);
+
+	private static readonly MediaId SampleMedia = MediaId.From(SampleId);
 }

@@ -1,5 +1,6 @@
 using Domain.Media;
 using Domain.Notifications;
+using Domain.Providers;
 
 namespace Messaging.Notifications;
 
@@ -18,7 +19,7 @@ internal sealed record NotificationPayload(
 	int? Added,
 	int? Removed,
 	string? Reason,
-	string? Provider,
+	MediaProvider? Provider,
 	TimeSpan? RetryAfter
 )
 {

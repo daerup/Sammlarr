@@ -1,6 +1,8 @@
 using API.Notifications;
 using Contracts.Notifications;
+using Domain.Media;
 using Domain.Notifications;
+using Domain.Providers;
 using TestInfrastructure;
 
 namespace API.Tests.Notifications;
@@ -12,7 +14,7 @@ public class FluidTemplateRendererTests
 	[Test]
 	public async Task Render_ForMediaFields_EmitsTopLevelAndNestedCamelCase()
 	{
-		var context = Context(new NotificationData { Media = [new NotificationMedia("id-1", "The Matrix", "Movie")] });
+		var context = Context(new NotificationData { Media = [new NotificationMedia("id-1", "The Matrix", MediaType.Movie)] });
 		var template = NotificationTemplate.None with { Title = Some.Of("{{ title }}: {% for m in data.media %}{{ m.title }} ({{ m.type }}){% endfor %}") };
 
 		var result = _testee.Render(template, context);
@@ -44,7 +46,7 @@ public class FluidTemplateRendererTests
 	[Test]
 	public async Task Render_ForARetryDelay_EmitsTheTimeSpan()
 	{
-		var context = Context(new NotificationData { Provider = "Tmdb", RetryAfter = TimeSpan.FromSeconds(30) });
+		var context = Context(new NotificationData { Provider = MediaProvider.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) });
 		var template = NotificationTemplate.None with { Message = Some.Of("{{ data.provider }} waits {{ data.retryAfter }}") };
 
 		var result = _testee.Render(template, context);
