@@ -1,5 +1,6 @@
 @using Contracts.Notifications
 @using Domain.Notifications
+@using global::Shared.Extensions
 @inject INotificationTargetRepository Targets
 @inject NotificationTester Tester
 @inject Notifier Notifier
@@ -93,10 +94,12 @@
 @code {
     private static readonly List<SelectOption<NotificationChannel>> ChannelOptions =
     [
-        new(NotificationChannel.Webhook, "Webhook"),
-        new(NotificationChannel.Pushover, "Pushover"),
-        new(NotificationChannel.WebUi, "This app"),
+        Option(NotificationChannel.Webhook),
+        Option(NotificationChannel.Pushover),
+        Option(NotificationChannel.WebUi),
     ];
+
+    private static SelectOption<NotificationChannel> Option(NotificationChannel channel) => new(channel, channel.GetDescription());
 
     [CascadingParameter]
     public IDialogReference DialogRef { get; set; } = null!;
