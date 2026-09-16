@@ -88,12 +88,12 @@
                         <p class="text-sm font-medium">Preview — @option.Label</p>
                         @if (previewClient.Channel == NotificationChannel.Webhook)
                         {
-                            <PreviewField Label="Body" Value="@RenderOrDefault(_body, context, "(default JSON body)")"/>
+                            <PreviewField Label="Body" Value="@PreviewBody(context)"/>
                         }
                         else
                         {
-                            <PreviewField Label="Title" Value="@RenderField(_title, context)"/>
-                            <PreviewField Label="Message" Value="@RenderField(_message, context)"/>
+                            <PreviewField Label="Title" Value="@PreviewTitle(context)"/>
+                            <PreviewField Label="Message" Value="@PreviewMessage(context)"/>
                             <PreviewField Label="Priority" Value="@(_priority?.ToString() ?? "default")"/>
                         }
                     </div>
@@ -191,12 +191,17 @@
 
     private string DefaultFieldId => _client?.Channel == NotificationChannel.Webhook ? "alert-body" : "alert-message";
 
-    private string RenderField(string template, NotificationContext context) =>
-        string.IsNullOrWhiteSpace(template) ? string.Empty : Renderer.Render(template, context) is Success<string> rendered ? rendered.Value : Error(template, context);
+    private string PreviewTitle(NotificationContext context) =>
+        Preview(NotificationTemplate.None with { Title = Opt(_title) }, context, rendered => rendered.Title, string.Empty);
 
-    private string RenderOrDefault(string template, NotificationContext context, string fallback) => string.IsNullOrWhiteSpace(template) ? fallback : RenderField(template, context);
+    private string PreviewMessage(NotificationContext context) =>
+        Preview(NotificationTemplate.None with { Message = Opt(_message) }, context, rendered => rendered.Message, string.Empty);
 
-    private string Error(string template, NotificationContext context) => Renderer.Render(template, context) is Error error ? "⚠ " + error.Reason : string.Empty;
+    private string PreviewBody(NotificationContext context) =>
+        Preview(NotificationTemplate.None with { Body = Opt(_body) }, context, rendered => rendered.Body, "(default JSON body)");
+
+    private string Preview(NotificationTemplate template, NotificationContext context, Func<RenderedNotification, Optional<string>> field, string fallback) =>
+        Renderer.Render(template, context).Match(rendered => field(rendered).GetValueOr(fallback), error => "⚠ " + error.Reason);
 
     private async Task SaveAsync()
     {

@@ -12,26 +12,68 @@ public class FluidTemplateRendererTests
 	[Test]
 	public async Task Render_ForMediaFields_EmitsTopLevelAndNestedCamelCase()
 	{
-		var context = new NotificationContext(
-			Guid.NewGuid(),
-			NotificationEventType.WatchlistSynced,
-			DateTimeOffset.UtcNow,
-			"Watchlist synced",
-			"Added.",
-			new NotificationData { Media = [new NotificationMedia("id-1", "The Matrix", "Movie")] }
-		);
+		var context = Context(new NotificationData { Media = [new NotificationMedia("id-1", "The Matrix", "Movie")] });
+		var template = NotificationTemplate.None with { Title = Some.Of("{{ title }}: {% for m in data.media %}{{ m.title }} ({{ m.type }}){% endfor %}") };
 
-		var result = _testee.Render("{{ title }}: {% for m in data.media %}{{ m.title }} ({{ m.type }}){% endfor %}", context);
+		var result = _testee.Render(template, context);
 
-		await Assert.That(result).IsSuccess().And.Multiple(async rendered => await Assert.That(rendered).IsEqualTo("Watchlist synced: The Matrix (Movie)"));
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async rendered => await Assert.That(rendered.Title).IsSome().And.IsEqualTo("Watchlist synced: The Matrix (Movie)"));
 	}
 
 	[Test]
-	public async Task Render_WhenTheTemplateIsInvalid_ReturnsAnError()
+	public async Task Render_ForEveryField_RendersEachOneAgainstTheContext()
 	{
-		var context = new NotificationContext(Guid.NewGuid(), NotificationEventType.TestPing, DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
+		var template = NotificationTemplate.None with { Title = Some.Of("{{ title }}"), Message = Some.Of("{{ summary }}"), Body = Some.Of("{{ type }}") };
 
-		var result = _testee.Render("{{ unclosed", context);
+		var result = _testee.Render(template, Context());
+
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async rendered =>
+			{
+				await Assert.That(rendered.Title).IsSome().And.IsEqualTo("Watchlist synced");
+				await Assert.That(rendered.Message).IsSome().And.IsEqualTo("Added.");
+				await Assert.That(rendered.Body).IsSome().And.IsEqualTo("WatchlistSynced");
+			});
+	}
+
+	[Test]
+	public async Task Render_ForARetryDelay_EmitsTheTimeSpan()
+	{
+		var context = Context(new NotificationData { Provider = "Tmdb", RetryAfter = TimeSpan.FromSeconds(30) });
+		var template = NotificationTemplate.None with { Message = Some.Of("{{ data.provider }} waits {{ data.retryAfter }}") };
+
+		var result = _testee.Render(template, context);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async rendered => await Assert.That(rendered.Message).IsSome().And.IsEqualTo("Tmdb waits 00:00:30"));
+	}
+
+	[Test]
+	public async Task Render_WhenAFieldHasNoTemplate_LeavesItUnrendered()
+	{
+		var result = _testee.Render(NotificationTemplate.None with { Message = Some.Of("{{ summary }}") }, Context());
+
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async rendered =>
+			{
+				await Assert.That(rendered.Title).IsNone();
+				await Assert.That(rendered.Message).IsSome().And.IsEqualTo("Added.");
+				await Assert.That(rendered.Body).IsNone();
+			});
+	}
+
+	[Test]
+	public async Task Render_WhenOneFieldIsInvalid_FailsTheWholeRender()
+	{
+		var template = NotificationTemplate.None with { Title = Some.Of("{{ title }}"), Message = Some.Of("{{ unclosed") };
+
+		var result = _testee.Render(template, Context());
 
 		await Assert.That(result).IsError();
 	}
@@ -39,10 +81,13 @@ public class FluidTemplateRendererTests
 	[Test]
 	public async Task Render_WhenTheStepLimitIsExceeded_ReturnsAnError()
 	{
-		var context = new NotificationContext(Guid.NewGuid(), NotificationEventType.TestPing, DateTimeOffset.UtcNow, "Test", "Test.", new NotificationData());
+		var template = NotificationTemplate.None with { Body = Some.Of("{% for i in (1..100000) %}{{ i }}{% endfor %}") };
 
-		var result = _testee.Render("{% for i in (1..100000) %}{{ i }}{% endfor %}", context);
+		var result = _testee.Render(template, Context());
 
 		await Assert.That(result).IsError();
 	}
+
+	private static NotificationContext Context(NotificationData? data = null) =>
+		new(Guid.NewGuid(), NotificationEventType.WatchlistSynced, DateTimeOffset.UtcNow, "Watchlist synced", "Added.", data ?? new NotificationData());
 }
