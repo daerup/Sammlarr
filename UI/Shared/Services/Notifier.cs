@@ -2,6 +2,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using BlazorBlueprint.Components;
 using Domain.Media;
+using Domain.Notifications;
 using Microsoft.Extensions.Logging;
 using UI.Shared.Common;
 
@@ -9,6 +10,31 @@ namespace UI.Shared.Services;
 
 internal sealed class Notifier(ToastService toastService, DialogService dialogService, ILogger<Notifier> logger)
 {
+	public void Show(Toast toast, [CallerFilePath] string source = "", [CallerMemberName] string member = "") =>
+		Show(toast.Level, toast.Message, toast.Title, source, member);
+
+	public void Show(
+		NotificationLevel level,
+		string description,
+		string? title = null,
+		[CallerFilePath] string source = "",
+		[CallerMemberName] string member = ""
+	)
+	{
+		switch (level)
+		{
+			case NotificationLevel.Info:
+				Info(description, title, source, member);
+				break;
+			case NotificationLevel.Warning:
+				Warning(description, title, source, member);
+				break;
+			case NotificationLevel.Error:
+				Error(description, title, source, member);
+				break;
+		}
+	}
+
 	public void Success(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
 	{
 		logger.LogDebug("{Source}.{Member} {Title}: {Description}", Component(source), member, title ?? "Success", description);

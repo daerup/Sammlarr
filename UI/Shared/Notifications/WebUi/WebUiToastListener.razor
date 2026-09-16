@@ -1,0 +1,19 @@
+@using Contracts.Identity
+@implements IDisposable
+@inject WebUiCircuits Circuits
+@inject ICurrentUser CurrentUser
+@inject Notifier Notifier
+
+@code {
+	private IDisposable? registration;
+
+	protected override void OnInitialized()
+	{
+		if (CurrentUser.IsAuthenticated)
+		{
+			registration = Circuits.Register(CurrentUser.Id, toast => _ = InvokeAsync(() => Notifier.Show(toast)));
+		}
+	}
+
+	public void Dispose() => registration?.Dispose();
+}

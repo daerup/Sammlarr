@@ -1,8 +1,11 @@
 using BlazorBlueprint.Components;
 using Contracts.Identity;
+using Contracts.Notifications;
+using Domain.Notifications;
 using Observability;
 using Shared.DI;
 using UI.Shared.Identity;
+using UI.Shared.Notifications.WebUi;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
 
@@ -22,6 +25,8 @@ internal class UiModule : IServiceModule
 		services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUserAccessor>());
 		services.AddScoped<ScrollService>();
 		services.AddScoped<Notifier>();
+		services.AddSingleton<WebUiCircuits>();
+		services.AddKeyedScoped<INotificationChannel, WebUiChannel>(NotificationChannel.WebUi);
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
 		services.AddScoped(sp => new MediaProviderBrandingService(sp.GetRequiredService<IWebHostEnvironment>().WebRootPath));
