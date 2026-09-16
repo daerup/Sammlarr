@@ -1,6 +1,4 @@
 using System.Net;
-using API.Notifications;
-
 using API.Notifications.Webhook;
 
 namespace API.Tests.Notifications.Webhook;

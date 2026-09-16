@@ -1,7 +1,4 @@
 using System.ComponentModel;
-using Contracts.Media;
-using Contracts.Media.Metadata;
-using Contracts.Media.Search;
 using Contracts.Processing;
 using Core.Processing;
 using Domain.Media;

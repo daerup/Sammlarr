@@ -1,5 +1,4 @@
 using Domain.Notifications;
-using Shared.Extensions;
 
 namespace UI.Features.Settings.Components.Notifications;
 

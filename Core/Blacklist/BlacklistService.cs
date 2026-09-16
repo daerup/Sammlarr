@@ -3,7 +3,6 @@ using Contracts.Blacklist;
 using Contracts.Media;
 using Domain.Blacklist;
 using Domain.Media;
-using Shared;
 
 namespace Core.Blacklist;
 

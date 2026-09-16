@@ -1,4 +1,3 @@
-using Contracts;
 using Observability.Logging;
 using Serilog;
 using Serilog.Core;

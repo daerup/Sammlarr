@@ -1,8 +1,6 @@
 using Contracts.Media;
 using Domain.Media;
 using Domain.Watchlist.Sync;
-using Shared;
-using UI.Shared.Media;
 
 namespace UI.Features.Watchlist.Components;
 

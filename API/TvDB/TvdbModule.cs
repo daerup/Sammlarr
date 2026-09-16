@@ -1,4 +1,3 @@
-using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;

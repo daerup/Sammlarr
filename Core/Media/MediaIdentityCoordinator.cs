@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Media;
 using Domain.Media;
 

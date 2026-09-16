@@ -1,7 +1,6 @@
 using Contracts.DI;
 using Contracts.Notifications;
 using Domain.Notifications;
-using Shared;
 
 namespace UI.Features.Settings.Components.Notifications;
 

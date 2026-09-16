@@ -1,6 +1,5 @@
 using Contracts.Media.Metadata;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 
 namespace Contracts.Media;

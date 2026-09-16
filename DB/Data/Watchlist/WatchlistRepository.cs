@@ -1,6 +1,4 @@
-using Contracts.Media;
 using Contracts.Watchlist;
-using DB.Data.Media;
 using Domain.Media;
 using Domain.Watchlist;
 using Microsoft.EntityFrameworkCore;

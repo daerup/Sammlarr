@@ -1,6 +1,4 @@
 using API.Plex;
-using Contracts;
-using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Media;
 

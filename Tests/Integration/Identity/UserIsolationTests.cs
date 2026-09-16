@@ -1,11 +1,9 @@
 using Contracts.Auth;
 using Contracts.Blacklist;
 using Contracts.Feed;
-using Contracts.Media;
 using Contracts.Watchlist;
 using Domain.Feed;
 using Domain.Providers;
-using Domain.Settings;
 using Domain.Watchlist;
 using Harness;
 using TestInfrastructure;

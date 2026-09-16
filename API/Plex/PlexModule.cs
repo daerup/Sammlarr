@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using API.Http;
 using Contracts.Auth;
-using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;

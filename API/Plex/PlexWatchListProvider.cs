@@ -1,11 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Plex.Types;
-using Contracts.Media;
 using Contracts.Watchlist;
 using Domain.Media;
 using Microsoft.Extensions.Logging;
-using Shared;
 
 namespace API.Plex;
 

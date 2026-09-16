@@ -1,5 +1,3 @@
-using Domain.Processing;
-
 namespace Contracts.Processing;
 
 public interface IQueryProcessor<T>

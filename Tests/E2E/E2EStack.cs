@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
@@ -7,7 +6,6 @@ using E2E.Tests.Recording;
 using Harness;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Playwright;
 using Shared.Options;
 
 namespace E2E.Tests;

@@ -3,17 +3,14 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Mdblist.Types;
-using Contracts;
 using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Settings;
-using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
-using Shared;
 
 namespace API.Mdblist;
 

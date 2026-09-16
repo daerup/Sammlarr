@@ -12,7 +12,6 @@ using DB.Data.Metadata;
 using DB.Data.Notifications;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
-using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;

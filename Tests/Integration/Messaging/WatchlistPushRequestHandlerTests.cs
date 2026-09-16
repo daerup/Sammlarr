@@ -1,4 +1,3 @@
-using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Settings;

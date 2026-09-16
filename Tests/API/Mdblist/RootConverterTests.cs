@@ -1,6 +1,5 @@
 using System.Text.Json;
 using API.Mdblist.Types;
-using Contracts.Media;
 using Domain.Media;
 
 namespace API.Tests.Mdblist;

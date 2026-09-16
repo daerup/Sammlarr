@@ -1,4 +1,3 @@
-using Domain.Notifications;
 using UI.Features.Settings.Components.Notifications;
 
 namespace UI.Tests.Settings;

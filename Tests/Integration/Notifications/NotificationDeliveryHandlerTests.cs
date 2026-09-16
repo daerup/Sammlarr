@@ -1,5 +1,4 @@
 using Contracts;
-using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Notifications;
 using Domain.Identity;

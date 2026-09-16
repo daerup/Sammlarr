@@ -1,5 +1,4 @@
 using Contracts.Blacklist;
-using Contracts.Media;
 using Contracts.Watchlist;
 using Domain.Media;
 using Domain.Providers;

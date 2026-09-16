@@ -1,6 +1,5 @@
 using System.Net;
 using API.Plex;
-using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 

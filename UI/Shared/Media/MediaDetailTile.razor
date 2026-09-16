@@ -1,5 +1,4 @@
 @using Contracts.Media
-@using Contracts.Media.Search
 @inject IMediaService MediaService
 <div class="search-result-row rounded-sm border bg-card @Class @(Media.IsUnresolved ? "is-unresolved" : null) @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"

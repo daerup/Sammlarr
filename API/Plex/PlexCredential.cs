@@ -1,5 +1,4 @@
 using Contracts;
-using Domain;
 using Domain.Auth;
 using Domain.Providers;
 

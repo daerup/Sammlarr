@@ -3,7 +3,6 @@ using Contracts.Media;
 using Core.Blacklist;
 using Domain.Blacklist;
 using Domain.Media;
-using TestInfrastructure;
 
 namespace Core.Tests.Blacklist;
 

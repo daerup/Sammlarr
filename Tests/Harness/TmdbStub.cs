@@ -1,5 +1,4 @@
 using API.Tmdb;
-using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 

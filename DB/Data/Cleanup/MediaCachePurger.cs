@@ -1,9 +1,6 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
-using DB.Data.Media;
-using Domain.Media;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

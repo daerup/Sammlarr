@@ -3,7 +3,6 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Harness;
-using TestInfrastructure;
 
 namespace Integration.Tests.Browse;
 

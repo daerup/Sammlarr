@@ -1,7 +1,6 @@
 using Contracts.Identity;
 using Core.Identity;
 using Domain.Identity;
-using TestInfrastructure;
 
 namespace Core.Tests.Identity;
 

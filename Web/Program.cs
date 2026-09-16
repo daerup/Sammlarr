@@ -4,7 +4,6 @@ using DB;
 using Domain.Identity;
 using Messaging;
 using Observability.Diagnostics;
-using Shared;
 using Shared.DI;
 using Web;
 using Westwind.AspNetCore.LiveReload;

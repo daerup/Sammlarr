@@ -2,7 +2,6 @@ using API.Http;
 using Contracts.Auth;
 using Contracts.Identity;
 using Domain.Auth;
-using Domain.Feed;
 using Domain.Providers;
 using Polly.CircuitBreaker;
 using Polly.Timeout;

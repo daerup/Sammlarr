@@ -18,7 +18,6 @@ using Domain.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Observability.Tracing;
-using Shared;
 
 namespace Core.Watchlist.Sync;
 

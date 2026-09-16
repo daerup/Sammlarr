@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Contracts.Media.Metadata;
 using Domain.Providers;
 
 namespace DB.Data.Metadata;
