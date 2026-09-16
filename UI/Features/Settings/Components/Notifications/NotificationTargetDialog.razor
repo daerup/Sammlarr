@@ -43,6 +43,9 @@
             case NotificationChannel.Pushover:
                 <PushoverClientEditor @ref="_editor" Target="Target"/>
                 break;
+            case NotificationChannel.WebUi:
+                <WebUiClientEditor @ref="_editor" Target="Target"/>
+                break;
         }
 
         @if (_error is { } error)
@@ -92,6 +95,7 @@
     [
         new(NotificationChannel.Webhook, "Webhook"),
         new(NotificationChannel.Pushover, "Pushover"),
+        new(NotificationChannel.WebUi, "This app"),
     ];
 
     [CascadingParameter]

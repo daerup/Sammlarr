@@ -1,0 +1,13 @@
+@using Domain.Notifications
+@inherits ClientEditorBase
+
+<p class="text-sm text-muted-foreground">Alerts appear as toasts in this app while you are signed in. Nothing to configure.</p>
+
+@code {
+    public override bool TryBuild(out NotificationConfig config, out string? error)
+    {
+        config = NotificationConfigBuilder.WebUi();
+        error = null;
+        return true;
+    }
+}
