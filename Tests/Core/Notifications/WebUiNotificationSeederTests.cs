@@ -12,13 +12,15 @@ public class WebUiNotificationSeederTests
 	private WebUiNotificationSeeder Testee => new(targets.Object, subscriptions.Object);
 
 	[Test]
-	public async Task SeedAsync_Always_CreatesAnEnabledWebUiTarget()
+	public async Task SeedAsync_Always_CreatesAnEnabledWebUiTargetNamedAfterTheApp()
 	{
 		targets.CreateAsync(Any(), Any()).Returns(Guid.NewGuid());
 
 		await Testee.SeedAsync();
 
-		targets.CreateAsync(Arg.Is<NotificationTarget>(target => target.Channel == NotificationChannel.WebUi && target.Enabled), Any()).WasCalled(Times.Once);
+		targets
+			.CreateAsync(Arg.Is<NotificationTarget>(target => target.Channel == NotificationChannel.WebUi && target.Enabled && target.Name == "Sammlarr"), Any())
+			.WasCalled(Times.Once);
 	}
 
 	[Test]

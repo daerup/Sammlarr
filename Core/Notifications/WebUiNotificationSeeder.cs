@@ -16,7 +16,7 @@ internal sealed class WebUiNotificationSeeder(INotificationTargetRepository targ
 
 	public async Task SeedAsync(CancellationToken cancellationToken = default)
 	{
-		var targetId = await targets.CreateAsync(new NotificationTarget(Guid.Empty, "This app", true, new WebUiConfig()), cancellationToken);
+		var targetId = await targets.CreateAsync(new NotificationTarget(Guid.Empty, "Sammlarr", true, new WebUiConfig()), cancellationToken);
 		await subscriptions.AddAsync(targetId, subscribedEvents, template, cancellationToken);
 	}
 }

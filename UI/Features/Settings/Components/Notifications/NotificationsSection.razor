@@ -42,9 +42,18 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2">
                             <p class="min-w-0 truncate font-medium">@client.Name</p>
+                            @if (ChannelHint(client.Channel) is { } hint)
+                            {
+                                <BbTooltip>
+                                    <BbTooltipTrigger>
+                                        <LucideIcon Name="info" Size="13" Class="shrink-0 text-muted-foreground"/>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>@hint</BbTooltipContent>
+                                </BbTooltip>
+                            }
                             <NotificationHealthDot Outcomes="Health(client.Id)"/>
                         </div>
-                        <p class="text-xs text-muted-foreground">@client.Channel@(client.Enabled ? "" : " · disabled")</p>
+                        <p class="text-xs text-muted-foreground">@client.Channel.GetDescription()@(client.Enabled ? "" : " · disabled")</p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <BbSwitch Checked="client.Enabled" CheckedChanged="value => ToggleEnabledAsync(client, value)"/>
@@ -78,18 +87,16 @@
         {
             @foreach (var alert in _alerts)
             {
-                <div class="flex items-start gap-3 rounded-lg border p-4">
+                <div class="flex items-center gap-3 rounded-lg border p-4">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                        <LucideIcon Name="bell" Size="18"/>
+                        <LucideIcon Name="@ChannelIcon(alert.Client.Channel)" Size="18"/>
                     </div>
-                    <div class="min-w-0 flex-1 space-y-2">
-                        <p class="truncate font-medium">@alert.Client.Name</p>
-                        <div class="flex flex-wrap gap-1.5">
-                            @foreach (var eventType in alert.Subscription.EventTypes)
-                            {
-                                <span class="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">@eventType.GetDescription()</span>
-                            }
-                        </div>
+                    <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                        <p class="min-w-0 truncate font-medium">@alert.Client.Name</p>
+                        @foreach (var eventType in alert.Subscription.EventTypes)
+                        {
+                            <span class="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">@eventType.GetDescription()</span>
+                        }
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditAlert(alert)">
@@ -140,6 +147,14 @@
     private IReadOnlyList<NotificationDeliveryOutcome> Health(Guid clientId) => _health.GetValueOrDefault(clientId, []);
 
 	private static string EventsLabel(NotificationSubscription subscription) => string.Join(", ", subscription.EventTypes.Select(eventType => eventType.GetDescription()));
+
+	private static string? ChannelHint(NotificationChannel channel) =>
+		channel switch
+		{
+			NotificationChannel.Webhook => null,
+			NotificationChannel.Pushover => null,
+			NotificationChannel.WebUi => "Toasts shown inside Sammlarr while you have it open.",
+		};
 
 	private static string ChannelIcon(NotificationChannel channel) =>
 		channel switch
