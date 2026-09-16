@@ -15,6 +15,7 @@ using Core.Caching;
 using Core.DI;
 using Core.Identity;
 using Core.Media;
+using Core.Notifications;
 using Core.Processing;
 using Core.Providers;
 using Core.Watchlist;
@@ -49,6 +50,7 @@ public class CoreModule : IServiceModule
 		services.AddScoped<IUserScope, UserScope>();
 		services.AddTracedScoped<IUserManagementService, UserManagementService>();
 		services.AddTracedScoped<ISignInService, SignInService>();
+		services.AddScoped<WebUiNotificationSeeder>();
 		services.AddScoped<ISessionValidator, SessionValidator>();
 	}
 }
