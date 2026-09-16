@@ -25,8 +25,8 @@ internal class PlexModule : IServiceModule
 		services.AddKeyedScoped<IExternalIdConverter, PlexIdConverter>(MediaProvider.Plex);
 
 		services.AddSingleton<PlexUrls>();
-		services.AddHttpClient<PlexClient>(ConfigurePlexClient).AddProviderHttp<PlexOptions>();
-		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient).AddProviderHttp<PlexOptions>();
+		services.AddHttpClient<PlexClient>(ConfigurePlexClient).AddProviderHttp<PlexOptions>(MediaProvider.Plex);
+		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient).AddProviderHttp<PlexOptions>(MediaProvider.Plex);
 	}
 
 	private static void ConfigurePlexClient(IServiceProvider sp, HttpClient client)

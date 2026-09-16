@@ -7,4 +7,6 @@ public sealed record NotificationData
 	public int? Added { get; init; }
 	public int? Removed { get; init; }
 	public string? Reason { get; init; }
+	public string? Provider { get; init; }
+	public TimeSpan? RetryAfter { get; init; }
 }

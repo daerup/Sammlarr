@@ -2,6 +2,7 @@ using System.Net;
 using API.Plex;
 using Bogus;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Providers;
 using Polly.CircuitBreaker;
 using TestInfrastructure;
@@ -26,7 +27,7 @@ public class PlexClientTests
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(Error.From("No credential is stored for this provider."));
-		var testee = new PlexClient(httpClient, credentialStore);
+		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
 		await Assert
 			.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl))
@@ -42,7 +43,7 @@ public class PlexClientTests
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
-		var testee = new PlexClient(httpClient, credentialStore);
+		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
 		await Assert.That(async () => await testee.SendAsync(HttpMethod.Get, PlexBaseUrl)).Throws<ProviderUnavailableException>();
 	}
@@ -55,7 +56,7 @@ public class PlexClientTests
 		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		var testee = new PlexClient(httpClient, credentialStore);
+		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, PlexBaseUrl, customHeaders: [("X-Custom", "abc")]);
 
@@ -79,7 +80,7 @@ public class PlexClientTests
 		var credential = credentialFaker.Generate();
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		var testee = new PlexClient(httpClient, credentialStore);
+		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/one");
 		await testee.SendAsync(HttpMethod.Get, $"{PlexBaseUrl}/two");
@@ -95,7 +96,7 @@ public class PlexClientTests
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
-		var testee = new PlexClient(httpClient, credentialStore);
+		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, PlexBaseUrl);
 

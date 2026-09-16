@@ -1,5 +1,6 @@
 using API.Http;
 using Contracts.Auth;
+using Contracts.Identity;
 using Domain.Auth;
 using Domain.Providers;
 using Polly.CircuitBreaker;
@@ -7,7 +8,7 @@ using Polly.Timeout;
 
 namespace API.Plex;
 
-internal class PlexClient(HttpClient client, ICredentialRepository credentialStore)
+internal class PlexClient(HttpClient client, ICredentialRepository credentialStore, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Plex";
 	public const int ContainerSize = 100;
@@ -29,6 +30,7 @@ internal class PlexClient(HttpClient client, ICredentialRepository credentialSto
 		request.Headers.Add("X-Plex-Client-Identifier", credential.ClientId.ToString());
 		customHeaders.ForEach(header => request.Headers.Add(header.Item1, header.Item2));
 		request.Content = content;
+		request.StampTriggeredBy(currentUser);
 
 		try
 		{

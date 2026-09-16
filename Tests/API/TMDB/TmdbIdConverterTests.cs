@@ -6,6 +6,7 @@ using API.Tmdb;
 using Bogus;
 using Contracts;
 using Contracts.Auth;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
@@ -119,7 +120,7 @@ public class TmdbIdConverterTests
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialRepository.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, CancellationToken.None).Returns(credential);
-		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore);
+		var plexClient = new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore, ICurrentUser.Mock().Object);
 		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}
 

@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net;
+using Contracts.Providers;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Polly.Timeout;
@@ -9,7 +11,7 @@ namespace API.Http;
 
 internal static class ProviderHttpExtensions
 {
-	public static IHttpClientBuilder AddProviderHttp<TOptions>(this IHttpClientBuilder builder)
+	public static IHttpClientBuilder AddProviderHttp<TOptions>(this IHttpClientBuilder builder, MediaProvider? provider = null)
 		where TOptions : class, IProviderHttpOptions
 	{
 		var clientName = builder.Name;
@@ -33,12 +35,12 @@ internal static class ProviderHttpExtensions
 
 		builder.ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler { EnableMultipleHttp2Connections = Resolve(sp).EnableMultipleHttp2Connections });
 
-		builder.AddStandardResilienceHandler().Configure((options, sp) => Apply(options, Resolve(sp)));
+		builder.AddStandardResilienceHandler().Configure((options, sp) => Apply(options, Resolve(sp), provider, sp));
 
 		return builder;
 	}
 
-	private static void Apply(HttpStandardResilienceOptions options, ProviderHttpOptions http)
+	private static void Apply(HttpStandardResilienceOptions options, ProviderHttpOptions http, MediaProvider? provider, IServiceProvider services)
 	{
 		options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(http.AttemptTimeoutSeconds);
 		options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(http.TotalTimeoutSeconds);
@@ -57,6 +59,18 @@ internal static class ProviderHttpExtensions
 				return new ValueTask<TimeSpan?>(delay is { } value && value > TimeSpan.Zero ? value : null);
 			};
 		}
+		if (provider is { } limited)
+		{
+			var reporter = services.GetRequiredService<IProviderRateLimitReporter>();
+			options.Retry.OnRetry = async args =>
+			{
+				if (args.Outcome.Result?.StatusCode is HttpStatusCode.TooManyRequests && args.Outcome.Result.TriggeredBy() is { } triggeredBy)
+				{
+					await reporter.ReportAsync(limited, args.RetryDelay, triggeredBy, args.Context.CancellationToken);
+				}
+			};
+		}
+
 		options.CircuitBreaker.FailureRatio = http.CircuitBreakerFailureRatio;
 		options.CircuitBreaker.MinimumThroughput = http.CircuitBreakerMinimumThroughput;
 	}

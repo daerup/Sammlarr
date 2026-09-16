@@ -14,8 +14,8 @@ public class MdblistModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddHttpClient<MdblistClient>().AddProviderHttp<MdblistOptions>();
-		services.AddHttpClient(MdblistClient.Unauthenticated).AddProviderHttp<MdblistOptions>();
+		services.AddHttpClient<MdblistClient>().AddProviderHttp<MdblistOptions>(MediaProvider.Mdblist);
+		services.AddHttpClient(MdblistClient.Unauthenticated).AddProviderHttp<MdblistOptions>(MediaProvider.Mdblist);
 		services.AddTracedKeyedScoped<IFeedService, MdblistService>(FeedProvider.Mdblist);
 	}
 }

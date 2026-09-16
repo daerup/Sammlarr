@@ -34,6 +34,7 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 	{
 		var options = new TemplateOptions { MaxSteps = 400 };
 		options.ValueConverters.Add(value => value is NotificationEventType type ? type.ToString() : null);
+		options.ValueConverters.Add(value => value is TimeSpan span ? span.ToString(@"hh\:mm\:ss") : null);
 		options.MemberAccessStrategy.MemberNameStrategy = MemberNameStrategies.CamelCase;
 		options.MemberAccessStrategy.Register<NotificationContext>();
 		options.MemberAccessStrategy.Register<NotificationData>();
