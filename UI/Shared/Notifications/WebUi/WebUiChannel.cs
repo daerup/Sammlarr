@@ -31,7 +31,7 @@ internal sealed class WebUiChannel(WebUiCircuits circuits, ICurrentUser recipien
 		circuits.Show(
 			recipient.Id,
 			new Toast(
-				template.Priority.Map(FromPriority).GetValueOr(() => FromEventType(context.Type)),
+				template.Level.GetValueOr(() => NotificationLevel.For(context.Type)),
 				rendered.Title.GetValueOr(context.Title),
 				rendered.Message.GetValueOr(context.Summary)
 			)
@@ -44,22 +44,4 @@ internal sealed class WebUiChannel(WebUiCircuits circuits, ICurrentUser recipien
 		logger.LogWarning("Web UI notification could not be rendered: {Reason}", error.Reason);
 		return new DeliveryUnrecoverable(error.Reason);
 	}
-
-	private static NotificationLevel FromPriority(int priority) =>
-		priority switch
-		{
-			<= 0 => NotificationLevel.Info,
-			1 => NotificationLevel.Warning,
-			_ => NotificationLevel.Error,
-		};
-
-	private static NotificationLevel FromEventType(NotificationEventType type) =>
-		type switch
-		{
-			NotificationEventType.FeedRunFailed => NotificationLevel.Error,
-			NotificationEventType.ProviderRateLimited => NotificationLevel.Warning,
-			NotificationEventType.WatchlistSynced => NotificationLevel.Info,
-			NotificationEventType.FeedRunCompleted => NotificationLevel.Info,
-			NotificationEventType.TestPing => NotificationLevel.Info,
-		};
 }

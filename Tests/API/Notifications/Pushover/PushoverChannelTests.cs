@@ -1,13 +1,12 @@
 using System.Net;
 using System.Text;
 using API.Notifications;
+using API.Notifications.Pushover;
 using Contracts.Notifications;
 using Domain.Notifications;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared;
 using TestInfrastructure;
-
-using API.Notifications.Pushover;
 
 namespace API.Tests.Notifications.Pushover;
 
@@ -79,11 +78,11 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task SendAsync_WhenPriorityIsConfigured_OverridesTheDerivedOne()
+	public async Task SendAsync_WhenTheLevelIsConfigured_OverridesTheDerivedPriority()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "hi", priority: -1), CancellationToken.None);
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "hi", level: NotificationLevel.Error), CancellationToken.None);
 
 		await Assert.That(Form(handler)["priority"]).IsEqualTo("1");
 	}
@@ -151,8 +150,8 @@ public class PushoverChannelTests
 
 	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));
 
-	private static NotificationTemplate Template(string? title = null, string? message = null, int? priority = null) =>
-		new(new None(), Opt(title), Opt(message), priority is { } value ? Some.Of(value) : new None());
+	private static NotificationTemplate Template(string? title = null, string? message = null, NotificationLevel? level = null) =>
+		new(new None(), Opt(title), Opt(message), level is { } value ? Some.Of(value) : new None());
 
 	private static Optional<string> Opt(string? value) => value is null ? new None() : Some.Of(value);
 

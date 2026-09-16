@@ -53,18 +53,18 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	}
 
 	[Test]
-	public async Task UpsertAsync_WhenTemplateAndPriorityChange_RoundTripAndUpdate()
+	public async Task UpsertAsync_WhenTemplateAndLevelChange_RoundTripAndUpdate()
 	{
 		var targetId = await CreateTargetAsync();
 		var id = await _testee.AddAsync(
 			targetId,
 			[NotificationEventType.WatchlistSynced],
-			new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(1))
+			new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(NotificationLevel.Warning))
 		);
 
 		var created = (await _testee.GetForTargetAsync(targetId)).Single();
 		await Assert.That(created.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ title }}");
-		await Assert.That(created.Template.Priority.Match(value => (int?)value, () => null)).IsEqualTo(1);
+		await Assert.That(created.Template.Level.Match(value => (NotificationLevel?)value, () => null)).IsEqualTo(NotificationLevel.Warning);
 
 		await _testee.UpdateAsync(
 			id,
@@ -74,7 +74,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 
 		var updated = (await _testee.GetForTargetAsync(targetId)).Single();
 		await Assert.That(updated.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ summary }}");
-		await Assert.That(updated.Template.Priority.Match(value => (int?)value, () => null)).IsNull();
+		await Assert.That(updated.Template.Level.Match(value => (NotificationLevel?)value, () => null)).IsNull();
 	}
 
 	[Test]
