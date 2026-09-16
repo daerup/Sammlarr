@@ -10,16 +10,18 @@
 </div>
 <BbField>
     <BbLabel>Level</BbLabel>
-    <BbSelect TValue="NotificationLevel?" Value="@Level" ValueChanged="LevelChanged" Options="LevelOptions"/>
+    <BbSelect TValue="NotificationLevel?" Value="@Level" ValueChanged="LevelChanged" Options="LevelOptions" Placeholder="@Automatic"/>
 </BbField>
 
 @code {
     private const string TitlePlaceholder = "e.g. {{ title }}";
     private const string MessagePlaceholder = "e.g. {{ summary }}";
 
+    private const string Automatic = "Automatic";
+
     private static readonly List<SelectOption<NotificationLevel?>> LevelOptions =
     [
-        new(null, "From the event"),
+        new(null, Automatic),
         new(NotificationLevel.Info, "Info"),
         new(NotificationLevel.Warning, "Warning"),
         new(NotificationLevel.Error, "Error"),

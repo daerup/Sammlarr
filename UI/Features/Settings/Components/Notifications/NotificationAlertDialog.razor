@@ -94,7 +94,7 @@
                         {
                             <PreviewField Label="Title" Value="@PreviewTitle(context)"/>
                             <PreviewField Label="Message" Value="@PreviewMessage(context)"/>
-                            <PreviewField Label="Level" Value="@(_level?.ToString() ?? "From the event")"/>
+                            <PreviewField Label="Level" Value="@PreviewLevel(context)"/>
                         }
                     </div>
                 }
@@ -198,6 +198,8 @@
 
     private string PreviewBody(NotificationContext context) =>
         Preview(NotificationTemplate.None with { Body = Opt(_body) }, context, rendered => rendered.Body, "(default JSON body)");
+
+    private string PreviewLevel(NotificationContext context) => (_level ?? NotificationLevel.For(context.Type)).ToString();
 
     private string Preview(NotificationTemplate template, NotificationContext context, Func<RenderedNotification, Optional<string>> field, string fallback) =>
         Renderer.Render(template, context).Match(rendered => field(rendered).GetValueOr(fallback), error => "⚠ " + error.Reason);
