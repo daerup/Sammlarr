@@ -63,6 +63,7 @@ internal sealed class NotificationTargetRepository(IDbContextFactory<SammlarrDbC
 		{
 			NotificationChannel.Webhook => new WebhookConfig(row.Url ?? string.Empty, row.SigningSecret ?? string.Empty),
 			NotificationChannel.Pushover => new PushoverConfig(row.AppToken ?? string.Empty, row.UserKey ?? string.Empty),
+			NotificationChannel.WebUi => new WebUiConfig(),
 		};
 
 	private static void ApplyConfig(NotificationTargetRow row, NotificationConfig config) =>
@@ -70,5 +71,6 @@ internal sealed class NotificationTargetRepository(IDbContextFactory<SammlarrDbC
 		{
 			WebhookConfig webhook => (webhook.Url, webhook.SigningSecret, (string?)null, (string?)null),
 			PushoverConfig pushover => ((string?)null, (string?)null, pushover.AppToken, pushover.UserKey),
+			WebUiConfig => ((string?)null, (string?)null, (string?)null, (string?)null),
 		};
 }
