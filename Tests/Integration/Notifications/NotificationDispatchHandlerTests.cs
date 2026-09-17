@@ -7,6 +7,7 @@ using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Domain.Notifications.Events;
+using Domain.Providers;
 using Messaging.Notifications;
 using Shared.Extensions;
 
@@ -73,6 +74,31 @@ public class NotificationDispatchHandlerTests
 		await Assert.That(items[0].Title).IsEqualTo("Pulled Movie");
 		await Assert.That(items[1].Descriptor).IsEqualTo("Removed remotely");
 		await Assert.That(items[1].Title).IsEqualTo("Pushed Movie");
+	}
+
+	[Test]
+	public async Task Handle_WhenAProviderIsRateLimited_DeliversTheProviderAndRetryDelay()
+	{
+		var targetId = Guid.NewGuid();
+		var subscriptions = SubscriptionsFor(
+			NotificationEventType.ProviderRateLimited,
+			new NotificationSubscription(Guid.NewGuid(), targetId, [NotificationEventType.ProviderRateLimited], NotificationTemplate.None)
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new ProviderRateLimitedEvent(User, DateTimeOffset.UtcNow, MediaProvider.Plex, TimeSpan.FromSeconds(30)),
+			Scope().Object,
+			subscriptions.Object,
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		var delivery = messages.OfType<DeliverNotification>().Single();
+		await Assert.That(delivery.TargetId).IsEqualTo(targetId);
+		await Assert.That(delivery.UserId).IsEqualTo(User);
+		await Assert.That(delivery.Context.Data.Provider).IsEqualTo(MediaProvider.Plex);
+		await Assert.That(delivery.Context.Data.RetryAfter).IsEqualTo(TimeSpan.FromSeconds(30));
 	}
 
 	[Test]
