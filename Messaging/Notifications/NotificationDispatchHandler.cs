@@ -19,6 +19,15 @@ public static class NotificationDispatchHandler
 		CancellationToken cancellationToken
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
 
+	public static Task<OutgoingMessages> Handle(
+		ProviderRateLimitedEvent message,
+		IUserScope userScope,
+		INotificationSubscriptionRepository subscriptions,
+		IMediaRepository mediaRepository,
+		IFeedRepository feedRepository,
+		CancellationToken cancellationToken
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
+
 	public static async Task<DeliverNotification> Handle(
 		TestPingEvent message,
 		IMediaRepository mediaRepository,
