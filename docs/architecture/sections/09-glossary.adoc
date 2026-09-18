@@ -77,8 +77,10 @@ Feed:: A saved query over a provider list: the provider, the list `Identifier`, 
 strategy, an optional filter, sort, and limit, and a schedule.
 
 Add strategy:: How a feed's results reconcile into the watchlist. `Append` adds them and leaves
-them; `Replace` mirrors the feed, removing watchlist items that dropped out of it
-(`FeedAddStrategy`).
+them; `Mirror` keeps the items this feed added matching the feed, removing the ones that dropped
+out of it. Mirror only ever touches its own slice, never manual, remote, or other feeds' items.
+`FeedStrategy` is a union, so `Mirror` carries the data only it needs: an absence threshold, the
+number of consecutive runs an item must be missing before it is removed.
 
 Schedule (`SyncMode`):: When a feed runs: `Manual`, or `Scheduled` with a cron expression.
 Only manual and preview runs exist today; see <<section-technical-risks>>.
