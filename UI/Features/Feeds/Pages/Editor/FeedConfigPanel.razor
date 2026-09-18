@@ -46,7 +46,8 @@
                 </BbFieldContent>
             </BbField>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-wrap gap-8" style="column-gap: 3rem;">
+                <div class="shrink-0">
                 <BbField>
                     <BbFieldLabel Class="flex items-center leading-none">
                         Provider
@@ -96,7 +97,10 @@
                         </BbSelect>
                     </BbFieldContent>
                 </BbField>
+                </div>
 
+                <div class="flex flex-wrap gap-8">
+                <div class="shrink-0">
                 <BbField>
                     <BbFieldLabel Class="flex leading-none">
                         Strategy
@@ -105,19 +109,66 @@
                                 <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex p-0 text-muted-foreground cursor-default">
                                     <LucideIcon Name="info" Size="14"/>
                                 </BbTooltipTrigger>
-                                <BbTooltipContent>Only relevant when a feed runs more than once. Controls whether repeated syncs add to or replace your
-                                    existing collection.
-                                </BbTooltipContent>
+                                <BbTooltipContent>Append only adds. Mirror also removes items this feed added, once they leave the list.</BbTooltipContent>
                             </BbTooltip>
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <EnumToggleGroup TEnum="FeedAddStrategy"
-                                         Value="@_strategy"
-                                         OnChange="@ChangeStrategy"
-                                         TooltipProvider="@GetStrategyTooltip"/>
+                        <div class="relative">
+                        <div class="flex items-center gap-2">
+                            <BbButton Variant="@(_strategyMode == StrategyMode.Append ? ButtonVariant.Default : ButtonVariant.Outline)"
+                                      Class="min-w-24 justify-center"
+                                      OnClick="@(() => ChangeStrategyMode(StrategyMode.Append))">
+                                Append
+                            </BbButton>
+                            @if (_strategyMode == StrategyMode.Mirror)
+                            {
+                                <div class="flex items-stretch h-10 rounded-md border border-primary overflow-hidden">
+                                    <BbButton Variant="ButtonVariant.Default" Class="min-w-20 justify-center rounded-none border-0 h-full">Mirror</BbButton>
+                                    <span class="flex items-center bg-accent px-2">
+                                        <input id="absence-threshold" inputmode="numeric" aria-label="Runs missing before removal"
+                                               aria-invalid="@AbsenceThresholdIsInvalid"
+                                               value="@_absenceThresholdRaw"
+                                               @oninput="@(e => ChangeAbsenceThreshold(e.Value?.ToString() ?? string.Empty))"
+                                               class="w-9 bg-transparent border-0 text-center text-sm text-foreground focus:outline-none"/>
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <BbButton Variant="ButtonVariant.Outline"
+                                          Class="min-w-24 justify-center"
+                                          OnClick="@(() => ChangeStrategyMode(StrategyMode.Mirror))">
+                                    Mirror
+                                </BbButton>
+                            }
+                        </div>
+                        @if (_strategyMode == StrategyMode.Mirror)
+                        {
+                            <p class="absolute left-0 top-full mt-1.5 whitespace-nowrap text-sm @AbsenceHelperClass">
+                                @if (AbsenceThresholdIsInvalid)
+                                {
+                                    <span>Enter a whole number of at least 1.</span>
+                                }
+                                else if (AbsenceThresholdIsRisky)
+                                {
+                                    <span>Removes an item as soon as it leaves the list.</span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        Waits
+                                        <span class="font-medium">@ParsedAbsenceThreshold</span>
+                                        runs before removing an item that left the list.
+                                    </span>
+                                }
+                            </p>
+                        }
+                        </div>
                     </BbFieldContent>
                 </BbField>
+                </div>
+                </div>
             </div>
 
             <BbField>
@@ -392,7 +443,8 @@
     private bool _isEnabled;
     private string _name = string.Empty;
     private FeedProvider? _provider;
-    private FeedAddStrategy _strategy;
+    private StrategyMode _strategyMode;
+    private string _absenceThresholdRaw = new Mirror().AbsenceThreshold.ToString();
     private string _identifier = string.Empty;
     private bool _filtersSectionOpen;
     private bool _filterEnabled;
@@ -409,6 +461,10 @@
     private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
+    private int? ParsedAbsenceThreshold => int.TryParse(_absenceThresholdRaw, out var n) && n >= 1 ? n : null;
+    private bool AbsenceThresholdIsInvalid => _strategyMode == StrategyMode.Mirror && ParsedAbsenceThreshold is null;
+    private bool AbsenceThresholdIsRisky => _strategyMode == StrategyMode.Mirror && ParsedAbsenceThreshold == 1;
+    private string AbsenceHelperClass => AbsenceThresholdIsInvalid ? "text-destructive" : AbsenceThresholdIsRisky ? "text-amber-500" : "text-muted-foreground";
 
     private string SortField => _sort.Property;
     private ListSortDirection SortDir => _sort.Direction;
@@ -455,7 +511,8 @@
         _isEnabled = Value.IsEnabled;
         _name = Value.Name;
         _provider = Value.Provider;
-        _strategy = Value.Strategy;
+        _strategyMode = Value.Strategy is Mirror ? StrategyMode.Mirror : StrategyMode.Append;
+        _absenceThresholdRaw = (Value.Strategy is Mirror m ? m : new Mirror()).AbsenceThreshold.ToString();
         _identifier = Value.Identifier;
         _filterEnabled = Value.Filter is not null;
         _filter = Value.Filter ?? new FilterDefinition();
@@ -488,12 +545,13 @@
         IsEnabled = _isEnabled,
         Name = _name,
         Provider = _provider,
-        Strategy = _strategy,
+        Strategy = _strategyMode == StrategyMode.Mirror ? new FeedStrategy(ParsedAbsenceThreshold is { } threshold ? new Mirror(threshold) : new Mirror()) : new FeedStrategy(new Append()),
         Identifier = _identifier,
         Filter = _filterEnabled ? _filter : null,
         Sort = _sortEnabled ? _sort : null,
         Limit = _limitEnabled ? _limit : null,
         IsScheduleValid = !ScheduleIsInvalid,
+        IsStrategyValid = !AbsenceThresholdIsInvalid,
         Schedule = _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is not null
             ? new SyncMode(new Scheduled(_scheduleCronExpression))
             : new SyncMode(new Manual()),
@@ -509,9 +567,14 @@
         _provider = v;
         NotifyChange();
     }
-    private void ChangeStrategy(FeedAddStrategy v)
+    private void ChangeStrategyMode(StrategyMode v)
     {
-        _strategy = v;
+        _strategyMode = v;
+        NotifyChange();
+    }
+    private void ChangeAbsenceThreshold(string v)
+    {
+        _absenceThresholdRaw = v;
         NotifyChange();
     }
     private void ChangeIdentifier(string v)
@@ -595,12 +658,11 @@
         _ => new MarkupString("The provider-specific identifier for the list (slug, numeric ID, or URL segment)."),
     };
 
-    private static string GetStrategyTooltip(FeedAddStrategy strategy) =>
+    private static string GetStrategyTooltip(StrategyMode strategy) =>
         strategy switch
         {
-            FeedAddStrategy.Append => "Each sync adds only new items. Items already in your collection are kept.",
-            FeedAddStrategy.Replace => "Each sync removes items that were added by this feed and are no longer on the list. Items added by other feeds are unaffected, even if they appear on this list.",
-            _ => string.Empty,
+            StrategyMode.Append => "Each sync adds only new items. Items already in your collection are kept.",
+            StrategyMode.Mirror => "Each sync removes items that were added by this feed and are no longer on the list. Items added by other feeds are unaffected, even if they appear on this list.",
         };
 
     private static string GetSlotPolicyTooltip(SlotPolicy behavior) =>

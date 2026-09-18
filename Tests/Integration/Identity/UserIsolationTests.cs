@@ -28,7 +28,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 				{
 					IsEnabled = true,
 					Provider = FeedProvider.Mdblist,
-					Strategy = FeedAddStrategy.Append,
+					Strategy = new FeedStrategy(new Append()),
 					Identifier = "list",
 					Schedule = new SyncMode(new Manual()),
 				}

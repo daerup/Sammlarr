@@ -103,7 +103,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		{
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
-			Strategy = FeedAddStrategy.Replace,
+			Strategy = new FeedStrategy(new Mirror(5)),
 			Identifier = "top-250",
 			Schedule = new SyncMode(new Scheduled("0 0 9 * * *")),
 		};
@@ -114,7 +114,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Name).IsEqualTo("Top 250");
 		await Assert.That(feed.Identifier).IsEqualTo("top-250");
 		await Assert.That(feed.Provider).IsEqualTo(FeedProvider.Mdblist);
-		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Replace);
+		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
 		await Assert.That(feed.Enabled).IsTrue();
 		await Assert.That(feed.Schedule).IsOfUnionType<SyncMode, Scheduled>();
 	}
@@ -129,7 +129,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed).IsNotNull();
 		await Assert.That(feed!.Name).IsEqualTo("Watchlist");
 		await Assert.That(feed.Identifier).IsEqualTo("my-watchlist");
-		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Append);
+		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Append()));
 		await Assert.That(feed.Enabled).IsTrue();
 	}
 
@@ -150,7 +150,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Name = "New Name",
 			IsEnabled = false,
 			Provider = FeedProvider.Mdblist,
-			Strategy = FeedAddStrategy.Replace,
+			Strategy = new FeedStrategy(new Mirror(5)),
 			Identifier = "new-id",
 			Schedule = new SyncMode(new Manual()),
 		};
@@ -160,7 +160,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var feed = await _testee.GetFeedByIdAsync(id);
 		await Assert.That(feed!.Name).IsEqualTo("New Name");
 		await Assert.That(feed.Identifier).IsEqualTo("new-id");
-		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Replace);
+		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
 		await Assert.That(feed.Enabled).IsFalse();
 		await Assert.That(feed.Schedule).IsOfUnionType<SyncMode, Manual>();
 	}
@@ -173,7 +173,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Name = "Ghost",
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
-			Strategy = FeedAddStrategy.Append,
+			Strategy = new FeedStrategy(new Append()),
 			Identifier = "ghost",
 			Schedule = new SyncMode(new Manual()),
 		};
@@ -188,7 +188,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Name = name,
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
-			Strategy = FeedAddStrategy.Append,
+			Strategy = new FeedStrategy(new Append()),
 			Identifier = identifier,
 		};
 

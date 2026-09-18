@@ -88,7 +88,7 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Name = "Victim Feed",
 					IsEnabled = true,
 					Provider = FeedProvider.Mdblist,
-					Strategy = FeedAddStrategy.Append,
+					Strategy = new FeedStrategy(new Append()),
 					Identifier = "victim-feed",
 				}
 			);

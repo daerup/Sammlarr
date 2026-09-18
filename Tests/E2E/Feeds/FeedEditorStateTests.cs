@@ -51,7 +51,7 @@ public class FeedEditorStateTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
-		await FeedEditor.Option(page, "Strategy", "Replace").ClickAsync();
+		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
 
 		await Expect(FeedEditor.SaveButton(page)).ToBeVisibleAsync();
 		await Expect(FeedEditor.ApplyButton(page)).ToBeHiddenAsync();
