@@ -81,10 +81,19 @@
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <EnumToggleGroup TEnum="FeedProvider"
-                                         Value="@_provider"
-                                         OnChange="@ChangeProvider"
-                                         DisabledValues="@_disabledProviders"/>
+                        <BbSelect TValue="FeedProvider?" Value="@_provider" ValueChanged="@ChangeProvider" Class="w-48">
+                            <BbSelectTrigger>
+                                <BbSelectValue Placeholder="Select a provider"/>
+                            </BbSelectTrigger>
+                            <BbSelectContent>
+                                @foreach (var provider in AllProviders)
+                                {
+                                    <BbSelectItem Value="@((FeedProvider?)provider)"
+                                                  Text="@provider.GetDescription()"
+                                                  Disabled="@_disabledProviders.Contains(provider)"/>
+                                }
+                            </BbSelectContent>
+                        </BbSelect>
                     </BbFieldContent>
                 </BbField>
 
@@ -495,7 +504,7 @@
         _name = v;
         NotifyChange();
     }
-    private void ChangeProvider(FeedProvider v)
+    private void ChangeProvider(FeedProvider? v)
     {
         _provider = v;
         NotifyChange();

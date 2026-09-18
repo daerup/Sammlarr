@@ -21,25 +21,4 @@ public readonly record struct Scheduled
 	public override string ToString() => _raw;
 }
 
-public union SyncMode(Manual, Scheduled)
-{
-	private const string manual = "manual";
-
-	public override string ToString()
-	{
-		return Value switch
-		{
-			Scheduled s => s.ToString(),
-			_ => manual,
-		};
-	}
-
-	public static SyncMode From(string value)
-	{
-		return value switch
-		{
-			manual => new SyncMode(new Manual()),
-			_ => new SyncMode(new Scheduled(value)),
-		};
-	}
-}
+public union SyncMode(Manual, Scheduled);
