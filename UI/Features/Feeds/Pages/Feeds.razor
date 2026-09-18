@@ -60,10 +60,12 @@
                                 @{
                                     var branding = MediaProviderBrandingService.GetBrandingInfo(feed.Provider.AsMediaProvider());
                                 }
-                                <span class="inline-flex items-center gap-1.5 text-sm font-medium">
-                                    <span class="shrink-0 flex items-center">@branding.Icon</span>
-                                    @branding.NickName
-                                </span>
+                                <BbTooltip>
+                                    <BbTooltipTrigger>
+                                        <span class="shrink-0 flex items-center" aria-label="@branding.DisplayName">@branding.Icon</span>
+                                    </BbTooltipTrigger>
+                                    <BbTooltipContent>@branding.DisplayName</BbTooltipContent>
+                                </BbTooltip>
                             </CellTemplate>
                         </BbDataTableColumn>
 
@@ -75,6 +77,45 @@
                                 <BbBadge Variant="BadgeVariant.Secondary">
                                     @(feed.Strategy is Mirror ? "Mirror" : "Append")
                                 </BbBadge>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+
+                        <BbDataTableColumn TData="Feed" TValue="string"
+                                           Header="Trigger"
+                                           Property="@(l => l.Schedule is Scheduled ? "Scheduled" : "Manual")"
+                                           Sortable="true">
+                            <CellTemplate Context="feed">
+                                @if (feed.Schedule is Scheduled scheduled)
+                                {
+                                    <BbPopover>
+                                        <BbPopoverTrigger AsChild="false" aria-label="Schedule details" class="inline-flex cursor-pointer">
+                                            <BbBadge Variant="BadgeVariant.Secondary">
+                                                <LucideIcon Name="clock" Size="12" Class="mr-1 shrink-0"/>
+                                                Scheduled
+                                            </BbBadge>
+                                        </BbPopoverTrigger>
+                                        <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72 overflow-hidden p-0">
+                                            <div class="border-b px-3 py-2 text-xs font-medium text-muted-foreground">Schedule</div>
+                                            <div class="flex flex-col gap-1.5 px-3 py-2 text-xs">
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <span class="text-muted-foreground">Expression</span>
+                                                    <code class="rounded bg-muted px-1.5 py-0.5 tabular-nums">@scheduled.ToString()</code>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-3">
+                                                    <span class="text-muted-foreground">Next run</span>
+                                                    <span class="tabular-nums">@NextRunLabel(scheduled)</span>
+                                                </div>
+                                            </div>
+                                        </BbPopoverContent>
+                                    </BbPopover>
+                                }
+                                else
+                                {
+                                    <BbBadge Variant="BadgeVariant.Outline">
+                                        <LucideIcon Name="hand" Size="12" Class="mr-1 shrink-0"/>
+                                        Manual
+                                    </BbBadge>
+                                }
                             </CellTemplate>
                         </BbDataTableColumn>
 
@@ -216,6 +257,9 @@
         _isSignedIn = hasAccess;
         return Task.CompletedTask;
     }
+
+    private static string NextRunLabel(Scheduled scheduled) =>
+        scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next ? next.ToString("MMMM d, yyyy HH:mm") : "Never";
 
     private void NavigateToCreateFeed()
     {
