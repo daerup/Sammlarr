@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DB.Conversion.Feed;
 using Domain.Feed;
 using Domain.Processing;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,6 @@ internal sealed class FeedRowConfiguration : IModelConfiguration
 				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);
 			builder.Property(x => x.Sort).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QuerySort>(v, JsonOptions)!);
 			builder.Property(x => x.Limit).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
-			builder.Property(x => x.SyncMode).HasConversion(v => v.ToString(), v => SyncMode.From(v));
+			builder.Property(x => x.SyncMode).HasConversion(new SyncModeConverter());
 		});
 }

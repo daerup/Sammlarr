@@ -7,6 +7,7 @@ using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace Integration.Tests.Feeds;
 
@@ -104,7 +105,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Provider = FeedProvider.Mdblist,
 			Strategy = FeedAddStrategy.Replace,
 			Identifier = "top-250",
-			Schedule = SyncMode.From("0 0 9 * * *"),
+			Schedule = new SyncMode(new Scheduled("0 0 9 * * *")),
 		};
 
 		await _testee.CreateFeedAsync("Top 250", createData);
@@ -115,7 +116,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Provider).IsEqualTo(FeedProvider.Mdblist);
 		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Replace);
 		await Assert.That(feed.Enabled).IsTrue();
-		await Assert.That(feed.Schedule.ToString()).IsEqualTo("0 0 9 * * *");
+		await Assert.That(feed.Schedule).IsOfUnionType<SyncMode, Scheduled>();
 	}
 
 	[Test]
@@ -161,7 +162,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Identifier).IsEqualTo("new-id");
 		await Assert.That(feed.Strategy).IsEqualTo(FeedAddStrategy.Replace);
 		await Assert.That(feed.Enabled).IsFalse();
-		await Assert.That(feed.Schedule.ToString()).IsEqualTo("manual");
+		await Assert.That(feed.Schedule).IsOfUnionType<SyncMode, Manual>();
 	}
 
 	[Test]
