@@ -9,7 +9,7 @@ public record Feed
 	public required FeedId Id { get; init; }
 	public required bool Enabled { get; init; }
 	public required FeedProvider Provider { get; init; }
-	public required FeedAddStrategy Strategy { get; init; }
+	public required FeedStrategy Strategy { get; init; }
 	public required string Identifier { get; init; }
 	public required DateTimeOffset CreatedAt { get; init; }
 	public QueryFilter? Filter { get; init; }

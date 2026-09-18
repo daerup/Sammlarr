@@ -103,17 +103,17 @@ public class FeedConfigurationTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
-		await FeedEditor.Option(page, "Strategy", "Replace").ClickAsync();
+		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
 		var row = page.Row(name);
 		await Expect(row).ToBeVisibleAsync(Wait.Settle);
-		await Expect(row.GetByText("Replace", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
+		await Expect(row.GetByText("Mirror", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
 
 		await row.GetByLabel("Edit").ClickAsync();
 
-		await Expect(FeedEditor.Option(page, "Strategy", "Replace")).ToHaveAttributeAsync("aria-pressed", "");
+		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-pressed", "");
 		await Expect(FeedEditor.Option(page, "Strategy", "Append")).Not.ToHaveAttributeAsync("aria-pressed", "");
 	}
 
@@ -158,7 +158,7 @@ public class FeedConfigurationTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, original);
-		await FeedEditor.Option(page, "Strategy", "Replace").ClickAsync();
+		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
@@ -169,7 +169,7 @@ public class FeedConfigurationTests
 		await Expect(page.GetByText("Clone feed").First).ToBeVisibleAsync();
 		await Expect(page.Locator("#name")).ToHaveValueAsync(original);
 		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.ListIdentifier);
-		await Expect(FeedEditor.Option(page, "Strategy", "Replace")).ToHaveAttributeAsync("aria-pressed", "");
+		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-pressed", "");
 
 		await FeedEditor.FillAsync(page, "#name", copy);
 		await FeedEditor.SaveAsync(page);
@@ -177,7 +177,7 @@ public class FeedConfigurationTests
 		var copyRow = page.Row(copy);
 		await Expect(copyRow).ToBeVisibleAsync(Wait.Settle);
 		await Expect(originalRow).ToBeVisibleAsync();
-		await Expect(copyRow.GetByText("Replace", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
+		await Expect(copyRow.GetByText("Mirror", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
 	}
 
 	[Test]

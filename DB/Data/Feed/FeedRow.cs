@@ -17,7 +17,7 @@ internal record FeedRow : Entity<Guid>, IUserOwned
 	public FeedProvider Provider { get; set; }
 
 	[Required]
-	public FeedAddStrategy Strategy { get; set; }
+	public FeedStrategy Strategy { get; set; } = new(new Append());
 
 	[Required]
 	public string Identifier { get; set; } = string.Empty;
@@ -25,5 +25,5 @@ internal record FeedRow : Entity<Guid>, IUserOwned
 	public QueryFilter? Filter { get; set; }
 	public QuerySort? Sort { get; set; }
 	public QueryLimit? Limit { get; set; }
-	public SyncMode SyncMode { get; set; }
+	public SyncMode SyncMode { get; set; } = new(new Manual());
 }

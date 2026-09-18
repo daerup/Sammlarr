@@ -13,6 +13,12 @@ public enum ScheduleMode
 	Scheduled,
 }
 
+public enum StrategyMode
+{
+	Append,
+	Mirror,
+}
+
 public static class PreviewResultFilter
 {
 	public static readonly Func<QueryResult<MediaQueryRow>, bool> Included = result => result is MediaQueryRow row && row.Media is not UnmatchedMedia;
@@ -39,7 +45,7 @@ public record FeedConfig
 	public bool IsEnabled { get; init; } = true;
 	public string Name { get; init; } = string.Empty;
 	public FeedProvider? Provider { get; init; } = FeedProvider.Mdblist;
-	public FeedAddStrategy Strategy { get; init; } = FeedAddStrategy.Append;
+	public FeedStrategy Strategy { get; init; } = new(new Append());
 	public string Identifier { get; init; } = string.Empty;
 	public FilterDefinition? Filter { get; init; }
 	public QuerySort? Sort { get; init; }
@@ -48,9 +54,11 @@ public record FeedConfig
 
 	public bool IsScheduleValid { get; init; } = true;
 
+	public bool IsStrategyValid { get; init; } = true;
+
 	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
 
-	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid;
+	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid && IsStrategyValid;
 
 	public int GetPreviewHash() => HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));
 

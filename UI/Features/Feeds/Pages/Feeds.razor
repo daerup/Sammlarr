@@ -67,19 +67,14 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="FeedAddStrategy"
+                        <BbDataTableColumn TData="Feed" TValue="string"
                                            Header="Strategy"
-                                           Property="@(l => l.Strategy)"
+                                           Property="@(l => l.Strategy.ToString())"
                                            Sortable="true">
                             <CellTemplate Context="feed">
-                                @if (feed.Strategy == FeedAddStrategy.Replace)
-                                {
-                                    <BbBadge Variant="BadgeVariant.Secondary">Replace</BbBadge>
-                                }
-                                else
-                                {
-                                    <BbBadge Variant="BadgeVariant.Secondary">Append</BbBadge>
-                                }
+                                <BbBadge Variant="BadgeVariant.Secondary">
+                                    @(feed.Strategy is Mirror ? "Mirror" : "Append")
+                                </BbBadge>
                             </CellTemplate>
                         </BbDataTableColumn>
 

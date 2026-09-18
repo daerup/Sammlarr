@@ -5,6 +5,7 @@ Shared/Result/Result.cs
 Shared/Optional/Optional.cs
 Contracts/Processing/QueryResult.cs
 Domain/Feed/RunSchedule.cs
+Domain/Feed/FeedStrategy.cs
 Domain/Watchlist/WatchlistItemProvenance.cs
 Domain/Watchlist/Sync/WatchlistSyncResult.cs
 Domain/Watchlist/Sync/WatchlistSyncTrigger.cs
