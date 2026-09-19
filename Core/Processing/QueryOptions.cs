@@ -1,8 +1,8 @@
 using Domain.Processing;
 
-namespace Contracts.Processing;
+namespace Core.Processing;
 
-public record QueryOptions
+internal record QueryOptions
 {
 	public QueryFilter? Filter { get; init; }
 	public QuerySort? Sort { get; init; }

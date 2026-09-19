@@ -2,12 +2,11 @@ using System.Collections;
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
 using System.Runtime.CompilerServices;
-using Contracts.Processing;
 using Domain.Processing;
 
 namespace Core.Processing;
 
-internal sealed class QueryProcessor<T> : IQueryProcessor<T>
+internal sealed class QueryProcessor<T>
 	where T : class
 {
 	private static readonly ParsingConfig FilterConfig = new() { EvaluateGroupByAtDatabase = true, AllowEqualsAndToStringMethodsOnObject = true };

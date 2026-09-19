@@ -2,6 +2,7 @@ using Contracts.Blacklist;
 using Contracts.Feed;
 using Contracts.Processing;
 using Contracts.Watchlist;
+using Core.Processing;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
@@ -9,7 +10,7 @@ using Domain.Watchlist;
 
 namespace Core.Feed;
 
-internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistService blacklist, IQueryProcessor<MediaQueryRow> processor) : IFeedRunEngine
+internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistService blacklist, QueryProcessor<MediaQueryRow> processor) : IFeedRunEngine
 {
 	public async Task<FeedRunSummary> DryRunAsync(
 		Domain.Feed.Feed feed,
