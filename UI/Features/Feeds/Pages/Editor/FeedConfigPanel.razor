@@ -158,7 +158,7 @@
                                 {
                                     <span>
                                         Waits
-                                        <span class="font-medium">@ParsedAbsenceThreshold</span>
+                                        <span class="absence-threshold-count">@ParsedAbsenceThreshold</span>
                                         runs before removing an item that left the list.
                                     </span>
                                 }
@@ -322,14 +322,15 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BbField>
                                 <BbFieldLabel Class="flex items-center leading-none">
-                                    Watchlist limit behavior
+                                    Watchlist slot policy
                                     <BbTooltipProvider>
                                         <BbTooltip>
                                             <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                                 <LucideIcon Name="info" Size="14"/>
                                             </BbTooltipTrigger>
-                                            <BbTooltipContent>Controls how already watchlisted items count towards the specified limit, since these items can't
-                                                be imported. If an item is watchlisted and blacklisted, the watchlist behavior takes precedence.
+                                            <BbTooltipContent>
+                                                Watchlisted items are never imported. This decides whether they still take a slot, and takes precedence if
+                                                the item is blacklisted too.
                                             </BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
@@ -339,19 +340,20 @@
                                                      Value="@WatchlistedBehavior"
                                                      OnChange="@ChangeWatchlistedBehavior"
                                                      TooltipProvider="@GetSlotPolicyTooltip"/>
+                                    <p class="mt-1.5 text-sm text-muted-foreground">@SlotScopeHelper</p>
                                 </BbFieldContent>
                             </BbField>
 
                             <BbField>
                                 <BbFieldLabel Class="flex items-center leading-none">
-                                    Blacklist limit behavior
+                                    Blacklist slot policy
                                     <BbTooltipProvider>
                                         <BbTooltip>
                                             <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                                 <LucideIcon Name="info" Size="14"/>
                                             </BbTooltipTrigger>
-                                            <BbTooltipContent>Controls how blacklisted items count towards the specified limit, since these items can't be
-                                                imported.
+                                            <BbTooltipContent>
+                                                Blacklisted items are never imported. This decides whether they still take a slot.
                                             </BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
@@ -665,12 +667,13 @@
             StrategyMode.Mirror => "Each sync removes items that were added by this feed and are no longer on the list. Items added by other feeds are unaffected, even if they appear on this list.",
         };
 
+    private const string SlotScopeHelper = "Only affects items this feed did not add itself.";
+
     private static string GetSlotPolicyTooltip(SlotPolicy behavior) =>
         behavior switch
         {
             SlotPolicy.Consumed => "Counts against your import limit, taking up a slot that could be used by another item.",
             SlotPolicy.Preserved => "Does not count against your import limit, preserving the slot for the next eligible item.",
-            _ => string.Empty,
         };
 
     private string GetSortLabel() =>
