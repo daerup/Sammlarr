@@ -1,6 +1,8 @@
 <button type="button"
         class="search-result-toggle-btn @(IsToggled ? "is-marked" : "") @(IsToggling ? "pointer-events-none" : "")"
         style="--toggle-active-color: orange"
+        title="@Label"
+        aria-label="@Label"
         @onclick="HandleToggleAsync">
     <span class="relative inline-flex items-center justify-center w-6 h-6">
         @if (IsToggled)
@@ -10,6 +12,10 @@
         else
         {
             <LucideIcon Name="bookmark" Size="24" Class="@_iconClass"/>
+        }
+        @if (DotColor is not null && !IsToggling)
+        {
+            <span class="toggle-dot" style="background: @DotColor"></span>
         }
         @if (IsToggling)
         {
@@ -24,7 +30,10 @@
     [Parameter] [EditorRequired] public required MediaLookup Result { get; set; }
     [Parameter] public bool IsToggled { get; set; }
     [Parameter] public bool IsToggling { get; set; }
+    [Parameter] public string? DotColor { get; set; }
     [Parameter] public EventCallback<MediaLookup> OnToggle { get; set; }
+
+    private string Label => IsToggled ? "Remove from watchlist" : "Add to watchlist";
 
     private string _iconClass = string.Empty;
 
