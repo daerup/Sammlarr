@@ -10,7 +10,7 @@ internal sealed record FeedRunPlan(FeedDelta Delta, Conclusiveness Conclusivenes
 	internal static FeedRunPlan Compute(
 		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
 		int unresolvedCount,
-		FeedOwnership owned,
+		IReadOnlySet<MediaId> owned,
 		FeedStrategy strategy,
 		FeedSource source
 	)
@@ -18,10 +18,12 @@ internal sealed record FeedRunPlan(FeedDelta Delta, Conclusiveness Conclusivenes
 		var qualifying = verdicts.Where(verdict => verdict.Outcome is QueryOutcome.Qualified).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
 
 		var delta = new FeedDelta(
-			Adds: [.. verdicts.Where(verdict => verdict.WillImport && !owned.Owns(verdict.Item.Identity.Id)).Select(verdict => verdict.Item.Identity.Id).Distinct()],
-			Keeps: [.. owned.Active.Where(qualifying.Contains)],
-			Drops: strategy is Mirror ? [.. owned.Active.Where(id => !qualifying.Contains(id))] : [],
-			Waives: [.. owned.Waived]
+			Adds:
+			[
+				.. verdicts.Where(verdict => verdict.WillImport && !owned.Contains(verdict.Item.Identity.Id)).Select(verdict => verdict.Item.Identity.Id).Distinct(),
+			],
+			Keeps: [.. owned.Where(qualifying.Contains)],
+			Drops: strategy is Mirror ? [.. owned.Where(id => !qualifying.Contains(id))] : []
 		);
 
 		var conclusiveness = Assess(qualifying.Count, verdicts.Count, unresolvedCount, source);

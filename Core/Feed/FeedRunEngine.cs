@@ -25,10 +25,7 @@ internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistSe
 		var entries = await watchlist.GetEntriesAsync(cancellationToken);
 		var blacklisted = await blacklist.GetBlacklistIdsAsync(cancellationToken);
 		var watchlisted = entries.Select(entry => entry.MediaId).ToHashSet();
-		var owned = new FeedOwnership(
-			entries.Where(entry => entry.Provenance is FeedOrigin origin && origin.FeedId == feed.Id.Value).Select(entry => entry.MediaId).ToHashSet(),
-			blacklisted
-		);
+		var owned = entries.Where(entry => entry.Provenance is FeedOrigin origin && origin.FeedId == feed.Id.Value).Select(entry => entry.MediaId).ToHashSet();
 
 		var options = new QueryOptions
 		{
@@ -39,7 +36,7 @@ internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistSe
 		var predicates = new QueryPredicates<MediaQueryRow>(
 			IsWatchlisted: row => watchlisted.Contains(row.Media.Identity.Id),
 			IsBlacklisted: row => blacklisted.Contains(row.Media.Identity.Id),
-			IsOwned: row => owned.Owns(row.Media.Identity.Id)
+			IsOwned: row => owned.Contains(row.Media.Identity.Id)
 		);
 
 		var classified = resolved.Count > 0 ? await processor.ExecuteAsync(resolved, options, predicates, cancellationToken).ToListAsync(cancellationToken) : [];
