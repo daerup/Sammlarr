@@ -12,7 +12,7 @@ namespace Core.Tests.Feed;
 
 public class FeedRunPlanProperties
 {
-	private sealed record Scenario(FeedRunPlan Plan, FeedOwnership Owned, FeedStrategy Strategy);
+	private sealed record Scenario(FeedRunPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy);
 
 	private static readonly Gen<Scenario> Scenarios = Gen.Select(
 			Gen.OneOfConst(QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Truncated),
@@ -34,11 +34,7 @@ public class FeedRunPlanProperties
 
 	[Test]
 	public void Compute_ForAnyScenario_OnlyDropsWhatTheFeedOwns() =>
-		Scenarios.Sample(scenario => scenario.Plan.Delta.Drops.All(scenario.Owned.Owns), iter: 10_000);
-
-	[Test]
-	public void Compute_ForAnyScenario_NeverDropsAndWaivesTheSameItem() =>
-		Scenarios.Sample(scenario => !scenario.Plan.Delta.Drops.Intersect(scenario.Plan.Delta.Waives).Any(), iter: 10_000);
+		Scenarios.Sample(scenario => scenario.Plan.Delta.Drops.All(scenario.Owned.Contains), iter: 10_000);
 
 	[Test]
 	public void Compute_ForAnyScenario_NeverDropsSomethingItReportsAsKept() =>
@@ -46,7 +42,7 @@ public class FeedRunPlanProperties
 
 	[Test]
 	public void Compute_ForAnyScenario_NeverAddsSomethingTheFeedAlreadyOwns() =>
-		Scenarios.Sample(scenario => !scenario.Plan.Delta.Adds.Any(scenario.Owned.Owns), iter: 10_000);
+		Scenarios.Sample(scenario => !scenario.Plan.Delta.Adds.Any(scenario.Owned.Contains), iter: 10_000);
 
 	[Test]
 	public void Compute_ForAnAppendFeed_NeverDrops() =>
@@ -57,8 +53,14 @@ public class FeedRunPlanProperties
 		Scenarios.Sample(scenario => scenario.Plan.Conclusiveness is Conclusiveness.Conclusive || scenario.Plan.Delta.Drops.Count == 0, iter: 10_000);
 
 	[Test]
-	public void Compute_RegardlessOfConclusiveness_WaivesEveryBlacklistedOwnedItem() =>
-		Scenarios.Sample(scenario => scenario.Plan.Delta.Waives.ToHashSet().SetEquals(scenario.Owned.Waived), iter: 10_000);
+	public void Compute_ForAConclusiveMirrorRun_AccountsForEveryOwnedItem() =>
+		Scenarios.Sample(
+			scenario =>
+				scenario.Plan.Conclusiveness is not Conclusiveness.Conclusive
+				|| scenario.Strategy is not Mirror
+				|| scenario.Plan.Delta.Drops.Concat(scenario.Plan.Delta.Keeps).ToHashSet().SetEquals(scenario.Owned),
+			iter: 10_000
+		);
 
 	private static Scenario Build(
 		(QueryOutcome Outcome, bool Owned, bool InWatchlist, bool InBlacklist, bool InSource)[] situations,
@@ -69,7 +71,6 @@ public class FeedRunPlanProperties
 	{
 		var verdicts = new List<QueryVerdict<MediaLookup>>();
 		var owned = new HashSet<MediaId>();
-		var blacklisted = new HashSet<MediaId>();
 
 		for (var index = 0; index < situations.Length; index++)
 		{
@@ -79,10 +80,6 @@ public class FeedRunPlanProperties
 			if (isOwned)
 			{
 				owned.Add(id);
-				if (inBlacklist)
-				{
-					blacklisted.Add(id);
-				}
 			}
 
 			if (inSource)
@@ -97,9 +94,7 @@ public class FeedRunPlanProperties
 			}
 		}
 
-		var ownership = new FeedOwnership(owned, blacklisted);
-
-		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, ownership, strategy, source), ownership, strategy);
+		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, owned, strategy, source), owned, strategy);
 	}
 
 	private static MediaLookup Row(MediaId id) =>

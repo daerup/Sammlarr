@@ -321,23 +321,17 @@ public class QueryProcessorTests
 	}
 
 	[Test]
-	public async Task Execute_WhenAnOwnedItemIsBlacklisted_ItWillWaiveAtEveryOutcome()
+	public async Task Execute_WhenAnOwnedItemIsBlacklisted_TheBlacklistChangesNothingAboutItsOwnership()
 	{
 		var owned = new Item("Owned", 2020, "Action");
 		var predicates = Enrolled(blacklisted: owned, owned: owned);
 		var culling = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
-		var truncating = new QueryOptions { Limit = new QueryLimit { Count = 0 } };
 
 		var qualified = await _testee.ExecuteAsync([owned], new QueryOptions(), predicates).ToListAsync();
 		var culled = await _testee.ExecuteAsync([owned], culling, predicates).ToListAsync();
-		var truncated = await _testee.ExecuteAsync([owned], truncating, predicates).ToListAsync();
 
-		await Assert
-			.That(Outcomes([.. qualified, .. culled, .. truncated]))
-			.IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Truncated], CollectionOrdering.Matching);
-		await Assert.That(qualified[0].WillWaive).IsTrue();
-		await Assert.That(culled[0].WillWaive).IsTrue();
-		await Assert.That(truncated[0].WillWaive).IsTrue();
+		await Assert.That(qualified[0].AlreadyYours).IsTrue();
+		await Assert.That(culled[0].AtRisk).IsTrue();
 	}
 
 	private static QueryPredicates<Item> Enrolled(Item? watchlisted = null, Item? blacklisted = null, Item? owned = null) =>
