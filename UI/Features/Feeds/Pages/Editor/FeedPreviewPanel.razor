@@ -5,6 +5,7 @@
 @using Contracts.Media
 @using Contracts.Processing
 @using Contracts.Watchlist
+@using Domain.Feed.Run
 @using UI.Features.Feeds.Components
 @using global::Observability.Tracing
 @implements IDisposable
@@ -12,7 +13,7 @@
 @inject IBlacklistService BlacklistService
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedService> FeedServiceIndex
-@inject IQueryProcessor<MediaQueryRow> QueryProcessor
+@inject IFeedRunEngine RunEngine
 @inject Notifier Notifier
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
@@ -77,23 +78,23 @@
                         <PreviewFilterBadge Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewResultFilter.Included)" OnClick="() => ToggleFilter(PreviewResultFilter.Included)">
+                        <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Included)" OnClick="() => ToggleFilter(PreviewBucket.Included)">
                             <Tooltip>Items that will be imported</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewResultFilter.Bypassed)" OnClick="() => ToggleFilter(PreviewResultFilter.Bypassed)">
+                        <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
                             <Tooltip>
                                 <p class="font-medium mb-0.5">Bypasses import</p>
                                 <p>@WatchlistCount in your watchlist · @BlacklistCount in your blacklist</p>
                                 <p class="opacity-70 mt-0.5">These will not be imported.</p>
                             </Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewResultFilter.Filtered)" OnClick="() => ToggleFilter(PreviewResultFilter.Filtered)">
+                        <PreviewFilterBadge Icon="filter-x" Count="FilteredCount" Active="IsFilterActive(PreviewBucket.Filtered)" OnClick="() => ToggleFilter(PreviewBucket.Filtered)">
                             <Tooltip>Items excluded by your filter rules</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewResultFilter.Skipped)" OnClick="() => ToggleFilter(PreviewResultFilter.Skipped)">
+                        <PreviewFilterBadge Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
                             <Tooltip>Items excluded by the import limit</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="circle-alert" Count="UnresolvedCount" Active="IsFilterActive(PreviewResultFilter.Unresolved)" OnClick="() => ToggleFilter(PreviewResultFilter.Unresolved)">
+                        <PreviewFilterBadge Icon="circle-alert" Count="UnresolvedCount" Active="IsFilterActive(PreviewBucket.Unresolved)" OnClick="() => ToggleFilter(PreviewBucket.Unresolved)">
                             <Tooltip>Items that could not be matched in your media provider</Tooltip>
                         </PreviewFilterBadge>
                     </div>
@@ -121,11 +122,11 @@
                 <Virtualize Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
                     <ItemContent>
                     @{
-                    var item = GetItem(result);
-                    var isCulled = result is Culled<MediaQueryRow>;
-                    var isTruncated = result is Truncated<MediaQueryRow>;
+                    var item = result.Item;
+                    var isCulled = result.Outcome is QueryOutcome.Culled;
+                    var isTruncated = result.Outcome is QueryOutcome.Truncated;
                     var isDimmed = isCulled || isTruncated;
-                    var isGreyedOut = result is Bypassed<MediaQueryRow>;
+                    var isGreyedOut = result.Bypassed;
                     var isBlacklisted = IsBlacklisted(item);
                     var isInWatchlist = IsWatchlisted(item);
                     var isTogglingWatchlist = _togglingWatchlistItem == item.Id;
@@ -169,7 +170,7 @@
                                                         <LucideIcon Name="redo-dot" Size="24"/>
                                                     </div>
                                                 </BbTooltipTrigger>
-                                                <BbTooltipContent>@(result is Bypassed<MediaQueryRow> bypassed ? BypassedTooltip(bypassed) : string.Empty)</BbTooltipContent>
+                                                <BbTooltipContent>@BypassedTooltip(result)</BbTooltipContent>
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     }
@@ -192,10 +193,10 @@
                     @{
                             <div class="pb-2">
                                 <MediaDetailTile @key="item"
-                                                 Media="item.Media"
-                                                 IsFocused="_focusedResult == item.Media.Key"
-                                                 OnFocusIn="() => _focusedResult = item.Media.Key"
-                                                 OnFocusOut="() => ClearFocus(item.Media)">
+                                                 Media="item"
+                                                 IsFocused="_focusedResult == item.Key"
+                                                 OnFocusIn="() => _focusedResult = item.Key"
+                                                 OnFocusOut="() => ClearFocus(item)">
                                     <Icons>
                                         <BbTooltipProvider>
                                             <BbTooltip DelayDuration="300">
@@ -272,22 +273,25 @@
 @code {
 
     [Parameter] public required FeedConfig Config { get; set; }
+    [Parameter] public FeedId? SavedFeedId { get; set; }
     [Parameter] public EventCallback<PreviewStatus> OnStatusChanged { get; set; }
+
+    private static readonly FeedId UnsavedFeedId = FeedId.From(new Guid("00000000-0000-0000-0000-0000000000ff"));
 
     private enum FetchState { Idle, Loading, Success, Failed }
 
     private FetchState _fetchState = FetchState.Idle;
     private List<MediaLookup> _rawResults = [];
-    private IReadOnlyList<MediaQueryRow> _unresolvedResults = [];
-    private IReadOnlyList<QueryResult<MediaQueryRow>> _processedResults = [];
-    private List<QueryResult<MediaQueryRow>> _filteredResults = [];
-    private List<MediaQueryRow> _filteredUnresolvedResults = [];
+    private IReadOnlyList<MediaLookup> _unresolvedResults = [];
+    private IReadOnlyList<QueryVerdict<MediaLookup>> _processedResults = [];
+    private List<QueryVerdict<MediaLookup>> _filteredResults = [];
+    private List<MediaLookup> _filteredUnresolvedResults = [];
     private FeedConfig? _appliedConfig;
     private CancellationTokenSource? _cts;
     private PreviewStatus _lastEmittedStatus = new();
 
     private string _searchQuery = string.Empty;
-    private readonly HashSet<Func<QueryResult<MediaQueryRow>, bool>> _activeFilters = [];
+    private readonly HashSet<PreviewBucket> _activeFilters = [];
     private string? _focusedResult;
     private MediaId? _togglingWatchlistItem;
     private MediaId? _togglingBlacklistItem;
@@ -349,7 +353,7 @@
         }
         else
         {
-            await ReprocessAsync(CancellationToken.None);
+            await ReprocessAsync(LoadedSource(), CancellationToken.None);
         }
 
         await EmitStatusIfChangedAsync();
@@ -427,7 +431,7 @@
                 if (reprocessed)
                 {
                     reprocessAt = _rawResults.Count * 2;
-                    await ReprocessAsync(ct);
+                    await ReprocessAsync(FeedSource.Partial, ct);
                 }
 
                 if (reprocessed || sinceRender.ElapsedMilliseconds >= 150)
@@ -446,7 +450,7 @@
             }
 
             _fetchState = FetchState.Success;
-            await ReprocessAsync(ct);
+            await ReprocessAsync(FeedSource.Complete, ct);
             activity?.SetTag("sammlarr.feed.items", _rawResults.Count);
             Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(_fetchTimer.Elapsed)}.");
         }
@@ -471,7 +475,7 @@
             if (_rawResults.Count > 0)
             {
                 _fetchState = FetchState.Success;
-                await ReprocessAsync(ct);
+                await ReprocessAsync(FeedSource.Partial, ct);
                 Notifier.Warning("The provider became unavailable before the full list loaded. Showing partial results — retry to load the rest.", "Provider unavailable");
             }
             else
@@ -499,33 +503,36 @@
         _providerUnavailable = false;
     }
 
-    private async Task ReprocessAsync(CancellationToken cancellationToken)
+    private async Task ReprocessAsync(FeedSource source, CancellationToken cancellationToken)
     {
         _hasEnrollmentChanges = false;
 
-        if (_rawResults.Count == 0)
-        {
-            _unresolvedResults = [];
-            _processedResults = [];
-        }
-        else
-        {
-            _unresolvedResults = _rawResults.Where(r => r is UnmatchedMedia).Select(MediaQueryRow.From).ToList();
-            var resolvedItems = _rawResults.Where(r => r is not UnmatchedMedia).Select(MediaQueryRow.From).ToList();
-
-            var applied = _appliedConfig ?? Config;
-            var options = new QueryOptions
-            {
-                Sort = applied.Sort,
-                Limit = applied.Limit,
-                Filter = FilterDefinitionConverter.ToQueryFilter(applied.Filter),
-            };
-            _processedResults = resolvedItems.Count > 0
-                ? await QueryProcessor.ExecuteAsync(resolvedItems, options, r => IsWatchlisted(r.Media), r => IsBlacklisted(r.Media), cancellationToken).ToListAsync(cancellationToken)
-                : [];
-        }
+        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), _rawResults, source, cancellationToken);
+        _processedResults = dryRun.Verdicts;
+        _unresolvedResults = dryRun.Unresolved;
 
         RebuildFilteredViews();
+    }
+
+    private FeedSource LoadedSource() => _providerUnavailable ? FeedSource.Partial : FeedSource.Complete;
+
+    private Domain.Feed.Feed SynthesizeFeed()
+    {
+        var applied = _appliedConfig ?? Config;
+        return new Domain.Feed.Feed
+        {
+            Id = SavedFeedId ?? UnsavedFeedId,
+            Name = applied.Name,
+            Enabled = applied.IsEnabled,
+            Provider = applied.Provider!.Value,
+            Strategy = applied.Strategy,
+            Identifier = applied.Identifier,
+            CreatedAt = DateTimeOffset.MinValue,
+            Filter = FilterDefinitionConverter.ToQueryFilter(applied.Filter),
+            Sort = applied.Sort,
+            Limit = applied.Limit,
+            Schedule = applied.Schedule,
+        };
     }
 
     private void OnSearchQueryChanged(string value)
@@ -537,10 +544,10 @@
     private void RebuildFilteredViews()
     {
         _filteredResults = _processedResults
-            .Where(r => PreviewResultFilter.IsVisible(r, _activeFilters) && MatchesSearch(GetItem(r).Title))
+            .Where(r => PreviewResultFilter.IsVisible(PreviewResultFilter.Bucket(r), _activeFilters) && MatchesSearch(r.Item.Title))
             .ToList();
         _filteredUnresolvedResults = _unresolvedResults
-            .Where(r => PreviewResultFilter.IsVisible(r, _activeFilters) && MatchesSearch(r.Media.Title))
+            .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unresolved, _activeFilters) && MatchesSearch(r.Title))
             .ToList();
         RecountBadges();
     }
@@ -548,13 +555,13 @@
     private bool MatchesSearch(string title) =>
         string.IsNullOrWhiteSpace(_searchQuery) || title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase);
 
-    private bool IsFilterActive(Func<QueryResult<MediaQueryRow>, bool> filter) => _activeFilters.Contains(filter);
+    private bool IsFilterActive(PreviewBucket bucket) => _activeFilters.Contains(bucket);
 
-    private void ToggleFilter(Func<QueryResult<MediaQueryRow>, bool> filter)
+    private void ToggleFilter(PreviewBucket bucket)
     {
-        if (!_activeFilters.Add(filter))
+        if (!_activeFilters.Add(bucket))
         {
-            _activeFilters.Remove(filter);
+            _activeFilters.Remove(bucket);
         }
         RebuildFilteredViews();
     }
@@ -617,77 +624,26 @@
 
     private void RecountBadges()
     {
-        var included = 0;
-        var bypassed = 0;
-        var filtered = 0;
-        var skipped = 0;
-        var watchlisted = 0;
-        var blacklisted = 0;
+        var buckets = _processedResults.CountBy(PreviewResultFilter.Bucket).ToDictionary();
 
-        foreach (var result in _processedResults)
-        {
-            if (result is MediaQueryRow)
-            {
-                included++;
-            }
-            else if (result is Bypassed<MediaQueryRow>)
-            {
-                bypassed++;
-            }
-            else if (result is Culled<MediaQueryRow>)
-            {
-                filtered++;
-            }
-            else if (result is Truncated<MediaQueryRow>)
-            {
-                skipped++;
-            }
-
-            var item = GetItem(result);
-            if (IsWatchlisted(item))
-            {
-                watchlisted++;
-            }
-
-            if (IsBlacklisted(item))
-            {
-                blacklisted++;
-            }
-        }
-
-        IncludedCount = included;
-        BypassedCount = bypassed;
-        FilteredCount = filtered;
-        SkippedCount = skipped;
-        WatchlistCount = watchlisted;
-        BlacklistCount = blacklisted;
+        IncludedCount = buckets.GetValueOrDefault(PreviewBucket.Included);
+        BypassedCount = buckets.GetValueOrDefault(PreviewBucket.Bypassed);
+        FilteredCount = buckets.GetValueOrDefault(PreviewBucket.Filtered);
+        SkippedCount = buckets.GetValueOrDefault(PreviewBucket.Skipped);
+        WatchlistCount = _processedResults.Count(result => IsWatchlisted(result.Item));
+        BlacklistCount = _processedResults.Count(result => IsBlacklisted(result.Item));
     }
 
     private bool IsBlacklisted(MediaLookup item) => _blacklistIds.Contains(item.Id);
     private bool IsWatchlisted(MediaLookup item) => _watchlisted.Contains(item.Id);
 
-    private string BypassedTooltip(Bypassed<MediaQueryRow> bypassed)
+    private string BypassedTooltip(QueryVerdict<MediaLookup> row)
     {
-        var source = bypassed.Source switch
-        {
-            BypassReason.Watchlisted => "On your watchlist",
-            BypassReason.Blacklisted => "On your blacklist",
-        };
+        var source = row.Enrollment.InWatchlist ? "On your watchlist" : "On your blacklist";
         if (Config.Limit is null)
             return $"{source}, will not be imported.";
-        return bypassed.CountsTowardLimit ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
+        return row.ConsumesSlot ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }
-
-    private static MediaLookup GetItem(QueryResult<MediaQueryRow> result) =>
-        (
-            result switch
-            {
-                MediaQueryRow row => row,
-                Bypassed<MediaQueryRow> e => e.Item,
-                Truncated<MediaQueryRow> s => s.Item,
-                Culled<MediaQueryRow> f => f.Item,
-            }
-        ).Media;
 
     private void ClearFocus(MediaLookup item)
     {

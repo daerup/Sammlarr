@@ -3,7 +3,6 @@ Domain/Media/IdentifiedMedia.cs
 Contracts/Auth/AuthSession.cs
 Shared/Result/Result.cs
 Shared/Optional/Optional.cs
-Contracts/Processing/QueryResult.cs
 Domain/Feed/RunSchedule.cs
 Domain/Feed/FeedStrategy.cs
 Domain/Watchlist/WatchlistItemProvenance.cs

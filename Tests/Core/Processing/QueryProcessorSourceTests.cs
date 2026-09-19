@@ -1,7 +1,7 @@
 using Contracts.Processing;
 using Core.Processing;
 using Domain.Processing;
-using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
 namespace Core.Tests.Processing;
@@ -15,10 +15,11 @@ public class QueryProcessorSourceTests
 	{
 		var lazy = new[] { "Keep", "Drop" }.Select(name => new LazyRow(name));
 		var options = new QueryOptions { Filter = Filter(Group(String(nameof(LazyRow.Name), FilterPredicateOperator.Equals, "Keep"))) };
+		var predicates = new QueryPredicates<LazyRow>(IsWatchlisted: _ => false, IsBlacklisted: _ => false, IsOwned: _ => false);
 
-		var results = await _testee.ExecuteAsync(lazy, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(lazy, options, predicates).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType<IList<QueryResult<LazyRow>>, QueryResult<LazyRow>>(typeof(LazyRow), typeof(Culled<LazyRow>));
+		await Assert.That(results.Select(row => row.Outcome)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 }
 

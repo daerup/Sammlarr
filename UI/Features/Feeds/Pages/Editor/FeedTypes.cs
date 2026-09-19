@@ -1,6 +1,6 @@
 using BlazorBlueprint.Primitives.Filtering;
-using Contracts.Processing;
 using Domain.Feed;
+using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
@@ -19,16 +19,26 @@ public enum StrategyMode
 	Mirror,
 }
 
+public enum PreviewBucket
+{
+	Included,
+	Bypassed,
+	Filtered,
+	Skipped,
+	Unresolved,
+}
+
 public static class PreviewResultFilter
 {
-	public static readonly Func<QueryResult<MediaQueryRow>, bool> Included = result => result is MediaQueryRow row && row.Media is not UnmatchedMedia;
-	public static readonly Func<QueryResult<MediaQueryRow>, bool> Bypassed = result => result is Bypassed<MediaQueryRow>;
-	public static readonly Func<QueryResult<MediaQueryRow>, bool> Filtered = result => result is Culled<MediaQueryRow>;
-	public static readonly Func<QueryResult<MediaQueryRow>, bool> Skipped = result => result is Truncated<MediaQueryRow>;
-	public static readonly Func<QueryResult<MediaQueryRow>, bool> Unresolved = result => result is MediaQueryRow row && row.Media is UnmatchedMedia;
+	public static PreviewBucket Bucket(QueryVerdict<MediaLookup> verdict) =>
+		verdict.Outcome switch
+		{
+			QueryOutcome.Culled => PreviewBucket.Filtered,
+			QueryOutcome.Truncated => PreviewBucket.Skipped,
+			QueryOutcome.Qualified => verdict.Bypassed ? PreviewBucket.Bypassed : PreviewBucket.Included,
+		};
 
-	public static bool IsVisible(QueryResult<MediaQueryRow> result, IReadOnlyCollection<Func<QueryResult<MediaQueryRow>, bool>> active) =>
-		active.Count == 0 || active.Any(matches => matches(result));
+	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
 }
 
 public record PreviewStatus
