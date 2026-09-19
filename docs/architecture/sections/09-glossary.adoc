@@ -88,9 +88,12 @@ Only manual and preview runs exist today; see <<section-technical-risks>>.
 Filter, Sort, Limit:: The query rules applied to a feed's source list (`QueryFilter`,
 `QuerySort`, `QueryLimit`).
 
-QueryResult:: The outcome of running a feed's rules over one candidate: a union of included
-(kept), `Bypassed` (already watchlisted or blacklisted), `Culled` (filtered out) and
-`Truncated` (past the limit). Unmatched candidates are reported separately as unresolved.
+QueryVerdict:: What running a feed's rules over one candidate produces, carrying two independent
+facts. `QueryOutcome` is purely the query verdict: `Qualified`, `Culled` (filtered out) or
+`Truncated` (past the limit). `Enrollment` is what the user already did with the item:
+`InWatchlist`, `InBlacklist`, `Owned` (this feed put it there). Questions like "will import" or
+"at risk" are predicates over both, so nothing depends on the order the rules are checked in.
+Unmatched candidates are reported separately as unresolved.
 
 Watchlist:: The set of titles Sammlarr keeps in sync with Plex.
 
