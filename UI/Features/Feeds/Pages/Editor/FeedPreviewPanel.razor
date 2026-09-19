@@ -418,16 +418,23 @@
 
             var service = FeedServiceIndex[Config.Provider!.Value];
             _fetchTimer.Restart();
-            var sw = Stopwatch.StartNew();
+            var reprocessAt = 1;
+            var sinceRender = Stopwatch.StartNew();
             await foreach (var item in service.GetFeedItemsAsync(Config.Identifier.Trim(), ct).WithCancellation(ct))
             {
                 _rawResults.Add(item);
-                if (sw.ElapsedMilliseconds >= 150)
+                var reprocessed = _rawResults.Count >= reprocessAt;
+                if (reprocessed)
                 {
+                    reprocessAt = _rawResults.Count * 2;
                     await ReprocessAsync(ct);
+                }
+
+                if (reprocessed || sinceRender.ElapsedMilliseconds >= 150)
+                {
+                    sinceRender.Restart();
                     await EmitStatusIfChangedAsync();
                     await InvokeAsync(StateHasChanged);
-                    sw.Restart();
                 }
             }
             _fetchTimer.Stop();

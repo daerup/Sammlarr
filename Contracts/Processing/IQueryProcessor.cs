@@ -1,6 +1,7 @@
 namespace Contracts.Processing;
 
 public interface IQueryProcessor<T>
+	where T : class
 {
 	IAsyncEnumerable<QueryResult<T>> ExecuteAsync(
 		IEnumerable<T> source,
