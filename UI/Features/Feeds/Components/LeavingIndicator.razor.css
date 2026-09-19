@@ -1,0 +1,60 @@
+.leaving-popover {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-width: 16rem;
+}
+
+.leaving-popover-title {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.leaving-popover-reason {
+    opacity: 0.6;
+}
+
+.leaving-popover-count {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.leaving-popover-tally {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3em;
+}
+
+.leaving-popover-tally > span {
+    opacity: 0.55;
+}
+
+.leaving-popover-tally > span.leaving-popover-number {
+    opacity: 1;
+    font-weight: 600;
+}
+
+.leaving-popover-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.leaving-popover-track span {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.leaving-popover-track span.is-spent {
+    background: var(--destructive);
+    border-color: var(--destructive);
+}

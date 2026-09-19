@@ -78,6 +78,19 @@
 .search-result-row.result-grey .search-result-main-content {
     filter: grayscale(0.75) brightness(70%);
 }
+
+.search-result-row.result-leaving {
+    border-color: color-mix(in srgb, var(--destructive) 45%, var(--border));
+}
+
+.search-result-row.result-leaving .search-result-main-content {
+    filter: grayscale(0.75) brightness(70%);
+}
+
+.search-result-row.result-leaving::before {
+    opacity: 0.1;
+}
+
 .search-result-status-indicator {
     flex-shrink: 0;
     padding: 0.3rem;

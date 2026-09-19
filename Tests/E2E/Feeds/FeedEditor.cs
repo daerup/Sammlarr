@@ -7,6 +7,7 @@ internal enum PreviewBadge
 {
 	Total,
 	Included,
+	AlreadyYours,
 	Bypassed,
 	Filtered,
 	Skipped,
@@ -17,7 +18,9 @@ internal static class FeedEditor
 {
 	internal const string ListIdentifier = "2236";
 
-	internal const string ResultRow = ".search-result-row";
+	internal const string ResultRow = ".preview-main-results .search-result-row";
+
+	internal const string UnresolvedRow = ".search-result-row.is-unresolved";
 
 	private const string RowTitle = $"{ResultRow} .media-title-text";
 
@@ -93,9 +96,10 @@ internal static class FeedEditor
 		{
 			PreviewBadge.Total => 0,
 			PreviewBadge.Included => 1,
-			PreviewBadge.Bypassed => 2,
-			PreviewBadge.Filtered => 3,
-			PreviewBadge.Skipped => 4,
-			PreviewBadge.Unresolved => 5,
+			PreviewBadge.AlreadyYours => 2,
+			PreviewBadge.Bypassed => 3,
+			PreviewBadge.Filtered => 4,
+			PreviewBadge.Skipped => 5,
+			PreviewBadge.Unresolved => 6,
 		};
 }

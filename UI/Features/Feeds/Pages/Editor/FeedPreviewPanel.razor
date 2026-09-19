@@ -7,6 +7,7 @@
 @using Contracts.Watchlist
 @using Domain.Feed.Run
 @using UI.Features.Feeds.Components
+@using UI.Shared.Services.Branding
 @using global::Observability.Tracing
 @implements IDisposable
 @inject IWatchlistService WatchlistService
@@ -14,6 +15,7 @@
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedService> FeedServiceIndex
 @inject IFeedRunEngine RunEngine
+@inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
@@ -74,12 +76,16 @@
                     </p>
                 </div>
                 <BbTooltipProvider>
+                    <div class="flex items-start">
                     <div class="stat-badges-row flex items-start text-xs font-medium">
-                        <PreviewFilterBadge Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0" OnClick="ResetFilters">
+                        <PreviewFilterBadge Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
                         <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Included)" OnClick="() => ToggleFilter(PreviewBucket.Included)">
                             <Tooltip>Items that will be imported</Tooltip>
+                        </PreviewFilterBadge>
+                        <PreviewFilterBadge Icon="bookmark-check" Count="AlreadyYoursCount" Active="IsFilterActive(PreviewBucket.AlreadyYours)" OnClick="() => ToggleFilter(PreviewBucket.AlreadyYours)">
+                            <Tooltip>Items this feed already added and still wants. Nothing to import.</Tooltip>
                         </PreviewFilterBadge>
                         <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
                             <Tooltip>
@@ -98,6 +104,18 @@
                             <Tooltip>Items that could not be matched in your media provider</Tooltip>
                         </PreviewFilterBadge>
                     </div>
+                    @if (IsMirror && LeavingCount > 0)
+                    {
+                        <div class="leaving-badge-slot flex items-start text-xs font-medium ml-2 pl-2 border-l border-border">
+                            <PreviewFilterBadge Icon="log-out" Count="LeavingCount" Active="_atRiskOnly" OnClick="ToggleAtRiskOnly">
+                                <Tooltip>
+                                    <p class="font-medium mb-0.5">On its way out</p>
+                                    <p>@AtRiskCount no longer match your rules · @(_goneResults.Count + _goneShortfall) gone from the list</p>
+                                </Tooltip>
+                            </PreviewFilterBadge>
+                        </div>
+                    }
+                    </div>
                 </BbTooltipProvider>
             </div>
         }
@@ -114,28 +132,30 @@
                 </BbButton>
             </div>
         }
-        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0))
+        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0 || _filteredGoneResults.Count > 0))
         {
             @if (_filteredResults.Count > 0)
             {
-                <div>
+                <div class="preview-main-results">
                 <Virtualize Items="_filteredResults" Context="result" ItemSize="215" OverscanCount="6">
                     <ItemContent>
                     @{
                     var item = result.Item;
                     var isCulled = result.Outcome is QueryOutcome.Culled;
                     var isTruncated = result.Outcome is QueryOutcome.Truncated;
-                    var isDimmed = isCulled || isTruncated;
+                    var isAtRisk = IsMirror && result.AtRisk;
+                    var isDimmed = (isCulled || isTruncated) && !isAtRisk;
                     var isGreyedOut = result.Bypassed;
                     var isBlacklisted = IsBlacklisted(item);
                     var isInWatchlist = IsWatchlisted(item);
                     var isTogglingWatchlist = _togglingWatchlistItem == item.Id;
                     var isTogglingBlacklist = _togglingBlacklistItem == item.Id;
 
-                    var hoverStyle = (isDimmed, isGreyedOut) switch
+                    var hoverStyle = (isAtRisk, isDimmed, isGreyedOut) switch
                     {
-                        (true, _) => "result-dimmed",
-                        (false, true) => "result-grey",
+                        (true, _, _) => "result-leaving",
+                        (false, true, _) => "result-dimmed",
+                        (false, false, true) => "result-grey",
                         _ => "hover-bg"
                     };
                     <div class="pb-2">
@@ -146,13 +166,17 @@
                                              OnFocusIn="() => _focusedResult = item.Key"
                                              OnFocusOut="() => ClearFocus(item)">
                                 <Icons>
-                                    @if (isDimmed)
+                                    @if (isAtRisk)
+                                    {
+                                        <LeavingIndicator Reason="@PreviewCopy.AtRiskReason(result)" Threshold="MirrorThreshold"/>
+                                    }
+                                    else if (isDimmed)
                                     {
                                         <BbTooltipProvider>
                                             <BbTooltip DelayDuration="300">
                                                 <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
                                                     <div class="search-result-status-indicator">
-                                                        <LucideIcon Name="@(isCulled ? "filter-x" : "scissors")" Size="24"/>
+                                                        <LucideIcon Name="@PreviewCopy.OutcomeIcon(result)" Size="24"/>
                                                     </div>
                                                 </BbTooltipTrigger>
                                                 <BbTooltipContent>
@@ -174,7 +198,11 @@
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     }
-                                    <WatchlistToggleIcon Result="item" IsToggled="isInWatchlist" IsToggling="isTogglingWatchlist" OnToggle="ToggleWatchlistAsync"/>
+                                    <WatchlistToggleIcon Result="item"
+                                                         IsToggled="isInWatchlist"
+                                                         IsToggling="isTogglingWatchlist"
+                                                         DotColor="@(result.Enrollment.Owned ? FeedBrandColor : null)"
+                                                         OnToggle="ToggleWatchlistAsync"/>
                                     <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist" OnToggle="ToggleBlacklistAsync"/>
                                 </Icons>
                             </MediaDetailTile>
@@ -182,6 +210,44 @@
                     }
                     </ItemContent>
                 </Virtualize>
+                </div>
+            }
+            @if (_filteredGoneResults.Count > 0)
+            {
+                <div class="mt-4 preview-gone-results">
+                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">@PreviewCopy.GoneHeading</p>
+                    <Virtualize Items="_filteredGoneResults" Context="gone" ItemSize="215" OverscanCount="6">
+                        <ItemContent>
+                    @{
+                            var goneItem = gone.Media;
+                            <div class="pb-2">
+                                <MediaDetailTile @key="goneItem"
+                                                 Media="goneItem"
+                                                 Class="result-leaving"
+                                                 IsFocused="_focusedResult == goneItem.Key"
+                                                 OnFocusIn="() => _focusedResult = goneItem.Key"
+                                                 OnFocusOut="() => ClearFocus(goneItem)">
+                                    <Icons>
+                                        <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold"/>
+                                        <WatchlistToggleIcon Result="goneItem"
+                                                             IsToggled="IsWatchlisted(goneItem)"
+                                                             IsToggling="_togglingWatchlistItem == goneItem.Id"
+                                                             DotColor="@FeedBrandColor"
+                                                             OnToggle="ToggleWatchlistAsync"/>
+                                        <BlacklistToggleIcon Result="goneItem"
+                                                             IsToggled="IsBlacklisted(goneItem)"
+                                                             IsToggling="_togglingBlacklistItem == goneItem.Id"
+                                                             OnToggle="ToggleBlacklistAsync"/>
+                                    </Icons>
+                                </MediaDetailTile>
+                            </div>
+                    }
+                        </ItemContent>
+                    </Virtualize>
+                    @if (_goneShortfall > 0)
+                    {
+                        <p class="text-xs text-muted-foreground px-1 pt-1">+@_goneShortfall more the provider could not describe</p>
+                    }
                 </div>
             }
             @if (_filteredUnresolvedResults.Count > 0)
@@ -229,6 +295,14 @@
                 <LucideIcon Name="search-x" Size="48" Class="text-muted-foreground mb-4"/>
                 <p class="text-lg font-semibold">No results match</p>
                 <p class="text-muted-foreground text-sm mt-2">Try adjusting your search or filters.</p>
+            </div>
+        }
+        else if (IsEmptyList)
+        {
+            <div class="flex flex-col items-center justify-center flex-1 text-center py-12">
+                <LucideIcon Name="list-x" Size="48" Class="text-muted-foreground mb-4"/>
+                <p class="text-lg font-semibold">The list is empty</p>
+                <p class="text-muted-foreground text-sm mt-2">The provider returned no items. Nothing will be imported, and nothing will be removed.</p>
             </div>
         }
         else if (IsLoading)
@@ -286,6 +360,10 @@
     private IReadOnlyList<QueryVerdict<MediaLookup>> _processedResults = [];
     private List<QueryVerdict<MediaLookup>> _filteredResults = [];
     private List<MediaLookup> _filteredUnresolvedResults = [];
+    private List<GoneItem> _goneResults = [];
+    private List<GoneItem> _filteredGoneResults = [];
+    private int _goneShortfall;
+    private bool _atRiskOnly;
     private FeedConfig? _appliedConfig;
     private CancellationTokenSource? _cts;
     private PreviewStatus _lastEmittedStatus = new();
@@ -308,6 +386,7 @@
     private bool IsLoading => _fetchState == FetchState.Loading;
     private bool HasItems => _rawResults.Count > 0;
     private bool HasResults => _fetchState == FetchState.Success && _rawResults.Count > 0;
+    private bool IsEmptyList => _fetchState == FetchState.Success && _rawResults.Count == 0;
     private bool HasFailed => _fetchState == FetchState.Failed;
     private bool EarlySaveAllowed => IsLoading && _fetchTimer.Elapsed >= EarlySaveDelay && _rawResults.Count >= EarlySaveMinItems;
 
@@ -336,6 +415,7 @@
 
         Config = config;
         var needsFetch = _fetchState is FetchState.Idle or FetchState.Failed ||
+                         _rawResults.Count == 0 ||
                          Config.Provider != _appliedConfig?.Provider ||
                          !string.Equals(Config.Identifier?.Trim(), _appliedConfig?.Identifier?.Trim(), StringComparison.Ordinal);
 
@@ -443,15 +523,16 @@
             }
             _fetchTimer.Stop();
 
-            if (_rawResults.Count == 0)
-            {
-                _fetchState = FetchState.Failed;
-                return;
-            }
-
             _fetchState = FetchState.Success;
             await ReprocessAsync(FeedSource.Complete, ct);
             activity?.SetTag("sammlarr.feed.items", _rawResults.Count);
+
+            if (_rawResults.Count == 0)
+            {
+                Notifier.Warning("The list loaded successfully but returned no items. Nothing will be imported or removed.", "Empty list");
+                return;
+            }
+
             Notifier.Info($"Loaded {_rawResults.Count} items in {FormatElapsed(_fetchTimer.Elapsed)}.");
         }
         catch (OperationCanceledException)
@@ -500,6 +581,9 @@
         _processedResults = [];
         _filteredResults = [];
         _filteredUnresolvedResults = [];
+        _goneResults = [];
+        _filteredGoneResults = [];
+        _goneShortfall = 0;
         _providerUnavailable = false;
     }
 
@@ -511,7 +595,33 @@
         _processedResults = dryRun.Verdicts;
         _unresolvedResults = dryRun.Unresolved;
 
+        await HydrateGoneAsync(dryRun, source, cancellationToken);
         RebuildFilteredViews();
+    }
+
+    private async Task HydrateGoneAsync(FeedRunSummary dryRun, FeedSource source, CancellationToken cancellationToken)
+    {
+        if (source is FeedSource.Partial || !IsMirror)
+        {
+            _goneResults = [];
+            _goneShortfall = 0;
+            return;
+        }
+
+        var present = _processedResults.Select(verdict => verdict.Item.Id).ToHashSet();
+        var gone = dryRun.Delta.Drops.Where(id => !present.Contains(id)).ToList();
+
+        var described = new Dictionary<MediaId, MediaLookup>();
+        await foreach (var result in Media.GetDetailsAsync(gone, cancellationToken))
+        {
+            if (result is Success<IdentifiedMedia>(var media))
+            {
+                described[media.Id] = media;
+            }
+        }
+
+        _goneResults = [.. gone.Where(described.ContainsKey).Select(id => new GoneItem(described[id]))];
+        _goneShortfall = gone.Count - _goneResults.Count;
     }
 
     private FeedSource LoadedSource() => _providerUnavailable ? FeedSource.Partial : FeedSource.Complete;
@@ -544,13 +654,28 @@
     private void RebuildFilteredViews()
     {
         _filteredResults = _processedResults
-            .Where(r => PreviewResultFilter.IsVisible(PreviewResultFilter.Bucket(r), _activeFilters) && MatchesSearch(r.Item.Title))
+            .Where(r => (!_atRiskOnly || r.AtRisk) && PreviewResultFilter.IsVisible(PreviewResultFilter.Bucket(r), _activeFilters) && MatchesSearch(r.Item.Title))
             .ToList();
-        _filteredUnresolvedResults = _unresolvedResults
-            .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unresolved, _activeFilters) && MatchesSearch(r.Title))
-            .ToList();
+        _filteredUnresolvedResults = _atRiskOnly
+            ? []
+            : _unresolvedResults.Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unresolved, _activeFilters) && MatchesSearch(r.Title)).ToList();
+        _filteredGoneResults = _activeFilters.Count > 0 ? [] : _goneResults.Where(gone => MatchesSearch(gone.Media.Title)).ToList();
         RecountBadges();
     }
+
+    private void ToggleAtRiskOnly()
+    {
+        _atRiskOnly = !_atRiskOnly;
+        _activeFilters.Clear();
+        RebuildFilteredViews();
+    }
+
+    private bool IsMirror => (_appliedConfig ?? Config).Strategy is Mirror;
+
+    private int MirrorThreshold => (_appliedConfig ?? Config).Strategy is Mirror mirror ? mirror.AbsenceThreshold : 1;
+
+    private string FeedBrandColor =>
+        (_appliedConfig ?? Config).Provider is { } provider ? Branding.GetBrandingInfo(provider.AsMediaProvider()).BrandColor : "currentColor";
 
     private bool MatchesSearch(string title) =>
         string.IsNullOrWhiteSpace(_searchQuery) || title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase);
@@ -563,12 +688,14 @@
         {
             _activeFilters.Remove(bucket);
         }
+        _atRiskOnly = false;
         RebuildFilteredViews();
     }
 
     private void ResetFilters()
     {
         _activeFilters.Clear();
+        _atRiskOnly = false;
         RebuildFilteredViews();
     }
 
@@ -615,10 +742,13 @@
     }
 
     private int IncludedCount { get; set; }
+    private int AlreadyYoursCount { get; set; }
     private int BypassedCount { get; set; }
     private int FilteredCount { get; set; }
     private int SkippedCount { get; set; }
     private int UnresolvedCount => _unresolvedResults.Count;
+    private int AtRiskCount { get; set; }
+    private int LeavingCount { get; set; }
     private int WatchlistCount { get; set; }
     private int BlacklistCount { get; set; }
 
@@ -627,11 +757,16 @@
         var buckets = _processedResults.CountBy(PreviewResultFilter.Bucket).ToDictionary();
 
         IncludedCount = buckets.GetValueOrDefault(PreviewBucket.Included);
+        AlreadyYoursCount = buckets.GetValueOrDefault(PreviewBucket.AlreadyYours);
         BypassedCount = buckets.GetValueOrDefault(PreviewBucket.Bypassed);
         FilteredCount = buckets.GetValueOrDefault(PreviewBucket.Filtered);
         SkippedCount = buckets.GetValueOrDefault(PreviewBucket.Skipped);
-        WatchlistCount = _processedResults.Count(result => IsWatchlisted(result.Item));
-        BlacklistCount = _processedResults.Count(result => IsBlacklisted(result.Item));
+        AtRiskCount = IsMirror ? _processedResults.Count(result => result.AtRisk) : 0;
+        LeavingCount = AtRiskCount + _goneResults.Count + _goneShortfall;
+
+        var bypassed = _processedResults.Where(result => PreviewResultFilter.Bucket(result) is PreviewBucket.Bypassed).ToList();
+        WatchlistCount = bypassed.Count(result => result.Enrollment.InWatchlist);
+        BlacklistCount = bypassed.Count(result => result.Enrollment.InBlacklist);
     }
 
     private bool IsBlacklisted(MediaLookup item) => _blacklistIds.Contains(item.Id);
@@ -687,7 +822,7 @@
         {
             _togglingBlacklistItem = null;
             _focusedResult = null;
-            RecountBadges();
+            await ReprocessAsync(LoadedSource(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -727,7 +862,7 @@
         {
             _togglingWatchlistItem = null;
             _focusedResult = null;
-            RecountBadges();
+            await ReprocessAsync(LoadedSource(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }

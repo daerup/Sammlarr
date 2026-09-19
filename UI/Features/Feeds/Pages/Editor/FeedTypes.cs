@@ -22,6 +22,7 @@ public enum StrategyMode
 public enum PreviewBucket
 {
 	Included,
+	AlreadyYours,
 	Bypassed,
 	Filtered,
 	Skipped,
@@ -35,11 +36,47 @@ public static class PreviewResultFilter
 		{
 			QueryOutcome.Culled => PreviewBucket.Filtered,
 			QueryOutcome.Truncated => PreviewBucket.Skipped,
-			QueryOutcome.Qualified => verdict.Bypassed ? PreviewBucket.Bypassed : PreviewBucket.Included,
+			QueryOutcome.Qualified => Qualified(verdict),
 		};
 
 	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
+
+	private static PreviewBucket Qualified(QueryVerdict<MediaLookup> verdict) =>
+		verdict.AlreadyYours ? PreviewBucket.AlreadyYours
+		: verdict.WillImport ? PreviewBucket.Included
+		: PreviewBucket.Bypassed;
 }
+
+internal static class PreviewCopy
+{
+	internal const string GoneHeading = "No longer on the list";
+
+	internal const string LeavingHeading = "On its way out";
+
+	internal const string GoneReason = "The source list no longer contains it.";
+
+	internal static AbsencePhrase Absence => new("Absent from", "of", "runs");
+
+	internal static string OutcomeIcon(QueryVerdict<MediaLookup> verdict) =>
+		verdict.Outcome switch
+		{
+			QueryOutcome.Culled => "filter-x",
+			QueryOutcome.Truncated => "scissors",
+			QueryOutcome.Qualified => "circle-help",
+		};
+
+	internal static string AtRiskReason(QueryVerdict<MediaLookup> verdict) =>
+		verdict.Outcome switch
+		{
+			QueryOutcome.Culled => "It no longer matches your filter rules.",
+			QueryOutcome.Truncated => "Your import limit no longer reaches it.",
+			QueryOutcome.Qualified => string.Empty,
+		};
+}
+
+internal sealed record AbsencePhrase(string Lead, string Join, string Tail);
+
+internal sealed record GoneItem(MediaLookup Media);
 
 public record PreviewStatus
 {
@@ -70,7 +107,8 @@ public record FeedConfig
 
 	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid && IsStrategyValid;
 
-	public int GetPreviewHash() => HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit));
+	public int GetPreviewHash() =>
+		HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit, Strategy));
 
 	public int GetSaveHash() =>
 		HashCode.Combine(
