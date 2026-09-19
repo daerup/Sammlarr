@@ -1,12 +1,11 @@
 using System.ComponentModel;
 using Contracts.Processing;
 using Core.Processing;
+using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Processing;
 using Domain.Providers;
-using TestInfrastructure;
-using TUnit.Assertions.Core;
 using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
@@ -17,27 +16,28 @@ public class QueryProcessorTests
 	private readonly QueryProcessor<Item> _testee = new();
 
 	[Test]
-	public async Task Execute_WhenNoOptionsProvided_ReturnsAllItems()
+	public async Task Execute_WhenNoOptionsProvided_QualifiesEveryItem()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 
-		var results = await _testee.ExecuteAsync(items, new QueryOptions(), _ => false, _ => false).ToListAsync();
-		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item));
+		var results = await _testee.ExecuteAsync(items, new QueryOptions(), Enrolled()).ToListAsync();
+
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenLimitProvided_ReturnsWithSkippedUnion()
+	public async Task Execute_WhenLimitProvided_TruncatesPastTheLimit()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
-		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Truncated<Item>));
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenSortProvided_ReturnsAllItemsAsValues()
+	public async Task Execute_WhenSortProvided_QualifiesEveryItemInSortedOrder()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama") };
 		var options = new QueryOptions
@@ -45,13 +45,14 @@ public class QueryProcessorTests
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Descending },
 		};
 
-		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
-		await Assert.That(results).AreOfUnionType<IList<QueryResult<Item>>, QueryResult<Item>>(typeof(Item), typeof(Item));
-		await Assert.That(results.OfUnionType<Item>()).IsEquivalentTo([items[1], items[0]], CollectionOrdering.Matching);
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(results.Select(row => row.Item)).IsEquivalentTo([items[1], items[0]], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenSortProvided_ReturnsAllItemsAsValuesWithSortDirection()
+	public async Task Execute_WhenSortAndLimitProvided_TruncatesTheLowestRanked()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions
@@ -60,24 +61,26 @@ public class QueryProcessorTests
 			Sort = new QuerySort { Property = nameof(Item.Year), Direction = ListSortDirection.Ascending },
 		};
 
-		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
-		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Item), typeof(Truncated<Item>));
-		await Assert.That(results.OfUnionType<Item>()).IsEquivalentTo([items[2], items[0]], CollectionOrdering.Matching);
-		await Assert.That(results.OfUnionType<Truncated<Item>>().Select(i => i.Item)).IsEquivalentTo([items[1]]);
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([items[2], items[0]], CollectionOrdering.Matching);
+		await Assert.That(Items(results, QueryOutcome.Truncated)).IsEquivalentTo([items[1]]);
 	}
 
 	[Test]
-	public async Task Execute_WhenFilterProvided_ReturnsOnlyMatchingFilter()
+	public async Task Execute_WhenFilterProvided_CullsEverythingThatDoesNotMatch()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
 
-		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
-		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Culled<Item>));
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenFilterAndLimitProvided_ReturnsOnlyMatchingFilterAndLimit()
+	public async Task Execute_WhenFilterAndLimitProvided_CulledItemsDoNotConsumeTheLimit()
 	{
 		var items = new[]
 		{
@@ -97,12 +100,18 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 2 },
 		};
 
-		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
-		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Culled<Item>), typeof(Item), typeof(Truncated<Item>));
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert
+			.That(Outcomes(results))
+			.IsEquivalentTo(
+				[QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Truncated],
+				CollectionOrdering.Matching
+			);
 	}
 
 	[Test]
-	public async Task Execute_WhenOrFilterProvided_ReturnsOnlyMatchingOrFilter()
+	public async Task Execute_WhenOrFilterProvided_QualifiesItemsMatchingEitherGroup()
 	{
 		var items = new[] { new Item("A", 2020, "Action"), new Item("B", 2021, "Drama"), new Item("C", 2019, "Comedy") };
 		var options = new QueryOptions
@@ -113,12 +122,14 @@ public class QueryProcessorTests
 				Group(Number("Year", FilterPredicateOperator.LessOrEqual, 2019))
 			),
 		};
-		var results = await _testee.ExecuteAsync(items, options, _ => false, _ => false).ToListAsync();
-		await Assert.That(results).AreOfUnionType(typeof(Culled<Item>), typeof(Item), typeof(Item));
+
+		var results = await _testee.ExecuteAsync(items, options, Enrolled()).ToListAsync();
+
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Culled, QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenWatchlistedIsExemptAndItemIsWatchlisted_ItemIsIncludedAndDoesNotCountTowardLimit()
+	public async Task Execute_WhenWatchlistedIsPreserved_TheWatchlistedItemDoesNotConsumeASlot()
 	{
 		var watchlisted = new Item("Watchlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
@@ -127,13 +138,15 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(results[0].Bypassed).IsTrue();
+		await Assert.That(results[0].ConsumesSlot).IsFalse();
 	}
 
 	[Test]
-	public async Task Execute_WhenBlacklistedIsExemptAndItemIsBlacklisted_ItemIsIncludedAndDoesNotCountTowardLimit()
+	public async Task Execute_WhenBlacklistedIsPreserved_TheBlacklistedItemDoesNotConsumeASlot()
 	{
 		var blacklisted = new Item("Blacklisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
@@ -142,14 +155,15 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Blacklisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([blacklisted, normal], options, _ => false, i => i == blacklisted).ToListAsync();
+		var results = await _testee.ExecuteAsync([blacklisted, normal], options, Enrolled(blacklisted: blacklisted)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
-		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().Source).IsEqualTo(BypassReason.Blacklisted);
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(results[0].Enrollment.InBlacklist).IsTrue();
+		await Assert.That(results[0].ConsumesSlot).IsFalse();
 	}
 
 	[Test]
-	public async Task Execute_WhenExemptItemsAreMixedWithNonExempt_OnlyNonExemptCountTowardLimit()
+	public async Task Execute_WhenPreservedItemsAreMixedWithOthers_OnlyTheOthersConsumeTheLimit()
 	{
 		var watchlisted = new Item("Watchlisted", 2019, "Action");
 		var normal1 = new Item("Normal1", 2020, "Drama");
@@ -159,13 +173,15 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal1, normal2], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal1, normal2], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item), typeof(Truncated<Item>));
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(results[0].ConsumesSlot).IsFalse();
+		await Assert.That(results[1].ConsumesSlot).IsTrue();
 	}
 
 	[Test]
-	public async Task Execute_WhenLimitIsReached_ExemptItemsAreStillIncluded()
+	public async Task Execute_WhenTheLimitIsAlreadyReached_PreservedItemsAreStillTruncated()
 	{
 		var normal1 = new Item("Normal1", 2019, "Action");
 		var watchlisted = new Item("Watchlisted", 2020, "Drama");
@@ -175,27 +191,28 @@ public class QueryProcessorTests
 			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([normal1, watchlisted, normal2], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([normal1, watchlisted, normal2], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Item), typeof(Truncated<Item>), typeof(Truncated<Item>));
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated, QueryOutcome.Truncated], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenWatchlistedIsIncluded_MatchedItemEmitsExemptWithCountsTowardLimitTrue()
+	public async Task Execute_WhenWatchlistedIsConsumed_TheWatchlistedItemBypassesButConsumesASlot()
 	{
 		var watchlisted = new Item("Watchlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 2 } };
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
-		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().Source).IsEqualTo(BypassReason.Watchlisted);
-		await Assert.That(results.OfUnionType<Bypassed<Item>>().Single().CountsTowardLimit).IsTrue();
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(results[0].Bypassed).IsTrue();
+		await Assert.That(results[0].Enrollment.InWatchlist).IsTrue();
+		await Assert.That(results[0].ConsumesSlot).IsTrue();
 	}
 
 	[Test]
-	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_WatchlistTakesPrecedenceOverSlotPolicy()
+	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_TheWatchlistPolicyWins()
 	{
 		var both = new Item("Both", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
@@ -209,16 +226,14 @@ public class QueryProcessorTests
 			},
 		};
 
-		var results = await _testee.ExecuteAsync([both, normal], options, i => i == both, i => i == both).ToListAsync();
+		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(watchlisted: both, blacklisted: both)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Item));
-		var bypassed = results.OfUnionType<Bypassed<Item>>().Single();
-		await Assert.That(bypassed.Source).IsEqualTo(BypassReason.Watchlisted);
-		await Assert.That(bypassed.CountsTowardLimit).IsFalse();
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
+		await Assert.That(results[0].ConsumesSlot).IsFalse();
 	}
 
 	[Test]
-	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_WatchlistTakesPrecedenceOverSlotPolicy2()
+	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_TheBlacklistPolicyIsIgnored()
 	{
 		var both = new Item("Both", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
@@ -232,25 +247,106 @@ public class QueryProcessorTests
 			},
 		};
 
-		var results = await _testee.ExecuteAsync([both, normal], options, i => i == both, i => i == both).ToListAsync();
+		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(watchlisted: both, blacklisted: both)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Truncated<Item>));
-		var bypassed = results.OfUnionType<Bypassed<Item>>().Single();
-		await Assert.That(bypassed.Source).IsEqualTo(BypassReason.Watchlisted);
-		await Assert.That(bypassed.CountsTowardLimit).IsTrue();
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(results[0].ConsumesSlot).IsTrue();
 	}
 
 	[Test]
-	public async Task Execute_WhenWatchlistedIsIncludedAndConsumesOnlySlot_NextItemIsSkipped()
+	public async Task Execute_WhenABypassedItemConsumesTheOnlySlot_TheNextItemIsTruncated()
 	{
 		var watchlisted = new Item("Watchlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal], options, i => i == watchlisted, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([watchlisted, normal], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
 
-		await Assert.That(results).AreOfUnionType(typeof(Bypassed<Item>), typeof(Truncated<Item>));
+		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(results[0].Bypassed).IsTrue();
 	}
+
+	[Test]
+	public async Task Execute_WhenAnOwnedItemIsAlsoWatchlisted_ItQualifiesAsOwnedAndIsNeverBypassed()
+	{
+		var owned = new Item("Owned", 2020, "Action");
+
+		var results = await _testee.ExecuteAsync([owned], new QueryOptions(), Enrolled(watchlisted: owned, owned: owned)).ToListAsync();
+
+		await Assert.That(results[0].Outcome).IsEqualTo(QueryOutcome.Qualified);
+		await Assert.That(results[0].Enrollment.Owned).IsTrue();
+		await Assert.That(results[0].Bypassed).IsFalse();
+		await Assert.That(results[0].AlreadyYours).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenAnOwnedItemIsWatchlistedAndPreserved_ItStillConsumesASlot()
+	{
+		var owned = new Item("Owned", 2020, "Action");
+		var normal = new Item("Normal", 2021, "Drama");
+		var options = new QueryOptions
+		{
+			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+		};
+
+		var results = await _testee.ExecuteAsync([owned, normal], options, Enrolled(watchlisted: owned, owned: owned)).ToListAsync();
+
+		await Assert.That(results[0].ConsumesSlot).IsTrue();
+		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
+	}
+
+	[Test]
+	public async Task Execute_WhenAnOwnedItemIsPastTheLimit_ItIsTruncatedAndAtRisk()
+	{
+		var first = new Item("First", 2020, "Action");
+		var owned = new Item("Owned", 2021, "Drama");
+		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
+
+		var results = await _testee.ExecuteAsync([first, owned], options, Enrolled(owned: owned)).ToListAsync();
+
+		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
+		await Assert.That(results[1].AtRisk).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenAnOwnedItemFailsTheFilter_ItIsCulledAndAtRisk()
+	{
+		var owned = new Item("Owned", 2020, "Action");
+		var options = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
+
+		var results = await _testee.ExecuteAsync([owned], options, Enrolled(owned: owned)).ToListAsync();
+
+		await Assert.That(results[0].Outcome).IsEqualTo(QueryOutcome.Culled);
+		await Assert.That(results[0].AtRisk).IsTrue();
+	}
+
+	[Test]
+	public async Task Execute_WhenAnOwnedItemIsBlacklisted_ItWillWaiveAtEveryOutcome()
+	{
+		var owned = new Item("Owned", 2020, "Action");
+		var predicates = Enrolled(blacklisted: owned, owned: owned);
+		var culling = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
+		var truncating = new QueryOptions { Limit = new QueryLimit { Count = 0 } };
+
+		var qualified = await _testee.ExecuteAsync([owned], new QueryOptions(), predicates).ToListAsync();
+		var culled = await _testee.ExecuteAsync([owned], culling, predicates).ToListAsync();
+		var truncated = await _testee.ExecuteAsync([owned], truncating, predicates).ToListAsync();
+
+		await Assert
+			.That(Outcomes([.. qualified, .. culled, .. truncated]))
+			.IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Truncated], CollectionOrdering.Matching);
+		await Assert.That(qualified[0].WillWaive).IsTrue();
+		await Assert.That(culled[0].WillWaive).IsTrue();
+		await Assert.That(truncated[0].WillWaive).IsTrue();
+	}
+
+	private static QueryPredicates<Item> Enrolled(Item? watchlisted = null, Item? blacklisted = null, Item? owned = null) =>
+		new(IsWatchlisted: item => item == watchlisted, IsBlacklisted: item => item == blacklisted, IsOwned: item => item == owned);
+
+	private static IEnumerable<QueryOutcome> Outcomes(IEnumerable<QueryVerdict<Item>> rows) => rows.Select(row => row.Outcome);
+
+	private static IEnumerable<Item> Items(IEnumerable<QueryVerdict<Item>> rows, QueryOutcome outcome) =>
+		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
 }
 
 public class QueryProcessorRatingTests
@@ -268,8 +364,8 @@ public class QueryProcessorRatingTests
 			Sort = new QuerySort { Property = nameof(MediaQueryRow.Rating), Direction = ListSortDirection.Descending },
 		};
 
-		var results = await _testee.ExecuteAsync([lowRated, unrated, rated], options, _ => false, _ => false).ToListAsync();
-		var ordered = results.OfUnionType<MediaQueryRow>().ToList();
+		var results = await _testee.ExecuteAsync([lowRated, unrated, rated], options, NoEnrollment).ToListAsync();
+		var ordered = results.Select(row => row.Item).ToList();
 
 		await Assert.That(ordered[0]).IsSameReferenceAs(rated);
 		await Assert.That(ordered[1]).IsSameReferenceAs(lowRated);
@@ -284,11 +380,16 @@ public class QueryProcessorRatingTests
 		var unrated = MovieWithRating(2022, null);
 		var options = new QueryOptions { Filter = Filter(Group(Number(nameof(MediaQueryRow.Rating), FilterPredicateOperator.GreaterOrEqual, 7.0))) };
 
-		var results = await _testee.ExecuteAsync([high, low, unrated], options, _ => false, _ => false).ToListAsync();
+		var results = await _testee.ExecuteAsync([high, low, unrated], options, NoEnrollment).ToListAsync();
 
-		await Assert.That(results.OfUnionType<MediaQueryRow>()).IsEquivalentTo([high]);
-		await Assert.That(results.OfUnionType<Culled<MediaQueryRow>>().Select(c => c.Item)).IsEquivalentTo([low, unrated]);
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([high]);
+		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([low, unrated]);
 	}
+
+	private static QueryPredicates<MediaQueryRow> NoEnrollment => new(IsWatchlisted: _ => false, IsBlacklisted: _ => false, IsOwned: _ => false);
+
+	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, QueryOutcome outcome) =>
+		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
 
 	private static MediaQueryRow MovieWithRating(int year, float? rating) =>
 		MediaQueryRow.From(
@@ -309,22 +410,3 @@ public class QueryProcessorRatingTests
 }
 
 internal record Item(string Name, int Year, string Genre = "Unknown");
-
-file static class Extension
-{
-	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<Item>> source) =>
-		EnumerableExtensions.OfUnionType<QueryResult<Item>, TOut>(source);
-
-	public static IEnumerable<TOut> OfUnionType<TOut>(this IEnumerable<QueryResult<MediaQueryRow>> source) =>
-		EnumerableExtensions.OfUnionType<QueryResult<MediaQueryRow>, TOut>(source);
-
-	public static UnionCollectionAssertion<TCollection, QueryResult<Item>> AreOfUnionType<TCollection>(
-		this IAssertionSource<TCollection> source,
-		params IEnumerable<Type> expectedTypes
-	)
-		where TCollection : IEnumerable<QueryResult<Item>>
-	{
-		using var _ = Assert.Multiple();
-		return new UnionCollectionAssertion<TCollection, QueryResult<Item>>(source.Context, expectedTypes);
-	}
-}

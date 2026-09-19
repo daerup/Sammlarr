@@ -16,11 +16,10 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 
 	private CompiledFilter? _compiled;
 
-	public async IAsyncEnumerable<QueryResult<T>> ExecuteAsync(
+	public async IAsyncEnumerable<QueryVerdict<T>> ExecuteAsync(
 		IEnumerable<T> source,
 		QueryOptions options,
-		Func<T, bool> isWatchlisted,
-		Func<T, bool> isBlacklisted,
+		QueryPredicates<T> predicates,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
@@ -37,25 +36,27 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 				await Task.Yield();
 			}
 
+			var enrollment = new Enrollment
+			{
+				InWatchlist = predicates.IsWatchlisted(item),
+				InBlacklist = predicates.IsBlacklisted(item),
+				Owned = predicates.IsOwned(item),
+			};
+
 			if (qualifying?.Contains(item) is false)
 			{
-				yield return new Culled<T>(item);
+				yield return new QueryVerdict<T>(item, QueryOutcome.Culled, enrollment, false);
 			}
 			else if (options?.Limit is { Count: var limit } && taken >= limit)
 			{
-				yield return new Truncated<T>(item);
-			}
-			else if (GetBypassReason(item, isWatchlisted, isBlacklisted) is { } enrollmentSource)
-			{
-				var consumesSlot = !SlotIsPreserved(enrollmentSource, options);
-				if (consumesSlot)
-					taken++;
-				yield return new Bypassed<T>(item, enrollmentSource, consumesSlot);
+				yield return new QueryVerdict<T>(item, QueryOutcome.Truncated, enrollment, false);
 			}
 			else
 			{
-				taken++;
-				yield return item;
+				var consumesSlot = ConsumesSlot(enrollment, options?.Limit);
+				if (consumesSlot)
+					taken++;
+				yield return new QueryVerdict<T>(item, QueryOutcome.Qualified, enrollment, consumesSlot);
 			}
 		}
 	}
@@ -90,21 +91,23 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 
 	private sealed record CompiledFilter(string Expression, Func<T, bool> Predicate);
 
-	private static BypassReason? GetBypassReason(T item, Func<T, bool> isWatchlisted, Func<T, bool> isBlacklisted)
+	private static bool ConsumesSlot(Enrollment enrollment, QueryLimit? limit)
 	{
-		return isWatchlisted(item) ? BypassReason.Watchlisted
-			: isBlacklisted(item) ? BypassReason.Blacklisted
-			: null;
-	}
+		if (limit is null || enrollment.Owned)
+		{
+			return true;
+		}
 
-	private static bool SlotIsPreserved(BypassReason source, QueryOptions? options)
-	{
-		return options?.Limit is { } limit
-			&& source switch
-			{
-				BypassReason.Watchlisted => limit.Watchlisted == SlotPolicy.Preserved,
-				BypassReason.Blacklisted => limit.Blacklisted == SlotPolicy.Preserved,
-				_ => false,
-			};
+		if (enrollment.InWatchlist)
+		{
+			return limit.Watchlisted is SlotPolicy.Consumed;
+		}
+
+		if (enrollment.InBlacklist)
+		{
+			return limit.Blacklisted is SlotPolicy.Consumed;
+		}
+
+		return true;
 	}
 }

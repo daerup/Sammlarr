@@ -1,13 +1,14 @@
+using Domain.Processing;
+
 namespace Contracts.Processing;
 
 public interface IQueryProcessor<T>
 	where T : class
 {
-	IAsyncEnumerable<QueryResult<T>> ExecuteAsync(
+	IAsyncEnumerable<QueryVerdict<T>> ExecuteAsync(
 		IEnumerable<T> source,
 		QueryOptions options,
-		Func<T, bool> isWatchlisted,
-		Func<T, bool> isBlacklisted,
+		QueryPredicates<T> predicates,
 		CancellationToken cancellationToken = default
 	);
 }

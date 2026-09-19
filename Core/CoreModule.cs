@@ -1,6 +1,7 @@
 using Contracts;
 using Contracts.Auth;
 using Contracts.Blacklist;
+using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Search;
@@ -13,6 +14,7 @@ using Core.Auth;
 using Core.Blacklist;
 using Core.Caching;
 using Core.DI;
+using Core.Feed;
 using Core.Identity;
 using Core.Media;
 using Core.Notifications;
@@ -36,6 +38,7 @@ public class CoreModule : IServiceModule
 		services.AddSingleton<IProviderRateLimitReporter, ProviderRateLimitReporter>();
 		services.AddTransient(typeof(IQueryProcessor<>), typeof(QueryProcessor<>));
 		services.AddTracedScoped<IBlacklistService, BlacklistService>();
+		services.AddTracedScoped<IFeedRunEngine, FeedRunEngine>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
 		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();
