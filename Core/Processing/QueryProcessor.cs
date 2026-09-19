@@ -1,3 +1,4 @@
+using System.Collections;
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
 using System.Runtime.CompilerServices;
@@ -7,7 +8,14 @@ using Domain.Processing;
 namespace Core.Processing;
 
 internal sealed class QueryProcessor<T> : IQueryProcessor<T>
+	where T : class
 {
+	private static readonly ParsingConfig FilterConfig = new() { EvaluateGroupByAtDatabase = true, AllowEqualsAndToStringMethodsOnObject = true };
+
+	private static readonly IEqualityComparer<T> Identity = ReferenceEqualityComparer.Instance;
+
+	private CompiledFilter? _compiled;
+
 	public async IAsyncEnumerable<QueryResult<T>> ExecuteAsync(
 		IEnumerable<T> source,
 		QueryOptions options,
@@ -16,18 +24,8 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var all = source.AsQueryable();
-
-		if (options?.Sort is { } sort)
-		{
-			var dir = sort.Direction == ListSortDirection.Descending ? "descending" : "ascending";
-			all = all.OrderBy($"{sort.Property} {dir}");
-		}
-
-		var config = ParsingConfig.DefaultEFCore21;
-		config.AllowEqualsAndToStringMethodsOnObject = true;
-		var filtered = options?.Filter is { } filter ? all.Where(config, FilterEvaluator.Build(filter)) : all;
-		var removed = new HashSet<T>(all.Except(filtered));
+		var all = Sort(source, options?.Sort);
+		var qualifying = options?.Filter is { } filter ? new HashSet<T>(all.Where(Compile(filter)), Identity) : null;
 
 		var taken = 0;
 		const int cooperativeYieldInterval = 32;
@@ -39,7 +37,7 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 				await Task.Yield();
 			}
 
-			if (removed.Contains(item))
+			if (qualifying?.Contains(item) is false)
 			{
 				yield return new Culled<T>(item);
 			}
@@ -61,6 +59,36 @@ internal sealed class QueryProcessor<T> : IQueryProcessor<T>
 			}
 		}
 	}
+
+	private static List<T> Sort(IEnumerable<T> source, QuerySort? sort)
+	{
+		if (sort is null)
+		{
+			return [.. source];
+		}
+
+		var direction = sort.Direction switch
+		{
+			ListSortDirection.Ascending => "ascending",
+			ListSortDirection.Descending => "descending",
+		};
+		return [.. source.AsQueryable().OrderBy($"{sort.Property} {direction}")];
+	}
+
+	private Func<T, bool> Compile(QueryFilter filter)
+	{
+		var expression = FilterEvaluator.Build(filter);
+		var compiled = _compiled;
+		if (compiled is null || !string.Equals(compiled.Expression, expression, StringComparison.Ordinal))
+		{
+			compiled = new CompiledFilter(expression, DynamicExpressionParser.ParseLambda<T, bool>(FilterConfig, false, expression).Compile());
+			_compiled = compiled;
+		}
+
+		return compiled.Predicate;
+	}
+
+	private sealed record CompiledFilter(string Expression, Func<T, bool> Predicate);
 
 	private static BypassReason? GetBypassReason(T item, Func<T, bool> isWatchlisted, Func<T, bool> isBlacklisted)
 	{
