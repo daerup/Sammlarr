@@ -1,0 +1,38 @@
+@using UI.Features.Feeds.Pages.Editor
+
+<BbTooltipProvider>
+    <BbTooltip DelayDuration="200">
+        <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+            <div class="search-result-status-indicator">
+                <LucideIcon Name="log-out" Size="24"/>
+            </div>
+        </BbTooltipTrigger>
+        <BbTooltipContent>
+            <div class="leaving-popover">
+                <p class="leaving-popover-title">@PreviewCopy.LeavingHeading</p>
+                <p class="leaving-popover-reason">@Reason</p>
+                <div class="leaving-popover-count">
+                    <span class="leaving-popover-track">
+                        @for (var pip = 0; pip < Threshold; pip++)
+                        {
+                            <span class="@(pip < Absences ? "is-spent" : null)"></span>
+                        }
+                    </span>
+                    <span class="leaving-popover-tally">
+                        <span>@PreviewCopy.Absence.Lead</span>
+                        <span class="leaving-popover-number">@Absences</span>
+                        <span>@PreviewCopy.Absence.Join</span>
+                        <span class="leaving-popover-number">@Threshold</span>
+                        <span>@PreviewCopy.Absence.Tail</span>
+                    </span>
+                </div>
+            </div>
+        </BbTooltipContent>
+    </BbTooltip>
+</BbTooltipProvider>
+
+@code {
+    [Parameter] [EditorRequired] public required string Reason { get; set; }
+    [Parameter] [EditorRequired] public required int Threshold { get; set; }
+    [Parameter] public int Absences { get; set; } = 3;
+}

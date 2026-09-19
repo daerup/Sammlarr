@@ -98,19 +98,19 @@ public class FeedPreviewTests
 		await FeedEditor.FillAsync(page, "#list-identifier", identifier);
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
-		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
+		await Expect(page.Locator(FeedEditor.UnresolvedRow)).ToHaveCountAsync(3);
 
 		await page.GetByLabel("Refresh assets").DispatchEventAsync("click");
 		await Expect(page.Heading("Refresh assets?")).ToBeVisibleAsync();
 		await page.Button("Refresh").ClickAsync();
 
 		await FeedEditor.PreviewLoadedAsync(page);
-		await Expect(page.Locator($"{FeedEditor.ResultRow}.is-unresolved")).ToHaveCountAsync(3);
+		await Expect(page.Locator(FeedEditor.UnresolvedRow)).ToHaveCountAsync(3);
 
 		await FeedEditor.FillAsync(page, SearchBox, Guid.NewGuid().ToString("N"));
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0, Wait.Settle);
+		await Expect(page.Locator(FeedEditor.UnresolvedRow)).ToHaveCountAsync(0, Wait.Settle);
 		await FeedEditor.FillAsync(page, SearchBox, string.Empty);
-		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(3, Wait.Settle);
+		await Expect(page.Locator(FeedEditor.UnresolvedRow)).ToHaveCountAsync(3, Wait.Settle);
 	}
 
 	private static string UnmatchedList(int count) =>
