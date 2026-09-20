@@ -1,10 +1,18 @@
 @using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Watchlist.Sync
+@using Contracts.Blacklist
+@using Contracts.Watchlist
+@using Domain.Watchlist
+@using UI.Shared.Changes
+@using UI.Shared.Media
 @implements IDisposable
 @inject IMediaService Media
+@inject IWatchlistService WatchlistService
+@inject IBlacklistService BlacklistService
 @inject IWatchlistSyncEngine SyncEngine
 @inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
 @inject Notifier Notifier
 
 @if (_isSyncing || IsSyncing)
@@ -16,121 +24,126 @@
 }
 else
 {
-    <BbHoverCard OpenDelay="200" CloseDelay="100" OnOpenChange="OnHoverChanged">
-        <BbHoverCardTrigger AsChild="false">
-            <HoverButton OnClick="SyncAsync" Color="@BrandColor" Class="relative whitespace-nowrap">
-                <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
-                <span>Sync</span>
-                <span class="ml-2 inline-flex items-center justify-center h-5" style="min-width: 1.5rem">
-                    @if (_isLoadingDryRun)
+    <HoverButton OnClick="OpenAsync" Color="@BrandColor" Class="relative whitespace-nowrap">
+        <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+        <span>Sync</span>
+        <span class="ml-2 inline-flex items-center justify-center h-5" style="min-width: 1.5rem">
+            @if (_isLoadingDryRun)
+            {
+                <BbSpinner Size="SpinnerSize.Small"/>
+            }
+            else if (_dryRun is { TotalChanges: > 0 } report)
+            {
+                <span class="sync-badge">
+                    @if (report.AddCount > 0)
                     {
-                        <BbSpinner Size="SpinnerSize.Small"/>
+                        <span class="is-added">@report.AddCount</span>
                     }
-                    else if (_dryRun is { TotalChanges: > 0 } report)
+                    @if (report is { AddCount: > 0, RemoveCount: > 0 })
                     {
-                        <BbBadge Variant="BadgeVariant.Outline"
-                                 Class="hover-button-badge min-w-5 h-5 px-1.5 rounded-full text-[10px] font-semibold">
-                            @report.TotalChanges
-                        </BbBadge>
+                        <span class="sync-dot">·</span>
                     }
-                    else if (_dryRun is not null)
+                    @if (report.RemoveCount > 0)
                     {
-                        <LucideIcon Name="check" Size="14"/>
-                    }
-                    else if (_dryRunError is not null)
-                    {
-                        <LucideIcon Name="cloud-off" Size="14"/>
+                        <span class="is-removed">@report.RemoveCount</span>
                     }
                 </span>
-            </HoverButton>
-        </BbHoverCardTrigger>
-        <BbHoverCardContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="p-0 watchlist-sync-preview">
-            @if (OutboxEntries.Count > 0)
-            {
-                <div class="px-4 py-2 flex items-center gap-2 text-sm @(HasFailedEntries ? "text-destructive" : "text-muted-foreground")" style="border-bottom: 1px solid var(--border);">
-                    <LucideIcon Name="send" Size="14"/>
-                    <span>@OutboxSummary</span>
-                </div>
             }
-            <div class="px-4 py-3" style="@PreviewHeaderStyle">
-                <p class="text-xs uppercase tracking-wide font-medium text-muted-foreground">Sync preview</p>
-                @if (_dryRunError is not null)
-                {
-                    <div class="flex items-center gap-2 text-sm text-destructive mt-1.5">
-                        <LucideIcon Name="cloud-off" Size="14"/>
-                        <span class="truncate">@_dryRunError</span>
-                    </div>
-                }
-                else if (_dryRun is null)
-                {
-                    <div class="flex items-center gap-2 text-sm text-muted-foreground mt-1.5">
-                        <BbSpinner Size="SpinnerSize.Small"/>
-                        <span>Computing…</span>
-                    </div>
-                }
-                else
-                {
-                    <div class="flex items-baseline gap-3 mt-1.5">
-                        <span class="text-sm font-semibold text-success tabular-nums">+@_dryRun.AddCount</span>
-                        <span class="text-sm font-semibold text-destructive tabular-nums">−@_dryRun.RemoveCount</span>
-                    </div>
-                    <p class="text-xs text-muted-foreground mt-1.5">@_dryRun.NoOps.Count already in sync</p>
-                }
-            </div>
-            @if (_dryRun is not null && _dryRun.TotalChanges > 0)
+            else if (_dryRun is not null)
             {
-                var window = _dryRun.Changes.Take(DryRunPreviewLimit).ToList();
-                <div class="max-h-64 overflow-y-auto scrollbar-thin py-2">
-                    @foreach (var change in window)
-                    {
-                        var directionIcon = change.Direction == WatchlistSyncDirection.Pull ? "arrow-down-left" : "arrow-up-right";
-                        var directionTooltip = change.Direction == WatchlistSyncDirection.Pull ? "from Plex" : "to Plex";
-                        var kindIcon = change.Action == WatchlistOperationAction.Add ? "plus" : "minus";
-                        var kindColor = change.Action == WatchlistOperationAction.Add ? "text-success" : "text-destructive";
-                        var title = _metadata.TryGetValue(change.MediaId, out var detail) ? detail.Title : "…";
-                        <div class="flex items-center gap-2 px-4 py-1.5 text-sm">
-                            <span class="inline-flex h-5 items-center shrink-0 @kindColor">
-                                <LucideIcon Name="@kindIcon" Size="14"/>
-                            </span>
-                            <span class="flex-1" style="white-space: nowrap; padding-right: 1rem;" title="@title">@title</span>
-                            <span title="@directionTooltip" class="inline-flex h-5 items-center shrink-0 text-muted-foreground">
-                                <LucideIcon Name="@directionIcon" Size="14"/>
-                            </span>
-                        </div>
-                    }
-                </div>
-                @if (_dryRun.TotalChanges > window.Count)
-                {
-                    var hidden = _dryRun.TotalChanges - window.Count;
-                    <div class="px-4 py-2 border-t text-xs text-muted-foreground">+@hidden more change@(hidden == 1 ? "" : "s")</div>
-                }
+                <LucideIcon Name="check" Size="14"/>
             }
-        </BbHoverCardContent>
-    </BbHoverCard>
+            else if (_dryRunError is not null)
+            {
+                <LucideIcon Name="cloud-off" Size="14"/>
+            }
+        </span>
+    </HoverButton>
+
+    <ChangeDialog Open="_open"
+                  OnOpenChanged="HandleOpenChangedAsync"
+                  Title="Review changes before syncing"
+                  Subtitle="@Subtitle"
+                  Entries="_entries"
+                  Chips="_chips"
+                  OnSelect="ShowDetailsAsync"
+                  RemovedLabel="Removing"
+                  AddedLabel="Adding"
+                  UnchangedLabel="Already in sync"
+                  EmptyMessage="Everything is in sync."
+                  BandTone="ChangeBandTone.Bad"
+                  Prologue="@(OutboxEntries.Count > 0 ? OutboxStrip : null)"
+                  Band="@(_dryRunError is not null ? ErrorBand : null)">
+        <Actions>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CloseAsync">Cancel</BbButton>
+            <BbButton Size="ButtonSize.Small" Disabled="@(_dryRun is null || (_dryRun.TotalChanges == 0 && OutboxEntries.Count == 0))" OnClick="ConfirmAsync">
+                <LucideIcon Name="refresh-cw" Size="13" Class="mr-1.5"/>
+                Sync now
+            </BbButton>
+        </Actions>
+    </ChangeDialog>
+
+    <MediaDetailSheet Open="_selected is not null"
+                      OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
+                      Media="_selected"
+                      OnEnrollmentChanged="HandleEnrollmentChangedAsync"/>
 }
 
 @code {
-    private const int DryRunPreviewLimit = 25;
+    private RenderFragment OutboxStrip =>
+        @<text>
+            <LucideIcon Name="send" Size="14"/>
+            <span>@OutboxSummary</span>
+        </text>;
 
-    [Parameter]
-    public EventCallback OnSynced { get; set; }
+    private RenderFragment ErrorBand =>
+        @<text>
+            <LucideIcon Name="cloud-off" Size="15" Class="shrink-0"/>
+            <span>@_dryRunError</span>
+        </text>;
 
-    [Parameter]
-    public string? BrandColor { get; set; }
+    [Parameter] public EventCallback OnSynced { get; set; }
 
-    [Parameter]
-    public IReadOnlyCollection<WatchlistOutboxEntry> OutboxEntries { get; set; } = [];
+    [Parameter] public string? BrandColor { get; set; }
 
-    [Parameter]
-    public EventCallback OnStatusRefresh { get; set; }
+    [Parameter] public IReadOnlyCollection<WatchlistOutboxEntry> OutboxEntries { get; set; } = [];
 
-    [Parameter]
-    public bool IsSyncing { get; set; }
+    [Parameter] public EventCallback OnStatusRefresh { get; set; }
 
-    [Parameter]
-    public EventCallback OnSyncStarted { get; set; }
+    [Parameter] public bool IsSyncing { get; set; }
 
-    private bool HasFailedEntries => OutboxEntries.Any(entry => entry.Status is WatchlistOutboxState.Failed);
+    [Parameter] public EventCallback OnSyncStarted { get; set; }
+
+    private const int DryRunAttempts = 3;
+    private static readonly TimeSpan DryRunRetryDelay = TimeSpan.FromSeconds(1);
+
+    private readonly CancellationTokenSource _cts = new();
+    private WatchlistSyncSummary? _dryRun;
+    private string? _dryRunError;
+    private IReadOnlyList<ChangeEntry> _entries = [];
+    private IReadOnlyList<ChangeChip> _chips = [];
+    private bool _isSyncing;
+    private bool _isLoadingDryRun;
+    private bool _open;
+    private MediaLookup? _selected;
+    private bool _watchlistChanged;
+
+    private Task ShowDetailsAsync(MediaLookup media)
+    {
+        _selected = media;
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleEnrollmentChangedAsync(MediaListKind changed)
+    {
+        if (changed is not MediaListKind.Watchlist)
+        {
+            return;
+        }
+
+        _watchlistChanged = true;
+        await LoadDryRunAsync();
+    }
 
     private string OutboxSummary
     {
@@ -141,79 +154,105 @@ else
             var parts = new List<string>(2);
             if (inFlight > 0)
             {
-                parts.Add($"{inFlight} in flight");
+                parts.Add($"{inFlight} waiting to reach Plex");
             }
             if (failed > 0)
             {
-                parts.Add($"{failed} failed");
+                parts.Add($"{failed} could not be delivered");
             }
             return string.Join(" · ", parts);
         }
     }
 
-    private const string PreviewHeaderStyle = "background: oklch(from var(--muted) calc(l - 0.08) c h); border-bottom: 2px solid #09090b;";
+    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges} titles compared" : "Comparing with Plex…";
 
-    private readonly CancellationTokenSource _cts = new();
-    private WatchlistSyncSummary? _dryRun;
-    private string? _dryRunError;
-    private Dictionary<MediaId, MediaLookup> _metadata = [];
-    private bool _isSyncing;
-    private bool _dryRunRequested;
-    private bool _isLoadingDryRun;
+    protected override async Task OnInitializedAsync() => await RefreshAsync();
 
-    protected override async Task OnInitializedAsync()
+    public async Task RefreshAsync() => await LoadDryRunAsync();
+
+    private async Task OpenAsync()
     {
-        await RefreshAsync();
-    }
-
-    public async Task RefreshAsync()
-    {
+        _open = true;
+        await OnStatusRefresh.InvokeAsync();
         await LoadDryRunAsync();
     }
 
-    private async Task OnHoverChanged(bool open)
+    private Task CloseAsync()
     {
+        _open = false;
+        ReloadIfWatchlistChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task HandleOpenChangedAsync(bool open)
+    {
+        _open = open;
         if (!open)
         {
-            return;
+            ReloadIfWatchlistChanged();
         }
-        await OnStatusRefresh.InvokeAsync();
-        if (_dryRunRequested)
+
+        return Task.CompletedTask;
+    }
+
+    private void ReloadIfWatchlistChanged()
+    {
+        if (_watchlistChanged)
         {
-            return;
+            Navigation.Refresh(true);
         }
-        await LoadDryRunAsync();
     }
 
     private async Task LoadDryRunAsync()
     {
-        _dryRunRequested = true;
         _isLoadingDryRun = true;
         _dryRun = null;
         _dryRunError = null;
-        _metadata = [];
+        _entries = [];
+        _chips = [];
         StateHasChanged();
 
+        for (var attempt = 1; attempt <= DryRunAttempts && _dryRun is null; attempt++)
+        {
+            if (attempt > 1)
+            {
+                await Task.Delay(DryRunRetryDelay, _cts.Token);
+            }
+
+            await AttemptDryRunAsync();
+        }
+
+        _isLoadingDryRun = false;
+        StateHasChanged();
+    }
+
+    private async Task AttemptDryRunAsync()
+    {
         var result = await SyncEngine.DryRunAsync(CurrentUser, _cts.Token);
         switch (result)
         {
             case WatchlistSyncSummary changes:
                 _dryRun = changes;
-                _metadata = await LoadMetadataAsync(changes);
+                _dryRunError = null;
+                var metadata = await DryRunMetadataLoader.LoadAsync(Media, changes, _cts.Token);
+                _entries = WatchlistSyncView.Entries(changes, metadata);
+                _chips = WatchlistSyncView.Chips(changes);
                 break;
             case WatchlistSyncRemoteFailed failed:
-                _dryRunError = $"Dry run unavailable — {failed.Reason}";
+                _dryRunError = failed.Reason;
                 break;
             case WatchlistSyncAlreadyRunning:
-                _dryRunError = "Dry run unavailable — a sync is already running.";
+                _dryRunError = "A sync is already running.";
                 break;
         }
-        _isLoadingDryRun = false;
-        StateHasChanged();
     }
 
-    private Task<Dictionary<MediaId, MediaLookup>> LoadMetadataAsync(WatchlistSyncSummary dryRun) =>
-        DryRunMetadataLoader.LoadAsync(Media, dryRun, DryRunPreviewLimit, _cts.Token);
+    private async Task ConfirmAsync()
+    {
+        _open = false;
+        _watchlistChanged = false;
+        await SyncAsync();
+    }
 
     public async Task SyncAsync()
     {
@@ -221,6 +260,7 @@ else
         {
             return;
         }
+
         _isSyncing = true;
         StateHasChanged();
         try

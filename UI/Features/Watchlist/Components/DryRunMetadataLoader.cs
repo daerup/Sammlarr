@@ -6,15 +6,10 @@ namespace UI.Features.Watchlist.Components;
 
 internal static class DryRunMetadataLoader
 {
-	public static async Task<Dictionary<MediaId, MediaLookup>> LoadAsync(
-		IMediaService media,
-		WatchlistSyncSummary dryRun,
-		int limit,
-		CancellationToken cancellationToken
-	)
+	public static async Task<Dictionary<MediaId, MediaLookup>> LoadAsync(IMediaService media, WatchlistSyncSummary dryRun, CancellationToken cancellationToken)
 	{
 		var metadata = new Dictionary<MediaId, MediaLookup>();
-		var ids = dryRun.Changes.Take(limit).Select(c => c.MediaId);
+		var ids = dryRun.Changes.Select(c => c.MediaId).Concat(dryRun.NoOps).Distinct();
 
 		await foreach (var detail in media.GetDetailsAsync(ids, cancellationToken).WhereSuccessAwait())
 		{
