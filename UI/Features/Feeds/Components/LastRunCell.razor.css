@@ -1,0 +1,54 @@
+.last-run {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 9px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.last-run:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.last-run.is-never {
+    cursor: default;
+}
+
+.last-run-badge {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 7px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.last-run-badge .is-added {
+    color: var(--alert-success);
+}
+
+.last-run-badge .is-removed {
+    color: var(--destructive);
+}
+
+.last-run-badge.is-guarded {
+    border-color: color-mix(in oklch, var(--alert-warning) 45%, transparent);
+    color: var(--alert-warning);
+}
+
+.last-run-badge.is-empty {
+    color: var(--muted-foreground);
+}

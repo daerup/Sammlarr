@@ -145,18 +145,10 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="DateTimeOffset"
-                                           Header="Added"
-                                           Property="@(l => l.CreatedAt)"
-                                           Sortable="true">
+                        <BbDataTableColumn TData="Feed" TValue="string"
+                                           Header="Last run">
                             <CellTemplate Context="feed">
-                                <BbTooltip>
-                                    <BbTooltipTrigger>
-                                        <span
-                                            class="text-sm text-muted-foreground tabular-nums">@feed.CreatedAt.ToLocalTime().ToString("MMMM d, yyyy HH:mm")</span>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>@feed.CreatedAt.ToLocalTime().ToString("MMMM d, yyyy HH:mm:ss")</BbTooltipContent>
-                                </BbTooltip>
+                                <LastRunCell FeedId="feed.Id"/>
                             </CellTemplate>
                         </BbDataTableColumn>
 
