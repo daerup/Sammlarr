@@ -8,7 +8,7 @@ public static class FeedVerdicts
 	{
 		public bool WillImport => verdict.Outcome is QueryOutcome.Qualified && !verdict.Enrollment.InWatchlist && !verdict.Enrollment.InBlacklist;
 
-		public bool AlreadyYours => verdict.Outcome is QueryOutcome.Qualified && verdict.Enrollment.Owned;
+		public bool Kept => verdict.Outcome is QueryOutcome.Qualified && verdict.Enrollment.Owned;
 
 		public bool Bypassed =>
 			verdict.Outcome is QueryOutcome.Qualified && !verdict.Enrollment.Owned && (verdict.Enrollment.InWatchlist || verdict.Enrollment.InBlacklist);

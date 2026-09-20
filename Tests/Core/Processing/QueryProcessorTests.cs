@@ -276,7 +276,7 @@ public class QueryProcessorTests
 		await Assert.That(results[0].Outcome).IsEqualTo(QueryOutcome.Qualified);
 		await Assert.That(results[0].Enrollment.Owned).IsTrue();
 		await Assert.That(results[0].Bypassed).IsFalse();
-		await Assert.That(results[0].AlreadyYours).IsTrue();
+		await Assert.That(results[0].Kept).IsTrue();
 	}
 
 	[Test]
@@ -330,7 +330,7 @@ public class QueryProcessorTests
 		var qualified = await _testee.ExecuteAsync([owned], new QueryOptions(), predicates).ToListAsync();
 		var culled = await _testee.ExecuteAsync([owned], culling, predicates).ToListAsync();
 
-		await Assert.That(qualified[0].AlreadyYours).IsTrue();
+		await Assert.That(qualified[0].Kept).IsTrue();
 		await Assert.That(culled[0].AtRisk).IsTrue();
 	}
 

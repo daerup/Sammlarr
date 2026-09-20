@@ -7,7 +7,7 @@ internal enum PreviewBadge
 {
 	Total,
 	Included,
-	AlreadyYours,
+	Kept,
 	Bypassed,
 	Filtered,
 	Skipped,
@@ -96,7 +96,7 @@ internal static class FeedEditor
 		{
 			PreviewBadge.Total => 0,
 			PreviewBadge.Included => 1,
-			PreviewBadge.AlreadyYours => 2,
+			PreviewBadge.Kept => 2,
 			PreviewBadge.Bypassed => 3,
 			PreviewBadge.Filtered => 4,
 			PreviewBadge.Skipped => 5,

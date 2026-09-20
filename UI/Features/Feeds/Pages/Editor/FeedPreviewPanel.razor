@@ -81,10 +81,10 @@
                         <PreviewFilterBadge Icon="list" Count="_rawResults.Count" Active="_activeFilters.Count == 0 && !_atRiskOnly" OnClick="ResetFilters">
                             <Tooltip>Total items fetched from the source list. Click to clear filters.</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Included)" OnClick="() => ToggleFilter(PreviewBucket.Included)">
+                        <PreviewFilterBadge Icon="check" Count="IncludedCount" Active="IsFilterActive(PreviewBucket.Added)" OnClick="() => ToggleFilter(PreviewBucket.Added)">
                             <Tooltip>Items that will be imported</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="bookmark-check" Count="AlreadyYoursCount" Active="IsFilterActive(PreviewBucket.AlreadyYours)" OnClick="() => ToggleFilter(PreviewBucket.AlreadyYours)">
+                        <PreviewFilterBadge Icon="bookmark-check" Count="KeptCount" Active="IsFilterActive(PreviewBucket.Kept)" OnClick="() => ToggleFilter(PreviewBucket.Kept)">
                             <Tooltip>Items this feed already added and still wants. Nothing to import.</Tooltip>
                         </PreviewFilterBadge>
                         <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
@@ -742,7 +742,7 @@
     }
 
     private int IncludedCount { get; set; }
-    private int AlreadyYoursCount { get; set; }
+    private int KeptCount { get; set; }
     private int BypassedCount { get; set; }
     private int FilteredCount { get; set; }
     private int SkippedCount { get; set; }
@@ -756,8 +756,8 @@
     {
         var buckets = _processedResults.CountBy(PreviewResultFilter.Bucket).ToDictionary();
 
-        IncludedCount = buckets.GetValueOrDefault(PreviewBucket.Included);
-        AlreadyYoursCount = buckets.GetValueOrDefault(PreviewBucket.AlreadyYours);
+        IncludedCount = buckets.GetValueOrDefault(PreviewBucket.Added);
+        KeptCount = buckets.GetValueOrDefault(PreviewBucket.Kept);
         BypassedCount = buckets.GetValueOrDefault(PreviewBucket.Bypassed);
         FilteredCount = buckets.GetValueOrDefault(PreviewBucket.Filtered);
         SkippedCount = buckets.GetValueOrDefault(PreviewBucket.Skipped);
