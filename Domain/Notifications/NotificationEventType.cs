@@ -7,6 +7,9 @@ public enum NotificationEventType
 	[Description("Watchlist synced")]
 	WatchlistSynced,
 
+	[Description("Watchlist sync failed")]
+	WatchlistSyncFailed,
+
 	[Description("Test notification")]
 	TestPing,
 

@@ -264,7 +264,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var events = host.Published<WatchlistSyncedEvent>();
 		await Assert.That(events).Count().IsEqualTo(1);
-		await Assert.That(events[0].PushedAdds).Contains(inception);
+		await Assert.That(events[0].QueuedAdds).Contains(inception);
 	}
 
 	[Test]
@@ -276,6 +276,31 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.SyncAsync(Trigger, CurrentUser);
 
 		await Assert.That(host.Published<WatchlistSyncedEvent>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task SyncAsync_WhenTheRemoteIsUnavailable_PublishesAWatchlistSyncFailedEvent()
+	{
+		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
+		await host.RemoteWatchlistUnavailable();
+
+		await Testee.SyncAsync(Trigger, CurrentUser);
+
+		var events = host.Published<WatchlistSyncFailedEvent>();
+		await Assert.That(events).Count().IsEqualTo(1);
+		await Assert.That(events[0].Reason).IsNotEmpty();
+		await Assert.That(host.Published<WatchlistSyncedEvent>()).IsEmpty();
+	}
+
+	[Test]
+	public async Task DryRunAsync_WhenTheRemoteIsUnavailable_PublishesNothingBecauseNothingWasAttempted()
+	{
+		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
+		await host.RemoteWatchlistUnavailable();
+
+		await Testee.DryRunAsync(CurrentUser);
+
+		await Assert.That(host.Published<WatchlistSyncFailedEvent>()).IsEmpty();
 	}
 
 	[Test]

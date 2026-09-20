@@ -20,6 +20,15 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
+		WatchlistSyncFailedEvent message,
+		IUserScope userScope,
+		INotificationSubscriptionRepository subscriptions,
+		IMediaRepository mediaRepository,
+		IFeedRepository feedRepository,
+		CancellationToken cancellationToken
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
+
+	public static Task<OutgoingMessages> Handle(
 		ProviderRateLimitedEvent message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,

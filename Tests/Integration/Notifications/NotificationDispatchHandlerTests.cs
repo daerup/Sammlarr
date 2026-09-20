@@ -72,8 +72,33 @@ public class NotificationDispatchHandlerTests
 		await Assert.That(items).Count().IsEqualTo(2);
 		await Assert.That(items[0].Descriptor).IsEqualTo("Added locally");
 		await Assert.That(items[0].Title).IsEqualTo("Pulled Movie");
-		await Assert.That(items[1].Descriptor).IsEqualTo("Removed remotely");
+		await Assert.That(items[1].Descriptor).IsEqualTo("Queued to remove remotely");
 		await Assert.That(items[1].Title).IsEqualTo("Pushed Movie");
+	}
+
+	[Test]
+	public async Task Handle_WhenAWatchlistSyncFails_DeliversTheReasonAsBothSummaryAndData()
+	{
+		var targetId = Guid.NewGuid();
+		var subscriptions = SubscriptionsFor(
+			NotificationEventType.WatchlistSyncFailed,
+			new NotificationSubscription(Guid.NewGuid(), targetId, [NotificationEventType.WatchlistSyncFailed], NotificationTemplate.None)
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new WatchlistSyncFailedEvent(User, DateTimeOffset.UtcNow, "Couldn't reach Plex"),
+			Scope().Object,
+			subscriptions.Object,
+			Media().Object,
+			Feed().Object,
+			CancellationToken.None
+		);
+
+		var delivery = messages.OfType<DeliverNotification>().Single();
+		await Assert.That(delivery.TargetId).IsEqualTo(targetId);
+		await Assert.That(delivery.Context.Summary).IsEqualTo("Couldn't reach Plex");
+		await Assert.That(delivery.Context.Data.Reason).IsEqualTo("Couldn't reach Plex");
+		await Assert.That(delivery.Context.Data.Media).IsNull();
 	}
 
 	[Test]

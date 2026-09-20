@@ -50,6 +50,7 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 			if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
 			{
 				activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
+				await deps.Publisher.PublishAsync(new WatchlistSyncFailedEvent(user.Id, deps.Clock.Now, remoteFailed.Reason), cancellationToken);
 			}
 			return syncResult;
 		}
