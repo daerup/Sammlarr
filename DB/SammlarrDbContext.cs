@@ -6,6 +6,7 @@ using DB.Data.Access;
 using DB.Data.Blacklist;
 using DB.Data.Config;
 using DB.Data.Feed;
+using DB.Data.FeedRun;
 using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Metadata;
@@ -70,6 +71,8 @@ internal sealed class SammlarrDbContext : DbContext
 
 	public DbSet<ProviderConfigRow> ProviderSettings => Set<ProviderConfigRow>();
 	public DbSet<FeedRow> Feeds => Set<FeedRow>();
+	public DbSet<FeedRunRow> FeedRuns => Set<FeedRunRow>();
+	public DbSet<FeedRunItemRow> FeedRunItems => Set<FeedRunItemRow>();
 	public DbSet<BlacklistRow> Blacklist => Set<BlacklistRow>();
 	public DbSet<WatchlistRow> Watchlist => Set<WatchlistRow>();
 	public DbSet<WatchlistOutboxRow> WatchlistOutbox => Set<WatchlistOutboxRow>();

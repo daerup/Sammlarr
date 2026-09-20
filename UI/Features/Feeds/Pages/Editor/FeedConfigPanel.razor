@@ -555,8 +555,8 @@
         IsScheduleValid = !ScheduleIsInvalid,
         IsStrategyValid = !AbsenceThresholdIsInvalid,
         Schedule = _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is not null
-            ? new SyncMode(new Scheduled(_scheduleCronExpression))
-            : new SyncMode(new Manual()),
+            ? new FeedRunTrigger(new Scheduled(_scheduleCronExpression))
+            : new FeedRunTrigger(new Manual()),
     };
 
     private void ChangeName(string v)

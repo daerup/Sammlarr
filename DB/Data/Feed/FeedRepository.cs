@@ -20,7 +20,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		Filter = projection.Filter,
 		Sort = projection.Sort,
 		Limit = projection.Limit,
-		Schedule = projection.SyncMode,
+		Schedule = projection.Trigger,
 	};
 
 	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
@@ -47,7 +47,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			Filter = createData.Filter,
 			Sort = createData.Sort,
 			Limit = createData.Limit,
-			SyncMode = createData.Schedule,
+			Trigger = createData.Schedule,
 		};
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -73,7 +73,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		entity.Filter = updateData.Filter;
 		entity.Sort = updateData.Sort;
 		entity.Limit = updateData.Limit;
-		entity.SyncMode = updateData.Schedule;
+		entity.Trigger = updateData.Schedule;
 
 		await ctx.SaveChangesAsync(cancellationToken);
 	}

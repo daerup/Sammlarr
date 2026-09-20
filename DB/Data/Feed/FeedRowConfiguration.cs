@@ -21,7 +21,7 @@ internal sealed class FeedRowConfiguration : IModelConfiguration
 				.HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryFilter>(v, JsonOptions)!);
 			builder.Property(x => x.Sort).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QuerySort>(v, JsonOptions)!);
 			builder.Property(x => x.Limit).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
-			builder.Property(x => x.SyncMode).HasConversion(new SyncModeConverter());
+			builder.Property(x => x.Trigger).HasConversion(new FeedRunTriggerConverter());
 			builder.Property(x => x.Strategy).HasConversion(new FeedStrategyConverter());
 		});
 }

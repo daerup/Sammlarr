@@ -105,7 +105,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Mirror(5)),
 			Identifier = "top-250",
-			Schedule = new SyncMode(new Scheduled("0 0 9 * * *")),
+			Schedule = new FeedRunTrigger(new Scheduled("0 0 9 * * *")),
 		};
 
 		await _testee.CreateFeedAsync("Top 250", createData);
@@ -116,7 +116,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Provider).IsEqualTo(FeedProvider.Mdblist);
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
 		await Assert.That(feed.Enabled).IsTrue();
-		await Assert.That(feed.Schedule).IsOfUnionType<SyncMode, Scheduled>();
+		await Assert.That(feed.Schedule).IsOfUnionType<FeedRunTrigger, Scheduled>();
 	}
 
 	[Test]
@@ -152,7 +152,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Mirror(5)),
 			Identifier = "new-id",
-			Schedule = new SyncMode(new Manual()),
+			Schedule = new FeedRunTrigger(new Manual()),
 		};
 
 		await _testee.UpdateFeedAsync(id, updateData);
@@ -162,7 +162,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Identifier).IsEqualTo("new-id");
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
 		await Assert.That(feed.Enabled).IsFalse();
-		await Assert.That(feed.Schedule).IsOfUnionType<SyncMode, Manual>();
+		await Assert.That(feed.Schedule).IsOfUnionType<FeedRunTrigger, Manual>();
 	}
 
 	[Test]
@@ -175,7 +175,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Append()),
 			Identifier = "ghost",
-			Schedule = new SyncMode(new Manual()),
+			Schedule = new FeedRunTrigger(new Manual()),
 		};
 
 		await Assert.That(async () => await _testee.UpdateFeedAsync(FeedId.From(Guid.NewGuid()), updateData)).Throws<InvalidOperationException>();
