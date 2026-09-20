@@ -57,10 +57,8 @@
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedMedia"
-                  ButtonAction="ToggleWatchlistAsync"
-                  ButtonText="GetSideMenuButtonText"
-                  ButtonIcon="GetSideMenuButtonIcon"
-                  ButtonDisabled="@SelectedIsUnresolvedOrNull"/>
+                  Source="ManualSource.Browse"
+                  OnEnrollmentChanged="@(_ => LoadWatchlistIdsAsync())"/>
 
 @code {
     private IReadOnlyList<MediaLookup>? _trendingMedia;
@@ -76,7 +74,6 @@
     private int _totalPages = 1;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    private bool SelectedIsUnresolvedOrNull => !_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved;
 
     protected override async Task OnInitializedAsync()
     {
@@ -194,45 +191,6 @@
     {
         _selectedMedia = media;
         _isSheetOpen = true;
-    }
-
-    private string GetSideMenuButtonText()
-    {
-        if (!_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved)
-        {
-            return "Could not be matched";
-        }
-        return IsInWatchlist(_selectedMedia.Value) ? "Remove from Watchlist" : "Add to Watchlist";
-    }
-
-    private string GetSideMenuButtonIcon()
-    {
-        if (!_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved)
-        {
-            return "circle-alert";
-        }
-        return IsInWatchlist(_selectedMedia.Value) ? "x" : "plus";
-    }
-
-    private async Task ToggleWatchlistAsync()
-    {
-        if (!_selectedMedia.HasValue || _selectedMedia.Value.IsUnresolved)
-        {
-            return;
-        }
-        var resolved = _selectedMedia.Value;
-
-        if (IsInWatchlist(resolved))
-        {
-            await WatchlistService.RemoveFromWatchlistAsync([resolved.Id]);
-        }
-        else
-        {
-            await WatchlistService.AddToWatchlistAsync([resolved.Id], new ManualOrigin(ManualSource.Browse));
-        }
-
-        await LoadWatchlistIdsAsync();
-        _isSheetOpen = false;
     }
 
     private Task DetailsOpenChangedAsync(bool isOpen)

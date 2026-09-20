@@ -1,15 +1,17 @@
 <button type="button"
         class="search-result-toggle-btn @(IsToggled ? "is-marked" : "") @(IsToggling ? "pointer-events-none" : "")"
         style="--toggle-active-color: var(--destructive)"
+        title="@Label"
+        aria-label="@Label"
         @onclick="HandleToggleAsync">
-    <span class="relative inline-flex items-center justify-center w-6 h-6">
+    <span class="relative inline-flex items-center justify-center" style="width: @(Size)px; height: @(Size)px">
         @if (IsToggled)
         {
-            <LucideIcon Name="shield-off" Size="24" Color="var(--destructive)" Class="@_iconClass"/>
+            <LucideIcon Name="shield-off" Size="@Size" Color="var(--destructive)" Class="@_iconClass"/>
         }
         else
         {
-            <LucideIcon Name="shield" Size="24" Class="@_iconClass"/>
+            <LucideIcon Name="shield" Size="@Size" Class="@_iconClass"/>
         }
         @if (IsToggling)
         {
@@ -24,7 +26,10 @@
     [Parameter] [EditorRequired] public required MediaLookup Result { get; set; }
     [Parameter] public bool IsToggled { get; set; }
     [Parameter] public bool IsToggling { get; set; }
+    [Parameter] public int Size { get; set; } = 24;
     [Parameter] public EventCallback<MediaLookup> OnToggle { get; set; }
+
+    private string Label => IsToggled ? "Remove from blacklist" : "Add to blacklist";
 
     private string _iconClass = string.Empty;
 

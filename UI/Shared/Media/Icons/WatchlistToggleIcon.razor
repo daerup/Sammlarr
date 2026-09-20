@@ -4,14 +4,14 @@
         title="@Label"
         aria-label="@Label"
         @onclick="HandleToggleAsync">
-    <span class="relative inline-flex items-center justify-center w-6 h-6">
+    <span class="relative inline-flex items-center justify-center" style="width: @(Size)px; height: @(Size)px">
         @if (IsToggled)
         {
-            <LucideIcon Name="bookmark" Size="24" Fill="orange" Color="orange" Class="@_iconClass"/>
+            <LucideIcon Name="bookmark" Size="@Size" Fill="orange" Color="orange" Class="@_iconClass"/>
         }
         else
         {
-            <LucideIcon Name="bookmark" Size="24" Class="@_iconClass"/>
+            <LucideIcon Name="bookmark" Size="@Size" Class="@_iconClass"/>
         }
         @if (DotColor is not null && !IsToggling)
         {
@@ -30,6 +30,7 @@
     [Parameter] [EditorRequired] public required MediaLookup Result { get; set; }
     [Parameter] public bool IsToggled { get; set; }
     [Parameter] public bool IsToggling { get; set; }
+    [Parameter] public int Size { get; set; } = 24;
     [Parameter] public string? DotColor { get; set; }
     [Parameter] public EventCallback<MediaLookup> OnToggle { get; set; }
 
