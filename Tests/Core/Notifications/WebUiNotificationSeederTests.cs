@@ -24,7 +24,7 @@ public class WebUiNotificationSeederTests
 	}
 
 	[Test]
-	public async Task SeedAsync_Always_SubscribesTheTargetToRateLimitingOnly()
+	public async Task SeedAsync_Always_SubscribesOneSubscriptionToRateLimitsAndBothWatchlistSyncOutcomes()
 	{
 		var created = Guid.NewGuid();
 		targets.CreateAsync(Any(), Any()).Returns(created);
@@ -34,7 +34,11 @@ public class WebUiNotificationSeederTests
 		subscriptions
 			.AddAsync(
 				created,
-				Arg.Is<IReadOnlyList<NotificationEventType>>(types => types.SequenceEqual(new[] { NotificationEventType.ProviderRateLimited })),
+				Arg.Is<IReadOnlyList<NotificationEventType>>(types =>
+					types.SequenceEqual(
+						new[] { NotificationEventType.ProviderRateLimited, NotificationEventType.WatchlistSynced, NotificationEventType.WatchlistSyncFailed }
+					)
+				),
 				Any(),
 				Any()
 			)
@@ -42,23 +46,12 @@ public class WebUiNotificationSeederTests
 	}
 
 	[Test]
-	public async Task SeedAsync_Always_SeedsAWarningTemplateNamingTheProvider()
+	public async Task SeedAsync_Always_LeavesTheTemplateAutomaticSoEachEventKeepsItsOwnLevel()
 	{
 		targets.CreateAsync(Any(), Any()).Returns(Guid.NewGuid());
 
 		await Testee.SeedAsync();
 
-		subscriptions
-			.AddAsync(
-				Any(),
-				Any(),
-				Arg.Is<NotificationTemplate>(seeded =>
-					seeded.Title.GetValueOr(string.Empty).Contains("{{ data.provider }}")
-					&& seeded.Message.GetValueOr(string.Empty).Contains("{{ summary }}")
-					&& seeded.Level.GetValueOr(NotificationLevel.Info) == NotificationLevel.Warning
-				),
-				Any()
-			)
-			.WasCalled(Times.Once);
+		subscriptions.AddAsync(Any(), Any(), Arg.Is<NotificationTemplate>(seeded => seeded == NotificationTemplate.None), Any()).WasCalled(Times.Once);
 	}
 }
