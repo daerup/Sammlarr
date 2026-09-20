@@ -48,6 +48,12 @@ internal sealed class WatchlistService(
 		return entries.OrderBy(e => e.AddedAt).Select(e => e.MediaId).ToHashSet();
 	}
 
+	public async Task<Optional<WatchlistItemProvenance>> GetProvenanceAsync(MediaId mediaId, CancellationToken cancellationToken = default)
+	{
+		var entries = await repository.GetEntriesAsync(cancellationToken);
+		return entries.FirstOrDefault(entry => entry.MediaId == mediaId) is { } match ? Some.Of(match.Provenance) : new None();
+	}
+
 	public async Task AddToWatchlistAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
 	{
 		var ids = mediaIds.ToList();
