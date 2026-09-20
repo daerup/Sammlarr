@@ -295,11 +295,7 @@ else
             _pushed.Clear();
             return;
         }
-        if (failed == 0)
-        {
-            Notifier.Success($"Synced {pushed} item{(pushed == 1 ? "" : "s")} to {WatchlistProviderName}.");
-        }
-        else
+        if (failed > 0)
         {
             Notifier.Warning($"Synced {pushed} to {WatchlistProviderName} — {failed} failed.");
         }

@@ -269,10 +269,7 @@ else
             var result = await SyncEngine.SyncAsync(new ManualTrigger(), CurrentUser, _cts.Token);
             switch (result)
             {
-                case WatchlistSyncSummary { Push.Count: > 0 }:
-                    break;
-                case WatchlistSyncSummary changes:
-                    Notifier.Info(changes.ToString(), null);
+                case WatchlistSyncSummary:
                     break;
                 case WatchlistSyncAlreadyRunning running:
                     Notifier.Info(running.ToString(), null);
