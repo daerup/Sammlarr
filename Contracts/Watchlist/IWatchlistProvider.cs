@@ -4,7 +4,7 @@ namespace Contracts.Watchlist;
 
 public interface IWatchlistProvider
 {
-	IAsyncEnumerable<IExternalMediaId> GetWatchlistAsync(CancellationToken cancellationToken = default);
+	IAsyncEnumerable<UnmatchedMedia> GetWatchlistAsync(CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<WatchlistPushAck> AddToWatchlistAsync(IEnumerable<IExternalMediaId> ids, CancellationToken cancellationToken = default);
 

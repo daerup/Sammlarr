@@ -17,48 +17,52 @@ public class PlexWatchListProviderTests
 	private static readonly Faker Faker = new();
 
 	[Test]
-	public async Task GetAllAsync_WhenItemHasZeroYear_FiltersItem()
+	public async Task GetWatchlistAsync_WhenItemHasNoYearOrDate_StillReturnsItWithoutAReleaseDate()
 	{
-		var json = BuildWatchlistJson(0, CreateMetadata(0));
-		var testee = CreateWatchListService(json);
-
-		var result = await testee.GetWatchlistAsync().ToListAsync();
-
-		await Assert.That(result).IsEmpty();
-	}
-
-	[Test]
-	public async Task GetAllAsync_WhenItemHasMissingDate_FiltersItem()
-	{
-		var json = BuildWatchlistJson(0, CreateMetadata(originallyAvailableAt: string.Empty));
-		var testee = CreateWatchListService(json);
-
-		var result = await testee.GetWatchlistAsync().ToListAsync();
-
-		await Assert.That(result).IsEmpty();
-	}
-
-	[Test]
-	public async Task GetAllAsync_WhenItemHasMissingTitle_FiltersItem()
-	{
-		var json = BuildWatchlistJson(0, CreateMetadata(title: string.Empty));
-		var testee = CreateWatchListService(json);
-
-		var result = await testee.GetWatchlistAsync().ToListAsync();
-
-		await Assert.That(result).IsEmpty();
-	}
-
-	[Test]
-	public async Task GetAllAsync_WhenItemIsComplete_ReturnsItem()
-	{
-		var json = BuildWatchlistJson(1, CreateMetadata(ratingKey: "plex-42"));
+		var json = BuildWatchlistJson(1, CreateMetadata(year: 0, originallyAvailableAt: string.Empty));
 		var testee = CreateWatchListService(json);
 
 		var result = await testee.GetWatchlistAsync().ToListAsync();
 
 		await Assert.That(result).Count().IsEqualTo(1);
-		await Assert.That(result[0].Value).IsEqualTo("plex-42");
+		await Assert.That(result[0].ReleaseDate).IsNull();
+	}
+
+	[Test]
+	public async Task GetWatchlistAsync_WhenItemHasOnlyAYear_DatesItToThatYear()
+	{
+		var json = BuildWatchlistJson(1, CreateMetadata(year: 1999, originallyAvailableAt: string.Empty));
+		var testee = CreateWatchListService(json);
+
+		var result = await testee.GetWatchlistAsync().ToListAsync();
+
+		await Assert.That(result[0].ReleaseDate).IsEqualTo(new DateOnly(1999, 1, 1));
+	}
+
+	[Test]
+	public async Task GetWatchlistAsync_WhenItemHasNoTitle_StillReturnsItWithItsExternalId()
+	{
+		var json = BuildWatchlistJson(1, CreateMetadata(title: string.Empty, ratingKey: "plex-7"));
+		var testee = CreateWatchListService(json);
+
+		var result = await testee.GetWatchlistAsync().ToListAsync();
+
+		await Assert.That(result).Count().IsEqualTo(1);
+		await Assert.That(result[0].Title).IsNull();
+		await Assert.That(result[0].Externals.First().Value).IsEqualTo("plex-7");
+	}
+
+	[Test]
+	public async Task GetWatchlistAsync_WhenItemIsComplete_CarriesItsTitleAlongsideItsExternalId()
+	{
+		var json = BuildWatchlistJson(1, CreateMetadata(ratingKey: "plex-42", title: "Futurama"));
+		var testee = CreateWatchListService(json);
+
+		var result = await testee.GetWatchlistAsync().ToListAsync();
+
+		await Assert.That(result).Count().IsEqualTo(1);
+		await Assert.That(result[0].Title).IsEqualTo("Futurama");
+		await Assert.That(result[0].Externals.First().Value).IsEqualTo("plex-42");
 		await Assert.That(result[0].Type).IsEqualTo(MediaType.Movie);
 	}
 

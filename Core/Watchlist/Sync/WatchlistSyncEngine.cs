@@ -137,7 +137,8 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 		return new WatchlistSyncRemoteFailed(error.Reason);
 	}
 
-	private static WatchlistSyncResult BuildChanges(WatchlistSyncPlan plan) => new WatchlistSyncSummary(plan.Pull, plan.Push, plan.NoOps);
+	private static WatchlistSyncResult BuildChanges(WatchlistSyncPlan plan) =>
+		new WatchlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant]) { Unmatched = plan.Unmatched };
 
 	private static async Task<EngineDeps> ResolveAsync(AsyncServiceScope scope, CancellationToken cancellationToken)
 	{
@@ -155,15 +156,18 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 		);
 	}
 
-	private async Task<Result<IReadOnlyList<MediaId>>> FetchRemoteAsync(EngineDeps deps, CancellationToken cancellationToken)
+	private readonly record struct RemoteWatchlist(IReadOnlyList<MediaId> Resolved, IReadOnlyList<UnmatchedMedia> Unmatched);
+
+	private async Task<Result<RemoteWatchlist>> FetchRemoteAsync(EngineDeps deps, CancellationToken cancellationToken)
 	{
 		try
 		{
-			var externals = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
-			var requests = externals.Select(e => new ResolveRequest([e], deps.MediaProvider, new None()));
-			var remoteMediaIds = new List<MediaId>(externals.Count);
-			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).ZipAwait(externals, cancellationToken);
-			await foreach (var (result, external) in pipeline)
+			var entries = await deps.RemoteWatchlistProvider.GetWatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
+			var requests = entries.Select(entry => new ResolveRequest([.. entry.Externals], deps.MediaProvider, new None()));
+			var remoteMediaIds = new List<MediaId>(entries.Count);
+			var unmatched = new List<UnmatchedMedia>();
+			var pipeline = deps.Media.IdentifyAsync(requests, cancellationToken).ZipAwait(entries, cancellationToken);
+			await foreach (var (result, entry) in pipeline)
 			{
 				if (result is Success<MediaIdentity>(var identity))
 				{
@@ -171,10 +175,11 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 				}
 				else
 				{
-					logger.LogWarning("Remote watchlist item {External} could not be resolved during sync", external);
+					unmatched.Add(entry);
+					logger.LogWarning("Remote watchlist item {Title} could not be resolved during sync", entry.Title ?? entry.Externals.FirstOrDefault()?.Value);
 				}
 			}
-			return Success.Of<IReadOnlyList<MediaId>>(remoteMediaIds);
+			return Success.Of(new RemoteWatchlist(remoteMediaIds, unmatched));
 		}
 		catch (Exception ex)
 		{
@@ -184,11 +189,11 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 
 	private async Task<Result<WatchlistSyncPlan>> PlanAsync(EngineDeps deps, CancellationToken cancellationToken) =>
 		await FetchRemoteAsync(deps, cancellationToken)
-			.Map(async remoteIds =>
+			.Map(async remote =>
 			{
 				var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
 				var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
-				return Success.Of(WatchlistSyncPlan.Compute(remoteIds, localIds, outboxOps));
+				return Success.Of(WatchlistSyncPlan.Compute(remote.Resolved, localIds, outboxOps) with { Unmatched = remote.Unmatched });
 			});
 
 	private readonly record struct EngineDeps(

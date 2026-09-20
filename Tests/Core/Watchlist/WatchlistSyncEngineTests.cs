@@ -111,7 +111,7 @@ public class WatchlistSyncEngineTests
 		}
 	}
 
-	private static async IAsyncEnumerable<IExternalMediaId> WaitingAsyncEnumerable(TaskCompletionSource gate)
+	private static async IAsyncEnumerable<UnmatchedMedia> WaitingAsyncEnumerable(TaskCompletionSource gate)
 	{
 		await gate.Task;
 		yield break;
