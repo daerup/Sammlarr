@@ -9,6 +9,7 @@
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
+@inject DialogService DialogService
 
 <PageTitle>@PageTitleText</PageTitle>
 
@@ -127,6 +128,7 @@
     private int? _storedHash;
     private int _appliedHash;
     private FeedId? _savedFeedId;
+    private FeedStrategy _storedStrategy = new(new Append());
 
     private bool _isSaving;
     private bool _isApplying;
@@ -188,6 +190,7 @@
             Schedule = feed.Schedule,
         };
         _storedHash = _config.GetSaveHash();
+        _storedStrategy = _config.Strategy;
         if (EditFeedId is not null)
         {
             _savedFeedId = sourceId;
@@ -253,8 +256,28 @@
 
     private Task HandleSaveAsync() => CanSave ? SaveAsync() : Task.CompletedTask;
 
+    private async Task<bool> ConfirmMirrorSwitchAsync()
+    {
+        if (!MirrorSwitch.NeedsConfirmation(_storedStrategy, _config.Strategy, _previewStatus.MirrorExposure) || _config.Strategy is not Mirror mirror)
+        {
+            return true;
+        }
+
+        var result = await DialogService.ConfirmAsync(
+            MirrorSwitch.Heading,
+            MirrorSwitch.Warning(_previewStatus.MirrorExposure, mirror.AbsenceThreshold),
+            new ConfirmDialogOptions { ConfirmText = MirrorSwitch.Confirm, Destructive = true }
+        );
+        return result.Confirmed;
+    }
+
     private async Task SaveAsync()
     {
+        if (!await ConfirmMirrorSwitchAsync())
+        {
+            return;
+        }
+
         _isSaving = true;
 
         try
@@ -271,7 +294,7 @@
 
     private async Task QuickSaveAsync()
     {
-        if (!CanSave || _isSaving)
+        if (!CanSave || _isSaving || !await ConfirmMirrorSwitchAsync())
         {
             return;
         }
