@@ -85,6 +85,24 @@ public record PreviewStatus
 	public bool HasFailed { get; init; }
 	public bool HasEnrollmentChanges { get; init; }
 	public bool EarlySaveAllowed { get; init; }
+	public int MirrorExposure { get; init; }
+}
+
+internal static class MirrorSwitch
+{
+	internal const string Heading = "Mirror removes titles this feed added";
+
+	internal const string Confirm = "Switch to Mirror";
+
+	public static bool NeedsConfirmation(FeedStrategy stored, FeedStrategy pending, int exposure) => stored is Append && pending is Mirror && exposure > 0;
+
+	public static string Warning(int exposure, int threshold)
+	{
+		var single = exposure == 1;
+		var left = single ? "1 has already left the list" : $"{exposure} have already left the list";
+		var timing = threshold == 1 ? "on the next run" : $"after {threshold} runs without {(single ? "it" : "them")}";
+		return $"{left}, and {(single ? "is" : "are")} deleted {timing}.";
+	}
 }
 
 public record FeedConfig
