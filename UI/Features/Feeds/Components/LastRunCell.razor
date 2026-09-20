@@ -1,0 +1,122 @@
+@using Contracts.Feed
+@using Contracts.Media
+@using Domain.Feed
+@using Domain.Feed.Run
+@using Domain.Media
+@using UI.Shared.Changes
+@inject IFeedRunLog RunLog
+@inject IMediaService Media
+
+@if (_run is null)
+{
+    <span class="last-run is-never">
+        <LucideIcon Name="history" Size="14"/>
+        <span>Never</span>
+        <span class="last-run-badge is-empty">—</span>
+    </span>
+}
+else
+{
+    <button type="button" class="last-run" @onclick="OpenAsync">
+        <LucideIcon Name="history" Size="14"/>
+        <span>@Relative(_run.StartedAt)</span>
+        @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
+        {
+            <span class="last-run-badge is-guarded">
+                <LucideIcon Name="shield" Size="11"/>
+            </span>
+        }
+        else
+        {
+            <span class="last-run-badge">
+                @if (_run.Counts.Added > 0)
+                {
+                    <span class="is-added">+@_run.Counts.Added</span>
+                }
+                @if (_run.Counts.Removed > 0)
+                {
+                    <span class="is-removed">−@_run.Counts.Removed</span>
+                }
+                @if (!_run.HasChanges)
+                {
+                    <LucideIcon Name="check" Size="11"/>
+                }
+            </span>
+        }
+    </button>
+
+    <ChangeDialog Open="_open"
+                  OnOpenChanged="@(open => _open = open)"
+                  Title="@Heading(_run)"
+                  Subtitle="@FeedRunView.Summary(_run)"
+                  Entries="_entries"
+                  Chips="@FeedRunView.Chips(_run.Counts)"
+                  EmptyMessage="Nothing was added or removed."
+                  Note="@($"{_runCount} runs")">
+        <Badges>
+            <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(_run.Strategy)</BbBadge>
+            @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
+            {
+                <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
+            }
+        </Badges>
+        <Actions>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _open = false)">Close</BbButton>
+        </Actions>
+    </ChangeDialog>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required FeedId FeedId { get; set; }
+
+    private FeedRun? _run;
+    private int _runCount;
+    private bool _open;
+    private IReadOnlyList<ChangeEntry> _entries = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var runs = await RunLog.GetRunsAsync(FeedId, take: 1);
+        _run = runs.FirstOrDefault();
+        _runCount = runs.Count;
+    }
+
+    private async Task OpenAsync()
+    {
+        if (_run is null)
+        {
+            return;
+        }
+
+        var wanted = _run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
+        var described = new Dictionary<MediaId, MediaLookup>();
+
+        await foreach (var result in Media.GetDetailsAsync(wanted))
+        {
+            if (result is Success<IdentifiedMedia>(var media))
+            {
+                described[media.Id] = media;
+            }
+        }
+
+        _entries = FeedRunView.Entries(_run, described);
+        _open = true;
+    }
+
+    private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm");
+
+    private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · grace {mirror.AbsenceThreshold}" : "Append";
+
+    private static string Relative(DateTimeOffset moment)
+    {
+        var elapsed = DateTimeOffset.UtcNow - moment;
+
+        return elapsed switch
+        {
+            { TotalMinutes: < 60 } => $"{elapsed.TotalMinutes:0} min ago",
+            { TotalHours: < 24 } => $"{elapsed.TotalHours:0} hours ago",
+            { TotalDays: < 30 } => $"{elapsed.TotalDays:0} days ago",
+            _ => moment.ToLocalTime().ToString("MMM d"),
+        };
+    }
+}
