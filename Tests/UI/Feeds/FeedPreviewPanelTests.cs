@@ -206,7 +206,7 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			var verdicts = items.Select(Owned).ToList();
 
-			return Task.FromResult(new FeedRunSummary(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive));
+			return Task.FromResult(new FeedRunSummary(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>()));
 		}
 
 		private static QueryVerdict<MediaLookup> Owned(MediaLookup item, int index) =>
@@ -256,7 +256,9 @@ public class FeedPreviewPanelTests : BunitContext
 				))
 				.ToList();
 
-			return Task.FromResult(new FeedRunSummary(verdicts, [], new FeedDelta([], [], [gone]), Conclusiveness.Conclusive));
+			return Task.FromResult(
+				new FeedRunSummary(verdicts, [], new FeedDelta([], [], [gone]), Conclusiveness.Conclusive, new Dictionary<MediaId, int> { [gone] = 0 })
+			);
 		}
 	}
 
@@ -296,7 +298,7 @@ public class FeedPreviewPanelTests : BunitContext
 			var unresolved = items.Where(item => item is UnmatchedMedia).ToList();
 			var verdicts = items.Where(item => item is not UnmatchedMedia).Select(Spread).ToList();
 
-			return Task.FromResult(new FeedRunSummary(verdicts, unresolved, FeedDelta.None, Conclusiveness.Conclusive));
+			return Task.FromResult(new FeedRunSummary(verdicts, unresolved, FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>()));
 		}
 
 		private static QueryVerdict<MediaLookup> Spread(MediaLookup item, int index) =>
