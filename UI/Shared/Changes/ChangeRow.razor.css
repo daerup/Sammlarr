@@ -1,0 +1,77 @@
+.change-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 17px;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.change-row:hover {
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.change-sign {
+    flex: none;
+    width: 14px;
+    display: inline-flex;
+}
+
+.change-sign.is-added {
+    color: var(--alert-success);
+}
+
+.change-sign.is-removed {
+    color: var(--destructive);
+}
+
+.change-sign.is-unmatched {
+    color: var(--alert-warning);
+}
+
+.change-poster {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex: none;
+    background: var(--muted);
+}
+
+.change-poster.is-missing {
+    border: 1px dashed var(--border);
+    background: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-foreground);
+}
+
+.change-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.change-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.change-subtitle {
+    color: var(--muted-foreground);
+    font-size: 11.5px;
+}
+
+.change-context {
+    flex: none;
+    color: var(--muted-foreground);
+    display: inline-flex;
+}
+
+.change-row.is-leaving .change-poster,
+.change-row.is-leaving .change-text {
+    filter: grayscale(0.8) brightness(68%);
+}

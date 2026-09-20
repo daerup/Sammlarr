@@ -1,0 +1,166 @@
+.change-chips {
+    display: flex;
+    align-items: center;
+    padding: 9px 13px;
+    border-bottom: 1px solid var(--border);
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.change-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.change-chip:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    color: var(--foreground);
+}
+
+.change-chip.is-on {
+    background: color-mix(in srgb, var(--foreground) 10%, transparent);
+    color: var(--foreground);
+}
+
+.change-chip.is-dim {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.change-chip.tone-added {
+    color: var(--alert-success);
+}
+
+.change-chip.tone-added:hover:not(:disabled),
+.change-chip.tone-added.is-on {
+    background: color-mix(in oklch, var(--alert-success) 16%, transparent);
+    color: var(--alert-success);
+}
+
+.change-chip.tone-removed {
+    color: var(--destructive);
+}
+
+.change-chip.tone-removed:hover:not(:disabled),
+.change-chip.tone-removed.is-on {
+    background: color-mix(in oklch, var(--destructive) 16%, transparent);
+    color: var(--destructive);
+}
+
+.change-chip.tone-unmatched {
+    color: var(--alert-warning);
+}
+
+.change-chip.tone-unmatched:hover:not(:disabled),
+.change-chip.tone-unmatched.is-on {
+    background: color-mix(in oklch, var(--alert-warning) 16%, transparent);
+    color: var(--alert-warning);
+}
+
+.change-glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.change-chip .change-glyph {
+    height: 16px;
+    transform: translateY(-0.78px);
+}
+
+.change-chip-count {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.change-chip ::deep svg {
+    display: block;
+    transform: translateY(-1.27px);
+}
+
+.change-chip-sep {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border);
+    margin: 0 7px;
+}
+
+.change-search {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--muted-foreground);
+    min-width: 260px;
+    flex: 0 1 320px;
+}
+
+.change-search:focus-within {
+    border-color: color-mix(in srgb, var(--foreground) 35%, transparent);
+}
+
+.change-search input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--foreground);
+    font-size: 13px;
+    width: 100%;
+}
+
+.change-body {
+    max-height: min(62vh, 640px);
+    overflow-y: auto;
+    background: var(--card);
+}
+
+.change-group {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 17px 5px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--card);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--border) 70%, transparent);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.change-group.tone-added {
+    color: var(--alert-success);
+}
+
+.change-group.tone-removed {
+    color: var(--destructive);
+}
+
+.change-group.tone-unmatched {
+    color: var(--alert-warning);
+}
+
+.change-group-count {
+    font-variant-numeric: tabular-nums;
+}

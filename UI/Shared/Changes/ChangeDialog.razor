@@ -1,0 +1,76 @@
+@using Domain.Media
+
+<BbDialog Open="Open" OpenChanged="OnOpenChanged">
+    <BbDialogContent Class="change-dialog p-0 gap-0">
+        @if (Prologue is not null)
+        {
+            <div class="change-prologue">@Prologue</div>
+        }
+        <div class="change-head">
+            <div class="change-head-top">
+                <div>
+                    <h3 class="change-title-text">@Title</h3>
+                    @if (!string.IsNullOrWhiteSpace(Subtitle))
+                    {
+                        <p class="change-sub">@Subtitle</p>
+                    }
+                </div>
+            </div>
+            @if (Badges is not null)
+            {
+                <div class="change-badges">@Badges</div>
+            }
+        </div>
+
+        @if (Band is not null)
+        {
+            <div class="change-band @BandClass">@Band</div>
+        }
+
+        @if (Entries.Count > 0)
+        {
+            <ChangeList Entries="Entries"
+                        Chips="Chips"
+                        OnSelect="OnSelect"
+                        RemovedLabel="@RemovedLabel"
+                        AddedLabel="@AddedLabel"
+                        UnchangedLabel="@UnchangedLabel"/>
+        }
+        else
+        {
+            <div class="change-empty">@EmptyMessage</div>
+        }
+
+        <div class="change-foot">
+            <span class="change-note">@Note</span>
+            <span class="change-actions">@Actions</span>
+        </div>
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OnOpenChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required string Title { get; set; }
+    [Parameter] public string? Subtitle { get; set; }
+    [Parameter] public RenderFragment? Badges { get; set; }
+
+    [Parameter] public RenderFragment? Prologue { get; set; }
+    [Parameter] public RenderFragment? Band { get; set; }
+    [Parameter] public ChangeBandTone BandTone { get; set; } = ChangeBandTone.Warn;
+
+    [Parameter] public IReadOnlyList<ChangeEntry> Entries { get; set; } = [];
+    [Parameter] public IReadOnlyList<ChangeChip> Chips { get; set; } = [];
+    [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+
+    [Parameter] public string RemovedLabel { get; set; } = "Removed";
+    [Parameter] public string AddedLabel { get; set; } = "Added";
+    [Parameter] public string UnchangedLabel { get; set; } = "Already yours";
+    [Parameter] public string EmptyMessage { get; set; } = "Nothing changed.";
+
+    [Parameter] public string? Note { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+
+    private string BandClass => BandTone is ChangeBandTone.Warn ? "is-warn" : "is-bad";
+}
