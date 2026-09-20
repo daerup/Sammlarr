@@ -3,6 +3,7 @@ using Contracts.Feed;
 using Contracts.Processing;
 using Contracts.Watchlist;
 using Core.Processing;
+using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
@@ -10,7 +11,8 @@ using Domain.Watchlist;
 
 namespace Core.Feed;
 
-internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistService blacklist, QueryProcessor<MediaQueryRow> processor) : IFeedRunEngine
+internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistService blacklist, IFeedRunLog runLog, QueryProcessor<MediaQueryRow> processor)
+	: IFeedRunEngine
 {
 	public async Task<FeedRunSummary> DryRunAsync(
 		Domain.Feed.Feed feed,
@@ -44,7 +46,10 @@ internal sealed class FeedRunEngine(IWatchlistRepository watchlist, IBlacklistSe
 			.Select(verdict => new QueryVerdict<MediaLookup>(verdict.Item.Media, verdict.Outcome, verdict.Enrollment, verdict.ConsumesSlot))
 			.ToList();
 
-		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, feed.Strategy, source);
-		return new FeedRunSummary(verdicts, unresolved, plan.Delta, plan.Conclusiveness);
+		var window = feed.Strategy is Mirror mirror ? mirror.AbsenceThreshold : 1;
+		var absences = await runLog.GetAbsencesAsync(feed.Id, owned, window, cancellationToken);
+
+		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, absences, feed.Strategy, source);
+		return new FeedRunSummary(verdicts, unresolved, plan.Delta, plan.Conclusiveness, plan.RunsRemaining);
 	}
 }

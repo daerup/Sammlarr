@@ -106,13 +106,49 @@ public class FeedRunPlanTests
 		await Assert.That(plan.Delta.Drops).IsEmpty();
 	}
 
+	[Test]
+	public async Task Compute_WhenGraceRemains_DropsNothingButCountsDownTheRun()
+	{
+		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: []);
+
+		await Assert.That(plan.Delta.Drops).IsEmpty();
+		await Assert.That(plan.RunsRemaining[Dropped]).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task Compute_WhenTheLastRunOfGraceIsSpent_DropsTheItem()
+	{
+		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
+
+		await Assert.That(plan.Delta.Drops).IsEquivalentTo([Dropped]);
+		await Assert.That(plan.RunsRemaining[Dropped]).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Compute_ForAQualifyingOwnedItem_ReportsNoGraceCountdownAtAll()
+	{
+		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept], absences: [(Kept, 2)]);
+
+		await Assert.That(plan.RunsRemaining).DoesNotContainKey(Kept);
+		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
+	}
+
 	private static FeedRunPlan Compute(
 		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
 		FeedSource source = FeedSource.Complete,
-		int unresolvedCount = 0
-	) => FeedRunPlan.Compute(verdicts, unresolvedCount, owned.ToHashSet(), strategy ?? new Mirror(3), source);
+		int unresolvedCount = 0,
+		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
+	) =>
+		FeedRunPlan.Compute(
+			verdicts,
+			unresolvedCount,
+			owned.ToHashSet(),
+			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
+			strategy ?? new Mirror(3),
+			source
+		);
 
 	private static QueryVerdict<MediaLookup> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlacklist = false) =>
 		new(

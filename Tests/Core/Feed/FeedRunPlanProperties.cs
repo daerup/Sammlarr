@@ -12,7 +12,9 @@ namespace Core.Tests.Feed;
 
 public class FeedRunPlanProperties
 {
-	private sealed record Scenario(FeedRunPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy);
+	private const int Threshold = 3;
+
+	private sealed record Scenario(FeedRunPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy, IReadOnlyDictionary<MediaId, int> Absences);
 
 	private static readonly Gen<Scenario> Scenarios = Gen.Select(
 			Gen.OneOfConst(QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Truncated),
@@ -20,12 +22,13 @@ public class FeedRunPlanProperties
 			Gen.Bool,
 			Gen.Bool,
 			Gen.Bool,
-			(outcome, owned, inWatchlist, inBlacklist, inSource) => (outcome, owned, inWatchlist, inBlacklist, inSource)
+			Gen.Int[0, Threshold + 1],
+			(outcome, owned, inWatchlist, inBlacklist, inSource, absences) => (outcome, owned, inWatchlist, inBlacklist, inSource, absences)
 		)
 		.Array[0, 6]
 		.SelectMany(situations =>
 			Gen.Select(
-				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(3), new Mirror(3)),
+				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
 				Gen.OneOfConst(FeedSource.Complete, FeedSource.Complete, FeedSource.Complete, FeedSource.Partial),
 				Gen.Int[0, 3],
 				(strategy, source, unresolved) => Build(situations, strategy, source, unresolved)
@@ -53,17 +56,24 @@ public class FeedRunPlanProperties
 		Scenarios.Sample(scenario => scenario.Plan.Conclusiveness is Conclusiveness.Conclusive || scenario.Plan.Delta.Drops.Count == 0, iter: 10_000);
 
 	[Test]
-	public void Compute_ForAConclusiveMirrorRun_AccountsForEveryOwnedItem() =>
+	public void Compute_ForAnyScenario_AccountsForEveryOwnedItem() =>
+		Scenarios.Sample(scenario => scenario.Plan.Delta.Keeps.Concat(scenario.Plan.RunsRemaining.Keys).ToHashSet().SetEquals(scenario.Owned), iter: 10_000);
+
+	[Test]
+	public void Compute_WhileGraceRemains_NeverDrops() =>
+		Scenarios.Sample(scenario => scenario.Plan.Delta.Drops.All(id => scenario.Absences.GetValueOrDefault(id) + 1 >= Threshold), iter: 10_000);
+
+	[Test]
+	public void Compute_ForAnyMissingOwnedItem_CountsDownFromTheThreshold() =>
 		Scenarios.Sample(
 			scenario =>
-				scenario.Plan.Conclusiveness is not Conclusiveness.Conclusive
-				|| scenario.Strategy is not Mirror
-				|| scenario.Plan.Delta.Drops.Concat(scenario.Plan.Delta.Keeps).ToHashSet().SetEquals(scenario.Owned),
+				scenario.Strategy is not Mirror
+				|| scenario.Plan.RunsRemaining.All(entry => entry.Value == Math.Max(0, Threshold - (scenario.Absences.GetValueOrDefault(entry.Key) + 1))),
 			iter: 10_000
 		);
 
 	private static Scenario Build(
-		(QueryOutcome Outcome, bool Owned, bool InWatchlist, bool InBlacklist, bool InSource)[] situations,
+		(QueryOutcome Outcome, bool Owned, bool InWatchlist, bool InBlacklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
 		FeedSource source,
 		int unresolvedCount
@@ -71,15 +81,17 @@ public class FeedRunPlanProperties
 	{
 		var verdicts = new List<QueryVerdict<MediaLookup>>();
 		var owned = new HashSet<MediaId>();
+		var absences = new Dictionary<MediaId, int>();
 
 		for (var index = 0; index < situations.Length; index++)
 		{
 			var id = MediaId.From(new Guid(index + 1, 0, 0, new byte[8]));
-			var (outcome, isOwned, inWatchlist, inBlacklist, inSource) = situations[index];
+			var (outcome, isOwned, inWatchlist, inBlacklist, inSource, absenceCount) = situations[index];
 
 			if (isOwned)
 			{
 				owned.Add(id);
+				absences[id] = absenceCount;
 			}
 
 			if (inSource)
@@ -94,7 +106,7 @@ public class FeedRunPlanProperties
 			}
 		}
 
-		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, owned, strategy, source), owned, strategy);
+		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, owned, absences, strategy, source), owned, strategy, absences);
 	}
 
 	private static MediaLookup Row(MediaId id) =>

@@ -7,5 +7,9 @@ public sealed record FeedRunSummary(
 	IReadOnlyList<QueryVerdict<MediaLookup>> Verdicts,
 	IReadOnlyList<MediaLookup> Unresolved,
 	FeedDelta Delta,
-	Conclusiveness Conclusiveness
-);
+	Conclusiveness Conclusiveness,
+	IReadOnlyDictionary<MediaId, int> RunsRemaining
+)
+{
+	public int AtRiskCount => RunsRemaining.Count;
+}
