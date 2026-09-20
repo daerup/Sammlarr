@@ -9,6 +9,7 @@ using Core.Watchlist.Sync;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Watchlist;
+using Domain.Watchlist.Outbox;
 using Domain.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -39,7 +40,39 @@ public class WatchlistSyncEngineTests
 		await Assert.That(firstResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
 	}
 
-	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider)
+	[Test]
+	public async Task DryRunAsync_WhenAQueuedRemovalTheProviderAlreadyAgreesWith_DropsItWithoutRunningASync()
+	{
+		var stale = MediaId.From(new Guid(11, 0, 0, new byte[8]));
+		var outbox = IWatchlistOutbox.Mock();
+		outbox.GetAsync(Any()).Returns([new WatchlistOutboxEntry(stale, WatchlistOperationAction.Remove, WatchlistOutboxState.Pending, 0)]);
+		var provider = IWatchlistProvider.Mock();
+		provider.GetWatchlistAsync(Any()).Returns(NothingRemote());
+
+		await BuildEngine(provider, outbox).DryRunAsync(User);
+
+		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task DryRunAsync_WhenTheOutboxAgreesWithTheProvider_LeavesItAlone()
+	{
+		var provider = IWatchlistProvider.Mock();
+		provider.GetWatchlistAsync(Any()).Returns(NothingRemote());
+		var outbox = EmptyOutbox();
+
+		await BuildEngine(provider, outbox).DryRunAsync(User);
+
+		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+	}
+
+	private static async IAsyncEnumerable<UnmatchedMedia> NothingRemote()
+	{
+		await Task.CompletedTask;
+		yield break;
+	}
+
+	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider, Mock<IWatchlistOutbox>? outbox = null)
 	{
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
 		var clock = IDateTimeProvider.Mock();
@@ -47,7 +80,7 @@ public class WatchlistSyncEngineTests
 
 		var services = new ServiceCollection();
 		services.AddSingleton(EmptyRepository().Object);
-		services.AddSingleton(EmptyOutbox().Object);
+		services.AddSingleton((outbox ?? EmptyOutbox()).Object);
 		services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
 		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
 		services.AddSingleton(UnresolvedMedia().Object);

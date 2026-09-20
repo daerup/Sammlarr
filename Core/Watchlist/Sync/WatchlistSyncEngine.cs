@@ -89,7 +89,6 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 	{
 		var pulledAdds = await deps.Repo.AddAsync(plan.Pull.Adds, new RemoteOrigin(deps.Provider), cancellationToken);
 		var pulledRemoves = await deps.Repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
-		await deps.Outbox.DropAsync(plan.Redundant, cancellationToken);
 
 		await QueuePushesAsync(deps, plan, userId, cancellationToken);
 		await PublishNotificationsAsync(deps, userId, pulledAdds, pulledRemoves, plan.Push, cancellationToken);
@@ -193,8 +192,21 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 			{
 				var localIds = await deps.Repo.GetIdsAsync(cancellationToken);
 				var outboxOps = await deps.Outbox.GetAsync(cancellationToken);
-				return Success.Of(WatchlistSyncPlan.Compute(remote.Resolved, localIds, outboxOps) with { Unmatched = remote.Unmatched });
+				var plan = WatchlistSyncPlan.Compute(remote.Resolved, localIds, outboxOps) with { Unmatched = remote.Unmatched };
+				await DropRedundantAsync(deps, plan, cancellationToken);
+				return Success.Of(plan);
 			});
+
+	private async Task DropRedundantAsync(EngineDeps deps, WatchlistSyncPlan plan, CancellationToken cancellationToken)
+	{
+		if (plan.Redundant.Count == 0)
+		{
+			return;
+		}
+
+		await deps.Outbox.DropAsync(plan.Redundant, cancellationToken);
+		logger.LogInformation("Dropped {Count} watchlist outbox entries {Provider} already agrees with", plan.Redundant.Count, deps.Provider);
+	}
 
 	private readonly record struct EngineDeps(
 		WatchlistProvider Provider,
