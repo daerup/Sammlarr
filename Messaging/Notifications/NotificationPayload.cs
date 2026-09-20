@@ -12,8 +12,8 @@ internal sealed record NotificationPayload(
 	string Summary,
 	IReadOnlyList<MediaId> PulledAdds,
 	IReadOnlyList<MediaId> PulledRemoves,
-	IReadOnlyList<MediaId> PushedAdds,
-	IReadOnlyList<MediaId> PushedRemoves,
+	IReadOnlyList<MediaId> QueuedAdds,
+	IReadOnlyList<MediaId> QueuedRemoves,
 	IReadOnlyList<MediaId> Media,
 	string? FeedId,
 	int? Added,
@@ -23,5 +23,5 @@ internal sealed record NotificationPayload(
 	TimeSpan? RetryAfter
 )
 {
-	public IEnumerable<MediaId> AllMediaIds => PulledAdds.Concat(PulledRemoves).Concat(PushedAdds).Concat(PushedRemoves).Concat(Media);
+	public IEnumerable<MediaId> AllMediaIds => PulledAdds.Concat(PulledRemoves).Concat(QueuedAdds).Concat(QueuedRemoves).Concat(Media);
 }

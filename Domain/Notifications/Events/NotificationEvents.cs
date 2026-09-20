@@ -17,11 +17,17 @@ public sealed record WatchlistSyncedEvent(
 	DateTimeOffset OccurredAt,
 	IReadOnlyList<MediaId> PulledAdds,
 	IReadOnlyList<MediaId> PulledRemoves,
-	IReadOnlyList<MediaId> PushedAdds,
-	IReadOnlyList<MediaId> PushedRemoves
+	IReadOnlyList<MediaId> QueuedAdds,
+	IReadOnlyList<MediaId> QueuedRemoves
 ) : BaseNotification(NotificationEventType.WatchlistSynced, UserId, OccurredAt)
 {
-	public override string Summary => $"Pulled {PulledAdds.Count + PulledRemoves.Count}, queued {PushedAdds.Count + PushedRemoves.Count} for push.";
+	public override string Summary => $"Pulled {PulledAdds.Count + PulledRemoves.Count}, queued {QueuedAdds.Count + QueuedRemoves.Count} for push.";
+}
+
+public sealed record WatchlistSyncFailedEvent(UserId UserId, DateTimeOffset OccurredAt, string Reason)
+	: BaseNotification(NotificationEventType.WatchlistSyncFailed, UserId, OccurredAt)
+{
+	public override string Summary => Reason;
 }
 
 public sealed record TestPingEvent(UserId UserId, DateTimeOffset OccurredAt, Guid TargetId)

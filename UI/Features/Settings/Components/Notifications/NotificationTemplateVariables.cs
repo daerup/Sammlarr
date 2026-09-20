@@ -43,6 +43,7 @@ internal static class NotificationTemplateVariables
 	{
 		[NotificationEventType.FeedRunCompleted] = [FeedName, FeedProvider, FeedIdentifier, Added, Removed],
 		[NotificationEventType.FeedRunFailed] = [FeedName, FeedProvider, FeedIdentifier, Reason],
+		[NotificationEventType.WatchlistSyncFailed] = [Reason],
 		[NotificationEventType.ProviderRateLimited] = [Provider, RetryAfter],
 	};
 

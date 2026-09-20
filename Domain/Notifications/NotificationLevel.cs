@@ -15,6 +15,7 @@ public static class NotificationLevels
 			type switch
 			{
 				NotificationEventType.FeedRunFailed => NotificationLevel.Error,
+				NotificationEventType.WatchlistSyncFailed => NotificationLevel.Error,
 				NotificationEventType.ProviderRateLimited => NotificationLevel.Warning,
 				NotificationEventType.WatchlistSynced => NotificationLevel.Info,
 				NotificationEventType.FeedRunCompleted => NotificationLevel.Info,

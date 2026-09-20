@@ -35,7 +35,8 @@ internal static class NotificationContextFactory
 	private static NotificationPayload ToPayload(BaseNotification message) =>
 		message switch
 		{
-			WatchlistSyncedEvent e => Payload(e, pulledAdds: e.PulledAdds, pulledRemoves: e.PulledRemoves, pushedAdds: e.PushedAdds, pushedRemoves: e.PushedRemoves),
+			WatchlistSyncedEvent e => Payload(e, pulledAdds: e.PulledAdds, pulledRemoves: e.PulledRemoves, queuedAdds: e.QueuedAdds, queuedRemoves: e.QueuedRemoves),
+			WatchlistSyncFailedEvent e => Payload(e) with { Reason = e.Reason },
 			FeedRunCompletedEvent e => Payload(e) with { FeedId = e.FeedId.ToString(), Added = e.Added, Removed = e.Removed },
 			FeedRunFailedEvent e => Payload(e) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
 			ProviderRateLimitedEvent e => Payload(e) with { Provider = e.Provider, RetryAfter = e.RetryAfter },
@@ -85,8 +86,8 @@ internal static class NotificationContextFactory
 		BaseNotification message,
 		IReadOnlyList<MediaId>? pulledAdds = null,
 		IReadOnlyList<MediaId>? pulledRemoves = null,
-		IReadOnlyList<MediaId>? pushedAdds = null,
-		IReadOnlyList<MediaId>? pushedRemoves = null,
+		IReadOnlyList<MediaId>? queuedAdds = null,
+		IReadOnlyList<MediaId>? queuedRemoves = null,
 		IReadOnlyList<MediaId>? media = null
 	) =>
 		new(
@@ -97,8 +98,8 @@ internal static class NotificationContextFactory
 			message.Summary,
 			pulledAdds ?? [],
 			pulledRemoves ?? [],
-			pushedAdds ?? [],
-			pushedRemoves ?? [],
+			queuedAdds ?? [],
+			queuedRemoves ?? [],
 			media ?? [],
 			null,
 			null,
@@ -112,8 +113,8 @@ internal static class NotificationContextFactory
 	{
 		var items = Describe(payload.PulledAdds, "Added locally", resolved)
 			.Concat(Describe(payload.PulledRemoves, "Removed locally", resolved))
-			.Concat(Describe(payload.PushedAdds, "Added remotely", resolved))
-			.Concat(Describe(payload.PushedRemoves, "Removed remotely", resolved))
+			.Concat(Describe(payload.QueuedAdds, "Queued to add remotely", resolved))
+			.Concat(Describe(payload.QueuedRemoves, "Queued to remove remotely", resolved))
 			.Concat(Describe(payload.Media, null, resolved))
 			.ToList();
 		return items.Count == 0 ? null : items.OrderBy(item => item.Descriptor ?? string.Empty).ToList();
