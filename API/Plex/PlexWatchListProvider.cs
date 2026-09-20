@@ -9,12 +9,12 @@ namespace API.Plex;
 
 internal class PlexWatchListProvider(PlexClient plexClient, PlexUrls urls, ILogger<PlexWatchListProvider> logger) : IWatchlistProvider
 {
-	public async IAsyncEnumerable<IExternalMediaId> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async IAsyncEnumerable<UnmatchedMedia> GetWatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var (items, pages) = await FetchPageAsync(1, cancellationToken);
-		foreach (var id in items)
+		foreach (var item in items)
 		{
-			yield return id;
+			yield return item;
 		}
 
 		if (pages <= 1)
@@ -29,9 +29,9 @@ internal class PlexWatchListProvider(PlexClient plexClient, PlexUrls urls, ILogg
 
 		await foreach (var (remaining, _) in rest)
 		{
-			foreach (var id in remaining)
+			foreach (var item in remaining)
 			{
-				yield return id;
+				yield return item;
 			}
 		}
 	}
@@ -78,7 +78,7 @@ internal class PlexWatchListProvider(PlexClient plexClient, PlexUrls urls, ILogg
 		}
 	}
 
-	private async Task<(List<IExternalMediaId>, int)> FetchPageAsync(int page, CancellationToken cancellationToken)
+	private async Task<(List<UnmatchedMedia>, int)> FetchPageAsync(int page, CancellationToken cancellationToken)
 	{
 		const string containerStartHeader = "X-Plex-Container-Start";
 		var offset = (page - 1) * PlexClient.ContainerSize;
@@ -88,12 +88,22 @@ internal class PlexWatchListProvider(PlexClient plexClient, PlexUrls urls, ILogg
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("Plex watchlist response was empty.");
 
-		var items = result.MediaContainer.Metadata.Where(m => !IsIncomplete(m)).Select(m => m.PlexId).Cast<IExternalMediaId>().ToList();
+		var items = result.MediaContainer.Metadata.Select(Entry).ToList();
 		var totalPages = result.MediaContainer.TotalSize <= 0 ? 1 : (int)Math.Ceiling(result.MediaContainer.TotalSize / (double)PlexClient.ContainerSize);
 
 		return (items, totalPages);
 	}
 
-	private static bool IsIncomplete(PlexTypes.Watchlist.Metadata arg) =>
-		arg.Year == 0 || string.IsNullOrEmpty(arg.OriginallyAvailableAt) || string.IsNullOrEmpty(arg.Title);
+	private static UnmatchedMedia Entry(PlexTypes.Watchlist.Metadata metadata) =>
+		new()
+		{
+			Externals = [metadata.PlexId],
+			Title = metadata.Title.NullIfBlank(),
+			ReleaseDate = ReleasedOn(metadata),
+		};
+
+	private static DateOnly? ReleasedOn(PlexTypes.Watchlist.Metadata metadata) =>
+		DateOnly.TryParse(metadata.OriginallyAvailableAt, out var released) ? released
+		: metadata.Year > 0 ? new DateOnly(metadata.Year, 1, 1)
+		: null;
 }

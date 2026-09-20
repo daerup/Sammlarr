@@ -5,6 +5,8 @@ namespace Domain.Watchlist.Sync;
 
 public record WatchlistSyncSummary(WatchlistDelta Pull, WatchlistDelta Push, IReadOnlyList<MediaId> NoOps)
 {
+	public IReadOnlyList<UnmatchedMedia> Unmatched { get; init; } = [];
+
 	private int Pulled => Pull.Adds.Count;
 	private int Removed => Pull.Removes.Count;
 	private int Queued => Push.Count;

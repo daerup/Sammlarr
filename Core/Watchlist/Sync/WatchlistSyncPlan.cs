@@ -6,6 +6,8 @@ namespace Core.Watchlist.Sync;
 
 internal sealed record WatchlistSyncPlan(WatchlistDelta Pull, WatchlistDelta Push, IReadOnlyList<MediaId> Redundant, IReadOnlyList<MediaId> NoOps)
 {
+	public IReadOnlyList<UnmatchedMedia> Unmatched { get; init; } = [];
+
 	public static WatchlistSyncPlan Compute(IReadOnlyList<MediaId> remoteIds, IReadOnlyList<MediaId> localIds, IReadOnlyList<WatchlistOutboxEntry> outbox)
 	{
 		var remoteSet = remoteIds.ToHashSet();
