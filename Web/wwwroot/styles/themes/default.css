@@ -127,6 +127,21 @@
     --alert-danger-bg: oklch(0.18 0.008 27);
 }
 
+.fixed.inset-0.z-50.bg-black\/80 {
+    background-color: color-mix(in oklab, black 40%, transparent);
+    backdrop-filter: blur(16px) saturate(120%);
+}
+
+.change-dialog {
+    width: 720px;
+    max-width: 94vw;
+}
+
+
+.change-dialog .change-prologue {
+    padding-right: 44px;
+}
+
 .bg-success {
     background-color: #1e944f;
 }

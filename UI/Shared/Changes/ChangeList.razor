@@ -1,0 +1,146 @@
+@using Domain.Media
+
+<div class="change-list">
+    <div class="change-chips">
+        <BbTooltipProvider>
+            @foreach (var chip in Chips)
+            {
+                @if (chip.StartsCountsOnly)
+                {
+                    <span class="change-chip-sep"></span>
+                }
+                <BbTooltip DelayDuration="200">
+                    <BbTooltipTrigger AsChild="false" Class="p-0">
+                        <button type="button"
+                                class="change-chip @ToneClass(chip.Tone) @(IsActive(chip) ? "is-on" : null) @(Clickable(chip) ? null : "is-dim")"
+                                disabled="@(!Clickable(chip))"
+                                @onclick="() => ToggleAsync(chip)">
+                            @if (chip.Glyph is { } glyph)
+                            {
+                                <span class="change-glyph">@glyph</span>
+                            }
+                            else if (chip.Icon is { } icon)
+                            {
+                                <LucideIcon Name="@icon" Size="16"/>
+                            }
+                            <span class="change-chip-count">@chip.Count</span>
+                        </button>
+                    </BbTooltipTrigger>
+                    <BbTooltipContent>@chip.Tooltip</BbTooltipContent>
+                </BbTooltip>
+            }
+        </BbTooltipProvider>
+        <span class="change-search">
+            <LucideIcon Name="search" Size="13"/>
+            <input type="text" placeholder="Search titles" value="@_search" @oninput="OnSearchChanged"/>
+        </span>
+    </div>
+
+    <div class="change-body">
+        @foreach (var group in Groups())
+        {
+            <div class="change-group @ToneClass(GroupTone(group.Key))">
+                @if (GroupGlyph(group.Key) is { } glyph)
+                {
+                    <span class="change-glyph">@glyph</span>
+                }
+                else
+                {
+                    <LucideIcon Name="@GroupIcon(group.Key)" Size="14"/>
+                }
+                <span>@GroupLabel(group.Key)</span>
+                <span class="change-group-count">@group.Count()</span>
+            </div>
+            @foreach (var entry in group)
+            {
+                <ChangeRow @key="entry" Entry="entry" OnSelect="OnSelect"/>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required IReadOnlyList<ChangeEntry> Entries { get; set; }
+    [Parameter] [EditorRequired] public required IReadOnlyList<ChangeChip> Chips { get; set; }
+    [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter] public string RemovedLabel { get; set; } = "Removed";
+    [Parameter] public string AddedLabel { get; set; } = "Added";
+    [Parameter] public string UnchangedLabel { get; set; } = "Already yours";
+
+    private readonly HashSet<ChangeKind> _active = [];
+    private string _search = string.Empty;
+
+    private IEnumerable<IGrouping<ChangeKind, ChangeEntry>> Groups() =>
+        Entries
+            .Where(entry => _active.Count == 0 || _active.Contains(entry.Kind))
+            .Where(entry => string.IsNullOrWhiteSpace(_search) || entry.Title.Contains(_search, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(entry => entry.Kind)
+            .OrderBy(group => group.Key);
+
+    private bool Clickable(ChangeChip chip) => chip.Filters is null ? _active.Count > 0 : chip.Count > 0;
+
+    private bool IsActive(ChangeChip chip) => chip.Filters is { } kind ? _active.Contains(kind) : _active.Count == 0;
+
+    private Task ToggleAsync(ChangeChip chip)
+    {
+        if (chip.Filters is not { } kind)
+        {
+            _active.Clear();
+            return Task.CompletedTask;
+        }
+
+        if (!_active.Add(kind))
+        {
+            _active.Remove(kind);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void OnSearchChanged(ChangeEventArgs args) => _search = args.Value?.ToString() ?? string.Empty;
+
+    private static ChipTone GroupTone(ChangeKind kind) =>
+        kind switch
+        {
+            ChangeKind.Removed => ChipTone.Removed,
+            ChangeKind.Added => ChipTone.Added,
+            ChangeKind.Unchanged => ChipTone.Neutral,
+            ChangeKind.Unmatched => ChipTone.Unmatched,
+        };
+
+    private static string? GroupGlyph(ChangeKind kind) =>
+        kind switch
+        {
+            ChangeKind.Removed => "−",
+            ChangeKind.Added => "+",
+            ChangeKind.Unchanged => null,
+            ChangeKind.Unmatched => null,
+        };
+
+    private static string GroupIcon(ChangeKind kind) =>
+        kind switch
+        {
+            ChangeKind.Removed => "minus",
+            ChangeKind.Added => "plus",
+            ChangeKind.Unchanged => "bookmark-check",
+            ChangeKind.Unmatched => "circle-alert",
+        };
+
+    private string GroupLabel(ChangeKind kind) =>
+        kind switch
+        {
+            ChangeKind.Removed => RemovedLabel,
+            ChangeKind.Added => AddedLabel,
+            ChangeKind.Unchanged => UnchangedLabel,
+            ChangeKind.Unmatched => "Could not be matched",
+        };
+
+    private static string ToneClass(ChipTone tone) =>
+        tone switch
+        {
+            ChipTone.Neutral => "tone-neutral",
+            ChipTone.Added => "tone-added",
+            ChipTone.Removed => "tone-removed",
+            ChipTone.Unmatched => "tone-unmatched",
+        };
+}
