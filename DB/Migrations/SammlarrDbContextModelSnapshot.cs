@@ -192,7 +192,7 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SyncMode")
+                    b.Property<string>("Trigger")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -207,6 +207,110 @@ namespace DB.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Feeds");
+                });
+
+            modelBuilder.Entity("DB.Data.FeedRun.FeedRunItemRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("FeedRunId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MediaId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("FeedRunId", "MediaId")
+                        .IsUnique();
+
+                    b.ToTable("FeedRunItems");
+                });
+
+            modelBuilder.Entity("DB.Data.FeedRun.FeedRunRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Added")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Bypassed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Conclusiveness")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("FeedId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Filtered")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Kept")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Removed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Skipped")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("StartedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Strategy")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Total")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Unresolved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("FeedId", "StartedAt");
+
+                    b.ToTable("FeedRuns");
                 });
 
             modelBuilder.Entity("DB.Data.Identity.UserRow", b =>
@@ -650,6 +754,36 @@ namespace DB.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DB.Data.FeedRun.FeedRunItemRow", b =>
+                {
+                    b.HasOne("DB.Data.FeedRun.FeedRunRow", null)
+                        .WithMany("Items")
+                        .HasForeignKey("FeedRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DB.Data.FeedRun.FeedRunRow", b =>
+                {
+                    b.HasOne("DB.Data.Feed.FeedRow", null)
+                        .WithMany()
+                        .HasForeignKey("FeedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DB.Data.Media.ExternalMediaIdRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
@@ -761,6 +895,11 @@ namespace DB.Migrations
                     b.Navigation("Media");
 
                     b.Navigation("SourceFeed");
+                });
+
+            modelBuilder.Entity("DB.Data.FeedRun.FeedRunRow", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("DB.Data.Media.MediaRow", b =>

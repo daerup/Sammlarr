@@ -26,6 +26,7 @@ internal class MediaCachePurger(
 			.Select(b => b.Media.Id)
 			.Union(ctx.Watchlist.IgnoreQueryFilters().Select(w => w.Media.Id))
 			.Union(ctx.WatchlistOutbox.IgnoreQueryFilters().Select(o => o.Media.Id))
+			.Union(ctx.FeedRunItems.IgnoreQueryFilters().Select(i => i.MediaId))
 			.ToListAsync(cancellationToken);
 
 		var metadataDeleted = await ctx.MediaMetadata.ExecuteDeleteAsync(cancellationToken);

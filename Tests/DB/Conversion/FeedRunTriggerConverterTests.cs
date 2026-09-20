@@ -4,14 +4,14 @@ using TestInfrastructure;
 
 namespace DB.Tests.Conversion;
 
-public class SyncModeConverterTests
+public class FeedRunTriggerConverterTests
 {
-	private readonly SyncModeConverter _testee = new();
+	private readonly FeedRunTriggerConverter _testee = new();
 
 	[Test]
 	public async Task ConvertToProvider_WhenManual_WritesTheManualLiteral()
 	{
-		var stored = _testee.ConvertToProvider(new SyncMode(new Manual()));
+		var stored = _testee.ConvertToProvider(new FeedRunTrigger(new Manual()));
 
 		await Assert.That(stored).IsEqualTo("manual");
 	}
@@ -19,9 +19,9 @@ public class SyncModeConverterTests
 	[Test]
 	public async Task ConvertFromProvider_WhenManualLiteral_ReturnsManual()
 	{
-		var restored = (SyncMode)_testee.ConvertFromProvider("manual")!;
+		var restored = (FeedRunTrigger)_testee.ConvertFromProvider("manual")!;
 
-		await Assert.That(restored).IsOfUnionType<SyncMode, Manual>();
+		await Assert.That(restored).IsOfUnionType<FeedRunTrigger, Manual>();
 	}
 
 	[Test]
@@ -31,11 +31,11 @@ public class SyncModeConverterTests
 	[Arguments("0 0 12 1 * *")]
 	public async Task Convert_WhenScheduled_RoundTripsTheCronExpression(string cron)
 	{
-		var original = new SyncMode(new Scheduled(cron));
+		var original = new FeedRunTrigger(new Scheduled(cron));
 
-		var restored = (SyncMode)_testee.ConvertFromProvider(_testee.ConvertToProvider(original))!;
+		var restored = (FeedRunTrigger)_testee.ConvertFromProvider(_testee.ConvertToProvider(original))!;
 
-		await Assert.That(restored).IsOfUnionType<SyncMode, Scheduled>();
+		await Assert.That(restored).IsOfUnionType<FeedRunTrigger, Scheduled>();
 		await Assert.That(_testee.ConvertToProvider(restored)).IsEqualTo(cron);
 	}
 

@@ -3,6 +3,7 @@ using DB.Data.Blacklist;
 using DB.Data.Cleanup;
 using DB.Data.Config;
 using DB.Data.Feed;
+using DB.Data.FeedRun;
 using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Metadata;
@@ -22,6 +23,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<CleanupModule>();
 		services.AddModule<ConfigModule>();
 		services.AddModule<FeedModule>();
+		services.AddModule<FeedRunModule>();
 		services.AddModule<IdentityDataModule>();
 		services.AddModule<MediaModule>();
 		services.AddModule<MetadataModule>();

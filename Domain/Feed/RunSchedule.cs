@@ -23,4 +23,4 @@ public readonly record struct Scheduled
 	public override string ToString() => _raw;
 }
 
-public union SyncMode(Manual, Scheduled);
+public union FeedRunTrigger(Manual, Scheduled);

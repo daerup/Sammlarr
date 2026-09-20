@@ -97,7 +97,7 @@ public record FeedConfig
 	public FilterDefinition? Filter { get; init; }
 	public QuerySort? Sort { get; init; }
 	public QueryLimit? Limit { get; init; }
-	public SyncMode Schedule { get; init; } = new SyncMode(new Manual());
+	public FeedRunTrigger Schedule { get; init; } = new FeedRunTrigger(new Manual());
 
 	public bool IsScheduleValid { get; init; } = true;
 

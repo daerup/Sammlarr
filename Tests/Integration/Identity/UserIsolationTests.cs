@@ -30,7 +30,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 					Provider = FeedProvider.Mdblist,
 					Strategy = new FeedStrategy(new Append()),
 					Identifier = "list",
-					Schedule = new SyncMode(new Manual()),
+					Schedule = new FeedRunTrigger(new Manual()),
 				}
 			);
 
