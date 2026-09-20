@@ -477,11 +477,7 @@
 
 <MediaDetailSheet Open="_sheetOpen"
                   OnOpenChanged="v => _sheetOpen = v"
-                  Media="_sheetMedia"
-                  ButtonText="SheetButtonText"
-                  ButtonIcon="SheetButtonIcon"
-                  ButtonAction="SheetButtonAction"
-                  ButtonDisabled="_sheetUnresolved"/>
+                  Media="_sheetMedia"/>
 
 @code {
     private ElementReference _grid;
@@ -630,7 +626,6 @@
 
     private bool _sheetOpen;
     private MediaLookup? _sheetMedia;
-    private bool _sheetUnresolved;
 
     private void ToggleDemoWatchlist(MediaLookup media)
     {
@@ -651,18 +646,7 @@
     private void OpenSheet(MediaLookup media)
     {
         _sheetMedia = media;
-        _sheetUnresolved = media.IsUnresolved;
         _sheetOpen = true;
-    }
-
-    private string SheetButtonText() => "Add to Watchlist";
-
-    private string SheetButtonIcon() => "plus";
-
-    private Task SheetButtonAction()
-    {
-        Notifier.Info("Adding to the watchlist is demo-only here.");
-        return Task.CompletedTask;
     }
 
     private int TotalPages => Math.Max(1, (int)Math.Ceiling(_items.Count / (double)PageSize));

@@ -143,10 +143,7 @@ else
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedItem?.Media.ToMatch()"
-                  ButtonAction="ApplyDetailActionAsync"
-                  ButtonText="GetRemoveButtonText"
-                  ButtonIcon="GetRemoveButtonIcon"
-                  ButtonDisabled="@(IsSelectedRemoved && _syncing)"/>
+                  OnEnrollmentChanged="ReloadAfterEnrollmentAsync"/>
 
 @if (_providerSettings is not null)
 {
@@ -172,7 +169,6 @@ else
     private bool _syncing;
     private WatchlistedMedia? _selectedItem;
     private bool _isLoading;
-    private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _isSignedIn;
     private bool _hasPlexAccess;
@@ -380,60 +376,18 @@ else
         StateHasChanged();
     }
 
-    private bool IsSelectedRemoved => _selectedItem is not null && _removedIds.Contains(_selectedItem.Media.Id);
-
-    private string GetRemoveButtonText() => IsSelectedRemoved ? "Cancel removal" : "Remove from Watchlist";
-
-    private string GetRemoveButtonIcon() => IsSelectedRemoved ? "rotate-ccw" : "x";
-
-    private Task ApplyDetailActionAsync() => IsSelectedRemoved ? CancelRemovalAsync() : RemoveSelectedFromWatchlistAsync();
-
     private void SelectItem(WatchlistedMedia item)
     {
         _selectedItem = item;
         _isSheetOpen = true;
     }
 
-    private async Task RemoveSelectedFromWatchlistAsync()
+    private async Task ReloadAfterEnrollmentAsync(MediaListKind changed)
     {
-        if (_isRemoving || _selectedItem is null)
+        await LoadWatchlistAsync();
+        if (changed is MediaListKind.Watchlist)
         {
-            return;
-        }
-
-        _isRemoving = true;
-        try
-        {
-            await WatchlistService.RemoveFromWatchlistAsync([_selectedItem.Media.Id], _cancellationTokenSource.Token);
-            CloseSelectedMedia();
-            await LoadWatchlistAsync();
             await RefreshPendingAsync();
-        }
-        finally
-        {
-            _isRemoving = false;
-        }
-    }
-
-    private async Task CancelRemovalAsync()
-    {
-        if (_isRemoving || _selectedItem is null || _syncing)
-        {
-            return;
-        }
-
-        _isRemoving = true;
-        try
-        {
-            await WatchlistService.AddToWatchlistAsync([_selectedItem.Media.Id], new ManualOrigin(ManualSource.Unknown), _cancellationTokenSource.Token);
-            CloseSelectedMedia();
-            await LoadWatchlistAsync();
-            await RefreshPendingAsync();
-            Notifier.Success("Removal cancelled.");
-        }
-        finally
-        {
-            _isRemoving = false;
         }
     }
 

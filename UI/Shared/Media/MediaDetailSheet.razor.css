@@ -17,3 +17,38 @@
 ::deep .media-sheet-meta {
     padding-top: 0.5rem;
 }
+
+.media-sheet-toggles {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2px;
+}
+
+::deep .search-result-toggle-btn {
+    flex-shrink: 0;
+    transition: color 0.15s ease, opacity 0.15s ease;
+    color: var(--muted-foreground);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    outline-offset: 2px;
+}
+
+::deep .search-result-toggle-btn.is-marked {
+    background: color-mix(in srgb, var(--toggle-active-color, orange) 10%, transparent);
+    color: var(--toggle-active-color, orange);
+}
+
+::deep .search-result-toggle-btn:not(.is-marked):not(:disabled):is(:hover, :focus-visible) svg {
+    stroke: var(--toggle-active-color, orange);
+    fill: color-mix(in srgb, var(--toggle-active-color, orange) 15%, transparent);
+    transition: stroke 0.15s ease, fill 0.15s ease;
+}

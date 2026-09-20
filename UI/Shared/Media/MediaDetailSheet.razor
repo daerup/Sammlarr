@@ -1,5 +1,16 @@
 @using Contracts.Media
+@using Contracts.Blacklist
+@using Contracts.Settings
+@using Contracts.Watchlist
+@using Domain.Watchlist
+@using UI.Shared.Media.Icons
+@using UI.Shared.Services.Branding
 @inject IMediaService MediaService
+@inject IWatchlistService WatchlistService
+@inject IBlacklistService BlacklistService
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject MediaProviderBrandingService Branding
+@inject Notifier Notifier
 @if (Open)
 {
     <div class="sheet-modal-backdrop"></div>
@@ -26,6 +37,22 @@
                 </div>
 
                 <BbSheetHeader Class="media-sheet-meta">
+                    @if (!media.IsUnresolved)
+                    {
+                        <div class="media-sheet-toggles">
+                            <WatchlistToggleIcon Result="media"
+                                                 Size="18"
+                                                 IsToggled="_watchlisted"
+                                                 IsToggling="_togglingWatchlist"
+                                                 DotColor="@ProvenanceBrandColor"
+                                                 OnToggle="ToggleWatchlistAsync"/>
+                            <BlacklistToggleIcon Result="media"
+                                                 Size="18"
+                                                 IsToggled="_blacklisted"
+                                                 IsToggling="_togglingBlacklist"
+                                                 OnToggle="ToggleBlacklistAsync"/>
+                        </div>
+                    }
                     <BbSheetTitle Class="font-bold tracking-wide text-xl">
                         <MediaTitleLink Title="@media.Title" Ids="@media.ExternalIds" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                     </BbSheetTitle>
@@ -74,25 +101,6 @@
                     </div>
                 }
 
-                <BbSeparator/>
-
-                <BbButton Class="w-full"
-                          OnClick="HandleButtonClickedAsync"
-                          Disabled="@(_isButtonBusy || ButtonDisabled)">
-                    @if (_isButtonBusy)
-                    {
-                        <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
-                        <span>Processing...</span>
-                    }
-                    else
-                    {
-                        @if (!string.IsNullOrWhiteSpace(ResolvedButtonIcon))
-                        {
-                            <LucideIcon Name="@ResolvedButtonIcon" Size="16" Class="mr-2"/>
-                        }
-                        <span>@ButtonText()</span>
-                    }
-                </BbButton>
             </div>
         }
     </BbSheetContent>
@@ -109,23 +117,32 @@
     public MediaLookup? Media { get; set; }
 
     [Parameter]
-    public required Func<string> ButtonText { get; init; }
+    public EventCallback<MediaListKind> OnEnrollmentChanged { get; set; }
 
     [Parameter]
-    public required Func<Task> ButtonAction { get; init; }
+    public ManualSource Source { get; set; } = ManualSource.Unknown;
 
-    [Parameter]
-    public required Func<string> ButtonIcon { get; init; }
-
-    [Parameter]
-    public bool ButtonDisabled { get; set; }
-
-    private bool _isButtonBusy;
     private bool _failed;
     private string? _lastImageUrl;
-    private string ResolvedButtonIcon => ButtonIcon.Invoke();
+    private MediaId? _loadedFor;
+    private bool _watchlisted;
+    private bool _blacklisted;
+    private bool _togglingWatchlist;
+    private bool _togglingBlacklist;
+    private Optional<WatchlistItemProvenance> _provenance = new None();
 
-    protected override void OnParametersSet()
+    private string? ProvenanceBrandColor =>
+        _provenance is Some<WatchlistItemProvenance>(var provenance)
+            ? provenance switch
+            {
+                RemoteOrigin remote => Branding.GetBrandingInfo(remote.Provider.AsMediaProvider()).BrandColor,
+                FeedOrigin feed => Branding.GetBrandingInfo(feed.Provider.AsMediaProvider()).BrandColor,
+                OrphanedOrigin => "var(--muted-foreground)",
+                ManualOrigin => null,
+            }
+            : null;
+
+    protected override async Task OnParametersSetAsync()
     {
         var poster = Media.HasValue ? Media.Value.PosterUrl : null;
         if (_lastImageUrl != poster)
@@ -133,6 +150,87 @@
             _lastImageUrl = poster;
             _failed = false;
         }
+
+        if (Media is { } lookup && !lookup.IsUnresolved && _loadedFor != lookup.Id)
+        {
+            _loadedFor = lookup.Id;
+            await LoadEnrollmentAsync(lookup.Id);
+        }
+    }
+
+    private async Task LoadEnrollmentAsync(MediaId id)
+    {
+        _watchlisted = (await WatchlistService.GetWatchlistIdsAsync()).Contains(id);
+        _blacklisted = (await BlacklistService.GetBlacklistIdsAsync()).Contains(id);
+        _provenance = await WatchlistService.GetProvenanceAsync(id);
+    }
+
+    private async Task ToggleWatchlistAsync(MediaLookup media)
+    {
+        if (_togglingWatchlist)
+        {
+            return;
+        }
+
+        _togglingWatchlist = true;
+        try
+        {
+            if (_watchlisted)
+            {
+                await WatchlistService.RemoveFromWatchlistAsync([media.Id]);
+            }
+            else
+            {
+                await WatchlistService.AddToWatchlistAsync([media.Id], new ManualOrigin(Source));
+            }
+
+            await LoadEnrollmentAsync(media.Id);
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to update watchlist");
+        }
+        finally
+        {
+            _togglingWatchlist = false;
+        }
+
+        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Watchlist);
+        await LoadEnrollmentAsync(media.Id);
+    }
+
+    private async Task ToggleBlacklistAsync(MediaLookup media)
+    {
+        if (_togglingBlacklist)
+        {
+            return;
+        }
+
+        _togglingBlacklist = true;
+        try
+        {
+            if (_blacklisted)
+            {
+                await BlacklistService.RemoveFromBacklistAsync(media.Id);
+            }
+            else
+            {
+                await BlacklistService.AddToBacklistAsync(media.Id);
+            }
+
+            await LoadEnrollmentAsync(media.Id);
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to update blacklist");
+        }
+        finally
+        {
+            _togglingBlacklist = false;
+        }
+
+        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Blacklist);
+        await LoadEnrollmentAsync(media.Id);
     }
 
     private async Task OnImageError()
@@ -148,25 +246,5 @@
     {
         Open = isOpen;
         await OnOpenChanged.InvokeAsync(isOpen);
-    }
-
-    private async Task HandleButtonClickedAsync()
-    {
-        if (_isButtonBusy)
-        {
-            return;
-        }
-
-        _isButtonBusy = true;
-        try
-        {
-            await ButtonAction();
-        }
-        finally
-        {
-            _isButtonBusy = false;
-            Open = false;
-            await OnOpenChanged.InvokeAsync(false);
-        }
     }
 }

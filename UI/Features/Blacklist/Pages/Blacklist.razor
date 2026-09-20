@@ -97,9 +97,7 @@ else
 <MediaDetailSheet Open="_isSheetOpen"
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedItem"
-                  ButtonAction="RemoveSelectedFromBlacklistAsync"
-                  ButtonText="GetRemoveButtonText"
-                  ButtonIcon="GetRemoveButtonIcon"/>
+                  OnEnrollmentChanged="@(_ => LoadBlacklistAsync())"/>
 
 <SearchModal @bind-IsOpen="_isSearchModalOpen"
              SearchProvider="@_providerSettings.SearchProvider"
@@ -116,7 +114,6 @@ else
     private IReadOnlyList<BlacklistedMedia>? _items;
     private MediaLookup? _selectedItem;
     private bool _isLoading;
-    private bool _isRemoving;
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
     private bool _isEditMode;
@@ -196,10 +193,6 @@ else
         }
     }
 
-    private static string GetRemoveButtonText() => "Remove from Blacklist";
-
-    private static string GetRemoveButtonIcon() => "x";
-
     private void SelectItem(MediaLookup detail)
     {
         _selectedItem = detail;
@@ -220,32 +213,6 @@ else
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blacklist.");
         await LoadBlacklistAsync();
-    }
-
-    private async Task RemoveSelectedFromBlacklistAsync()
-    {
-        if (_isRemoving)
-        {
-            return;
-        }
-
-        if (!_selectedItem.HasValue)
-        {
-            return;
-        }
-
-        _isRemoving = true;
-
-        try
-        {
-            await BlacklistService.RemoveFromBacklistAsync(_selectedItem.Value.Id, _cancellationTokenSource.Token);
-            CloseSelectedMedia();
-            await LoadBlacklistAsync();
-        }
-        finally
-        {
-            _isRemoving = false;
-        }
     }
 
     private void CloseSelectedMedia()
