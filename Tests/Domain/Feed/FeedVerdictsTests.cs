@@ -24,8 +24,8 @@ public class FeedVerdictsTests
 	[Arguments(QueryOutcome.Qualified, true, true, true)]
 	[Arguments(QueryOutcome.Qualified, false, false, false)]
 	[Arguments(QueryOutcome.Culled, false, true, false)]
-	public async Task AlreadyYours_HoldsForAnyQualifiedOwnedRow(QueryOutcome outcome, bool inBlacklist, bool owned, bool expected) =>
-		await Assert.That(Row(outcome, inWatchlist: false, inBlacklist, owned).AlreadyYours).IsEqualTo(expected);
+	public async Task Kept_HoldsForAnyQualifiedOwnedRow(QueryOutcome outcome, bool inBlacklist, bool owned, bool expected) =>
+		await Assert.That(Row(outcome, inWatchlist: false, inBlacklist, owned).Kept).IsEqualTo(expected);
 
 	[Test]
 	[Arguments(QueryOutcome.Qualified, true, false, false, true)]

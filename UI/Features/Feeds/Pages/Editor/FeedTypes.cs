@@ -21,8 +21,8 @@ public enum StrategyMode
 
 public enum PreviewBucket
 {
-	Included,
-	AlreadyYours,
+	Added,
+	Kept,
 	Bypassed,
 	Filtered,
 	Skipped,
@@ -42,8 +42,8 @@ public static class PreviewResultFilter
 	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
 
 	private static PreviewBucket Qualified(QueryVerdict<MediaLookup> verdict) =>
-		verdict.AlreadyYours ? PreviewBucket.AlreadyYours
-		: verdict.WillImport ? PreviewBucket.Included
+		verdict.Kept ? PreviewBucket.Kept
+		: verdict.WillImport ? PreviewBucket.Added
 		: PreviewBucket.Bypassed;
 }
 
