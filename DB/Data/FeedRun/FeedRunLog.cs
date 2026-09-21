@@ -9,28 +9,7 @@ namespace DB.Data.FeedRun;
 
 internal sealed class FeedRunLog(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRunLog
 {
-	private static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> project = row => new Domain.Feed.Run.FeedRun
-	{
-		Id = row.Id,
-		FeedId = FeedId.From(row.FeedId),
-		StartedAt = row.StartedAt,
-		Duration = TimeSpan.FromMilliseconds(row.DurationMs),
-		Strategy = row.Strategy,
-		Trigger = row.Trigger,
-		Conclusiveness = row.Conclusiveness,
-		Counts = new FeedRunCounts
-		{
-			Total = row.Total,
-			Added = row.Added,
-			Kept = row.Kept,
-			Bypassed = row.Bypassed,
-			Filtered = row.Filtered,
-			Skipped = row.Skipped,
-			Unresolved = row.Unresolved,
-			Removed = row.Removed,
-		},
-		Items = row.Items.Select(item => new FeedRunItem { MediaId = MediaId.From(item.MediaId), State = item.State }).ToList(),
-	};
+	private static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> project = FeedRunProjection.Project;
 
 	public async Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(
 		FeedId feedId,

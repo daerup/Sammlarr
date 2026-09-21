@@ -8,20 +8,7 @@ namespace DB.Data.Feed;
 
 internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
 {
-	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = projection => new Domain.Feed.Feed
-	{
-		Id = FeedId.From(projection.Id),
-		Name = projection.Name,
-		Enabled = projection.IsEnabled,
-		Provider = projection.Provider,
-		Strategy = projection.Strategy,
-		Identifier = projection.Identifier,
-		CreatedAt = projection.CreatedAt,
-		Filter = projection.Filter,
-		Sort = projection.Sort,
-		Limit = projection.Limit,
-		Schedule = projection.Trigger,
-	};
+	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = FeedProjection.Project;
 
 	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
 	{
