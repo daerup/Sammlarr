@@ -2,6 +2,7 @@
 @implements IDisposable
 @using Contracts.Blacklist
 @using Contracts.Settings
+@using UI.Shared.Filters
 @inject IBlacklistService BlacklistService
 @inject ScrollService ScrollService
 @inject AccountConnectionPrompt AccountConnectionPrompt
@@ -45,6 +46,14 @@ else
                         <LucideIcon Name="square-check" Size="16" Class="mr-2"/>
                         Bulk edit
                     </BbButton>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="ToggleFilterBar" Class="@ViewButtonClass">
+                        <LucideIcon Name="sliders-horizontal" Size="16" Class="mr-2"/>
+                        View
+                        @if (_filter.ActiveCount > 0)
+                        {
+                            <span class="view-badge">@_filter.ActiveCount</span>
+                        }
+                    </BbButton>
                 }
                 </div>
             </ProtectedSection>
@@ -79,15 +88,34 @@ else
             }
             else if (_items is not null)
             {
-                <BulkEditableMediaGrid TItem="BlacklistedMedia"
-                                       Items="_items"
-                                       Detail="@(i => i.Media)"
-                                       Key="@(i => i.Media.Id)"
-                                       IsEditMode="_isEditMode"
-                                       IsEditModeChanged="@(v => _isEditMode = v)"
-                                       OnTileClick="@(i => SelectItem(i.Media))"
-                                       OnBulkRemove="RemoveBulkAsync"
-                                       RemoveLabel="Remove from Blacklist"/>
+                @if (_showFilters)
+                {
+                    <ListFilterBar Filter="_filter"
+                                   FilterChanged="ApplyFilterAsync"
+                                   Shown="GridItems.Count"
+                                   Total="_items.Count"/>
+                }
+
+                @if (GridItems.Count == 0)
+                {
+                    <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                        <LucideIcon Name="filter-x" Size="36" Class="mx-auto text-muted-foreground"/>
+                        <h3 class="text-base font-semibold tracking-tight">Nothing matches these filters.</h3>
+                        <p class="text-sm text-muted-foreground leading-relaxed">@_items.Count titles are hidden. Clear the filters to see them.</p>
+                    </div>
+                }
+                else
+                {
+                    <BulkEditableMediaGrid TItem="BlacklistedMedia"
+                                           Items="GridItems"
+                                           Detail="@(i => i.Media)"
+                                           Key="@(i => i.Media.Id)"
+                                           IsEditMode="_isEditMode"
+                                           IsEditModeChanged="@(v => _isEditMode = v)"
+                                           OnTileClick="@(i => SelectItem(i.Media))"
+                                           OnBulkRemove="RemoveBulkAsync"
+                                           RemoveLabel="Remove from Blacklist"/>
+                }
             }
             </ProtectedSection>
         </ChildContent>
@@ -117,7 +145,35 @@ else
     private bool _isSheetOpen;
     private bool _isSearchModalOpen;
     private bool _isEditMode;
+    private ListFilter _filter = ListFilter.None;
+    private bool _showFilters;
     private string? _errorMessage;
+
+    private IReadOnlyList<BlacklistedMedia> GridItems =>
+        [
+            .. _filter.SortBy(
+                (_items ?? []).Where(item => _filter.MatchesType(item.Media.ToMatch().MediaType)),
+                item => item.Media,
+                item => item.AddedAt
+            ),
+        ];
+
+    private string ViewButtonClass => _showFilters ? "whitespace-nowrap bg-accent" : "whitespace-nowrap";
+
+    private Task ApplyFilterAsync(ListFilter filter)
+    {
+        _filter = filter;
+        return Task.CompletedTask;
+    }
+
+    private void ToggleFilterBar()
+    {
+        _showFilters = !_showFilters;
+        if (!_showFilters)
+        {
+            _filter = ListFilter.None;
+        }
+    }
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private ProviderConfig? _providerSettings;
 

@@ -4,7 +4,10 @@
 @using Contracts.Watchlist
 @using Contracts.Watchlist.Outbox
 @using Domain.Identity
+@using Domain.Feed
+@using global::Shared
 @using UI.Features.Watchlist.Components
+@using UI.Shared.Filters
 @using UI.Shared.Services.Branding
 @implements IDisposable
 @inject IWatchlistService WatchlistService
@@ -53,6 +56,17 @@ else
                             Bulk edit
                         </BbButton>
                     }
+                    @if (_items is { Count: > 0 } && !_isEditMode)
+                    {
+                        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="ToggleFilterBar" Class="@ViewButtonClass">
+                            <LucideIcon Name="sliders-horizontal" Size="16" Class="mr-2"/>
+                            View
+                            @if (_filter.ActiveCount > 0)
+                            {
+                                <span class="view-badge">@_filter.ActiveCount</span>
+                            }
+                        </BbButton>
+                    }
                     @if (_removedItems.Count > 0 && !_isEditMode)
                     {
                         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="ToggleShowRemoved" Class="whitespace-nowrap">
@@ -91,7 +105,7 @@ else
                         </div>
                     </div>
                 }
-                else if (_items is not null && GridItems.Count == 0)
+                else if (_items is not null && AllItems.Count == 0)
                 {
                     <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
                         <LucideIcon Name="inbox" Size="36" Class="mx-auto text-muted-foreground"/>
@@ -103,6 +117,25 @@ else
                 }
                 else if (_items is not null)
                 {
+                    @if (_showFilters)
+                    {
+                        <ListFilterBar Filter="_filter"
+                                       FilterChanged="ApplyFilterAsync"
+                                       Available="SourceOptions"
+                                       Shown="GridItems.Count"
+                                       Total="AllItems.Count"/>
+                    }
+
+                    @if (GridItems.Count == 0)
+                    {
+                        <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
+                            <LucideIcon Name="filter-x" Size="36" Class="mx-auto text-muted-foreground"/>
+                            <h3 class="text-base font-semibold tracking-tight">Nothing matches these filters.</h3>
+                            <p class="text-sm text-muted-foreground leading-relaxed">@AllItems.Count titles are hidden. Clear the filters to see them.</p>
+                        </div>
+                    }
+                    else
+                    {
                     <BulkEditableMediaGrid TItem="WatchlistedMedia"
                                            Items="GridItems"
                                            Detail="@(i => i.Media)"
@@ -134,6 +167,7 @@ else
                             }
                         </Overlay>
                     </BulkEditableMediaGrid>
+                    }
                 }
             </ProtectedSection>
         </ChildContent>
@@ -174,7 +208,13 @@ else
     private bool _hasPlexAccess;
     private bool _isSearchModalOpen;
     private bool _isEditMode;
+    private ListFilter _filter = ListFilter.None;
+    private bool _showFilters;
     private string? _errorMessage;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "feed")]
+    public string? FeedParam { get; set; }
     private WatchlistSyncButton? _syncControl;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private ProviderConfig? _providerSettings;
@@ -186,10 +226,71 @@ else
     private string WatchlistProviderName => _providerSettings is null ? "your watchlist provider" : _providerSettings.WatchlistProvider.GetDescription();
     private bool IsSignedIn() => _isSignedIn;
 
+    private IReadOnlyList<WatchlistedMedia> AllItems =>
+        _showRemoved && !_isEditMode && _items is not null ? [.. _items.Concat(_removedItems)] : _items ?? [];
+
     private IReadOnlyList<WatchlistedMedia> GridItems =>
-        _showRemoved && !_isEditMode && _items is not null
-            ? [.. _items.Concat(_removedItems).OrderByDescending(item => item.AddedAt)]
-            : _items ?? [];
+        [
+            .. _filter.SortBy(
+                AllItems.Where(item =>
+                    _filter.MatchesSource(item.Provenance) && _filter.MatchesType(item.Media.ToMatch().MediaType)
+                ),
+                item => item.Media,
+                item => item.AddedAt
+            ),
+        ];
+
+    private IReadOnlyList<SourceOption> SourceOptions =>
+        [
+            .. AllItems.Select(item => item.Provenance)
+                .Select(SourceOptionFor)
+                .Where(option => option is not null)
+                .Select(option => option!)
+                .DistinctBy(option => option.Key)
+                .OrderBy(option => option.Label),
+        ];
+
+    private static SourceOption? SourceOptionFor(WatchlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            FeedOrigin feed => new SourceOption(UrlGuid.Encode(feed.Feed.Id.Value), feed.Feed.Name, new SourceChoice(SourceKind.Feed, feed.Feed.Id)),
+            ManualOrigin => new SourceOption("manual", "Added by hand", new SourceChoice(SourceKind.Manual)),
+            RemoteOrigin => new SourceOption("remote", "Remote watchlist", new SourceChoice(SourceKind.Remote)),
+            OrphanedOrigin => new SourceOption("orphaned", "Feed deleted", new SourceChoice(SourceKind.Orphaned)),
+            _ => null,
+        };
+
+    private Task ApplyFilterAsync(ListFilter filter)
+    {
+        _filter = filter;
+        return Task.CompletedTask;
+    }
+
+    private void ApplyFeedFromQuery()
+    {
+        if (FeedParam is null || _items is null)
+        {
+            return;
+        }
+
+        var wanted = new SourceChoice(SourceKind.Feed, FeedId.From(UrlGuid.Decode(FeedParam)));
+        if (SourceOptions.Any(option => option.Choice == wanted))
+        {
+            _filter = ListFilter.None with { Sources = [wanted] };
+            _showFilters = true;
+        }
+    }
+
+    private string ViewButtonClass => _showFilters ? "whitespace-nowrap bg-accent" : "whitespace-nowrap";
+
+    private void ToggleFilterBar()
+    {
+        _showFilters = !_showFilters;
+        if (!_showFilters)
+        {
+            _filter = ListFilter.None;
+        }
+    }
 
     private void ToggleShowRemoved() => _showRemoved = !_showRemoved;
 
@@ -240,6 +341,7 @@ else
             var all = await WatchlistService.GetWatchlistItemsAsync(WatchlistQueryOptions.WithRemoved, _cancellationTokenSource.Token).ToListAsync(_cancellationTokenSource.Token);
             _items = all.Where(item => !_removedIds.Contains(item.Media.Id)).ToList();
             _removedItems = all.Where(item => _removedIds.Contains(item.Media.Id)).ToList();
+            ApplyFeedFromQuery();
 
             if (_selectedItem is not null)
             {
