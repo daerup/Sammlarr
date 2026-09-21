@@ -47,7 +47,7 @@ public class MediaDetailSheetTests : BunitContext
 	{
 		Register();
 		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
-		_watchlist.GetProvenanceAsync(Any(), Any()).Returns(Some.Of<WatchlistItemProvenance>(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed")));
+		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed"))));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
@@ -60,13 +60,52 @@ public class MediaDetailSheetTests : BunitContext
 	{
 		Register();
 		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
-		_watchlist.GetProvenanceAsync(Any(), Any()).Returns(Some.Of<WatchlistItemProvenance>(new ManualOrigin(ManualSource.Search)));
+		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(new ManualOrigin(ManualSource.Search))));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => Toggle(cut) is not null);
 
 		await Assert.That(cut.FindAll(".toggle-dot")).IsEmpty();
 	}
+
+	[Test]
+	public async Task Provenance_WhenTheWatchlistIconIsRightClicked_IsRevealedInAPopover()
+	{
+		Register();
+		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
+		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy"))));
+
+		var cut = RenderSheet();
+		cut.WaitForState(() => cut.FindAll(".media-sheet-provenance-trigger").Count > 0);
+
+		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
+
+		await cut.Find(".media-sheet-provenance-trigger").ContextMenuAsync(new());
+
+		var details = cut.Find(".provenance-details");
+		var links = details.QuerySelectorAll("a").Select(link => link.GetAttribute("href")).ToList();
+
+		await Assert.That(details.TextContent).Contains("Comedy");
+		await Assert.That(links).HasCount(2);
+		await Assert.That(links[0]).StartsWith("/feeds/edit/");
+		await Assert.That(links[1]).Contains("/runs/");
+		await Assert.That(links[1]).Contains("?item=");
+	}
+
+	[Test]
+	public async Task Provenance_ForATitleThatIsNotOnTheWatchlist_StaysHiddenOnRightClick()
+	{
+		Register();
+
+		var cut = RenderSheet();
+		cut.WaitForState(() => cut.FindAll(".media-sheet-provenance-trigger").Count > 0);
+
+		await cut.Find(".media-sheet-provenance-trigger").ContextMenuAsync(new());
+
+		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
+	}
+
+	private static WatchlistEntry Entry(WatchlistItemProvenance provenance) => new(Id, DateTimeOffset.UnixEpoch, provenance);
 
 	private static IElement? Toggle(IRenderedComponent<Harness> cut) =>
 		cut.FindAll(".media-detail-sheet-content button")
@@ -85,7 +124,7 @@ public class MediaDetailSheetTests : BunitContext
 
 		_watchlist = IWatchlistService.Mock();
 		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Empty);
-		_watchlist.GetProvenanceAsync(Any(), Any()).Returns(new None());
+		_watchlist.GetEntryAsync(Any(), Any()).Returns(new None());
 		Services.AddSingleton(_watchlist.Object);
 
 		var blacklist = IBlacklistService.Mock();
