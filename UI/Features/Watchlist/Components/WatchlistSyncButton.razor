@@ -212,29 +212,37 @@ else
         _chips = [];
         StateHasChanged();
 
-        for (var attempt = 1; attempt <= DryRunAttempts && _dryRun is null; attempt++)
+        var token = _cts.Token;
+        try
         {
-            if (attempt > 1)
+            for (var attempt = 1; attempt <= DryRunAttempts && _dryRun is null; attempt++)
             {
-                await Task.Delay(DryRunRetryDelay, _cts.Token);
-            }
+                if (attempt > 1)
+                {
+                    await Task.Delay(DryRunRetryDelay, token);
+                }
 
-            await AttemptDryRunAsync();
+                await AttemptDryRunAsync(token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
         }
 
         _isLoadingDryRun = false;
         StateHasChanged();
     }
 
-    private async Task AttemptDryRunAsync()
+    private async Task AttemptDryRunAsync(CancellationToken cancellationToken)
     {
-        var result = await SyncEngine.DryRunAsync(CurrentUser, _cts.Token);
+        var result = await SyncEngine.DryRunAsync(CurrentUser, cancellationToken);
         switch (result)
         {
             case WatchlistSyncSummary changes:
                 _dryRun = changes;
                 _dryRunError = null;
-                var metadata = await DryRunMetadataLoader.LoadAsync(Media, changes, _cts.Token);
+                var metadata = await DryRunMetadataLoader.LoadAsync(Media, changes, cancellationToken);
                 _entries = WatchlistSyncView.Entries(changes, metadata);
                 _chips = WatchlistSyncView.Chips(changes);
                 break;
