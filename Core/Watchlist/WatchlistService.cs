@@ -3,6 +3,7 @@ using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
+using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Watchlist;
@@ -54,12 +55,16 @@ internal sealed class WatchlistService(
 		return entries.FirstOrDefault(entry => entry.MediaId == mediaId) is { } match ? Some.Of(match.Provenance) : new None();
 	}
 
-	public async Task AddToWatchlistAsync(IEnumerable<MediaId> mediaIds, WatchlistItemProvenance provenance, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaId>> AddToWatchlistAsync(
+		IEnumerable<MediaId> mediaIds,
+		WatchlistItemProvenance provenance,
+		CancellationToken cancellationToken = default
+	)
 	{
 		var ids = mediaIds.ToList();
 		if (ids.Count == 0)
 		{
-			return;
+			return [];
 		}
 
 		var ops = await outbox.GetAsync(cancellationToken);
@@ -72,8 +77,35 @@ internal sealed class WatchlistService(
 		await EnsureWatchlistProviderInExternalsAsync(needsPush, cancellationToken);
 
 		await outbox.DropAsync(uncancel, cancellationToken);
-		await repository.AddAsync(ids, provenance, cancellationToken);
-		await outbox.EnqueueAsync(WatchlistOperationAction.Add, needsPush, cancellationToken);
+		var added = await repository.AddAsync(ids, provenance, cancellationToken);
+		await outbox.EnqueueAsync(WatchlistOperationAction.Add, needsPush.Where(added.Contains).ToList(), cancellationToken);
+		return added;
+	}
+
+	public async Task<IReadOnlyList<MediaId>> RemoveOwnedAsync(IEnumerable<MediaId> mediaIds, FeedId owner, CancellationToken cancellationToken = default)
+	{
+		var ids = mediaIds.ToList();
+		if (ids.Count == 0)
+		{
+			return [];
+		}
+
+		var ops = await outbox.GetAsync(cancellationToken);
+		var unpushedAdds = ops.Where(o => o.Action == WatchlistOperationAction.Add).Select(o => o.MediaId).ToHashSet();
+
+		var removed = await repository.RemoveOwnedAsync(ids, owner, cancellationToken);
+		if (removed.Count == 0)
+		{
+			return removed;
+		}
+
+		var cancelAdds = removed.Where(unpushedAdds.Contains).ToList();
+		var candidates = removed.Where(id => !unpushedAdds.Contains(id)).ToList();
+		var pushable = await PushableAsync(candidates, cancellationToken);
+
+		await outbox.DropAsync(cancelAdds, cancellationToken);
+		await outbox.EnqueueAsync(WatchlistOperationAction.Remove, pushable, cancellationToken);
+		return removed;
 	}
 
 	public async Task RemoveFromWatchlistAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
@@ -116,5 +148,16 @@ internal sealed class WatchlistService(
 		{
 			throw new MissingWatchlistExternalIdException(watchlistProvider);
 		}
+	}
+
+	private async Task<List<MediaId>> PushableAsync(List<MediaId> ids, CancellationToken cancellationToken)
+	{
+		if (ids.Count == 0)
+		{
+			return [];
+		}
+		var config = await configRepository.GetAsync(cancellationToken);
+		var externals = await mediaRepository.GetExternalsAsync(ids, config.WatchlistProvider.AsMediaProvider(), cancellationToken);
+		return [.. ids.Where(externals.ContainsKey)];
 	}
 }
