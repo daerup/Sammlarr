@@ -186,6 +186,15 @@
                                     </BbTooltip>
                                     <BbTooltip>
                                         <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run history"
+                                                      Href="@($"/feeds/{UrlGuid.Encode(feed.Id.Value)}/runs")">
+                                                <LucideIcon Name="history" Size="15"/>
+                                            </BbButton>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>Run history</BbTooltipContent>
+                                    </BbTooltip>
+                                    <BbTooltip>
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
                                             <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit"
                                                       Href="@($"/feeds/edit/{UrlGuid.Encode(feed.Id.Value)}")">
                                                 <LucideIcon Name="pencil" Size="15"/>
