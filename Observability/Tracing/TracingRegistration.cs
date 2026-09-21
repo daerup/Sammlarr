@@ -14,6 +14,14 @@ public static class TracingRegistration
 			services.AddScoped<TInterface>(provider => TracingProxy<TInterface>.Wrap(provider.GetRequiredService<TImplementation>()));
 		}
 
+		public void AddTracedSingleton<TInterface, TImplementation>()
+			where TInterface : class
+			where TImplementation : class, TInterface
+		{
+			services.AddSingleton<TImplementation>();
+			services.AddSingleton<TInterface>(provider => TracingProxy<TInterface>.Wrap(provider.GetRequiredService<TImplementation>()));
+		}
+
 		public void AddTracedKeyedScoped<TInterface, TImplementation>(object key)
 			where TInterface : class
 			where TImplementation : class, TInterface
