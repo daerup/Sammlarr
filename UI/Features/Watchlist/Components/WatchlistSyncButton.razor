@@ -249,9 +249,6 @@ else
             case WatchlistSyncRemoteFailed failed:
                 _dryRunError = failed.Reason;
                 break;
-            case WatchlistSyncAlreadyRunning:
-                _dryRunError = "A sync is already running.";
-                break;
         }
     }
 

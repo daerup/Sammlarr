@@ -2,6 +2,8 @@ namespace Domain.Watchlist.Sync;
 
 public union WatchlistSyncResult(WatchlistSyncSummary, WatchlistSyncAlreadyRunning, WatchlistSyncRemoteFailed);
 
+public union WatchlistDryRunResult(WatchlistSyncSummary, WatchlistSyncRemoteFailed);
+
 public readonly record struct WatchlistSyncAlreadyRunning
 {
 	public override string ToString() => "Sync already in progress.";

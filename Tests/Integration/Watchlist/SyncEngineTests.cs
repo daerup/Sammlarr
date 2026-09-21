@@ -217,7 +217,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert
 			.That(result)
-			.IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>()
+			.IsOfUnionType<WatchlistDryRunResult, WatchlistSyncSummary>()
 			.And.Multiple(async summary =>
 			{
 				await Assert.That(summary.TotalChanges).IsEqualTo(2);
@@ -236,7 +236,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var result = await Testee.DryRunAsync(CurrentUser);
 
-		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncRemoteFailed>();
+		await Assert.That(result).IsOfUnionType<WatchlistDryRunResult, WatchlistSyncRemoteFailed>();
 		await AssertWatchlist(1, WatchlistEntryOrigin.Manual);
 	}
 

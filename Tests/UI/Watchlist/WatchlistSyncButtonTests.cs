@@ -64,10 +64,10 @@ public class WatchlistSyncButtonTests : BunitContext
 	}
 
 	[Test]
-	public async Task DryRun_WhenAnAttemptCollidesWithARunningSync_RetriesInsteadOfReportingAnError()
+	public async Task DryRun_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
 	{
 		var engine = RegisterServices();
-		engine.DryRunAsync(Any(), Any()).ReturnsSequentially(new WatchlistSyncAlreadyRunning(), Summary(), Summary());
+		engine.DryRunAsync(Any(), Any()).ReturnsSequentially(new WatchlistSyncRemoteFailed("temporary"), Summary(), Summary());
 
 		var cut = Render<Harness>();
 
@@ -79,7 +79,7 @@ public class WatchlistSyncButtonTests : BunitContext
 	public async Task DryRun_WhenEveryAttemptFails_GivesUpAfterThreeTries()
 	{
 		var engine = RegisterServices();
-		engine.DryRunAsync(Any(), Any()).Returns(new WatchlistSyncAlreadyRunning());
+		engine.DryRunAsync(Any(), Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
 
 		var cut = Render<Harness>();
 
