@@ -67,6 +67,16 @@ public class PlexWatchListProviderTests
 	}
 
 	[Test]
+	public async Task GetWatchlistAsync_WhenTheWatchlistIsEmpty_ReturnsNothingInsteadOfThrowing()
+	{
+		var testee = CreateWatchListService(EmptyWatchlistJson());
+
+		var result = await testee.GetWatchlistAsync().ToListAsync();
+
+		await Assert.That(result).IsEmpty();
+	}
+
+	[Test]
 	public async Task AddToWatchlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
 	{
 		var testee = CreateWatchListService(HttpStatusCode.OK);
@@ -157,6 +167,20 @@ public class PlexWatchListProviderTests
 
 		return JsonSerializer.Serialize(payload);
 	}
+
+	private static string EmptyWatchlistJson() =>
+		JsonSerializer.Serialize(
+			new
+			{
+				MediaContainer = new
+				{
+					identifier = "plex",
+					offset = 0,
+					totalSize = 0,
+					size = 0,
+				},
+			}
+		);
 
 	private static object CreateMetadata(int year = 2021, string? originallyAvailableAt = "2021-01-01", string title = "Movie 1", string? ratingKey = null) =>
 		new
