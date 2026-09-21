@@ -1,3 +1,4 @@
+using Contracts.Blacklist;
 using Contracts.Feed;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
@@ -81,6 +82,54 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunSummary>();
 		await Assert.That(result is FeedRunSummary { Delta.Drops.Count: 1 }).IsTrue();
 		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
+	}
+
+	[Test]
+	public async Task RunAsync_ForABlacklistedTitleTheFeedOwns_RemovesItLikeAnyOtherOnceItStopsQualifying()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("blacklist-list", new Mirror(1));
+		host.MdblistFeedContains("blacklist-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+
+		var blacklisted = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+		await host.Resolve<IBlacklistRepository>().AddAsync(blacklisted);
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		await Assert.That(await WatchlistIdsAsync()).DoesNotContain(blacklisted);
+	}
+
+	[Test]
+	public async Task RunAsync_ForABlacklistedTitleTheFeedOwns_KeepsItWhileItStillQualifies()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("blacklist-kept-list", new Mirror(1));
+		host.MdblistFeedContains("blacklist-kept-list", Item("Inception", MediaType.Movie, Tmdb("27205")));
+
+		var blacklisted = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+		await host.Resolve<IBlacklistRepository>().AddAsync(blacklisted);
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		await Assert.That(await WatchlistIdsAsync()).Contains(blacklisted);
+	}
+
+	[Test]
+	public async Task RunAsync_ForATitleAnotherFeedOwns_LeavesItAloneEvenWhenAbsentFromThisList()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var runningFeed = await SeedFeedAsync("running-list", new Mirror(1));
+		var otherFeed = await SeedFeedAsync("other-list", new Mirror(1));
+		host.MdblistFeedContains("running-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+
+		var ownedByOther = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(otherFeed));
+
+		var result = await Testee.RunAsync(runningFeed, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		await Assert.That(await WatchlistIdsAsync()).Contains(ownedByOther);
+		await Assert.That(result is FeedRunSummary summary && !summary.Delta.Drops.Contains(ownedByOther)).IsTrue();
 	}
 
 	[Test]
