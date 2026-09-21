@@ -25,34 +25,44 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 {
 	private readonly SemaphoreSlim _gate = new(1, 1);
 
-	public async Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default)
+	public async Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
+		await RunGuardedAsync(
+			async () =>
+			{
+				using var activity = Instrumentation.Source.StartActivity(nameof(WatchlistSyncEngine));
+				activity?.SetTag("sammlarr.sync.trigger", trigger.ToString());
+
+				await using var scope = scopeFactory.CreateAsyncScope();
+				using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
+				var deps = await ResolveAsync(scope, cancellationToken);
+				activity?.SetTag("sammlarr.sync.provider", deps.Provider.ToString());
+
+				var planning = await PlanAsync(deps, cancellationToken);
+				WatchlistSyncResult syncResult = planning switch
+				{
+					Error error => OnPlanError(error, deps.Provider),
+					Success<WatchlistSyncPlan>(var plan) => await ExecuteAsync(plan, deps, user.Id, cancellationToken),
+				};
+				if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
+				{
+					activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
+					await deps.Publisher.PublishAsync(new WatchlistSyncFailedEvent(user.Id, deps.Clock.Now, remoteFailed.Reason), cancellationToken);
+				}
+				return syncResult;
+			},
+			cancellationToken
+		);
+
+	private async Task<WatchlistSyncResult> RunGuardedAsync(Func<Task<WatchlistSyncResult>> run, CancellationToken cancellationToken)
 	{
 		if (!await _gate.WaitAsync(0, cancellationToken))
 		{
 			return new WatchlistSyncAlreadyRunning();
 		}
 
-		using var activity = Instrumentation.Source.StartActivity(nameof(WatchlistSyncEngine));
-		activity?.SetTag("sammlarr.sync.trigger", trigger.ToString());
 		try
 		{
-			await using var scope = scopeFactory.CreateAsyncScope();
-			using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
-			var deps = await ResolveAsync(scope, cancellationToken);
-			activity?.SetTag("sammlarr.sync.provider", deps.Provider.ToString());
-
-			var planning = await PlanAsync(deps, cancellationToken);
-			var syncResult = planning switch
-			{
-				Error error => OnPlanError(error, deps.Provider),
-				Success<WatchlistSyncPlan>(var plan) => await ExecuteAsync(plan, deps, user.Id, cancellationToken),
-			};
-			if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
-			{
-				activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
-				await deps.Publisher.PublishAsync(new WatchlistSyncFailedEvent(user.Id, deps.Clock.Now, remoteFailed.Reason), cancellationToken);
-			}
-			return syncResult;
+			return await run();
 		}
 		finally
 		{
@@ -60,30 +70,18 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 		}
 	}
 
-	public async Task<WatchlistSyncResult> DryRunAsync(ICurrentUser user, CancellationToken cancellationToken = default)
+	public async Task<WatchlistDryRunResult> DryRunAsync(ICurrentUser user, CancellationToken cancellationToken = default)
 	{
-		if (!await _gate.WaitAsync(0, cancellationToken))
-		{
-			return new WatchlistSyncAlreadyRunning();
-		}
+		await using var scope = scopeFactory.CreateAsyncScope();
+		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
+		var deps = await ResolveAsync(scope, cancellationToken);
 
-		try
+		var planning = await PlanAsync(deps, cancellationToken);
+		return planning switch
 		{
-			await using var scope = scopeFactory.CreateAsyncScope();
-			using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
-			var deps = await ResolveAsync(scope, cancellationToken);
-
-			var planning = await PlanAsync(deps, cancellationToken);
-			return planning switch
-			{
-				Error error => OnPlanError(error, deps.Provider),
-				Success<WatchlistSyncPlan>(var plan) => BuildChanges(plan),
-			};
-		}
-		finally
-		{
-			_gate.Release();
-		}
+			Error error => OnPlanError(error, deps.Provider),
+			Success<WatchlistSyncPlan>(var plan) => BuildChanges(plan),
+		};
 	}
 
 	private async Task<WatchlistSyncResult> ExecuteAsync(WatchlistSyncPlan plan, EngineDeps deps, UserId userId, CancellationToken cancellationToken)
@@ -131,13 +129,13 @@ internal sealed class WatchlistSyncEngine(IServiceScopeFactory scopeFactory, ILo
 		}
 	}
 
-	private WatchlistSyncResult OnPlanError(Error error, WatchlistProvider provider)
+	private WatchlistSyncRemoteFailed OnPlanError(Error error, WatchlistProvider provider)
 	{
 		logger.LogWarning("Remote fetch failed for {Provider}: {Reason}", provider, error.Reason);
 		return new WatchlistSyncRemoteFailed(error.Reason);
 	}
 
-	private static WatchlistSyncResult BuildChanges(WatchlistSyncPlan plan) =>
+	private static WatchlistSyncSummary BuildChanges(WatchlistSyncPlan plan) =>
 		new WatchlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant]) { Unmatched = plan.Unmatched };
 
 	private static async Task<EngineDeps> ResolveAsync(AsyncServiceScope scope, CancellationToken cancellationToken)
