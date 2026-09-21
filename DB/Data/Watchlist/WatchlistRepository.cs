@@ -1,4 +1,5 @@
 using Contracts.Watchlist;
+using Domain.Feed;
 using Domain.Media;
 using Domain.Watchlist;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +67,22 @@ internal sealed class WatchlistRepository(IDbContextFactory<SammlarrDbContext> d
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var removed = await ctx.Watchlist.Where(w => rawIds.Contains(w.Media.Id)).Select(w => w.Media.Id).ToListAsync(cancellationToken);
 		await ctx.Watchlist.Where(w => rawIds.Contains(w.Media.Id)).ExecuteDeleteAsync(cancellationToken);
+		return [.. removed.Select(MediaId.From)];
+	}
+
+	public async Task<IReadOnlyList<MediaId>> RemoveOwnedAsync(IEnumerable<MediaId> mediaIds, FeedId owner, CancellationToken cancellationToken = default)
+	{
+		var ids = mediaIds.Distinct().ToList();
+		if (ids.Count == 0)
+		{
+			return [];
+		}
+		var rawIds = ids.Select(id => id.Value).ToList();
+
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var owned = ctx.Watchlist.Where(w => rawIds.Contains(w.Media.Id) && w.SourceFeedId == owner.Value && w.Origin == WatchlistEntryOrigin.Feed);
+		var removed = await owned.Select(w => w.Media.Id).ToListAsync(cancellationToken);
+		await owned.ExecuteDeleteAsync(cancellationToken);
 		return [.. removed.Select(MediaId.From)];
 	}
 }
