@@ -39,6 +39,7 @@ public class CoreModule : IServiceModule
 		services.AddTransient(typeof(QueryProcessor<>));
 		services.AddTracedScoped<IBlacklistService, BlacklistService>();
 		services.AddTracedSingleton<IFeedRunEngine, FeedRunEngine>();
+		services.AddTracedScoped<IFeedService, FeedService>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
 		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();

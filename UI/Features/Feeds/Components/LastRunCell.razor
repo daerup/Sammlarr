@@ -6,7 +6,6 @@
 @using UI.Shared.Changes
 @using UI.Shared.Media
 @using global::Shared
-@inject IFeedRunLog RunLog
 @inject IMediaService Media
 
 @if (_run is null)
@@ -79,6 +78,8 @@ else
 @code {
     [Parameter] [EditorRequired] public required FeedId FeedId { get; set; }
 
+    [Parameter] public FeedOverview? Overview { get; set; }
+
     private FeedRun? _run;
     private int _runCount;
     private bool _open;
@@ -91,11 +92,10 @@ else
         return Task.CompletedTask;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
-        var runs = await RunLog.GetRunsAsync(FeedId, take: 1);
-        _run = runs.FirstOrDefault();
-        _runCount = (await RunLog.GetHistoryAsync(FeedId)).TotalRuns;
+        _run = Overview?.LastRun;
+        _runCount = Overview?.History.TotalRuns ?? 0;
     }
 
     private async Task OpenAsync()

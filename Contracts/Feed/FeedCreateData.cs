@@ -6,6 +6,7 @@ namespace Contracts.Feed;
 
 public record FeedCreateData
 {
+	public required string Name { get; init; }
 	public required bool IsEnabled { get; init; }
 	public required FeedProvider Provider { get; init; }
 	public required FeedStrategy Strategy { get; init; }

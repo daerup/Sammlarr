@@ -12,7 +12,7 @@ namespace Integration.Tests.Feeds;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private IFeedService Testee => host.ResolveKeyed<IFeedService>(FeedProvider.Mdblist);
+	private IFeedProvider Testee => host.ResolveKeyed<IFeedProvider>(FeedProvider.Mdblist);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 

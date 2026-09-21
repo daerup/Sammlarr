@@ -15,36 +15,36 @@ public static class NotificationDispatchHandler
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
-		IFeedRepository feedRepository,
+		IFeedService feedService,
 		CancellationToken cancellationToken
-	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
 		WatchlistSyncFailedEvent message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
-		IFeedRepository feedRepository,
+		IFeedService feedService,
 		CancellationToken cancellationToken
-	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
 		ProviderRateLimitedEvent message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
-		IFeedRepository feedRepository,
+		IFeedService feedService,
 		CancellationToken cancellationToken
-	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedRepository, cancellationToken);
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static async Task<DeliverNotification> Handle(
 		TestPingEvent message,
 		IMediaRepository mediaRepository,
-		IFeedRepository feedRepository,
+		IFeedService feedService,
 		CancellationToken cancellationToken
 	)
 	{
-		var context = await NotificationContextFactory.BuildAsync(message, mediaRepository, feedRepository, cancellationToken);
+		var context = await NotificationContextFactory.BuildAsync(message, mediaRepository, feedService, cancellationToken);
 		return new DeliverNotification(context, message.TargetId, message.UserId, NotificationTemplate.None);
 	}
 
@@ -53,7 +53,7 @@ public static class NotificationDispatchHandler
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
-		IFeedRepository feedRepository,
+		IFeedService feedService,
 		CancellationToken cancellationToken
 	)
 	{
@@ -64,7 +64,7 @@ public static class NotificationDispatchHandler
 			return [];
 		}
 
-		var context = await NotificationContextFactory.BuildAsync(message, mediaRepository, feedRepository, cancellationToken);
+		var context = await NotificationContextFactory.BuildAsync(message, mediaRepository, feedService, cancellationToken);
 		return [.. matching.Select(subscription => new DeliverNotification(context, subscription.TargetId, message.UserId, subscription.Template))];
 	}
 }

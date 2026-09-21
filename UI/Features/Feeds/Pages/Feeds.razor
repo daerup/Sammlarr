@@ -11,7 +11,7 @@
 @using UI.Shared.Changes
 @using UI.Shared.Media
 @using UI.Shared.Services.Branding
-@inject IFeedRepository FeedRepository
+@inject IFeedService FeedService
 @inject NavigationManager NavigationManager
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject IProviderConfigRepository ProviderConfigRepository
@@ -21,7 +21,6 @@
 @inject Notifier Notifier
 @inject IMediaService Media
 @inject IWatchlistRepository Watchlist
-@inject IFeedRunLog RunLog
 
 <PageTitle>Feeds</PageTitle>
 
@@ -169,7 +168,7 @@
                                            Property="@(l => OwnedBy(l))"
                                            Sortable="true">
                             <CellTemplate Context="feed">
-                                @if (!_everRan.Contains(feed.Id))
+                                @if (!_overviews.ContainsKey(feed.Id))
                                 {
                                     <span class="feed-owned is-none">—</span>
                                 }
@@ -189,7 +188,7 @@
                         <BbDataTableColumn TData="Feed" TValue="string"
                                            Header="Last run">
                             <CellTemplate Context="feed">
-                                <LastRunCell @key="(feed.Id, _runVersion)" FeedId="feed.Id"/>
+                                <LastRunCell @key="(feed.Id, _runVersion)" FeedId="feed.Id" Overview="@_overviews.GetValueOrDefault(feed.Id)"/>
                             </CellTemplate>
                         </BbDataTableColumn>
 
@@ -335,7 +334,7 @@
 
     private IReadOnlyList<Feed> _feeds = [];
     private IReadOnlyDictionary<FeedId, int> _owned = new Dictionary<FeedId, int>();
-    private IReadOnlySet<FeedId> _everRan = new HashSet<FeedId>();
+    private IReadOnlyDictionary<FeedId, FeedOverview> _overviews = new Dictionary<FeedId, FeedOverview>();
 
     private int OwnedBy(Feed feed) => _owned.GetValueOrDefault(feed.Id);
 
@@ -356,9 +355,9 @@
     protected override async Task OnInitializedAsync()
     {
         _providerConfig = await ProviderConfigRepository.GetAsync();
-        _feeds = await FeedRepository.GetFeedsAsync();
+        _feeds = await FeedService.GetFeedsAsync();
         _owned = await Watchlist.GetOwnedCountsAsync();
-        _everRan = await RunLog.GetFeedsThatHaveRunAsync();
+        _overviews = await FeedService.GetOverviewsAsync();
         UpdatePagedFeeds();
         _isLoading = false;
     }
@@ -386,8 +385,8 @@
 
     private async Task DeleteFeedAsync(FeedId id)
     {
-        await FeedRepository.DeleteFeedAsync(id);
-        _feeds = await FeedRepository.GetFeedsAsync();
+        await FeedService.DeleteFeedAsync(id);
+        _feeds = await FeedService.GetFeedsAsync();
         UpdatePagedFeeds();
     }
 
@@ -534,7 +533,7 @@
             _runningFeed = null;
             _runVersion++;
             _owned = await Watchlist.GetOwnedCountsAsync();
-        _everRan = await RunLog.GetFeedsThatHaveRunAsync();
+        _overviews = await FeedService.GetOverviewsAsync();
         }
     }
 

@@ -30,7 +30,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var missing = await fixture.Movie(TestMedia.Inception).OnWatchlist(origin);
 
 		var engine = fixture.Resolve<IFeedRunEngine>();
-		var log = fixture.Resolve<IFeedRunLog>();
+		var log = fixture.Resolve<IFeedRepository>();
 		var source = new[] { Lookup(kept) };
 
 		var drops = new List<int>();
@@ -40,7 +40,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 			var summary = await engine.DryRunAsync(feed, source, FeedSource.Complete, fixture.CurrentUser);
 			drops.Add(summary.Delta.Drops.Count);
 
-			await log.StartAsync(
+			await log.StartRunAsync(
 				new FeedRun
 				{
 					Id = Guid.NewGuid(),
@@ -73,13 +73,13 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var owned = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
 
 		var engine = fixture.Resolve<IFeedRunEngine>();
-		var log = fixture.Resolve<IFeedRunLog>();
+		var log = fixture.Resolve<IFeedRepository>();
 
 		for (var run = 1; run <= Threshold + 2; run++)
 		{
 			var summary = await engine.DryRunAsync(feed, [], FeedSource.Complete, fixture.CurrentUser);
 
-			await log.StartAsync(
+			await log.StartRunAsync(
 				new FeedRun
 				{
 					Id = Guid.NewGuid(),

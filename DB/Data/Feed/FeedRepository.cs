@@ -1,7 +1,10 @@
 using System.Linq.Expressions;
 using Contracts.Feed;
+using DB.Data.FeedRun;
 using DB.Data.Watchlist;
 using Domain.Feed;
+using Domain.Feed.Run;
+using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
@@ -9,6 +12,7 @@ namespace DB.Data.Feed;
 internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IFeedRepository
 {
 	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = FeedProjection.Project;
+	private static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> projectRun = FeedRunProjection.Project;
 
 	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
 	{
@@ -22,11 +26,11 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return await ctx.Feeds.AsNoTracking().Where(l => l.Id == id.Value).Select(project).FirstOrDefaultAsync(cancellationToken);
 	}
 
-	public async Task<FeedId> CreateFeedAsync(string name, FeedCreateData createData, CancellationToken cancellationToken = default)
+	public async Task<FeedId> CreateFeedAsync(FeedCreateData createData, CancellationToken cancellationToken = default)
 	{
 		var entity = new FeedRow
 		{
-			Name = name,
+			Name = createData.Name,
 			IsEnabled = createData.IsEnabled,
 			Provider = createData.Provider,
 			Strategy = createData.Strategy,
@@ -86,5 +90,161 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		ctx.Feeds.Remove(entity);
 		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(
+		FeedId feedId,
+		IReadOnlySet<MediaId> owned,
+		int window,
+		CancellationToken cancellationToken = default
+	)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var recent = await ctx
+			.FeedRuns.AsNoTracking()
+			.Where(row => row.FeedId == feedId.Value && row.Conclusiveness == Conclusiveness.Conclusive)
+			.OrderByDescending(row => row.StartedAt)
+			.Take(window)
+			.Select(row => row.Items.Select(item => item.MediaId).ToList())
+			.ToListAsync(cancellationToken);
+
+		var seen = recent.Select(ids => ids.ToHashSet()).ToList();
+
+		return owned
+			.Select(id => (Id: id, Absences: seen.TakeWhile(ids => !ids.Contains(id.Value)).Count()))
+			.Where(entry => entry.Absences > 0)
+			.ToDictionary(entry => entry.Id, entry => entry.Absences);
+	}
+
+	public async Task<IReadOnlyList<Domain.Feed.Run.FeedRun>> GetRunsAsync(FeedId feedId, int take, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		return await ctx
+			.FeedRuns.AsNoTracking()
+			.Where(row => row.FeedId == feedId.Value)
+			.OrderByDescending(row => row.StartedAt)
+			.Take(take)
+			.Select(projectRun)
+			.ToListAsync(cancellationToken);
+	}
+
+	public async Task<Optional<Domain.Feed.Run.FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var run = await ctx.FeedRuns.AsNoTracking().Where(row => row.Id == runId).Select(projectRun).FirstOrDefaultAsync(cancellationToken);
+
+		return run is null ? new None() : Some.Of(run);
+	}
+
+	public async Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var runs = ctx.FeedRuns.AsNoTracking().Where(row => row.FeedId == feedId.Value);
+		if (!await runs.AnyAsync(cancellationToken))
+		{
+			return FeedRunHistory.None;
+		}
+
+		return new FeedRunHistory
+		{
+			TotalRuns = await runs.CountAsync(cancellationToken),
+			FirstRunAt = await runs.MinAsync(row => row.StartedAt, cancellationToken),
+			TotalAdded = await runs.SumAsync(row => row.Added, cancellationToken),
+			TotalRemoved = await runs.SumAsync(row => row.Removed, cancellationToken),
+		};
+	}
+
+	public async Task<IReadOnlyDictionary<FeedId, FeedOverview>> GetOverviewsAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var totals = await ctx
+			.FeedRuns.AsNoTracking()
+			.GroupBy(row => row.FeedId)
+			.Select(group => new
+			{
+				FeedId = group.Key,
+				TotalRuns = group.Count(),
+				FirstRunAt = group.Min(row => row.StartedAt),
+				TotalAdded = group.Sum(row => row.Added),
+				TotalRemoved = group.Sum(row => row.Removed),
+				LatestAt = group.Max(row => row.StartedAt),
+			})
+			.ToListAsync(cancellationToken);
+
+		if (totals.Count == 0)
+		{
+			return new Dictionary<FeedId, FeedOverview>();
+		}
+
+		var latestStamps = totals.Select(total => total.LatestAt).ToList();
+		var candidates = await ctx.FeedRuns.AsNoTracking().Where(row => latestStamps.Contains(row.StartedAt)).Select(projectRun).ToListAsync(cancellationToken);
+
+		var latest = candidates.GroupBy(run => run.FeedId).ToDictionary(group => group.Key, group => group.OrderByDescending(run => run.StartedAt).First());
+
+		return totals
+			.Select(total => (Id: FeedId.From(total.FeedId), Total: total))
+			.Where(entry => latest.ContainsKey(entry.Id))
+			.ToDictionary(
+				entry => entry.Id,
+				entry => new FeedOverview(
+					latest[entry.Id],
+					new FeedRunHistory
+					{
+						TotalRuns = entry.Total.TotalRuns,
+						FirstRunAt = entry.Total.FirstRunAt,
+						TotalAdded = entry.Total.TotalAdded,
+						TotalRemoved = entry.Total.TotalRemoved,
+					}
+				)
+			);
+	}
+
+	public async Task StartRunAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var row = new FeedRunRow
+		{
+			Id = run.Id,
+			FeedId = run.FeedId.Value,
+			StartedAt = run.StartedAt,
+		};
+		Fill(row, run);
+		ctx.FeedRuns.Add(row);
+
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task CompleteRunAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var row = await ctx.FeedRuns.Include(r => r.Items).FirstAsync(r => r.Id == run.Id, cancellationToken);
+		row.Items.Clear();
+		Fill(row, run);
+
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	private static void Fill(FeedRunRow row, Domain.Feed.Run.FeedRun run)
+	{
+		row.DurationMs = (long)run.Duration.TotalMilliseconds;
+		row.Strategy = run.Strategy;
+		row.Trigger = run.Trigger;
+		row.Conclusiveness = run.Conclusiveness;
+		row.Total = run.Counts.Total;
+		row.Added = run.Counts.Added;
+		row.Kept = run.Counts.Kept;
+		row.Bypassed = run.Counts.Bypassed;
+		row.Filtered = run.Counts.Filtered;
+		row.Skipped = run.Counts.Skipped;
+		row.Unresolved = run.Counts.Unresolved;
+		row.Removed = run.Counts.Removed;
+		row.Items.AddRange(run.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State }));
 	}
 }
