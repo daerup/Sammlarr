@@ -40,11 +40,11 @@ public sealed record ListFilter
 {
 	public static readonly ListFilter None = new();
 
-	public SourceChoice? Source { get; init; }
+	public IReadOnlyList<SourceChoice> Sources { get; init; } = [];
 	public MediaType? Type { get; init; }
 	public ListSort Sort { get; init; } = ListSort.RecentlyAdded;
 
-	public int ActiveCount => (Source is null ? 0 : 1) + (Type is null ? 0 : 1);
+	public int ActiveCount => (Sources.Count > 0 ? 1 : 0) + (Type is null ? 0 : 1);
 
 	public bool HasFilters => ActiveCount > 0;
 
@@ -54,7 +54,7 @@ public sealed record ListFilter
 
 	public bool MatchesType(MediaType type) => Type is null || Type == type;
 
-	public bool MatchesSource(WatchlistItemProvenance provenance) => Source is not { } source || source.Matches(provenance);
+	public bool MatchesSource(WatchlistItemProvenance provenance) => Sources.Count == 0 || Sources.Any(source => source.Matches(provenance));
 
 	public IEnumerable<T> SortBy<T>(IEnumerable<T> items, Func<T, IdentifiedMedia> media, Func<T, DateTimeOffset> addedAt) =>
 		Sort switch

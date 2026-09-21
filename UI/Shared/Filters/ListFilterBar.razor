@@ -2,14 +2,17 @@
 @using Domain.Media
 
 <div class="filter-bar">
-    @if (Sources.Count > 0)
+    @if (Available.Count > 0)
     {
-        <BbSelect TValue="string"
-                  Value="@SelectedSourceKey"
-                  ValueChanged="OnSourceChangedAsync"
-                  Options="@SourceOptions"
-                  Placeholder="Any source"
-                  Class="filter-control filter-source"/>
+        <BbMultiSelect TValue="string"
+                       Values="@SelectedSourceKeys"
+                       ValuesChanged="OnSourcesChangedAsync"
+                       Options="@SourceOptions"
+                       Placeholder="Any source"
+                       SearchPlaceholder="Search sources"
+                       PopoverWidth="w-[420px]"
+                       MaxDisplayTags="2"
+                       Class="filter-control"/>
     }
 
     <BbSelect TValue="string"
@@ -44,7 +47,7 @@
     public EventCallback<ListFilter> FilterChanged { get; set; }
 
     [Parameter]
-    public IReadOnlyList<SourceOption> Sources { get; set; } = [];
+    public IReadOnlyList<SourceOption> Available { get; set; } = [];
 
     [Parameter]
     public int Shown { get; set; }
@@ -52,7 +55,7 @@
     [Parameter]
     public int Total { get; set; }
 
-    private IReadOnlyList<SelectOption<string>> SourceOptions => [.. Sources.Select(source => new SelectOption<string>(source.Key, source.Label))];
+    private IReadOnlyList<SelectOption<string>> SourceOptions => [.. Available.Select(source => new SelectOption<string>(source.Key, source.Label))];
 
     private static readonly SelectOption<string>[] TypeOptions =
     [
@@ -70,10 +73,24 @@
         new(ListSort.OldestRelease, "Oldest release"),
     ];
 
-    private string? SelectedSourceKey => Filter.Source is { } choice ? Sources.FirstOrDefault(source => source.Choice == choice)?.Key : null;
+    private IEnumerable<string> SelectedSourceKeys =>
+        Filter.Sources.Select(KeyFor).Where(key => key is not null).Select(key => key!);
 
-    private Task OnSourceChangedAsync(string? key) =>
-        Apply(Filter with { Source = Sources.FirstOrDefault(source => source.Key == key)?.Choice });
+    private string? KeyFor(SourceChoice choice) => Available.FirstOrDefault(source => source.Choice == choice)?.Key;
+
+    private Task OnSourcesChangedAsync(IEnumerable<string>? keys) =>
+        Apply(
+            Filter with
+            {
+                Sources =
+                [
+                    .. (keys ?? [])
+                        .Select(key => Available.FirstOrDefault(source => source.Key == key))
+                        .Where(source => source is not null)
+                        .Select(source => source!.Choice),
+                ],
+            }
+        );
 
     private Task OnTypeChangedAsync(string? key) =>
         Apply(Filter with { Type = Enum.TryParse<MediaType>(key, out var type) ? type : null });

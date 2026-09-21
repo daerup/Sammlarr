@@ -10,10 +10,6 @@
     background: color-mix(in srgb, var(--foreground) 3%, transparent);
 }
 
-.filter-source {
-    min-width: 320px;
-}
-
 .filter-type {
     min-width: 140px;
 }
