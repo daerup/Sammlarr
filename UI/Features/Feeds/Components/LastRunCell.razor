@@ -4,6 +4,7 @@
 @using Domain.Feed.Run
 @using Domain.Media
 @using UI.Shared.Changes
+@using UI.Shared.Media
 @inject IFeedRunLog RunLog
 @inject IMediaService Media
 
@@ -51,6 +52,7 @@ else
                   Subtitle="@FeedRunView.Summary(_run)"
                   Entries="_entries"
                   Chips="@FeedRunView.Chips(_run.Counts)"
+                  OnSelect="ShowDetailsAsync"
                   EmptyMessage="Nothing was added or removed."
                   Note="@($"{_runCount} runs")">
         <Badges>
@@ -64,6 +66,10 @@ else
             <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _open = false)">Close</BbButton>
         </Actions>
     </ChangeDialog>
+
+    <MediaDetailSheet Open="_selected is not null"
+                      OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
+                      Media="_selected"/>
 }
 
 @code {
@@ -73,6 +79,13 @@ else
     private int _runCount;
     private bool _open;
     private IReadOnlyList<ChangeEntry> _entries = [];
+    private MediaLookup? _selected;
+
+    private Task ShowDetailsAsync(MediaLookup media)
+    {
+        _selected = media;
+        return Task.CompletedTask;
+    }
 
     protected override async Task OnInitializedAsync()
     {
