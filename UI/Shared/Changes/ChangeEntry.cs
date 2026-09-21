@@ -21,6 +21,7 @@ public enum ChipTone
 public sealed record ChangeEntry
 {
 	public required string Title { get; init; }
+	public MediaId? Id { get; init; }
 	public MediaLookup? Media { get; init; }
 	public required ChangeKind Kind { get; init; }
 	public string? Subtitle { get; init; }

@@ -198,6 +198,7 @@
                                 <ChangeList Entries="_entries"
                                             Chips="@FeedRunView.Chips(run.Counts)"
                                             OnSelect="ShowDetailsAsync"
+                                            Highlight="Highlight"
                                             Fill="true"
                                             RemovedLabel="Removed"
                                             AddedLabel="Added"/>
@@ -235,6 +236,10 @@
 @code {
     [Parameter] public string? FeedIdParam { get; set; }
     [Parameter] public string? RunIdParam { get; set; }
+
+    [Parameter] [SupplyParameterFromQuery(Name = "item")] public string? ItemParam { get; set; }
+
+    private MediaId? Highlight => ItemParam is null ? null : MediaId.From(UrlGuid.Decode(ItemParam));
 
     private const int PageSize = 25;
 

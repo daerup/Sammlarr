@@ -203,6 +203,40 @@ public class ChangeListTests : BunitContext
 		await Assert.That(cut.FindAll(".change-row")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Render_WhenTheCallerPointsAtOneItem_MarksOnlyThatRowAsHighlighted()
+	{
+		var wanted = MediaId.From(Guid.NewGuid());
+		var target = Added("Wanted") with { Id = wanted };
+		var other = Added("Ignored") with { Id = MediaId.From(Guid.NewGuid()) };
+
+		var cut = RenderList([target, other], [], highlight: wanted);
+
+		var highlighted = cut.FindAll(".change-row").Where(row => row.ClassList.Contains("is-highlight")).ToList();
+
+		await Assert.That(highlighted).HasCount(1);
+		await Assert.That(highlighted[0].TextContent).Contains("Wanted");
+	}
+
+	[Test]
+	public async Task Highlight_OnceARowIsOpened_StopsMarkingTheRowItPointedAt()
+	{
+		var wanted = MediaId.From(Guid.NewGuid());
+		var cut = RenderList([Added("Wanted") with { Id = wanted }], [], highlight: wanted);
+
+		await cut.Find(".change-row").ClickAsync(new MouseEventArgs());
+
+		await Assert.That(cut.FindAll(".change-row.is-highlight")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Render_WhenTheCallerPointsAtNothing_LeavesEveryRowUnhighlighted()
+	{
+		var cut = RenderList([Added("Wanted") with { Id = MediaId.From(Guid.NewGuid()) }], []);
+
+		await Assert.That(cut.FindAll(".change-row.is-highlight")).IsEmpty();
+	}
+
 	private static ChangeChip Chip(string icon, int count, ChangeKind? filters = null) =>
 		new()
 		{
@@ -242,7 +276,8 @@ public class ChangeListTests : BunitContext
 		IReadOnlyList<ChangeEntry> entries,
 		IReadOnlyList<ChangeChip> chips,
 		Action<MediaLookup>? onSelect = null,
-		string? unchangedLabel = null
+		string? unchangedLabel = null,
+		MediaId? highlight = null
 	)
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -252,6 +287,10 @@ public class ChangeListTests : BunitContext
 		{
 			parameters.Add(list => list.Entries, entries);
 			parameters.Add(list => list.Chips, chips);
+			if (highlight is not null)
+			{
+				parameters.Add(list => list.Highlight, highlight);
+			}
 			if (onSelect is not null)
 			{
 				parameters.Add(list => list.OnSelect, onSelect);

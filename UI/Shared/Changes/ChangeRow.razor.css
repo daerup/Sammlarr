@@ -11,6 +11,22 @@
     background: color-mix(in srgb, var(--foreground) 5%, transparent);
 }
 
+.change-row.is-highlight {
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    box-shadow: inset 2px 0 0 var(--primary);
+    outline: none;
+    animation: change-row-reveal 1.6s ease-out 1;
+}
+
+@keyframes change-row-reveal {
+    0%, 40% {
+        background: color-mix(in srgb, var(--primary) 30%, transparent);
+    }
+    100% {
+        background: color-mix(in srgb, var(--primary) 12%, transparent);
+    }
+}
+
 .change-sign {
     flex: none;
     width: 14px;
