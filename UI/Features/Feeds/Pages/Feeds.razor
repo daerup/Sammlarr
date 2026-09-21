@@ -51,6 +51,7 @@
             }
             else
             {
+                <div class="feeds-table">
                 <BbDataTable TData="Feed"
                              Data="@_pagedFeeds"
                              IsLoading="@_isLoading"
@@ -62,7 +63,11 @@
                                            Header="Name"
                                            Property="@(l => l.Name)"
                                            Sortable="true"
-                                           Filterable="true"/>
+                                           Filterable="true">
+                            <CellTemplate Context="feed">
+                                <span class="feed-name" title="@feed.Name">@feed.Name</span>
+                            </CellTemplate>
+                        </BbDataTableColumn>
 
                         <BbDataTableColumn TData="Feed" TValue="FeedProvider"
                                            Header="Provider"
@@ -78,6 +83,33 @@
                                     </BbTooltipTrigger>
                                     <BbTooltipContent>@branding.DisplayName</BbTooltipContent>
                                 </BbTooltip>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+
+                        <BbDataTableColumn TData="Feed" TValue="string"
+                                           Header="List ID"
+                                           Property="@(l => l.Identifier)"
+                                           Filterable="true">
+                            <CellTemplate Context="feed">
+                                <span class="feed-ident" title="@feed.Identifier">
+                                    <FeedSourceLink Identifier="@feed.Identifier" Provider="@feed.Provider"/>
+                                </span>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+
+                        <BbDataTableColumn TData="Feed" TValue="bool"
+                                           Header="Status"
+                                           Property="@(l => l.Enabled)"
+                                           Sortable="true">
+                            <CellTemplate Context="feed">
+                                @if (feed.Enabled)
+                                {
+                                    <BbBadge Class="bg-success">Enabled</BbBadge>
+                                }
+                                else
+                                {
+                                    <BbBadge Variant="BadgeVariant.Destructive">Disabled</BbBadge>
+                                }
                             </CellTemplate>
                         </BbDataTableColumn>
 
@@ -131,39 +163,6 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="List ID"
-                                           Property="@(l => l.Identifier)"
-                                           Filterable="true">
-                            <CellTemplate Context="feed">
-                                <FeedSourceLink Identifier="@feed.Identifier" Provider="@feed.Provider"/>
-                            </CellTemplate>
-                        </BbDataTableColumn>
-
-                        <BbDataTableColumn TData="Feed" TValue="bool"
-                                           Header="Status"
-                                           Property="@(l => l.Enabled)"
-                                           Sortable="true">
-                            <CellTemplate Context="feed">
-                                @if (feed.Enabled)
-                                {
-
-                                    <BbBadge Class="bg-success">Enabled</BbBadge>
-                                }
-                                else
-                                {
-                                    <BbBadge Variant="BadgeVariant.Destructive">Disabled</BbBadge>
-                                }
-                            </CellTemplate>
-                        </BbDataTableColumn>
-
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="Last run">
-                            <CellTemplate Context="feed">
-                                <LastRunCell @key="(feed.Id, _runVersion)" FeedId="feed.Id"/>
-                            </CellTemplate>
-                        </BbDataTableColumn>
-
                         <BbDataTableColumn TData="Feed" TValue="int"
                                            Header="On watchlist"
                                            Property="@(l => OwnedBy(l))"
@@ -181,10 +180,17 @@
                         </BbDataTableColumn>
 
                         <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header=""
-                                           Width="80px">
+                                           Header="Last run">
                             <CellTemplate Context="feed">
-                                <div class="flex items-center gap-1">
+                                <LastRunCell @key="(feed.Id, _runVersion)" FeedId="feed.Id"/>
+                            </CellTemplate>
+                        </BbDataTableColumn>
+
+                        <BbDataTableColumn TData="Feed" TValue="string"
+                                           Header=""
+                                           CellClass="feeds-actions-cell">
+                            <CellTemplate Context="feed">
+                                <div class="flex items-center justify-end gap-1">
                                     <BbTooltip>
                                         <BbTooltipTrigger>
                                             <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run now"
@@ -266,6 +272,7 @@
                         </BbDataTableColumn>
                     </Columns>
                 </BbDataTable>
+                </div>
 
                 <PaginationControls CurrentPage="_currentPage"
                                     TotalPages="_totalPages"

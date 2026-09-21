@@ -5,10 +5,10 @@
 @if (url is not null)
 {
     <BbTooltip>
-        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+        <BbTooltipTrigger AsChild="false" Class="inline-flex min-w-0 max-w-full" Focusable="false">
             <a href="@url" target="_blank" rel="noopener noreferrer"
-               class="inline-flex items-center gap-1 font-mono text-sm text-primary underline-offset-4 hover:underline">
-                @Identifier
+               class="inline-flex items-center gap-1 min-w-0 max-w-full font-mono text-sm text-primary underline-offset-4 hover:underline">
+                <span class="min-w-0 truncate">@Identifier</span>
                 <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
             </a>
         </BbTooltipTrigger>
@@ -17,7 +17,7 @@
 }
 else
 {
-    <span class="font-mono text-sm">@Identifier</span>
+    <span class="block truncate font-mono text-sm">@Identifier</span>
 }
 
 @code {
