@@ -4,11 +4,16 @@
 
 @if (url is not null)
 {
-    <a href="@url" target="_blank" rel="noopener noreferrer"
-       class="inline-flex items-center gap-1 font-mono text-sm text-primary underline-offset-4 hover:underline">
-        @Identifier
-        <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
-    </a>
+    <BbTooltip>
+        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+            <a href="@url" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1 font-mono text-sm text-primary underline-offset-4 hover:underline">
+                @Identifier
+                <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
+            </a>
+        </BbTooltipTrigger>
+        <BbTooltipContent>Open on @ProviderName</BbTooltipContent>
+    </BbTooltip>
 }
 else
 {
@@ -21,6 +26,13 @@ else
 
     [Parameter] [EditorRequired]
     public FeedProvider Provider { get; set; }
+
+    private string ProviderName =>
+        Provider switch
+        {
+            FeedProvider.Mdblist => "MDBList",
+            FeedProvider.Tmdb => "TMDB",
+        };
 
     private static string GetProviderUrl(string identifier, FeedProvider provider) =>
         provider switch

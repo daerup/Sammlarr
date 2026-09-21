@@ -19,6 +19,8 @@
 }
 else
 {
+    <BbTooltip>
+    <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
     <button type="button" class="last-run" @onclick="OpenAsync">
         <LucideIcon Name="history" Size="14"/>
         <span>@Relative(_run.StartedAt)</span>
@@ -46,6 +48,9 @@ else
             </span>
         }
     </button>
+    </BbTooltipTrigger>
+    <BbTooltipContent>See what this run changed</BbTooltipContent>
+    </BbTooltip>
 
     <ChangeDialog Open="_open"
                   OnOpenChanged="@(open => _open = open)"
