@@ -71,6 +71,17 @@
     font-variant-numeric: tabular-nums;
 }
 
+.runs-owned-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.runs-owned-link:hover,
+.runs-owned-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .runs-alltime {
     opacity: 0.72;
 }
