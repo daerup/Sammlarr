@@ -77,6 +77,15 @@ internal sealed class FeedRunLog(IDbContextFactory<SammlarrDbContext> dbContextF
 		};
 	}
 
+	public async Task<IReadOnlySet<FeedId>> GetFeedsThatHaveRunAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var feedIds = await ctx.FeedRuns.AsNoTracking().Select(row => row.FeedId).Distinct().ToListAsync(cancellationToken);
+
+		return feedIds.Select(FeedId.From).ToHashSet();
+	}
+
 	public async Task StartAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
