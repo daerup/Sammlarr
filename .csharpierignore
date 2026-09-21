@@ -11,3 +11,4 @@ Domain/Watchlist/Sync/WatchlistSyncTrigger.cs
 Domain/Notifications/NotificationConfig.cs
 Contracts/Notifications/DeliveryResult.cs
 Domain/Notifications/DeliveryOutcome.cs
+Domain/Feed/Run/FeedRunResult.cs
