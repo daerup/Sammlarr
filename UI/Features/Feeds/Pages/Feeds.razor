@@ -52,232 +52,232 @@
             else
             {
                 <div class="feeds-table">
-                <BbDataTable TData="Feed"
-                             Data="@_pagedFeeds"
-                             IsLoading="@_isLoading"
-                             ShowToolbar="true"
-                             ShowPagination="false"
-                             AriaLabel="Feeds">
-                    <Columns>
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="Name"
-                                           Property="@(l => l.Name)"
-                                           Sortable="true"
-                                           Filterable="true">
-                            <CellTemplate Context="feed">
-                                <span class="feed-name" title="@feed.Name">@feed.Name</span>
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                    <BbDataTable TData="Feed"
+                                 Data="@_pagedFeeds"
+                                 IsLoading="@_isLoading"
+                                 ShowToolbar="true"
+                                 ShowPagination="false"
+                                 AriaLabel="Feeds">
+                        <Columns>
+                            <BbDataTableColumn TData="Feed" TValue="string"
+                                               Header="Name"
+                                               Property="@(l => l.Name)"
+                                               Sortable="true"
+                                               Filterable="true">
+                                <CellTemplate Context="feed">
+                                    <span class="feed-name" title="@feed.Name">@feed.Name</span>
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="FeedProvider"
-                                           Header="Provider"
-                                           Property="@(l => l.Provider)"
-                                           Sortable="true">
-                            <CellTemplate Context="feed">
-                                @{
-                                    var branding = MediaProviderBrandingService.GetBrandingInfo(feed.Provider.AsMediaProvider());
-                                }
-                                <BbTooltip>
-                                    <BbTooltipTrigger AsChild="false" Class="inline-flex">
-                                        <span class="shrink-0 flex items-center" aria-label="@branding.DisplayName">@branding.Icon</span>
-                                    </BbTooltipTrigger>
-                                    <BbTooltipContent>@branding.DisplayName</BbTooltipContent>
-                                </BbTooltip>
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                            <BbDataTableColumn TData="Feed" TValue="FeedProvider"
+                                               Header="Provider"
+                                               Property="@(l => l.Provider)"
+                                               Sortable="true">
+                                <CellTemplate Context="feed">
+                                    @{
+                                        var branding = MediaProviderBrandingService.GetBrandingInfo(feed.Provider.AsMediaProvider());
+                                    }
+                                    <BbTooltip>
+                                        <BbTooltipTrigger AsChild="false" Class="inline-flex">
+                                            <span class="shrink-0 flex items-center" aria-label="@branding.DisplayName">@branding.Icon</span>
+                                        </BbTooltipTrigger>
+                                        <BbTooltipContent>@branding.DisplayName</BbTooltipContent>
+                                    </BbTooltip>
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="List ID"
-                                           Property="@(l => l.Identifier)"
-                                           Filterable="true">
-                            <CellTemplate Context="feed">
+                            <BbDataTableColumn TData="Feed" TValue="string"
+                                               Header="List ID"
+                                               Property="@(l => l.Identifier)"
+                                               Filterable="true">
+                                <CellTemplate Context="feed">
                                 <span class="feed-ident" title="@feed.Identifier">
                                     <FeedSourceLink Identifier="@feed.Identifier" Provider="@feed.Provider"/>
                                 </span>
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="bool"
-                                           Header="Status"
-                                           Property="@(l => l.Enabled)"
-                                           Sortable="true">
-                            <CellTemplate Context="feed">
-                                @if (feed.Enabled)
-                                {
-                                    <BbBadge Class="bg-success">Enabled</BbBadge>
-                                }
-                                else
-                                {
-                                    <BbBadge Variant="BadgeVariant.Destructive">Disabled</BbBadge>
-                                }
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                            <BbDataTableColumn TData="Feed" TValue="bool"
+                                               Header="Status"
+                                               Property="@(l => l.Enabled)"
+                                               Sortable="true">
+                                <CellTemplate Context="feed">
+                                    @if (feed.Enabled)
+                                    {
+                                        <BbBadge Class="bg-success">Enabled</BbBadge>
+                                    }
+                                    else
+                                    {
+                                        <BbBadge Variant="BadgeVariant.Destructive">Disabled</BbBadge>
+                                    }
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="Strategy"
-                                           Property="@(l => l.Strategy.ToString())"
-                                           Sortable="true">
-                            <CellTemplate Context="feed">
-                                <BbBadge Variant="BadgeVariant.Secondary">
-                                    @(feed.Strategy is Mirror ? "Mirror" : "Append")
-                                </BbBadge>
-                            </CellTemplate>
-                        </BbDataTableColumn>
-
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="Trigger"
-                                           Property="@(l => l.Schedule is Scheduled ? "Scheduled" : "Manual")"
-                                           Sortable="true">
-                            <CellTemplate Context="feed">
-                                @if (feed.Schedule is Scheduled scheduled)
-                                {
-                                    <BbPopover>
-                                        <BbPopoverTrigger AsChild="false" aria-label="Schedule details" class="inline-flex cursor-pointer">
-                                            <BbBadge Variant="BadgeVariant.Secondary">
-                                                <LucideIcon Name="clock" Size="12" Class="mr-1 shrink-0"/>
-                                                Scheduled
-                                            </BbBadge>
-                                        </BbPopoverTrigger>
-                                        <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72 overflow-hidden p-0">
-                                            <div class="border-b px-3 py-2 text-xs font-medium text-muted-foreground">Schedule</div>
-                                            <div class="flex flex-col gap-1.5 px-3 py-2 text-xs">
-                                                <div class="flex items-center justify-between gap-3">
-                                                    <span class="text-muted-foreground">Expression</span>
-                                                    <code class="rounded bg-muted px-1.5 py-0.5 tabular-nums">@scheduled.ToString()</code>
-                                                </div>
-                                                <div class="flex items-center justify-between gap-3">
-                                                    <span class="text-muted-foreground">Next run</span>
-                                                    <span class="tabular-nums">@NextRunLabel(scheduled)</span>
-                                                </div>
-                                            </div>
-                                        </BbPopoverContent>
-                                    </BbPopover>
-                                }
-                                else
-                                {
-                                    <BbBadge Variant="BadgeVariant.Outline">
-                                        <LucideIcon Name="hand" Size="12" Class="mr-1 shrink-0"/>
-                                        Manual
+                            <BbDataTableColumn TData="Feed" TValue="string"
+                                               Header="Strategy"
+                                               Property="@(l => l.Strategy.ToString())"
+                                               Sortable="true">
+                                <CellTemplate Context="feed">
+                                    <BbBadge Variant="BadgeVariant.Secondary">
+                                        @(feed.Strategy is Mirror ? "Mirror" : "Append")
                                     </BbBadge>
-                                }
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="int"
-                                           Header="On watchlist"
-                                           Property="@(l => OwnedBy(l))"
-                                           Sortable="true">
-                            <CellTemplate Context="feed">
-                                @if (!_overviews.ContainsKey(feed.Id))
-                                {
-                                    <span class="feed-owned is-none">—</span>
-                                }
-                                else if (OwnedBy(feed) is > 0 and var owned)
-                                {
-                                    <a class="feed-owned feed-owned-link"
-                                       href="@($"/watchlist?feed={UrlGuid.Encode(feed.Id.Value)}")"
-                                       title="@($"Show the {owned} titles this feed put on your watchlist")">@owned</a>
-                                }
-                                else
-                                {
-                                    <span class="feed-owned is-none">0</span>
-                                }
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                            <BbDataTableColumn TData="Feed" TValue="string"
+                                               Header="Trigger"
+                                               Property="@(l => l.Schedule is Scheduled ? "Scheduled" : "Manual")"
+                                               Sortable="true">
+                                <CellTemplate Context="feed">
+                                    @if (feed.Schedule is Scheduled scheduled)
+                                    {
+                                        <BbPopover>
+                                            <BbPopoverTrigger AsChild="false" aria-label="Schedule details" class="inline-flex cursor-pointer">
+                                                <BbBadge Variant="BadgeVariant.Secondary">
+                                                    <LucideIcon Name="clock" Size="12" Class="mr-1 shrink-0"/>
+                                                    Scheduled
+                                                </BbBadge>
+                                            </BbPopoverTrigger>
+                                            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72 overflow-hidden p-0">
+                                                <div class="border-b px-3 py-2 text-xs font-medium text-muted-foreground">Schedule</div>
+                                                <div class="flex flex-col gap-1.5 px-3 py-2 text-xs">
+                                                    <div class="flex items-center justify-between gap-3">
+                                                        <span class="text-muted-foreground">Expression</span>
+                                                        <code class="rounded bg-muted px-1.5 py-0.5 tabular-nums">@scheduled.ToString()</code>
+                                                    </div>
+                                                    <div class="flex items-center justify-between gap-3">
+                                                        <span class="text-muted-foreground">Next run</span>
+                                                        <span class="tabular-nums">@NextRunLabel(scheduled)</span>
+                                                    </div>
+                                                </div>
+                                            </BbPopoverContent>
+                                        </BbPopover>
+                                    }
+                                    else
+                                    {
+                                        <BbBadge Variant="BadgeVariant.Outline">
+                                            <LucideIcon Name="hand" Size="12" Class="mr-1 shrink-0"/>
+                                            Manual
+                                        </BbBadge>
+                                    }
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header="Last run">
-                            <CellTemplate Context="feed">
-                                <LastRunCell @key="(feed.Id, _runVersion)" FeedId="feed.Id" Overview="@_overviews.GetValueOrDefault(feed.Id)"/>
-                            </CellTemplate>
-                        </BbDataTableColumn>
+                            <BbDataTableColumn TData="Feed" TValue="int"
+                                               Header="On watchlist"
+                                               Property="@(l => OwnedBy(l))"
+                                               Sortable="true">
+                                <CellTemplate Context="feed">
+                                    @if (!_overviews.ContainsKey(feed.Id))
+                                    {
+                                        <span class="feed-owned is-none">—</span>
+                                    }
+                                    else if (OwnedBy(feed) is > 0 and var owned)
+                                    {
+                                        <a class="feed-owned feed-owned-link"
+                                           href="@($"/watchlist?feed={UrlGuid.Encode(feed.Id.Value)}")"
+                                           title="@($"Show the {owned} titles this feed put on your watchlist")">@owned</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="feed-owned is-none">0</span>
+                                    }
+                                </CellTemplate>
+                            </BbDataTableColumn>
 
-                        <BbDataTableColumn TData="Feed" TValue="string"
-                                           Header=""
-                                           CellClass="feeds-actions-cell">
-                            <CellTemplate Context="feed">
-                                <div class="flex items-center justify-end gap-1">
-                                    <BbTooltip>
-                                        <BbTooltipTrigger>
-                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run now"
-                                                      Disabled="@(_runningFeed is not null || _isPreviewing)"
-                                                      OnClick="@(() => RunFeedAsync(feed))">
-                                                @if (_runningFeed == feed.Id)
-                                                {
-                                                    <BbSpinner Size="SpinnerSize.Small"/>
-                                                }
-                                                else
-                                                {
-                                                    <LucideIcon Name="play" Size="15"/>
-                                                }
-                                            </BbButton>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Run now</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip>
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run history"
-                                                      Href="@($"/feeds/{UrlGuid.Encode(feed.Id.Value)}/runs")">
-                                                <LucideIcon Name="history" Size="15"/>
-                                            </BbButton>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Run history</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip>
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit"
-                                                      Href="@($"/feeds/edit/{UrlGuid.Encode(feed.Id.Value)}")">
-                                                <LucideIcon Name="pencil" Size="15"/>
-                                            </BbButton>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Edit</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbTooltip>
-                                        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
-                                            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate"
-                                                      Href="@($"/feeds/clone/{UrlGuid.Encode(feed.Id.Value)}")">
-                                                <LucideIcon Name="copy" Size="15"/>
-                                            </BbButton>
-                                        </BbTooltipTrigger>
-                                        <BbTooltipContent>Duplicate</BbTooltipContent>
-                                    </BbTooltip>
-                                    <BbAlertDialog>
-                                        <BbAlertDialogTrigger>
-                                            <BbTooltip>
-                                                <BbTooltipTrigger>
-                                                    <HoverButton Preset="HoverButtonPreset.Destructive"
-                                                                 Icon="trash-2"
-                                                                 Size="ButtonSize.Icon"
-                                                                 AriaLabel="Delete"
-                                                                 Border="false"/>
-                                                </BbTooltipTrigger>
-                                                <BbTooltipContent>Delete</BbTooltipContent>
-                                            </BbTooltip>
-                                        </BbAlertDialogTrigger>
-                                        <BbAlertDialogContent>
-                                            <BbAlertDialogHeader>
-                                                <BbAlertDialogTitle>Delete "@feed.Name"?</BbAlertDialogTitle>
-                                                <BbAlertDialogDescription>
-                                                    This will permanently remove the feed. This action cannot be undone.
-                                                </BbAlertDialogDescription>
-                                            </BbAlertDialogHeader>
-                                            <BbAlertDialogFooter>
-                                                <BbAlertDialogCancel>
-                                                    <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
-                                                </BbAlertDialogCancel>
-                                                <BbAlertDialogAction>
-                                                    <HoverButton Preset="HoverButtonPreset.Destructive"
-                                                                 Text="Delete"
-                                                                 OnClick="@(() => DeleteFeedAsync(feed.Id))"/>
-                                                </BbAlertDialogAction>
-                                            </BbAlertDialogFooter>
-                                        </BbAlertDialogContent>
-                                    </BbAlertDialog>
-                                </div>
-                            </CellTemplate>
-                        </BbDataTableColumn>
-                    </Columns>
-                </BbDataTable>
+                            <BbDataTableColumn TData="Feed" TValue="string"
+                                               Header="Last run">
+                                <CellTemplate Context="feed">
+                                    <LastRunCell @key="(feed.Id, _runVersion)" FeedId="feed.Id" Overview="@_overviews.GetValueOrDefault(feed.Id)"/>
+                                </CellTemplate>
+                            </BbDataTableColumn>
+
+                            <BbDataTableColumn TData="Feed" TValue="string"
+                                               Header=""
+                                               CellClass="feeds-actions-cell">
+                                <CellTemplate Context="feed">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <BbTooltip>
+                                            <BbTooltipTrigger>
+                                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run now"
+                                                          Disabled="@(_runningFeed is not null || _isPreviewing)"
+                                                          OnClick="@(() => RunFeedAsync(feed))">
+                                                    @if (_runningFeed == feed.Id)
+                                                    {
+                                                        <BbSpinner Size="SpinnerSize.Small"/>
+                                                    }
+                                                    else
+                                                    {
+                                                        <LucideIcon Name="play" Size="15"/>
+                                                    }
+                                                </BbButton>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>Run now</BbTooltipContent>
+                                        </BbTooltip>
+                                        <BbTooltip>
+                                            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run history"
+                                                          Href="@($"/feeds/{UrlGuid.Encode(feed.Id.Value)}/runs")">
+                                                    <LucideIcon Name="history" Size="15"/>
+                                                </BbButton>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>Run history</BbTooltipContent>
+                                        </BbTooltip>
+                                        <BbTooltip>
+                                            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Edit"
+                                                          Href="@($"/feeds/edit/{UrlGuid.Encode(feed.Id.Value)}")">
+                                                    <LucideIcon Name="pencil" Size="15"/>
+                                                </BbButton>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>Edit</BbTooltipContent>
+                                        </BbTooltip>
+                                        <BbTooltip>
+                                            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                                                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Duplicate"
+                                                          Href="@($"/feeds/clone/{UrlGuid.Encode(feed.Id.Value)}")">
+                                                    <LucideIcon Name="copy" Size="15"/>
+                                                </BbButton>
+                                            </BbTooltipTrigger>
+                                            <BbTooltipContent>Duplicate</BbTooltipContent>
+                                        </BbTooltip>
+                                        <BbAlertDialog>
+                                            <BbAlertDialogTrigger>
+                                                <BbTooltip>
+                                                    <BbTooltipTrigger>
+                                                        <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                                     Icon="trash-2"
+                                                                     Size="ButtonSize.Icon"
+                                                                     AriaLabel="Delete"
+                                                                     Border="false"/>
+                                                    </BbTooltipTrigger>
+                                                    <BbTooltipContent>Delete</BbTooltipContent>
+                                                </BbTooltip>
+                                            </BbAlertDialogTrigger>
+                                            <BbAlertDialogContent>
+                                                <BbAlertDialogHeader>
+                                                    <BbAlertDialogTitle>Delete "@feed.Name"?</BbAlertDialogTitle>
+                                                    <BbAlertDialogDescription>
+                                                        This will permanently remove the feed. This action cannot be undone.
+                                                    </BbAlertDialogDescription>
+                                                </BbAlertDialogHeader>
+                                                <BbAlertDialogFooter>
+                                                    <BbAlertDialogCancel>
+                                                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                                                    </BbAlertDialogCancel>
+                                                    <BbAlertDialogAction>
+                                                        <HoverButton Preset="HoverButtonPreset.Destructive"
+                                                                     Text="Delete"
+                                                                     OnClick="@(() => DeleteFeedAsync(feed.Id))"/>
+                                                    </BbAlertDialogAction>
+                                                </BbAlertDialogFooter>
+                                            </BbAlertDialogContent>
+                                        </BbAlertDialog>
+                                    </div>
+                                </CellTemplate>
+                            </BbDataTableColumn>
+                        </Columns>
+                    </BbDataTable>
                 </div>
 
                 <PaginationControls CurrentPage="_currentPage"
@@ -292,7 +292,7 @@
 <ChangeDialog Open="_confirmOpen"
               OnOpenChanged="HandleConfirmOpenChanged"
               Title="@($"Run \"{_pendingFeed?.Name}\" now?")"
-              Subtitle="@(_pendingSummary is { } loaded ? FeedRunView.Pending(loaded) : null)"
+              Subtitle="@(_pendingSummary is {} loaded ? FeedRunView.Pending(loaded) : null)"
               Loading="_isPreviewing"
               Entries="_pendingEntries"
               Chips="_pendingChips"
@@ -301,11 +301,11 @@
               RemovedLabel="Removing"
               AddedLabel="Adding">
     <Badges>
-        @if (_pendingFeed is { } pending)
+        @if (_pendingFeed is {} pending)
         {
             <BbBadge Variant="BadgeVariant.Secondary">@(pending.Strategy is Mirror ? "Mirror" : "Append")</BbBadge>
         }
-        @if (_pendingSummary is { } badged && badged.Conclusiveness is not Conclusiveness.Conclusive)
+        @if (_pendingSummary is {} badged && badged.Conclusiveness is not Conclusiveness.Conclusive)
         {
             <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
         }
@@ -320,7 +320,9 @@
 </ChangeDialog>
 
 <MediaDetailSheet Open="_selected is not null"
-                  OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
+                  OnOpenChanged="@(open => {
+                                     if (!open) { _selected = null; }
+                                 })"
                   Media="_selected"
                   OnEnrollmentChanged="@(_ => HandleEnrollmentChangedAsync())"/>
 
@@ -369,7 +371,7 @@
     }
 
     private static string NextRunLabel(Scheduled scheduled) =>
-        scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next ? next.ToString("MMMM d, yyyy HH:mm") : "Never";
+        scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is {} next ? next.ToString("MMMM d, yyyy HH:mm") : "Never";
 
     private void NavigateToCreateFeed()
     {
@@ -459,7 +461,7 @@
 
     private async Task HandleEnrollmentChangedAsync()
     {
-        if (_pendingFeed is { } feed && _confirmOpen)
+        if (_pendingFeed is {} feed && _confirmOpen)
         {
             await LoadPreviewAsync(feed);
         }
@@ -501,7 +503,7 @@
 
     private async Task ConfirmRunAsync()
     {
-        if (_pendingFeed is not { } feed)
+        if (_pendingFeed is not {} feed)
         {
             return;
         }
@@ -533,7 +535,7 @@
             _runningFeed = null;
             _runVersion++;
             _owned = await Watchlist.GetOwnedCountsAsync();
-        _overviews = await FeedService.GetOverviewsAsync();
+            _overviews = await FeedService.GetOverviewsAsync();
         }
     }
 
