@@ -1,0 +1,429 @@
+@page "/feeds/{FeedIdParam}/runs"
+@page "/feeds/{FeedIdParam}/runs/{RunIdParam}"
+@using Contracts.Feed
+@using Contracts.Media
+@using CronExpressionDescriptor
+@using Domain.Feed
+@using Domain.Feed.Run
+@using Domain.Media
+@using global::Shared
+@using UI.Features.Feeds.Components
+@using UI.Shared.Changes
+@using UI.Shared.Media
+@inject IFeedRepository FeedRepository
+@inject IFeedRunLog RunLog
+@inject IMediaService Media
+@inject NavigationManager Navigation
+
+<PageTitle>Run history</PageTitle>
+
+<div class="h-full px-6 py-4">
+    @if (_feed is { } feed)
+    {
+        <div class="runs-page">
+            <div class="runs-head">
+                <nav class="runs-crumbs">
+                    <a href="/feeds">Feeds</a>
+                    <LucideIcon Name="chevron-right" Size="12"/>
+                    <a href="@($"/feeds/edit/{FeedIdParam}")">@feed.Name</a>
+                    <LucideIcon Name="chevron-right" Size="12"/>
+                    <span class="is-current">Runs</span>
+                </nav>
+                <div class="runs-title">
+                    <h2>Run history</h2>
+                    <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(feed.Strategy)</BbBadge>
+                    <BbBadge Variant="BadgeVariant.Secondary">@TriggerLabel(feed)</BbBadge>
+                    @if (feed.Enabled)
+                    {
+                        <BbBadge Variant="BadgeVariant.Default">Enabled</BbBadge>
+                    }
+                    else
+                    {
+                        <BbBadge Variant="BadgeVariant.Secondary">Disabled</BbBadge>
+                    }
+                    <span class="runs-spacer"></span>
+                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small"
+                              OnClick="@(() => Navigation.NavigateTo($"/feeds/edit/{FeedIdParam}"))">
+                        <LucideIcon Name="pencil" Size="13" Class="mr-1.5"/>
+                        Edit feed
+                    </BbButton>
+                </div>
+                @if (_history.TotalRuns > 0)
+                {
+                    <div class="runs-meta">
+                        <LucideIcon Name="clapperboard" Size="13"/>
+                        <FeedSourceLink Provider="feed.Provider" Identifier="@feed.Identifier"/>
+                        <span>·</span>
+                        <span>@HistoryLine</span>
+                        @if (_history.TotalAdded > 0 || _history.TotalRemoved > 0)
+                        {
+                            <span>·</span>
+                            <span>
+                                @if (_history.TotalAdded > 0)
+                                {
+                                    <span class="is-added">+@_history.TotalAdded</span>
+                                }
+                                @if (_history is { TotalAdded: > 0, TotalRemoved: > 0 })
+                                {
+                                    @(" ")
+                                }
+                                @if (_history.TotalRemoved > 0)
+                                {
+                                    <span class="is-removed">−@_history.TotalRemoved</span>
+                                }
+                                <span>  all time</span>
+                            </span>
+                        }
+                        @if (NextRunLine is { } next)
+                        {
+                            <span>·</span>
+                            <span>@next</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (_history.TotalRuns == 0)
+            {
+                <div class="runs-empty is-tall">
+                    <LucideIcon Name="history" Size="28"/>
+                    <div>This feed has not run yet.</div>
+                    <div class="runs-empty-note">Run it from the feeds list to see its history here.</div>
+                </div>
+            }
+            else
+            {
+                <div class="runs-split">
+                    <div class="runs-rail">
+                        <div class="runs-filters">
+                            @foreach (var filter in Enum.GetValues<RunFilter>())
+                            {
+                                <button type="button"
+                                        class="runs-filter @FilterToneClass(filter) @(_filter == filter ? "is-on" : null)"
+                                        disabled="@(CountFor(filter) == 0 && filter != RunFilter.All)"
+                                        @onclick="() => _filter = filter">
+                                    @FilterLabel(filter) @CountFor(filter)
+                                </button>
+                            }
+                        </div>
+                        <div class="runs-rail-body">
+                            @foreach (var day in RailDays())
+                            {
+                                @if (day.Grouped)
+                                {
+                                    <div class="runs-day">@day.Label</div>
+                                }
+                                @foreach (var item in day.Runs)
+                                {
+                                    <button type="button" class="runs-item @(item.Id == _selected?.Id ? "is-sel" : null)"
+                                            @onclick="() => SelectAsync(item)">
+                                        <span class="runs-dot @DotClass(item)"></span>
+                                        <span class="runs-when">
+                                            <span>@item.StartedAt.ToLocalTime().ToString("HH:mm")</span>
+                                            <span class="runs-item-meta">@RunMeta(item)</span>
+                                        </span>
+                                        <span class="runs-delta @(item.HasChanges ? null : "is-none")">
+                                            @if (IsFailed(item))
+                                            {
+                                                <span class="is-removed">failed</span>
+                                            }
+                                            else if (item.Conclusiveness is not Conclusiveness.Conclusive)
+                                            {
+                                                <span class="is-guarded">guarded</span>
+                                            }
+                                            else if (!item.HasChanges)
+                                            {
+                                                <span>no change</span>
+                                            }
+                                            else
+                                            {
+                                                @if (item.Counts.Added > 0)
+                                                {
+                                                    <span class="is-added">+@item.Counts.Added</span>
+                                                }
+                                                @if (item.Counts.Removed > 0)
+                                                {
+                                                    <span class="is-removed">−@item.Counts.Removed</span>
+                                                }
+                                            }
+                                        </span>
+                                    </button>
+                                }
+                            }
+                            @if (_more)
+                            {
+                                <button type="button" class="runs-older" @onclick="LoadOlderAsync">Load older runs</button>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="runs-divider"></div>
+
+                    <div class="runs-detail">
+                        @if (_selected is { } run)
+                        {
+                            <div class="runs-detail-head">
+                                <h3>@Heading(run)</h3>
+                                <div class="runs-detail-sub">@FeedRunView.Summary(run)</div>
+                                <div class="runs-detail-badges">
+                                    <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(run.Strategy)</BbBadge>
+                                    @if (IsFailed(run))
+                                    {
+                                        <BbBadge Variant="BadgeVariant.Destructive">Failed</BbBadge>
+                                    }
+                                    else if (run.Conclusiveness is not Conclusiveness.Conclusive)
+                                    {
+                                        <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (IsFailed(run))
+                            {
+                                <div class="runs-band is-bad">
+                                    <LucideIcon Name="cloud-off" Size="15"/>
+                                    <span><strong>The source returned nothing, so nothing was applied.</strong></span>
+                                </div>
+                            }
+                            else if (run.Conclusiveness is not Conclusiveness.Conclusive)
+                            {
+                                <div class="runs-band is-warn">
+                                    <LucideIcon Name="shield" Size="15"/>
+                                    <span><strong>@GuardLine(run)</strong></span>
+                                </div>
+                            }
+
+                            @if (_entries.Count > 0)
+                            {
+                                <ChangeList Entries="_entries"
+                                            Chips="@FeedRunView.Chips(run.Counts)"
+                                            OnSelect="ShowDetailsAsync"
+                                            Fill="true"
+                                            RemovedLabel="Removed"
+                                            AddedLabel="Added"/>
+                            }
+                            else if (run.Counts.Total > 0 && run.Conclusiveness is Conclusiveness.Conclusive)
+                            {
+                                <div class="runs-empty">
+                                    <LucideIcon Name="check-check" Size="24" Class="is-clean"/>
+                                    <div>The list matched your collection exactly.</div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="runs-empty">Nothing was added or removed.</div>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <MediaDetailSheet Open="_sheet is not null"
+                          OnOpenChanged="@(open => { if (!open) { _sheet = null; } })"
+                          Media="_sheet"/>
+    }
+    else if (!_loading)
+    {
+        <div class="runs-empty is-tall">
+            <LucideIcon Name="circle-alert" Size="28"/>
+            <div>That feed no longer exists.</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? FeedIdParam { get; set; }
+    [Parameter] public string? RunIdParam { get; set; }
+
+    private const int PageSize = 25;
+
+    private enum RunFilter
+    {
+        All,
+        Changed,
+        Guarded,
+        Failed,
+    }
+
+    private Feed? _feed;
+    private FeedRunHistory _history = FeedRunHistory.None;
+    private IReadOnlyList<FeedRun> _runs = [];
+    private FeedRun? _selected;
+    private IReadOnlyList<ChangeEntry> _entries = [];
+    private MediaLookup? _sheet;
+    private RunFilter _filter = RunFilter.All;
+    private int _take = PageSize;
+    private bool _more;
+    private bool _loading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (FeedIdParam is null)
+        {
+            return;
+        }
+
+        var feedId = FeedId.From(UrlGuid.Decode(FeedIdParam));
+        _feed = await FeedRepository.GetFeedByIdAsync(feedId);
+        _loading = false;
+        if (_feed is null)
+        {
+            return;
+        }
+
+        _history = await RunLog.GetHistoryAsync(feedId);
+        await LoadRunsAsync(feedId);
+
+        var wanted = RunIdParam is null ? _runs.FirstOrDefault() : _runs.FirstOrDefault(run => UrlGuid.Encode(run.Id) == RunIdParam);
+        if (wanted is null && RunIdParam is not null && await RunLog.GetRunAsync(UrlGuid.Decode(RunIdParam)) is Some<FeedRun>(var linked))
+        {
+            wanted = linked;
+        }
+
+        if (wanted is not null && wanted.Id != _selected?.Id)
+        {
+            await ShowRunAsync(wanted);
+        }
+    }
+
+    private async Task LoadRunsAsync(FeedId feedId)
+    {
+        var loaded = await RunLog.GetRunsAsync(feedId, _take + 1);
+        _more = loaded.Count > _take;
+        _runs = [.. loaded.Take(_take)];
+    }
+
+    private async Task LoadOlderAsync()
+    {
+        _take += PageSize;
+        await LoadRunsAsync(_feed!.Id);
+    }
+
+    private async Task SelectAsync(FeedRun run)
+    {
+        await ShowRunAsync(run);
+        Navigation.NavigateTo($"/feeds/{FeedIdParam}/runs/{UrlGuid.Encode(run.Id)}", forceLoad: false, replace: true);
+    }
+
+    private async Task ShowRunAsync(FeedRun run)
+    {
+        _selected = run;
+        var wanted = run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
+        var described = new Dictionary<MediaId, MediaLookup>();
+
+        await foreach (var result in Media.GetDetailsAsync(wanted))
+        {
+            if (result is Success<IdentifiedMedia>(var media))
+            {
+                described[media.Id] = media;
+            }
+        }
+
+        _entries = FeedRunView.Entries(run, described);
+    }
+
+    private Task ShowDetailsAsync(MediaLookup media)
+    {
+        _sheet = media;
+        return Task.CompletedTask;
+    }
+
+    private static bool IsFailed(FeedRun run) => run.Counts.Total == 0 && run.Conclusiveness is not Conclusiveness.Conclusive;
+
+    private IEnumerable<FeedRun> Filtered() =>
+        _runs.Where(run =>
+            _filter switch
+            {
+                RunFilter.All => true,
+                RunFilter.Changed => run.HasChanges,
+                RunFilter.Guarded => run.Conclusiveness is not Conclusiveness.Conclusive && !IsFailed(run),
+                RunFilter.Failed => IsFailed(run),
+            }
+        );
+
+    private int CountFor(RunFilter filter) =>
+        filter switch
+        {
+            RunFilter.All => _runs.Count,
+            RunFilter.Changed => _runs.Count(run => run.HasChanges),
+            RunFilter.Guarded => _runs.Count(run => run.Conclusiveness is not Conclusiveness.Conclusive && !IsFailed(run)),
+            RunFilter.Failed => _runs.Count(IsFailed),
+        };
+
+    private static string FilterLabel(RunFilter filter) =>
+        filter switch
+        {
+            RunFilter.All => "All",
+            RunFilter.Changed => "Changed",
+            RunFilter.Guarded => "Guarded",
+            RunFilter.Failed => "Failed",
+        };
+
+    private static string? FilterToneClass(RunFilter filter) =>
+        filter switch
+        {
+            RunFilter.All => null,
+            RunFilter.Changed => null,
+            RunFilter.Guarded => "is-guarded",
+            RunFilter.Failed => "is-failed",
+        };
+
+    private sealed record RailDay(string Label, bool Grouped, IReadOnlyList<FeedRun> Runs);
+
+    private IReadOnlyList<RailDay> RailDays() =>
+        [
+            .. Filtered()
+                .GroupBy(run => run.StartedAt.ToLocalTime().Date)
+                .OrderByDescending(group => group.Key)
+                .Select(group => new RailDay(DayLabel(group.Key), group.Count() > 1, [.. group.OrderByDescending(run => run.StartedAt)])),
+        ];
+
+    private static string DayLabel(DateTime day) =>
+        day == DateTime.Today ? "Today"
+        : day == DateTime.Today.AddDays(-1) ? "Yesterday"
+        : day.ToString("d MMMM");
+
+    private static string Heading(FeedRun run)
+    {
+        var local = run.StartedAt.ToLocalTime();
+        var day =
+            local.Date == DateTime.Today ? "Today"
+            : local.Date == DateTime.Today.AddDays(-1) ? "Yesterday"
+            : local.ToString("d MMMM");
+        return $"{day}, {local:HH:mm}";
+    }
+
+    private static string RunMeta(FeedRun run) => $"{(run.Trigger is Scheduled ? "scheduled" : "manual")} · {StrategyLabel(run.Strategy)}";
+
+    private static string DotClass(FeedRun run) =>
+        IsFailed(run) ? "is-bad"
+        : run.Conclusiveness is not Conclusiveness.Conclusive ? "is-warn"
+        : run.HasChanges ? "is-ok"
+        : "is-idle";
+
+    private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · grace {mirror.AbsenceThreshold}" : "Append";
+
+    private static string TriggerLabel(Feed feed) =>
+        feed.Schedule is Scheduled scheduled ? ExpressionDescriptor.GetDescription(scheduled.ToString()) : "Manual";
+
+    private string? NextRunLine =>
+        _feed?.Schedule is Scheduled scheduled && scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next
+            ? $"next run {next:d MMMM HH:mm}"
+            : null;
+
+    private static string GuardLine(FeedRun run) =>
+        run.Conclusiveness switch
+        {
+            Conclusiveness.NoItems => "The source returned nothing, so no removals were applied.",
+            Conclusiveness.NoMatches => "Nothing the source returned could be matched, so no removals were applied.",
+            Conclusiveness.NoneAdmitted => "Nothing the source returned was admitted, so no removals were applied.",
+            Conclusiveness.StillLoading => "The source was still loading, so no removals were applied.",
+            Conclusiveness.Conclusive => string.Empty,
+        };
+
+    private string HistoryLine =>
+        _history.FirstRunAt is { } first
+            ? $"{_history.TotalRuns} {(_history.TotalRuns == 1 ? "run" : "runs")} since {first.ToLocalTime():d MMMM}"
+            : $"{_history.TotalRuns} runs";
+}

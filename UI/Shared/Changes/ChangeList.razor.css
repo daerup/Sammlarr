@@ -2,6 +2,13 @@
     min-width: 0;
 }
 
+.change-list.is-fill {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
 .change-chips {
     display: flex;
     align-items: center;
@@ -114,7 +121,9 @@
     font-size: 13px;
     color: var(--muted-foreground);
     min-width: 0;
+    max-width: 320px;
     flex: 1 1 180px;
+    margin-left: auto;
 }
 
 .change-search:focus-within {
@@ -134,6 +143,16 @@
     max-height: min(62vh, 640px);
     overflow-y: auto;
     background: var(--card);
+}
+
+.change-list.is-fill .change-body {
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+}
+
+.change-list.is-fill .change-chips {
+    flex: none;
 }
 
 .change-group {
