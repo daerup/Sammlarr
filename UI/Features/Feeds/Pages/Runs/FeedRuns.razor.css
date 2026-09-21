@@ -65,6 +65,16 @@
     color: var(--muted-foreground);
 }
 
+.runs-owned {
+    color: var(--foreground);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.runs-alltime {
+    opacity: 0.72;
+}
+
 .is-added {
     color: var(--alert-success);
 }

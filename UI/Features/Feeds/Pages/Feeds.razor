@@ -2,6 +2,7 @@
 @using Contracts.Feed
 @using Contracts.Media
 @using Contracts.Identity
+@using Contracts.Watchlist
 @using Domain.Feed.Run
 @using Contracts.Settings
 @using global::Shared
@@ -19,6 +20,7 @@
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IMediaService Media
+@inject IWatchlistRepository Watchlist
 
 <PageTitle>Feeds</PageTitle>
 
@@ -162,6 +164,22 @@
                             </CellTemplate>
                         </BbDataTableColumn>
 
+                        <BbDataTableColumn TData="Feed" TValue="int"
+                                           Header="On watchlist"
+                                           Property="@(l => OwnedBy(l))"
+                                           Sortable="true">
+                            <CellTemplate Context="feed">
+                                @if (OwnedBy(feed) is > 0 and var owned)
+                                {
+                                    <span class="feed-owned">@owned</span>
+                                }
+                                else
+                                {
+                                    <span class="feed-owned is-none">—</span>
+                                }
+                            </CellTemplate>
+                        </BbDataTableColumn>
+
                         <BbDataTableColumn TData="Feed" TValue="string"
                                            Header=""
                                            Width="80px">
@@ -302,6 +320,10 @@
     private bool IsSignedIn() => _isSignedIn;
 
     private IReadOnlyList<Feed> _feeds = [];
+    private IReadOnlyDictionary<FeedId, int> _owned = new Dictionary<FeedId, int>();
+
+    private int OwnedBy(Feed feed) => _owned.GetValueOrDefault(feed.Id);
+
     private IReadOnlyList<Feed> _pagedFeeds = [];
     private bool _isLoading = true;
     private int _currentPage = 1;
@@ -320,6 +342,7 @@
     {
         _providerConfig = await ProviderConfigRepository.GetAsync();
         _feeds = await FeedRepository.GetFeedsAsync();
+        _owned = await Watchlist.GetOwnedCountsAsync();
         UpdatePagedFeeds();
         _isLoading = false;
     }
@@ -494,6 +517,7 @@
         {
             _runningFeed = null;
             _runVersion++;
+            _owned = await Watchlist.GetOwnedCountsAsync();
         }
     }
 
