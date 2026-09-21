@@ -2,7 +2,7 @@
 module.exports = {
     darkMode: ["class"],
     content: [
-        './Pages/**/*.{razor,html,cs}',
+        './Features/**/*.{razor,html,cs}',
         './Shared/**/*.{razor,html,cs}',
     ],
     theme: {
