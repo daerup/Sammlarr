@@ -1,0 +1,341 @@
+.runs-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    overflow: hidden;
+    background: var(--card);
+    min-width: 0;
+}
+
+.runs-head {
+    flex: none;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.runs-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    margin-bottom: 8px;
+}
+
+.runs-crumbs a {
+    color: var(--muted-foreground);
+    text-decoration: none;
+}
+
+.runs-crumbs a:hover {
+    color: var(--foreground);
+}
+
+.runs-crumbs .is-current {
+    color: var(--foreground);
+}
+
+.runs-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.runs-title h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.runs-spacer {
+    flex: 1;
+}
+
+.runs-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 9px;
+    font-size: 12.5px;
+    color: var(--muted-foreground);
+}
+
+.is-added {
+    color: var(--alert-success);
+}
+
+.is-removed {
+    color: var(--destructive);
+}
+
+.is-guarded {
+    color: var(--alert-warning);
+}
+
+.runs-split {
+    display: grid;
+    grid-template-columns: 290px 1px 1fr;
+    flex: 1;
+    min-height: 0;
+}
+
+.runs-divider {
+    background: var(--border);
+}
+
+.runs-rail {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+.runs-filters {
+    display: flex;
+    flex: none;
+    gap: 2px;
+    flex-wrap: wrap;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.runs-filter {
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+.runs-filter:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    color: var(--foreground);
+}
+
+.runs-filter.is-on {
+    background: color-mix(in srgb, var(--foreground) 9%, transparent);
+    color: var(--foreground);
+}
+
+.runs-filter.is-guarded {
+    color: var(--alert-warning);
+}
+
+.runs-filter.is-failed {
+    color: var(--destructive);
+}
+
+.runs-filter:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.runs-rail-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.runs-day {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 9px 13px 4px;
+    background: var(--card);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--muted-foreground);
+}
+
+.runs-item {
+    display: grid;
+    grid-template-columns: 9px 1fr auto;
+    gap: 9px;
+    align-items: center;
+    width: 100%;
+    padding: 9px 13px;
+    border: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    background: transparent;
+    color: inherit;
+    font-size: 12.5px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.runs-item:hover {
+    background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.runs-item.is-sel {
+    background: color-mix(in srgb, var(--foreground) 7%, transparent);
+    box-shadow: inset 2px 0 0 var(--foreground);
+}
+
+.runs-when {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.runs-item-meta {
+    color: var(--muted-foreground);
+    font-size: 11px;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.runs-delta {
+    display: flex;
+    gap: 7px;
+    justify-content: flex-end;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.runs-delta.is-none {
+    color: var(--muted-foreground);
+    font-size: 11px;
+}
+
+.runs-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.runs-dot.is-ok {
+    background: var(--alert-success);
+}
+
+.runs-dot.is-warn {
+    background: var(--alert-warning);
+}
+
+.runs-dot.is-bad {
+    background: var(--destructive);
+}
+
+.runs-dot.is-idle {
+    background: var(--muted-foreground);
+    opacity: 0.4;
+}
+
+.runs-older {
+    display: block;
+    width: 100%;
+    padding: 10px 13px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+.runs-older:hover {
+    color: var(--foreground);
+}
+
+.runs-detail {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.runs-detail-head {
+    flex: none;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    min-width: 0;
+}
+
+.runs-detail-head h3 {
+    margin: 0;
+    font-size: 15.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.runs-detail-sub {
+    color: var(--muted-foreground);
+    font-size: 12.5px;
+    margin-top: 3px;
+}
+
+.runs-detail-badges {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 9px;
+}
+
+.runs-band {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 13px 18px;
+    font-size: 13px;
+}
+
+.runs-band.is-warn {
+    background: color-mix(in oklch, var(--alert-warning) 10%, transparent);
+    border-bottom: 1px solid color-mix(in oklch, var(--alert-warning) 25%, transparent);
+}
+
+.runs-band.is-warn strong {
+    color: var(--alert-warning);
+    font-weight: 500;
+}
+
+.runs-band.is-bad {
+    background: color-mix(in oklch, var(--destructive) 12%, transparent);
+    border-bottom: 1px solid color-mix(in oklch, var(--destructive) 30%, transparent);
+}
+
+.runs-band.is-bad strong {
+    color: var(--destructive);
+    font-weight: 500;
+}
+
+.runs-empty {
+    padding: 34px 20px;
+    text-align: center;
+    color: var(--muted-foreground);
+    font-size: 13px;
+    min-width: 0;
+}
+
+.runs-empty.is-tall {
+    padding: 56px 20px;
+}
+
+.runs-empty ::deep svg {
+    display: block;
+    margin: 0 auto 10px;
+}
+
+.runs-empty ::deep .is-clean {
+    color: var(--alert-success);
+}
+
+.runs-empty-note {
+    margin-top: 5px;
+    font-size: 12.5px;
+}

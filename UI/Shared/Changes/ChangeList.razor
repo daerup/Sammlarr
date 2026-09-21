@@ -1,6 +1,6 @@
 @using Domain.Media
 
-<div class="change-list">
+<div class="change-list @(Fill ? "is-fill" : null)">
     <div class="change-chips">
         <BbTooltipProvider>
             @foreach (var (chip, separator) in ChipRow())
@@ -63,6 +63,7 @@
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeEntry> Entries { get; set; }
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeChip> Chips { get; set; }
     [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter] public bool Fill { get; set; }
     [Parameter] public string RemovedLabel { get; set; } = "Removed";
     [Parameter] public string AddedLabel { get; set; } = "Added";
     [Parameter] public string UnchangedLabel { get; set; } = "Already yours";
