@@ -25,6 +25,9 @@ else
     [Parameter, EditorRequired]
     public required DateTimeOffset AddedAt { get; set; }
 
+    [Parameter]
+    public MediaId? ItemId { get; set; }
+
     private RenderFragment Badge =>
         @<BbBadge Variant="@ProvenanceBadgeVariant(Provenance)" Class="wl-badge">
             <BbTooltip>
@@ -38,8 +41,12 @@ else
             </BbTooltip>
         </BbBadge>;
 
-    private static string? FeedEditUrl(WatchlistItemProvenance provenance) =>
-        provenance.Value is FeedOrigin feed ? $"/feeds/{UrlGuid.Encode(feed.Feed.Id.Value)}/runs/{UrlGuid.Encode(feed.Run.Id)}" : null;
+    private string? FeedEditUrl(WatchlistItemProvenance provenance) =>
+        provenance.Value is FeedOrigin feed
+            ? $"/feeds/{UrlGuid.Encode(feed.Feed.Id.Value)}/runs/{UrlGuid.Encode(feed.Run.Id)}{ItemQuery()}"
+            : null;
+
+    private string ItemQuery() => ItemId is { } id ? $"?item={UrlGuid.Encode(id.Value)}" : string.Empty;
 
     private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
         provenance.Value switch

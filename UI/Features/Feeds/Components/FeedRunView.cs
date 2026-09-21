@@ -14,6 +14,7 @@ internal static class FeedRunView
 				.Select(item => new ChangeEntry
 				{
 					Title = media[item.MediaId] is IdentifiedMedia named ? named.Title : string.Empty,
+					Id = item.MediaId,
 					Media = media[item.MediaId],
 					Kind = item.State is FeedRunItemState.Removed ? ChangeKind.Removed : ChangeKind.Added,
 					Subtitle = Subtitle(media[item.MediaId]),
@@ -24,14 +25,15 @@ internal static class FeedRunView
 
 	internal static IReadOnlyList<ChangeEntry> Entries(FeedRunSummary summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
 		[
-			.. summary.Delta.Drops.Where(media.ContainsKey).Select(id => Pending(media[id], ChangeKind.Removed)),
-			.. summary.Delta.Adds.Where(media.ContainsKey).Select(id => Pending(media[id], ChangeKind.Added)),
+			.. summary.Delta.Drops.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Removed)),
+			.. summary.Delta.Adds.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Added)),
 		];
 
-	private static ChangeEntry Pending(MediaLookup item, ChangeKind kind) =>
+	private static ChangeEntry Pending(MediaId id, MediaLookup item, ChangeKind kind) =>
 		new()
 		{
 			Title = item is IdentifiedMedia named ? named.Title : string.Empty,
+			Id = id,
 			Media = item,
 			Kind = kind,
 			Subtitle = Subtitle(item),

@@ -53,7 +53,7 @@
             </div>
             @foreach (var entry in group)
             {
-                <ChangeRow @key="entry" Entry="entry" OnSelect="OnSelect"/>
+                <ChangeRow @key="entry" Entry="entry" OnSelect="SelectAsync" Highlighted="@IsHighlighted(entry)"/>
             }
         }
     </div>
@@ -63,6 +63,7 @@
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeEntry> Entries { get; set; }
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeChip> Chips { get; set; }
     [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter] public MediaId? Highlight { get; set; }
     [Parameter] public bool Fill { get; set; }
     [Parameter] public string RemovedLabel { get; set; } = "Removed";
     [Parameter] public string AddedLabel { get; set; } = "Added";
@@ -70,6 +71,27 @@
 
     private readonly HashSet<ChangeKind> _active = [];
     private string _search = string.Empty;
+    private MediaId? _pointedAt;
+    private bool _dismissed;
+
+    protected override void OnParametersSet()
+    {
+        if (Highlight == _pointedAt)
+        {
+            return;
+        }
+
+        _pointedAt = Highlight;
+        _dismissed = false;
+    }
+
+    private bool IsHighlighted(ChangeEntry entry) => !_dismissed && Highlight is { } wanted && entry.Id == wanted;
+
+    private async Task SelectAsync(MediaLookup media)
+    {
+        _dismissed = true;
+        await OnSelect.InvokeAsync(media);
+    }
 
     private IEnumerable<IGrouping<ChangeKind, ChangeEntry>> Groups() =>
         Entries
