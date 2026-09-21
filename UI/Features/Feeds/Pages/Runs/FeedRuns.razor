@@ -2,6 +2,7 @@
 @page "/feeds/{FeedIdParam}/runs/{RunIdParam}"
 @using Contracts.Feed
 @using Contracts.Media
+@using Contracts.Watchlist
 @using CronExpressionDescriptor
 @using Domain.Feed
 @using Domain.Feed.Run
@@ -13,6 +14,7 @@
 @inject IFeedRepository FeedRepository
 @inject IFeedRunLog RunLog
 @inject IMediaService Media
+@inject IWatchlistRepository Watchlist
 @inject NavigationManager Navigation
 
 <PageTitle>Run history</PageTitle>
@@ -53,12 +55,17 @@
                     <div class="runs-meta">
                         <LucideIcon Name="clapperboard" Size="13"/>
                         <FeedSourceLink Provider="feed.Provider" Identifier="@feed.Identifier"/>
+                        @if (_owned > 0)
+                        {
+                            <span>·</span>
+                            <span><span class="runs-owned">@_owned</span> on your watchlist</span>
+                        }
                         <span>·</span>
                         <span>@HistoryLine</span>
                         @if (_history.TotalAdded > 0 || _history.TotalRemoved > 0)
                         {
                             <span>·</span>
-                            <span>
+                            <span class="runs-alltime">
                                 @if (_history.TotalAdded > 0)
                                 {
                                     <span class="is-added">+@_history.TotalAdded</span>
@@ -253,6 +260,7 @@
 
     private Feed? _feed;
     private FeedRunHistory _history = FeedRunHistory.None;
+    private int _owned;
     private IReadOnlyList<FeedRun> _runs = [];
     private FeedRun? _selected;
     private IReadOnlyList<ChangeEntry> _entries = [];
@@ -278,6 +286,7 @@
         }
 
         _history = await RunLog.GetHistoryAsync(feedId);
+        _owned = (await Watchlist.GetOwnedCountsAsync()).GetValueOrDefault(feedId);
         await LoadRunsAsync(feedId);
 
         var wanted = RunIdParam is null ? _runs.FirstOrDefault() : _runs.FirstOrDefault(run => UrlGuid.Encode(run.Id) == RunIdParam);

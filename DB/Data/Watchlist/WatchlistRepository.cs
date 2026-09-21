@@ -26,6 +26,20 @@ internal sealed class WatchlistRepository(IDbContextFactory<SammlarrDbContext> d
 		return [.. values.Select(MediaId.From)];
 	}
 
+	public async Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var counts = await ctx
+			.Watchlist.AsNoTracking()
+			.Where(w => w.Origin == WatchlistEntryOrigin.Feed && w.SourceFeedId != null)
+			.GroupBy(w => w.SourceFeedId!.Value)
+			.Select(group => new { FeedId = group.Key, Count = group.Count() })
+			.ToListAsync(cancellationToken);
+
+		return counts.ToDictionary(entry => FeedId.From(entry.FeedId), entry => entry.Count);
+	}
+
 	public async Task<IReadOnlyList<MediaId>> AddAsync(
 		IEnumerable<MediaId> mediaIds,
 		WatchlistItemProvenance provenance,

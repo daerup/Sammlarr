@@ -1,9 +1,12 @@
+using DB.Data.Feed;
 using DB.Data.Media;
 using DB.Data.Watchlist;
+using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Watchlist;
 using Harness;
+using Integration.Tests.Feeds;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
 
@@ -18,6 +21,52 @@ public class WatchlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 
 	[Before(Test)]
 	public void Setup() => _testee = new WatchlistRepository(fixture.ContextFactory);
+
+	[Test]
+	public async Task GetOwnedCountsAsync_ForTitlesAFeedAdded_CountsThemPerFeedAndIgnoresOtherOrigins()
+	{
+		var feedId = await SeedFeedAsync("owned-list");
+		var origin = await fixture.SeedFeedOriginAsync(feedId);
+
+		var first = await SeedMediaAsync([PlexId.From("plex-900", MediaType.Movie)]);
+		var second = await SeedMediaAsync([PlexId.From("plex-901", MediaType.Movie)]);
+		var byHand = await SeedMediaAsync([PlexId.From("plex-902", MediaType.Movie)]);
+
+		await _testee.AddAsync([first, second], origin);
+		await _testee.AddAsync([byHand], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+
+		var counts = await _testee.GetOwnedCountsAsync();
+
+		await Assert.That(counts[feedId]).IsEqualTo(2);
+		await Assert.That(counts).HasCount(1);
+	}
+
+	[Test]
+	public async Task GetOwnedCountsAsync_ForAFeedThatOwnsNothing_LeavesItOutRatherThanReportingZero()
+	{
+		var feedId = await SeedFeedAsync("empty-list");
+
+		var counts = await _testee.GetOwnedCountsAsync();
+
+		await Assert.That(counts).DoesNotContainKey(feedId);
+	}
+
+	private async Task<FeedId> SeedFeedAsync(string identifier)
+	{
+		var entity = new FeedRow
+		{
+			Name = identifier,
+			IsEnabled = true,
+			Provider = FeedProvider.Mdblist,
+			Strategy = new FeedStrategy(new Append()),
+			Identifier = identifier,
+		};
+
+		fixture.Context.Feeds.Add(entity);
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+		return FeedId.From(entity.Id);
+	}
 
 	[Test]
 	public async Task AddAsync_BatchOfDistinctMedia_CreatesSeparateEntries()
