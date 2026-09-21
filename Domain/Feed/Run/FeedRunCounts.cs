@@ -14,6 +14,19 @@ public readonly record struct FeedRunCounts
 	public required int Unresolved { get; init; }
 	public required int Removed { get; init; }
 
+	public static FeedRunCounts None { get; } =
+		new()
+		{
+			Total = 0,
+			Added = 0,
+			Kept = 0,
+			Bypassed = 0,
+			Filtered = 0,
+			Skipped = 0,
+			Unresolved = 0,
+			Removed = 0,
+		};
+
 	public static FeedRunCounts From(FeedRunSummary summary)
 	{
 		var buckets = summary.Verdicts.CountBy(ChangeBuckets.Of).ToDictionary();
