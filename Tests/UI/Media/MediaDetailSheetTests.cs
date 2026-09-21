@@ -47,7 +47,7 @@ public class MediaDetailSheetTests : BunitContext
 	{
 		Register();
 		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
-		_watchlist.GetProvenanceAsync(Any(), Any()).Returns(Some.Of<WatchlistItemProvenance>(new FeedOrigin(Guid.NewGuid(), "feed", FeedProvider.Mdblist)));
+		_watchlist.GetProvenanceAsync(Any(), Any()).Returns(Some.Of<WatchlistItemProvenance>(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed")));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
