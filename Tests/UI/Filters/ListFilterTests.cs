@@ -23,18 +23,37 @@ public class ListFilterTests
 	}
 
 	[Test]
+	public async Task MatchesSource_WithSeveralSourcesChosen_AcceptsAnyOfThem()
+	{
+		var other = FeedId.From(new Guid(32, 0, 0, new byte[8]));
+		var filter = new ListFilter { Sources = [new SourceChoice(SourceKind.Feed, Feed), new SourceChoice(SourceKind.Manual)] };
+
+		await Assert.That(filter.MatchesSource(TestFeeds.Origin(FeedGuid, Guid.NewGuid()))).IsTrue();
+		await Assert.That(filter.MatchesSource(new ManualOrigin(ManualSource.Search))).IsTrue();
+		await Assert.That(filter.MatchesSource(TestFeeds.Origin(other.Value, Guid.NewGuid()))).IsFalse();
+	}
+
+	[Test]
+	public async Task MatchesSource_WithNothingChosen_AcceptsEverything()
+	{
+		await Assert.That(ListFilter.None.MatchesSource(new ManualOrigin(ManualSource.Browse))).IsTrue();
+		await Assert.That(ListFilter.None.ActiveCount).IsEqualTo(0);
+	}
+
+	[Test]
 	public async Task ClearFilters_DropsEveryFilterButKeepsTheChosenOrder()
 	{
 		var filter = new ListFilter
 		{
 			Type = MediaType.Movie,
-			Source = new SourceChoice(SourceKind.Manual),
+			Sources = [new SourceChoice(SourceKind.Manual)],
 			Sort = ListSort.TitleDescending,
 		};
 
 		var cleared = filter.ClearFilters();
 
 		await Assert.That(cleared.HasFilters).IsFalse();
+		await Assert.That(cleared.Sources).IsEmpty();
 		await Assert.That(cleared.Sort).IsEqualTo(ListSort.TitleDescending);
 	}
 
