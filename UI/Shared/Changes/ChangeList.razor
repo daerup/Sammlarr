@@ -3,9 +3,9 @@
 <div class="change-list">
     <div class="change-chips">
         <BbTooltipProvider>
-            @foreach (var chip in Chips)
+            @foreach (var (chip, separator) in ChipRow())
             {
-                @if (chip.StartsCountsOnly)
+                @if (separator)
                 {
                     <span class="change-chip-sep"></span>
                 }
@@ -76,6 +76,26 @@
             .Where(entry => string.IsNullOrWhiteSpace(_search) || entry.Title.Contains(_search, StringComparison.OrdinalIgnoreCase))
             .GroupBy(entry => entry.Kind)
             .OrderBy(group => group.Key);
+
+    private IEnumerable<(ChangeChip Chip, bool Separator)> ChipRow()
+    {
+        var separatorPending = false;
+        foreach (var chip in Chips)
+        {
+            if (chip.StartsCountsOnly)
+            {
+                separatorPending = true;
+            }
+
+            if (chip.Count == 0)
+            {
+                continue;
+            }
+
+            yield return (chip, separatorPending);
+            separatorPending = false;
+        }
+    }
 
     private bool Clickable(ChangeChip chip) => chip.Filters is null ? _active.Count > 0 : chip.Count > 0;
 
