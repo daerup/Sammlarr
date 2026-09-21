@@ -1,0 +1,160 @@
+using Contracts.Feed;
+using Contracts.Watchlist;
+using Contracts.Watchlist.Outbox;
+using DB.Data.Feed;
+using Domain.Feed;
+using Domain.Feed.Run;
+using Domain.Media;
+using Domain.Providers;
+using Domain.Watchlist;
+using Domain.Watchlist.Outbox;
+using Harness;
+using TestInfrastructure;
+using static Harness.Ids;
+
+namespace Integration.Tests.Feeds;
+
+[ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
+public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
+{
+	public async ValueTask DisposeAsync() => await host.DisposeAsync();
+
+	private IFeedRunEngine Testee => host.Resolve<IFeedRunEngine>();
+
+	[Test]
+	public async Task RunAsync_ForAnAppendFeed_AddsWhatTheListHoldsAndRemovesNothing()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("append-list", new Append());
+		host.MdblistFeedContains("append-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		var stale = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+
+		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunSummary>();
+		await Assert.That(result is FeedRunSummary { Delta.Drops.Count: 0 }).IsTrue();
+		await Assert.That(await WatchlistIdsAsync()).Contains(stale);
+	}
+
+	[Test]
+	public async Task RunAsync_ForAMirrorFeed_RemovesOnlyTheTitlesItOwns()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("mirror-list", new Mirror(1));
+		host.MdblistFeedContains("mirror-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+
+		var ownedButGone = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+		var addedByHand = await host.Movie(TestMedia.Interstellar).OnWatchlist(new ManualOrigin(ManualSource.Search));
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		var remaining = await WatchlistIdsAsync();
+		await Assert.That(remaining).DoesNotContain(ownedButGone);
+		await Assert.That(remaining).Contains(addedByHand);
+	}
+
+	[Test]
+	public async Task RunAsync_WhenTheProviderFailsOutright_LeavesTheWatchlistAlone()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("broken-list", new Mirror(1));
+		host.MdblistFeedReturnsStatus("broken-list", System.Net.HttpStatusCode.InternalServerError);
+		var owned = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
+	}
+
+	[Test]
+	public async Task PreviewAsync_ForAFeedWithItems_ReturnsASummaryAndChangesNothing()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("preview-list", new Mirror(1));
+		host.MdblistFeedContains("preview-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		var owned = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+
+		var result = await Testee.PreviewAsync(feedId, host.CurrentUser);
+
+		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunSummary>();
+		await Assert.That(result is FeedRunSummary { Delta.Drops.Count: 1 }).IsTrue();
+		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
+	}
+
+	[Test]
+	public async Task RunAsync_WhenItAddsTitles_QueuesThemToPushInsteadOfLeavingTheSyncToRemoveThem()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("pushing-list", new Append());
+		host.MdblistFeedContains("pushing-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		var queued = await host.Resolve<IWatchlistOutbox>().GetAsync();
+		await Assert.That(queued.Where(op => op.Action == WatchlistOperationAction.Add).Select(op => op.MediaId)).Contains(fightClub);
+	}
+
+	[Test]
+	public async Task RunAsync_WhenMirrorRemovesATitle_QueuesTheRemovalSoTheSyncCannotPullItBack()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("dropping-list", new Mirror(1));
+		host.MdblistFeedContains("dropping-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		await host.Movie(TestMedia.FightClub).SeedAsync();
+		var dropped = await host.Movie(TestMedia.Inception).OnWatchlist(Origin(feedId));
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		var queued = await host.Resolve<IWatchlistOutbox>().GetAsync();
+		await Assert.That(queued.Where(op => op.Action == WatchlistOperationAction.Remove).Select(op => op.MediaId)).Contains(dropped);
+	}
+
+	[Test]
+	public async Task RunAsync_ForAFeedThatNoLongerExists_FailsWithoutThrowing()
+	{
+		var result = await Testee.RunAsync(FeedId.From(Guid.NewGuid()), new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunFailed>();
+	}
+
+	[Test]
+	public async Task RunAsync_Always_RecordsTheRunSoItShowsInTheHistory()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("logged-list", new Append());
+		host.MdblistFeedContains("logged-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+
+		var runs = await host.Resolve<IFeedRunLog>().GetRunsAsync(feedId, take: 5);
+		await Assert.That(runs).IsNotEmpty();
+		await Assert.That(runs[0].Trigger).IsEqualTo(new FeedRunTrigger(new Manual()));
+	}
+
+	private static FeedItemSpec Item(string? title, MediaType type, params ProviderId[] ids) =>
+		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
+
+	private static WatchlistItemProvenance Origin(FeedId feedId) => new FeedOrigin(feedId.Value, "Comedy", FeedProvider.Mdblist);
+
+	private async Task<IReadOnlyList<MediaId>> WatchlistIdsAsync() => await host.Resolve<IWatchlistRepository>().GetIdsAsync();
+
+	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy)
+	{
+		var entity = new FeedRow
+		{
+			Name = "Comedy",
+			IsEnabled = true,
+			Provider = FeedProvider.Mdblist,
+			Strategy = strategy,
+			Identifier = identifier,
+		};
+
+		host.Context.Feeds.Add(entity);
+		await host.Context.SaveChangesAsync();
+		host.Context.ChangeTracker.Clear();
+		return FeedId.From(entity.Id);
+	}
+}

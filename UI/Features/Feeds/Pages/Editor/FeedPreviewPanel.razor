@@ -2,6 +2,7 @@
 @using Contracts.Blacklist
 @using Contracts.DI
 @using Contracts.Feed
+@using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Processing
 @using Contracts.Watchlist
@@ -15,6 +16,7 @@
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedService> FeedServiceIndex
 @inject IFeedRunEngine RunEngine
+@inject ICurrentUser CurrentUser
 @inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
 
@@ -592,7 +594,7 @@
     {
         _hasEnrollmentChanges = false;
 
-        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), _rawResults, source, cancellationToken);
+        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), _rawResults, source, CurrentUser, cancellationToken);
         _processedResults = dryRun.Verdicts;
         _unresolvedResults = dryRun.Unresolved;
         _runsRemaining = dryRun.RunsRemaining;
