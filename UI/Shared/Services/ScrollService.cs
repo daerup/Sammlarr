@@ -8,7 +8,7 @@ internal class ScrollService(IJSRuntime jsRuntime)
 	{
 		var task = navigateAction();
 		await Task.Delay(50, cancellationToken);
-		await jsRuntime.InvokeVoidAsync("scrollTo", cancellationToken, new { top = 0, behavior = "smooth" });
+		await jsRuntime.InvokeVoidAsync("sammlarrScroll.toTop", cancellationToken);
 		await task;
 	}
 }
