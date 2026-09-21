@@ -79,6 +79,25 @@ internal sealed class FeedRunLog(IDbContextFactory<SammlarrDbContext> dbContextF
 		return run is null ? new None() : Some.Of(run);
 	}
 
+	public async Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var runs = ctx.FeedRuns.AsNoTracking().Where(row => row.FeedId == feedId.Value);
+		if (!await runs.AnyAsync(cancellationToken))
+		{
+			return FeedRunHistory.None;
+		}
+
+		return new FeedRunHistory
+		{
+			TotalRuns = await runs.CountAsync(cancellationToken),
+			FirstRunAt = await runs.MinAsync(row => row.StartedAt, cancellationToken),
+			TotalAdded = await runs.SumAsync(row => row.Added, cancellationToken),
+			TotalRemoved = await runs.SumAsync(row => row.Removed, cancellationToken),
+		};
+	}
+
 	public async Task RecordAsync(FeedRunRecord record, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);

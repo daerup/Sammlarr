@@ -132,6 +132,46 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 	private static DateTimeOffset Day(int day) => new(2026, 03, day, 4, 0, 0, TimeSpan.Zero);
 
+	[Test]
+	public async Task GetHistoryAsync_ForAFeedWithRuns_TotalsTheCountsAndDatesTheFirstRun()
+	{
+		var feedId = await SeedFeedAsync();
+
+		await _testee.RecordAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
+		await _testee.RecordAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
+
+		var history = await _testee.GetHistoryAsync(feedId);
+
+		await Assert.That(history.TotalRuns).IsEqualTo(2);
+		await Assert.That(history.TotalAdded).IsEqualTo(5);
+		await Assert.That(history.TotalRemoved).IsEqualTo(1);
+		await Assert.That(history.FirstRunAt).IsEqualTo(Day(1));
+	}
+
+	[Test]
+	public async Task GetHistoryAsync_ForAFeedThatNeverRan_ReportsNothingRatherThanThrowing()
+	{
+		var feedId = await SeedFeedAsync();
+
+		var history = await _testee.GetHistoryAsync(feedId);
+
+		await Assert.That(history.TotalRuns).IsEqualTo(0);
+		await Assert.That(history.FirstRunAt).IsNull();
+	}
+
+	private static FeedRunCounts Counts(int added, int removed) =>
+		new()
+		{
+			Total = added + removed,
+			Added = added,
+			Kept = 0,
+			Bypassed = 0,
+			Filtered = 0,
+			Skipped = 0,
+			Unresolved = 0,
+			Removed = removed,
+		};
+
 	private static FeedRunRecord Run(FeedId feedId, IReadOnlyList<MediaId> kept, int day) =>
 		new()
 		{
