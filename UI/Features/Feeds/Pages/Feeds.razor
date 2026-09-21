@@ -169,13 +169,19 @@
                                            Property="@(l => OwnedBy(l))"
                                            Sortable="true">
                             <CellTemplate Context="feed">
-                                @if (_everRan.Contains(feed.Id))
+                                @if (!_everRan.Contains(feed.Id))
                                 {
-                                    <span class="feed-owned @(OwnedBy(feed) == 0 ? "is-none" : null)">@OwnedBy(feed)</span>
+                                    <span class="feed-owned is-none">—</span>
+                                }
+                                else if (OwnedBy(feed) is > 0 and var owned)
+                                {
+                                    <a class="feed-owned feed-owned-link"
+                                       href="@($"/watchlist?feed={UrlGuid.Encode(feed.Id.Value)}")"
+                                       title="@($"Show the {owned} titles this feed put on your watchlist")">@owned</a>
                                 }
                                 else
                                 {
-                                    <span class="feed-owned is-none">—</span>
+                                    <span class="feed-owned is-none">0</span>
                                 }
                             </CellTemplate>
                         </BbDataTableColumn>
