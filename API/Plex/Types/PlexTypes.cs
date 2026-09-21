@@ -12,7 +12,7 @@ internal static class PlexTypes
 			[property: JsonPropertyName("offset")] int Offset,
 			[property: JsonPropertyName("totalSize")] int TotalSize,
 			[property: JsonPropertyName("size")] int Size,
-			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata> Metadata
+			[property: JsonPropertyName("Metadata")] IReadOnlyList<Metadata>? Metadata
 		);
 
 		public record Metadata(
