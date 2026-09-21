@@ -21,6 +21,7 @@
 @inject Notifier Notifier
 @inject IMediaService Media
 @inject IWatchlistRepository Watchlist
+@inject IFeedRunLog RunLog
 
 <PageTitle>Feeds</PageTitle>
 
@@ -168,9 +169,9 @@
                                            Property="@(l => OwnedBy(l))"
                                            Sortable="true">
                             <CellTemplate Context="feed">
-                                @if (OwnedBy(feed) is > 0 and var owned)
+                                @if (_everRan.Contains(feed.Id))
                                 {
-                                    <span class="feed-owned">@owned</span>
+                                    <span class="feed-owned @(OwnedBy(feed) == 0 ? "is-none" : null)">@OwnedBy(feed)</span>
                                 }
                                 else
                                 {
@@ -328,6 +329,7 @@
 
     private IReadOnlyList<Feed> _feeds = [];
     private IReadOnlyDictionary<FeedId, int> _owned = new Dictionary<FeedId, int>();
+    private IReadOnlySet<FeedId> _everRan = new HashSet<FeedId>();
 
     private int OwnedBy(Feed feed) => _owned.GetValueOrDefault(feed.Id);
 
@@ -350,6 +352,7 @@
         _providerConfig = await ProviderConfigRepository.GetAsync();
         _feeds = await FeedRepository.GetFeedsAsync();
         _owned = await Watchlist.GetOwnedCountsAsync();
+        _everRan = await RunLog.GetFeedsThatHaveRunAsync();
         UpdatePagedFeeds();
         _isLoading = false;
     }
@@ -525,6 +528,7 @@
             _runningFeed = null;
             _runVersion++;
             _owned = await Watchlist.GetOwnedCountsAsync();
+        _everRan = await RunLog.GetFeedsThatHaveRunAsync();
         }
     }
 

@@ -128,6 +128,20 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(runs[1].StartedAt).IsEqualTo(Day(2));
 	}
 
+	[Test]
+	public async Task GetFeedsThatHaveRunAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
+	{
+		var ran = await SeedFeedAsync();
+		var neverRan = await SeedFeedAsync();
+
+		await _testee.StartAsync(Run(ran, kept: [Held], 1));
+
+		var everRan = await _testee.GetFeedsThatHaveRunAsync();
+
+		await Assert.That(everRan).Contains(ran);
+		await Assert.That(everRan).DoesNotContain(neverRan);
+	}
+
 	private static FeedRunItem Item(MediaId mediaId, FeedRunItemState state) => new() { MediaId = mediaId, State = state };
 
 	private static DateTimeOffset Day(int day) => new(2026, 03, day, 4, 0, 0, TimeSpan.Zero);
