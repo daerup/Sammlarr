@@ -1,0 +1,59 @@
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+
+.filter-source {
+    min-width: 320px;
+}
+
+.filter-type {
+    min-width: 140px;
+}
+
+.filter-sort {
+    min-width: 180px;
+}
+
+.filter-control ::deep button {
+    width: 100%;
+}
+
+.filter-count {
+    font-size: 12px;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.filter-clear {
+    font-size: 12px;
+    color: var(--muted-foreground);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+.filter-clear:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.filter-spacer {
+    margin-left: auto;
+}
+
+.filter-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+}
