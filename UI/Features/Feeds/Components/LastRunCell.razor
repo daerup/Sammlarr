@@ -5,6 +5,7 @@
 @using Domain.Media
 @using UI.Shared.Changes
 @using UI.Shared.Media
+@using global::Shared
 @inject IFeedRunLog RunLog
 @inject IMediaService Media
 
@@ -54,7 +55,8 @@ else
                   Chips="@FeedRunView.Chips(_run.Counts)"
                   OnSelect="ShowDetailsAsync"
                   EmptyMessage="Nothing was added or removed."
-                  Note="@($"{_runCount} runs")">
+                  Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
+                  NoteHref="@($"/feeds/{UrlGuid.Encode(FeedId.Value)}/runs")">
         <Badges>
             <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(_run.Strategy)</BbBadge>
             @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
@@ -62,9 +64,6 @@ else
                 <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
             }
         </Badges>
-        <Actions>
-            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _open = false)">Close</BbButton>
-        </Actions>
     </ChangeDialog>
 
     <MediaDetailSheet Open="_selected is not null"
@@ -91,7 +90,7 @@ else
     {
         var runs = await RunLog.GetRunsAsync(FeedId, take: 1);
         _run = runs.FirstOrDefault();
-        _runCount = runs.Count;
+        _runCount = (await RunLog.GetHistoryAsync(FeedId)).TotalRuns;
     }
 
     private async Task OpenAsync()
