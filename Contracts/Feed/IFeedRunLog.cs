@@ -17,5 +17,7 @@ public interface IFeedRunLog
 
 	Task<Optional<FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default);
 
+	Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default);
+
 	Task RecordAsync(FeedRunRecord record, CancellationToken cancellationToken = default);
 }
