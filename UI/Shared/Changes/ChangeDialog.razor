@@ -49,8 +49,18 @@
             <div class="change-empty">@EmptyMessage</div>
         }
 
-        <div class="change-foot">
-            <span class="change-note">@Note</span>
+        <div class="change-foot @(Actions is null ? "is-note-only" : null)">
+            @if (Note is not null && NoteHref is not null)
+            {
+                <a class="change-note is-link" href="@NoteHref">
+                    <span>@Note</span>
+                    <LucideIcon Name="arrow-right" Size="12"/>
+                </a>
+            }
+            else
+            {
+                <span class="change-note">@Note</span>
+            }
             <span class="change-actions">@Actions</span>
         </div>
     </BbDialogContent>
@@ -80,6 +90,7 @@
     [Parameter] public string EmptyMessage { get; set; } = "Nothing changed.";
 
     [Parameter] public string? Note { get; set; }
+    [Parameter] public string? NoteHref { get; set; }
     [Parameter] public RenderFragment? Actions { get; set; }
 
     private string BandClass => BandTone is ChangeBandTone.Warn ? "is-warn" : "is-bad";
