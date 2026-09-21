@@ -3,8 +3,8 @@
 
 <SessionInvalidationListener/>
 
-<div class="relative min-h-screen flex flex-col">
-    <header class="sticky top-0 z-50 w-full border-b bg-background">
+<div class="relative h-screen overflow-hidden flex flex-col">
+    <header class="shrink-0 z-50 w-full border-b bg-background">
         <div class="flex h-14 items-center px-6">
             <div class="mr-6 flex">
                 <a href="/" class="flex items-center gap-2 group" aria-label="Sammlarr — home">
@@ -42,11 +42,11 @@
         </div>
     </header>
 
-    <main class="flex-1">
+    <main class="flex-1 min-h-0 overflow-y-auto">
         @Body
     </main>
 
-    <footer class="border-t py-6 md:py-0">
+    <footer class="shrink-0 border-t py-6 md:py-0">
         <div class="flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row px-6">
             <p class="text-sm text-muted-foreground">
                 Built with <a href="https://blazorblueprintui.com" target="_blank" class="font-medium underline underline-offset-4">BlazorBlueprint</a>
