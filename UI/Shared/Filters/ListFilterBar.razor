@@ -1,0 +1,86 @@
+@using BlazorBlueprint.Primitives
+@using Domain.Media
+
+<div class="filter-bar">
+    @if (Sources.Count > 0)
+    {
+        <BbSelect TValue="string"
+                  Value="@SelectedSourceKey"
+                  ValueChanged="OnSourceChangedAsync"
+                  Options="@SourceOptions"
+                  Placeholder="Any source"
+                  Class="filter-control filter-source"/>
+    }
+
+    <BbSelect TValue="string"
+              Value="@(Filter.Type?.ToString())"
+              ValueChanged="OnTypeChangedAsync"
+              Options="@TypeOptions"
+              Placeholder="Any type"
+              Class="filter-control filter-type"/>
+
+    <span class="filter-count">@Shown of @Total</span>
+
+    @if (Filter.HasFilters)
+    {
+        <button type="button" class="filter-clear" @onclick="ClearAsync">Clear all</button>
+    }
+
+    <span class="filter-spacer"></span>
+    <span class="filter-divider"></span>
+
+    <BbSelect TValue="ListSort"
+              Value="@Filter.Sort"
+              ValueChanged="OnSortChangedAsync"
+              Options="@SortOptions"
+              Class="filter-control filter-sort"/>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required ListFilter Filter { get; set; }
+
+    [Parameter]
+    public EventCallback<ListFilter> FilterChanged { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<SourceOption> Sources { get; set; } = [];
+
+    [Parameter]
+    public int Shown { get; set; }
+
+    [Parameter]
+    public int Total { get; set; }
+
+    private IReadOnlyList<SelectOption<string>> SourceOptions => [.. Sources.Select(source => new SelectOption<string>(source.Key, source.Label))];
+
+    private static readonly SelectOption<string>[] TypeOptions =
+    [
+        new(nameof(MediaType.Movie), "Movies"),
+        new(nameof(MediaType.Show), "Shows"),
+    ];
+
+    private static readonly SelectOption<ListSort>[] SortOptions =
+    [
+        new(ListSort.RecentlyAdded, "Recently added"),
+        new(ListSort.OldestAdded, "Oldest added"),
+        new(ListSort.TitleAscending, "Title A to Z"),
+        new(ListSort.TitleDescending, "Title Z to A"),
+        new(ListSort.NewestRelease, "Newest release"),
+        new(ListSort.OldestRelease, "Oldest release"),
+    ];
+
+    private string? SelectedSourceKey => Filter.Source is { } choice ? Sources.FirstOrDefault(source => source.Choice == choice)?.Key : null;
+
+    private Task OnSourceChangedAsync(string? key) =>
+        Apply(Filter with { Source = Sources.FirstOrDefault(source => source.Key == key)?.Choice });
+
+    private Task OnTypeChangedAsync(string? key) =>
+        Apply(Filter with { Type = Enum.TryParse<MediaType>(key, out var type) ? type : null });
+
+    private Task OnSortChangedAsync(ListSort sort) => Apply(Filter with { Sort = sort });
+
+    private Task ClearAsync() => Apply(Filter.ClearFilters());
+
+    private Task Apply(ListFilter filter) => FilterChanged.InvokeAsync(filter);
+}
