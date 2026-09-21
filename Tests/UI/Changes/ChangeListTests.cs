@@ -151,6 +151,67 @@ public class ChangeListTests : BunitContext
 		await Assert.That(groups[2]).Contains("Already in sync");
 	}
 
+	[Test]
+	public async Task Chips_ForACountThatIsZero_AreOmittedSoZeroIsNeverRenderedAsANumber()
+	{
+		var cut = RenderList([Added("Fresh")], [Chip("list", 2), Chip("minus", 0, ChangeKind.Removed)]);
+
+		var counts = cut.FindAll(".change-chip-count").Select(chip => chip.TextContent.Trim()).ToList();
+
+		await Assert.That(counts).IsEquivalentTo(["2"]);
+		await Assert.That(cut.FindAll(".change-chip")).Count().IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task Chips_WhenTheCountsOnlySectionStartsOnAnOmittedChip_StillDrawTheSeparatorBeforeTheNextOne()
+	{
+		var kept = Chip("bookmark-check", 0) with { StartsCountsOnly = true };
+		var cut = RenderList([Added("Fresh")], [Chip("list", 2), kept, Chip("filter-x", 7)]);
+
+		await Assert.That(cut.FindAll(".change-chip-sep")).Count().IsEqualTo(1);
+		await Assert.That(cut.FindAll(".change-chip")).Count().IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task Render_ForARunThatOnlyAdded_ShowsNoRemovedGroup()
+	{
+		var cut = RenderList(Added("Fresh"), Added("Also Fresh"));
+
+		var groups = cut.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
+
+		await Assert.That(groups).Count().IsEqualTo(1);
+		await Assert.That(groups[0]).Contains("Added");
+	}
+
+	[Test]
+	public async Task Render_ForARunThatOnlyRemoved_ShowsNoAddedGroup()
+	{
+		var cut = RenderList(Removed("Gone"), Removed("Also Gone"));
+
+		var groups = cut.FindAll(".change-group").Select(group => group.TextContent.Trim()).ToList();
+
+		await Assert.That(groups).Count().IsEqualTo(1);
+		await Assert.That(groups[0]).Contains("Removed");
+	}
+
+	[Test]
+	public async Task Render_ForARunThatChangedNothing_ShowsNoGroupsAtAll()
+	{
+		var cut = RenderList([], [Chip("list", 180)]);
+
+		await Assert.That(cut.FindAll(".change-group")).IsEmpty();
+		await Assert.That(cut.FindAll(".change-row")).IsEmpty();
+	}
+
+	private static ChangeChip Chip(string icon, int count, ChangeKind? filters = null) =>
+		new()
+		{
+			Icon = icon,
+			Count = count,
+			Tooltip = icon,
+			Filters = filters,
+		};
+
 	private static ChangeEntry Unchanged(string title) =>
 		new()
 		{
