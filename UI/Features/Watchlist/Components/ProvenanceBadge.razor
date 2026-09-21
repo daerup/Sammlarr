@@ -1,19 +1,18 @@
 @using UI.Shared.Services.Branding
-@using global::Shared
 @inject MediaProviderBrandingService Branding
 
 @{
-    var feedUrl = FeedEditUrl(Provenance);
+    var feedUrl = ProvenanceView.RunUrl(Provenance, ItemId);
 }
 @if (feedUrl is not null)
 {
-    <a href="@feedUrl" class="wl-badge-brand inline-flex cursor-pointer" style="@BrandStyle(Provenance)">
+    <a href="@feedUrl" class="wl-badge-brand inline-flex cursor-pointer" style="@BrandStyle">
         @Badge
     </a>
 }
 else
 {
-    <span class="wl-badge-brand inline-flex" style="@BrandStyle(Provenance)">
+    <span class="wl-badge-brand inline-flex" style="@BrandStyle">
         @Badge
     </span>
 }
@@ -33,20 +32,13 @@ else
             <BbTooltip>
                 <BbTooltipTrigger AsChild="false" Class="p-0">
                     <span class="flex items-center gap-1 wl-badge-content">
-                        <LucideIcon Name="@ProvenanceIcon(Provenance)" Size="14" Color="@IconColor(Provenance)"/>
-                        <span class="wl-badge-label">@ProvenanceLabel(Provenance)</span>
+                        <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14" Color="@IconColor"/>
+                        <span class="wl-badge-label">@ProvenanceView.Label(Provenance, Branding)</span>
                     </span>
                 </BbTooltipTrigger>
-                <BbTooltipContent>@ProvenanceTooltip()</BbTooltipContent>
+                <BbTooltipContent>@ProvenanceView.Description(Provenance, AddedAt, Branding)</BbTooltipContent>
             </BbTooltip>
         </BbBadge>;
-
-    private string? FeedEditUrl(WatchlistItemProvenance provenance) =>
-        provenance.Value is FeedOrigin feed
-            ? $"/feeds/{UrlGuid.Encode(feed.Feed.Id.Value)}/runs/{UrlGuid.Encode(feed.Run.Id)}{ItemQuery()}"
-            : null;
-
-    private string ItemQuery() => ItemId is { } id ? $"?item={UrlGuid.Encode(id.Value)}" : string.Empty;
 
     private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
         provenance.Value switch
@@ -58,70 +50,7 @@ else
             _ => BadgeVariant.Secondary,
         };
 
-    private static string ProvenanceIcon(WatchlistItemProvenance provenance) =>
-        provenance.Value switch
-        {
-            RemoteOrigin => "cloud",
-            ManualOrigin manual => ManualSourceIcon(manual.Source),
-            FeedOrigin => "rss",
-            OrphanedOrigin => "unlink",
-            _ => "circle",
-        };
+    private string IconColor => ProvenanceView.BrandColor(Provenance, Branding) ?? "currentColor";
 
-    private string ProvenanceLabel(WatchlistItemProvenance provenance) =>
-        provenance.Value switch
-        {
-            RemoteOrigin remote => ProviderName(remote.Provider),
-            ManualOrigin => "Manual",
-            FeedOrigin feed => feed.Feed.Name,
-            OrphanedOrigin orphaned => orphaned.FormerFeedName,
-            _ => string.Empty,
-        };
-
-    private string ProvenanceTooltip()
-    {
-        var when = AddedAt.LocalDateTime.ToString("MMM d, yyyy HH:mm");
-        return Provenance.Value switch
-        {
-            RemoteOrigin remote => $"From your remote {ProviderName(remote.Provider)} watchlist",
-            ManualOrigin manual => manual.Source == ManualSource.Unknown
-                ? $"Added manually on {when}"
-                : $"Added from {ManualSourceName(manual.Source)} on {when}",
-            FeedOrigin feed => $"Added by feed '{feed.Feed.Name}' on {when}",
-            OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
-            _ => string.Empty,
-        };
-    }
-
-    private string? BrandColor(WatchlistItemProvenance provenance) =>
-        provenance.Value switch
-        {
-            RemoteOrigin remote => Branding.GetBrandingInfo(remote.Provider.AsMediaProvider()).BrandColor,
-            FeedOrigin feed => Branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
-            _ => null,
-        };
-
-    private string IconColor(WatchlistItemProvenance provenance) => BrandColor(provenance) ?? "currentColor";
-
-    private string ProviderName(WatchlistProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider()).DisplayName;
-
-    private static string ManualSourceIcon(ManualSource source) =>
-        source switch
-        {
-            ManualSource.Search => "search",
-            ManualSource.Browse => "compass",
-            ManualSource.FeedPreview => "flask-conical",
-            ManualSource.Unknown => "user",
-        };
-
-    private static string ManualSourceName(ManualSource source) =>
-        source switch
-        {
-            ManualSource.Search => "Search",
-            ManualSource.Browse => "Browse",
-            ManualSource.FeedPreview => "feed preview",
-            ManualSource.Unknown => "manual",
-        };
-
-    private string? BrandStyle(WatchlistItemProvenance provenance) => BrandColor(provenance) is { } color ? $"--wl-brand: {color}" : null;
+    private string? BrandStyle => ProvenanceView.BrandColor(Provenance, Branding) is { } color ? $"--wl-brand: {color}" : null;
 }
