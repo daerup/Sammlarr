@@ -5,6 +5,7 @@ using Bunit;
 using Contracts.Blacklist;
 using Contracts.DI;
 using Contracts.Feed;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Processing;
 using Contracts.Watchlist;
@@ -168,6 +169,7 @@ public class FeedPreviewPanelTests : BunitContext
 		blacklist.GetBlacklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
 		Services.AddSingleton(watchlist.Object);
 		Services.AddSingleton(blacklist.Object);
+		Services.AddSingleton(ICurrentUser.Mock().Object);
 		var media = IMediaService.Mock();
 		if (gone is { } id)
 		{
@@ -197,10 +199,17 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class OwnedRunEngine : IFeedRunEngine
 	{
+		public Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default) =>
+			throw new NotSupportedException();
+
+		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
+			throw new NotSupportedException();
+
 		public Task<FeedRunSummary> DryRunAsync(
 			Domain.Feed.Feed feed,
 			IReadOnlyList<MediaLookup> items,
 			FeedSource source,
+			ICurrentUser user,
 			CancellationToken cancellationToken = default
 		)
 		{
@@ -235,10 +244,17 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class GoneRunEngine(MediaId gone) : IFeedRunEngine
 	{
+		public Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default) =>
+			throw new NotSupportedException();
+
+		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
+			throw new NotSupportedException();
+
 		public Task<FeedRunSummary> DryRunAsync(
 			Domain.Feed.Feed feed,
 			IReadOnlyList<MediaLookup> items,
 			FeedSource source,
+			ICurrentUser user,
 			CancellationToken cancellationToken = default
 		)
 		{
@@ -288,10 +304,17 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class SpreadRunEngine : IFeedRunEngine
 	{
+		public Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default) =>
+			throw new NotSupportedException();
+
+		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
+			throw new NotSupportedException();
+
 		public Task<FeedRunSummary> DryRunAsync(
 			Domain.Feed.Feed feed,
 			IReadOnlyList<MediaLookup> items,
 			FeedSource source,
+			ICurrentUser user,
 			CancellationToken cancellationToken = default
 		)
 		{

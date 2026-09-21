@@ -37,7 +37,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		for (var run = 1; run <= Threshold; run++)
 		{
-			var summary = await engine.DryRunAsync(feed, source, FeedSource.Complete);
+			var summary = await engine.DryRunAsync(feed, source, FeedSource.Complete, fixture.CurrentUser);
 			drops.Add(summary.Delta.Drops.Count);
 
 			await log.RecordAsync(
@@ -57,7 +57,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await Assert.That(drops).IsEquivalentTo([0, 0, 1], CollectionOrdering.Matching);
 
-		var final = await engine.DryRunAsync(feed, source, FeedSource.Complete);
+		var final = await engine.DryRunAsync(feed, source, FeedSource.Complete, fixture.CurrentUser);
 		await Assert.That(final.Delta.Drops).IsEquivalentTo([missing]);
 		await Assert.That(final.RunsRemaining[missing]).IsEqualTo(0);
 	}
@@ -76,7 +76,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		for (var run = 1; run <= Threshold + 2; run++)
 		{
-			var summary = await engine.DryRunAsync(feed, [], FeedSource.Complete);
+			var summary = await engine.DryRunAsync(feed, [], FeedSource.Complete, fixture.CurrentUser);
 
 			await log.RecordAsync(
 				new FeedRunRecord
