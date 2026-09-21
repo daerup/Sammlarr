@@ -1,4 +1,5 @@
 using DB.Data.Feed;
+using DB.Data.FeedRun;
 using DB.Data.Media;
 using Domain.Providers;
 using Domain.Watchlist;
@@ -18,6 +19,8 @@ internal record WatchlistRow : IAuditable, IUserOwned
 	public Guid? SourceFeedId { get; set; }
 	public FeedRow? SourceFeed { get; set; }
 	public string? SourceFeedNameSnapshot { get; set; }
+	public Guid? SourceRunId { get; set; }
+	public FeedRunRow? SourceRun { get; set; }
 
 	public DateTimeOffset CreatedAt { get; set; }
 	public DateTimeOffset UpdatedAt { get; set; }

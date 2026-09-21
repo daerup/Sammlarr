@@ -672,6 +672,9 @@ namespace DB.Migrations
                     b.Property<string>("SourceFeedNameSnapshot")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("SourceRunId")
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("UpdatedAt")
                         .HasColumnType("INTEGER");
 
@@ -680,6 +683,8 @@ namespace DB.Migrations
                     b.HasIndex("MediaId");
 
                     b.HasIndex("SourceFeedId");
+
+                    b.HasIndex("SourceRunId");
 
                     b.ToTable("Watchlist");
                 });
@@ -886,6 +891,11 @@ namespace DB.Migrations
                         .HasForeignKey("SourceFeedId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("DB.Data.FeedRun.FeedRunRow", "SourceRun")
+                        .WithMany()
+                        .HasForeignKey("SourceRunId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DB.Data.Identity.UserRow", null)
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -895,6 +905,8 @@ namespace DB.Migrations
                     b.Navigation("Media");
 
                     b.Navigation("SourceFeed");
+
+                    b.Navigation("SourceRun");
                 });
 
             modelBuilder.Entity("DB.Data.FeedRun.FeedRunRow", b =>

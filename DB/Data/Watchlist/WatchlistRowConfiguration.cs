@@ -13,5 +13,7 @@ internal sealed class WatchlistRowConfiguration : IModelConfiguration
 			builder.HasOne(w => w.Media).WithMany().HasForeignKey("MediaId").OnDelete(DeleteBehavior.Restrict);
 			builder.HasOne(w => w.SourceFeed).WithMany().HasForeignKey(w => w.SourceFeedId).OnDelete(DeleteBehavior.SetNull);
 			builder.HasIndex(w => w.SourceFeedId);
+			builder.HasOne(w => w.SourceRun).WithMany().HasForeignKey(w => w.SourceRunId).OnDelete(DeleteBehavior.Restrict);
+			builder.HasIndex(w => w.SourceRunId);
 		});
 }
