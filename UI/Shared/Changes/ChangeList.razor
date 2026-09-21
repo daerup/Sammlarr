@@ -10,7 +10,7 @@
                     <span class="change-chip-sep"></span>
                 }
                 <BbTooltip DelayDuration="200">
-                    <BbTooltipTrigger AsChild="false" Class="p-0">
+                    <BbTooltipTrigger AsChild="false" Class="p-0" Focusable="false">
                         <button type="button"
                                 class="change-chip @ToneClass(chip.Tone) @(IsActive(chip) ? "is-on" : null) @(Clickable(chip) ? null : "is-dim")"
                                 disabled="@(!Clickable(chip))"

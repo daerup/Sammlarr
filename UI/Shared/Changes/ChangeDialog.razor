@@ -1,7 +1,8 @@
+@using BlazorBlueprint.Primitives
 @using Domain.Media
 
 <BbDialog Open="Open" OpenChanged="OnOpenChanged">
-    <BbDialogContent Class="change-dialog p-0 gap-0">
+    <BbDialogContent Class="change-dialog p-0 gap-0" InitialFocus="FocusTrapInitialFocus.Container">
         @if (Prologue is not null)
         {
             <div class="change-prologue">@Prologue</div>
@@ -15,11 +16,11 @@
                         <p class="change-sub">@Subtitle</p>
                     }
                 </div>
+                @if (Badges is not null)
+                {
+                    <div class="change-badges">@Badges</div>
+                }
             </div>
-            @if (Badges is not null)
-            {
-                <div class="change-badges">@Badges</div>
-            }
         </div>
 
         @if (Band is not null)
@@ -27,7 +28,14 @@
             <div class="change-band @BandClass">@Band</div>
         }
 
-        @if (Entries.Count > 0)
+        @if (Loading)
+        {
+            <div class="change-empty change-loading">
+                <BbSpinner Size="SpinnerSize.Small"/>
+                <span>Loading…</span>
+            </div>
+        }
+        else if (Entries.Count > 0)
         {
             <ChangeList Entries="Entries"
                         Chips="Chips"
@@ -59,6 +67,8 @@
     [Parameter] public RenderFragment? Prologue { get; set; }
     [Parameter] public RenderFragment? Band { get; set; }
     [Parameter] public ChangeBandTone BandTone { get; set; } = ChangeBandTone.Warn;
+
+    [Parameter] public bool Loading { get; set; }
 
     [Parameter] public IReadOnlyList<ChangeEntry> Entries { get; set; } = [];
     [Parameter] public IReadOnlyList<ChangeChip> Chips { get; set; } = [];
