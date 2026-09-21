@@ -24,7 +24,7 @@ else
     <SignInGuard AccessChanged="HandleSignInChanged"/>
     <OAuthGuard Provider="@_providerSettings.AuthProvider" AccessChanged="HandlePlexAccessChanged"/>
 
-    <PageContainer Heading="@PageHeading" Description="@PageDescription">
+    <PageContainer Heading="@PageHeading" Description="@PageDescription" Fill="true">
         <HeaderActions>
             <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
                 <div class="flex items-center gap-2">
