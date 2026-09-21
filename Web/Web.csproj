@@ -6,7 +6,12 @@
 		<LangVersion>preview</LangVersion>
 		<!-- CS8524: allow exhaustive-over-named enum switches without a default arm (Razor compiler warnings ignore .editorconfig). -->
 		<NoWarn>$(NoWarn);CS8524</NoWarn>
+		<RepoRoot>$(MSBuildThisFileDirectory)..\</RepoRoot>
 	</PropertyGroup>
+	<ItemGroup>
+		<TailwindInput Include="$(MSBuildThisFileDirectory)wwwroot\css\app-input.css;$(RepoRoot)UI\tailwind.config.js" />
+		<TailwindInput Include="$(RepoRoot)UI\Features\**\*.razor;$(RepoRoot)UI\Shared\**\*.razor;$(MSBuildThisFileDirectory)*.razor" />
+	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Core.csproj" />
 		<ProjectReference Include="..\DB\DB.csproj" />
@@ -23,4 +28,8 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="Web.Tests" />
 	</ItemGroup>
+	<Target Name="BuildTailwindCss" BeforeTargets="BeforeBuild" Inputs="@(TailwindInput)" Outputs="$(MSBuildThisFileDirectory)wwwroot\css\app.css">
+		<Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(RepoRoot)" Condition="!Exists('$(RepoRoot)node_modules')" />
+		<Exec Command="npm run css" WorkingDirectory="$(RepoRoot)" />
+	</Target>
 </Project>

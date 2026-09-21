@@ -4,14 +4,15 @@
  */
 
 /* Reference the Tailwind config file */
-@config "../../tailwind.config.js";
+@config "../../../UI/tailwind.config.js";
 
 /* Import Tailwind with full theme (preflight is minimal, blazorblueprint.css provides resets) */
 @import 'tailwindcss';
 
-/* Scan template files for utility classes */
-@source "../../Shared";
-@source "../../Features";
+/* Scan the component library and the host for utility classes */
+@source "../../../UI/Features";
+@source "../../../UI/Shared";
+@source "../../*.razor";
 
 /* Container with responsive max-width */
 .container {
@@ -52,8 +53,6 @@
     }
 }
 
-/* Safelisted utilities not picked up by the scanner */
-.px-6 {
-    padding-inline: 1.5rem;
-}
+/* Classes the scanner cannot see because they are assembled in C# go here, e.g.
+   @source inline("px-6 mt-7"); — plain literals in markup are found automatically. */
 

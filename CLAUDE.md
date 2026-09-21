@@ -27,6 +27,12 @@ Windows 11. Use **PowerShell** for shell commands — never bash, sh, git-bash, 
 
 CSharpier runs automatically on `.cs` edits via a PostToolUse hook; don't invoke it manually.
 
+## Styling
+
+Tailwind utilities come from **`Web/wwwroot/css/app.css`**, which is **generated, gitignored, and rebuilt by `dotnet build`** (the `BuildTailwindCss` target in `Web/Web.csproj` runs `npm run css`, and `npm ci` first if `node_modules` is missing). A new utility class works as soon as you build; run `npm run css` by hand for a faster loop. This means **`dotnet build` requires Node**.
+
+Custom CSS has a home per kind, all in `Web/wwwroot/css/app-input.css`: design tokens in the `@config`'d `UI/tailwind.config.js`, component classes in `@layer components`, custom utilities via `@utility`, and `@source inline("…")` to safelist classes the scanner cannot see because they are assembled in C#. Anything component-specific stays in that component's scoped `.razor.css` — note a class passed into a child component (`<LucideIcon Class="mr-2"/>`) or portalled content lands outside the parent's scope, so those need a utility rather than scoped CSS.
+
 ## Dev run
 
 The app runs via the Aspire AppHost (`AppHost/`). The UI is pinned to a fixed dev URL **http://localhost:6769** (`AppHost/AppHost.cs` `WithHttpEndpoint`), and the AppHost's `launchSettings.json` bakes `ASPIRE_ALLOW_UNSECURED_TRANSPORT=true`, so a bare `aspire run` starts without the https crash. Aspire dashboard: **http://localhost:15223**.
