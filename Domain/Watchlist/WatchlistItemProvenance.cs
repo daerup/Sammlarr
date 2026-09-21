@@ -1,3 +1,4 @@
+using Domain.Feed.Run;
 using Domain.Providers;
 
 namespace Domain.Watchlist;
@@ -8,9 +9,8 @@ public readonly record struct ManualOrigin(ManualSource Source);
 
 public enum ManualSource { Unknown, Search, Browse, FeedPreview }
 
-public readonly record struct FeedOrigin(Guid FeedId, string FeedName, FeedProvider Provider);
+public readonly record struct FeedOrigin(Feed.Feed Feed, FeedRun Run);
 
 public readonly record struct OrphanedOrigin(string FormerFeedName);
 
 public union WatchlistItemProvenance(RemoteOrigin, ManualOrigin, FeedOrigin, OrphanedOrigin);
-

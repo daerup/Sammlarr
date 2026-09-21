@@ -100,19 +100,29 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var (items, source) = await FetchAsync(deps, feed, cancellationToken);
 		var planned = await PlanAsync(deps, feed, items, source, cancellationToken);
 
-		var added = await deps.Enrollment.AddToWatchlistAsync(planned.Delta.Adds, new FeedOrigin(feed.Id.Value, feed.Name, feed.Provider), cancellationToken);
+		var run = new Domain.Feed.Run.FeedRun
+		{
+			Id = Guid.NewGuid(),
+			FeedId = feed.Id,
+			StartedAt = startedAt,
+			Duration = elapsed.Elapsed,
+			Strategy = feed.Strategy,
+			Trigger = trigger,
+			Conclusiveness = planned.Conclusiveness,
+			Counts = FeedRunCounts.From(planned),
+			Items = Record(planned.Delta),
+		};
+		await deps.RunLog.StartAsync(run, cancellationToken);
+
+		var added = await deps.Enrollment.AddToWatchlistAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
 		var removed = await deps.Enrollment.RemoveOwnedAsync(planned.Delta.Drops, feed.Id, cancellationToken);
 		WarnOnDrift(feed, planned.Delta, added, removed);
 
 		var applied = planned with { Delta = new FeedDelta(added, planned.Delta.Keeps, removed) };
-		await deps.RunLog.RecordAsync(
-			new FeedRunRecord
+		await deps.RunLog.CompleteAsync(
+			run with
 			{
-				FeedId = feed.Id,
-				StartedAt = startedAt,
 				Duration = elapsed.Elapsed,
-				Strategy = feed.Strategy,
-				Trigger = trigger,
 				Conclusiveness = applied.Conclusiveness,
 				Counts = FeedRunCounts.From(applied),
 				Items = Record(applied.Delta),
@@ -183,7 +193,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var entries = await deps.Watchlist.GetEntriesAsync(cancellationToken);
 		var blacklisted = await deps.Blacklist.GetBlacklistIdsAsync(cancellationToken);
 		var watchlisted = entries.Select(entry => entry.MediaId).ToHashSet();
-		var owned = entries.Where(entry => entry.Provenance is FeedOrigin origin && origin.FeedId == feed.Id.Value).Select(entry => entry.MediaId).ToHashSet();
+		var owned = entries.Where(entry => entry.Provenance is FeedOrigin origin && origin.Feed.Id == feed.Id).Select(entry => entry.MediaId).ToHashSet();
 
 		var options = new QueryOptions
 		{

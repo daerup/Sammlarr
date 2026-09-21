@@ -136,7 +136,7 @@
             ? provenance switch
             {
                 RemoteOrigin remote => Branding.GetBrandingInfo(remote.Provider.AsMediaProvider()).BrandColor,
-                FeedOrigin feed => Branding.GetBrandingInfo(feed.Provider.AsMediaProvider()).BrandColor,
+                FeedOrigin feed => Branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
                 OrphanedOrigin => "var(--muted-foreground)",
                 ManualOrigin => null,
             }

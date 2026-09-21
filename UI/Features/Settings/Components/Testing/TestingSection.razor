@@ -1,3 +1,5 @@
+@using Domain.Feed
+@using Domain.Feed.Run
 @using Domain.Notifications
 @using UI.Shared.Services.Branding
 @using UI.Features.Feeds.Components
@@ -548,8 +550,39 @@
     private static readonly WatchlistItemProvenance _browseProvenance = new(new ManualOrigin(ManualSource.Browse));
     private static readonly WatchlistItemProvenance _feedPreviewProvenance = new(new ManualOrigin(ManualSource.FeedPreview));
     private static readonly WatchlistItemProvenance _remoteProvenance = new(new RemoteOrigin(WatchlistProvider.Plex));
-    private static readonly WatchlistItemProvenance _feedProvenance = new(new FeedOrigin(Guid.Empty, "Trending feed", FeedProvider.Tmdb));
-    private static readonly WatchlistItemProvenance _feedMdblistProvenance = new(new FeedOrigin(Guid.Empty, "Top watched (MDBList)", FeedProvider.Mdblist));
+    private static readonly WatchlistItemProvenance _feedProvenance = DemoFeedOrigin("Trending feed", FeedProvider.Tmdb);
+    private static readonly WatchlistItemProvenance _feedMdblistProvenance = DemoFeedOrigin("Top watched (MDBList)", FeedProvider.Mdblist);
+
+    private static WatchlistItemProvenance DemoFeedOrigin(string name, FeedProvider provider)
+    {
+        var feed = new Domain.Feed.Feed
+        {
+            Id = FeedId.From(Guid.NewGuid()),
+            Name = name,
+            Enabled = true,
+            Provider = provider,
+            Strategy = new FeedStrategy(new Append()),
+            Identifier = "demo",
+            CreatedAt = _sampleDate,
+            Schedule = new FeedRunTrigger(new Manual()),
+        };
+
+        return new FeedOrigin(
+            feed,
+            new FeedRun
+            {
+                Id = Guid.NewGuid(),
+                FeedId = feed.Id,
+                StartedAt = _sampleDate,
+                Duration = TimeSpan.Zero,
+                Strategy = feed.Strategy,
+                Trigger = feed.Schedule,
+                Conclusiveness = Conclusiveness.Conclusive,
+                Counts = FeedRunCounts.None,
+                Items = [],
+            }
+        );
+    }
     private static readonly WatchlistItemProvenance _orphanedProvenance = new(new OrphanedOrigin("Old feed"));
 
     private static readonly MediaLookup _demoMovie = new Movie

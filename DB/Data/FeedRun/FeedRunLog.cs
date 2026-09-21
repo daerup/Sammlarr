@@ -77,31 +77,47 @@ internal sealed class FeedRunLog(IDbContextFactory<SammlarrDbContext> dbContextF
 		};
 	}
 
-	public async Task RecordAsync(FeedRunRecord record, CancellationToken cancellationToken = default)
+	public async Task StartAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		ctx.FeedRuns.Add(
-			new FeedRunRow
-			{
-				FeedId = record.FeedId.Value,
-				StartedAt = record.StartedAt,
-				DurationMs = (long)record.Duration.TotalMilliseconds,
-				Strategy = record.Strategy,
-				Trigger = record.Trigger,
-				Conclusiveness = record.Conclusiveness,
-				Total = record.Counts.Total,
-				Added = record.Counts.Added,
-				Kept = record.Counts.Kept,
-				Bypassed = record.Counts.Bypassed,
-				Filtered = record.Counts.Filtered,
-				Skipped = record.Counts.Skipped,
-				Unresolved = record.Counts.Unresolved,
-				Removed = record.Counts.Removed,
-				Items = [.. record.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State })],
-			}
-		);
+		var row = new FeedRunRow
+		{
+			Id = run.Id,
+			FeedId = run.FeedId.Value,
+			StartedAt = run.StartedAt,
+		};
+		Fill(row, run);
+		ctx.FeedRuns.Add(row);
 
 		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task CompleteAsync(Domain.Feed.Run.FeedRun run, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		var row = await ctx.FeedRuns.Include(r => r.Items).FirstAsync(r => r.Id == run.Id, cancellationToken);
+		row.Items.Clear();
+		Fill(row, run);
+
+		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	private static void Fill(FeedRunRow row, Domain.Feed.Run.FeedRun run)
+	{
+		row.DurationMs = (long)run.Duration.TotalMilliseconds;
+		row.Strategy = run.Strategy;
+		row.Trigger = run.Trigger;
+		row.Conclusiveness = run.Conclusiveness;
+		row.Total = run.Counts.Total;
+		row.Added = run.Counts.Added;
+		row.Kept = run.Counts.Kept;
+		row.Bypassed = run.Counts.Bypassed;
+		row.Filtered = run.Counts.Filtered;
+		row.Skipped = run.Counts.Skipped;
+		row.Unresolved = run.Counts.Unresolved;
+		row.Removed = run.Counts.Removed;
+		row.Items.AddRange(run.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State }));
 	}
 }

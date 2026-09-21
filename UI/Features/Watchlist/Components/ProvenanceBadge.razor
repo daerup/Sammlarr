@@ -39,7 +39,7 @@ else
         </BbBadge>;
 
     private static string? FeedEditUrl(WatchlistItemProvenance provenance) =>
-        provenance.Value is FeedOrigin feed && feed.FeedId != Guid.Empty ? $"/feeds/edit/{UrlGuid.Encode(feed.FeedId)}" : null;
+        provenance.Value is FeedOrigin feed ? $"/feeds/{UrlGuid.Encode(feed.Feed.Id.Value)}/runs/{UrlGuid.Encode(feed.Run.Id)}" : null;
 
     private static BadgeVariant ProvenanceBadgeVariant(WatchlistItemProvenance provenance) =>
         provenance.Value switch
@@ -66,7 +66,7 @@ else
         {
             RemoteOrigin remote => ProviderName(remote.Provider),
             ManualOrigin => "Manual",
-            FeedOrigin feed => feed.FeedName,
+            FeedOrigin feed => feed.Feed.Name,
             OrphanedOrigin orphaned => orphaned.FormerFeedName,
             _ => string.Empty,
         };
@@ -80,7 +80,7 @@ else
             ManualOrigin manual => manual.Source == ManualSource.Unknown
                 ? $"Added manually on {when}"
                 : $"Added from {ManualSourceName(manual.Source)} on {when}",
-            FeedOrigin feed => $"Added by feed '{feed.FeedName}' on {when}",
+            FeedOrigin feed => $"Added by feed '{feed.Feed.Name}' on {when}",
             OrphanedOrigin orphaned => $"Was from '{orphaned.FormerFeedName}' (deleted)",
             _ => string.Empty,
         };
@@ -90,7 +90,7 @@ else
         provenance.Value switch
         {
             RemoteOrigin remote => Branding.GetBrandingInfo(remote.Provider.AsMediaProvider()).BrandColor,
-            FeedOrigin feed => Branding.GetBrandingInfo(feed.Provider.AsMediaProvider()).BrandColor,
+            FeedOrigin feed => Branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
             _ => null,
         };
 

@@ -24,7 +24,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
-		var origin = new FeedOrigin(feedId.Value, feed.Name, FeedProvider.Mdblist);
+		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
 		var kept = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
 		var missing = await fixture.Movie(TestMedia.Inception).OnWatchlist(origin);
@@ -40,9 +40,10 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 			var summary = await engine.DryRunAsync(feed, source, FeedSource.Complete, fixture.CurrentUser);
 			drops.Add(summary.Delta.Drops.Count);
 
-			await log.RecordAsync(
-				new FeedRunRecord
+			await log.StartAsync(
+				new FeedRun
 				{
+					Id = Guid.NewGuid(),
 					FeedId = feedId,
 					StartedAt = new DateTimeOffset(2026, 03, run, 4, 0, 0, TimeSpan.Zero),
 					Duration = TimeSpan.FromSeconds(1),
@@ -67,7 +68,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
-		var origin = new FeedOrigin(feedId.Value, feed.Name, FeedProvider.Mdblist);
+		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
 		var owned = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
 
@@ -78,9 +79,10 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		{
 			var summary = await engine.DryRunAsync(feed, [], FeedSource.Complete, fixture.CurrentUser);
 
-			await log.RecordAsync(
-				new FeedRunRecord
+			await log.StartAsync(
+				new FeedRun
 				{
+					Id = Guid.NewGuid(),
 					FeedId = feedId,
 					StartedAt = new DateTimeOffset(2026, 03, run, 4, 0, 0, TimeSpan.Zero),
 					Duration = TimeSpan.FromSeconds(1),

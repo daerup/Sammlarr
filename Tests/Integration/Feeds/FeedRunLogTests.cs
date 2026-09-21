@@ -31,8 +31,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 1));
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 2));
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -45,10 +45,10 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 1));
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 2));
-		await _testee.RecordAsync(Run(feedId, kept: [Held, Missing], 3));
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 4));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartAsync(Run(feedId, kept: [Held, Missing], 3));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 4));
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -60,9 +60,9 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 1));
-		await _testee.RecordAsync(Run(feedId, kept: [Held, Missing], 2) with { Conclusiveness = Conclusiveness.NoItems });
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartAsync(Run(feedId, kept: [Held, Missing], 2) with { Conclusiveness = Conclusiveness.NoItems });
+		await _testee.StartAsync(Run(feedId, kept: [Held], 3));
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -74,8 +74,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 1));
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 2) with { Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Added)] });
+		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 2) with { Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Added)] });
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -87,7 +87,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(
+		await _testee.StartAsync(
 			Run(feedId, kept: [Held], 1) with
 			{
 				Counts = new FeedRunCounts
@@ -117,9 +117,9 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 1));
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 2));
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartAsync(Run(feedId, kept: [Held], 3));
 
 		var runs = await _testee.GetRunsAsync(feedId, take: 2);
 
@@ -137,8 +137,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
-		await _testee.RecordAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
+		await _testee.StartAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
+		await _testee.StartAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
 
 		var history = await _testee.GetHistoryAsync(feedId);
 
@@ -172,9 +172,10 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Removed = removed,
 		};
 
-	private static FeedRunRecord Run(FeedId feedId, IReadOnlyList<MediaId> kept, int day) =>
+	private static FeedRun Run(FeedId feedId, IReadOnlyList<MediaId> kept, int day) =>
 		new()
 		{
+			Id = Guid.NewGuid(),
 			FeedId = feedId,
 			StartedAt = Day(day),
 			Duration = TimeSpan.FromSeconds(4),

@@ -1,3 +1,5 @@
+using DB.Data.Feed;
+using DB.Data.FeedRun;
 using DB.Data.Media;
 using Domain.Watchlist;
 
@@ -10,9 +12,11 @@ internal static class WatchlistEntryMapping
 		{
 			WatchlistEntryOrigin.Remote => new WatchlistItemProvenance(new RemoteOrigin(row.RemoteProvider ?? default)),
 			WatchlistEntryOrigin.Manual => new WatchlistItemProvenance(new ManualOrigin(row.ManualSource ?? ManualSource.Unknown)),
-			WatchlistEntryOrigin.Feed => new WatchlistItemProvenance(
-				new FeedOrigin(row.SourceFeedId ?? Guid.Empty, row.SourceFeed?.Name ?? row.SourceFeedNameSnapshot ?? string.Empty, row.SourceFeed?.Provider ?? default)
-			),
+			WatchlistEntryOrigin.Feed => row switch
+			{
+				{ SourceFeed: { } feed, SourceRun: { } run } => new WatchlistItemProvenance(new FeedOrigin(feed.ToDomain(), run.ToDomain())),
+				_ => new WatchlistItemProvenance(new OrphanedOrigin(row.SourceFeed?.Name ?? row.SourceFeedNameSnapshot ?? string.Empty)),
+			},
 			WatchlistEntryOrigin.Orphaned => new WatchlistItemProvenance(new OrphanedOrigin(row.SourceFeedNameSnapshot ?? string.Empty)),
 		};
 
@@ -35,7 +39,8 @@ internal static class WatchlistEntryMapping
 			{
 				Media = media,
 				Origin = WatchlistEntryOrigin.Feed,
-				SourceFeedId = feed.FeedId,
+				SourceFeedId = feed.Feed.Id.Value,
+				SourceRunId = feed.Run.Id,
 			},
 			OrphanedOrigin orphaned => new WatchlistRow
 			{
