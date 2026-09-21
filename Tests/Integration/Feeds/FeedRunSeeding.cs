@@ -13,7 +13,7 @@ internal static class FeedRunSeeding
 	{
 		var feed = (await host.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
 		var run = TestFeeds.Run(feed, Guid.NewGuid(), Conclusiveness.NoItems);
-		await host.Resolve<IFeedRunLog>().StartAsync(run);
+		await host.Resolve<IFeedRepository>().StartRunAsync(run);
 
 		return new FeedOrigin(feed, run);
 	}

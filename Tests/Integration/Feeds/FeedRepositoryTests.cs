@@ -101,6 +101,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var createData = new FeedCreateData
 		{
+			Name = "Top 250",
 			IsEnabled = true,
 			Provider = FeedProvider.Mdblist,
 			Strategy = new FeedStrategy(new Mirror(5)),
@@ -108,7 +109,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Schedule = new FeedRunTrigger(new Scheduled("0 0 9 * * *")),
 		};
 
-		await _testee.CreateFeedAsync("Top 250", createData);
+		await _testee.CreateFeedAsync(createData);
 
 		var feed = (await _testee.GetFeedsAsync()).Single();
 		await Assert.That(feed.Name).IsEqualTo("Top 250");

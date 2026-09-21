@@ -19,7 +19,7 @@ internal sealed class MdblistService(
 	IMediaService media,
 	IProviderConfigRepository configRepository,
 	IApiKeyConfigRepository apiKeyRepository
-) : IFeedService
+) : IFeedProvider
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";

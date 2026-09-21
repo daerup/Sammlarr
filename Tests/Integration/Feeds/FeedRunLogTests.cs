@@ -1,6 +1,5 @@
 using Contracts.Feed;
 using DB.Data.Feed;
-using DB.Data.FeedRun;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -21,18 +20,18 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	private static readonly MediaId Held = MediaId.From(new Guid(2, 0, 0, new byte[8]));
 	private static readonly IReadOnlySet<MediaId> Owned = new HashSet<MediaId> { Missing, Held };
 
-	private IFeedRunLog _testee = null!;
+	private IFeedRepository _testee = null!;
 
 	[Before(Test)]
-	public void Setup() => _testee = new FeedRunLog(fixture.ContextFactory);
+	public void Setup() => _testee = new FeedRepository(fixture.ContextFactory);
 
 	[Test]
 	public async Task GetAbsencesAsync_WhenAnItemIsMissingAcrossRuns_CountsTheConsecutiveRuns()
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -45,10 +44,10 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartAsync(Run(feedId, kept: [Held], 2));
-		await _testee.StartAsync(Run(feedId, kept: [Held, Missing], 3));
-		await _testee.StartAsync(Run(feedId, kept: [Held], 4));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held, Missing], 3));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 4));
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -60,9 +59,9 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartAsync(Run(feedId, kept: [Held, Missing], 2) with { Conclusiveness = Conclusiveness.NoItems });
-		await _testee.StartAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held, Missing], 2) with { Conclusiveness = Conclusiveness.NoItems });
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -74,8 +73,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartAsync(Run(feedId, kept: [Held], 2) with { Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Added)] });
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2) with { Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Added)] });
 
 		var absences = await _testee.GetAbsencesAsync(feedId, Owned, Window);
 
@@ -87,7 +86,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(
+		await _testee.StartRunAsync(
 			Run(feedId, kept: [Held], 1) with
 			{
 				Counts = new FeedRunCounts
@@ -117,9 +116,9 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartAsync(Run(feedId, kept: [Held], 2));
-		await _testee.StartAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
 
 		var runs = await _testee.GetRunsAsync(feedId, take: 2);
 
@@ -129,17 +128,17 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedsThatHaveRunAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
+	public async Task GetOverviewsAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
 	{
 		var ran = await SeedFeedAsync();
 		var neverRan = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(ran, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(ran, kept: [Held], 1));
 
-		var everRan = await _testee.GetFeedsThatHaveRunAsync();
+		var everRan = await _testee.GetOverviewsAsync();
 
-		await Assert.That(everRan).Contains(ran);
-		await Assert.That(everRan).DoesNotContain(neverRan);
+		await Assert.That(everRan).ContainsKey(ran);
+		await Assert.That(everRan).DoesNotContainKey(neverRan);
 	}
 
 	private static FeedRunItem Item(MediaId mediaId, FeedRunItemState state) => new() { MediaId = mediaId, State = state };
@@ -151,8 +150,8 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		var feedId = await SeedFeedAsync();
 
-		await _testee.StartAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
-		await _testee.StartAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
 
 		var history = await _testee.GetHistoryAsync(feedId);
 

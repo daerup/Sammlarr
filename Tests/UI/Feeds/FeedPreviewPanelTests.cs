@@ -176,8 +176,8 @@ public class FeedPreviewPanelTests : BunitContext
 			media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(id))));
 		}
 		Services.AddSingleton(media.Object);
-		Services.AddSingleton<IKeyedServiceIndex<FeedProvider, IFeedService>>(
-			new FakeKeyedServiceIndex<FeedProvider, IFeedService>().Register(FeedProvider.Mdblist, new StubFeedService(resolved, unmatched))
+		Services.AddSingleton<IKeyedServiceIndex<FeedProvider, IFeedProvider>>(
+			new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, new StubFeedService(resolved, unmatched))
 		);
 		Services.AddScoped<Notifier>();
 		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
@@ -343,7 +343,7 @@ public class FeedPreviewPanelTests : BunitContext
 			};
 	}
 
-	private sealed class StubFeedService(int resolved, int unmatched) : IFeedService
+	private sealed class StubFeedService(int resolved, int unmatched) : IFeedProvider
 	{
 		public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{

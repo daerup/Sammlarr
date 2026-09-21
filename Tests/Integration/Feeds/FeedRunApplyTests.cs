@@ -171,7 +171,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
 
-		var recorded = (await host.Resolve<IFeedRunLog>().GetRunsAsync(feedId, take: 1)).Single();
+		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
 		var entry = (await host.Resolve<IWatchlistRepository>().GetEntriesAsync()).Single(e => e.MediaId == fightClub);
 
 		await Assert.That(entry.Provenance.Value is FeedOrigin origin && origin.Run.Id == recorded.Id).IsTrue();
@@ -194,7 +194,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
 
-		var runs = await host.Resolve<IFeedRunLog>().GetRunsAsync(feedId, take: 5);
+		var runs = await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 5);
 		await Assert.That(runs).IsNotEmpty();
 		await Assert.That(runs[0].Trigger).IsEqualTo(new FeedRunTrigger(new Manual()));
 	}

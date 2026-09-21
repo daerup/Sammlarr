@@ -4,7 +4,7 @@
 @using Contracts.Feed
 @using Contracts.Settings
 @using global::Shared
-@inject IFeedRepository FeedRepository
+@inject IFeedService FeedService
 @inject NavigationManager NavigationManager
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject AccountConnectionPrompt AccountConnectionPrompt
@@ -169,7 +169,7 @@
         }
 
         var sourceId = FeedId.From(UrlGuid.Decode(EditFeedId ?? CloneFeedId));
-        var feed = await FeedRepository.GetFeedByIdAsync(sourceId);
+        var feed = await FeedService.GetFeedByIdAsync(sourceId);
 
         if (feed is null)
         {
@@ -320,11 +320,11 @@
     {
         if (_savedFeedId is { } id)
         {
-            await FeedRepository.UpdateFeedAsync(id, BuildUpdateData(), CancellationToken.None);
+            await FeedService.UpdateFeedAsync(id, BuildUpdateData(), CancellationToken.None);
         }
         else
         {
-            _savedFeedId = await FeedRepository.CreateFeedAsync(_config.Name.Trim(), BuildCreateData(), CancellationToken.None);
+            _savedFeedId = await FeedService.CreateFeedAsync(BuildCreateData(), CancellationToken.None);
         }
 
         _storedHash = _config.GetSaveHash();
@@ -352,6 +352,7 @@
     private FeedCreateData BuildCreateData() =>
         new()
         {
+            Name = _config.Name.Trim(),
             IsEnabled = _config.IsEnabled,
             Provider = _config.Provider!.Value,
             Strategy = _config.Strategy,

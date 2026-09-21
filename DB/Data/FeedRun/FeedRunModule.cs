@@ -1,4 +1,3 @@
-using Contracts.Feed;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -8,7 +7,6 @@ internal class FeedRunModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped<IFeedRunLog, FeedRunLog>();
 		services.AddScoped<IModelConfiguration, FeedRunRowConfiguration>();
 	}
 }

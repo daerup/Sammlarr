@@ -106,7 +106,7 @@ public class NotificationDeliveryPipelineTests
 					services.AddSingleton(targets.Object);
 					services.AddSingleton(userScope.Object);
 					services.AddSingleton(Contracts.Media.IMediaRepository.Mock().Object);
-					services.AddSingleton(Contracts.Feed.IFeedRepository.Mock().Object);
+					services.AddSingleton(Contracts.Feed.IFeedService.Mock().Object);
 					services.AddSingleton<IKeyedServiceIndex<NotificationChannel, INotificationChannel>>(index);
 					services.AddSingleton<INotificationDeliveryOutcomeRepository>(new NoopOutcomes());
 					services.AddSingleton(clock.Object);

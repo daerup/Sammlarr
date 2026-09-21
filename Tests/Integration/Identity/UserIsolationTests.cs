@@ -23,9 +23,9 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.SignInAs("Alice");
 		await host.Resolve<IFeedRepository>()
 			.CreateFeedAsync(
-				"Weekly",
 				new FeedCreateData
 				{
+					Name = "Weekly",
 					IsEnabled = true,
 					Provider = FeedProvider.Mdblist,
 					Strategy = new FeedStrategy(new Append()),

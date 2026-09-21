@@ -241,9 +241,9 @@ public class NotificationDispatchHandlerTests
 		return repository;
 	}
 
-	private static Mock<IFeedRepository> Feed()
+	private static Mock<IFeedService> Feed()
 	{
-		var repository = IFeedRepository.Mock();
+		var repository = IFeedService.Mock();
 		repository.GetFeedByIdAsync(Any(), Any()).Returns((Domain.Feed.Feed?)null);
 		return repository;
 	}

@@ -100,7 +100,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var (items, source) = await FetchAsync(deps, feed, cancellationToken);
 		var planned = await PlanAsync(deps, feed, items, source, cancellationToken);
 
-		var run = new Domain.Feed.Run.FeedRun
+		var run = new FeedRun
 		{
 			Id = Guid.NewGuid(),
 			FeedId = feed.Id,
@@ -112,14 +112,14 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			Counts = FeedRunCounts.From(planned),
 			Items = Record(planned.Delta),
 		};
-		await deps.RunLog.StartAsync(run, cancellationToken);
+		await deps.Feeds.StartRunAsync(run, cancellationToken);
 
 		var added = await deps.Enrollment.AddToWatchlistAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
 		var removed = await deps.Enrollment.RemoveOwnedAsync(planned.Delta.Drops, feed.Id, cancellationToken);
 		WarnOnDrift(feed, planned.Delta, added, removed);
 
 		var applied = planned with { Delta = new FeedDelta(added, planned.Delta.Keeps, removed) };
-		await deps.RunLog.CompleteAsync(
+		await deps.Feeds.CompleteRunAsync(
 			run with
 			{
 				Duration = elapsed.Elapsed,
@@ -214,7 +214,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			.ToList();
 
 		var window = feed.Strategy is Mirror mirror ? mirror.AbsenceThreshold : 1;
-		var absences = await deps.RunLog.GetAbsencesAsync(feed.Id, owned, window, cancellationToken);
+		var absences = await deps.Feeds.GetAbsencesAsync(feed.Id, owned, window, cancellationToken);
 
 		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, absences, feed.Strategy, source);
 		return new FeedRunSummary(verdicts, unresolved, plan.Delta, plan.Conclusiveness, plan.RunsRemaining);
@@ -225,10 +225,9 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			Watchlist: scope.ServiceProvider.GetRequiredService<IWatchlistRepository>(),
 			Enrollment: scope.ServiceProvider.GetRequiredService<IWatchlistService>(),
 			Blacklist: scope.ServiceProvider.GetRequiredService<IBlacklistService>(),
-			RunLog: scope.ServiceProvider.GetRequiredService<IFeedRunLog>(),
 			Processor: scope.ServiceProvider.GetRequiredService<QueryProcessor<MediaQueryRow>>(),
 			Feeds: scope.ServiceProvider.GetRequiredService<IFeedRepository>(),
-			Providers: scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedService>>(),
+			Providers: scope.ServiceProvider.GetRequiredService<IKeyedServiceIndex<FeedProvider, IFeedProvider>>(),
 			Clock: scope.ServiceProvider.GetRequiredService<IDateTimeProvider>()
 		);
 
@@ -236,10 +235,9 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		IWatchlistRepository Watchlist,
 		IWatchlistService Enrollment,
 		IBlacklistService Blacklist,
-		IFeedRunLog RunLog,
 		QueryProcessor<MediaQueryRow> Processor,
 		IFeedRepository Feeds,
-		IKeyedServiceIndex<FeedProvider, IFeedService> Providers,
+		IKeyedServiceIndex<FeedProvider, IFeedProvider> Providers,
 		IDateTimeProvider Clock
 	);
 }

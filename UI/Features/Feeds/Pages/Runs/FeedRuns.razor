@@ -11,8 +11,7 @@
 @using UI.Features.Feeds.Components
 @using UI.Shared.Changes
 @using UI.Shared.Media
-@inject IFeedRepository FeedRepository
-@inject IFeedRunLog RunLog
+@inject IFeedService FeedService
 @inject IMediaService Media
 @inject IWatchlistRepository Watchlist
 @inject NavigationManager Navigation
@@ -278,19 +277,19 @@
         }
 
         var feedId = FeedId.From(UrlGuid.Decode(FeedIdParam));
-        _feed = await FeedRepository.GetFeedByIdAsync(feedId);
+        _feed = await FeedService.GetFeedByIdAsync(feedId);
         _loading = false;
         if (_feed is null)
         {
             return;
         }
 
-        _history = await RunLog.GetHistoryAsync(feedId);
+        _history = await FeedService.GetHistoryAsync(feedId);
         _owned = (await Watchlist.GetOwnedCountsAsync()).GetValueOrDefault(feedId);
         await LoadRunsAsync(feedId);
 
         var wanted = RunIdParam is null ? _runs.FirstOrDefault() : _runs.FirstOrDefault(run => UrlGuid.Encode(run.Id) == RunIdParam);
-        if (wanted is null && RunIdParam is not null && await RunLog.GetRunAsync(UrlGuid.Decode(RunIdParam)) is Some<FeedRun>(var linked))
+        if (wanted is null && RunIdParam is not null && await FeedService.GetRunAsync(UrlGuid.Decode(RunIdParam)) is Some<FeedRun>(var linked))
         {
             wanted = linked;
         }
@@ -303,7 +302,7 @@
 
     private async Task LoadRunsAsync(FeedId feedId)
     {
-        var loaded = await RunLog.GetRunsAsync(feedId, _take + 1);
+        var loaded = await FeedService.GetRunsAsync(feedId, _take + 1);
         _more = loaded.Count > _take;
         _runs = [.. loaded.Take(_take)];
     }

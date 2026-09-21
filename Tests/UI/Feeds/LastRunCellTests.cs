@@ -48,10 +48,6 @@ public class LastRunCellTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 
-		var runLog = IFeedRunLog.Mock();
-		runLog.GetRunsAsync(Any(), Any<int>(), Any()).Returns([Run()]);
-		Services.AddSingleton(runLog.Object);
-
 		var media = IMediaService.Mock();
 		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(Added))));
 		Services.AddSingleton(media.Object);
@@ -142,6 +138,20 @@ public class LastRunCellTests : BunitContext
 			builder.CloseComponent();
 			builder.OpenComponent<LastRunCell>(1);
 			builder.AddComponentParameter(2, nameof(LastRunCell.FeedId), Feed);
+			builder.AddComponentParameter(
+				3,
+				nameof(LastRunCell.Overview),
+				new FeedOverview(
+					Run(),
+					new FeedRunHistory
+					{
+						TotalRuns = 1,
+						FirstRunAt = Run().StartedAt,
+						TotalAdded = 1,
+						TotalRemoved = 0,
+					}
+				)
+			);
 			builder.CloseComponent();
 		}
 	}
