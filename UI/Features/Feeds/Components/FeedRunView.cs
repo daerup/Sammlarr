@@ -22,6 +22,35 @@ internal static class FeedRunView
 				}),
 		];
 
+	internal static IReadOnlyList<ChangeEntry> Entries(FeedRunSummary summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+		[
+			.. summary.Delta.Drops.Where(media.ContainsKey).Select(id => Pending(media[id], ChangeKind.Removed)),
+			.. summary.Delta.Adds.Where(media.ContainsKey).Select(id => Pending(media[id], ChangeKind.Added)),
+		];
+
+	private static ChangeEntry Pending(MediaLookup item, ChangeKind kind) =>
+		new()
+		{
+			Title = item is IdentifiedMedia named ? named.Title : string.Empty,
+			Media = item,
+			Kind = kind,
+			Subtitle = Subtitle(item),
+			ContextIcon = kind is ChangeKind.Removed ? "log-out" : null,
+			ContextTooltip = kind is ChangeKind.Removed ? "Absent long enough that this run will remove it" : null,
+		};
+
+	internal static string Pending(FeedRunSummary summary)
+	{
+		var parts = new List<string> { $"{summary.Verdicts.Count + summary.Unresolved.Count} fetched" };
+
+		if (summary.Conclusiveness is not Conclusiveness.Conclusive)
+		{
+			parts.Add("removals held back");
+		}
+
+		return string.Join(" · ", parts);
+	}
+
 	internal static IReadOnlyList<ChangeChip> Chips(FeedRunCounts counts) =>
 		[
 			new ChangeChip
