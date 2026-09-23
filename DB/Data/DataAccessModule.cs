@@ -8,6 +8,7 @@ using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Notifications;
+using DB.Data.Scheduler;
 using DB.Data.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -28,6 +29,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<MediaModule>();
 		services.AddModule<MetadataModule>();
 		services.AddModule<NotificationDataModule>();
+		services.AddModule<SchedulerDataModule>();
 		services.AddModule<WatchlistModule>();
 	}
 }
