@@ -1,3 +1,4 @@
+using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Processing;
 
@@ -27,20 +28,22 @@ public readonly record struct FeedRunCounts
 			Removed = 0,
 		};
 
-	public static FeedRunCounts From(FeedRunSummary summary)
+	public static FeedRunCounts From(IFeedPlan plan) => From(plan, plan.Delta);
+
+	public static FeedRunCounts From(IFeedPlan plan, FeedDelta delta)
 	{
-		var buckets = summary.Verdicts.CountBy(ChangeBuckets.Of).ToDictionary();
+		var buckets = plan.Verdicts.CountBy(ChangeBuckets.Of).ToDictionary();
 
 		return new FeedRunCounts
 		{
-			Total = summary.Verdicts.Count + summary.Unresolved.Count,
-			Added = summary.Delta.Adds.Count,
+			Total = plan.Verdicts.Count + plan.Unresolved.Count,
+			Added = delta.Adds.Count,
 			Kept = buckets.GetValueOrDefault(ChangeBucket.Kept),
 			Bypassed = buckets.GetValueOrDefault(ChangeBucket.Bypassed),
 			Filtered = buckets.GetValueOrDefault(ChangeBucket.Filtered),
 			Skipped = buckets.GetValueOrDefault(ChangeBucket.Skipped),
-			Unresolved = summary.Unresolved.Count,
-			Removed = summary.Delta.Drops.Count,
+			Unresolved = plan.Unresolved.Count,
+			Removed = delta.Drops.Count,
 		};
 	}
 }
