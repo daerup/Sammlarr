@@ -236,7 +236,7 @@ else
 
     private async Task AttemptDryRunAsync(CancellationToken cancellationToken)
     {
-        var result = await SyncEngine.DryRunAsync(CurrentUser, cancellationToken);
+        var result = await SyncEngine.DryRunAsync(cancellationToken);
         switch (result)
         {
             case WatchlistSyncSummary changes:
@@ -271,7 +271,7 @@ else
         try
         {
             await OnSyncStarted.InvokeAsync();
-            var result = await SyncEngine.SyncAsync(new ManualTrigger(), CurrentUser, _cts.Token);
+            var result = await SyncEngine.SyncAsync(new ManualTrigger(), _cts.Token);
             switch (result)
             {
                 case WatchlistSyncSummary:

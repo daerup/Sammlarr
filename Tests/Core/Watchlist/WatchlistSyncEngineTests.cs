@@ -11,7 +11,6 @@ using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
 using Domain.Watchlist.Sync;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
@@ -29,9 +28,9 @@ public class WatchlistSyncEngineTests
 		provider.GetWatchlistAsync(Any()).Returns(WaitingAsyncEnumerable(gate));
 		var engine = BuildEngine(provider);
 
-		var first = engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
+		var first = engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 		await Task.Delay(50);
-		var second = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()), User);
+		var second = await engine.SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
 		await Assert.That(second).IsOfUnionType<WatchlistSyncResult, WatchlistSyncAlreadyRunning>();
 
@@ -49,7 +48,7 @@ public class WatchlistSyncEngineTests
 		var provider = IWatchlistProvider.Mock();
 		provider.GetWatchlistAsync(Any()).Returns(NothingRemote());
 
-		await BuildEngine(provider, outbox).DryRunAsync(User);
+		await BuildEngine(provider, outbox).DryRunAsync();
 
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 	}
@@ -61,7 +60,7 @@ public class WatchlistSyncEngineTests
 		provider.GetWatchlistAsync(Any()).Returns(NothingRemote());
 		var outbox = EmptyOutbox();
 
-		await BuildEngine(provider, outbox).DryRunAsync(User);
+		await BuildEngine(provider, outbox).DryRunAsync();
 
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
 	}
@@ -78,36 +77,24 @@ public class WatchlistSyncEngineTests
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
 
-		var services = new ServiceCollection();
-		services.AddSingleton(EmptyRepository().Object);
-		services.AddSingleton((outbox ?? EmptyOutbox()).Object);
-		services.AddSingleton(ProviderConfigStubs.PlexWatchlist().Object);
-		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(index);
-		services.AddSingleton(UnresolvedMedia().Object);
-		services.AddSingleton(NoopUserScope().Object);
-		services.AddSingleton<IMessagePublisher>(new NoopPublisher());
-		services.AddSingleton<IDateTimeProvider>(clock.Object);
-
-		var serviceProvider = services.BuildServiceProvider();
-		return new WatchlistSyncEngine(serviceProvider.GetRequiredService<IServiceScopeFactory>(), NullLogger<WatchlistSyncEngine>.Instance);
+		return new WatchlistSyncEngine(
+			new WatchlistSyncGate(),
+			ProviderConfigStubs.PlexWatchlist().Object,
+			EmptyRepository().Object,
+			(outbox ?? EmptyOutbox()).Object,
+			UnresolvedMedia().Object,
+			index,
+			new NoopPublisher(),
+			clock.Object,
+			User,
+			NullLogger<WatchlistSyncEngine>.Instance
+		);
 	}
 
 	private sealed class NoopPublisher : IMessagePublisher
 	{
 		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
 			where TMessage : notnull => Task.CompletedTask;
-	}
-
-	private static Mock<IUserScope> NoopUserScope()
-	{
-		var userScope = IUserScope.Mock();
-		userScope.As(Any<ICurrentUser>()).Returns(new NoopScope());
-		return userScope;
-	}
-
-	private sealed class NoopScope : IDisposable
-	{
-		public void Dispose() { }
 	}
 
 	private static Mock<IWatchlistRepository> EmptyRepository()

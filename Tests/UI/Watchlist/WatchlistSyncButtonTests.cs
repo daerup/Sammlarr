@@ -67,11 +67,11 @@ public class WatchlistSyncButtonTests : BunitContext
 	public async Task DryRun_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
 	{
 		var engine = RegisterServices();
-		engine.DryRunAsync(Any(), Any()).ReturnsSequentially(new WatchlistSyncRemoteFailed("temporary"), Summary(), Summary());
+		engine.DryRunAsync(Any()).ReturnsSequentially(new WatchlistSyncRemoteFailed("temporary"), Summary(), Summary());
 
 		var cut = Render<Harness>();
 
-		cut.WaitForAssertion(() => engine.DryRunAsync(Any(), Any()).WasCalled(Times.Exactly(2)), TimeSpan.FromSeconds(10));
+		cut.WaitForAssertion(() => engine.DryRunAsync(Any()).WasCalled(Times.Exactly(2)), TimeSpan.FromSeconds(10));
 		await Assert.That(cut.FindAll(".change-band")).IsEmpty();
 	}
 
@@ -79,13 +79,13 @@ public class WatchlistSyncButtonTests : BunitContext
 	public async Task DryRun_WhenEveryAttemptFails_GivesUpAfterThreeTries()
 	{
 		var engine = RegisterServices();
-		engine.DryRunAsync(Any(), Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
+		engine.DryRunAsync(Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
 
 		var cut = Render<Harness>();
 
-		cut.WaitForAssertion(() => engine.DryRunAsync(Any(), Any()).WasCalled(Times.Exactly(3)), TimeSpan.FromSeconds(10));
+		cut.WaitForAssertion(() => engine.DryRunAsync(Any()).WasCalled(Times.Exactly(3)), TimeSpan.FromSeconds(10));
 		await Task.Delay(TimeSpan.FromSeconds(1.5));
-		engine.DryRunAsync(Any(), Any()).WasCalled(Times.Exactly(3));
+		engine.DryRunAsync(Any()).WasCalled(Times.Exactly(3));
 	}
 
 	private async Task ToggleWatchlistAsync(IRenderedComponent<Harness> cut)
@@ -104,8 +104,8 @@ public class WatchlistSyncButtonTests : BunitContext
 	private async Task<IRenderedComponent<Harness>> OpenDialogAsync()
 	{
 		var engine = RegisterServices();
-		engine.DryRunAsync(Any(), Any()).Returns(Summary());
-		engine.SyncAsync(Any(), Any(), Any()).Returns(Summary());
+		engine.DryRunAsync(Any()).Returns(Summary());
+		engine.SyncAsync(Any(), Any()).Returns(Summary());
 
 		var cut = Render<Harness>();
 		await cut.Find("button").ClickAsync(new());
