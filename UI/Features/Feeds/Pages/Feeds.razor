@@ -17,6 +17,7 @@
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject IFeedRunEngine RunEngine
+@inject IFeedRunPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IMediaService Media
@@ -292,7 +293,7 @@
 <ChangeDialog Open="_confirmOpen"
               OnOpenChanged="HandleConfirmOpenChanged"
               Title="@($"Run \"{_pendingFeed?.Name}\" now?")"
-              Subtitle="@(_pendingSummary is {} loaded ? FeedRunView.Pending(loaded) : null)"
+              Subtitle="@(_pendingPlan is {} loaded ? FeedRunView.Pending(loaded) : null)"
               Loading="_isPreviewing"
               Entries="_pendingEntries"
               Chips="_pendingChips"
@@ -305,14 +306,14 @@
         {
             <BbBadge Variant="BadgeVariant.Secondary">@(pending.Strategy is Mirror ? "Mirror" : "Append")</BbBadge>
         }
-        @if (_pendingSummary is {} badged && badged.Conclusiveness is not Conclusiveness.Conclusive)
+        @if (_pendingPlan is {} badged && badged.Conclusiveness is not Conclusiveness.Conclusive)
         {
             <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
         }
     </Badges>
     <Actions>
         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="@(() => _confirmOpen = false)">Cancel</BbButton>
-        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingSummary is null)" OnClick="ConfirmRunAsync">
+        <BbButton Size="ButtonSize.Small" Disabled="@(_pendingPlan is null)" OnClick="ConfirmRunAsync">
             <LucideIcon Name="play" Size="13" Class="mr-1.5"/>
             Run now
         </BbButton>
@@ -349,7 +350,7 @@
     private bool _confirmOpen;
     private bool _isPreviewing;
     private Feed? _pendingFeed;
-    private FeedRunSummary? _pendingSummary;
+    private IFeedPlan? _pendingPlan;
     private IReadOnlyList<ChangeEntry> _pendingEntries = [];
     private IReadOnlyList<ChangeChip> _pendingChips = [];
     private MediaLookup? _selected;
@@ -392,21 +393,21 @@
         UpdatePagedFeeds();
     }
 
-    private static string Outcome(string name, FeedRunSummary summary)
+    private static string Outcome(string name, FeedRunCompleted run)
     {
-        if (!summary.Delta.HasChanges)
+        if (!run.Delta.HasChanges)
         {
             return $"'{name}' is already up to date.";
         }
 
         var parts = new List<string>(2);
-        if (summary.Delta.Adds.Count > 0)
+        if (run.Delta.Adds.Count > 0)
         {
-            parts.Add($"added {summary.Delta.Adds.Count}");
+            parts.Add($"added {run.Delta.Adds.Count}");
         }
-        if (summary.Delta.Drops.Count > 0)
+        if (run.Delta.Drops.Count > 0)
         {
-            parts.Add($"removed {summary.Delta.Drops.Count}");
+            parts.Add($"removed {run.Delta.Drops.Count}");
         }
         return $"'{name}' {string.Join(" and ", parts)}.";
     }
@@ -425,7 +426,7 @@
 
     private async Task LoadPreviewAsync(Feed feed)
     {
-        _pendingSummary = null;
+        _pendingPlan = null;
         _pendingEntries = [];
         _pendingChips = [];
         _isPreviewing = true;
@@ -433,16 +434,12 @@
 
         try
         {
-            switch (await RunEngine.PreviewAsync(feed.Id, CurrentUser))
+            switch (await Planner.PlanAsync(new SavedFeed(feed.Id)))
             {
-                case FeedRunSummary summary:
-                    await FillConfirmAsync(summary);
+                case IFeedPlan plan:
+                    await FillConfirmAsync(plan);
                     break;
-                case FeedRunAlreadyRunning running:
-                    _confirmOpen = false;
-                    Notifier.Info(running.ToString(), null);
-                    break;
-                case FeedRunFailed failed:
+                case FeedPlanFailed failed:
                     _confirmOpen = false;
                     Notifier.Warning(failed.ToString(), null);
                     break;
@@ -467,7 +464,7 @@
         }
     }
 
-    private async Task FillConfirmAsync(FeedRunSummary summary)
+    private async Task FillConfirmAsync(IFeedPlan summary)
     {
         var media = new Dictionary<MediaId, MediaLookup>();
         foreach (var verdict in summary.Verdicts)
@@ -481,7 +478,7 @@
             media[detail.Id] = detail.ToMatch();
         }
 
-        _pendingSummary = summary;
+        _pendingPlan = summary;
         _pendingEntries = FeedRunView.Entries(summary, media);
         _pendingChips = FeedRunView.Chips(FeedRunCounts.From(summary));
     }
@@ -515,8 +512,8 @@
         {
             switch (await RunEngine.RunAsync(feed.Id, new Manual(), CurrentUser))
             {
-                case FeedRunSummary summary:
-                    Notifier.Success(Outcome(feed.Name, summary));
+                case FeedRunCompleted applied:
+                    Notifier.Success(Outcome(feed.Name, applied));
                     break;
                 case FeedRunAlreadyRunning running:
                     Notifier.Info(running.ToString(), null);

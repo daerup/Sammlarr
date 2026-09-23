@@ -6,16 +6,23 @@
 @using Contracts.Media
 @using Contracts.Processing
 @using Contracts.Watchlist
+@using Domain.Feed
+@using Domain.Feed.Planning
 @using Domain.Feed.Run
+@using Domain.Media
+@using Domain.Processing
+@using Domain.Providers
+@using Domain.Watchlist
 @using UI.Features.Feeds.Components
 @using UI.Shared.Services.Branding
 @using global::Observability.Tracing
+@using global::UI.Features.Feeds.Pages.Editor
 @implements IDisposable
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedProvider> FeedServiceIndex
-@inject IFeedRunEngine RunEngine
+@inject IFeedRunPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
@@ -358,11 +365,11 @@
 
     private FetchState _fetchState = FetchState.Idle;
     private List<MediaLookup> _rawResults = [];
-    private IReadOnlyList<MediaLookup> _unresolvedResults = [];
+    private IReadOnlyList<UnmatchedMedia> _unresolvedResults = [];
     private IReadOnlyList<QueryVerdict<MediaLookup>> _processedResults = [];
     private List<QueryVerdict<MediaLookup>> _filteredResults = [];
     private List<MediaLookup> _filteredUnresolvedResults = [];
-    private IReadOnlyDictionary<MediaId, int> _runsRemaining = new Dictionary<MediaId, int>();
+    private IReadOnlyDictionary<MediaId, int> _missedRuns = new Dictionary<MediaId, int>();
     private List<GoneItem> _goneResults = [];
     private List<GoneItem> _filteredGoneResults = [];
     private int _goneShortfall;
@@ -514,7 +521,10 @@
                 if (reprocessed)
                 {
                     reprocessAt = _rawResults.Count * 2;
-                    await ReprocessAsync(Completeness.Partial, ct);
+                    if (!await ReprocessAsync(Completeness.Partial, ct))
+                    {
+                        return;
+                    }
                 }
 
                 if (reprocessed || sinceRender.ElapsedMilliseconds >= 150)
@@ -526,8 +536,12 @@
             }
             _fetchTimer.Stop();
 
+            if (!await ReprocessAsync(Completeness.Complete, ct))
+            {
+                return;
+            }
+
             _fetchState = FetchState.Success;
-            await ReprocessAsync(Completeness.Complete, ct);
             activity?.SetTag("sammlarr.feed.items", _rawResults.Count);
 
             if (_rawResults.Count == 0)
@@ -556,16 +570,17 @@
         catch (ProviderUnavailableException)
         {
             _providerUnavailable = true;
-            if (_rawResults.Count > 0)
-            {
-                _fetchState = FetchState.Success;
-                await ReprocessAsync(Completeness.Partial, ct);
-                Notifier.Warning("The provider became unavailable before the full list loaded. Showing partial results — retry to load the rest.", "Provider unavailable");
-            }
-            else
+            if (_rawResults.Count == 0)
             {
                 _fetchState = FetchState.Failed;
                 Notifier.Warning("The list provider is temporarily unavailable (rate-limited or unreachable). Try again in a moment.", "Provider unavailable");
+                return;
+            }
+
+            if (await ReprocessAsync(Completeness.Partial, ct))
+            {
+                _fetchState = FetchState.Success;
+                Notifier.Warning("The provider became unavailable before the full list loaded. Showing partial results — retry to load the rest.", "Provider unavailable");
             }
         }
         catch (Exception ex)
@@ -590,22 +605,30 @@
         _providerUnavailable = false;
     }
 
-    private async Task ReprocessAsync(Completeness completeness, CancellationToken cancellationToken)
+    private async Task<bool> ReprocessAsync(Completeness completeness, CancellationToken cancellationToken)
     {
         _hasEnrollmentChanges = false;
 
-        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), new FeedLoad(_rawResults, completeness), CurrentUser, cancellationToken);
-        _processedResults = dryRun.Verdicts;
-        _unresolvedResults = dryRun.Unresolved;
-        _runsRemaining = dryRun.RunsRemaining;
+        if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, completeness)), cancellationToken) is not IFeedPlan plan)
+        {
+            ClearResults();
+            _fetchState = FetchState.Failed;
+            Notifier.Warning("The preview could not finish. Your library or the list provider may be unavailable.", "Preview failed");
+            return false;
+        }
 
-        await HydrateGoneAsync(dryRun, completeness, cancellationToken);
+        _processedResults = plan.Verdicts;
+        _unresolvedResults = plan.Unresolved;
+        _missedRuns = plan is MirrorPlan mirrored ? mirrored.MissedRuns : new Dictionary<MediaId, int>();
+
+        await HydrateGoneAsync(plan, completeness, cancellationToken);
         RebuildFilteredViews();
+        return true;
     }
 
-    private async Task HydrateGoneAsync(FeedRunSummary dryRun, Completeness completeness, CancellationToken cancellationToken)
+    private async Task HydrateGoneAsync(IFeedPlan plan, Completeness completeness, CancellationToken cancellationToken)
     {
-        if (completeness is Completeness.Partial || !IsMirror)
+        if (completeness is Completeness.Partial || plan is not MirrorPlan mirrored)
         {
             _goneResults = [];
             _goneShortfall = 0;
@@ -613,7 +636,7 @@
         }
 
         var present = _processedResults.Select(verdict => verdict.Item.Id).ToHashSet();
-        var gone = dryRun.RunsRemaining.Keys.Where(id => !present.Contains(id)).OrderBy(id => dryRun.RunsRemaining[id]).ToList();
+        var gone = mirrored.MissedRuns.Keys.Where(id => !present.Contains(id)).OrderByDescending(id => mirrored.MissedRuns[id]).ToList();
 
         var described = new Dictionary<MediaId, MediaLookup>();
         await foreach (var result in Media.GetDetailsAsync(gone, cancellationToken))
@@ -662,7 +685,10 @@
             .ToList();
         _filteredUnresolvedResults = _atRiskOnly
             ? []
-            : _unresolvedResults.Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unresolved, _activeFilters) && MatchesSearch(r.Title)).ToList();
+            : _unresolvedResults
+                .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unresolved, _activeFilters) && MatchesSearch(r.Title ?? string.Empty))
+                .Select(MediaLookup (r) => r)
+                .ToList();
         _filteredGoneResults = _activeFilters.Count > 0 ? [] : _goneResults.Where(gone => MatchesSearch(gone.Media.Title)).ToList();
         RecountBadges();
     }
@@ -678,7 +704,7 @@
 
     private int MirrorThreshold => (_appliedConfig ?? Config).Strategy is Mirror mirror ? mirror.AbsenceThreshold : 1;
 
-    private int AbsencesOf(MediaId id) => MirrorThreshold - _runsRemaining.GetValueOrDefault(id, MirrorThreshold - 1);
+    private int AbsencesOf(MediaId id) => Math.Min(MirrorThreshold, _missedRuns.GetValueOrDefault(id));
 
     private string FeedBrandColor =>
         (_appliedConfig ?? Config).Provider is { } provider ? Branding.GetBrandingInfo(provider.AsMediaProvider()).BrandColor : "currentColor";
