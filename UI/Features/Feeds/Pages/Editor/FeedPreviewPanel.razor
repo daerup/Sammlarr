@@ -594,7 +594,7 @@
     {
         _hasEnrollmentChanges = false;
 
-        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), _rawResults, completeness, CurrentUser, cancellationToken);
+        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), new FeedLoad(_rawResults, completeness), CurrentUser, cancellationToken);
         _processedResults = dryRun.Verdicts;
         _unresolvedResults = dryRun.Unresolved;
         _runsRemaining = dryRun.RunsRemaining;

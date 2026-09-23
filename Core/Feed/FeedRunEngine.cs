@@ -24,17 +24,11 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 {
 	private readonly ConcurrentDictionary<FeedId, SemaphoreSlim> _gates = new();
 
-	public async Task<FeedRunSummary> DryRunAsync(
-		Domain.Feed.Feed feed,
-		IReadOnlyList<MediaLookup> items,
-		Completeness completeness,
-		ICurrentUser user,
-		CancellationToken cancellationToken = default
-	)
+	public async Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
 	{
 		await using var scope = scopeFactory.CreateAsyncScope();
 		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
-		return await PlanAsync(Resolve(scope), feed, items, completeness, cancellationToken);
+		return await PlanAsync(Resolve(scope), feed, load, cancellationToken);
 	}
 
 	public async Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default)
@@ -50,8 +44,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 				return new FeedRunFailed("The feed no longer exists.");
 			}
 
-			var (items, completeness) = await FetchAsync(deps, feed, cancellationToken);
-			return await PlanAsync(deps, feed, items, completeness, cancellationToken);
+			return await PlanAsync(deps, feed, await FetchAsync(deps, feed, cancellationToken), cancellationToken);
 		}
 		catch (Exception ex)
 		{
@@ -97,8 +90,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var startedAt = deps.Clock.Now;
 		var elapsed = Stopwatch.StartNew();
 
-		var (items, completeness) = await FetchAsync(deps, feed, cancellationToken);
-		var planned = await PlanAsync(deps, feed, items, completeness, cancellationToken);
+		var planned = await PlanAsync(deps, feed, await FetchAsync(deps, feed, cancellationToken), cancellationToken);
 
 		var run = new FeedRun
 		{
@@ -157,11 +149,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			.. delta.Drops.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Removed }),
 		];
 
-	private async Task<(IReadOnlyList<MediaLookup> Items, Completeness Completeness)> FetchAsync(
-		EngineDeps deps,
-		Domain.Feed.Feed feed,
-		CancellationToken cancellationToken
-	)
+	private async Task<FeedLoad> FetchAsync(EngineDeps deps, Domain.Feed.Feed feed, CancellationToken cancellationToken)
 	{
 		var items = new List<MediaLookup>();
 		try
@@ -170,25 +158,19 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			{
 				items.Add(item);
 			}
-			return (items, Completeness.Complete);
+			return new FeedLoad(items, Completeness.Complete);
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			logger.LogWarning(ex, "Feed {FeedId} returned a partial list; removals are suppressed for this run", feed.Id);
-			return (items, Completeness.Partial);
+			return new FeedLoad(items, Completeness.Partial);
 		}
 	}
 
-	private static async Task<FeedRunSummary> PlanAsync(
-		EngineDeps deps,
-		Domain.Feed.Feed feed,
-		IReadOnlyList<MediaLookup> items,
-		Completeness completeness,
-		CancellationToken cancellationToken
-	)
+	private static async Task<FeedRunSummary> PlanAsync(EngineDeps deps, Domain.Feed.Feed feed, FeedLoad load, CancellationToken cancellationToken)
 	{
-		var unresolved = items.Where(item => item is UnmatchedMedia).ToList();
-		var resolved = items.Where(item => item is not UnmatchedMedia).Select(MediaQueryRow.From).ToList();
+		var unresolved = load.Items.Where(item => item is UnmatchedMedia).ToList();
+		var resolved = load.Items.Where(item => item is not UnmatchedMedia).Select(MediaQueryRow.From).ToList();
 
 		var entries = await deps.Watchlist.GetEntriesAsync(cancellationToken);
 		var blacklisted = await deps.Blacklist.GetBlacklistIdsAsync(cancellationToken);
@@ -216,7 +198,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var window = feed.Strategy is Mirror mirror ? mirror.AbsenceThreshold : 1;
 		var absences = await deps.Feeds.GetAbsencesAsync(feed.Id, owned, window, cancellationToken);
 
-		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, absences, feed.Strategy, completeness);
+		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, absences, feed.Strategy, load.Completeness);
 		return new FeedRunSummary(verdicts, unresolved, plan.Delta, plan.Conclusiveness, plan.RunsRemaining);
 	}
 
