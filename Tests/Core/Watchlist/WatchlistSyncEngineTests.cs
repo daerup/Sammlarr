@@ -6,6 +6,7 @@ using Contracts.Messaging;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Core.Watchlist.Sync;
+using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Watchlist;
@@ -19,6 +20,7 @@ namespace Core.Tests.Watchlist;
 public class WatchlistSyncEngineTests
 {
 	private static readonly ICurrentUser User = new TestCurrentUser();
+	private static readonly ICurrentUser Other = new TestCurrentUser { Id = UserId.From(new Guid("22222222-2222-2222-2222-222222222222")) };
 
 	[Test]
 	public async Task SyncAsync_OverlappingCalls_ReturnsAlreadyRunning()
@@ -37,6 +39,26 @@ public class WatchlistSyncEngineTests
 		gate.SetResult();
 		var firstResult = await first;
 		await Assert.That(firstResult).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
+	}
+
+	[Test]
+	public async Task SyncAsync_WhileAnotherUserIsSyncing_RunsAnyway()
+	{
+		var held = new TaskCompletionSource();
+		var busy = IWatchlistProvider.Mock();
+		busy.GetWatchlistAsync(Any()).Returns(WaitingAsyncEnumerable(held));
+		var idle = IWatchlistProvider.Mock();
+		idle.GetWatchlistAsync(Any()).Returns(NothingRemote());
+		var shared = new WatchlistSyncGate();
+
+		var blocking = BuildEngine(busy, gate: shared).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+		await Task.Delay(50);
+		var other = await BuildEngine(idle, gate: shared, user: Other).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+
+		await Assert.That(other).IsOfUnionType<WatchlistSyncResult, WatchlistSyncSummary>();
+
+		held.SetResult();
+		await blocking;
 	}
 
 	[Test]
@@ -71,14 +93,19 @@ public class WatchlistSyncEngineTests
 		yield break;
 	}
 
-	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider, Mock<IWatchlistOutbox>? outbox = null)
+	private static WatchlistSyncEngine BuildEngine(
+		Mock<IWatchlistProvider> provider,
+		Mock<IWatchlistOutbox>? outbox = null,
+		WatchlistSyncGate? gate = null,
+		ICurrentUser? user = null
+	)
 	{
 		var index = new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object);
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
 
 		return new WatchlistSyncEngine(
-			new WatchlistSyncGate(),
+			gate ?? new WatchlistSyncGate(),
 			ProviderConfigStubs.PlexWatchlist().Object,
 			EmptyRepository().Object,
 			(outbox ?? EmptyOutbox()).Object,
@@ -86,7 +113,7 @@ public class WatchlistSyncEngineTests
 			index,
 			new NoopPublisher(),
 			clock.Object,
-			User,
+			user ?? User,
 			NullLogger<WatchlistSyncEngine>.Instance
 		);
 	}
