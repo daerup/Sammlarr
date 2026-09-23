@@ -2,7 +2,7 @@ namespace Domain.Watchlist.Sync;
 
 public union WatchlistSyncResult(WatchlistSyncSummary, WatchlistSyncAlreadyRunning, WatchlistSyncRemoteFailed);
 
-public union WatchlistDryRunResult(WatchlistSyncSummary, WatchlistSyncRemoteFailed);
+public union WatchlistPlanResult(WatchlistSyncSummary, WatchlistSyncRemoteFailed);
 
 public readonly record struct WatchlistSyncAlreadyRunning
 {

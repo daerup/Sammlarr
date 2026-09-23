@@ -44,6 +44,7 @@ public class CoreModule : IServiceModule
 		services.AddTracedScoped<IFeedService, FeedService>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
 		services.AddSingleton<WatchlistSyncGate>();
+		services.AddTracedScoped<IWatchlistSyncPlanner, WatchlistSyncPlanner>();
 		services.AddTracedScoped<IWatchlistSyncEngine, WatchlistSyncEngine>();
 		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();
 		services.AddScoped<MediaIdResolver>();
