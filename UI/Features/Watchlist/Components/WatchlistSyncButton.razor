@@ -11,6 +11,7 @@
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
 @inject IWatchlistSyncEngine SyncEngine
+@inject IWatchlistSyncPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject NavigationManager Navigation
 @inject Notifier Notifier
@@ -236,7 +237,7 @@ else
 
     private async Task AttemptDryRunAsync(CancellationToken cancellationToken)
     {
-        var result = await SyncEngine.DryRunAsync(cancellationToken);
+        var result = await Planner.PlanAsync(cancellationToken);
         switch (result)
         {
             case WatchlistSyncSummary changes:

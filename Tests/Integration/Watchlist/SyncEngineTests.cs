@@ -23,6 +23,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	private static readonly WatchlistSyncTrigger Trigger = new(new ManualTrigger());
 
 	private IWatchlistSyncEngine Testee => host.Resolve<IWatchlistSyncEngine>();
+	private IWatchlistSyncPlanner Planner => host.Resolve<IWatchlistSyncPlanner>();
 	private IWatchlistOutbox Outbox => host.Resolve<IWatchlistOutbox>();
 	private ICurrentUser CurrentUser => host.Resolve<ICurrentUser>();
 
@@ -206,18 +207,18 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task SyncAsync_WhenItIsADryRun_PreviewsChangesWithoutApplyingThem()
+	public async Task PlanAsync_PreviewsChangesWithoutApplyingThem()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.FightClub);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		var result = await Testee.DryRunAsync();
+		var result = await Planner.PlanAsync();
 
 		await Assert
 			.That(result)
-			.IsOfUnionType<WatchlistDryRunResult, WatchlistSyncSummary>()
+			.IsOfUnionType<WatchlistPlanResult, WatchlistSyncSummary>()
 			.And.Multiple(async summary =>
 			{
 				await Assert.That(summary.TotalChanges).IsEqualTo(2);
@@ -229,14 +230,14 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task SyncAsync_WhenADryRunHitsAnUnavailableRemote_ReportsAnErrorAndLeavesStateUntouched()
+	public async Task PlanAsync_WhenTheRemoteIsUnavailable_ReportsAnErrorAndLeavesStateUntouched()
 	{
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
 
-		var result = await Testee.DryRunAsync();
+		var result = await Planner.PlanAsync();
 
-		await Assert.That(result).IsOfUnionType<WatchlistDryRunResult, WatchlistSyncRemoteFailed>();
+		await Assert.That(result).IsOfUnionType<WatchlistPlanResult, WatchlistSyncRemoteFailed>();
 		await AssertWatchlist(1, WatchlistEntryOrigin.Manual);
 	}
 
@@ -293,12 +294,12 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task DryRunAsync_WhenTheRemoteIsUnavailable_PublishesNothingBecauseNothingWasAttempted()
+	public async Task PlanAsync_WhenTheRemoteIsUnavailable_PublishesNothingBecauseNothingWasAttempted()
 	{
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
 
-		await Testee.DryRunAsync();
+		await Planner.PlanAsync();
 
 		await Assert.That(host.Published<WatchlistSyncFailedEvent>()).IsEmpty();
 	}

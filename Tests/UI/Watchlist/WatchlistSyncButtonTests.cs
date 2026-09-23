@@ -64,28 +64,28 @@ public class WatchlistSyncButtonTests : BunitContext
 	}
 
 	[Test]
-	public async Task DryRun_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
+	public async Task Plan_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
 	{
-		var engine = RegisterServices();
-		engine.DryRunAsync(Any()).ReturnsSequentially(new WatchlistSyncRemoteFailed("temporary"), Summary(), Summary());
+		var (engine, planner) = RegisterServices();
+		planner.PlanAsync(Any()).ReturnsSequentially(new WatchlistSyncRemoteFailed("temporary"), Summary(), Summary());
 
 		var cut = Render<Harness>();
 
-		cut.WaitForAssertion(() => engine.DryRunAsync(Any()).WasCalled(Times.Exactly(2)), TimeSpan.FromSeconds(10));
+		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Exactly(2)), TimeSpan.FromSeconds(10));
 		await Assert.That(cut.FindAll(".change-band")).IsEmpty();
 	}
 
 	[Test]
-	public async Task DryRun_WhenEveryAttemptFails_GivesUpAfterThreeTries()
+	public async Task Plan_WhenEveryAttemptFails_GivesUpAfterThreeTries()
 	{
-		var engine = RegisterServices();
-		engine.DryRunAsync(Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
+		var (engine, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
 
 		var cut = Render<Harness>();
 
-		cut.WaitForAssertion(() => engine.DryRunAsync(Any()).WasCalled(Times.Exactly(3)), TimeSpan.FromSeconds(10));
+		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Exactly(3)), TimeSpan.FromSeconds(10));
 		await Task.Delay(TimeSpan.FromSeconds(1.5));
-		engine.DryRunAsync(Any()).WasCalled(Times.Exactly(3));
+		planner.PlanAsync(Any()).WasCalled(Times.Exactly(3));
 	}
 
 	private async Task ToggleWatchlistAsync(IRenderedComponent<Harness> cut)
@@ -103,8 +103,8 @@ public class WatchlistSyncButtonTests : BunitContext
 
 	private async Task<IRenderedComponent<Harness>> OpenDialogAsync()
 	{
-		var engine = RegisterServices();
-		engine.DryRunAsync(Any()).Returns(Summary());
+		var (engine, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary());
 		engine.SyncAsync(Any(), Any()).Returns(Summary());
 
 		var cut = Render<Harness>();
@@ -113,13 +113,16 @@ public class WatchlistSyncButtonTests : BunitContext
 		return cut;
 	}
 
-	private Mock<IWatchlistSyncEngine> RegisterServices()
+	private (Mock<IWatchlistSyncEngine> Engine, Mock<IWatchlistSyncPlanner> Planner) RegisterServices()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 
 		var engine = IWatchlistSyncEngine.Mock();
 		Services.AddSingleton(engine.Object);
+
+		var planner = IWatchlistSyncPlanner.Mock();
+		Services.AddSingleton(planner.Object);
 
 		var media = IMediaService.Mock();
 		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(Synced))));
@@ -159,7 +162,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
-		return engine;
+		return (engine, planner);
 	}
 
 	private sealed class Harness : ComponentBase
