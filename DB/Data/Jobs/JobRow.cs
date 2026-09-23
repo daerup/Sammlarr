@@ -17,6 +17,4 @@ internal record JobRow : Entity<Guid>
 	public DateTimeOffset FirstArmedAt { get; set; }
 
 	public int Attempts { get; set; }
-
-	public DateTimeOffset? LeaseExpiresAt { get; set; }
 }
