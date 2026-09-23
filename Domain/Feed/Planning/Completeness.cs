@@ -1,4 +1,4 @@
-namespace Domain.Feed.Run;
+namespace Domain.Feed.Planning;
 
 public enum Completeness
 {
