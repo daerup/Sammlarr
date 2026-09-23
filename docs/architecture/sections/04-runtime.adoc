@@ -102,7 +102,7 @@ sequenceDiagram
   participant F as IFeedService (MDBList)
   participant M as MDBList
   participant R as IMediaService (+ cache, DB)
-  participant E as IFeedRunEngine
+  participant E as IFeedRunPlanner
   participant W as Watchlist + blacklist
 
   U->>P: edit feed, preview
@@ -115,10 +115,10 @@ sequenceDiagram
     F-->>P: stream items
   end
   loop as items arrive, then once more when settled
-    P->>E: DryRunAsync(feed, items so far, Partial or Complete)
+    P->>E: PlanAsync(DraftFeed(feed, RawFeedLoad(items so far, Partial or Complete)))
     E->>W: watchlist ids, blacklist ids, this feed's own slice
-    E->>E: classify each row, then FeedRunPlan.Compute
-    E-->>P: FeedRunSummary (verdicts, unresolved, delta, conclusiveness)
+    E->>E: classify each row, then FeedPlans.Compute
+    E-->>P: FeedPlanResult (an AppendPlan or MirrorPlan, or FeedPlanFailed)
   end
   P-->>U: tiles, stat badges, unresolved list
 ....
@@ -128,14 +128,14 @@ sequenceDiagram
 provider. On a circuit-breaker trip or timeout the client raises `ProviderUnavailableException`;
 the panel shows partial results and a retry rather than failing the whole preview.
 
-The preview does not classify for itself. It goes through `IFeedRunEngine`, which reads the
-enrollment collections, classifies the rows and hands them to the pure `FeedRunPlan.Compute`.
-The scheduled run will take that same path when it lands, so the two cannot drift apart about
-what a run would do. The panel re-runs the dry run as items arrive, on a geometric schedule
-(after items 1, 2, 4, 8 …) rather than on a timer, which keeps total classification work linear
-in the size of the list.
+The preview does not classify for itself. It goes through `IFeedRunPlanner`, which reads the
+enrollment collections, classifies the rows and hands them to the pure `FeedPlans.Compute`.
+`IFeedRunEngine` plans through that same planner before it applies anything, so a preview and a
+run cannot drift apart about what a run would do: they are the same call. The panel re-plans as
+items arrive, on a geometric schedule (after items 1, 2, 4, 8 …) rather than on a timer, which
+keeps total classification work linear in the size of the list.
 
-Every call made before the fetch settles passes `Completeness.Partial`. The engine then reports
+Every call made before the fetch settles passes `Completeness.Partial`. The planner then reports
 `Conclusiveness.StillLoading` and withholds removals, because absence from a list that is still
 loading is not evidence that an item has left it. The panel keeps reporting a partial source for
 as long as it is showing truncated results after a provider outage, so tightening a filter
