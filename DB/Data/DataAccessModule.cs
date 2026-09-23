@@ -5,6 +5,7 @@ using DB.Data.Config;
 using DB.Data.Feed;
 using DB.Data.FeedRun;
 using DB.Data.Identity;
+using DB.Data.Jobs;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Notifications;
@@ -26,6 +27,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<FeedModule>();
 		services.AddModule<FeedRunModule>();
 		services.AddModule<IdentityDataModule>();
+		services.AddModule<JobModule>();
 		services.AddModule<MediaModule>();
 		services.AddModule<MetadataModule>();
 		services.AddModule<NotificationDataModule>();
