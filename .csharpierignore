@@ -12,3 +12,5 @@ Domain/Notifications/NotificationConfig.cs
 Contracts/Notifications/DeliveryResult.cs
 Domain/Notifications/DeliveryOutcome.cs
 Domain/Feed/Run/FeedRunResult.cs
+Domain/Feed/Planning/FeedPlanTarget.cs
+Domain/Feed/Planning/FeedPlanResult.cs
