@@ -14,3 +14,5 @@ Domain/Notifications/DeliveryOutcome.cs
 Domain/Feed/Run/FeedRunResult.cs
 Domain/Feed/Planning/FeedPlanTarget.cs
 Domain/Feed/Planning/FeedPlanResult.cs
+Domain/Jobs/JobRequest.cs
+Domain/Jobs/EnqueueResult.cs
