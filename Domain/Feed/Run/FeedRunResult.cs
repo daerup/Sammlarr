@@ -1,6 +1,8 @@
 namespace Domain.Feed.Run;
 
-public union FeedRunResult(FeedRunSummary, FeedRunAlreadyRunning, FeedRunFailed);
+public union FeedRunResult(FeedRunCompleted, FeedRunAlreadyRunning, FeedRunFailed);
+
+public sealed record FeedRunCompleted(FeedDelta Delta, Conclusiveness Conclusiveness);
 
 public readonly record struct FeedRunAlreadyRunning
 {
