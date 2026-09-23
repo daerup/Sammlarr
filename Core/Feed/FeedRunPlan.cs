@@ -13,7 +13,7 @@ internal sealed record FeedRunPlan(FeedDelta Delta, Conclusiveness Conclusivenes
 		IReadOnlySet<MediaId> owned,
 		IReadOnlyDictionary<MediaId, int> absences,
 		FeedStrategy strategy,
-		FeedSource source
+		Completeness source
 	)
 	{
 		var qualifying = verdicts.Where(verdict => verdict.Outcome is QueryOutcome.Qualified).Select(verdict => verdict.Item.Identity.Id).ToHashSet();
@@ -37,11 +37,11 @@ internal sealed record FeedRunPlan(FeedDelta Delta, Conclusiveness Conclusivenes
 		return new FeedRunPlan(conclusive ? delta : delta with { Drops = [] }, conclusiveness, runsRemaining);
 	}
 
-	private static Conclusiveness Assess(int qualifying, int resolved, int unresolved, FeedSource source) =>
+	private static Conclusiveness Assess(int qualifying, int resolved, int unresolved, Completeness source) =>
 		source switch
 		{
-			FeedSource.Partial => Conclusiveness.StillLoading,
-			FeedSource.Complete => Settled(qualifying, resolved, unresolved),
+			Completeness.Partial => Conclusiveness.StillLoading,
+			Completeness.Complete => Settled(qualifying, resolved, unresolved),
 		};
 
 	private static Conclusiveness Settled(int qualifying, int resolved, int unresolved)

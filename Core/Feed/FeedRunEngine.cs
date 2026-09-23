@@ -27,7 +27,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 	public async Task<FeedRunSummary> DryRunAsync(
 		Domain.Feed.Feed feed,
 		IReadOnlyList<MediaLookup> items,
-		FeedSource source,
+		Completeness source,
 		ICurrentUser user,
 		CancellationToken cancellationToken = default
 	)
@@ -157,7 +157,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			.. delta.Drops.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Removed }),
 		];
 
-	private async Task<(IReadOnlyList<MediaLookup> Items, FeedSource Source)> FetchAsync(
+	private async Task<(IReadOnlyList<MediaLookup> Items, Completeness Source)> FetchAsync(
 		EngineDeps deps,
 		Domain.Feed.Feed feed,
 		CancellationToken cancellationToken
@@ -170,12 +170,12 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			{
 				items.Add(item);
 			}
-			return (items, FeedSource.Complete);
+			return (items, Completeness.Complete);
 		}
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			logger.LogWarning(ex, "Feed {FeedId} returned a partial list; removals are suppressed for this run", feed.Id);
-			return (items, FeedSource.Partial);
+			return (items, Completeness.Partial);
 		}
 	}
 
@@ -183,7 +183,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		EngineDeps deps,
 		Domain.Feed.Feed feed,
 		IReadOnlyList<MediaLookup> items,
-		FeedSource source,
+		Completeness source,
 		CancellationToken cancellationToken
 	)
 	{

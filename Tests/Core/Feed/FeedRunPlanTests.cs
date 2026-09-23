@@ -99,7 +99,7 @@ public class FeedRunPlanTests
 	[Test]
 	public async Task Compute_WhileTheSourceIsStillLoading_DropsNothingButStillAdds()
 	{
-		var plan = Compute([Verdict(Fresh, QueryOutcome.Qualified)], owned: [Kept, Dropped], source: FeedSource.Partial);
+		var plan = Compute([Verdict(Fresh, QueryOutcome.Qualified)], owned: [Kept, Dropped], source: Completeness.Partial);
 
 		await Assert.That(plan.Conclusiveness).IsEqualTo(Conclusiveness.StillLoading);
 		await Assert.That(plan.Delta.Adds).IsEquivalentTo([Fresh]);
@@ -137,7 +137,7 @@ public class FeedRunPlanTests
 		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
-		FeedSource source = FeedSource.Complete,
+		Completeness source = Completeness.Complete,
 		int unresolvedCount = 0,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
 	) =>
