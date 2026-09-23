@@ -9,8 +9,8 @@
 		<RepoRoot>$(MSBuildThisFileDirectory)..\</RepoRoot>
 	</PropertyGroup>
 	<ItemGroup>
-		<TailwindInput Include="$(MSBuildThisFileDirectory)wwwroot\css\app-input.css;$(RepoRoot)UI\tailwind.config.js" />
-		<TailwindInput Include="$(RepoRoot)UI\Features\**\*.razor;$(RepoRoot)UI\Shared\**\*.razor;$(MSBuildThisFileDirectory)*.razor" />
+		<TailwindInput Include="$(MSBuildThisFileDirectory)wwwroot\css\app-input.css;$(RepoRoot)UI\tailwind.config.js" Visible="false" />
+		<TailwindInput Include="$(RepoRoot)UI\**\*.razor;$(MSBuildThisFileDirectory)*.razor" Exclude="$(RepoRoot)UI\obj\**;$(RepoRoot)UI\bin\**" Visible="false" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Core\Core.csproj" />

@@ -6,7 +6,6 @@ using API.Observability;
 using API.Plex;
 using API.Tmdb;
 using API.TvDB;
-using Contracts.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -16,6 +15,7 @@ public class ApiModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddModule<AuthModule>();
 		services.AddModule<ImdbModule>();
 		services.AddModule<TvdbModule>();
 		services.AddModule<PlexModule>();
@@ -24,8 +24,5 @@ public class ApiModule : IServiceModule
 		services.AddModule<NotificationsApiModule>();
 		services.AddModule<InstrumentationModule>();
 		services.AddModule<ResilienceModule>();
-
-		services.AddScoped<IApiKeyFactory, ApiKeyFactory>();
-		services.AddScoped<ICredentialFactory, CredentialFactory>();
 	}
 }

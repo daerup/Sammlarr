@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Shared.DI;
 
-namespace Web;
+namespace Web.Health;
 
 internal sealed class HealthModule : IServiceModule
 {

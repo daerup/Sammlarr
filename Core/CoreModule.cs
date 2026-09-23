@@ -1,16 +1,4 @@
 using Contracts;
-using Contracts.Auth;
-using Contracts.Blacklist;
-using Contracts.Feed;
-using Contracts.Identity;
-using Contracts.Jobs;
-using Contracts.Media;
-using Contracts.Media.Search;
-using Contracts.Processing;
-using Contracts.Providers;
-using Contracts.Watchlist;
-using Contracts.Watchlist.Outbox;
-using Contracts.Watchlist.Sync;
 using Core.Auth;
 using Core.Blacklist;
 using Core.Caching;
@@ -23,10 +11,7 @@ using Core.Notifications;
 using Core.Processing;
 using Core.Providers;
 using Core.Watchlist;
-using Core.Watchlist.Sync;
-using Domain.Jobs;
 using Microsoft.Extensions.DependencyInjection;
-using Observability.Tracing;
 using Shared.DI;
 
 namespace Core;
@@ -35,38 +20,18 @@ public class CoreModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddModule<AuthModule>();
+		services.AddModule<BlacklistModule>();
 		services.AddModule<CachingModule>();
 		services.AddModule<DiModule>();
+		services.AddModule<FeedModule>();
+		services.AddModule<IdentityModule>();
+		services.AddModule<JobsModule>();
+		services.AddModule<MediaModule>();
+		services.AddModule<NotificationsModule>();
+		services.AddModule<ProcessingModule>();
+		services.AddModule<ProvidersModule>();
+		services.AddModule<WatchlistModule>();
 		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
-		services.AddSingleton<IProviderRateLimitReporter, ProviderRateLimitReporter>();
-		services.AddTransient(typeof(QueryProcessor<>));
-		services.AddTracedScoped<IBlacklistService, BlacklistService>();
-		services.AddSingleton<JobSignal>();
-		services.AddScoped<IJobHandler<RunFeed>, FeedRunJobHandler>();
-		services.AddScoped<IJobHandler<SyncWatchlist>, WatchlistSyncJobHandler>();
-		services.AddTracedScoped<IJobQueue, JobQueue>();
-		services.AddHostedService<JobRunner>();
-		services.AddTracedScoped<IFeedRunPlanner, FeedRunPlanner>();
-		services.AddSingleton<FeedRunGate>();
-		services.AddTracedScoped<IFeedRunEngine, FeedRunEngine>();
-		services.AddTracedScoped<IFeedService, FeedService>();
-		services.AddTracedScoped<IWatchlistService, WatchlistService>();
-		services.AddSingleton<WatchlistSyncGate>();
-		services.AddTracedScoped<IWatchlistSyncPlanner, WatchlistSyncPlanner>();
-		services.AddTracedScoped<IWatchlistSyncEngine, WatchlistSyncEngine>();
-		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();
-		services.AddScoped<MediaIdResolver>();
-		services.AddScoped<IUnresolvedMediaCache, UnresolvedMediaCache>();
-		services.AddScoped<MediaMetadataResolver>();
-		services.AddScoped<MediaIdentityCoordinator>();
-		services.AddScoped<MediaResolutionBufferFactory>();
-		services.AddTracedScoped<IMediaService, MediaService>();
-		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
-		services.AddScoped<CurrentUserOverride>();
-		services.AddScoped<IUserScope, UserScope>();
-		services.AddTracedScoped<IUserManagementService, UserManagementService>();
-		services.AddTracedScoped<ISignInService, SignInService>();
-		services.AddScoped<WebUiNotificationSeeder>();
-		services.AddScoped<ISessionValidator, SessionValidator>();
 	}
 }

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Web;
+namespace Web.Localization;
 
 internal static class BrowserLocalization
 {

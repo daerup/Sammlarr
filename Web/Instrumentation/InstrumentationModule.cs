@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using OpenTelemetry.Trace;
 using Shared.DI;
 
-namespace Web;
+namespace Web.Instrumentation;
 
 internal class InstrumentationModule : IServiceModule
 {
