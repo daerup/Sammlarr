@@ -10,6 +10,8 @@ internal record JobRow : Entity<Guid>
 
 	public required string Key { get; set; }
 
+	public required IJobRequest Request { get; set; }
+
 	public JobState State { get; set; }
 
 	public DateTimeOffset RunAfter { get; set; }

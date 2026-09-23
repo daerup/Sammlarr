@@ -19,6 +19,7 @@ namespace DB.Migrations
 					OwnerId = table.Column<Guid>(type: "TEXT", nullable: false),
 					Kind = table.Column<string>(type: "TEXT", nullable: false),
 					Key = table.Column<string>(type: "TEXT", nullable: false),
+					Request = table.Column<string>(type: "TEXT", nullable: false),
 					State = table.Column<string>(type: "TEXT", nullable: false),
 					RunAfter = table.Column<long>(type: "INTEGER", nullable: false),
 					FirstArmedAt = table.Column<long>(type: "INTEGER", nullable: false),

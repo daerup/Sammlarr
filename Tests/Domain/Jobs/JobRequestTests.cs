@@ -1,5 +1,6 @@
 using Domain.Feed;
 using Domain.Jobs;
+using Domain.Watchlist.Sync;
 
 namespace Domain.Tests.Jobs;
 
@@ -8,7 +9,25 @@ public class JobRequestTests
 	[Test]
 	public async Task Kind_DiscriminatesTheRequest()
 	{
-		await Assert.That(new JobRequest(new RunFeed(FeedId.From(Guid.NewGuid()))).Kind).IsEqualTo(JobKind.FeedRun);
-		await Assert.That(new JobRequest(new SyncWatchlist()).Kind).IsEqualTo(JobKind.WatchlistSync);
+		await Assert.That(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()).Kind).IsEqualTo(JobKind.FeedRun);
+		await Assert.That(new SyncWatchlist(new ManualTrigger()).Kind).IsEqualTo(JobKind.WatchlistSync);
+	}
+
+	[Test]
+	public async Task Key_OfAFeedRun_IsItsFeedIdSoTwoRunsOfOneFeedCoalesce()
+	{
+		var feedId = FeedId.From(Guid.NewGuid());
+
+		var scheduled = new RunFeed(feedId, new Scheduled("0 0 * * * *"));
+		var manual = new RunFeed(feedId, new Manual());
+
+		await Assert.That(scheduled.Key).IsEqualTo(feedId.Value.ToString());
+		await Assert.That(manual.Key).IsEqualTo(scheduled.Key);
+	}
+
+	[Test]
+	public async Task Key_OfAWatchlistSync_IsEmptyBecauseTheOwnerAloneIdentifiesIt()
+	{
+		await Assert.That(new SyncWatchlist(new ManualTrigger()).Key).IsEmpty();
 	}
 }

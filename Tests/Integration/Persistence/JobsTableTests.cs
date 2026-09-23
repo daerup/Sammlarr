@@ -1,5 +1,6 @@
 using DB.Data.Identity;
 using DB.Data.Jobs;
+using Domain.Feed;
 using Domain.Identity;
 using Domain.Jobs;
 using Domain.Providers;
@@ -53,6 +54,7 @@ public class JobsTableTests(SammlarrTestHost host) : IAsyncDisposable
 			OwnerId = owner,
 			Kind = JobKind.FeedRun,
 			Key = key,
+			Request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()),
 			State = JobState.Queued,
 			RunAfter = DateTimeOffset.UnixEpoch,
 			FirstArmedAt = DateTimeOffset.UnixEpoch,

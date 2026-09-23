@@ -4,6 +4,7 @@ using Contracts.Jobs;
 using Core.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
+using Domain.Watchlist.Sync;
 using TestInfrastructure;
 
 namespace Core.Tests.Jobs;
@@ -18,19 +19,19 @@ public class JobQueueTests
 		var feedId = FeedId.From(Guid.NewGuid());
 		var (testee, jobs) = BuildTestee();
 
-		await testee.EnqueueAsync(new RunFeed(feedId));
+		await testee.EnqueueAsync(new RunFeed(feedId, new Manual()));
 
-		jobs.EnqueueAsync(new QueuedJob(JobKind.FeedRun, feedId.Value.ToString(), TestCurrentUser.DefaultId, Now), Any()).WasCalled(Times.Once);
+		jobs.EnqueueAsync(new QueuedJob(new RunFeed(feedId, new Manual()), TestCurrentUser.DefaultId, Now), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task EnqueueAsync_OfAWatchlistSync_UsesTheEmptyKeySoTheOwnerAloneCoalescesIt()
+	public async Task EnqueueAsync_CarriesTheRequestThroughUntouched()
 	{
 		var (testee, jobs) = BuildTestee();
 
-		await testee.EnqueueAsync(new SyncWatchlist());
+		await testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
 
-		jobs.EnqueueAsync(new QueuedJob(JobKind.WatchlistSync, string.Empty, TestCurrentUser.DefaultId, Now), Any()).WasCalled(Times.Once);
+		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ManualTrigger()), TestCurrentUser.DefaultId, Now), Any()).WasCalled(Times.Once);
 	}
 
 	private static (JobQueue Testee, Mock<IJobRepository> Jobs) BuildTestee()
@@ -40,6 +41,6 @@ public class JobQueueTests
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
 
-		return (new JobQueue(jobs.Object, new TestCurrentUser(), clock.Object), jobs);
+		return (new JobQueue(jobs.Object, new JobSignal(), new TestCurrentUser(), clock.Object), jobs);
 	}
 }
