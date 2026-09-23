@@ -1,4 +1,4 @@
-namespace Domain.Feed.Run;
+namespace Domain.Feed;
 
 public enum Conclusiveness
 {
