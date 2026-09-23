@@ -4,6 +4,7 @@ using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using DB.Data.Feed;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
@@ -32,8 +33,8 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
 
-		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunSummary>();
-		await Assert.That(result is FeedRunSummary { Delta.Drops.Count: 0 }).IsTrue();
+		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
+		await Assert.That(completed!.Delta.Drops).IsEmpty();
 		await Assert.That(await WatchlistIdsAsync()).Contains(stale);
 	}
 
@@ -69,7 +70,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PreviewAsync_ForAFeedWithItems_ReturnsASummaryAndChangesNothing()
+	public async Task PlanAsync_ForAFeedWithItems_ReturnsAPlanAndChangesNothing()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		var feedId = await SeedFeedAsync("preview-list", new Mirror(1));
@@ -77,10 +78,10 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var owned = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 
-		var result = await Testee.PreviewAsync(feedId, host.CurrentUser);
+		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
 
-		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunSummary>();
-		await Assert.That(result is FeedRunSummary { Delta.Drops.Count: 1 }).IsTrue();
+		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, MirrorPlan>();
+		await Assert.That(plan!.Delta.Drops).Count().IsEqualTo(1);
 		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
 	}
 
@@ -128,8 +129,9 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var result = await Testee.RunAsync(runningFeed, new FeedRunTrigger(new Manual()), host.CurrentUser);
 
+		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(await WatchlistIdsAsync()).Contains(ownedByOther);
-		await Assert.That(result is FeedRunSummary summary && !summary.Delta.Drops.Contains(ownedByOther)).IsTrue();
+		await Assert.That(completed!.Delta.Drops).DoesNotContain(ownedByOther);
 	}
 
 	[Test]

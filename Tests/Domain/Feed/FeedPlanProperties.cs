@@ -1,20 +1,18 @@
-using Contracts.Processing;
-using Core.Feed;
 using CsCheck;
 using Domain.Feed;
-using Domain.Feed.Run;
+using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Processing;
 using Domain.Providers;
 
-namespace Core.Tests.Feed;
+namespace Domain.Tests.Feed;
 
-public class FeedRunPlanProperties
+public class FeedPlanProperties
 {
 	private const int Threshold = 3;
 
-	private sealed record Scenario(FeedRunPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy, IReadOnlyDictionary<MediaId, int> Absences);
+	private sealed record Scenario(IFeedPlan Plan, IReadOnlySet<MediaId> Owned, FeedStrategy Strategy, IReadOnlyDictionary<MediaId, int> Absences);
 
 	private static readonly Gen<Scenario> Scenarios = Gen.Select(
 			Gen.OneOfConst(QueryOutcome.Qualified, QueryOutcome.Culled, QueryOutcome.Truncated),
@@ -56,19 +54,28 @@ public class FeedRunPlanProperties
 		Scenarios.Sample(scenario => scenario.Plan.Conclusiveness is Conclusiveness.Conclusive || scenario.Plan.Delta.Drops.Count == 0, iter: 10_000);
 
 	[Test]
-	public void Compute_ForAnyScenario_AccountsForEveryOwnedItem() =>
-		Scenarios.Sample(scenario => scenario.Plan.Delta.Keeps.Concat(scenario.Plan.RunsRemaining.Keys).ToHashSet().SetEquals(scenario.Owned), iter: 10_000);
+	public void Compute_ForAnyMirrorScenario_AccountsForEveryOwnedItem() =>
+		Scenarios.Sample(
+			scenario => scenario.Plan is not MirrorPlan mirror || mirror.Delta.Keeps.Concat(mirror.MissedRuns.Keys).ToHashSet().SetEquals(scenario.Owned),
+			iter: 10_000
+		);
+
+	[Test]
+	public void Compute_ForAnAppendFeed_ReportsNothingAsMissing() =>
+		Scenarios.Sample(scenario => scenario.Strategy is not Append || scenario.Plan is AppendPlan, iter: 10_000);
+
+	[Test]
+	public void Compute_ForAnyScenario_OnlyKeepsWhatTheFeedOwns() =>
+		Scenarios.Sample(scenario => scenario.Plan.Delta.Keeps.All(scenario.Owned.Contains), iter: 10_000);
 
 	[Test]
 	public void Compute_WhileGraceRemains_NeverDrops() =>
 		Scenarios.Sample(scenario => scenario.Plan.Delta.Drops.All(id => scenario.Absences.GetValueOrDefault(id) + 1 >= Threshold), iter: 10_000);
 
 	[Test]
-	public void Compute_ForAnyMissingOwnedItem_CountsDownFromTheThreshold() =>
+	public void Compute_ForAnyMissingOwnedItem_CountsTheRunsItHasBeenMissing() =>
 		Scenarios.Sample(
-			scenario =>
-				scenario.Strategy is not Mirror
-				|| scenario.Plan.RunsRemaining.All(entry => entry.Value == Math.Max(0, Threshold - (scenario.Absences.GetValueOrDefault(entry.Key) + 1))),
+			scenario => scenario.Plan is not MirrorPlan mirror || mirror.MissedRuns.All(entry => entry.Value == scenario.Absences.GetValueOrDefault(entry.Key) + 1),
 			iter: 10_000
 		);
 
@@ -106,7 +113,12 @@ public class FeedRunPlanProperties
 			}
 		}
 
-		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, owned, absences, strategy, completeness), owned, strategy, absences);
+		var unresolved = Enumerable
+			.Range(0, unresolvedCount)
+			.Select(index => new UnmatchedMedia { Externals = [TmdbId.From($"unmatched-{index}", MediaType.Movie)] })
+			.ToList();
+
+		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unresolved, completeness), owned, absences, strategy), owned, strategy, absences);
 	}
 
 	private static MediaLookup Row(MediaId id) =>

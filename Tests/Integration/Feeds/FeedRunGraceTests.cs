@@ -1,6 +1,7 @@
 using Contracts.Feed;
 using DB.Data.Feed;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Media.Metadata;
@@ -20,7 +21,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	private const int Threshold = 3;
 
 	[Test]
-	public async Task DryRunAsync_ForAnOwnedItemMissingFromTheSource_DropsItOnlyOnceGraceIsSpent()
+	public async Task PlanAsync_ForAnOwnedItemMissingFromTheList_DropsItOnlyOnceGraceIsSpent()
 	{
 		var feedId = await SeedFeedAsync();
 		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
@@ -29,16 +30,16 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var kept = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
 		var missing = await fixture.Movie(TestMedia.Inception).OnWatchlist(origin);
 
-		var engine = fixture.Resolve<IFeedRunEngine>();
+		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
-		var load = new FeedLoad([Lookup(kept)], Completeness.Complete);
+		var load = new RawFeedLoad([Lookup(kept)], Completeness.Complete);
 
 		var drops = new List<int>();
 
 		for (var run = 1; run <= Threshold; run++)
 		{
-			var summary = await engine.DryRunAsync(feed, load, fixture.CurrentUser);
-			drops.Add(summary.Delta.Drops.Count);
+			var summary = await Assert.That(await planner.PlanAsync(new DraftFeed(feed, load))).IsOfUnionType<FeedPlanResult, MirrorPlan>();
+			drops.Add(summary!.Delta.Drops.Count);
 
 			await log.StartRunAsync(
 				new FeedRun
@@ -49,7 +50,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Duration = TimeSpan.FromSeconds(1),
 					Strategy = feed.Strategy,
 					Trigger = new FeedRunTrigger(new Manual()),
-					Conclusiveness = summary.Conclusiveness,
+					Conclusiveness = summary!.Conclusiveness,
 					Counts = FeedRunCounts.From(summary),
 					Items = [new FeedRunItem { MediaId = kept, State = FeedRunItemState.Kept }],
 				}
@@ -58,13 +59,13 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await Assert.That(drops).IsEquivalentTo([0, 0, 1], CollectionOrdering.Matching);
 
-		var final = await engine.DryRunAsync(feed, load, fixture.CurrentUser);
-		await Assert.That(final.Delta.Drops).IsEquivalentTo([missing]);
-		await Assert.That(final.RunsRemaining[missing]).IsEqualTo(0);
+		var final = await Assert.That(await planner.PlanAsync(new DraftFeed(feed, load))).IsOfUnionType<FeedPlanResult, MirrorPlan>();
+		await Assert.That(final!.Delta.Drops).IsEquivalentTo([missing]);
+		await Assert.That(final.MissedRuns[missing]).IsGreaterThanOrEqualTo(Threshold);
 	}
 
 	[Test]
-	public async Task DryRunAsync_WhenTheSourceOutageIsInconclusive_NeverBurnsGrace()
+	public async Task PlanAsync_WhenTheListOutageIsInconclusive_NeverBurnsGrace()
 	{
 		var feedId = await SeedFeedAsync();
 		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
@@ -72,12 +73,14 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var owned = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
 
-		var engine = fixture.Resolve<IFeedRunEngine>();
+		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
 
 		for (var run = 1; run <= Threshold + 2; run++)
 		{
-			var summary = await engine.DryRunAsync(feed, new FeedLoad([], Completeness.Complete), fixture.CurrentUser);
+			var summary = await Assert
+				.That(await planner.PlanAsync(new DraftFeed(feed, new RawFeedLoad([], Completeness.Complete))))
+				.IsOfUnionType<FeedPlanResult, MirrorPlan>();
 
 			await log.StartRunAsync(
 				new FeedRun
@@ -88,7 +91,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Duration = TimeSpan.FromSeconds(1),
 					Strategy = feed.Strategy,
 					Trigger = new FeedRunTrigger(new Manual()),
-					Conclusiveness = summary.Conclusiveness,
+					Conclusiveness = summary!.Conclusiveness,
 					Counts = FeedRunCounts.From(summary),
 					Items = [],
 				}

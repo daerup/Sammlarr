@@ -1,16 +1,14 @@
-using Contracts.Processing;
-using Core.Feed;
 using Domain.Feed;
-using Domain.Feed.Run;
+using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Processing;
 using Domain.Providers;
 using TestInfrastructure;
 
-namespace Core.Tests.Feed;
+namespace Domain.Tests.Feed;
 
-public class FeedRunPlanTests
+public class FeedPlanTests
 {
 	private static readonly MediaId Kept = Id(1);
 	private static readonly MediaId Dropped = Id(2);
@@ -107,33 +105,33 @@ public class FeedRunPlanTests
 	}
 
 	[Test]
-	public async Task Compute_WhenGraceRemains_DropsNothingButCountsDownTheRun()
+	public async Task Compute_WhenGraceRemains_DropsNothingButCountsTheMissedRun()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: []);
+		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: []);
 
 		await Assert.That(plan.Delta.Drops).IsEmpty();
-		await Assert.That(plan.RunsRemaining[Dropped]).IsEqualTo(2);
+		await Assert.That(plan.MissedRuns[Dropped]).IsEqualTo(1);
 	}
 
 	[Test]
 	public async Task Compute_WhenTheLastRunOfGraceIsSpent_DropsTheItem()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
+		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept, Dropped], absences: [(Dropped, 2)]);
 
 		await Assert.That(plan.Delta.Drops).IsEquivalentTo([Dropped]);
-		await Assert.That(plan.RunsRemaining[Dropped]).IsEqualTo(0);
+		await Assert.That(plan.MissedRuns[Dropped]).IsEqualTo(3);
 	}
 
 	[Test]
 	public async Task Compute_ForAQualifyingOwnedItem_ReportsNoGraceCountdownAtAll()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept], absences: [(Kept, 2)]);
+		var plan = Mirrored([Verdict(Kept, QueryOutcome.Qualified, owned: true)], owned: [Kept], absences: [(Kept, 2)]);
 
-		await Assert.That(plan.RunsRemaining).DoesNotContainKey(Kept);
+		await Assert.That(plan.MissedRuns).DoesNotContainKey(Kept);
 		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
 	}
 
-	private static FeedRunPlan Compute(
+	private static IFeedPlan Compute(
 		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
@@ -141,14 +139,18 @@ public class FeedRunPlanTests
 		int unresolvedCount = 0,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
 	) =>
-		FeedRunPlan.Compute(
-			verdicts,
-			unresolvedCount,
+		FeedPlans.Compute(
+			new ClassifiedFeedLoad(verdicts, [.. Enumerable.Range(0, unresolvedCount).Select(Unmatched)], completeness),
 			owned.ToHashSet(),
 			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
-			strategy ?? new Mirror(3),
-			completeness
+			strategy ?? new Mirror(3)
 		);
+
+	private static MirrorPlan Mirrored(
+		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
+		IReadOnlyList<MediaId> owned,
+		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
+	) => (MirrorPlan)Compute(verdicts, owned, absences: absences);
 
 	private static QueryVerdict<MediaLookup> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlacklist = false) =>
 		new(
@@ -164,6 +166,8 @@ public class FeedRunPlanTests
 		);
 
 	private static MediaId Id(int seed) => MediaId.From(new Guid(seed, 0, 0, new byte[8]));
+
+	private static UnmatchedMedia Unmatched(int seed) => new() { Externals = [TmdbId.From($"unmatched-{seed}", MediaType.Movie)] };
 
 	private static MediaLookup Row(MediaId id) =>
 		new PartialMovie
