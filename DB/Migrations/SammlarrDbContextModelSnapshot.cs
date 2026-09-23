@@ -356,6 +356,58 @@ namespace DB.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("FirstArmedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("LeaseExpiresAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("RunAfter")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("State", "RunAfter");
+
+                    b.HasIndex("Kind", "Key", "OwnerId")
+                        .IsUnique()
+                        .HasFilter("\"State\" = 'Queued'");
+
+                    b.ToTable("Jobs");
+                });
+
             modelBuilder.Entity("DB.Data.Media.ExternalMediaIdRow", b =>
                 {
                     b.Property<string>("Source")
@@ -973,6 +1025,15 @@ namespace DB.Migrations
                     b.HasOne("DB.Data.Identity.UserRow", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DB.Data.Jobs.JobRow", b =>
+                {
+                    b.HasOne("DB.Data.Identity.UserRow", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

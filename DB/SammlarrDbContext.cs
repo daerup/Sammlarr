@@ -8,6 +8,7 @@ using DB.Data.Config;
 using DB.Data.Feed;
 using DB.Data.FeedRun;
 using DB.Data.Identity;
+using DB.Data.Jobs;
 using DB.Data.Media;
 using DB.Data.Metadata;
 using DB.Data.Notifications;
@@ -77,6 +78,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<WatchlistRow> Watchlist => Set<WatchlistRow>();
 	public DbSet<WatchlistOutboxRow> WatchlistOutbox => Set<WatchlistOutboxRow>();
 	public DbSet<UserRow> Users => Set<UserRow>();
+	public DbSet<JobRow> Jobs => Set<JobRow>();
 	public DbSet<NotificationTargetRow> NotificationTargets => Set<NotificationTargetRow>();
 	public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();
 	public DbSet<NotificationDeliveryOutcomeRow> NotificationDeliveryOutcomes => Set<NotificationDeliveryOutcomeRow>();
