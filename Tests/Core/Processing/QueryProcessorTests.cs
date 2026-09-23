@@ -399,7 +399,7 @@ public class QueryProcessorRatingTests
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),
 				Rating = rating is { } value ? RatingSummary.From([new MediaRating(RatingProvider.Tmdb, value, 1)]) : RatingSummary.None,
-			}.ToMatch()
+			}
 		);
 }
 
