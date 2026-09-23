@@ -43,8 +43,10 @@ internal sealed class FeedRunPlanner(
 		}
 	}
 
-	internal async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default) =>
-		await PlanAsync(feed, await FetchAsync(feed, cancellationToken), cancellationToken);
+	internal async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default)
+	{
+		return await PlanAsync(feed, await FetchAsync(feed, cancellationToken), cancellationToken);
+	}
 
 	private static FeedId Identify(FeedPlanTarget target) =>
 		target switch
@@ -103,7 +105,7 @@ internal sealed class FeedRunPlanner(
 		var items = new List<MediaLookup>();
 		try
 		{
-			await foreach (var item in providers[feed.Provider].GetFeedItemsAsync(feed.Identifier, cancellationToken).WithCancellation(cancellationToken))
+			await foreach (var item in providers[feed.Provider].GetFeedItemsAsync(feed.Identifier, cancellationToken))
 			{
 				items.Add(item);
 			}
