@@ -11,6 +11,7 @@ using Contracts.Processing;
 using Contracts.Watchlist;
 using Domain.Blacklist;
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Media.Metadata;
@@ -32,7 +33,7 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_WhenEveryOutcomeIsPresent_TheBadgesAccountForEveryFetchedItem()
 	{
-		var cut = RenderPanel(new SpreadRunEngine(), resolved: 5, unmatched: 2);
+		var cut = RenderPanel(new SpreadPlanner(), resolved: 5, unmatched: 2);
 
 		await ApplyAsync(cut, new Append());
 		cut.WaitForState(() => BadgeCounts(cut).Skip(1).Sum() == 7);
@@ -46,7 +47,7 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_ForAMirrorFeed_MarksOwnedAtRiskRowsInTheGrid()
 	{
-		var cut = RenderPanel(new OwnedRunEngine(), resolved: 5, unmatched: 0);
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
@@ -60,7 +61,7 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_WhenAnOwnedRowIsBlacklisted_ItStillLeavesOnceItStopsQualifying()
 	{
-		var cut = RenderPanel(new OwnedRunEngine(), resolved: 5, unmatched: 0);
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
@@ -72,7 +73,7 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_WhenTheFeedAlreadyOwnsAQualifyingRow_ItIsNotCountedAsAnImport()
 	{
-		var cut = RenderPanel(new OwnedRunEngine(), resolved: 5, unmatched: 0);
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
@@ -87,7 +88,7 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_WhenOnItsWayOutIsToggled_TheTotalBadgeStopsReadingAsActive()
 	{
-		var cut = RenderPanel(new OwnedRunEngine(), resolved: 5, unmatched: 0);
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
@@ -103,7 +104,7 @@ public class FeedPreviewPanelTests : BunitContext
 	public async Task Preview_WhenABucketFilterIsActive_TheNoLongerOnTheListSectionIsHidden()
 	{
 		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
-		var cut = RenderPanel(new GoneRunEngine(gone), resolved: 5, unmatched: 0, gone: gone);
+		var cut = RenderPanel(new GonePlanner(gone), resolved: 5, unmatched: 0, gone: gone);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
@@ -117,7 +118,7 @@ public class FeedPreviewPanelTests : BunitContext
 	public async Task Preview_ForAGoneRow_TheWatchlistAndBlacklistTogglesAreAvailable()
 	{
 		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
-		var cut = RenderPanel(new GoneRunEngine(gone), resolved: 5, unmatched: 0, gone: gone);
+		var cut = RenderPanel(new GonePlanner(gone), resolved: 5, unmatched: 0, gone: gone);
 
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
@@ -128,7 +129,7 @@ public class FeedPreviewPanelTests : BunitContext
 	[Test]
 	public async Task Preview_ForAnAppendFeed_MarksNothingAtRiskEvenWhenOwnedRowsNoLongerQualify()
 	{
-		var cut = RenderPanel(new OwnedRunEngine(), resolved: 5, unmatched: 0);
+		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
 		await ApplyAsync(cut, new Append());
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
@@ -158,11 +159,11 @@ public class FeedPreviewPanelTests : BunitContext
 	private static List<int> BadgeCounts(IRenderedComponent<FeedPreviewPanel> cut) =>
 		[.. cut.FindAll(".stat-badges-row .preview-filter-badge span").Select(badge => int.Parse(badge.TextContent))];
 
-	private IRenderedComponent<FeedPreviewPanel> RenderPanel(IFeedRunEngine engine, int resolved, int unmatched, MediaId? gone = null)
+	private IRenderedComponent<FeedPreviewPanel> RenderPanel(IFeedRunPlanner planner, int resolved, int unmatched, MediaId? gone = null)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
-		Services.AddSingleton(engine);
+		Services.AddSingleton(planner);
 		var watchlist = IWatchlistService.Mock();
 		watchlist.GetWatchlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
 		var blacklist = IBlacklistService.Mock();
@@ -197,19 +198,17 @@ public class FeedPreviewPanelTests : BunitContext
 		);
 	}
 
-	private sealed class OwnedRunEngine : IFeedRunEngine
+	private sealed class OwnedPlanner : IFeedRunPlanner
 	{
-		public Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default) =>
-			throw new NotSupportedException();
-
-		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
-			throw new NotSupportedException();
-
-		public Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var verdicts = load.Items.Select(Owned).ToList();
+			var verdicts = Load(target).Items.Select(Owned).ToList();
 
-			return Task.FromResult(new FeedRunSummary(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>()));
+			return Task.FromResult<FeedPlanResult>(
+				target is DraftFeed(var definition, _) && definition.Strategy is Mirror
+					? new MirrorPlan(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>())
+					: new AppendPlan(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive)
+			);
 		}
 
 		private static QueryVerdict<MediaLookup> Owned(MediaLookup item, int index) =>
@@ -236,17 +235,11 @@ public class FeedPreviewPanelTests : BunitContext
 			);
 	}
 
-	private sealed class GoneRunEngine(MediaId gone) : IFeedRunEngine
+	private sealed class GonePlanner(MediaId gone) : IFeedRunPlanner
 	{
-		public Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default) =>
-			throw new NotSupportedException();
-
-		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
-			throw new NotSupportedException();
-
-		public Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var verdicts = load
+			var verdicts = Load(target)
 				.Items.Select(item => new QueryVerdict<MediaLookup>(
 					item,
 					QueryOutcome.Qualified,
@@ -260,11 +253,13 @@ public class FeedPreviewPanelTests : BunitContext
 				))
 				.ToList();
 
-			return Task.FromResult(
-				new FeedRunSummary(verdicts, [], new FeedDelta([], [], [gone]), Conclusiveness.Conclusive, new Dictionary<MediaId, int> { [gone] = 0 })
+			return Task.FromResult<FeedPlanResult>(
+				new MirrorPlan(verdicts, [], new FeedDelta([], [], [gone]), Conclusiveness.Conclusive, new Dictionary<MediaId, int> { [gone] = 3 })
 			);
 		}
 	}
+
+	private static RawFeedLoad Load(FeedPlanTarget target) => target is DraftFeed(_, var load) ? load : new RawFeedLoad([], Completeness.Complete);
 
 	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
 	{
@@ -290,20 +285,15 @@ public class FeedPreviewPanelTests : BunitContext
 			Rating = RatingSummary.None,
 		};
 
-	private sealed class SpreadRunEngine : IFeedRunEngine
+	private sealed class SpreadPlanner : IFeedRunPlanner
 	{
-		public Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default) =>
-			throw new NotSupportedException();
-
-		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
-			throw new NotSupportedException();
-
-		public Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
+		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var unresolved = load.Items.Where(item => item is UnmatchedMedia).ToList();
+			var load = Load(target);
+			var unresolved = load.Items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
 			var verdicts = load.Items.Where(item => item is not UnmatchedMedia).Select(Spread).ToList();
 
-			return Task.FromResult(new FeedRunSummary(verdicts, unresolved, FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>()));
+			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, unresolved, FeedDelta.None, Conclusiveness.Conclusive));
 		}
 
 		private static QueryVerdict<MediaLookup> Spread(MediaLookup item, int index) =>

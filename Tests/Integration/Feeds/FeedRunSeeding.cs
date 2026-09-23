@@ -1,6 +1,5 @@
 using Contracts.Feed;
 using Domain.Feed;
-using Domain.Feed.Run;
 using Domain.Watchlist;
 using Harness;
 using TestInfrastructure;
