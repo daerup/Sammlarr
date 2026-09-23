@@ -1,4 +1,5 @@
 using Domain.Feed;
+using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using UI.Shared.Changes;
@@ -24,7 +25,7 @@ internal static class FeedRunView
 				}),
 		];
 
-	internal static IReadOnlyList<ChangeEntry> Entries(FeedRunSummary summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeEntry> Entries(IFeedPlan summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
 		[
 			.. summary.Delta.Drops.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Removed)),
 			.. summary.Delta.Adds.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Added)),
@@ -42,7 +43,7 @@ internal static class FeedRunView
 			ContextTooltip = kind is ChangeKind.Removed ? "Absent long enough that this run will remove it" : null,
 		};
 
-	internal static string Pending(FeedRunSummary summary)
+	internal static string Pending(IFeedPlan summary)
 	{
 		var parts = new List<string> { $"{summary.Verdicts.Count + summary.Unresolved.Count} fetched" };
 
