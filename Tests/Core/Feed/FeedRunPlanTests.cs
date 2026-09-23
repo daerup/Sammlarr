@@ -97,9 +97,9 @@ public class FeedRunPlanTests
 	}
 
 	[Test]
-	public async Task Compute_WhileTheSourceIsStillLoading_DropsNothingButStillAdds()
+	public async Task Compute_WhileTheListIsStillLoading_DropsNothingButStillAdds()
 	{
-		var plan = Compute([Verdict(Fresh, QueryOutcome.Qualified)], owned: [Kept, Dropped], source: Completeness.Partial);
+		var plan = Compute([Verdict(Fresh, QueryOutcome.Qualified)], owned: [Kept, Dropped], completeness: Completeness.Partial);
 
 		await Assert.That(plan.Conclusiveness).IsEqualTo(Conclusiveness.StillLoading);
 		await Assert.That(plan.Delta.Adds).IsEquivalentTo([Fresh]);
@@ -137,7 +137,7 @@ public class FeedRunPlanTests
 		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
-		Completeness source = Completeness.Complete,
+		Completeness completeness = Completeness.Complete,
 		int unresolvedCount = 0,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
 	) =>
@@ -147,7 +147,7 @@ public class FeedRunPlanTests
 			owned.ToHashSet(),
 			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
 			strategy ?? new Mirror(3),
-			source
+			completeness
 		);
 
 	private static QueryVerdict<MediaLookup> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlacklist = false) =>

@@ -208,7 +208,7 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedRunSummary> DryRunAsync(
 			Domain.Feed.Feed feed,
 			IReadOnlyList<MediaLookup> items,
-			Completeness source,
+			Completeness completeness,
 			ICurrentUser user,
 			CancellationToken cancellationToken = default
 		)
@@ -253,7 +253,7 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedRunSummary> DryRunAsync(
 			Domain.Feed.Feed feed,
 			IReadOnlyList<MediaLookup> items,
-			Completeness source,
+			Completeness completeness,
 			ICurrentUser user,
 			CancellationToken cancellationToken = default
 		)
@@ -313,7 +313,7 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedRunSummary> DryRunAsync(
 			Domain.Feed.Feed feed,
 			IReadOnlyList<MediaLookup> items,
-			Completeness source,
+			Completeness completeness,
 			ICurrentUser user,
 			CancellationToken cancellationToken = default
 		)

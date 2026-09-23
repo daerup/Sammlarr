@@ -436,7 +436,7 @@
         }
         else
         {
-            await ReprocessAsync(LoadedSource(), CancellationToken.None);
+            await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
         }
 
         await EmitStatusIfChangedAsync();
@@ -590,22 +590,22 @@
         _providerUnavailable = false;
     }
 
-    private async Task ReprocessAsync(Completeness source, CancellationToken cancellationToken)
+    private async Task ReprocessAsync(Completeness completeness, CancellationToken cancellationToken)
     {
         _hasEnrollmentChanges = false;
 
-        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), _rawResults, source, CurrentUser, cancellationToken);
+        var dryRun = await RunEngine.DryRunAsync(SynthesizeFeed(), _rawResults, completeness, CurrentUser, cancellationToken);
         _processedResults = dryRun.Verdicts;
         _unresolvedResults = dryRun.Unresolved;
         _runsRemaining = dryRun.RunsRemaining;
 
-        await HydrateGoneAsync(dryRun, source, cancellationToken);
+        await HydrateGoneAsync(dryRun, completeness, cancellationToken);
         RebuildFilteredViews();
     }
 
-    private async Task HydrateGoneAsync(FeedRunSummary dryRun, Completeness source, CancellationToken cancellationToken)
+    private async Task HydrateGoneAsync(FeedRunSummary dryRun, Completeness completeness, CancellationToken cancellationToken)
     {
-        if (source is Completeness.Partial || !IsMirror)
+        if (completeness is Completeness.Partial || !IsMirror)
         {
             _goneResults = [];
             _goneShortfall = 0;
@@ -628,7 +628,7 @@
         _goneShortfall = gone.Count - _goneResults.Count;
     }
 
-    private Completeness LoadedSource() => _providerUnavailable ? Completeness.Partial : Completeness.Complete;
+    private Completeness LoadedCompleteness() => _providerUnavailable ? Completeness.Partial : Completeness.Complete;
 
     private Domain.Feed.Feed SynthesizeFeed()
     {
@@ -829,7 +829,7 @@
         {
             _togglingBlacklistItem = null;
             _focusedResult = null;
-            await ReprocessAsync(LoadedSource(), CancellationToken.None);
+            await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -869,7 +869,7 @@
         {
             _togglingWatchlistItem = null;
             _focusedResult = null;
-            await ReprocessAsync(LoadedSource(), CancellationToken.None);
+            await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }

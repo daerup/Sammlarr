@@ -31,7 +31,7 @@ public class FeedRunPlanProperties
 				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
 				Gen.OneOfConst(Completeness.Complete, Completeness.Complete, Completeness.Complete, Completeness.Partial),
 				Gen.Int[0, 3],
-				(strategy, source, unresolved) => Build(situations, strategy, source, unresolved)
+				(strategy, completeness, unresolved) => Build(situations, strategy, completeness, unresolved)
 			)
 		);
 
@@ -75,7 +75,7 @@ public class FeedRunPlanProperties
 	private static Scenario Build(
 		(QueryOutcome Outcome, bool Owned, bool InWatchlist, bool InBlacklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
-		Completeness source,
+		Completeness completeness,
 		int unresolvedCount
 	)
 	{
@@ -106,7 +106,7 @@ public class FeedRunPlanProperties
 			}
 		}
 
-		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, owned, absences, strategy, source), owned, strategy, absences);
+		return new Scenario(FeedRunPlan.Compute(verdicts, unresolvedCount, owned, absences, strategy, completeness), owned, strategy, absences);
 	}
 
 	private static MediaLookup Row(MediaId id) =>
