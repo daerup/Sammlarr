@@ -43,7 +43,8 @@ public class CoreModule : IServiceModule
 		services.AddTracedScoped<IFeedRunEngine, FeedRunEngine>();
 		services.AddTracedScoped<IFeedService, FeedService>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
-		services.AddSingleton<IWatchlistSyncEngine, WatchlistSyncEngine>();
+		services.AddSingleton<WatchlistSyncGate>();
+		services.AddTracedScoped<IWatchlistSyncEngine, WatchlistSyncEngine>();
 		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();
 		services.AddScoped<MediaIdResolver>();
 		services.AddScoped<IUnresolvedMediaCache, UnresolvedMediaCache>();

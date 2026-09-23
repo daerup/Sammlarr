@@ -34,7 +34,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.Inception);
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertWatchlist(1, WatchlistEntryOrigin.Remote);
 		await AssertOutboxEmpty();
@@ -51,7 +51,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistEmpty();
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertWatchlistEmpty();
 		await Assert.That(host.RemoteWatchlistPlexIds).IsEmpty();
@@ -67,7 +67,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistHas(TestMedia.Inception);
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertWatchlist(1, WatchlistEntryOrigin.Manual);
 		await AssertOutboxEmpty();
@@ -85,7 +85,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistEmpty();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertOutboxEmpty();
 		await Assert.That(host.RemoteWatchlistContains(TestMedia.Inception)).IsTrue();
@@ -102,7 +102,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistHas(TestMedia.Inception);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertWatchlist(1, WatchlistEntryOrigin.Remote);
 		await AssertOutboxEmpty();
@@ -120,7 +120,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
 		await host.RemoteWatchlistEmpty();
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		await AssertWatchlistEmpty();
 		await AssertOutboxEmpty();
@@ -134,7 +134,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistHas(TestMedia.Inception);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		await AssertOutboxEmpty();
 		await AssertWatchlist(1, WatchlistEntryOrigin.Remote);
@@ -149,7 +149,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.ProviderRejectsPushes();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertOutbox(WatchlistOperationAction.Add, inception, attempts: 1);
 		await Assert.That(host.RemoteWatchlistPlexIds).IsEmpty();
@@ -167,7 +167,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.ProviderRejectsPushes();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await AssertOutbox(WatchlistOperationAction.Remove, inception, attempts: 1);
 		await AssertWatchlist(1, WatchlistEntryOrigin.Remote);
@@ -185,7 +185,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistEmpty();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [solaris]);
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		await AssertOutbox(WatchlistOperationAction.Add, solaris, attempts: 1);
 		await Assert.That(host.RemoteWatchlistPlexIds).IsEmpty();
@@ -198,7 +198,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Remove, [inception]);
 		await host.RemoteWatchlistUnavailable();
 
-		var result = await Testee.SyncAsync(Trigger, CurrentUser);
+		var result = await Testee.SyncAsync(Trigger);
 
 		await Assert.That(result).IsOfUnionType<WatchlistSyncResult, WatchlistSyncRemoteFailed>();
 		await AssertWatchlist(1, WatchlistEntryOrigin.Manual);
@@ -213,7 +213,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistHas(TestMedia.FightClub);
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		var result = await Testee.DryRunAsync(CurrentUser);
+		var result = await Testee.DryRunAsync();
 
 		await Assert
 			.That(result)
@@ -234,7 +234,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
 
-		var result = await Testee.DryRunAsync(CurrentUser);
+		var result = await Testee.DryRunAsync();
 
 		await Assert.That(result).IsOfUnionType<WatchlistDryRunResult, WatchlistSyncRemoteFailed>();
 		await AssertWatchlist(1, WatchlistEntryOrigin.Manual);
@@ -246,7 +246,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.Inception);
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		var events = host.Published<WatchlistSyncedEvent>();
 		await Assert.That(events).Count().IsEqualTo(1);
@@ -260,7 +260,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistEmpty();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		var events = host.Published<WatchlistSyncedEvent>();
 		await Assert.That(events).Count().IsEqualTo(1);
@@ -273,7 +273,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistEmpty();
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		await Assert.That(host.Published<WatchlistSyncedEvent>()).IsEmpty();
 	}
@@ -284,7 +284,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		var events = host.Published<WatchlistSyncFailedEvent>();
 		await Assert.That(events).Count().IsEqualTo(1);
@@ -298,7 +298,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
 
-		await Testee.DryRunAsync(CurrentUser);
+		await Testee.DryRunAsync();
 
 		await Assert.That(host.Published<WatchlistSyncFailedEvent>()).IsEmpty();
 	}
@@ -310,7 +310,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.RemoteWatchlistEmpty();
 		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
 
-		await Testee.SyncAsync(Trigger, CurrentUser);
+		await Testee.SyncAsync(Trigger);
 
 		await Assert.That(host.Published<WatchlistPushRequest>().Any(push => push.MediaId == inception)).IsTrue();
 	}
