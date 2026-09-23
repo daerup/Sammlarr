@@ -1,5 +1,4 @@
 using Contracts.Watchlist;
-using Contracts.Watchlist.Outbox;
 using DB.Data.Watchlist.Outbox;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -10,9 +9,8 @@ internal class WatchlistModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddModule<OutboxModule>();
 		services.AddScoped<IWatchlistRepository, WatchlistRepository>();
-		services.AddScoped<IWatchlistOutbox, WatchlistOutboxRepository>();
 		services.AddScoped<IModelConfiguration, WatchlistRowConfiguration>();
-		services.AddScoped<IModelConfiguration, WatchlistOutboxRowConfiguration>();
 	}
 }

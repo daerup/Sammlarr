@@ -4,15 +4,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Shared.DI;
 using UI.Shared.Identity;
 
-namespace Web;
+namespace Web.Auth;
 
 internal sealed class AuthenticationModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddCascadingAuthenticationState();
-		services.AddSingleton<CircuitUserRegistry>();
-		services.AddSingleton<ISessionInvalidator>(sp => sp.GetRequiredService<CircuitUserRegistry>());
 		services
 			.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 			.AddCookie(options =>

@@ -9,7 +9,7 @@ internal sealed class ResilienceModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddSingleton<ProviderConcurrencyGates>();
+		services.AddModule<HttpModule>();
 		services.Configure<TelemetryOptions>(options => options.SeverityProvider = args => Severity(args.Event.EventName, args.Event.Severity));
 	}
 

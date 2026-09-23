@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Observability.Tracing;
 using UI.Observability;
 
-namespace Web;
+namespace Web.Instrumentation;
 
 internal sealed class BlazorHubActivityFilter : IHubFilter
 {
@@ -19,7 +19,7 @@ internal sealed class BlazorHubActivityFilter : IHubFilter
 			return await next(invocationContext);
 		}
 
-		using var activity = Instrumentation.Source.StartActivity($"{label} {url ?? invocationContext.HubMethodName}");
+		using var activity = Observability.Tracing.Instrumentation.Source.StartActivity($"{label} {url ?? invocationContext.HubMethodName}");
 		activity?.SetTag("circuit.id", connectionId);
 		try
 		{

@@ -3,19 +3,26 @@ using Core;
 using DB;
 using Domain.Identity;
 using Messaging;
+using Observability;
 using Observability.Diagnostics;
 using Shared.DI;
+using UI;
 using Web;
+using Web.Auth;
+using Web.Health;
+using Web.Localization;
 using Westwind.AspNetCore.LiveReload;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddModule<CoreModule>();
 builder.Services.AddModule<SharedModule>();
+builder.Services.AddModule<ObservabilityModule>();
 builder.Services.AddModule<DbModule>();
+builder.Services.AddModule<CoreModule>();
 builder.Services.AddModule<ApiModule>();
-builder.Services.AddModule<UiModule>();
 builder.Services.AddModule<MessagingModule>();
+builder.Services.AddModule<UiModule>();
+builder.Services.AddModule<WebModule>();
 builder.Host.UseSammlarrMessaging(builder.Configuration);
 
 if (builder.Environment.IsDevelopment())
