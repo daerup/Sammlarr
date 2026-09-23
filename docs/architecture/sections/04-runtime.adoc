@@ -135,7 +135,7 @@ what a run would do. The panel re-runs the dry run as items arrive, on a geometr
 (after items 1, 2, 4, 8 …) rather than on a timer, which keeps total classification work linear
 in the size of the list.
 
-Every call made before the fetch settles passes `FeedSource.Partial`. The engine then reports
+Every call made before the fetch settles passes `Completeness.Partial`. The engine then reports
 `Conclusiveness.StillLoading` and withholds removals, because absence from a list that is still
 loading is not evidence that an item has left it. The panel keeps reporting a partial source for
 as long as it is showing truncated results after a provider outage, so tightening a filter
