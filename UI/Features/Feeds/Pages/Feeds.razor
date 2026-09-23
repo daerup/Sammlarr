@@ -510,7 +510,7 @@
         StateHasChanged();
         try
         {
-            switch (await RunEngine.RunAsync(feed.Id, new Manual(), CurrentUser))
+            switch (await RunEngine.RunAsync(feed.Id, new Manual()))
             {
                 case FeedRunCompleted applied:
                     Notifier.Success(Outcome(feed.Name, applied));

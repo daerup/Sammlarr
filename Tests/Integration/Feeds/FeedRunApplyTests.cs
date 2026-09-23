@@ -31,7 +31,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains("append-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var stale = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 
-		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(completed!.Delta.Drops).IsEmpty();
@@ -49,7 +49,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var ownedButGone = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 		var addedByHand = await host.Movie(TestMedia.Interstellar).OnWatchlist(new ManualOrigin(ManualSource.Search));
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var remaining = await WatchlistIdsAsync();
 		await Assert.That(remaining).DoesNotContain(ownedButGone);
@@ -64,7 +64,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedReturnsStatus("broken-list", System.Net.HttpStatusCode.InternalServerError);
 		var owned = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
 	}
@@ -96,7 +96,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var blacklisted = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 		await host.Resolve<IBlacklistRepository>().AddAsync(blacklisted);
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		await Assert.That(await WatchlistIdsAsync()).DoesNotContain(blacklisted);
 	}
@@ -111,7 +111,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var blacklisted = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 		await host.Resolve<IBlacklistRepository>().AddAsync(blacklisted);
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		await Assert.That(await WatchlistIdsAsync()).Contains(blacklisted);
 	}
@@ -127,7 +127,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var ownedByOther = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(otherFeed));
 
-		var result = await Testee.RunAsync(runningFeed, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		var result = await Testee.RunAsync(runningFeed, new FeedRunTrigger(new Manual()));
 
 		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(await WatchlistIdsAsync()).Contains(ownedByOther);
@@ -142,7 +142,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains("pushing-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var queued = await host.Resolve<IWatchlistOutbox>().GetAsync();
 		await Assert.That(queued.Where(op => op.Action == WatchlistOperationAction.Add).Select(op => op.MediaId)).Contains(fightClub);
@@ -157,7 +157,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 		var dropped = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var queued = await host.Resolve<IWatchlistOutbox>().GetAsync();
 		await Assert.That(queued.Where(op => op.Action == WatchlistOperationAction.Remove).Select(op => op.MediaId)).Contains(dropped);
@@ -171,7 +171,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains("stamping-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
 		var entry = (await host.Resolve<IWatchlistRepository>().GetEntriesAsync()).Single(e => e.MediaId == fightClub);
@@ -182,7 +182,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task RunAsync_ForAFeedThatNoLongerExists_FailsWithoutThrowing()
 	{
-		var result = await Testee.RunAsync(FeedId.From(Guid.NewGuid()), new FeedRunTrigger(new Manual()), host.CurrentUser);
+		var result = await Testee.RunAsync(FeedId.From(Guid.NewGuid()), new FeedRunTrigger(new Manual()));
 
 		await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunFailed>();
 	}
@@ -194,7 +194,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var feedId = await SeedFeedAsync("logged-list", new Append());
 		host.MdblistFeedContains("logged-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 
-		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()), host.CurrentUser);
+		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var runs = await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 5);
 		await Assert.That(runs).IsNotEmpty();
