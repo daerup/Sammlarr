@@ -205,15 +205,9 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
 			throw new NotSupportedException();
 
-		public Task<FeedRunSummary> DryRunAsync(
-			Domain.Feed.Feed feed,
-			IReadOnlyList<MediaLookup> items,
-			Completeness completeness,
-			ICurrentUser user,
-			CancellationToken cancellationToken = default
-		)
+		public Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
 		{
-			var verdicts = items.Select(Owned).ToList();
+			var verdicts = load.Items.Select(Owned).ToList();
 
 			return Task.FromResult(new FeedRunSummary(verdicts, [], FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>()));
 		}
@@ -250,16 +244,10 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
 			throw new NotSupportedException();
 
-		public Task<FeedRunSummary> DryRunAsync(
-			Domain.Feed.Feed feed,
-			IReadOnlyList<MediaLookup> items,
-			Completeness completeness,
-			ICurrentUser user,
-			CancellationToken cancellationToken = default
-		)
+		public Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
 		{
-			var verdicts = items
-				.Select(item => new QueryVerdict<MediaLookup>(
+			var verdicts = load
+				.Items.Select(item => new QueryVerdict<MediaLookup>(
 					item,
 					QueryOutcome.Qualified,
 					new Enrollment
@@ -310,16 +298,10 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedRunResult> RunAsync(FeedId feedId, FeedRunTrigger trigger, ICurrentUser user, CancellationToken cancellationToken = default) =>
 			throw new NotSupportedException();
 
-		public Task<FeedRunSummary> DryRunAsync(
-			Domain.Feed.Feed feed,
-			IReadOnlyList<MediaLookup> items,
-			Completeness completeness,
-			ICurrentUser user,
-			CancellationToken cancellationToken = default
-		)
+		public Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default)
 		{
-			var unresolved = items.Where(item => item is UnmatchedMedia).ToList();
-			var verdicts = items.Where(item => item is not UnmatchedMedia).Select(Spread).ToList();
+			var unresolved = load.Items.Where(item => item is UnmatchedMedia).ToList();
+			var verdicts = load.Items.Where(item => item is not UnmatchedMedia).Select(Spread).ToList();
 
 			return Task.FromResult(new FeedRunSummary(verdicts, unresolved, FeedDelta.None, Conclusiveness.Conclusive, new Dictionary<MediaId, int>()));
 		}

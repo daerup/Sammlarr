@@ -7,13 +7,7 @@ namespace Contracts.Feed;
 
 public interface IFeedRunEngine
 {
-	Task<FeedRunSummary> DryRunAsync(
-		Domain.Feed.Feed feed,
-		IReadOnlyList<MediaLookup> items,
-		Completeness completeness,
-		ICurrentUser user,
-		CancellationToken cancellationToken = default
-	);
+	Task<FeedRunSummary> DryRunAsync(Domain.Feed.Feed feed, FeedLoad load, ICurrentUser user, CancellationToken cancellationToken = default);
 
 	Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default);
 
