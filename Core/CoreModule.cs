@@ -38,6 +38,7 @@ public class CoreModule : IServiceModule
 		services.AddSingleton<IProviderRateLimitReporter, ProviderRateLimitReporter>();
 		services.AddTransient(typeof(QueryProcessor<>));
 		services.AddTracedScoped<IBlacklistService, BlacklistService>();
+		services.AddTracedScoped<IFeedRunPlanner, FeedRunPlanner>();
 		services.AddTracedSingleton<IFeedRunEngine, FeedRunEngine>();
 		services.AddTracedScoped<IFeedService, FeedService>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
