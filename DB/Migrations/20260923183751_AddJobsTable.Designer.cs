@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations
 {
     [DbContext(typeof(SammlarrDbContext))]
-    [Migration("20260923171950_AddJobsTable")]
+    [Migration("20260923183751_AddJobsTable")]
     partial class AddJobsTable
     {
         /// <inheritdoc />
@@ -381,9 +381,6 @@ namespace DB.Migrations
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<long?>("LeaseExpiresAt")
-                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("TEXT");

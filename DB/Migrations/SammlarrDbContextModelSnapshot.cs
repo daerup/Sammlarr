@@ -379,9 +379,6 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long?>("LeaseExpiresAt")
-                        .HasColumnType("INTEGER");
-
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("TEXT");
 

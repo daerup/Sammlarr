@@ -23,7 +23,6 @@ namespace DB.Migrations
 					RunAfter = table.Column<long>(type: "INTEGER", nullable: false),
 					FirstArmedAt = table.Column<long>(type: "INTEGER", nullable: false),
 					Attempts = table.Column<int>(type: "INTEGER", nullable: false),
-					LeaseExpiresAt = table.Column<long>(type: "INTEGER", nullable: true),
 					CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
 					UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
 				},
