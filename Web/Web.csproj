@@ -23,6 +23,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+		<PackageReference Include="TickerQ" />
 		<PackageReference Include="Westwind.AspNetCore.LiveReload" />
 	</ItemGroup>
 	<ItemGroup>

@@ -26,5 +26,7 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" />
+		<PackageReference Include="TickerQ" />
+		<PackageReference Include="TickerQ.EntityFrameworkCore" />
 	</ItemGroup>
 </Project>

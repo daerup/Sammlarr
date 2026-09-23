@@ -8,5 +8,8 @@ public static class ServiceCollectionExtensions
 	{
 		public void AddModule<TModule>()
 			where TModule : IServiceModule, new() => new TModule().RegisterServices(services);
+
+		public void AddModule<TModule>(TModule module)
+			where TModule : IServiceModule => module.RegisterServices(services);
 	}
 }
