@@ -27,14 +27,14 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 	public async Task<FeedRunSummary> DryRunAsync(
 		Domain.Feed.Feed feed,
 		IReadOnlyList<MediaLookup> items,
-		Completeness source,
+		Completeness completeness,
 		ICurrentUser user,
 		CancellationToken cancellationToken = default
 	)
 	{
 		await using var scope = scopeFactory.CreateAsyncScope();
 		using var _ = scope.ServiceProvider.GetRequiredService<IUserScope>().As(user);
-		return await PlanAsync(Resolve(scope), feed, items, source, cancellationToken);
+		return await PlanAsync(Resolve(scope), feed, items, completeness, cancellationToken);
 	}
 
 	public async Task<FeedRunResult> PreviewAsync(FeedId feedId, ICurrentUser user, CancellationToken cancellationToken = default)
@@ -50,8 +50,8 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 				return new FeedRunFailed("The feed no longer exists.");
 			}
 
-			var (items, source) = await FetchAsync(deps, feed, cancellationToken);
-			return await PlanAsync(deps, feed, items, source, cancellationToken);
+			var (items, completeness) = await FetchAsync(deps, feed, cancellationToken);
+			return await PlanAsync(deps, feed, items, completeness, cancellationToken);
 		}
 		catch (Exception ex)
 		{
@@ -97,8 +97,8 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var startedAt = deps.Clock.Now;
 		var elapsed = Stopwatch.StartNew();
 
-		var (items, source) = await FetchAsync(deps, feed, cancellationToken);
-		var planned = await PlanAsync(deps, feed, items, source, cancellationToken);
+		var (items, completeness) = await FetchAsync(deps, feed, cancellationToken);
+		var planned = await PlanAsync(deps, feed, items, completeness, cancellationToken);
 
 		var run = new FeedRun
 		{
@@ -157,7 +157,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 			.. delta.Drops.Select(id => new FeedRunItem { MediaId = id, State = FeedRunItemState.Removed }),
 		];
 
-	private async Task<(IReadOnlyList<MediaLookup> Items, Completeness Source)> FetchAsync(
+	private async Task<(IReadOnlyList<MediaLookup> Items, Completeness Completeness)> FetchAsync(
 		EngineDeps deps,
 		Domain.Feed.Feed feed,
 		CancellationToken cancellationToken
@@ -183,7 +183,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		EngineDeps deps,
 		Domain.Feed.Feed feed,
 		IReadOnlyList<MediaLookup> items,
-		Completeness source,
+		Completeness completeness,
 		CancellationToken cancellationToken
 	)
 	{
@@ -216,7 +216,7 @@ internal sealed class FeedRunEngine(IServiceScopeFactory scopeFactory, ILogger<F
 		var window = feed.Strategy is Mirror mirror ? mirror.AbsenceThreshold : 1;
 		var absences = await deps.Feeds.GetAbsencesAsync(feed.Id, owned, window, cancellationToken);
 
-		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, absences, feed.Strategy, source);
+		var plan = FeedRunPlan.Compute(verdicts, unresolved.Count, owned, absences, feed.Strategy, completeness);
 		return new FeedRunSummary(verdicts, unresolved, plan.Delta, plan.Conclusiveness, plan.RunsRemaining);
 	}
 
