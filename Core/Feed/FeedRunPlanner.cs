@@ -59,13 +59,13 @@ internal sealed class FeedRunPlanner(
 		var resolved = new List<MediaQueryRow>();
 		foreach (var item in load.Items)
 		{
-			if (item is UnmatchedMedia unmatched)
+			if (item is IdentifiedMedia identified)
+			{
+				resolved.Add(MediaQueryRow.From(identified));
+			}
+			else if (item is UnmatchedMedia unmatched)
 			{
 				unresolved.Add(unmatched);
-			}
-			else
-			{
-				resolved.Add(MediaQueryRow.From(item));
 			}
 		}
 
