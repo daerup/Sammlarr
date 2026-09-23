@@ -1,6 +1,7 @@
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
+using Domain.Watchlist.Sync;
 using Harness;
 using TestInfrastructure;
 
@@ -16,7 +17,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenNothingIsQueued_QueuesTheJob()
 	{
-		var result = await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid())));
+		var result = await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
 
 		await Assert.That(result).IsOfUnionType<EnqueueResult, Queued>();
 	}
@@ -24,7 +25,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenTheSameFeedIsAlreadyQueued_FoldsIntoIt()
 	{
-		var request = new JobRequest(new RunFeed(FeedId.From(Guid.NewGuid())));
+		IJobRequest request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual());
 
 		var first = await Testee.EnqueueAsync(request);
 		var second = await Testee.EnqueueAsync(request);
@@ -37,7 +38,7 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenTheSameFeedIsEnqueuedConcurrently_QueuesItExactlyOnce()
 	{
-		var request = new JobRequest(new RunFeed(FeedId.From(Guid.NewGuid())));
+		IJobRequest request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual());
 
 		var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => Testee.EnqueueAsync(request)));
 
@@ -48,9 +49,9 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenADifferentFeedIsQueued_QueuesItSeparately()
 	{
-		await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid())));
+		await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
 
-		var result = await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid())));
+		var result = await Testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
 
 		await Assert.That(result).IsOfUnionType<EnqueueResult, Queued>();
 	}
@@ -58,8 +59,8 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_WhenAWatchlistSyncIsAlreadyQueued_FoldsIntoItBecauseTheOwnerIsTheKey()
 	{
-		var first = await Testee.EnqueueAsync(new SyncWatchlist());
-		var second = await Testee.EnqueueAsync(new SyncWatchlist());
+		var first = await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		var second = await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
 
 		var queued = await Assert.That(first).IsOfUnionType<EnqueueResult, Queued>();
 		var folded = await Assert.That(second).IsOfUnionType<EnqueueResult, AlreadyQueued>();

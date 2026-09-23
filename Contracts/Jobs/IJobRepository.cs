@@ -12,8 +12,10 @@ public interface IJobRepository
 	Task<Optional<RunningJob>> TakeNextAsync(DateTimeOffset now, CancellationToken cancellationToken = default);
 
 	Task CompleteAsync(JobId id, DateTimeOffset completedAt, CancellationToken cancellationToken = default);
+
+	Task FailAsync(JobId id, DateTimeOffset failedAt, CancellationToken cancellationToken = default);
 }
 
-public readonly record struct QueuedJob(JobKind Kind, string Key, UserId Owner, DateTimeOffset RunAfter);
+public readonly record struct QueuedJob(IJobRequest Request, UserId Owner, DateTimeOffset RunAfter);
 
-public readonly record struct RunningJob(JobId Id, JobKind Kind, string Key, UserId Owner);
+public readonly record struct RunningJob(JobId Id, IJobRequest Request, UserId Owner);

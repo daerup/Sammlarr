@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DB.Migrations
 {
     [DbContext(typeof(SammlarrDbContext))]
-    [Migration("20260923183751_AddJobsTable")]
+    [Migration("20260923204742_AddJobsTable")]
     partial class AddJobsTable
     {
         /// <inheritdoc />
@@ -383,6 +383,10 @@ namespace DB.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("OwnerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Request")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<long>("RunAfter")

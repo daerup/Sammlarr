@@ -1,6 +1,7 @@
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
+using Domain.Watchlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
@@ -38,8 +39,8 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var taken = await Assert.That(await Testee.TakeNextAsync(Now)).IsSome();
 
-		await Assert.That(taken!.Kind).IsEqualTo(JobKind.FeedRun);
-		await Assert.That(taken!.Key).IsEqualTo(feedId.Value.ToString());
+		await Assert.That(taken!.Request.Kind).IsEqualTo(JobKind.FeedRun);
+		await Assert.That(taken!.Request.Key).IsEqualTo(feedId.Value.ToString());
 		await Assert.That(taken!.Owner.Value).IsEqualTo(SammlarrTestHost.SeededAdmin.Id);
 	}
 
@@ -81,7 +82,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var taken = await Assert.That(await Testee.TakeNextAsync(Now.AddMinutes(2))).IsSome();
 
-		await Assert.That(taken!.Key).IsEqualTo(earlier.Value.ToString());
+		await Assert.That(taken!.Request.Key).IsEqualTo(earlier.Value.ToString());
 	}
 
 	[Test]
@@ -121,7 +122,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 	private async Task EnqueueAsync(FeedId feedId, DateTimeOffset at)
 	{
 		host.SetCurrentTime(at);
-		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(feedId));
+		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(feedId, new Manual()));
 	}
 
 	private async Task<int> AttemptsOfAsync(JobId id)

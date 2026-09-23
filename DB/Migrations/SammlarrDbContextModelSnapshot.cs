@@ -382,6 +382,10 @@ namespace DB.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Request")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("RunAfter")
                         .HasColumnType("INTEGER");
 
