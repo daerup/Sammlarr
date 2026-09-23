@@ -36,7 +36,7 @@ internal sealed class WatchlistSyncEngine(
 {
 	public async Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, CancellationToken cancellationToken = default)
 	{
-		if (await gate.EnterAsync(cancellationToken) is not Some<IDisposable>(var lease))
+		if (await gate.EnterAsync(currentUser.Id, cancellationToken) is not Some<IDisposable>(var lease))
 		{
 			return new WatchlistSyncAlreadyRunning();
 		}
