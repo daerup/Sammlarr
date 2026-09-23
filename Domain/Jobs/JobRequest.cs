@@ -10,6 +10,13 @@ public union JobRequest(RunFeed, SyncWatchlist)
 			RunFeed => JobKind.FeedRun,
 			SyncWatchlist => JobKind.WatchlistSync,
 		};
+
+	public string Key =>
+		this switch
+		{
+			RunFeed(var id) => id.Value.ToString(),
+			SyncWatchlist => string.Empty,
+		};
 }
 
 public readonly record struct RunFeed(FeedId Id);
