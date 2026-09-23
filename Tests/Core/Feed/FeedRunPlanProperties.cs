@@ -29,7 +29,7 @@ public class FeedRunPlanProperties
 		.SelectMany(situations =>
 			Gen.Select(
 				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
-				Gen.OneOfConst(FeedSource.Complete, FeedSource.Complete, FeedSource.Complete, FeedSource.Partial),
+				Gen.OneOfConst(Completeness.Complete, Completeness.Complete, Completeness.Complete, Completeness.Partial),
 				Gen.Int[0, 3],
 				(strategy, source, unresolved) => Build(situations, strategy, source, unresolved)
 			)
@@ -75,7 +75,7 @@ public class FeedRunPlanProperties
 	private static Scenario Build(
 		(QueryOutcome Outcome, bool Owned, bool InWatchlist, bool InBlacklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
-		FeedSource source,
+		Completeness source,
 		int unresolvedCount
 	)
 	{

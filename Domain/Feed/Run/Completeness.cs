@@ -1,6 +1,6 @@
 namespace Domain.Feed.Run;
 
-public enum FeedSource
+public enum Completeness
 {
 	Complete,
 	Partial,

@@ -10,7 +10,7 @@ public interface IFeedRunEngine
 	Task<FeedRunSummary> DryRunAsync(
 		Domain.Feed.Feed feed,
 		IReadOnlyList<MediaLookup> items,
-		FeedSource source,
+		Completeness source,
 		ICurrentUser user,
 		CancellationToken cancellationToken = default
 	);

@@ -514,7 +514,7 @@
                 if (reprocessed)
                 {
                     reprocessAt = _rawResults.Count * 2;
-                    await ReprocessAsync(FeedSource.Partial, ct);
+                    await ReprocessAsync(Completeness.Partial, ct);
                 }
 
                 if (reprocessed || sinceRender.ElapsedMilliseconds >= 150)
@@ -527,7 +527,7 @@
             _fetchTimer.Stop();
 
             _fetchState = FetchState.Success;
-            await ReprocessAsync(FeedSource.Complete, ct);
+            await ReprocessAsync(Completeness.Complete, ct);
             activity?.SetTag("sammlarr.feed.items", _rawResults.Count);
 
             if (_rawResults.Count == 0)
@@ -559,7 +559,7 @@
             if (_rawResults.Count > 0)
             {
                 _fetchState = FetchState.Success;
-                await ReprocessAsync(FeedSource.Partial, ct);
+                await ReprocessAsync(Completeness.Partial, ct);
                 Notifier.Warning("The provider became unavailable before the full list loaded. Showing partial results — retry to load the rest.", "Provider unavailable");
             }
             else
@@ -590,7 +590,7 @@
         _providerUnavailable = false;
     }
 
-    private async Task ReprocessAsync(FeedSource source, CancellationToken cancellationToken)
+    private async Task ReprocessAsync(Completeness source, CancellationToken cancellationToken)
     {
         _hasEnrollmentChanges = false;
 
@@ -603,9 +603,9 @@
         RebuildFilteredViews();
     }
 
-    private async Task HydrateGoneAsync(FeedRunSummary dryRun, FeedSource source, CancellationToken cancellationToken)
+    private async Task HydrateGoneAsync(FeedRunSummary dryRun, Completeness source, CancellationToken cancellationToken)
     {
-        if (source is FeedSource.Partial || !IsMirror)
+        if (source is Completeness.Partial || !IsMirror)
         {
             _goneResults = [];
             _goneShortfall = 0;
@@ -628,7 +628,7 @@
         _goneShortfall = gone.Count - _goneResults.Count;
     }
 
-    private FeedSource LoadedSource() => _providerUnavailable ? FeedSource.Partial : FeedSource.Complete;
+    private Completeness LoadedSource() => _providerUnavailable ? Completeness.Partial : Completeness.Complete;
 
     private Domain.Feed.Feed SynthesizeFeed()
     {
