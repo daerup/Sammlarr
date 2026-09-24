@@ -2,7 +2,7 @@
 	"stryker-config": {
 		"test-projects": ["../Tests/Integration/Integration.Tests.csproj"],
 		"mutate": [
-			"Data/Metadata/MediaMetadataFactory.cs"
+			"Data/Media/Metadata/MediaMetadataFactory.cs"
 		],
 		"test-runner": "mtp",
 		"reporters": ["progress", "html", "json"],
