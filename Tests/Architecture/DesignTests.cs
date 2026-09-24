@@ -15,7 +15,7 @@ public class DesignTests
 	}
 
 	[Test]
-	public async Task Design_OfPureInfrastructure_ExposesOnlyServiceModulesPublicly()
+	public async Task Design_OfPureInfrastructure_ExposesOnlyItsCompositionRootsPublicly()
 	{
 		await Types
 			.InAssemblies([Projects.Api, Projects.Db])
@@ -23,6 +23,8 @@ public class DesignTests
 			.ArePublic()
 			.And()
 			.AreNotNested()
+			.And()
+			.AreNotStatic()
 			.And()
 			.DoNotImplementInterface<Shared.DI.IServiceModule>()
 			.And()
