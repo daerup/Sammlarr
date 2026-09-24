@@ -8,20 +8,54 @@ using Domain.Providers;
 
 namespace Core.Feed;
 
-internal sealed class FeedService(IFeedRepository repository, IKeyedServiceIndex<FeedProvider, IFeedProvider> providers) : IFeedService
+internal sealed class FeedService(IFeedRepository repository, IFeedScheduler scheduler, IKeyedServiceIndex<FeedProvider, IFeedProvider> providers)
+	: IFeedService
 {
 	public Task<IReadOnlyList<Domain.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default) => repository.GetFeedsAsync(cancellationToken);
 
 	public Task<Domain.Feed.Feed?> GetFeedByIdAsync(FeedId id, CancellationToken cancellationToken = default) =>
 		repository.GetFeedByIdAsync(id, cancellationToken);
 
-	public Task<FeedId> CreateFeedAsync(FeedCreateData createData, CancellationToken cancellationToken = default) =>
-		repository.CreateFeedAsync(createData, cancellationToken);
+	public async Task<FeedId> CreateFeedAsync(FeedCreateData createData, CancellationToken cancellationToken = default)
+	{
+		var id = await repository.CreateFeedAsync(createData, cancellationToken);
+		await RescheduleAsync(id, cancellationToken);
+		return id;
+	}
 
-	public Task UpdateFeedAsync(FeedId id, FeedUpdateData updateData, CancellationToken cancellationToken = default) =>
-		repository.UpdateFeedAsync(id, updateData, cancellationToken);
+	public async Task UpdateFeedAsync(FeedId id, FeedUpdateData updateData, CancellationToken cancellationToken = default)
+	{
+		await repository.UpdateFeedAsync(id, updateData, cancellationToken);
+		await RescheduleAsync(id, cancellationToken);
+	}
 
-	public Task DeleteFeedAsync(FeedId id, CancellationToken cancellationToken = default) => repository.DeleteFeedAsync(id, cancellationToken);
+	public async Task DeleteFeedAsync(FeedId id, CancellationToken cancellationToken = default)
+	{
+		if (await repository.GetFeedByIdAsync(id, cancellationToken) is null)
+		{
+			return;
+		}
+
+		await scheduler.UnscheduleAsync(id, cancellationToken);
+		await repository.DeleteFeedAsync(id, cancellationToken);
+	}
+
+	private async Task RescheduleAsync(FeedId id, CancellationToken cancellationToken)
+	{
+		if (await repository.GetFeedByIdAsync(id, cancellationToken) is not { } feed)
+		{
+			return;
+		}
+
+		if (feed is { Enabled: true, Schedule: Scheduled schedule })
+		{
+			await scheduler.ScheduleAsync(id, schedule, cancellationToken);
+		}
+		else
+		{
+			await scheduler.UnscheduleAsync(id, cancellationToken);
+		}
+	}
 
 	public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(Domain.Feed.Feed feed, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
