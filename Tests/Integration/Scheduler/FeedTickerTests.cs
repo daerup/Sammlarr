@@ -17,6 +17,7 @@ public class FeedTickerTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private const string Nightly = "0 0 3 * * *";
 	private const string Hourly = "0 0 * * * *";
+	private const string Macro = "@daily";
 
 	private ServiceProvider? _scheduling;
 
@@ -78,11 +79,22 @@ public class FeedTickerTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task UnscheduleAsync_WhenTheFeedWasNeverScheduled_DoesNothing()
+	public async Task UnscheduleAsync_WhenTheFeedWasNeverScheduled_LeavesTheOtherTickersAlone()
 	{
+		var scheduled = FeedId.From(Guid.NewGuid());
+		await Testee.ScheduleAsync(scheduled, new Scheduled(Nightly));
+
 		await Testee.UnscheduleAsync(FeedId.From(Guid.NewGuid()));
 
-		await Assert.That(await TickersAsync()).IsEmpty();
+		await Assert.That((await SingleTickerAsync()).Id).IsEqualTo(scheduled.Value);
+	}
+
+	[Test]
+	public async Task ScheduleAsync_WhenTheSchedulerRejectsTheCron_ThrowsRatherThanLeavingTheFeedUnscheduled()
+	{
+		var id = FeedId.From(Guid.NewGuid());
+
+		await Assert.That(async () => await Testee.ScheduleAsync(id, new Scheduled(Macro))).Throws<InvalidOperationException>();
 	}
 
 	private async Task<CronTickerEntity> SingleTickerAsync() => (await TickersAsync()).Single();
