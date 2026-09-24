@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
-namespace DB.Data.Metadata;
+namespace DB.Data.Media.Metadata;
 
 internal class MetadataModule : IServiceModule
 {

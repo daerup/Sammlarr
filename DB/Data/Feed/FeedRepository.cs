@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using Contracts.Feed;
-using DB.Data.FeedRun;
+using DB.Data.Feed.Run;
 using DB.Data.Watchlist;
 using Domain.Feed;
 using Domain.Feed.Run;

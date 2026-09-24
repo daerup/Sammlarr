@@ -3,7 +3,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
 
-namespace DB.Data.FeedRun;
+namespace DB.Data.Feed.Run;
 
 internal static class FeedRunProjection
 {

@@ -8,6 +8,7 @@ internal class FeedModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddModule<Run.FeedRunModule>();
 		services.AddScoped<IFeedRepository, FeedRepository>();
 		services.AddScoped<IModelConfiguration, FeedRowConfiguration>();
 	}

@@ -1,7 +1,7 @@
 using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
-using DB.Data.Metadata;
+using DB.Data.Media.Metadata;
 using Domain.Media;
 using Domain.Providers;
 using Harness;

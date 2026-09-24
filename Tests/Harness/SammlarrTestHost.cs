@@ -14,7 +14,7 @@ using DB;
 using DB.Data.Access;
 using DB.Data.Identity;
 using DB.Data.Media;
-using DB.Data.Metadata;
+using DB.Data.Media.Metadata;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;

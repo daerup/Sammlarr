@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
-namespace DB.Data.FeedRun;
+namespace DB.Data.Feed.Run;
 
 internal class FeedRunModule : IServiceModule
 {

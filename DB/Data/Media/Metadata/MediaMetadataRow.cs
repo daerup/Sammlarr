@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using DB.Data.Media;
 using Domain.Media;
 
-namespace DB.Data.Metadata;
+namespace DB.Data.Media.Metadata;
 
 internal abstract record MediaMetadataRow : IAuditable
 {
