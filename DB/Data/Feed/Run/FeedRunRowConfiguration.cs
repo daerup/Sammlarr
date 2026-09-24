@@ -2,7 +2,7 @@ using DB.Conversion.Feed;
 using DB.Data.Feed;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Data.FeedRun;
+namespace DB.Data.Feed.Run;
 
 internal sealed class FeedRunRowConfiguration : IModelConfiguration
 {

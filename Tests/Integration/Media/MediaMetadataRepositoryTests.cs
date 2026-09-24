@@ -1,6 +1,6 @@
 using Contracts;
 using DB.Data.Media;
-using DB.Data.Metadata;
+using DB.Data.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;

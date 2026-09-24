@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Providers;
 
-namespace DB.Data.Metadata;
+namespace DB.Data.Media.Metadata;
 
 internal record MediaRatingRow
 {

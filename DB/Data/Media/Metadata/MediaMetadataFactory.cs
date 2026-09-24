@@ -2,7 +2,7 @@ using Contracts;
 using Domain.Media;
 using Domain.Media.Metadata;
 
-namespace DB.Data.Metadata;
+namespace DB.Data.Media.Metadata;
 
 internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 {

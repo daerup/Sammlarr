@@ -5,7 +5,7 @@ using DB.Data.Blacklist;
 using DB.Data.Cleanup;
 using DB.Data.Identity;
 using DB.Data.Media;
-using DB.Data.Metadata;
+using DB.Data.Media.Metadata;
 using DB.Data.Watchlist;
 using DB.Data.Watchlist.Outbox;
 using Domain.Identity;

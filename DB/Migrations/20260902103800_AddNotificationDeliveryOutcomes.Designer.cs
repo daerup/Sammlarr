@@ -293,7 +293,7 @@ namespace DB.Migrations
                     b.ToTable("Media");
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.MediaMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.MediaMetadataRow", b =>
                 {
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
@@ -348,7 +348,7 @@ namespace DB.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.MediaRatingRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.MediaRatingRow", b =>
                 {
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
@@ -584,9 +584,9 @@ namespace DB.Migrations
                     b.ToTable("Watchlist");
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.MovieMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.MovieMetadataRow", b =>
                 {
-                    b.HasBaseType("DB.Data.Metadata.MediaMetadataRow");
+                    b.HasBaseType("DB.Data.Media.Metadata.MediaMetadataRow");
 
                     b.Property<TimeSpan>("Runtime")
                         .HasColumnType("TEXT");
@@ -594,9 +594,9 @@ namespace DB.Migrations
                     b.HasDiscriminator().HasValue("Movie");
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.ShowMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.ShowMetadataRow", b =>
                 {
-                    b.HasBaseType("DB.Data.Metadata.MediaMetadataRow");
+                    b.HasBaseType("DB.Data.Media.Metadata.MediaMetadataRow");
 
                     b.Property<int>("Episodes")
                         .HasColumnType("INTEGER");
@@ -665,20 +665,20 @@ namespace DB.Migrations
                     b.Navigation("Media");
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.MediaMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.MediaMetadataRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
                         .WithOne("Metadata")
-                        .HasForeignKey("DB.Data.Metadata.MediaMetadataRow", "MediaId")
+                        .HasForeignKey("DB.Data.Media.Metadata.MediaMetadataRow", "MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Media");
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.MediaRatingRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.MediaRatingRow", b =>
                 {
-                    b.HasOne("DB.Data.Metadata.MediaMetadataRow", "Metadata")
+                    b.HasOne("DB.Data.Media.Metadata.MediaMetadataRow", "Metadata")
                         .WithMany("Ratings")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -774,7 +774,7 @@ namespace DB.Migrations
                     b.Navigation("Metadata");
                 });
 
-            modelBuilder.Entity("DB.Data.Metadata.MediaMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.Metadata.MediaMetadataRow", b =>
                 {
                     b.Navigation("Ratings");
                 });

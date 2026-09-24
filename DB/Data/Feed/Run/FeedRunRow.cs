@@ -1,7 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 
-namespace DB.Data.FeedRun;
+namespace DB.Data.Feed.Run;
 
 internal record FeedRunRow : Entity<Guid>, IUserOwned
 {

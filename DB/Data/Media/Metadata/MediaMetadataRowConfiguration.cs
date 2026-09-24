@@ -1,7 +1,7 @@
 using Domain.Media;
 using Microsoft.EntityFrameworkCore;
 
-namespace DB.Data.Metadata;
+namespace DB.Data.Media.Metadata;
 
 internal sealed class MediaMetadataRowConfiguration : IModelConfiguration
 {
