@@ -9,7 +9,6 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 {
 	private const string FeedRunPrefix = "feed:";
 	private const string WatchlistSyncPrefix = "sync:";
-	private const string ManualLiteral = "manual";
 
 	public JobRequestConverter()
 		: base(request => ToText(request), text => FromText(text)) { }
@@ -17,7 +16,7 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 	private static string ToText(IJobRequest request) =>
 		request switch
 		{
-			RunFeed(var id, var trigger) => $"{FeedRunPrefix}{id.Value}:{TriggerToText(trigger)}",
+			RunFeed(var id, var trigger) => $"{FeedRunPrefix}{id.Value}:{trigger}",
 			SyncWatchlist(var trigger) => $"{WatchlistSyncPrefix}{trigger}",
 			_ => throw new NotSupportedException($"{request.GetType().Name} has no stored form"),
 		};
@@ -28,15 +27,6 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 	private static IJobRequest FeedRunFromText(string text)
 	{
 		var separator = text.IndexOf(':', StringComparison.Ordinal);
-		var id = FeedId.From(Guid.Parse(text[..separator]));
-		var trigger = text[(separator + 1)..];
-		return new RunFeed(id, trigger == ManualLiteral ? new Manual() : new Scheduled(trigger));
+		return new RunFeed(FeedId.From(Guid.Parse(text[..separator])), FeedRunTrigger.Parse(text[(separator + 1)..]));
 	}
-
-	private static string TriggerToText(FeedRunTrigger trigger) =>
-		trigger switch
-		{
-			Scheduled scheduled => scheduled.ToString(),
-			Manual => ManualLiteral,
-		};
 }
