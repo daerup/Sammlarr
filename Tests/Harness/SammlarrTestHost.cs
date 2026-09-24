@@ -72,6 +72,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal TestCurrentUser CurrentUser { get; } = new();
 
+	internal SqliteConnection Connection => _connection;
+
 	internal HttpStub HttpStub { get; } = new();
 
 	private ServiceProvider DbOnlyProvider => _dbOnlyProvider ??= BuildDbOnlyProvider();
