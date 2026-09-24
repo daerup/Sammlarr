@@ -7,6 +7,7 @@ using API.Plex;
 using API.Tmdb;
 using Contracts;
 using Contracts.Auth;
+using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Messaging;
 using Core;
@@ -503,6 +504,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
 		services.AddModule<ApiModule>();
+		services.AddSingleton<RecordingFeedScheduler>();
+		services.AddSingleton<IFeedScheduler>(sp => sp.GetRequiredService<RecordingFeedScheduler>());
 		services.AddKeyedSingleton<IOAuthProvider>(AuthProvider.Plex, _oauth);
 		services.AddSingleton<ISessionInvalidator>(_sessionInvalidator);
 		services.ConfigureAll<HttpStandardResilienceOptions>(options => options.Retry.ShouldHandle = _ => ValueTask.FromResult(false));
