@@ -19,7 +19,8 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
-	private JobRunner Testee => new(host.Resolve<IServiceScopeFactory>(), new JobSignal(), host.Resolve<IDateTimeProvider>(), NullLogger<JobRunner>.Instance);
+	private JobRunner Testee =>
+		new(host.Resolve<IServiceScopeFactory>(), new JobSignal(), new JobRunnerStatus(), host.Resolve<IDateTimeProvider>(), NullLogger<JobRunner>.Instance);
 
 	[Test]
 	public async Task RunNextAsync_WhenNothingIsQueued_DoesNothing()

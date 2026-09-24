@@ -10,7 +10,11 @@ internal sealed class HealthModule : IServiceModule
 	{
 		services.AddRequestTimeouts(timeouts => timeouts.AddPolicy(HealthEndpoints.Policy, TimeSpan.FromSeconds(5)));
 		services.AddOutputCache(caching => caching.AddPolicy(HealthEndpoints.Policy, policy => policy.Expire(TimeSpan.FromSeconds(10))));
-		services.AddHealthChecks().AddCheck("self", static () => HealthCheckResult.Healthy(), ["live"]);
+		services
+			.AddHealthChecks()
+			.AddCheck("self", static () => HealthCheckResult.Healthy(), ["live"])
+			.AddCheck<JobRunnerLivenessCheck>("job-runner-liveness", tags: ["live"])
+			.AddCheck<JobRunnerHealthCheck>("job-runner");
 	}
 }
 
