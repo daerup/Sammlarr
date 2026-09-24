@@ -1,3 +1,14 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.db binary
 
 # Verify snapshots: never line-ending-convert (keeps CRLF/LF stable for the comparer)
 *.verified.txt -text
