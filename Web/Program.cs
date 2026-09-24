@@ -1,11 +1,13 @@
 using API;
 using Core;
 using DB;
+using DB.Scheduling;
 using Domain.Identity;
 using Messaging;
 using Observability;
 using Observability.Diagnostics;
 using Shared.DI;
+using TickerQ.DependencyInjection;
 using UI;
 using Web;
 using Web.Auth;
@@ -23,6 +25,7 @@ builder.Services.AddModule<ApiModule>();
 builder.Services.AddModule<MessagingModule>();
 builder.Services.AddModule<UiModule>();
 builder.Services.AddModule<WebModule>();
+builder.Services.AddSammlarrScheduling(builder.Configuration);
 builder.Host.UseSammlarrMessaging(builder.Configuration);
 
 if (builder.Environment.IsDevelopment())
@@ -31,6 +34,7 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+app.UseTickerQ();
 
 if (app.Environment.IsDevelopment())
 {
