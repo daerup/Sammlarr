@@ -12,7 +12,11 @@ internal sealed class TickerFeedScheduler(ICronTickerManager<CronTickerEntity> t
 	public async Task ScheduleAsync(FeedId id, Scheduled schedule, CancellationToken cancellationToken = default)
 	{
 		await UnscheduleAsync(id, cancellationToken);
-		await tickers.AddAsync(Ticker(id, schedule), cancellationToken);
+		var added = await tickers.AddAsync(Ticker(id, schedule), cancellationToken);
+		if (!added.IsSucceeded)
+		{
+			throw new InvalidOperationException($"Feed {id} could not be scheduled on '{schedule}'.", added.Exception);
+		}
 	}
 
 	public async Task UnscheduleAsync(FeedId id, CancellationToken cancellationToken = default) => await tickers.DeleteAsync(id.Value, cancellationToken);
