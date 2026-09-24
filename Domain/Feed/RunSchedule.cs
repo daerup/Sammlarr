@@ -23,4 +23,16 @@ public readonly record struct Scheduled
 	public override string ToString() => _raw;
 }
 
-public union FeedRunTrigger(Manual, Scheduled);
+public union FeedRunTrigger(Manual, Scheduled)
+{
+	private const string ManualLiteral = "manual";
+
+	public override string ToString() =>
+		this switch
+		{
+			Scheduled scheduled => scheduled.ToString(),
+			Manual => ManualLiteral,
+		};
+
+	public static FeedRunTrigger Parse(string text) => text == ManualLiteral ? new Manual() : new Scheduled(text);
+}
