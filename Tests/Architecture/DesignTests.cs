@@ -24,7 +24,7 @@ public class DesignTests
 			.And()
 			.AreNotNested()
 			.And()
-			.AreNotStatic()
+			.DoNotHaveNameEndingWith("Extensions")
 			.And()
 			.DoNotImplementInterface<Shared.DI.IServiceModule>()
 			.And()

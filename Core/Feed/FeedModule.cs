@@ -9,6 +9,7 @@ internal class FeedModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddModule<Scheduling.FeedSchedulingModule>();
 		services.AddSingleton<FeedRunGate>();
 		services.AddTracedScoped<IFeedRunPlanner, FeedRunPlanner>();
 		services.AddTracedScoped<IFeedRunEngine, FeedRunEngine>();

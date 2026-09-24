@@ -5,7 +5,7 @@ using Shared.DI;
 
 namespace DB.Scheduling;
 
-public static class SchedulingServiceExtensions
+public static class SchedulingRegistrationExtensions
 {
 	extension(IServiceCollection services)
 	{
