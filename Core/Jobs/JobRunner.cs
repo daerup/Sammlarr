@@ -9,7 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Jobs;
 
-internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, IDateTimeProvider clock, ILogger<JobRunner> logger) : BackgroundService
+internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, JobRunnerStatus status, IDateTimeProvider clock, ILogger<JobRunner> logger)
+	: BackgroundService
 {
 	private static readonly MethodInfo Handle = typeof(JobRunner).GetMethod(nameof(HandleAsync), BindingFlags.NonPublic | BindingFlags.Static)!;
 
@@ -17,15 +18,49 @@ internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, I
 	{
 		await using var shutdown = stoppingToken.Register(signal.Complete);
 
-		await RequeueRunningAsync(stoppingToken);
-		signal.Raise();
+		using var running = status.Running();
 
-		await foreach (var _ in signal.NudgesAsync().WithCancellation(stoppingToken))
+		try
 		{
-			if (await TryRunNextAsync(stoppingToken))
+			await GuardAsync(() => RequeueRunningAsync(stoppingToken), "Jobs left running by a previous process could not be recovered", stoppingToken);
+			signal.Raise();
+
+			await foreach (var _ in signal.NudgesAsync().WithCancellation(stoppingToken))
 			{
-				signal.Raise();
+				await GuardAsync(() => PumpAsync(stoppingToken), "The job runner could not take the next job and will retry when one is enqueued", stoppingToken);
 			}
+		}
+		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
+		catch (Exception exception)
+		{
+			logger.LogCritical(exception, "The job runner stopped and no queued work will run until the app restarts");
+		}
+	}
+
+	private async Task GuardAsync(Func<Task> work, string whatFailed, CancellationToken cancellationToken)
+	{
+		try
+		{
+			await work();
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			throw;
+		}
+		catch (Exception exception)
+		{
+			status.Failed(clock.Now);
+			logger.LogError(exception, whatFailed);
+		}
+	}
+
+	private async Task PumpAsync(CancellationToken cancellationToken)
+	{
+		var ran = await TryRunNextAsync(cancellationToken);
+		status.Succeeded();
+		if (ran)
+		{
+			signal.Raise();
 		}
 	}
 
@@ -53,12 +88,17 @@ internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, I
 		try
 		{
 			await DispatchAsync(scope.ServiceProvider, request, cancellationToken);
-			await jobs.CompleteAsync(job.Id, clock.Now, cancellationToken);
+			await jobs.CompleteAsync(job.Id, clock.Now, CancellationToken.None);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			logger.LogInformation("Job {Kind} {Key} was interrupted by shutdown and stays running for recovery", request.Kind, request.Key);
+			throw;
 		}
 		catch (Exception exception)
 		{
-			logger.LogError(exception, "Job {Kind} {Key} failed", job.Request.Kind, job.Request.Key);
-			await jobs.FailAsync(job.Id, clock.Now, cancellationToken);
+			logger.LogError(exception, "Job {Kind} {Key} failed", request.Kind, request.Key);
+			await jobs.FailAsync(job.Id, clock.Now, CancellationToken.None);
 		}
 
 		return true;
