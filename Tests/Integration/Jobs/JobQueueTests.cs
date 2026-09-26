@@ -1,8 +1,11 @@
+using Contracts;
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Watchlist.Sync;
 using Harness;
+using Microsoft.EntityFrameworkCore;
+using Shared.Options;
 using TestInfrastructure;
 
 namespace Integration.Tests.Jobs;
@@ -65,5 +68,64 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 		var queued = await Assert.That(first).IsOfUnionType<EnqueueResult, Queued>();
 		var folded = await Assert.That(second).IsOfUnionType<EnqueueResult, AlreadyQueued>();
 		await Assert.That(folded!.Id).IsEqualTo(queued!.Id);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenAWatchlistSyncIsArmed_WaitsOutTheGraceBeforeItIsDue()
+	{
+		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+
+		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+
+		await Assert.That(await RunAfterAsync()).IsEqualTo(armedAt + Options.Grace);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenASyncIsRearmedInsideTheWindow_PushesTheGraceOut()
+	{
+		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(1));
+
+		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+
+		await Assert.That(await RunAfterAsync()).IsEqualTo(armedAt + TimeSpan.FromMinutes(1) + Options.Grace);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenASyncIsRearmedForever_StillFiresAtMaxWait()
+	{
+		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		var ceiling = armedAt + Options.Grace + Options.MaxWait;
+
+		foreach (var minute in new[] { 1, 31 })
+		{
+			host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(minute));
+			await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		}
+
+		await Assert.That(await RunAfterAsync()).IsEqualTo(ceiling);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenTheSameFeedIsRequeued_DoesNotDelayIt()
+	{
+		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		IJobRequest request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual());
+		await Testee.EnqueueAsync(request);
+		host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(5));
+
+		await Testee.EnqueueAsync(request);
+
+		await Assert.That(await RunAfterAsync()).IsEqualTo(armedAt);
+	}
+
+	private SchedulerOptions Options => host.Resolve<SchedulerOptions>();
+
+	private async Task<DateTimeOffset> RunAfterAsync()
+	{
+		await using var context = await host.ContextFactory.CreateDbContextAsync();
+		return await context.Jobs.Select(row => row.RunAfter).SingleAsync();
 	}
 }

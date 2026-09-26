@@ -16,6 +16,6 @@ public interface IJobRepository
 	Task FailAsync(JobId id, DateTimeOffset failedAt, CancellationToken cancellationToken = default);
 }
 
-public readonly record struct QueuedJob(IJobRequest Request, UserId Owner, DateTimeOffset RunAfter);
+public readonly record struct QueuedJob(IJobRequest Request, UserId Owner, DateTimeOffset RunAfter, TimeSpan MaxWait);
 
 public readonly record struct RunningJob(JobId Id, IJobRequest Request, UserId Owner);
