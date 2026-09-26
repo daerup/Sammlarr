@@ -5,6 +5,7 @@ using Core.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Watchlist.Sync;
+using Shared.Options;
 using TestInfrastructure;
 
 namespace Core.Tests.Jobs;
@@ -21,7 +22,7 @@ public class JobQueueTests
 
 		await testee.EnqueueAsync(new RunFeed(feedId, new Manual()));
 
-		jobs.EnqueueAsync(new QueuedJob(new RunFeed(feedId, new Manual()), TestCurrentUser.DefaultId, Now), Any()).WasCalled(Times.Once);
+		jobs.EnqueueAsync(new QueuedJob(new RunFeed(feedId, new Manual()), TestCurrentUser.DefaultId, Now, TimeSpan.Zero), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -31,8 +32,11 @@ public class JobQueueTests
 
 		await testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
 
-		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ManualTrigger()), TestCurrentUser.DefaultId, Now), Any()).WasCalled(Times.Once);
+		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ManualTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Any())
+			.WasCalled(Times.Once);
 	}
+
+	private static SchedulerOptions Options => new();
 
 	private static (JobQueue Testee, Mock<IJobRepository> Jobs) BuildTestee()
 	{
@@ -41,6 +45,6 @@ public class JobQueueTests
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
 
-		return (new JobQueue(jobs.Object, new JobSignal(), new TestCurrentUser(), clock.Object), jobs);
+		return (new JobQueue(jobs.Object, new JobSignal(), new TestCurrentUser(), clock.Object, Options), jobs);
 	}
 }

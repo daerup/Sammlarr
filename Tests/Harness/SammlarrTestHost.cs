@@ -503,6 +503,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		));
 		services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<SammlarrDbContext>>().CreateDbContext());
 
+		services.AddSingleton(new SchedulerOptions());
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
 		services.AddModule<ApiModule>();

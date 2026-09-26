@@ -12,7 +12,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		if (await FindQueuedAsync(context, job, cancellationToken) is { } queued)
 		{
-			return new AlreadyQueued(JobId.From(queued));
+			return await RearmAsync(context, queued, job, cancellationToken);
 		}
 
 		var row = new JobRow
@@ -37,7 +37,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			await using var reread = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 			if (await FindQueuedAsync(reread, job, cancellationToken) is { } raced)
 			{
-				return new AlreadyQueued(JobId.From(raced));
+				return await RearmAsync(reread, raced, job, cancellationToken);
 			}
 
 			throw;
@@ -100,15 +100,22 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, outcome).SetProperty(row => row.UpdatedAt, settledAt), cancellationToken);
 	}
 
-	private static async Task<Guid?> FindQueuedAsync(SammlarrDbContext context, QueuedJob job, CancellationToken cancellationToken)
+	private static async Task<JobRow?> FindQueuedAsync(SammlarrDbContext context, QueuedJob job, CancellationToken cancellationToken)
 	{
 		var owner = job.Owner.Value;
 		var kind = job.Request.Kind;
 		var key = job.Request.Key;
-		return await context
-			.Jobs.AsNoTracking()
-			.Where(row => row.Kind == kind && row.Key == key && row.OwnerId == owner && row.State == JobState.Queued)
-			.Select(row => (Guid?)row.Id)
-			.FirstOrDefaultAsync(cancellationToken);
+		return await context.Jobs.FirstOrDefaultAsync(
+			row => row.Kind == kind && row.Key == key && row.OwnerId == owner && row.State == JobState.Queued,
+			cancellationToken
+		);
+	}
+
+	private static async Task<EnqueueResult> RearmAsync(SammlarrDbContext context, JobRow queued, QueuedJob job, CancellationToken cancellationToken)
+	{
+		var ceiling = queued.FirstArmedAt + job.MaxWait;
+		queued.RunAfter = job.RunAfter < ceiling ? job.RunAfter : ceiling;
+		await context.SaveChangesAsync(cancellationToken);
+		return new AlreadyQueued(JobId.From(queued.Id));
 	}
 }
