@@ -14,7 +14,7 @@ internal static class NotificationSampleContext
 	private static readonly IReadOnlyList<NotificationMedia> SyncedMedia =
 	[
 		new("sample-1", "The Matrix", MediaType.Movie, 1999, "Added locally"),
-		new("sample-2", "Dune", MediaType.Movie, 2021, "Queued to add remotely"),
+		new("sample-2", "Dune", MediaType.Movie, 2021, "Added remotely"),
 		new("sample-3", "Breaking Bad", MediaType.Show, 2008, "Removed locally"),
 	];
 
@@ -29,7 +29,7 @@ internal static class NotificationSampleContext
 	private static BaseNotification Sample(NotificationEventType eventType) =>
 		eventType switch
 		{
-			NotificationEventType.WatchlistSynced => new WatchlistSyncedEvent(SampleUser, SampleMoment, [SampleMedia, SampleMedia], [], [SampleMedia], []),
+			NotificationEventType.WatchlistSynced => new WatchlistSyncedEvent(SampleUser, SampleMoment, [SampleMedia, SampleMedia], [], [SampleMedia], [], []),
 			NotificationEventType.WatchlistSyncFailed => new WatchlistSyncFailedEvent(SampleUser, SampleMoment, "Provider timed out"),
 			NotificationEventType.FeedRunCompleted => new FeedRunCompletedEvent(SampleUser, SampleMoment, SampleFeed, 2, 1),
 			NotificationEventType.FeedRunFailed => new FeedRunFailedEvent(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),

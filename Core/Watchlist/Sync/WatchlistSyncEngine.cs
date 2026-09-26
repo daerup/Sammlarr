@@ -1,13 +1,12 @@
 using System.Diagnostics;
-using Contracts;
+using Contracts.DI;
 using Contracts.Identity;
-using Contracts.Messaging;
+using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Domain.Media;
-using Domain.Notifications.Events;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -23,12 +22,15 @@ internal sealed class WatchlistSyncEngine(
 	IProviderConfigRepository config,
 	IWatchlistRepository repo,
 	IWatchlistOutbox outbox,
-	IMessagePublisher publisher,
-	IDateTimeProvider clock,
+	IMediaRepository media,
+	IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider> providers,
+	WatchlistSyncAnnouncer announcer,
 	ICurrentUser currentUser,
 	ILogger<WatchlistSyncEngine> logger
 ) : IWatchlistSyncEngine
 {
+	private const int MaxAttempts = 5;
+
 	public async Task<WatchlistSyncResult> SyncAsync(WatchlistSyncTrigger trigger, CancellationToken cancellationToken = default)
 	{
 		if (await gate.EnterAsync(currentUser.Id, cancellationToken) is not Some<IDisposable>(var lease))
@@ -52,7 +54,7 @@ internal sealed class WatchlistSyncEngine(
 		if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
 		{
 			activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
-			await publisher.PublishAsync(new WatchlistSyncFailedEvent(currentUser.Id, clock.Now, remoteFailed.Reason), cancellationToken);
+			await announcer.NotifySyncFailedAsync(remoteFailed.Reason, cancellationToken);
 		}
 		return syncResult;
 	}
@@ -62,41 +64,102 @@ internal sealed class WatchlistSyncEngine(
 		var pulledAdds = await repo.AddAsync(plan.Pull.Adds, new RemoteOrigin(provider), cancellationToken);
 		var pulledRemoves = await repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
 
-		await QueuePushesAsync(plan.Push, cancellationToken);
-		await PublishNotificationsAsync(pulledAdds, pulledRemoves, plan.Push, cancellationToken);
+		var pushed = await DrainAsync(provider, cancellationToken);
+		await announcer.NotifySyncedAsync(pulledAdds, pulledRemoves, pushed, cancellationToken);
 
 		logger.LogInformation(
-			"Watchlist sync {Provider} complete: pulled {Pulled}, removed {Removed}, queued {Queued}",
+			"Watchlist sync {Provider} complete: pulled {Pulled}, removed {Removed}, pushed {Pushed}, failed {Failed}",
 			provider,
 			plan.Pull.Adds.Count,
 			plan.Pull.Removes.Count,
-			plan.Push.Count
+			pushed.Count(outcome => outcome.Kind is WatchlistOutboxEventKind.Pushed),
+			pushed.Count(outcome => outcome.Kind is not WatchlistOutboxEventKind.Pushed)
 		);
 		return plan;
 	}
 
-	private async Task PublishNotificationsAsync(
-		IReadOnlyList<MediaId> pulledAdds,
-		IReadOnlyList<MediaId> pulledRemoves,
-		WatchlistDelta push,
+	private async Task<IReadOnlyList<PushOutcome>> DrainAsync(WatchlistProvider provider, CancellationToken cancellationToken)
+	{
+		var pending = (await outbox.GetAsync(cancellationToken)).Where(entry => entry.Status is WatchlistOutboxState.Pending).ToList();
+		if (pending.Count == 0)
+		{
+			return [];
+		}
+
+		var externals = await media.GetExternalsAsync([.. pending.Select(entry => entry.MediaId)], provider.AsMediaProvider(), cancellationToken);
+		List<PushOutcome> outcomes = [];
+		foreach (var stranded in pending.Where(entry => !externals.ContainsKey(entry.MediaId)))
+		{
+			outcomes.Add(await SettleAsync(stranded, WatchlistOutboxEventKind.Abandoned, cancellationToken));
+		}
+
+		foreach (var batch in pending.Where(entry => externals.ContainsKey(entry.MediaId)).GroupBy(entry => entry.Action))
+		{
+			outcomes.AddRange(await PushBatchAsync(providers[provider], batch.Key, [.. batch], externals, cancellationToken));
+		}
+
+		return outcomes;
+	}
+
+	private async Task<IReadOnlyList<PushOutcome>> PushBatchAsync(
+		IWatchlistProvider provider,
+		WatchlistOperationAction action,
+		IReadOnlyList<WatchlistOutboxEntry> entries,
+		IReadOnlyDictionary<MediaId, IExternalMediaId> externals,
 		CancellationToken cancellationToken
 	)
 	{
-		var now = clock.Now;
-		if (pulledAdds.Count + pulledRemoves.Count + push.Adds.Count + push.Removes.Count > 0)
+		var awaiting = entries.ToDictionary(entry => externals[entry.MediaId].Value);
+		List<PushOutcome> outcomes = [];
+		await foreach (var ack in Send(provider, action, [.. entries.Select(entry => externals[entry.MediaId])], cancellationToken))
 		{
-			await publisher.PublishAsync(new WatchlistSyncedEvent(currentUser.Id, now, pulledAdds, pulledRemoves, push.Adds, push.Removes), cancellationToken);
+			var acked = awaiting[ack.ExternalId.Value];
+			awaiting.Remove(ack.ExternalId.Value);
+			outcomes.Add(await SettleAsync(acked, KindFor(acked, ack.Success), cancellationToken));
 		}
+
+		foreach (var unacked in awaiting.Values)
+		{
+			outcomes.Add(await SettleAsync(unacked, KindFor(unacked, delivered: false), cancellationToken));
+		}
+
+		return outcomes;
 	}
 
-	private async Task QueuePushesAsync(WatchlistDelta push, CancellationToken cancellationToken)
+	private async Task<PushOutcome> SettleAsync(WatchlistOutboxEntry entry, WatchlistOutboxEventKind kind, CancellationToken cancellationToken)
 	{
-		await outbox.EnqueueAsync(WatchlistOperationAction.Add, push.Adds, cancellationToken);
-		await outbox.EnqueueAsync(WatchlistOperationAction.Remove, push.Removes, cancellationToken);
-
-		foreach (var mediaId in push.All)
+		if (kind is WatchlistOutboxEventKind.Pushed)
 		{
-			await publisher.PublishAsync(new WatchlistPushRequest(currentUser.Id, mediaId), cancellationToken);
+			await outbox.DropAsync([entry.MediaId], cancellationToken);
 		}
+		else
+		{
+			await outbox.RecordFailedAttemptAsync(
+				[entry.MediaId],
+				kind is WatchlistOutboxEventKind.Abandoned ? WatchlistOutboxState.Failed : WatchlistOutboxState.Pending,
+				cancellationToken
+			);
+		}
+
+		var outcome = new PushOutcome(entry.MediaId, entry.Action, kind);
+		announcer.NotifyPushed(outcome);
+		return outcome;
 	}
+
+	private static WatchlistOutboxEventKind KindFor(WatchlistOutboxEntry entry, bool delivered) =>
+		delivered ? WatchlistOutboxEventKind.Pushed
+		: entry.Attempts + 1 >= MaxAttempts ? WatchlistOutboxEventKind.Abandoned
+		: WatchlistOutboxEventKind.Retrying;
+
+	private static IAsyncEnumerable<WatchlistPushAck> Send(
+		IWatchlistProvider provider,
+		WatchlistOperationAction action,
+		IReadOnlyList<IExternalMediaId> externals,
+		CancellationToken cancellationToken
+	) =>
+		action switch
+		{
+			WatchlistOperationAction.Add => provider.AddToWatchlistAsync(externals, cancellationToken),
+			WatchlistOperationAction.Remove => provider.RemoveFromWatchlistAsync(externals, cancellationToken),
+		};
 }

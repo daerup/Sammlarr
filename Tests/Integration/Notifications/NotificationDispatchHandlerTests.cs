@@ -27,7 +27,7 @@ public class NotificationDispatchHandlerTests
 			new NotificationSubscription(Guid.NewGuid(), targetA, [NotificationEventType.WatchlistSynced], NotificationTemplate.None),
 			new NotificationSubscription(Guid.NewGuid(), targetB, [NotificationEventType.WatchlistSynced], NotificationTemplate.None)
 		);
-		var @event = new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []);
+		var @event = new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], [], []);
 
 		var messages = await NotificationDispatchHandler.Handle(
 			@event,
@@ -60,7 +60,7 @@ public class NotificationDispatchHandlerTests
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove]),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove], []),
 			Scope().Object,
 			subscriptions.Object,
 			media.Object,
@@ -72,7 +72,7 @@ public class NotificationDispatchHandlerTests
 		await Assert.That(items).Count().IsEqualTo(2);
 		await Assert.That(items[0].Descriptor).IsEqualTo("Added locally");
 		await Assert.That(items[0].Title).IsEqualTo("Pulled Movie");
-		await Assert.That(items[1].Descriptor).IsEqualTo("Queued to remove remotely");
+		await Assert.That(items[1].Descriptor).IsEqualTo("Removed remotely");
 		await Assert.That(items[1].Title).IsEqualTo("Pushed Movie");
 	}
 
@@ -149,7 +149,7 @@ public class NotificationDispatchHandlerTests
 		var scope = Scope();
 
 		await NotificationDispatchHandler.Handle(
-			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], [], []),
 			scope.Object,
 			SubscriptionsFor(NotificationEventType.WatchlistSynced).Object,
 			Media().Object,
@@ -166,7 +166,7 @@ public class NotificationDispatchHandlerTests
 		var media = Media();
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())], [], [], []),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())], [], [], [], []),
 			Scope().Object,
 			SubscriptionsFor(NotificationEventType.WatchlistSynced).Object,
 			media.Object,
@@ -190,7 +190,7 @@ public class NotificationDispatchHandlerTests
 		var media = Media(new CachedMedia(new PartialMovie { Identity = new MediaIdentity(id, []), Title = "The Matrix" }, DateTimeOffset.UtcNow));
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [id], [], [], []),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [id], [], [], [], []),
 			Scope().Object,
 			subscriptions.Object,
 			media.Object,
@@ -214,7 +214,7 @@ public class NotificationDispatchHandlerTests
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []),
+			new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], [], []),
 			Scope().Object,
 			subscriptions.Object,
 			Media().Object,
@@ -224,7 +224,7 @@ public class NotificationDispatchHandlerTests
 
 		var context = messages.OfType<DeliverNotification>().Single().Context;
 		await Assert.That(context.Title).IsEqualTo(NotificationEventType.WatchlistSynced.GetDescription());
-		await Assert.That(context.Summary).IsEqualTo("Pulled 0, queued 0 for push.");
+		await Assert.That(context.Summary).IsEqualTo("Pulled 0, pushed 0.");
 	}
 
 	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(NotificationEventType eventType, params NotificationSubscription[] subscriptions)

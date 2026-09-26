@@ -31,36 +31,6 @@ public class MessagingBootstrapTests
 		});
 	}
 
-	[Test]
-	public async Task Handle_ForAWatchlistPush_RunsThroughTheWolverineRuntime()
-	{
-		await WithHostAsync(
-			async host =>
-			{
-				var operation = new WatchlistPushRequest(UserId.From(Guid.NewGuid()), MediaId.From(Guid.NewGuid()));
-				var session = await host.TrackActivity().PublishMessageAndWaitAsync(operation);
-				await Assert.That(session.Executed.MessagesOf<WatchlistPushRequest>().ToList()).Count().IsEqualTo(1);
-			},
-			RegisterHandlerDependencies
-		);
-	}
-
-	private static void RegisterHandlerDependencies(IServiceCollection services)
-	{
-		var userScope = IUserScope.Mock();
-		userScope.AsAsync(Any<UserId>(), Any()).Returns(new NoopDisposable());
-		services.AddSingleton(userScope.Object);
-
-		var outbox = IWatchlistOutbox.Mock();
-		outbox.FindPendingAsync(Any<MediaId>(), Any()).Returns((WatchlistOutboxEntry?)null);
-		services.AddSingleton(outbox.Object);
-
-		services.AddSingleton(IProviderConfigRepository.Mock().Object);
-		services.AddSingleton(IMediaRepository.Mock().Object);
-		services.AddSingleton<IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>>(new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>());
-		services.AddSingleton(IWatchlistOutboxEventFeed.Mock().Object);
-	}
-
 	private static async Task WithHostAsync(Func<IHost, Task> body, Action<IServiceCollection>? configureServices = null)
 	{
 		var dbPath = Path.Combine(Path.GetTempPath(), $"wolverine-test-{Guid.NewGuid():N}.db");
