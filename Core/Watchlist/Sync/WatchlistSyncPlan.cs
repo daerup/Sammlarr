@@ -16,15 +16,20 @@ internal sealed record WatchlistSyncPlan(WatchlistDelta Pull, WatchlistDelta Pus
 		var outboxRemoves = outbox.Where(o => o.Action == WatchlistOperationAction.Remove).Select(o => o.MediaId).ToList();
 		var outboxAddSet = outboxAdds.ToHashSet();
 		var outboxRemoveSet = outboxRemoves.ToHashSet();
+		var pendingAdds = PendingIds(outbox, WatchlistOperationAction.Add);
+		var pendingRemoves = PendingIds(outbox, WatchlistOperationAction.Remove);
 
 		return new WatchlistSyncPlan(
 			Pull: new WatchlistDelta(
 				Adds: remoteIds.Where(id => !localSet.Contains(id) && !outboxRemoveSet.Contains(id)).ToList(),
 				Removes: localIds.Where(id => !remoteSet.Contains(id) && !outboxAddSet.Contains(id)).ToList()
 			),
-			Push: new WatchlistDelta(Adds: outboxAdds.Where(id => !remoteSet.Contains(id)).ToList(), Removes: outboxRemoves.Where(remoteSet.Contains).ToList()),
+			Push: new WatchlistDelta(Adds: pendingAdds.Where(id => !remoteSet.Contains(id)).ToList(), Removes: pendingRemoves.Where(remoteSet.Contains).ToList()),
 			Redundant: [.. outboxAdds.Where(remoteSet.Contains), .. outboxRemoves.Where(id => !remoteSet.Contains(id))],
 			NoOps: localIds.Where(id => remoteSet.Contains(id) && !outboxAddSet.Contains(id) && !outboxRemoveSet.Contains(id)).ToList()
 		);
 	}
+
+	private static List<MediaId> PendingIds(IReadOnlyList<WatchlistOutboxEntry> outbox, WatchlistOperationAction action) =>
+		[.. outbox.Where(entry => entry.Status is WatchlistOutboxState.Pending && entry.Action == action).Select(entry => entry.MediaId)];
 }
