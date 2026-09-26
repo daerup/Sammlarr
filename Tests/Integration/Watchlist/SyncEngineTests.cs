@@ -265,7 +265,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var events = host.Published<WatchlistSyncedEvent>();
 		await Assert.That(events).Count().IsEqualTo(1);
-		await Assert.That(events[0].QueuedAdds).Contains(inception);
+		await Assert.That(events[0].PushedAdds).Contains(inception);
 	}
 
 	[Test]
@@ -305,15 +305,17 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task SyncAsync_WhenAnAddIsPending_RepublishesAPushRequest()
+	public async Task SyncAsync_WhenAPendingEntryHasAlreadyFailedAttempts_DoesNotResetItsAttemptCount()
 	{
-		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
+		var unpushable = await host.SeedMediaAsync(TmdbId.From("55555", MediaType.Movie));
 		await host.RemoteWatchlistEmpty();
-		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [inception]);
+		await Outbox.EnqueueAsync(WatchlistOperationAction.Add, [unpushable]);
+		await Outbox.RecordFailedAttemptAsync([unpushable], WatchlistOutboxState.Pending);
+		await Outbox.RecordFailedAttemptAsync([unpushable], WatchlistOutboxState.Pending);
 
 		await Testee.SyncAsync(Trigger);
 
-		await Assert.That(host.Published<WatchlistPushRequest>().Any(push => push.MediaId == inception)).IsTrue();
+		await Assert.That((await Outbox.GetAsync()).Single().Attempts).IsEqualTo(3);
 	}
 
 	private static async Task AssertPlanned(WatchlistSyncSummary summary, WatchlistSyncDirection direction, WatchlistOperationAction action, MediaId mediaId) =>

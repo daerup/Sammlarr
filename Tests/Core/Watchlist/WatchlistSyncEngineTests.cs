@@ -1,9 +1,11 @@
 using Contracts;
 using Contracts.Identity;
+using Contracts.Messaging;
 using Contracts.Watchlist;
 using Core.Watchlist.Sync;
 using Domain.Identity;
 using Domain.Media;
+using Domain.Notifications.Events;
 using Domain.Watchlist.Sync;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
@@ -53,24 +55,37 @@ public class WatchlistSyncEngineTests
 		await blocking;
 	}
 
-	private static WatchlistSyncEngine BuildEngine(Mock<IWatchlistProvider> provider, WatchlistSyncGate? gate = null, ICurrentUser? user = null)
+	[Test]
+	public async Task SyncAsync_WhenPushesFailMidBatch_PublishesOneEventNamingTheFailures()
 	{
-		var clock = IDateTimeProvider.Mock();
-		clock.Now.Getter.Returns(DateTimeOffset.UnixEpoch);
-		var outbox = WatchlistStubs.EmptyOutbox();
+		var stranded = MediaId.From(Guid.NewGuid());
+		var alsoStranded = MediaId.From(Guid.NewGuid());
+		var provider = IWatchlistProvider.Mock();
+		provider.GetWatchlistAsync(Any()).Returns(WatchlistStubs.NothingRemote());
+		var published = new WatchlistStubs.RecordingPublisher();
 
-		return new WatchlistSyncEngine(
-			gate ?? new WatchlistSyncGate(),
-			WatchlistStubs.Planner(provider, outbox),
-			ProviderConfigStubs.PlexWatchlist().Object,
-			WatchlistStubs.EmptyRepository().Object,
-			outbox.Object,
-			new WatchlistStubs.NoopPublisher(),
-			clock.Object,
-			user ?? User,
-			NullLogger<WatchlistSyncEngine>.Instance
-		);
+		await BuildEngine(provider, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+
+		var events = published.Published<WatchlistSyncedEvent>();
+		await Assert.That(events).Count().IsEqualTo(1);
+		await Assert.That(events[0].FailedPushes).Contains(stranded).And.Contains(alsoStranded);
+		await Assert.That(events[0].PushedAdds).IsEmpty();
 	}
+
+	private static WatchlistSyncEngine BuildEngine(
+		Mock<IWatchlistProvider> provider,
+		WatchlistSyncGate? gate = null,
+		ICurrentUser? user = null,
+		IMessagePublisher? publisher = null,
+		IReadOnlyList<MediaId>? pending = null
+	) =>
+		WatchlistStubs.Engine(
+			provider,
+			pending is null ? WatchlistStubs.EmptyOutbox() : WatchlistStubs.OutboxPending(pending),
+			gate: gate,
+			user: user ?? User,
+			publisher: publisher
+		);
 
 	private static async IAsyncEnumerable<UnmatchedMedia> WaitingRemote(TaskCompletionSource gate)
 	{

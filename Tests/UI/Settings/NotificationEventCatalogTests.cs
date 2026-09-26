@@ -14,7 +14,7 @@ public class NotificationEventCatalogTests
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
-		await Assert.That(catalog).Contains(new WatchlistSyncedEvent(User, Now, [], [], [], []).Type);
+		await Assert.That(catalog).Contains(new WatchlistSyncedEvent(User, Now, [], [], [], [], []).Type);
 	}
 
 	[Test]

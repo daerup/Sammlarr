@@ -1,3 +1,6 @@
+using Contracts;
+using Contracts.DI;
+using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Watchlist;
@@ -6,6 +9,7 @@ using Core.Watchlist.Sync;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Watchlist;
+using Domain.Watchlist.Outbox;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
@@ -39,6 +43,44 @@ internal static class WatchlistStubs
 		return outbox;
 	}
 
+	public static Mock<IWatchlistOutbox> OutboxPending(IReadOnlyList<MediaId> mediaIds)
+	{
+		var outbox = IWatchlistOutbox.Mock();
+		outbox.GetAsync(Any()).Returns([.. mediaIds.Select(id => new WatchlistOutboxEntry(id, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 0))]);
+		return outbox;
+	}
+
+	public static WatchlistSyncEngine Engine(
+		Mock<IWatchlistProvider> provider,
+		Mock<IWatchlistOutbox>? outbox = null,
+		IReadOnlyDictionary<MediaId, IExternalMediaId>? externals = null,
+		Mock<IWatchlistOutboxEventFeed>? feed = null,
+		WatchlistSyncGate? gate = null,
+		ICurrentUser? user = null,
+		IMessagePublisher? publisher = null
+	)
+	{
+		outbox ??= EmptyOutbox();
+		var owner = user ?? new TestCurrentUser();
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(new DateTimeOffset(2026, 9, 23, 12, 0, 0, TimeSpan.Zero));
+		var media = IMediaRepository.Mock();
+		media.GetExternalsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).Returns(externals ?? new Dictionary<MediaId, IExternalMediaId>());
+
+		return new WatchlistSyncEngine(
+			gate ?? new WatchlistSyncGate(),
+			Planner(provider, outbox),
+			ProviderConfigStubs.PlexWatchlist().Object,
+			EmptyRepository().Object,
+			outbox.Object,
+			media.Object,
+			new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object),
+			new WatchlistSyncAnnouncer((feed ?? IWatchlistOutboxEventFeed.Mock()).Object, publisher ?? new NoopPublisher(), clock.Object, owner),
+			owner,
+			NullLogger<WatchlistSyncEngine>.Instance
+		);
+	}
+
 	public static Mock<IMediaService> UnresolvedMedia()
 	{
 		var media = IMediaService.Mock();
@@ -67,5 +109,19 @@ internal static class WatchlistStubs
 	{
 		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
 			where TMessage : notnull => Task.CompletedTask;
+	}
+
+	internal sealed class RecordingPublisher : IMessagePublisher
+	{
+		private readonly List<object> _published = [];
+
+		internal IReadOnlyList<T> Published<T>() => [.. _published.OfType<T>()];
+
+		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
+			where TMessage : notnull
+		{
+			_published.Add(message);
+			return Task.CompletedTask;
+		}
 	}
 }

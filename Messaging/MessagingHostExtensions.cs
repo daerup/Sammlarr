@@ -30,12 +30,6 @@ public static class MessagingHostExtensions
 		options.PersistMessagesWithSqlite(connectionString);
 		options.Policies.UseDurableLocalQueues();
 		options.Discovery.IncludeAssembly(typeof(MessagingModule).Assembly);
-		options.LocalQueueFor<WatchlistPushRequest>().Sequential();
-
-		options
-			.Policies.OnException<WatchlistPushFailedException>()
-			.RetryWithCooldown(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
-
 		options.Policies.OnException<NotificationDeliveryFailedException>().RetryWithCooldown(NotificationDeliveryRetry.Cooldowns);
 	}
 }

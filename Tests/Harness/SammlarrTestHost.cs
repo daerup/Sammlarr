@@ -532,7 +532,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			}
 		);
 		services.AddSingleton<PublishedMessages>();
-		services.AddScoped<IMessagePublisher, InlineWatchlistPushPublisher>();
+		services.AddScoped<IMessagePublisher, RecordingMessagePublisher>();
 		return services.BuildServiceProvider();
 	}
 

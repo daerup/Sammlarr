@@ -17,11 +17,15 @@ public sealed record WatchlistSyncedEvent(
 	DateTimeOffset OccurredAt,
 	IReadOnlyList<MediaId> PulledAdds,
 	IReadOnlyList<MediaId> PulledRemoves,
-	IReadOnlyList<MediaId> QueuedAdds,
-	IReadOnlyList<MediaId> QueuedRemoves
+	IReadOnlyList<MediaId> PushedAdds,
+	IReadOnlyList<MediaId> PushedRemoves,
+	IReadOnlyList<MediaId> FailedPushes
 ) : BaseNotification(NotificationEventType.WatchlistSynced, UserId, OccurredAt)
 {
-	public override string Summary => $"Pulled {PulledAdds.Count + PulledRemoves.Count}, queued {QueuedAdds.Count + QueuedRemoves.Count} for push.";
+	public override string Summary =>
+		FailedPushes.Count == 0
+			? $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}."
+			: $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}, {FailedPushes.Count} failed.";
 }
 
 public sealed record WatchlistSyncFailedEvent(UserId UserId, DateTimeOffset OccurredAt, string Reason)

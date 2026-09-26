@@ -34,7 +34,7 @@ public class NotificationDeliveryPipelineTests
 			{
 				var session = await host.TrackActivity()
 					.Timeout(TimeSpan.FromSeconds(30))
-					.PublishMessageAndWaitAsync(new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []));
+					.PublishMessageAndWaitAsync(new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], [], []));
 
 				await Assert.That(session.Executed.MessagesOf<DeliverNotification>().ToList()).Count().IsEqualTo(1);
 				await Assert.That(channel.Sent).Count().IsEqualTo(1);
@@ -55,7 +55,7 @@ public class NotificationDeliveryPipelineTests
 					using var scope = host.Services.CreateScope();
 					await scope
 						.ServiceProvider.GetRequiredService<IMessagePublisher>()
-						.PublishAsync(new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], []));
+						.PublishAsync(new WatchlistSyncedEvent(User, DateTimeOffset.UtcNow, [], [], [], [], []));
 				};
 
 				await host.TrackActivity().Timeout(TimeSpan.FromSeconds(30)).ExecuteAndWaitAsync(publish);

@@ -34,7 +34,7 @@ public record WatchlistSyncSummary(WatchlistDelta Pull, WatchlistDelta Push, IRe
 		}
 		if (Queued > 0)
 		{
-			parts.Add($"queued {Queued} for push");
+			parts.Add($"pushed {Queued}");
 		}
 		return parts.Count == 0 ? "Synced: no changes." : $"Synced: {string.Join(", ", parts)}.";
 	}
