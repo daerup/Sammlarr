@@ -22,7 +22,9 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 		};
 
 	private static IJobRequest FromText(string text) =>
-		text.StartsWith(FeedRunPrefix, StringComparison.Ordinal) ? FeedRunFromText(text[FeedRunPrefix.Length..]) : new SyncWatchlist(new ManualTrigger());
+		text.StartsWith(FeedRunPrefix, StringComparison.Ordinal)
+			? FeedRunFromText(text[FeedRunPrefix.Length..])
+			: new SyncWatchlist(WatchlistSyncTrigger.Parse(text[WatchlistSyncPrefix.Length..]));
 
 	private static IJobRequest FeedRunFromText(string text)
 	{
