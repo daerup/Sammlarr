@@ -42,8 +42,8 @@ public class JobRequestConverterTests
 	[Test]
 	public async Task Convert_WhenAScheduledSync_RoundTripsTheTriggerRatherThanFallingBackToManual()
 	{
-		var restored = (SyncWatchlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWatchlist(new ScheduledTrigger())))!;
+		var restored = (SyncWatchlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWatchlist(new ScheduledFeedTrigger())))!;
 
-		await Assert.That(restored.Trigger).IsOfUnionType<WatchlistSyncTrigger, ScheduledTrigger>();
+		await Assert.That(restored.Trigger).IsOfUnionType<WatchlistSyncTrigger, ScheduledFeedTrigger>();
 	}
 }

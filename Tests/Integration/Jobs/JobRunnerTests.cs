@@ -53,6 +53,32 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(await StateOfAsync(queued!.Id)).IsEqualTo(JobState.Queued);
 	}
 
+	[Test]
+	public async Task RunNextAsync_AfterAScheduledFeedRun_ArmsAWatchlistSync()
+	{
+		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Scheduled("0 0 3 * * *")));
+
+		await Testee.TryRunNextAsync(CancellationToken.None);
+
+		await Assert.That(await KindsAsync()).Contains(JobKind.WatchlistSync);
+	}
+
+	[Test]
+	public async Task RunNextAsync_AfterAManualFeedRun_ArmsNothingSoAnIdleAppStaysSilent()
+	{
+		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
+
+		await Testee.TryRunNextAsync(CancellationToken.None);
+
+		await Assert.That(await KindsAsync()).DoesNotContain(JobKind.WatchlistSync);
+	}
+
+	private async Task<IReadOnlyList<JobKind>> KindsAsync()
+	{
+		await using var context = await host.ContextFactory.CreateDbContextAsync();
+		return await context.Jobs.Select(row => row.Kind).ToListAsync();
+	}
+
 	private void PastTheGrace() => host.SetCurrentTime(host.Resolve<IDateTimeProvider>().Now + TimeSpan.FromHours(1));
 
 	private async Task<JobState> StateOfAsync(JobId id)

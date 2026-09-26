@@ -71,11 +71,11 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task EnqueueAsync_WhenAWatchlistSyncIsArmed_WaitsOutTheGraceBeforeItIsDue()
+	public async Task EnqueueAsync_WhenAScheduledSyncIsArmed_WaitsOutTheGraceBeforeItIsDue()
 	{
 		var armedAt = host.Resolve<IDateTimeProvider>().Now;
 
-		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		await Testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 
 		await Assert.That(await RunAfterAsync()).IsEqualTo(armedAt + Options.Grace);
 	}
@@ -84,10 +84,10 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task EnqueueAsync_WhenASyncIsRearmedInsideTheWindow_PushesTheGraceOut()
 	{
 		var armedAt = host.Resolve<IDateTimeProvider>().Now;
-		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		await Testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 		host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(1));
 
-		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		await Testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 
 		await Assert.That(await RunAfterAsync()).IsEqualTo(armedAt + TimeSpan.FromMinutes(1) + Options.Grace);
 	}
@@ -96,13 +96,13 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task EnqueueAsync_WhenASyncIsRearmedForever_StillFiresAtMaxWait()
 	{
 		var armedAt = host.Resolve<IDateTimeProvider>().Now;
-		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		await Testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 		var ceiling = armedAt + Options.Grace + Options.MaxWait;
 
 		foreach (var minute in new[] { 1, 31 })
 		{
 			host.SetCurrentTime(armedAt + TimeSpan.FromMinutes(minute));
-			await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+			await Testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 		}
 
 		await Assert.That(await RunAfterAsync()).IsEqualTo(ceiling);
@@ -119,6 +119,29 @@ public class JobQueueTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.EnqueueAsync(request);
 
 		await Assert.That(await RunAfterAsync()).IsEqualTo(armedAt);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenAManualSyncIsPressed_FiresImmediatelyWithoutTheGrace()
+	{
+		var pressedAt = host.Resolve<IDateTimeProvider>().Now;
+
+		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+
+		await Assert.That(await RunAfterAsync()).IsEqualTo(pressedAt);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenAManualSyncLandsOnAnArmedOne_PullsItForwardInsteadOfDeferringIt()
+	{
+		var armedAt = host.Resolve<IDateTimeProvider>().Now;
+		await Testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		var pressedAt = armedAt + TimeSpan.FromMinutes(1);
+		host.SetCurrentTime(pressedAt);
+
+		await Testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+
+		await Assert.That(await RunAfterAsync()).IsEqualTo(pressedAt);
 	}
 
 	private SchedulerOptions Options => host.Resolve<SchedulerOptions>();

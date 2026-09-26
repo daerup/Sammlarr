@@ -1,20 +1,20 @@
 namespace Domain.Watchlist.Sync;
 
-public union WatchlistSyncTrigger(ManualTrigger, ScheduledTrigger)
+public union WatchlistSyncTrigger(ManualTrigger, ScheduledFeedTrigger)
 {
 	private const string ManualLiteral = "Manual";
-	private const string ScheduledLiteral = "Scheduled";
+	private const string ScheduledFeedLiteral = "ScheduledFeed";
 
 	public override string ToString() =>
 		this switch
 		{
 			ManualTrigger => ManualLiteral,
-			ScheduledTrigger => ScheduledLiteral,
+			ScheduledFeedTrigger => ScheduledFeedLiteral,
 		};
 
-	public static WatchlistSyncTrigger Parse(string text) => text == ScheduledLiteral ? new ScheduledTrigger() : new ManualTrigger();
+	public static WatchlistSyncTrigger Parse(string text) => text == ScheduledFeedLiteral ? new ScheduledFeedTrigger() : new ManualTrigger();
 }
 
 public readonly record struct ManualTrigger;
 
-public readonly record struct ScheduledTrigger;
+public readonly record struct ScheduledFeedTrigger;

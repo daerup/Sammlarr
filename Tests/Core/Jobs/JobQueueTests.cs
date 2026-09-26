@@ -30,9 +30,9 @@ public class JobQueueTests
 	{
 		var (testee, jobs) = BuildTestee();
 
-		await testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 
-		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ManualTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Any())
+		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ScheduledFeedTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Any())
 			.WasCalled(Times.Once);
 	}
 
