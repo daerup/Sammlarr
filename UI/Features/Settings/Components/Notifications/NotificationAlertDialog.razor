@@ -48,7 +48,9 @@
                         break;
                     case NotificationChannel.Pushover:
                     case NotificationChannel.WebUi:
-                        <LeveledAlertFields @bind-Title="_title" @bind-Title:after="MarkDirty" @bind-Message="_message" @bind-Message:after="MarkDirty" @bind-Level="_level" @bind-Level:after="MarkDirty"/>
+                        <LeveledAlertFields @bind-Title="_title" @bind-Title:after="MarkDirty" @bind-Message="_message" @bind-Message:after="MarkDirty" @bind-Level="_level" @bind-Level:after="MarkDirty"
+
+                                                          @bind-Priority="_priority" @bind-Priority:after="MarkDirty" IsPushover="_client?.Channel == NotificationChannel.Pushover"/>
                         break;
                 }
 
@@ -94,7 +96,14 @@
                         {
                             <PreviewField Label="Title" Value="@PreviewTitle(context)"/>
                             <PreviewField Label="Message" Value="@PreviewMessage(context)"/>
-                            <PreviewField Label="Level" Value="@PreviewLevel(context)"/>
+                            @if (previewClient.Channel == NotificationChannel.Pushover)
+                            {
+                                <PreviewField Label="Priority" Value="@PreviewPriority(context)"/>
+                            }
+                            else
+                            {
+                                <PreviewField Label="Level" Value="@PreviewLevel(context)"/>
+                            }
                         }
                     </div>
                 }
@@ -134,6 +143,7 @@
     private string _title = string.Empty;
     private string _message = string.Empty;
     private NotificationLevel? _level;
+    private PushoverPriority? _priority;
 
     private bool _previewOpen = true;
     private string? _error;
@@ -154,6 +164,7 @@
             _title = Value(existing.Template.Title);
             _message = Value(existing.Template.Message);
             _level = existing.Template.Level.Match(value => (NotificationLevel?)value, () => null);
+            _priority = existing.Template.Priority.Match(value => (PushoverPriority?)value, () => null);
         }
         else
         {
@@ -201,6 +212,12 @@
 
     private string PreviewLevel(NotificationContext context) => (_level ?? context.DefaultLevel).ToString();
 
+    private string PreviewPriority(NotificationContext context)
+    {
+        var priority = _priority ?? (_level ?? context.DefaultLevel).AsPushoverPriority();
+        return $"{priority} ({(int)priority})";
+    }
+
     private string Preview(NotificationTemplate template, NotificationContext context, Func<RenderedNotification, Optional<string>> field, string fallback) =>
         Renderer.Render(template, context).Match(rendered => field(rendered).GetValueOr(fallback), error => "⚠ " + error.Reason);
 
@@ -238,10 +255,22 @@
         }
     }
 
-    private NotificationTemplate BuildTemplate() =>
-        _client?.Channel == NotificationChannel.Webhook
-            ? new NotificationTemplate(Opt(_body), new None(), new None(), new None())
-            : new NotificationTemplate(new None(), Opt(_title), Opt(_message), _level is { } value ? Some.Of(value) : new None());
+    private NotificationTemplate BuildTemplate()
+    {
+        if (_client?.Channel == NotificationChannel.Webhook)
+        {
+            return new NotificationTemplate(Opt(_body), new None(), new None(), new None(), new None());
+        }
+
+        var pushover = _client?.Channel == NotificationChannel.Pushover;
+        return new NotificationTemplate(
+            new None(),
+            Opt(_title),
+            Opt(_message),
+            !pushover && _level is { } level ? Some.Of(level) : new None(),
+            pushover && _priority is { } priority ? Some.Of(priority) : new None()
+        );
+    }
 
     private static Optional<string> Opt(string value) => string.IsNullOrWhiteSpace(value) ? new None() : Some.Of(value);
 

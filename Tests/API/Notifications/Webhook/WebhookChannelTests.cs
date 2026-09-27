@@ -143,7 +143,7 @@ public class WebhookChannelTests
 	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
 
 	private static NotificationTemplate Body(string? template) =>
-		template is null ? NotificationTemplate.None : new NotificationTemplate(Some.Of(template), new None(), new None(), new None());
+		template is null ? NotificationTemplate.None : new NotificationTemplate(Some.Of(template), new None(), new None(), new None(), new None());
 
 	private static string Header(CapturingHandler handler, string name) => handler.Request!.Headers.GetValues(name).Single();
 

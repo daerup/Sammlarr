@@ -6,7 +6,7 @@ namespace UI.Features.Settings.Components.Notifications;
 
 internal sealed class NotificationTester(IKeyedServiceIndex<NotificationChannel, INotificationChannel> channels)
 {
-	private static readonly NotificationTemplate pingTemplate = new(new None(), Some.Of("{{ title }}"), Some.Of("{{ summary }}"), new None());
+	private static readonly NotificationTemplate pingTemplate = new(new None(), Some.Of("{{ title }}"), Some.Of("{{ summary }}"), new None(), new None());
 
 	public Task<DeliveryResult> PingAsync(NotificationTarget target, CancellationToken cancellationToken = default) =>
 		channels[target.Channel].SendAsync(PingContext(), target, pingTemplate, cancellationToken);
