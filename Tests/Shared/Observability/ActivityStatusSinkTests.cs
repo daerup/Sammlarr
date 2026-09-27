@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using Serilog;
 using Observability.Logging;
+using Serilog;
 
 namespace Shared.Tests.Observability;
 
