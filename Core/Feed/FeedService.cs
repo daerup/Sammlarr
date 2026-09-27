@@ -68,6 +68,9 @@ internal sealed class FeedService(IFeedRepository repository, IFeedScheduler sch
 	public Task<IReadOnlyList<FeedRun>> GetRunsAsync(FeedId feedId, int take, CancellationToken cancellationToken = default) =>
 		repository.GetRunsAsync(feedId, take, cancellationToken);
 
+	public Task<IReadOnlyList<FeedRun>> GetRecentRunsAsync(DateTimeOffset since, int take, CancellationToken cancellationToken = default) =>
+		repository.GetRecentRunsAsync(since, take, cancellationToken);
+
 	public Task<Optional<FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default) => repository.GetRunAsync(runId, cancellationToken);
 
 	public Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default) =>

@@ -130,6 +130,20 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.ToListAsync(cancellationToken);
 	}
 
+	public async Task<IReadOnlyList<Domain.Feed.Run.FeedRun>> GetRecentRunsAsync(DateTimeOffset since, int take, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var cutoff = since.ToUniversalTime();
+
+		return await ctx
+			.FeedRuns.AsNoTracking()
+			.Where(row => row.StartedAt >= cutoff)
+			.OrderByDescending(row => row.StartedAt)
+			.Take(take)
+			.Select(projectRun)
+			.ToListAsync(cancellationToken);
+	}
+
 	public async Task<Optional<Domain.Feed.Run.FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
