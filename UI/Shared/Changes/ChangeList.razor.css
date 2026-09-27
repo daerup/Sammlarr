@@ -48,6 +48,11 @@
     cursor: default;
 }
 
+.change-chip.is-count {
+    cursor: default;
+    background: transparent;
+}
+
 .change-chip.tone-added {
     color: var(--alert-success);
 }

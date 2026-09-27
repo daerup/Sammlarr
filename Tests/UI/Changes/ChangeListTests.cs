@@ -44,7 +44,7 @@ public class ChangeListTests : BunitContext
 	}
 
 	[Test]
-	public async Task Chips_WhenOneHasNoItemsBehindIt_AreDimmedAndInert()
+	public async Task Chips_AfterTheSeparator_AreReadoutsRatherThanButtons()
 	{
 		var cut = RenderList(
 			[Added("Fresh")],
@@ -69,10 +69,42 @@ public class ChangeListTests : BunitContext
 
 		var chips = cut.FindAll(".change-chip");
 
-		await Assert.That(chips[0].ClassList).DoesNotContain("is-dim");
-		await Assert.That(chips[1].ClassList).Contains("is-dim");
-		await Assert.That(chips[1].HasAttribute("disabled")).IsTrue();
+		await Assert.That(chips[0].TagName).IsEqualTo("BUTTON");
+		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
+		await Assert.That(chips[1].ClassList).Contains("is-count");
 		await Assert.That(cut.FindAll(".change-chip-sep")).HasCount(1);
+	}
+
+	[Test]
+	public async Task Chips_AfterTheSeparator_StayInertOnceAFilterIsPicked()
+	{
+		var cut = RenderList(
+			[Added("Fresh"), Removed("Gone")],
+			[
+				new ChangeChip
+				{
+					Icon = "plus",
+					Count = 1,
+					Tooltip = "Added",
+					Tone = ChipTone.Added,
+					Filters = ChangeKind.Added,
+				},
+				new ChangeChip
+				{
+					Icon = "bookmark-check",
+					Count = 178,
+					Tooltip = "Already yours",
+					StartsCountsOnly = true,
+				},
+			]
+		);
+
+		await cut.FindAll("button.change-chip").First().ClickAsync();
+
+		var chips = cut.FindAll(".change-chip");
+
+		await Assert.That(chips[1].TagName).IsNotEqualTo("BUTTON");
+		await Assert.That(chips[1].ClassList).DoesNotContain("is-on");
 	}
 
 	[Test]

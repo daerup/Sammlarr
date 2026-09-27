@@ -3,7 +3,7 @@
 <div class="change-list @(Fill ? "is-fill" : null)">
     <div class="change-chips">
         <BbTooltipProvider>
-            @foreach (var (chip, separator) in ChipRow())
+            @foreach (var (chip, separator, countsOnly) in ChipRow())
             {
                 @if (separator)
                 {
@@ -11,20 +11,21 @@
                 }
                 <BbTooltip DelayDuration="200">
                     <BbTooltipTrigger AsChild="false" Class="p-0" Focusable="false">
-                        <button type="button"
-                                class="change-chip @ToneClass(chip.Tone) @(IsActive(chip) ? "is-on" : null) @(Clickable(chip) ? null : "is-dim")"
-                                disabled="@(!Clickable(chip))"
-                                @onclick="() => ToggleAsync(chip)">
-                            @if (chip.Glyph is { } glyph)
-                            {
-                                <span class="change-glyph">@glyph</span>
-                            }
-                            else if (chip.Icon is { } icon)
-                            {
-                                <LucideIcon Name="@icon" Size="16"/>
-                            }
-                            <span class="change-chip-count">@chip.Count</span>
-                        </button>
+                        @if (countsOnly)
+                        {
+                            <span class="change-chip is-count @ToneClass(chip.Tone)">
+                                @ChipFace(chip)
+                            </span>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="change-chip @ToneClass(chip.Tone) @(IsActive(chip) ? "is-on" : null) @(Clickable(chip) ? null : "is-dim")"
+                                    disabled="@(!Clickable(chip))"
+                                    @onclick="() => ToggleAsync(chip)">
+                                @ChipFace(chip)
+                            </button>
+                        }
                     </BbTooltipTrigger>
                     <BbTooltipContent>@chip.Tooltip</BbTooltipContent>
                 </BbTooltip>
@@ -100,14 +101,29 @@
             .GroupBy(entry => entry.Kind)
             .OrderBy(group => group.Key);
 
-    private IEnumerable<(ChangeChip Chip, bool Separator)> ChipRow()
+    private RenderFragment ChipFace(ChangeChip chip) =>
+        @<text>
+            @if (chip.Glyph is { } glyph)
+            {
+                <span class="change-glyph">@glyph</span>
+            }
+            else if (chip.Icon is { } icon)
+            {
+                <LucideIcon Name="@icon" Size="16"/>
+            }
+            <span class="change-chip-count">@chip.Count</span>
+        </text>;
+
+    private IEnumerable<(ChangeChip Chip, bool Separator, bool CountsOnly)> ChipRow()
     {
         var separatorPending = false;
+        var countsOnly = false;
         foreach (var chip in Chips)
         {
             if (chip.StartsCountsOnly)
             {
                 separatorPending = true;
+                countsOnly = true;
             }
 
             if (chip.Count == 0)
@@ -115,7 +131,7 @@
                 continue;
             }
 
-            yield return (chip, separatorPending);
+            yield return (chip, separatorPending, countsOnly);
             separatorPending = false;
         }
     }
