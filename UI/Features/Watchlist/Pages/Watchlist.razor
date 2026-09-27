@@ -9,6 +9,7 @@
 @using Domain.Feed
 @using global::Shared
 @using UI.Features.Watchlist.Components
+@using UI.Shared.Announcing
 @using UI.Shared.Filters
 @using UI.Shared.Services.Branding
 @implements IDisposable
@@ -437,7 +438,7 @@ else
 
     private void OnEvent(IEvent raised)
     {
-        if (_userId is not { } current || raised.UserId != current || raised is not WatchlistOutboxEvent outboxEvent)
+        if (ViewerEvent.Own<WatchlistOutboxEvent>(raised, _userId) is not { } outboxEvent)
         {
             return;
         }

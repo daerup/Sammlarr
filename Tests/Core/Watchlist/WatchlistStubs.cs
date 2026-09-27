@@ -6,6 +6,7 @@ using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
+using Core.Announcing;
 using Core.Watchlist.Sync;
 using Domain.Media;
 using Domain.Providers;
@@ -76,8 +77,9 @@ internal static class WatchlistStubs
 			outbox.Object,
 			media.Object,
 			new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object),
-			new WatchlistSyncAnnouncer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher(), clock.Object, owner),
+			new Announcer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher()),
 			owner,
+			clock.Object,
 			NullLogger<WatchlistSyncEngine>.Instance
 		);
 	}

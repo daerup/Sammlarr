@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Contracts;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
@@ -6,7 +7,9 @@ using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
+using Core.Announcing;
 using Domain.Media;
+using Domain.Notifications.Events;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -24,8 +27,9 @@ internal sealed class WatchlistSyncEngine(
 	IWatchlistOutbox outbox,
 	IMediaRepository media,
 	IKeyedServiceIndex<WatchlistProvider, IWatchlistProvider> providers,
-	WatchlistSyncAnnouncer announcer,
+	Announcer announcer,
 	ICurrentUser currentUser,
+	IDateTimeProvider clock,
 	ILogger<WatchlistSyncEngine> logger
 ) : IWatchlistSyncEngine
 {
@@ -54,7 +58,7 @@ internal sealed class WatchlistSyncEngine(
 		if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
 		{
 			activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
-			await announcer.NotifySyncFailedAsync(remoteFailed.Reason, cancellationToken);
+			await announcer.AnnounceAsync(new WatchlistSyncFailedEvent(currentUser.Id, clock.Now, remoteFailed.Reason), cancellationToken);
 		}
 		return syncResult;
 	}
@@ -65,7 +69,10 @@ internal sealed class WatchlistSyncEngine(
 		var pulledRemoves = await repo.RemoveAsync(plan.Pull.Removes, cancellationToken);
 
 		var pushed = await DrainAsync(provider, cancellationToken);
-		await announcer.NotifySyncedAsync(pulledAdds, pulledRemoves, pushed, cancellationToken);
+		if (SyncNotification.For(currentUser.Id, clock.Now, pulledAdds, pulledRemoves, pushed) is { } synced)
+		{
+			await announcer.AnnounceAsync(synced, cancellationToken);
+		}
 
 		logger.LogInformation(
 			"Watchlist sync {Provider} complete: pulled {Pulled}, removed {Removed}, pushed {Pushed}, failed {Failed}",
@@ -142,7 +149,7 @@ internal sealed class WatchlistSyncEngine(
 		}
 
 		var outcome = new PushOutcome(entry.MediaId, entry.Action, kind);
-		announcer.NotifyPushed(outcome);
+		announcer.Announce(new WatchlistOutboxEvent(currentUser.Id, outcome.MediaId, outcome.Kind));
 		return outcome;
 	}
 

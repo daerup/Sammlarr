@@ -10,6 +10,8 @@ internal sealed class WebUiNotificationSeeder(INotificationTargetRepository targ
 		NotificationEventType.ProviderRateLimited,
 		NotificationEventType.WatchlistSynced,
 		NotificationEventType.WatchlistSyncFailed,
+		NotificationEventType.FeedRunCompleted,
+		NotificationEventType.FeedRunFailed,
 	];
 
 	public async Task SeedAsync(CancellationToken cancellationToken = default)

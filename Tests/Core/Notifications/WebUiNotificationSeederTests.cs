@@ -24,7 +24,7 @@ public class WebUiNotificationSeederTests
 	}
 
 	[Test]
-	public async Task SeedAsync_Always_SubscribesOneSubscriptionToRateLimitsAndBothWatchlistSyncOutcomes()
+	public async Task SeedAsync_Always_SubscribesOneSubscriptionToEveryDefaultEventType()
 	{
 		var created = Guid.NewGuid();
 		targets.CreateAsync(Any(), Any()).Returns(created);
@@ -36,7 +36,14 @@ public class WebUiNotificationSeederTests
 				created,
 				Arg.Is<IReadOnlyList<NotificationEventType>>(types =>
 					types.SequenceEqual(
-						new[] { NotificationEventType.ProviderRateLimited, NotificationEventType.WatchlistSynced, NotificationEventType.WatchlistSyncFailed }
+						new[]
+						{
+							NotificationEventType.ProviderRateLimited,
+							NotificationEventType.WatchlistSynced,
+							NotificationEventType.WatchlistSyncFailed,
+							NotificationEventType.FeedRunCompleted,
+							NotificationEventType.FeedRunFailed,
+						}
 					)
 				),
 				Any(),
