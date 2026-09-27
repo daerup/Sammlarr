@@ -1,231 +1,113 @@
 @page "/blacklist"
-@implements IDisposable
+@inherits MediaListPage
 @using Contracts.Blacklist
-@using Contracts.Settings
+@using Contracts.Watchlist
+@using UI.Shared.Services.Branding
 @using UI.Shared.Filters
 @inject IBlacklistService BlacklistService
-@inject ScrollService ScrollService
-@inject AccountConnectionPrompt AccountConnectionPrompt
-@inject IProviderConfigRepository ProviderConfigRepository
-@inject Notifier Notifier
 @inject ToastService ToastService
+@inject IWatchlistService WatchlistService
+@inject MediaProviderBrandingService BrandingService
 
-<PageTitle>@PageTitleText</PageTitle>
+<PageTitle>Blacklist</PageTitle>
 
-@if (_providerSettings is null)
-{
-    <PageContainer>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
-        </div>
-    </PageContainer>
-}
-else
-{
-    <SignInGuard AccessChanged="HandleSignInChanged"/>
-    <OAuthGuard Provider="@_providerSettings.AuthProvider" AccessChanged="HandlePlexAccessChanged"/>
-
-    <PageContainer Heading="@PageHeading" Description="@PageDescription" Fill="true">
-        <HeaderActions>
-            <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
-                <div class="flex items-center gap-2">
-                <ProtectedComponent GuardState="IsPlexConnected"
-                                    AuthProvider="@_providerSettings.AuthProvider"
-                                    DeniedActionDescription="search and add titles">
-                    <BbCommand Class="border">
-                        <BbCommandItem OnSelect="OpenSearchModal" Value="search" class="search-command-item">
-                            <LucideIcon Name="search" Class="mr-2"/>
-                            Add from Search
-                            <BbKbd Keys="Ctrl+K" Class="search-command-item-shortcut"/>
-                        </BbCommandItem>
-                    </BbCommand>
-                </ProtectedComponent>
-                @if (_items is { Count: > 0 } && !_isEditMode)
-                {
-                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="EnterEditMode" Class="whitespace-nowrap">
-                        <LucideIcon Name="square-check" Size="16" Class="mr-2"/>
-                        Bulk edit
-                    </BbButton>
-                    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="ToggleFilterBar" Class="@ViewButtonClass">
-                        <LucideIcon Name="sliders-horizontal" Size="16" Class="mr-2"/>
-                        View
-                        @if (_filter.ActiveCount > 0)
-                        {
-                            <span class="view-badge">@_filter.ActiveCount</span>
-                        }
-                    </BbButton>
-                }
-                </div>
-            </ProtectedSection>
-        </HeaderActions>
-        <ChildContent>
-            <ProtectedSection GuardState="IsSignedIn"
-                              DeniedActionDescription="managing your blacklist"
-                              FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
-            @if (_isLoading)
-            {
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
-                </div>
-            }
-            else if (!string.IsNullOrEmpty(_errorMessage))
-            {
-                <div class="rounded-lg border bg-destructive/10 border-destructive/20 p-4 space-y-3">
-                    <p class="text-sm text-destructive font-medium">@_errorMessage</p>
-                    <BbButton Variant="ButtonVariant.Secondary" @onclick="LoadBlacklistAsync">
-                        <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
-                        Retry
-                    </BbButton>
-                </div>
-            }
-            else if (_items is not null && _items.Count == 0)
-            {
-                <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
-                    <LucideIcon Name="shield-off" Size="36" Class="mx-auto text-muted-foreground"/>
-                    <h3 class="text-base font-semibold tracking-tight">Nothing blacklisted.</h3>
-                    <p class="text-sm text-muted-foreground leading-relaxed">Add a title with <span class="font-medium text-foreground">Ctrl+K</span> to keep it out of your Watchlist.</p>
-                </div>
-            }
-            else if (_items is not null)
-            {
-                @if (_showFilters)
-                {
-                    <ListFilterBar Filter="_filter"
-                                   FilterChanged="ApplyFilterAsync"
-                                   Shown="GridItems.Count"
-                                   Total="_items.Count"/>
-                }
-
-                @if (GridItems.Count == 0)
-                {
-                    <div class="rounded-lg border bg-muted/40 p-8 text-center space-y-3">
-                        <LucideIcon Name="filter-x" Size="36" Class="mx-auto text-muted-foreground"/>
-                        <h3 class="text-base font-semibold tracking-tight">Nothing matches these filters.</h3>
-                        <p class="text-sm text-muted-foreground leading-relaxed">@_items.Count titles are hidden. Clear the filters to see them.</p>
-                    </div>
-                }
-                else
-                {
-                    <BulkEditableMediaGrid TItem="BlacklistedMedia"
-                                           Items="GridItems"
-                                           Detail="@(i => i.Media)"
-                                           Key="@(i => i.Media.Id)"
-                                           IsEditMode="_isEditMode"
-                                           IsEditModeChanged="@(v => _isEditMode = v)"
-                                           OnTileClick="@(i => SelectItem(i.Media))"
-                                           OnBulkRemove="RemoveBulkAsync"
-                                           RemoveLabel="Remove from Blacklist"/>
-                }
-            }
-            </ProtectedSection>
-        </ChildContent>
-    </PageContainer>
+@{
+    var gridItems = GridItems;
+    var pageItems = Paged(gridItems);
 }
 
-<MediaDetailSheet Open="_isSheetOpen"
-                  OnOpenChanged="DetailsOpenChangedAsync"
+<MediaListShell Settings="Settings"
+                Heading="Blacklist"
+                Description="Your blacklisted movies and shows."
+                IsSignedIn="IsSignedIn"
+                IsConnected="IsConnected"
+                DeniedActionDescription="managing your blacklist"
+                OnSignInChanged="HandleSignInChanged"
+                OnAccessChanged="HandleAccessChanged"
+                Search="@Filter.Search"
+                SearchChanged="ApplySearchAsync">
+    <HeaderExtras>
+        <MediaListViewActions HasItems="@(_items is { Count: > 0 })"
+                              IsEditMode="IsEditMode"
+                              ShowFilters="ShowFilters"
+                              Filter="Filter"
+                              OnEnterEditMode="EnterEditMode"
+                              OnToggleFilters="ToggleFilterBar"/>
+    </HeaderExtras>
+    <ChildContent>
+        <MediaListBody IsLoading="IsLoadingList"
+                       ErrorMessage="@ErrorMessage"
+                       OnRetry="LoadAsync"
+                       TotalCount="_items?.Count"
+                       VisibleCount="gridItems.Count"
+                       ShowFilters="ShowFilters"
+                       Filter="Filter"
+                       FilterChanged="ApplyFilterAsync"
+                       CurrentPage="@PageWithin(gridItems.Count)"
+                       PageCount="@PageCount(gridItems.Count)"
+                       PageChanged="GoToPageAsync">
+            <EmptyState>
+                <MediaListEmptyState Icon="shield-off" Heading="Nothing blacklisted.">
+                    Add a title with <span class="font-medium text-foreground">Ctrl+K</span> to keep it out of your Watchlist.
+                </MediaListEmptyState>
+            </EmptyState>
+            <Grid>
+                <BulkEditableMediaGrid TItem="BlacklistedMedia"
+                                       Items="pageItems"
+                                       AllItems="gridItems"
+                                       Detail="@(i => i.Media)"
+                                       Key="@(i => i.Media.Id)"
+                                       IsEditMode="IsEditMode"
+                                       IsEditModeChanged="SetEditMode"
+                                       OnTileClick="@(i => SelectItem(i.Media))"
+                                       OnBulkRemove="RemoveBulkAsync"
+                                       RemoveLabel="Remove"
+                                       MarkLabel="Watchlist"
+                                       MarkIcon="bookmark"
+                                       MarkTint="@WatchlistBrandColor"
+                                       OnBulkMark="WatchlistBulkAsync"
+                                       RemoveConfirm="RemoveConfirm"
+                                       MarkConfirm="WatchlistConfirm"
+                                       IsMarked="@(item => _watchlistedIds.Contains(item.Media.Id))"
+                                       AlreadyMarkedHint="Every selected title is already on your watchlist."/>
+            </Grid>
+        </MediaListBody>
+    </ChildContent>
+</MediaListShell>
+
+<MediaDetailSheet Open="IsSheetOpen"
+                  OnOpenChanged="SheetOpenChangedAsync"
                   Media="_selectedItem"
-                  OnEnrollmentChanged="@(_ => LoadBlacklistAsync())"/>
-
-<SearchModal @bind-IsOpen="_isSearchModalOpen"
-             SearchProvider="@_providerSettings.SearchProvider"
-             IsInWatchlist="IsBlacklisted"
-             OnToggle="ToggleFromSearchAsync"
-             Title="Search & Add to Blacklist"
-             Description="Find a movie or show and add it to your blacklist.">
-    <TileIcons Context="ctx">
-        <BlacklistToggleIcon Result="ctx.Result" IsToggled="ctx.IsToggled" IsToggling="ctx.IsToggling" OnToggle="ctx.OnToggle"/>
-    </TileIcons>
-</SearchModal>
+                  OnEnrollmentChanged="@(_ => LoadAsync())"/>
 
 @code {
     private IReadOnlyList<BlacklistedMedia>? _items;
     private MediaLookup? _selectedItem;
-    private bool _isLoading;
-    private bool _isSheetOpen;
-    private bool _isSearchModalOpen;
-    private bool _isEditMode;
-    private ListFilter _filter = ListFilter.None;
-    private bool _showFilters;
-    private string? _errorMessage;
+    private IReadOnlySet<MediaId> _watchlistedIds = new HashSet<MediaId>();
 
     private IReadOnlyList<BlacklistedMedia> GridItems =>
         [
-            .. _filter.SortBy(
-                (_items ?? []).Where(item => _filter.MatchesType(item.Media.ToMatch().MediaType)),
+            .. Filter.SortBy(
+                (_items ?? []).Where(item => Filter.MatchesType(item.Media.ToMatch().MediaType) && Filter.MatchesSearch(item.Media.Title)),
                 item => item.Media,
                 item => item.AddedAt
             ),
         ];
 
-    private string ViewButtonClass => _showFilters ? "whitespace-nowrap bg-accent" : "whitespace-nowrap";
+    protected override void ClearItems() => _items = null;
 
-    private Task ApplyFilterAsync(ListFilter filter)
+    protected override void ClearSelection() => _selectedItem = null;
+
+    protected override async Task LoadAsync()
     {
-        _filter = filter;
-        return Task.CompletedTask;
-    }
-
-    private void ToggleFilterBar()
-    {
-        _showFilters = !_showFilters;
-        if (!_showFilters)
-        {
-            _filter = ListFilter.None;
-        }
-    }
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private ProviderConfig? _providerSettings;
-
-    private string PageTitleText => "Blacklist";
-    private string PageHeading => "Blacklist";
-    private string PageDescription => "Your blacklisted movies and shows.";
-    private string EmptyStateMessage => "Your blacklist is empty.";
-    private bool _isSignedIn;
-
-    private bool IsSignedIn() => _isSignedIn;
-
-    private bool _hasPlexAccess;
-
-    private bool IsPlexConnected() => _hasPlexAccess;
-
-    private void HandlePlexAccessChanged(bool hasAccess)
-    {
-        _hasPlexAccess = hasAccess;
-        StateHasChanged();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
-    }
-
-    private async Task HandleSignInChanged(bool hasAccess)
-    {
-        _isSignedIn = hasAccess;
-
-        if (!hasAccess)
-        {
-            _items = null;
-            _errorMessage = null;
-            _isLoading = false;
-            _isEditMode = false;
-            CloseSelectedMedia();
-            return;
-        }
-
-        await LoadBlacklistAsync();
-    }
-
-    private async Task LoadBlacklistAsync()
-    {
-        _isLoading = true;
-        _errorMessage = null;
+        IsLoadingList = true;
+        ErrorMessage = null;
         StateHasChanged();
 
         try
         {
-            _items = await BlacklistService.GetBlacklistItemsAsync(_cancellationTokenSource.Token).ToListAsync();
+            _items = await BlacklistService.GetBlacklistItemsAsync(Cancellation.Token).ToListAsync();
+            _watchlistedIds = await WatchlistService.GetWatchlistIdsAsync(Cancellation.Token);
 
             if (_selectedItem.HasValue)
             {
@@ -233,18 +115,22 @@ else
                 _selectedItem = _items.FirstOrDefault(i => i.Media.Id == selectedId)?.Media.ToMatch();
                 if (_selectedItem is null)
                 {
-                    _isSheetOpen = false;
+                    IsSheetOpen = false;
                 }
             }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
         }
         catch (Exception ex)
         {
             Notifier.Error(ex, "Failed to load blacklist");
-            _errorMessage = $"Failed to load blacklist: {ex.Message}";
+            ErrorMessage = $"Failed to load blacklist: {ex.Message}";
         }
         finally
         {
-            _isLoading = false;
+            IsLoadingList = false;
             StateHasChanged();
         }
     }
@@ -252,106 +138,35 @@ else
     private void SelectItem(MediaLookup detail)
     {
         _selectedItem = detail;
-        _isSheetOpen = true;
-    }
-
-    private void EnterEditMode()
-    {
-        _isEditMode = true;
-        CloseSelectedMedia();
+        IsSheetOpen = true;
     }
 
     private async Task RemoveBulkAsync(IReadOnlyList<BlacklistedMedia> toRemove)
     {
         foreach (var item in toRemove)
         {
-            await BlacklistService.RemoveFromBacklistAsync(item.Media.Id, _cancellationTokenSource.Token);
+            await BlacklistService.RemoveFromBacklistAsync(item.Media.Id, Cancellation.Token);
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blacklist.");
-        await LoadBlacklistAsync();
+        await LoadAsync();
     }
 
-    private void CloseSelectedMedia()
+    private async Task WatchlistBulkAsync(IReadOnlyList<BlacklistedMedia> toMark)
     {
-        _isSheetOpen = false;
-        _selectedItem = null;
+        await WatchlistService.AddToWatchlistAsync(toMark.Select(item => item.Media.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
+        ToastService.Success($"Added {toMark.Count} title{(toMark.Count == 1 ? "" : "s")} to your watchlist.");
     }
 
-    private Task DetailsOpenChangedAsync(bool isOpen)
-    {
-        if (!isOpen)
-        {
-            CloseSelectedMedia();
-        }
-        return Task.CompletedTask;
-    }
+    private string? WatchlistBrandColor =>
+        Settings is null ? null : BrandingService.GetBrandingInfo(Settings.WatchlistProvider.AsMediaProvider()).BrandColor;
 
-    private bool IsBlacklisted(MediaId mediaId)
-    {
-        if (_items is null)
-        {
-            return false;
-        }
+    private static BulkConfirm RemoveConfirm(int count) =>
+        new(
+            $"Remove {Titles(count)} from your blacklist?",
+            "Later feed runs will be able to add them again. They are not added to your watchlist."
+        );
 
-        return _items.Any(item => item.Media.Id.Equals(mediaId));
-    }
+    private static BulkConfirm WatchlistConfirm(int count) => new($"Watchlist {Titles(count)}?", "They stay blacklisted.");
 
-    private void OpenSearchModal()
-    {
-        _isSearchModalOpen = true;
-    }
-
-    private async Task<bool> ToggleFromSearchAsync(MediaId id, string title, bool isMarked)
-    {
-        if (isMarked)
-        {
-            if (!IsBlacklisted(id))
-            {
-                Notifier.Warning($"'{title}' is not in your blacklist.");
-                return false;
-            }
-
-            try
-            {
-                await BlacklistService.RemoveFromBacklistAsync(id, _cancellationTokenSource.Token);
-                Notifier.Success($"'{title}' has been removed from your blacklist.");
-                await LoadBlacklistAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Notifier.Error(ex, "Failed to remove from blacklist");
-                return false;
-            }
-        }
-
-        if (IsBlacklisted(id))
-        {
-            Notifier.Warning($"'{title}' is already in your blacklist.");
-            return false;
-        }
-
-        try
-        {
-            await BlacklistService.AddToBacklistAsync(id, _cancellationTokenSource.Token);
-            Notifier.Success($"'{title}' has been added to your blacklist.");
-            await LoadBlacklistAsync();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Notifier.Error(ex, "Failed to add to blacklist");
-            return false;
-        }
-    }
-
-    public void Dispose()
-    {
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource.Dispose();
-    }
+    private static string Titles(int count) => count == 1 ? "1 title" : $"{count} titles";
 }
-
-
-
-

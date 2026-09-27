@@ -1,0 +1,43 @@
+.bulk-tick {
+    width: 17px;
+    height: 17px;
+    border-radius: 4px;
+    border: 1.5px solid var(--muted-foreground);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.bulk-tick.is-on {
+    background: var(--foreground);
+    border-color: var(--foreground);
+    color: var(--background);
+}
+
+.bulk-caret {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 22px;
+    color: var(--muted-foreground);
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.bulk-caret:hover {
+    color: var(--foreground);
+}
+
+.bulk-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    margin: 0 -24px 16px;
+    padding: 10px 24px;
+    background: var(--background);
+}

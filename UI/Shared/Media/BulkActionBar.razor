@@ -1,49 +1,207 @@
-<div class="sticky top-0 z-30 mb-4 flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm">
-    <span class="text-sm font-medium">@SelectedCount of @TotalCount selected</span>
-    <div class="flex items-center gap-2">
-        @if (SelectedCount == TotalCount && TotalCount > 0)
+<div class="bulk-sticky">
+<div class="flex items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm">
+    <BbDropdownMenu>
+        <div class="flex items-center gap-1">
+            <button type="button"
+                    role="checkbox"
+                    aria-checked="@AriaChecked"
+                    aria-label="@SelectionLabel"
+                    class="bulk-tick @(SelectedCount > 0 ? "is-on" : "")"
+                    @onclick="ToggleAsync">
+                @if (SelectedCount > 0)
+                {
+                    <LucideIcon Name="@TickIcon" Size="12"/>
+                }
+            </button>
+            <BbDropdownMenuTrigger AsChild="false" class="bulk-caret" aria-label="Change selection">
+                <LucideIcon Name="chevron-down" Size="13"/>
+            </BbDropdownMenuTrigger>
+        </div>
+        <BbDropdownMenuContent Align="PopoverAlign.Start" Class="w-56">
+            <BbDropdownMenuItem OnClick="SelectPageAsync">
+                <Icon><LucideIcon Name="square-check" Size="14"/></Icon>
+                <ChildContent>@(HasMorePages ? $"All {PageCount} on this page" : $"All {PageCount}")</ChildContent>
+            </BbDropdownMenuItem>
+            @if (HasMorePages)
+            {
+                <BbDropdownMenuItem OnClick="SelectListAsync">
+                    <Icon><LucideIcon Name="check-check" Size="14"/></Icon>
+                    <ChildContent>All @ListCount in this list</ChildContent>
+                </BbDropdownMenuItem>
+            }
+        </BbDropdownMenuContent>
+    </BbDropdownMenu>
+
+    <span class="text-sm whitespace-nowrap">
+        @if (SelectedCount == 0)
         {
-            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnClearSelection">
-                <LucideIcon Name="square" Size="14" Class="mr-1"/>
-                Clear
-            </BbButton>
+            <span class="text-muted-foreground">Select</span>
         }
         else
         {
-            <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnSelectAll" Class="whitespace-nowrap">
-                <LucideIcon Name="square-check" Size="14" Class="mr-1"/>
-                Select all
-            </BbButton>
+            <span class="font-medium">@SelectedCount</span>
+            <span class="text-muted-foreground">@CountSuffix</span>
         }
-        <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="OnCancel">
-            <LucideIcon Name="x" Size="14" Class="mr-1"/>
-            Cancel
-        </BbButton>
-        <HoverButton Preset="HoverButtonPreset.Destructive"
-                     Size="ButtonSize.Small"
-                     OnClick="OnRemove"
-                     Disabled="@(SelectedCount == 0 || IsRemoving)">
-            @if (IsRemoving)
+    </span>
+
+    <span class="flex-1"></span>
+
+    <div class="flex items-center gap-1.5">
+    @if (MarkLabel is not null)
+    {
+        <BbTooltip>
+            <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+                <HoverButton Preset="@(MarkTint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
+                             Color="@MarkTint"
+                             Size="ButtonSize.Small"
+                             OnClick="MarkAsync"
+                             Disabled="@(MarkableCount == 0 || IsRemoving)">
+                    <LucideIcon Name="@MarkIcon" Size="14" Class="mr-1"/>
+                    <span>@MarkLabel</span>
+                </HoverButton>
+            </BbTooltipTrigger>
+            @if (SelectedCount > 0 && MarkableCount == 0)
             {
-                <BbSpinner Size="SpinnerSize.Small" Class="mr-1"/>
-                <span>Removing...</span>
+                <BbTooltipContent>@AlreadyMarkedHint</BbTooltipContent>
             }
-            else
-            {
-                <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
-                <span>@RemoveLabel (@SelectedCount)</span>
-            }
-        </HoverButton>
+        </BbTooltip>
+    }
+
+    <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
+
+    <BbTooltip>
+        <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
+            <HoverButton Preset="HoverButtonPreset.Destructive"
+                         Size="ButtonSize.Small"
+                         OnClick="RemoveAsync"
+                         Disabled="@(RemovableCount == 0 || IsRemoving)">
+                @if (IsRemoving)
+                {
+                    <BbSpinner Size="SpinnerSize.Small" Class="mr-1"/>
+                    <span>Removing...</span>
+                }
+                else
+                {
+                    <LucideIcon Name="trash-2" Size="14" Class="mr-1"/>
+                    <span>@RemoveLabel</span>
+                }
+            </HoverButton>
+        </BbTooltipTrigger>
+        @if (SelectedCount > 0 && RemovableCount == 0)
+        {
+            <BbTooltipContent>@AlreadyRemovedHint</BbTooltipContent>
+        }
+    </BbTooltip>
     </div>
+
+    <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
+
+    <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" OnClick="OnExit" AriaLabel="Leave bulk edit">
+        <LucideIcon Name="x" Size="15"/>
+    </BbButton>
 </div>
+</div>
+
+@if (_pending is { } pending)
+{
+    <BbAlertDialog Open="true" OpenChanged="@(open => { if (!open) { _pending = null; } })">
+        <BbAlertDialogContent>
+            <BbAlertDialogHeader>
+                <BbAlertDialogTitle>@pending.Copy.Question</BbAlertDialogTitle>
+                <BbAlertDialogDescription>
+                    @if (HasMorePages)
+                    {
+                        <span>This applies to your whole selection of @SelectedCount, not just the @PageCount on this page. </span>
+                    }
+                    <span>@pending.Copy.Body</span>
+                </BbAlertDialogDescription>
+            </BbAlertDialogHeader>
+            <BbAlertDialogFooter>
+                <BbAlertDialogCancel>
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="CancelAsync">Cancel</BbButton>
+                </BbAlertDialogCancel>
+                <HoverButton Preset="@(pending.Tint is null ? HoverButtonPreset.Destructive : HoverButtonPreset.Custom)"
+                             Color="@pending.Tint"
+                             OnClick="ConfirmAsync">
+                    <LucideIcon Name="@pending.Icon" Size="15" Class="mr-1"/>
+                    <span>@pending.ConfirmLabel @pending.Count</span>
+                </HoverButton>
+            </BbAlertDialogFooter>
+        </BbAlertDialogContent>
+    </BbAlertDialog>
+}
 
 @code {
     [Parameter] public int SelectedCount { get; set; }
-    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public int PageCount { get; set; }
+    [Parameter] public int ListCount { get; set; }
     [Parameter] public string RemoveLabel { get; set; } = "Remove";
     [Parameter] public bool IsRemoving { get; set; }
-    [Parameter] public EventCallback OnSelectAll { get; set; }
+    [Parameter] public EventCallback OnSelectPage { get; set; }
+    [Parameter] public EventCallback OnSelectList { get; set; }
     [Parameter] public EventCallback OnClearSelection { get; set; }
-    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnExit { get; set; }
     [Parameter] public EventCallback OnRemove { get; set; }
+    [Parameter] public string? MarkLabel { get; set; }
+    [Parameter] public string MarkIcon { get; set; } = "shield-ban";
+    [Parameter] public string? MarkTint { get; set; }
+    [Parameter] public EventCallback OnMark { get; set; }
+    [Parameter] public int MarkableCount { get; set; }
+    [Parameter] public string? AlreadyMarkedHint { get; set; }
+    [Parameter] public int RemovableCount { get; set; }
+    [Parameter] public string? AlreadyRemovedHint { get; set; }
+    [Parameter] public Func<int, BulkConfirm>? RemoveConfirm { get; set; }
+    [Parameter] public Func<int, BulkConfirm>? MarkConfirm { get; set; }
+
+    private sealed record PendingAction(BulkConfirm Copy, int Count, string ConfirmLabel, string Icon, string? Tint, EventCallback Run);
+
+    private PendingAction? _pending;
+
+    private bool HasMorePages => ListCount > PageCount;
+
+    private bool NeedsConfirm => HasMorePages ? SelectedCount > PageCount : ListCount > 0 && SelectedCount >= ListCount;
+
+    private string TickIcon => HasMorePages && SelectedCount >= ListCount ? "check-check" : SelectedCount >= PageCount ? "check" : "minus";
+
+    private string AriaChecked => SelectedCount == 0 ? "false" : SelectedCount >= PageCount ? "true" : "mixed";
+
+    private string SelectionLabel => SelectedCount > 0 ? "Clear selection" : "Select all on this page";
+
+    private string CountSuffix =>
+        HasMorePages && SelectedCount >= ListCount ? "in this list selected"
+        : HasMorePages && SelectedCount == PageCount ? "on this page selected"
+        : "selected";
+
+    private Task ToggleAsync() => SelectedCount > 0 ? ClearAsync() : SelectPageAsync();
+
+    private Task SelectPageAsync() => OnSelectPage.InvokeAsync();
+
+    private Task SelectListAsync() => OnSelectList.InvokeAsync();
+
+    private Task ClearAsync() => OnClearSelection.InvokeAsync();
+
+    private Task RemoveAsync() =>
+        NeedsConfirm && RemoveConfirm is { } copy ? Arm(copy(RemovableCount), RemovableCount, RemoveLabel, "trash-2", null, OnRemove) : OnRemove.InvokeAsync();
+
+    private Task MarkAsync() =>
+        NeedsConfirm && MarkConfirm is { } copy ? Arm(copy(MarkableCount), MarkableCount, MarkLabel!, MarkIcon, MarkTint, OnMark) : OnMark.InvokeAsync();
+
+    private Task Arm(BulkConfirm copy, int count, string label, string icon, string? tint, EventCallback run)
+    {
+        _pending = new PendingAction(copy, count, label, icon, tint, run);
+        return Task.CompletedTask;
+    }
+
+    private void CancelAsync() => _pending = null;
+
+    private async Task ConfirmAsync()
+    {
+        if (_pending is not { } pending)
+        {
+            return;
+        }
+
+        _pending = null;
+        await pending.Run.InvokeAsync();
+    }
 }

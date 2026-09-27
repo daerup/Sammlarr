@@ -1,0 +1,74 @@
+@using UI.Shared.Filters
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="rounded-lg border bg-destructive/10 border-destructive/30 p-5 flex items-start gap-3">
+        <LucideIcon Name="circle-alert" Size="18" Class="text-destructive shrink-0 mt-0.5"/>
+        <div class="flex-1 space-y-3">
+            <p class="text-sm text-destructive font-medium">@ErrorMessage</p>
+            <BbButton Variant="ButtonVariant.Secondary" @onclick="OnRetry">
+                <LucideIcon Name="refresh-cw" Size="14" Class="mr-2"/>
+                Retry
+            </BbButton>
+        </div>
+    </div>
+}
+else if (IsLoading || TotalCount is null)
+{
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="12"/>
+    </div>
+}
+else if (TotalCount is 0)
+{
+    @EmptyState
+}
+else if (TotalCount is { } total)
+{
+    @if (ShowFilters)
+    {
+        <ListFilterBar Filter="Filter"
+                       FilterChanged="FilterChanged"
+                       Available="Sources"
+                       AvailableStatuses="Statuses"
+                       Shown="VisibleCount"
+                       Total="total"/>
+    }
+
+    @if (VisibleCount == 0)
+    {
+        <MediaListEmptyState Icon="filter-x" Heading="Nothing matches these filters.">
+            @total titles are hidden. Clear the filters to see them.
+        </MediaListEmptyState>
+    }
+    else
+    {
+        @Grid
+
+        @if (PageCount > 1)
+        {
+            <PaginationControls CurrentPage="CurrentPage"
+                                TotalPages="PageCount"
+                                IsDisabled="IsLoading"
+                                PageChanged="PageChanged"/>
+        }
+    }
+}
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public EventCallback OnRetry { get; set; }
+    [Parameter] public int? TotalCount { get; set; }
+    [Parameter] public int VisibleCount { get; set; }
+    [Parameter] public bool ShowFilters { get; set; }
+    [Parameter] public ListFilter Filter { get; set; } = ListFilter.None;
+    [Parameter] public EventCallback<ListFilter> FilterChanged { get; set; }
+    [Parameter] public IReadOnlyList<SourceOption> Sources { get; set; } = [];
+    [Parameter] public IReadOnlyList<StatusOption> Statuses { get; set; } = [];
+    [Parameter] public int CurrentPage { get; set; } = 1;
+    [Parameter] public int PageCount { get; set; } = 1;
+    [Parameter] public EventCallback<int> PageChanged { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment EmptyState { get; set; }
+    [Parameter, EditorRequired] public required RenderFragment Grid { get; set; }
+}

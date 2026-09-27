@@ -23,6 +23,55 @@ public class ListFilterTests
 	}
 
 	[Test]
+	public async Task ActiveCount_WithASearchTerm_CountsItAlongsideTheOtherFilters()
+	{
+		var filter = new ListFilter { Type = MediaType.Movie, Search = "dune" };
+
+		await Assert.That(filter.ActiveCount).IsEqualTo(2);
+	}
+
+	[Test]
+	[Arguments("dune", "Dune: Part Two", true)]
+	[Arguments("DUNE", "Dune: Part Two", true)]
+	[Arguments("part two", "Dune: Part Two", true)]
+	[Arguments("  dune  ", "Dune: Part Two", true)]
+	[Arguments("arrival", "Dune: Part Two", false)]
+	public async Task MatchesSearch_AgainstATitle_IgnoresCaseAndSurroundingSpace(string search, string title, bool expected)
+	{
+		var filter = new ListFilter { Search = search };
+
+		await Assert.That(filter.MatchesSearch(title)).IsEqualTo(expected);
+	}
+
+	[Test]
+	[Arguments(null)]
+	[Arguments("")]
+	[Arguments("   ")]
+	public async Task MatchesSearch_WithoutATerm_KeepsEveryTitle(string? search)
+	{
+		var filter = new ListFilter { Search = search };
+
+		await Assert.That(filter.MatchesSearch("anything at all")).IsTrue();
+	}
+
+	[Test]
+	public async Task ClearFilters_WithASearchTerm_DropsItButKeepsTheSort()
+	{
+		var filter = new ListFilter
+		{
+			Search = "dune",
+			Type = MediaType.Movie,
+			Sort = ListSort.TitleAscending,
+		};
+
+		var cleared = filter.ClearFilters();
+
+		await Assert.That(cleared.Search).IsNull();
+		await Assert.That(cleared.Type).IsNull();
+		await Assert.That(cleared.Sort).IsEqualTo(ListSort.TitleAscending);
+	}
+
+	[Test]
 	public async Task MatchesSource_WithSeveralSourcesChosen_AcceptsAnyOfThem()
 	{
 		var other = FeedId.From(new Guid(32, 0, 0, new byte[8]));

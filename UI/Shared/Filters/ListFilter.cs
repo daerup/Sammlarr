@@ -36,15 +36,21 @@ public readonly record struct SourceChoice(SourceKind Kind, FeedId? Feed = null)
 
 public sealed record SourceOption(string Key, string Label, SourceChoice Choice);
 
+public sealed record StatusOption(string Key, string Label);
+
 public sealed record ListFilter
 {
 	public static readonly ListFilter None = new();
 
 	public IReadOnlyList<SourceChoice> Sources { get; init; } = [];
 	public MediaType? Type { get; init; }
+	public string? Search { get; init; }
+	public IReadOnlyList<string> Statuses { get; init; } = [];
 	public ListSort Sort { get; init; } = ListSort.RecentlyAdded;
 
-	public int ActiveCount => (Sources.Count > 0 ? 1 : 0) + (Type is null ? 0 : 1);
+	public int ActiveCount => (Sources.Count > 0 ? 1 : 0) + (Type is null ? 0 : 1) + (string.IsNullOrWhiteSpace(Search) ? 0 : 1) + (Statuses.Count > 0 ? 1 : 0);
+
+	public bool HasStatus(string key) => Statuses.Contains(key);
 
 	public bool HasFilters => ActiveCount > 0;
 
@@ -53,6 +59,9 @@ public sealed record ListFilter
 	public ListFilter ClearFilters() => new() { Sort = Sort };
 
 	public bool MatchesType(MediaType type) => Type is null || Type == type;
+
+	public bool MatchesSearch(string? title) =>
+		string.IsNullOrWhiteSpace(Search) || (title is not null && title.Contains(Search.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
 	public bool MatchesSource(WatchlistItemProvenance provenance) => Sources.Count == 0 || Sources.Any(source => source.Matches(provenance));
 
