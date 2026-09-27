@@ -5,6 +5,7 @@
         {
             <PageHeader Heading="@Heading"
                         Description="@Description"
+                        DescriptionContent="@DescriptionContent"
                         Actions="@HeaderActions"
                         Class="px-6 pb-4 shrink-0"/>
         }
@@ -20,6 +21,7 @@ else
         {
             <PageHeader Heading="@Heading"
                         Description="@Description"
+                        DescriptionContent="@DescriptionContent"
                         Actions="@HeaderActions"
                         Class="pb-4"/>
         }
@@ -30,6 +32,7 @@ else
 @code {
     [Parameter] public string? Heading { get; set; }
     [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? DescriptionContent { get; set; }
     [Parameter] public RenderFragment? HeaderActions { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public string? HeaderClass { get; set; }
