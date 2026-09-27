@@ -62,7 +62,7 @@ public class WatchlistSyncEngineTests
 		var alsoStranded = MediaId.From(Guid.NewGuid());
 		var provider = IWatchlistProvider.Mock();
 		provider.GetWatchlistAsync(Any()).Returns(WatchlistStubs.NothingRemote());
-		var published = new WatchlistStubs.RecordingPublisher();
+		var published = new RecordingPublisher();
 
 		await BuildEngine(provider, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
