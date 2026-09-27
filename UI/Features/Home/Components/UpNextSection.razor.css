@@ -69,6 +69,16 @@
     text-overflow: ellipsis;
 }
 
+a.row-name {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.row-name:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .row-detail {
     font-size: 10.5px;
     color: var(--muted-foreground);
