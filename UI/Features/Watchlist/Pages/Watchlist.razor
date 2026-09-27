@@ -50,7 +50,7 @@
         <ProtectedComponent GuardState="IsConnected"
                             AuthProvider="@Settings!.AuthProvider"
                             DeniedActionDescription="sync your watchlist">
-            <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@WatchlistBrandColor" OutboxEntries="_outboxEntries.Values"/>
+            <WatchlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@WatchlistBrandColor" ProviderName="@WatchlistProviderName" OutboxEntries="_outboxEntries.Values"/>
         </ProtectedComponent>
     </HeaderExtras>
     <ChildContent>

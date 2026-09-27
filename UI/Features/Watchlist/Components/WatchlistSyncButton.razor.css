@@ -1,30 +1,35 @@
-.sync-badge {
+.sync-status {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-width: 1.6rem;
-    height: 22px;
-    padding: 0 10px;
-    border-radius: 999px;
-    border: 1px solid currentColor;
-    background: color-mix(in srgb, var(--background) 82%, transparent);
-    font-size: 12.5px;
+    gap: 9px;
+    padding: 0 12px;
+    border: 1px solid var(--tint, var(--border));
+    border-left: none;
+    border-top-right-radius: calc(var(--radius) - 2px);
+    border-bottom-right-radius: calc(var(--radius) - 2px);
+    background: color-mix(in srgb, var(--tint, var(--border)) 9%, transparent);
+    color: var(--muted-foreground);
+    font-size: 13px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
+    white-space: nowrap;
+    cursor: default;
 }
 
-.sync-badge .is-added {
+.sync-status.is-busy {
+    opacity: 0.5;
+}
+
+.sync-status .is-added {
     color: var(--alert-success);
 }
 
-.sync-badge .is-removed {
+.sync-status .is-removed {
     color: var(--destructive);
 }
 
-.sync-badge .sync-dot {
-    color: var(--muted-foreground);
-    font-size: 14px;
-    line-height: 1;
+.sync-status .sync-note {
+    font-size: 12.5px;
+    font-weight: 500;
 }
