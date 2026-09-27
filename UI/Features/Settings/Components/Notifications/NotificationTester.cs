@@ -15,6 +15,7 @@ internal sealed class NotificationTester(IKeyedServiceIndex<NotificationChannel,
 		new(
 			Guid.CreateVersion7(),
 			NotificationEventType.TestPing,
+			NotificationLevel.Info,
 			DateTimeOffset.UtcNow,
 			"Test notification",
 			"This is a test notification from Sammlarr.",

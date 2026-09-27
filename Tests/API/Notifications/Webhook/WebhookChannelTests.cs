@@ -41,6 +41,7 @@ public class WebhookChannelTests
 		var context = new NotificationContext(
 			Guid.NewGuid(),
 			NotificationEventType.WatchlistSyncCompleted,
+			NotificationLevel.Success,
 			Now,
 			"Watchlist sync completed",
 			"Added 1 item(s).",
@@ -129,7 +130,15 @@ public class WebhookChannelTests
 	}
 
 	private static NotificationContext Context() =>
-		new(Guid.NewGuid(), NotificationEventType.WatchlistSyncCompleted, Now, "Watchlist sync completed", "Synced.", new NotificationData());
+		new(
+			Guid.NewGuid(),
+			NotificationEventType.WatchlistSyncCompleted,
+			NotificationLevel.Success,
+			Now,
+			"Watchlist sync completed",
+			"Synced.",
+			new NotificationData()
+		);
 
 	private static NotificationTarget WebhookTarget(string url, string secret) => new(Guid.NewGuid(), "Hook", true, new WebhookConfig(url, secret));
 

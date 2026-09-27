@@ -14,6 +14,7 @@ internal static class NotificationTemplateVariables
 			new("{{ title }}", "Headline text"),
 			new("{{ summary }}", "Short summary line"),
 			new("{{ type }}", "Event type"),
+			new("{{ defaultLevel }}", "The notification's own level: Info, Success, Warning or Error"),
 			new("{{ id }}", "Unique event id"),
 			new("{{ occurredAt }}", "When it happened"),
 		]

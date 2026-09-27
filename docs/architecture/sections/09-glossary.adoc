@@ -154,13 +154,35 @@ with retry and backoff. See <<section-runtime-view>>.
 Delta:: The difference between the local and remote watchlist computed during a sync
 (`WatchlistDelta`).
 
-Notification:: A webhook or Pushover message emitted for a watchlist or sync event.
+Event:: Something that happened, announced only to open pages. In memory, never stored, gone on
+restart, and invisible in settings because no user can subscribe to one. Used for high-frequency
+progress that would be noise as a notification, such as per-item watchlist push status, and for
+telling a page its cached numbers are stale. Named `*Event`, marked `IEvent`. Contrast Notification.
+Which of the two a fact is never depends on what triggered it, only on whether a user could
+reasonably subscribe to it.
 
-Channel:: How a notification is delivered: webhook or Pushover (`INotificationChannel`).
+Notification:: A durable, user-subscribable fact worth telling someone about. Queued on Wolverine,
+fanned out to every matching Subscription, rendered through a Template and delivered on a Channel.
+Named `*Notification`, marked `INotification`, which also carries the notification's own
+`DefaultLevel`. Neither marker is assignable to the other, so the two kinds cannot be confused.
+
+Event publisher:: The process-wide singleton carrying Events to open pages (`IEventPublisher`). A
+C# `event`, not a queue: nothing is stored and nothing is replayed, so a page that was closed simply
+missed it. Notifications do not travel this way; they reach pages through the WebUi Channel.
+
+Announcer:: The single seam that publishes both kinds (`Announcer`). `Announce` takes an `IEvent`
+and reaches the Event publisher alone; `AnnounceAsync` takes an `INotification` and goes to the
+durable queue. The parameter types are what keep the two apart: calling the wrong one does not
+compile.
+
+Channel:: How a notification is delivered: webhook, Pushover, or the in-app toasts of the WebUi
+channel (`INotificationChannel`). The WebUi channel is seeded as a Target on signup, so in-app
+notifications work without configuration and can be unsubscribed like any other.
 
 Target:: A configured notification destination, such as one webhook URL or Pushover account.
 
-Subscription:: A rule binding an event type to a target and a template: who is told about what.
+Subscription:: A rule binding a notification type to a target and a template: who is told about
+what.
 
 Template:: The Fluid template that renders a notification's title and body for a target.
 

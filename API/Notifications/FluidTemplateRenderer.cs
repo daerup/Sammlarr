@@ -45,6 +45,7 @@ internal sealed class FluidTemplateRenderer : INotificationTemplateRenderer
 	{
 		var options = new TemplateOptions { MaxSteps = 400 };
 		options.ValueConverters.Add(value => value is NotificationEventType type ? type.ToString() : null);
+		options.ValueConverters.Add(value => value is NotificationLevel level ? level.ToString() : null);
 		options.ValueConverters.Add(value => value is MediaProvider provider ? provider.ToString() : null);
 		options.ValueConverters.Add(value => value is FeedProvider feedProvider ? feedProvider.ToString() : null);
 		options.ValueConverters.Add(value => value is MediaType mediaType ? mediaType.ToString() : null);

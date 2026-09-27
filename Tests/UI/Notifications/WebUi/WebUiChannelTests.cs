@@ -57,16 +57,11 @@ public class WebUiChannelTests
 	}
 
 	[Test]
-	[Arguments(NotificationEventType.FeedRunFailed, NotificationLevel.Error)]
-	[Arguments(NotificationEventType.ProviderRateLimited, NotificationLevel.Warning)]
-	[Arguments(NotificationEventType.FeedRunCompleted, NotificationLevel.Info)]
-	[Arguments(NotificationEventType.WatchlistSyncCompleted, NotificationLevel.Info)]
-	[Arguments(NotificationEventType.TestPing, NotificationLevel.Info)]
-	public async Task SendAsync_WhenNoLevelIsConfigured_DerivesTheLevelFromTheEventType(NotificationEventType type, NotificationLevel expected)
+	public async Task SendAsync_WhenNoLevelIsConfigured_ShowsTheNotificationsOwnLevelRatherThanOneDerivedFromItsType()
 	{
-		await Testee.SendAsync(Context(type), Target(), NotificationTemplate.None);
+		await Testee.SendAsync(Context(NotificationEventType.FeedRunCompleted, NotificationLevel.Error), Target(), NotificationTemplate.None);
 
-		await Assert.That(shown[0].Level).IsEqualTo(expected);
+		await Assert.That(shown[0].Level).IsEqualTo(NotificationLevel.Error);
 	}
 
 	[Test]
@@ -118,8 +113,8 @@ public class WebUiChannelTests
 
 	private static NotificationTarget Target() => new(Guid.NewGuid(), "This app", true, new WebUiConfig());
 
-	private static NotificationContext Context(NotificationEventType type) =>
-		new(Guid.NewGuid(), type, DateTimeOffset.UnixEpoch, Title(type), "42 items", new NotificationData());
+	private static NotificationContext Context(NotificationEventType type, NotificationLevel level = NotificationLevel.Info) =>
+		new(Guid.NewGuid(), type, level, DateTimeOffset.UnixEpoch, Title(type), "42 items", new NotificationData());
 
 	private static string Title(NotificationEventType type) =>
 		type switch
@@ -128,6 +123,7 @@ public class WebUiChannelTests
 			NotificationEventType.FeedRunFailed => "Feed run failed",
 			NotificationEventType.ProviderRateLimited => "Provider rate limited",
 			NotificationEventType.WatchlistSyncCompleted => "Watchlist sync completed",
+			NotificationEventType.WatchlistSyncFailed => "Watchlist sync failed",
 			NotificationEventType.TestPing => "Test ping",
 		};
 }

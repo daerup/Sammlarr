@@ -30,11 +30,7 @@ internal sealed class WebUiChannel(WebUiCircuits circuits, ICurrentUser recipien
 	{
 		circuits.Show(
 			recipient.Id,
-			new Toast(
-				template.Level.GetValueOr(() => NotificationLevel.For(context.Type)),
-				rendered.Title.GetValueOr(context.Title),
-				rendered.Message.GetValueOr(context.Summary)
-			)
+			new Toast(template.Level.GetValueOr(context.DefaultLevel), rendered.Title.GetValueOr(context.Title), rendered.Message.GetValueOr(context.Summary))
 		);
 		return new DeliverySucceeded();
 	}

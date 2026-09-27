@@ -1,6 +1,7 @@
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Notifications;
+using Domain.Announcing;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Notifications;
@@ -10,7 +11,7 @@ namespace Messaging.Notifications;
 internal static class NotificationContextFactory
 {
 	public static async Task<NotificationContext> BuildAsync(
-		BaseNotification message,
+		INotification message,
 		IMediaRepository mediaRepository,
 		IFeedService feedService,
 		CancellationToken cancellationToken
@@ -32,7 +33,7 @@ internal static class NotificationContextFactory
 		return feed is null ? null : new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier);
 	}
 
-	private static NotificationPayload ToPayload(BaseNotification message) =>
+	private static NotificationPayload ToPayload(INotification message) =>
 		message switch
 		{
 			WatchlistSyncCompletedNotification e => Payload(
@@ -71,6 +72,7 @@ internal static class NotificationContextFactory
 		new(
 			payload.Id,
 			payload.Type,
+			payload.DefaultLevel,
 			payload.OccurredAt,
 			payload.Title,
 			payload.Summary,
@@ -89,7 +91,7 @@ internal static class NotificationContextFactory
 	private static readonly IReadOnlyDictionary<MediaId, NotificationMedia> NoMedia = new Dictionary<MediaId, NotificationMedia>();
 
 	private static NotificationPayload Payload(
-		BaseNotification message,
+		INotification message,
 		IReadOnlyList<MediaId>? pulledAdds = null,
 		IReadOnlyList<MediaId>? pulledRemoves = null,
 		IReadOnlyList<MediaId>? pushedAdds = null,
@@ -99,6 +101,7 @@ internal static class NotificationContextFactory
 		new(
 			message.Id,
 			message.Type,
+			message.DefaultLevel,
 			message.OccurredAt,
 			message.Type.GetDescription(),
 			message.Summary,

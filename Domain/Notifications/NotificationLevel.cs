@@ -3,23 +3,7 @@ namespace Domain.Notifications;
 public enum NotificationLevel
 {
 	Info,
+	Success,
 	Warning,
 	Error,
-}
-
-public static class NotificationLevels
-{
-	extension(NotificationLevel)
-	{
-		public static NotificationLevel For(NotificationEventType type) =>
-			type switch
-			{
-				NotificationEventType.FeedRunFailed => NotificationLevel.Error,
-				NotificationEventType.WatchlistSyncFailed => NotificationLevel.Error,
-				NotificationEventType.ProviderRateLimited => NotificationLevel.Warning,
-				NotificationEventType.WatchlistSyncCompleted => NotificationLevel.Info,
-				NotificationEventType.FeedRunCompleted => NotificationLevel.Info,
-				NotificationEventType.TestPing => NotificationLevel.Info,
-			};
-	}
 }

@@ -199,7 +199,7 @@
     private string PreviewBody(NotificationContext context) =>
         Preview(NotificationTemplate.None with { Body = Opt(_body) }, context, rendered => rendered.Body, "(default JSON body)");
 
-    private string PreviewLevel(NotificationContext context) => (_level ?? NotificationLevel.For(context.Type)).ToString();
+    private string PreviewLevel(NotificationContext context) => (_level ?? context.DefaultLevel).ToString();
 
     private string Preview(NotificationTemplate template, NotificationContext context, Func<RenderedNotification, Optional<string>> field, string fallback) =>
         Renderer.Render(template, context).Match(rendered => field(rendered).GetValueOr(fallback), error => "⚠ " + error.Reason);

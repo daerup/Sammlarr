@@ -1,4 +1,5 @@
 using Contracts.Notifications;
+using Domain.Announcing;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
@@ -21,14 +22,21 @@ internal static class NotificationSampleContext
 	public static NotificationContext For(NotificationEventType eventType)
 	{
 		var sample = Sample(eventType);
-		return new NotificationContext(sample.Id, sample.Type, sample.OccurredAt, sample.Type.GetDescription(), sample.Summary, Data(eventType));
+		return new NotificationContext(
+			sample.Id,
+			sample.Type,
+			sample.DefaultLevel,
+			sample.OccurredAt,
+			sample.Type.GetDescription(),
+			sample.Summary,
+			Data(eventType)
+		);
 	}
 
-	// csharpier-ignore
-	private static BaseNotification Sample(NotificationEventType eventType) =>
+	private static INotification Sample(NotificationEventType eventType) =>
 		eventType switch
 		{
-			NotificationEventType.WatchlistSyncCompleted => new WatchlistSyncCompletedNotification(SampleUser, SampleMoment, [SampleMedia, SampleMedia], [], [SampleMedia], [], []),
+			NotificationEventType.WatchlistSyncCompleted => new WatchlistSyncCompletedNotification(SampleUser, SampleMoment, SamplePulled, [], [SampleMedia], [], []),
 			NotificationEventType.WatchlistSyncFailed => new WatchlistSyncFailedNotification(SampleUser, SampleMoment, "Provider timed out"),
 			NotificationEventType.FeedRunCompleted => new FeedRunCompletedNotification(SampleUser, SampleMoment, SampleFeed, 2, 1),
 			NotificationEventType.FeedRunFailed => new FeedRunFailedNotification(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),
@@ -36,13 +44,17 @@ internal static class NotificationSampleContext
 			NotificationEventType.TestPing => new TestPingNotification(SampleUser, SampleMoment, Guid.Empty),
 		};
 
-	// csharpier-ignore
 	private static NotificationData Data(NotificationEventType eventType) =>
 		eventType switch
 		{
 			NotificationEventType.WatchlistSyncCompleted => new NotificationData { Media = SyncedMedia },
 			NotificationEventType.WatchlistSyncFailed => new NotificationData { Reason = "Provider timed out" },
-			NotificationEventType.FeedRunCompleted => new NotificationData { Feed = Feed, Added = 2, Removed = 1 },
+			NotificationEventType.FeedRunCompleted => new NotificationData
+			{
+				Feed = Feed,
+				Added = 2,
+				Removed = 1,
+			},
 			NotificationEventType.FeedRunFailed => new NotificationData { Feed = Feed, Reason = "Provider timed out" },
 			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = MediaProvider.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) },
 			NotificationEventType.TestPing => new NotificationData(),
@@ -57,4 +69,5 @@ internal static class NotificationSampleContext
 	private static readonly FeedId SampleFeed = FeedId.From(SampleId);
 
 	private static readonly MediaId SampleMedia = MediaId.From(SampleId);
+	private static readonly IReadOnlyList<MediaId> SamplePulled = [SampleMedia, SampleMedia];
 }

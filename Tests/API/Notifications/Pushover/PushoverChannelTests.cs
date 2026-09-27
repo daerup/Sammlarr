@@ -67,11 +67,12 @@ public class PushoverChannelTests
 	}
 
 	[Test]
-	public async Task SendAsync_WhenAFeedRunFailed_MapsToHighPriority()
+	public async Task SendAsync_WhenTheNotificationsOwnLevelIsError_MapsToHighPriority()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 
-		await Channel(handler).SendAsync(Context(NotificationEventType.FeedRunFailed), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
+		await Channel(handler)
+			.SendAsync(Context(NotificationEventType.FeedRunFailed, NotificationLevel.Error), PushoverTarget(), NotificationTemplate.None, CancellationToken.None);
 
 		await Assert.That(Form(handler)["priority"]).IsEqualTo("1");
 	}
@@ -144,8 +145,10 @@ public class PushoverChannelTests
 	private static PushoverChannel Channel(HttpMessageHandler handler) =>
 		new(new PushoverClient(new HttpClient(handler)), new FluidTemplateRenderer(), NullLogger<PushoverChannel>.Instance);
 
-	private static NotificationContext Context(NotificationEventType type = NotificationEventType.WatchlistSyncCompleted) =>
-		new(Guid.NewGuid(), type, Now, "Watchlist sync completed", "Synced.", new NotificationData());
+	private static NotificationContext Context(
+		NotificationEventType type = NotificationEventType.WatchlistSyncCompleted,
+		NotificationLevel level = NotificationLevel.Success
+	) => new(Guid.NewGuid(), type, level, Now, "Watchlist sync completed", "Synced.", new NotificationData());
 
 	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));
 

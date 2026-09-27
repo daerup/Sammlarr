@@ -2,6 +2,7 @@ using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Notifications;
+using Domain.Announcing;
 using Domain.Notifications;
 using Wolverine;
 
@@ -66,7 +67,7 @@ public static class NotificationDispatchHandler
 	}
 
 	private static async Task<OutgoingMessages> FanOutAsync(
-		BaseNotification message,
+		INotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,

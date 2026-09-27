@@ -3,6 +3,7 @@ using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Notifications;
+using Domain.Announcing;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Notifications;
@@ -32,10 +33,10 @@ public class MessagingBootstrapTests
 	}
 
 	[Test]
-	public async Task Publish_WhenTheVariableIsTypedAsTheBaseNotification_StillReachesTheConcreteHandler()
+	public async Task Publish_WhenTheVariableIsTypedAsTheINotification_StillReachesTheConcreteHandler()
 	{
 		var owner = UserId.From(Guid.NewGuid());
-		BaseNotification notification = new FeedRunCompletedNotification(owner, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), 3, 1);
+		INotification notification = new FeedRunCompletedNotification(owner, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), 3, 1);
 		var userScope = DispatchingUserScope();
 
 		await WithHostAsync(
