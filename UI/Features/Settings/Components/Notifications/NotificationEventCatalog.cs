@@ -12,4 +12,9 @@ internal static class NotificationEventCatalog
 		.Except(NotSubscribable)
 		.Select(type => new NotificationEventOption(type, type.GetDescription()))
 		.ToList();
+
+	public static string Summarise(IReadOnlyList<NotificationEventType> eventTypes) =>
+		eventTypes.Count == 1 ? eventTypes[0].GetDescription() : $"{eventTypes.Count} events";
+
+	public static string Spell(IReadOnlyList<NotificationEventType> eventTypes) => string.Join(", ", eventTypes.Select(eventType => eventType.GetDescription()));
 }

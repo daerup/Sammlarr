@@ -31,4 +31,32 @@ public class NotificationEventCatalogTests
 		await Assert.That(NotificationEventCatalog.Subscribable).IsNotEmpty();
 		await Assert.That(NotificationEventCatalog.Subscribable.All(option => !string.IsNullOrWhiteSpace(option.Label))).IsTrue();
 	}
+
+	[Test]
+	public async Task Summarise_ForASingleEvent_NamesItRatherThanCountingIt()
+	{
+		var summary = NotificationEventCatalog.Summarise([NotificationEventType.FeedRunFailed]);
+
+		await Assert.That(summary).IsEqualTo("Feed run failed");
+	}
+
+	[Test]
+	public async Task Summarise_ForSeveralEvents_CountsThemSoTheRowStaysOneLine()
+	{
+		var summary = NotificationEventCatalog.Summarise([
+			NotificationEventType.FeedRunFailed,
+			NotificationEventType.FeedRunCompleted,
+			NotificationEventType.WatchlistSyncFailed,
+		]);
+
+		await Assert.That(summary).IsEqualTo("3 events");
+	}
+
+	[Test]
+	public async Task Spell_ListsEveryEvent_SoTheTooltipStillShowsWhatTheSummaryHides()
+	{
+		var spelled = NotificationEventCatalog.Spell([NotificationEventType.FeedRunFailed, NotificationEventType.WatchlistSyncCompleted]);
+
+		await Assert.That(spelled).IsEqualTo("Feed run failed, Watchlist sync completed");
+	}
 }
