@@ -15,6 +15,7 @@
 @inject IMediaService Media
 @inject IWatchlistRepository Watchlist
 @inject NavigationManager Navigation
+@inject ScrollService ScrollService
 
 <PageTitle>Run history</PageTitle>
 
@@ -126,6 +127,7 @@
                                 @foreach (var item in day.Runs)
                                 {
                                     <button type="button" class="runs-item @(item.Id == _selected?.Id ? "is-sel" : null)"
+                                            id="@(item.Id == _selected?.Id ? SelectedAnchor : null)"
                                             @onclick="() => SelectAsync(item)">
                                         <span class="runs-dot @DotClass(item)"></span>
                                         <span class="runs-when">
@@ -265,6 +267,9 @@
     private FeedRunHistory _history = FeedRunHistory.None;
     private int _owned;
     private IReadOnlyList<FeedRun> _runs = [];
+    private const string SelectedAnchor = "run-selected";
+
+    private bool _revealSelected;
     private FeedRun? _selected;
     private IReadOnlyList<ChangeEntry> _entries = [];
     private MediaLookup? _sheet;
@@ -301,7 +306,19 @@
         if (wanted is not null && wanted.Id != _selected?.Id)
         {
             await ShowRunAsync(wanted);
+            _revealSelected = true;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_revealSelected)
+        {
+            return;
+        }
+
+        _revealSelected = false;
+        await ScrollService.IntoViewAsync(SelectedAnchor);
     }
 
     private async Task LoadRunsAsync(FeedId feedId)

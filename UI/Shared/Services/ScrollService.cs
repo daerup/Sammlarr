@@ -11,4 +11,13 @@ internal class ScrollService(IJSRuntime jsRuntime)
 		await jsRuntime.InvokeVoidAsync("sammlarrScroll.toTop", cancellationToken);
 		await task;
 	}
+
+	public async Task IntoViewAsync(string elementId, CancellationToken cancellationToken = default)
+	{
+		try
+		{
+			await jsRuntime.InvokeVoidAsync("sammlarrScroll.intoView", cancellationToken, elementId);
+		}
+		catch (JSDisconnectedException) { }
+	}
 }
