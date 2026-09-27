@@ -5,11 +5,13 @@ using Bunit;
 using Bunit.TestDoubles;
 using Contracts.Blacklist;
 using Contracts.Identity;
+using Contracts.Jobs;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
+using Domain.Jobs;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -66,7 +68,7 @@ public class WatchlistSyncButtonTests : BunitContext
 	[Test]
 	public async Task Plan_WhenAnAttemptFailsTransiently_RetriesInsteadOfReportingAnError()
 	{
-		var (engine, planner) = RegisterServices();
+		var (_, planner) = RegisterServices();
 		planner.PlanAsync(Any()).ReturnsSequentially(new WatchlistSyncRemoteFailed("temporary"), Summary(), Summary());
 
 		var cut = Render<Harness>();
@@ -78,7 +80,7 @@ public class WatchlistSyncButtonTests : BunitContext
 	[Test]
 	public async Task Plan_WhenEveryAttemptFails_GivesUpAfterThreeTries()
 	{
-		var (engine, planner) = RegisterServices();
+		var (_, planner) = RegisterServices();
 		planner.PlanAsync(Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
 
 		var cut = Render<Harness>();
@@ -103,9 +105,8 @@ public class WatchlistSyncButtonTests : BunitContext
 
 	private async Task<IRenderedComponent<Harness>> OpenDialogAsync()
 	{
-		var (engine, planner) = RegisterServices();
+		var (_, planner) = RegisterServices();
 		planner.PlanAsync(Any()).Returns(Summary());
-		engine.SyncAsync(Any(), Any()).Returns(Summary());
 
 		var cut = Render<Harness>();
 		await cut.Find("button").ClickAsync(new());
@@ -113,13 +114,14 @@ public class WatchlistSyncButtonTests : BunitContext
 		return cut;
 	}
 
-	private (Mock<IWatchlistSyncEngine> Engine, Mock<IWatchlistSyncPlanner> Planner) RegisterServices()
+	private (Mock<IJobQueue> Queue, Mock<IWatchlistSyncPlanner> Planner) RegisterServices()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 
-		var engine = IWatchlistSyncEngine.Mock();
-		Services.AddSingleton(engine.Object);
+		var queue = IJobQueue.Mock();
+		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
+		Services.AddSingleton(queue.Object);
 
 		var planner = IWatchlistSyncPlanner.Mock();
 		Services.AddSingleton(planner.Object);
@@ -162,7 +164,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
-		return (engine, planner);
+		return (queue, planner);
 	}
 
 	private sealed class Harness : ComponentBase

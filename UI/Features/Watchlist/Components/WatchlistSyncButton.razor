@@ -3,6 +3,8 @@
 @using Contracts.Watchlist.Sync
 @using Contracts.Blacklist
 @using Contracts.Watchlist
+@using Contracts.Jobs
+@using Domain.Jobs
 @using Domain.Watchlist
 @using UI.Shared.Changes
 @using UI.Shared.Media
@@ -10,7 +12,7 @@
 @inject IMediaService Media
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
-@inject IWatchlistSyncEngine SyncEngine
+@inject IJobQueue JobQueue
 @inject IWatchlistSyncPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject NavigationManager Navigation
@@ -272,16 +274,13 @@ else
         try
         {
             await OnSyncStarted.InvokeAsync();
-            var result = await SyncEngine.SyncAsync(new ManualTrigger(), _cts.Token);
-            switch (result)
+            switch (await JobQueue.EnqueueAsync(new SyncWatchlist(new ManualTrigger()), _cts.Token))
             {
-                case WatchlistSyncSummary:
+                case Queued:
+                    Notifier.Info("Sync has been queued", null);
                     break;
-                case WatchlistSyncAlreadyRunning running:
-                    Notifier.Info(running.ToString(), null);
-                    break;
-                case WatchlistSyncRemoteFailed failed:
-                    Notifier.Warning(failed.ToString(), null);
+                case AlreadyQueued:
+                    Notifier.Info("A sync is already queued", null);
                     break;
             }
         }
