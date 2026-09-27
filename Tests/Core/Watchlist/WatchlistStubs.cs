@@ -75,7 +75,7 @@ internal static class WatchlistStubs
 			outbox.Object,
 			media.Object,
 			new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object),
-			new WatchlistSyncAnnouncer((feed ?? IWatchlistOutboxEventFeed.Mock()).Object, publisher ?? new NoopPublisher(), clock.Object, owner),
+			new WatchlistSyncAnnouncer((feed ?? IWatchlistOutboxEventFeed.Mock()).Object, publisher ?? new RecordingPublisher(), clock.Object, owner),
 			owner,
 			NullLogger<WatchlistSyncEngine>.Instance
 		);
@@ -102,26 +102,6 @@ internal static class WatchlistStubs
 		{
 			yield return item;
 			await Task.CompletedTask;
-		}
-	}
-
-	internal sealed class NoopPublisher : IMessagePublisher
-	{
-		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
-			where TMessage : notnull => Task.CompletedTask;
-	}
-
-	internal sealed class RecordingPublisher : IMessagePublisher
-	{
-		private readonly List<object> _published = [];
-
-		internal IReadOnlyList<T> Published<T>() => [.. _published.OfType<T>()];
-
-		public Task PublishAsync<TMessage>(TMessage message, CancellationToken cancellationToken = default)
-			where TMessage : notnull
-		{
-			_published.Add(message);
-			return Task.CompletedTask;
 		}
 	}
 }
