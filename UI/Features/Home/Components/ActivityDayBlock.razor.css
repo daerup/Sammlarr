@@ -1,0 +1,207 @@
+.dcard {
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--card);
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.dtop {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 11px 16px 10px;
+    background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    border-bottom: 1px solid var(--border);
+}
+
+.dname {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.dstat {
+    font-size: 12px;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+}
+
+.dstat .up {
+    color: var(--alert-success);
+    font-weight: 600;
+}
+
+.dstat .dn {
+    color: var(--destructive);
+    font-weight: 600;
+}
+
+.dstat .sep {
+    opacity: 0.4;
+    margin: 0 3px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 16px 2px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+    text-decoration: none;
+}
+
+.chip:hover {
+    border-color: var(--muted-foreground);
+    color: var(--foreground);
+}
+
+.chip-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+
+.chip b {
+    color: var(--alert-success);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.chip-rm {
+    color: var(--destructive);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.chip-runs {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+}
+
+.dsub {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    padding: 2px 16px 6px;
+}
+
+.dtop + .dproblem {
+    margin-top: 12px;
+}
+
+.dproblem {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 16px 13px;
+    padding: 8px 11px;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--destructive) 30%, transparent);
+    background: color-mix(in srgb, var(--destructive) 7%, transparent);
+    font-size: 12px;
+}
+
+.dproblem ::deep svg {
+    color: var(--destructive);
+    flex: 0 0 auto;
+}
+
+.problem-feed {
+    font-weight: 600;
+}
+
+.dtoggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    padding: 9px 16px;
+    border: 0;
+    border-top: 1px solid var(--border);
+    background: none;
+    color: var(--muted-foreground);
+    font-size: 11.5px;
+    cursor: pointer;
+}
+
+.dtoggle:hover {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--foreground) 2%, transparent);
+}
+
+.druns {
+    border-top: 1px solid var(--border);
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.drun {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 7px 16px;
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+    text-decoration: none;
+}
+
+.drun:hover {
+    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+
+.drun-at {
+    font-variant-numeric: tabular-nums;
+    width: 42px;
+    flex: 0 0 auto;
+}
+
+.drun-feed {
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.drun-delta {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 7px;
+    font-variant-numeric: tabular-nums;
+    flex: 0 0 auto;
+}
+
+.drun-delta .up {
+    color: var(--alert-success);
+}
+
+.drun-delta .dn {
+    color: var(--destructive);
+}
+
+.drun-delta .bad {
+    color: var(--destructive);
+}
+
+.drun-delta .nil {
+    opacity: 0.6;
+}

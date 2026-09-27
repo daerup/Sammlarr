@@ -1,11 +1,405 @@
 @page "/"
+@implements IDisposable
+@using Contracts.Announcing
+@using Contracts.Blacklist
+@using Contracts.Feed
+@using Contracts.Identity
+@using Contracts.Media
+@using Contracts.Settings
+@using Contracts.Watchlist
+@using Contracts.Watchlist.Outbox
+@using Domain.Announcing
+@using Domain.Feed
+@using Domain.Feed.Run
+@using Domain.Identity
+@using Domain.Media
+@using UI.Features.Home.Components
+@using UI.Shared.Announcing
+@using Domain.Jobs
+@using Domain.Watchlist.Sync
+@using UI.Features.Watchlist.Components
+@using UI.Shared.Services.Branding
+@using Contracts.Jobs
+@inject IFeedService FeedService
+@inject IMediaService MediaService
+@inject IWatchlistRepository WatchlistRepository
+@inject IBlacklistService BlacklistService
+@inject IWatchlistOutbox Outbox
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject IEventPublisher Events
+@inject ICurrentUser CurrentUser
+@inject Notifier Notifier
+@inject IJobQueue JobQueue
+@inject IJobQueueView JobQueueView
+@inject MediaProviderBrandingService BrandingService
 
 <PageTitle>Sammlarr</PageTitle>
 
-<PageContainer Heading="Your library"
-               Description="The local watchlist Sammlarr keeps in sync with your feeds. Anything you see here is here on purpose."/>
+@if (_settings is null)
+{
+    <PageContainer>
+        <HomeSkeleton/>
+    </PageContainer>
+}
+else
+{
+<SignInGuard AccessChanged="HandleSignInChangedAsync"/>
+<OAuthGuard Provider="@_settings.AuthProvider" AccessChanged="HandleConnectionChanged"/>
 
-@code {
+<PageContainer Heading="Your library" Fill="true">
+    <DescriptionContent>
+        @if (_watchlistCount == 0)
+        {
+            <span>The local watchlist Sammlarr keeps in sync with your feeds.</span>
+        }
+        else
+        {
+            <a href="/watchlist" class="summary-count">@_watchlistCount.ToString("N0")</a>
 
+            <span> titles on your watchlist, assembled by</span>
+            <a href="/feeds" class="summary-count">@_feeds.Count.ToString("N0")</a>
+            <span>@(_feeds.Count == 1 ? "feed" : "feeds").</span>
+
+            @if (_blacklistCount > 0)
+            {
+                <a href="/blacklist" class="summary-count">@_blacklistCount.ToString("N0")</a>
+                <span>blacklisted.</span>
+            }
+        }
+    </DescriptionContent>
+    <HeaderActions>
+        <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
+            <div class="flex items-center gap-2">
+                @if (_feeds.Count > 0)
+                {
+                    <BbButton Variant="ButtonVariant.Outline" OnClick="@(() => _isRunOpen = true)">
+                        <LucideIcon Name="play" Size="16" Class="mr-2"/>
+                        Run feeds
+                    </BbButton>
+                }
+                <ProtectedComponent GuardState="IsConnected"
+                                    AuthProvider="@_settings.AuthProvider"
+                                    DeniedActionDescription="sync your watchlist">
+                    <WatchlistSyncButton @ref="_syncControl"
+                                         OnSynced="SyncFinishedAsync"
+                                         OnStatusRefresh="LoadOutboxAsync"
+                                         OnSyncStarted="StartSync"
+                                         IsSyncing="_syncing"
+                                         BrandColor="@BrandColor"
+                                         ProviderName="@ProviderName"
+                                         OutboxEntries="_outbox"/>
+                </ProtectedComponent>
+            </div>
+        </ProtectedSection>
+    </HeaderActions>
+    <ChildContent>
+        <ProtectedSection GuardState="IsSignedIn"
+                          DeniedActionDescription="viewing your library"
+                          FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
+            @if (_isLoading)
+            {
+                <HomeSkeleton/>
+            }
+            else if (_days.Count == 0 && _feeds.Count == 0)
+            {
+                <MediaListEmptyState Icon="rss" Heading="Nothing has happened yet.">
+                    Sammlarr fills your watchlist from feeds, and every run shows up here with what it added and why.
+                </MediaListEmptyState>
+            }
+            else
+            {
+                <LibrarySourcesPanel Sources="_sources" Total="_watchlistCount"/>
+                <UpNextPanel Queued="_queued" Scheduled="_scheduled"/>
+
+                <div class="home-sec">
+                    <h2 class="home-sec-title">Recent activity</h2>
+                </div>
+
+                @if (_days.Count == 0)
+                {
+                    <MediaListEmptyState Icon="clock" Heading="No feed has changed anything yet.">
+                        Runs that add or remove a title will show up here.
+                    </MediaListEmptyState>
+                }
+                else
+                {
+                    @foreach (var day in _days)
+                    {
+                        <ActivityDayBlock @key="day.Date" Day="day" Media="_media" Today="_today" OnSelect="SelectMedia" OnNeedMedia="LoadPostersAsync"/>
+                    }
+                }
+            }
+        </ProtectedSection>
+    </ChildContent>
+</PageContainer>
+
+<MediaDetailSheet Open="_isSheetOpen" OnOpenChanged="SheetOpenChangedAsync" Media="_selected"/>
+
+<RunFeedsDialog Open="_isRunOpen"
+                OpenChanged="@(open => _isRunOpen = open)"
+                Candidates="_candidates"
+                Now="_now"
+                ProviderName="@ProviderName"
+                OnRun="RunFeedsAsync"/>
 }
 
+@code {
+    private static readonly TimeSpan ActivityWindow = TimeSpan.FromDays(14);
+    private const int RunCap = 500;
+
+    [Inject] internal AccountConnectionPrompt AccountConnectionPrompt { get; set; } = null!;
+
+    private readonly CancellationTokenSource _cancellation = new();
+    private readonly Dictionary<MediaId, MediaLookup> _media = [];
+
+    private IReadOnlyList<ActivityDay> _days = [];
+    private IReadOnlyList<UpNextRow> _queued = [];
+    private IReadOnlyList<UpNextRow> _scheduled = [];
+    private IReadOnlyList<SourceShare> _sources = [];
+    private IReadOnlyList<RunCandidate> _candidates = [];
+    private IReadOnlyList<Feed> _feeds = [];
+    private IReadOnlyList<WatchlistOutboxEntry> _outbox = [];
+    private WatchlistSyncButton? _syncControl;
+    private bool _isConnected;
+    private bool _isRunOpen;
+    private bool _syncing;
+    private ProviderConfig? _settings;
+    private MediaLookup? _selected;
+    private UserId? _userId;
+    private DateTimeOffset _now = DateTimeOffset.Now;
+    private DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
+    private int _watchlistCount;
+    private int _blacklistCount;
+    private bool _isLoading = true;
+    private bool _isSignedIn;
+    private bool _isSheetOpen;
+
+    private bool IsSignedIn() => _isSignedIn;
+
+    private IReadOnlyDictionary<FeedId, string> FeedNames() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Name);
+
+    private bool IsConnected() => _isConnected;
+
+    private string? BrandColor => _settings is null ? null : BrandingService.GetBrandingInfo(_settings.WatchlistProvider.AsMediaProvider()).BrandColor;
+
+    private void StartSync()
+    {
+        _syncing = true;
+        StateHasChanged();
+    }
+
+    private async Task SyncFinishedAsync()
+    {
+        _syncing = false;
+        await LoadAsync();
+    }
+
+    private void HandleConnectionChanged(bool hasAccess)
+    {
+        _isConnected = hasAccess;
+        StateHasChanged();
+    }
+
+    private async Task RunFeedsAsync((IReadOnlyList<FeedId> Feeds, bool SyncAfter) plan)
+    {
+        try
+        {
+            var queued = 0;
+            foreach (var feedId in plan.Feeds)
+            {
+                if (await JobQueue.EnqueueAsync(new RunFeed(feedId, new Manual()), _cancellation.Token) is Queued)
+                {
+                    queued++;
+                }
+            }
+
+            if (plan.SyncAfter)
+            {
+                await JobQueue.EnqueueAsync(new SyncWatchlist(new ManualTrigger()), _cancellation.Token);
+            }
+
+            Notifier.Info(QueuedSummary(queued, plan.Feeds.Count - queued), null);
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "The feeds could not be queued");
+        }
+    }
+
+    private static string QueuedSummary(int queued, int alreadyQueued) =>
+        (queued, alreadyQueued) switch
+        {
+            (0, _) => $"{FeedCount(alreadyQueued)} already queued.",
+            (_, 0) => $"Queued {FeedCount(queued)}. They run one at a time.",
+            _ => $"Queued {FeedCount(queued)}, {alreadyQueued} already queued. They run one at a time.",
+        };
+
+    private static string FeedCount(int count) => count == 1 ? "1 feed" : $"{count} feeds";
+
+    private string ProviderName => _settings is null ? "your watchlist provider" : _settings.WatchlistProvider.GetDescription();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.Published += OnEvent;
+        _settings = await ProviderConfigRepository.GetAsync();
+    }
+
+    private async Task HandleSignInChangedAsync(bool hasAccess)
+    {
+        _isSignedIn = hasAccess;
+
+        if (!hasAccess)
+        {
+            ClearLibrary();
+            return;
+        }
+
+        _userId = CurrentUser.Id;
+        _isLoading = true;
+        StateHasChanged();
+        await Task.Yield();
+        await LoadAsync();
+    }
+
+    private void ClearLibrary()
+    {
+        _userId = null;
+        _days = [];
+        _queued = [];
+        _scheduled = [];
+        _sources = [];
+        _candidates = [];
+        _feeds = [];
+        _outbox = [];
+        _media.Clear();
+        _watchlistCount = 0;
+        _blacklistCount = 0;
+        _selected = null;
+        _isSheetOpen = false;
+        _isRunOpen = false;
+        _isLoading = false;
+    }
+
+    private async Task LoadOutboxAsync()
+    {
+        _outbox = await Outbox.GetAsync(_cancellation.Token);
+        StateHasChanged();
+    }
+
+    private async Task LoadAsync()
+    {
+        _now = DateTimeOffset.Now;
+        _today = DateOnly.FromDateTime(DateTime.Now);
+
+        try
+        {
+            _feeds = await FeedService.GetFeedsAsync(_cancellation.Token);
+            var runs = await FeedService.GetRecentRunsAsync(_now - ActivityWindow, RunCap, _cancellation.Token);
+            var owned = await WatchlistRepository.GetOwnedCountsAsync(_cancellation.Token);
+            var watchlisted = await WatchlistRepository.GetIdsAsync(_cancellation.Token);
+            var blacklisted = await BlacklistService.GetBlacklistIdsAsync(_cancellation.Token);
+            var overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
+            _outbox = await Outbox.GetAsync(_cancellation.Token);
+            var queue = await JobQueueView.GetAsync(_cancellation.Token);
+
+            var names = FeedNames();
+            _watchlistCount = watchlisted.Count;
+            _blacklistCount = blacklisted.Count;
+            _sources = LibraryView.Sources(owned, names, _watchlistCount);
+            _queued = UpNextView.InTheQueue(queue, names, ProviderName);
+            _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);
+            _candidates = RunPlan.Candidates(_feeds, overviews, _now, TimeZoneInfo.Local);
+            _days = ActivityLog.Days(runs, names, TimeZoneInfo.Local);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to load your library");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadPostersAsync(IReadOnlyList<MediaId> ids)
+    {
+        var wanted = ids.Where(id => !_media.ContainsKey(id)).Distinct().ToList();
+        if (wanted.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await foreach (var result in MediaService.GetDetailsAsync(wanted, _cancellation.Token))
+            {
+                if (result is Success<IdentifiedMedia>(var media))
+                {
+                    _media[media.Id] = media;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnEvent(IEvent raised)
+    {
+        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _userId) is not null)
+        {
+            _ = InvokeAsync(LoadAsync);
+            return;
+        }
+
+        if (ViewerEvent.Own<JobStateChangedEvent>(raised, _userId) is not null)
+        {
+            _ = InvokeAsync(RefreshQueueAsync);
+        }
+    }
+
+    private async Task RefreshQueueAsync()
+    {
+        try
+        {
+            _queued = UpNextView.InTheQueue(await JobQueueView.GetAsync(_cancellation.Token), FeedNames(), ProviderName);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        StateHasChanged();
+    }
+
+    private void SelectMedia(MediaLookup media)
+    {
+        _selected = media;
+        _isSheetOpen = true;
+    }
+
+    private Task SheetOpenChangedAsync(bool isOpen)
+    {
+        if (!isOpen)
+        {
+            _isSheetOpen = false;
+            _selected = null;
+        }
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        Events.Published -= OnEvent;
+        _cancellation.Cancel();
+        _cancellation.Dispose();
+    }
+}
