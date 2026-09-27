@@ -1,8 +1,10 @@
 @page "/watchlist"
 @using Contracts.Identity
+@using Contracts.Announcing
 @using Contracts.Settings
 @using Contracts.Watchlist
 @using Contracts.Watchlist.Outbox
+@using Domain.Announcing
 @using Domain.Identity
 @using Domain.Feed
 @using global::Shared
@@ -16,7 +18,7 @@
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject MediaProviderBrandingService BrandingService
 @inject Notifier Notifier
-@inject IWatchlistOutboxEventFeed OutboxEventFeed
+@inject IEventPublisher Events
 @inject ICurrentUser CurrentUser
 
 <PageTitle>@PageTitleText</PageTitle>
@@ -304,7 +306,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        OutboxEventFeed.Published += OnOutboxEvent;
+        Events.Published += OnEvent;
         _providerSettings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
     }
 
@@ -433,9 +435,9 @@ else
         return null;
     }
 
-    private void OnOutboxEvent(WatchlistOutboxEvent outboxEvent)
+    private void OnEvent(IEvent raised)
     {
-        if (_userId is not { } current || outboxEvent.UserId != current)
+        if (_userId is not { } current || raised.UserId != current || raised is not WatchlistOutboxEvent outboxEvent)
         {
             return;
         }
@@ -562,7 +564,7 @@ else
 
     public void Dispose()
     {
-        OutboxEventFeed.Published -= OnOutboxEvent;
+        Events.Published -= OnEvent;
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
     }

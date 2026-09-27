@@ -1,16 +1,16 @@
 using Contracts;
+using Contracts.Announcing;
 using Contracts.Identity;
 using Contracts.Messaging;
-using Contracts.Watchlist.Outbox;
 using Domain.Media;
 using Domain.Notifications.Events;
 using Domain.Watchlist.Outbox;
 
 namespace Core.Watchlist.Sync;
 
-internal sealed class WatchlistSyncAnnouncer(IWatchlistOutboxEventFeed feed, IMessagePublisher publisher, IDateTimeProvider clock, ICurrentUser currentUser)
+internal sealed class WatchlistSyncAnnouncer(IEventPublisher events, IMessagePublisher publisher, IDateTimeProvider clock, ICurrentUser currentUser)
 {
-	internal void NotifyPushed(PushOutcome outcome) => feed.Publish(new WatchlistOutboxEvent(currentUser.Id, outcome.MediaId, outcome.Kind));
+	internal void NotifyPushed(PushOutcome outcome) => events.Publish(new WatchlistOutboxEvent(currentUser.Id, outcome.MediaId, outcome.Kind));
 
 	internal async Task NotifySyncedAsync(
 		IReadOnlyList<MediaId> pulledAdds,

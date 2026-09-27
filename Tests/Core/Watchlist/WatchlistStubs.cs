@@ -1,4 +1,5 @@
 using Contracts;
+using Contracts.Announcing;
 using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
@@ -54,7 +55,7 @@ internal static class WatchlistStubs
 		Mock<IWatchlistProvider> provider,
 		Mock<IWatchlistOutbox>? outbox = null,
 		IReadOnlyDictionary<MediaId, IExternalMediaId>? externals = null,
-		Mock<IWatchlistOutboxEventFeed>? feed = null,
+		Mock<IEventPublisher>? events = null,
 		WatchlistSyncGate? gate = null,
 		ICurrentUser? user = null,
 		IMessagePublisher? publisher = null
@@ -75,7 +76,7 @@ internal static class WatchlistStubs
 			outbox.Object,
 			media.Object,
 			new FakeKeyedServiceIndex<WatchlistProvider, IWatchlistProvider>().Register(WatchlistProvider.Plex, provider.Object),
-			new WatchlistSyncAnnouncer((feed ?? IWatchlistOutboxEventFeed.Mock()).Object, publisher ?? new RecordingPublisher(), clock.Object, owner),
+			new WatchlistSyncAnnouncer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher(), clock.Object, owner),
 			owner,
 			NullLogger<WatchlistSyncEngine>.Instance
 		);

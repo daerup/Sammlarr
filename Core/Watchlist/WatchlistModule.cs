@@ -1,5 +1,4 @@
 using Contracts.Watchlist;
-using Contracts.Watchlist.Outbox;
 using Core.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;
@@ -13,6 +12,5 @@ internal class WatchlistModule : IServiceModule
 	{
 		services.AddModule<SyncModule>();
 		services.AddTracedScoped<IWatchlistService, WatchlistService>();
-		services.AddSingleton<IWatchlistOutboxEventFeed, WatchlistOutboxEventFeed>();
 	}
 }

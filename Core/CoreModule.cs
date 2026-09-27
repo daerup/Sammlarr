@@ -1,4 +1,5 @@
 using Contracts;
+using Core.Announcing;
 using Core.Auth;
 using Core.Blacklist;
 using Core.Caching;
@@ -20,6 +21,7 @@ public class CoreModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
+		services.AddModule<AnnouncingModule>();
 		services.AddModule<AuthModule>();
 		services.AddModule<BlacklistModule>();
 		services.AddModule<CachingModule>();
