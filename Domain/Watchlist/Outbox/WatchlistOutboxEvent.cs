@@ -1,3 +1,4 @@
+using Domain.Announcing;
 using Domain.Identity;
 using Domain.Media;
 
@@ -10,4 +11,4 @@ public enum WatchlistOutboxEventKind
 	Abandoned,
 }
 
-public record WatchlistOutboxEvent(UserId UserId, MediaId MediaId, WatchlistOutboxEventKind Kind);
+public record WatchlistOutboxEvent(UserId UserId, MediaId MediaId, WatchlistOutboxEventKind Kind) : IEvent;

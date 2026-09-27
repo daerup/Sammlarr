@@ -1,3 +1,4 @@
+using Domain.Announcing;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NetArchTest.Rules;
@@ -94,5 +95,11 @@ public class DesignTests
 	public async Task Design_OfSourceGenerators_ExcludesThemAtRuntime()
 	{
 		await Types.InAssemblies(Projects.All).Should().NotHaveDependencyOnAny(Packages.Roslyn).GetResult().AssertNone();
+	}
+
+	[Test]
+	public async Task Design_OfAnnouncedFacts_IsEitherAnEventOrANotification()
+	{
+		await Types.InAssemblies(Projects.All).That().ImplementInterface<IEvent>().And().ImplementInterface<INotification>().GetTypes().AssertNone();
 	}
 }

@@ -1,3 +1,4 @@
+using Domain.Announcing;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
@@ -5,7 +6,7 @@ using Domain.Providers;
 
 namespace Domain.Notifications.Events;
 
-public abstract record BaseNotification(NotificationEventType Type, UserId UserId, DateTimeOffset OccurredAt)
+public abstract record BaseNotification(NotificationEventType Type, UserId UserId, DateTimeOffset OccurredAt) : INotification
 {
 	public Guid Id { get; init; } = Guid.CreateVersion7();
 
