@@ -10,5 +10,6 @@ internal class JobModule : IServiceModule
 	{
 		services.AddScoped<IModelConfiguration, JobRowConfiguration>();
 		services.AddScoped<IJobRepository, JobRepository>();
+		services.AddScoped<IJobQueueView, JobQueueView>();
 	}
 }
