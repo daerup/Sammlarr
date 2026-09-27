@@ -3,7 +3,10 @@
 @using Contracts.Watchlist.Sync
 @using Contracts.Blacklist
 @using Contracts.Watchlist
+@using Contracts.Announcing
 @using Contracts.Jobs
+@using Domain.Announcing
+@using UI.Shared.Announcing
 @using Domain.Jobs
 @using Domain.Watchlist
 @using UI.Shared.Changes
@@ -16,9 +19,11 @@
 @inject IWatchlistSyncPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject NavigationManager Navigation
+@inject IEventPublisher Events
+@inject IJobQueueView JobQueueView
 @inject Notifier Notifier
 
-@if (_isSyncing || IsSyncing)
+@if (_isSyncing || _isRunning || IsSyncing)
 {
     <HoverButton Disabled="true" Color="@BrandColor" Class="whitespace-nowrap">
         <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
@@ -126,6 +131,7 @@ else
     private IReadOnlyList<ChangeEntry> _entries = [];
     private IReadOnlyList<ChangeChip> _chips = [];
     private bool _isSyncing;
+    private bool _isRunning;
     private bool _isLoadingDryRun;
     private bool _open;
     private MediaLookup? _selected;
@@ -169,7 +175,18 @@ else
 
     private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges} titles compared" : "Comparing with Plex…";
 
-    protected override async Task OnInitializedAsync() => await RefreshAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        Events.Published += OnEvent;
+        _isRunning = await IsSyncRunningAsync();
+        await RefreshAsync();
+    }
+
+    private async Task<bool> IsSyncRunningAsync()
+    {
+        var queue = await JobQueueView.GetAsync(_cts.Token);
+        return queue.Jobs.Any(job => job.Request is SyncWatchlist && job.State is JobState.Running);
+    }
 
     public async Task RefreshAsync() => await LoadDryRunAsync();
 
@@ -291,14 +308,33 @@ else
         finally
         {
             _isSyncing = false;
-            await RefreshAsync();
-            await OnSynced.InvokeAsync();
         }
     }
 
     public void Dispose()
     {
+        Events.Published -= OnEvent;
         _cts.Cancel();
         _cts.Dispose();
+    }
+
+    private void OnEvent(IEvent raised)
+    {
+        if (ViewerEvent.Own<JobStateChangedEvent>(raised, CurrentUser.Id) is not { Kind: JobKind.WatchlistSync } job)
+        {
+            return;
+        }
+
+        _isRunning = job.State is JobState.Running;
+        _ = InvokeAsync(async () =>
+        {
+            if (!_isRunning)
+            {
+                await RefreshAsync();
+                await OnSynced.InvokeAsync();
+            }
+
+            StateHasChanged();
+        });
     }
 }
