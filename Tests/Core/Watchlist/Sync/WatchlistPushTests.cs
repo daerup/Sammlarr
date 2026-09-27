@@ -1,3 +1,4 @@
+using Contracts.Announcing;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Watchlist;
@@ -21,14 +22,14 @@ public class WatchlistPushTests
 		var external = PlexId.From("plex-1", MediaType.Movie);
 		var outbox = OutboxWith(Pending(mediaId, WatchlistOperationAction.Add));
 		var provider = ProviderPushing(external, success: true);
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, Externals(mediaId, external), feed);
+		await Sync(provider, outbox, Externals(mediaId, external), events);
 
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), Any<WatchlistOutboxState>(), Any()).WasCalled(Times.Never);
-		feed.Publish(Event(mediaId, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
+		events.Publish(Event(mediaId, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -63,13 +64,13 @@ public class WatchlistPushTests
 		var mediaId = MediaId.From(Guid.NewGuid());
 		var outbox = OutboxWith(Pending(mediaId, WatchlistOperationAction.Add));
 		var provider = ProviderPushing(PlexId.From("plex-0", MediaType.Movie), success: true);
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, Externals(), feed);
+		await Sync(provider, outbox, Externals(), events);
 
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Never);
 		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WatchlistOutboxState.Failed, Any()).WasCalled(Times.Once);
-		feed.Publish(Event(mediaId, WatchlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
+		events.Publish(Event(mediaId, WatchlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -79,12 +80,12 @@ public class WatchlistPushTests
 		var external = PlexId.From("plex-3", MediaType.Movie);
 		var outbox = OutboxWith(Pending(mediaId, WatchlistOperationAction.Remove));
 		var provider = ProviderPushing(external, success: false);
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, Externals(mediaId, external), feed);
+		await Sync(provider, outbox, Externals(mediaId, external), events);
 
 		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WatchlistOutboxState.Pending, Any()).WasCalled(Times.Once);
-		feed.Publish(Event(mediaId, WatchlistOutboxEventKind.Retrying)).WasCalled(Times.Once);
+		events.Publish(Event(mediaId, WatchlistOutboxEventKind.Retrying)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -94,13 +95,13 @@ public class WatchlistPushTests
 		var external = PlexId.From("plex-4", MediaType.Movie);
 		var outbox = OutboxWith(new WatchlistOutboxEntry(mediaId, WatchlistOperationAction.Add, WatchlistOutboxState.Pending, 4));
 		var provider = ProviderPushing(external, success: false);
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, Externals(mediaId, external), feed);
+		await Sync(provider, outbox, Externals(mediaId, external), events);
 
 		outbox.RecordFailedAttemptAsync(Any<IEnumerable<MediaId>>(), WatchlistOutboxState.Failed, Any()).WasCalled(Times.Once);
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Never);
-		feed.Publish(Event(mediaId, WatchlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
+		events.Publish(Event(mediaId, WatchlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -111,12 +112,12 @@ public class WatchlistPushTests
 		var external = PlexId.From("plex-5", MediaType.Movie);
 		var outbox = OutboxWith(Pending(pushable, WatchlistOperationAction.Add), Pending(stranded, WatchlistOperationAction.Add));
 		var provider = ProviderPushing(external, success: true);
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, Externals(pushable, external), feed);
+		await Sync(provider, outbox, Externals(pushable, external), events);
 
-		feed.Publish(Event(pushable, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
-		feed.Publish(Event(stranded, WatchlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
+		events.Publish(Event(pushable, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
+		events.Publish(Event(stranded, WatchlistOutboxEventKind.Abandoned)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -128,13 +129,13 @@ public class WatchlistPushTests
 		var secondExternal = PlexId.From("plex-7", MediaType.Movie);
 		var outbox = OutboxWith(Pending(first, WatchlistOperationAction.Add), Pending(second, WatchlistOperationAction.Add));
 		var provider = ProviderAcking(new WatchlistPushAck(firstExternal, true), new WatchlistPushAck(secondExternal, true));
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, new Dictionary<MediaId, IExternalMediaId> { [first] = firstExternal, [second] = secondExternal }, feed);
+		await Sync(provider, outbox, new Dictionary<MediaId, IExternalMediaId> { [first] = firstExternal, [second] = secondExternal }, events);
 
 		provider.AddToWatchlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).WasCalled(Times.Once);
-		feed.Publish(Event(first, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
-		feed.Publish(Event(second, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
+		events.Publish(Event(first, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
+		events.Publish(Event(second, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -146,12 +147,12 @@ public class WatchlistPushTests
 		var ignoredExternal = PlexId.From("plex-9", MediaType.Movie);
 		var outbox = OutboxWith(Pending(acked, WatchlistOperationAction.Add), Pending(ignored, WatchlistOperationAction.Add));
 		var provider = ProviderAcking(new WatchlistPushAck(ackedExternal, true));
-		var feed = IWatchlistOutboxEventFeed.Mock();
+		var events = IEventPublisher.Mock();
 
-		await Sync(provider, outbox, new Dictionary<MediaId, IExternalMediaId> { [acked] = ackedExternal, [ignored] = ignoredExternal }, feed);
+		await Sync(provider, outbox, new Dictionary<MediaId, IExternalMediaId> { [acked] = ackedExternal, [ignored] = ignoredExternal }, events);
 
-		feed.Publish(Event(acked, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
-		feed.Publish(Event(ignored, WatchlistOutboxEventKind.Retrying)).WasCalled(Times.Once);
+		events.Publish(Event(acked, WatchlistOutboxEventKind.Pushed)).WasCalled(Times.Once);
+		events.Publish(Event(ignored, WatchlistOutboxEventKind.Retrying)).WasCalled(Times.Once);
 	}
 
 	private static Mock<IWatchlistProvider> ProviderAcking(params WatchlistPushAck[] acks)
@@ -187,8 +188,8 @@ public class WatchlistPushTests
 		Mock<IWatchlistProvider> provider,
 		Mock<IWatchlistOutbox> outbox,
 		IReadOnlyDictionary<MediaId, IExternalMediaId> externals,
-		Mock<IWatchlistOutboxEventFeed>? feed = null
-	) => await WatchlistStubs.Engine(provider, outbox, externals, feed, user: Owner).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
+		Mock<IEventPublisher>? events = null
+	) => await WatchlistStubs.Engine(provider, outbox, externals, events, user: Owner).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
 	private static IReadOnlyDictionary<MediaId, IExternalMediaId> Externals(MediaId id, IExternalMediaId external) =>
 		new Dictionary<MediaId, IExternalMediaId> { [id] = external };
