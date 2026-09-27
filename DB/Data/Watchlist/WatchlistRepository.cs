@@ -12,7 +12,7 @@ internal sealed class WatchlistRepository(IDbContextFactory<SammlarrDbContext> d
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
-			from watchlistEntry in ctx.Watchlist.AsNoTrackingWithIdentityResolution().Include(w => w.SourceFeed).Include(w => w.SourceRun).ThenInclude(r => r!.Items)
+			from watchlistEntry in ctx.Watchlist.AsNoTrackingWithIdentityResolution().Include(w => w.SourceFeed).Include(w => w.SourceRun)
 			select new { WatchlistEntry = watchlistEntry, MediaIdValue = watchlistEntry.Media.Id }
 		).ToListAsync(cancellationToken);
 

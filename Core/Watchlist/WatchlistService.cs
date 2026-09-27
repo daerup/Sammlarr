@@ -43,11 +43,8 @@ internal sealed class WatchlistService(
 		}
 	}
 
-	public async Task<IReadOnlySet<MediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default)
-	{
-		var entries = await repository.GetEntriesAsync(cancellationToken);
-		return entries.OrderBy(e => e.AddedAt).Select(e => e.MediaId).ToHashSet();
-	}
+	public async Task<IReadOnlySet<MediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default) =>
+		(await repository.GetIdsAsync(cancellationToken)).ToHashSet();
 
 	public async Task<Optional<WatchlistEntry>> GetEntryAsync(MediaId mediaId, CancellationToken cancellationToken = default)
 	{
