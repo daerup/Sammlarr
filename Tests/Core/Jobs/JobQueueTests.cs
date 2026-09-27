@@ -1,7 +1,9 @@
 using Contracts;
 using Contracts.Identity;
 using Contracts.Jobs;
+using Core.Announcing;
 using Core.Jobs;
+using Domain.Announcing;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Watchlist.Sync;
@@ -18,7 +20,7 @@ public class JobQueueTests
 	public async Task EnqueueAsync_StampsTheRequestWithTheCurrentUserAndTime()
 	{
 		var feedId = FeedId.From(Guid.NewGuid());
-		var (testee, jobs) = BuildTestee();
+		var (testee, jobs, _) = BuildTestee();
 
 		await testee.EnqueueAsync(new RunFeed(feedId, new Manual()));
 
@@ -28,7 +30,7 @@ public class JobQueueTests
 	[Test]
 	public async Task EnqueueAsync_CarriesTheRequestThroughUntouched()
 	{
-		var (testee, jobs) = BuildTestee();
+		var (testee, jobs, _) = BuildTestee();
 
 		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 
@@ -38,13 +40,32 @@ public class JobQueueTests
 
 	private static SchedulerOptions Options => new();
 
-	private static (JobQueue Testee, Mock<IJobRepository> Jobs) BuildTestee()
+	[Test]
+	public async Task EnqueueAsync_AnnouncesTheJobAsQueued_SoAnOpenPageCanShowItWaiting()
+	{
+		var (testee, _, events) = BuildTestee();
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		await testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+
+		var announced = seen.OfType<JobStateChangedEvent>().Single();
+		await Assert.That(announced.State).IsEqualTo(JobState.Queued);
+		await Assert.That(announced.Kind).IsEqualTo(JobKind.WatchlistSync);
+	}
+
+	private static (JobQueue Testee, Mock<IJobRepository> Jobs, EventPublisher Events) BuildTestee()
 	{
 		var jobs = IJobRepository.Mock();
 		jobs.EnqueueAsync(Any<QueuedJob>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
 
-		return (new JobQueue(jobs.Object, new JobSignal(), new TestCurrentUser(), clock.Object, Options), jobs);
+		var events = new EventPublisher();
+		return (
+			new JobQueue(jobs.Object, new JobSignal(), new TestCurrentUser(), clock.Object, Options, new Announcer(events, new RecordingPublisher())),
+			jobs,
+			events
+		);
 	}
 }

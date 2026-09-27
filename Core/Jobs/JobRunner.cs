@@ -2,6 +2,7 @@ using System.Reflection;
 using Contracts;
 using Contracts.Identity;
 using Contracts.Jobs;
+using Core.Announcing;
 using Domain.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -85,10 +86,13 @@ internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, J
 
 		using var _ = await scope.ServiceProvider.GetRequiredService<IUserScope>().AsAsync(job.Owner, cancellationToken);
 		var request = job.Request;
+		var announcer = scope.ServiceProvider.GetRequiredService<Announcer>();
+		announcer.Announce(new JobStateChangedEvent(job.Owner, request.Kind, request.Key, JobState.Running));
 		try
 		{
 			await DispatchAsync(scope.ServiceProvider, request, cancellationToken);
 			await jobs.CompleteAsync(job.Id, clock.Now, CancellationToken.None);
+			announcer.Announce(new JobStateChangedEvent(job.Owner, request.Kind, request.Key, JobState.Done));
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
@@ -99,6 +103,7 @@ internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, J
 		{
 			logger.LogError(exception, "Job {Kind} {Key} failed", request.Kind, request.Key);
 			await jobs.FailAsync(job.Id, clock.Now, CancellationToken.None);
+			announcer.Announce(new JobStateChangedEvent(job.Owner, request.Kind, request.Key, JobState.Failed));
 		}
 
 		return true;

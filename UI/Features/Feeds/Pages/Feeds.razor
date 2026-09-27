@@ -30,6 +30,7 @@
 @inject IMediaService Media
 @inject IWatchlistRepository Watchlist
 @inject IEventPublisher Events
+@inject IJobQueueView JobQueueView
 
 <PageTitle>Feeds</PageTitle>
 
@@ -209,19 +210,23 @@
                                         <BbTooltip>
                                             <BbTooltipTrigger>
                                                 <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" AriaLabel="Run now"
-                                                          Disabled="@(_runningFeed is not null || _isPreviewing)"
+                                                          Disabled="@(Pending(feed.Id) is not null || _isPreviewing)"
                                                           OnClick="@(() => RunFeedAsync(feed))">
-                                                    @if (_runningFeed == feed.Id)
+                                                    @switch (Pending(feed.Id))
                                                     {
-                                                        <BbSpinner Size="SpinnerSize.Small"/>
-                                                    }
-                                                    else
-                                                    {
-                                                        <LucideIcon Name="play" Size="15"/>
+                                                        case JobState.Running:
+                                                            <BbSpinner Size="SpinnerSize.Small"/>
+                                                            break;
+                                                        case JobState.Queued:
+                                                            <LucideIcon Name="clock" Size="15"/>
+                                                            break;
+                                                        default:
+                                                            <LucideIcon Name="play" Size="15"/>
+                                                            break;
                                                     }
                                                 </BbButton>
                                             </BbTooltipTrigger>
-                                            <BbTooltipContent>Run now</BbTooltipContent>
+                                            <BbTooltipContent>@RunLabel(feed.Id)</BbTooltipContent>
                                         </BbTooltip>
                                         <BbTooltip>
                                             <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
@@ -354,7 +359,7 @@
     private bool _isLoading = true;
     private int _currentPage = 1;
     private int _totalPages = 1;
-    private FeedId? _runningFeed;
+    private readonly Dictionary<FeedId, JobState> _feedJobs = [];
     private int _runVersion;
     private bool _confirmOpen;
     private bool _isPreviewing;
@@ -367,6 +372,7 @@
     protected override async Task OnInitializedAsync()
     {
         Events.Published += OnEvent;
+        await LoadQueueAsync();
         _providerConfig = await ProviderConfigRepository.GetAsync();
         _feeds = await FeedService.GetFeedsAsync();
         _owned = await Watchlist.GetOwnedCountsAsync();
@@ -374,6 +380,41 @@
         UpdatePagedFeeds();
         _isLoading = false;
     }
+
+    private async Task LoadQueueAsync()
+    {
+        var queue = await JobQueueView.GetAsync();
+        _feedJobs.Clear();
+        foreach (var job in queue.Jobs)
+        {
+            if (job.Request is RunFeed(var id, _))
+            {
+                _feedJobs[id] = job.State;
+            }
+        }
+    }
+
+    private void ApplyFeedJob(JobStateChangedEvent job)
+    {
+        var id = FeedId.From(Guid.Parse(job.Key));
+        if (job.State is JobState.Queued or JobState.Running)
+        {
+            _feedJobs[id] = job.State;
+            return;
+        }
+
+        _feedJobs.Remove(id);
+    }
+
+    private JobState? Pending(FeedId id) => _feedJobs.TryGetValue(id, out var state) ? state : null;
+
+    private string RunLabel(FeedId id) =>
+        Pending(id) switch
+        {
+            JobState.Running => "Running now",
+            JobState.Queued => "Waiting in the queue",
+            _ => "Run now",
+        };
 
     private Task HandleSignInChangedAsync(bool hasAccess)
     {
@@ -408,12 +449,17 @@
 
     private void OnEvent(IEvent raised)
     {
-        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _viewer) is null)
+        if (ViewerEvent.Own<JobStateChangedEvent>(raised, _viewer) is { Kind: JobKind.FeedRun } job)
         {
+            ApplyFeedJob(job);
+            _ = InvokeAsync(StateHasChanged);
             return;
         }
 
-        _ = InvokeAsync(RefreshAfterRunAsync);
+        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _viewer) is {})
+        {
+            _ = InvokeAsync(RefreshAfterRunAsync);
+        }
     }
 
     private async Task RefreshAfterRunAsync()
@@ -518,8 +564,6 @@
         }
 
         _confirmOpen = false;
-        _runningFeed = feed.Id;
-        StateHasChanged();
         try
         {
             switch (await JobQueue.EnqueueAsync(new RunFeed(feed.Id, new Manual())))
@@ -535,10 +579,6 @@
         catch (Exception ex)
         {
             Notifier.Error(ex, $"'{feed.Name}' could not run");
-        }
-        finally
-        {
-            _runningFeed = null;
         }
     }
 

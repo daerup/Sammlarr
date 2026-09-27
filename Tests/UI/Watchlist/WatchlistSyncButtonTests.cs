@@ -3,6 +3,7 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives.Services;
 using Bunit;
 using Bunit.TestDoubles;
+using Contracts.Announcing;
 using Contracts.Blacklist;
 using Contracts.Identity;
 using Contracts.Jobs;
@@ -11,6 +12,8 @@ using Contracts.Settings;
 using Contracts.Watchlist;
 using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
+using Domain.Identity;
+using Domain.Jobs;
 using Domain.Jobs;
 using Domain.Media;
 using Domain.Media.Metadata;
@@ -32,6 +35,41 @@ namespace UI.Tests.Watchlist;
 public class WatchlistSyncButtonTests : BunitContext
 {
 	private static readonly MediaId Synced = MediaId.From(new Guid(7, 0, 0, new byte[8]));
+	private static readonly UserId Viewer = UserId.From(new Guid(9, 0, 0, new byte[8]));
+	private readonly TestEventPublisher events = new();
+
+	[Test]
+	public async Task Button_WhileTheViewersSyncJobIsRunning_ShowsTheSpinnerEvenThoughThisTabDidNotStartIt()
+	{
+		RegisterServices();
+		var cut = Render<WatchlistSyncButton>();
+		await Assert.That(cut.Markup).DoesNotContain("Syncing...");
+
+		cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(Viewer, JobKind.WatchlistSync, string.Empty, JobState.Running)));
+
+		await Assert.That(cut.Markup).Contains("Syncing...");
+	}
+
+	[Test]
+	public async Task Button_WhenTheQueueAlreadyHasASyncRunning_ShowsTheSpinnerOnFirstRender()
+	{
+		RegisterServices(runningSync: true);
+
+		var cut = Render<WatchlistSyncButton>();
+
+		await Assert.That(cut.Markup).Contains("Syncing...");
+	}
+
+	[Test]
+	public async Task Button_WhenAnotherUsersSyncRuns_KeepsTheButtonUsable()
+	{
+		RegisterServices();
+		var cut = Render<WatchlistSyncButton>();
+
+		cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(UserId.From(Guid.NewGuid()), JobKind.WatchlistSync, string.Empty, JobState.Running)));
+
+		await Assert.That(cut.Markup).DoesNotContain("Syncing...");
+	}
 
 	[Test]
 	public async Task Dialog_WhenDismissedAfterAWatchlistToggle_ReloadsThePage()
@@ -114,10 +152,24 @@ public class WatchlistSyncButtonTests : BunitContext
 		return cut;
 	}
 
-	private (Mock<IJobQueue> Queue, Mock<IWatchlistSyncPlanner> Planner) RegisterServices()
+	private static readonly PendingJob RunningSync = new(
+		JobId.From(Guid.NewGuid()),
+		new SyncWatchlist(new ManualTrigger()),
+		JobState.Running,
+		DateTimeOffset.UnixEpoch,
+		1
+	);
+
+	private (Mock<IJobQueue> Queue, Mock<IWatchlistSyncPlanner> Planner) RegisterServices(bool runningSync = false)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
+
+		Services.AddSingleton<IEventPublisher>(events);
+
+		var queueView = IJobQueueView.Mock();
+		queueView.GetAsync(Any()).Returns(new QueueSnapshot(runningSync ? [RunningSync] : [], 0));
+		Services.AddSingleton(queueView.Object);
 
 		var queue = IJobQueue.Mock();
 		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
@@ -158,7 +210,9 @@ public class WatchlistSyncButtonTests : BunitContext
 			);
 		Services.AddSingleton(providerConfig.Object);
 
-		Services.AddSingleton(ICurrentUser.Mock().Object);
+		var currentUser = ICurrentUser.Mock();
+		currentUser.Id.Getter.Returns(Viewer);
+		Services.AddSingleton(currentUser.Object);
 		Services.AddScoped<Notifier>();
 		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
 		Services.AddScoped<ScrollService>();
