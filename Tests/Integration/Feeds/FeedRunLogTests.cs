@@ -128,6 +128,35 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task GetRecentRunsAsync_AcrossFeeds_ReturnsTheRunsSinceTheCutoffNewestFirst()
+	{
+		var comedy = await SeedFeedAsync();
+		var horror = await SeedFeedAsync();
+
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(horror, kept: [Held], 2));
+
+		var runs = await _testee.GetRecentRunsAsync(since: Day(2), take: 10);
+
+		await Assert.That(runs).Count().IsEqualTo(2);
+		await Assert.That(runs[0].FeedId).IsEqualTo(comedy);
+		await Assert.That(runs[1].FeedId).IsEqualTo(horror);
+	}
+
+	[Test]
+	public async Task GetRecentRunsAsync_ForACutoffInAnotherOffset_ComparesTheSameInstant()
+	{
+		var feedId = await SeedFeedAsync();
+
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+
+		var runs = await _testee.GetRecentRunsAsync(since: Day(2).ToOffset(TimeSpan.FromHours(2)), take: 10);
+
+		await Assert.That(runs).HasSingleItem();
+	}
+
+	[Test]
 	public async Task GetOverviewsAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
 	{
 		var ran = await SeedFeedAsync();
