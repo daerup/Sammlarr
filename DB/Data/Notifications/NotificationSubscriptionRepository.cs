@@ -67,7 +67,13 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 			row.Id,
 			row.TargetId,
 			row.EventTypes,
-			new NotificationTemplate(Optional.Of(row.BodyTemplate), Optional.Of(row.TitleTemplate), Optional.Of(row.MessageTemplate), Level(row.Level))
+			new NotificationTemplate(
+				Optional.Of(row.BodyTemplate),
+				Optional.Of(row.TitleTemplate),
+				Optional.Of(row.MessageTemplate),
+				FromColumn(row.Level),
+				FromColumn(row.Priority)
+			)
 		);
 
 	private static void ApplyTemplate(NotificationSubscriptionRow row, NotificationTemplate template)
@@ -75,10 +81,15 @@ internal sealed class NotificationSubscriptionRepository(IDbContextFactory<Samml
 		row.BodyTemplate = ToColumn(template.Body);
 		row.TitleTemplate = ToColumn(template.Title);
 		row.MessageTemplate = ToColumn(template.Message);
-		row.Level = template.Level is Some<NotificationLevel> level ? level.Value : null;
+		row.Level = ToColumn(template.Level);
+		row.Priority = ToColumn(template.Priority);
 	}
 
 	private static string? ToColumn(Optional<string> value) => value is Some<string> some ? some.Value : null;
 
-	private static Optional<NotificationLevel> Level(NotificationLevel? value) => value is { } level ? Some.Of(level) : new None();
+	private static T? ToColumn<T>(Optional<T> value)
+		where T : struct => value is Some<T> some ? some.Value : null;
+
+	private static Optional<T> FromColumn<T>(T? value)
+		where T : struct => value is { } present ? Some.Of(present) : new None();
 }

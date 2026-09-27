@@ -1,9 +1,14 @@
 using System.Net;
 using Contracts.Notifications;
+using Domain.Notifications;
 
 namespace API.Notifications.Pushover;
 
-internal sealed record PushoverMessage(string AppToken, string UserKey, string Title, string Message, int Priority);
+internal sealed record PushoverMessage(string AppToken, string UserKey, string Title, string Message, PushoverPriority Priority)
+{
+	internal const int RetrySeconds = 60;
+	internal const int ExpireSeconds = 3600;
+}
 
 internal sealed class PushoverClient(HttpClient client)
 {
@@ -11,16 +16,22 @@ internal sealed class PushoverClient(HttpClient client)
 
 	public async Task<DeliveryResult> SendAsync(PushoverMessage message, CancellationToken cancellationToken)
 	{
-		using var content = new FormUrlEncodedContent(
-			new Dictionary<string, string>
-			{
-				["token"] = message.AppToken,
-				["user"] = message.UserKey,
-				["title"] = message.Title,
-				["message"] = message.Message,
-				["priority"] = message.Priority.ToString(),
-			}
-		);
+		Dictionary<string, string> fields = new()
+		{
+			["token"] = message.AppToken,
+			["user"] = message.UserKey,
+			["title"] = message.Title,
+			["message"] = message.Message,
+			["priority"] = ((int)message.Priority).ToString(),
+		};
+
+		if (message.Priority is PushoverPriority.Emergency)
+		{
+			fields["retry"] = PushoverMessage.RetrySeconds.ToString();
+			fields["expire"] = PushoverMessage.ExpireSeconds.ToString();
+		}
+
+		using var content = new FormUrlEncodedContent(fields);
 
 		try
 		{

@@ -595,6 +595,9 @@ namespace DB.Migrations
                         .HasMaxLength(8192)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Priority")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("TargetId")
                         .HasColumnType("TEXT");
 

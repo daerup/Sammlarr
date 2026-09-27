@@ -58,17 +58,18 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 		var id = await _testee.AddAsync(
 			targetId,
 			[NotificationEventType.WatchlistSyncCompleted],
-			new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(NotificationLevel.Warning))
+			new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(NotificationLevel.Warning), Some.Of(PushoverPriority.Low))
 		);
 
 		var created = (await _testee.GetForTargetAsync(targetId)).Single();
 		await Assert.That(created.Template.Body.Match(value => value, () => null!)).IsEqualTo("{{ title }}");
 		await Assert.That(created.Template.Level.Match(value => (NotificationLevel?)value, () => null)).IsEqualTo(NotificationLevel.Warning);
+		await Assert.That(created.Template.Priority.Match(value => (PushoverPriority?)value, () => null)).IsEqualTo(PushoverPriority.Low);
 
 		await _testee.UpdateAsync(
 			id,
 			[NotificationEventType.WatchlistSyncCompleted],
-			new NotificationTemplate(Some.Of("{{ summary }}"), new None(), new None(), new None())
+			new NotificationTemplate(Some.Of("{{ summary }}"), new None(), new None(), new None(), new None())
 		);
 
 		var updated = (await _testee.GetForTargetAsync(targetId)).Single();

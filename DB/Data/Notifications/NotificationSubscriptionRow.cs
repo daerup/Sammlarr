@@ -22,4 +22,6 @@ internal record NotificationSubscriptionRow : Entity<Guid>, IUserOwned
 	public string? MessageTemplate { get; set; }
 
 	public NotificationLevel? Level { get; set; }
+
+	public PushoverPriority? Priority { get; set; }
 }

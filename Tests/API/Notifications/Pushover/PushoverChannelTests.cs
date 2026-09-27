@@ -78,6 +78,44 @@ public class PushoverChannelTests
 	}
 
 	[Test]
+	[Arguments(PushoverPriority.Lowest, "-2")]
+	[Arguments(PushoverPriority.Low, "-1")]
+	[Arguments(PushoverPriority.Normal, "0")]
+	[Arguments(PushoverPriority.High, "1")]
+	public async Task SendAsync_WhenTheSubscriptionSetsAPriority_SendsThatPriorityRatherThanTheLevels(PushoverPriority chosen, string expected)
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler)
+			.SendAsync(Context(), PushoverTarget(), Template(message: "hi", level: NotificationLevel.Error, priority: chosen), CancellationToken.None);
+
+		await Assert.That(Form(handler)["priority"]).IsEqualTo(expected);
+	}
+
+	[Test]
+	public async Task SendAsync_WhenTheSubscriptionAsksForEmergency_SendsRetryAndExpireSoPushoverAcceptsIt()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "hi", priority: PushoverPriority.Emergency), CancellationToken.None);
+
+		var form = Form(handler);
+		await Assert.That(form["priority"]).IsEqualTo("2");
+		await Assert.That(form["retry"]).IsEqualTo("60");
+		await Assert.That(form["expire"]).IsEqualTo("3600");
+	}
+
+	[Test]
+	public async Task SendAsync_WhenThePriorityIsNotEmergency_SendsNoRetryOrExpire()
+	{
+		var handler = new CapturingHandler(HttpStatusCode.OK);
+
+		await Channel(handler).SendAsync(Context(), PushoverTarget(), Template(message: "hi", priority: PushoverPriority.High), CancellationToken.None);
+
+		await Assert.That(Form(handler).ContainsKey("retry")).IsFalse();
+	}
+
+	[Test]
 	public async Task SendAsync_WhenTheLevelIsConfigured_OverridesTheDerivedPriority()
 	{
 		var handler = new CapturingHandler(HttpStatusCode.OK);
@@ -152,8 +190,12 @@ public class PushoverChannelTests
 
 	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));
 
-	private static NotificationTemplate Template(string? title = null, string? message = null, NotificationLevel? level = null) =>
-		new(new None(), Opt(title), Opt(message), level is { } value ? Some.Of(value) : new None());
+	private static NotificationTemplate Template(
+		string? title = null,
+		string? message = null,
+		NotificationLevel? level = null,
+		PushoverPriority? priority = null
+	) => new(new None(), Opt(title), Opt(message), level is { } value ? Some.Of(value) : new None(), priority is { } chosen ? Some.Of(chosen) : new None());
 
 	private static Optional<string> Opt(string? value) => value is null ? new None() : Some.Of(value);
 

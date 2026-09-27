@@ -8,10 +8,20 @@
     <BbLabel>Message template</BbLabel>
     <BbTextarea Id="alert-message" Value="@Message" ValueChanged="MessageChanged" Placeholder="@MessagePlaceholder" MaxLength="8192" UpdateTiming="UpdateTiming.Immediate" Class="field-sizing-fixed min-h-0 flex-1 resize-none"/>
 </div>
-<BbField>
-    <BbLabel>Level</BbLabel>
-    <BbSelect TValue="NotificationLevel?" Value="@Level" ValueChanged="LevelChanged" Options="LevelOptions" Placeholder="@Automatic"/>
-</BbField>
+@if (IsPushover)
+{
+    <BbField>
+        <BbLabel>Priority</BbLabel>
+        <BbSelect TValue="PushoverPriority?" Value="@Priority" ValueChanged="PriorityChanged" Options="PriorityOptions" Placeholder="@Automatic"/>
+    </BbField>
+}
+else
+{
+    <BbField>
+        <BbLabel>Level</BbLabel>
+        <BbSelect TValue="NotificationLevel?" Value="@Level" ValueChanged="LevelChanged" Options="LevelOptions" Placeholder="@Automatic"/>
+    </BbField>
+}
 
 @code {
     private const string TitlePlaceholder = "e.g. {{ title }}";
@@ -26,6 +36,12 @@
         new(NotificationLevel.Success, "Success"),
         new(NotificationLevel.Warning, "Warning"),
         new(NotificationLevel.Error, "Error"),
+    ];
+
+    private static readonly List<SelectOption<PushoverPriority?>> PriorityOptions =
+    [
+        new(null, Automatic),
+        .. PushoverPriorities.Ascending.Select(priority => new SelectOption<PushoverPriority?>(priority, priority.GetDescription())),
     ];
 
     [Parameter]
@@ -45,4 +61,13 @@
 
     [Parameter]
     public EventCallback<NotificationLevel?> LevelChanged { get; set; }
+
+    [Parameter]
+    public PushoverPriority? Priority { get; set; }
+
+    [Parameter]
+    public EventCallback<PushoverPriority?> PriorityChanged { get; set; }
+
+    [Parameter]
+    public bool IsPushover { get; set; }
 }
