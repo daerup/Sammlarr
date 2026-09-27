@@ -15,6 +15,17 @@
                        Class="filter-control"/>
     }
 
+    @if (AvailableStatuses.Count > 0)
+    {
+        <BbMultiSelect TValue="string"
+                       Values="@Filter.Statuses"
+                       ValuesChanged="OnStatusesChangedAsync"
+                       Options="@StatusSelectOptions"
+                       Placeholder="Any status"
+                       MaxDisplayTags="2"
+                       Class="filter-control filter-status"/>
+    }
+
     <BbSelect TValue="string"
               Value="@(Filter.Type?.ToString())"
               ValueChanged="OnTypeChangedAsync"
@@ -50,6 +61,9 @@
     public IReadOnlyList<SourceOption> Available { get; set; } = [];
 
     [Parameter]
+    public IReadOnlyList<StatusOption> AvailableStatuses { get; set; } = [];
+
+    [Parameter]
     public int Shown { get; set; }
 
     [Parameter]
@@ -59,6 +73,7 @@
 
     private static readonly SelectOption<string>[] TypeOptions =
     [
+        new(string.Empty, "Any type"),
         new(nameof(MediaType.Movie), "Movies"),
         new(nameof(MediaType.Show), "Shows"),
     ];
@@ -91,6 +106,10 @@
                 ],
             }
         );
+
+    private IReadOnlyList<SelectOption<string>> StatusSelectOptions => [.. AvailableStatuses.Select(status => new SelectOption<string>(status.Key, status.Label))];
+
+    private Task OnStatusesChangedAsync(IEnumerable<string>? keys) => Apply(Filter with { Statuses = [.. keys ?? []] });
 
     private Task OnTypeChangedAsync(string? key) =>
         Apply(Filter with { Type = Enum.TryParse<MediaType>(key, out var type) ? type : null });

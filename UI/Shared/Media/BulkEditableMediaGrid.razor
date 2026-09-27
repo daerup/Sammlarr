@@ -2,14 +2,26 @@
 
 @if (IsEditMode)
 {
-    <BulkActionBar SelectedCount="_selected.Count"
-                   TotalCount="Items.Count"
+    <BulkActionBar SelectedCount="SelectedCount"
+                   PageCount="Items.Count"
+                   ListCount="ListItems.Count"
                    RemoveLabel="@RemoveLabel"
                    IsRemoving="_isRemoving"
-                   OnSelectAll="SelectAll"
+                   OnSelectPage="SelectPage"
+                   OnSelectList="SelectList"
                    OnClearSelection="ClearSelection"
-                   OnCancel="ExitEditModeAsync"
-                   OnRemove="RemoveSelectedAsync"/>
+                   OnExit="ExitEditModeAsync"
+                   OnRemove="RemoveSelectedAsync"
+                   MarkLabel="@MarkLabel"
+                   MarkIcon="@MarkIcon"
+                   MarkTint="@MarkTint"
+                   OnMark="MarkSelectedAsync"
+                   MarkableCount="MarkableCount"
+                   AlreadyMarkedHint="@AlreadyMarkedHint"
+                   RemovableCount="RemovableCount"
+                   AlreadyRemovedHint="@AlreadyRemovedHint"
+                   RemoveConfirm="@RemoveConfirm"
+                   MarkConfirm="@MarkConfirm"/>
 }
 
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -49,11 +61,36 @@
     [Parameter] public RenderFragment<TItem>? Overlay { get; set; }
     [Parameter] public Func<TItem, bool>? IsDimmed { get; set; }
     [Parameter] public string RemoveLabel { get; set; } = "Remove";
+    [Parameter] public IReadOnlyList<TItem>? AllItems { get; set; }
+    [Parameter] public string? MarkLabel { get; set; }
+    [Parameter] public string MarkIcon { get; set; } = "shield-ban";
+    [Parameter] public string? MarkTint { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<TItem>> OnBulkMark { get; set; }
+    [Parameter] public Func<TItem, bool>? IsMarked { get; set; }
+    [Parameter] public string? AlreadyMarkedHint { get; set; }
+    [Parameter] public Func<TItem, bool>? IsRemoved { get; set; }
+    [Parameter] public string? AlreadyRemovedHint { get; set; }
+    [Parameter] public Func<int, BulkConfirm>? RemoveConfirm { get; set; }
+    [Parameter] public Func<int, BulkConfirm>? MarkConfirm { get; set; }
 
     private readonly HashSet<MediaId> _selected = new();
     private MediaId? _anchor;
     private bool _anchorSelected;
     private bool _isRemoving;
+
+    private IReadOnlyList<TItem> ListItems => AllItems ?? Items;
+
+    private int SelectedCount => _selected.Count;
+
+    private IEnumerable<TItem> Chosen => ListItems.Where(item => _selected.Contains(Key(item)));
+
+    private IReadOnlyList<TItem> Markable => [.. IsMarked is null ? Chosen : Chosen.Where(item => !IsMarked(item))];
+
+    private int MarkableCount => Markable.Count;
+
+    private IReadOnlyList<TItem> Removable => [.. IsRemoved is null ? Chosen : Chosen.Where(item => !IsRemoved(item))];
+
+    private int RemovableCount => Removable.Count;
 
     private string SelectionPillClass(bool selected) =>
         selected
@@ -136,7 +173,17 @@
         }
     }
 
-    private void SelectAll() => _selected.UnionWith(Items.Select(Key));
+    private void SelectPage()
+    {
+        _selected.Clear();
+        _selected.UnionWith(Items.Select(Key));
+    }
+
+    private void SelectList()
+    {
+        _selected.Clear();
+        _selected.UnionWith(ListItems.Select(Key));
+    }
 
     private void ClearSelection()
     {
@@ -153,20 +200,21 @@
         await IsEditModeChanged.InvokeAsync(false);
     }
 
-    private async Task RemoveSelectedAsync()
+    private Task RemoveSelectedAsync() => RunAsync(OnBulkRemove, Removable);
+
+    private Task MarkSelectedAsync() => RunAsync(OnBulkMark, Markable);
+
+    private async Task RunAsync(EventCallback<IReadOnlyList<TItem>> action, IReadOnlyList<TItem> chosen)
     {
-        if (_selected.Count == 0 || _isRemoving)
+        if (chosen.Count == 0 || _isRemoving)
         {
             return;
         }
-        var toRemove = Items.Where(i => _selected.Contains(Key(i))).ToList();
         _isRemoving = true;
         try
         {
-            await OnBulkRemove.InvokeAsync(toRemove);
-            _selected.Clear();
-            _anchor = null;
-            _anchorSelected = false;
+            await action.InvokeAsync(chosen);
+            ClearSelection();
             await IsEditModeChanged.InvokeAsync(false);
         }
         finally

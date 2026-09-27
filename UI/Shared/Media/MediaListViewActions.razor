@@ -1,0 +1,31 @@
+@using UI.Shared.Filters
+
+@if (HasItems)
+{
+    @if (!IsEditMode)
+    {
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="OnEnterEditMode" Class="whitespace-nowrap">
+            <LucideIcon Name="square-check" Size="16" Class="mr-2"/>
+            Bulk edit
+        </BbButton>
+    }
+    <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="OnToggleFilters" Class="@ViewButtonClass">
+        <LucideIcon Name="sliders-horizontal" Size="16" Class="mr-2"/>
+        View
+        @if (Filter.ActiveCount > 0)
+        {
+            <span class="view-badge">@Filter.ActiveCount</span>
+        }
+    </BbButton>
+}
+
+@code {
+    [Parameter] public bool HasItems { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+    [Parameter] public bool ShowFilters { get; set; }
+    [Parameter] public ListFilter Filter { get; set; } = ListFilter.None;
+    [Parameter] public EventCallback OnEnterEditMode { get; set; }
+    [Parameter] public EventCallback OnToggleFilters { get; set; }
+
+    private string ViewButtonClass => ShowFilters ? "whitespace-nowrap bg-accent" : "whitespace-nowrap";
+}
