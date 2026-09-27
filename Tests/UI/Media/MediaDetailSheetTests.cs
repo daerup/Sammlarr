@@ -76,11 +76,11 @@ public class MediaDetailSheetTests : BunitContext
 		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy"))));
 
 		var cut = RenderSheet();
-		cut.WaitForState(() => cut.FindAll(".media-sheet-provenance-trigger").Count > 0);
+		cut.WaitForState(() => cut.FindAll(".provenance-trigger").Count > 0);
 
 		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
 
-		await cut.Find(".media-sheet-provenance-trigger").ContextMenuAsync(new());
+		await cut.Find(".provenance-trigger").ContextMenuAsync(new());
 
 		var details = cut.Find(".provenance-details");
 		var links = details.QuerySelectorAll("a").Select(link => link.GetAttribute("href")).ToList();
@@ -98,9 +98,9 @@ public class MediaDetailSheetTests : BunitContext
 		Register();
 
 		var cut = RenderSheet();
-		cut.WaitForState(() => cut.FindAll(".media-sheet-provenance-trigger").Count > 0);
+		cut.WaitForState(() => cut.FindAll(".provenance-trigger").Count > 0);
 
-		await cut.Find(".media-sheet-provenance-trigger").ContextMenuAsync(new());
+		await cut.Find(".provenance-trigger").ContextMenuAsync(new());
 
 		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
 	}
