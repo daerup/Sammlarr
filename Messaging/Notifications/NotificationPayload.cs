@@ -7,6 +7,7 @@ namespace Messaging.Notifications;
 internal sealed record NotificationPayload(
 	Guid Id,
 	NotificationEventType Type,
+	NotificationLevel DefaultLevel,
 	DateTimeOffset OccurredAt,
 	string Title,
 	string Summary,

@@ -14,10 +14,10 @@ public class AnnouncingMarkersTests
 	}
 
 	[Test]
-	public async Task BaseNotification_IsANotification_AndNeverAnEvent()
+	public async Task INotification_IsANotification_AndNeverAnEvent()
 	{
-		await Assert.That(typeof(BaseNotification).IsAssignableTo(typeof(INotification))).IsTrue();
-		await Assert.That(typeof(BaseNotification).IsAssignableTo(typeof(IEvent))).IsFalse();
+		await Assert.That(typeof(INotification).IsAssignableTo(typeof(INotification))).IsTrue();
+		await Assert.That(typeof(INotification).IsAssignableTo(typeof(IEvent))).IsFalse();
 	}
 
 	[Test]

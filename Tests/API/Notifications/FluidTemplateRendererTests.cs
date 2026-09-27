@@ -94,6 +94,7 @@ public class FluidTemplateRendererTests
 		new(
 			Guid.NewGuid(),
 			NotificationEventType.WatchlistSyncCompleted,
+			NotificationLevel.Success,
 			DateTimeOffset.UtcNow,
 			"Watchlist sync completed",
 			"Added.",

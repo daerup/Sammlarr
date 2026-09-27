@@ -6,13 +6,6 @@ using Domain.Providers;
 
 namespace Domain.Notifications;
 
-public abstract record BaseNotification(NotificationEventType Type, UserId UserId, DateTimeOffset OccurredAt) : INotification
-{
-	public Guid Id { get; init; } = Guid.CreateVersion7();
-
-	public abstract string Summary { get; }
-}
-
 public sealed record WatchlistSyncCompletedNotification(
 	UserId UserId,
 	DateTimeOffset OccurredAt,
@@ -21,40 +14,71 @@ public sealed record WatchlistSyncCompletedNotification(
 	IReadOnlyList<MediaId> PushedAdds,
 	IReadOnlyList<MediaId> PushedRemoves,
 	IReadOnlyList<MediaId> FailedPushes
-) : BaseNotification(NotificationEventType.WatchlistSyncCompleted, UserId, OccurredAt)
+) : INotification
 {
-	public override string Summary =>
+	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public NotificationEventType Type => NotificationEventType.WatchlistSyncCompleted;
+
+	public string Summary =>
 		FailedPushes.Count == 0
 			? $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}."
 			: $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}, {FailedPushes.Count} failed.";
+
+	public NotificationLevel DefaultLevel => FailedPushes.Count == 0 ? NotificationLevel.Success : NotificationLevel.Warning;
 }
 
-public sealed record WatchlistSyncFailedNotification(UserId UserId, DateTimeOffset OccurredAt, string Reason)
-	: BaseNotification(NotificationEventType.WatchlistSyncFailed, UserId, OccurredAt)
+public sealed record WatchlistSyncFailedNotification(UserId UserId, DateTimeOffset OccurredAt, string Reason) : INotification
 {
-	public override string Summary => Reason;
+	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public NotificationEventType Type => NotificationEventType.WatchlistSyncFailed;
+
+	public string Summary => Reason;
+
+	public NotificationLevel DefaultLevel => NotificationLevel.Error;
 }
 
-public sealed record TestPingNotification(UserId UserId, DateTimeOffset OccurredAt, Guid TargetId)
-	: BaseNotification(NotificationEventType.TestPing, UserId, OccurredAt)
+public sealed record TestPingNotification(UserId UserId, DateTimeOffset OccurredAt, Guid TargetId) : INotification
 {
-	public override string Summary => "This is a test notification from Sammlarr.";
+	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public NotificationEventType Type => NotificationEventType.TestPing;
+
+	public string Summary => "This is a test notification from Sammlarr.";
+
+	public NotificationLevel DefaultLevel => NotificationLevel.Info;
 }
 
-public sealed record FeedRunCompletedNotification(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, int Added, int Removed)
-	: BaseNotification(NotificationEventType.FeedRunCompleted, UserId, OccurredAt)
+public sealed record FeedRunCompletedNotification(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, int Added, int Removed) : INotification
 {
-	public override string Summary => $"Added {Added}, removed {Removed}.";
+	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public NotificationEventType Type => NotificationEventType.FeedRunCompleted;
+
+	public string Summary => $"Added {Added}, removed {Removed}.";
+
+	public NotificationLevel DefaultLevel => NotificationLevel.Success;
 }
 
-public sealed record FeedRunFailedNotification(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, string Reason)
-	: BaseNotification(NotificationEventType.FeedRunFailed, UserId, OccurredAt)
+public sealed record FeedRunFailedNotification(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, string Reason) : INotification
 {
-	public override string Summary => Reason;
+	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public NotificationEventType Type => NotificationEventType.FeedRunFailed;
+
+	public string Summary => Reason;
+
+	public NotificationLevel DefaultLevel => NotificationLevel.Error;
 }
 
-public sealed record ProviderRateLimitedNotification(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter)
-	: BaseNotification(NotificationEventType.ProviderRateLimited, UserId, OccurredAt)
+public sealed record ProviderRateLimitedNotification(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter) : INotification
 {
-	public override string Summary => $"Waiting {(int)Math.Ceiling(RetryAfter.TotalSeconds)}s before retrying.";
+	public Guid Id { get; init; } = Guid.CreateVersion7();
+
+	public NotificationEventType Type => NotificationEventType.ProviderRateLimited;
+
+	public string Summary => $"Waiting {(int)Math.Ceiling(RetryAfter.TotalSeconds)}s before retrying.";
+
+	public NotificationLevel DefaultLevel => NotificationLevel.Warning;
 }

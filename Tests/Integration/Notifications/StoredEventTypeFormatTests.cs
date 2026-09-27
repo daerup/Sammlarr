@@ -27,8 +27,12 @@ public class StoredEventTypeFormatTests(SammlarrTestHost fixture) : IAsyncDispos
 		await using var context = await fixture.ContextFactory.CreateDbContextAsync();
 		var connection = context.Database.GetDbConnection();
 		await connection.OpenAsync();
+		await using var counter = connection.CreateCommand();
+		counter.CommandText = """SELECT count(*) FROM "NotificationSubscriptions" """;
+		await Assert.That(Convert.ToInt32(await counter.ExecuteScalarAsync())).IsEqualTo(1);
+
 		await using var command = connection.CreateCommand();
-		command.CommandText = """SELECT "EventTypes" FROM "NotificationSubscriptions" LIMIT 1""";
+		command.CommandText = """SELECT "EventTypes" FROM "NotificationSubscriptions" """;
 
 		await Assert.That((string?)await command.ExecuteScalarAsync()).IsEqualTo("""["WatchlistSyncCompleted","WatchlistSyncFailed"]""");
 	}

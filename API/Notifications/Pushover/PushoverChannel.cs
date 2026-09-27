@@ -35,7 +35,7 @@ internal sealed class PushoverChannel(PushoverClient client, INotificationTempla
 		CancellationToken cancellationToken
 	)
 	{
-		var priority = template.Level.GetValueOr(() => NotificationLevel.For(context.Type)).Priority;
+		var priority = template.Level.GetValueOr(context.DefaultLevel).Priority;
 		var message = content.Message.GetValueOr(string.Empty);
 		var messageText = string.IsNullOrWhiteSpace(message) ? EmptyMessagePlaceholder : message;
 		var request = new PushoverMessage(config.AppToken, config.UserKey, content.Title.GetValueOr(string.Empty), messageText, priority);
@@ -62,6 +62,7 @@ file static class PushoverPriority
 			level switch
 			{
 				NotificationLevel.Info => 0,
+				NotificationLevel.Success => 0,
 				NotificationLevel.Warning => 0,
 				NotificationLevel.Error => 1,
 			};

@@ -127,6 +127,7 @@ public class NotificationDeliveryHandlerTests
 		new(
 			Guid.CreateVersion7(),
 			NotificationEventType.WatchlistSyncCompleted,
+			NotificationLevel.Success,
 			DateTimeOffset.UtcNow,
 			"Watchlist sync completed",
 			"Added 1 item(s).",

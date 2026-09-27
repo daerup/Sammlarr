@@ -19,18 +19,14 @@ internal sealed class Notifier(ToastService toastService, DialogService dialogSe
 		[CallerMemberName] string member = ""
 	)
 	{
-		switch (level)
+		Action<string, string?, string, string> func = level switch
 		{
-			case NotificationLevel.Info:
-				Info(description, title, source, member);
-				break;
-			case NotificationLevel.Warning:
-				Warning(description, title, source, member);
-				break;
-			case NotificationLevel.Error:
-				Error(description, title, source, member);
-				break;
-		}
+			NotificationLevel.Info => Info,
+			NotificationLevel.Success => Success,
+			NotificationLevel.Warning => Warning,
+			NotificationLevel.Error => Error,
+		};
+		func(description, title, source, member);
 	}
 
 	public void Success(string description, string? title = null, [CallerFilePath] string source = "", [CallerMemberName] string member = "")
