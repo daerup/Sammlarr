@@ -14,7 +14,6 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Domain.Identity;
 using Domain.Jobs;
-using Domain.Jobs;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -45,7 +44,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		var cut = Render<WatchlistSyncButton>();
 		await Assert.That(cut.Markup).DoesNotContain("Syncing...");
 
-		cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(Viewer, JobKind.WatchlistSync, string.Empty, JobState.Running)));
+		await cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(Viewer, JobKind.WatchlistSync, string.Empty, JobState.Running)));
 
 		await Assert.That(cut.Markup).Contains("Syncing...");
 	}
@@ -66,7 +65,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		RegisterServices();
 		var cut = Render<WatchlistSyncButton>();
 
-		cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(UserId.From(Guid.NewGuid()), JobKind.WatchlistSync, string.Empty, JobState.Running)));
+		await cut.InvokeAsync(() => events.Publish(new JobStateChangedEvent(UserId.From(Guid.NewGuid()), JobKind.WatchlistSync, string.Empty, JobState.Running)));
 
 		await Assert.That(cut.Markup).DoesNotContain("Syncing...");
 	}
@@ -126,6 +125,56 @@ public class WatchlistSyncButtonTests : BunitContext
 		cut.WaitForAssertion(() => planner.PlanAsync(Any()).WasCalled(Times.Exactly(3)), TimeSpan.FromSeconds(10));
 		await Task.Delay(TimeSpan.FromSeconds(1.5));
 		planner.PlanAsync(Any()).WasCalled(Times.Exactly(3));
+	}
+
+	[Test]
+	public async Task Status_WithChangesInBothDirections_ShowsOneSignedAddAndOneSignedRemoveCount()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary(new WatchlistDelta(Ids(12), Ids(3)), new WatchlistDelta(Ids(2), Ids(1))));
+
+		var cut = Render<WatchlistSyncButton>();
+
+		cut.WaitForElement(".sync-status .is-added");
+		await Assert.That(cut.FindAll(".sync-status .is-added").Select(count => count.TextContent)).IsEquivalentTo(["+14"]);
+		await Assert.That(cut.FindAll(".sync-status .is-removed").Select(count => count.TextContent)).IsEquivalentTo(["−4"]);
+	}
+
+	[Test]
+	public async Task Status_BesideTheSyncButton_IsStaticTextRatherThanASecondButton()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary(new WatchlistDelta(Ids(5), [])));
+
+		var cut = Render<WatchlistSyncButton>();
+
+		cut.WaitForElement(".sync-status .is-added");
+		await Assert.That(cut.Find("[role=group]").QuerySelectorAll("button").Length).IsEqualTo(1);
+		await Assert.That(cut.Find(".sync-status").TagName).IsEqualTo("SPAN");
+	}
+
+	[Test]
+	public async Task Status_WithUnmatchedTitles_LeavesThemOutOfTheCounts()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(Summary() with { Unmatched = [new UnmatchedMedia { Externals = [], Title = "Unsung Hero" }] });
+
+		var cut = Render<WatchlistSyncButton>();
+
+		cut.WaitForState(() => !cut.Find(".sync-status").TextContent.Contains("Comparing"));
+		await Assert.That(cut.Find(".sync-status").TextContent).Contains("In sync");
+	}
+
+	[Test]
+	public async Task Status_WhenEveryPlanAttemptFails_NamesTheUnreachableProvider()
+	{
+		var (_, planner) = RegisterServices();
+		planner.PlanAsync(Any()).Returns(new WatchlistSyncRemoteFailed("unreachable"));
+
+		var cut = Render<WatchlistSyncButton>(parameters => parameters.Add(button => button.ProviderName, "Plex"));
+
+		cut.WaitForState(() => !cut.Find(".sync-status").TextContent.Contains("Comparing"), TimeSpan.FromSeconds(10));
+		await Assert.That(cut.Find(".sync-status").TextContent).Contains("Plex unreachable");
 	}
 
 	private async Task ToggleWatchlistAsync(IRenderedComponent<Harness> cut)
@@ -232,7 +281,11 @@ public class WatchlistSyncButtonTests : BunitContext
 		}
 	}
 
-	private static WatchlistSyncSummary Summary() => new(new WatchlistDelta([], []), new WatchlistDelta([], []), [Synced]);
+	private static readonly WatchlistDelta NoChanges = new([], []);
+
+	private static WatchlistSyncSummary Summary(WatchlistDelta? pull = null, WatchlistDelta? push = null) => new(pull ?? NoChanges, push ?? NoChanges, [Synced]);
+
+	private static IReadOnlyList<MediaId> Ids(int count) => [.. Enumerable.Range(0, count).Select(_ => MediaId.From(Guid.NewGuid()))];
 
 	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
 	{
