@@ -91,12 +91,21 @@
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                         <LucideIcon Name="@ChannelIcon(alert.Client.Channel)" Size="18"/>
                     </div>
-                    <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                    <div class="flex min-w-0 flex-1 flex-col">
                         <p class="min-w-0 truncate font-medium">@alert.Client.Name</p>
-                        @foreach (var eventType in alert.Subscription.EventTypes)
-                        {
-                            <span class="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">@eventType.GetDescription()</span>
-                        }
+                        <BbTooltip>
+                            <BbTooltipTrigger AsChild="false" Class="inline-flex min-w-0 max-w-full">
+                                <span class="min-w-0 truncate text-sm text-muted-foreground">@NotificationEventCatalog.Summarise(alert.Subscription.EventTypes)</span>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent Class="max-w-xs">
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach (var eventType in alert.Subscription.EventTypes)
+                                    {
+                                        <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@eventType.GetDescription()</BbBadge>
+                                    }
+                                </div>
+                            </BbTooltipContent>
+                        </BbTooltip>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Small" OnClick="() => EditAlert(alert)">
@@ -146,7 +155,7 @@
 
     private IReadOnlyList<NotificationDeliveryOutcome> Health(Guid clientId) => _health.GetValueOrDefault(clientId, []);
 
-	private static string EventsLabel(NotificationSubscription subscription) => string.Join(", ", subscription.EventTypes.Select(eventType => eventType.GetDescription()));
+	private static string EventsLabel(NotificationSubscription subscription) => NotificationEventCatalog.Spell(subscription.EventTypes);
 
 	private static string? ChannelHint(NotificationChannel channel) =>
 		channel switch
