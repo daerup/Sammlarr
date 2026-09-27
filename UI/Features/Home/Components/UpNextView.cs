@@ -2,6 +2,7 @@ using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using UI.Features.Feeds.Components;
+using UrlGuid = global::Shared.UrlGuid;
 
 namespace UI.Features.Home.Components;
 
@@ -12,7 +13,7 @@ public enum UpNextKind
 	Scheduled,
 }
 
-public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind);
+public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href);
 
 internal static class UpNextView
 {
@@ -30,14 +31,20 @@ internal static class UpNextView
 					entry.feed.Name,
 					ScheduleText.Describe(entry.feed.Schedule),
 					ScheduleText.Away(entry.next!.Value, from),
-					UpNextKind.Scheduled
+					UpNextKind.Scheduled,
+					EditHref(entry.feed.Id)
 				)),
 		];
 
 	private static UpNextRow Row(PendingJob job, int index, IReadOnlyDictionary<FeedId, string> feedNames, string providerName) =>
 		job.State is JobState.Running
-			? new UpNextRow(Name(job.Request, feedNames, providerName), "running now", "running", UpNextKind.Running)
-			: new UpNextRow(Name(job.Request, feedNames, providerName), "queued", $"{Ordinal(index + 1)} in line", UpNextKind.Queued);
+			? new UpNextRow(Name(job.Request, feedNames, providerName), "running now", "running", UpNextKind.Running, Href(job.Request, feedNames))
+			: new UpNextRow(Name(job.Request, feedNames, providerName), "queued", $"{Ordinal(index + 1)} in line", UpNextKind.Queued, Href(job.Request, feedNames));
+
+	private static string? Href(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) =>
+		request is RunFeed feed && feedNames.ContainsKey(feed.Id) ? EditHref(feed.Id) : null;
+
+	private static string EditHref(FeedId feedId) => $"/feeds/edit/{UrlGuid.Encode(feedId.Value)}";
 
 	private static string Name(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames, string providerName) =>
 		request switch

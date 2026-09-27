@@ -6,6 +6,7 @@ using Domain.Providers;
 using Domain.Watchlist.Sync;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
+using UrlGuid = global::Shared.UrlGuid;
 
 namespace UI.Tests.Home;
 
@@ -48,11 +49,38 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_ForAFeedThatWasDeleted_StillNamesTheRow()
+	public async Task InTheQueue_ForAFeedThatWasDeleted_NamesTheRowButLinksNowhere()
 	{
 		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
 
-		await Assert.That(UpNextView.InTheQueue(queue, Names, "Plex")[0].Name).IsEqualTo("A deleted feed");
+		var row = UpNextView.InTheQueue(queue, Names, "Plex")[0];
+
+		await Assert.That(row.Name).IsEqualTo("A deleted feed");
+		await Assert.That(row.Href).IsNull();
+	}
+
+	[Test]
+	public async Task InTheQueue_ForAFeedJob_LinksToThatFeedsEditorButNotForASync()
+	{
+		var queue = Snapshot(
+			Job(Docs, JobState.Running),
+			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0)
+		);
+
+		var rows = UpNextView.InTheQueue(queue, Names, "Plex");
+
+		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
+		await Assert.That(rows[1].Href).IsNull();
+	}
+
+	[Test]
+	public async Task OnASchedule_LinksEachFeedToItsEditor()
+	{
+		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *"))];
+
+		var rows = UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc);
+
+		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
 	}
 
 	[Test]

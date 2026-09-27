@@ -13,7 +13,14 @@
                 <LucideIcon Name="@Icon(row.Kind)" Size="12"/>
             </span>
             <span class="row-body">
-                <span class="row-name">@row.Name</span>
+                @if (row.Href is { } href)
+                {
+                    <a class="row-name" href="@href">@row.Name</a>
+                }
+                else
+                {
+                    <span class="row-name">@row.Name</span>
+                }
                 <span class="row-detail">@row.Detail</span>
             </span>
             <span class="row-when @(row.Kind is UpNextKind.Running ? "is-running" : "")">@row.When</span>
