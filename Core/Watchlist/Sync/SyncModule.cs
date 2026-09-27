@@ -10,7 +10,6 @@ internal class SyncModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddSingleton<WatchlistSyncGate>();
-		services.AddScoped<WatchlistSyncAnnouncer>();
 		services.AddTracedScoped<IWatchlistSyncPlanner, WatchlistSyncPlanner>();
 		services.AddTracedScoped<IWatchlistSyncEngine, WatchlistSyncEngine>();
 	}

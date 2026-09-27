@@ -1,9 +1,13 @@
+using Contracts;
 using Contracts.Feed;
 using Contracts.Jobs;
+using Core.Announcing;
 using Core.Jobs;
+using Domain.Announcing;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
+using Domain.Notifications.Events;
 using Domain.Watchlist.Sync;
 using TestInfrastructure;
 
@@ -16,8 +20,7 @@ public class FeedRunJobHandlerTests
 	[Test]
 	public async Task HandleAsync_AfterAScheduledRun_ArmsASyncForTheOwner()
 	{
-		var (engine, queue) = Collaborators();
-		var testee = new FeedRunJobHandler(engine.Object, queue.Object);
+		var (testee, queue, _, _) = Testee();
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), Nightly));
 
@@ -27,8 +30,7 @@ public class FeedRunJobHandlerTests
 	[Test]
 	public async Task HandleAsync_AfterAManualRun_ArmsNothing()
 	{
-		var (engine, queue) = Collaborators();
-		var testee = new FeedRunJobHandler(engine.Object, queue.Object);
+		var (testee, queue, _, _) = Testee();
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
 
@@ -39,20 +41,52 @@ public class FeedRunJobHandlerTests
 	public async Task HandleAsync_RunsTheFeedUnderTheTriggerItWasQueuedWith()
 	{
 		var id = FeedId.From(Guid.NewGuid());
-		var (engine, queue) = Collaborators();
-		var testee = new FeedRunJobHandler(engine.Object, queue.Object);
+		var (testee, _, _, engine) = Testee();
 
 		await testee.HandleAsync(new RunFeed(id, Nightly));
 
 		engine.RunAsync(id, Nightly, Any()).WasCalled(Times.Once);
 	}
 
-	private static (Mock<IFeedRunEngine> Engine, Mock<IJobQueue> Queue) Collaborators()
+	[Test]
+	public async Task HandleAsync_AnnouncesTheRunFinishedSoAnOpenPageCanRefresh()
+	{
+		var id = FeedId.From(Guid.NewGuid());
+		var (testee, _, events, _) = Testee();
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		await testee.HandleAsync(new RunFeed(id, new Manual()));
+
+		var finished = seen.OfType<FeedRunFinishedEvent>().Single();
+		await Assert.That(finished.FeedId).IsEqualTo(id);
+		await Assert.That(finished.UserId).IsEqualTo(TestCurrentUser.DefaultId);
+	}
+
+	[Test]
+	public async Task HandleAsync_PublishesTheRunsNotificationForDelivery()
+	{
+		var published = new RecordingPublisher();
+		var (testee, _, _, _) = Testee(published);
+
+		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
+
+		await Assert.That(published.Published<FeedRunFailedEvent>()).Count().IsEqualTo(1);
+	}
+
+	private static (FeedRunJobHandler Testee, Mock<IJobQueue> Queue, EventPublisher Events, Mock<IFeedRunEngine> Engine) Testee(
+		RecordingPublisher? published = null
+	)
 	{
 		var engine = IFeedRunEngine.Mock();
 		engine.RunAsync(Any<FeedId>(), Any<FeedRunTrigger>(), Any()).Returns(new FeedRunFailed("stubbed"));
 		var queue = IJobQueue.Mock();
 		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
-		return (engine, queue);
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(new DateTimeOffset(2026, 9, 27, 12, 0, 0, TimeSpan.Zero));
+		var events = new EventPublisher();
+		var announcer = new Announcer(events, published ?? new RecordingPublisher());
+
+		return (new FeedRunJobHandler(engine.Object, queue.Object, announcer, new TestCurrentUser(), clock.Object), queue, events, engine);
 	}
 }

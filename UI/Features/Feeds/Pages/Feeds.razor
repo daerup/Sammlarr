@@ -1,13 +1,20 @@
 @page "/feeds"
+@implements IDisposable
 @using Contracts.Feed
 @using Contracts.Media
 @using Contracts.Identity
 @using Contracts.Watchlist
+@using Contracts.Jobs
+@using Contracts.Announcing
+@using Domain.Announcing
+@using Domain.Identity
+@using Domain.Jobs
 @using Domain.Feed.Run
 @using Contracts.Settings
 @using global::Shared
 @using Domain.Media
 @using UI.Features.Feeds.Components
+@using UI.Shared.Announcing
 @using UI.Shared.Changes
 @using UI.Shared.Media
 @using UI.Shared.Services.Branding
@@ -16,12 +23,13 @@
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject IProviderConfigRepository ProviderConfigRepository
 @inject AccountConnectionPrompt AccountConnectionPrompt
-@inject IFeedRunEngine RunEngine
+@inject IJobQueue JobQueue
 @inject IFeedRunPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IMediaService Media
 @inject IWatchlistRepository Watchlist
+@inject IEventPublisher Events
 
 <PageTitle>Feeds</PageTitle>
 
@@ -333,6 +341,7 @@
 
     private ProviderConfig _providerConfig = null!;
     private bool _isSignedIn;
+    private UserId? _viewer;
     private bool IsSignedIn() => _isSignedIn;
 
     private IReadOnlyList<Feed> _feeds = [];
@@ -357,6 +366,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Events.Published += OnEvent;
         _providerConfig = await ProviderConfigRepository.GetAsync();
         _feeds = await FeedService.GetFeedsAsync();
         _owned = await Watchlist.GetOwnedCountsAsync();
@@ -368,6 +378,7 @@
     private Task HandleSignInChangedAsync(bool hasAccess)
     {
         _isSignedIn = hasAccess;
+        _viewer = hasAccess ? CurrentUser.Id : null;
         return Task.CompletedTask;
     }
 
@@ -393,23 +404,24 @@
         UpdatePagedFeeds();
     }
 
-    private static string Outcome(string name, FeedRunCompleted run)
+    public void Dispose() => Events.Published -= OnEvent;
+
+    private void OnEvent(IEvent raised)
     {
-        if (!run.Delta.HasChanges)
+        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _viewer) is null)
         {
-            return $"'{name}' is already up to date.";
+            return;
         }
 
-        var parts = new List<string>(2);
-        if (run.Delta.Adds.Count > 0)
-        {
-            parts.Add($"added {run.Delta.Adds.Count}");
-        }
-        if (run.Delta.Drops.Count > 0)
-        {
-            parts.Add($"removed {run.Delta.Drops.Count}");
-        }
-        return $"'{name}' {string.Join(" and ", parts)}.";
+        _ = InvokeAsync(RefreshAfterRunAsync);
+    }
+
+    private async Task RefreshAfterRunAsync()
+    {
+        _runVersion++;
+        _owned = await Watchlist.GetOwnedCountsAsync();
+        _overviews = await FeedService.GetOverviewsAsync();
+        StateHasChanged();
     }
 
     private async Task RunFeedAsync(Feed feed)
@@ -510,16 +522,13 @@
         StateHasChanged();
         try
         {
-            switch (await RunEngine.RunAsync(feed.Id, new Manual()))
+            switch (await JobQueue.EnqueueAsync(new RunFeed(feed.Id, new Manual())))
             {
-                case FeedRunCompleted applied:
-                    Notifier.Success(Outcome(feed.Name, applied));
+                case Queued:
+                    Notifier.Info($"'{feed.Name}' has been queued", null);
                     break;
-                case FeedRunAlreadyRunning running:
-                    Notifier.Info(running.ToString(), null);
-                    break;
-                case FeedRunFailed failed:
-                    Notifier.Warning(failed.ToString(), null);
+                case AlreadyQueued:
+                    Notifier.Info($"'{feed.Name}' is already queued", null);
                     break;
             }
         }
@@ -530,9 +539,6 @@
         finally
         {
             _runningFeed = null;
-            _runVersion++;
-            _owned = await Watchlist.GetOwnedCountsAsync();
-            _overviews = await FeedService.GetOverviewsAsync();
         }
     }
 

@@ -9,5 +9,6 @@ internal class AnnouncingModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddSingleton<IEventPublisher, EventPublisher>();
+		services.AddScoped<Announcer>();
 	}
 }
