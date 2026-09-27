@@ -29,6 +29,24 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
+		FeedRunCompletedEvent message,
+		IUserScope userScope,
+		INotificationSubscriptionRepository subscriptions,
+		IMediaRepository mediaRepository,
+		IFeedService feedService,
+		CancellationToken cancellationToken
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
+
+	public static Task<OutgoingMessages> Handle(
+		FeedRunFailedEvent message,
+		IUserScope userScope,
+		INotificationSubscriptionRepository subscriptions,
+		IMediaRepository mediaRepository,
+		IFeedService feedService,
+		CancellationToken cancellationToken
+	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
+
+	public static Task<OutgoingMessages> Handle(
 		ProviderRateLimitedEvent message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
