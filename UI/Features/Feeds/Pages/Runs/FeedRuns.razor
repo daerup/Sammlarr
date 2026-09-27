@@ -120,10 +120,7 @@
                         <div class="runs-rail-body">
                             @foreach (var day in RailDays())
                             {
-                                @if (day.Grouped)
-                                {
-                                    <div class="runs-day">@day.Label</div>
-                                }
+                                <div class="runs-day">@day.Label</div>
                                 @foreach (var item in day.Runs)
                                 {
                                     <button type="button" class="runs-item @(item.Id == _selected?.Id ? "is-sel" : null)"
@@ -403,14 +400,14 @@
             RunFilter.Failed => "is-failed",
         };
 
-    private sealed record RailDay(string Label, bool Grouped, IReadOnlyList<FeedRun> Runs);
+    private sealed record RailDay(string Label, IReadOnlyList<FeedRun> Runs);
 
     private IReadOnlyList<RailDay> RailDays() =>
         [
             .. Filtered()
                 .GroupBy(run => run.StartedAt.ToLocalTime().Date)
                 .OrderByDescending(group => group.Key)
-                .Select(group => new RailDay(DayLabel(group.Key), group.Count() > 1, [.. group.OrderByDescending(run => run.StartedAt)])),
+                .Select(group => new RailDay(DayLabel(group.Key), [.. group.OrderByDescending(run => run.StartedAt)])),
         ];
 
     private static string DayLabel(DateTime day) =>
