@@ -1,0 +1,174 @@
+@using Domain.Feed
+@using UI.Features.Feeds.Components
+
+<BbDialog Open="Open" OpenChanged="OnOpenChanged">
+    <BbDialogContent Class="max-w-xl p-0 gap-0">
+        <div class="run-head">
+            <h2 class="run-title">Run feeds</h2>
+            <p class="run-desc">Queues each selected feed. They run one at a time, in order.</p>
+        </div>
+
+        <div class="run-body">
+            @foreach (var group in Groups)
+            {
+                var inGroup = Candidates.Where(candidate => candidate.Group == group).ToList();
+                if (inGroup.Count == 0)
+                {
+                    continue;
+                }
+                var picked = inGroup.Count(candidate => _selected.Contains(candidate.Id));
+                var selectable = inGroup.Where(candidate => candidate.Enabled).ToList();
+
+                <div class="run-card @(group is RunGroup.WorthRunning ? "is-hot" : "")">
+                    <div class="run-card-head">
+                        <BbCheckbox Checked="@(selectable.Count > 0 && picked == selectable.Count)"
+                                    Indeterminate="@(picked > 0 && picked < selectable.Count)"
+                                    Disabled="@(selectable.Count == 0)"
+                                    AriaLabel="@RunPlan.Label(group)"
+                                    CheckedChanged="_ => ToggleGroup(selectable, picked < selectable.Count)"/>
+                        <span class="run-card-title">
+                            <span class="run-card-name">@RunPlan.Label(group)</span>
+                            <span class="run-card-sub">@RunPlan.Describe(group)</span>
+                        </span>
+                        <span class="run-card-count">@picked of @selectable.Count</span>
+                    </div>
+
+                @foreach (var candidate in inGroup)
+                {
+                    var isPicked = _selected.Contains(candidate.Id);
+                    <div class="run-row @(candidate.Enabled ? "" : "off")" @key="candidate.Id.Value">
+                        <BbCheckbox Checked="isPicked"
+                                    Disabled="@(!candidate.Enabled)"
+                                    AriaLabel="@candidate.Name"
+                                    CheckedChanged="_ => Toggle(candidate.Id)"/>
+                        <span class="run-row-body">
+                            <span class="run-row-name">@candidate.Name</span>
+                            <span class="run-row-meta">
+                                @candidate.Schedule
+                                <span class="run-sep">·</span>
+                                @if (!candidate.LastRun.EverRan)
+                                {
+                                    <span>never run</span>
+                                }
+                                else if (!candidate.LastRun.Changed)
+                                {
+                                    <span>last ran with no change</span>
+                                }
+                                else
+                                {
+                                    <span>last ran</span>
+                                    @if (candidate.LastRun.Added > 0)
+                                    {
+                                        <span class="run-added"> +@candidate.LastRun.Added.ToString("N0")</span>
+                                    }
+                                    @if (candidate.LastRun.Removed > 0)
+                                    {
+                                        <span class="run-removed"> &minus;@candidate.LastRun.Removed.ToString("N0")</span>
+                                    }
+                                }
+                            </span>
+                        </span>
+                        @if (candidate.Flag is { } flag)
+                        {
+                            <span class="run-flag @Tone(flag)">@RunPlan.Label(flag)</span>
+                        }
+                        @if (candidate.NextRun is { } next)
+                        {
+                            <span class="run-row-next">
+                                next<br/>
+                                <span class="em">@ScheduleText.Away(next, Now)</span>
+                            </span>
+                        }
+                    </div>
+                }
+                </div>
+            }
+        </div>
+
+        <div class="run-foot">
+            <label class="run-sync">
+                <BbCheckbox @bind-Checked="_syncAfter"/>
+                <span>Sync to @ProviderName when done</span>
+            </label>
+            <span class="run-foot-push">
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Cancel">Cancel</BbButton>
+                <BbButton OnClick="Confirm" Disabled="@(_selected.Count == 0)">
+                    <LucideIcon Name="play" Size="15" Class="mr-1"/>
+                    @(_selected.Count == 0 ? "Run feeds" : $"Run {_selected.Count} feed{(_selected.Count == 1 ? "" : "s")}")
+                </BbButton>
+            </span>
+        </div>
+        <p class="run-note">One sync after the last run, not one per feed.</p>
+    </BbDialogContent>
+</BbDialog>
+
+@code {
+    private static readonly RunGroup[] Groups = [RunGroup.WorthRunning, RunGroup.SoonAnyway, RunGroup.ManualOnly];
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyList<RunCandidate> Candidates { get; set; }
+    [Parameter] public DateTimeOffset Now { get; set; }
+    [Parameter] public string ProviderName { get; set; } = "your watchlist provider";
+    [Parameter] public EventCallback<(IReadOnlyList<FeedId> Feeds, bool SyncAfter)> OnRun { get; set; }
+
+    private readonly HashSet<FeedId> _selected = [];
+    private bool _syncAfter = true;
+    private bool _armed;
+
+    protected override void OnParametersSet()
+    {
+        if (Open && !_armed)
+        {
+            _selected.Clear();
+            _selected.UnionWith(RunPlan.DefaultSelection(Candidates));
+            _armed = true;
+        }
+        else if (!Open)
+        {
+            _armed = false;
+        }
+    }
+
+    private static string? Tone(RunFlag flag) =>
+        flag switch
+        {
+            RunFlag.Disabled => null,
+            RunFlag.Inconclusive => "bad",
+            RunFlag.NotDue => "due",
+        };
+
+    private void Toggle(FeedId id)
+    {
+        if (!_selected.Add(id))
+        {
+            _selected.Remove(id);
+        }
+    }
+
+    private void ToggleGroup(IEnumerable<RunCandidate> group, bool select)
+    {
+        foreach (var candidate in group)
+        {
+            if (select)
+            {
+                _selected.Add(candidate.Id);
+            }
+            else
+            {
+                _selected.Remove(candidate.Id);
+            }
+        }
+    }
+
+    private Task Cancel() => OnOpenChanged(false);
+
+    private async Task Confirm()
+    {
+        var chosen = _selected.ToList();
+        await OnOpenChanged(false);
+        await OnRun.InvokeAsync((chosen, _syncAfter));
+    }
+
+    private Task OnOpenChanged(bool open) => OpenChanged.InvokeAsync(open);
+}

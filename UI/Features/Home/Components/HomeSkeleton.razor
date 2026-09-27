@@ -1,0 +1,57 @@
+<div class="sk-band">
+    <div class="sk-top">
+        <BbSkeleton Width="170px" Height="14px"/>
+        <BbSkeleton Width="80px" Height="11px"/>
+    </div>
+    <div class="sk-body">
+        <BbSkeleton Height="16px" Class="rounded-full"/>
+        <div class="sk-keys">
+            @for (var key = 0; key < 4; key++)
+            {
+                <BbSkeleton Width="170px" Height="11px"/>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="sk-band">
+    <div class="sk-top">
+        <BbSkeleton Width="64px" Height="14px"/>
+        <BbSkeleton Width="110px" Height="11px"/>
+    </div>
+    @for (var row = 0; row < 3; row++)
+    {
+        <div class="sk-row">
+            <BbSkeleton Width="23px" Height="23px"/>
+            <div class="sk-lines">
+                <BbSkeleton Width="38%" Height="11px"/>
+                <BbSkeleton Width="20%" Height="9px"/>
+            </div>
+            <BbSkeleton Width="64px" Height="11px"/>
+        </div>
+    }
+</div>
+
+<div class="sk-sec">
+    <BbSkeleton Width="110px" Height="15px"/>
+</div>
+
+@for (var card = 0; card < 2; card++)
+{
+    <div class="sk-card">
+        <div class="sk-top">
+            <BbSkeleton Width="74px" Height="16px"/>
+            <BbSkeleton Width="200px" Height="12px"/>
+        </div>
+        <div class="sk-chips">
+            <BbSkeleton Width="250px" Height="22px" Class="rounded-full"/>
+            <BbSkeleton Width="170px" Height="22px" Class="rounded-full"/>
+        </div>
+        <div class="sk-track">
+            @for (var tile = 0; tile < 13; tile++)
+            {
+                <BbSkeleton Width="110px" Class="aspect-[2/3] rounded-lg shrink-0"/>
+            }
+        </div>
+    </div>
+}

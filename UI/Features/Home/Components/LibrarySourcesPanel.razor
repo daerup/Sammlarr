@@ -1,0 +1,88 @@
+<div class="band">
+    <div class="band-head">
+        <span class="band-title">Where your library came from</span>
+        <span class="band-note">@Note</span>
+    </div>
+
+    @if (Sources.Count == 0)
+    {
+        <p class="band-empty">Nothing on your watchlist yet, so there is nothing to attribute.</p>
+    }
+    else
+    {
+        <div class="band-body">
+            <BbTooltipProvider>
+                <div class="stack">
+                    @for (var index = 0; index < Sources.Count; index++)
+                    {
+                        var source = Sources[index];
+                        var tone = Tone(index);
+                        @if (IsShown(source))
+                        {
+                            <BbTooltip @key="source.Name" DelayDuration="150">
+                                <BbTooltipTrigger AsChild="false" Focusable="false" style="@Grow(source)">
+                                    <span class="stack-part @tone"></span>
+                                </BbTooltipTrigger>
+                                <BbTooltipContent>@Detail(source)</BbTooltipContent>
+                            </BbTooltip>
+                        }
+                    }
+                </div>
+                <div class="keys">
+                    @for (var index = 0; index < Sources.Count; index++)
+                    {
+                        var source = Sources[index];
+                        var tone = Tone(index);
+                        <BbTooltip DelayDuration="150">
+                            <BbTooltipTrigger AsChild="false" Focusable="false">
+                                <button type="button"
+                                        class="key @(IsShown(source) ? null : "is-hidden")"
+                                        aria-pressed="@(IsShown(source) ? "true" : "false")"
+                                        @onclick="() => Toggle(source)">
+                                    <i class="key-dot @tone"></i>
+                                    <span class="key-name">@source.Name</span>
+                                </button>
+                            </BbTooltipTrigger>
+                            <BbTooltipContent>@Detail(source)</BbTooltipContent>
+                        </BbTooltip>
+                    }
+                </div>
+            </BbTooltipProvider>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required IReadOnlyList<SourceShare> Sources { get; set; }
+    [Parameter] public int Total { get; set; }
+
+    private readonly HashSet<string> _hidden = [];
+
+    private int ShownTotal => Sources.Where(IsShown).Sum(source => source.Count);
+
+    private string Note => ShownTotal == Total ? $"{Total:N0} titles" : $"{ShownTotal:N0} of {Total:N0} titles";
+
+    private bool IsShown(SourceShare source) => !_hidden.Contains(source.Name);
+
+    private void Toggle(SourceShare source)
+    {
+        if (_hidden.Remove(source.Name))
+        {
+            return;
+        }
+
+        if (Sources.Count(IsShown) > 1)
+        {
+            _hidden.Add(source.Name);
+        }
+    }
+
+    private static string Tone(int index) => $"tone-{index % 5}";
+
+    private static string Grow(SourceShare source) => $"flex: {source.Count}";
+
+    private string Detail(SourceShare source) =>
+        IsShown(source)
+            ? $"{source.Name} · {source.Count:N0} of {ShownTotal:N0} ({source.Count / (double)ShownTotal:P1})"
+            : $"{source.Name} · {source.Count:N0} titles, hidden";
+}

@@ -1,0 +1,65 @@
+.sk-band {
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--card);
+    margin-bottom: 11px;
+    overflow: hidden;
+}
+
+.sk-card {
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--card);
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.sk-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 15px 10px;
+}
+
+.sk-body {
+    padding: 2px 15px 13px;
+}
+
+.sk-keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px 18px;
+    margin-top: 11px;
+}
+
+.sk-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 15px;
+    border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+.sk-lines {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sk-sec {
+    margin: 18px 0 12px;
+}
+
+.sk-chips {
+    display: flex;
+    gap: 6px;
+    padding: 0 15px 11px;
+}
+
+.sk-track {
+    display: flex;
+    gap: 8px;
+    padding: 0 15px 13px;
+    overflow: hidden;
+}

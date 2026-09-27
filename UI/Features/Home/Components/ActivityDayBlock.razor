@@ -1,0 +1,134 @@
+@using Domain.Media
+
+<div class="dcard">
+    <div class="dtop">
+        <span class="dname">@DayName</span>
+        <span class="dstat">
+            @if (Day.Added.Count > 0)
+            {
+                <span class="up">+@Day.Added.Count.ToString("N0")</span> <span>added</span>
+            }
+            @if (Day.Removed.Count > 0)
+            {
+                @if (Day.Added.Count > 0)
+                {
+                    <span class="sep">·</span>
+                }
+                <span class="dn">&minus;@Day.Removed.Count.ToString("N0")</span> <span>removed</span>
+            }
+            <span class="sep">·</span>
+            <span>@Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")</span>
+        </span>
+    </div>
+
+    @if (Day.Feeds.Count > 0)
+    {
+        <div class="chips">
+            @foreach (var feed in Day.Feeds)
+            {
+                <a class="chip" href="@FeedHref(feed)">
+                    <LucideIcon Name="rss" Size="11"/>
+                    <span class="chip-name">@feed.Name</span>
+                    @if (feed.Added > 0)
+                    {
+                        <b>+@feed.Added.ToString("N0")</b>
+                    }
+                    @if (feed.Removed > 0)
+                    {
+                        <span class="chip-rm">&minus;@feed.Removed.ToString("N0")</span>
+                    }
+                    @if (feed.Runs > 1)
+                    {
+                        <span class="chip-runs">&times;@feed.Runs</span>
+                    }
+                </a>
+            }
+        </div>
+    }
+
+    @if (Day.Added.Count > 0)
+    {
+        <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
+    }
+
+    @if (Day.Removed.Count > 0)
+    {
+        <div class="dsub">
+            <LucideIcon Name="trash-2" Size="11"/>
+            Removed
+        </div>
+        <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
+    }
+
+    @foreach (var entry in Day.Inconclusive)
+    {
+        <div class="dproblem">
+            <LucideIcon Name="circle-alert" Size="14"/>
+            <span>
+                <span class="problem-feed">@entry.FeedName</span> ran at @At(entry) but @entry.Outcome.
+            </span>
+        </div>
+    }
+
+    <button type="button" class="dtoggle" @onclick="@(() => _expanded = !_expanded)">
+        <LucideIcon Name="@(_expanded ? "chevron-down" : "chevron-right")" Size="13"/>
+        @(_expanded ? "Hide" : "Show") all @Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")
+    </button>
+
+    @if (_expanded)
+    {
+        <div class="druns">
+            @foreach (var entry in Day.Runs)
+            {
+                <a class="drun" href="@RunHref(entry)" @key="entry.Run.Id">
+                    <span class="drun-at">@At(entry)</span>
+                    <span class="drun-feed">@entry.FeedName</span>
+                    <span class="drun-delta">
+                        @if (entry.Inconclusive)
+                        {
+                            <span class="bad">inconclusive</span>
+                        }
+                        else if (entry.Run.HasChanges)
+                        {
+                            @if (entry.Run.Counts.Added > 0)
+                            {
+                                <span class="up">+@entry.Run.Counts.Added.ToString("N0")</span>
+                            }
+                            @if (entry.Run.Counts.Removed > 0)
+                            {
+                                <span class="dn">&minus;@entry.Run.Counts.Removed.ToString("N0")</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="nil">no change</span>
+                        }
+                    </span>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required ActivityDay Day { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, MediaLookup> Media { get; set; }
+    [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
+    [Parameter] public DateOnly Today { get; set; }
+
+    private bool _expanded;
+
+    private string DayName =>
+        Day.Date == Today ? "Today"
+        : Day.Date == Today.AddDays(-1) ? "Yesterday"
+        : Day.Date.Year == Today.Year ? Day.Date.ToString("dddd d MMMM")
+        : Day.Date.ToString("d MMMM yyyy");
+
+    private static string At(ActivityRun entry) => entry.Run.StartedAt.ToLocalTime().ToString("HH:mm");
+
+    private static string FeedHref(FeedContribution feed) =>
+        $"/feeds/{UrlGuid.Encode(feed.FeedId.Value)}/runs/{UrlGuid.Encode(feed.LatestRunId)}";
+
+    private static string RunHref(ActivityRun entry) => $"/feeds/{UrlGuid.Encode(entry.Run.FeedId.Value)}/runs/{UrlGuid.Encode(entry.Run.Id)}";
+}

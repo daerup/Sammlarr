@@ -3,7 +3,6 @@
 @using Contracts.Feed
 @using Contracts.Media
 @using Contracts.Watchlist
-@using CronExpressionDescriptor
 @using Domain.Feed
 @using Domain.Feed.Run
 @using Domain.Media
@@ -34,7 +33,7 @@
                 <div class="runs-title">
                     <h2>Run history</h2>
                     <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(feed.Strategy)</BbBadge>
-                    <BbBadge Variant="BadgeVariant.Secondary">@TriggerLabel(feed)</BbBadge>
+                    <BbBadge Variant="BadgeVariant.Secondary">@ScheduleText.Describe(feed.Schedule)</BbBadge>
                     @if (feed.Enabled)
                     {
                         <BbBadge Variant="BadgeVariant.Default">Enabled</BbBadge>
@@ -434,9 +433,6 @@
         : "is-idle";
 
     private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · grace {mirror.AbsenceThreshold}" : "Append";
-
-    private static string TriggerLabel(Feed feed) =>
-        feed.Schedule is Scheduled scheduled ? ExpressionDescriptor.GetDescription(scheduled.ToString()) : "Manual";
 
     private string? NextRunLine =>
         _feed?.Schedule is Scheduled scheduled && scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next

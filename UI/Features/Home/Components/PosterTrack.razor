@@ -1,0 +1,147 @@
+@using Domain.Media
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+<div class="track-wrap">
+    @if (_canLeft)
+    {
+        <button type="button" class="track-arrow left" aria-label="Scroll back" @onclick="ScrollLeftAsync">
+            <LucideIcon Name="chevron-left" Size="16"/>
+        </button>
+    }
+    <div class="track" @ref="_track">
+        @foreach (var id in Shown)
+        {
+            @if (Media.TryGetValue(id, out var media))
+            {
+                <button type="button" class="track-tile @(Faded ? "faded" : "")" @key="id.Value" @onclick="() => OnSelect.InvokeAsync(media)">
+                    @if (string.IsNullOrWhiteSpace(media.PosterUrl))
+                    {
+                        <span class="track-blank">
+                            <LucideIcon Name="image-off" Size="20"/>
+                        </span>
+                    }
+                    else
+                    {
+                        <img class="track-poster" src="@media.PosterUrl" alt="" loading="lazy"/>
+                    }
+                    <span class="track-scrim"></span>
+                    <span class="track-title">@Title(media)</span>
+                </button>
+            }
+        }
+    </div>
+    @if (CanRight)
+    {
+        <button type="button" class="track-arrow right" aria-label="Scroll forward" @onclick="ScrollRightAsync">
+            <LucideIcon Name="chevron-right" Size="16"/>
+        </button>
+    }
+</div>
+
+@code {
+    private const int Batch = 30;
+
+    [Parameter, EditorRequired] public required IReadOnlyList<MediaId> Ids { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, MediaLookup> Media { get; set; }
+    [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
+    [Parameter] public bool Faded { get; set; }
+
+    private ElementReference _track;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _watcher;
+    private DotNetObjectReference<PosterTrack>? _self;
+    private readonly HashSet<MediaId> _requested = [];
+    private int _rendered = Batch;
+    private bool _canLeft;
+    private bool _canScrollRight;
+
+    private IReadOnlyList<MediaId> Shown => Ids.Count <= _rendered ? Ids : [.. Ids.Take(_rendered)];
+
+    private bool CanRight => _canScrollRight || _rendered < Ids.Count;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _rendered = Math.Min(_rendered, Math.Max(Batch, Ids.Count));
+        await RequestMediaAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _self = DotNetObjectReference.Create(this);
+            _watcher = await (await Module()).InvokeAsync<IJSObjectReference>("observe", _track, _self);
+        }
+        else if (_watcher is not null)
+        {
+            await _watcher.InvokeVoidAsync("report");
+        }
+    }
+
+    [JSInvokable]
+    public Task OnScrollState(bool canLeft, bool canRight)
+    {
+        if (canLeft == _canLeft && canRight == _canScrollRight)
+        {
+            return Task.CompletedTask;
+        }
+
+        _canLeft = canLeft;
+        _canScrollRight = canRight;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private static string Title(MediaLookup media) => string.IsNullOrWhiteSpace(media.Title) ? "Unknown title" : media.Title;
+
+    private async Task RequestMediaAsync()
+    {
+        var wanted = Shown.Where(id => !_requested.Contains(id)).ToList();
+        if (wanted.Count == 0)
+        {
+            return;
+        }
+
+        _requested.UnionWith(wanted);
+        await OnNeedMedia.InvokeAsync(wanted);
+    }
+
+    private async Task ScrollRightAsync()
+    {
+        if (!_canScrollRight && _rendered < Ids.Count)
+        {
+            _rendered = Math.Min(_rendered + Batch, Ids.Count);
+            await RequestMediaAsync();
+            StateHasChanged();
+        }
+
+        await ScrollAsync("scrollForward");
+    }
+
+    private Task ScrollLeftAsync() => ScrollAsync("scrollBack");
+
+    private async Task ScrollAsync(string action) => await (await Module()).InvokeVoidAsync(action, _track);
+
+    private async Task<IJSObjectReference> Module() => _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./js/poster-track.js");
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_watcher is not null)
+            {
+                await _watcher.InvokeVoidAsync("dispose");
+                await _watcher.DisposeAsync();
+            }
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+
+        _self?.Dispose();
+    }
+}
