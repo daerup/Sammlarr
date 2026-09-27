@@ -5,12 +5,10 @@
 @using Domain.Watchlist
 @using UI.Features.Watchlist.Components
 @using UI.Shared.Media.Icons
-@using UI.Shared.Services.Branding
 @inject IMediaService MediaService
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
 @inject IProviderConfigRepository ProviderConfigRepository
-@inject MediaProviderBrandingService Branding
 @inject Notifier Notifier
 @if (Open)
 {
@@ -41,25 +39,12 @@
                     @if (!media.IsUnresolved)
                     {
                         <div class="media-sheet-toggles">
-                            <span class="media-sheet-provenance-trigger"
-                                  @oncontextmenu="RevealProvenance"
-                                  @oncontextmenu:preventDefault="CanRevealProvenance">
-                                <WatchlistToggleIcon Result="media"
-                                                     Size="18"
-                                                     IsToggled="_watchlisted"
-                                                     IsToggling="_togglingWatchlist"
-                                                     DotColor="@ProvenanceBrandColor"
-                                                     OnToggle="ToggleWatchlistAsync"/>
-                                <BbPopover Open="_showProvenance" OpenChanged="@(open => _showProvenance = open)">
-                                    <BbPopoverTrigger AsChild="false" tabindex="-1" aria-hidden="true" class="media-sheet-provenance-anchor"/>
-                                    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.End" Class="w-auto p-0 overflow-hidden">
-                                        @if (_entry is Some<WatchlistEntry>(var shown))
-                                        {
-                                            <ProvenanceDetails Provenance="shown.Provenance" AddedAt="shown.AddedAt" ItemId="media.Id"/>
-                                        }
-                                    </BbPopoverContent>
-                                </BbPopover>
-                            </span>
+                            <WatchlistProvenanceToggle Result="media"
+                                                       Size="18"
+                                                       IsToggled="_watchlisted"
+                                                       IsToggling="_togglingWatchlist"
+                                                       Entry="@(_entry is Some<WatchlistEntry>(var shown) ? shown : null)"
+                                                       OnToggle="ToggleWatchlistAsync"/>
                             <BlacklistToggleIcon Result="media"
                                                  Size="18"
                                                  IsToggled="_blacklisted"
@@ -144,22 +129,6 @@
     private bool _togglingWatchlist;
     private bool _togglingBlacklist;
     private Optional<WatchlistEntry> _entry = new None();
-    private bool _showProvenance;
-
-    private bool CanRevealProvenance => _watchlisted && _entry is Some<WatchlistEntry>;
-
-    private void RevealProvenance() => _showProvenance = CanRevealProvenance;
-
-    private string? ProvenanceBrandColor =>
-        _entry is Some<WatchlistEntry>(var entry)
-            ? entry.Provenance switch
-            {
-                RemoteOrigin remote => Branding.GetBrandingInfo(remote.Provider.AsMediaProvider()).BrandColor,
-                FeedOrigin feed => Branding.GetBrandingInfo(feed.Feed.Provider.AsMediaProvider()).BrandColor,
-                OrphanedOrigin => "var(--muted-foreground)",
-                ManualOrigin => null,
-            }
-            : null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -182,7 +151,6 @@
         _watchlisted = (await WatchlistService.GetWatchlistIdsAsync()).Contains(id);
         _blacklisted = (await BlacklistService.GetBlacklistIdsAsync()).Contains(id);
         _entry = await WatchlistService.GetEntryAsync(id);
-        _showProvenance = false;
     }
 
     private async Task ToggleWatchlistAsync(MediaLookup media)

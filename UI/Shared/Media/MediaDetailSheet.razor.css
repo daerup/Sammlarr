@@ -26,19 +26,6 @@
     gap: 2px;
 }
 
-.media-sheet-provenance-trigger {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-
-::deep .media-sheet-provenance-anchor {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-}
-
 ::deep .search-result-toggle-btn {
     flex-shrink: 0;
     transition: color 0.15s ease, opacity 0.15s ease;
