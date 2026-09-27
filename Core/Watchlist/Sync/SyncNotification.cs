@@ -1,7 +1,7 @@
 using Domain.Announcing;
 using Domain.Identity;
 using Domain.Media;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Watchlist.Outbox;
 
 namespace Core.Watchlist.Sync;
@@ -21,7 +21,7 @@ internal static class SyncNotification
 		var failed = pushed.Where(outcome => outcome.Kind is not WatchlistOutboxEventKind.Pushed).Select(outcome => outcome.MediaId).ToList();
 		return pulledAdds.Count + pulledRemoves.Count + pushedAdds.Count + pushedRemoves.Count + failed.Count == 0
 			? null
-			: new WatchlistSyncedEvent(owner, now, pulledAdds, pulledRemoves, pushedAdds, pushedRemoves, failed);
+			: new WatchlistSyncCompletedNotification(owner, now, pulledAdds, pulledRemoves, pushedAdds, pushedRemoves, failed);
 	}
 
 	private static List<MediaId> Delivered(IReadOnlyList<PushOutcome> outcomes, WatchlistOperationAction action) =>

@@ -2,7 +2,7 @@ using Contracts;
 using Contracts.Messaging;
 using Core.Providers;
 using Domain.Identity;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,7 +20,7 @@ public class ProviderRateLimitReporterTests
 
 		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
-		publisher.PublishAsync(Any<ProviderRateLimitedEvent>(), Any()).WasCalled(Times.Once);
+		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -32,7 +32,7 @@ public class ProviderRateLimitReporterTests
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(1));
 		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
-		publisher.PublishAsync(Any<ProviderRateLimitedEvent>(), Any()).WasCalled(Times.Once);
+		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -44,7 +44,7 @@ public class ProviderRateLimitReporterTests
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(6));
 		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
-		publisher.PublishAsync(Any<ProviderRateLimitedEvent>(), Any()).WasCalled(Times.Exactly(2));
+		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}
 
 	[Test]
@@ -59,7 +59,7 @@ public class ProviderRateLimitReporterTests
 		clock.Now.Returns(Now + TimeSpan.FromSeconds(5));
 		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(5), Owner);
 
-		publisher.PublishAsync(Any<ProviderRateLimitedEvent>(), Any()).WasCalled(Times.Exactly(2));
+		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}
 
 	[Test]
@@ -70,7 +70,7 @@ public class ProviderRateLimitReporterTests
 		await testee.ReportAsync(MediaProvider.Tmdb, TimeSpan.FromSeconds(30), Owner);
 		await testee.ReportAsync(MediaProvider.Plex, TimeSpan.FromSeconds(30), Owner);
 
-		publisher.PublishAsync(Any<ProviderRateLimitedEvent>(), Any()).WasCalled(Times.Exactly(2));
+		publisher.PublishAsync(Any<ProviderRateLimitedNotification>(), Any()).WasCalled(Times.Exactly(2));
 	}
 
 	private static (ProviderRateLimitReporter Testee, Mock<IMessagePublisher> Publisher, Mock<IDateTimeProvider> Clock) CreateTestee()

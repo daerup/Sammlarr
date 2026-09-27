@@ -47,7 +47,7 @@ internal static class NotificationTemplateVariables
 		[NotificationEventType.ProviderRateLimited] = [Provider, RetryAfter],
 	};
 
-	private static readonly HashSet<NotificationEventType> HasMediaLists = [NotificationEventType.WatchlistSynced];
+	private static readonly HashSet<NotificationEventType> HasMediaLists = [NotificationEventType.WatchlistSyncCompleted];
 
 	public static IReadOnlyList<TemplateVariableGroup> GroupsFor(IReadOnlyCollection<NotificationEventType> eventTypes)
 	{

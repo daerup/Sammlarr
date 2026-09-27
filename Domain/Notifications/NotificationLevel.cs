@@ -17,7 +17,7 @@ public static class NotificationLevels
 				NotificationEventType.FeedRunFailed => NotificationLevel.Error,
 				NotificationEventType.WatchlistSyncFailed => NotificationLevel.Error,
 				NotificationEventType.ProviderRateLimited => NotificationLevel.Warning,
-				NotificationEventType.WatchlistSynced => NotificationLevel.Info,
+				NotificationEventType.WatchlistSyncCompleted => NotificationLevel.Info,
 				NotificationEventType.FeedRunCompleted => NotificationLevel.Info,
 				NotificationEventType.TestPing => NotificationLevel.Info,
 			};

@@ -3,7 +3,7 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using DB.Data.Watchlist;
 using Domain.Media;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -242,14 +242,14 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task SyncAsync_WhenItPulls_PublishesAWatchlistSyncedEvent()
+	public async Task SyncAsync_WhenItPulls_PublishesAWatchlistSyncCompletedNotification()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await host.RemoteWatchlistHas(TestMedia.Inception);
 
 		await Testee.SyncAsync(Trigger);
 
-		var events = host.Published<WatchlistSyncedEvent>();
+		var events = host.Published<WatchlistSyncCompletedNotification>();
 		await Assert.That(events).Count().IsEqualTo(1);
 		await Assert.That(events[0].PulledAdds).Contains(inception);
 	}
@@ -263,7 +263,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.SyncAsync(Trigger);
 
-		var events = host.Published<WatchlistSyncedEvent>();
+		var events = host.Published<WatchlistSyncCompletedNotification>();
 		await Assert.That(events).Count().IsEqualTo(1);
 		await Assert.That(events[0].PushedAdds).Contains(inception);
 	}
@@ -276,21 +276,21 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.SyncAsync(Trigger);
 
-		await Assert.That(host.Published<WatchlistSyncedEvent>()).IsEmpty();
+		await Assert.That(host.Published<WatchlistSyncCompletedNotification>()).IsEmpty();
 	}
 
 	[Test]
-	public async Task SyncAsync_WhenTheRemoteIsUnavailable_PublishesAWatchlistSyncFailedEvent()
+	public async Task SyncAsync_WhenTheRemoteIsUnavailable_PublishesAWatchlistSyncFailedNotification()
 	{
 		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Manual);
 		await host.RemoteWatchlistUnavailable();
 
 		await Testee.SyncAsync(Trigger);
 
-		var events = host.Published<WatchlistSyncFailedEvent>();
+		var events = host.Published<WatchlistSyncFailedNotification>();
 		await Assert.That(events).Count().IsEqualTo(1);
 		await Assert.That(events[0].Reason).IsNotEmpty();
-		await Assert.That(host.Published<WatchlistSyncedEvent>()).IsEmpty();
+		await Assert.That(host.Published<WatchlistSyncCompletedNotification>()).IsEmpty();
 	}
 
 	[Test]
@@ -301,7 +301,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Planner.PlanAsync();
 
-		await Assert.That(host.Published<WatchlistSyncFailedEvent>()).IsEmpty();
+		await Assert.That(host.Published<WatchlistSyncFailedNotification>()).IsEmpty();
 	}
 
 	[Test]

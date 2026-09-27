@@ -124,7 +124,14 @@ public class NotificationDeliveryHandlerTests
 	}
 
 	private static NotificationContext Context() =>
-		new(Guid.CreateVersion7(), NotificationEventType.WatchlistSynced, DateTimeOffset.UtcNow, "Watchlist synced", "Added 1 item(s).", new NotificationData());
+		new(
+			Guid.CreateVersion7(),
+			NotificationEventType.WatchlistSyncCompleted,
+			DateTimeOffset.UtcNow,
+			"Watchlist sync completed",
+			"Added 1 item(s).",
+			new NotificationData()
+		);
 
 	private static NotificationTarget WebhookTarget(bool enabled) =>
 		new(Guid.NewGuid(), "Hook", enabled, new WebhookConfig("https://example.test/hook", "whsec_x"));

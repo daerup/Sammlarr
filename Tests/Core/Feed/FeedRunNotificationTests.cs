@@ -3,7 +3,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Identity;
 using Domain.Media;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 
 namespace Core.Tests.Feed;
 
@@ -18,7 +18,7 @@ public class FeedRunNotificationTests
 	{
 		var notification = FeedRunNotification.For(Owner, Now, Id, Completed(added: 2, removed: 1));
 
-		var completed = (FeedRunCompletedEvent)notification!;
+		var completed = (FeedRunCompletedNotification)notification!;
 		await Assert.That(completed.FeedId).IsEqualTo(Id);
 		await Assert.That(completed.UserId).IsEqualTo(Owner);
 		await Assert.That(completed.Added).IsEqualTo(2);
@@ -30,7 +30,7 @@ public class FeedRunNotificationTests
 	{
 		var notification = FeedRunNotification.For(Owner, Now, Id, new FeedRunFailed("the provider timed out"));
 
-		await Assert.That(((FeedRunFailedEvent)notification!).Reason).IsEqualTo("The run could not finish - the provider timed out");
+		await Assert.That(((FeedRunFailedNotification)notification!).Reason).IsEqualTo("The run could not finish - the provider timed out");
 	}
 
 	[Test]

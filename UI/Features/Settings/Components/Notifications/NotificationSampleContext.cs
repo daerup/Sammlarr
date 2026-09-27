@@ -3,9 +3,7 @@ using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
-using Domain.Notifications.Events;
 using Domain.Providers;
-using Shared.Extensions;
 
 namespace UI.Features.Settings.Components.Notifications;
 
@@ -26,28 +24,25 @@ internal static class NotificationSampleContext
 		return new NotificationContext(sample.Id, sample.Type, sample.OccurredAt, sample.Type.GetDescription(), sample.Summary, Data(eventType));
 	}
 
+	// csharpier-ignore
 	private static BaseNotification Sample(NotificationEventType eventType) =>
 		eventType switch
 		{
-			NotificationEventType.WatchlistSynced => new WatchlistSyncedEvent(SampleUser, SampleMoment, [SampleMedia, SampleMedia], [], [SampleMedia], [], []),
-			NotificationEventType.WatchlistSyncFailed => new WatchlistSyncFailedEvent(SampleUser, SampleMoment, "Provider timed out"),
-			NotificationEventType.FeedRunCompleted => new FeedRunCompletedEvent(SampleUser, SampleMoment, SampleFeed, 2, 1),
-			NotificationEventType.FeedRunFailed => new FeedRunFailedEvent(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),
-			NotificationEventType.ProviderRateLimited => new ProviderRateLimitedEvent(SampleUser, SampleMoment, MediaProvider.Tmdb, TimeSpan.FromSeconds(30)),
-			NotificationEventType.TestPing => new TestPingEvent(SampleUser, SampleMoment, Guid.Empty),
+			NotificationEventType.WatchlistSyncCompleted => new WatchlistSyncCompletedNotification(SampleUser, SampleMoment, [SampleMedia, SampleMedia], [], [SampleMedia], [], []),
+			NotificationEventType.WatchlistSyncFailed => new WatchlistSyncFailedNotification(SampleUser, SampleMoment, "Provider timed out"),
+			NotificationEventType.FeedRunCompleted => new FeedRunCompletedNotification(SampleUser, SampleMoment, SampleFeed, 2, 1),
+			NotificationEventType.FeedRunFailed => new FeedRunFailedNotification(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),
+			NotificationEventType.ProviderRateLimited => new ProviderRateLimitedNotification(SampleUser, SampleMoment, MediaProvider.Tmdb, TimeSpan.FromSeconds(30)),
+			NotificationEventType.TestPing => new TestPingNotification(SampleUser, SampleMoment, Guid.Empty),
 		};
 
+	// csharpier-ignore
 	private static NotificationData Data(NotificationEventType eventType) =>
 		eventType switch
 		{
-			NotificationEventType.WatchlistSynced => new NotificationData { Media = SyncedMedia },
+			NotificationEventType.WatchlistSyncCompleted => new NotificationData { Media = SyncedMedia },
 			NotificationEventType.WatchlistSyncFailed => new NotificationData { Reason = "Provider timed out" },
-			NotificationEventType.FeedRunCompleted => new NotificationData
-			{
-				Feed = Feed,
-				Added = 2,
-				Removed = 1,
-			},
+			NotificationEventType.FeedRunCompleted => new NotificationData { Feed = Feed, Added = 2, Removed = 1 },
 			NotificationEventType.FeedRunFailed => new NotificationData { Feed = Feed, Reason = "Provider timed out" },
 			NotificationEventType.ProviderRateLimited => new NotificationData { Provider = MediaProvider.Tmdb, RetryAfter = TimeSpan.FromSeconds(30) },
 			NotificationEventType.TestPing => new NotificationData(),

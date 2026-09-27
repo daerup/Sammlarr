@@ -4,7 +4,7 @@ using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 
-namespace Domain.Notifications.Events;
+namespace Domain.Notifications;
 
 public abstract record BaseNotification(NotificationEventType Type, UserId UserId, DateTimeOffset OccurredAt) : INotification
 {
@@ -13,7 +13,7 @@ public abstract record BaseNotification(NotificationEventType Type, UserId UserI
 	public abstract string Summary { get; }
 }
 
-public sealed record WatchlistSyncedEvent(
+public sealed record WatchlistSyncCompletedNotification(
 	UserId UserId,
 	DateTimeOffset OccurredAt,
 	IReadOnlyList<MediaId> PulledAdds,
@@ -21,7 +21,7 @@ public sealed record WatchlistSyncedEvent(
 	IReadOnlyList<MediaId> PushedAdds,
 	IReadOnlyList<MediaId> PushedRemoves,
 	IReadOnlyList<MediaId> FailedPushes
-) : BaseNotification(NotificationEventType.WatchlistSynced, UserId, OccurredAt)
+) : BaseNotification(NotificationEventType.WatchlistSyncCompleted, UserId, OccurredAt)
 {
 	public override string Summary =>
 		FailedPushes.Count == 0
@@ -29,31 +29,31 @@ public sealed record WatchlistSyncedEvent(
 			: $"Pulled {PulledAdds.Count + PulledRemoves.Count}, pushed {PushedAdds.Count + PushedRemoves.Count}, {FailedPushes.Count} failed.";
 }
 
-public sealed record WatchlistSyncFailedEvent(UserId UserId, DateTimeOffset OccurredAt, string Reason)
+public sealed record WatchlistSyncFailedNotification(UserId UserId, DateTimeOffset OccurredAt, string Reason)
 	: BaseNotification(NotificationEventType.WatchlistSyncFailed, UserId, OccurredAt)
 {
 	public override string Summary => Reason;
 }
 
-public sealed record TestPingEvent(UserId UserId, DateTimeOffset OccurredAt, Guid TargetId)
+public sealed record TestPingNotification(UserId UserId, DateTimeOffset OccurredAt, Guid TargetId)
 	: BaseNotification(NotificationEventType.TestPing, UserId, OccurredAt)
 {
 	public override string Summary => "This is a test notification from Sammlarr.";
 }
 
-public sealed record FeedRunCompletedEvent(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, int Added, int Removed)
+public sealed record FeedRunCompletedNotification(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, int Added, int Removed)
 	: BaseNotification(NotificationEventType.FeedRunCompleted, UserId, OccurredAt)
 {
 	public override string Summary => $"Added {Added}, removed {Removed}.";
 }
 
-public sealed record FeedRunFailedEvent(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, string Reason)
+public sealed record FeedRunFailedNotification(UserId UserId, DateTimeOffset OccurredAt, FeedId FeedId, string Reason)
 	: BaseNotification(NotificationEventType.FeedRunFailed, UserId, OccurredAt)
 {
 	public override string Summary => Reason;
 }
 
-public sealed record ProviderRateLimitedEvent(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter)
+public sealed record ProviderRateLimitedNotification(UserId UserId, DateTimeOffset OccurredAt, MediaProvider Provider, TimeSpan RetryAfter)
 	: BaseNotification(NotificationEventType.ProviderRateLimited, UserId, OccurredAt)
 {
 	public override string Summary => $"Waiting {(int)Math.Ceiling(RetryAfter.TotalSeconds)}s before retrying.";

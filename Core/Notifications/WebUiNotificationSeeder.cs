@@ -8,7 +8,7 @@ internal sealed class WebUiNotificationSeeder(INotificationTargetRepository targ
 	private static readonly NotificationEventType[] subscribedEvents =
 	[
 		NotificationEventType.ProviderRateLimited,
-		NotificationEventType.WatchlistSynced,
+		NotificationEventType.WatchlistSyncCompleted,
 		NotificationEventType.WatchlistSyncFailed,
 		NotificationEventType.FeedRunCompleted,
 		NotificationEventType.FeedRunFailed,

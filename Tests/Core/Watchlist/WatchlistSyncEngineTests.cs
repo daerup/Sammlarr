@@ -5,7 +5,7 @@ using Contracts.Watchlist;
 using Core.Watchlist.Sync;
 using Domain.Identity;
 using Domain.Media;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Watchlist.Sync;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
@@ -66,7 +66,7 @@ public class WatchlistSyncEngineTests
 
 		await BuildEngine(provider, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WatchlistSyncTrigger(new ManualTrigger()));
 
-		var events = published.Published<WatchlistSyncedEvent>();
+		var events = published.Published<WatchlistSyncCompletedNotification>();
 		await Assert.That(events).Count().IsEqualTo(1);
 		await Assert.That(events[0].FailedPushes).Contains(stranded).And.Contains(alsoStranded);
 		await Assert.That(events[0].PushedAdds).IsEmpty();
