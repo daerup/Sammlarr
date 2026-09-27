@@ -60,7 +60,7 @@ public class WebUiChannelTests
 	[Arguments(NotificationEventType.FeedRunFailed, NotificationLevel.Error)]
 	[Arguments(NotificationEventType.ProviderRateLimited, NotificationLevel.Warning)]
 	[Arguments(NotificationEventType.FeedRunCompleted, NotificationLevel.Info)]
-	[Arguments(NotificationEventType.WatchlistSynced, NotificationLevel.Info)]
+	[Arguments(NotificationEventType.WatchlistSyncCompleted, NotificationLevel.Info)]
 	[Arguments(NotificationEventType.TestPing, NotificationLevel.Info)]
 	public async Task SendAsync_WhenNoLevelIsConfigured_DerivesTheLevelFromTheEventType(NotificationEventType type, NotificationLevel expected)
 	{
@@ -127,7 +127,7 @@ public class WebUiChannelTests
 			NotificationEventType.FeedRunCompleted => "Feed run completed",
 			NotificationEventType.FeedRunFailed => "Feed run failed",
 			NotificationEventType.ProviderRateLimited => "Provider rate limited",
-			NotificationEventType.WatchlistSynced => "Watchlist synced",
+			NotificationEventType.WatchlistSyncCompleted => "Watchlist sync completed",
 			NotificationEventType.TestPing => "Test ping",
 		};
 }

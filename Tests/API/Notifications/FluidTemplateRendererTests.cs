@@ -22,7 +22,7 @@ public class FluidTemplateRendererTests
 		await Assert
 			.That(result)
 			.IsSuccess()
-			.And.Multiple(async rendered => await Assert.That(rendered.Title).IsSome().And.IsEqualTo("Watchlist synced: The Matrix (Movie)"));
+			.And.Multiple(async rendered => await Assert.That(rendered.Title).IsSome().And.IsEqualTo("Watchlist sync completed: The Matrix (Movie)"));
 	}
 
 	[Test]
@@ -37,9 +37,9 @@ public class FluidTemplateRendererTests
 			.IsSuccess()
 			.And.Multiple(async rendered =>
 			{
-				await Assert.That(rendered.Title).IsSome().And.IsEqualTo("Watchlist synced");
+				await Assert.That(rendered.Title).IsSome().And.IsEqualTo("Watchlist sync completed");
 				await Assert.That(rendered.Message).IsSome().And.IsEqualTo("Added.");
-				await Assert.That(rendered.Body).IsSome().And.IsEqualTo("WatchlistSynced");
+				await Assert.That(rendered.Body).IsSome().And.IsEqualTo("WatchlistSyncCompleted");
 			});
 	}
 
@@ -91,5 +91,12 @@ public class FluidTemplateRendererTests
 	}
 
 	private static NotificationContext Context(NotificationData? data = null) =>
-		new(Guid.NewGuid(), NotificationEventType.WatchlistSynced, DateTimeOffset.UtcNow, "Watchlist synced", "Added.", data ?? new NotificationData());
+		new(
+			Guid.NewGuid(),
+			NotificationEventType.WatchlistSyncCompleted,
+			DateTimeOffset.UtcNow,
+			"Watchlist sync completed",
+			"Added.",
+			data ?? new NotificationData()
+		);
 }

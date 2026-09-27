@@ -9,7 +9,7 @@ using Contracts.Watchlist.Outbox;
 using Contracts.Watchlist.Sync;
 using Core.Announcing;
 using Domain.Media;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Providers;
 using Domain.Watchlist;
 using Domain.Watchlist.Outbox;
@@ -58,7 +58,7 @@ internal sealed class WatchlistSyncEngine(
 		if (syncResult is WatchlistSyncRemoteFailed remoteFailed)
 		{
 			activity?.SetStatus(ActivityStatusCode.Error, remoteFailed.Reason);
-			await announcer.AnnounceAsync(new WatchlistSyncFailedEvent(currentUser.Id, clock.Now, remoteFailed.Reason), cancellationToken);
+			await announcer.AnnounceAsync(new WatchlistSyncFailedNotification(currentUser.Id, clock.Now, remoteFailed.Reason), cancellationToken);
 		}
 		return syncResult;
 	}

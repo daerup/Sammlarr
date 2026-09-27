@@ -7,7 +7,7 @@ using Domain.Announcing;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Watchlist.Sync;
 using TestInfrastructure;
 
@@ -71,7 +71,7 @@ public class FeedRunJobHandlerTests
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
 
-		await Assert.That(published.Published<FeedRunFailedEvent>()).Count().IsEqualTo(1);
+		await Assert.That(published.Published<FeedRunFailedNotification>()).Count().IsEqualTo(1);
 	}
 
 	private static (FeedRunJobHandler Testee, Mock<IJobQueue> Queue, EventPublisher Events, Mock<IFeedRunEngine> Engine) Testee(

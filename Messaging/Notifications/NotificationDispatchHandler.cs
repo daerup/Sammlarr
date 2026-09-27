@@ -3,7 +3,6 @@ using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Notifications;
 using Domain.Notifications;
-using Domain.Notifications.Events;
 using Wolverine;
 
 namespace Messaging.Notifications;
@@ -11,7 +10,7 @@ namespace Messaging.Notifications;
 public static class NotificationDispatchHandler
 {
 	public static Task<OutgoingMessages> Handle(
-		WatchlistSyncedEvent message,
+		WatchlistSyncCompletedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
@@ -20,7 +19,7 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
-		WatchlistSyncFailedEvent message,
+		WatchlistSyncFailedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
@@ -29,7 +28,7 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
-		FeedRunCompletedEvent message,
+		FeedRunCompletedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
@@ -38,7 +37,7 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
-		FeedRunFailedEvent message,
+		FeedRunFailedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
@@ -47,7 +46,7 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
-		ProviderRateLimitedEvent message,
+		ProviderRateLimitedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
@@ -56,7 +55,7 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static async Task<DeliverNotification> Handle(
-		TestPingEvent message,
+		TestPingNotification message,
 		IMediaRepository mediaRepository,
 		IFeedService feedService,
 		CancellationToken cancellationToken

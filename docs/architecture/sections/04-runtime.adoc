@@ -197,7 +197,7 @@ through an in-process event feed.
 === Other flows
 
 Two flows are worth a mention but not a diagram of their own. Notifications ride the same durable
-outbox as the watchlist push: a sync raises one `WatchlistSyncedEvent`, a handler fans it out to
+outbox as the watchlist push: a sync raises one `WatchlistSyncCompletedNotification`, a handler fans it out to
 each matching subscription, and each is rendered from a Fluid template and delivered on its own
 retry schedule. Plex sign-in is a standard OAuth PIN flow; its notable parts, the app-owned
 `User`, the first user becoming Admin, the open or closed registration gate, and per-request

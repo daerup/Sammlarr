@@ -3,7 +3,7 @@ using Contracts.Media;
 using Contracts.Notifications;
 using Domain.Feed;
 using Domain.Media;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 
 namespace Messaging.Notifications;
 
@@ -35,11 +35,17 @@ internal static class NotificationContextFactory
 	private static NotificationPayload ToPayload(BaseNotification message) =>
 		message switch
 		{
-			WatchlistSyncedEvent e => Payload(e, pulledAdds: e.PulledAdds, pulledRemoves: e.PulledRemoves, pushedAdds: e.PushedAdds, pushedRemoves: e.PushedRemoves),
-			WatchlistSyncFailedEvent e => Payload(e) with { Reason = e.Reason },
-			FeedRunCompletedEvent e => Payload(e) with { FeedId = e.FeedId.ToString(), Added = e.Added, Removed = e.Removed },
-			FeedRunFailedEvent e => Payload(e) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
-			ProviderRateLimitedEvent e => Payload(e) with { Provider = e.Provider, RetryAfter = e.RetryAfter },
+			WatchlistSyncCompletedNotification e => Payload(
+				e,
+				pulledAdds: e.PulledAdds,
+				pulledRemoves: e.PulledRemoves,
+				pushedAdds: e.PushedAdds,
+				pushedRemoves: e.PushedRemoves
+			),
+			WatchlistSyncFailedNotification e => Payload(e) with { Reason = e.Reason },
+			FeedRunCompletedNotification e => Payload(e) with { FeedId = e.FeedId.ToString(), Added = e.Added, Removed = e.Removed },
+			FeedRunFailedNotification e => Payload(e) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
+			ProviderRateLimitedNotification e => Payload(e) with { Provider = e.Provider, RetryAfter = e.RetryAfter },
 			_ => Payload(message),
 		};
 

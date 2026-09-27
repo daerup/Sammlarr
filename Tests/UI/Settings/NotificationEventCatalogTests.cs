@@ -1,5 +1,5 @@
 using Domain.Identity;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using UI.Features.Settings.Components.Notifications;
 
 namespace UI.Tests.Settings;
@@ -14,7 +14,7 @@ public class NotificationEventCatalogTests
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
-		await Assert.That(catalog).Contains(new WatchlistSyncedEvent(User, Now, [], [], [], [], []).Type);
+		await Assert.That(catalog).Contains(new WatchlistSyncCompletedNotification(User, Now, [], [], [], [], []).Type);
 	}
 
 	[Test]
@@ -22,7 +22,7 @@ public class NotificationEventCatalogTests
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
-		await Assert.That(catalog.Contains(new TestPingEvent(User, Now, Guid.NewGuid()).Type)).IsFalse();
+		await Assert.That(catalog.Contains(new TestPingNotification(User, Now, Guid.NewGuid()).Type)).IsFalse();
 	}
 
 	[Test]

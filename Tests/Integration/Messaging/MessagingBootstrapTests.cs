@@ -6,7 +6,6 @@ using Contracts.Notifications;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Notifications;
-using Domain.Notifications.Events;
 using Messaging;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
@@ -36,7 +35,7 @@ public class MessagingBootstrapTests
 	public async Task Publish_WhenTheVariableIsTypedAsTheBaseNotification_StillReachesTheConcreteHandler()
 	{
 		var owner = UserId.From(Guid.NewGuid());
-		BaseNotification notification = new FeedRunCompletedEvent(owner, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), 3, 1);
+		BaseNotification notification = new FeedRunCompletedNotification(owner, DateTimeOffset.UtcNow, FeedId.From(Guid.NewGuid()), 3, 1);
 		var userScope = DispatchingUserScope();
 
 		await WithHostAsync(
@@ -50,7 +49,7 @@ public class MessagingBootstrapTests
 
 				var session = await host.TrackActivity().Timeout(TimeSpan.FromSeconds(30)).ExecuteAndWaitAsync(publish);
 
-				await Assert.That(session.Executed.MessagesOf<FeedRunCompletedEvent>().ToList()).Count().IsEqualTo(1);
+				await Assert.That(session.Executed.MessagesOf<FeedRunCompletedNotification>().ToList()).Count().IsEqualTo(1);
 				userScope.AsAsync(owner, Any()).WasCalled(Times.Once);
 			},
 			services => DispatchCollaborators(services, userScope)

@@ -3,7 +3,7 @@ using Contracts;
 using Contracts.Messaging;
 using Contracts.Providers;
 using Domain.Identity;
-using Domain.Notifications.Events;
+using Domain.Notifications;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +23,7 @@ internal sealed class ProviderRateLimitReporter(IServiceScopeFactory scopeFactor
 
 		await using var scope = scopeFactory.CreateAsyncScope();
 		var publisher = scope.ServiceProvider.GetRequiredService<IMessagePublisher>();
-		await publisher.PublishAsync(new ProviderRateLimitedEvent(triggeredBy, now, provider, retryAfter), cancellationToken);
+		await publisher.PublishAsync(new ProviderRateLimitedNotification(triggeredBy, now, provider, retryAfter), cancellationToken);
 	}
 
 	private bool StartsBurst(MediaProvider provider, DateTimeOffset now, DateTimeOffset until)

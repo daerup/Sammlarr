@@ -4,8 +4,8 @@ namespace Domain.Notifications;
 
 public enum NotificationEventType
 {
-	[Description("Watchlist synced")]
-	WatchlistSynced,
+	[Description("Watchlist sync completed")]
+	WatchlistSyncCompleted,
 
 	[Description("Watchlist sync failed")]
 	WatchlistSyncFailed,
