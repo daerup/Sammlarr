@@ -7,6 +7,7 @@
 @using Domain.Announcing
 @using Domain.Identity
 @using Domain.Feed
+@using Domain.Feed.Run
 @using global::Shared
 @using UI.Features.Watchlist.Components
 @using UI.Shared.Announcing
@@ -333,8 +334,13 @@ else
     private async Task LoadWatchlistAsync()
     {
         _isLoading = true;
-        _errorMessage = null;
         StateHasChanged();
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _errorMessage = null;
 
         try
         {
@@ -438,6 +444,12 @@ else
 
     private void OnEvent(IEvent raised)
     {
+        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _userId) is not null)
+        {
+            _ = InvokeAsync(ReloadAsync);
+            return;
+        }
+
         if (ViewerEvent.Own<WatchlistOutboxEvent>(raised, _userId) is not { } outboxEvent)
         {
             return;
