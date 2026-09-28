@@ -1,4 +1,23 @@
-<BbPagination Class="mt-5 pagination-controls"
+@implements IAsyncDisposable
+@inject IJSRuntime Js
+
+@if (TotalPages > 1)
+{
+    <div class="pager-float">
+        <div class="pager-pill @(_docked ? "is-docked" : null)">
+            @if (Range is { } range)
+            {
+                <span class="pager-range">@range</span>
+            }
+            @Control
+        </div>
+    </div>
+    <div class="pager-end" @ref="_end"></div>
+}
+
+@code {
+    private RenderFragment Control =>
+        @<BbPagination Class="pagination-controls"
               CurrentPage="CurrentPage"
               TotalPages="TotalPages"
               CurrentPageChanged="HandleCurrentPageChangedAsync">
@@ -41,9 +60,8 @@
             </div>
         </BbPaginationItem>
     </BbPaginationContent>
-</BbPagination>
+</BbPagination>;
 
-@code {
     private int _jumpPageValue = 1;
     private string JumpInputStyle => $"width: calc({Math.Max(1, _jumpPageValue.ToString().Length)} * 9px + 28px);";
 
@@ -58,6 +76,101 @@
 
     [Parameter]
     public EventCallback<int> PageChanged { get; set; }
+
+    [Parameter]
+    public int? TotalItems { get; set; }
+
+    [Parameter]
+    public int ItemsPerPage { get; set; }
+
+    private ElementReference _end;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _watcher;
+    private DotNetObjectReference<PaginationControls>? _self;
+    private bool _docked;
+    private bool _watching;
+
+    private string? Range
+    {
+        get
+        {
+            if (TotalItems is not { } total || ItemsPerPage <= 0 || total == 0)
+            {
+                return null;
+            }
+
+            var first = ((CurrentPage - 1) * ItemsPerPage) + 1;
+            return $"{first:N0}–{Math.Min(CurrentPage * ItemsPerPage, total):N0} of {total:N0}";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var shown = TotalPages > 1;
+        if (shown == _watching)
+        {
+            return;
+        }
+
+        _watching = shown;
+
+        if (!shown)
+        {
+            await StopWatchingAsync();
+            _docked = false;
+            return;
+        }
+
+        _self ??= DotNetObjectReference.Create(this);
+        _module ??= await Js.InvokeAsync<IJSObjectReference>("import", "./js/pager.js");
+        _watcher = await _module.InvokeAsync<IJSObjectReference>("watchEnd", _end, _self);
+    }
+
+    private async Task StopWatchingAsync()
+    {
+        if (_watcher is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await _watcher.InvokeVoidAsync("dispose");
+            await _watcher.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+
+        _watcher = null;
+    }
+
+    [JSInvokable]
+    public Task OnDockedChanged(bool docked)
+    {
+        if (docked == _docked)
+        {
+            return Task.CompletedTask;
+        }
+
+        _docked = docked;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await StopWatchingAsync();
+
+        try
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException) { }
+
+        _self?.Dispose();
+    }
 
     private static string? GetDisabledCursorStyle(bool isDisabled) => isDisabled ? "cursor: not-allowed;" : null;
 

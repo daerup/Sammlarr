@@ -4,3 +4,49 @@
     transition: width 0.1s ease;
 }
 
+
+.pager-float {
+    position: sticky;
+    bottom: 16px;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    pointer-events: none;
+}
+
+.pager-pill {
+    pointer-events: auto;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 10px 28px #0000009e;
+}
+
+.pager-pill.is-docked {
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+.pager-range {
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    padding-right: 11px;
+    margin-right: 4px;
+    border-right: 1px solid var(--border);
+}
+
+.pager-pill {
+    display: flex;
+    align-items: center;
+}
+
+.pager-end {
+    height: 16px;
+}
