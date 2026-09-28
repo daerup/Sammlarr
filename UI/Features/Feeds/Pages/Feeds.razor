@@ -433,9 +433,9 @@
 
     private void UpdatePagedFeeds()
     {
-        const int pageSize = 20;
-        _totalPages = (int)Math.Ceiling((double)_feeds.Count / pageSize);
-        _pagedFeeds = _feeds.Skip((_currentPage - 1) * pageSize).Take(pageSize).ToList();
+        _totalPages = FeedPaging.PageCount(_feeds.Count);
+        _currentPage = FeedPaging.PageWithin(_currentPage, _feeds.Count);
+        _pagedFeeds = FeedPaging.Slice(_feeds, _currentPage);
     }
 
     private async Task DeleteFeedAsync(FeedId id)
