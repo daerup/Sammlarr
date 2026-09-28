@@ -45,13 +45,10 @@ else if (TotalCount is { } total)
     {
         @Grid
 
-        @if (PageCount > 1)
-        {
-            <PaginationControls CurrentPage="CurrentPage"
-                                TotalPages="PageCount"
-                                IsDisabled="IsLoading"
-                                PageChanged="PageChanged"/>
-        }
+        <PaginationControls CurrentPage="CurrentPage"
+                            TotalPages="PageCount"
+                            IsDisabled="IsLoading"
+                            PageChanged="PageChanged"/>
     }
 }
 

@@ -20,7 +20,7 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	[Inject]
 	internal ScrollService ScrollService { get; set; } = null!;
 
-	protected const int PageSize = 48;
+	protected const int PageSize = 20;
 
 	protected int Page = 1;
 	protected readonly CancellationTokenSource Cancellation = new();
