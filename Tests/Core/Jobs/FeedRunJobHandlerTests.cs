@@ -81,7 +81,7 @@ public class FeedRunJobHandlerTests
 		var engine = IFeedRunEngine.Mock();
 		engine.RunAsync(Any<FeedId>(), Any<FeedRunTrigger>(), Any()).Returns(new FeedRunFailed("stubbed"));
 		var queue = IJobQueue.Mock();
-		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
+		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(new DateTimeOffset(2026, 9, 27, 12, 0, 0, TimeSpan.Zero));
 		var events = new EventPublisher();

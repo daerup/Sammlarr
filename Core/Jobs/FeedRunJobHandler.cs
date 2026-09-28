@@ -23,7 +23,7 @@ internal sealed class FeedRunJobHandler(IFeedRunEngine engine, IJobQueue queue, 
 			await announcer.AnnounceAsync(notification, cancellationToken);
 		}
 
-		if (request.Trigger is Scheduled)
+		if (request.Trigger is Scheduled || request.SyncAfter)
 		{
 			await queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), cancellationToken);
 		}

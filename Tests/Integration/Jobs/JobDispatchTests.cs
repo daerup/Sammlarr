@@ -4,6 +4,7 @@ using Domain.Jobs;
 using Domain.Watchlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using Shared.Options;
 using TestInfrastructure;
 
 namespace Integration.Tests.Jobs;
@@ -54,11 +55,16 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task TakeNextAsync_WhenTheJobIsNotDueYet_TakesNothing()
+	public async Task TakeNextAsync_WhileAJobIsStillWaiting_TakesNothingUntilItIsReleased()
 	{
-		await EnqueueAsync(FeedId.From(Guid.NewGuid()));
+		host.SetCurrentTime(Now);
+		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 
-		await Assert.That(await Testee.TakeNextAsync(Now.AddMinutes(-1))).IsNone();
+		await Assert.That(await Testee.TakeNextAsync(Now)).IsNone();
+
+		await Testee.ReleaseDueAsync(Now + host.Resolve<SchedulerOptions>().Grace);
+
+		await Assert.That(await Testee.TakeNextAsync(Now)).IsSome();
 	}
 
 	[Test]

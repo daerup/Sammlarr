@@ -9,6 +9,7 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 {
 	private const string FeedRunPrefix = "feed:";
 	private const string WatchlistSyncPrefix = "sync:";
+	private const string SyncAfterMarker = "+sync ";
 
 	public JobRequestConverter()
 		: base(request => ToText(request), text => FromText(text)) { }
@@ -16,7 +17,7 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 	private static string ToText(IJobRequest request) =>
 		request switch
 		{
-			RunFeed(var id, var trigger) => $"{FeedRunPrefix}{id.Value}:{trigger}",
+			RunFeed(var id, var trigger, var syncAfter) => $"{FeedRunPrefix}{id.Value}:{(syncAfter ? SyncAfterMarker : string.Empty)}{trigger}",
 			SyncWatchlist(var trigger) => $"{WatchlistSyncPrefix}{trigger}",
 			_ => throw new NotSupportedException($"{request.GetType().Name} has no stored form"),
 		};
@@ -29,6 +30,8 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 	private static IJobRequest FeedRunFromText(string text)
 	{
 		var separator = text.IndexOf(':', StringComparison.Ordinal);
-		return new RunFeed(FeedId.From(Guid.Parse(text[..separator])), FeedRunTrigger.Parse(text[(separator + 1)..]));
+		var rest = text[(separator + 1)..];
+		var syncAfter = rest.StartsWith(SyncAfterMarker, StringComparison.Ordinal);
+		return new RunFeed(FeedId.From(Guid.Parse(text[..separator])), FeedRunTrigger.Parse(syncAfter ? rest[SyncAfterMarker.Length..] : rest), syncAfter);
 	}
 }

@@ -387,7 +387,7 @@
         _feedJobs.Clear();
         foreach (var job in queue.Jobs)
         {
-            if (job.Request is RunFeed(var id, _))
+            if (job.Request is RunFeed(var id, _, _))
             {
                 _feedJobs[id] = job.State;
             }

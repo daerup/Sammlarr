@@ -20,6 +20,6 @@ internal sealed class JobRowConfiguration : IModelConfiguration
 					job.OwnerId,
 				})
 				.IsUnique()
-				.HasFilter("\"State\" = 'Queued'");
+				.HasFilter("\"State\" IN ('Queued', 'Waiting')");
 		});
 }

@@ -7,6 +7,8 @@ using Domain.Announcing;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Watchlist.Sync;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -24,7 +26,8 @@ public class JobQueueTests
 
 		await testee.EnqueueAsync(new RunFeed(feedId, new Manual()));
 
-		jobs.EnqueueAsync(new QueuedJob(new RunFeed(feedId, new Manual()), TestCurrentUser.DefaultId, Now, TimeSpan.Zero), Any()).WasCalled(Times.Once);
+		jobs.EnqueueAsync(new QueuedJob(new RunFeed(feedId, new Manual()), TestCurrentUser.DefaultId, Now, TimeSpan.Zero, SkipWhileRunning: true), Now, Any())
+			.WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -34,14 +37,14 @@ public class JobQueueTests
 
 		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
 
-		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ScheduledFeedTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Any())
+		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ScheduledFeedTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Now, Any())
 			.WasCalled(Times.Once);
 	}
 
 	private static SchedulerOptions Options => new();
 
 	[Test]
-	public async Task EnqueueAsync_AnnouncesTheJobAsQueued_SoAnOpenPageCanShowItWaiting()
+	public async Task EnqueueAsync_WhenItRunsNow_AnnouncesItQueued()
 	{
 		var (testee, _, events) = BuildTestee();
 		List<IEvent> seen = [];
@@ -54,16 +57,35 @@ public class JobQueueTests
 		await Assert.That(announced.Kind).IsEqualTo(JobKind.WatchlistSync);
 	}
 
+	[Test]
+	public async Task EnqueueAsync_AnnouncesTheStateTheRowWasActuallyWrittenWith_NotOneItGuessedFromTheDelay()
+	{
+		var (testee, jobs, events) = BuildTestee();
+		jobs.EnqueueAsync(Any<QueuedJob>(), Any<DateTimeOffset>(), Any()).Returns(new AlreadyQueued(JobId.From(Guid.NewGuid()), JobState.Queued));
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+
+		await Assert.That(seen.OfType<JobStateChangedEvent>().Single().State).IsEqualTo(JobState.Queued);
+	}
+
 	private static (JobQueue Testee, Mock<IJobRepository> Jobs, EventPublisher Events) BuildTestee()
 	{
 		var jobs = IJobRepository.Mock();
-		jobs.EnqueueAsync(Any<QueuedJob>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
+		jobs.EnqueueAsync(Any<QueuedJob>(), Any<DateTimeOffset>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
+		jobs.NextWaitingAsync(Any()).Returns(new None());
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
 
+		var services = new ServiceCollection();
+		services.AddSingleton(jobs.Object);
+		var signal = new JobSignal();
+		var alarm = new JobAlarm(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(), signal, clock.Object, NullLogger<JobAlarm>.Instance);
+
 		var events = new EventPublisher();
 		return (
-			new JobQueue(jobs.Object, new JobSignal(), new TestCurrentUser(), clock.Object, Options, new Announcer(events, new RecordingPublisher())),
+			new JobQueue(jobs.Object, signal, alarm, new TestCurrentUser(), clock.Object, Options, new Announcer(events, new RecordingPublisher())),
 			jobs,
 			events
 		);
