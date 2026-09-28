@@ -1,15 +1,15 @@
 @if (Fill)
 {
-    <div class="h-full flex flex-col py-4">
+    <div class="h-full flex flex-col pt-4 pb-2">
         @if (Heading is not null || HeaderActions is not null)
         {
             <PageHeader Heading="@Heading"
                         Description="@Description"
                         DescriptionContent="@DescriptionContent"
                         Actions="@HeaderActions"
-                        Class="px-6 pb-4 shrink-0"/>
+                        Class="px-6 pb-2 shrink-0"/>
         }
-        <div class="flex-1 min-h-0 overflow-y-auto px-6">
+        <div class="flex-1 min-h-0 overflow-y-auto px-6 py-2">
             @ChildContent
         </div>
     </div>
