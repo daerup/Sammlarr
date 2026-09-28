@@ -7,12 +7,12 @@ namespace DB.Data.Jobs;
 
 internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IJobRepository
 {
-	public async Task<EnqueueResult> EnqueueAsync(QueuedJob job, CancellationToken cancellationToken = default)
+	public async Task<EnqueueResult> EnqueueAsync(QueuedJob job, DateTimeOffset now, CancellationToken cancellationToken = default)
 	{
 		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		if (await FindQueuedAsync(context, job, cancellationToken) is { } queued)
+		if (await FindPendingAsync(context, job, cancellationToken) is { } pending)
 		{
-			return await RearmAsync(context, queued, job, cancellationToken);
+			return await RearmAsync(context, pending, job, now, cancellationToken);
 		}
 
 		var row = new JobRow
@@ -22,7 +22,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			Kind = job.Request.Kind,
 			Key = job.Request.Key,
 			Request = job.Request,
-			State = JobState.Queued,
+			State = StateFor(job.RunAfter, now),
 			RunAfter = job.RunAfter,
 			FirstArmedAt = job.RunAfter,
 		};
@@ -30,14 +30,14 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		try
 		{
 			await context.SaveChangesAsync(cancellationToken);
-			return new Queued(JobId.From(row.Id));
+			return new Queued(JobId.From(row.Id), row.State);
 		}
 		catch (DbUpdateException)
 		{
 			await using var reread = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-			if (await FindQueuedAsync(reread, job, cancellationToken) is { } raced)
+			if (await FindPendingAsync(reread, job, cancellationToken) is { } raced)
 			{
-				return await RearmAsync(reread, raced, job, cancellationToken);
+				return await RearmAsync(reread, raced, job, now, cancellationToken);
 			}
 
 			throw;
@@ -64,7 +64,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var candidate = await context
 			.Jobs.AsNoTracking()
-			.Where(row => row.State == JobState.Queued && row.RunAfter <= now)
+			.Where(row => row.State == JobState.Queued)
 			.OrderBy(row => row.RunAfter)
 			.Select(row => new
 			{
@@ -85,6 +85,26 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		return affected == 1 ? Some.Of(new RunningJob(JobId.From(claimed), candidate.Request, UserId.From(candidate.OwnerId))) : new None();
 	}
 
+	public async Task<Optional<DateTimeOffset>> NextWaitingAsync(CancellationToken cancellationToken = default)
+	{
+		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var due = await context
+			.Jobs.AsNoTracking()
+			.Where(row => row.State == JobState.Waiting)
+			.OrderBy(row => row.RunAfter)
+			.Select(row => (DateTimeOffset?)row.RunAfter)
+			.FirstOrDefaultAsync(cancellationToken);
+		return due is { } next ? Some.Of(next) : new None();
+	}
+
+	public async Task<int> ReleaseDueAsync(DateTimeOffset now, CancellationToken cancellationToken = default)
+	{
+		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await context
+			.Jobs.Where(row => row.State == JobState.Waiting && row.RunAfter <= now)
+			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, JobState.Queued).SetProperty(row => row.UpdatedAt, now), cancellationToken);
+	}
+
 	public async Task CompleteAsync(JobId id, DateTimeOffset completedAt, CancellationToken cancellationToken = default) =>
 		await SettleAsync(id, JobState.Done, completedAt, cancellationToken);
 
@@ -100,22 +120,41 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, outcome).SetProperty(row => row.UpdatedAt, settledAt), cancellationToken);
 	}
 
-	private static async Task<JobRow?> FindQueuedAsync(SammlarrDbContext context, QueuedJob job, CancellationToken cancellationToken)
+	private static JobState StateFor(DateTimeOffset runAfter, DateTimeOffset now) => runAfter <= now ? JobState.Queued : JobState.Waiting;
+
+	private static async Task<JobRow?> FindPendingAsync(SammlarrDbContext context, QueuedJob job, CancellationToken cancellationToken)
 	{
 		var owner = job.Owner.Value;
 		var kind = job.Request.Kind;
 		var key = job.Request.Key;
+		var running = job.SkipWhileRunning;
 		return await context.Jobs.FirstOrDefaultAsync(
-			row => row.Kind == kind && row.Key == key && row.OwnerId == owner && row.State == JobState.Queued,
+			row =>
+				row.Kind == kind
+				&& row.Key == key
+				&& row.OwnerId == owner
+				&& (row.State == JobState.Waiting || row.State == JobState.Queued || (running && row.State == JobState.Running)),
 			cancellationToken
 		);
 	}
 
-	private static async Task<EnqueueResult> RearmAsync(SammlarrDbContext context, JobRow queued, QueuedJob job, CancellationToken cancellationToken)
+	private static async Task<EnqueueResult> RearmAsync(
+		SammlarrDbContext context,
+		JobRow pending,
+		QueuedJob job,
+		DateTimeOffset now,
+		CancellationToken cancellationToken
+	)
 	{
-		var ceiling = queued.FirstArmedAt + job.MaxWait;
-		queued.RunAfter = job.RunAfter < ceiling ? job.RunAfter : ceiling;
+		if (pending.State is JobState.Running)
+		{
+			return new AlreadyQueued(JobId.From(pending.Id), JobState.Running);
+		}
+
+		var ceiling = pending.FirstArmedAt + job.MaxWait;
+		pending.RunAfter = job.RunAfter < ceiling ? job.RunAfter : ceiling;
+		pending.State = StateFor(pending.RunAfter, now);
 		await context.SaveChangesAsync(cancellationToken);
-		return new AlreadyQueued(JobId.From(queued.Id));
+		return new AlreadyQueued(JobId.From(pending.Id), pending.State);
 	}
 }

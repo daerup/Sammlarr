@@ -404,7 +404,7 @@ namespace DB.Migrations
 
                     b.HasIndex("Kind", "Key", "OwnerId")
                         .IsUnique()
-                        .HasFilter("\"State\" = 'Queued'");
+                        .HasFilter("\"State\" IN ('Queued', 'Waiting')");
 
                     b.ToTable("Jobs");
                 });

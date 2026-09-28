@@ -10,7 +10,7 @@ public interface IJobRequest
 	public string Key { get; }
 }
 
-public readonly record struct RunFeed(FeedId Id, FeedRunTrigger Trigger) : IJobRequest
+public readonly record struct RunFeed(FeedId Id, FeedRunTrigger Trigger, bool SyncAfter = false) : IJobRequest
 {
 	public JobKind Kind => JobKind.FeedRun;
 	public string Key => Id.ToString();

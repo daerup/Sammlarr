@@ -10,8 +10,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Jobs;
 
-internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, JobRunnerStatus status, IDateTimeProvider clock, ILogger<JobRunner> logger)
-	: BackgroundService
+internal sealed class JobRunner(
+	IServiceScopeFactory scopes,
+	JobSignal signal,
+	JobAlarm alarm,
+	JobRunnerStatus status,
+	IDateTimeProvider clock,
+	ILogger<JobRunner> logger
+) : BackgroundService
 {
 	private static readonly MethodInfo Handle = typeof(JobRunner).GetMethod(nameof(HandleAsync), BindingFlags.NonPublic | BindingFlags.Static)!;
 
@@ -24,6 +30,7 @@ internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, J
 		try
 		{
 			await GuardAsync(() => RequeueRunningAsync(stoppingToken), "Jobs left running by a previous process could not be recovered", stoppingToken);
+			await GuardAsync(() => alarm.ArmAsync(stoppingToken), "The alarm for deferred jobs could not be set and they may run late", stoppingToken);
 			signal.Raise();
 
 			await foreach (var _ in signal.NudgesAsync().WithCancellation(stoppingToken))
@@ -62,7 +69,10 @@ internal sealed class JobRunner(IServiceScopeFactory scopes, JobSignal signal, J
 		if (ran)
 		{
 			signal.Raise();
+			return;
 		}
+
+		await alarm.ArmAsync(cancellationToken);
 	}
 
 	internal async Task RequeueRunningAsync(CancellationToken cancellationToken)

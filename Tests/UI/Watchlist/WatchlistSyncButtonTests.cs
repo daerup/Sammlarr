@@ -221,7 +221,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		Services.AddSingleton(queueView.Object);
 
 		var queue = IJobQueue.Mock();
-		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid())));
+		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
 		Services.AddSingleton(queue.Object);
 
 		var planner = IWatchlistSyncPlanner.Mock();
