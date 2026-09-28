@@ -2,8 +2,8 @@
 == Deployment View
 
 Sammlarr deploys as one self-hosted process. It is an ASP.NET Core / Blazor Server app whose
-entire state lives in a local SQLite file: the application data and the Wolverine message queue
-share one database. There is no external database server and no message broker. Telemetry is
+entire state lives in a local SQLite file: the application data, the job queue, the TickerQ
+schedule and the Wolverine notification queue share one database. There is no external database server and no message broker. Telemetry is
 sent over OTLP to an Aspire dashboard, which is optional. Provider secrets are not held in
 configuration; they are stored in the database, encrypted with data protection (see
 <<section-concepts>>).
@@ -44,9 +44,9 @@ SQLite file (`Data Source=sammlarr.db`) is created in the working directory.
 | Node / artifact | Role
 
 | AppHost | The Aspire orchestrator. Starts the Web host, injects its telemetry settings, opens a browser.
-| Web process | The whole application: the Blazor host and its `UI` components, providers, the Wolverine worker, all in one process on `:6769`.
+| Web process | The whole application: the Blazor host and its `UI` components, providers, the TickerQ scheduler, the job runner and the Wolverine worker, all in one process on `:6769`.
 | Aspire dashboard | Receives OTLP logs and traces; the dev window into the running app.
-| `sammlarr.db` | The SQLite database: application data plus the durable Wolverine queue.
+| `sammlarr.db` | The SQLite database: application data, the `Jobs` table, TickerQ's cron tickers and the durable Wolverine queue.
 |===
 
 === Infrastructure Level 2
@@ -82,6 +82,6 @@ exist. The Dockerfile, the GHCR push and the signing and SBOM steps are owned by
 release-engineering work (see <<section-technical-risks>>). That Dockerfile must make `/data`
 writable by the container user, or the app cannot write the database and keys.
 
-Because the Wolverine queue and the database are in-process and file-based, a deployment is a
-single instance. There is no horizontal scale-out today; a second replica would contend on the
-same SQLite file.
+Because the queues and the database are in-process and file-based, a deployment is a single
+instance. There is no horizontal scale-out today; a second replica would contend on the same
+SQLite file, and the job runner assumes it is the only one (see <<section-technical-risks>>).

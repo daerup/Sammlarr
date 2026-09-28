@@ -82,8 +82,16 @@ out of it. Mirror only ever touches its own slice, never manual, remote, or othe
 `FeedStrategy` is a union, so `Mirror` carries the data only it needs: an absence threshold, the
 number of consecutive runs an item must be missing before it is removed.
 
-Schedule (`SyncMode`):: When a feed runs: `Manual`, or `Scheduled` with a cron expression.
-Only manual and preview runs exist today; see <<section-technical-risks>>.
+Schedule:: When a feed runs, a `FeedRunTrigger`: `Manual`, or `Scheduled` with a cron expression
+(seconds field included). A scheduled, enabled feed has a TickerQ cron ticker. The same union
+records what started each run.
+
+Feed run:: One application of a feed to the watchlist by `FeedRunEngine`: plan (the same planner
+the preview uses), then apply the adds and the feed's owned drops. Always executed as a job.
+
+Run log:: The recorded feed runs (`FeedRun` with its `FeedRunItem` rows): when, what triggered it,
+how conclusive the load was, and what was added, kept and removed. Mirror reads it to count how
+many conclusive runs an item has been missing.
 
 Filter, Sort, Limit:: The query rules applied to a feed's source list (`QueryFilter`,
 `QuerySort`, `QueryLimit`).
@@ -140,16 +148,18 @@ logs through `[Sensitive]`. See <<section-concepts>>.
 `IUserOwned`:: A marker interface on entities that belong to a user. The `DbContext` gives each a
 per-user query filter and stamps the owner on insert.
 
-`IUserScope`:: Sets the ambient current user for a scope via `As(user)`, so background work (the
-Wolverine handlers, the sync engine) runs under the right user's filters.
+`IUserScope`:: Sets the ambient current user for a scope via `As`/`AsAsync`, so background work
+(the job runner, the cron ticker function, the Wolverine handlers) runs under the right user's
+filters.
 
-=== Sync and messaging
+=== Sync and announcing
 
 Sync:: Reconciling the local watchlist with Plex: pull remote changes in, push local changes
 out.
 
-Outbox:: The durable queue of pending watchlist pushes to Plex, drained by background messages
-with retry and backoff. See <<section-runtime-view>>.
+Outbox:: The table of local watchlist changes not yet pushed to Plex, one row per title with its
+action (add or remove), status and attempt count. Opposing changes cancel in it; each sync drains
+it inline, and an item that fails five times becomes `Failed`. See <<section-runtime-view>>.
 
 Delta:: The difference between the local and remote watchlist computed during a sync
 (`WatchlistDelta`).
@@ -185,6 +195,26 @@ Subscription:: A rule binding a notification type to a target and a template: wh
 what.
 
 Template:: The Fluid template that renders a notification's title and body for a target.
+
+=== Jobs and scheduling
+
+Job:: One unit of background work, a row in the `Jobs` table: a request (`RunFeed` or
+`SyncWatchlist`), its owner and a state. The table is the queue of record; the UI reads it.
+
+Job state:: `Waiting` (due in the future), `Queued` (ready), `Running`, then `Done` or `Failed`.
+
+Job runner:: The hosted service that takes the oldest `Queued` job and runs it, one at a time, in
+its own scope as the job's owner (`JobRunner`). A `JobAlarm` timer moves `Waiting` jobs to
+`Queued` when they are due.
+
+Coalescing:: Enqueueing a job that is already pending for the same kind, key and owner folds into
+the pending row instead of adding one. It is what turns N scheduled feed runs into one sync.
+
+Grace and MaxWait:: The sync a scheduled run arms is due `Grace` (2 minutes) later; each further
+run pushes it back, never past `MaxWait` (30 minutes) after it was first armed (`SchedulerOptions`).
+
+Cron ticker:: TickerQ's persisted per-feed cron entry. When it fires it only enqueues a `RunFeed`
+job; it never runs the feed itself.
 
 === Kernel types
 

@@ -19,18 +19,14 @@ The user-facing feature areas. Most map to a folder under `UI/Features`:
 | Feature | What it does
 
 | Browse | Browse trending movies and shows from TMDB and add them to the watchlist.
-| Feeds | Define and preview a _feed_: a saved query over an external provider list (an MDBList list) with filter, sort and limit rules.
-| Watchlist | The watchlist Sammlarr keeps in sync with Plex, pulling remote changes and pushing local ones through a durable outbox, with per-item push status.
-| Home | The local library view of the current watchlist.
+| Feeds | Define, preview and run a _feed_: a saved query over an external provider list (an MDBList list) with filter, sort and limit rules. A feed runs on demand or on a cron schedule, and every run is kept in a run log.
+| Watchlist | The watchlist Sammlarr keeps in sync with Plex, pulling remote changes and pushing local ones queued in an outbox, with per-item push status.
+| Home | A dashboard of the library: its numbers, what runs next (the job queue and upcoming scheduled runs), and recent feed activity by day.
 | Blacklist | Exclude specific media so they never appear in curated lists.
-| Notifications | Webhook and Pushover notifications for watchlist and sync events, bundled and templated (configured under Settings).
+| Notifications | Webhook, Pushover and in-app notifications for sync, feed-run and rate-limit events, templated per target (configured under Settings).
 | Auth | Plex OAuth sign-in; app-owned users with Admin/Member roles and open or closed registration.
 | Settings | Manage providers, secrets (API keys and credentials), users, notifications, caching and diagnostics.
 |===
-
-NOTE: Feeds can be defined and previewed today. The background scheduler that would run them
-on a cron and reconcile them into the watchlist is planned, not built yet (see
-<<section-technical-risks>>). For now items enter the watchlist by manual add or Plex sync.
 
 === Quality Goals
 
