@@ -23,9 +23,16 @@
 }
 
 .dstat {
+    display: inline-flex;
+    align-items: center;
     font-size: 12px;
+    line-height: 15px;
     color: var(--muted-foreground);
     font-variant-numeric: tabular-nums;
+}
+
+.dstat .part {
+    position: relative;
 }
 
 .dstat .up {
@@ -38,9 +45,22 @@
     font-weight: 600;
 }
 
-.dstat .sep {
-    opacity: 0.4;
-    margin: 0 3px;
+.dstat .part + .part {
+    padding-left: 17px;
+}
+
+.dstat .part + .part::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    width: 3px;
+    height: 3px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.6;
 }
 
 .chips {
