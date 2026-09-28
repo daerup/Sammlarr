@@ -5,10 +5,6 @@
 {
     <div class="pager-float">
         <div class="pager-pill @(_docked ? "is-docked" : null)">
-            @if (Range is { } range)
-            {
-                <span class="pager-range">@range</span>
-            }
             @Control
         </div>
     </div>
@@ -77,32 +73,12 @@
     [Parameter]
     public EventCallback<int> PageChanged { get; set; }
 
-    [Parameter]
-    public int? TotalItems { get; set; }
-
-    [Parameter]
-    public int ItemsPerPage { get; set; }
-
     private ElementReference _end;
     private IJSObjectReference? _module;
     private IJSObjectReference? _watcher;
     private DotNetObjectReference<PaginationControls>? _self;
     private bool _docked;
     private bool _watching;
-
-    private string? Range
-    {
-        get
-        {
-            if (TotalItems is not { } total || ItemsPerPage <= 0 || total == 0)
-            {
-                return null;
-            }
-
-            var first = ((CurrentPage - 1) * ItemsPerPage) + 1;
-            return $"{first:N0}–{Math.Min(CurrentPage * ItemsPerPage, total):N0} of {total:N0}";
-        }
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
