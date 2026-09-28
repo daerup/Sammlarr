@@ -2,6 +2,7 @@
 @inject CurrentUserAccessor CurrentUser
 
 <SessionInvalidationListener/>
+<GlobalSearch @bind-IsOpen="_isSearchOpen"/>
 
 <div class="relative h-screen overflow-hidden flex flex-col">
     <header class="shrink-0 z-50 w-full border-b bg-background">
@@ -29,6 +30,11 @@
                 </BbNavigationMenuList>
             </BbNavigationMenu>
             <div class="flex flex-1 items-center justify-end space-x-2">
+                <button type="button" class="search-trigger" aria-label="Search for a movie or show" @onclick="@(() => _isSearchOpen = true)">
+                    <LucideIcon Name="search" Size="14"/>
+                    <span class="search-trigger-label">Search</span>
+                    <BbKbd Keys="Ctrl+K"/>
+                </button>
                 <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"/>
                 <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/settings" AriaLabel="Settings">
                     <LucideIcon Name="settings" Size="16"/>
@@ -58,6 +64,8 @@
 <BbPortalHost/>
 
 @code {
+	private bool _isSearchOpen;
+
 	[CascadingParameter]
 	private Task<AuthenticationState>? AuthenticationState { get; set; }
 

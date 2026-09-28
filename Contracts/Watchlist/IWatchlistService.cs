@@ -12,6 +12,8 @@ public interface IWatchlistService
 
 	Task<Optional<WatchlistEntry>> GetEntryAsync(MediaId mediaId, CancellationToken cancellationToken = default);
 
+	Task<IReadOnlyDictionary<MediaId, WatchlistEntry>> GetEntriesAsync(CancellationToken cancellationToken = default);
+
 	Task<IReadOnlyList<MediaId>> AddToWatchlistAsync(
 		IEnumerable<MediaId> mediaIds,
 		WatchlistItemProvenance provenance,

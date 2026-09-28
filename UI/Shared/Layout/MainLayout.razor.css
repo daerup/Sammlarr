@@ -36,3 +36,29 @@ header ::deep nav > ul::after {
 header ::deep nav > ul[data-underline-ready="true"]::after {
 	opacity: 1;
 }
+
+.search-trigger {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 8px 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--input);
+    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+
+.search-trigger:hover {
+    color: var(--foreground);
+    border-color: var(--muted-foreground);
+}
+
+.search-trigger-label {
+    font-size: 12.5px;
+}
+
+.search-trigger ::deep svg {
+    display: block;
+}

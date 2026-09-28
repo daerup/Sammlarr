@@ -1,0 +1,113 @@
+@using Contracts.Blacklist
+@using Contracts.Settings
+@using Contracts.Watchlist
+@using Domain.Watchlist
+@using UI.Shared.Media.Icons
+@implements IDisposable
+@inject IProviderConfigRepository ProviderConfigRepository
+@inject IWatchlistService WatchlistService
+@inject IBlacklistService BlacklistService
+@inject Notifier Notifier
+
+@if (_settings is not null)
+{
+    <SearchModal IsOpen="IsOpen"
+                 IsOpenChanged="IsOpenChanged"
+                 SearchProvider="@_settings.SearchProvider"
+                 IsInWatchlist="IsWatchlisted"
+                 OnToggle="ToggleWatchlistAsync"
+                 Title="Search"
+                 Description="Find a movie or show and add it to a list.">
+        <TileIcons Context="ctx">
+            <WatchlistProvenanceToggle Result="ctx.Result"
+                                       IsToggled="ctx.IsToggled"
+                                       IsToggling="ctx.IsToggling"
+                                       Entry="@EntryFor(ctx.Result.Id)"
+                                       OnToggle="ctx.OnToggle"/>
+            <BlacklistToggleIcon Result="ctx.Result"
+                                 IsToggled="@_blacklisted.Contains(ctx.Result.Id)"
+                                 IsToggling="@(_blacklisting == ctx.Result.Id)"
+                                 OnToggle="ToggleBlacklistAsync"/>
+        </TileIcons>
+    </SearchModal>
+}
+
+@code {
+    private readonly CancellationTokenSource _cancellation = new();
+    private ProviderConfig? _settings;
+    private IReadOnlySet<MediaId> _blacklisted = new HashSet<MediaId>();
+    private IReadOnlyDictionary<MediaId, WatchlistEntry> _entries = new Dictionary<MediaId, WatchlistEntry>();
+    private MediaId? _blacklisting;
+
+    [Parameter] public bool IsOpen { get; set; }
+
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _settings = await ProviderConfigRepository.GetAsync(_cancellation.Token);
+        await RefreshAsync();
+    }
+
+    private bool IsWatchlisted(MediaId mediaId) => _entries.ContainsKey(mediaId);
+
+    private WatchlistEntry? EntryFor(MediaId mediaId) => _entries.TryGetValue(mediaId, out var entry) ? entry : null;
+
+    private async Task RefreshAsync()
+    {
+        _entries = await WatchlistService.GetEntriesAsync(_cancellation.Token);
+        _blacklisted = await BlacklistService.GetBlacklistIdsAsync(_cancellation.Token);
+    }
+
+    private async Task<bool> ToggleWatchlistAsync(MediaId id, string title, bool isMarked)
+    {
+        if (isMarked)
+        {
+            await WatchlistService.RemoveFromWatchlistAsync([id], _cancellation.Token);
+            Notifier.Success($"'{title}' has been removed from your watchlist.");
+        }
+        else
+        {
+            await WatchlistService.AddToWatchlistAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
+            Notifier.Success($"'{title}' has been added to your watchlist.");
+        }
+
+        await RefreshAsync();
+        return true;
+    }
+
+    private async Task ToggleBlacklistAsync(MediaLookup media)
+    {
+        if (_blacklisting is not null)
+        {
+            return;
+        }
+
+        _blacklisting = media.Id;
+        try
+        {
+            if (_blacklisted.Contains(media.Id))
+            {
+                await BlacklistService.RemoveFromBacklistAsync(media.Id, _cancellation.Token);
+                Notifier.Success($"'{media.Title}' has been removed from your blacklist.");
+            }
+            else
+            {
+                await BlacklistService.AddToBacklistAsync(media.Id, _cancellation.Token);
+                Notifier.Success($"'{media.Title}' has been blacklisted.");
+            }
+
+            await RefreshAsync();
+        }
+        finally
+        {
+            _blacklisting = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        _cancellation.Cancel();
+        _cancellation.Dispose();
+    }
+}
