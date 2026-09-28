@@ -1,3 +1,6 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
 <button type="button" class="sect" aria-expanded="@_open" @onclick="@(() => _open = !_open)">
     <LucideIcon Name="@(_open ? "chevron-down" : "chevron-right")" Size="12"/>
     <span class="sect-title">@Title</span>
@@ -9,8 +12,21 @@
     @foreach (var row in Rows)
     {
         <div class="row">
-            <span class="row-icon @(row.Kind is UpNextKind.Running ? "is-running" : "")">
-                <LucideIcon Name="@Icon(row.Kind)" Size="12"/>
+            <span class="row-icon @(row.Brand is null ? null : "is-brand")" style="@BrandStyle(row)">
+                @if (row.Brand is { } provider)
+                {
+                    @Branding.GetBrandingInfo(provider).IconRenderer(null)
+                    @if (row.Push)
+                    {
+                        <span class="row-pip">
+                            <LucideIcon Name="refresh-cw" Size="8"/>
+                        </span>
+                    }
+                }
+                else
+                {
+                    <LucideIcon Name="@Icon(row.Kind)" Size="12"/>
+                }
             </span>
             <span class="row-body">
                 @if (row.Href is { } href)
@@ -21,7 +37,13 @@
                 {
                     <span class="row-name">@row.Name</span>
                 }
-                <span class="row-detail">@row.Detail</span>
+                <span class="row-detail">
+                    @if (row.Kind is UpNextKind.Running)
+                    {
+                        <span class="row-dot"></span>
+                    }
+                    @row.Detail
+                </span>
             </span>
             <span class="row-when @(row.Kind is UpNextKind.Running ? "is-running" : "")">@row.When</span>
         </div>
@@ -34,11 +56,15 @@
 
     private bool _open = true;
 
+    private string? BrandStyle(UpNextRow row) =>
+        row.Brand is { } provider ? $"--brand: {Branding.GetBrandingInfo(provider).BrandColor};" : null;
+
     private static string Icon(UpNextKind kind) =>
         kind switch
         {
             UpNextKind.Running => "loader",
             UpNextKind.Queued => "ellipsis",
+            UpNextKind.Waiting => "hourglass",
             UpNextKind.Scheduled => "clock",
         };
 }

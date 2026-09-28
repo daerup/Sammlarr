@@ -40,6 +40,7 @@
 }
 
 .row-icon {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,9 +52,63 @@
     flex: 0 0 auto;
 }
 
-.row-icon.is-running {
-    background: color-mix(in srgb, var(--alert-warning) 18%, var(--muted));
-    color: var(--alert-warning);
+.row-icon.is-brand {
+    background: color-mix(in srgb, var(--brand) 16%, transparent);
+    color: var(--brand);
+}
+
+.row-icon.is-brand ::deep svg {
+    display: block;
+    width: 13px;
+    height: 13px;
+}
+
+.row-pip {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--muted-foreground);
+}
+
+.row-pip ::deep svg {
+    display: block;
+}
+
+.row-dot {
+    position: relative;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--alert-warning);
+    flex: 0 0 auto;
+}
+
+.row-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--alert-warning);
+    animation: row-dot-pulse 1.6s ease-out infinite;
+}
+
+@keyframes row-dot-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
 }
 
 .row-body {
@@ -80,6 +135,9 @@ a.row-name:hover {
 }
 
 .row-detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 10.5px;
     color: var(--muted-foreground);
 }

@@ -70,6 +70,11 @@
     align-items: center;
     gap: 11px;
     padding: 9px 13px;
+    cursor: pointer;
+}
+
+.run-row:hover {
+    background: color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
 .run-row + .run-row {
@@ -78,6 +83,11 @@
 
 .run-row.off {
     opacity: 0.45;
+    cursor: default;
+}
+
+.run-row.off:hover {
+    background: none;
 }
 
 .run-row-body {
