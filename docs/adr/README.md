@@ -22,3 +22,6 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0003 | [Use EF Core migrations for the schema](0003-use-ef-core-migrations-for-the-schema.md) | accepted | 2026-09-06 |
 | 0004 | [Store all state in one SQLite file](0004-store-all-state-in-one-sqlite-file.md) | accepted | 2026-09-06 |
 | 0005 | [Enforce per-user data isolation](0005-enforce-per-user-data-isolation.md) | accepted | 2026-09-06 |
+| 0006 | [Run background work through one job queue](0006-run-background-work-through-one-job-queue.md) | accepted | 2026-09-24 |
+| 0007 | [Push watchlist changes inline during sync](0007-push-watchlist-changes-inline-during-sync.md) | accepted | 2026-09-26 |
+| 0008 | [Separate events from notifications](0008-separate-events-from-notifications.md) | accepted | 2026-09-27 |

@@ -1,8 +1,9 @@
 [[section-runtime-view]]
 == Runtime View
 
-Three scenarios: resolving a title (the one the others build on), feed preview, and watchlist
-sync/push. Each runs across the layers through `Contracts`, with providers resolved by keyed DI.
+Four scenarios: resolving a title (the one the others build on), feed preview, a feed run through
+the job queue, and watchlist sync/push. Each runs across the layers through `Contracts`, with
+providers resolved by keyed DI.
 
 === Resolving a title
 
@@ -141,15 +142,67 @@ loading is not evidence that an item has left it. The panel keeps reporting a pa
 as long as it is showing truncated results after a provider outage, so tightening a filter
 against a half-loaded list cannot propose deleting the part that never arrived.
 
-NOTE: Only preview exists today. A scheduler that runs feeds on a cron and reconciles the
-results into the watchlist is planned, not built (see <<section-technical-risks>>). Titles enter
-the watchlist by manual add or by sync, below.
+=== Feed runs and the job queue
+
+A run applies what the preview showed. Feed runs and watchlist syncs never execute where they are
+requested: every request becomes a row in the `Jobs` table, and one runner works through the rows
+one at a time.
+
+[mermaid]
+....
+sequenceDiagram
+  participant T as TickerQ (cron)
+  actor U as User (Run now / Sync)
+  participant Q as IJobQueue
+  participant J as Jobs table
+  participant R as JobRunner
+  participant E as FeedRunEngine
+  participant W as IWatchlistService
+  participant SE as WatchlistSyncEngine
+
+  T->>Q: cron fires: RunFeed(feed, Scheduled), as the feed's owner
+  U->>Q: RunFeed(feed, Manual)
+  Q->>J: insert, or fold into the feed's pending row
+  R->>J: take the oldest Queued row, mark Running
+  R->>E: dispatch in a fresh scope, as the job's owner
+  E->>E: plan (the same planner as the preview)
+  E->>W: apply adds and owned drops, recorded in the run log
+  Note over W: outbox rows written, nothing sent to Plex yet
+  R->>Q: scheduled run: SyncWatchlist(ScheduledFeedTrigger)
+  Q->>J: one Waiting sync per owner, due after the grace period
+  Note over J: further runs push the sync back,<br/>never past its first arming + MaxWait
+  J->>R: the alarm releases the sync when due
+  R->>SE: dispatch the sync
+....
+
+TickerQ owns only the _when_: each scheduled feed has one cron ticker (keyed by the feed id,
+created, updated or deleted as the feed is saved), and its function does nothing but enqueue a
+`RunFeed` under the feed owner's identity. The runner decides what runs next and the UI reads the
+rows, which is how the Home dashboard shows what is running, queued and waiting.
+
+Enqueueing coalesces by kind, key and owner, so a request never duplicates one already pending: a
+second run of the same feed folds into the pending or running one, and a sync folds into the
+owner's pending sync. A sync that follows a scheduled run (or a manual run with _sync when done_)
+is armed `Grace` (2 minutes) in the future and every later run pushes it back, clamped to
+`MaxWait` (30 minutes) after it was first armed. So N feed runs in a window produce one sync, and
+a feed that adds a title and another that removes it cancel out in the outbox before anything
+reaches Plex. A manual Sync pulls a waiting sync forward to now.
+
+A future row is `Waiting`; a `JobAlarm` timer moves it to `Queued` when due and nudges the runner,
+so a deferred sync runs on time without the runner polling. A handler that throws ends `Failed`;
+there is no automatic retry. A row still `Running` when the app starts was abandoned by the
+previous process (there is only one runner), so startup puts it back to `Queued`.
+
+The engine plans through the same planner as the preview, before it records the run, so a run
+does what a preview taken at that moment would show. Mirror removals follow the preview's rule: a load that did not finish, or came back empty, is not
+conclusive and drops nothing, and an item is only removed after it has been missing for the
+feed's absence threshold of conclusive runs.
 
 === Watchlist sync and push to Plex
 
 Adding a title and pushing it to Plex are two separate steps. An add writes the local row and
-queues the change; the push to Plex happens on the next sync, drained from a durable outbox so
-it survives restarts and provider outages.
+queues the change in the outbox; the push happens inside the next sync, which drains the outbox
+inline. A change that fails stays in the outbox and is retried by the sync after it.
 
 [mermaid]
 ....
@@ -158,9 +211,7 @@ sequenceDiagram
   participant W as UI (Watchlist / Browse)
   participant S as IWatchlistService
   participant DB as DB (watchlist + outbox)
-  participant SE as WatchlistSyncEngine
-  participant WO as Wolverine queue (SQLite)
-  participant H as Push handler
+  participant SE as WatchlistSyncEngine (a job)
   participant PX as IWatchlistProvider (Plex)
   participant Plex as Plex
 
@@ -170,35 +221,37 @@ sequenceDiagram
   S->>DB: insert watchlist row + outbox row (Pending)
   S-->>W: item shows a Pending push dot
 
-  Note over U,Plex: Sync: push pending changes
-  U->>SE: Sync
-  SE->>WO: publish WatchlistPushRequest per item
-  WO->>H: deliver (durable, retried)
-  H->>DB: find pending row (skip if already gone)
-  H->>PX: AddToWatchlistAsync(external id)
-  PX->>Plex: PUT watchlist
-  Plex-->>PX: ack
-  alt success
-    H->>DB: drop outbox row
-    H-->>W: event Pushed (dot clears)
-  else failure
-    H->>DB: record attempt
-    H-->>W: event Retrying or Failed
-    H->>WO: throw, re-queued with cooldown
+  Note over U,Plex: Sync: pull, then push pending changes
+  SE->>PX: read the remote watchlist
+  SE->>DB: apply remote adds and removes
+  SE->>DB: read Pending outbox rows, grouped by add / remove
+  SE->>PX: push each group as one batch
+  PX->>Plex: PUT / DELETE watchlist
+  Plex-->>PX: ack per item
+  alt acked
+    SE->>DB: drop outbox row
+    SE-->>W: event Pushed (dot clears)
+  else not acked
+    SE->>DB: record attempt
+    SE-->>W: event Retrying, or Abandoned on the fifth attempt
   end
+  SE->>SE: one sync notification with what reached Plex
 ....
 
-Adds and removes cancel each other in the queue (adding cancels a pending removal; removing
-cancels an un-pushed add); if the outbox row is gone when a message runs, the handler no-ops (a
-harmless "ghost"). Retries are two-level: the handler caps at five attempts and records per-item
-status, and Wolverine re-delivers on a cooldown (5s, 15s, 30s, 1min). Status reaches the open page
-through an in-process event feed.
+Adds and removes cancel each other in the outbox (adding cancels a pending removal; removing
+cancels an un-pushed add), so opposing changes never reach Plex. Each item gets five attempts, one
+per sync; the fifth failure marks it `Failed`, which is terminal: later syncs no longer push it,
+but still count it as intent, so an abandoned add is not mistaken for a remote deletion. An item
+with no Plex id is abandoned at once. Per-item status reaches the open page as in-process events,
+and the sync ends with one notification that reports what actually reached Plex, not what was
+queued. The engine holds a per-user gate, so two syncs for one user never overlap.
 
 === Other flows
 
-Two flows are worth a mention but not a diagram of their own. Notifications ride the same durable
-outbox as the watchlist push: a sync raises one `WatchlistSyncCompletedNotification`, a handler fans it out to
-each matching subscription, and each is rendered from a Fluid template and delivered on its own
-retry schedule. Plex sign-in is a standard OAuth PIN flow; its notable parts, the app-owned
+Two flows are worth a mention but not a diagram of their own. Notifications are the one thing on
+Wolverine's durable queue: a finished sync or feed run publishes one notification, a handler fans
+it out to each matching subscription, and each is rendered from a Fluid template and delivered on
+its own retry schedule (1, 5 and 15 minutes, then an hour); the WebUi channel delivers it as an
+in-app toast. Plex sign-in is a standard OAuth PIN flow; its notable parts, the app-owned
 `User`, the first user becoming Admin, the open or closed registration gate, and per-request
 session revalidation, are covered in <<section-concepts>>.

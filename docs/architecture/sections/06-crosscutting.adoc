@@ -73,16 +73,41 @@ is enforced in persistence: a user-owned entity implements `IUserOwned`, `OnMode
 a global query filter on a shadow `UserId`, and the current-user lookup throws when unauthenticated
 (fails closed). An ownership stamper sets the owner on insert and blocks it from changing. Feeds,
 watchlist, blacklist, notification targets and stored secrets are user-owned; `ProviderConfig` and
-the media catalogue are global. Background code (Wolverine handlers, the sync engine) calls
-`IUserScope.As(user)` so the same filters apply. Isolation tests are noted in
+the media catalogue are global. Background code (the job runner, the cron ticker function,
+Wolverine handlers) calls `IUserScope.AsAsync(owner)` so the same filters apply: every job and
+every scheduled feed carries its owner. Isolation tests are noted in
 <<section-quality-scenarios>>.
 
-=== Durable messaging
+=== Background work and scheduling
 
-Work that must survive a restart or a provider outage runs as Wolverine messages on a durable
-SQLite-backed queue: the watchlist push and notification delivery (<<section-runtime-view>>). Each
-has its own retry policy keyed on its exception type, with escalating cooldowns and an attempt cap.
-There is no external broker; the queue is the application database.
+Background work that users start or schedule (feed runs and watchlist syncs) goes through one
+queue of record, the `Jobs` table (`IJobQueue`), and one hosted `JobRunner` that executes a row at
+a time in a fresh DI scope, as the row's owner. Running one job at a time is deliberate: it keeps
+SQLite to one writer and each provider to one caller. TickerQ holds the cron schedule and only
+enqueues; enqueueing coalesces by kind, key and owner; a deferred row waits in `Waiting` until a
+timer releases it. The walk-through is in <<section-runtime-view>>, the reasoning in
+link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0006-run-background-work-through-one-job-queue.md[ADR 0006].
+
+A push to Plex is a step of the sync, not a message: pending changes wait in the watchlist outbox
+and the sync drains it inline, retrying a failed item on the next sync
+(link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0007-push-watchlist-changes-inline-during-sync.md[ADR 0007]).
+
+=== Events and notifications
+
+Anything that reports "something happened" is one of two disjoint kinds, and each has exactly
+one transport. An _event_ (`IEvent`: per-item push status, job state changes, "this feed just
+ran") goes to open pages through the in-process `IEventPublisher`; it is never stored and is gone
+on restart. A _notification_ (`INotification`: a sync or feed run finished or failed, a provider
+is rate limiting) is durable and subscribable: it is queued on Wolverine in the application
+database, fanned out to each matching subscription and delivered by its channel (webhook,
+Pushover, or the WebUi channel's in-app toast), with escalating retry cooldowns and an attempt
+cap. There is no external broker.
+
+Producers publish through one `Announcer`: `Announce(IEvent)` and `AnnounceAsync(INotification)`
+take the two markers, so sending a fact down the wrong transport does not compile. Which kind a
+fact is depends only on whether a user could reasonably subscribe to it, never on what triggered
+it (<<section-glossary>>,
+link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0008-separate-events-from-notifications.md[ADR 0008]).
 
 === Logging and observability
 
