@@ -1,6 +1,7 @@
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
+using Domain.Providers;
 using UI.Features.Feeds.Components;
 using UrlGuid = global::Shared.UrlGuid;
 
@@ -10,15 +11,34 @@ public enum UpNextKind
 {
 	Running,
 	Queued,
+	Waiting,
 	Scheduled,
 }
 
-public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href);
+public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null, bool Push = false);
 
 internal static class UpNextView
 {
-	internal static IReadOnlyList<UpNextRow> InTheQueue(QueueSnapshot queue, IReadOnlyDictionary<FeedId, string> feedNames, string providerName) =>
-		[.. queue.Jobs.Where(job => job.State is JobState.Queued or JobState.Running).Select((job, index) => Row(job, index, feedNames, providerName))];
+	internal static IReadOnlyList<UpNextRow> InTheQueue(
+		QueueSnapshot queue,
+		IReadOnlyDictionary<FeedId, string> feedNames,
+		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
+		string providerName,
+		MediaProvider watchlistProvider
+	) =>
+		[
+			.. queue
+				.Jobs.Where(job => job.State is JobState.Waiting or JobState.Queued or JobState.Running)
+				.Select(job => Row(job, feedNames, feedBrands, providerName, watchlistProvider)),
+		];
+
+	internal static IReadOnlySet<FeedId> FeedsAlreadyPending(QueueSnapshot queue) =>
+		queue
+			.Jobs.Where(job => job.State is JobState.Waiting or JobState.Queued or JobState.Running)
+			.Select(job => job.Request)
+			.OfType<RunFeed>()
+			.Select(feed => feed.Id)
+			.ToHashSet();
 
 	internal static IReadOnlyList<UpNextRow> OnASchedule(IReadOnlyList<Feed> feeds, DateTimeOffset from, TimeZoneInfo zone) =>
 		[
@@ -32,14 +52,35 @@ internal static class UpNextView
 					ScheduleText.Describe(entry.feed.Schedule),
 					ScheduleText.Away(entry.next!.Value, from),
 					UpNextKind.Scheduled,
-					EditHref(entry.feed.Id)
+					EditHref(entry.feed.Id),
+					entry.feed.Provider.AsMediaProvider()
 				)),
 		];
 
-	private static UpNextRow Row(PendingJob job, int index, IReadOnlyDictionary<FeedId, string> feedNames, string providerName) =>
-		job.State is JobState.Running
-			? new UpNextRow(Name(job.Request, feedNames, providerName), "running now", "running", UpNextKind.Running, Href(job.Request, feedNames))
-			: new UpNextRow(Name(job.Request, feedNames, providerName), "queued", $"{Ordinal(index + 1)} in line", UpNextKind.Queued, Href(job.Request, feedNames));
+	private static UpNextRow Row(
+		PendingJob job,
+		IReadOnlyDictionary<FeedId, string> feedNames,
+		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
+		string providerName,
+		MediaProvider watchlistProvider
+	)
+	{
+		var name = Name(job.Request, feedNames, providerName);
+		var href = Href(job.Request, feedNames);
+		var brand = Brand(job.Request, feedBrands, watchlistProvider);
+		var push = job.Request is SyncWatchlist;
+		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, push)
+			: job.State is JobState.Waiting ? new UpNextRow(name, "waiting", string.Empty, UpNextKind.Waiting, href, brand, push)
+			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, push);
+	}
+
+	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider watchlistProvider) =>
+		request switch
+		{
+			RunFeed feed => feedBrands.TryGetValue(feed.Id, out var provider) ? provider : null,
+			SyncWatchlist => watchlistProvider,
+			_ => null,
+		};
 
 	private static string? Href(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) =>
 		request is RunFeed feed && feedNames.ContainsKey(feed.Id) ? EditHref(feed.Id) : null;
@@ -52,17 +93,5 @@ internal static class UpNextView
 			RunFeed feed => FeedLabel.Of(feed.Id, feedNames),
 			SyncWatchlist => $"Sync to {providerName}",
 			_ => request.Kind.GetDescription(),
-		};
-
-	internal static string Ordinal(int position) =>
-		position switch
-		{
-			1 => "1st",
-			2 => "2nd",
-			3 => "3rd",
-			_ when position % 10 is 1 && position % 100 is not 11 => $"{position}st",
-			_ when position % 10 is 2 && position % 100 is not 12 => $"{position}nd",
-			_ when position % 10 is 3 && position % 100 is not 13 => $"{position}rd",
-			_ => $"{position}th",
 		};
 }

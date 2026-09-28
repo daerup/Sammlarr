@@ -1,6 +1,8 @@
 using BlazorBlueprint.Components;
 using Bunit;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Home.Components;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Home;
 
@@ -10,6 +12,7 @@ public class UpNextPanelTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

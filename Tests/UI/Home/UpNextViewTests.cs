@@ -3,6 +3,7 @@ using Domain.Feed;
 using Domain.Jobs;
 using Domain.Processing;
 using Domain.Providers;
+using Domain.Providers;
 using Domain.Watchlist.Sync;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
@@ -16,18 +17,51 @@ public class UpNextViewTests
 	private static readonly FeedId Anime = FeedId.From(new Guid("00000000-0000-0000-0000-0000000000d1"));
 
 	private static readonly Dictionary<FeedId, string> Names = new() { [Docs] = "hdlists/documentaries", [Anime] = "hdlists/anime" };
+
+	private static readonly Dictionary<FeedId, MediaProvider> Brands = new() { [Docs] = MediaProvider.Mdblist, [Anime] = MediaProvider.Tmdb };
 	private static readonly DateTimeOffset Now = new(2026, 9, 27, 14, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task InTheQueue_LabelsTheRunningJobAndNumbersTheRestByTheirPlaceInLine()
+	public async Task InTheQueue_MarksTheRunningJobAndLeavesQueuedOnesWithoutATimeOfTheirOwn()
 	{
 		var queue = Snapshot(Job(Anime, JobState.Running), Job(Docs, JobState.Queued));
 
-		var rows = UpNextView.InTheQueue(queue, Names, "Plex");
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex);
 
 		await Assert.That(rows[0].Kind).IsEqualTo(UpNextKind.Running);
 		await Assert.That(rows[0].When).IsEqualTo("running");
-		await Assert.That(rows[1].When).IsEqualTo("2nd in line");
+		await Assert.That(rows[1].Kind).IsEqualTo(UpNextKind.Queued);
+		await Assert.That(rows[1].When).IsEmpty();
+	}
+
+	[Test]
+	public async Task InTheQueue_ForAFeedJob_CarriesTheFeedsOwnProviderSoTheRowShowsItsBrand()
+	{
+		var queue = Snapshot(Job(Anime, JobState.Queued));
+
+		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
+
+		await Assert.That(row.Brand).IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(row.Push).IsFalse();
+	}
+
+	[Test]
+	public async Task InTheQueue_ForASyncJob_CarriesTheWatchlistProviderAndMarksItAPush()
+	{
+		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0));
+
+		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
+
+		await Assert.That(row.Brand).IsEqualTo(MediaProvider.Plex);
+		await Assert.That(row.Push).IsTrue();
+	}
+
+	[Test]
+	public async Task InTheQueue_ForAFeedThatWasDeleted_HasNoBrandToShow()
+	{
+		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
+
+		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0].Brand).IsNull();
 	}
 
 	[Test]
@@ -35,17 +69,29 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0));
 
-		var rows = UpNextView.InTheQueue(queue, Names, "Plex");
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex);
 
 		await Assert.That(rows[0].Name).IsEqualTo("Sync to Plex");
 	}
 
 	[Test]
-	public async Task InTheQueue_LeavesOutJobsThatAreNeitherRunningNorQueued()
+	public async Task InTheQueue_ForASyncStillInsideItsGrace_SaysItIsWaitingWithoutPromisingWhen()
+	{
+		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0));
+
+		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
+
+		await Assert.That(row.Kind).IsEqualTo(UpNextKind.Waiting);
+		await Assert.That(row.Detail).IsEqualTo("waiting");
+		await Assert.That(row.When).IsEmpty();
+	}
+
+	[Test]
+	public async Task InTheQueue_LeavesOutJobsThatHaveAlreadySettled()
 	{
 		var queue = Snapshot(Job(Docs, JobState.Done), Job(Anime, JobState.Failed));
 
-		await Assert.That(UpNextView.InTheQueue(queue, Names, "Plex")).IsEmpty();
+		await Assert.That(UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)).IsEmpty();
 	}
 
 	[Test]
@@ -53,7 +99,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
 
-		var row = UpNextView.InTheQueue(queue, Names, "Plex")[0];
+		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
 
 		await Assert.That(row.Name).IsEqualTo("A deleted feed");
 		await Assert.That(row.Href).IsNull();
@@ -67,7 +113,7 @@ public class UpNextViewTests
 			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0)
 		);
 
-		var rows = UpNextView.InTheQueue(queue, Names, "Plex");
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex);
 
 		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
 		await Assert.That(rows[1].Href).IsNull();
@@ -104,16 +150,6 @@ public class UpNextViewTests
 		IReadOnlyList<Feed> feeds = [Feed(Docs, "docs", new Scheduled("0 0 4 * * *")) with { Enabled = false }];
 
 		await Assert.That(UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc)).IsEmpty();
-	}
-
-	[Test]
-	public async Task Ordinal_ReadsTheWayEnglishDoesPastTheObviousCases()
-	{
-		await Assert.That(UpNextView.Ordinal(1)).IsEqualTo("1st");
-		await Assert.That(UpNextView.Ordinal(4)).IsEqualTo("4th");
-		await Assert.That(UpNextView.Ordinal(11)).IsEqualTo("11th");
-		await Assert.That(UpNextView.Ordinal(21)).IsEqualTo("21st");
-		await Assert.That(UpNextView.Ordinal(22)).IsEqualTo("22nd");
 	}
 
 	private static QueueSnapshot Snapshot(params PendingJob[] jobs) => new(jobs, 0);

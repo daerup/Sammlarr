@@ -17,7 +17,7 @@
                     continue;
                 }
                 var picked = inGroup.Count(candidate => _selected.Contains(candidate.Id));
-                var selectable = inGroup.Where(candidate => candidate.Enabled).ToList();
+                var selectable = inGroup.Where(Selectable).ToList();
 
                 <div class="run-card @(group is RunGroup.WorthRunning ? "is-hot" : "")">
                     <div class="run-card-head">
@@ -36,14 +36,21 @@
                 @foreach (var candidate in inGroup)
                 {
                     var isPicked = _selected.Contains(candidate.Id);
-                    <div class="run-row @(candidate.Enabled ? "" : "off")" @key="candidate.Id.Value">
-                        <BbCheckbox Checked="isPicked"
-                                    Disabled="@(!candidate.Enabled)"
-                                    AriaLabel="@candidate.Name"
-                                    CheckedChanged="_ => Toggle(candidate.Id)"/>
+                    <div class="run-row @(Selectable(candidate) ? "" : "off")" @key="candidate.Id.Value" @onclick="() => Toggle(candidate)">
+                        <span @onclick:stopPropagation="true">
+                            <BbCheckbox Checked="isPicked"
+                                        Disabled="@(!Selectable(candidate))"
+                                        AriaLabel="@candidate.Name"
+                                        CheckedChanged="_ => Toggle(candidate)"/>
+                        </span>
                         <span class="run-row-body">
                             <span class="run-row-name">@candidate.Name</span>
                             <span class="run-row-meta">
+                                @if (Pending.Contains(candidate.Id))
+                                {
+                                    <span>already in the queue</span>
+                                    <span class="run-sep">·</span>
+                                }
                                 @candidate.Schedule
                                 <span class="run-sep">·</span>
                                 @if (!candidate.LastRun.EverRan)
@@ -110,6 +117,7 @@
     [Parameter, EditorRequired] public required IReadOnlyList<RunCandidate> Candidates { get; set; }
     [Parameter] public DateTimeOffset Now { get; set; }
     [Parameter] public string ProviderName { get; set; } = "your watchlist provider";
+    [Parameter] public IReadOnlySet<FeedId> Pending { get; set; } = new HashSet<FeedId>();
     [Parameter] public EventCallback<(IReadOnlyList<FeedId> Feeds, bool SyncAfter)> OnRun { get; set; }
 
     private readonly HashSet<FeedId> _selected = [];
@@ -121,7 +129,7 @@
         if (Open && !_armed)
         {
             _selected.Clear();
-            _selected.UnionWith(RunPlan.DefaultSelection(Candidates));
+            _selected.UnionWith(RunPlan.DefaultSelection(Candidates).Where(id => !Pending.Contains(id)));
             _armed = true;
         }
         else if (!Open)
@@ -138,11 +146,18 @@
             RunFlag.NotDue => "due",
         };
 
-    private void Toggle(FeedId id)
+    private bool Selectable(RunCandidate candidate) => candidate.Enabled && !Pending.Contains(candidate.Id);
+
+    private void Toggle(RunCandidate candidate)
     {
-        if (!_selected.Add(id))
+        if (!Selectable(candidate))
         {
-            _selected.Remove(id);
+            return;
+        }
+
+        if (!_selected.Add(candidate.Id))
+        {
+            _selected.Remove(candidate.Id);
         }
     }
 

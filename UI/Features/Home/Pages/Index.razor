@@ -138,6 +138,7 @@ else
 <RunFeedsDialog Open="_isRunOpen"
                 OpenChanged="@(open => _isRunOpen = open)"
                 Candidates="_candidates"
+                Pending="_pendingFeeds"
                 Now="_now"
                 ProviderName="@ProviderName"
                 OnRun="RunFeedsAsync"/>
@@ -155,6 +156,7 @@ else
     private IReadOnlyList<ActivityDay> _days = [];
     private IReadOnlyList<UpNextRow> _queued = [];
     private IReadOnlyList<UpNextRow> _scheduled = [];
+    private IReadOnlySet<FeedId> _pendingFeeds = new HashSet<FeedId>();
     private IReadOnlyList<SourceShare> _sources = [];
     private IReadOnlyList<RunCandidate> _candidates = [];
     private IReadOnlyList<Feed> _feeds = [];
@@ -177,6 +179,10 @@ else
     private bool IsSignedIn() => _isSignedIn;
 
     private IReadOnlyDictionary<FeedId, string> FeedNames() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Name);
+
+    private IReadOnlyDictionary<FeedId, MediaProvider> FeedBrands() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Provider.AsMediaProvider());
+
+    private MediaProvider WatchlistProvider => _settings?.WatchlistProvider.AsMediaProvider() ?? MediaProvider.Plex;
 
     private bool IsConnected() => _isConnected;
 
@@ -207,15 +213,15 @@ else
             var queued = 0;
             foreach (var feedId in plan.Feeds)
             {
-                if (await JobQueue.EnqueueAsync(new RunFeed(feedId, new Manual()), _cancellation.Token) is Queued)
+                if (await JobQueue.EnqueueAsync(new RunFeed(feedId, new Manual(), plan.SyncAfter), _cancellation.Token) is Queued)
                 {
                     queued++;
                 }
             }
 
-            if (plan.SyncAfter)
+            if (plan.SyncAfter && queued > 0)
             {
-                await JobQueue.EnqueueAsync(new SyncWatchlist(new ManualTrigger()), _cancellation.Token);
+                await JobQueue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), _cancellation.Token);
             }
 
             Notifier.Info(QueuedSummary(queued, plan.Feeds.Count - queued), null);
@@ -303,10 +309,12 @@ else
             var queue = await JobQueueView.GetAsync(_cancellation.Token);
 
             var names = FeedNames();
+            var brands = FeedBrands();
             _watchlistCount = watchlisted.Count;
             _blacklistCount = blacklisted.Count;
             _sources = LibraryView.Sources(owned, names, _watchlistCount);
-            _queued = UpNextView.InTheQueue(queue, names, ProviderName);
+            _queued = UpNextView.InTheQueue(queue, names, brands, ProviderName, WatchlistProvider);
+            _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
             _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);
             _candidates = RunPlan.Candidates(_feeds, overviews, _now, TimeZoneInfo.Local);
             _days = ActivityLog.Days(runs, names, TimeZoneInfo.Local);
@@ -370,7 +378,9 @@ else
     {
         try
         {
-            _queued = UpNextView.InTheQueue(await JobQueueView.GetAsync(_cancellation.Token), FeedNames(), ProviderName);
+            var snapshot = await JobQueueView.GetAsync(_cancellation.Token);
+            _queued = UpNextView.InTheQueue(snapshot, FeedNames(), FeedBrands(), ProviderName, WatchlistProvider);
+            _pendingFeeds = UpNextView.FeedsAlreadyPending(snapshot);
         }
         catch (OperationCanceledException)
         {
