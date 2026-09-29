@@ -1,0 +1,16 @@
+@using Domain.Feed
+
+@if (Strategy is Mirror mirror)
+{
+    <FeedChip Tone="FeedChipTone.Mirror" Icon="flip-horizontal-2" Title="@($"Mirror: removes a title after {mirror.AbsenceThreshold} runs without it")">
+        Mirror <span class="feed-chip-sep">·</span> @mirror.AbsenceThreshold
+    </FeedChip>
+}
+else
+{
+    <FeedChip Tone="FeedChipTone.Append" Icon="list-plus" Title="Append: only ever adds titles">Append</FeedChip>
+}
+
+@code {
+    [Parameter, EditorRequired] public required FeedStrategy Strategy { get; set; }
+}

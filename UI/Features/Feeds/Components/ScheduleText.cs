@@ -8,6 +8,19 @@ internal static class ScheduleText
 	internal static string Describe(FeedRunTrigger schedule) =>
 		schedule is Scheduled scheduled ? ExpressionDescriptor.GetDescription(scheduled.ToString()) : "Manual";
 
+	internal static string Ago(DateTimeOffset moment, DateTimeOffset now)
+	{
+		var elapsed = now - moment;
+
+		return elapsed switch
+		{
+			{ TotalMinutes: < 60 } => $"{elapsed.TotalMinutes:0} min ago",
+			{ TotalHours: < 24 } => $"{elapsed.TotalHours:0} hours ago",
+			{ TotalDays: < 30 } => $"{elapsed.TotalDays:0} days ago",
+			_ => moment.ToLocalTime().ToString("MMM d"),
+		};
+	}
+
 	internal static string Away(DateTimeOffset at, DateTimeOffset from)
 	{
 		var span = at - from;

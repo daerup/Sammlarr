@@ -11,11 +11,11 @@ public class FeedPagingTests
 	}
 
 	[Test]
-	[Arguments(11, 1)]
-	[Arguments(12, 2)]
-	[Arguments(22, 2)]
-	[Arguments(23, 3)]
-	public async Task PageCount_FitsElevenFeedsOnEachPage(int feedCount, int expected)
+	[Arguments(20, 1)]
+	[Arguments(21, 2)]
+	[Arguments(40, 2)]
+	[Arguments(41, 3)]
+	public async Task PageCount_FitsTwentyFeedsOnEachPage(int feedCount, int expected)
 	{
 		await Assert.That(FeedPaging.PageCount(feedCount)).IsEqualTo(expected);
 	}
@@ -23,14 +23,14 @@ public class FeedPagingTests
 	[Test]
 	public async Task PageWithin_WhenTheLastFeedOnTheLastPageIsDeleted_FallsBackToThePageThatStillExists()
 	{
-		await Assert.That(FeedPaging.PageWithin(page: 2, feedCount: 11)).IsEqualTo(1);
+		await Assert.That(FeedPaging.PageWithin(page: 2, feedCount: 20)).IsEqualTo(1);
 	}
 
 	[Test]
 	public async Task Slice_TakesTheFeedsBelongingToThatPage()
 	{
-		var feeds = Enumerable.Range(1, 12).ToList();
+		var feeds = Enumerable.Range(1, 21).ToList();
 
-		await Assert.That(FeedPaging.Slice(feeds, 2)).IsEquivalentTo([12]);
+		await Assert.That(FeedPaging.Slice(feeds, 2)).IsEquivalentTo([21]);
 	}
 }

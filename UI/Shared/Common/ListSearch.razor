@@ -1,0 +1,57 @@
+@implements IDisposable
+
+<KeyboardShortcut Keys="Ctrl+F" OnInvoked="FocusAsync"/>
+
+<div class="list-search">
+    <LucideIcon Name="search" Size="15" Class="text-muted-foreground shrink-0"/>
+    <input @ref="_search"
+           type="search"
+           class="list-search-input"
+           placeholder="@Placeholder"
+           aria-label="@Placeholder"
+           value="@Value"
+           @oninput="OnTypedAsync"/>
+    <BbKbd Keys="Ctrl+F" Class="shrink-0"/>
+</div>
+
+@code {
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter, EditorRequired] public required string Placeholder { get; set; }
+
+    private static readonly TimeSpan TypingPause = TimeSpan.FromMilliseconds(250);
+
+    private ElementReference _search;
+    private CancellationTokenSource? _typing;
+
+    private Task FocusAsync() => _search.FocusAsync().AsTask();
+
+    private async Task OnTypedAsync(ChangeEventArgs args)
+    {
+        var typed = args.Value as string;
+
+        _typing?.Cancel();
+        _typing?.Dispose();
+        _typing = new CancellationTokenSource();
+        var token = _typing.Token;
+
+        try
+        {
+            await Task.Delay(TypingPause, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        await ValueChanged.InvokeAsync(string.IsNullOrWhiteSpace(typed) ? null : typed);
+    }
+
+    public void Dispose()
+    {
+        _typing?.Cancel();
+        _typing?.Dispose();
+    }
+}

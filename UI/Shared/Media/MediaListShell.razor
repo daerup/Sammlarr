@@ -1,4 +1,3 @@
-@implements IDisposable
 @inject AccountConnectionPrompt AccountConnectionPrompt
 
 @if (Settings is null)
@@ -11,7 +10,6 @@
 }
 else
 {
-    <KeyboardShortcut Keys="Ctrl+F" OnInvoked="FocusSearchAsync"/>
     <SignInGuard AccessChanged="OnSignInChanged"/>
     <OAuthGuard Provider="@Settings.AuthProvider" AccessChanged="OnAccessChanged"/>
 
@@ -19,17 +17,7 @@ else
         <HeaderActions>
             <ProtectedSection GuardState="IsSignedIn" ShowFallback="false">
                 <div class="flex items-center gap-2">
-                    <div class="list-search">
-                        <LucideIcon Name="search" Size="15" Class="text-muted-foreground shrink-0"/>
-                        <input @ref="_search"
-                               type="search"
-                               class="list-search-input"
-                               placeholder="Search titles"
-                               aria-label="Search titles"
-                               value="@Search"
-                               @oninput="OnTypedAsync"/>
-                        <BbKbd Keys="Ctrl+F" Class="shrink-0"/>
-                    </div>
+                    <ListSearch Value="@Search" ValueChanged="SearchChanged" Placeholder="Search titles"/>
                     @HeaderExtras
                 </div>
             </ProtectedSection>
@@ -57,38 +45,4 @@ else
     [Parameter] public EventCallback<string?> SearchChanged { get; set; }
     [Parameter] public RenderFragment? HeaderExtras { get; set; }
     [Parameter, EditorRequired] public required RenderFragment ChildContent { get; set; }
-
-    private static readonly TimeSpan TypingPause = TimeSpan.FromMilliseconds(250);
-
-    private ElementReference _search;
-    private CancellationTokenSource? _typing;
-
-    private Task FocusSearchAsync() => _search.FocusAsync().AsTask();
-
-    private async Task OnTypedAsync(ChangeEventArgs args)
-    {
-        var typed = args.Value as string;
-
-        _typing?.Cancel();
-        _typing?.Dispose();
-        _typing = new CancellationTokenSource();
-        var token = _typing.Token;
-
-        try
-        {
-            await Task.Delay(TypingPause, token);
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
-
-        await SearchChanged.InvokeAsync(string.IsNullOrWhiteSpace(typed) ? null : typed);
-    }
-
-    public void Dispose()
-    {
-        _typing?.Cancel();
-        _typing?.Dispose();
-    }
 }

@@ -7,8 +7,8 @@
     <BbTooltip>
         <BbTooltipTrigger AsChild="false" Class="inline-flex min-w-0 max-w-full" Focusable="false">
             <a href="@url" target="_blank" rel="noopener noreferrer"
-               class="inline-flex items-center gap-1 min-w-0 max-w-full font-mono text-sm text-primary underline-offset-4 hover:underline">
-                <span class="min-w-0 truncate">@Identifier</span>
+               class="inline-flex items-center gap-1 min-w-0 max-w-full font-mono text-primary underline-offset-4 hover:underline @(Class ?? "text-sm")">
+                <span class="min-w-0 overflow-x-clip text-ellipsis whitespace-nowrap">@Identifier</span>
                 <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
             </a>
         </BbTooltipTrigger>
@@ -26,6 +26,9 @@ else
 
     [Parameter] [EditorRequired]
     public FeedProvider Provider { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
 
     private string ProviderName =>
         Provider switch

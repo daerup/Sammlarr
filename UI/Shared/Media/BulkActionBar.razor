@@ -46,6 +46,12 @@
 
     <span class="flex-1"></span>
 
+    @if (Actions is not null)
+    {
+        <div class="flex items-center gap-2">@Actions</div>
+    }
+    else
+    {
     <div class="flex items-center gap-1.5">
     @if (MarkLabel is not null)
     {
@@ -93,6 +99,7 @@
         }
     </BbTooltip>
     </div>
+    }
 
     <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
 
@@ -152,6 +159,7 @@
     [Parameter] public string? AlreadyRemovedHint { get; set; }
     [Parameter] public Func<int, BulkConfirm>? RemoveConfirm { get; set; }
     [Parameter] public Func<int, BulkConfirm>? MarkConfirm { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
 
     private sealed record PendingAction(BulkConfirm Copy, int Count, string ConfirmLabel, string Icon, string? Tint, EventCallback Run);
 

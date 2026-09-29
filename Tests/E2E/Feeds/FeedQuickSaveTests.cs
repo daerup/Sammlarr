@@ -40,7 +40,7 @@ public class FeedQuickSaveTests
 		var feeds = await E2EApp.OpenAuthenticatedPageAsync();
 		await feeds.VisitAsync("/feeds");
 
-		await Expect(feeds.GetByRole(AriaRole.Row, new PageGetByRoleOptions { Name = name })).ToBeVisibleAsync(Wait.Settle);
+		await Expect(feeds.FeedCard(name)).ToBeVisibleAsync(Wait.Settle);
 	}
 
 	private static StubSpec Page(int offset, int items, bool hasMore, int delayMs) =>

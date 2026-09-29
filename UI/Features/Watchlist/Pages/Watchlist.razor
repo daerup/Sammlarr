@@ -44,7 +44,7 @@
         <MediaListViewActions HasItems="@(_items is { Count: > 0 } || _removedItems.Count > 0)"
                               IsEditMode="IsEditMode"
                               ShowFilters="ShowFilters"
-                              Filter="Filter"
+                              ActiveFilters="Filter.ActiveCount"
                               OnEnterEditMode="EnterEditMode"
                               OnToggleFilters="ToggleFilterBar"/>
         <ProtectedComponent GuardState="IsConnected"

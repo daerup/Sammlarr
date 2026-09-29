@@ -1,0 +1,15 @@
+.feed-chip-ring {
+    display: block;
+    flex: none;
+    transform: rotate(-90deg);
+}
+
+.feed-chip-ring .track {
+    stroke: currentColor;
+    opacity: 0.25;
+}
+
+.feed-chip-ring .fill {
+    stroke: currentColor;
+    stroke-linecap: round;
+}

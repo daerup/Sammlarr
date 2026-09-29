@@ -19,6 +19,8 @@ public interface IFeedRepository
 
 	Task<IReadOnlyList<FeedId>> DisableFeedsAsync(IReadOnlyCollection<FeedProvider> providers, CancellationToken cancellationToken = default);
 
+	Task<IReadOnlyList<FeedId>> SetEnabledAsync(IReadOnlyCollection<FeedId> ids, bool enabled, CancellationToken cancellationToken = default);
+
 	Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(
 		FeedId feedId,
 		IReadOnlySet<MediaId> owned,

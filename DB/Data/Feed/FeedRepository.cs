@@ -106,6 +106,20 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return feeds.Select(feed => FeedId.From(feed.Id)).ToList();
 	}
 
+	public async Task<IReadOnlyList<FeedId>> SetEnabledAsync(IReadOnlyCollection<FeedId> ids, bool enabled, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var keys = ids.Select(id => id.Value).ToList();
+		var feeds = await ctx.Feeds.Where(feed => feed.IsEnabled != enabled && keys.Contains(feed.Id)).ToListAsync(cancellationToken);
+		foreach (var feed in feeds)
+		{
+			feed.IsEnabled = enabled;
+		}
+
+		await ctx.SaveChangesAsync(cancellationToken);
+		return feeds.Select(feed => FeedId.From(feed.Id)).ToList();
+	}
+
 	public async Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(
 		FeedId feedId,
 		IReadOnlySet<MediaId> owned,

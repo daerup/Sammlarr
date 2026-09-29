@@ -1,0 +1,38 @@
+@using Domain.Feed
+
+@if (NextRun is { } next)
+{
+    <FeedChip Tone="FeedChipTone.Scheduled" Title="@ScheduleText.Describe(Schedule)">
+        <svg class="feed-chip-ring" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+            <circle class="track" cx="6.5" cy="6.5" r="5.35" fill="none" stroke-width="2.3"/>
+            <circle class="fill" cx="6.5" cy="6.5" r="5.35" fill="none" stroke-width="2.3" stroke-dasharray="@RingDash(next)"/>
+        </svg>
+        @ScheduleText.Away(next, Now)
+    </FeedChip>
+}
+else if (Schedule is Scheduled)
+{
+    <FeedChip Tone="FeedChipTone.Quiet" Icon="clock">@ScheduleText.Describe(Schedule)</FeedChip>
+}
+else
+{
+    <FeedChip Tone="FeedChipTone.Quiet" Icon="hand">Manual</FeedChip>
+}
+
+@code {
+    [Parameter, EditorRequired] public required FeedRunTrigger Schedule { get; set; }
+
+    [Parameter] public DateTimeOffset? NextRun { get; set; }
+
+    [Parameter] public DateTimeOffset Now { get; set; }
+
+    private const double Circumference = 2 * Math.PI * 5.35;
+
+    private string RingDash(DateTimeOffset next)
+    {
+        var after = Schedule is Scheduled scheduled ? scheduled.NextRun(next, TimeZoneInfo.Local) : null;
+        var period = after is { } following ? following - next : TimeSpan.Zero;
+        var left = period > TimeSpan.Zero ? Math.Clamp((next - Now) / period, 0, 1) : 1;
+        return FormattableString.Invariant($"{Circumference * left:0.##} {Circumference:0.##}");
+    }
+}

@@ -63,9 +63,9 @@ public class FeedFilteringTests
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.Row(name);
-		await Expect(row).ToBeVisibleAsync(Wait.Settle);
-		await row.GetByLabel("Edit").ClickAsync();
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await card.Labelled("Edit").ClickAsync();
 
 		await Expect(FeedEditor.Toggle(page, "Enable filters")).ToHaveAttributeAsync("aria-checked", "true");
 		var condition = page.Locator("[role='group'][aria-label='Filter condition']");

@@ -1,0 +1,66 @@
+@using BlazorBlueprint.Primitives
+@using UI.Features.Feeds.Pages
+@using UI.Shared.Filters
+
+<FilterStrip Shown="Shown" Total="Total" HasFilters="Filter.HasFilters" OnClear="() => Apply(Filter.ClearFilters())">
+    <Filters>
+        <FeedProviderFilter Options="Providers"
+                            Values="Filter.Providers"
+                            ValuesChanged="providers => Apply(Filter with { Providers = providers })"/>
+        <BbMultiSelect TValue="FeedStatus"
+                       Values="Filter.Statuses"
+                       ValuesChanged="statuses => Apply(Filter with { Statuses = [.. statuses ?? []] })"
+                       Options="StatusOptions"
+                       Placeholder="Any status"
+                       ShowSelectAll="false"
+                       MaxDisplayTags="2"
+                       PopoverWidth="w-56"/>
+        <BbMultiSelect TValue="FeedTriggerKind"
+                       Values="Filter.Triggers"
+                       ValuesChanged="triggers => Apply(Filter with { Triggers = [.. triggers ?? []] })"
+                       Options="TriggerOptions"
+                       Placeholder="Any trigger"
+                       ShowSelectAll="false"
+                       MaxDisplayTags="2"
+                       PopoverWidth="w-56"/>
+        <BbMultiSelect TValue="FeedStrategyKind"
+                       Values="Filter.Strategies"
+                       ValuesChanged="strategies => Apply(Filter with { Strategies = [.. strategies ?? []] })"
+                       Options="StrategyOptions"
+                       Placeholder="Any strategy"
+                       ShowSelectAll="false"
+                       MaxDisplayTags="2"
+                       PopoverWidth="w-56"/>
+    </Filters>
+    <Sort>
+        <BbSelect TValue="FeedSort"
+                  Value="Filter.Sort"
+                  ValueChanged="sort => Apply(Filter with { Sort = sort })"
+                  Options="SortOptions"
+                  Class="w-48"/>
+    </Sort>
+</FilterStrip>
+
+@code {
+    [Parameter, EditorRequired] public required FeedFilter Filter { get; set; }
+
+    [Parameter] public EventCallback<FeedFilter> FilterChanged { get; set; }
+
+    [Parameter, EditorRequired] public required IReadOnlyList<ProviderCount> Providers { get; set; }
+
+    [Parameter] public int Shown { get; set; }
+
+    [Parameter] public int Total { get; set; }
+
+    private static readonly SelectOption<FeedStatus>[] StatusOptions = [.. Enum.GetValues<FeedStatus>().Select(status => new SelectOption<FeedStatus>(status, FeedFilterText.Label(status)))];
+
+    private static readonly SelectOption<FeedTriggerKind>[] TriggerOptions =
+        [.. Enum.GetValues<FeedTriggerKind>().Select(trigger => new SelectOption<FeedTriggerKind>(trigger, FeedFilterText.Label(trigger)))];
+
+    private static readonly SelectOption<FeedStrategyKind>[] StrategyOptions =
+        [.. Enum.GetValues<FeedStrategyKind>().Select(strategy => new SelectOption<FeedStrategyKind>(strategy, FeedFilterText.Label(strategy)))];
+
+    private static readonly SelectOption<FeedSort>[] SortOptions = [.. Enum.GetValues<FeedSort>().Select(sort => new SelectOption<FeedSort>(sort, FeedFilterText.Label(sort)))];
+
+    private Task Apply(FeedFilter filter) => FilterChanged.InvokeAsync(filter);
+}

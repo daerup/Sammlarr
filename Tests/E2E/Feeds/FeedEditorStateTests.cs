@@ -17,9 +17,9 @@ public class FeedEditorStateTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.Row(name);
-		await Expect(row).ToBeVisibleAsync(Wait.Settle);
-		await row.GetByLabel("Edit").ClickAsync();
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await card.Labelled("Edit").ClickAsync();
 
 		await Expect(FeedEditor.SaveButton(page)).ToBeDisabledAsync(new LocatorAssertionsToBeDisabledOptions { Timeout = 60000 });
 

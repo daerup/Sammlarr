@@ -2,9 +2,9 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Providers;
 using TUnit.Assertions.Enums;
-using UI.Features.Home.Components;
+using UI.Features.Feeds.Components;
 
-namespace UI.Tests.Home;
+namespace UI.Tests.Feeds;
 
 public class RunPlanTests
 {

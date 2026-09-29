@@ -32,15 +32,11 @@
                 </nav>
                 <div class="runs-title">
                     <h2>Run history</h2>
-                    <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(feed.Strategy)</BbBadge>
-                    <BbBadge Variant="BadgeVariant.Secondary">@ScheduleText.Describe(feed.Schedule)</BbBadge>
-                    @if (feed.Enabled)
+                    <FeedStrategyChip Strategy="feed.Strategy"/>
+                    <FeedTriggerChip Schedule="feed.Schedule" NextRun="@ChipNextRun" Now="DateTimeOffset.UtcNow"/>
+                    @if (!feed.Enabled)
                     {
-                        <BbBadge Variant="BadgeVariant.Default">Enabled</BbBadge>
-                    }
-                    else
-                    {
-                        <BbBadge Variant="BadgeVariant.Secondary">Disabled</BbBadge>
+                        <FeedChip Tone="FeedChipTone.Attention" Icon="pause">Paused</FeedChip>
                     }
                     <span class="runs-spacer"></span>
                     <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small"
@@ -174,14 +170,14 @@
                                 <h3>@Heading(run)</h3>
                                 <div class="runs-detail-sub">@FeedRunView.Summary(run)</div>
                                 <div class="runs-detail-badges">
-                                    <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(run.Strategy)</BbBadge>
+                                    <FeedStrategyChip Strategy="run.Strategy"/>
                                     @if (IsFailed(run))
                                     {
-                                        <BbBadge Variant="BadgeVariant.Destructive">Failed</BbBadge>
+                                        <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
                                     }
                                     else if (run.Conclusiveness is not Conclusiveness.Conclusive)
                                     {
-                                        <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
+                                        <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
                                     }
                                 </div>
                             </div>
@@ -434,7 +430,10 @@
         : run.HasChanges ? "is-ok"
         : "is-idle";
 
-    private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · grace {mirror.AbsenceThreshold}" : "Append";
+    private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · {mirror.AbsenceThreshold}" : "Append";
+
+    private DateTimeOffset? ChipNextRun =>
+        _feed is { Enabled: true, Schedule: Scheduled scheduled } ? scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) : null;
 
     private string? NextRunLine =>
         _feed?.Schedule is Scheduled scheduled && scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next

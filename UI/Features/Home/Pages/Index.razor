@@ -13,6 +13,7 @@
 @using Domain.Feed.Run
 @using Domain.Identity
 @using Domain.Media
+@using UI.Features.Feeds.Components
 @using UI.Features.Home.Components
 @using UI.Shared.Announcing
 @using Domain.Jobs
@@ -210,37 +211,13 @@ else
     {
         try
         {
-            var queued = 0;
-            foreach (var feedId in plan.Feeds)
-            {
-                if (await JobQueue.EnqueueAsync(new RunFeed(feedId, new Manual(), plan.SyncAfter), _cancellation.Token) is Queued)
-                {
-                    queued++;
-                }
-            }
-
-            if (plan.SyncAfter && queued > 0)
-            {
-                await JobQueue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), _cancellation.Token);
-            }
-
-            Notifier.Info(QueuedSummary(queued, plan.Feeds.Count - queued), null);
+            Notifier.Info(await FeedRunQueue.EnqueueAsync(JobQueue, plan.Feeds, plan.SyncAfter, _cancellation.Token), null);
         }
         catch (Exception ex)
         {
             Notifier.Error(ex, "The feeds could not be queued");
         }
     }
-
-    private static string QueuedSummary(int queued, int alreadyQueued) =>
-        (queued, alreadyQueued) switch
-        {
-            (0, _) => $"{FeedCount(alreadyQueued)} already queued.",
-            (_, 0) => $"Queued {FeedCount(queued)}. They run one at a time.",
-            _ => $"Queued {FeedCount(queued)}, {alreadyQueued} already queued. They run one at a time.",
-        };
-
-    private static string FeedCount(int count) => count == 1 ? "1 feed" : $"{count} feeds";
 
     private string ProviderName => _settings is null ? "your watchlist provider" : _settings.WatchlistProvider.GetDescription();
 

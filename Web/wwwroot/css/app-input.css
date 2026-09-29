@@ -53,6 +53,10 @@
     }
 }
 
+body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next-details) {
+    z-index: 40 !important;
+}
+
 /* Classes the scanner cannot see because they are assembled in C# go here, e.g.
    @source inline("px-6 mt-7"); — plain literals in markup are found automatically. */
 

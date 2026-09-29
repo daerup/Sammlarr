@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
@@ -41,6 +42,22 @@ public class LastRunCellTests : BunitContext
 
 		cut.WaitForState(() => cut.FindAll(".media-detail-sheet-content").Count == 1);
 		await Assert.That(cut.Find(".media-detail-sheet-content").TextContent).Contains("Futurama");
+	}
+
+	[Test]
+	public async Task Dialog_WhenOpenedAndClosed_TellsItsHostBothTimes()
+	{
+		RegisterServices();
+
+		var cut = Render<Harness>();
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+		await cut.Find(".last-run").ClickAsync(new());
+		cut.WaitForState(() => cut.Instance.Opened.Count == 1);
+
+		await cut.FindAll("[role=dialog] button").Last(button => button.TextContent.Contains("Close")).ClickAsync(new());
+		cut.WaitForState(() => cut.Instance.Opened.Count == 2);
+
+		await Assert.That(cut.Instance.Opened).IsEquivalentTo([true, false], CollectionOrdering.Matching);
 	}
 
 	private void RegisterServices()
@@ -132,6 +149,8 @@ public class LastRunCellTests : BunitContext
 
 	private sealed class Harness : ComponentBase
 	{
+		internal List<bool> Opened { get; } = [];
+
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
 			builder.OpenComponent<BbPortalHost>(0);
@@ -152,6 +171,7 @@ public class LastRunCellTests : BunitContext
 					}
 				)
 			);
+			builder.AddComponentParameter(4, nameof(LastRunCell.DialogOpenChanged), EventCallback.Factory.Create<bool>(this, Opened.Add));
 			builder.CloseComponent();
 		}
 	}

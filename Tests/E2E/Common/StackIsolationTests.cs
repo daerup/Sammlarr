@@ -17,16 +17,16 @@ public class StackIsolationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		await Expect(page.Row(SharedName)).ToHaveCountAsync(1, Wait.Settle);
+		await Expect(page.FeedCard(SharedName)).ToHaveCountAsync(1, Wait.Settle);
 
 		await DeleteAsync(page);
 
-		await Expect(page.Row(SharedName)).ToHaveCountAsync(0, Wait.Settle);
+		await Expect(page.FeedCard(SharedName)).ToHaveCountAsync(0, Wait.Settle);
 	}
 
 	private static async Task DeleteAsync(IPage page)
 	{
-		await page.Row(SharedName).GetByLabel("Delete").ClickAsync();
+		await page.FeedCard(SharedName).Labelled("Delete").ClickAsync();
 		await Expect(page.Heading($"Delete \"{SharedName}\"?")).ToBeVisibleAsync();
 		await page.AlertDialog.Button("Delete").ClickAsync();
 	}

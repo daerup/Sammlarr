@@ -1,40 +1,17 @@
-.feeds-table ::deep div:has(> table) {
-    overflow-x: auto;
+.feeds-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 16px;
 }
 
-.feeds-table ::deep .feeds-actions-cell {
-    width: 1%;
-    white-space: nowrap;
-    text-align: right;
+@media (min-width: 768px) {
+    .feeds-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-.feed-name {
-    display: block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.feed-ident {
-    display: block;
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-}
-
-.feed-ident ::deep span,
-.feed-ident ::deep a {
-    min-width: 0;
-    max-width: 100%;
-}
-
-.feed-owned {
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-}
-
-.feed-owned.is-none {
-    font-weight: 400;
-    color: var(--muted-foreground);
+@media (min-width: 1280px) {
+    .feeds-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 }

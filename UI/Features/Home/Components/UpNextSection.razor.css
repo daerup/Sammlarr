@@ -90,7 +90,7 @@
 .row-name {
     font-size: 12px;
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: clip;
     text-overflow: ellipsis;
 }
 

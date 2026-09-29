@@ -1,0 +1,28 @@
+<span class="feed-chip @ToneClass" title="@Title">
+    @if (Icon is not null)
+    {
+        <LucideIcon Name="@Icon" Size="13"/>
+    }
+    @ChildContent
+</span>
+
+@code {
+    [Parameter, EditorRequired] public required FeedChipTone Tone { get; set; }
+
+    [Parameter] public string? Icon { get; set; }
+
+    [Parameter] public string? Title { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ToneClass =>
+        Tone switch
+        {
+            FeedChipTone.Append => "is-append",
+            FeedChipTone.Mirror => "is-mirror",
+            FeedChipTone.Scheduled => "is-scheduled",
+            FeedChipTone.Quiet => "is-quiet",
+            FeedChipTone.Attention => "is-attention",
+            FeedChipTone.Failed => "is-failed",
+        };
+}

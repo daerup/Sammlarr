@@ -19,6 +19,8 @@ public interface IFeedService
 
 	Task DisableFeedsUsingAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
 
+	Task SetEnabledAsync(IReadOnlyCollection<FeedId> ids, bool enabled, CancellationToken cancellationToken = default);
+
 	IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<FeedRun>> GetRunsAsync(FeedId feedId, int take, CancellationToken cancellationToken = default);

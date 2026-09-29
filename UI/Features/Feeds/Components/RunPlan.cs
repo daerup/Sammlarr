@@ -1,8 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
-using UI.Features.Feeds.Components;
 
-namespace UI.Features.Home.Components;
+namespace UI.Features.Feeds.Components;
 
 public enum RunGroup
 {

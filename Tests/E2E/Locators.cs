@@ -16,6 +16,8 @@ internal static class Locators
 
 		internal ILocator Cell(string name) => page.GetByRole(AriaRole.Cell, new PageGetByRoleOptions { Name = name });
 
+		internal ILocator FeedCard(string name) => page.GetByRole(AriaRole.Article, Exact(name));
+
 		internal ILocator Option(string name) => page.GetByRole(AriaRole.Option, Exact(name));
 
 		internal ILocator OptionContaining(string name) => page.GetByRole(AriaRole.Option, new PageGetByRoleOptions { Name = name });
@@ -50,6 +52,8 @@ internal static class Locators
 		internal ILocator Checkbox => scope.GetByRole(AriaRole.Checkbox);
 
 		internal ILocator Text(string value) => scope.GetByText(value, new LocatorGetByTextOptions { Exact = true });
+
+		internal ILocator Labelled(string label) => scope.GetByLabel(label, new LocatorGetByLabelOptions { Exact = true });
 	}
 
 	private static PageGetByRoleOptions Exact(string name) => new() { Name = name, Exact = true };

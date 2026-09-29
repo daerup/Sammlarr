@@ -30,7 +30,7 @@
         var detail = Detail(item);
         var mediaId = Key(item);
         var renderKey = mediaId.Value;
-        var isSelected = _selected.Contains(mediaId);
+        var isSelected = _selection.Contains(mediaId);
         <div class="relative media-card @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
             <MediaGridTile @key="renderKey"
                            Media="detail"
@@ -73,16 +73,14 @@
     [Parameter] public Func<int, BulkConfirm>? RemoveConfirm { get; set; }
     [Parameter] public Func<int, BulkConfirm>? MarkConfirm { get; set; }
 
-    private readonly HashSet<MediaId> _selected = new();
-    private MediaId? _anchor;
-    private bool _anchorSelected;
+    private readonly BulkSelection<MediaId> _selection = new();
     private bool _isRemoving;
 
     private IReadOnlyList<TItem> ListItems => AllItems ?? Items;
 
-    private int SelectedCount => _selected.Count;
+    private int SelectedCount => _selection.Count;
 
-    private IEnumerable<TItem> Chosen => ListItems.Where(item => _selected.Contains(Key(item)));
+    private IEnumerable<TItem> Chosen => ListItems.Where(item => _selection.Contains(Key(item)));
 
     private IReadOnlyList<TItem> Markable => [.. IsMarked is null ? Chosen : Chosen.Where(item => !IsMarked(item))];
 
@@ -99,10 +97,9 @@
 
     protected override void OnParametersSet()
     {
-        if (!IsEditMode && _selected.Count > 0)
+        if (!IsEditMode && _selection.Count > 0)
         {
-            _selected.Clear();
-            _anchor = null;
+            _selection.Clear();
         }
     }
 
@@ -115,88 +112,17 @@
         await OnTileClick.InvokeAsync(item);
     }
 
-    private void HandleSelectionClick(MediaId mediaId, MouseEventArgs e)
-    {
-        if (e.ShiftKey && _anchor is { } anchorId)
-        {
-            ApplyRange(anchorId, mediaId, _anchorSelected);
-            return;
-        }
-        _anchorSelected = ToggleSelection(mediaId);
-        _anchor = mediaId;
-    }
+    private void HandleSelectionClick(MediaId mediaId, MouseEventArgs e) => _selection.Click(mediaId, e.ShiftKey, [.. Items.Select(Key)]);
 
-    private bool ToggleSelection(MediaId mediaId)
-    {
-        if (_selected.Add(mediaId))
-        {
-            return true;
-        }
-        _selected.Remove(mediaId);
-        return false;
-    }
+    private void SelectPage() => _selection.SelectAll(Items.Select(Key));
 
-    private void ApplyRange(MediaId anchor, MediaId target, bool select)
-    {
-        var anchorIdx = -1;
-        var targetIdx = -1;
-        for (var i = 0; i < Items.Count; i++)
-        {
-            var id = Key(Items[i]);
-            if (id.Equals(anchor))
-            {
-                anchorIdx = i;
-            }
-            if (id.Equals(target))
-            {
-                targetIdx = i;
-            }
-        }
-        if (anchorIdx < 0 || targetIdx < 0)
-        {
-            _anchorSelected = ToggleSelection(target);
-            _anchor = target;
-            return;
-        }
-        var (lo, hi) = anchorIdx <= targetIdx ? (anchorIdx, targetIdx) : (targetIdx, anchorIdx);
-        for (var i = lo; i <= hi; i++)
-        {
-            var id = Key(Items[i]);
-            if (select)
-            {
-                _selected.Add(id);
-            }
-            else
-            {
-                _selected.Remove(id);
-            }
-        }
-    }
+    private void SelectList() => _selection.SelectAll(ListItems.Select(Key));
 
-    private void SelectPage()
-    {
-        _selected.Clear();
-        _selected.UnionWith(Items.Select(Key));
-    }
-
-    private void SelectList()
-    {
-        _selected.Clear();
-        _selected.UnionWith(ListItems.Select(Key));
-    }
-
-    private void ClearSelection()
-    {
-        _selected.Clear();
-        _anchor = null;
-        _anchorSelected = false;
-    }
+    private void ClearSelection() => _selection.Clear();
 
     private async Task ExitEditModeAsync()
     {
-        _selected.Clear();
-        _anchor = null;
-        _anchorSelected = false;
+        _selection.Clear();
         await IsEditModeChanged.InvokeAsync(false);
     }
 

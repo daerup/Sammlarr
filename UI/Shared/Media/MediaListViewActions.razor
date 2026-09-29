@@ -1,5 +1,3 @@
-@using UI.Shared.Filters
-
 @if (HasItems)
 {
     @if (!IsEditMode)
@@ -12,9 +10,9 @@
     <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Default" @onclick="OnToggleFilters" Class="@ViewButtonClass">
         <LucideIcon Name="sliders-horizontal" Size="16" Class="mr-2"/>
         View
-        @if (Filter.ActiveCount > 0)
+        @if (ActiveFilters > 0)
         {
-            <span class="view-badge">@Filter.ActiveCount</span>
+            <span class="view-badge">@ActiveFilters</span>
         }
     </BbButton>
 }
@@ -23,7 +21,7 @@
     [Parameter] public bool HasItems { get; set; }
     [Parameter] public bool IsEditMode { get; set; }
     [Parameter] public bool ShowFilters { get; set; }
-    [Parameter] public ListFilter Filter { get; set; } = ListFilter.None;
+    [Parameter] public int ActiveFilters { get; set; }
     [Parameter] public EventCallback OnEnterEditMode { get; set; }
     [Parameter] public EventCallback OnToggleFilters { get; set; }
 
