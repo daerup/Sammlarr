@@ -143,7 +143,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task ClearApiKeyAsync_WhenTheTmdbKeyIsCleared_RemovesItsCachedRatings()
+	public async Task ClearApiKeyAsync_WhenTheTmdbKeyIsCleared_LeavesTheCachedRatingsToTheCachePurger()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
 		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
@@ -152,6 +152,6 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		host.ScopedDbContext.ChangeTracker.Clear();
 		var cached = await host.ScopedDbContext.MediaRatings.AsNoTracking().AnyAsync(rating => rating.Source == RatingProvider.Tmdb);
-		await Assert.That(cached).IsFalse();
+		await Assert.That(cached).IsTrue();
 	}
 }

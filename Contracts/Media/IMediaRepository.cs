@@ -21,8 +21,6 @@ public interface IMediaRepository
 
 	Task RemoveMetadataAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);
 
-	Task RemoveRatingsBySourceAsync(RatingProvider source, CancellationToken cancellationToken = default);
-
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
 		IEnumerable<MediaId> ids,
 		MediaProvider source,

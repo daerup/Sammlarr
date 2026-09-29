@@ -187,12 +187,6 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		await ctx.MediaMetadata.Where(m => rawIds.Contains(m.MediaId)).ExecuteDeleteAsync(cancellationToken);
 	}
 
-	public async Task RemoveRatingsBySourceAsync(RatingProvider source, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.MediaRatings.Where(r => r.Source == source).ExecuteDeleteAsync(cancellationToken);
-	}
-
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
 		IEnumerable<MediaId> ids,
 		MediaProvider source,
