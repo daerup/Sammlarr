@@ -31,6 +31,17 @@ public class ProviderLogoTests : BunitContext
 	}
 
 	[Test]
+	public async Task Logo_AtAGivenSize_HoldsThatHeightSoTheWidthFollowsTheArt()
+	{
+		var cut = Render<ProviderLogo>(parameters =>
+			parameters.Add(logo => logo.Provider, MediaProvider.Mdblist).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 22)
+		);
+
+		var sizes = cut.FindAll("img").Select(image => $"{image.GetAttribute("width")}|{image.GetAttribute("style")}");
+		await Assert.That(sizes).IsEquivalentTo(["|height: 22px", "|height: 22px"]);
+	}
+
+	[Test]
 	public async Task Mark_OnItsOwn_IsNamedForAssistiveTechnology()
 	{
 		var cut = Render<ProviderLogo>(parameters => parameters.Add(logo => logo.Provider, MediaProvider.Imdb));

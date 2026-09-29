@@ -3,12 +3,12 @@
 
 @if (Art.IsThemed)
 {
-    <img class="provider-logo is-light" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size"/>
-    <img class="provider-logo is-dark" src="@Source(Art.Dark)" alt="@Alt" width="@Width" height="@Size"/>
+    <img class="provider-logo is-light" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size" style="@HeightStyle"/>
+    <img class="provider-logo is-dark" src="@Source(Art.Dark)" alt="@Alt" width="@Width" height="@Size" style="@HeightStyle"/>
 }
 else
 {
-    <img class="provider-logo" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size"/>
+    <img class="provider-logo" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size" style="@HeightStyle"/>
 }
 
 @code {
@@ -33,6 +33,8 @@ else
     private string Alt => Decorative ? string.Empty : Brand.DisplayName;
 
     private int? Width => Form is ProviderLogoForm.Logo ? null : Size;
+
+    private string? HeightStyle => Form is ProviderLogoForm.Logo ? $"height: {Size}px" : null;
 
     private string Source(string file) => Assets[$"_content/UI/providers/{file}"];
 }
