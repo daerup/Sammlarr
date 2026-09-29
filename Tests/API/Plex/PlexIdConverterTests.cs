@@ -76,7 +76,7 @@ public class PlexIdConverterTests
 		var details = new TmdbTypes.Details(int.Parse(tmdbId.Value), originalTitle, null, "2021-01-01", null, originalTitle, null, "movie");
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(JsonSerializer.Serialize(details));
-		var apiKeyStore = IApiKeyConfigRepository.Mock();
+		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-api-key");
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
 		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
@@ -132,7 +132,7 @@ public class PlexIdConverterTests
 		handler.OnAnyRequest().RespondWithJson(json);
 		var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
@@ -144,7 +144,7 @@ public class PlexIdConverterTests
 		handler.OnAnyRequest().RespondWithJson(BuildEmptySearchJson());
 		var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
@@ -157,7 +157,7 @@ public class PlexIdConverterTests
 		handler.OnRequest(r => r.PathStartsWith("/library/metadata")).RespondWithJson(payload.Json);
 		var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var plexClient = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 		return new PlexApi(plexClient, PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);

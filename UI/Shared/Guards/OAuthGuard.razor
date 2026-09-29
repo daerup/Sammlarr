@@ -1,5 +1,5 @@
 @using Contracts.Auth
-@inject ICredentialRepository CredentialStore
+@inject ICredentialService Credentials
 
 @code {
     [Parameter] [EditorRequired] public AuthProvider Provider { get; set; }
@@ -9,7 +9,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var hasAccess = await CredentialStore.GetAsync(Provider).IsSuccess();
+        var hasAccess = await Credentials.HasCredentialAsync(Provider);
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != hasAccess)
         {

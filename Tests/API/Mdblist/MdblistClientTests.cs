@@ -21,7 +21,7 @@ public class MdblistClientTests
 		var testee = new MdblistClient(
 			handler.CreateClient(BaseUrl),
 			new MdblistOptions { BaseUrl = BaseUrl },
-			IApiKeyConfigRepository.Mock().Object,
+			IApiKeyService.Mock().Object,
 			ICurrentUser.Mock().Object
 		);
 
@@ -34,7 +34,7 @@ public class MdblistClientTests
 	public async Task SendAsync_WhenUnauthorized_InvalidatesCachedApiKey()
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
-		var apiKeys = IApiKeyConfigRepository.Mock();
+		var apiKeys = IApiKeyService.Mock();
 		var testee = new MdblistClient(handler.CreateClient(BaseUrl), new MdblistOptions { BaseUrl = BaseUrl }, apiKeys.Object, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, new Faker().Random.AlphaNumeric(32)));

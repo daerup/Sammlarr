@@ -13,7 +13,7 @@ namespace Integration.Tests.Settings;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private IApiKeyConfigRepository ApiKeys => host.Resolve<IApiKeyConfigRepository>();
+	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
 	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
 	private IMediaRatingService TmdbRatings => host.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb);
 	private IWatchlistProvider PlexWatchlist => host.ResolveKeyed<IWatchlistProvider>(WatchlistProvider.Plex);
@@ -26,7 +26,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task GetApiKeyAsync_WhenAKeyWasStored_ReturnsIt()
 	{
-		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
+		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
 
 		await Assert
 			.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb))
@@ -37,9 +37,9 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task SetApiKeyAsync_WhenAKeyAlreadyExists_ReplacesIt()
 	{
-		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "old-key"));
+		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "old-key"));
 
-		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
+		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
 
 		await Assert
 			.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb))
@@ -50,7 +50,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task ClearApiKeyAsync_WhenAKeyExists_RemovesIt()
 	{
-		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "secret-key"));
+		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "secret-key"));
 
 		await ApiKeys.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 

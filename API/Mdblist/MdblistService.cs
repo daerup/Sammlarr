@@ -14,12 +14,8 @@ using Domain.Providers;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistService(
-	MdblistClient client,
-	IMediaService media,
-	IProviderConfigRepository configRepository,
-	IApiKeyConfigRepository apiKeyRepository
-) : IFeedProvider
+internal sealed class MdblistService(MdblistClient client, IMediaService media, IProviderConfigRepository configRepository, IApiKeyService apiKeys)
+	: IFeedProvider
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
@@ -79,7 +75,7 @@ internal sealed class MdblistService(
 	private async Task<(MdblistTypes.ListItems.Root Page, bool HasMore)> FetchPageAsync(string identifier, int offset, CancellationToken cancellationToken)
 	{
 		var endpoint = string.Format(MdblistEndpoints.ListItems, identifier, PageSize, offset);
-		var apiKey = await apiKeyRepository
+		var apiKey = await apiKeys
 			.GetApiKeyAsync(ApiKeyProvider.Mdblist, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys."));
 		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);

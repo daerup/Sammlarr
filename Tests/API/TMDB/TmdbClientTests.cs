@@ -20,7 +20,7 @@ public class TmdbClientTests
 		var apiKey = GetApiKey();
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(options.BaseUrl);
-		var testee = new TmdbClient(httpClient, options, IApiKeyConfigRepository.Mock().Object, ICurrentUser.Mock().Object);
+		var testee = new TmdbClient(httpClient, options, IApiKeyService.Mock().Object, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, "trending/all/week?page=2", new TestApiKey(ApiKeyProvider.Tmdb, apiKey));
 
@@ -34,7 +34,7 @@ public class TmdbClientTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.Unauthorized);
 		using var httpClient = handler.CreateClient(options.BaseUrl);
-		var apiKeys = IApiKeyConfigRepository.Mock();
+		var apiKeys = IApiKeyService.Mock();
 		var testee = new TmdbClient(httpClient, options, apiKeys.Object, ICurrentUser.Mock().Object);
 
 		await testee.SendAsync(HttpMethod.Get, "trending/all/week?page=1", new TestApiKey(ApiKeyProvider.Tmdb, GetApiKey()));
