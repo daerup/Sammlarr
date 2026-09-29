@@ -526,7 +526,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddHttpClient<MdblistClient>().ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 		services.AddHttpClient(MdblistClient.Unauthenticated).ConfigurePrimaryHttpMessageHandler(_ => HttpStub);
 
-		services.AddSingleton(new TmdbOptions { BaseUrl = $"https://{TestUrls.TmdbApi}", ImageBaseUrl = "https://image.tmdb.org/t/p/original" });
+		services.AddSingleton(new TmdbOptions { BaseUrl = $"https://{TestUrls.TmdbApi}", ImageBaseUrl = "https://image.tmdb.org/t/p" });
 		services.AddSingleton(new MdblistOptions { BaseUrl = $"https://{TestUrls.MdblistApi}" });
 		services.AddSingleton(
 			new PlexOptions

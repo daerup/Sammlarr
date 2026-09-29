@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using API.Http;
 using Contracts.Auth;
+using Contracts.Media.Artwork;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
@@ -24,6 +25,7 @@ internal class PlexModule : IServiceModule
 		services.AddKeyedScoped<IExternalIdConverter, PlexIdConverter>(MediaProvider.Plex);
 
 		services.AddSingleton<PlexUrls>();
+		services.AddKeyedSingleton<IArtworkResizer, PlexArtwork>(ArtworkProvider.Plex);
 		services.AddHttpClient<PlexClient>(ConfigurePlexClient).AddProviderHttp<PlexOptions>(MediaProvider.Plex);
 		services.AddHttpClient(PlexClient.Unauthenticated, ConfigurePlexClient).AddProviderHttp<PlexOptions>(MediaProvider.Plex);
 	}

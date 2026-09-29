@@ -3,7 +3,9 @@ using Bunit;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Home.Components;
+using UI.Tests.Media;
 
 namespace UI.Tests.Home;
 
@@ -19,6 +21,7 @@ public class ActivityDayBlockTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(ArtworkStub.Sizing());
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 

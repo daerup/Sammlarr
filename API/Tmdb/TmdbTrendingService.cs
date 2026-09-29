@@ -11,13 +11,12 @@ using Contracts.Settings;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
-using Shared.Options;
 
 namespace API.Tmdb;
 
 internal sealed class TmdbTrendingService(
 	TmdbClient tmdbClient,
-	TmdbOptions options,
+	TmdbArtwork artwork,
 	IMediaService media,
 	IProviderConfigService providerConfig,
 	IApiKeyService apiKeys
@@ -74,8 +73,8 @@ internal sealed class TmdbTrendingService(
 				Identity = identity,
 				Title = response.DisplayTitle,
 				Summary = response.Overview,
-				PosterUrl = options.ImageBaseUrl + response.PosterPath,
-				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+				PosterUrl = artwork.Original(response.PosterPath),
+				BackdropUrl = artwork.Original(response.BackdropPath),
 				ReleaseDate = ParseReleaseDate(response.AvailableDate),
 				Rating = BuildRating(response.VoteAverage),
 			},
@@ -84,8 +83,8 @@ internal sealed class TmdbTrendingService(
 				Identity = identity,
 				Title = response.DisplayTitle,
 				Summary = response.Overview,
-				PosterUrl = options.ImageBaseUrl + response.PosterPath,
-				BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+				PosterUrl = artwork.Original(response.PosterPath),
+				BackdropUrl = artwork.Original(response.BackdropPath),
 				ReleaseDate = ParseReleaseDate(response.AvailableDate),
 				Rating = BuildRating(response.VoteAverage),
 			},
@@ -98,8 +97,8 @@ internal sealed class TmdbTrendingService(
 			Externals = [response.TmdbId],
 			Title = response.DisplayTitle,
 			Summary = response.Overview,
-			PosterUrl = options.ImageBaseUrl + response.PosterPath,
-			BackdropUrl = options.ImageBaseUrl + response.BackdropPath,
+			PosterUrl = artwork.Original(response.PosterPath),
+			BackdropUrl = artwork.Original(response.BackdropPath),
 			ReleaseDate = ParseReleaseDate(response.AvailableDate),
 			Rating = BuildRating(response.VoteAverage),
 		};

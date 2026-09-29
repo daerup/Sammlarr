@@ -13,5 +13,6 @@ internal class ServicesModule : IServiceModule
 		services.AddScoped<Notifier>();
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
+		services.AddScoped<ArtworkSources>();
 	}
 }

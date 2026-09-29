@@ -1,4 +1,5 @@
 using System.Globalization;
+using Contracts.Media.Artwork;
 using Shared.Options;
 
 namespace API.Plex;
@@ -29,6 +30,14 @@ internal sealed class PlexUrls(PlexOptions options)
 
 	public string RemoveFromWatchlist(string ratingKey) =>
 		Compose(options.VodUrl, string.Format(CultureInfo.InvariantCulture, PlexEndpoints.RemoveFromWatchlistQuery, Uri.EscapeDataString(ratingKey)));
+
+	public bool IsArtwork(string url) => url.StartsWith($"{options.ArtworkUrl.TrimEnd('/')}/", StringComparison.Ordinal);
+
+	public string Photo(string artworkUrl, ArtworkSize size) =>
+		Compose(
+			options.ImagesUrl,
+			string.Format(CultureInfo.InvariantCulture, PlexEndpoints.PhotoQuery, size.Width, size.Height, Uri.EscapeDataString(artworkUrl))
+		);
 
 	private static string Compose(string host, string path) => $"{host.TrimEnd('/')}/{path}";
 }

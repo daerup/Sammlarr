@@ -1,5 +1,7 @@
 @using Contracts.Media
+@using Contracts.Media.Artwork
 @inject IMediaService MediaService
+@inject ArtworkSources Artwork
 <div data-testid="media-tile" class="cursor-pointer group @(Media.IsUnresolved ? "tile-unresolved" : "")" @onclick="OnClick">
     <div class="relative overflow-hidden rounded-lg media-card-backdrop @(Dimmed ? "media-card-dimmed" : "")">
         @if (_failed)
@@ -10,7 +12,7 @@
         }
         else
         {
-            <img class="media-card-poster" src="@_src" alt="" @onerror="OnImageError"/>
+            <img class="media-card-poster" src="@_src" srcset="@_srcSet" sizes="@Sizes" alt="" @onerror="OnImageError"/>
             <div class="media-card-scrim"></div>
         }
 
@@ -81,7 +83,11 @@
     [Parameter] public bool IsInWatchlist { get; set; }
     [Parameter] public bool Dimmed { get; set; }
 
+    private const string Sizes = "(min-width: 768px) calc(30vw - 40px), calc(120vw - 76px)";
+    private static readonly ArtworkSize[] Candidates = [new(780, 413), new(1280, 678)];
+
     private string _src = string.Empty;
+    private string? _srcSet;
     private string? _lastImageUrl;
     private bool _isShowingPoster;
     private bool _failed;
@@ -91,14 +97,26 @@
         if (_lastImageUrl != Media.BackdropUrl)
         {
             _lastImageUrl = Media.BackdropUrl;
-            _src = Media.BackdropUrl;
+            Show(Media.BackdropUrl);
             _isShowingPoster = false;
             _failed = false;
         }
     }
 
+    private void Show(string url)
+    {
+        _src = url;
+        _srcSet = Artwork.ByWidth(url, Candidates);
+    }
+
     private async Task OnImageError()
     {
+        if (_srcSet is not null)
+        {
+            _srcSet = null;
+            return;
+        }
+
         if (_isShowingPoster || string.IsNullOrWhiteSpace(Media.PosterUrl))
         {
             _failed = true;
@@ -109,6 +127,6 @@
             return;
         }
         _isShowingPoster = true;
-        _src = Media.PosterUrl;
+        Show(Media.PosterUrl);
     }
 }

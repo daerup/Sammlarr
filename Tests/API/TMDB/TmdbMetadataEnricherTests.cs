@@ -15,7 +15,7 @@ public class TmdbMetadataEnricherTests
 	[Test]
 	public async Task LookUpAsync_MapsTmdbRatingFromDetail()
 	{
-		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
+		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson("{\"id\":123,\"title\":\"Example\",\"vote_average\":7.5,\"vote_count\":1000}");
 		var apiKeyStore = IApiKeyService.Mock();
@@ -26,7 +26,7 @@ public class TmdbMetadataEnricherTests
 			apiKeyStore.Object,
 			NullLogger<TmdbApi>.Instance
 		);
-		var testee = new TmdbMetadataEnricher(tmdbApi, options);
+		var testee = new TmdbMetadataEnricher(tmdbApi, new TmdbArtwork(options));
 
 		var result = await testee.LookUpAsync(TmdbId.From("123", MediaType.Movie));
 
