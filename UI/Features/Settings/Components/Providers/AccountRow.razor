@@ -1,0 +1,154 @@
+@using Contracts.Auth
+@using Contracts.Identity
+@using UI.Shared.Services.Branding
+@inject ICredentialRepository CredentialRepository
+@inject ICredentialFactory CredentialFactory
+@inject MediaProviderBrandingService MediaProviderBrandingService
+@inject ICurrentUser CurrentUser
+@inject NavigationManager NavigationManager
+
+<ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
+    <Status>
+        <CredentialStatus State="_state" IdleText="Not connected"/>
+    </Status>
+    <ChildContent>
+        <BbField>
+            <BbFieldLabel>Access token</BbFieldLabel>
+            <BbFieldContent>
+                <SensitiveInput @bind-Value="Token" Placeholder="Paste an access token" Label="access token" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+                <BbFieldDescription>
+                    @if (_savedState == CredentialState.Saved)
+                    {
+                        <span>Signed in as <span class="font-medium text-foreground">@CurrentUser.DisplayName</span>. Paste a @Branding.NickName access token to replace it, or connect through @Branding.NickName.</span>
+                    }
+                    else
+                    {
+                        <span>Paste a @Branding.NickName access token, or connect through @Branding.NickName.</span>
+                    }
+                </BbFieldDescription>
+            </BbFieldContent>
+        </BbField>
+
+        <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="Cancel">
+            <ChildContent>
+                <BbButton Variant="ButtonVariant.Outline" OnClick="Connect">
+                    <LucideIcon Name="log-in" Size="14" Class="mr-2"/>
+                    <span>@(_savedState == CredentialState.Saved ? "Reconnect" : "Connect") with @Branding.NickName</span>
+                </BbButton>
+            </ChildContent>
+            <Remove>
+                <BbAlertDialog>
+                    <BbAlertDialogTrigger>
+                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect"/>
+                    </BbAlertDialogTrigger>
+                    <BbAlertDialogContent>
+                        <BbAlertDialogHeader>
+                            <BbAlertDialogTitle>Disconnect @Branding.DisplayName?</BbAlertDialogTitle>
+                            <BbAlertDialogDescription>
+                                This removes the stored @Branding.NickName credential. You will need to reconnect to use @Branding.NickName again.
+                            </BbAlertDialogDescription>
+                        </BbAlertDialogHeader>
+                        <BbAlertDialogFooter>
+                            <BbAlertDialogCancel>
+                                <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                            </BbAlertDialogCancel>
+                            <BbAlertDialogAction>
+                                <HoverButton Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect" OnClick="DisconnectAsync"/>
+                            </BbAlertDialogAction>
+                        </BbAlertDialogFooter>
+                    </BbAlertDialogContent>
+                </BbAlertDialog>
+            </Remove>
+        </CredentialActions>
+    </ChildContent>
+</ProviderRow>
+
+@code {
+    [Parameter] [EditorRequired] public required AuthProvider Provider { get; set; }
+
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
+
+    private string _tokenInput = string.Empty;
+    private string _savedToken = string.Empty;
+    private AuthProvider? _loadedProvider;
+    private CredentialState _state = CredentialState.Idle;
+    private CredentialState _savedState = CredentialState.Idle;
+    private Guid _clientId;
+
+    private bool HasChange => !string.IsNullOrWhiteSpace(_tokenInput) && _tokenInput != _savedToken;
+
+    private string Token
+    {
+        get => _tokenInput;
+        set
+        {
+            if (_tokenInput == value)
+            {
+                return;
+            }
+
+            _tokenInput = value;
+            _state = value == _savedToken ? _savedState : CredentialState.Idle;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_loadedProvider == Provider)
+        {
+            return;
+        }
+
+        _loadedProvider = Provider;
+        _savedState = await CredentialRepository
+            .GetAsync(Provider)
+            .Apply(credential =>
+            {
+                _savedToken = _tokenInput = credential.AccessToken;
+                _clientId = credential.ClientId;
+            })
+            .ApplyError(_ => _savedToken = _tokenInput = string.Empty)
+            .Match(CredentialState.Saved, CredentialState.Idle);
+        _state = _savedState;
+    }
+
+    private async Task TestAsync()
+    {
+        _state = CredentialState.Testing;
+        _clientId = Guid.NewGuid();
+        _state = await CredentialFactory.CreateAsync(Provider, _clientId, _tokenInput, DateTimeOffset.MaxValue).Match(CredentialState.Success, CredentialState.Failed);
+    }
+
+    private async Task SaveAsync()
+    {
+        _state = CredentialState.Saving;
+        await CredentialRepository.StoreAsync(Provider, _tokenInput, DateTimeOffset.MaxValue, _clientId);
+        _savedToken = _tokenInput;
+        _savedState = CredentialState.Saved;
+        _state = CredentialState.Saved;
+    }
+
+    private async Task DisconnectAsync()
+    {
+        await CredentialRepository.ClearAsync(Provider);
+        _savedToken = _tokenInput = string.Empty;
+        _savedState = CredentialState.Idle;
+        _state = CredentialState.Idle;
+    }
+
+    private void Cancel()
+    {
+        _tokenInput = _savedToken;
+        _state = _savedState;
+    }
+
+    private void Connect()
+    {
+        var returnUrl = Uri.EscapeDataString("/settings?section=providers");
+        NavigationManager.NavigateTo($"/auth/{Provider.ToString().ToLowerInvariant()}/login?returnUrl={returnUrl}", forceLoad: true);
+    }
+}

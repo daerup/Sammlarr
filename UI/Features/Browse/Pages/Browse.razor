@@ -24,7 +24,7 @@
             <ProtectedSection GuardState="HasTrendingProviderAccess"
                               ApiProvider="@_providerConfig.TrendingProvider.AsApiKeyProvider()"
                               DeniedActionDescription="browse trending media"
-                              FallbackAction="@(() => NavigationManager.NavigateTo("/settings?section=secrets"))">
+                              FallbackAction="@(() => NavigationManager.NavigateTo("/settings?section=providers"))">
                 @if (_isLoading)
                 {
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">

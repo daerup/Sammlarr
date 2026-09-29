@@ -14,7 +14,7 @@ internal sealed class AccountConnectionPrompt(
 		var state = await authenticationStateProvider.GetAuthenticationStateAsync();
 		if (state.User.Identity?.IsAuthenticated == true)
 		{
-			navigationManager.NavigateTo("/settings?section=secrets");
+			navigationManager.NavigateTo("/settings?section=providers");
 			return;
 		}
 
