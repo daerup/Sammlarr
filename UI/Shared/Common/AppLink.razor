@@ -1,0 +1,21 @@
+<a href="@Href" class="@($"app-link {Class}".Trim())" style="@(Color is null ? null : $"color: {Color}")" title="@Title">
+    @ChildContent
+    @if (Arrow)
+    {
+        <LucideIcon Name="arrow-up-right" Size="12" Class="app-link-arrow"/>
+    }
+</a>
+
+@code {
+    [Parameter] [EditorRequired] public required string Href { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    [Parameter] public bool Arrow { get; set; } = true;
+
+    [Parameter] public string? Color { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+
+    [Parameter] public string? Title { get; set; }
+}

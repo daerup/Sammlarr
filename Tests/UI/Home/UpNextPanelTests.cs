@@ -42,9 +42,8 @@ public class UpNextPanelTests : BunitContext
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 
 		var names = cut.FindAll(".row-name");
-		await Assert.That(names[0].TagName).IsEqualTo("A");
-		await Assert.That(names[0].GetAttribute("href")).IsEqualTo("/feeds/edit/docs");
-		await Assert.That(names[1].TagName).IsEqualTo("SPAN");
+		await Assert.That(names[0].Closest("a")?.GetAttribute("href")).IsEqualTo("/feeds/edit/docs");
+		await Assert.That(names[1].Closest("a")).IsNull();
 	}
 
 	[Test]

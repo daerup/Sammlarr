@@ -1,0 +1,29 @@
+.app-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15em;
+    color: var(--foreground);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    text-underline-offset: 3px;
+}
+
+.app-link:hover,
+.app-link:focus-visible {
+    text-decoration: underline;
+}
+
+.app-link ::deep .app-link-arrow {
+    display: block;
+    flex: none;
+    width: 0.9em;
+    height: 0.9em;
+    opacity: 0.7;
+    transition: opacity 150ms ease;
+}
+
+.app-link:hover ::deep .app-link-arrow,
+.app-link:focus-visible ::deep .app-link-arrow {
+    opacity: 1;
+}

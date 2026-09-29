@@ -17,9 +17,9 @@
             </span>
             @if (ProvenanceView.EditUrl(Provenance) is { } editUrl)
             {
-                <a class="provenance-link provenance-name" href="@editUrl" title="Open feed settings">
+                <AppLink Href="@editUrl" Title="Open feed settings" Class="min-w-0">
                     <span class="provenance-name-text">@ProvenanceView.Heading(Provenance)</span>
-                </a>
+                </AppLink>
             }
             else
             {
@@ -62,10 +62,7 @@
         @if (ProvenanceView.RunUrl(Provenance, ItemId) is { } runUrl)
         {
             <div class="provenance-foot">
-                <a class="provenance-link" href="@runUrl">
-                    <LucideIcon Name="history" Size="13"/>
-                    <span>See this run</span>
-                </a>
+                <AppLink Href="@runUrl" Class="text-xs">See this run</AppLink>
             </div>
         }
     </div>

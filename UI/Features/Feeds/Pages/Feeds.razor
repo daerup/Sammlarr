@@ -184,9 +184,8 @@
                                     }
                                     else if (OwnedBy(feed) is > 0 and var owned)
                                     {
-                                        <a class="feed-owned feed-owned-link"
-                                           href="@($"/watchlist?feed={UrlGuid.Encode(feed.Id.Value)}")"
-                                           title="@($"Show the {owned} titles this feed put on your watchlist")">@owned</a>
+                                        <AppLink Href="@($"/watchlist?feed={UrlGuid.Encode(feed.Id.Value)}")"
+                                                 Title="@($"Show the {owned} titles this feed put on your watchlist")">@owned</AppLink>
                                     }
                                     else
                                     {

@@ -104,35 +104,6 @@
     color: var(--muted-foreground);
 }
 
-.change-note.is-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 8px;
-    margin-right: -8px;
-    border-radius: 6px;
-    font-weight: 600;
-    color: var(--foreground);
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.12s ease;
-}
-
-.change-note.is-link:hover,
-.change-note.is-link:focus-visible {
-    background: color-mix(in srgb, var(--foreground) 9%, transparent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}
-
-.change-note.is-link ::deep svg {
-    transition: transform 0.12s ease;
-}
-
-.change-note.is-link:hover ::deep svg {
-    transform: translateX(2px);
-}
-
 .change-actions {
     display: flex;
     gap: 8px;

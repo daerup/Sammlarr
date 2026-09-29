@@ -24,15 +24,6 @@
     margin-bottom: 8px;
 }
 
-.runs-crumbs a {
-    color: var(--muted-foreground);
-    text-decoration: none;
-}
-
-.runs-crumbs a:hover {
-    color: var(--foreground);
-}
-
 .runs-crumbs .is-current {
     color: var(--foreground);
 }
@@ -63,23 +54,6 @@
     margin-top: 9px;
     font-size: 12.5px;
     color: var(--muted-foreground);
-}
-
-.runs-owned {
-    color: var(--foreground);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-}
-
-.runs-owned-link {
-    color: inherit;
-    text-decoration: none;
-}
-
-.runs-owned-link:hover,
-.runs-owned-link:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: 3px;
 }
 
 .runs-alltime {

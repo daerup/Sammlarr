@@ -30,31 +30,29 @@ public class FeedConfigPanelTests : BunitContext
 	[Test]
 	public async Task Provider_WhenAnOpenedFeedsProviderHasNoKey_StaysChosenSaysWhereToAddItAndBlocksTesting()
 	{
-		var cut = RenderPanel(FeedProvider.Tmdb, isNew: false);
+		var cut = RenderPanel(FeedProvider.Tmdb);
 
 		var config = _changes.Last();
 		await Assert.That(config.Provider).IsEqualTo(FeedProvider.Tmdb);
 		await Assert.That(config.IsTestable).IsFalse();
 		await Assert.That(ProviderLabel(cut).TextContent).Contains("*");
-		await Assert.That(cut.Markup).Contains("Add the TMDb API key in");
+		await Assert.That(cut.Markup).Contains("API key is missing, fix in");
 	}
 
 	[Test]
-	public async Task Provider_WhenANewFeedStartsOnOneWithNoKey_MovesToOneThatHasAKey()
+	public async Task Provider_OnANewFeed_StartsEmptyAndAsksForOne()
 	{
-		var cut = RenderPanel(FeedProvider.Tmdb, isNew: true);
+		var cut = RenderPanel(null);
 
-		var config = _changes.Last();
-		await Assert.That(config.Provider).IsEqualTo(FeedProvider.Mdblist);
-		await Assert.That(config.IsTestable).IsTrue();
-		await Assert.That(ProviderLabel(cut).TextContent).Contains("*");
-		await Assert.That(cut.Markup).DoesNotContain("API key in");
+		await Assert.That(cut.Find("[role=combobox]").TextContent).Contains("Select a provider");
+		await Assert.That(_changes).IsEmpty();
+		await Assert.That(cut.Markup).DoesNotContain("API key is missing");
 	}
 
 	private static IElement ProviderLabel(IRenderedComponent<FeedConfigPanel> cut) =>
 		cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider"));
 
-	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider provider, bool isNew) =>
+	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider) =>
 		Render<FeedConfigPanel>(parameters =>
 			parameters
 				.Add(
@@ -66,7 +64,6 @@ public class FeedConfigPanelTests : BunitContext
 						Identifier = "hdlists/documentaries",
 					}
 				)
-				.Add(panel => panel.IsNew, isNew)
 				.Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))
 		);
 }

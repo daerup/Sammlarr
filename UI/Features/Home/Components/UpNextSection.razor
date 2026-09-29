@@ -22,7 +22,7 @@
             <span class="row-body">
                 @if (row.Href is { } href)
                 {
-                    <a class="row-name" href="@href">@row.Name</a>
+                    <AppLink Href="@href" Class="min-w-0 text-xs"><span class="row-name">@row.Name</span></AppLink>
                 }
                 else
                 {
