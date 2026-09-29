@@ -37,6 +37,14 @@ public class SammlarrLogoTests : BunitContext
 	}
 
 	[Test]
+	public async Task Wordmark_Always_DrawsThePerchAsPartOfTheSSoTheJoinHasNoSeam()
+	{
+		var cut = Render<SammlarrLogo>();
+
+		await Assert.That(cut.FindAll("path.sammlarr-word")).Count().IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task Logo_UnderACommaDecimalCulture_StillWritesDotDecimals()
 	{
 		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
