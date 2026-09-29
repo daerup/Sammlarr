@@ -297,6 +297,8 @@
         if (wanted is null && RunIdParam is not null && await FeedService.GetRunAsync(UrlGuid.Decode(RunIdParam)) is Some<FeedRun>(var linked))
         {
             wanted = linked;
+            _take = await FeedService.CountRunsSinceAsync(feedId, linked.StartedAt);
+            await LoadRunsAsync(feedId);
         }
 
         if (wanted is not null && wanted.Id != _selected?.Id)
