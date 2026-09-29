@@ -1,0 +1,33 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="provider-row" style="--brand: @Branding.GetBrandingInfo(Provider).BrandColor">
+    <BbCollapsible Open="Open" OpenChanged="OpenChanged">
+        <BbCollapsibleTrigger AsChild="false"
+                              Class="group w-full grid grid-cols-[15px_190px_1fr_auto] items-center gap-3.5 pl-5 pr-4 py-4 text-left hover:bg-muted/40 transition-colors">
+            <LucideIcon Name="chevron-right" Size="15" Class="text-muted-foreground transition-transform duration-150 group-data-[state=open]:rotate-90"/>
+            <span class="flex items-center">
+                <ProviderLogo Provider="Provider" Form="ProviderLogoForm.Logo" Size="22"/>
+            </span>
+            <span class="text-sm text-muted-foreground truncate">@ProviderCaption.For(Provider)</span>
+            <span>@Status</span>
+        </BbCollapsibleTrigger>
+        <BbCollapsibleContent>
+            <div class="flex flex-col gap-4 pl-[49px] pr-4 pt-1 pb-5">
+                @ChildContent
+            </div>
+        </BbCollapsibleContent>
+    </BbCollapsible>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required MediaProvider Provider { get; set; }
+
+    [Parameter] public bool Open { get; set; }
+
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment Status { get; set; }
+
+    [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
+}

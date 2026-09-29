@@ -6,7 +6,7 @@ public class SettingsSectionTests
 {
 	[Test]
 	[Arguments("provider-settings", "Choose which provider powers the watchlist and OAuth flow.")]
-	[Arguments("secrets", "Your TMDB v3 API key")]
+	[Arguments("providers", "Which service does what, and the account, keys and connections behind it.")]
 	[Arguments("notifications", "Webhook or Pushover connections to deliver to.")]
 	[Arguments("cache", "Id groups.")]
 	[Arguments("diagnostics", "Live log stream")]

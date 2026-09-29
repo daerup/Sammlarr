@@ -1,0 +1,48 @@
+@using Contracts.Settings
+@inject IProviderConfigRepository ProviderConfigRepository
+
+<div class="flex max-w-4xl flex-col gap-8">
+    <div>
+        <h2 class="text-lg font-semibold">Providers</h2>
+        <p class="text-sm text-muted-foreground">Which service does what, and the account, keys and connections behind it.</p>
+    </div>
+
+    <section class="flex flex-col gap-3" aria-label="Accounts and keys">
+        <h3 class="text-sm font-semibold">Accounts and keys</h3>
+        <div class="rounded-lg border bg-card overflow-hidden">
+            <AccountRow Provider="_authProvider"
+                        Open="IsOpen(_authProvider.AsMediaProvider())"
+                        OpenChanged="open => Toggle(_authProvider.AsMediaProvider(), open)"/>
+            <ApiKeyRow Provider="ApiKeyProvider.Tmdb"
+                       Open="IsOpen(MediaProvider.Tmdb)"
+                       OpenChanged="open => Toggle(MediaProvider.Tmdb, open)">
+                <Description>
+                    Your TMDB API key. Get one at
+                    <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer"
+                       class="underline underline-offset-2 hover:text-foreground transition-colors">themoviedb.org</a>
+                </Description>
+            </ApiKeyRow>
+            <ApiKeyRow Provider="ApiKeyProvider.Mdblist"
+                       Open="IsOpen(MediaProvider.Mdblist)"
+                       OpenChanged="open => Toggle(MediaProvider.Mdblist, open)">
+                <Description>
+                    Your MDBList API key. Get one at
+                    <a href="https://mdblist.com/preferences/#api" target="_blank" rel="noopener noreferrer"
+                       class="underline underline-offset-2 hover:text-foreground transition-colors">mdblist.com</a>
+                </Description>
+            </ApiKeyRow>
+        </div>
+    </section>
+</div>
+
+@code {
+    private AuthProvider _authProvider = AuthProvider.Plex;
+
+    private MediaProvider? _open;
+
+    protected override async Task OnInitializedAsync() => _authProvider = (await ProviderConfigRepository.GetAsync()).AuthProvider;
+
+    private bool IsOpen(MediaProvider provider) => _open == provider;
+
+    private void Toggle(MediaProvider provider, bool open) => _open = open ? provider : null;
+}

@@ -8,5 +8,10 @@ internal static class SettingsPage
 
 	internal static Task VisitSectionAsync(IPage page, string slug) => page.VisitAsync(Section(slug));
 
-	internal static ILocator Card(IPage page, string title) => page.Locator("div.max-w-lg").Filter(new LocatorFilterOptions { Has = page.Heading(title) });
+	internal static async Task<ILocator> OpenProviderAsync(IPage page, string provider)
+	{
+		var row = page.Locator("div.provider-row").Filter(new LocatorFilterOptions { Has = page.ButtonContaining(provider) });
+		await row.ButtonContaining(provider).ClickAsync();
+		return row;
+	}
 }
