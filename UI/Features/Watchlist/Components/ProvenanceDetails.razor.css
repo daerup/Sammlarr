@@ -1,6 +1,7 @@
 .provenance-details {
     display: flex;
-    width: 252px;
+    width: auto;
+    max-width: 320px;
 }
 
 .provenance-rail {
