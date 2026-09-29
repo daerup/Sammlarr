@@ -2,7 +2,7 @@
 @using Contracts.Settings
 @using Domain.Identity
 @using UI.Shared.Services.Branding
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject MediaProviderBrandingService MediaProviderBrandingService
@@ -67,7 +67,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _providerConfig = await ProviderConfigRepository.GetAsync();
+        _providerConfig = await ProviderConfigService.GetAsync();
         _isLoaded = true;
     }
 
@@ -92,7 +92,7 @@ else
 
         try
         {
-            await ProviderConfigRepository.StoreAsync(_providerConfig);
+            await ProviderConfigService.StoreAsync(_providerConfig);
             Notifier.Success("Provider settings saved.");
         }
         catch (Exception ex)

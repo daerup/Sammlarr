@@ -1,4 +1,3 @@
-using Contracts.Caching;
 using Contracts.Settings;
 using DB.Data.Config;
 using Domain.Providers;
@@ -13,27 +12,18 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 {
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
-	private Mock<ITypedMemoryCache<string, ProviderConfig>> _cache = null!;
-	private IProviderConfigRepository _testee = null!;
-
-	[Before(Test)]
-	public void Setup()
-	{
-		_cache = ITypedMemoryCache<string, ProviderConfig>.Mock();
-		_testee = new ProviderConfigRepository(fixture.ContextFactory, _cache.Object, fixture.CurrentUser);
-	}
+	private IProviderConfigRepository Testee => new ProviderConfigRepository(fixture.ContextFactory);
 
 	[Test]
 	public async Task GetAsync_OnFreshDatabase_ReturnsSeededDefaults()
 	{
-		var providerSettings = await _testee.GetAsync();
+		var providerSettings = await Testee.GetAsync();
 
 		await Assert.That(providerSettings).IsNotNull();
 		await Assert.That(providerSettings.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
 		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(TrendingProvider.Tmdb);
 		await Assert.That(providerSettings.SearchProvider).IsEqualTo(SearchProvider.Plex);
 		await Assert.That(providerSettings.AuthProvider).IsEqualTo(AuthProvider.Plex);
-		_cache.TryGetValue(Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -41,7 +31,7 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	{
 		var expected = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 
-		await _testee.StoreAsync(expected);
+		await Testee.StoreAsync(expected);
 
 		var entity = await fixture.Context.ProviderSettings.SingleAsync();
 
@@ -57,8 +47,8 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		var initial = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 		var updated = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 
-		await _testee.StoreAsync(initial);
-		await _testee.StoreAsync(updated);
+		await Testee.StoreAsync(initial);
+		await Testee.StoreAsync(updated);
 
 		var entities = await fixture.Context.ProviderSettings.ToListAsync();
 

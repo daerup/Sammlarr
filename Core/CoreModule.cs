@@ -11,6 +11,7 @@ using Core.Media;
 using Core.Notifications;
 using Core.Processing;
 using Core.Providers;
+using Core.Settings;
 using Core.Watchlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -33,6 +34,7 @@ public class CoreModule : IServiceModule
 		services.AddModule<NotificationsModule>();
 		services.AddModule<ProcessingModule>();
 		services.AddModule<ProvidersModule>();
+		services.AddModule<SettingsModule>();
 		services.AddModule<WatchlistModule>();
 		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
 	}

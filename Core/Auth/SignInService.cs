@@ -16,7 +16,7 @@ internal sealed class SignInService(
 	ICredentialService credentials,
 	IUserRepository users,
 	IUserScope userScope,
-	IProviderConfigRepository providerConfig,
+	IProviderConfigService providerConfig,
 	IDateTimeProvider dateTimeProvider,
 	WebUiNotificationSeeder webUiNotifications,
 	ILogger<SignInService> logger

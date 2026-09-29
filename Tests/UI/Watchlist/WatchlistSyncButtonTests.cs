@@ -243,7 +243,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		outbox.FindPendingAsync(Any(), Any()).Returns((WatchlistOutboxEntry?)null);
 		Services.AddSingleton(outbox.Object);
 
-		var providerConfig = IProviderConfigRepository.Mock();
+		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
 			.GetAsync(Any())
 			.Returns(

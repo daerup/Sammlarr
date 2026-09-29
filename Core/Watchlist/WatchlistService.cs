@@ -16,7 +16,7 @@ internal sealed class WatchlistService(
 	IWatchlistOutbox outbox,
 	IMediaService media,
 	IMediaRepository mediaRepository,
-	IProviderConfigRepository configRepository
+	IProviderConfigService providerConfig
 ) : IWatchlistService
 {
 	public async IAsyncEnumerable<WatchlistedMedia> GetWatchlistItemsAsync(
@@ -45,6 +45,9 @@ internal sealed class WatchlistService(
 
 	public async Task<IReadOnlySet<MediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default) =>
 		(await repository.GetIdsAsync(cancellationToken)).ToHashSet();
+
+	public Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default) =>
+		repository.GetOwnedCountsAsync(cancellationToken);
 
 	public async Task<IReadOnlyDictionary<MediaId, WatchlistEntry>> GetEntriesAsync(CancellationToken cancellationToken = default) =>
 		(await repository.GetEntriesAsync(cancellationToken)).ToDictionary(entry => entry.MediaId);
@@ -141,7 +144,7 @@ internal sealed class WatchlistService(
 		{
 			return;
 		}
-		var config = await configRepository.GetAsync(cancellationToken);
+		var config = await providerConfig.GetAsync(cancellationToken);
 		var watchlistProvider = config.WatchlistProvider.AsMediaProvider();
 		var externals = await mediaRepository.GetExternalsAsync(ids, watchlistProvider, cancellationToken);
 		if (ids.Any(id => !externals.ContainsKey(id)))
@@ -156,7 +159,7 @@ internal sealed class WatchlistService(
 		{
 			return [];
 		}
-		var config = await configRepository.GetAsync(cancellationToken);
+		var config = await providerConfig.GetAsync(cancellationToken);
 		var externals = await mediaRepository.GetExternalsAsync(ids, config.WatchlistProvider.AsMediaProvider(), cancellationToken);
 		return [.. ids.Where(externals.ContainsKey)];
 	}

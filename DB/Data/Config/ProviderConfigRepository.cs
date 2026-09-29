@@ -1,28 +1,16 @@
-using Contracts.Caching;
-using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Config;
 
-internal sealed class ProviderConfigRepository(
-	IDbContextFactory<SammlarrDbContext> dbContextFactory,
-	ITypedMemoryCache<string, ProviderConfig> cache,
-	ICurrentUser currentUser
-) : IProviderConfigRepository
+internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IProviderConfigRepository
 {
-	private const string CacheKey = nameof(ProviderConfig);
-
 	public async ValueTask<ProviderConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(CacheKey, out var cached))
-		{
-			return cached!;
-		}
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.ProviderSettings.SingleOrDefaultAsync(cancellationToken) ?? ProviderConfigRow.Default;
-		var config = new ProviderConfig
+		return new ProviderConfig
 		{
 			WatchlistProvider = row.WatchlistProvider,
 			TrendingProvider = row.TrendingProvider,
@@ -31,13 +19,10 @@ internal sealed class ProviderConfigRepository(
 			AuthProvider = row.AuthProvider,
 			RegistrationMode = row.RegistrationMode,
 		};
-		cache.Set(CacheKey, config);
-		return config;
 	}
 
 	public async Task StoreAsync(ProviderConfig config, CancellationToken cancellationToken = default)
 	{
-		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var row = await ctx.ProviderSettings.SingleOrDefaultAsync(cancellationToken);
 		if (row is null)
@@ -65,6 +50,5 @@ internal sealed class ProviderConfigRepository(
 		}
 
 		await ctx.SaveChangesAsync(cancellationToken);
-		cache.Set(CacheKey, config);
 	}
 }

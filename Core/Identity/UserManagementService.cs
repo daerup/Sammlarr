@@ -8,7 +8,7 @@ namespace Core.Identity;
 internal sealed class UserManagementService(
 	IUserRepository users,
 	ICurrentUser currentUser,
-	IProviderConfigRepository providerConfig,
+	IProviderConfigService providerConfig,
 	ISessionValidator sessionValidator,
 	ISessionInvalidator sessionInvalidator
 ) : IUserManagementService

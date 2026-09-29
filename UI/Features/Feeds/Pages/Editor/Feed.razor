@@ -7,7 +7,7 @@
 @using global::Shared
 @inject IFeedService FeedService
 @inject NavigationManager NavigationManager
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 @inject IApiKeyService ApiKeyService
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
@@ -164,7 +164,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _providerConfig = await ProviderConfigRepository.GetAsync();
+        _providerConfig = await ProviderConfigService.GetAsync();
         if (!IsEditOrClone)
         {
             return;

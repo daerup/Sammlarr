@@ -356,7 +356,7 @@ public class MediaServiceTests
 		var enricher = IMetadataEnricher.Mock();
 		var rating = IMediaRatingService.Mock();
 		rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("no ratings"));
-		var configRepo = IProviderConfigRepository.Mock();
+		var configRepo = IProviderConfigService.Mock();
 		configRepo
 			.GetAsync(Any())
 			.Returns(
