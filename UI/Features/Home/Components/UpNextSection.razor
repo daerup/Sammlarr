@@ -1,6 +1,3 @@
-@using UI.Shared.Services.Branding
-@inject MediaProviderBrandingService Branding
-
 <button type="button" class="sect" aria-expanded="@_open" @onclick="@(() => _open = !_open)">
     <LucideIcon Name="@(_open ? "chevron-down" : "chevron-right")" Size="12"/>
     <span class="sect-title">@Title</span>
@@ -12,22 +9,16 @@
     @foreach (var row in Rows)
     {
         <div class="row">
-            <span class="row-icon @(row.Brand is null ? null : "is-brand")" style="@BrandStyle(row)">
-                @if (row.Brand is { } provider)
-                {
-                    @Branding.GetBrandingInfo(provider).IconRenderer(null)
-                    @if (row.Push)
-                    {
-                        <span class="row-pip">
-                            <LucideIcon Name="refresh-cw" Size="8"/>
-                        </span>
-                    }
-                }
-                else
-                {
+            @if (row.Brand is { } provider)
+            {
+                <ProviderTile Provider="provider" Decorative="true"/>
+            }
+            else
+            {
+                <span class="row-icon">
                     <LucideIcon Name="@Icon(row.Kind)" Size="12"/>
-                }
-            </span>
+                </span>
+            }
             <span class="row-body">
                 @if (row.Href is { } href)
                 {
@@ -55,9 +46,6 @@
     [Parameter, EditorRequired] public required IReadOnlyList<UpNextRow> Rows { get; set; }
 
     private bool _open = true;
-
-    private string? BrandStyle(UpNextRow row) =>
-        row.Brand is { } provider ? $"--brand: {Branding.GetBrandingInfo(provider).BrandColor};" : null;
 
     private static string Icon(UpNextKind kind) =>
         kind switch

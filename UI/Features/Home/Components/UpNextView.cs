@@ -15,7 +15,7 @@ public enum UpNextKind
 	Scheduled,
 }
 
-public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null, bool Push = false);
+public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null);
 
 internal static class UpNextView
 {
@@ -68,10 +68,9 @@ internal static class UpNextView
 		var name = Name(job.Request, feedNames, providerName);
 		var href = Href(job.Request, feedNames);
 		var brand = Brand(job.Request, feedBrands, watchlistProvider);
-		var push = job.Request is SyncWatchlist;
-		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, push)
-			: job.State is JobState.Waiting ? new UpNextRow(name, "waiting", string.Empty, UpNextKind.Waiting, href, brand, push)
-			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, push);
+		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand)
+			: job.State is JobState.Waiting ? new UpNextRow(name, "waiting", string.Empty, UpNextKind.Waiting, href, brand)
+			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand);
 	}
 
 	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider watchlistProvider) =>

@@ -1,0 +1,14 @@
+.provider-logo {
+    display: block;
+    flex: none;
+    object-fit: contain;
+}
+
+.provider-logo.is-dark,
+.dark .provider-logo.is-light {
+    display: none;
+}
+
+.dark .provider-logo.is-dark {
+    display: block;
+}

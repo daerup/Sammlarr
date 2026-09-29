@@ -119,7 +119,7 @@ These are the source of truth for conventions. Read them when scope is ambiguous
 - `Microsoft.EntityFrameworkCore.Sqlite` / `InMemory` — persistence + testing.
 - `Microsoft.AspNetCore.DataProtection` — protects sensitive data and keys.
 - `Vogen` — strongly-typed IDs / value objects (used in `Contracts`/`Shared`).
-- `BlazorBlueprint.*` + `timewarp-simple-icons` — UI components and icons.
+- `BlazorBlueprint.*`: UI components and icons. Provider logos are vendored files in `UI/wwwroot/providers/`, drawn by `ProviderLogo` and `ProviderTile`.
 - `TUnit` (`.Core`, `.Assertions`, `.Mocks`, `.Mocks.Http`) — test framework.
 - `Bogus`, `TUnit.Mocks.Http` — test data generation + HTTP stubbing.
 - `Dapper` — lightweight data access in some test projects.

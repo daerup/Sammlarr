@@ -56,7 +56,7 @@ public class ProvenanceBadgeTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ProvenanceBadge>(parameters =>

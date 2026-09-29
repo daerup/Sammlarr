@@ -54,14 +54,6 @@
         );
 }
 
-.id-link-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    line-height: 0;
-}
-
 .id-link-text {
     display: flex;
     flex-direction: column;

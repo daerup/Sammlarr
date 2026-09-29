@@ -77,7 +77,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddSingleton(providerConfig.Object);
 
 		Services.AddScoped<Notifier>();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

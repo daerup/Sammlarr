@@ -7,6 +7,6 @@ internal class BrandingModule : IServiceModule
 {
 	public void RegisterServices(IServiceCollection services)
 	{
-		services.AddScoped(sp => new MediaProviderBrandingService(sp.GetRequiredService<BrandingAssetRoot>().Path));
+		services.AddSingleton<MediaProviderBrandingService>();
 	}
 }

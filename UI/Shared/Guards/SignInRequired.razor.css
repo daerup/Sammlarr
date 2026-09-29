@@ -2,7 +2,8 @@
     display: inline-flex;
 }
 
-.provider-mark ::deep svg {
-    color: inherit;
-    fill: currentColor;
+.hover-button:hover .provider-mark ::deep img,
+.hover-button:focus .provider-mark ::deep img,
+.hover-button:focus-visible .provider-mark ::deep img {
+    filter: brightness(0);
 }

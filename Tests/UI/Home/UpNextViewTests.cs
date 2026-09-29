@@ -3,7 +3,6 @@ using Domain.Feed;
 using Domain.Jobs;
 using Domain.Processing;
 using Domain.Providers;
-using Domain.Providers;
 using Domain.Watchlist.Sync;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
@@ -42,18 +41,16 @@ public class UpNextViewTests
 		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
 
 		await Assert.That(row.Brand).IsEqualTo(MediaProvider.Tmdb);
-		await Assert.That(row.Push).IsFalse();
 	}
 
 	[Test]
-	public async Task InTheQueue_ForASyncJob_CarriesTheWatchlistProviderAndMarksItAPush()
+	public async Task InTheQueue_ForASyncJob_CarriesTheWatchlistProviderSoTheRowShowsItsBrand()
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0));
 
 		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
 
 		await Assert.That(row.Brand).IsEqualTo(MediaProvider.Plex);
-		await Assert.That(row.Push).IsTrue();
 	}
 
 	[Test]

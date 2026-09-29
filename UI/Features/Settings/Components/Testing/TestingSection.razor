@@ -201,8 +201,8 @@
                     {
                         var info = Branding.GetBrandingInfo(provider);
                         <div class="flex items-center gap-3">
-                            <span class="shrink-0 inline-flex items-center justify-center rounded-lg" style="width: 2.25rem; height: 2.25rem; background-color: color-mix(in oklch, @info.BrandColor 16%, transparent); color: @info.BrandColor">
-                                @info.IconWithClass("h-6 w-6")
+                            <span class="shrink-0 inline-flex items-center justify-center rounded-lg" style="width: 2.25rem; height: 2.25rem; background-color: color-mix(in oklch, @info.BrandColor 16%, transparent)">
+                                <ProviderLogo Provider="provider" Size="24" Decorative="true"/>
                             </span>
                             <div class="min-w-0 flex-1">
                                 <div class="text-sm font-medium truncate">@info.DisplayName</div>
@@ -220,7 +220,7 @@
                         <p class="text-xs font-medium text-muted-foreground">Card header (SettingsCard) — follows the enum toggle</p>
                         <div class="rounded-lg border overflow-hidden" style="--brand: @head.BrandColor">
                             <div class="flex items-center gap-3" style="padding: 0.75rem 1rem; background: linear-gradient(90deg, color-mix(in oklch, @head.BrandColor 26%, transparent) 0%, color-mix(in oklch, @head.BrandColor 12%, transparent) 100%); border-bottom: 2px solid @head.BrandColor">
-                                <span class="inline-flex items-center justify-center" style="color: @head.BrandColor">@head.IconWithClass("h-6 w-6")</span>
+                                <ProviderLogo Provider="_toggleProvider" Size="24" Decorative="true"/>
                                 <span class="text-sm font-semibold">Auth provider</span>
                                 <BbBadge Variant="BadgeVariant.Outline" Class="provider-pill whitespace-nowrap ml-auto">@head.DisplayName</BbBadge>
                             </div>
@@ -256,6 +256,22 @@
                                 </span>
                             }
                         </div>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-xs font-medium text-muted-foreground">Logo forms (ProviderLogo): the mark, then the logo, at 16, 24 and 32px</p>
+                        @foreach (var provider in BrandProviders)
+                        {
+                            <div class="flex flex-wrap items-center gap-4">
+                                @foreach (var size in LabSizes)
+                                {
+                                    <ProviderLogo Provider="provider" Size="size"/>
+                                }
+                                @foreach (var size in LabSizes)
+                                {
+                                    <ProviderLogo Provider="provider" Form="ProviderLogoForm.Logo" Size="size"/>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -535,6 +551,8 @@
         new("b", "Option B"),
         new("c", "Option C"),
     ];
+
+    private static readonly int[] LabSizes = [16, 24, 32];
 
     private static readonly MediaProvider[] BrandProviders =
     [

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using TestInfrastructure;
 
 namespace Web.Tests.Theme;
 
@@ -82,13 +83,5 @@ public class HoverButtonPaletteTests
 
 	private static string Normalize(string css) => Regex.Replace(css, @"\s+", " ").Trim();
 
-	private static string ReadThemeCss()
-	{
-		var directory = new DirectoryInfo(AppContext.BaseDirectory);
-		while (!File.Exists(Path.Combine(directory.FullName, "Sammlarr.slnx")))
-		{
-			directory = directory.Parent!;
-		}
-		return File.ReadAllText(Path.Combine(directory.FullName, "Web", "wwwroot", "styles", "themes", "default.css"));
-	}
+	private static string ReadThemeCss() => File.ReadAllText(RepositoryRoot.Resolve("Web", "wwwroot", "styles", "themes", "default.css"));
 }

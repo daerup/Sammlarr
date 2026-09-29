@@ -1,0 +1,10 @@
+.provider-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: var(--tile-size);
+    height: var(--tile-size);
+    border-radius: 6px;
+    overflow: hidden;
+}

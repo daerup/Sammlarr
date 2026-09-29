@@ -40,45 +40,15 @@
 }
 
 .row-icon {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 23px;
-    height: 23px;
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
     background: var(--muted);
     color: var(--muted-foreground);
     flex: 0 0 auto;
-}
-
-.row-icon.is-brand {
-    background: color-mix(in srgb, var(--brand) 16%, transparent);
-    color: var(--brand);
-}
-
-.row-icon.is-brand ::deep svg {
-    display: block;
-    width: 13px;
-    height: 13px;
-}
-
-.row-pip {
-    position: absolute;
-    right: -3px;
-    bottom: -3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    background: var(--card);
-    color: var(--muted-foreground);
-}
-
-.row-pip ::deep svg {
-    display: block;
 }
 
 .row-dot {

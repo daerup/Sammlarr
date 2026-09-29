@@ -181,7 +181,7 @@ public class FeedPreviewPanelTests : BunitContext
 			new FakeKeyedServiceIndex<FeedProvider, IFeedProvider>().Register(FeedProvider.Mdblist, new StubFeedService(resolved, unmatched))
 		);
 		Services.AddScoped<Notifier>();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 

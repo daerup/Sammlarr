@@ -150,7 +150,7 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddSingleton(providerConfig.Object);
 
 		Services.AddScoped<Notifier>();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
