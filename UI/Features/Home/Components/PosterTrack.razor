@@ -1,6 +1,8 @@
+@using Contracts.Media.Artwork
 @using Domain.Media
 @implements IAsyncDisposable
 @inject IJSRuntime Js
+@inject ArtworkSources Artwork
 
 <div class="track-wrap">
     @if (_canLeft)
@@ -23,7 +25,7 @@
                     }
                     else
                     {
-                        <img class="track-poster" src="@media.PosterUrl" alt="" loading="lazy"/>
+                        <img class="track-poster" src="@media.PosterUrl" srcset="@SrcSet(id, media)" alt="" loading="lazy" @onerror="() => _unsized.Add(id)"/>
                     }
                     <span class="track-scrim"></span>
                     <span class="track-title">@Title(media)</span>
@@ -41,6 +43,8 @@
 
 @code {
     private const int Batch = 30;
+    private static readonly ArtworkSize Poster = new(110, 165);
+    private static readonly ArtworkSize FadedPoster = new(78, 117);
 
     [Parameter, EditorRequired] public required IReadOnlyList<MediaId> Ids { get; set; }
     [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, MediaLookup> Media { get; set; }
@@ -53,6 +57,7 @@
     private IJSObjectReference? _watcher;
     private DotNetObjectReference<PosterTrack>? _self;
     private readonly HashSet<MediaId> _requested = [];
+    private readonly HashSet<MediaId> _unsized = [];
     private int _rendered = Batch;
     private bool _canLeft;
     private bool _canScrollRight;
@@ -95,6 +100,8 @@
     }
 
     private static string Title(MediaLookup media) => string.IsNullOrWhiteSpace(media.Title) ? "Unknown title" : media.Title;
+
+    private string? SrcSet(MediaId id, MediaLookup media) => _unsized.Contains(id) ? null : Artwork.ByDensity(media.PosterUrl, Faded ? FadedPoster : Poster);
 
     private async Task RequestMediaAsync()
     {

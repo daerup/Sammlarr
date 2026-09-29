@@ -8,7 +8,7 @@ namespace API.Tests.TMDB;
 
 public class TmdbApiKeyTests
 {
-	private static TmdbOptions CreateOptions() => new() { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
+	private static TmdbOptions CreateOptions() => new() { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
 
 	[Test]
 	public async Task CreateAsync_WhenKeyValid_ReturnsKeyAndSendsItAsQueryParameter()

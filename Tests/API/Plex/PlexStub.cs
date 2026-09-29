@@ -66,7 +66,7 @@ internal sealed class PlexStub : HttpMessageHandler
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
 		var apiKeys = IApiKeyService.Mock();
 		apiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Tmdb, "key")));
-		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
+		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
 		return new TmdbApi(
 			new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeys.Object, ICurrentUser.Mock().Object),
 			apiKeys.Object,

@@ -5,11 +5,10 @@ using Contracts.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
-using Shared.Options;
 
 namespace API.Tmdb;
 
-internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMetadataEnricher
+internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMetadataEnricher
 {
 	public Task<Result<MediaLookup>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
 		id.Require<TmdbId>("TMDB enrichment requires a TMDB id.")
@@ -30,8 +29,8 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMet
 			Title = details.Title.NullIfBlank(),
 			Tagline = details.Tagline.NullIfBlank(),
 			Summary = details.Overview.NullIfBlank(),
-			PosterUrl = ComposeImageUrl(details.PosterPath).NullIfBlank(),
-			BackdropUrl = ComposeImageUrl(details.BackdropPath).NullIfBlank(),
+			PosterUrl = artwork.Original(details.PosterPath).NullIfBlank(),
+			BackdropUrl = artwork.Original(details.BackdropPath).NullIfBlank(),
 			ReleaseDate = ParseReleaseDate(details.ReleaseDate ?? details.FirstAirDate),
 			Genres = [.. (details.Genres ?? []).Select(g => g.Name).Where(name => !string.IsNullOrWhiteSpace(name))],
 			Rating = BuildRating(details),
@@ -45,8 +44,8 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMet
 			Title = details.Name.NullIfBlank(),
 			Tagline = details.Tagline.NullIfBlank(),
 			Summary = details.Overview.NullIfBlank(),
-			PosterUrl = ComposeImageUrl(details.PosterPath).NullIfBlank(),
-			BackdropUrl = ComposeImageUrl(details.BackdropPath).NullIfBlank(),
+			PosterUrl = artwork.Original(details.PosterPath).NullIfBlank(),
+			BackdropUrl = artwork.Original(details.BackdropPath).NullIfBlank(),
 			ReleaseDate = ParseReleaseDate(details.FirstAirDate ?? details.ReleaseDate),
 			Genres = [.. (details.Genres ?? []).Select(g => g.Name).Where(name => !string.IsNullOrWhiteSpace(name))],
 			Rating = BuildRating(details),
@@ -59,8 +58,6 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbOptions options) : IMet
 		details.VoteAverage is { } vote && vote > 0
 			? RatingSummary.From([new MediaRating(RatingProvider.Tmdb, (float)vote, details.VoteCount)])
 			: RatingSummary.None;
-
-	private string ComposeImageUrl(string? path) => string.IsNullOrWhiteSpace(path) ? string.Empty : options.ImageBaseUrl + path;
 
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 }

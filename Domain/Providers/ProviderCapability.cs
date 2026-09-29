@@ -17,4 +17,5 @@ internal enum ProviderCapability
 	ApiKey = 32,
 
 	Auth = 64,
+	Artwork = 128,
 }
