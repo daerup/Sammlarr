@@ -1,5 +1,11 @@
+@using Contracts.Auth
+@using Contracts.Identity
 @using Contracts.Settings
+@using Domain.Identity
 @inject IProviderConfigService ProviderConfigService
+@inject IApiKeyService ApiKeys
+@inject ICredentialService Credentials
+@inject ICurrentUser CurrentUser
 
 <div class="flex max-w-4xl flex-col gap-8">
     <div>
@@ -12,10 +18,12 @@
         <div class="rounded-lg border bg-card overflow-hidden">
             <AccountRow Provider="_authProvider"
                         Open="IsOpen(_authProvider.AsMediaProvider())"
-                        OpenChanged="open => Toggle(_authProvider.AsMediaProvider(), open)"/>
+                        OpenChanged="open => Toggle(_authProvider.AsMediaProvider(), open)"
+                        Changed="RefreshReadyAsync"/>
             <ApiKeyRow Provider="ApiKeyProvider.Tmdb"
                        Open="IsOpen(MediaProvider.Tmdb)"
-                       OpenChanged="open => Toggle(MediaProvider.Tmdb, open)">
+                       OpenChanged="open => Toggle(MediaProvider.Tmdb, open)"
+                       Changed="RefreshReadyAsync">
                 <Description>
                     Your TMDB API key. Get one at
                     <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer"
@@ -24,7 +32,8 @@
             </ApiKeyRow>
             <ApiKeyRow Provider="ApiKeyProvider.Mdblist"
                        Open="IsOpen(MediaProvider.Mdblist)"
-                       OpenChanged="open => Toggle(MediaProvider.Mdblist, open)">
+                       OpenChanged="open => Toggle(MediaProvider.Mdblist, open)"
+                       Changed="RefreshReadyAsync">
                 <Description>
                     Your MDBList API key. Get one at
                     <a href="https://mdblist.com/preferences/#api" target="_blank" rel="noopener noreferrer"
@@ -33,14 +42,53 @@
             </ApiKeyRow>
         </div>
     </section>
+
+    @if (_config is { } config)
+    {
+        <section class="flex flex-col gap-3" aria-label="Services">
+            <h3 class="text-sm font-semibold">Services</h3>
+            <ServicesMap Config="config" Ready="_ready" CanPickWatchlist="@(CurrentUser.Role == UserRole.Admin)"/>
+        </section>
+    }
 </div>
 
 @code {
     private AuthProvider _authProvider = AuthProvider.Plex;
 
+    private ProviderConfig? _config;
+
+    private IReadOnlySet<MediaProvider> _ready = new HashSet<MediaProvider>();
+
     private MediaProvider? _open;
 
-    protected override async Task OnInitializedAsync() => _authProvider = (await ProviderConfigService.GetAsync()).AuthProvider;
+    protected override async Task OnInitializedAsync()
+    {
+        _config = await ProviderConfigService.GetAsync();
+        _authProvider = _config.AuthProvider;
+        await RefreshReadyAsync();
+    }
+
+    private async Task RefreshReadyAsync()
+    {
+        var ready = new HashSet<MediaProvider>();
+        foreach (var provider in Enum.GetValues<AuthProvider>())
+        {
+            if (await Credentials.HasCredentialAsync(provider))
+            {
+                ready.Add(provider.AsMediaProvider());
+            }
+        }
+
+        foreach (var provider in Enum.GetValues<ApiKeyProvider>())
+        {
+            if (await ApiKeys.HasApiKeyAsync(provider))
+            {
+                ready.Add(provider.AsMediaProvider());
+            }
+        }
+
+        _ready = ready;
+    }
 
     private bool IsOpen(MediaProvider provider) => _open == provider;
 

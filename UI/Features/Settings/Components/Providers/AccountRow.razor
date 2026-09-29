@@ -14,7 +14,7 @@
         <BbField>
             <BbFieldLabel>Access token</BbFieldLabel>
             <BbFieldContent>
-                <SensitiveInput @bind-Value="Token" Placeholder="Paste an access token" Label="access token" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+                <SensitiveInput @bind-Value="Token" Compact="true" Placeholder="Paste an access token" Label="access token" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
                 <BbFieldDescription>
                     @if (_savedState == CredentialState.Saved)
                     {
@@ -30,7 +30,7 @@
 
         <CredentialActions State="_state" HasChange="HasChange" OnTest="TestAsync" OnSave="SaveAsync" OnCancel="Cancel">
             <ChildContent>
-                <BbButton Variant="ButtonVariant.Outline" OnClick="Connect">
+                <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Connect">
                     <LucideIcon Name="log-in" Size="14" Class="mr-2"/>
                     <span>@(_savedState == CredentialState.Saved ? "Reconnect" : "Connect") with @Branding.NickName</span>
                 </BbButton>
@@ -38,7 +38,7 @@
             <Remove>
                 <BbAlertDialog>
                     <BbAlertDialogTrigger>
-                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="unplug" Text="Disconnect"/>
+                        <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="unplug" Text="Disconnect"/>
                     </BbAlertDialogTrigger>
                     <BbAlertDialogContent>
                         <BbAlertDialogHeader>
@@ -68,6 +68,8 @@
     [Parameter] public bool Open { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] public EventCallback Changed { get; set; }
 
     private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
 
@@ -129,6 +131,7 @@
         _savedToken = _tokenInput;
         _savedState = CredentialState.Saved;
         _state = CredentialState.Saved;
+        await Changed.InvokeAsync();
     }
 
     private async Task DisconnectAsync()
@@ -137,6 +140,7 @@
         _savedToken = _tokenInput = string.Empty;
         _savedState = CredentialState.Idle;
         _state = CredentialState.Idle;
+        await Changed.InvokeAsync();
     }
 
     private void Cancel()

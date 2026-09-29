@@ -5,7 +5,6 @@ namespace E2E.Tests.Settings;
 public class SettingsSectionTests
 {
 	[Test]
-	[Arguments("provider-settings", "Choose which provider powers the watchlist and OAuth flow.")]
 	[Arguments("providers", "Which service does what, and the account, keys and connections behind it.")]
 	[Arguments("notifications", "Webhook or Pushover connections to deliver to.")]
 	[Arguments("cache", "Id groups.")]

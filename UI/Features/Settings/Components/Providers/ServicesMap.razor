@@ -1,0 +1,145 @@
+@using System.Globalization
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="overflow-hidden rounded-lg border bg-card">
+    <div class="flex items-center gap-2 border-b bg-foreground/5 px-[15px] pb-[9px] pt-2.5">
+        <LucideIcon Name="network" Size="14" Class="text-muted-foreground"/>
+        <span class="text-[12.5px] font-semibold">Which service does what</span>
+        @if (!CanPickWatchlist)
+        {
+            <span class="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
+                <LucideIcon Name="lock" Size="11"/>
+                Managed by an admin
+            </span>
+        }
+    </div>
+
+    <div class="map">
+        <div class="map-roles">
+            @foreach (var role in _model.Roles)
+            {
+                <div class="map-role">
+                    <span class="map-role-icon"><LucideIcon Name="@role.Icon" Size="14"/></span>
+                    <div>
+                        <div class="map-role-name">@role.Name</div>
+                        <div class="map-role-description">@role.Description</div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <svg class="map-lines" width="100%" height="@Px(_model.Height)" viewBox="0 0 100 @Px(_model.Height)" preserveAspectRatio="none" aria-hidden="true">
+            @foreach (var line in _model.Lines)
+            {
+                <path d="@Curve(line.From, line.To)" stroke="@Brand(line.Provider).BrandColor" stroke-dasharray="@Dash(line.Provider)"/>
+            }
+        </svg>
+
+        <div class="map-services" style="height: @Px(_model.Height)px">
+            @if (_model.SourcesCaptionY is { } captionY)
+            {
+                <span class="map-sources-caption" style="top: @Px(captionY)px">Feed sources</span>
+            }
+            @foreach (var service in _model.Services)
+            {
+                @if (service.IsFeedSource)
+                {
+                    <div class="map-source" style="top: @Px(service.Y - ServicesMapModel.SourceHeight / 2)px" title="@Status(service.Provider)">
+                        <ProviderLogo Provider="service.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                        <span class="map-source-name">@Brand(service.Provider).NickName</span>
+                        <span class="map-dot ml-auto @DotClass(service.Provider)"></span>
+                        <span class="sr-only">@Status(service.Provider)</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="map-service-slot" style="top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px">
+                        @if (CanPickWatchlist && service.Provider == WatchlistTarget)
+                        {
+                            <BbDropdownMenu>
+                                <BbDropdownMenuTrigger AsChild="false" Class="map-service is-picker">
+                                    @ServiceBody(service)
+                                    <LucideIcon Name="chevron-down" Size="15" Class="ml-auto text-muted-foreground"/>
+                                </BbDropdownMenuTrigger>
+                                <BbDropdownMenuContent Align="PopoverAlign.End" Class="w-72">
+                                    <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">Watchlist syncs to</BbDropdownMenuLabel>
+                                    @foreach (var target in Enum.GetValues<WatchlistProvider>())
+                                    {
+                                        <BbDropdownMenuItem Class="gap-2.5">
+                                            <ProviderLogo Provider="@target.AsMediaProvider()" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+                                            <span class="flex flex-col">
+                                                <span>@Brand(target.AsMediaProvider()).NickName</span>
+                                                <span class="text-xs text-muted-foreground">Each user's own @Brand(target.AsMediaProvider()).NickName watchlist</span>
+                                            </span>
+                                            @if (target == Config.WatchlistProvider)
+                                            {
+                                                <LucideIcon Name="check" Size="14" Class="ml-auto"/>
+                                            }
+                                        </BbDropdownMenuItem>
+                                    }
+                                </BbDropdownMenuContent>
+                            </BbDropdownMenu>
+                        }
+                        else
+                        {
+                            <div class="map-service">@ServiceBody(service)</div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="map-legend">
+        <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4"/></svg>Connected</span>
+        <span><svg width="26" height="8" aria-hidden="true"><line x1="0" y1="4" x2="26" y2="4" stroke-dasharray="4 3"/></svg>Not connected or pending</span>
+        <span><span class="map-dot bg-success"></span>Ready</span>
+        <span><span class="map-dot bg-destructive"></span>Not set up</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required ProviderConfig Config { get; set; }
+
+    [Parameter] [EditorRequired] public required IReadOnlySet<MediaProvider> Ready { get; set; }
+
+    [Parameter] public bool CanPickWatchlist { get; set; }
+
+    private ServicesMapModel _model = null!;
+
+    private MediaProvider WatchlistTarget => Config.WatchlistProvider.AsMediaProvider();
+
+    protected override void OnParametersSet() => _model = ServicesMapModel.For(Config);
+
+    private BrandingInfo Brand(MediaProvider provider) => Branding.GetBrandingInfo(provider);
+
+    private string? Dash(MediaProvider provider) => Ready.Contains(provider) ? null : "4 3";
+
+    private string DotClass(MediaProvider provider) => Ready.Contains(provider) ? "bg-success" : "bg-destructive";
+
+    private string Status(MediaProvider provider) =>
+        (ProviderCaption.IsAccount(provider), Ready.Contains(provider)) switch
+        {
+            (true, true) => "Your account",
+            (true, false) => "Not connected",
+            (false, true) => "Your key is set",
+            (false, false) => "No key yet",
+        };
+
+    private static string Px(double value) => value.ToString(CultureInfo.InvariantCulture);
+
+    private static string Curve(double from, double to) => FormattableString.Invariant($"M0 {from} C 60 {from}, 40 {to}, 100 {to}");
+
+    private RenderFragment ServiceBody(MapService service) =>
+        @<text>
+            <ProviderLogo Provider="service.Provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+            <span class="flex min-w-0 flex-col items-start">
+                <span class="map-service-name">@Brand(service.Provider).NickName</span>
+                <span class="map-service-status">
+                    <span class="map-dot @DotClass(service.Provider)"></span>
+                    @Status(service.Provider)
+                </span>
+            </span>
+        </text>;
+}
