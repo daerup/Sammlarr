@@ -102,12 +102,14 @@
             @if (_items.Count > 0)
             {
                 <BulkActionBar SelectedCount="_selected.Count"
-                               TotalCount="_items.Count"
+                               PageCount="PageItems.Count()"
+                               ListCount="_items.Count"
                                RemoveLabel="Remove"
                                IsRemoving="false"
-                               OnSelectAll="SelectAllItems"
+                               OnSelectPage="SelectPageItems"
+                               OnSelectList="SelectAllItems"
                                OnClearSelection="() => _selected.Clear()"
-                               OnCancel="() => _selected.Clear()"
+                               OnExit="() => _selected.Clear()"
                                OnRemove="RemoveSelectedItems"/>
                 <div class="flex flex-wrap gap-2">
                     @foreach (var item in PageItems)
@@ -691,6 +693,14 @@
     private void ToggleItem(int item)
     {
         if (!_selected.Remove(item))
+        {
+            _selected.Add(item);
+        }
+    }
+
+    private void SelectPageItems()
+    {
+        foreach (var item in PageItems)
         {
             _selected.Add(item);
         }
