@@ -15,12 +15,11 @@ public class AuthLayoutTests : BunitContext
 	}
 
 	[Test]
-	public async Task HomeLink_Always_IsNamedSammlarrHomeAndCarriesTheLogo()
+	public async Task Logo_WhileSignedOut_IsShownWithoutLinkingHome()
 	{
 		var cut = Render<AuthLayout>(parameters => parameters.Add(layout => layout.Body, (RenderFragment)(_ => { })));
 
-		var link = cut.Find("a[href='/']");
-		await Assert.That(link.GetAttribute("aria-label")).IsEqualTo("Sammlarr home");
-		await Assert.That(link.QuerySelector("svg.sammlarr-logo")).IsNotNull();
+		var logo = cut.Find("svg.sammlarr-logo");
+		await Assert.That(logo.Closest("a")).IsNull();
 	}
 }

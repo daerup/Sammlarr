@@ -1,0 +1,8 @@
+.provider-mark {
+    display: inline-flex;
+}
+
+.provider-mark ::deep svg {
+    color: inherit;
+    fill: currentColor;
+}
