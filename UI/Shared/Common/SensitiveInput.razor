@@ -1,4 +1,4 @@
-<div class="relative">
+<div class="@(Compact ? "relative is-compact" : "relative")">
     <BbInput Id="@Id"
              Placeholder="@Placeholder"
              Value="@Value"
@@ -34,9 +34,12 @@
     [Parameter]
     public string Class { get; set; } = string.Empty;
 
+    [Parameter]
+    public bool Compact { get; set; }
+
     private bool _show;
 
-    private string InputClass => $"bg-accent pr-10 {Class}".Trim();
+    private string InputClass => $"bg-accent pr-10 {(Compact ? "h-9 text-sm" : null)} {Class}".Trim();
 
     private void Toggle() => _show = !_show;
 }

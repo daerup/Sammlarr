@@ -18,7 +18,7 @@ public class RoleGatingTests
 
 		await SettingsPage.VisitSectionAsync(page, label.ToLowerInvariant());
 
-		await Expect(page.Button("Provider Settings")).ToBeVisibleAsync();
+		await Expect(page.Button("Providers")).ToBeVisibleAsync();
 		await Expect(page.Button(label)).ToBeHiddenAsync();
 	}
 

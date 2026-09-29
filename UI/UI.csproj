@@ -40,8 +40,5 @@
 		<Content Update="Shared\Media\MediaDetailSheet.razor.css">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
-		<Content Update="Features\Settings\Components\ProviderSettingCard.razor.css">
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-		</Content>
 	</ItemGroup>
 </Project>

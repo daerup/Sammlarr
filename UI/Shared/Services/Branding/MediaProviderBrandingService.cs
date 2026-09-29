@@ -53,7 +53,7 @@ public class MediaProviderBrandingService
 				"MDBList",
 				"#4284CA",
 				new BrandArt("mdblist-square.svg"),
-				new BrandArt("mdblist-logo-light.svg", "mdblist-logo-dark.svg"),
+				new BrandArt("mdblist-logo-light.svg", "mdblist-logo-dark.svg") { Scale = 1.25 },
 				new BrandTile(OwnTile, new BrandArt("mdblist-square.svg"), 100)
 			),
 		};

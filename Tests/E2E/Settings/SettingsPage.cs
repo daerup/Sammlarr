@@ -8,6 +8,8 @@ internal static class SettingsPage
 
 	internal static Task VisitSectionAsync(IPage page, string slug) => page.VisitAsync(Section(slug));
 
+	internal static ILocator MapService(IPage page, string name) => page.Locator(".map-service").Filter(new LocatorFilterOptions { HasText = name });
+
 	internal static async Task<ILocator> OpenProviderAsync(IPage page, string provider)
 	{
 		var row = page.Locator("div.provider-row").Filter(new LocatorFilterOptions { Has = page.ButtonContaining(provider) });

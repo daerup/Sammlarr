@@ -11,7 +11,7 @@
         <BbField>
             <BbFieldLabel>API key</BbFieldLabel>
             <BbFieldContent>
-                <SensitiveInput @bind-Value="ApiKey" Placeholder="Enter API key" Label="API key" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
+                <SensitiveInput @bind-Value="ApiKey" Compact="true" Placeholder="Enter API key" Label="API key" Class="@(_state == CredentialState.Failed ? "border-destructive" : string.Empty)"/>
                 <BbFieldDescription>@Description</BbFieldDescription>
             </BbFieldContent>
         </BbField>
@@ -20,7 +20,7 @@
             <Remove>
                 <BbAlertDialog>
                     <BbAlertDialogTrigger>
-                        <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Delete key"/>
+                        <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="trash-2" Text="Delete key"/>
                     </BbAlertDialogTrigger>
                     <BbAlertDialogContent>
                         <BbAlertDialogHeader>
@@ -53,6 +53,8 @@
     [Parameter] public bool Open { get; set; }
 
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    [Parameter] public EventCallback Changed { get; set; }
 
     private BrandingInfo Branding => MediaProviderBrandingService.GetBrandingInfo(Provider.AsMediaProvider());
 
@@ -116,6 +118,7 @@
         _savedState = CredentialState.Saved;
 
         _state = CredentialState.Saved;
+        await Changed.InvokeAsync();
     }
 
     private async Task DeleteAsync()
@@ -125,6 +128,7 @@
         _apiKeyInput = string.Empty;
         _savedState = CredentialState.Idle;
         _state = CredentialState.Idle;
+        await Changed.InvokeAsync();
     }
 
     private void Cancel()

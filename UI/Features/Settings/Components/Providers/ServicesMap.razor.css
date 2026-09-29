@@ -1,0 +1,164 @@
+.map {
+    display: grid;
+    grid-template-columns: auto 1fr 214px;
+    padding: 8px 16px 10px;
+}
+
+.map-roles {
+    display: flex;
+    flex-direction: column;
+    padding-right: 14px;
+}
+
+.map-role {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+}
+
+.map-role-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--muted);
+    color: var(--muted-foreground);
+}
+
+.map-role-name {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.map-role-description {
+    font-size: 11px;
+    line-height: 1.25;
+    color: var(--muted-foreground);
+}
+
+.map-lines {
+    display: block;
+    overflow: visible;
+}
+
+.map-lines path {
+    fill: none;
+    stroke-width: 1.7;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.85;
+}
+
+.map-services {
+    position: relative;
+}
+
+.map-service-slot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 44px;
+}
+
+.map-services ::deep .map-service {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: 44px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    text-align: left;
+}
+
+.map-services ::deep .map-service.is-picker {
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.map-services ::deep .map-service.is-picker:hover,
+.map-services ::deep .map-service.is-picker[data-state=open] {
+    background: color-mix(in oklch, var(--muted) 60%, var(--card));
+}
+
+.map-service-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.map-service-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+.map-dot {
+    display: inline-block;
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 99px;
+}
+
+.map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+}
+
+.map-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.map-legend line {
+    stroke: var(--muted-foreground);
+    stroke-width: 1.8;
+}
+
+.map-sources-caption {
+    position: absolute;
+    left: 0;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 18px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+}
+
+.map-source {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 26px;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+}
+
+.map-source-name {
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}

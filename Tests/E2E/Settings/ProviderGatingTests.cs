@@ -13,7 +13,7 @@ public class ProviderGatingTests
 	private const string Disabled = "data-disabled";
 
 	[Test]
-	public async Task ApiKey_WhenRemovedAndRestored_TogglesProviderAvailabilityInTheFeedEditor()
+	public async Task ApiKey_WhenRemovedAndRestored_TogglesTheProviderInTheMapAndTheFeedEditor()
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
 		var saved = await (await SettingsPage.OpenProviderAsync(page, Tmdb)).Locator(KeyInput).InputValueAsync();
@@ -26,6 +26,7 @@ public class ProviderGatingTests
 		var row = await SettingsPage.OpenProviderAsync(page, Tmdb);
 		await DeleteKeyAsync(page, row);
 		await Expect(row.Text("Not set")).ToBeVisibleAsync();
+		await Expect(SettingsPage.MapService(page, "TMDb")).ToContainTextAsync("No key yet");
 
 		await page.VisitAsync(Routes.CreateFeed);
 
@@ -36,6 +37,7 @@ public class ProviderGatingTests
 
 		await SettingsPage.VisitSectionAsync(page, "providers");
 		await RestoreKeyAsync(await SettingsPage.OpenProviderAsync(page, Tmdb), saved);
+		await Expect(SettingsPage.MapService(page, "TMDb")).ToContainTextAsync("Your key is set");
 		await page.VisitAsync(Routes.CreateFeed);
 
 		await Expect(await FeedEditor.ProviderOptionAsync(page, "TMDb")).Not.ToHaveAttributeAsync(Disabled, "true");

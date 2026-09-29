@@ -16,9 +16,11 @@ internal static class ProviderCaption
 		(Accounts, "sign-in"),
 	];
 
+	internal static bool IsAccount(MediaProvider provider) => Accounts.Contains(provider);
+
 	internal static string For(MediaProvider provider)
 	{
-		var credential = Accounts.Contains(provider) ? "Account" : "API key";
+		var credential = IsAccount(provider) ? "Account" : "API key";
 		var uses = Uses.Where(use => use.Providers.Contains(provider)).Select(use => use.Word);
 		return $"{credential} · {string.Join(", ", uses)}";
 	}

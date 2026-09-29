@@ -34,7 +34,7 @@ else
 
     private int? Width => Form is ProviderLogoForm.Logo ? null : Size;
 
-    private string? HeightStyle => Form is ProviderLogoForm.Logo ? $"height: {Size}px" : null;
+    private string? HeightStyle => Form is ProviderLogoForm.Logo ? FormattableString.Invariant($"height: {Size * Art.Scale}px") : null;
 
     private string Source(string file) => Assets[$"_content/UI/providers/{file}"];
 }
