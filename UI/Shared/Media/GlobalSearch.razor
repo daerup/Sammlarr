@@ -4,7 +4,7 @@
 @using Domain.Watchlist
 @using UI.Shared.Media.Icons
 @implements IDisposable
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 @inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
 @inject Notifier Notifier
@@ -45,7 +45,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _settings = await ProviderConfigRepository.GetAsync(_cancellation.Token);
+        _settings = await ProviderConfigService.GetAsync(_cancellation.Token);
         await RefreshAsync();
     }
 

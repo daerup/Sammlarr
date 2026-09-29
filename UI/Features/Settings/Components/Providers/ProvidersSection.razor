@@ -1,5 +1,5 @@
 @using Contracts.Settings
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 
 <div class="flex max-w-4xl flex-col gap-8">
     <div>
@@ -40,7 +40,7 @@
 
     private MediaProvider? _open;
 
-    protected override async Task OnInitializedAsync() => _authProvider = (await ProviderConfigRepository.GetAsync()).AuthProvider;
+    protected override async Task OnInitializedAsync() => _authProvider = (await ProviderConfigService.GetAsync()).AuthProvider;
 
     private bool IsOpen(MediaProvider provider) => _open == provider;
 

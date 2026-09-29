@@ -10,6 +10,8 @@ public interface IWatchlistService
 
 	Task<IReadOnlySet<MediaId>> GetWatchlistIdsAsync(CancellationToken cancellationToken = default);
 
+	Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default);
+
 	Task<Optional<WatchlistEntry>> GetEntryAsync(MediaId mediaId, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, WatchlistEntry>> GetEntriesAsync(CancellationToken cancellationToken = default);

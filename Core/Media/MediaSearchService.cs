@@ -10,7 +10,7 @@ namespace Core.Media;
 internal sealed class MediaSearchService(
 	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> providers,
 	IMediaService mediaService,
-	IProviderConfigRepository configRepository
+	IProviderConfigService providerConfig
 ) : IMediaSearchService
 {
 	public async Task<IReadOnlyList<MediaLookup>> SearchAsync(
@@ -19,7 +19,7 @@ internal sealed class MediaSearchService(
 		CancellationToken cancellationToken = default
 	)
 	{
-		var config = await configRepository.GetAsync(cancellationToken);
+		var config = await providerConfig.GetAsync(cancellationToken);
 		var raws = await providers[config.SearchProvider].SearchAsync(query, mediaTypes, cancellationToken);
 		if (raws.Count == 0)
 		{

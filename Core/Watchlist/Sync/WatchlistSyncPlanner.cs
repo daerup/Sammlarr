@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace Core.Watchlist.Sync;
 
 internal sealed class WatchlistSyncPlanner(
-	IProviderConfigRepository config,
+	IProviderConfigService config,
 	IWatchlistRepository repo,
 	IWatchlistOutbox outbox,
 	IMediaService media,

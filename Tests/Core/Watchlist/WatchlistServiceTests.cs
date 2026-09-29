@@ -48,7 +48,7 @@ public class WatchlistServiceTests
 	private static WatchlistService CreateTestee(Mock<IWatchlistRepository> repository, Mock<IWatchlistOutbox> outbox, IMediaService media)
 	{
 		var mediaRepository = IMediaRepository.Mock();
-		var configRepository = IProviderConfigRepository.Mock();
+		var configRepository = IProviderConfigService.Mock();
 		return new WatchlistService(repository.Object, outbox.Object, media, mediaRepository.Object, configRepository.Object);
 	}
 

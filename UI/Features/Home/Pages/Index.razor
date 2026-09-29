@@ -22,10 +22,10 @@
 @using Contracts.Jobs
 @inject IFeedService FeedService
 @inject IMediaService MediaService
-@inject IWatchlistRepository WatchlistRepository
+@inject IWatchlistService WatchlistService
 @inject IBlacklistService BlacklistService
 @inject IWatchlistOutbox Outbox
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 @inject IEventPublisher Events
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
@@ -247,7 +247,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         Events.Published += OnEvent;
-        _settings = await ProviderConfigRepository.GetAsync();
+        _settings = await ProviderConfigService.GetAsync();
     }
 
     private async Task HandleSignInChangedAsync(bool hasAccess)
@@ -301,8 +301,8 @@ else
         {
             _feeds = await FeedService.GetFeedsAsync(_cancellation.Token);
             var runs = await FeedService.GetRecentRunsAsync(_now - ActivityWindow, RunCap, _cancellation.Token);
-            var owned = await WatchlistRepository.GetOwnedCountsAsync(_cancellation.Token);
-            var watchlisted = await WatchlistRepository.GetIdsAsync(_cancellation.Token);
+            var owned = await WatchlistService.GetOwnedCountsAsync(_cancellation.Token);
+            var watchlisted = await WatchlistService.GetWatchlistIdsAsync(_cancellation.Token);
             var blacklisted = await BlacklistService.GetBlacklistIdsAsync(_cancellation.Token);
             var overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
             _outbox = await Outbox.GetAsync(_cancellation.Token);

@@ -22,7 +22,7 @@ namespace Core.Watchlist.Sync;
 internal sealed class WatchlistSyncEngine(
 	WatchlistSyncGate gate,
 	IWatchlistSyncPlanner planner,
-	IProviderConfigRepository config,
+	IProviderConfigService config,
 	IWatchlistRepository repo,
 	IWatchlistOutbox outbox,
 	IMediaRepository media,

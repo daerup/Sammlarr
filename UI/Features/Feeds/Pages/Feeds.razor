@@ -21,14 +21,14 @@
 @inject IFeedService FeedService
 @inject NavigationManager NavigationManager
 @inject MediaProviderBrandingService MediaProviderBrandingService
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject IJobQueue JobQueue
 @inject IFeedRunPlanner Planner
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IMediaService Media
-@inject IWatchlistRepository Watchlist
+@inject IWatchlistService Watchlist
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
 
@@ -372,7 +372,7 @@
     {
         Events.Published += OnEvent;
         await LoadQueueAsync();
-        _providerConfig = await ProviderConfigRepository.GetAsync();
+        _providerConfig = await ProviderConfigService.GetAsync();
         _feeds = await FeedService.GetFeedsAsync();
         _owned = await Watchlist.GetOwnedCountsAsync();
         _overviews = await FeedService.GetOverviewsAsync();

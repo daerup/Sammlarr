@@ -60,7 +60,7 @@ public class LastRunCellTests : BunitContext
 		blacklist.GetBlacklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
 		Services.AddSingleton(blacklist.Object);
 
-		var providerConfig = IProviderConfigRepository.Mock();
+		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
 			.GetAsync(Any())
 			.Returns(

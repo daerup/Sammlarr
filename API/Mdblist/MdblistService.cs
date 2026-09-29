@@ -14,16 +14,15 @@ using Domain.Providers;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistService(MdblistClient client, IMediaService media, IProviderConfigRepository configRepository, IApiKeyService apiKeys)
-	: IFeedProvider
+internal sealed class MdblistService(MdblistClient client, IMediaService media, IProviderConfigService providerConfig, IApiKeyService apiKeys) : IFeedProvider
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
 
 	public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var providerConfig = await configRepository.GetAsync(cancellationToken);
-		var watchlistProvider = providerConfig.WatchlistProvider.AsMediaProvider();
+		var config = await providerConfig.GetAsync(cancellationToken);
+		var watchlistProvider = config.WatchlistProvider.AsMediaProvider();
 		var unknowns = new ConcurrentQueue<MdblistTypes.ListItems.UnknownListItem>();
 
 		var requests = BuildRequestsAsync(identifier, watchlistProvider, unknowns, cancellationToken);

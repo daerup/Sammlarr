@@ -6,9 +6,9 @@ namespace Core.Tests.Watchlist;
 
 internal static class ProviderConfigStubs
 {
-	public static Mock<IProviderConfigRepository> PlexWatchlist()
+	public static Mock<IProviderConfigService> PlexWatchlist()
 	{
-		var mock = IProviderConfigRepository.Mock();
+		var mock = IProviderConfigService.Mock();
 		mock.GetAsync(Any())
 			.Returns(
 				new ProviderConfig

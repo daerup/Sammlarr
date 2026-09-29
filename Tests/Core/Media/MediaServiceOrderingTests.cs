@@ -154,7 +154,7 @@ public class MediaServiceOrderingTests
 		var search = IMediaSearchProvider.Mock();
 		var enricher = IMetadataEnricher.Mock();
 		var rating = IMediaRatingService.Mock();
-		var configRepository = IProviderConfigRepository.Mock();
+		var configRepository = IProviderConfigService.Mock();
 		configRepository
 			.GetAsync(Any())
 			.Returns(

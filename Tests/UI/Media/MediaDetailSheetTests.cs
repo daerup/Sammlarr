@@ -133,7 +133,7 @@ public class MediaDetailSheetTests : BunitContext
 
 		Services.AddSingleton(IMediaService.Mock().Object);
 
-		var providerConfig = IProviderConfigRepository.Mock();
+		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
 			.GetAsync(Any())
 			.Returns(

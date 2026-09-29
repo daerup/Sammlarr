@@ -4,7 +4,7 @@
 @using UI.Shared.Services.Branding
 @inject NavigationManager NavigationManager
 @inject ProfileDropdownService ProfileDropdownService
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 @inject MediaProviderBrandingService BrandingService
 
 @if (_isAuthenticated && _branding is not null)
@@ -77,7 +77,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var config = await ProviderConfigRepository.GetAsync();
+        var config = await ProviderConfigService.GetAsync();
         _branding = BrandingService.GetBrandingInfo(config.WatchlistProvider.AsMediaProvider());
         _accountUrl = config.AuthProvider == AuthProvider.Plex ? "https://app.plex.tv/desktop/#!/settings/account" : null;
 

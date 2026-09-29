@@ -49,7 +49,7 @@ public class MediaMetadataResolverTests
 		var rating = IMediaRatingService.Mock();
 		rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of<IReadOnlyList<MediaRating>>([]));
 
-		var configRepository = IProviderConfigRepository.Mock();
+		var configRepository = IProviderConfigService.Mock();
 		configRepository
 			.GetAsync(Any())
 			.Returns(

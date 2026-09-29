@@ -81,13 +81,12 @@ public class FeedRunsTests : BunitContext
 		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<IdentifiedMedia>>());
 		Services.AddSingleton(media.Object);
 
-		var watchlist = IWatchlistRepository.Mock();
+		var watchlist = IWatchlistService.Mock();
 		watchlist.GetOwnedCountsAsync(Any()).Returns(new Dictionary<FeedId, int>());
 		Services.AddSingleton(watchlist.Object);
 
-		Services.AddSingleton(IWatchlistService.Mock().Object);
 		Services.AddSingleton(IBlacklistService.Mock().Object);
-		Services.AddSingleton(IProviderConfigRepository.Mock().Object);
+		Services.AddSingleton(IProviderConfigService.Mock().Object);
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddScoped<ScrollService>();

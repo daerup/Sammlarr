@@ -19,7 +19,7 @@ internal sealed class TmdbTrendingService(
 	TmdbClient tmdbClient,
 	TmdbOptions options,
 	IMediaService media,
-	IProviderConfigRepository providerConfigRepository,
+	IProviderConfigService providerConfig,
 	IApiKeyService apiKeys
 ) : ITrendingService
 {
@@ -36,7 +36,7 @@ internal sealed class TmdbTrendingService(
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
-		var settings = await providerConfigRepository.GetAsync(cancellationToken);
+		var settings = await providerConfig.GetAsync(cancellationToken);
 
 		var finalItems = new MediaLookup[result.Results.Count];
 		var indexed = result.Results.Index().ToList();

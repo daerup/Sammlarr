@@ -9,7 +9,7 @@
 @inject NavigationManager NavigationManager
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject ScrollService ScrollService
-@inject IProviderConfigRepository ProviderConfigRepository
+@inject IProviderConfigService ProviderConfigService
 
 <PageTitle>Browse Movies</PageTitle>
 
@@ -77,7 +77,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _providerConfig = await ProviderConfigRepository.GetAsync();
+        _providerConfig = await ProviderConfigService.GetAsync();
     }
 
     private bool IsSignedIn() => _isSignedIn;

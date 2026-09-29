@@ -12,14 +12,14 @@ internal sealed class MediaMetadataResolver(
 	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> searchIndex,
 	IKeyedServiceIndex<MediaProvider, IMetadataEnricher> enricherIndex,
 	IKeyedServiceIndex<RatingProvider, IMediaRatingService> ratingIndex,
-	IProviderConfigRepository configRepository
+	IProviderConfigService providerConfig
 )
 {
 	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
 
 	public async Task<Result<MediaLookup>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
 	{
-		var config = await configRepository.GetAsync(cancellationToken);
+		var config = await providerConfig.GetAsync(cancellationToken);
 		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
 			.Map(detail => CompleteAsync(detail, config.SearchProvider, config.RatingProvider, cancellationToken))
 			.Apply(buffer.Add);

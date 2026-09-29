@@ -55,7 +55,7 @@ public class MdblistServiceTests
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
 		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => Realize(requests, token));
-		var providerConfig = IProviderConfigRepository.Mock();
+		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
 			.GetAsync(Any())
 			.Returns(

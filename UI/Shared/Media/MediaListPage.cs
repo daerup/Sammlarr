@@ -9,7 +9,7 @@ namespace UI.Shared.Media;
 public abstract class MediaListPage : ComponentBase, IDisposable
 {
 	[Inject]
-	protected IProviderConfigRepository ProviderConfigRepository { get; set; } = null!;
+	protected IProviderConfigService ProviderConfigService { get; set; } = null!;
 
 	[Inject]
 	internal AccountConnectionPrompt AccountConnectionPrompt { get; set; } = null!;
@@ -46,7 +46,7 @@ public abstract class MediaListPage : ComponentBase, IDisposable
 	protected bool IsConnected() => connected;
 
 	protected override async Task OnInitializedAsync() =>
-		Settings = await ProviderConfigRepository.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
+		Settings = await ProviderConfigService.GetAsync() ?? throw new InvalidOperationException("Provider settings are not configured.");
 
 	protected void HandleAccessChanged(bool hasAccess)
 	{
