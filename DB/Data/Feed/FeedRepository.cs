@@ -5,6 +5,7 @@ using DB.Data.Watchlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Feed;
@@ -90,6 +91,19 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		ctx.Feeds.Remove(entity);
 		await ctx.SaveChangesAsync(cancellationToken);
+	}
+
+	public async Task<IReadOnlyList<FeedId>> DisableFeedsAsync(IReadOnlyCollection<FeedProvider> providers, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var feeds = await ctx.Feeds.Where(feed => feed.IsEnabled && providers.Contains(feed.Provider)).ToListAsync(cancellationToken);
+		foreach (var feed in feeds)
+		{
+			feed.IsEnabled = false;
+		}
+
+		await ctx.SaveChangesAsync(cancellationToken);
+		return feeds.Select(feed => FeedId.From(feed.Id)).ToList();
 	}
 
 	public async Task<IReadOnlyDictionary<MediaId, int>> GetAbsencesAsync(

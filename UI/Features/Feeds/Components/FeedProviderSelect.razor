@@ -3,17 +3,26 @@
 
 <div class="feed-provider-select">
     <BbSelect TValue="FeedProvider?" Value="@Value" ValueChanged="@ValueChanged" Class="w-54">
-        <BbSelectTrigger Class="provider-trigger" style="@BrandStyle(Value)">
+        <BbSelectTrigger Class="provider-trigger" style="@BrandStyle(HasNoKey ? null : Value)">
             @if (Value is { } selected)
             {
                 <span class="flex min-w-0 items-center gap-2">
-                    <ProviderTile Provider="@selected.AsMediaProvider()" Size="22" Decorative="true"/>
-                    <span class="truncate">@Brand(selected).NickName</span>
+                    <span class="@(HasNoKey ? "flex grayscale opacity-45" : "flex")">
+                        <ProviderTile Provider="@selected.AsMediaProvider()" Size="22" Decorative="true"/>
+                    </span>
+                    <span class="@(HasNoKey ? "truncate font-normal text-muted-foreground" : "truncate")">@Brand(selected).NickName</span>
+                    @if (HasNoKey)
+                    {
+                        <span class="inline-flex shrink-0 items-center gap-1 text-xs font-normal text-muted-foreground">
+                            <LucideIcon Name="key-round" Size="12"/>
+                            No API key
+                        </span>
+                    }
                 </span>
             }
             else
             {
-                <span class="font-normal text-muted-foreground">No provider available</span>
+                <span class="font-normal text-muted-foreground">@(Providers.All(Unavailable.Contains) ? "No provider available" : "Select a provider")</span>
             }
         </BbSelectTrigger>
         <BbSelectContent>
@@ -61,6 +70,8 @@
     [Parameter] public IReadOnlyCollection<FeedProvider> Unavailable { get; set; } = [];
 
     private static readonly FeedProvider[] Providers = Enum.GetValues<FeedProvider>();
+
+    private bool HasNoKey => Value is { } selected && Unavailable.Contains(selected);
 
     private BrandingInfo Brand(FeedProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider());
 

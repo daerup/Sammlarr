@@ -40,6 +40,15 @@ internal sealed class FeedService(IFeedRepository repository, IFeedScheduler sch
 		await repository.DeleteFeedAsync(id, cancellationToken);
 	}
 
+	public async Task DisableFeedsUsingAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	{
+		var providers = Enum.GetValues<FeedProvider>().Where(feedProvider => feedProvider.AsApiKeyProvider() == provider).ToList();
+		foreach (var id in await repository.DisableFeedsAsync(providers, cancellationToken))
+		{
+			await scheduler.UnscheduleAsync(id, cancellationToken);
+		}
+	}
+
 	private async Task RescheduleAsync(FeedId id, CancellationToken cancellationToken)
 	{
 		if (await repository.GetFeedByIdAsync(id, cancellationToken) is not { } feed)
