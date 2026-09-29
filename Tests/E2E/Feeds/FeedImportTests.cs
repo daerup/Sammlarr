@@ -61,10 +61,10 @@ public class FeedImportTests
 		await FeedEditor.SaveAsync(page);
 		await Expect(page.GetByText(name)).ToBeVisibleAsync(Wait.Settle);
 
-		await page.Row(name).GetByRole(AriaRole.Button).Last.ClickAsync();
+		await page.FeedCard(name).Labelled("Delete").ClickAsync();
 		await Expect(page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = $"Delete \"{name}\"?" })).ToBeVisibleAsync();
-		await page.Button("Delete").Last.ClickAsync();
+		await page.AlertDialog.Button("Delete").ClickAsync();
 
-		await Expect(page.GetByRole(AriaRole.Cell, new PageGetByRoleOptions { Name = name })).ToBeHiddenAsync(Wait.Settle);
+		await Expect(page.FeedCard(name)).ToBeHiddenAsync(Wait.Settle);
 	}
 }

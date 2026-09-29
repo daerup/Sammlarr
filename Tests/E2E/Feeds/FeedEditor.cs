@@ -35,8 +35,14 @@ internal static class FeedEditor
 
 	internal static async Task SelectMdblistAsync(IPage page)
 	{
-		await page.Button("Mdblist").First.ClickAsync();
+		await (await ProviderOptionAsync(page, "MDBList")).ClickAsync();
 		await page.WaitForTimeoutAsync(500);
+	}
+
+	internal static async Task<ILocator> ProviderOptionAsync(IPage page, string provider)
+	{
+		await page.Locator(".provider-trigger").ClickAsync();
+		return page.OptionContaining(provider);
 	}
 
 	internal static async Task FillAsync(IPage page, string selector, string value)

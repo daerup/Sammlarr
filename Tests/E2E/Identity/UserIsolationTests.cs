@@ -13,11 +13,11 @@ public class UserIsolationTests
 		await FeedEditor.ConfigureAsync(admin, name);
 		await FeedEditor.TestAsync(admin);
 		await FeedEditor.SaveAsync(admin);
-		await Expect(admin.Row(name)).ToBeVisibleAsync(Wait.Settle);
+		await Expect(admin.FeedCard(name)).ToBeVisibleAsync(Wait.Settle);
 
 		var member = await E2EApp.MemberAt(Routes.Feeds);
 
 		await Expect(member.Heading("Feeds")).ToBeVisibleAsync();
-		await Expect(member.Row(name)).ToBeHiddenAsync();
+		await Expect(member.FeedCard(name)).ToBeHiddenAsync();
 	}
 }

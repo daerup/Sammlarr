@@ -1,11 +1,20 @@
 @using Domain.Feed
-@using UI.Features.Feeds.Components
 
 <BbDialog Open="Open" OpenChanged="OnOpenChanged">
     <BbDialogContent Class="max-w-xl p-0 gap-0">
         <div class="run-head">
             <h2 class="run-title">Run feeds</h2>
             <p class="run-desc">Queues each selected feed. They run one at a time, in order.</p>
+            @if (Selection is { } chosen)
+            {
+                var skipped = chosen.Count - _fromSelection;
+                <p class="run-from">
+                    <LucideIcon Name="square-check" Size="13"/>
+                    <span>
+                        <span class="run-from-count">@_fromSelection</span> ticked from your selection on Feeds@(skipped > 0 ? $"; {skipped} {(skipped == 1 ? "is" : "are")} paused or already in the queue and can't run" : string.Empty).
+                    </span>
+                </p>
+            }
         </div>
 
         <div class="run-body">
@@ -119,17 +128,24 @@
     [Parameter] public string ProviderName { get; set; } = "your watchlist provider";
     [Parameter] public IReadOnlySet<FeedId> Pending { get; set; } = new HashSet<FeedId>();
     [Parameter] public EventCallback<(IReadOnlyList<FeedId> Feeds, bool SyncAfter)> OnRun { get; set; }
+    [Parameter] public IReadOnlySet<FeedId>? Selection { get; set; }
 
     private readonly HashSet<FeedId> _selected = [];
     private bool _syncAfter = true;
     private bool _armed;
+    private int _fromSelection;
 
     protected override void OnParametersSet()
     {
         if (Open && !_armed)
         {
             _selected.Clear();
-            _selected.UnionWith(RunPlan.DefaultSelection(Candidates).Where(id => !Pending.Contains(id)));
+            _selected.UnionWith(
+                Selection is { } chosen
+                    ? Candidates.Where(candidate => chosen.Contains(candidate.Id) && Selectable(candidate)).Select(candidate => candidate.Id)
+                    : RunPlan.DefaultSelection(Candidates).Where(id => !Pending.Contains(id))
+            );
+            _fromSelection = _selected.Count;
             _armed = true;
         }
         else if (!Open)

@@ -1,54 +1,47 @@
 @using BlazorBlueprint.Primitives
 @using Domain.Media
 
-<div class="filter-bar">
-    @if (Available.Count > 0)
-    {
-        <BbMultiSelect TValue="string"
-                       Values="@SelectedSourceKeys"
-                       ValuesChanged="OnSourcesChangedAsync"
-                       Options="@SourceOptions"
-                       Placeholder="Any source"
-                       SearchPlaceholder="Search sources"
-                       PopoverWidth="w-[420px]"
-                       MaxDisplayTags="2"
-                       Class="filter-control"/>
-    }
+<FilterStrip Shown="Shown" Total="Total" HasFilters="Filter.HasFilters" OnClear="ClearAsync">
+    <Filters>
+        @if (Available.Count > 0)
+        {
+            <BbMultiSelect TValue="string"
+                           Values="@SelectedSourceKeys"
+                           ValuesChanged="OnSourcesChangedAsync"
+                           Options="@SourceOptions"
+                           Placeholder="Any source"
+                           SearchPlaceholder="Search sources"
+                           PopoverWidth="w-[420px]"
+                           MaxDisplayTags="2"
+                           Class="filter-control"/>
+        }
 
-    @if (AvailableStatuses.Count > 0)
-    {
-        <BbMultiSelect TValue="string"
-                       Values="@Filter.Statuses"
-                       ValuesChanged="OnStatusesChangedAsync"
-                       Options="@StatusSelectOptions"
-                       Placeholder="Any status"
-                       MaxDisplayTags="2"
-                       Class="filter-control filter-status"/>
-    }
+        @if (AvailableStatuses.Count > 0)
+        {
+            <BbMultiSelect TValue="string"
+                           Values="@Filter.Statuses"
+                           ValuesChanged="OnStatusesChangedAsync"
+                           Options="@StatusSelectOptions"
+                           Placeholder="Any status"
+                           MaxDisplayTags="2"
+                           Class="filter-control filter-status"/>
+        }
 
-    <BbSelect TValue="string"
-              Value="@(Filter.Type?.ToString())"
-              ValueChanged="OnTypeChangedAsync"
-              Options="@TypeOptions"
-              Placeholder="Any type"
-              Class="filter-control filter-type"/>
-
-    <span class="filter-count">@Shown of @Total</span>
-
-    @if (Filter.HasFilters)
-    {
-        <button type="button" class="filter-clear" @onclick="ClearAsync">Clear all</button>
-    }
-
-    <span class="filter-spacer"></span>
-    <span class="filter-divider"></span>
-
-    <BbSelect TValue="ListSort"
-              Value="@Filter.Sort"
-              ValueChanged="OnSortChangedAsync"
-              Options="@SortOptions"
-              Class="filter-control filter-sort"/>
-</div>
+        <BbSelect TValue="string"
+                  Value="@(Filter.Type?.ToString())"
+                  ValueChanged="OnTypeChangedAsync"
+                  Options="@TypeOptions"
+                  Placeholder="Any type"
+                  Class="filter-control filter-type"/>
+    </Filters>
+    <Sort>
+        <BbSelect TValue="ListSort"
+                  Value="@Filter.Sort"
+                  ValueChanged="OnSortChangedAsync"
+                  Options="@SortOptions"
+                  Class="filter-control filter-sort"/>
+    </Sort>
+</FilterStrip>
 
 @code {
     [Parameter, EditorRequired]

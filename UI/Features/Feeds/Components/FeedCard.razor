@@ -1,0 +1,182 @@
+@using Domain.Feed
+@using Domain.Feed.Run
+@using Domain.Jobs
+@using UI.Features.Feeds.Pages
+@using UI.Shared.Services.Branding
+@using UrlGuid = global::Shared.UrlGuid
+@inject MediaProviderBrandingService Branding
+
+<article class="feed-card @(Feed.Enabled ? null : "is-paused") @(IsSelecting ? "is-selecting" : null) @(IsSelected ? "is-selected" : null)"
+         style="--brand: @Brand.BrandColor"
+         aria-label="@Feed.Name">
+    @if (IsSelecting)
+    {
+        <button type="button" class="feed-card-select" aria-pressed="@(IsSelected ? "true" : "false")" aria-label="Select @Feed.Name" @onclick="OnToggleSelect"></button>
+    }
+    else
+    {
+        <a class="feed-card-link" href="@EditHref" aria-label="Edit @Feed.Name"></a>
+    }
+
+    <div class="feed-card-head">
+        <ProviderTile Provider="@Brand.Provider" Size="36" Decorative="true"/>
+        <div class="feed-card-title">
+            <span class="feed-card-name" title="@Feed.Name">@Feed.Name</span>
+            <span class="feed-card-control feed-card-source">
+                <FeedSourceLink Identifier="@Feed.Identifier" Provider="@Feed.Provider" Class="text-[11px] leading-4"/>
+            </span>
+        </div>
+        <div class="feed-card-corner">
+            @if (!Feed.Enabled)
+            {
+                <FeedChip Tone="FeedChipTone.Attention" Icon="pause" Title="@(Feed.Schedule is Scheduled ? "Paused: the schedule is on hold" : "Paused")">Paused</FeedChip>
+            }
+            @if (IsSelecting)
+            {
+                <span class="feed-card-tick @(IsSelected ? "is-on" : null)" aria-hidden="true">
+                    <LucideIcon Name="@(IsSelected ? "check" : "circle")" Size="16"/>
+                </span>
+            }
+            else
+            {
+                <button type="button"
+                        class="feed-card-control feed-card-run @RunClass"
+                        aria-label="@RunLabel"
+                        title="@RunLabel"
+                        disabled="@(Row.IsBusy || !Feed.Enabled || RunDisabled)"
+                        @onclick="OnRun">
+                    @switch (Row.Job)
+                    {
+                        case JobState.Running:
+                            <LucideIcon Name="loader-circle" Size="15" Class="animate-spin"/>
+                            break;
+                        case JobState.Waiting or JobState.Queued:
+                            <LucideIcon Name="clock" Size="15"/>
+                            break;
+                        default:
+                            <LucideIcon Name="play" Size="15"/>
+                            break;
+                    }
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="feed-card-chips">
+        <FeedStrategyChip Strategy="Feed.Strategy"/>
+        <FeedTriggerChip Schedule="Feed.Schedule" NextRun="Row.NextRun" Now="Now"/>
+        <FeedJobChip Job="Row.Job"/>
+    </div>
+
+    <div class="feed-card-stats">
+        <div>
+            <span class="feed-stat-label">Watchlist</span>
+            @if (Row.Owned > 0)
+            {
+                <span class="feed-card-control feed-stat-link">
+                    <AppLink Href="@($"/watchlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
+                             Title="@($"Show the {Row.Owned} titles this feed put on your watchlist")">@Row.Owned</AppLink>
+                </span>
+            }
+            else
+            {
+                <span class="feed-stat-value is-none">0</span>
+            }
+        </div>
+        <div>
+            <span class="feed-stat-label">Runs</span>
+            @if (History.TotalRuns > 0)
+            {
+                <span class="feed-card-control feed-stat-link">
+                    <AppLink Href="@RunsHref" Title="Open the run history">@History.TotalRuns.ToString("N0")</AppLink>
+                </span>
+            }
+            else
+            {
+                <span class="feed-stat-value is-none">0</span>
+            }
+        </div>
+        <div>
+            <span class="feed-stat-label">All time</span>
+            @if (History.TotalAdded > 0 || History.TotalRemoved > 0)
+            {
+                <span class="feed-stat-value">
+                    <span class="is-added">+@History.TotalAdded.ToString("N0")</span>
+                    @if (History.TotalRemoved > 0)
+                    {
+                        <span class="is-removed">−@History.TotalRemoved.ToString("N0")</span>
+                    }
+                </span>
+            }
+            else
+            {
+                <span class="feed-stat-value is-none">—</span>
+            }
+        </div>
+    </div>
+
+    <div class="feed-card-foot">
+        <span class="feed-card-control">
+            <LastRunCell @key="(Feed.Id, RunVersion)" FeedId="Feed.Id" Overview="@Row.Overview"/>
+        </span>
+        <div class="feed-card-actions">
+            <a class="feed-card-control feed-card-icon" href="@EditHref" aria-label="Edit" title="Edit">
+                <LucideIcon Name="pencil" Size="15"/>
+            </a>
+            <a class="feed-card-control feed-card-icon" href="@($"/feeds/clone/{UrlGuid.Encode(Feed.Id.Value)}")" aria-label="Duplicate" title="Duplicate">
+                <LucideIcon Name="copy" Size="15"/>
+            </a>
+            <button type="button" class="feed-card-control feed-card-icon is-danger" aria-label="Delete" title="Delete" @onclick="OnDelete">
+                <LucideIcon Name="trash-2" Size="15"/>
+            </button>
+        </div>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public required FeedRow Row { get; set; }
+
+    [Parameter, EditorRequired] public required DateTimeOffset Now { get; set; }
+
+    [Parameter] public int RunVersion { get; set; }
+
+    [Parameter] public bool RunDisabled { get; set; }
+
+    [Parameter] public bool IsSelecting { get; set; }
+
+    [Parameter] public bool IsSelected { get; set; }
+
+    [Parameter] public EventCallback<MouseEventArgs> OnToggleSelect { get; set; }
+
+    [Parameter] public EventCallback OnRun { get; set; }
+
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private Feed Feed => Row.Feed;
+
+    private FeedRunHistory History => Row.Overview?.History ?? FeedRunHistory.None;
+
+    private BrandingInfo Brand => Branding.GetBrandingInfo(Feed.Provider.AsMediaProvider());
+
+    private string EditHref => $"/feeds/edit/{UrlGuid.Encode(Feed.Id.Value)}";
+
+    private string RunsHref => $"/feeds/{UrlGuid.Encode(Feed.Id.Value)}/runs";
+
+    private string RunLabel =>
+        Row.Job switch
+        {
+            JobState.Running => "Running now",
+            JobState.Waiting or JobState.Queued => "Waiting in the queue",
+            _ when !Feed.Enabled => "Paused: resume the feed to run it",
+            _ => "Run now",
+        };
+
+    private string? RunClass =>
+        Row.Job switch
+        {
+            JobState.Running => "is-running",
+            JobState.Waiting or JobState.Queued => "is-queued",
+            _ when !Feed.Enabled => "is-paused",
+            _ => null,
+        };
+}

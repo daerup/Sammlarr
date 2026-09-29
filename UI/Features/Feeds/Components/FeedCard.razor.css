@@ -1,0 +1,283 @@
+.feed-card {
+    --brand: var(--muted-foreground);
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--card);
+    overflow: hidden;
+}
+
+.feed-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    background: var(--brand);
+    opacity: 0;
+    z-index: 3;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+}
+
+.feed-card:not(.is-selecting):hover::before {
+    opacity: 1;
+}
+
+.feed-card:not(.is-selecting):has(.feed-card-control:hover)::before {
+    opacity: 0;
+}
+
+.feed-card-link,
+.feed-card-select {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.feed-card-select {
+    z-index: 4;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.feed-card-control {
+    position: relative;
+    z-index: 2;
+}
+
+.feed-card-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 12px 10px 14px;
+}
+
+.feed-card-title {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.feed-card-name {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.feed-card-source {
+    display: flex;
+    min-width: 0;
+    line-height: 16px;
+    overflow-x: clip;
+}
+
+.feed-card-source ::deep > span,
+.feed-card-source ::deep > span > span {
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.feed-card-corner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+
+.feed-card-run {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+.feed-card-run:hover:not(:disabled) {
+    background: var(--secondary);
+}
+
+.feed-card-run:disabled {
+    cursor: default;
+}
+
+.feed-card-run.is-running {
+    color: var(--alert-warning);
+    border-color: color-mix(in oklch, var(--alert-warning) 45%, transparent);
+}
+
+.feed-card-run.is-queued {
+    color: var(--muted-foreground);
+}
+
+.feed-card-run.is-paused {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+}
+
+.feed-card-tick {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--background) 80%, transparent);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+.feed-card-tick.is-on {
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.feed-card.is-selected {
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.feed-card.is-selecting .feed-card-actions {
+    visibility: hidden;
+}
+
+.feed-card-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px 12px;
+}
+
+.feed-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+}
+
+.feed-card-stats > div {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    padding: 9px 12px;
+}
+
+.feed-card-stats > div + div {
+    border-left: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.feed-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+}
+
+.feed-stat-value,
+.feed-stat-link {
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.feed-stat-value {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.feed-stat-value.is-none {
+    font-weight: 500;
+    color: var(--muted-foreground);
+}
+
+.feed-stat-link {
+    align-self: flex-start;
+}
+
+.is-added {
+    color: var(--alert-success);
+}
+
+.is-removed {
+    color: var(--destructive);
+}
+
+.feed-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 8px 10px 8px 12px;
+    border-top: 1px solid var(--border);
+    background: color-mix(in srgb, var(--foreground) 2.5%, transparent);
+}
+
+.feed-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.feed-card-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: calc(var(--radius) - 2px);
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+}
+
+.feed-card-icon:hover {
+    background: var(--secondary);
+}
+
+.feed-card-icon.is-danger {
+    color: var(--destructive);
+}
+
+.feed-card.is-paused {
+    border-style: dashed;
+    background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--foreground) 4.5%, transparent) 0 6px, transparent 6px 14px), var(--card);
+}
+
+.feed-card.is-paused .feed-card-foot {
+    background: transparent;
+}
+
+.feed-card.is-paused .feed-card-head ::deep .provider-tile {
+    filter: grayscale(1);
+}
+
+.feed-card.is-paused .feed-card-head ::deep .provider-tile,
+.feed-card.is-paused .feed-card-title,
+.feed-card.is-paused .feed-card-chips,
+.feed-card.is-paused .feed-card-stats {
+    opacity: 0.55;
+}

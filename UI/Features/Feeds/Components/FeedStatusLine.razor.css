@@ -1,0 +1,166 @@
+.status-line {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--muted-foreground);
+}
+
+.status-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-strong {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.status-item.is-running {
+    color: var(--alert-warning);
+    font-weight: 600;
+}
+
+.status-strong.is-added {
+    color: var(--alert-success);
+}
+
+.status-strong.is-removed {
+    color: var(--destructive);
+}
+
+.status-dot {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--alert-warning);
+}
+
+.status-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: var(--alert-warning);
+    animation: status-dot-pulse 1.6s ease-out infinite;
+}
+
+@keyframes status-dot-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.status-sep {
+    width: 1px;
+    height: 14px;
+    background: var(--border);
+}
+
+.status-line ::deep .status-next {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: -2px -6px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: inherit;
+}
+
+.status-line ::deep .status-next:hover,
+.status-line ::deep .status-next[data-state="open"] {
+    color: var(--foreground);
+    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.next-details {
+    display: flex;
+    width: auto;
+    max-width: 320px;
+}
+
+.next-rail {
+    width: 3px;
+    flex: none;
+    background: var(--border);
+}
+
+.next-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 11px 13px;
+}
+
+.next-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.next-name {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.next-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.next-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+}
+
+.next-meta > span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.next-meta > .next-last {
+    margin-top: 4px;
+}
+
+.next-key {
+    width: 54px;
+    flex: none;
+}
+
+.next-value {
+    min-width: 0;
+    color: var(--foreground);
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.next-foot {
+    display: block;
+    margin: 2px -13px -11px;
+    padding: 8px 13px;
+    border-top: 1px solid var(--border);
+}

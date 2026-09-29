@@ -22,7 +22,7 @@ else
     <BbTooltipTrigger AsChild="false" Class="inline-flex" Focusable="false">
     <button type="button" class="last-run" @onclick="OpenAsync">
         <LucideIcon Name="history" Size="14"/>
-        <span>@Relative(_run.StartedAt)</span>
+        <span>@ScheduleText.Ago(_run.StartedAt, DateTimeOffset.UtcNow)</span>
         @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
         {
             <span class="last-run-badge is-guarded">
@@ -52,7 +52,7 @@ else
     </BbTooltip>
 
     <ChangeDialog Open="_open"
-                  OnOpenChanged="@(open => _open = open)"
+                  OnOpenChanged="SetOpenAsync"
                   Title="@Heading(_run)"
                   Subtitle="@FeedRunView.Summary(_run)"
                   Entries="_entries"
@@ -62,10 +62,10 @@ else
                   Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
                   NoteHref="@($"/feeds/{UrlGuid.Encode(FeedId.Value)}/runs")">
         <Badges>
-            <BbBadge Variant="BadgeVariant.Secondary">@StrategyLabel(_run.Strategy)</BbBadge>
+            <FeedStrategyChip Strategy="_run.Strategy"/>
             @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
             {
-                <BbBadge Variant="BadgeVariant.Secondary">Guarded</BbBadge>
+                <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
             }
         </Badges>
     </ChangeDialog>
@@ -79,6 +79,8 @@ else
     [Parameter] [EditorRequired] public required FeedId FeedId { get; set; }
 
     [Parameter] public FeedOverview? Overview { get; set; }
+
+    [Parameter] public EventCallback<bool> DialogOpenChanged { get; set; }
 
     private FeedRun? _run;
     private int _runCount;
@@ -117,23 +119,14 @@ else
         }
 
         _entries = FeedRunView.Entries(_run, described);
-        _open = true;
+        await SetOpenAsync(true);
+    }
+
+    private Task SetOpenAsync(bool open)
+    {
+        _open = open;
+        return DialogOpenChanged.InvokeAsync(open);
     }
 
     private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm");
-
-    private static string StrategyLabel(FeedStrategy strategy) => strategy is Mirror mirror ? $"Mirror · grace {mirror.AbsenceThreshold}" : "Append";
-
-    private static string Relative(DateTimeOffset moment)
-    {
-        var elapsed = DateTimeOffset.UtcNow - moment;
-
-        return elapsed switch
-        {
-            { TotalMinutes: < 60 } => $"{elapsed.TotalMinutes:0} min ago",
-            { TotalHours: < 24 } => $"{elapsed.TotalHours:0} hours ago",
-            { TotalDays: < 30 } => $"{elapsed.TotalDays:0} days ago",
-            _ => moment.ToLocalTime().ToString("MMM d"),
-        };
-    }
 }

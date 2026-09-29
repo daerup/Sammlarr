@@ -30,7 +30,7 @@
         <MediaListViewActions HasItems="@(_items is { Count: > 0 })"
                               IsEditMode="IsEditMode"
                               ShowFilters="ShowFilters"
-                              Filter="Filter"
+                              ActiveFilters="Filter.ActiveCount"
                               OnEnterEditMode="EnterEditMode"
                               OnToggleFilters="ToggleFilterBar"/>
     </HeaderExtras>

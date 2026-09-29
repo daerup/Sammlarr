@@ -15,4 +15,12 @@ public class ScheduleTextTests
 		await Assert.That(ScheduleText.Away(Now.AddDays(3), Now)).IsEqualTo("in 3 days");
 		await Assert.That(ScheduleText.Away(Now.AddMinutes(-5), Now)).IsEqualTo("due now");
 	}
+
+	[Test]
+	public async Task Ago_ReadsAsAHumanWouldSayIt()
+	{
+		await Assert.That(ScheduleText.Ago(Now.AddMinutes(-16), Now)).IsEqualTo("16 min ago");
+		await Assert.That(ScheduleText.Ago(Now.AddHours(-2), Now)).IsEqualTo("2 hours ago");
+		await Assert.That(ScheduleText.Ago(Now.AddDays(-12), Now)).IsEqualTo("12 days ago");
+	}
 }

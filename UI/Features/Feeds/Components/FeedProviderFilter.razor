@@ -1,0 +1,64 @@
+@using UI.Features.Feeds.Pages
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<BbPopover>
+    <BbPopoverTrigger AsChild="false"
+                      Class="flex h-10 min-w-40 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-background pl-3 pr-2.5 text-sm"
+                      aria-label="Filter by provider">
+        @if (Values.Count == 0)
+        {
+            <span class="provider-filter-placeholder">Any provider</span>
+        }
+        else
+        {
+            <span class="provider-filter-tags">
+                @foreach (var provider in Values)
+                {
+                    <span class="provider-filter-tag">
+                        <ProviderTile Provider="@provider.AsMediaProvider()" Size="14" Decorative="true"/>
+                        @Brand(provider).NickName
+                    </span>
+                }
+            </span>
+        }
+        <LucideIcon Name="chevron-down" Size="15" Class="shrink-0 opacity-50"/>
+    </BbPopoverTrigger>
+    <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-56 p-1">
+        <div role="menu" aria-label="Providers">
+            @foreach (var option in Options)
+            {
+                var chosen = Values.Contains(option.Provider);
+                <button type="button"
+                        role="menuitemcheckbox"
+                        aria-checked="@(chosen ? "true" : "false")"
+                        class="provider-filter-row @(chosen ? "is-chosen" : null)"
+                        style="--brand: @Brand(option.Provider).BrandColor"
+                        @onclick="() => ToggleAsync(option.Provider)">
+                    <ProviderTile Provider="@option.Provider.AsMediaProvider()" Size="22" Decorative="true"/>
+                    <span class="provider-filter-name">@Brand(option.Provider).NickName</span>
+                    <span class="provider-filter-count">@option.Count</span>
+                    <span class="provider-filter-check">
+                        @if (chosen)
+                        {
+                            <LucideIcon Name="check" Size="16"/>
+                        }
+                    </span>
+                </button>
+            }
+        </div>
+    </BbPopoverContent>
+</BbPopover>
+
+@code {
+    [Parameter, EditorRequired] public required IReadOnlyList<ProviderCount> Options { get; set; }
+
+    [Parameter] public IReadOnlyList<FeedProvider> Values { get; set; } = [];
+
+    [Parameter] public EventCallback<IReadOnlyList<FeedProvider>> ValuesChanged { get; set; }
+
+    private BrandingInfo Brand(FeedProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider());
+
+    private Task ToggleAsync(FeedProvider provider) =>
+        ValuesChanged.InvokeAsync(Values.Contains(provider) ? [.. Values.Where(value => value != provider)] : [.. Values, provider]);
+}

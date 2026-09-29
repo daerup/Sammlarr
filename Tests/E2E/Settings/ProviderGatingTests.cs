@@ -10,6 +10,8 @@ public class ProviderGatingTests
 
 	private const string KeyInput = "input[placeholder='Enter API key']";
 
+	private const string Disabled = "data-disabled";
+
 	[Test]
 	public async Task ApiKey_WhenRemovedAndRestored_TogglesProviderAvailabilityInTheFeedEditor()
 	{
@@ -18,7 +20,7 @@ public class ProviderGatingTests
 		await Assert.That(saved).IsNotEmpty();
 
 		await page.VisitAsync(Routes.CreateFeed);
-		await Expect(FeedEditor.Option(page, "Provider", "TMDB")).ToBeEnabledAsync();
+		await Expect(await FeedEditor.ProviderOptionAsync(page, "TMDb")).Not.ToHaveAttributeAsync(Disabled, "true");
 
 		await SettingsPage.VisitSectionAsync(page, "providers");
 		var row = await SettingsPage.OpenProviderAsync(page, Tmdb);
@@ -27,14 +29,16 @@ public class ProviderGatingTests
 
 		await page.VisitAsync(Routes.CreateFeed);
 
-		await Expect(FeedEditor.Option(page, "Provider", "TMDB")).ToBeDisabledAsync();
-		await Expect(FeedEditor.Option(page, "Provider", "Mdblist")).ToBeEnabledAsync();
+		var tmdb = await FeedEditor.ProviderOptionAsync(page, "TMDb");
+		await Expect(tmdb).ToHaveAttributeAsync(Disabled, "true");
+		await Expect(tmdb).ToContainTextAsync("No API key");
+		await Expect(page.OptionContaining("MDBList")).Not.ToHaveAttributeAsync(Disabled, "true");
 
 		await SettingsPage.VisitSectionAsync(page, "providers");
 		await RestoreKeyAsync(await SettingsPage.OpenProviderAsync(page, Tmdb), saved);
 		await page.VisitAsync(Routes.CreateFeed);
 
-		await Expect(FeedEditor.Option(page, "Provider", "TMDB")).ToBeEnabledAsync();
+		await Expect(await FeedEditor.ProviderOptionAsync(page, "TMDb")).Not.ToHaveAttributeAsync(Disabled, "true");
 	}
 
 	private static async Task DeleteKeyAsync(IPage page, ILocator row)

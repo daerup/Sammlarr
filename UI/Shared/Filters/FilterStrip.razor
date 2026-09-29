@@ -1,0 +1,29 @@
+<div class="filter-bar">
+    @Filters
+
+    <span class="filter-count">@Shown of @Total</span>
+
+    @if (HasFilters)
+    {
+        <button type="button" class="filter-clear" @onclick="OnClear">Clear all</button>
+    }
+
+    <span class="filter-spacer"></span>
+    <span class="filter-divider"></span>
+
+    @Sort
+</div>
+
+@code {
+    [Parameter, EditorRequired] public required RenderFragment Filters { get; set; }
+
+    [Parameter, EditorRequired] public required RenderFragment Sort { get; set; }
+
+    [Parameter] public int Shown { get; set; }
+
+    [Parameter] public int Total { get; set; }
+
+    [Parameter] public bool HasFilters { get; set; }
+
+    [Parameter] public EventCallback OnClear { get; set; }
+}

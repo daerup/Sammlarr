@@ -1,0 +1,15 @@
+@using Domain.Jobs
+
+@switch (Job)
+{
+    case JobState.Running:
+        <FeedChip Tone="FeedChipTone.Attention"><span class="feed-chip-dot"></span>Running</FeedChip>
+        break;
+    case JobState.Waiting or JobState.Queued:
+        <FeedChip Tone="FeedChipTone.Quiet" Icon="hourglass">Queued</FeedChip>
+        break;
+}
+
+@code {
+    [Parameter] public JobState? Job { get; set; }
+}

@@ -1,0 +1,89 @@
+@using Domain.Feed
+@using UI.Features.Feeds.Pages
+@using UI.Shared.Services.Branding
+@using UrlGuid = global::Shared.UrlGuid
+@inject MediaProviderBrandingService Branding
+
+<span class="status-line">
+    @if (Running > 0)
+    {
+        <span class="status-item is-running"><span class="status-dot"></span>@Running running</span>
+    }
+    @if (Queued > 0)
+    {
+        <span class="status-item"><LucideIcon Name="hourglass" Size="14"/><span class="status-strong">@Queued</span> queued</span>
+    }
+    @if (Running > 0 || Queued > 0)
+    {
+        <span class="status-sep" aria-hidden="true"></span>
+    }
+    @if (FeedPulse.Next(Rows) is { NextRun: { } at } next)
+    {
+        <BbPopover>
+            <BbPopoverTrigger AsChild="false" Class="status-next" aria-label="@($"Next run: {next.Feed.Name}")">
+                <LucideIcon Name="clock" Size="14"/>
+                Next <span class="status-strong">@ScheduleText.Away(at, Now)</span>
+            </BbPopoverTrigger>
+            <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-auto overflow-hidden p-0"
+                              CloseOnClickOutside="!_runOpen" CloseOnEscape="!_runOpen">
+                <span class="next-details">
+                    <span class="next-rail" style="background: @Brand(next.Feed).BrandColor"></span>
+                    <span class="next-body">
+                        <span class="next-head">
+                            <ProviderTile Provider="@Brand(next.Feed).Provider" Size="16" Decorative="true"/>
+                            <AppLink Href="@($"/feeds/edit/{UrlGuid.Encode(next.Feed.Id.Value)}")" Title="Open feed settings" Class="min-w-0">
+                                <span class="next-name">@next.Feed.Name</span>
+                            </AppLink>
+                        </span>
+                        <span class="next-chips">
+                            <FeedStrategyChip Strategy="next.Feed.Strategy"/>
+                            <FeedTriggerChip Schedule="next.Feed.Schedule" NextRun="at" Now="Now"/>
+                        </span>
+                        <span class="next-meta">
+                            <span><span class="next-key">At</span><span class="next-value">@When(at)</span></span>
+                            <span><span class="next-key">Repeats</span><span class="next-value">@ScheduleText.Describe(next.Feed.Schedule)</span></span>
+                            <span class="next-last"><span class="next-key">Last run</span><LastRunCell FeedId="next.Feed.Id" Overview="next.Overview" DialogOpenChanged="open => _runOpen = open"/></span>
+                        </span>
+                        <span class="next-foot">
+                            <AppLink Href="@($"/feeds/{UrlGuid.Encode(next.Feed.Id.Value)}/runs")" Class="text-xs">Run history</AppLink>
+                        </span>
+                    </span>
+                </span>
+            </BbPopoverContent>
+        </BbPopover>
+        <span class="status-sep" aria-hidden="true"></span>
+    }
+    <span class="status-item">
+        <LucideIcon Name="history" Size="14"/>
+        Last 7 days
+        @if (Added == 0 && Removed == 0)
+        {
+            <span>nothing changed</span>
+        }
+        else
+        {
+            <span class="status-strong is-added">+@Added.ToString("N0")</span>
+            <span class="status-strong is-removed">−@Removed.ToString("N0")</span>
+        }
+    </span>
+</span>
+
+@code {
+    [Parameter, EditorRequired] public required IReadOnlyList<FeedRow> Rows { get; set; }
+
+    [Parameter] public int Added { get; set; }
+
+    [Parameter] public int Removed { get; set; }
+
+    [Parameter] public DateTimeOffset Now { get; set; }
+
+    private bool _runOpen;
+
+    private int Running => FeedPulse.Running(Rows);
+
+    private int Queued => FeedPulse.Queued(Rows);
+
+    private BrandingInfo Brand(Feed feed) => Branding.GetBrandingInfo(feed.Provider.AsMediaProvider());
+
+    private string When(DateTimeOffset at) => at - Now < TimeSpan.FromDays(1) ? at.ToLocalTime().ToString("HH:mm") : at.ToLocalTime().ToString("d MMMM HH:mm");
+}

@@ -35,4 +35,17 @@ public class FeedSourceLinkTests : BunitContext
 		await Assert.That(anchor.GetAttribute("target")).IsEqualTo("_blank");
 		await Assert.That(anchor.GetAttribute("rel")).IsEqualTo("noopener noreferrer");
 	}
+
+	[Test]
+	public async Task Render_WithASizeClass_KeepsTheLinkColour()
+	{
+		var cut = Render<FeedSourceLink>(parameters =>
+			parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list").Add(link => link.Class, "text-[11px]")
+		);
+
+		var classes = cut.Find("a").ClassList;
+		await Assert.That(classes).Contains("text-primary");
+		await Assert.That(classes).Contains("text-[11px]");
+		await Assert.That(classes).DoesNotContain("text-sm");
+	}
 }

@@ -192,3 +192,20 @@
 .run-sep {
     opacity: 0.5;
 }
+
+.run-from {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 10px 0 0;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.run-from-count {
+    color: var(--foreground);
+    font-weight: 600;
+}

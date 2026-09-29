@@ -107,11 +107,11 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.Row(name);
-		await Expect(row).ToBeVisibleAsync(Wait.Settle);
-		await Expect(row.GetByText("Mirror", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await Expect(card.GetByText("Mirror")).ToBeVisibleAsync();
 
-		await row.GetByLabel("Edit").ClickAsync();
+		await card.Labelled("Edit").ClickAsync();
 
 		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-pressed", "");
 		await Expect(FeedEditor.Option(page, "Strategy", "Append")).Not.ToHaveAttributeAsync("aria-pressed", "");
@@ -140,9 +140,9 @@ public class FeedConfigurationTests
 		await FeedEditor.FillAsync(page, CronField("Hour"), hour);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.Row(name);
-		await Expect(row).ToBeVisibleAsync(Wait.Settle);
-		await row.GetByLabel("Edit").ClickAsync();
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await card.Labelled("Edit").ClickAsync();
 
 		await Expect(FeedEditor.Option(page, "Trigger", "Scheduled")).ToHaveAttributeAsync("aria-pressed", "");
 		await Expect(page.Locator(CronField("Minute"))).ToHaveValueAsync(minute);
@@ -162,9 +162,9 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var originalRow = page.Row(original);
-		await Expect(originalRow).ToBeVisibleAsync(Wait.Settle);
-		await originalRow.GetByLabel("Duplicate").ClickAsync();
+		var originalCard = page.FeedCard(original);
+		await Expect(originalCard).ToBeVisibleAsync(Wait.Settle);
+		await originalCard.Labelled("Duplicate").ClickAsync();
 
 		await Expect(page.GetByText("Clone feed").First).ToBeVisibleAsync();
 		await Expect(page.Locator("#name")).ToHaveValueAsync(original);
@@ -174,10 +174,10 @@ public class FeedConfigurationTests
 		await FeedEditor.FillAsync(page, "#name", copy);
 		await FeedEditor.SaveAsync(page);
 
-		var copyRow = page.Row(copy);
-		await Expect(copyRow).ToBeVisibleAsync(Wait.Settle);
-		await Expect(originalRow).ToBeVisibleAsync();
-		await Expect(copyRow.GetByText("Mirror", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
+		var copyCard = page.FeedCard(copy);
+		await Expect(copyCard).ToBeVisibleAsync(Wait.Settle);
+		await Expect(originalCard).ToBeVisibleAsync();
+		await Expect(copyCard.GetByText("Mirror")).ToBeVisibleAsync();
 	}
 
 	[Test]
@@ -191,16 +191,17 @@ public class FeedConfigurationTests
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
-		var row = page.Row(name);
-		await Expect(row).ToBeVisibleAsync(Wait.Settle);
-		await Expect(row.GetByText("Disabled", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync();
+		var card = page.FeedCard(name);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await Expect(card.Text("Paused")).ToBeVisibleAsync();
 
-		await row.GetByLabel("Edit").ClickAsync();
+		await card.Labelled("Edit").ClickAsync();
 		await Expect(FeedEditor.Toggle(page, "Enabled")).ToHaveAttributeAsync("aria-checked", "false");
 		await FeedEditor.Toggle(page, "Enabled").ClickAsync();
 		await FeedEditor.SaveAsync(page);
 
-		await Expect(row.GetByText("Enabled", new LocatorGetByTextOptions { Exact = true })).ToBeVisibleAsync(Wait.Settle);
+		await Expect(card).ToBeVisibleAsync(Wait.Settle);
+		await Expect(card.Text("Paused")).ToBeHiddenAsync();
 	}
 
 	[Test]
