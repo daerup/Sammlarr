@@ -51,27 +51,6 @@
                 <BbField>
                     <BbFieldLabel Class="flex items-center leading-none">
                         Provider
-                        @if (_disabledProviders.Count > 0)
-                        {
-                            <BbPopover>
-                                <BbPopoverTrigger AsChild="false"
-                                                  Class="@($"ml-1 inline-flex items-center cursor-pointer {(_disabledProviders.Count == AllProviders.Length ? "text-destructive" : "text-amber-500")}")">
-                                    <LucideIcon Name="triangle-alert" Size="14"/>
-                                </BbPopoverTrigger>
-                                <BbPopoverContent Side="PopoverSide.Bottom" Align="PopoverAlign.Start" Class="w-72">
-                                    <div class="space-y-2">
-                                        <p class="text-sm font-semibold">API key required</p>
-                                        <p class="text-sm text-muted-foreground">
-                                            The following providers are unavailable because no API key is configured:
-                                            <span class="font-medium">@string.Join(", ", _disabledProviders)</span>.
-                                        </p>
-                                        <BbButton Variant="ButtonVariant.Link" Href="/settings?section=api-keys" Class="h-auto p-0 text-sm">
-                                            Go to Settings
-                                        </BbButton>
-                                    </div>
-                                </BbPopoverContent>
-                            </BbPopover>
-                        }
                         <BbTooltipProvider>
                             <BbTooltip DelayDuration="0">
                                 <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
@@ -82,19 +61,7 @@
                         </BbTooltipProvider>
                     </BbFieldLabel>
                     <BbFieldContent>
-                        <BbSelect TValue="FeedProvider?" Value="@_provider" ValueChanged="@ChangeProvider" Class="w-48">
-                            <BbSelectTrigger>
-                                <BbSelectValue Placeholder="Select a provider"/>
-                            </BbSelectTrigger>
-                            <BbSelectContent>
-                                @foreach (var provider in AllProviders)
-                                {
-                                    <BbSelectItem Value="@((FeedProvider?)provider)"
-                                                  Text="@provider.GetDescription()"
-                                                  Disabled="@_disabledProviders.Contains(provider)"/>
-                                }
-                            </BbSelectContent>
-                        </BbSelect>
+                        <FeedProviderSelect Value="@_provider" ValueChanged="@ChangeProvider" Unavailable="@_disabledProviders"/>
                     </BbFieldContent>
                 </BbField>
                 </div>
