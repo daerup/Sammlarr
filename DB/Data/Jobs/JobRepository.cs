@@ -24,7 +24,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			Request = job.Request,
 			State = StateFor(job.RunAfter, now),
 			RunAfter = job.RunAfter,
-			FirstArmedAt = job.RunAfter,
+			Deadline = job.RunAfter + job.MaxWait,
 		};
 		context.Jobs.Add(row);
 		try
@@ -105,6 +105,26 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, JobState.Queued).SetProperty(row => row.UpdatedAt, now), cancellationToken);
 	}
 
+	public async Task<IReadOnlyList<IJobRequest>> QueuedAsync(UserId owner, JobKind kind, CancellationToken cancellationToken = default)
+	{
+		var raw = owner.Value;
+		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await context
+			.Jobs.AsNoTracking()
+			.Where(row => row.OwnerId == raw && row.Kind == kind && row.State == JobState.Queued)
+			.Select(row => row.Request)
+			.ToListAsync(cancellationToken);
+	}
+
+	public async Task<int> QueueWaitingAsync(UserId owner, JobKind kind, DateTimeOffset now, CancellationToken cancellationToken = default)
+	{
+		var raw = owner.Value;
+		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		return await context
+			.Jobs.Where(row => row.OwnerId == raw && row.Kind == kind && row.State == JobState.Waiting)
+			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, JobState.Queued).SetProperty(row => row.UpdatedAt, now), cancellationToken);
+	}
+
 	public async Task CompleteAsync(JobId id, DateTimeOffset completedAt, CancellationToken cancellationToken = default) =>
 		await SettleAsync(id, JobState.Done, completedAt, cancellationToken);
 
@@ -121,6 +141,8 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 	}
 
 	private static JobState StateFor(DateTimeOffset runAfter, DateTimeOffset now) => runAfter <= now ? JobState.Queued : JobState.Waiting;
+
+	private static DateTimeOffset Earliest(DateTimeOffset left, DateTimeOffset right) => left < right ? left : right;
 
 	private static async Task<JobRow?> FindPendingAsync(SammlarrDbContext context, QueuedJob job, CancellationToken cancellationToken)
 	{
@@ -151,8 +173,8 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			return new AlreadyQueued(JobId.From(pending.Id), JobState.Running);
 		}
 
-		var ceiling = pending.FirstArmedAt + job.MaxWait;
-		pending.RunAfter = job.RunAfter < ceiling ? job.RunAfter : ceiling;
+		pending.Deadline = Earliest(pending.Deadline, job.RunAfter + job.MaxWait);
+		pending.RunAfter = Earliest(job.RunAfter, pending.Deadline);
 		pending.State = StateFor(pending.RunAfter, now);
 		await context.SaveChangesAsync(cancellationToken);
 		return new AlreadyQueued(JobId.From(pending.Id), pending.State);

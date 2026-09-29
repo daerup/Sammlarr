@@ -164,13 +164,13 @@ sequenceDiagram
   U->>Q: RunFeed(feed, Manual)
   Q->>J: insert, or fold into the feed's pending row
   R->>J: take the oldest Queued row, mark Running
+  R->>Q: a scheduled run starts: SyncWatchlist(ScheduledFeedTrigger)
+  Q->>J: one Waiting sync per owner, due after the grace period
   R->>E: dispatch in a fresh scope, as the job's owner
   E->>E: plan (the same planner as the preview)
   E->>W: apply adds and owned drops, recorded in the run log
   Note over W: outbox rows written, nothing sent to Plex yet
-  R->>Q: scheduled run: SyncWatchlist(ScheduledFeedTrigger)
-  Q->>J: one Waiting sync per owner, due after the grace period
-  Note over J: further runs push the sync back,<br/>never past its first arming + MaxWait
+  Note over J: further runs push the sync back,<br/>never past its deadline (first arming + MaxWait)
   J->>R: the alarm releases the sync when due
   R->>SE: dispatch the sync
 ....
@@ -182,11 +182,16 @@ rows, which is how the Home dashboard shows what is running, queued and waiting.
 
 Enqueueing coalesces by kind, key and owner, so a request never duplicates one already pending: a
 second run of the same feed folds into the pending or running one, and a sync folds into the
-owner's pending sync. A sync that follows a scheduled run (or a manual run with _sync when done_)
-is armed `Grace` (2 minutes) in the future and every later run pushes it back, clamped to
-`MaxWait` (30 minutes) after it was first armed. So N feed runs in a window produce one sync, and
-a feed that adds a title and another that removes it cancel out in the outbox before anything
-reaches Plex. A manual Sync pulls a waiting sync forward to now.
+owner's pending sync. A scheduled run (or a manual run with _sync when done_) arms the sync as it
+starts, `Grace` (2 minutes) in the future, and every later such run pushes it back, never past
+its deadline, `MaxWait` (30 minutes) after it was first armed. So N feed runs in a window produce
+one sync, and a feed that adds a title and another that removes it cancel out in the outbox before
+anything reaches Plex. A sync only counts down its grace while none of its owner's syncing runs is
+queued: once one is, the sync is `Queued` behind it, and when that run starts and arms the sync
+again, the grace starts over. A plain manual run, from the Feeds page, neither arms nor holds the
+sync. A manual Sync skips the grace: it moves the sync's deadline to now, so it runs as soon as the
+runs already queued ahead of it finish, no later run can push it back, and runs queued after it
+wait their turn.
 
 A future row is `Waiting`; a `JobAlarm` timer moves it to `Queued` when due and nudges the runner,
 so a deferred sync runs on time without the runner polling. A handler that throws ends `Failed`;

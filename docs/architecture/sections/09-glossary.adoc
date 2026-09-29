@@ -210,8 +210,11 @@ its own scope as the job's owner (`JobRunner`). A `JobAlarm` timer moves `Waitin
 Coalescing:: Enqueueing a job that is already pending for the same kind, key and owner folds into
 the pending row instead of adding one. It is what turns N scheduled feed runs into one sync.
 
-Grace and MaxWait:: The sync a scheduled run arms is due `Grace` (2 minutes) later; each further
-run pushes it back, never past `MaxWait` (30 minutes) after it was first armed (`SchedulerOptions`).
+Grace and MaxWait:: The sync a scheduled run arms as it starts is due `Grace` (2 minutes) later;
+each further run pushes it back, never past its deadline, `MaxWait` (30 minutes) after it was
+first armed (`SchedulerOptions`). While one of the owner's scheduled or _sync when done_ runs is
+queued, the sync is `Queued` behind it instead of `Waiting`. A manual Sync moves the deadline to
+now, so nothing pushes it back.
 
 Cron ticker:: TickerQ's persisted per-feed cron entry. When it fires it only enqueues a `RunFeed`
 job; it never runs the feed itself.

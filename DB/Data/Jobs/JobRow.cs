@@ -16,7 +16,7 @@ internal record JobRow : Entity<Guid>
 
 	public DateTimeOffset RunAfter { get; set; }
 
-	public DateTimeOffset FirstArmedAt { get; set; }
+	public DateTimeOffset Deadline { get; set; }
 
 	public int Attempts { get; set; }
 }
