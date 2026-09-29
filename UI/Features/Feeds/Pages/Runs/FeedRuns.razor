@@ -24,9 +24,9 @@
         <div class="runs-page">
             <div class="runs-head">
                 <nav class="runs-crumbs">
-                    <a href="/feeds">Feeds</a>
+                    <AppLink Href="/feeds" Arrow="false" Color="var(--muted-foreground)">Feeds</AppLink>
                     <LucideIcon Name="chevron-right" Size="12"/>
-                    <a href="@($"/feeds/edit/{FeedIdParam}")">@feed.Name</a>
+                    <AppLink Href="@($"/feeds/edit/{FeedIdParam}")" Arrow="false" Color="var(--muted-foreground)">@feed.Name</AppLink>
                     <LucideIcon Name="chevron-right" Size="12"/>
                     <span class="is-current">Runs</span>
                 </nav>
@@ -57,11 +57,11 @@
                         @if (_owned > 0)
                         {
                             <span>·</span>
-                            <a class="runs-owned-link"
-                               href="@($"/watchlist?feed={FeedIdParam}")"
-                               title="@($"Show the {_owned} titles this feed put on your watchlist")">
-                                <span class="runs-owned">@_owned</span> on your watchlist
-                            </a>
+                            <span>
+                                <AppLink Href="@($"/watchlist?feed={FeedIdParam}")" Arrow="false"
+                                         Title="@($"Show the {_owned} titles this feed put on your watchlist")">@_owned</AppLink>
+                                on your watchlist
+                            </span>
                         }
                         <span>·</span>
                         <span>@HistoryLine</span>

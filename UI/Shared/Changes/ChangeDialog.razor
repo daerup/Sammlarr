@@ -52,10 +52,7 @@
         <div class="change-foot @(Actions is null ? "is-note-only" : null)">
             @if (Note is not null && NoteHref is not null)
             {
-                <a class="change-note is-link" href="@NoteHref">
-                    <span>@Note</span>
-                    <LucideIcon Name="arrow-right" Size="12"/>
-                </a>
+                <AppLink Href="@NoteHref" Class="text-xs">@Note</AppLink>
             }
             else
             {

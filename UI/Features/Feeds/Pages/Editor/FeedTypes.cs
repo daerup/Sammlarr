@@ -109,7 +109,7 @@ public record FeedConfig
 {
 	public bool IsEnabled { get; init; } = true;
 	public string Name { get; init; } = string.Empty;
-	public FeedProvider? Provider { get; init; } = FeedProvider.Mdblist;
+	public FeedProvider? Provider { get; init; }
 	public FeedStrategy Strategy { get; init; } = new(new Append());
 	public string Identifier { get; init; } = string.Empty;
 	public FilterDefinition? Filter { get; init; }

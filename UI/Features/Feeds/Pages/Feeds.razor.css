@@ -38,15 +38,3 @@
     font-weight: 400;
     color: var(--muted-foreground);
 }
-
-.feed-owned-link {
-    color: var(--foreground);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.feed-owned-link:hover,
-.feed-owned-link:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}

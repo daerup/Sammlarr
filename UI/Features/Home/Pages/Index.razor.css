@@ -10,15 +10,3 @@
     font-size: 14px;
     font-weight: 600;
 }
-
-.summary-count {
-    color: var(--foreground);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    text-decoration: none;
-}
-
-a.summary-count:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-}

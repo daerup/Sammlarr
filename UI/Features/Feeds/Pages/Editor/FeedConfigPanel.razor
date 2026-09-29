@@ -3,9 +3,7 @@
 @using Contracts.Auth
 @using Contracts.Processing
 @using UI.Features.Feeds.Components
-@using UI.Shared.Services.Branding
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
-@inject MediaProviderBrandingService Branding
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6" style="scrollbar-gutter: stable;">
@@ -64,12 +62,10 @@
                     <BbFieldContent>
                         <FeedProviderSelect Value="@_provider" ValueChanged="@ChangeProvider" Unavailable="@_disabledProviders"/>
                     </BbFieldContent>
-                    @if (_provider is { } missing && ProviderHasNoKey)
+                    @if (ProviderHasNoKey)
                     {
                         <BbFieldError>
-                            Add the @Branding.GetBrandingInfo(missing.AsMediaProvider()).NickName API key in
-                            <a href="/settings?section=providers" class="underline underline-offset-2">Settings › Providers</a>
-                            to save this feed.
+                            API key is missing, fix in <AppLink Href="/settings?section=providers" Color="inherit">Settings</AppLink>
                         </BbFieldError>
                     }
                 </BbField>
@@ -405,7 +401,6 @@
 
     [Parameter] public required FeedConfig Value { get; set; }
     [Parameter] public bool IsLoading { get; set; }
-    [Parameter] public bool IsNew { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
 
     private static readonly FeedProvider[] AllProviders = Enum.GetValues<FeedProvider>();
@@ -506,14 +501,9 @@
             await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsApiKeyProvider()).ApplyError(_ => _disabledProviders.Add(provider));
         }
 
-        if (_provider is not null && _disabledProviders.Contains(_provider.Value))
+        if (ProviderHasNoKey)
         {
-            if (IsNew)
-            {
-                _provider = AllProviders.Cast<FeedProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
-            }
-
-            _ = OnChange.InvokeAsync(BuildConfig());
+            NotifyChange();
         }
     }
 

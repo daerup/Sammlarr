@@ -54,15 +54,15 @@ else
         }
         else
         {
-            <a href="/watchlist" class="summary-count">@_watchlistCount.ToString("N0")</a>
+            <AppLink Href="/watchlist" Arrow="false">@_watchlistCount.ToString("N0")</AppLink>
 
             <span> titles on your watchlist, assembled by</span>
-            <a href="/feeds" class="summary-count">@_feeds.Count.ToString("N0")</a>
-            <span>@(_feeds.Count == 1 ? "feed" : "feeds").</span>
+            <AppLink Href="/feeds" Arrow="false">@_feeds.Count.ToString("N0")</AppLink>
+            <span>@(_feeds.Count == 1 ? "feed" : "feeds"). </span>
 
             @if (_blacklistCount > 0)
             {
-                <a href="/blacklist" class="summary-count">@_blacklistCount.ToString("N0")</a>
+                <AppLink Href="/blacklist" Arrow="false">@_blacklistCount.ToString("N0")</AppLink>
                 <span>blacklisted.</span>
             }
         }

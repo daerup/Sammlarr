@@ -42,6 +42,16 @@ public class FeedProviderSelectTests : BunitContext
 	}
 
 	[Test]
+	public async Task Trigger_WithNothingChosenYet_AsksForAProvider()
+	{
+		var cut = RenderSelect(null);
+
+		var trigger = cut.Find("[role=combobox]");
+		await Assert.That(trigger.TextContent).Contains("Select a provider");
+		await Assert.That(trigger.HasAttribute("style")).IsFalse();
+	}
+
+	[Test]
 	public async Task Trigger_WhenTheChosenProviderLostItsKey_KeepsItButGreysItOutLikeItsOption()
 	{
 		var cut = RenderSelect(FeedProvider.Tmdb, FeedProvider.Tmdb);

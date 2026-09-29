@@ -94,7 +94,6 @@
                 <FeedConfigPanel @key="_configKey"
                                  Value="@_config"
                                  IsLoading="@(_previewStatus.IsLoading || _isApplying)"
-                                 IsNew="!IsEditOrClone"
                                  OnChange="@OnConfigChanged"/>
 
                 <FeedPreviewPanel @ref="_previewPanel"
