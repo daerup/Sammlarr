@@ -3,10 +3,9 @@
 @inject MediaProviderBrandingService BrandingService
 
 <div class="w-full max-w-md rounded-lg border bg-muted/40 p-8 text-center space-y-4">
-    <LucideIcon Name="log-in" Size="40" Class="mx-auto text-muted-foreground"/>
     <div class="space-y-1.5">
-        <h2 class="text-lg font-semibold tracking-tight">Sign in to continue</h2>
-        <p class="text-sm text-muted-foreground">You need to sign in to view this page.</p>
+        <h2 class="text-lg font-semibold tracking-tight">Sign in</h2>
+        <p class="text-sm text-muted-foreground">Use your @ProviderNames account to continue.</p>
     </div>
     @if (!string.IsNullOrWhiteSpace(Error))
     {
@@ -20,8 +19,8 @@
         {
             var branding = BrandingService.GetBrandingInfo(provider.AsMediaProvider());
             <HoverButton OnClick="() => SignIn(provider)" Color="@branding.BrandColor" Class="font-medium w-full" Border="false">
-                <LucideIcon Name="log-in" Size="16" Class="mr-2"/>
-                <span>Sign in with @branding.NickName</span>
+                <span class="provider-mark" aria-hidden="true">@branding.IconWithClass("w-4 h-4")</span>
+                <span class="provider-label">Sign in with @branding.NickName</span>
             </HoverButton>
         }
     </div>
@@ -33,6 +32,8 @@
     [Parameter] public string? Error { get; set; }
 
     private static readonly AuthProvider[] Providers = Enum.GetValues<AuthProvider>();
+
+    private string ProviderNames => string.Join(" or ", Providers.Select(provider => BrandingService.GetBrandingInfo(provider.AsMediaProvider()).NickName));
 
     private void SignIn(AuthProvider provider)
     {
