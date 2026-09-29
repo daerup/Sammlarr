@@ -1,0 +1,115 @@
+.sammlarr-logo {
+    --sammlarr-gold: #e3a008;
+    display: block;
+    overflow: visible;
+}
+
+.dark .sammlarr-logo {
+    --sammlarr-gold: #f5b82e;
+}
+
+.sammlarr-mark {
+    overflow: visible;
+    color: var(--primary);
+}
+
+.sammlarr-word {
+    fill: var(--foreground);
+}
+
+.sammlarr-knockout {
+    fill: var(--background);
+    stroke: var(--background);
+    stroke-width: 90;
+    stroke-linejoin: round;
+}
+
+.sammlarr-tilt {
+    transform-box: view-box;
+    transform-origin: 176px 198.8px;
+    transition: rotate 0.2s;
+}
+
+.sammlarr-logo:hover .sammlarr-tilt,
+a.active .sammlarr-tilt {
+    rotate: -6deg;
+}
+
+.sammlarr-bird {
+    transform-box: view-box;
+    transform-origin: 150px 198.8px;
+}
+
+.sammlarr-tail {
+    transform-box: view-box;
+    transform-origin: 116.81px 157.31px;
+}
+
+.sammlarr-star {
+    fill: var(--sammlarr-gold);
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.sammlarr-rays {
+    fill: none;
+    stroke: var(--sammlarr-gold);
+    stroke-width: 7;
+    stroke-linecap: round;
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: 222.75px 45.58px;
+}
+
+.sammlarr-logo:hover .sammlarr-bird {
+    animation: sammlarr-hop 1s ease-in-out;
+}
+
+.sammlarr-logo:hover .sammlarr-tail {
+    animation: sammlarr-flick 1s ease-in-out;
+}
+
+.sammlarr-logo:hover .sammlarr-star {
+    animation: sammlarr-shine 1s ease-in-out;
+}
+
+.sammlarr-logo:hover .sammlarr-rays {
+    animation: sammlarr-rays 1s ease-in-out;
+}
+
+@keyframes sammlarr-hop {
+    0% { translate: 0 0; scale: 1 1; }
+    14% { translate: 0 0; scale: 1.05 0.9; }
+    40% { translate: 0 -12%; scale: 0.97 1.05; }
+    66% { translate: 0 0; scale: 1.04 0.93; }
+    82%, 100% { translate: 0 0; scale: 1 1; }
+}
+
+@keyframes sammlarr-flick {
+    0% { rotate: 0deg; }
+    14% { rotate: -6deg; }
+    40% { rotate: 22deg; }
+    70% { rotate: -4deg; }
+    100% { rotate: 0deg; }
+}
+
+@keyframes sammlarr-shine {
+    0%, 30% { scale: 1; rotate: 0deg; }
+    44% { scale: 1.4; rotate: 72deg; }
+    70%, 100% { scale: 1; rotate: 72deg; }
+}
+
+@keyframes sammlarr-rays {
+    0%, 34% { opacity: 0; scale: 0.5; }
+    46% { opacity: 1; scale: 1; }
+    70%, 100% { opacity: 0; scale: 1.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sammlarr-logo:hover .sammlarr-bird,
+    .sammlarr-logo:hover .sammlarr-tail,
+    .sammlarr-logo:hover .sammlarr-star,
+    .sammlarr-logo:hover .sammlarr-rays {
+        animation: none;
+    }
+}

@@ -2,16 +2,17 @@
 @inject CurrentUserAccessor CurrentUser
 
 <SessionInvalidationListener/>
-<GlobalSearch @bind-IsOpen="_isSearchOpen"/>
+<AuthorizeView>
+    <GlobalSearch @bind-IsOpen="_isSearchOpen"/>
+</AuthorizeView>
 
 <div class="relative h-screen overflow-hidden flex flex-col">
     <header class="shrink-0 z-50 w-full border-b bg-background">
-        <div class="flex h-14 items-center px-6">
+        <div class="flex h-12 items-center px-6">
             <div class="mr-6 flex">
-                <a href="/" class="flex items-center gap-2 group" aria-label="Sammlarr home">
-                    <LucideIcon Name="library-big" Size="22" Class="text-primary transition-transform duration-200 group-hover:rotate-[-6deg]"/>
-                    <span class="font-bold tracking-tight text-base">Sammlarr</span>
-                </a>
+                <NavLink href="/" Match="NavLinkMatch.All" class="flex items-center group" aria-label="Sammlarr home">
+                    <SammlarrLogo Size="33" WordSize="19"/>
+                </NavLink>
             </div>
             <BbNavigationMenu Class="text-sm font-medium">
                 <BbNavigationMenuList>
@@ -30,11 +31,13 @@
                 </BbNavigationMenuList>
             </BbNavigationMenu>
             <div class="flex flex-1 items-center justify-end space-x-2">
-                <button type="button" class="search-trigger" aria-label="Search for a movie or show" @onclick="@(() => _isSearchOpen = true)">
-                    <LucideIcon Name="search" Size="14"/>
-                    <span class="search-trigger-label">Search</span>
-                    <BbKbd Keys="Ctrl+K"/>
-                </button>
+                <AuthorizeView>
+                    <button type="button" class="search-trigger" aria-label="Search for a movie or show" @onclick="@(() => _isSearchOpen = true)">
+                        <LucideIcon Name="search" Size="14"/>
+                        <span class="search-trigger-label">Search</span>
+                        <BbKbd Keys="Ctrl+K"/>
+                    </button>
+                </AuthorizeView>
                 <BbDarkModeToggle Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon"/>
                 <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.Icon" Href="/settings" AriaLabel="Settings">
                     <LucideIcon Name="settings" Size="16"/>
