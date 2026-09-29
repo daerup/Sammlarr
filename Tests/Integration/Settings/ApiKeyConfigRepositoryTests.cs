@@ -1,6 +1,5 @@
 using Contracts.Auth;
 using Contracts.Caching;
-using Contracts.Media;
 using DB.Data.Access;
 using Domain.Auth;
 using Domain.Providers;
@@ -16,7 +15,6 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
 	private Mock<ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>> _cache = null!;
-	private Mock<IMediaRepository> _mediaRepository = null!;
 	private IApiKeyConfigRepository _testee = null!;
 
 	private (Guid, ApiKeyProvider) Key(ApiKeyProvider provider) => (fixture.CurrentUser.Id.Value, provider);
@@ -25,8 +23,7 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	public void Setup()
 	{
 		_cache = ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>.Mock();
-		_mediaRepository = IMediaRepository.Mock();
-		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, _mediaRepository.Object, new TestApiKeyFactory(), fixture.CurrentUser);
+		_testee = new ApiKeyConfigRepository(fixture.ContextFactory, _cache.Object, new TestApiKeyFactory(), fixture.CurrentUser);
 	}
 
 	[Test]

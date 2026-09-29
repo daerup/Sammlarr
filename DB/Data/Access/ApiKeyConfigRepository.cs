@@ -1,7 +1,6 @@
 using Contracts.Auth;
 using Contracts.Caching;
 using Contracts.Identity;
-using Contracts.Media;
 using Domain.Auth;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,6 @@ namespace DB.Data.Access;
 internal sealed class ApiKeyConfigRepository(
 	IDbContextFactory<SammlarrDbContext> dbContextFactory,
 	ITypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey> cache,
-	IMediaRepository mediaRepository,
 	IApiKeyFactory apiKeyFactory,
 	ICurrentUser currentUser
 ) : IApiKeyConfigRepository
@@ -63,10 +61,5 @@ internal sealed class ApiKeyConfigRepository(
 		}
 
 		cache.Remove(CacheKey(provider));
-
-		if (provider.AsRatingProvider() is { } ratingProvider)
-		{
-			await mediaRepository.RemoveRatingsBySourceAsync(ratingProvider, cancellationToken);
-		}
 	}
 }
