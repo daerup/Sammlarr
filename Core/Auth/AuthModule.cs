@@ -11,5 +11,6 @@ internal class AuthModule : IServiceModule
 	{
 		services.AddTracedScoped<ISignInService, SignInService>();
 		services.AddTracedScoped<IApiKeyService, ApiKeyService>();
+		services.AddTracedScoped<ICredentialService, CredentialService>();
 	}
 }

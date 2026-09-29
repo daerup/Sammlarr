@@ -2,7 +2,6 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
 using Contracts.Auth;
-using Domain.Auth;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +19,8 @@ public class FeedConfigPanelTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton<MediaProviderBrandingService>();
-		var keys = IApiKeyConfigRepository.Mock();
-		keys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Error.From("No API key is configured for this provider."));
-		keys.GetApiKeyAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(IApiKey.Mock().Object));
+		var keys = IApiKeyService.Mock();
+		keys.GetFeedProvidersWithoutKeyAsync(Any()).Returns(new HashSet<FeedProvider> { FeedProvider.Tmdb });
 		Services.AddSingleton(keys.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

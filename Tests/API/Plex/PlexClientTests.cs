@@ -25,7 +25,7 @@ public class PlexClientTests
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(Error.From("No credential is stored for this provider."));
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
@@ -41,7 +41,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Throws(new BrokenCircuitException("plex circuit is open"));
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
@@ -54,7 +54,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
@@ -78,7 +78,7 @@ public class PlexClientTests
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.OK);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
 		var credential = credentialFaker.Generate();
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 
@@ -94,7 +94,7 @@ public class PlexClientTests
 	{
 		var handler = Mock.HttpHandler().WithDefaultStatus(HttpStatusCode.Unauthorized);
 		using var httpClient = handler.CreateClient(PlexBaseUrl);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credentialFaker.Generate());
 		var testee = new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object);
 

@@ -1,5 +1,5 @@
 @using Contracts.Auth
-@inject IApiKeyConfigRepository ApiKeyConfigRepository
+@inject IApiKeyService ApiKeyService
 
 @code {
     [Parameter] [EditorRequired] public ApiKeyProvider Provider { get; set; }
@@ -10,7 +10,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        _hasAccess = await ApiKeyConfigRepository.GetApiKeyAsync(Provider).IsSuccess();
+        _hasAccess = await ApiKeyService.HasApiKeyAsync(Provider);
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != _hasAccess)
         {

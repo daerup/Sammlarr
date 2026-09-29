@@ -1,7 +1,5 @@
 @using Contracts.Auth
 @using UI.Shared.Services.Branding
-@inject IApiKeyConfigRepository ApiKeyConfigRepository
-@inject IApiKeyFactory ApiKeyFactory
 @inject IApiKeyService ApiKeyService
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
@@ -90,7 +88,7 @@
         }
 
         _loadedProvider = Provider;
-        _savedState = await ApiKeyConfigRepository
+        _savedState = await ApiKeyService
             .GetApiKeyAsync(Provider)
             .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
             .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
@@ -102,8 +100,8 @@
     {
         _state = CredentialState.Testing;
 
-        _state = await ApiKeyFactory
-            .CreateAsync(Provider, _apiKeyInput)
+        _state = await ApiKeyService
+            .TestApiKeyAsync(Provider, _apiKeyInput)
             .Apply(key => _validatedKey = key)
             .ApplyError(_ => _validatedKey = null)
             .Match(CredentialState.Success, CredentialState.Failed);
@@ -113,7 +111,7 @@
     {
         _state = CredentialState.Saving;
 
-        await ApiKeyConfigRepository.SetApiKeyAsync(_validatedKey!);
+        await ApiKeyService.SaveApiKeyAsync(_validatedKey!);
         _savedApiKey = _apiKeyInput;
         _savedState = CredentialState.Saved;
 

@@ -3,7 +3,7 @@
 @using Contracts.Auth
 @using Contracts.Processing
 @using UI.Features.Feeds.Components
-@inject IApiKeyConfigRepository ApiKeyConfigRepository
+@inject IApiKeyService ApiKeyService
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6" style="scrollbar-gutter: stable;">
@@ -403,7 +403,6 @@
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
 
-    private static readonly FeedProvider[] AllProviders = Enum.GetValues<FeedProvider>();
     private readonly HashSet<FeedProvider> _disabledProviders = [];
 
     private static readonly QuerySort DefaultSort = new() { Property = nameof(MediaQueryRow.Title), Direction = ListSortDirection.Descending };
@@ -496,10 +495,7 @@
         _scheduleCronExpression = Value.Schedule is Scheduled scheduled ? scheduled.ToString() : null;
         _syncFrequencySectionOpen = _scheduleMode == ScheduleMode.Scheduled;
 
-        foreach (var provider in AllProviders)
-        {
-            await ApiKeyConfigRepository.GetApiKeyAsync(provider.AsApiKeyProvider()).ApplyError(_ => _disabledProviders.Add(provider));
-        }
+        _disabledProviders.UnionWith(await ApiKeyService.GetFeedProvidersWithoutKeyAsync());
 
         if (ProviderHasNoKey)
         {

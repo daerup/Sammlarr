@@ -48,7 +48,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task ApiKeys_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
-		await host.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-secret"));
+		await host.Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(ApiKeyProvider.Tmdb, "tmdb-secret");
 
 		host.SignOut();
 		await host.SignInAs("Bob");

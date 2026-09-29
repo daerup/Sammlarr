@@ -7,7 +7,7 @@ using Polly.Timeout;
 
 namespace API.Plex;
 
-internal class PlexClient(HttpClient client, ICredentialRepository credentialStore, ICurrentUser currentUser)
+internal class PlexClient(HttpClient client, ICredentialService credentials, ICurrentUser currentUser)
 {
 	public const string Unauthenticated = "Plex";
 	public const int ContainerSize = 100;
@@ -20,7 +20,7 @@ internal class PlexClient(HttpClient client, ICredentialRepository credentialSto
 		params List<(string, string)> customHeaders
 	)
 	{
-		var credential = await credentialStore
+		var credential = await credentials
 			.GetAsync(AuthProvider.Plex, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No valid Plex credentials are stored. Use Plex auth to sign in first."));
 
@@ -33,7 +33,7 @@ internal class PlexClient(HttpClient client, ICredentialRepository credentialSto
 
 		try
 		{
-			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentialStore.Invalidate(AuthProvider.Plex));
+			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentials.Invalidate(AuthProvider.Plex));
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{

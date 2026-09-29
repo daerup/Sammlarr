@@ -1,7 +1,5 @@
 using Contracts.Auth;
-using Contracts.Caching;
 using DB.Data.Access;
-using Domain.Auth;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
@@ -14,22 +12,12 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 {
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
-	private Mock<ITypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>> _cache = null!;
-	private ICredentialRepository _testee = null!;
-
-	private (Guid, AuthProvider) Key(AuthProvider provider) => (fixture.CurrentUser.Id.Value, provider);
-
-	[Before(Test)]
-	public void Setup()
-	{
-		_cache = ITypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>.Mock();
-		_testee = new CredentialRepository(fixture.ContextFactory, _cache.Object, new TestCredentialFactory(), fixture.CurrentUser);
-	}
+	private ICredentialRepository Testee => new CredentialRepository(fixture.ContextFactory);
 
 	[Test]
 	public async Task GetCredential_WhenNotStored_ReturnsError()
 	{
-		var credential = await _testee.GetAsync(AuthProvider.Plex);
+		var credential = await Testee.GetAsync(AuthProvider.Plex);
 
 		await Assert.That(credential).IsError();
 	}
@@ -42,7 +30,7 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var accessToken = "test-token";
 		var expiresAt = new DateTimeOffset(2026, 5, 20, 15, 0, 0, TimeSpan.Zero);
 
-		await _testee.StoreAsync(authProvider, accessToken, expiresAt, clientId);
+		await Testee.StoreAsync(authProvider, accessToken, expiresAt, clientId);
 
 		var credential = await fixture.Context.Credentials.SingleAsync();
 
@@ -61,7 +49,7 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var plainToken = "secret-access-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await _testee.StoreAsync(authProvider, plainToken, expiresAt, clientId);
+		await Testee.StoreAsync(authProvider, plainToken, expiresAt, clientId);
 
 		var encrypted = (await fixture.RawContext.Table<CredentialRow>().QueryAsync(x => x.AccessToken)).Single();
 
@@ -77,7 +65,7 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var token = "secret-token";
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
+		await Testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
 		var encryptedClientId = (await fixture.RawContext.Table<CredentialRow>().QueryAsync<string>(nameof(CredentialRow.ClientId))).Single();
 
@@ -96,7 +84,7 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
 		fixture.Context.ChangeTracker.Clear();
 
-		var credential = await _testee.GetAsync(authProvider);
+		var credential = await Testee.GetAsync(authProvider);
 
 		await Assert.That(credential).IsSuccess().And.Multiple(async resolved => await Assert.That(resolved.ClientId).IsEqualTo(clientId));
 	}
@@ -113,7 +101,7 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var clientId = Guid.NewGuid();
 		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
 
-		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
+		await Testee.StoreAsync(authProvider, token, expiresAt, clientId);
 
 		var credential = await fixture.Context.Credentials.SingleAsync();
 
@@ -132,7 +120,7 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var newToken = "new-token";
 
 		await SetUpCredentialAsync(authProvider, "old-token", expiresAt, clientId1);
-		await _testee.StoreAsync(authProvider, newToken, expiresAt, clientId2);
+		await Testee.StoreAsync(authProvider, newToken, expiresAt, clientId2);
 
 		var storedKeys = await fixture.Context.Credentials.ToListAsync();
 
@@ -153,68 +141,10 @@ public class CredentialRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 
 		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
 
-		await _testee.ClearAsync(authProvider);
+		await Testee.ClearAsync(authProvider);
 		var exists = await fixture.Context.Credentials.AnyAsync();
 
 		await Assert.That(exists).IsFalse();
-	}
-
-	[Test]
-	public async Task GetAsync_ReadsFromCache()
-	{
-		var authProvider = AuthProvider.Plex;
-
-		await _testee.GetAsync(authProvider);
-
-		_cache.TryGetValue(Key(authProvider)).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task StoreAsync_InvalidatesCache()
-	{
-		var authProvider = AuthProvider.Plex;
-		var clientId = Guid.NewGuid();
-		var token = "secret-token";
-		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
-
-		await _testee.StoreAsync(authProvider, token, expiresAt, clientId);
-
-		_cache.Remove(Key(authProvider)).WasCalled(Times.Once);
-		_cache.VerifyNoOtherCalls();
-	}
-
-	[Test]
-	public async Task Invalidate_RemovesFromCacheOnly()
-	{
-		var authProvider = AuthProvider.Plex;
-		var clientId = Guid.NewGuid();
-		var token = "secret-token";
-		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
-		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
-		_cache.Reset();
-
-		_testee.Invalidate(authProvider);
-
-		_cache.Remove(Key(authProvider)).WasCalled(Times.Once);
-		_cache.VerifyNoOtherCalls();
-		await Assert.That(await fixture.Context.Credentials.AnyAsync()).IsTrue();
-	}
-
-	[Test]
-	public async Task ClearAsync_RemovesFromCache()
-	{
-		var authProvider = AuthProvider.Plex;
-		var clientId = Guid.NewGuid();
-		var token = "secret-token";
-		var expiresAt = DateTimeOffset.UtcNow.AddDays(7);
-
-		await SetUpCredentialAsync(authProvider, token, expiresAt, clientId);
-		_cache.Reset();
-
-		await _testee.ClearAsync(authProvider);
-
-		_cache.Remove(Key(authProvider)).WasCalled(Times.Once);
-		_cache.VerifyNoOtherCalls();
 	}
 
 	private async Task SetUpCredentialAsync(AuthProvider provider, string accessToken, DateTimeOffset expiresAt, Guid clientId)

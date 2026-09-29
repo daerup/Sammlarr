@@ -24,9 +24,28 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 	private RecordingFeedScheduler Scheduler => host.Resolve<RecordingFeedScheduler>();
 
 	[Test]
+	public async Task SaveApiKeyAsync_ThenGetApiKeyAsync_ReturnsTheSavedKey()
+	{
+		await Testee.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
+
+		await Assert
+			.That(await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb))
+			.IsSuccess()
+			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("tmdb-key-12345"));
+	}
+
+	[Test]
+	public async Task GetFeedProvidersWithoutKeyAsync_WithOnlyAnMdblistKey_ListsTheFeedProvidersThatNeedTheOthers()
+	{
+		await Testee.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key-12345"));
+
+		await Assert.That(await Testee.GetFeedProvidersWithoutKeyAsync()).IsEquivalentTo([FeedProvider.Tmdb]);
+	}
+
+	[Test]
 	public async Task RemoveApiKeyAsync_WhenAKeyIsStored_RemovesIt()
 	{
-		await ApiKeys.SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
+		await ApiKeys.SetApiKeyAsync(ApiKeyProvider.Tmdb, "tmdb-key-12345");
 
 		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 

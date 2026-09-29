@@ -1,8 +1,7 @@
 @using Contracts.Auth
 @using Contracts.Identity
 @using UI.Shared.Services.Branding
-@inject ICredentialRepository CredentialRepository
-@inject ICredentialFactory CredentialFactory
+@inject ICredentialService Credentials
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject ICurrentUser CurrentUser
 @inject NavigationManager NavigationManager
@@ -104,7 +103,7 @@
         }
 
         _loadedProvider = Provider;
-        _savedState = await CredentialRepository
+        _savedState = await Credentials
             .GetAsync(Provider)
             .Apply(credential =>
             {
@@ -120,13 +119,13 @@
     {
         _state = CredentialState.Testing;
         _clientId = Guid.NewGuid();
-        _state = await CredentialFactory.CreateAsync(Provider, _clientId, _tokenInput, DateTimeOffset.MaxValue).Match(CredentialState.Success, CredentialState.Failed);
+        _state = await Credentials.TestAsync(Provider, _clientId, _tokenInput, DateTimeOffset.MaxValue).Match(CredentialState.Success, CredentialState.Failed);
     }
 
     private async Task SaveAsync()
     {
         _state = CredentialState.Saving;
-        await CredentialRepository.StoreAsync(Provider, _tokenInput, DateTimeOffset.MaxValue, _clientId);
+        await Credentials.StoreAsync(Provider, _tokenInput, DateTimeOffset.MaxValue, _clientId);
         _savedToken = _tokenInput;
         _savedState = CredentialState.Saved;
         _state = CredentialState.Saved;
@@ -134,7 +133,7 @@
 
     private async Task DisconnectAsync()
     {
-        await CredentialRepository.ClearAsync(Provider);
+        await Credentials.ClearAsync(Provider);
         _savedToken = _tokenInput = string.Empty;
         _savedState = CredentialState.Idle;
         _state = CredentialState.Idle;

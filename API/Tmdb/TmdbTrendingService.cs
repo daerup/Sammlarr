@@ -20,13 +20,13 @@ internal sealed class TmdbTrendingService(
 	TmdbOptions options,
 	IMediaService media,
 	IProviderConfigRepository providerConfigRepository,
-	IApiKeyConfigRepository apiKeyConfigRepository
+	IApiKeyService apiKeys
 ) : ITrendingService
 {
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
-		var apiKey = await apiKeyConfigRepository
+		var apiKey = await apiKeys
 			.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings → API Keys."));
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);

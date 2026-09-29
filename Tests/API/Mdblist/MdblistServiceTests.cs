@@ -48,7 +48,7 @@ public class MdblistServiceTests
 
 	private static MdblistService CreateTestee(HttpMessageHandler handler, out Mock<IMediaService> media)
 	{
-		var apiKeyStore = IApiKeyConfigRepository.Mock();
+		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
 		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
 		var options = new MdblistOptions { BaseUrl = BaseUrl };

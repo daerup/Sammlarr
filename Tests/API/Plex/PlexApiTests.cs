@@ -132,7 +132,7 @@ public class PlexApiTests
 	private static PlexApi BuildPlexApi(HttpClient httpClient)
 	{
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialRepository.Mock();
+		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
 		return new PlexApi(new PlexClient(httpClient, credentialStore, ICurrentUser.Mock().Object), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}

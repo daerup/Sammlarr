@@ -64,7 +64,7 @@ internal sealed class PlexStub : HttpMessageHandler
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
-		var apiKeys = IApiKeyConfigRepository.Mock();
+		var apiKeys = IApiKeyService.Mock();
 		apiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of<IApiKey>(new TestApiKey(ApiKeyProvider.Tmdb, "key")));
 		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p/original" };
 		return new TmdbApi(
@@ -77,7 +77,7 @@ internal sealed class PlexStub : HttpMessageHandler
 	public PlexApi CreateApi()
 	{
 		var client = new HttpClient(this) { BaseAddress = new Uri(PlexBaseUrl) };
-		var credentials = ICredentialRepository.Mock();
+		var credentials = ICredentialService.Mock();
 		credentials.GetAsync(AuthProvider.Plex, Any()).Returns(new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "token", DateTimeOffset.MaxValue));
 		return new PlexApi(new PlexClient(client, credentials, ICurrentUser.Mock().Object), PlexTestUrls.Instance, NullLogger<PlexApi>.Instance);
 	}

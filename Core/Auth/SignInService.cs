@@ -13,7 +13,7 @@ namespace Core.Auth;
 
 internal sealed class SignInService(
 	IKeyedServiceIndex<AuthProvider, IOAuthProvider> providers,
-	ICredentialRepository credentials,
+	ICredentialService credentials,
 	IUserRepository users,
 	IUserScope userScope,
 	IProviderConfigRepository providerConfig,

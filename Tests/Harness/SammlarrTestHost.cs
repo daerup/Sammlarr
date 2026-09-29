@@ -166,19 +166,19 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal async Task WithPlexAccount(string token)
 	{
-		await Resolve<ICredentialRepository>().StoreAsync(AuthProvider.Plex, token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
+		await Resolve<ICredentialService>().StoreAsync(AuthProvider.Plex, token, DateTimeOffset.UtcNow.AddDays(30), Guid.NewGuid());
 		HttpStub.RequireHeader(TestUrls.PlexApi, "X-Plex-Token", token);
 	}
 
 	internal async Task WithTmdbAccount(string apiKey)
 	{
-		await Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, apiKey));
+		await Resolve<IApiKeyService>().SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, apiKey));
 		HttpStub.RequireQueryParam(TestUrls.TmdbApi, "api_key", apiKey);
 	}
 
 	internal async Task WithMdblistAccount(string apiKey)
 	{
-		await Resolve<IApiKeyConfigRepository>().SetApiKeyAsync(new TestApiKey(ApiKeyProvider.Mdblist, apiKey));
+		await Resolve<IApiKeyService>().SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Mdblist, apiKey));
 		HttpStub.RequireQueryParam(TestUrls.MdblistApi, "apikey", apiKey);
 	}
 
