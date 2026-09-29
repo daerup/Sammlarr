@@ -19,7 +19,7 @@
         {
             var branding = BrandingService.GetBrandingInfo(provider.AsMediaProvider());
             <HoverButton OnClick="() => SignIn(provider)" Color="@branding.BrandColor" Class="font-medium w-full" Border="false">
-                <span class="provider-mark" aria-hidden="true">@branding.IconWithClass("w-4 h-4")</span>
+                <span class="provider-mark" aria-hidden="true"><ProviderLogo Provider="@branding.Provider" Size="16" Decorative="true"/></span>
                 <span class="provider-label">Sign in with @branding.NickName</span>
             </HoverButton>
         }

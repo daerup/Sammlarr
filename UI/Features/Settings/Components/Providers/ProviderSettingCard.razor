@@ -5,7 +5,10 @@
     var selectedBranding = BrandingProvider(Selected);
 }
 
-<SettingsCard Title="@Title" Color="@selectedBranding.BrandColor" Icon="@selectedBranding.Icon">
+<SettingsCard Title="@Title" Color="@selectedBranding.BrandColor">
+    <Icon>
+        <ProviderLogo Provider="@selectedBranding.Provider" Size="36" Decorative="true"/>
+    </Icon>
     <Badge>
         <BbBadge Variant="BadgeVariant.Outline" Class="gap-1.5 whitespace-nowrap provider-pill">
             @selectedBranding.DisplayName

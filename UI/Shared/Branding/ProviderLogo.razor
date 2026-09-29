@@ -1,0 +1,38 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+@if (Art.IsThemed)
+{
+    <img class="provider-logo is-light" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size"/>
+    <img class="provider-logo is-dark" src="@Source(Art.Dark)" alt="@Alt" width="@Width" height="@Size"/>
+}
+else
+{
+    <img class="provider-logo" src="@Source(Art.Light)" alt="@Alt" width="@Width" height="@Size"/>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required MediaProvider Provider { get; set; }
+
+    [Parameter] public ProviderLogoForm Form { get; set; }
+
+    [Parameter] public int Size { get; set; } = 16;
+
+    [Parameter] public bool Decorative { get; set; }
+
+    private BrandingInfo Brand => Branding.GetBrandingInfo(Provider);
+
+    private BrandArt Art =>
+        Form switch
+        {
+            ProviderLogoForm.Mark => Brand.Mark,
+            ProviderLogoForm.Logo => Brand.Logo,
+            ProviderLogoForm.Tile => Brand.Tile.Art,
+        };
+
+    private string Alt => Decorative ? string.Empty : Brand.DisplayName;
+
+    private int? Width => Form is ProviderLogoForm.Logo ? null : Size;
+
+    private string Source(string file) => Assets[$"_content/UI/providers/{file}"];
+}

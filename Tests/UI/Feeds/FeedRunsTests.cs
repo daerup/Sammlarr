@@ -89,7 +89,7 @@ public class FeedRunsTests : BunitContext
 		Services.AddSingleton(IBlacklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigRepository.Mock().Object);
 		Services.AddScoped<Notifier>();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}

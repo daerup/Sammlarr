@@ -263,7 +263,7 @@ public class WatchlistSyncButtonTests : BunitContext
 		currentUser.Id.Getter.Returns(Viewer);
 		Services.AddSingleton(currentUser.Object);
 		Services.AddScoped<Notifier>();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 

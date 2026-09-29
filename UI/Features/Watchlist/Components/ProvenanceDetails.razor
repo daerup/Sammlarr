@@ -8,7 +8,7 @@
             <span class="provenance-mark">
                 @if (ProvenanceView.Provider(Provenance) is { } provider)
                 {
-                    @Branding.GetBrandingInfo(provider).IconWithClass("w-4 h-4")
+                    <ProviderLogo Provider="provider" Size="16" Decorative="true"/>
                 }
                 else
                 {

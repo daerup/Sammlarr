@@ -1,6 +1,5 @@
 using BlazorBlueprint.Components;
 using Shared.DI;
-using UI.Shared.Services.Branding;
 using Web.Auth;
 using Web.Health;
 using Web.Instrumentation;
@@ -16,6 +15,5 @@ internal class WebModule : IServiceModule
 		services.AddModule<InstrumentationModule>();
 		services.AddRazorComponents().AddInteractiveServerComponents();
 		services.AddBlazorBlueprintComponents();
-		services.AddSingleton(sp => new BrandingAssetRoot(sp.GetRequiredService<IWebHostEnvironment>().WebRootPath));
 	}
 }

@@ -12,7 +12,7 @@ public class SignInRequiredTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -30,9 +30,10 @@ public class SignInRequiredTests : BunitContext
 	{
 		var cut = Render<SignInRequired>();
 
-		var buttons = cut.FindAll("button");
-		await Assert.That(buttons.Select(button => button.QuerySelector(".provider-label")?.TextContent)).IsEquivalentTo(["Sign in with Plex"]);
-		await Assert.That(buttons.All(button => button.QuerySelector(".provider-mark svg") is not null)).IsTrue();
+		var labels = cut.FindAll("button .provider-label").Select(label => label.TextContent);
+		var marks = cut.FindAll("button .provider-mark img").Select(mark => mark.GetAttribute("src") ?? string.Empty);
+		await Assert.That(labels).IsEquivalentTo(["Sign in with Plex"]);
+		await Assert.That(marks).IsEquivalentTo(["_content/UI/providers/plex-square.svg"]);
 	}
 
 	[Test]
@@ -40,7 +41,8 @@ public class SignInRequiredTests : BunitContext
 	{
 		var cut = Render<SignInRequired>();
 
-		await Assert.That(cut.FindAll("button .provider-mark").Select(mark => mark.GetAttribute("aria-hidden"))).IsEquivalentTo(["true"]);
+		var hidden = cut.FindAll("button .provider-mark").Select(mark => mark.GetAttribute("aria-hidden") ?? string.Empty);
+		await Assert.That(hidden).IsEquivalentTo(["true"]);
 	}
 
 	[Test]

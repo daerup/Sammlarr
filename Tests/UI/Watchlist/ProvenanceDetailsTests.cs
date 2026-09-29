@@ -71,7 +71,7 @@ public class ProvenanceDetailsTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
-		Services.AddScoped(_ => new MediaProviderBrandingService(string.Empty));
+		Services.AddSingleton<MediaProviderBrandingService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 
 		return Render<ProvenanceDetails>(parameters =>

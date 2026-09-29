@@ -1,10 +1,15 @@
-using Microsoft.AspNetCore.Components;
+using Domain.Providers;
 
 namespace UI.Shared.Services.Branding;
 
-public record BrandingInfo(string DisplayName, string NickName, string BrandColor, Func<string?, RenderFragment> IconRenderer)
-{
-	public RenderFragment Icon => IconRenderer(null);
+public sealed record BrandingInfo(MediaProvider Provider, string DisplayName, string NickName, string BrandColor, BrandArt Mark, BrandArt Logo, BrandTile Tile);
 
-	public RenderFragment IconWithClass(string cssClass) => IconRenderer(cssClass);
+public sealed record BrandArt(string Light, string Dark)
+{
+	public BrandArt(string file)
+		: this(file, file) { }
+
+	public bool IsThemed => Light != Dark;
 }
+
+public sealed record BrandTile(string Background, BrandArt Art, int ArtPercent);
