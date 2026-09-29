@@ -122,16 +122,6 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task RunNextAsync_AfterAScheduledFeedRun_ArmsAWatchlistSync()
-	{
-		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Scheduled("0 0 3 * * *")));
-
-		await Testee.TryRunNextAsync(CancellationToken.None);
-
-		await Assert.That(await KindsAsync()).Contains(JobKind.WatchlistSync);
-	}
-
-	[Test]
 	public async Task RunNextAsync_AfterAManualFeedRun_ArmsNothingSoAnIdleAppStaysSilent()
 	{
 		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));

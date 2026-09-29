@@ -57,7 +57,7 @@ public class JobsTableTests(SammlarrTestHost host) : IAsyncDisposable
 			Request = new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()),
 			State = JobState.Queued,
 			RunAfter = DateTimeOffset.UnixEpoch,
-			FirstArmedAt = DateTimeOffset.UnixEpoch,
+			Deadline = DateTimeOffset.UnixEpoch,
 		};
 
 	private async Task StoreAsync(JobRow job)

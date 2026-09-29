@@ -192,6 +192,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void MdblistFeedEmpty(string identifier) => MdblistFeedStub.Empty(HttpStub, identifier);
 
+	internal HeldRequest HoldMdblistFeed(string identifier) => MdblistFeedStub.Hold(HttpStub, identifier);
+
+	internal HeldRequest HoldRemoteWatchlist() => HttpStub.Hold(PlexEndpoints.WatchlistPath);
+
 	internal void MdblistFeedUnavailable(string identifier) => MdblistFeedStub.Unavailable(HttpStub, identifier);
 
 	internal void MdblistFeedPartialThenUnavailable(string identifier, params FeedItemSpec[] items) =>

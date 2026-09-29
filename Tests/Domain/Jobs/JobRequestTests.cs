@@ -26,6 +26,16 @@ public class JobRequestTests
 	}
 
 	[Test]
+	public async Task ArmsSync_ForAScheduledRunOrOneAskedToSyncAfter_ButNotAPlainManualRun()
+	{
+		var feedId = FeedId.From(Guid.NewGuid());
+
+		await Assert.That(new RunFeed(feedId, new Scheduled("0 0 * * * *")).ArmsSync).IsTrue();
+		await Assert.That(new RunFeed(feedId, new Manual(), SyncAfter: true).ArmsSync).IsTrue();
+		await Assert.That(new RunFeed(feedId, new Manual()).ArmsSync).IsFalse();
+	}
+
+	[Test]
 	public async Task Key_OfAWatchlistSync_IsEmptyBecauseTheOwnerAloneIdentifiesIt()
 	{
 		await Assert.That(new SyncWatchlist(new ManualTrigger()).Key).IsEmpty();

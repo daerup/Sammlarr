@@ -368,7 +368,7 @@ namespace DB.Migrations
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("FirstArmedAt")
+                    b.Property<long>("Deadline")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Key")

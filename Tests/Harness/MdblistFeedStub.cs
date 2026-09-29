@@ -27,6 +27,8 @@ internal static class MdblistFeedStub
 			_ => new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<html>not json</html>", Encoding.UTF8, "application/json") }
 		);
 
+	internal static HeldRequest Hold(HttpStub http, string identifier) => http.Hold(Url(identifier));
+
 	internal static void Empty(HttpStub http, string identifier) => http.RespondWithJsonForUrl(Url(identifier), """{ "movies": [], "shows": [] }""");
 
 	internal static void Unavailable(HttpStub http, string identifier) =>

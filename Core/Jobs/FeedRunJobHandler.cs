@@ -4,7 +4,6 @@ using Contracts.Identity;
 using Contracts.Jobs;
 using Core.Announcing;
 using Core.Feed;
-using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
 using Domain.Watchlist.Sync;
@@ -16,16 +15,16 @@ internal sealed class FeedRunJobHandler(IFeedRunEngine engine, IJobQueue queue, 
 {
 	public async Task HandleAsync(RunFeed request, CancellationToken cancellationToken = default)
 	{
+		if (request.ArmsSync)
+		{
+			await queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), cancellationToken);
+		}
+
 		var result = await engine.RunAsync(request.Id, request.Trigger, cancellationToken);
 		announcer.Announce(new FeedRunFinishedEvent(currentUser.Id, request.Id));
 		if (FeedRunNotification.For(currentUser.Id, clock.Now, request.Id, result) is { } notification)
 		{
 			await announcer.AnnounceAsync(notification, cancellationToken);
-		}
-
-		if (request.Trigger is Scheduled || request.SyncAfter)
-		{
-			await queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), cancellationToken);
 		}
 	}
 }

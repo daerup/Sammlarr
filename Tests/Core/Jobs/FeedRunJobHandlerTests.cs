@@ -10,6 +10,7 @@ using Domain.Jobs;
 using Domain.Notifications;
 using Domain.Watchlist.Sync;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 
 namespace Core.Tests.Jobs;
 
@@ -18,7 +19,7 @@ public class FeedRunJobHandlerTests
 	private static readonly FeedRunTrigger Nightly = new Scheduled("0 0 3 * * *");
 
 	[Test]
-	public async Task HandleAsync_AfterAScheduledRun_ArmsASyncForTheOwner()
+	public async Task HandleAsync_ForAScheduledRun_ArmsASyncForTheOwner()
 	{
 		var (testee, queue, _, _) = Testee();
 
@@ -28,7 +29,30 @@ public class FeedRunJobHandlerTests
 	}
 
 	[Test]
-	public async Task HandleAsync_AfterAManualRun_ArmsNothing()
+	public async Task HandleAsync_ForAManualRunWithSyncAfter_ArmsASyncForTheOwner()
+	{
+		var (testee, queue, _, _) = Testee();
+
+		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual(), SyncAfter: true));
+
+		queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task HandleAsync_ForAScheduledRun_ArmsTheSyncBeforeTheFeedRuns()
+	{
+		var (testee, queue, _, engine) = Testee();
+		List<string> calls = [];
+		queue.EnqueueAsync(Any<IJobRequest>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Waiting)).Callback(() => calls.Add("arm"));
+		engine.RunAsync(Any<FeedId>(), Any<FeedRunTrigger>(), Any()).Returns(new FeedRunFailed("stubbed")).Callback(() => calls.Add("run"));
+
+		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), Nightly));
+
+		await Assert.That(calls).IsEquivalentTo(["arm", "run"], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task HandleAsync_ForAPlainManualRun_ArmsNothing()
 	{
 		var (testee, queue, _, _) = Testee();
 

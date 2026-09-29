@@ -14,6 +14,7 @@ public readonly record struct RunFeed(FeedId Id, FeedRunTrigger Trigger, bool Sy
 {
 	public JobKind Kind => JobKind.FeedRun;
 	public string Key => Id.ToString();
+	public bool ArmsSync => Trigger is Scheduled || SyncAfter;
 }
 
 public readonly record struct SyncWatchlist(WatchlistSyncTrigger Trigger) : IJobRequest

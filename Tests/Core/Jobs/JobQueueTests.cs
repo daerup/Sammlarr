@@ -5,6 +5,7 @@ using Core.Announcing;
 using Core.Jobs;
 using Domain.Announcing;
 using Domain.Feed;
+using Domain.Identity;
 using Domain.Jobs;
 using Domain.Watchlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
@@ -70,10 +71,69 @@ public class JobQueueTests
 		await Assert.That(seen.OfType<JobStateChangedEvent>().Single().State).IsEqualTo(JobState.Queued);
 	}
 
+	[Test]
+	public async Task EnqueueAsync_WhenAScheduledFeedQueuesTheWaitingSyncBehindIt_AnnouncesTheSyncQueuedToo()
+	{
+		var (testee, jobs, events) = BuildTestee();
+		var nightly = new RunFeed(FeedId.From(Guid.NewGuid()), Nightly);
+		jobs.QueuedAsync(Any<UserId>(), JobKind.FeedRun, Any()).Returns([nightly]);
+		jobs.QueueWaitingAsync(Any<UserId>(), JobKind.WatchlistSync, Any<DateTimeOffset>(), Any()).Returns(1);
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		await testee.EnqueueAsync(nightly);
+
+		await Assert
+			.That(seen.OfType<JobStateChangedEvent>().Select(announced => (announced.Kind, announced.State)))
+			.IsEquivalentTo([(JobKind.FeedRun, JobState.Queued), (JobKind.WatchlistSync, JobState.Queued)]);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_ForAPlainManualRun_LeavesTheWaitingSyncAlone()
+	{
+		var (testee, jobs, _) = BuildTestee();
+
+		await testee.EnqueueAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual()));
+
+		jobs.QueueWaitingAsync(Any<UserId>(), Any<JobKind>(), Any<DateTimeOffset>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenTheArmedSyncLandsBehindAQueuedScheduledFeed_ReportsItQueuedRatherThanWaiting()
+	{
+		var (testee, jobs, events) = BuildTestee();
+		jobs.EnqueueAsync(Any<QueuedJob>(), Any<DateTimeOffset>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Waiting));
+		jobs.QueuedAsync(Any<UserId>(), JobKind.FeedRun, Any()).Returns([new RunFeed(FeedId.From(Guid.NewGuid()), Nightly)]);
+		jobs.QueueWaitingAsync(Any<UserId>(), JobKind.WatchlistSync, Any<DateTimeOffset>(), Any()).Returns(1);
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		var result = await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+
+		var queued = await Assert.That(result).IsOfUnionType<EnqueueResult, Queued>();
+		await Assert.That(queued.State).IsEqualTo(JobState.Queued);
+		await Assert.That(seen.OfType<JobStateChangedEvent>().Single().State).IsEqualTo(JobState.Queued);
+	}
+
+	[Test]
+	public async Task EnqueueAsync_WhenOnlyPlainManualRunsAreQueued_LetsTheArmedSyncWaitOutItsGrace()
+	{
+		var (testee, jobs, _) = BuildTestee();
+		jobs.QueuedAsync(Any<UserId>(), JobKind.FeedRun, Any()).Returns([new RunFeed(FeedId.From(Guid.NewGuid()), new Manual())]);
+
+		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+
+		jobs.QueueWaitingAsync(Any<UserId>(), Any<JobKind>(), Any<DateTimeOffset>(), Any()).WasCalled(Times.Never);
+	}
+
+	private static readonly FeedRunTrigger Nightly = new Scheduled("0 0 3 * * *");
+
 	private static (JobQueue Testee, Mock<IJobRepository> Jobs, EventPublisher Events) BuildTestee()
 	{
 		var jobs = IJobRepository.Mock();
 		jobs.EnqueueAsync(Any<QueuedJob>(), Any<DateTimeOffset>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Queued));
+		jobs.QueuedAsync(Any<UserId>(), Any<JobKind>(), Any()).Returns([]);
+		jobs.QueueWaitingAsync(Any<UserId>(), Any<JobKind>(), Any<DateTimeOffset>(), Any()).Returns(0);
 		jobs.NextWaitingAsync(Any()).Returns(new None());
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(Now);
