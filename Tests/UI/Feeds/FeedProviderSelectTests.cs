@@ -42,6 +42,18 @@ public class FeedProviderSelectTests : BunitContext
 	}
 
 	[Test]
+	public async Task Trigger_WhenTheChosenProviderLostItsKey_KeepsItButGreysItOutLikeItsOption()
+	{
+		var cut = RenderSelect(FeedProvider.Tmdb, FeedProvider.Tmdb);
+
+		var trigger = cut.Find("[role=combobox]");
+		await Assert.That(trigger.TextContent).Contains("TMDb").And.Contains("No API key");
+		await Assert.That(trigger.QuerySelector(".grayscale")).IsNotNull();
+		await Assert.That(trigger.HasAttribute("style")).IsFalse();
+		await Assert.That(trigger.HasAttribute("aria-invalid")).IsFalse();
+	}
+
+	[Test]
 	public async Task Open_WithASelection_TintsEveryRowWithItsOwnBrand()
 	{
 		var cut = await OpenAsync(FeedProvider.Mdblist);

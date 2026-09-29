@@ -3,7 +3,9 @@
 @using Contracts.Auth
 @using Contracts.Processing
 @using UI.Features.Feeds.Components
+@using UI.Shared.Services.Branding
 @inject IApiKeyConfigRepository ApiKeyConfigRepository
+@inject MediaProviderBrandingService Branding
 
 <BbCard Class="flex-1 min-w-0 flex flex-col overflow-hidden feed-pane rounded-lg bg-card border border-border shadow-sm">
     <div class="flex-1 min-h-0 overflow-y-auto scrollbar-thin px-6 py-6" style="scrollbar-gutter: stable;">
@@ -46,11 +48,10 @@
                 </BbFieldContent>
             </BbField>
 
-            <div class="flex flex-wrap gap-8" style="column-gap: 3rem;">
-                <div class="shrink-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                 <BbField>
                     <BbFieldLabel Class="flex items-center leading-none">
-                        Provider
+                        Provider <span class="text-destructive ml-0.5">*</span>
                         <BbTooltipProvider>
                             <BbTooltip DelayDuration="0">
                                 <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
@@ -63,11 +64,16 @@
                     <BbFieldContent>
                         <FeedProviderSelect Value="@_provider" ValueChanged="@ChangeProvider" Unavailable="@_disabledProviders"/>
                     </BbFieldContent>
+                    @if (_provider is { } missing && ProviderHasNoKey)
+                    {
+                        <BbFieldError>
+                            Add the @Branding.GetBrandingInfo(missing.AsMediaProvider()).NickName API key in
+                            <a href="/settings?section=providers" class="underline underline-offset-2">Settings › Providers</a>
+                            to save this feed.
+                        </BbFieldError>
+                    }
                 </BbField>
-                </div>
 
-                <div class="flex flex-wrap gap-8">
-                <div class="shrink-0">
                 <BbField>
                     <BbFieldLabel Class="flex leading-none">
                         Strategy
@@ -134,8 +140,6 @@
                         </div>
                     </BbFieldContent>
                 </BbField>
-                </div>
-                </div>
             </div>
 
             <BbField>
@@ -401,6 +405,7 @@
 
     [Parameter] public required FeedConfig Value { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsNew { get; set; }
     [Parameter] public EventCallback<FeedConfig> OnChange { get; set; }
 
     private static readonly FeedProvider[] AllProviders = Enum.GetValues<FeedProvider>();
@@ -427,6 +432,7 @@
     private ScheduleMode _scheduleMode;
     private string? _scheduleCronExpression;
 
+    private bool ProviderHasNoKey => _provider is { } provider && _disabledProviders.Contains(provider);
     private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
@@ -502,7 +508,11 @@
 
         if (_provider is not null && _disabledProviders.Contains(_provider.Value))
         {
-            _provider = AllProviders.Cast<FeedProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
+            if (IsNew)
+            {
+                _provider = AllProviders.Cast<FeedProvider?>().FirstOrDefault(p => !_disabledProviders.Contains(p!.Value));
+            }
+
             _ = OnChange.InvokeAsync(BuildConfig());
         }
     }
@@ -521,6 +531,7 @@
         Limit = _limitEnabled ? _limit : null,
         IsScheduleValid = !ScheduleIsInvalid,
         IsStrategyValid = !AbsenceThresholdIsInvalid,
+        IsProviderAvailable = !ProviderHasNoKey,
         Schedule = _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is not null
             ? new FeedRunTrigger(new Scheduled(_scheduleCronExpression))
             : new FeedRunTrigger(new Manual()),

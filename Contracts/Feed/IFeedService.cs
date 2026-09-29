@@ -1,6 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
+using Domain.Providers;
 
 namespace Contracts.Feed;
 
@@ -15,6 +16,8 @@ public interface IFeedService
 	Task UpdateFeedAsync(FeedId id, FeedUpdateData updateData, CancellationToken cancellationToken = default);
 
 	Task DeleteFeedAsync(FeedId id, CancellationToken cancellationToken = default);
+
+	Task DisableFeedsUsingAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken = default);
 

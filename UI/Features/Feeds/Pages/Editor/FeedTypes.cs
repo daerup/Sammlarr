@@ -121,7 +121,9 @@ public record FeedConfig
 
 	public bool IsStrategyValid { get; init; } = true;
 
-	public bool IsTestable => Provider is not null && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
+	public bool IsProviderAvailable { get; init; } = true;
+
+	public bool IsTestable => Provider is not null && IsProviderAvailable && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
 
 	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid && IsStrategyValid;
 

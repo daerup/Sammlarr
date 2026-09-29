@@ -10,5 +10,6 @@ internal class AuthModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddTracedScoped<ISignInService, SignInService>();
+		services.AddTracedScoped<IApiKeyService, ApiKeyService>();
 	}
 }

@@ -1,12 +1,14 @@
 @page "/feeds/create"
 @page "/feeds/edit/{EditFeedId}"
 @page "/feeds/clone/{CloneFeedId}"
+@using Contracts.Auth
 @using Contracts.Feed
 @using Contracts.Settings
 @using global::Shared
 @inject IFeedService FeedService
 @inject NavigationManager NavigationManager
 @inject IProviderConfigRepository ProviderConfigRepository
+@inject IApiKeyConfigRepository ApiKeyConfigRepository
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
 @inject DialogService DialogService
@@ -92,6 +94,7 @@
                 <FeedConfigPanel @key="_configKey"
                                  Value="@_config"
                                  IsLoading="@(_previewStatus.IsLoading || _isApplying)"
+                                 IsNew="!IsEditOrClone"
                                  OnChange="@OnConfigChanged"/>
 
                 <FeedPreviewPanel @ref="_previewPanel"
@@ -188,6 +191,7 @@
             Sort = feed.Sort,
             Limit = feed.Limit,
             Schedule = feed.Schedule,
+            IsProviderAvailable = await ApiKeyConfigRepository.GetApiKeyAsync(feed.Provider.AsApiKeyProvider()).Match(true, false),
         };
         _storedHash = _config.GetSaveHash();
         _storedStrategy = _config.Strategy;
@@ -204,7 +208,10 @@
         if (_pendingAutoApply)
         {
             _pendingAutoApply = false;
-            await ApplyAsync();
+            if (_config.IsTestable)
+            {
+                await ApplyAsync();
+            }
         }
     }
 

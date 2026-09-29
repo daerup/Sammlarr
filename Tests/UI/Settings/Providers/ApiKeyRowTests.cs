@@ -27,6 +27,7 @@ public class ApiKeyRowTests : BunitContext
 		keys.GetApiKeyAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(keys.Object);
 		Services.AddSingleton(_factory.Object);
+		Services.AddSingleton(IApiKeyService.Mock().Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
