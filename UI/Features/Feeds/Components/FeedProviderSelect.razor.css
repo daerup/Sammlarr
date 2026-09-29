@@ -1,0 +1,33 @@
+.feed-provider-select ::deep .provider-trigger {
+    --tint: var(--brand, var(--muted-foreground));
+    color: var(--foreground);
+    font-weight: 600;
+    border-color: color-mix(in oklch, var(--tint) 55%, transparent);
+    background: linear-gradient(90deg, color-mix(in oklch, var(--tint) 26%, transparent) 0%, color-mix(in oklch, var(--tint) 12%, transparent) 100%);
+}
+
+.feed-provider-select ::deep .provider-trigger:hover {
+    background: linear-gradient(90deg, color-mix(in oklch, var(--tint) 34%, transparent) 0%, color-mix(in oklch, var(--tint) 18%, transparent) 100%);
+}
+
+.provider-wash {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: calc(var(--radius) - 4px);
+}
+
+[data-focused=true] .provider-wash {
+    background: color-mix(in oklch, var(--brand) 12%, transparent);
+}
+
+[data-focused=true] .provider-wash::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 5px;
+    bottom: 5px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--brand);
+}
