@@ -22,6 +22,8 @@ public interface IFeedService
 
 	Task<IReadOnlyList<FeedRun>> GetRecentRunsAsync(DateTimeOffset since, int take, CancellationToken cancellationToken = default);
 
+	Task<int> CountRunsSinceAsync(FeedId feedId, DateTimeOffset since, CancellationToken cancellationToken = default);
+
 	Task<Optional<FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default);
 
 	Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default);

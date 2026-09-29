@@ -144,6 +144,14 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.ToListAsync(cancellationToken);
 	}
 
+	public async Task<int> CountRunsSinceAsync(FeedId feedId, DateTimeOffset since, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var cutoff = since.ToUniversalTime();
+
+		return await ctx.FeedRuns.AsNoTracking().CountAsync(row => row.FeedId == feedId.Value && row.StartedAt >= cutoff, cancellationToken);
+	}
+
 	public async Task<Optional<Domain.Feed.Run.FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);

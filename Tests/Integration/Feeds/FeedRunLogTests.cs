@@ -157,6 +157,22 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task CountRunsSinceAsync_CountsOnlyThatFeedsRunsFromTheCutoffOn()
+	{
+		var comedy = await SeedFeedAsync();
+		var horror = await SeedFeedAsync();
+
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(horror, kept: [Held], 3));
+
+		var count = await _testee.CountRunsSinceAsync(comedy, since: Day(2));
+
+		await Assert.That(count).IsEqualTo(2);
+	}
+
+	[Test]
 	public async Task GetOverviewsAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
 	{
 		var ran = await SeedFeedAsync();
