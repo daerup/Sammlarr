@@ -153,7 +153,7 @@ public class MediaServiceTests
 	{
 		var external = TmdbId.From("999", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.UnresolvedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
+		deps.UnmatchedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
 
 		var results = await testee
 			.ResolveDetailsAsync(new List<ResolveRequest> { new([external], MediaProvider.Tmdb, new None()) }.ToAsyncEnumerable())
@@ -346,7 +346,7 @@ public class MediaServiceTests
 		dateTimeProvider.Now.Returns(_now);
 		var mediaRepo = IMediaRepository.Mock();
 		var search = IMediaSearchProvider.Mock();
-		var unresolvedCache = ITypedMemoryCache<string, bool>.Mock();
+		var unmatchedCache = ITypedMemoryCache<string, bool>.Mock();
 
 		mediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
 		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
@@ -362,7 +362,7 @@ public class MediaServiceTests
 			.Returns(
 				new ProviderConfig
 				{
-					WatchlistProvider = WatchlistProvider.Plex,
+					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
@@ -384,7 +384,7 @@ public class MediaServiceTests
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
-			new MediaIdResolver(converters, unresolvedCache.Object),
+			new MediaIdResolver(converters, unmatchedCache.Object),
 			metadataResolver,
 			coordinator,
 			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
@@ -392,10 +392,10 @@ public class MediaServiceTests
 			dateTimeProvider.Object,
 			NullLogger<MediaService>.Instance
 		);
-		return (testee, new Deps(mediaRepo, search, unresolvedCache));
+		return (testee, new Deps(mediaRepo, search, unmatchedCache));
 	}
 
-	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IMediaSearchProvider> Search, Mock<ITypedMemoryCache<string, bool>> UnresolvedCache);
+	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IMediaSearchProvider> Search, Mock<ITypedMemoryCache<string, bool>> UnmatchedCache);
 
 	private static List<MediaIdentity> RecordUpsertedIdentities(Deps deps)
 	{

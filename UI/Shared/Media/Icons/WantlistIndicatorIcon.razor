@@ -1,0 +1,16 @@
+@if (IsInWantlist)
+{
+    <BbTooltipProvider>
+        <BbTooltip DelayDuration="300">
+            <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default flex items-center justify-center w-6 h-6">
+                <LucideIcon Name="bookmark" Size="20" Fill="orange" Color="orange"/>
+            </BbTooltipTrigger>
+            <BbTooltipContent>In your wantlist</BbTooltipContent>
+        </BbTooltip>
+    </BbTooltipProvider>
+}
+
+@code {
+    [Parameter] public bool IsInWantlist { get; set; }
+}
+

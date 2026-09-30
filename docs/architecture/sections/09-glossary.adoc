@@ -69,14 +69,14 @@ Coordinator:: The step that merges freshly resolved ids against existing library
 references to the same title never create two library ids.
 
 Negative cache:: The in-memory cache of ids already known to be unmatched, kept for an hour and
-checked before any provider call, so a repeated miss skips the providers (`IUnresolvedMediaCache`).
+checked before any provider call, so a repeated miss skips the providers (`IUnmatchedMediaCache`).
 
 === Curation
 
 Feed:: A saved query over a provider list: the provider, the list `Identifier`, an add
 strategy, an optional filter, sort, and limit, and a schedule.
 
-Add strategy:: How a feed's results reconcile into the watchlist. `Append` adds them and leaves
+Add strategy:: How a feed's results reconcile into the wantlist. `Append` adds them and leaves
 them; `Mirror` keeps the items this feed added matching the feed, removing the ones that dropped
 out of it. Mirror only ever touches its own slice, never manual, remote, or other feeds' items.
 `FeedStrategy` is a union, so `Mirror` carries the data only it needs: an absence threshold, the
@@ -86,7 +86,7 @@ Schedule:: When a feed runs, a `FeedRunTrigger`: `Manual`, or `Scheduled` with a
 (seconds field included). A scheduled, enabled feed has a TickerQ cron ticker. The same union
 records what started each run.
 
-Feed run:: One application of a feed to the watchlist by `FeedRunEngine`: plan (the same planner
+Feed run:: One application of a feed to the wantlist by `FeedRunEngine`: plan (the same planner
 the preview uses), then apply the adds and the feed's owned drops. Always executed as a job.
 
 Run log:: The recorded feed runs (`FeedRun` with its `FeedRunItem` rows): when, what triggered it,
@@ -99,28 +99,31 @@ Filter, Sort, Limit:: The query rules applied to a feed's source list (`QueryFil
 QueryVerdict:: What running a feed's rules over one candidate produces, carrying two independent
 facts. `QueryOutcome` is purely the query verdict: `Qualified`, `Culled` (filtered out) or
 `Truncated` (past the limit). `Enrollment` is what the user already did with the item:
-`InWatchlist`, `InBlacklist`, `Owned` (this feed put it there). Questions like "will import" or
+`InWantlist`, `InBlocklist`, `Owned` (this feed put it there). Questions like "will import" or
 "at risk" are predicates over both, so nothing depends on the order the rules are checked in.
-Unmatched candidates are reported separately as unresolved.
+Unmatched candidates are reported separately as unmatched.
 
-Watchlist:: The set of titles Sammlarr keeps in sync with Plex.
+Wantlist:: The set of titles Sammlarr keeps in sync with the sink.
 
-Provenance:: Where a watchlist item came from: `RemoteOrigin` (pulled from Plex),
+Sink:: The service the wantlist syncs to, an `IMediaSink` keyed by the hand-written `SinkKind`;
+Plex today. A sync reads the sink, pulls in what was added there, and pushes queued changes.
+
+Provenance:: Where a wantlist item came from: `SinkOrigin` (added on the sink and pulled in),
 `ManualOrigin` (search, browse, or feed preview), `FeedOrigin` (a feed put it there), or
 `OrphanedOrigin` (its feed was later deleted).
 
-Blacklist:: Titles excluded from curation so they never enter a list.
+Blocklist:: Titles excluded from curation so they never enter a list.
 
 === Providers and wiring
 
 Provider:: An external service (TMDB, MDBList, Plex) or an id namespace (IMDb, TheTVDB),
 modelled as a `MediaProvider` enum value.
 
-Capability:: What a provider can do: `Search`, `Watchlist`, `Trending`, `Rating`, `Feed`,
+Capability:: What a provider can do: `Search`, `Trending`, `Rating`, `Feed`, `Artwork`,
 `ApiKey`, or `Auth`. Declared per provider and used to generate the provider-subset enums.
 
 Provider-subset enum:: A generated enum holding only the providers with a given capability,
-such as `FeedProvider` or `WatchlistProvider`. See <<section-concepts>>.
+such as `FeedProvider` or `AuthProvider`. See <<section-concepts>>.
 
 Module:: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
 from `Web`'s `Program.cs` via `AddModule<T>()`.
@@ -154,19 +157,19 @@ filters.
 
 === Sync and announcing
 
-Sync:: Reconciling the local watchlist with Plex: pull remote changes in, push local changes
+Sync:: Reconciling the local wantlist with Plex: pull remote changes in, push local changes
 out.
 
-Outbox:: The table of local watchlist changes not yet pushed to Plex, one row per title with its
+Outbox:: The table of local wantlist changes not yet pushed to Plex, one row per title with its
 action (add or remove), status and attempt count. Opposing changes cancel in it; each sync drains
 it inline, and an item that fails five times becomes `Failed`. See <<section-runtime-view>>.
 
-Delta:: The difference between the local and remote watchlist computed during a sync
-(`WatchlistDelta`).
+Delta:: The difference between the wantlist and the sink computed during a sync
+(`WantlistDelta`).
 
 Event:: Something that happened, announced only to open pages. In memory, never stored, gone on
 restart, and invisible in settings because no user can subscribe to one. Used for high-frequency
-progress that would be noise as a notification, such as per-item watchlist push status, and for
+progress that would be noise as a notification, such as per-item wantlist push status, and for
 telling a page its cached numbers are stale. Named `*Event`, marked `IEvent`. Contrast Notification.
 Which of the two a fact is never depends on what triggered it, only on whether a user could
 reasonably subscribe to it.
@@ -199,7 +202,7 @@ Template:: The Fluid template that renders a notification's title and body for a
 === Jobs and scheduling
 
 Job:: One unit of background work, a row in the `Jobs` table: a request (`RunFeed` or
-`SyncWatchlist`), its owner and a state. The table is the queue of record; the UI reads it.
+`SyncWantlist`), its owner and a state. The table is the queue of record; the UI reads it.
 
 Job state:: `Waiting` (due in the future), `Queued` (ready), `Running`, then `Done` or `Failed`.
 A job its owner cancels before it starts ends `Cancelled`.

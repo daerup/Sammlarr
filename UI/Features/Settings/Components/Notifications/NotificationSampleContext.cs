@@ -36,8 +36,8 @@ internal static class NotificationSampleContext
 	private static INotification Sample(NotificationEventType eventType) =>
 		eventType switch
 		{
-			NotificationEventType.WatchlistSyncCompleted => new WatchlistSyncCompletedNotification(SampleUser, SampleMoment, SamplePulled, [], [SampleMedia], [], []),
-			NotificationEventType.WatchlistSyncFailed => new WatchlistSyncFailedNotification(SampleUser, SampleMoment, "Provider timed out"),
+			NotificationEventType.WantlistSyncCompleted => new WantlistSyncCompletedNotification(SampleUser, SampleMoment, SamplePulled, [], [SampleMedia], [], []),
+			NotificationEventType.WantlistSyncFailed => new WantlistSyncFailedNotification(SampleUser, SampleMoment, "Provider timed out"),
 			NotificationEventType.FeedRunCompleted => new FeedRunCompletedNotification(SampleUser, SampleMoment, SampleFeed, 2, 1),
 			NotificationEventType.FeedRunFailed => new FeedRunFailedNotification(SampleUser, SampleMoment, SampleFeed, "Provider timed out"),
 			NotificationEventType.ProviderRateLimited => new ProviderRateLimitedNotification(SampleUser, SampleMoment, MediaProvider.Tmdb, TimeSpan.FromSeconds(30)),
@@ -47,8 +47,8 @@ internal static class NotificationSampleContext
 	private static NotificationData Data(NotificationEventType eventType) =>
 		eventType switch
 		{
-			NotificationEventType.WatchlistSyncCompleted => new NotificationData { Media = SyncedMedia },
-			NotificationEventType.WatchlistSyncFailed => new NotificationData { Reason = "Provider timed out" },
+			NotificationEventType.WantlistSyncCompleted => new NotificationData { Media = SyncedMedia },
+			NotificationEventType.WantlistSyncFailed => new NotificationData { Reason = "Provider timed out" },
 			NotificationEventType.FeedRunCompleted => new NotificationData
 			{
 				Feed = Feed,

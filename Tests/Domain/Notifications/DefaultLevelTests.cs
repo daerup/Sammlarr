@@ -15,7 +15,7 @@ public class DefaultLevelTests
 	[Test]
 	public async Task DefaultLevel_OfACleanSync_IsSuccess()
 	{
-		var synced = new WatchlistSyncCompletedNotification(Owner, Now, [Media], [], [], [], []);
+		var synced = new WantlistSyncCompletedNotification(Owner, Now, [Media], [], [], [], []);
 
 		await Assert.That(synced.DefaultLevel).IsEqualTo(NotificationLevel.Success);
 	}
@@ -23,7 +23,7 @@ public class DefaultLevelTests
 	[Test]
 	public async Task DefaultLevel_OfASyncWithFailedPushes_IsWarningBecauseItOnlyPartlySucceeded()
 	{
-		var synced = new WatchlistSyncCompletedNotification(Owner, Now, [Media], [], [], [], [Media]);
+		var synced = new WantlistSyncCompletedNotification(Owner, Now, [Media], [], [], [], [Media]);
 
 		await Assert.That(synced.DefaultLevel).IsEqualTo(NotificationLevel.Warning);
 	}
@@ -39,7 +39,7 @@ public class DefaultLevelTests
 	[Test]
 	public async Task DefaultLevel_OfAFailure_IsError()
 	{
-		await Assert.That(new WatchlistSyncFailedNotification(Owner, Now, "nope").DefaultLevel).IsEqualTo(NotificationLevel.Error);
+		await Assert.That(new WantlistSyncFailedNotification(Owner, Now, "nope").DefaultLevel).IsEqualTo(NotificationLevel.Error);
 		await Assert.That(new FeedRunFailedNotification(Owner, Now, FeedId.From(Guid.NewGuid()), "nope").DefaultLevel).IsEqualTo(NotificationLevel.Error);
 	}
 

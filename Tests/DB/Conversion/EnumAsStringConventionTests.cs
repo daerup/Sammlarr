@@ -15,7 +15,7 @@ public class EnumAsStringConventionTests
 		await using var context = new EnumContext(connection);
 		await context.Database.EnsureCreatedAsync();
 
-		context.Holders.Add(new EnumHolder { NullableProvider = WatchlistProvider.Plex });
+		context.Holders.Add(new EnumHolder { NullableProvider = SinkKind.Plex });
 		await context.SaveChangesAsync();
 
 		await using var command = connection.CreateCommand();
@@ -35,14 +35,14 @@ public class EnumAsStringConventionTests
 		await using var context = new EnumContext(connection);
 		await context.Database.EnsureCreatedAsync();
 
-		context.Holders.Add(new EnumHolder { NullableProvider = WatchlistProvider.Plex });
+		context.Holders.Add(new EnumHolder { NullableProvider = SinkKind.Plex });
 		context.Holders.Add(new EnumHolder { NullableProvider = null });
 		await context.SaveChangesAsync();
 		context.ChangeTracker.Clear();
 
 		var loaded = await context.Holders.OrderBy(holder => holder.Id).ToListAsync();
 
-		await Assert.That(loaded[0].NullableProvider).IsEqualTo(WatchlistProvider.Plex);
+		await Assert.That(loaded[0].NullableProvider).IsEqualTo(SinkKind.Plex);
 		await Assert.That(loaded[1].NullableProvider).IsNull();
 	}
 
@@ -59,6 +59,6 @@ public class EnumAsStringConventionTests
 	private sealed class EnumHolder
 	{
 		public int Id { get; set; }
-		public WatchlistProvider? NullableProvider { get; set; }
+		public SinkKind? NullableProvider { get; set; }
 	}
 }

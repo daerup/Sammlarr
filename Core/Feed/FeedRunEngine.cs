@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using Contracts;
 using Contracts.Feed;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
-using Domain.Watchlist;
+using Domain.Wantlist;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Feed;
@@ -13,7 +13,7 @@ namespace Core.Feed;
 internal sealed class FeedRunEngine(
 	FeedRunGate gate,
 	FeedRunPlanner planner,
-	IWatchlistService watchlist,
+	IWantlistService wantlist,
 	IFeedRepository feeds,
 	IDateTimeProvider clock,
 	ILogger<FeedRunEngine> logger
@@ -65,8 +65,8 @@ internal sealed class FeedRunEngine(
 		};
 		await feeds.StartRunAsync(run, cancellationToken);
 
-		var added = await watchlist.AddToWatchlistAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
-		var removed = await watchlist.RemoveOwnedAsync(planned.Delta.Drops, feed.Id, cancellationToken);
+		var added = await wantlist.AddToWantlistAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
+		var removed = await wantlist.RemoveOwnedAsync(planned.Delta.Drops, feed.Id, cancellationToken);
 		WarnOnDrift(feed, planned.Delta, added, removed);
 
 		var applied = planned.Delta with { Adds = added, Drops = removed };

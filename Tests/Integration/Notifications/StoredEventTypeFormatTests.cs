@@ -18,11 +18,7 @@ public class StoredEventTypeFormatTests(SammlarrTestHost fixture) : IAsyncDispos
 		var subscriptions = new NotificationSubscriptionRepository(fixture.ContextFactory);
 		var targetId = await targets.CreateAsync(new NotificationTarget(Guid.Empty, "Target", true, new PushoverConfig("token", "key")));
 
-		await subscriptions.AddAsync(
-			targetId,
-			[NotificationEventType.WatchlistSyncCompleted, NotificationEventType.WatchlistSyncFailed],
-			NotificationTemplate.None
-		);
+		await subscriptions.AddAsync(targetId, [NotificationEventType.WantlistSyncCompleted, NotificationEventType.WantlistSyncFailed], NotificationTemplate.None);
 
 		await using var context = await fixture.ContextFactory.CreateDbContextAsync();
 		var connection = context.Database.GetDbConnection();
@@ -34,6 +30,6 @@ public class StoredEventTypeFormatTests(SammlarrTestHost fixture) : IAsyncDispos
 		await using var command = connection.CreateCommand();
 		command.CommandText = """SELECT "EventTypes" FROM "NotificationSubscriptions" """;
 
-		await Assert.That((string?)await command.ExecuteScalarAsync()).IsEqualTo("""["WatchlistSyncCompleted","WatchlistSyncFailed"]""");
+		await Assert.That((string?)await command.ExecuteScalarAsync()).IsEqualTo("""["WantlistSyncCompleted","WantlistSyncFailed"]""");
 	}
 }

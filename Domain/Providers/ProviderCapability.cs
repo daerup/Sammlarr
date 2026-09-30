@@ -4,7 +4,6 @@ namespace Domain.Providers;
 internal enum ProviderCapability
 {
 	Search = 1,
-	Watchlist = 2,
 
 	[ConvertsTo<ProviderCapability>(ApiKey)]
 	Trending = 4,

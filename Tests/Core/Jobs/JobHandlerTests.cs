@@ -2,7 +2,7 @@ using Contracts.Jobs;
 using Core.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Tests.Jobs;
@@ -22,11 +22,11 @@ public class JobHandlerTests
 	}
 
 	[Test]
-	public async Task DispatchAsync_OfAWatchlistSync_ReachesTheSyncHandler()
+	public async Task DispatchAsync_OfAWantlistSync_ReachesTheSyncHandler()
 	{
 		var (services, feeds, syncs) = BuildServices();
 
-		await JobRunner.DispatchAsync(services, new SyncWatchlist(new ManualTrigger()), CancellationToken.None);
+		await JobRunner.DispatchAsync(services, new SyncWantlist(new ManualTrigger()), CancellationToken.None);
 
 		await Assert.That(syncs.Received).IsNotNull();
 		await Assert.That(feeds.Received).IsNull();
@@ -48,7 +48,7 @@ public class JobHandlerTests
 		var services = new ServiceCollection().BuildServiceProvider();
 
 		await Assert
-			.That(async () => await JobRunner.DispatchAsync(services, new SyncWatchlist(new ManualTrigger()), CancellationToken.None))
+			.That(async () => await JobRunner.DispatchAsync(services, new SyncWantlist(new ManualTrigger()), CancellationToken.None))
 			.Throws<InvalidOperationException>();
 	}
 
@@ -58,7 +58,7 @@ public class JobHandlerTests
 		var syncs = new RecordingSyncHandler();
 		var services = new ServiceCollection();
 		services.AddSingleton<IJobHandler<RunFeed>>(feeds);
-		services.AddSingleton<IJobHandler<SyncWatchlist>>(syncs);
+		services.AddSingleton<IJobHandler<SyncWantlist>>(syncs);
 
 		return (services.BuildServiceProvider(), feeds, syncs);
 	}
@@ -74,11 +74,11 @@ public class JobHandlerTests
 		}
 	}
 
-	private sealed class RecordingSyncHandler : IJobHandler<SyncWatchlist>
+	private sealed class RecordingSyncHandler : IJobHandler<SyncWantlist>
 	{
-		public SyncWatchlist? Received { get; private set; }
+		public SyncWantlist? Received { get; private set; }
 
-		public Task HandleAsync(SyncWatchlist request, CancellationToken cancellationToken = default)
+		public Task HandleAsync(SyncWantlist request, CancellationToken cancellationToken = default)
 		{
 			Received = request;
 			return Task.CompletedTask;

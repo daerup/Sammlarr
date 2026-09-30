@@ -14,8 +14,8 @@ public class NotificationIdentityTests
 
 	public static IEnumerable<Func<INotification>> AllKinds() =>
 		[
-			() => new WatchlistSyncCompletedNotification(Owner, Now, [], [], [], [], []),
-			() => new WatchlistSyncFailedNotification(Owner, Now, "nope"),
+			() => new WantlistSyncCompletedNotification(Owner, Now, [], [], [], [], []),
+			() => new WantlistSyncFailedNotification(Owner, Now, "nope"),
 			() => new TestPingNotification(Owner, Now, Guid.NewGuid()),
 			() => new FeedRunCompletedNotification(Owner, Now, FeedId.From(Guid.NewGuid()), 1, 0),
 			() => new FeedRunFailedNotification(Owner, Now, FeedId.From(Guid.NewGuid()), "nope"),

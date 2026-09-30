@@ -1,7 +1,7 @@
 @using Contracts.Media
 @using Contracts.Media.Metadata
 @inject IMediaCachePurger CachePurger
-@inject IUnresolvedMediaCache UnresolvedCache
+@inject IUnmatchedMediaCache UnmatchedCache
 @inject Notifier Notifier
 
 <div class="space-y-6">
@@ -36,7 +36,7 @@
                         <div class="flex gap-3">
                             <LucideIcon Name="circle-alert" Size="16" Class="mt-0.5 shrink-0 text-foreground"/>
                             <p>
-                                <span class="font-semibold text-foreground">Unresolved lookups.</span>
+                                <span class="font-semibold text-foreground">Unmatched lookups.</span>
                                 When no provider can match an item, that miss is held in memory for an hour and skipped on the next run, so it isn't retried in a tight loop. This list never touches the database and resets whenever the app restarts.
                             </p>
                         </div>
@@ -55,7 +55,7 @@
         </Icon>
         <ChildContent>
             <p class="text-muted-foreground text-sm leading-relaxed">
-                The deepest reset: deletes the id groups, all metadata, and ratings alike, so every item is re-matched from scratch on demand. Slowest to rebuild — your watchlist stays intact.
+                The deepest reset: deletes the id groups, all metadata, and ratings alike, so every item is re-matched from scratch on demand. Slowest to rebuild — your wantlist stays intact.
             </p>
         </ChildContent>
         <Actions>
@@ -131,7 +131,7 @@
         </Actions>
     </SettingsCard>
 
-    <SettingsCard Title="Unresolved lookups" Color="var(--primary)">
+    <SettingsCard Title="Unmatched lookups" Color="var(--primary)">
         <Icon>
             <div class="w-9 h-9 flex items-center justify-center">
                 <LucideIcon Name="circle-alert" Size="22"/>
@@ -144,10 +144,10 @@
         </ChildContent>
         <Actions>
             <BbButton Variant="ButtonVariant.Outline"
-                      OnClick="ClearUnresolved"
-                      Disabled="@_isClearingUnresolved">
+                      OnClick="ClearUnmatched"
+                      Disabled="@_isClearingUnmatched">
                 <LucideIcon Name="circle-alert" Size="14" Class="mr-2"/>
-                <span>@(_isClearingUnresolved ? "Clearing…" : "Clear unresolved lookups")</span>
+                <span>@(_isClearingUnmatched ? "Clearing…" : "Clear unmatched lookups")</span>
             </BbButton>
         </Actions>
     </SettingsCard>
@@ -157,7 +157,7 @@
 @code {
     private bool _isPurging;
     private bool _isRemovingAssets;
-    private bool _isClearingUnresolved;
+    private bool _isClearingUnmatched;
 
     private async Task PurgeAsync()
     {
@@ -205,26 +205,26 @@
         }
     }
 
-    private void ClearUnresolved()
+    private void ClearUnmatched()
     {
-        if (_isClearingUnresolved)
+        if (_isClearingUnmatched)
         {
             return;
         }
 
-        _isClearingUnresolved = true;
+        _isClearingUnmatched = true;
         try
         {
-            UnresolvedCache.Clear();
-            Notifier.Success("Unresolved-lookup cache cleared — items will be re-checked.");
+            UnmatchedCache.Clear();
+            Notifier.Success("Unmatched-lookup cache cleared — items will be re-checked.");
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex, "Failed to clear unresolved-lookup cache");
+            Notifier.Error(ex, "Failed to clear unmatched-lookup cache");
         }
         finally
         {
-            _isClearingUnresolved = false;
+            _isClearingUnmatched = false;
         }
     }
 }

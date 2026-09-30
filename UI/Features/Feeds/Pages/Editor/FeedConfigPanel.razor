@@ -290,23 +290,23 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BbField>
                                 <BbFieldLabel Class="flex items-center leading-none">
-                                    Watchlist slot policy
+                                    Wantlist slot policy
                                     <BbTooltipProvider>
                                         <BbTooltip>
                                             <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                                 <LucideIcon Name="info" Size="14"/>
                                             </BbTooltipTrigger>
                                             <BbTooltipContent>
-                                                Watchlisted items are never imported. This decides whether they still take a slot, and takes precedence if
-                                                the item is blacklisted too.
+                                                Wantlisted items are never imported. This decides whether they still take a slot, and takes precedence if
+                                                the item is blocklisted too.
                                             </BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
                                 </BbFieldLabel>
                                 <BbFieldContent>
                                     <EnumToggleGroup TEnum="SlotPolicy"
-                                                     Value="@WatchlistedBehavior"
-                                                     OnChange="@ChangeWatchlistedBehavior"
+                                                     Value="@WantlistedBehavior"
+                                                     OnChange="@ChangeWantlistedBehavior"
                                                      TooltipProvider="@GetSlotPolicyTooltip"/>
                                     <p class="mt-1.5 text-sm text-muted-foreground">@SlotScopeHelper</p>
                                 </BbFieldContent>
@@ -314,22 +314,22 @@
 
                             <BbField>
                                 <BbFieldLabel Class="flex items-center leading-none">
-                                    Blacklist slot policy
+                                    Blocklist slot policy
                                     <BbTooltipProvider>
                                         <BbTooltip>
                                             <BbTooltipTrigger AsChild="false" Class="ml-1 inline-flex items-center p-0 text-muted-foreground cursor-default">
                                                 <LucideIcon Name="info" Size="14"/>
                                             </BbTooltipTrigger>
                                             <BbTooltipContent>
-                                                Blacklisted items are never imported. This decides whether they still take a slot.
+                                                Blocklisted items are never imported. This decides whether they still take a slot.
                                             </BbTooltipContent>
                                         </BbTooltip>
                                     </BbTooltipProvider>
                                 </BbFieldLabel>
                                 <BbFieldContent>
                                     <EnumToggleGroup TEnum="SlotPolicy"
-                                                     Value="@BlacklistedBehavior"
-                                                     OnChange="@ChangeBlacklistedBehavior"
+                                                     Value="@BlocklistedBehavior"
+                                                     OnChange="@ChangeBlocklistedBehavior"
                                                      TooltipProvider="@GetSlotPolicyTooltip"/>
                                 </BbFieldContent>
                             </BbField>
@@ -407,7 +407,7 @@
     private readonly HashSet<FeedProvider> _disabledProviders = [];
 
     private static readonly QuerySort DefaultSort = new() { Property = nameof(MediaQueryRow.Title), Direction = ListSortDirection.Descending };
-    private static readonly QueryLimit DefaultLimit = new() { Count = 0, Watchlisted = SlotPolicy.Consumed, Blacklisted = SlotPolicy.Consumed };
+    private static readonly QueryLimit DefaultLimit = new() { Count = 0, Wantlisted = SlotPolicy.Consumed, Blocklisted = SlotPolicy.Consumed };
 
     private bool _isEnabled;
     private string _name = string.Empty;
@@ -439,8 +439,8 @@
 
     private string SortField => _sort.Property;
     private ListSortDirection SortDir => _sort.Direction;
-    private SlotPolicy WatchlistedBehavior => _limit.Watchlisted;
-    private SlotPolicy BlacklistedBehavior => _limit.Blacklisted;
+    private SlotPolicy WantlistedBehavior => _limit.Wantlisted;
+    private SlotPolicy BlocklistedBehavior => _limit.Blocklisted;
 
     private record FieldDefinition(string Property, string Label, FilterFieldType FilterType, IReadOnlyList<SelectOption<string>>? Options = null);
 
@@ -596,15 +596,15 @@
         NotifyChange();
     }
 
-    private void ChangeWatchlistedBehavior(SlotPolicy v)
+    private void ChangeWantlistedBehavior(SlotPolicy v)
     {
-        _limit = _limit with { Watchlisted = v };
+        _limit = _limit with { Wantlisted = v };
         NotifyChange();
     }
 
-    private void ChangeBlacklistedBehavior(SlotPolicy v)
+    private void ChangeBlocklistedBehavior(SlotPolicy v)
     {
-        _limit = _limit with { Blacklisted = v };
+        _limit = _limit with { Blocklisted = v };
         NotifyChange();
     }
 

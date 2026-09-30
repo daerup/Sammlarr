@@ -30,7 +30,7 @@ id is enough to merge, with no multi-id agreement check, so within a single flus
 titles a provider tags with the same or conflicting id coalesce silently; only collisions against
 already-persisted rows are surfaced (<<section-technical-risks>>).
 
-Scenario I (isolation):: User B requests feeds/watchlist/blacklist while User A's rows exist.
+Scenario I (isolation):: User B requests feeds/wantlist/blocklist while User A's rows exist.
 _Response:_ B sees only B's rows; a query with no authenticated user throws rather than returning
 everyone's. _Measure:_ the isolation integration tests pass; the current-user lookup is fail-closed.
 

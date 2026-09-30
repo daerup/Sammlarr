@@ -1,0 +1,459 @@
+@page "/wantlist"
+@inherits MediaListPage
+@using Contracts.Identity
+@using Contracts.Announcing
+@using Contracts.Blocklist
+@using Contracts.Wantlist
+@using Contracts.Wantlist.Outbox
+@using Domain.Announcing
+@using Domain.Identity
+@using Domain.Feed
+@using Domain.Feed.Run
+@using global::Shared
+@using UI.Features.Wantlist.Components
+@using UI.Shared.Announcing
+@using UI.Shared.Filters
+@using UI.Shared.Services.Branding
+@inject IWantlistService WantlistService
+@inject IWantlistOutbox Outbox
+@inject IBlocklistService BlocklistService
+@inject MediaProviderBrandingService BrandingService
+@inject IEventPublisher Events
+@inject ICurrentUser CurrentUser
+
+<PageTitle>@PageHeading</PageTitle>
+
+@{
+    var allItems = AllItems;
+    var gridItems = Visible(allItems);
+    var sources = SourcesFrom(allItems);
+    var pageItems = Paged(gridItems);
+}
+
+<MediaListShell Settings="Settings"
+                Heading="@PageHeading"
+                Description="@PageDescription"
+                IsSignedIn="IsSignedIn"
+                IsConnected="IsConnected"
+                DeniedActionDescription="viewing your wantlist"
+                OnSignInChanged="HandleSignInChanged"
+                OnAccessChanged="HandleAccessChanged"
+                Search="@Filter.Search"
+                SearchChanged="ApplySearchAsync">
+    <HeaderExtras>
+        <MediaListViewActions HasItems="@(_items is { Count: > 0 } || _removedItems.Count > 0)"
+                              IsEditMode="IsEditMode"
+                              ShowFilters="ShowFilters"
+                              ActiveFilters="Filter.ActiveCount"
+                              OnEnterEditMode="EnterEditMode"
+                              OnToggleFilters="ToggleFilterBar"/>
+        <ProtectedComponent GuardState="IsConnected"
+                            AuthProvider="@Settings!.AuthProvider"
+                            DeniedActionDescription="sync your wantlist">
+            <WantlistSyncButton @ref="_syncControl" OnSynced="LoadAsync" OnStatusRefresh="LoadOutboxAsync" OnSyncStarted="StartSync" IsSyncing="_syncing" BrandColor="@SinkBrandColor" ProviderName="@SinkName" OutboxEntries="_outboxEntries.Values"/>
+        </ProtectedComponent>
+    </HeaderExtras>
+    <ChildContent>
+        <MediaListBody IsLoading="IsLoadingList"
+                       ErrorMessage="@ErrorMessage"
+                       OnRetry="LoadAsync"
+                       TotalCount="@(_items is null ? null : allItems.Count)"
+                       VisibleCount="gridItems.Count"
+                       ShowFilters="ShowFilters"
+                       Filter="Filter"
+                       FilterChanged="ApplyFilterAsync"
+                       Sources="sources"
+                       Statuses="StatusOptions"
+                       CurrentPage="@PageWithin(gridItems.Count)"
+                       PageCount="@PageCount(gridItems.Count)"
+                       PageChanged="GoToPageAsync">
+            <EmptyState>
+                <MediaListEmptyState Icon="inbox" Heading="Your wantlist is empty.">
+                    Click Sync above to load it from @SinkName, or add a title with <span class="font-medium text-foreground">Ctrl+K</span>.
+                </MediaListEmptyState>
+            </EmptyState>
+            <Grid>
+                <BulkEditableMediaGrid TItem="WantlistedMedia"
+                                       Items="pageItems"
+                                       AllItems="gridItems"
+                                       Detail="@(i => i.Media)"
+                                       Key="@(i => i.Media.Id)"
+                                       IsEditMode="IsEditMode"
+                                       IsEditModeChanged="SetEditMode"
+                                       IsDimmed="@(gridItem => _removedIds.Contains(gridItem.Media.Id))"
+                                       OnTileClick="SelectItem"
+                                       OnBulkRemove="RemoveBulkAsync"
+                                       RemoveLabel="Remove"
+                                       MarkLabel="Blocklist"
+                                       MarkIcon="shield-ban"
+                                       OnBulkMark="BlocklistBulkAsync"
+                                       RemoveConfirm="RemoveConfirm"
+                                       MarkConfirm="BlocklistConfirm"
+                                       IsMarked="@(item => _blocklistedIds.Contains(item.Media.Id))"
+                                       AlreadyMarkedHint="Every selected title is already blocklisted."
+                                       IsRemoved="@(item => _removedIds.Contains(item.Media.Id))"
+                                       AlreadyRemovedHint="Every selected title is already pending removal.">
+                    <Overlay Context="item">
+                        @if (_removedIds.Contains(item.Media.Id))
+                        {
+                            <div class="absolute top-2 right-2 z-10">
+                                <PushStatusDot State="PushDotState.Removed" ProviderName="@SinkName"/>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                                <ProvenanceBadge Provenance="item.Provenance" AddedAt="item.AddedAt" ItemId="item.Media.Id"/>
+                            </div>
+                            @if (PushDotFor(item.Media.Id) is { } dot)
+                            {
+                                <div class="absolute top-2 right-2 z-10">
+                                    <PushStatusDot State="dot.State" Attempts="dot.Attempts" ProviderName="@SinkName"/>
+                                </div>
+                            }
+                        }
+                    </Overlay>
+                </BulkEditableMediaGrid>
+            </Grid>
+        </MediaListBody>
+    </ChildContent>
+</MediaListShell>
+
+<MediaDetailSheet Open="IsSheetOpen"
+                  OnOpenChanged="SheetOpenChangedAsync"
+                  Media="_selectedItem?.Media.ToMatch()"
+                  OnEnrollmentChanged="ReloadAfterEnrollmentAsync"/>
+
+@code {
+    private static readonly TimeSpan RenderCoalesceWindow = TimeSpan.FromMilliseconds(120);
+    private bool _renderQueued;
+    private List<WantlistedMedia>? _items;
+    private Dictionary<MediaId, WantlistOutboxEntry> _outboxEntries = [];
+    private List<WantlistedMedia> _removedItems = [];
+    private HashSet<MediaId> _removedIds = [];
+    private readonly HashSet<MediaId> _pushed = [];
+    private IReadOnlySet<MediaId> _blocklistedIds = new HashSet<MediaId>();
+    private UserId? _userId;
+    private bool _syncing;
+    private WantlistedMedia? _selectedItem;
+    private WantlistSyncButton? _syncControl;
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "feed")]
+    public string? FeedParam { get; set; }
+
+    private const string PageHeading = "Wantlist";
+
+    private string PageDescription =>
+        Settings is null ? "Your saved movies and shows." : $"Your saved movies and shows, synced with {Settings.Sink.GetDescription()}.";
+
+    private string? SinkBrandColor => Settings is null ? null : BrandingService.GetBrandingInfo(Settings.Sink.AsMediaProvider()).BrandColor;
+
+    private string SinkName => Settings is null ? "your media service" : Settings.Sink.GetDescription();
+
+    private IReadOnlyList<StatusOption> StatusOptions => WantlistStatusView.Options(_removedItems.Count);
+
+    private IReadOnlyList<WantlistedMedia> AllItems =>
+        _items is null ? [] : WantlistStatusView.Within(Filter, _items, _removedItems);
+
+    private IReadOnlyList<WantlistedMedia> Visible(IReadOnlyList<WantlistedMedia> all) =>
+        [
+            .. Filter.SortBy(
+                all.Where(item =>
+                    Filter.MatchesSource(item.Provenance) && Filter.MatchesType(item.Media.ToMatch().MediaType) && Filter.MatchesSearch(item.Media.Title)
+                ),
+                item => item.Media,
+                item => item.AddedAt
+            ),
+        ];
+
+    private static IReadOnlyList<SourceOption> SourcesFrom(IReadOnlyList<WantlistedMedia> all) =>
+        [
+            .. all.Select(item => item.Provenance)
+                .Select(SourceOptionFor)
+                .Where(option => option is not null)
+                .Select(option => option!)
+                .DistinctBy(option => option.Key)
+                .OrderBy(option => option.Label),
+        ];
+
+    private static SourceOption? SourceOptionFor(WantlistItemProvenance provenance) =>
+        provenance.Value switch
+        {
+            FeedOrigin feed => new SourceOption(UrlGuid.Encode(feed.Feed.Id.Value), feed.Feed.Name, new SourceChoice(SourceKind.Feed, feed.Feed.Id)),
+            ManualOrigin => new SourceOption("manual", "Added by hand", new SourceChoice(SourceKind.Manual)),
+            SinkOrigin sink => new SourceOption("sink", $"Added on {sink.Provider.GetDescription()}", new SourceChoice(SourceKind.Sink)),
+            OrphanedOrigin => new SourceOption("orphaned", "Feed deleted", new SourceChoice(SourceKind.Orphaned)),
+            _ => null,
+        };
+
+    private void ApplyFeedFromQuery()
+    {
+        if (FeedParam is null || _items is null)
+        {
+            return;
+        }
+
+        var wanted = new SourceChoice(SourceKind.Feed, FeedId.From(UrlGuid.Decode(FeedParam)));
+        if (SourcesFrom(AllItems).Any(option => option.Choice == wanted))
+        {
+            Filter = Filter with { Sources = [wanted] };
+            ShowFilters = true;
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.Published += OnEvent;
+        Filter = Filter with { Statuses = [WantlistStatusView.Active] };
+        await base.OnInitializedAsync();
+    }
+
+    protected override void ClearItems()
+    {
+        _items = null;
+        _userId = null;
+    }
+
+    protected override void ClearSelection() => _selectedItem = null;
+
+    protected override async Task LoadAsync()
+    {
+        _userId ??= CurrentUser.Id;
+        IsLoadingList = true;
+        StateHasChanged();
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        ErrorMessage = null;
+
+        try
+        {
+            await LoadOutboxAsync();
+            _removedIds = _outboxEntries.Values.Where(entry => entry.Action == WantlistOperationAction.Remove).Select(entry => entry.MediaId).ToHashSet();
+
+            _blocklistedIds = await BlocklistService.GetBlocklistIdsAsync(Cancellation.Token);
+
+            var all = await WantlistService.GetWantlistItemsAsync(WantlistQueryOptions.WithRemoved, Cancellation.Token).ToListAsync(Cancellation.Token);
+            _items = all.Where(item => !_removedIds.Contains(item.Media.Id)).ToList();
+            _removedItems = all.Where(item => _removedIds.Contains(item.Media.Id)).ToList();
+            Filter = Filter with { Statuses = WantlistStatusView.Adjusted(Filter.Statuses, _items.Count, _removedItems.Count) };
+            ApplyFeedFromQuery();
+
+            if (_selectedItem is not null)
+            {
+                _selectedItem = _items.FirstOrDefault(item => item.Media.Id.Equals(_selectedItem.Media.Id));
+                if (_selectedItem is null)
+                {
+                    IsSheetOpen = false;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to load wantlist");
+            ErrorMessage = $"Failed to load wantlist: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingList = false;
+            StateHasChanged();
+        }
+    }
+
+    private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
+
+    private async Task LoadOutboxAsync()
+    {
+        _outboxEntries = (await Outbox.GetAsync(Cancellation.Token)).ToDictionary(entry => entry.MediaId);
+        CompleteIfDrained();
+        StateHasChanged();
+    }
+
+    private void StartSync()
+    {
+        _pushed.Clear();
+        _syncing = true;
+        StateHasChanged();
+    }
+
+    private void CompleteIfDrained()
+    {
+        if (!_syncing || _outboxEntries.Values.Any(entry => entry.Status == WantlistOutboxState.Pending))
+        {
+            return;
+        }
+
+        _syncing = false;
+        _ = RefreshPendingAsync();
+        var pushed = _pushed.Count;
+        var failed = _outboxEntries.Values.Count(entry => entry.Status == WantlistOutboxState.Failed);
+
+        if (pushed == 0 && failed == 0)
+        {
+            _pushed.Clear();
+            return;
+        }
+        if (failed > 0)
+        {
+            Notifier.Warning($"Synced {pushed} to {SinkName} — {failed} failed.");
+        }
+
+        _ = ClearPushedAfterDelayAsync();
+    }
+
+    private async Task ClearPushedAfterDelayAsync()
+    {
+        try
+        {
+            await Task.Delay(1000, Cancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        _pushed.Clear();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private (PushDotState State, int Attempts)? PushDotFor(MediaId mediaId)
+    {
+        if (_pushed.Contains(mediaId))
+        {
+            return (PushDotState.Pushed, 0);
+        }
+        if (_outboxEntries.TryGetValue(mediaId, out var entry))
+        {
+            var state = entry.Status == WantlistOutboxState.Failed ? PushDotState.Failed : PushDotState.Pending;
+            return (state, entry.Attempts);
+        }
+        return null;
+    }
+
+    private void OnEvent(IEvent raised)
+    {
+        if (ViewerEvent.Own<FeedRunFinishedEvent>(raised, _userId) is not null)
+        {
+            _ = InvokeAsync(ReloadAsync);
+            return;
+        }
+
+        if (ViewerEvent.Own<WantlistOutboxEvent>(raised, _userId) is not { } outboxEvent)
+        {
+            return;
+        }
+        _ = InvokeAsync(() => ApplyOutboxEvent(outboxEvent));
+    }
+
+    private void ApplyOutboxEvent(WantlistOutboxEvent outboxEvent)
+    {
+        switch (outboxEvent.Kind)
+        {
+            case WantlistOutboxEventKind.Pushed:
+                _outboxEntries.Remove(outboxEvent.MediaId);
+                if (_removedIds.Remove(outboxEvent.MediaId))
+                {
+                    _removedItems.RemoveAll(item => item.Media.Id == outboxEvent.MediaId);
+                }
+                if (_syncing)
+                {
+                    _pushed.Add(outboxEvent.MediaId);
+                }
+                break;
+            case WantlistOutboxEventKind.Abandoned:
+                if (_outboxEntries.TryGetValue(outboxEvent.MediaId, out var failedRow))
+                {
+                    _outboxEntries[outboxEvent.MediaId] = failedRow with { Status = WantlistOutboxState.Failed };
+                }
+                break;
+            case WantlistOutboxEventKind.Retrying:
+                if (_outboxEntries.TryGetValue(outboxEvent.MediaId, out var retryRow))
+                {
+                    _outboxEntries[outboxEvent.MediaId] = retryRow with { Attempts = retryRow.Attempts + 1 };
+                }
+                break;
+        }
+        CompleteIfDrained();
+        QueueRender();
+    }
+
+    private void QueueRender()
+    {
+        if (_renderQueued)
+        {
+            return;
+        }
+
+        _renderQueued = true;
+        _ = InvokeAsync(async () =>
+        {
+            try
+            {
+                await Task.Delay(RenderCoalesceWindow, Cancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            _renderQueued = false;
+            StateHasChanged();
+        });
+    }
+
+    private void SelectItem(WantlistedMedia item)
+    {
+        _selectedItem = item;
+        IsSheetOpen = true;
+    }
+
+    private async Task ReloadAfterEnrollmentAsync(MediaListKind changed)
+    {
+        await LoadAsync();
+        if (changed is MediaListKind.Wantlist)
+        {
+            await RefreshPendingAsync();
+        }
+    }
+
+    private async Task RemoveBulkAsync(IReadOnlyList<WantlistedMedia> toRemove)
+    {
+        await WantlistService.RemoveFromWantlistAsync(toRemove.Select(item => item.Media.Id), Cancellation.Token);
+        Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your wantlist.");
+        await LoadAsync();
+        await RefreshPendingAsync();
+    }
+
+    private async Task BlocklistBulkAsync(IReadOnlyList<WantlistedMedia> toMark)
+    {
+        foreach (var item in toMark)
+        {
+            await BlocklistService.AddToBlocklistAsync(item.Media.Id, Cancellation.Token);
+        }
+        Notifier.Success($"Blocklisted {toMark.Count} title{(toMark.Count == 1 ? "" : "s")}.");
+    }
+
+    private static BulkConfirm RemoveConfirm(int count) =>
+        new(
+            $"Remove {Titles(count)} from your wantlist?",
+            "They are not blocklisted, so a later feed run can add them back."
+        );
+
+    private static BulkConfirm BlocklistConfirm(int count) =>
+        new($"Blocklist {Titles(count)}?", "Future feed runs will skip them. They stay on your wantlist.");
+
+    private static string Titles(int count) => count == 1 ? "1 title" : $"{count} titles";
+
+    public override void Dispose()
+    {
+        Events.Published -= OnEvent;
+        base.Dispose();
+    }
+}

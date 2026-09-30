@@ -61,7 +61,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task IdentifyAsync_WhenTheProviderErrors_LeavesTheIdUnresolved()
+	public async Task IdentifyAsync_WhenTheProviderErrors_LeavesTheIdUnmatched()
 	{
 		await host.EnsurePlexAccount();
 		host.PlexLookupFails(Spec("Mystery", Plex("550")));

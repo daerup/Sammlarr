@@ -1,12 +1,12 @@
-@using Contracts.Blacklist
+@using Contracts.Blocklist
 @using Contracts.Settings
-@using Contracts.Watchlist
-@using Domain.Watchlist
+@using Contracts.Wantlist
+@using Domain.Wantlist
 @using UI.Shared.Media.Icons
 @implements IDisposable
 @inject IProviderConfigService ProviderConfigService
-@inject IWatchlistService WatchlistService
-@inject IBlacklistService BlacklistService
+@inject IWantlistService WantlistService
+@inject IBlocklistService BlocklistService
 @inject Notifier Notifier
 
 @if (_settings is not null)
@@ -14,20 +14,20 @@
     <SearchModal IsOpen="IsOpen"
                  IsOpenChanged="IsOpenChanged"
                  SearchProvider="@_settings.SearchProvider"
-                 IsInWatchlist="IsWatchlisted"
-                 OnToggle="ToggleWatchlistAsync"
+                 IsInWantlist="IsWantlisted"
+                 OnToggle="ToggleWantlistAsync"
                  Title="Search"
                  Description="Find a movie or show and add it to a list.">
         <TileIcons Context="ctx">
-            <WatchlistProvenanceToggle Result="ctx.Result"
+            <WantlistProvenanceToggle Result="ctx.Result"
                                        IsToggled="ctx.IsToggled"
                                        IsToggling="ctx.IsToggling"
                                        Entry="@EntryFor(ctx.Result.Id)"
                                        OnToggle="ctx.OnToggle"/>
-            <BlacklistToggleIcon Result="ctx.Result"
-                                 IsToggled="@_blacklisted.Contains(ctx.Result.Id)"
-                                 IsToggling="@(_blacklisting == ctx.Result.Id)"
-                                 OnToggle="ToggleBlacklistAsync"/>
+            <BlocklistToggleIcon Result="ctx.Result"
+                                 IsToggled="@_blocklisted.Contains(ctx.Result.Id)"
+                                 IsToggling="@(_blocklisting == ctx.Result.Id)"
+                                 OnToggle="ToggleBlocklistAsync"/>
         </TileIcons>
     </SearchModal>
 }
@@ -35,9 +35,9 @@
 @code {
     private readonly CancellationTokenSource _cancellation = new();
     private ProviderConfig? _settings;
-    private IReadOnlySet<MediaId> _blacklisted = new HashSet<MediaId>();
-    private IReadOnlyDictionary<MediaId, WatchlistEntry> _entries = new Dictionary<MediaId, WatchlistEntry>();
-    private MediaId? _blacklisting;
+    private IReadOnlySet<MediaId> _blocklisted = new HashSet<MediaId>();
+    private IReadOnlyDictionary<MediaId, WantlistItem> _entries = new Dictionary<MediaId, WantlistItem>();
+    private MediaId? _blocklisting;
 
     [Parameter] public bool IsOpen { get; set; }
 
@@ -49,59 +49,59 @@
         await RefreshAsync();
     }
 
-    private bool IsWatchlisted(MediaId mediaId) => _entries.ContainsKey(mediaId);
+    private bool IsWantlisted(MediaId mediaId) => _entries.ContainsKey(mediaId);
 
-    private WatchlistEntry? EntryFor(MediaId mediaId) => _entries.TryGetValue(mediaId, out var entry) ? entry : null;
+    private WantlistItem? EntryFor(MediaId mediaId) => _entries.TryGetValue(mediaId, out var entry) ? entry : null;
 
     private async Task RefreshAsync()
     {
-        _entries = await WatchlistService.GetEntriesAsync(_cancellation.Token);
-        _blacklisted = await BlacklistService.GetBlacklistIdsAsync(_cancellation.Token);
+        _entries = await WantlistService.GetEntriesAsync(_cancellation.Token);
+        _blocklisted = await BlocklistService.GetBlocklistIdsAsync(_cancellation.Token);
     }
 
-    private async Task<bool> ToggleWatchlistAsync(MediaId id, string title, bool isMarked)
+    private async Task<bool> ToggleWantlistAsync(MediaId id, string title, bool isMarked)
     {
         if (isMarked)
         {
-            await WatchlistService.RemoveFromWatchlistAsync([id], _cancellation.Token);
-            Notifier.Success($"'{title}' has been removed from your watchlist.");
+            await WantlistService.RemoveFromWantlistAsync([id], _cancellation.Token);
+            Notifier.Success($"'{title}' has been removed from your wantlist.");
         }
         else
         {
-            await WatchlistService.AddToWatchlistAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
-            Notifier.Success($"'{title}' has been added to your watchlist.");
+            await WantlistService.AddToWantlistAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
+            Notifier.Success($"'{title}' has been added to your wantlist.");
         }
 
         await RefreshAsync();
         return true;
     }
 
-    private async Task ToggleBlacklistAsync(MediaLookup media)
+    private async Task ToggleBlocklistAsync(MediaLookup media)
     {
-        if (_blacklisting is not null)
+        if (_blocklisting is not null)
         {
             return;
         }
 
-        _blacklisting = media.Id;
+        _blocklisting = media.Id;
         try
         {
-            if (_blacklisted.Contains(media.Id))
+            if (_blocklisted.Contains(media.Id))
             {
-                await BlacklistService.RemoveFromBacklistAsync(media.Id, _cancellation.Token);
-                Notifier.Success($"'{media.Title}' has been removed from your blacklist.");
+                await BlocklistService.RemoveFromBlocklistAsync(media.Id, _cancellation.Token);
+                Notifier.Success($"'{media.Title}' has been removed from your blocklist.");
             }
             else
             {
-                await BlacklistService.AddToBacklistAsync(media.Id, _cancellation.Token);
-                Notifier.Success($"'{media.Title}' has been blacklisted.");
+                await BlocklistService.AddToBlocklistAsync(media.Id, _cancellation.Token);
+                Notifier.Success($"'{media.Title}' has been blocklisted.");
             }
 
             await RefreshAsync();
         }
         finally
         {
-            _blacklisting = null;
+            _blocklisting = null;
         }
     }
 

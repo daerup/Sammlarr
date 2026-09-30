@@ -29,7 +29,7 @@ public enum FeedSort
 	Name,
 	RecentlyRun,
 	NextRun,
-	MostOnWatchlist,
+	MostOnWantlist,
 	RecentlyAdded,
 }
 
@@ -120,7 +120,7 @@ public sealed record FeedFilter
 			FeedSort.Name => rows.OrderBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
 			FeedSort.RecentlyRun => rows.OrderBy(row => row.Overview is null).ThenByDescending(row => row.Overview?.LastRun.StartedAt),
 			FeedSort.NextRun => rows.OrderBy(row => row.NextRun is null).ThenBy(row => row.NextRun),
-			FeedSort.MostOnWatchlist => rows.OrderByDescending(row => row.Owned).ThenBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
+			FeedSort.MostOnWantlist => rows.OrderByDescending(row => row.Owned).ThenBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
 			FeedSort.RecentlyAdded => rows.OrderByDescending(row => row.Feed.CreatedAt),
 		};
 }
@@ -155,7 +155,7 @@ internal static class FeedFilterText
 			FeedSort.Name => "Name A to Z",
 			FeedSort.RecentlyRun => "Recently run",
 			FeedSort.NextRun => "Next run",
-			FeedSort.MostOnWatchlist => "Most on watchlist",
+			FeedSort.MostOnWantlist => "Most on wantlist",
 			FeedSort.RecentlyAdded => "Recently added",
 		};
 }

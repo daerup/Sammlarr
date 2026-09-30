@@ -44,7 +44,7 @@ internal sealed class TmdbTrendingService(
 		unresolvable.ForEach(r => finalItems[r.Index] = BuildUnmatched(r.Item));
 
 		var resolvable = indexed.Except(unresolvable).ToList();
-		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], settings.WatchlistProvider.AsMediaProvider(), BuildHints(x.Item)));
+		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], settings.Sink.AsMediaProvider(), BuildHints(x.Item)));
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
 		await foreach (var (identity, entry) in pipeline.ZipAwait(resolvable, cancellationToken))

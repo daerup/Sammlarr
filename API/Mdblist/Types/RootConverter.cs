@@ -11,14 +11,14 @@ internal sealed class RootConverter : JsonConverter<MdblistTypes.ListItems.Root>
 	public override MdblistTypes.ListItems.Root Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
 		using var doc = JsonDocument.ParseValue(ref reader);
-		var (movies, movieUnknowns) = SplitSection<MdblistTypes.ListItems.Movie>(doc.RootElement, "movies", MediaType.Movie, options);
-		var (shows, showUnknowns) = SplitSection<MdblistTypes.ListItems.Show>(doc.RootElement, "shows", MediaType.Show, options);
-		return new MdblistTypes.ListItems.Root(movies, shows, [.. movieUnknowns, .. showUnknowns]);
+		var (movies, movieUnmatched) = SplitSection<MdblistTypes.ListItems.Movie>(doc.RootElement, "movies", MediaType.Movie, options);
+		var (shows, showUnmatched) = SplitSection<MdblistTypes.ListItems.Show>(doc.RootElement, "shows", MediaType.Show, options);
+		return new MdblistTypes.ListItems.Root(movies, shows, [.. movieUnmatched, .. showUnmatched]);
 	}
 
 	public override void Write(Utf8JsonWriter writer, MdblistTypes.ListItems.Root value, JsonSerializerOptions options) => throw new NotSupportedException();
 
-	private static (IReadOnlyList<T> Strict, IReadOnlyList<MdblistTypes.ListItems.UnknownListItem> Unknown) SplitSection<T>(
+	private static (IReadOnlyList<T> Strict, IReadOnlyList<MdblistTypes.ListItems.UnmatchedListItem> Unmatched) SplitSection<T>(
 		JsonElement root,
 		string propertyName,
 		MediaType mediaType,
@@ -30,7 +30,7 @@ internal sealed class RootConverter : JsonConverter<MdblistTypes.ListItems.Root>
 			return ([], []);
 		}
 		var strict = new List<T>(section.GetArrayLength());
-		var unknown = new List<MdblistTypes.ListItems.UnknownListItem>();
+		var unmatched = new List<MdblistTypes.ListItems.UnmatchedListItem>();
 		foreach (var element in section.EnumerateArray())
 		{
 			if (TryStrict<T>(element, options) is { } parsed)
@@ -39,10 +39,10 @@ internal sealed class RootConverter : JsonConverter<MdblistTypes.ListItems.Root>
 			}
 			else
 			{
-				unknown.Add(BuildUnknown(element, mediaType, options));
+				unmatched.Add(BuildUnmatched(element, mediaType, options));
 			}
 		}
-		return (strict, unknown);
+		return (strict, unmatched);
 	}
 
 	private static T? TryStrict<T>(JsonElement element, JsonSerializerOptions options)
@@ -62,12 +62,12 @@ internal sealed class RootConverter : JsonConverter<MdblistTypes.ListItems.Root>
 		}
 	}
 
-	private static MdblistTypes.ListItems.UnknownListItem BuildUnknown(JsonElement element, MediaType mediaType, JsonSerializerOptions options)
+	private static MdblistTypes.ListItems.UnmatchedListItem BuildUnmatched(JsonElement element, MediaType mediaType, JsonSerializerOptions options)
 	{
 		var ids = element.TryGetProperty("ids", out var idsElement) ? TryDeserializeIds(idsElement, options) ?? EmptyIds : EmptyIds;
 		var title = element.TryGetProperty("title", out var t) && t.ValueKind == JsonValueKind.String ? t.GetString() ?? string.Empty : string.Empty;
 		var year = element.TryGetProperty("release_year", out var y) && y.ValueKind == JsonValueKind.Number && y.TryGetInt32(out var yr) ? yr : 0;
-		return new MdblistTypes.ListItems.UnknownListItem(mediaType, ids, title, year);
+		return new MdblistTypes.ListItems.UnmatchedListItem(mediaType, ids, title, year);
 	}
 
 	private static MdblistTypes.ListItems.Ids? TryDeserializeIds(JsonElement element, JsonSerializerOptions options)

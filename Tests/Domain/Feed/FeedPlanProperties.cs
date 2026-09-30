@@ -21,7 +21,7 @@ public class FeedPlanProperties
 			Gen.Bool,
 			Gen.Bool,
 			Gen.Int[0, Threshold + 1],
-			(outcome, owned, inWatchlist, inBlacklist, inSource, absences) => (outcome, owned, inWatchlist, inBlacklist, inSource, absences)
+			(outcome, owned, inWantlist, inBlocklist, inSource, absences) => (outcome, owned, inWantlist, inBlocklist, inSource, absences)
 		)
 		.Array[0, 6]
 		.SelectMany(situations =>
@@ -29,7 +29,7 @@ public class FeedPlanProperties
 				Gen.OneOfConst<FeedStrategy>(new Append(), new Mirror(Threshold), new Mirror(Threshold)),
 				Gen.OneOfConst(Completeness.Complete, Completeness.Complete, Completeness.Complete, Completeness.Partial),
 				Gen.Int[0, 3],
-				(strategy, completeness, unresolved) => Build(situations, strategy, completeness, unresolved)
+				(strategy, completeness, unmatched) => Build(situations, strategy, completeness, unmatched)
 			)
 		);
 
@@ -80,10 +80,10 @@ public class FeedPlanProperties
 		);
 
 	private static Scenario Build(
-		(QueryOutcome Outcome, bool Owned, bool InWatchlist, bool InBlacklist, bool InSource, int Absences)[] situations,
+		(QueryOutcome Outcome, bool Owned, bool InWantlist, bool InBlocklist, bool InSource, int Absences)[] situations,
 		FeedStrategy strategy,
 		Completeness completeness,
-		int unresolvedCount
+		int unmatchedCount
 	)
 	{
 		var verdicts = new List<QueryVerdict<MediaLookup>>();
@@ -93,7 +93,7 @@ public class FeedPlanProperties
 		for (var index = 0; index < situations.Length; index++)
 		{
 			var id = MediaId.From(new Guid(index + 1, 0, 0, new byte[8]));
-			var (outcome, isOwned, inWatchlist, inBlacklist, inSource, absenceCount) = situations[index];
+			var (outcome, isOwned, inWantlist, inBlocklist, inSource, absenceCount) = situations[index];
 
 			if (isOwned)
 			{
@@ -105,20 +105,20 @@ public class FeedPlanProperties
 			{
 				var enrollment = new Enrollment
 				{
-					InWatchlist = inWatchlist,
-					InBlacklist = inBlacklist,
+					InWantlist = inWantlist,
+					InBlocklist = inBlocklist,
 					Owned = isOwned,
 				};
 				verdicts.Add(new QueryVerdict<MediaLookup>(Row(id), outcome, enrollment, ConsumesSlot: true));
 			}
 		}
 
-		var unresolved = Enumerable
-			.Range(0, unresolvedCount)
+		var unmatched = Enumerable
+			.Range(0, unmatchedCount)
 			.Select(index => new UnmatchedMedia { Externals = [TmdbId.From($"unmatched-{index}", MediaType.Movie)] })
 			.ToList();
 
-		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unresolved, completeness), owned, absences, strategy), owned, strategy, absences);
+		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatched, completeness), owned, absences, strategy), owned, strategy, absences);
 	}
 
 	private static MediaLookup Row(MediaId id) =>

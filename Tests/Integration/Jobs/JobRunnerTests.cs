@@ -4,7 +4,7 @@ using Core.Jobs;
 using DB.Data.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,8 +47,8 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task RunNextAsync_RunsAQueuedJob_AndMarksItDone()
 	{
-		await host.RemoteWatchlistEmpty();
-		var queued = await Assert.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ManualTrigger()))).IsOfUnionType<EnqueueResult, Queued>();
+		await host.RemoteWantlistEmpty();
+		var queued = await Assert.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()))).IsOfUnionType<EnqueueResult, Queued>();
 		PastTheGrace();
 
 		await Assert.That(await Testee.TryRunNextAsync(CancellationToken.None)).IsTrue();
@@ -62,7 +62,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 		var armedAt = host.Resolve<IDateTimeProvider>().Now;
 
 		var queued = await Assert
-			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger())))
+			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger())))
 			.IsOfUnionType<EnqueueResult, Queued>();
 
 		await Assert.That(await StateOfAsync(queued!.Id)).IsEqualTo(JobState.Waiting);
@@ -74,31 +74,31 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task EnqueueAsync_ForTwoScheduledRuns_StillLeavesOneWaitingSyncRatherThanTwo()
 	{
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
+		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
-		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WatchlistSync]);
+		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WantlistSync]);
 	}
 
 	[Test]
 	public async Task EnqueueAsync_WhenAManualSyncLandsOnAWaitingOne_PullsItForwardToQueuedInsteadOfAddingASecond()
 	{
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
 		var pressed = await Assert
-			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ManualTrigger())))
+			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger())))
 			.IsOfUnionType<EnqueueResult, AlreadyQueued>();
 
 		await Assert.That(await StateOfAsync(pressed!.Id)).IsEqualTo(JobState.Queued);
-		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WatchlistSync]);
+		await Assert.That(await KindsAsync()).IsEquivalentTo([JobKind.WantlistSync]);
 	}
 
 	[Test]
 	public async Task ReleaseDueAsync_OnceTheGraceHasPassed_MakesTheWaitingSyncTakeableAndItRunsToDone()
 	{
-		await host.RemoteWatchlistEmpty();
+		await host.RemoteWantlistEmpty();
 		var queued = await Assert
-			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger())))
+			.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger())))
 			.IsOfUnionType<EnqueueResult, Queued>();
 		PastTheGrace();
 
@@ -111,8 +111,8 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task RequeueRunningAsync_PutsAJobAPreviousProcessLeftRunningBackInTheQueue()
 	{
-		await host.RemoteWatchlistEmpty();
-		var queued = await Assert.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ManualTrigger()))).IsOfUnionType<EnqueueResult, Queued>();
+		await host.RemoteWantlistEmpty();
+		var queued = await Assert.That(await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ManualTrigger()))).IsOfUnionType<EnqueueResult, Queued>();
 		PastTheGrace();
 		await Assert.That(await host.Resolve<IJobRepository>().TakeNextAsync(host.Resolve<IDateTimeProvider>().Now)).IsSome();
 
@@ -128,7 +128,7 @@ public class JobRunnerTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.TryRunNextAsync(CancellationToken.None);
 
-		await Assert.That(await KindsAsync()).DoesNotContain(JobKind.WatchlistSync);
+		await Assert.That(await KindsAsync()).DoesNotContain(JobKind.WantlistSync);
 	}
 
 	private async Task<IReadOnlyList<JobKind>> KindsAsync()

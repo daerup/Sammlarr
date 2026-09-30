@@ -1,13 +1,13 @@
 @page "/"
 @implements IDisposable
 @using Contracts.Announcing
-@using Contracts.Blacklist
+@using Contracts.Blocklist
 @using Contracts.Feed
 @using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Settings
-@using Contracts.Watchlist
-@using Contracts.Watchlist.Outbox
+@using Contracts.Wantlist
+@using Contracts.Wantlist.Outbox
 @using Domain.Announcing
 @using Domain.Feed
 @using Domain.Feed.Run
@@ -17,15 +17,15 @@
 @using UI.Features.Home.Components
 @using UI.Shared.Announcing
 @using Domain.Jobs
-@using Domain.Watchlist.Sync
-@using UI.Features.Watchlist.Components
+@using Domain.Wantlist.Sync
+@using UI.Features.Wantlist.Components
 @using UI.Shared.Services.Branding
 @using Contracts.Jobs
 @inject IFeedService FeedService
 @inject IMediaService MediaService
-@inject IWatchlistService WatchlistService
-@inject IBlacklistService BlacklistService
-@inject IWatchlistOutbox Outbox
+@inject IWantlistService WantlistService
+@inject IBlocklistService BlocklistService
+@inject IWantlistOutbox Outbox
 @inject IProviderConfigService ProviderConfigService
 @inject IEventPublisher Events
 @inject ICurrentUser CurrentUser
@@ -50,22 +50,22 @@ else
 
 <PageContainer Heading="Your library" Fill="true">
     <DescriptionContent>
-        @if (_watchlistCount == 0)
+        @if (_wantlistCount == 0)
         {
-            <span>The local watchlist Sammlarr keeps in sync with your feeds.</span>
+            <span>The local wantlist Sammlarr keeps in sync with your feeds.</span>
         }
         else
         {
-            <AppLink Href="/watchlist" Arrow="false">@_watchlistCount.ToString("N0")</AppLink>
+            <AppLink Href="/wantlist" Arrow="false">@_wantlistCount.ToString("N0")</AppLink>
 
-            <span> titles on your watchlist, assembled by</span>
+            <span> titles on your wantlist, assembled by</span>
             <AppLink Href="/feeds" Arrow="false">@_feeds.Count.ToString("N0")</AppLink>
             <span>@(_feeds.Count == 1 ? "feed" : "feeds"). </span>
 
-            @if (_blacklistCount > 0)
+            @if (_blocklistCount > 0)
             {
-                <AppLink Href="/blacklist" Arrow="false">@_blacklistCount.ToString("N0")</AppLink>
-                <span>blacklisted.</span>
+                <AppLink Href="/blocklist" Arrow="false">@_blocklistCount.ToString("N0")</AppLink>
+                <span>blocklisted.</span>
             }
         }
     </DescriptionContent>
@@ -81,8 +81,8 @@ else
                 }
                 <ProtectedComponent GuardState="IsConnected"
                                     AuthProvider="@_settings.AuthProvider"
-                                    DeniedActionDescription="sync your watchlist">
-                    <WatchlistSyncButton @ref="_syncControl"
+                                    DeniedActionDescription="sync your wantlist">
+                    <WantlistSyncButton @ref="_syncControl"
                                          OnSynced="SyncFinishedAsync"
                                          OnStatusRefresh="LoadOutboxAsync"
                                          OnSyncStarted="StartSync"
@@ -105,12 +105,12 @@ else
             else if (_days.Count == 0 && _feeds.Count == 0)
             {
                 <MediaListEmptyState Icon="rss" Heading="Nothing has happened yet.">
-                    Sammlarr fills your watchlist from feeds, and every run shows up here with what it added and why.
+                    Sammlarr fills your wantlist from feeds, and every run shows up here with what it added and why.
                 </MediaListEmptyState>
             }
             else
             {
-                <LibrarySourcesPanel Sources="_sources" Total="_watchlistCount"/>
+                <LibrarySourcesPanel Sources="_sources" Total="_wantlistCount"/>
                 <UpNextPanel Queued="_queued" Scheduled="_scheduled" OnCancel="CancelJobAsync"/>
 
                 <div class="home-sec">
@@ -162,8 +162,8 @@ else
     private IReadOnlyList<SourceShare> _sources = [];
     private IReadOnlyList<RunCandidate> _candidates = [];
     private IReadOnlyList<Feed> _feeds = [];
-    private IReadOnlyList<WatchlistOutboxEntry> _outbox = [];
-    private WatchlistSyncButton? _syncControl;
+    private IReadOnlyList<WantlistOutboxEntry> _outbox = [];
+    private WantlistSyncButton? _syncControl;
     private bool _isConnected;
     private bool _isRunOpen;
     private bool _syncing;
@@ -172,8 +172,8 @@ else
     private UserId? _userId;
     private DateTimeOffset _now = DateTimeOffset.Now;
     private DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
-    private int _watchlistCount;
-    private int _blacklistCount;
+    private int _wantlistCount;
+    private int _blocklistCount;
     private bool _isLoading = true;
     private bool _isSignedIn;
     private bool _isSheetOpen;
@@ -184,11 +184,11 @@ else
 
     private IReadOnlyDictionary<FeedId, MediaProvider> FeedBrands() => _feeds.ToDictionary(feed => feed.Id, feed => feed.Provider.AsMediaProvider());
 
-    private MediaProvider WatchlistProvider => _settings?.WatchlistProvider.AsMediaProvider() ?? MediaProvider.Plex;
+    private MediaProvider Sink => _settings?.Sink.AsMediaProvider() ?? MediaProvider.Plex;
 
     private bool IsConnected() => _isConnected;
 
-    private string? BrandColor => _settings is null ? null : BrandingService.GetBrandingInfo(_settings.WatchlistProvider.AsMediaProvider()).BrandColor;
+    private string? BrandColor => _settings is null ? null : BrandingService.GetBrandingInfo(_settings.Sink.AsMediaProvider()).BrandColor;
 
     private void StartSync()
     {
@@ -249,7 +249,7 @@ else
         }
     }
 
-    private string ProviderName => _settings is null ? "your watchlist provider" : _settings.WatchlistProvider.GetDescription();
+    private string ProviderName => _settings is null ? "your media service" : _settings.Sink.GetDescription();
 
     protected override async Task OnInitializedAsync()
     {
@@ -285,8 +285,8 @@ else
         _feeds = [];
         _outbox = [];
         _media.Clear();
-        _watchlistCount = 0;
-        _blacklistCount = 0;
+        _wantlistCount = 0;
+        _blocklistCount = 0;
         _selected = null;
         _isSheetOpen = false;
         _isRunOpen = false;
@@ -308,19 +308,19 @@ else
         {
             _feeds = await FeedService.GetFeedsAsync(_cancellation.Token);
             var runs = await FeedService.GetRecentRunsAsync(_now - ActivityWindow, RunCap, _cancellation.Token);
-            var owned = await WatchlistService.GetOwnedCountsAsync(_cancellation.Token);
-            var watchlisted = await WatchlistService.GetWatchlistIdsAsync(_cancellation.Token);
-            var blacklisted = await BlacklistService.GetBlacklistIdsAsync(_cancellation.Token);
+            var owned = await WantlistService.GetOwnedCountsAsync(_cancellation.Token);
+            var wantlisted = await WantlistService.GetWantlistIdsAsync(_cancellation.Token);
+            var blocklisted = await BlocklistService.GetBlocklistIdsAsync(_cancellation.Token);
             var overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
             _outbox = await Outbox.GetAsync(_cancellation.Token);
             var queue = await JobQueueView.GetAsync(_cancellation.Token);
 
             var names = FeedNames();
             var brands = FeedBrands();
-            _watchlistCount = watchlisted.Count;
-            _blacklistCount = blacklisted.Count;
-            _sources = LibraryView.Sources(owned, names, _watchlistCount);
-            _queued = UpNextView.InTheQueue(queue, names, brands, WatchlistProvider);
+            _wantlistCount = wantlisted.Count;
+            _blocklistCount = blocklisted.Count;
+            _sources = LibraryView.Sources(owned, names, _wantlistCount);
+            _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
             _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);
             _candidates = RunPlan.Candidates(_feeds, overviews, _now, TimeZoneInfo.Local);
@@ -386,7 +386,7 @@ else
         try
         {
             var snapshot = await JobQueueView.GetAsync(_cancellation.Token);
-            _queued = UpNextView.InTheQueue(snapshot, FeedNames(), FeedBrands(), WatchlistProvider);
+            _queued = UpNextView.InTheQueue(snapshot, FeedNames(), FeedBrands(), Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(snapshot);
         }
         catch (OperationCanceledException)

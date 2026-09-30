@@ -97,7 +97,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Bypassed = 2,
 					Filtered = 12,
 					Skipped = 4,
-					Unresolved = 2,
+					Unmatched = 2,
 					Removed = 1,
 				},
 				Items = [Item(Held, FeedRunItemState.Kept), Item(Missing, FeedRunItemState.Removed)],
@@ -226,7 +226,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Bypassed = 0,
 			Filtered = 0,
 			Skipped = 0,
-			Unresolved = 0,
+			Unmatched = 0,
 			Removed = removed,
 		};
 
@@ -248,7 +248,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 				Bypassed = 0,
 				Filtered = 0,
 				Skipped = 0,
-				Unresolved = 0,
+				Unmatched = 0,
 				Removed = 0,
 			},
 			Items = [.. kept.Select(id => Item(id, FeedRunItemState.Kept))],

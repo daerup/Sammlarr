@@ -10,8 +10,8 @@ public class UiInvariantTests
 	[Test]
 	public async Task CtrlK_WhenPressed_OpensSearch()
 	{
-		var page = await E2EApp.AdminAt(Routes.Blacklist);
-		await Expect(page.Heading("Blacklist")).ToBeVisibleAsync(Wait.Settle);
+		var page = await E2EApp.AdminAt(Routes.Blocklist);
+		await Expect(page.Heading("Blocklist")).ToBeVisibleAsync(Wait.Settle);
 		var search = page.Modal("Search");
 		await Expect(search).ToBeHiddenAsync();
 

@@ -12,7 +12,7 @@ internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbConte
 		var row = await ctx.ProviderSettings.SingleOrDefaultAsync(cancellationToken) ?? ProviderConfigRow.Default;
 		return new ProviderConfig
 		{
-			WatchlistProvider = row.WatchlistProvider,
+			Sink = row.Sink,
 			TrendingProvider = row.TrendingProvider,
 			SearchProvider = row.SearchProvider,
 			RatingProvider = row.RatingProvider,
@@ -30,7 +30,7 @@ internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbConte
 			ctx.ProviderSettings.Add(
 				new ProviderConfigRow
 				{
-					WatchlistProvider = config.WatchlistProvider,
+					Sink = config.Sink,
 					TrendingProvider = config.TrendingProvider,
 					SearchProvider = config.SearchProvider,
 					RatingProvider = config.RatingProvider,
@@ -41,7 +41,7 @@ internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbConte
 		}
 		else
 		{
-			row.WatchlistProvider = config.WatchlistProvider;
+			row.Sink = config.Sink;
 			row.TrendingProvider = config.TrendingProvider;
 			row.SearchProvider = config.SearchProvider;
 			row.RatingProvider = config.RatingProvider;

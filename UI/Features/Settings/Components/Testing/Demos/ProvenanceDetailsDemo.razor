@@ -1,11 +1,11 @@
-@using UI.Features.Watchlist.Components
+@using UI.Features.Wantlist.Components
 
-<DemoCard Title="Provenance details" Where="Watchlist detail sheet"
-          Note="ProvenanceDetails for a title a feed added and for one that came from the remote watchlist.">
+<DemoCard Title="Provenance details" Where="Wantlist detail sheet"
+          Note="ProvenanceDetails for a title a feed added and for one that came from the sink.">
     <div class="rounded-lg border p-3">
         <ProvenanceDetails Provenance="DemoProvenance.Feed" AddedAt="DemoProvenance.AddedAt" ItemId="DemoMedia.Movie.Id"/>
     </div>
     <div class="rounded-lg border p-3">
-        <ProvenanceDetails Provenance="DemoProvenance.Remote" AddedAt="DemoProvenance.AddedAt"/>
+        <ProvenanceDetails Provenance="DemoProvenance.Sink" AddedAt="DemoProvenance.AddedAt"/>
     </div>
 </DemoCard>

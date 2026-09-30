@@ -1,16 +1,16 @@
 using Contracts.Identity;
 using DB.Data.Access;
-using DB.Data.Blacklist;
+using DB.Data.Blocklist;
 using DB.Data.Feed;
 using DB.Data.Identity;
 using DB.Data.Media;
-using DB.Data.Watchlist;
-using DB.Data.Watchlist.Outbox;
+using DB.Data.Wantlist;
+using DB.Data.Wantlist.Outbox;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 
@@ -92,9 +92,9 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 					Identifier = "victim-feed",
 				}
 			);
-			seed.Watchlist.Add(new WatchlistRow { Media = media, Origin = WatchlistEntryOrigin.Manual });
-			seed.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = media, Action = WatchlistOperationAction.Add });
-			seed.Blacklist.Add(new BlacklistRow { Media = media });
+			seed.Wantlist.Add(new WantlistRow { Media = media, Origin = WantlistItemOrigin.Manual });
+			seed.WantlistOutbox.Add(new WantlistOutboxRow { Media = media, Action = WantlistOperationAction.Add });
+			seed.Blocklist.Add(new BlocklistRow { Media = media });
 			seed.ApiKeySettings.Add(new ApiKeyConfigRow { Provider = ApiKeyProvider.Tmdb, ApiKey = "victim-key" });
 			seed.Credentials.Add(
 				new CredentialRow
@@ -117,9 +117,9 @@ public class UserRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		await using var ctx = fixture.ContextFactory.CreateDbContext();
 		await Assert.That(await CountForAsync(ctx.Feeds, userId)).IsEqualTo(expected);
-		await Assert.That(await CountForAsync(ctx.Watchlist, userId)).IsEqualTo(expected);
-		await Assert.That(await CountForAsync(ctx.WatchlistOutbox, userId)).IsEqualTo(expected);
-		await Assert.That(await CountForAsync(ctx.Blacklist, userId)).IsEqualTo(expected);
+		await Assert.That(await CountForAsync(ctx.Wantlist, userId)).IsEqualTo(expected);
+		await Assert.That(await CountForAsync(ctx.WantlistOutbox, userId)).IsEqualTo(expected);
+		await Assert.That(await CountForAsync(ctx.Blocklist, userId)).IsEqualTo(expected);
 		await Assert.That(await CountForAsync(ctx.ApiKeySettings, userId)).IsEqualTo(expected);
 		await Assert.That(await CountForAsync(ctx.Credentials, userId)).IsEqualTo(expected);
 	}

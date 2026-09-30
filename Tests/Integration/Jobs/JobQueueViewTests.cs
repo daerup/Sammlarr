@@ -3,7 +3,7 @@ using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Harness;
 using TestInfrastructure;
 
@@ -31,12 +31,12 @@ public class JobQueueViewTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var armedAt = host.Resolve<IDateTimeProvider>().Now;
 		var feed = FeedId.From(Guid.NewGuid());
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 		await host.Resolve<IJobQueue>().EnqueueAsync(new RunFeed(feed, new Manual()));
 
 		var snapshot = await Testee.GetAsync();
 
-		await Assert.That(snapshot.Jobs.Select(job => job.Request.Kind)).IsEquivalentTo([JobKind.FeedRun, JobKind.WatchlistSync]);
+		await Assert.That(snapshot.Jobs.Select(job => job.Request.Kind)).IsEquivalentTo([JobKind.FeedRun, JobKind.WantlistSync]);
 		await Assert.That(snapshot.Jobs[0].RunAfter).IsEqualTo(armedAt);
 	}
 

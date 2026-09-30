@@ -10,11 +10,11 @@ public class NotificationEventCatalogTests
 	private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch;
 
 	[Test]
-	public async Task Catalog_ForTheWatchlistSyncEvent_IncludesIt()
+	public async Task Catalog_ForTheWantlistSyncEvent_IncludesIt()
 	{
 		var catalog = NotificationEventCatalog.Subscribable.Select(option => option.EventType).ToHashSet();
 
-		await Assert.That(catalog).Contains(new WatchlistSyncCompletedNotification(User, Now, [], [], [], [], []).Type);
+		await Assert.That(catalog).Contains(new WantlistSyncCompletedNotification(User, Now, [], [], [], [], []).Type);
 	}
 
 	[Test]
@@ -46,7 +46,7 @@ public class NotificationEventCatalogTests
 		var summary = NotificationEventCatalog.Summarise([
 			NotificationEventType.FeedRunFailed,
 			NotificationEventType.FeedRunCompleted,
-			NotificationEventType.WatchlistSyncFailed,
+			NotificationEventType.WantlistSyncFailed,
 		]);
 
 		await Assert.That(summary).IsEqualTo("3 events");
@@ -55,8 +55,8 @@ public class NotificationEventCatalogTests
 	[Test]
 	public async Task Spell_ListsEveryEvent_SoTheTooltipStillShowsWhatTheSummaryHides()
 	{
-		var spelled = NotificationEventCatalog.Spell([NotificationEventType.FeedRunFailed, NotificationEventType.WatchlistSyncCompleted]);
+		var spelled = NotificationEventCatalog.Spell([NotificationEventType.FeedRunFailed, NotificationEventType.WantlistSyncCompleted]);
 
-		await Assert.That(spelled).IsEqualTo("Feed run failed, Watchlist sync completed");
+		await Assert.That(spelled).IsEqualTo("Feed run failed, Wantlist sync completed");
 	}
 }

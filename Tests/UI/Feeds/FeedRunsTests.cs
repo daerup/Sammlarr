@@ -1,10 +1,10 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Settings;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -111,11 +111,11 @@ public class FeedRunsTests : BunitContext
 		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<IdentifiedMedia>>());
 		Services.AddSingleton(media.Object);
 
-		var watchlist = IWatchlistService.Mock();
-		watchlist.GetOwnedCountsAsync(Any()).Returns(new Dictionary<FeedId, int>());
-		Services.AddSingleton(watchlist.Object);
+		var wantlist = IWantlistService.Mock();
+		wantlist.GetOwnedCountsAsync(Any()).Returns(new Dictionary<FeedId, int>());
+		Services.AddSingleton(wantlist.Object);
 
-		Services.AddSingleton(IBlacklistService.Mock().Object);
+		Services.AddSingleton(IBlocklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigService.Mock().Object);
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton<MediaProviderBrandingService>();

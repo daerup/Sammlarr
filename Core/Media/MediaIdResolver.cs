@@ -8,18 +8,18 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExternalIdConverter> converters, ITypedMemoryCache<string, bool> unresolvedCache)
+internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExternalIdConverter> converters, ITypedMemoryCache<string, bool> unmatchedCache)
 {
-	private static readonly TimeSpan unresolvedTtl = TimeSpan.FromHours(1);
+	private static readonly TimeSpan unmatchedTtl = TimeSpan.FromHours(1);
 
 	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(ResolveRequest request, CancellationToken cancellationToken = default)
 	{
 		var candidates = request.Candidates;
 		var target = request.Target;
 		var hints = request.Hints;
-		var key = MediaUnresolvedCacheKey.Build(candidates, target);
+		var key = MediaUnmatchedCacheKey.Build(candidates, target);
 
-		if (unresolvedCache.TryGetValue(key, out _))
+		if (unmatchedCache.TryGetValue(key, out _))
 		{
 			return Error.From("Candidates were previously resolved as unmatched.");
 		}
@@ -37,6 +37,6 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 
 		return discovered
 			.Map(found => (IReadOnlyList<IExternalMediaId>)[.. candidates.Concat(found).Distinct()])
-			.ApplyError(_ => unresolvedCache.Set(key, true, unresolvedTtl));
+			.ApplyError(_ => unmatchedCache.Set(key, true, unmatchedTtl));
 	}
 }

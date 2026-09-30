@@ -43,7 +43,7 @@ public class LibraryViewTests
 	}
 
 	[Test]
-	public async Task Sources_OnAnEmptyWatchlist_ShowsNothingRatherThanZeroRows()
+	public async Task Sources_OnAnEmptyWantlist_ShowsNothingRatherThanZeroRows()
 	{
 		await Assert.That(LibraryView.Sources(new Dictionary<FeedId, int>(), Names, total: 0)).IsEmpty();
 	}

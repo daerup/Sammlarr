@@ -1,7 +1,7 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 
 namespace TestInfrastructure;
 

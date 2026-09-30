@@ -2,33 +2,33 @@
 @using UI.Features.Feeds.Pages.Editor
 
 <DemoCard Title="Media icons" Where="Tiles, search, detail sheet, preview"
-          Note="Every toggle and indicator a title can carry, each off then on. The provenance toggle shows no dot for a title added by hand and a brand dot for a feed or the remote watchlist (muted once the feed is deleted); right-click one for its details.">
+          Note="Every toggle and indicator a title can carry, each off then on. The provenance toggle shows no dot for a title added by hand and a brand dot for a feed or the sink (muted once the feed is deleted); right-click one for its details.">
     <BbTooltipProvider>
         <div class="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 text-xs text-muted-foreground">
-            <span>Watchlist</span>
+            <span>Wantlist</span>
             <div class="flex items-center gap-3">
-                <WatchlistToggleIcon Result="DemoMedia.Movie" IsToggled="false" IsToggling="false"/>
-                <WatchlistToggleIcon Result="DemoMedia.Movie" IsToggled="true" IsToggling="false"/>
-                <WatchlistToggleIcon Result="DemoMedia.Movie" IsToggled="false" IsToggling="true"/>
+                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="false" IsToggling="false"/>
+                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="true" IsToggling="false"/>
+                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="false" IsToggling="true"/>
             </div>
-            <span>Blacklist</span>
+            <span>Blocklist</span>
             <div class="flex items-center gap-3">
-                <BlacklistToggleIcon Result="DemoMedia.Movie" IsToggled="false" IsToggling="false"/>
-                <BlacklistToggleIcon Result="DemoMedia.Movie" IsToggled="true" IsToggling="false"/>
-                <PreviewBlacklistToggleIcon Result="DemoMedia.Movie" IsToggled="_previewBlacklisted" OnToggle="_ => _previewBlacklisted = !_previewBlacklisted"/>
+                <BlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="false" IsToggling="false"/>
+                <BlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="true" IsToggling="false"/>
+                <PreviewBlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="_previewBlocklisted" OnToggle="_ => _previewBlocklisted = !_previewBlocklisted"/>
             </div>
             <span>Provenance</span>
             <div class="flex items-center gap-3">
-                <WatchlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="false"/>
+                <WantlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="false"/>
                 @foreach (var provenance in Origins)
                 {
-                    <WatchlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="true" Entry="new WatchlistEntry(DemoMedia.Movie.Id, DemoProvenance.AddedAt, provenance)"/>
+                    <WantlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="true" Entry="new WantlistItem(DemoMedia.Movie.Id, DemoProvenance.AddedAt, provenance)"/>
                 }
             </div>
             <span>Indicator</span>
             <div class="flex items-center gap-3">
-                <WatchlistIndicatorIcon IsInWatchlist="false"/>
-                <WatchlistIndicatorIcon IsInWatchlist="true"/>
+                <WantlistIndicatorIcon IsInWantlist="false"/>
+                <WantlistIndicatorIcon IsInWantlist="true"/>
             </div>
             <span>Leaving</span>
             <div class="flex items-center gap-3">
@@ -39,13 +39,13 @@
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyList<WatchlistItemProvenance> Origins =
+    private static readonly IReadOnlyList<WantlistItemProvenance> Origins =
     [
         new ManualOrigin(ManualSource.Search),
         DemoProvenance.Feed,
-        DemoProvenance.Remote,
+        DemoProvenance.Sink,
         new OrphanedOrigin("Old feed"),
     ];
 
-    private bool _previewBlacklisted;
+    private bool _previewBlocklisted;
 }

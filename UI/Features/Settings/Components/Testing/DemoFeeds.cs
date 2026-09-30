@@ -36,7 +36,7 @@ internal static class DemoFeeds
 			Bypassed = 0,
 			Filtered = 1,
 			Skipped = 0,
-			Unresolved = 0,
+			Unmatched = 0,
 			Removed = 1,
 		},
 		[
@@ -50,7 +50,7 @@ internal static class DemoFeeds
 		SourceFailure = "The list could not be found (HTTP 404).",
 	};
 
-	public static readonly FeedRun GuardedRun = Run(MirrorFeed, Conclusiveness.NoMatches, FeedRunCounts.None with { Total = 20, Unresolved = 20 }, []);
+	public static readonly FeedRun GuardedRun = Run(MirrorFeed, Conclusiveness.NoMatches, FeedRunCounts.None with { Total = 20, Unmatched = 20 }, []);
 
 	public static readonly Feed DocumentariesFeed = Create(
 		"hdlists/latest-hd-documentary-movies-1980-to-today",

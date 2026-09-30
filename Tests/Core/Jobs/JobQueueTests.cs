@@ -7,7 +7,7 @@ using Domain.Announcing;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
@@ -36,9 +36,9 @@ public class JobQueueTests
 	{
 		var (testee, jobs, _) = BuildTestee();
 
-		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
-		jobs.EnqueueAsync(new QueuedJob(new SyncWatchlist(new ScheduledFeedTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Now, Any())
+		jobs.EnqueueAsync(new QueuedJob(new SyncWantlist(new ScheduledFeedTrigger()), TestCurrentUser.DefaultId, Now + Options.Grace, Options.MaxWait), Now, Any())
 			.WasCalled(Times.Once);
 	}
 
@@ -51,11 +51,11 @@ public class JobQueueTests
 		List<IEvent> seen = [];
 		events.Published += seen.Add;
 
-		await testee.EnqueueAsync(new SyncWatchlist(new ManualTrigger()));
+		await testee.EnqueueAsync(new SyncWantlist(new ManualTrigger()));
 
 		var announced = seen.OfType<JobStateChangedEvent>().Single();
 		await Assert.That(announced.State).IsEqualTo(JobState.Queued);
-		await Assert.That(announced.Kind).IsEqualTo(JobKind.WatchlistSync);
+		await Assert.That(announced.Kind).IsEqualTo(JobKind.WantlistSync);
 	}
 
 	[Test]
@@ -66,7 +66,7 @@ public class JobQueueTests
 		List<IEvent> seen = [];
 		events.Published += seen.Add;
 
-		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
 		await Assert.That(seen.OfType<JobStateChangedEvent>().Single().State).IsEqualTo(JobState.Queued);
 	}
@@ -77,7 +77,7 @@ public class JobQueueTests
 		var (testee, jobs, events) = BuildTestee();
 		var nightly = new RunFeed(FeedId.From(Guid.NewGuid()), Nightly);
 		jobs.QueuedAsync(Any<UserId>(), JobKind.FeedRun, Any()).Returns([nightly]);
-		jobs.QueueWaitingAsync(Any<UserId>(), JobKind.WatchlistSync, Any<DateTimeOffset>(), Any()).Returns(1);
+		jobs.QueueWaitingAsync(Any<UserId>(), JobKind.WantlistSync, Any<DateTimeOffset>(), Any()).Returns(1);
 		List<IEvent> seen = [];
 		events.Published += seen.Add;
 
@@ -85,7 +85,7 @@ public class JobQueueTests
 
 		await Assert
 			.That(seen.OfType<JobStateChangedEvent>().Select(announced => (announced.Kind, announced.State)))
-			.IsEquivalentTo([(JobKind.FeedRun, JobState.Queued), (JobKind.WatchlistSync, JobState.Queued)]);
+			.IsEquivalentTo([(JobKind.FeedRun, JobState.Queued), (JobKind.WantlistSync, JobState.Queued)]);
 	}
 
 	[Test]
@@ -104,11 +104,11 @@ public class JobQueueTests
 		var (testee, jobs, events) = BuildTestee();
 		jobs.EnqueueAsync(Any<QueuedJob>(), Any<DateTimeOffset>(), Any()).Returns(new Queued(JobId.From(Guid.NewGuid()), JobState.Waiting));
 		jobs.QueuedAsync(Any<UserId>(), JobKind.FeedRun, Any()).Returns([new RunFeed(FeedId.From(Guid.NewGuid()), Nightly)]);
-		jobs.QueueWaitingAsync(Any<UserId>(), JobKind.WatchlistSync, Any<DateTimeOffset>(), Any()).Returns(1);
+		jobs.QueueWaitingAsync(Any<UserId>(), JobKind.WantlistSync, Any<DateTimeOffset>(), Any()).Returns(1);
 		List<IEvent> seen = [];
 		events.Published += seen.Add;
 
-		var result = await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		var result = await testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
 		var queued = await Assert.That(result).IsOfUnionType<EnqueueResult, Queued>();
 		await Assert.That(queued.State).IsEqualTo(JobState.Queued);
@@ -121,7 +121,7 @@ public class JobQueueTests
 		var (testee, jobs, _) = BuildTestee();
 		jobs.QueuedAsync(Any<UserId>(), JobKind.FeedRun, Any()).Returns([new RunFeed(FeedId.From(Guid.NewGuid()), new Manual())]);
 
-		await testee.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await testee.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
 		jobs.QueueWaitingAsync(Any<UserId>(), Any<JobKind>(), Any<DateTimeOffset>(), Any()).WasCalled(Times.Never);
 	}

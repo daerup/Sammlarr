@@ -2,7 +2,7 @@
 == Runtime View
 
 Four scenarios: resolving a title (the one the others build on), feed preview, a feed run through
-the job queue, and watchlist sync/push. Each runs across the layers through `Contracts`, with
+the job queue, and wantlist sync/push. Each runs across the layers through `Contracts`, with
 providers resolved by keyed DI.
 
 === Resolving a title
@@ -42,13 +42,13 @@ stale title runs the two phases.
 
 One `IExternalIdConverter`, chosen by the target provider, resolves the ids. The TMDB, IMDb and
 TheTVDB targets just pass ids through; the Plex target does the work, since an MDBList or TMDB
-reference has no Plex id and the watchlist can only push a Plex id.
+reference has no Plex id and the wantlist can only push a Plex id.
 
 [mermaid]
 ....
 sequenceDiagram
   participant MS as IMediaService
-  participant NC as Unresolved cache
+  participant NC as Unmatched cache
   participant IC as Plex converter
   participant PX as Plex
 
@@ -69,7 +69,7 @@ sequenceDiagram
   alt a hit matched
     IC-->>MS: canonical identity
   else nothing matched
-    IC-->>MS: unresolved
+    IC-->>MS: unmatched
     MS->>NC: cache unmatched (1h)
   end
 ....
@@ -85,7 +85,7 @@ library ids.
 
 Metadata comes from the search provider first (Plex), then an enricher chain (TMDB) until the
 record is complete, then ratings (TMDB); writes are batched write-behind (one identity + one
-metadata upsert per run). Two failure behaviours matter: an unresolved candidate becomes
+metadata upsert per run). Two failure behaviours matter: an unmatched candidate becomes
 `UnmatchedMedia` (surfaced, never persisted); and when a provider is down or rate-limiting the id
 is cached unmatched for the hour, which is why a Plex 429 storm reports existing titles as "not
 found" (see <<section-technical-risks>>).
@@ -104,7 +104,7 @@ sequenceDiagram
   participant M as MDBList
   participant R as IMediaService (+ cache, DB)
   participant E as IFeedRunPlanner
-  participant W as Watchlist + blacklist
+  participant W as Wantlist + blocklist
 
   U->>P: edit feed, preview
   P->>F: GetFeedItemsAsync, keyed by FeedProvider
@@ -117,11 +117,11 @@ sequenceDiagram
   end
   loop as items arrive, then once more when settled
     P->>E: PlanAsync(DraftFeed(feed, RawFeedLoad(items so far, Partial or Complete)))
-    E->>W: watchlist ids, blacklist ids, this feed's own slice
+    E->>W: wantlist ids, blocklist ids, this feed's own slice
     E->>E: classify each row, then FeedPlans.Compute
     E-->>P: FeedPlanResult (an AppendPlan or MirrorPlan, or FeedPlanFailed)
   end
-  P-->>U: tiles, stat badges, unresolved list
+  P-->>U: tiles, stat badges, unmatched list
 ....
 
 `IFeedService` is resolved by the feed's `FeedProvider` key. Each entry is resolved to a
@@ -144,7 +144,7 @@ against a half-loaded list cannot propose deleting the part that never arrived.
 
 === Feed runs and the job queue
 
-A run applies what the preview showed. Feed runs and watchlist syncs never execute where they are
+A run applies what the preview showed. Feed runs and wantlist syncs never execute where they are
 requested: every request becomes a row in the `Jobs` table, and one runner works through the rows
 one at a time.
 
@@ -157,14 +157,14 @@ sequenceDiagram
   participant J as Jobs table
   participant R as JobRunner
   participant E as FeedRunEngine
-  participant W as IWatchlistService
-  participant SE as WatchlistSyncEngine
+  participant W as IWantlistService
+  participant SE as WantlistSyncEngine
 
   T->>Q: cron fires: RunFeed(feed, Scheduled), as the feed's owner
   U->>Q: RunFeed(feed, Manual)
   Q->>J: insert, or fold into the feed's pending row
   R->>J: take the oldest Queued row, mark Running
-  R->>Q: a scheduled run starts: SyncWatchlist(ScheduledFeedTrigger)
+  R->>Q: a scheduled run starts: SyncWantlist(ScheduledFeedTrigger)
   Q->>J: one Waiting sync per owner, due after the grace period
   R->>E: dispatch in a fresh scope, as the job's owner
   E->>E: plan (the same planner as the preview)
@@ -209,7 +209,7 @@ does what a preview taken at that moment would show. Mirror removals follow the 
 conclusive and drops nothing, and an item is only removed after it has been missing for the
 feed's absence threshold of conclusive runs.
 
-=== Watchlist sync and push to Plex
+=== Wantlist sync and push to Plex
 
 Adding a title and pushing it to Plex are two separate steps. An add writes the local row and
 queues the change in the outbox; the push happens inside the next sync, which drains the outbox
@@ -219,25 +219,25 @@ inline. A change that fails stays in the outbox and is retried by the sync after
 ....
 sequenceDiagram
   actor U as User
-  participant W as UI (Watchlist / Browse)
-  participant S as IWatchlistService
-  participant DB as DB (watchlist + outbox)
-  participant SE as WatchlistSyncEngine (a job)
-  participant PX as IWatchlistProvider (Plex)
+  participant W as UI (Wantlist / Browse)
+  participant S as IWantlistService
+  participant DB as DB (wantlist + outbox)
+  participant SE as WantlistSyncEngine (a job)
+  participant PX as IMediaSink (Plex)
   participant Plex as Plex
 
   Note over U,DB: Add: local only, no Plex call
   U->>W: add title
-  W->>S: AddToWatchlistAsync(ids, origin)
-  S->>DB: insert watchlist row + outbox row (Pending)
+  W->>S: AddToWantlistAsync(ids, origin)
+  S->>DB: insert wantlist row + outbox row (Pending)
   S-->>W: item shows a Pending push dot
 
   Note over U,Plex: Sync: pull, then push pending changes
-  SE->>PX: read the remote watchlist
+  SE->>PX: read the Plex watchlist
   SE->>DB: apply remote adds and removes
   SE->>DB: read Pending outbox rows, grouped by add / remove
   SE->>PX: push each group as one batch
-  PX->>Plex: PUT / DELETE watchlist
+  PX->>Plex: PUT / DELETE wantlist
   Plex-->>PX: ack per item
   alt acked
     SE->>DB: drop outbox row

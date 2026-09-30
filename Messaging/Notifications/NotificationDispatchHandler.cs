@@ -11,7 +11,7 @@ namespace Messaging.Notifications;
 public static class NotificationDispatchHandler
 {
 	public static Task<OutgoingMessages> Handle(
-		WatchlistSyncCompletedNotification message,
+		WantlistSyncCompletedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,
@@ -20,7 +20,7 @@ public static class NotificationDispatchHandler
 	) => FanOutAsync(message, userScope, subscriptions, mediaRepository, feedService, cancellationToken);
 
 	public static Task<OutgoingMessages> Handle(
-		WatchlistSyncFailedNotification message,
+		WantlistSyncFailedNotification message,
 		IUserScope userScope,
 		INotificationSubscriptionRepository subscriptions,
 		IMediaRepository mediaRepository,

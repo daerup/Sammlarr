@@ -10,9 +10,9 @@ namespace UI.Tests.Media;
 
 public class BulkActionBarTests : BunitContext
 {
-	private static readonly Func<int, BulkConfirm> Confirm = count => new($"Remove {count} titles from your blacklist?", "Body.");
+	private static readonly Func<int, BulkConfirm> Confirm = count => new($"Remove {count} titles from your blocklist?", "Body.");
 
-	private static readonly Func<int, BulkConfirm> MarkCopy = count => new($"Watchlist {count} titles?", "They stay blacklisted.");
+	private static readonly Func<int, BulkConfirm> MarkCopy = count => new($"Wantlist {count} titles?", "They stay blocklisted.");
 
 	[Before(Test)]
 	public void Setup()
@@ -31,7 +31,7 @@ public class BulkActionBarTests : BunitContext
 		await ClickRemove(cut);
 
 		await Assert.That(removed).IsFalse();
-		await Assert.That(cut.Markup).Contains("Remove 7 titles from your blacklist?");
+		await Assert.That(cut.Markup).Contains("Remove 7 titles from your blocklist?");
 	}
 
 	[Test]
@@ -78,7 +78,7 @@ public class BulkActionBarTests : BunitContext
 		await cancel.ClickAsync();
 
 		await Assert.That(removed).IsFalse();
-		await Assert.That(cut.Markup).DoesNotContain("Remove 7 titles from your blacklist?");
+		await Assert.That(cut.Markup).DoesNotContain("Remove 7 titles from your blocklist?");
 	}
 
 	[Test]
@@ -99,7 +99,7 @@ public class BulkActionBarTests : BunitContext
 
 		await ClickRemove(cut);
 
-		await Assert.That(cut.Markup).Contains("Remove 2 titles from your blacklist?");
+		await Assert.That(cut.Markup).Contains("Remove 2 titles from your blocklist?");
 	}
 
 	[Test]
@@ -107,10 +107,10 @@ public class BulkActionBarTests : BunitContext
 	{
 		var cut = RenderBar(selected: 7, page: 7, list: 7, onRemove: () => { }, markable: 0);
 
-		var mark = cut.FindAll("button").First(button => button.TextContent.Trim() == "Watchlist");
+		var mark = cut.FindAll("button").First(button => button.TextContent.Trim() == "Wantlist");
 
 		await Assert.That(mark.HasAttribute("disabled")).IsTrue();
-		await Assert.That(cut.Markup).Contains("Every selected title is already on your watchlist.");
+		await Assert.That(cut.Markup).Contains("Every selected title is already on your wantlist.");
 	}
 
 	[Test]
@@ -118,10 +118,10 @@ public class BulkActionBarTests : BunitContext
 	{
 		var cut = RenderBar(selected: 7, page: 7, list: 7, onRemove: () => { }, markable: 1);
 
-		await cut.FindAll("button").First(button => button.TextContent.Trim() == "Watchlist").ClickAsync();
+		await cut.FindAll("button").First(button => button.TextContent.Trim() == "Wantlist").ClickAsync();
 
-		await Assert.That(cut.Markup).Contains("Watchlist 1");
-		await Assert.That(cut.Markup).DoesNotContain("Watchlist 7 title");
+		await Assert.That(cut.Markup).Contains("Wantlist 1");
+		await Assert.That(cut.Markup).DoesNotContain("Wantlist 7 title");
 	}
 
 	private static Task ClickRemove(IRenderedComponent<Harness> cut) => cut.FindAll("button").First(button => button.TextContent.Trim() == "Remove").ClickAsync();
@@ -167,9 +167,9 @@ public class BulkActionBarTests : BunitContext
 			builder.AddAttribute(4, nameof(BulkActionBar.ListCount), ListCount);
 			builder.AddAttribute(5, nameof(BulkActionBar.OnRemove), OnRemove);
 			builder.AddAttribute(6, nameof(BulkActionBar.RemoveConfirm), Confirm);
-			builder.AddAttribute(7, nameof(BulkActionBar.MarkLabel), "Watchlist");
+			builder.AddAttribute(7, nameof(BulkActionBar.MarkLabel), "Wantlist");
 			builder.AddAttribute(8, nameof(BulkActionBar.MarkableCount), MarkableCount);
-			builder.AddAttribute(9, nameof(BulkActionBar.AlreadyMarkedHint), "Every selected title is already on your watchlist.");
+			builder.AddAttribute(9, nameof(BulkActionBar.AlreadyMarkedHint), "Every selected title is already on your wantlist.");
 			builder.AddAttribute(10, nameof(BulkActionBar.MarkConfirm), MarkCopy);
 			builder.AddAttribute(11, nameof(BulkActionBar.RemovableCount), RemovableCount);
 			builder.AddAttribute(12, nameof(BulkActionBar.AlreadyRemovedHint), "Every selected title is already pending removal.");

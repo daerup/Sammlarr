@@ -8,9 +8,9 @@ internal static class Routes
 
 	internal const string Browse = "/browse";
 
-	internal const string Watchlist = "/watchlist";
+	internal const string Wantlist = "/wantlist";
 
-	internal const string Blacklist = "/blacklist";
+	internal const string Blocklist = "/blocklist";
 
 	internal const string Feeds = "/feeds";
 

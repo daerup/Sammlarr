@@ -1,12 +1,12 @@
 <DemoCard Title="Services map" Where="Providers" Span="2"
           Note="ServicesMap: which provider does which job. TMDB is missing its key here, so the jobs that need it show as not ready.">
-    <ServicesMap Config="Config" Ready="Ready" CanPickWatchlist="true"/>
+    <ServicesMap Config="Config" Ready="Ready" CanPickSink="true"/>
 </DemoCard>
 
 @code {
     private static readonly ProviderConfig Config = new()
     {
-        WatchlistProvider = WatchlistProvider.Plex,
+        Sink = SinkKind.Plex,
         TrendingProvider = TrendingProvider.Tmdb,
         SearchProvider = SearchProvider.Plex,
         RatingProvider = RatingProvider.Tmdb,

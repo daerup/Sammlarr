@@ -25,8 +25,9 @@ is a keyed service, resolved by an enum key (`IFeedService` keyed `FeedProvider.
 
 Providers are declared, not hand-wired. Each `MediaProvider` value carries a `[Capabilities]`
 attribute; Roslyn source generators emit the provider-subset enums (`FeedProvider`,
-`WatchlistProvider`, …) and their conversions from that matrix, plus the options-record
-registration. Adding a provider is a folder, an enum value and a module (recipe in
+`AuthProvider`, …) and their conversions from that matrix, plus the options-record
+registration. `SinkKind` is hand-written, because a sink can span providers (Radarr +
+Sonarr). Adding a provider is a folder, an enum value and a module (recipe in
 <<section-building-block-view>>).
 
 === HTTP resilience
@@ -72,7 +73,7 @@ the stored user on each request, so a removed user or a role change takes effect
 is enforced in persistence: a user-owned entity implements `IUserOwned`, `OnModelCreating` gives it
 a global query filter on a shadow `UserId`, and the current-user lookup throws when unauthenticated
 (fails closed). An ownership stamper sets the owner on insert and blocks it from changing. Feeds,
-watchlist, blacklist, notification targets and stored secrets are user-owned; `ProviderConfig` and
+wantlist, blocklist, notification targets and stored secrets are user-owned; `ProviderConfig` and
 the media catalogue are global. Background code (the job runner, the cron ticker function,
 Wolverine handlers) calls `IUserScope.AsAsync(owner)` so the same filters apply: every job and
 every scheduled feed carries its owner. Isolation tests are noted in
@@ -80,7 +81,7 @@ every scheduled feed carries its owner. Isolation tests are noted in
 
 === Background work and scheduling
 
-Background work that users start or schedule (feed runs and watchlist syncs) goes through one
+Background work that users start or schedule (feed runs and wantlist syncs) goes through one
 queue of record, the `Jobs` table (`IJobQueue`), and one hosted `JobRunner` that executes a row at
 a time in a fresh DI scope, as the row's owner. Running one job at a time is deliberate: it keeps
 SQLite to one writer and each provider to one caller. TickerQ holds the cron schedule and only
@@ -88,7 +89,7 @@ enqueues; enqueueing coalesces by kind, key and owner; a deferred row waits in `
 timer releases it. The walk-through is in <<section-runtime-view>>, the reasoning in
 link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0006-run-background-work-through-one-job-queue.md[ADR 0006].
 
-A push to Plex is a step of the sync, not a message: pending changes wait in the watchlist outbox
+A push to Plex is a step of the sync, not a message: pending changes wait in the wantlist outbox
 and the sync drains it inline, retrying a failed item on the next sync
 (link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0007-push-watchlist-changes-inline-during-sync.md[ADR 0007]).
 

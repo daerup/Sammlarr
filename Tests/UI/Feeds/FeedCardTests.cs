@@ -1,9 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
@@ -30,8 +30,8 @@ public class FeedCardTests : BunitContext
 		var media = IMediaService.Mock();
 		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<IdentifiedMedia>>());
 		Services.AddSingleton(media.Object);
-		Services.AddSingleton(IWatchlistService.Mock().Object);
-		Services.AddSingleton(IBlacklistService.Mock().Object);
+		Services.AddSingleton(IWantlistService.Mock().Object);
+		Services.AddSingleton(IBlocklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigService.Mock().Object);
 		Services.AddScoped<Notifier>();
 		Services.AddSingleton<MediaProviderBrandingService>();
@@ -59,16 +59,16 @@ public class FeedCardTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAFeedWithHistory_LinksItsCountsToTheWatchlistAndTheRunHistory()
+	public async Task Render_ForAFeedWithHistory_LinksItsCountsToTheWantlistAndTheRunHistory()
 	{
 		var cut = RenderCard(Row(owned: 1, runs: 79));
 
 		var links = cut.FindAll(".feed-stat-link a").Select(link => link.GetAttribute("href") ?? string.Empty).ToList();
-		await Assert.That(links).IsEquivalentTo([$"/watchlist?feed={UrlGuid.Encode(Comedy.Value)}", $"/feeds/{UrlGuid.Encode(Comedy.Value)}/runs"]);
+		await Assert.That(links).IsEquivalentTo([$"/wantlist?feed={UrlGuid.Encode(Comedy.Value)}", $"/feeds/{UrlGuid.Encode(Comedy.Value)}/runs"]);
 	}
 
 	[Test]
-	public async Task Render_WithNothingOnTheWatchlist_ShowsAPlainZeroRatherThanALink()
+	public async Task Render_WithNothingOnTheWantlist_ShowsAPlainZeroRatherThanALink()
 	{
 		var cut = RenderCard(Row(owned: 0, runs: 0));
 

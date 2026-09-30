@@ -123,7 +123,7 @@ public class MediaServiceOrderingTests
 	private static IMediaService CreateTestee(RequestBuilder builder)
 	{
 		var mediaRepo = IMediaRepository.Mock();
-		var unresolvedCache = ITypedMemoryCache<string, bool>.Mock();
+		var unmatchedCache = ITypedMemoryCache<string, bool>.Mock();
 
 		var externalToId = builder.Items.Where(i => i.Resolves).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 
@@ -145,8 +145,8 @@ public class MediaServiceOrderingTests
 
 		foreach (var item in builder.Items.Where(i => !i.Resolves))
 		{
-			var key = MediaUnresolvedCacheKey.Build([item.External], MediaProvider.Tmdb);
-			unresolvedCache.TryGetValue(Arg.Is<string>(k => k == key)).Returns(true).SetsOutValue(true);
+			var key = MediaUnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
+			unmatchedCache.TryGetValue(Arg.Is<string>(k => k == key)).Returns(true).SetsOutValue(true);
 		}
 
 		var dateTimeProvider = IDateTimeProvider.Mock();
@@ -160,7 +160,7 @@ public class MediaServiceOrderingTests
 			.Returns(
 				new ProviderConfig
 				{
-					WatchlistProvider = WatchlistProvider.Plex,
+					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
@@ -178,7 +178,7 @@ public class MediaServiceOrderingTests
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepository.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
-			new MediaIdResolver(null, unresolvedCache.Object),
+			new MediaIdResolver(null, unmatchedCache.Object),
 			metadataResolver,
 			coordinator,
 			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),

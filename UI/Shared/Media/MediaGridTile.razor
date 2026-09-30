@@ -2,7 +2,7 @@
 @using Contracts.Media.Artwork
 @inject IMediaService MediaService
 @inject ArtworkSources Artwork
-<div data-testid="media-tile" class="cursor-pointer group @(Media.IsUnresolved ? "tile-unresolved" : "")" @onclick="OnClick">
+<div data-testid="media-tile" class="cursor-pointer group @(Media.IsUnmatched ? "tile-unmatched" : "")" @onclick="OnClick">
     <div class="relative overflow-hidden rounded-lg media-card-backdrop @(Dimmed ? "media-card-dimmed" : "")">
         @if (_failed)
         {
@@ -16,17 +16,17 @@
             <div class="media-card-scrim"></div>
         }
 
-        @if (Media.IsUnresolved)
+        @if (Media.IsUnmatched)
         {
             <div class="absolute top-4 right-4 z-10">
                 <BbTooltipProvider>
                     <BbTooltip DelayDuration="200">
                         <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
-                            <div class="tile-unresolved-indicator">
+                            <div class="tile-unmatched-indicator">
                                 <LucideIcon Name="circle-alert" Size="24"/>
                             </div>
                         </BbTooltipTrigger>
-                        <BbTooltipContent>Could not be matched in your watchlist provider. This item can't be added to your watchlist.</BbTooltipContent>
+                        <BbTooltipContent>Could not be matched in your media service. This item can't be added to your wantlist.</BbTooltipContent>
                     </BbTooltip>
                 </BbTooltipProvider>
             </div>
@@ -37,7 +37,7 @@
                 <LucideIcon Name="bookmark"
                             Size="25"
                             Color="orange"
-                            Fill="@(IsInWatchlist ? "orange" : "transparent")"/>
+                            Fill="@(IsInWantlist ? "orange" : "transparent")"/>
             </div>
         }
 
@@ -80,7 +80,7 @@
     [Parameter] [EditorRequired] public required MediaLookup Media { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
     [Parameter] public bool ShowBookmark { get; set; }
-    [Parameter] public bool IsInWatchlist { get; set; }
+    [Parameter] public bool IsInWantlist { get; set; }
     [Parameter] public bool Dimmed { get; set; }
 
     private const string Sizes = "(min-width: 768px) calc(30vw - 40px), calc(120vw - 76px)";
@@ -120,7 +120,7 @@
         if (_isShowingPoster || string.IsNullOrWhiteSpace(Media.PosterUrl))
         {
             _failed = true;
-            if (!Media.IsUnresolved)
+            if (!Media.IsUnmatched)
             {
                 await MediaService.InvalidateAsync([Media.Id]);
             }

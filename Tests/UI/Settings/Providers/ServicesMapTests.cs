@@ -12,7 +12,7 @@ public class ServicesMapTests : BunitContext
 {
 	private static readonly ProviderConfig Config = new()
 	{
-		WatchlistProvider = WatchlistProvider.Plex,
+		Sink = SinkKind.Plex,
 		TrendingProvider = TrendingProvider.Tmdb,
 		SearchProvider = SearchProvider.Plex,
 		RatingProvider = RatingProvider.Tmdb,
@@ -64,7 +64,7 @@ public class ServicesMapTests : BunitContext
 	}
 
 	[Test]
-	public async Task Map_ForAnAdmin_OpensTheWatchlistPickerFromItsTarget()
+	public async Task Map_ForAnAdmin_OpensTheWantlistPickerFromItsTarget()
 	{
 		var cut = RenderMap(canPick: true);
 
@@ -84,6 +84,6 @@ public class ServicesMapTests : BunitContext
 
 	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready) =>
 		Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config).Add(map => map.Ready, (IReadOnlySet<MediaProvider>)ready.ToHashSet()).Add(map => map.CanPickWatchlist, canPick)
+			parameters.Add(map => map.Config, Config).Add(map => map.Ready, (IReadOnlySet<MediaProvider>)ready.ToHashSet()).Add(map => map.CanPickSink, canPick)
 		);
 }

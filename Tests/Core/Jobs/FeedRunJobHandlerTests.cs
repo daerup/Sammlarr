@@ -8,7 +8,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
 using Domain.Notifications;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
 
@@ -25,7 +25,7 @@ public class FeedRunJobHandlerTests
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), Nightly));
 
-		queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), Any()).WasCalled(Times.Once);
+		queue.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -35,7 +35,7 @@ public class FeedRunJobHandlerTests
 
 		await testee.HandleAsync(new RunFeed(FeedId.From(Guid.NewGuid()), new Manual(), SyncAfter: true));
 
-		queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), Any()).WasCalled(Times.Once);
+		queue.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]

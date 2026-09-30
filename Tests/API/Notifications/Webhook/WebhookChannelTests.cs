@@ -31,7 +31,7 @@ public class WebhookChannelTests
 		await Assert.That(Header(handler, "webhook-id")).IsEqualTo(context.Id.ToString());
 		await Assert.That(Header(handler, "webhook-timestamp")).IsEqualTo("1700000000");
 		await Assert.That(Header(handler, "webhook-signature")).IsEqualTo(ExpectedSignature(secret, context.Id.ToString(), "1700000000", handler.Body!));
-		await Assert.That(Encoding.UTF8.GetString(handler.Body!)).Contains("\"type\":\"WatchlistSyncCompleted\"");
+		await Assert.That(Encoding.UTF8.GetString(handler.Body!)).Contains("\"type\":\"WantlistSyncCompleted\"");
 	}
 
 	[Test]
@@ -40,10 +40,10 @@ public class WebhookChannelTests
 		var handler = new CapturingHandler(HttpStatusCode.OK);
 		var context = new NotificationContext(
 			Guid.NewGuid(),
-			NotificationEventType.WatchlistSyncCompleted,
+			NotificationEventType.WantlistSyncCompleted,
 			NotificationLevel.Success,
 			Now,
-			"Watchlist sync completed",
+			"Wantlist sync completed",
 			"Added 1 item(s).",
 			new NotificationData { Media = [new NotificationMedia("abc", "The Matrix", MediaType.Movie)] }
 		);
@@ -68,7 +68,7 @@ public class WebhookChannelTests
 				CancellationToken.None
 			);
 
-		await Assert.That(Encoding.UTF8.GetString(handler.Body!)).IsEqualTo("{\"t\":\"Watchlist sync completed\"}");
+		await Assert.That(Encoding.UTF8.GetString(handler.Body!)).IsEqualTo("{\"t\":\"Wantlist sync completed\"}");
 	}
 
 	[Test]
@@ -132,10 +132,10 @@ public class WebhookChannelTests
 	private static NotificationContext Context() =>
 		new(
 			Guid.NewGuid(),
-			NotificationEventType.WatchlistSyncCompleted,
+			NotificationEventType.WantlistSyncCompleted,
 			NotificationLevel.Success,
 			Now,
-			"Watchlist sync completed",
+			"Wantlist sync completed",
 			"Synced.",
 			new NotificationData()
 		);

@@ -17,9 +17,9 @@ public class NotificationTemplateVariablesTests
 	}
 
 	[Test]
-	public async Task Variables_ForAWatchlistSync_ShowMediaItemFieldsWithDescriptor()
+	public async Task Variables_ForAWantlistSync_ShowMediaItemFieldsWithDescriptor()
 	{
-		var tokens = Tokens(NotificationEventType.WatchlistSyncCompleted);
+		var tokens = Tokens(NotificationEventType.WantlistSyncCompleted);
 
 		await Assert.That(tokens).Contains("{{ item.title }}");
 		await Assert.That(tokens).Contains("{{ item.descriptor }}");
@@ -46,7 +46,7 @@ public class NotificationTemplateVariablesTests
 	[Test]
 	public async Task Variables_ForMultipleEvents_ShowTheUnionOfTheirs()
 	{
-		var tokens = Tokens(NotificationEventType.FeedRunFailed, NotificationEventType.WatchlistSyncCompleted);
+		var tokens = Tokens(NotificationEventType.FeedRunFailed, NotificationEventType.WantlistSyncCompleted);
 
 		await Assert.That(tokens).Contains("{{ data.reason }}");
 		await Assert.That(tokens).Contains("{{ item.title }}");

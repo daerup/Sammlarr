@@ -1,0 +1,82 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="provenance-details">
+    <span class="provenance-rail" style="@RailStyle"></span>
+    <div class="provenance-body">
+        <div class="provenance-head">
+            <span class="provenance-mark">
+                @if (ProvenanceView.Provider(Provenance) is { } provider)
+                {
+                    <ProviderLogo Provider="provider" Size="16" Decorative="true"/>
+                }
+                else
+                {
+                    <LucideIcon Name="@ProvenanceView.Icon(Provenance)" Size="14"/>
+                }
+            </span>
+            @if (ProvenanceView.EditUrl(Provenance) is { } editUrl)
+            {
+                <AppLink Href="@editUrl" Title="Open feed settings" Class="min-w-0">
+                    <span class="provenance-name-text">@ProvenanceView.Heading(Provenance)</span>
+                </AppLink>
+            }
+            else
+            {
+                <span class="provenance-name-text is-plain">@ProvenanceView.Heading(Provenance)</span>
+            }
+        </div>
+
+        @if (Provenance is OrphanedOrigin)
+        {
+            <div class="provenance-note">This feed no longer exists</div>
+        }
+
+        <div class="provenance-meta">
+            <div>
+                <span class="provenance-key">Added</span>
+                <span class="provenance-value">@AddedAt.LocalDateTime.ToString("d MMM yyyy, HH:mm")</span>
+            </div>
+            @if (ProvenanceView.RunCounts(Provenance) is { } counts && counts is { Added: > 0 } or { Removed: > 0 })
+            {
+                <div>
+                    <span class="provenance-key">Run</span>
+                    <span class="provenance-value">
+                        @if (counts.Added > 0)
+                        {
+                            <span class="is-added">+@counts.Added</span>
+                        }
+                        @if (counts is { Added: > 0, Removed: > 0 })
+                        {
+                            @(" ")
+                        }
+                        @if (counts.Removed > 0)
+                        {
+                            <span class="is-removed">−@counts.Removed</span>
+                        }
+                    </span>
+                </div>
+            }
+        </div>
+
+        @if (ProvenanceView.RunUrl(Provenance, ItemId) is { } runUrl)
+        {
+            <div class="provenance-foot">
+                <AppLink Href="@runUrl" Class="text-xs">See this run</AppLink>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required WantlistItemProvenance Provenance { get; set; }
+
+    [Parameter, EditorRequired]
+    public required DateTimeOffset AddedAt { get; set; }
+
+    [Parameter]
+    public MediaId? ItemId { get; set; }
+
+    private string? RailStyle => ProvenanceView.BrandColor(Provenance, Branding) is { } color ? $"background: {color}" : null;
+}

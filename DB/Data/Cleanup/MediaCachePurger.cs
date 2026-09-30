@@ -19,13 +19,13 @@ internal class MediaCachePurger(
 		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var config = await providerConfigRepository.GetAsync(cancellationToken);
-		var anchor = config.WatchlistProvider.AsMediaProvider();
+		var anchor = config.Sink.AsMediaProvider();
 
 		var protectedMediaIds = await ctx
-			.Blacklist.IgnoreQueryFilters()
+			.Blocklist.IgnoreQueryFilters()
 			.Select(b => b.Media.Id)
-			.Union(ctx.Watchlist.IgnoreQueryFilters().Select(w => w.Media.Id))
-			.Union(ctx.WatchlistOutbox.IgnoreQueryFilters().Select(o => o.Media.Id))
+			.Union(ctx.Wantlist.IgnoreQueryFilters().Select(w => w.Media.Id))
+			.Union(ctx.WantlistOutbox.IgnoreQueryFilters().Select(o => o.Media.Id))
 			.Union(ctx.FeedRunItems.IgnoreQueryFilters().Select(i => i.MediaId))
 			.ToListAsync(cancellationToken);
 

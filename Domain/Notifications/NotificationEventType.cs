@@ -4,11 +4,11 @@ namespace Domain.Notifications;
 
 public enum NotificationEventType
 {
-	[Description("Watchlist sync completed")]
-	WatchlistSyncCompleted,
+	[Description("Wantlist sync completed")]
+	WantlistSyncCompleted,
 
-	[Description("Watchlist sync failed")]
-	WatchlistSyncFailed,
+	[Description("Wantlist sync failed")]
+	WantlistSyncFailed,
 
 	[Description("Test notification")]
 	TestPing,

@@ -45,7 +45,7 @@ internal static class FeedRunView
 
 	internal static string Pending(IFeedPlan summary)
 	{
-		var parts = new List<string> { $"{summary.Verdicts.Count + summary.Unresolved.Count} fetched" };
+		var parts = new List<string> { $"{summary.Verdicts.Count + summary.Unmatched.Count} fetched" };
 
 		if (summary.Conclusiveness is not Conclusiveness.Conclusive)
 		{
@@ -107,7 +107,7 @@ internal static class FeedRunView
 			new ChangeChip
 			{
 				Icon = "circle-alert",
-				Count = counts.Unresolved,
+				Count = counts.Unmatched,
 				Tooltip = "Could not be matched in your media provider",
 			},
 		];
@@ -130,7 +130,7 @@ internal static class FeedRunView
 
 	internal static string? Problem(IFeedPlan plan) =>
 		plan.SourceFailure is null ? null
-		: plan.Verdicts.Count + plan.Unresolved.Count == 0 ? "The source could not be read, so this run would change nothing."
+		: plan.Verdicts.Count + plan.Unmatched.Count == 0 ? "The source could not be read, so this run would change nothing."
 		: "The source failed partway through, so this run would hold back removals.";
 
 	internal static string Summary(FeedRun run)

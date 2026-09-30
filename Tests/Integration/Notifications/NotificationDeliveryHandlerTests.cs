@@ -126,10 +126,10 @@ public class NotificationDeliveryHandlerTests
 	private static NotificationContext Context() =>
 		new(
 			Guid.CreateVersion7(),
-			NotificationEventType.WatchlistSyncCompleted,
+			NotificationEventType.WantlistSyncCompleted,
 			NotificationLevel.Success,
 			DateTimeOffset.UtcNow,
-			"Watchlist sync completed",
+			"Wantlist sync completed",
 			"Added 1 item(s).",
 			new NotificationData()
 		);

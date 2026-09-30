@@ -1,6 +1,6 @@
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DB.Conversion.Jobs;
@@ -8,7 +8,7 @@ namespace DB.Conversion.Jobs;
 internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 {
 	private const string FeedRunPrefix = "feed:";
-	private const string WatchlistSyncPrefix = "sync:";
+	private const string WantlistSyncPrefix = "sync:";
 	private const string SyncAfterMarker = "+sync ";
 
 	public JobRequestConverter()
@@ -18,14 +18,14 @@ internal sealed class JobRequestConverter : ValueConverter<IJobRequest, string>
 		request switch
 		{
 			RunFeed(var id, var trigger, var syncAfter) => $"{FeedRunPrefix}{id.Value}:{(syncAfter ? SyncAfterMarker : string.Empty)}{trigger}",
-			SyncWatchlist(var trigger) => $"{WatchlistSyncPrefix}{trigger}",
+			SyncWantlist(var trigger) => $"{WantlistSyncPrefix}{trigger}",
 			_ => throw new NotSupportedException($"{request.GetType().Name} has no stored form"),
 		};
 
 	private static IJobRequest FromText(string text) =>
 		text.StartsWith(FeedRunPrefix, StringComparison.Ordinal)
 			? FeedRunFromText(text[FeedRunPrefix.Length..])
-			: new SyncWatchlist(WatchlistSyncTrigger.Parse(text[WatchlistSyncPrefix.Length..]));
+			: new SyncWantlist(WantlistSyncTrigger.Parse(text[WantlistSyncPrefix.Length..]));
 
 	private static IJobRequest FeedRunFromText(string text)
 	{

@@ -7,7 +7,7 @@ namespace Domain.Feed.Planning;
 public interface IFeedPlan
 {
 	IReadOnlyList<QueryVerdict<MediaLookup>> Verdicts { get; }
-	IReadOnlyList<UnmatchedMedia> Unresolved { get; }
+	IReadOnlyList<UnmatchedMedia> Unmatched { get; }
 	FeedDelta Delta { get; }
 	Conclusiveness Conclusiveness { get; }
 	string? SourceFailure { get; }
@@ -15,7 +15,7 @@ public interface IFeedPlan
 
 public sealed record AppendPlan(
 	IReadOnlyList<QueryVerdict<MediaLookup>> Verdicts,
-	IReadOnlyList<UnmatchedMedia> Unresolved,
+	IReadOnlyList<UnmatchedMedia> Unmatched,
 	FeedDelta Delta,
 	Conclusiveness Conclusiveness
 ) : IFeedPlan
@@ -25,7 +25,7 @@ public sealed record AppendPlan(
 
 public sealed record MirrorPlan(
 	IReadOnlyList<QueryVerdict<MediaLookup>> Verdicts,
-	IReadOnlyList<UnmatchedMedia> Unresolved,
+	IReadOnlyList<UnmatchedMedia> Unmatched,
 	FeedDelta Delta,
 	Conclusiveness Conclusiveness,
 	IReadOnlyDictionary<MediaId, int> MissedRuns
@@ -43,7 +43,7 @@ public static class FeedPlans
 		var missing = owned.Where(id => !qualifying.Contains(id)).ToList();
 		var missedRuns = missing.ToDictionary(id => id, id => absences.GetValueOrDefault(id) + 1);
 
-		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unresolved.Count, load.Completeness);
+		var conclusiveness = Assess(qualifying.Count, verdicts.Count, load.Unmatched.Count, load.Completeness);
 		var conclusive = conclusiveness is Conclusiveness.Conclusive;
 
 		var delta = new FeedDelta(
@@ -57,23 +57,23 @@ public static class FeedPlans
 
 		return strategy switch
 		{
-			Append => new AppendPlan(verdicts, load.Unresolved, delta, conclusiveness) { SourceFailure = load.SourceFailure },
-			Mirror => new MirrorPlan(verdicts, load.Unresolved, delta, conclusiveness, missedRuns) { SourceFailure = load.SourceFailure },
+			Append => new AppendPlan(verdicts, load.Unmatched, delta, conclusiveness) { SourceFailure = load.SourceFailure },
+			Mirror => new MirrorPlan(verdicts, load.Unmatched, delta, conclusiveness, missedRuns) { SourceFailure = load.SourceFailure },
 		};
 	}
 
-	private static Conclusiveness Assess(int qualifying, int resolved, int unresolved, Completeness completeness) =>
+	private static Conclusiveness Assess(int qualifying, int resolved, int unmatched, Completeness completeness) =>
 		completeness switch
 		{
 			Completeness.Partial => Conclusiveness.StillLoading,
-			Completeness.Complete => Settled(qualifying, resolved, unresolved),
+			Completeness.Complete => Settled(qualifying, resolved, unmatched),
 		};
 
-	private static Conclusiveness Settled(int qualifying, int resolved, int unresolved)
+	private static Conclusiveness Settled(int qualifying, int resolved, int unmatched)
 	{
 		if (resolved == 0)
 		{
-			return unresolved == 0 ? Conclusiveness.NoItems : Conclusiveness.NoMatches;
+			return unmatched == 0 ? Conclusiveness.NoItems : Conclusiveness.NoMatches;
 		}
 
 		return qualifying == 0 ? Conclusiveness.NoneAdmitted : Conclusiveness.Conclusive;

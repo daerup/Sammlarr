@@ -18,7 +18,7 @@ public class UserOwnedAccessGuardTests(SammlarrTestHost fixture) : IAsyncDisposa
 		var threw = false;
 		try
 		{
-			await fixture.Context.Watchlist.AnyAsync();
+			await fixture.Context.Wantlist.AnyAsync();
 		}
 		catch (InvalidOperationException)
 		{

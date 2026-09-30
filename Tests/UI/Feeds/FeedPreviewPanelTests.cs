@@ -2,14 +2,14 @@ using System.Runtime.CompilerServices;
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using Bunit;
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Processing;
-using Contracts.Watchlist;
-using Domain.Blacklist;
+using Contracts.Wantlist;
+using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
@@ -17,7 +17,7 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Processing;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using TestInfrastructure;
@@ -59,7 +59,7 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Preview_WhenAnOwnedRowIsBlacklisted_ItStillLeavesOnceItStopsQualifying()
+	public async Task Preview_WhenAnOwnedRowIsBlocklisted_ItStillLeavesOnceItStopsQualifying()
 	{
 		var cut = RenderPanel(new OwnedPlanner(), resolved: 5, unmatched: 0);
 
@@ -115,7 +115,7 @@ public class FeedPreviewPanelTests : BunitContext
 	}
 
 	[Test]
-	public async Task Preview_ForAGoneRow_TheWatchlistAndBlacklistTogglesAreAvailable()
+	public async Task Preview_ForAGoneRow_TheWantlistAndBlocklistTogglesAreAvailable()
 	{
 		var gone = MediaId.From(new Guid(99, 0, 0, new byte[8]));
 		var cut = RenderPanel(new GonePlanner(gone), resolved: 5, unmatched: 0, gone: gone);
@@ -164,12 +164,12 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 		Services.AddSingleton(planner);
-		var watchlist = IWatchlistService.Mock();
-		watchlist.GetWatchlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
-		var blacklist = IBlacklistService.Mock();
-		blacklist.GetBlacklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
-		Services.AddSingleton(watchlist.Object);
-		Services.AddSingleton(blacklist.Object);
+		var wantlist = IWantlistService.Mock();
+		wantlist.GetWantlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		var blocklist = IBlocklistService.Mock();
+		blocklist.GetBlocklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		Services.AddSingleton(wantlist.Object);
+		Services.AddSingleton(blocklist.Object);
 		Services.AddSingleton(ICurrentUser.Mock().Object);
 		var media = IMediaService.Mock();
 		if (gone is { } id)
@@ -215,20 +215,20 @@ public class FeedPreviewPanelTests : BunitContext
 			index switch
 			{
 				0 => Verdict(item, QueryOutcome.Culled, owned: true),
-				1 => Verdict(item, QueryOutcome.Qualified, owned: true, inBlacklist: true),
-				2 => Verdict(item, QueryOutcome.Culled, owned: true, inBlacklist: true),
+				1 => Verdict(item, QueryOutcome.Qualified, owned: true, inBlocklist: true),
+				2 => Verdict(item, QueryOutcome.Culled, owned: true, inBlocklist: true),
 				3 => Verdict(item, QueryOutcome.Qualified, owned: true),
 				_ => Verdict(item, QueryOutcome.Qualified),
 			};
 
-		private static QueryVerdict<MediaLookup> Verdict(MediaLookup item, QueryOutcome outcome, bool owned = false, bool inBlacklist = false) =>
+		private static QueryVerdict<MediaLookup> Verdict(MediaLookup item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false) =>
 			new(
 				item,
 				outcome,
 				new Enrollment
 				{
-					InWatchlist = owned,
-					InBlacklist = inBlacklist,
+					InWantlist = owned,
+					InBlocklist = inBlocklist,
 					Owned = owned,
 				},
 				ConsumesSlot: true
@@ -245,8 +245,8 @@ public class FeedPreviewPanelTests : BunitContext
 					QueryOutcome.Qualified,
 					new Enrollment
 					{
-						InWatchlist = false,
-						InBlacklist = false,
+						InWantlist = false,
+						InBlocklist = false,
 						Owned = false,
 					},
 					ConsumesSlot: true
@@ -290,27 +290,27 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
 			var load = Load(target);
-			var unresolved = load.Items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
+			var unmatchedItems = load.Items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
 			var verdicts = load.Items.Where(item => item is not UnmatchedMedia).Select(Spread).ToList();
 
-			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, unresolved, FeedDelta.None, Conclusiveness.Conclusive));
+			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, unmatchedItems, FeedDelta.None, Conclusiveness.Conclusive));
 		}
 
 		private static QueryVerdict<MediaLookup> Spread(MediaLookup item, int index) =>
 			index switch
 			{
 				0 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(), true),
-				1 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(inWatchlist: true), true),
+				1 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
 				2 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Culled, Enrolled(), false),
 				3 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Truncated, Enrolled(), false),
-				_ => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(inBlacklist: true), true),
+				_ => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
 			};
 
-		private static Enrollment Enrolled(bool inWatchlist = false, bool inBlacklist = false) =>
+		private static Enrollment Enrolled(bool inWantlist = false, bool inBlocklist = false) =>
 			new()
 			{
-				InWatchlist = inWatchlist,
-				InBlacklist = inBlacklist,
+				InWantlist = inWantlist,
+				InBlocklist = inBlocklist,
 				Owned = false,
 			};
 	}

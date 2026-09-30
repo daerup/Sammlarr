@@ -18,7 +18,7 @@ Sammlarr uses **TUnit** (not xUnit/NUnit), run on Microsoft.Testing.Platform. Ge
 | A repository / EF query / migration drift | `Tests/Integration` (repo tests) | `SammlarrTestHost` on real SQLite |
 | A Blazor component's render logic | `Tests/UI` | **bUnit** |
 
-Rule of thumb: if you're wiring up more than one or two `.Mock()`s just to construct the subject, it belongs in the harness as an integration scenario, not a unit test. Each per-layer test project (`Domain`/`Shared`/`Core`/`API`) is **pure-unit organized by feature**; `Tests/Integration` is the only home for harness-based tests, organized by feature slice (Watchlist, Media, Feeds, Identity, Settings, Notifications, Auth, …). `Tests/TestInfrastructure` and `Tests/Harness` are helper projects — never put test cases there.
+Rule of thumb: if you're wiring up more than one or two `.Mock()`s just to construct the subject, it belongs in the harness as an integration scenario, not a unit test. Each per-layer test project (`Domain`/`Shared`/`Core`/`API`) is **pure-unit organized by feature**; `Tests/Integration` is the only home for harness-based tests, organized by feature slice (Wantlist, Media, Feeds, Identity, Settings, Notifications, Auth, …). `Tests/TestInfrastructure` and `Tests/Harness` are helper projects — never put test cases there.
 
 ## Test syntax (TUnit)
 
@@ -50,7 +50,7 @@ public class ThingTests
 
 - `[Test]` not `[Fact]`; `[Arguments(...)]` not `[InlineData]`. Every test is `async Task`; assertions are awaited.
 - Unit tests: name the subject `testee` and call its real method inline (no private wrapper that re-invokes the SUT).
-- Integration tests read as sentences: `A_member_cannot_list_the_users`, `A_remote_only_item_is_pulled_into_the_local_watchlist`.
+- Integration tests read as sentences: `A_member_cannot_list_the_users`, `A_remote_only_item_is_pulled_into_the_local_wantlist`.
 - **No comments** anywhere (no XML docs, no inline notes). Qualified enum access (`MediaType.Movie`, never `using static`). Implicit lambda params. Prefer the `*Async` overload when one exists.
 
 ## Union / result assertions (`using TestInfrastructure;`)
@@ -108,9 +108,9 @@ The harness boots the real `Core`+`DB`+`API` graph on real SQLite, pins the cloc
 
 ```csharp
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
-public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
+public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 {
-    private IWatchlistService Testee => host.Resolve<IWatchlistService>();
+    private IWantlistService Testee => host.Resolve<IWantlistService>();
 
     public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -119,17 +119,17 @@ public class WatchlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
     {
         var inception = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().SeedAsync();
 
-        await Testee.AddToWatchlistAsync([inception], new WatchlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
+        await Testee.AddToWantlistAsync([inception], new WantlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
 
-        var entries = await host.ScopedDbContext.Watchlist.AsNoTracking().ToListAsync();
+        var entries = await host.ScopedDbContext.Wantlist.AsNoTracking().ToListAsync();
         await Assert.That(entries).Count().IsEqualTo(1);
     }
 }
 ```
 
 Patterns:
-- **Seed media** with `host.Movie(spec)` / `host.Show(spec)`, chaining `.ServedByPlex(...)`, `.ServedByTmdb(rating, votes)`, then `.SeedAsync()`, `.OnWatchlist(origin)`, `.OnBlacklist()`, or `.SeedWithMetadataAsync(title, fetched)` for pre-cached metadata.
-- **Stub providers** at the edge with the host helpers (`PlexSearchReturns`, `RemoteWatchlistHas`, `TmdbTrendingPage`, `MdblistFeedContains`, `ProviderRejectsPushes`, …). Accounts via `EnsurePlexAccount`/`WithTmdbAccount` (chaining `ServedBy*` ensures them for you).
+- **Seed media** with `host.Movie(spec)` / `host.Show(spec)`, chaining `.ServedByPlex(...)`, `.ServedByTmdb(rating, votes)`, then `.SeedAsync()`, `.OnWantlist(origin)`, `.OnBlocklist()`, or `.SeedWithMetadataAsync(title, fetched)` for pre-cached metadata.
+- **Stub providers** at the edge with the host helpers (`PlexSearchReturns`, `RemoteWantlistHas`, `TmdbTrendingPage`, `MdblistFeedContains`, `ProviderRejectsPushes`, …). Accounts via `EnsurePlexAccount`/`WithTmdbAccount` (chaining `ServedBy*` ensures them for you).
 - **Resolve the SUT** with `host.Resolve<IService>()`; assert on real DB state via `host.ScopedDbContext`, or on emitted messages/events via `host.Published<TEvent>()`.
 - **Time** is a fixed audit clock (2024-06-01); `host.SetCurrentTime(...)` moves the app-logic clock (metadata freshness), NOT the DB `CreatedAt` audit stamp — behaviors that depend on distinct persisted timestamps stay unit tests.
 - **Repository tests** live in `Tests/Integration` too, using the same `[ClassDataSource<SammlarrTestHost>]` fixture against a real DbContext.
@@ -155,7 +155,7 @@ Keep only high-value laws that catch real bugs; `.Sample(predicate)` shrinks to 
 
 ## Snapshot tests — Verify
 
-For complex multi-field domain outputs where per-field asserts are noise (merged `Media`, reconcile plans, `WatchlistSyncResult`):
+For complex multi-field domain outputs where per-field asserts are noise (merged `Media`, reconcile plans, `WantlistSyncResult`):
 ```csharp
 await Verify(merged);   // using static VerifyTUnit.Verifier;
 ```
@@ -164,7 +164,7 @@ Snapshots land in a `Snapshots/` folder (a `[ModuleInitializer]` sets `Verifier.
 ## UI components — bUnit
 
 ```csharp
-public class WatchlistToggleIconTests : BunitContext
+public class WantlistToggleIconTests : BunitContext
 {
     [Before(Test)]
     public void Setup()
@@ -177,7 +177,7 @@ public class WatchlistToggleIconTests : BunitContext
     public async Task Clicking_the_icon_invokes_the_toggle_callback()
     {
         MediaLookup? toggled = null;
-        var cut = Render<WatchlistToggleIcon>(p => p.Add(i => i.Result, Lookup()).Add(i => i.OnToggle, v => toggled = v));
+        var cut = Render<WantlistToggleIcon>(p => p.Add(i => i.Result, Lookup()).Add(i => i.OnToggle, v => toggled = v));
 
         await cut.Find("button").ClickAsync();
 

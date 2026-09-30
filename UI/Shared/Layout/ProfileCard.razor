@@ -78,7 +78,7 @@
     protected override async Task OnInitializedAsync()
     {
         var config = await ProviderConfigService.GetAsync();
-        _branding = BrandingService.GetBrandingInfo(config.WatchlistProvider.AsMediaProvider());
+        _branding = BrandingService.GetBrandingInfo(config.Sink.AsMediaProvider());
         _accountUrl = config.AuthProvider == AuthProvider.Plex ? "https://app.plex.tv/desktop/#!/settings/account" : null;
 
         if (AuthState is not null)

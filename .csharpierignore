@@ -5,9 +5,9 @@ Shared/Result/Result.cs
 Shared/Optional/Optional.cs
 Domain/Feed/RunSchedule.cs
 Domain/Feed/FeedStrategy.cs
-Domain/Watchlist/WatchlistItemProvenance.cs
-Domain/Watchlist/Sync/WatchlistSyncResult.cs
-Domain/Watchlist/Sync/WatchlistSyncTrigger.cs
+Domain/Wantlist/WantlistItemProvenance.cs
+Domain/Wantlist/Sync/WantlistSyncResult.cs
+Domain/Wantlist/Sync/WantlistSyncTrigger.cs
 Domain/Notifications/NotificationConfig.cs
 Contracts/Notifications/DeliveryResult.cs
 Domain/Notifications/DeliveryOutcome.cs

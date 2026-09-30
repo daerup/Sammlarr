@@ -12,7 +12,7 @@ public readonly record struct FeedRunCounts
 	public required int Bypassed { get; init; }
 	public required int Filtered { get; init; }
 	public required int Skipped { get; init; }
-	public required int Unresolved { get; init; }
+	public required int Unmatched { get; init; }
 	public required int Removed { get; init; }
 
 	public static FeedRunCounts None { get; } =
@@ -24,7 +24,7 @@ public readonly record struct FeedRunCounts
 			Bypassed = 0,
 			Filtered = 0,
 			Skipped = 0,
-			Unresolved = 0,
+			Unmatched = 0,
 			Removed = 0,
 		};
 
@@ -36,13 +36,13 @@ public readonly record struct FeedRunCounts
 
 		return new FeedRunCounts
 		{
-			Total = plan.Verdicts.Count + plan.Unresolved.Count,
+			Total = plan.Verdicts.Count + plan.Unmatched.Count,
 			Added = delta.Adds.Count,
 			Kept = buckets.GetValueOrDefault(ChangeBucket.Kept),
 			Bypassed = buckets.GetValueOrDefault(ChangeBucket.Bypassed),
 			Filtered = buckets.GetValueOrDefault(ChangeBucket.Filtered),
 			Skipped = buckets.GetValueOrDefault(ChangeBucket.Skipped),
-			Unresolved = plan.Unresolved.Count,
+			Unmatched = plan.Unmatched.Count,
 			Removed = delta.Drops.Count,
 		};
 	}

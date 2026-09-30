@@ -1,7 +1,7 @@
 using Contracts;
 using Core.Announcing;
 using Core.Auth;
-using Core.Blacklist;
+using Core.Blocklist;
 using Core.Caching;
 using Core.DI;
 using Core.Feed;
@@ -12,7 +12,7 @@ using Core.Notifications;
 using Core.Processing;
 using Core.Providers;
 using Core.Settings;
-using Core.Watchlist;
+using Core.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -24,7 +24,7 @@ public class CoreModule : IServiceModule
 	{
 		services.AddModule<AnnouncingModule>();
 		services.AddModule<AuthModule>();
-		services.AddModule<BlacklistModule>();
+		services.AddModule<BlocklistModule>();
 		services.AddModule<CachingModule>();
 		services.AddModule<DiModule>();
 		services.AddModule<FeedModule>();
@@ -35,7 +35,7 @@ public class CoreModule : IServiceModule
 		services.AddModule<ProcessingModule>();
 		services.AddModule<ProvidersModule>();
 		services.AddModule<SettingsModule>();
-		services.AddModule<WatchlistModule>();
+		services.AddModule<WantlistModule>();
 		services.AddTransient<IDateTimeProvider, SystemDateTimeProvider>();
 	}
 }

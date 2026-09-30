@@ -37,8 +37,8 @@ internal sealed class QueryProcessor<T>
 
 			var enrollment = new Enrollment
 			{
-				InWatchlist = predicates.IsWatchlisted(item),
-				InBlacklist = predicates.IsBlacklisted(item),
+				InWantlist = predicates.IsWantlisted(item),
+				InBlocklist = predicates.IsBlocklisted(item),
 				Owned = predicates.IsOwned(item),
 			};
 
@@ -97,14 +97,14 @@ internal sealed class QueryProcessor<T>
 			return true;
 		}
 
-		if (enrollment.InWatchlist)
+		if (enrollment.InWantlist)
 		{
-			return limit.Watchlisted is SlotPolicy.Consumed;
+			return limit.Wantlisted is SlotPolicy.Consumed;
 		}
 
-		if (enrollment.InBlacklist)
+		if (enrollment.InBlocklist)
 		{
-			return limit.Blacklisted is SlotPolicy.Consumed;
+			return limit.Blocklisted is SlotPolicy.Consumed;
 		}
 
 		return true;

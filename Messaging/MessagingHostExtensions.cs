@@ -1,4 +1,4 @@
-using Contracts.Watchlist.Outbox;
+using Contracts.Wantlist.Outbox;
 using JasperFx.CodeGeneration.Model;
 using Messaging.Notifications;
 using Microsoft.Extensions.Configuration;

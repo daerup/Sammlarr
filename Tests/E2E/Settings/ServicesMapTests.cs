@@ -15,13 +15,13 @@ public class ServicesMapTests
 	}
 
 	[Test]
-	public async Task Map_ForAnAdmin_OpensTheWatchlistTargetFromThePlexBox()
+	public async Task Map_ForAnAdmin_OpensTheWantlistTargetFromThePlexBox()
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
 
 		await page.Locator("button.map-service").Filter(new() { HasText = "Plex" }).ClickAsync();
 
-		await Expect(page.Text("Watchlist syncs to")).ToBeVisibleAsync();
+		await Expect(page.Text("Wantlist syncs to")).ToBeVisibleAsync();
 		await Expect(page.MenuItem("Plex")).ToBeVisibleAsync();
 	}
 }

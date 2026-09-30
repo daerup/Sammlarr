@@ -1,23 +1,23 @@
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Processing;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Core.Processing;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Feed;
 
 internal sealed class FeedRunPlanner(
-	IWatchlistRepository watchlist,
-	IBlacklistService blacklist,
+	IWantlistRepository wantlist,
+	IBlocklistService blocklist,
 	QueryProcessor<MediaQueryRow> processor,
 	IFeedRepository feeds,
 	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers,
@@ -57,7 +57,7 @@ internal sealed class FeedRunPlanner(
 
 	private async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, RawFeedLoad load, CancellationToken cancellationToken = default)
 	{
-		var unresolved = new List<UnmatchedMedia>();
+		var unmatchedItems = new List<UnmatchedMedia>();
 		var resolved = new List<MediaQueryRow>();
 		foreach (var item in load.Items)
 		{
@@ -67,13 +67,13 @@ internal sealed class FeedRunPlanner(
 			}
 			else if (item is UnmatchedMedia unmatched)
 			{
-				unresolved.Add(unmatched);
+				unmatchedItems.Add(unmatched);
 			}
 		}
 
-		var entries = await watchlist.GetEntriesAsync(cancellationToken);
-		var blacklisted = await blacklist.GetBlacklistIdsAsync(cancellationToken);
-		var watchlisted = entries.Select(entry => entry.MediaId).ToHashSet();
+		var entries = await wantlist.GetEntriesAsync(cancellationToken);
+		var blocklisted = await blocklist.GetBlocklistIdsAsync(cancellationToken);
+		var wantlisted = entries.Select(entry => entry.MediaId).ToHashSet();
 		var owned = entries.Where(entry => entry.Provenance is FeedOrigin origin && origin.Feed.Id == feed.Id).Select(entry => entry.MediaId).ToHashSet();
 
 		var options = new QueryOptions
@@ -83,8 +83,8 @@ internal sealed class FeedRunPlanner(
 			Filter = feed.Filter,
 		};
 		var predicates = new QueryPredicates<MediaQueryRow>(
-			IsWatchlisted: row => watchlisted.Contains(row.Media.Identity.Id),
-			IsBlacklisted: row => blacklisted.Contains(row.Media.Identity.Id),
+			IsWantlisted: row => wantlisted.Contains(row.Media.Identity.Id),
+			IsBlocklisted: row => blocklisted.Contains(row.Media.Identity.Id),
 			IsOwned: row => owned.Contains(row.Media.Identity.Id)
 		);
 
@@ -97,7 +97,7 @@ internal sealed class FeedRunPlanner(
 			? await feeds.GetAbsencesAsync(feed.Id, owned, mirror.AbsenceThreshold, cancellationToken)
 			: new Dictionary<MediaId, int>();
 
-		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unresolved, load.Completeness, load.SourceFailure), owned, absences, feed.Strategy);
+		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatchedItems, load.Completeness, load.SourceFailure), owned, absences, feed.Strategy);
 	}
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)

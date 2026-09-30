@@ -88,7 +88,7 @@ namespace DB.Migrations
                     b.ToTable("Credentials");
                 });
 
-            modelBuilder.Entity("DB.Data.Blacklist.BlacklistRow", b =>
+            modelBuilder.Entity("DB.Data.Blocklist.BlocklistRow", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
@@ -106,7 +106,7 @@ namespace DB.Migrations
 
                     b.HasIndex("MediaId");
 
-                    b.ToTable("Blacklist");
+                    b.ToTable("Blocklist");
                 });
 
             modelBuilder.Entity("DB.Data.Config.ProviderConfigRow", b =>
@@ -130,11 +130,11 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TrendingProvider")
+                    b.Property<string>("Sink")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("WatchlistProvider")
+                    b.Property<string>("TrendingProvider")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -150,8 +150,8 @@ namespace DB.Migrations
                             RatingProvider = "Tmdb",
                             RegistrationMode = "Open",
                             SearchProvider = "Plex",
-                            TrendingProvider = "Tmdb",
-                            WatchlistProvider = "Plex"
+                            Sink = "Plex",
+                            TrendingProvider = "Tmdb"
                         });
                 });
 
@@ -298,7 +298,7 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Unresolved")
+                    b.Property<int>("Unmatched")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("UpdatedAt")
@@ -673,7 +673,7 @@ namespace DB.Migrations
                     b.ToTable("NotificationTargets");
                 });
 
-            modelBuilder.Entity("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", b =>
+            modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
@@ -701,10 +701,10 @@ namespace DB.Migrations
 
                     b.HasIndex("MediaId");
 
-                    b.ToTable("WatchlistOutbox");
+                    b.ToTable("WantlistOutbox");
                 });
 
-            modelBuilder.Entity("DB.Data.Watchlist.WatchlistRow", b =>
+            modelBuilder.Entity("DB.Data.Wantlist.WantlistRow", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("TEXT");
@@ -722,7 +722,7 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RemoteProvider")
+                    b.Property<string>("Sink")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("SourceFeedId")
@@ -745,7 +745,7 @@ namespace DB.Migrations
 
                     b.HasIndex("SourceRunId");
 
-                    b.ToTable("Watchlist");
+                    b.ToTable("Wantlist");
                 });
 
             modelBuilder.Entity("TickerQ.Utilities.Entities.CronTickerEntity", b =>
@@ -980,7 +980,7 @@ namespace DB.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DB.Data.Blacklist.BlacklistRow", b =>
+            modelBuilder.Entity("DB.Data.Blocklist.BlocklistRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
                         .WithMany()
@@ -1117,7 +1117,7 @@ namespace DB.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DB.Data.Watchlist.Outbox.WatchlistOutboxRow", b =>
+            modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
                         .WithMany()
@@ -1134,7 +1134,7 @@ namespace DB.Migrations
                     b.Navigation("Media");
                 });
 
-            modelBuilder.Entity("DB.Data.Watchlist.WatchlistRow", b =>
+            modelBuilder.Entity("DB.Data.Wantlist.WantlistRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
                         .WithMany()

@@ -26,7 +26,7 @@ public enum PreviewBucket
 	Bypassed,
 	Filtered,
 	Skipped,
-	Unresolved,
+	Unmatched,
 }
 
 public static class PreviewResultFilter

@@ -99,7 +99,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenEveryItemFailsStrictValidation_ReturnsThemAsUnresolved()
+	public async Task GetFeedItemsAsync_WhenEveryItemFailsStrictValidation_ReturnsThemAsUnmatched()
 	{
 		await host.WithMdblistAccount("test-key");
 		host.MdblistFeedContains("loose-list", Item("No Ids One", MediaType.Movie), Item("No Ids Two", MediaType.Movie));
@@ -107,11 +107,11 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var items = await Testee.GetFeedItemsAsync("loose-list").ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(2);
-		await AssertAllUnresolved(items);
+		await AssertAllUnmatched(items);
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenMetadataCannotBeResolved_ReturnsTheItemAsUnresolved()
+	public async Task GetFeedItemsAsync_WhenMetadataCannotBeResolved_ReturnsTheItemAsUnmatched()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.WithPlexAccount("plex-token");
@@ -122,7 +122,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		var items = await Testee.GetFeedItemsAsync("failing-list").ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertAllUnresolved(items);
+		await AssertAllUnmatched(items);
 	}
 
 	[Test]
@@ -282,7 +282,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private static async Task AssertAllUnresolved(IReadOnlyList<MediaLookup> items) =>
+	private static async Task AssertAllUnmatched(IReadOnlyList<MediaLookup> items) =>
 		await Assert.That(items.All(item => !(item is IdentifiedMedia identified && identified is IMedia))).IsTrue();
 
 	private async Task AssertExternalIdStored(MediaId mediaId, MediaProvider provider, string id)

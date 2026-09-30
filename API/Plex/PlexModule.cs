@@ -5,7 +5,7 @@ using Contracts.Media.Artwork;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
@@ -21,7 +21,7 @@ internal class PlexModule : IServiceModule
 		services.AddKeyedScoped<IMediaSearchProvider, PlexApi>(SearchProvider.Plex);
 		services.AddKeyedScoped<IMetadataEnricher, PlexMetadataEnricher>(MediaProvider.Plex);
 		services.AddKeyedScoped<IOAuthProvider, PlexOAuthProvider>(AuthProvider.Plex);
-		services.AddKeyedScoped<IWatchlistProvider, PlexWatchListProvider>(WatchlistProvider.Plex);
+		services.AddKeyedScoped<IMediaSink, PlexSink>(SinkKind.Plex);
 		services.AddKeyedScoped<IExternalIdConverter, PlexIdConverter>(MediaProvider.Plex);
 
 		services.AddSingleton<PlexUrls>();

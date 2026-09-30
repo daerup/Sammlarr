@@ -9,8 +9,8 @@ public enum QueryOutcome
 
 public readonly record struct Enrollment
 {
-	public required bool InWatchlist { get; init; }
-	public required bool InBlacklist { get; init; }
+	public required bool InWantlist { get; init; }
+	public required bool InBlocklist { get; init; }
 	public required bool Owned { get; init; }
 }
 

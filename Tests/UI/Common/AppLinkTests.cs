@@ -9,10 +9,10 @@ public class AppLinkTests : BunitContext
 	[Test]
 	public async Task Link_ByDefault_StaysInTheAppAndPointsTheDiagonalArrowAtWhereItGoes()
 	{
-		var cut = Render<AppLink>(parameters => parameters.Add(link => link.Href, "/watchlist").AddChildContent("12"));
+		var cut = Render<AppLink>(parameters => parameters.Add(link => link.Href, "/wantlist").AddChildContent("12"));
 
 		var link = cut.Find("a");
-		await Assert.That(link.GetAttribute("href")).IsEqualTo("/watchlist");
+		await Assert.That(link.GetAttribute("href")).IsEqualTo("/wantlist");
 		await Assert.That(link.HasAttribute("target")).IsFalse();
 		await Assert.That(link.HasAttribute("style")).IsFalse();
 		await Assert.That(cut.FindAll(".app-link-arrow")).IsNotEmpty();

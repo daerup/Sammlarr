@@ -1,7 +1,7 @@
 @using UI.Features.Feeds.Components
 
 <DemoCard Title="Media detail tiles" Where="Feed preview" Span="2" PinRight="true"
-          Note="MediaDetailTile with watchlist / blacklist toggles and status indicators, plus the preview stat badges. Toggles are visual-only.">
+          Note="MediaDetailTile with wantlist / blocklist toggles and status indicators, plus the preview stat badges. Toggles are visual-only.">
     <BbTooltipProvider>
         <div class="flex items-start text-xs font-medium">
             <PreviewFilterBadge Icon="list" Count="3" Active="true" OnClick="() => {}">
@@ -21,8 +21,8 @@
     <div class="space-y-2 overflow-hidden">
         <MediaDetailTile Media="DemoMedia.Movie">
             <Icons>
-                <WatchlistToggleIcon Result="DemoMedia.Movie" IsToggled="@Watchlisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="OnToggleWatchlist"/>
-                <BlacklistToggleIcon Result="DemoMedia.Movie" IsToggled="@_blacklisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="ToggleBlacklist"/>
+                <WantlistToggleIcon Result="DemoMedia.Movie" IsToggled="@Wantlisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
+                <BlocklistToggleIcon Result="DemoMedia.Movie" IsToggled="@_blocklisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
             </Icons>
         </MediaDetailTile>
         <MediaDetailTile Media="DemoMedia.Show" Class="result-dimmed">
@@ -37,8 +37,8 @@
                         <BbTooltipContent>Excluded by the specified import limit.</BbTooltipContent>
                     </BbTooltip>
                 </BbTooltipProvider>
-                <WatchlistToggleIcon Result="DemoMedia.Show" IsToggled="@Watchlisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="OnToggleWatchlist"/>
-                <BlacklistToggleIcon Result="DemoMedia.Show" IsToggled="@_blacklisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="ToggleBlacklist"/>
+                <WantlistToggleIcon Result="DemoMedia.Show" IsToggled="@Wantlisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="OnToggleWantlist"/>
+                <BlocklistToggleIcon Result="DemoMedia.Show" IsToggled="@_blocklisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="ToggleBlocklist"/>
             </Icons>
         </MediaDetailTile>
         <MediaDetailTile Media="DemoMedia.Unknown">
@@ -60,17 +60,17 @@
 </DemoCard>
 
 @code {
-    [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Watchlisted { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Wantlisted { get; set; }
 
-    [Parameter] public EventCallback<MediaLookup> OnToggleWatchlist { get; set; }
+    [Parameter] public EventCallback<MediaLookup> OnToggleWantlist { get; set; }
 
-    private readonly HashSet<MediaId> _blacklisted = [];
+    private readonly HashSet<MediaId> _blocklisted = [];
 
-    private void ToggleBlacklist(MediaLookup media)
+    private void ToggleBlocklist(MediaLookup media)
     {
-        if (!_blacklisted.Remove(media.Id))
+        if (!_blocklisted.Remove(media.Id))
         {
-            _blacklisted.Add(media.Id);
+            _blocklisted.Add(media.Id);
         }
     }
 }

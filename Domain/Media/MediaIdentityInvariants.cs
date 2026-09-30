@@ -6,11 +6,11 @@ public static class MediaIdentityInvariants
 {
 	extension(IEnumerable<IExternalMediaId> externals)
 	{
-		public void EnsureWatchlistProviderPresent(MediaProvider watchlistProvider)
+		public void EnsureSinkIdPresent(MediaProvider sinkProvider)
 		{
-			if (externals.All(id => id.Source != watchlistProvider))
+			if (externals.All(id => id.Source != sinkProvider))
 			{
-				throw new MissingWatchlistExternalIdException(watchlistProvider);
+				throw new MissingSinkIdException(sinkProvider);
 			}
 		}
 
@@ -24,10 +24,9 @@ public static class MediaIdentityInvariants
 	}
 }
 
-public sealed class MissingWatchlistExternalIdException(MediaProvider watchlistProvider)
-	: Exception($"No external ID for the configured watchlist provider '{watchlistProvider}' is present.")
+public sealed class MissingSinkIdException(MediaProvider sinkProvider) : Exception($"No external ID for the configured sink '{sinkProvider}' is present.")
 {
-	public MediaProvider WatchlistProvider { get; } = watchlistProvider;
+	public MediaProvider Sink { get; } = sinkProvider;
 }
 
 public sealed class MixedMediaTypesException() : Exception("All external IDs must be of the same media type.");

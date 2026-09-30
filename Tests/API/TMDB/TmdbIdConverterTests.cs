@@ -50,7 +50,7 @@ public class TmdbIdConverterTests
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenPlexMetadataHasNoTmdbIds_ReturnsUnresolvedWithOtherIds()
+	public async Task ConvertAsync_WhenPlexMetadataHasNoTmdbIds_ReturnsUnmatchedWithOtherIds()
 	{
 		var payload = CreatePlexByIdPayload(false, false, false);
 		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json));

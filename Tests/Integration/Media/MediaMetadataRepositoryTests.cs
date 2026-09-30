@@ -93,7 +93,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	}
 
 	[Test]
-	public async Task QueryMediaMetadata_WhenMetadataMissing_YieldsUnresolvedMediaWithoutFetchedAt()
+	public async Task QueryMediaMetadata_WhenMetadataMissing_YieldsUnmatchedMediaWithoutFetchedAt()
 	{
 		var plexId = PlexId.From("plex-811", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
