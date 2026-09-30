@@ -35,6 +35,9 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(config.IsTestable).IsFalse();
 		await Assert.That(ProviderLabel(cut).TextContent).Contains("*");
 		await Assert.That(cut.Markup).Contains("API key is missing, fix in");
+		await Assert
+			.That(cut.FindAll("a").Single(link => link.TextContent.Trim() == "Settings").GetAttribute("href"))
+			.IsEqualTo("/settings?section=providers&provider=tmdb");
 	}
 
 	[Test]

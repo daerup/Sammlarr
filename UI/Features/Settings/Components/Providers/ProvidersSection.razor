@@ -53,6 +53,8 @@
 </div>
 
 @code {
+    [Parameter] public MediaProvider? Expanded { get; set; }
+
     private AuthProvider _authProvider = AuthProvider.Plex;
 
     private ProviderConfig? _config;
@@ -61,11 +63,25 @@
 
     private MediaProvider? _open;
 
+    private static readonly TimeSpan RevealDelay = TimeSpan.FromMilliseconds(250);
+
     protected override async Task OnInitializedAsync()
     {
         _config = await ProviderConfigService.GetAsync();
         _authProvider = _config.AuthProvider;
         await RefreshReadyAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Expanded is not { } provider)
+        {
+            return;
+        }
+
+        await Task.Delay(RevealDelay);
+        _open = provider;
+        StateHasChanged();
     }
 
     private async Task RefreshReadyAsync()
