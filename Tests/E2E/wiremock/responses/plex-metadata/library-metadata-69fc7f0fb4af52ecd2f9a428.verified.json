@@ -1,0 +1,193 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://image.tmdb.org/t/p/original/esIDrOv4l40jHeIfeBF6pVIWAMa.jpg",
+        "guid": "plex://movie/69fc7f0fb4af52ecd2f9a428",
+        "key": "/library/metadata/69fc7f0fb4af52ecd2f9a428",
+        "ratingKey": "69fc7f0fb4af52ecd2f9a428",
+        "summary": "A hated, desperate, up-and-coming dance music promoter, across a single frenetic night,  must put on a successful gig, navigating: petty thieves stealing the music equipment, his drug-addled, unconscious headliner and a thousand pounds of urgent debt to a ruthless loan shark, risking his life.",
+        "tagline": "No Encore.",
+        "type": "movie",
+        "addedAt": 1778544000,
+        "budget": 1377,
+        "duration": 600000,
+        "originallyAvailableAt": "2026-05-12",
+        "publicPagesURL": "https://watch.plex.tv/movie/one-night-only-2026-1",
+        "slug": "one-night-only-2026-1",
+        "thumb": "https://image.tmdb.org/t/p/original/4acAp9fDdolmpEJOUqWtbqaw99k.jpg",
+        "title": "One Night Only",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "One Night Only",
+            "type": "background",
+            "url": "https://image.tmdb.org/t/p/original/esIDrOv4l40jHeIfeBF6pVIWAMa.jpg"
+          },
+          {
+            "alt": "One Night Only",
+            "type": "coverPoster",
+            "url": "https://image.tmdb.org/t/p/original/4acAp9fDdolmpEJOUqWtbqaw99k.jpg"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "tmdb://1689666"
+          }
+        ],
+        "Role": [
+          {
+            "id": "692085e1c3222f63660fdda0",
+            "order": 1,
+            "slug": "finlay-cockerell-1",
+            "tag": "Finlay Cockerell",
+            "role": "Matthew Truman",
+            "key": "/library/people/692085e1c3222f63660fdda0",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a42a",
+            "order": 2,
+            "slug": "tega-blaize-1",
+            "tag": "Tega Blaize",
+            "role": "Jonah",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a42a",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a42b",
+            "order": 3,
+            "slug": "mahdog-rigby-hancock",
+            "tag": "Mahdog Rigby Hancock",
+            "role": "NOMAD",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a42b",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a42c",
+            "order": 4,
+            "slug": "james-joynson",
+            "tag": "James Joynson",
+            "role": "Angus",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a42c",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a42d",
+            "order": 5,
+            "slug": "lewi-richardson",
+            "tag": "Lewi Richardson",
+            "role": "Keithey",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a42d",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a42e",
+            "order": 6,
+            "slug": "kieron-gooding-1",
+            "tag": "Kieron Gooding",
+            "role": "Sammy",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a42e",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a42f",
+            "order": 7,
+            "slug": "thomas-heaton-3",
+            "tag": "Thomas Heaton",
+            "role": "Guard 1",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a42f",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a430",
+            "order": 8,
+            "slug": "naomi-mcgivern",
+            "tag": "Naomi McGivern",
+            "role": "Ballroom Dancer (Female)",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a430",
+            "type": "person"
+          },
+          {
+            "id": "69fc7f10b4af52ecd2f9a431",
+            "order": 9,
+            "slug": "caiden-ferguson",
+            "tag": "Caiden Ferguson",
+            "role": "Ballroom Dancer (Male)",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a431",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "60353241a24f08002ca6be13",
+            "slug": "theo-heywood",
+            "tag": "Theo Heywood",
+            "role": "Director",
+            "key": "/library/people/60353241a24f08002ca6be13",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "69fc7f10b4af52ecd2f9a432",
+            "slug": "george-joynson-1",
+            "tag": "George Joynson",
+            "role": "Producer",
+            "key": "/library/people/69fc7f10b4af52ecd2f9a432",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/5d7768364de0ee001fccbaf0",
+            "tag": "Human Traffic"
+          },
+          {
+            "guid": "plex://movie/5d77699bf617c9002016210e",
+            "tag": "The Joker Is Wild"
+          },
+          {
+            "guid": "plex://movie/5d9f350506d220001feb435b",
+            "tag": "You Got Served"
+          },
+          {
+            "guid": "plex://movie/5d776845e6d55c002040f8b2",
+            "tag": "Exotica"
+          },
+          {
+            "guid": "plex://movie/5d77684f33f255001e8528f9",
+            "tag": "The Janky Promoters"
+          },
+          {
+            "guid": "plex://movie/5d776b3cfb0d55001f560feb",
+            "tag": "We Are Your Friends"
+          },
+          {
+            "guid": "plex://movie/5d776b6696b655001fe0f973",
+            "tag": "Kill Your Friends"
+          },
+          {
+            "guid": "plex://movie/5d776826eb5d26001f1dd3fd",
+            "tag": "Leaving Las Vegas"
+          },
+          {
+            "guid": "plex://movie/5d776826151a60001f24a9cd",
+            "tag": "Flashdance"
+          },
+          {
+            "guid": "plex://movie/61a7791592093601e7fa5abd",
+            "tag": "Magic Mike's Last Dance"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -7,16 +7,14 @@ namespace E2E.Tests.Common;
 
 public class UiInvariantTests
 {
-	private const string SearchModal = "Search & Add to Blacklist";
-
 	[Test]
 	public async Task CtrlK_WhenPressed_OpensSearch()
 	{
 		var page = await E2EApp.AdminAt(Routes.Blacklist);
-		await Expect(page.GetByText("Add from Search")).ToBeVisibleAsync(Wait.Settle);
-		await Expect(page.Text(SearchModal)).ToBeHiddenAsync();
+		await Expect(page.Heading("Blacklist")).ToBeVisibleAsync(Wait.Settle);
+		var search = page.Modal("Search");
+		await Expect(search).ToBeHiddenAsync();
 
-		var search = page.Text(SearchModal);
 		for (var attempt = 0; attempt < 10 && !await search.IsVisibleAsync(); attempt++)
 		{
 			await page.Keyboard.PressAsync("Control+k");

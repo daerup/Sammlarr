@@ -19,8 +19,6 @@ public class BlacklistRemovalTests
 		var target = (await FeedEditor.RowTitlesAsync(page))[0];
 
 		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
-		await FeedEditor.ApplyAsync(page);
-		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(bypassed + 1));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(included - 1));

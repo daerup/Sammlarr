@@ -49,9 +49,15 @@ internal sealed class FeedService(IFeedRepository repository, IFeedScheduler sch
 		}
 	}
 
-	public async Task SetEnabledAsync(IReadOnlyCollection<FeedId> ids, bool enabled, CancellationToken cancellationToken = default)
+	public async Task PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
+		await RescheduleAllAsync(await repository.PauseAsync(ids, cancellationToken), cancellationToken);
+
+	public async Task ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
+		await RescheduleAllAsync(await repository.ResumeAsync(ids, cancellationToken), cancellationToken);
+
+	private async Task RescheduleAllAsync(IReadOnlyList<FeedId> changed, CancellationToken cancellationToken)
 	{
-		foreach (var id in await repository.SetEnabledAsync(ids, enabled, cancellationToken))
+		foreach (var id in changed)
 		{
 			await RescheduleAsync(id, cancellationToken);
 		}

@@ -97,7 +97,10 @@ public class NotificationTargetTests
 	}
 
 	private static ILocator Client(IPage page, string name) =>
-		page.Locator("div.items-center.rounded-lg.border").Filter(new LocatorFilterOptions { HasText = name }).Last;
+		page.Locator("div.flex-col.gap-4")
+			.Filter(new LocatorFilterOptions { Has = page.Heading("Clients") })
+			.Locator("div.items-center.rounded-lg.border")
+			.Filter(new LocatorFilterOptions { HasText = name });
 
 	private static async Task FillAsync(IPage page, string selector, string value)
 	{

@@ -412,7 +412,7 @@
 
     private async Task ResumeAsync()
     {
-        await FeedService.SetEnabledAsync([.. Chosen.Select(row => row.Feed.Id)], enabled: true, _cancellation.Token);
+        await FeedService.ResumeAsync([.. Chosen.Select(row => row.Feed.Id)], _cancellation.Token);
         ExitSelecting();
         await LoadAsync();
     }
@@ -420,7 +420,7 @@
     private async Task PauseAsync()
     {
         _confirm = null;
-        await FeedService.SetEnabledAsync([.. Chosen.Select(row => row.Feed.Id)], enabled: false, _cancellation.Token);
+        await FeedService.PauseAsync([.. Chosen.Select(row => row.Feed.Id)], _cancellation.Token);
         ExitSelecting();
         await LoadAsync();
     }
