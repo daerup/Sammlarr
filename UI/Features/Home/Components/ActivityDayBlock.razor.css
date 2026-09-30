@@ -11,9 +11,34 @@
     align-items: baseline;
     gap: 12px;
     flex-wrap: wrap;
+    width: 100%;
     padding: 11px 16px 10px;
     background: color-mix(in srgb, var(--foreground) 5%, transparent);
+    border: 0;
     border-bottom: 1px solid var(--border);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dtop:hover {
+    background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.dtop.is-collapsed {
+    border-bottom: 0;
+}
+
+.dchev {
+    align-self: center;
+    display: inline-flex;
+    margin-right: -5px;
+    color: var(--muted-foreground);
+}
+
+.dchev ::deep svg {
+    display: block;
 }
 
 .dname {

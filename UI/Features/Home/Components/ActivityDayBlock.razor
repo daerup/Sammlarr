@@ -1,7 +1,8 @@
 @using Domain.Media
 
 <div class="dcard">
-    <div class="dtop">
+    <button type="button" class="dtop @(_collapsed ? "is-collapsed" : null)" aria-expanded="@(_collapsed ? "false" : "true")" @onclick="@(() => _collapsed = !_collapsed)">
+        <span class="dchev"><LucideIcon Name="@(_collapsed ? "chevron-right" : "chevron-down")" Size="13"/></span>
         <span class="dname">@DayName</span>
         <span class="dstat">
             @if (Day.Added.Count > 0)
@@ -14,94 +15,97 @@
             }
             <span class="part">@Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")</span>
         </span>
-    </div>
-
-    @if (Day.Feeds.Count > 0)
-    {
-        <div class="chips">
-            @foreach (var feed in Day.Feeds)
-            {
-                <a class="chip" href="@FeedHref(feed)">
-                    <LucideIcon Name="rss" Size="11"/>
-                    <span class="chip-name">@feed.Name</span>
-                    @if (feed.Added > 0)
-                    {
-                        <b>+@feed.Added.ToString("N0")</b>
-                    }
-                    @if (feed.Removed > 0)
-                    {
-                        <span class="chip-rm">&minus;@feed.Removed.ToString("N0")</span>
-                    }
-                    @if (feed.Runs > 1)
-                    {
-                        <span class="chip-runs">&times;@feed.Runs</span>
-                    }
-                </a>
-            }
-        </div>
-    }
-
-    @if (Day.Added.Count > 0)
-    {
-        <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
-    }
-
-    @if (Day.Removed.Count > 0)
-    {
-        <div class="dsub">
-            <LucideIcon Name="trash-2" Size="11"/>
-            Removed
-        </div>
-        <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
-    }
-
-    @foreach (var entry in Day.Inconclusive)
-    {
-        <div class="dproblem">
-            <LucideIcon Name="circle-alert" Size="14"/>
-            <span>
-                <span class="problem-feed">@entry.FeedName</span> @Problem(entry)
-            </span>
-        </div>
-    }
-
-    <button type="button" class="dtoggle" @onclick="@(() => _expanded = !_expanded)">
-        <LucideIcon Name="@(_expanded ? "chevron-down" : "chevron-right")" Size="13"/>
-        @(_expanded ? "Hide" : "Show") all @Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")
     </button>
 
-    @if (_expanded)
+    @if (!_collapsed)
     {
-        <div class="druns">
-            @foreach (var entry in Day.Runs)
-            {
-                <a class="drun" href="@RunHref(entry)" @key="entry.Run.Id">
-                    <span class="drun-at">@At(entry)</span>
-                    <span class="drun-feed">@entry.FeedName</span>
-                    <span class="drun-delta">
-                        @if (entry.Inconclusive)
+        @if (Day.Feeds.Count > 0)
+        {
+            <div class="chips">
+                @foreach (var feed in Day.Feeds)
+                {
+                    <a class="chip" href="@FeedHref(feed)">
+                        <LucideIcon Name="rss" Size="11"/>
+                        <span class="chip-name">@feed.Name</span>
+                        @if (feed.Added > 0)
                         {
-                            <span class="bad">@(entry.Run.Failed ? "failed" : "inconclusive")</span>
+                            <b>+@feed.Added.ToString("N0")</b>
                         }
-                        else if (entry.Run.HasChanges)
+                        @if (feed.Removed > 0)
                         {
-                            @if (entry.Run.Counts.Added > 0)
+                            <span class="chip-rm">&minus;@feed.Removed.ToString("N0")</span>
+                        }
+                        @if (feed.Runs > 1)
+                        {
+                            <span class="chip-runs">&times;@feed.Runs</span>
+                        }
+                    </a>
+                }
+            </div>
+        }
+
+        @if (Day.Added.Count > 0)
+        {
+            <PosterTrack Ids="Day.Added" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia"/>
+        }
+
+        @if (Day.Removed.Count > 0)
+        {
+            <div class="dsub">
+                <LucideIcon Name="trash-2" Size="11"/>
+                Removed
+            </div>
+            <PosterTrack Ids="Day.Removed" Media="Media" OnSelect="OnSelect" OnNeedMedia="OnNeedMedia" Faded="true"/>
+        }
+
+        @foreach (var entry in Day.Inconclusive)
+        {
+            <div class="dproblem">
+                <LucideIcon Name="circle-alert" Size="14"/>
+                <span>
+                    <span class="problem-feed">@entry.FeedName</span> @Problem(entry)
+                </span>
+            </div>
+        }
+
+        <button type="button" class="dtoggle" @onclick="@(() => _expanded = !_expanded)">
+            <LucideIcon Name="@(_expanded ? "chevron-down" : "chevron-right")" Size="13"/>
+            @(_expanded ? "Hide" : "Show") all @Day.RunCount @(Day.RunCount == 1 ? "run" : "runs")
+        </button>
+
+        @if (_expanded)
+        {
+            <div class="druns">
+                @foreach (var entry in Day.Runs)
+                {
+                    <a class="drun" href="@RunHref(entry)" @key="entry.Run.Id">
+                        <span class="drun-at">@At(entry)</span>
+                        <span class="drun-feed">@entry.FeedName</span>
+                        <span class="drun-delta">
+                            @if (entry.Inconclusive)
                             {
-                                <span class="up">+@entry.Run.Counts.Added.ToString("N0")</span>
+                                <span class="bad">@(entry.Run.Failed ? "failed" : "inconclusive")</span>
                             }
-                            @if (entry.Run.Counts.Removed > 0)
+                            else if (entry.Run.HasChanges)
                             {
-                                <span class="dn">&minus;@entry.Run.Counts.Removed.ToString("N0")</span>
+                                @if (entry.Run.Counts.Added > 0)
+                                {
+                                    <span class="up">+@entry.Run.Counts.Added.ToString("N0")</span>
+                                }
+                                @if (entry.Run.Counts.Removed > 0)
+                                {
+                                    <span class="dn">&minus;@entry.Run.Counts.Removed.ToString("N0")</span>
+                                }
                             }
-                        }
-                        else
-                        {
-                            <span class="nil">no change</span>
-                        }
-                    </span>
-                </a>
-            }
-        </div>
+                            else
+                            {
+                                <span class="nil">no change</span>
+                            }
+                        </span>
+                    </a>
+                }
+            </div>
+        }
     }
 </div>
 
@@ -111,6 +115,8 @@
     [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
     [Parameter] public DateOnly Today { get; set; }
+
+    private bool _collapsed;
 
     private bool _expanded;
 
