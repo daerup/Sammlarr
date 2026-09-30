@@ -202,6 +202,7 @@ Job:: One unit of background work, a row in the `Jobs` table: a request (`RunFee
 `SyncWatchlist`), its owner and a state. The table is the queue of record; the UI reads it.
 
 Job state:: `Waiting` (due in the future), `Queued` (ready), `Running`, then `Done` or `Failed`.
+A job its owner cancels before it starts ends `Cancelled`.
 
 Job runner:: The hosted service that takes the oldest `Queued` job and runs it, one at a time, in
 its own scope as the job's owner (`JobRunner`). A `JobAlarm` timer moves `Waiting` jobs to

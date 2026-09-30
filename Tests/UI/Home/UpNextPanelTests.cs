@@ -2,6 +2,7 @@ using BlazorBlueprint.Components;
 using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Contracts;
+using Domain.Jobs;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Home.Components;
 using UI.Shared.Services.Branding;
@@ -86,6 +87,47 @@ public class UpNextPanelTests : BunitContext
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 
 		await Assert.That(cut.Find(".row-when").TextContent.Trim()).IsEqualTo("in 2 min");
+	}
+
+	[Test]
+	public async Task Cancel_OnAJobThatHasNotStarted_HandsItsRowToTheCaller()
+	{
+		var job = JobId.From(Guid.NewGuid());
+		IReadOnlyList<UpNextRow> queued =
+		[
+			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, null, Job: JobId.From(Guid.NewGuid())),
+			new("hdlists/anime", "queued", string.Empty, UpNextKind.Queued, null, Job: job),
+		];
+		UpNextRow? cancelled = null;
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued).Add(panel => panel.OnCancel, (UpNextRow row) => cancelled = row));
+		await cut.Find("[aria-label='Cancel hdlists/anime']").ClickAsync(new());
+
+		await Assert.That(cut.FindAll(".row-cancel")).Count().IsEqualTo(1);
+		await Assert.That(cancelled?.Job).IsEqualTo(job);
+	}
+
+	[Test]
+	public async Task Sections_WhenEmpty_ShowCollapsedAndOpenOntoAPlaceholder()
+	{
+		var cut = Render<UpNextPanel>();
+		var shownAtFirst = cut.FindAll(".sect-empty").Count;
+
+		await cut.FindAll(".sect")[0].ClickAsync(new());
+
+		await Assert.That(cut.FindAll(".sect-title").Select(title => title.TextContent)).IsEquivalentTo(["Running and queued", "On a schedule"]);
+		await Assert.That(shownAtFirst).IsEqualTo(0);
+		await Assert.That(cut.FindAll(".sect-empty").Select(placeholder => placeholder.TextContent)).IsEquivalentTo(["Nothing is running or queued right now."]);
+	}
+
+	[Test]
+	public async Task Queue_WhenAJobArrivesWhileItIsCollapsedForBeingEmpty_OpensToShowIt()
+	{
+		var cut = Render<UpNextPanel>();
+
+		cut.Render(parameters => parameters.Add(panel => panel.Queued, [new UpNextRow("hdlists/anime", "queued", string.Empty, UpNextKind.Queued, null)]));
+
+		await Assert.That(cut.FindAll(".row")).Count().IsEqualTo(1);
 	}
 
 	[Test]

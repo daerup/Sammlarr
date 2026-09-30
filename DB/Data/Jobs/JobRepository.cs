@@ -125,6 +125,25 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, JobState.Queued).SetProperty(row => row.UpdatedAt, now), cancellationToken);
 	}
 
+	public async Task<Optional<IJobRequest>> CancelAsync(JobId id, UserId owner, DateTimeOffset cancelledAt, CancellationToken cancellationToken = default)
+	{
+		var raw = id.Value;
+		var ownerId = owner.Value;
+		await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var pending = context.Jobs.Where(row => row.Id == raw && row.OwnerId == ownerId && (row.State == JobState.Waiting || row.State == JobState.Queued));
+		var request = await pending.AsNoTracking().Select(row => row.Request).FirstOrDefaultAsync(cancellationToken);
+		if (request is null)
+		{
+			return new None();
+		}
+
+		var affected = await pending.ExecuteUpdateAsync(
+			setters => setters.SetProperty(row => row.State, JobState.Cancelled).SetProperty(row => row.UpdatedAt, cancelledAt),
+			cancellationToken
+		);
+		return affected == 1 ? Some.Of(request) : new None();
+	}
+
 	public async Task CompleteAsync(JobId id, DateTimeOffset completedAt, CancellationToken cancellationToken = default) =>
 		await SettleAsync(id, JobState.Done, completedAt, cancellationToken);
 

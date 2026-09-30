@@ -1,11 +1,15 @@
-<button type="button" class="sect" aria-expanded="@_open" @onclick="@(() => _open = !_open)">
-    <LucideIcon Name="@(_open ? "chevron-down" : "chevron-right")" Size="12"/>
+<button type="button" class="sect" aria-expanded="@Open" @onclick="@(() => _open = !Open)">
+    <LucideIcon Name="@(Open ? "chevron-down" : "chevron-right")" Size="12"/>
     <span class="sect-title">@Title</span>
     <span class="sect-count">@Rows.Count</span>
 </button>
 
-@if (_open)
+@if (Open)
 {
+    @if (Rows.Count == 0 && Empty is { } empty)
+    {
+        <p class="sect-empty">@empty</p>
+    }
     @foreach (var row in Rows)
     {
         <div class="row @(row.Kind is UpNextKind.Running ? "is-running" : null)">
@@ -46,6 +50,13 @@
                     @row.When
                 }
             </span>
+            @if (row.CanCancel)
+            {
+                <BbButton Variant="ButtonVariant.Ghost" Size="ButtonSize.IconSmall" AriaLabel="@($"Cancel {row.Name}")"
+                          Class="row-cancel h-6 w-6 text-muted-foreground hover:text-destructive" OnClick="() => OnCancel.InvokeAsync(row)">
+                    <LucideIcon Name="x" Size="14"/>
+                </BbButton>
+            }
         </div>
     }
 }
@@ -53,8 +64,12 @@
 @code {
     [Parameter, EditorRequired] public required string Title { get; set; }
     [Parameter, EditorRequired] public required IReadOnlyList<UpNextRow> Rows { get; set; }
+    [Parameter] public string? Empty { get; set; }
+    [Parameter] public EventCallback<UpNextRow> OnCancel { get; set; }
 
-    private bool _open = true;
+    private bool? _open;
+
+    private bool Open => _open ?? Rows.Count > 0;
 
     private static string Icon(UpNextKind kind) =>
         kind switch

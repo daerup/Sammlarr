@@ -126,6 +126,37 @@ public class JobQueueTests
 		jobs.QueueWaitingAsync(Any<UserId>(), Any<JobKind>(), Any<DateTimeOffset>(), Any()).WasCalled(Times.Never);
 	}
 
+	[Test]
+	public async Task CancelAsync_ForAJobThatHasNotStarted_AnnouncesItCancelled()
+	{
+		var feedId = FeedId.From(Guid.NewGuid());
+		var (testee, jobs, events) = BuildTestee();
+		jobs.CancelAsync(Any<JobId>(), Any<UserId>(), Any<DateTimeOffset>(), Any()).Returns(Some.Of<IJobRequest>(new RunFeed(feedId, new Manual())));
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		var cancelled = await testee.CancelAsync(JobId.From(Guid.NewGuid()));
+
+		await Assert.That(cancelled).IsTrue();
+		await Assert
+			.That(seen.OfType<JobStateChangedEvent>().Single())
+			.IsEqualTo(new JobStateChangedEvent(TestCurrentUser.DefaultId, JobKind.FeedRun, feedId.ToString(), JobState.Cancelled));
+	}
+
+	[Test]
+	public async Task CancelAsync_ForAJobThatAlreadyStarted_AnnouncesNothing()
+	{
+		var (testee, jobs, events) = BuildTestee();
+		jobs.CancelAsync(Any<JobId>(), Any<UserId>(), Any<DateTimeOffset>(), Any()).Returns(new None());
+		List<IEvent> seen = [];
+		events.Published += seen.Add;
+
+		var cancelled = await testee.CancelAsync(JobId.From(Guid.NewGuid()));
+
+		await Assert.That(cancelled).IsFalse();
+		await Assert.That(seen).IsEmpty();
+	}
+
 	private static readonly FeedRunTrigger Nightly = new Scheduled("0 0 3 * * *");
 
 	private static (JobQueue Testee, Mock<IJobRepository> Jobs, EventPublisher Events) BuildTestee()

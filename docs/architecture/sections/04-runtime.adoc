@@ -198,6 +198,12 @@ so a deferred sync runs on time without the runner polling. A handler that throw
 there is no automatic retry. A row still `Running` when the app starts was abandoned by the
 previous process (there is only one runner), so startup puts it back to `Queued`.
 
+The owner can cancel a job that has not started, from Up Next on the Home page: a `Waiting` or
+`Queued` row ends `Cancelled` and never runs. The cancel only takes a row still in one of those two
+states, so a job the runner claims at the same moment runs instead, and the owner is told it had
+already started. Cancelling a feed run leaves a sync queued behind it in place, and a schedule
+still fires as usual.
+
 The engine plans through the same planner as the preview, before it records the run, so a run
 does what a preview taken at that moment would show. Mirror removals follow the preview's rule: a load that did not finish, or came back empty, is not
 conclusive and drops nothing, and an item is only removed after it has been missing for the

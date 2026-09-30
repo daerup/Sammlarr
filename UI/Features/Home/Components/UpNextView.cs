@@ -23,8 +23,12 @@ public sealed record UpNextRow(
 	string? Href,
 	MediaProvider? Brand = null,
 	bool Deleted = false,
-	DateTimeOffset? RunsAt = null
-);
+	DateTimeOffset? RunsAt = null,
+	JobId? Job = null
+)
+{
+	public bool CanCancel => Job is not null && Kind is UpNextKind.Queued or UpNextKind.Waiting;
+}
 
 internal static class UpNextView
 {
@@ -78,9 +82,9 @@ internal static class UpNextView
 		var href = Href(job.Request, feedNames);
 		var brand = Brand(job.Request, feedBrands, watchlistProvider);
 		var deleted = Deleted(job.Request, feedNames);
-		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted)
-			: job.State is JobState.Waiting ? new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted, job.RunAfter)
-			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted);
+		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted, Job: job.Id)
+			: job.State is JobState.Waiting ? new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted, job.RunAfter, job.Id)
+			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted, Job: job.Id);
 	}
 
 	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider watchlistProvider) =>
