@@ -26,23 +26,14 @@ public class SignInRequiredTests : BunitContext
 	}
 
 	[Test]
-	public async Task Button_ForEachProvider_ShowsTheProviderMark()
+	public async Task Button_ForEachProvider_ReadsSignInWithThenTheProvidersWordmark()
 	{
 		var cut = Render<SignInRequired>();
 
-		var labels = cut.FindAll("button .provider-label").Select(label => label.TextContent);
-		var marks = cut.FindAll("button .provider-mark img").Select(mark => mark.GetAttribute("src") ?? string.Empty);
-		await Assert.That(labels).IsEquivalentTo(["Sign in with Plex"]);
-		await Assert.That(marks).IsEquivalentTo(["_content/UI/providers/plex-square.svg"]);
-	}
-
-	[Test]
-	public async Task Button_ForEachProvider_HidesTheMarkBehindItsVisibleName()
-	{
-		var cut = Render<SignInRequired>();
-
-		var hidden = cut.FindAll("button .provider-mark").Select(mark => mark.GetAttribute("aria-hidden") ?? string.Empty);
-		await Assert.That(hidden).IsEquivalentTo(["true"]);
+		var button = cut.Find("button.signin-button");
+		var wordmarks = button.QuerySelectorAll("img").Select(logo => $"{logo.GetAttribute("alt")}|{logo.GetAttribute("src")}");
+		await Assert.That(button.TextContent.Trim()).IsEqualTo("Sign in with");
+		await Assert.That(wordmarks).IsEquivalentTo(["Plex|_content/UI/providers/plex-logo-light.svg", "Plex|_content/UI/providers/plex-logo-dark.svg"]);
 	}
 
 	[Test]

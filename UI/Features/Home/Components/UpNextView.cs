@@ -15,7 +15,7 @@ public enum UpNextKind
 	Scheduled,
 }
 
-public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null);
+public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null, bool Deleted = false);
 
 internal static class UpNextView
 {
@@ -68,9 +68,10 @@ internal static class UpNextView
 		var name = Name(job.Request, feedNames, providerName);
 		var href = Href(job.Request, feedNames);
 		var brand = Brand(job.Request, feedBrands, watchlistProvider);
-		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand)
-			: job.State is JobState.Waiting ? new UpNextRow(name, "waiting", string.Empty, UpNextKind.Waiting, href, brand)
-			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand);
+		var deleted = Deleted(job.Request, feedNames);
+		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted)
+			: job.State is JobState.Waiting ? new UpNextRow(name, "waiting", string.Empty, UpNextKind.Waiting, href, brand, deleted)
+			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted);
 	}
 
 	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider watchlistProvider) =>
@@ -80,6 +81,8 @@ internal static class UpNextView
 			SyncWatchlist => watchlistProvider,
 			_ => null,
 		};
+
+	private static bool Deleted(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) => request is RunFeed feed && !feedNames.ContainsKey(feed.Id);
 
 	private static string? Href(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) =>
 		request is RunFeed feed && feedNames.ContainsKey(feed.Id) ? EditHref(feed.Id) : null;

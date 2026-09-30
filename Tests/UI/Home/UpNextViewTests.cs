@@ -92,7 +92,7 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_ForAFeedThatWasDeleted_NamesTheRowButLinksNowhere()
+	public async Task InTheQueue_ForAFeedThatWasDeleted_NamesTheRowMarksItDeletedAndLinksNowhere()
 	{
 		var queue = Snapshot(Job(FeedId.From(Guid.NewGuid()), JobState.Queued));
 
@@ -100,10 +100,11 @@ public class UpNextViewTests
 
 		await Assert.That(row.Name).IsEqualTo("A deleted feed");
 		await Assert.That(row.Href).IsNull();
+		await Assert.That(row.Deleted).IsTrue();
 	}
 
 	[Test]
-	public async Task InTheQueue_ForAFeedJob_LinksToThatFeedsEditorButNotForASync()
+	public async Task InTheQueue_ForALiveFeedAndASync_LinksOnlyTheFeedAndMarksNeitherDeleted()
 	{
 		var queue = Snapshot(
 			Job(Docs, JobState.Running),
@@ -114,6 +115,7 @@ public class UpNextViewTests
 
 		await Assert.That(rows[0].Href).IsEqualTo($"/feeds/edit/{UrlGuid.Encode(Docs.Value)}");
 		await Assert.That(rows[1].Href).IsNull();
+		await Assert.That(rows.Select(row => row.Deleted)).IsEquivalentTo([false, false]);
 	}
 
 	[Test]
