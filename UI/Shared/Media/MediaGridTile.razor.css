@@ -10,7 +10,7 @@
 
 .media-card-backdrop {
     position: relative;
-    display: inline-block;
+    display: block;
     transition: transform 0.4s ease;
     width: 100%;
     aspect-ratio: 17 / 9;
