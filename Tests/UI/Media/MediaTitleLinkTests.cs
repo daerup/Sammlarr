@@ -33,9 +33,22 @@ public class MediaTitleLinkTests : BunitContext
 		await Assert.That(cut.FindAll(".id-link-card .provider-tile")).Count().IsEqualTo(2);
 		await Assert.That(cut.FindAll("a .provider-tile")).IsEmpty();
 		await Assert
-			.That(cut.FindAll("a.id-link").Select(link => link.GetAttribute("href")))
+			.That(cut.FindAll("a.id-link").Select(link => link.GetAttribute("href") ?? string.Empty))
 			.IsEquivalentTo(["https://www.themoviedb.org/movie/278", "https://www.imdb.com/title/tt0111161"], CollectionOrdering.Matching);
 		await Assert.That(cut.FindAll("a.id-link")[1].GetAttribute("aria-label")).IsEqualTo("View tt0111161 on IMDb (opens in new tab)");
+	}
+
+	[Test]
+	public async Task Popover_ForEachId_GivesItsRowTheProvidersBrandColourToHoverIn()
+	{
+		var cut = Render<Harness>();
+
+		await cut.Find(".media-title-trigger").ClickAsync(new());
+		cut.WaitForElement(".id-links-popover-list");
+
+		await Assert
+			.That(cut.FindAll(".id-link-card").Select(row => row.GetAttribute("style") ?? string.Empty))
+			.IsEquivalentTo(["--brand: #01B4E4", "--brand: #F5DE50"], CollectionOrdering.Matching);
 	}
 
 	private sealed class Harness : ComponentBase
