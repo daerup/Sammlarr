@@ -24,6 +24,7 @@ public class UiInvariantTests
 		await Expect(search).ToBeVisibleAsync(Wait.Settle);
 	}
 
+#if DEBUG
 	[Test]
 	public async Task TestingSection_WhenExceptionThrown_OpensErrorDialog()
 	{
@@ -39,6 +40,7 @@ public class UiInvariantTests
 		await Expect(page.GetByText("System.InvalidOperationException")).ToBeVisibleAsync();
 		await Expect(page.GetByText("Stack Trace")).ToBeVisibleAsync();
 	}
+#endif
 
 	[Test]
 	public async Task ThemeToggle_WhenFlipped_PersistsAcrossNavigation()

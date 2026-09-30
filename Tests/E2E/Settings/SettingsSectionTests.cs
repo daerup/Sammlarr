@@ -10,7 +10,9 @@ public class SettingsSectionTests
 	[Arguments("cache", "Id groups.")]
 	[Arguments("diagnostics", "Live log stream")]
 	[Arguments("users", "People with access to this Sammlarr instance.")]
+#if DEBUG
 	[Arguments("testing", "Fire a toast of the chosen kind")]
+#endif
 	[Arguments("about", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.")]
 	public async Task Section_WhenSelectedByQueryAsAdmin_RendersThatSection(string slug, string expectedContent)
 	{
@@ -23,7 +25,9 @@ public class SettingsSectionTests
 	[Arguments("Cache")]
 	[Arguments("Diagnostics")]
 	[Arguments("Users")]
+#if DEBUG
 	[Arguments("Testing")]
+#endif
 	public async Task AdminSection_WhenSignedInAsAdmin_IsOfferedInTheSectionNav(string label)
 	{
 		var page = await E2EApp.AdminAt(Routes.Settings);
