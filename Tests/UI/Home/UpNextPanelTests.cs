@@ -3,7 +3,9 @@ using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Contracts;
 using Domain.Jobs;
+using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
+using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 using UI.Shared.Services.Branding;
 
@@ -39,7 +41,7 @@ public class UpNextPanelTests : BunitContext
 		IReadOnlyList<UpNextRow> queued =
 		[
 			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, "/feeds/edit/docs"),
-			new("Sync to Plex", "queued", "2nd in line", UpNextKind.Queued, null),
+			new("Sync Watchlist", "queued", "2nd in line", UpNextKind.Queued, null),
 		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
@@ -47,6 +49,22 @@ public class UpNextPanelTests : BunitContext
 		var names = cut.FindAll(".row-name");
 		await Assert.That(names[0].Closest("a")?.GetAttribute("href")).IsEqualTo("/feeds/edit/docs");
 		await Assert.That(names[1].Closest("a")).IsNull();
+	}
+
+	[Test]
+	public async Task Row_WithABrand_NamesItsProviderInTheLogo()
+	{
+		IReadOnlyList<UpNextRow> queued =
+		[
+			new("hdlists/documentaries", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/docs", MediaProvider.Mdblist),
+			new("Sync Watchlist", "queued", string.Empty, UpNextKind.Queued, null, MediaProvider.Plex),
+		];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
+
+		await Assert
+			.That(cut.FindAll(".row .provider-tile img").Select(logo => logo.GetAttribute("alt") ?? string.Empty))
+			.IsEquivalentTo(["Movie Database List", "Plex"], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -82,7 +100,7 @@ public class UpNextPanelTests : BunitContext
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(now);
 		Services.AddSingleton(clock.Object);
-		IReadOnlyList<UpNextRow> queued = [new("Sync to Plex", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, RunsAt: now.AddMinutes(2))];
+		IReadOnlyList<UpNextRow> queued = [new("Sync Watchlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, RunsAt: now.AddMinutes(2))];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 

@@ -1,24 +1,9 @@
-@{
-    var url = GetProviderUrl(Identifier, Provider);
-}
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
 
-@if (url is not null)
-{
-    <BbTooltip>
-        <BbTooltipTrigger AsChild="false" Class="inline-flex min-w-0 max-w-full" Focusable="false">
-            <a href="@url" target="_blank" rel="noopener noreferrer"
-               class="inline-flex items-center gap-1 min-w-0 max-w-full font-mono text-primary underline-offset-4 hover:underline @(Class ?? "text-sm")">
-                <span class="min-w-0 overflow-x-clip text-ellipsis whitespace-nowrap">@Identifier</span>
-                <LucideIcon Name="external-link" Size="12" Class="shrink-0 opacity-60"/>
-            </a>
-        </BbTooltipTrigger>
-        <BbTooltipContent>Open on @ProviderName</BbTooltipContent>
-    </BbTooltip>
-}
-else
-{
-    <span class="block truncate font-mono text-sm">@Identifier</span>
-}
+<AppLink Href="@Url" External="true" Muted="Muted" Title="@($"Open on {Branding.GetBrandingInfo(Provider.AsMediaProvider()).NickName}")" Class="@($"min-w-0 max-w-full {Class ?? "text-sm"}")">
+    <span class="min-w-0 truncate font-mono">@Identifier</span>
+</AppLink>
 
 @code {
     [Parameter] [EditorRequired]
@@ -28,19 +13,15 @@ else
     public FeedProvider Provider { get; set; }
 
     [Parameter]
+    public bool Muted { get; set; }
+
+    [Parameter]
     public string? Class { get; set; }
 
-    private string ProviderName =>
+    private string Url =>
         Provider switch
         {
-            FeedProvider.Mdblist => "MDBList",
-            FeedProvider.Tmdb => "TMDB",
-        };
-
-    private static string GetProviderUrl(string identifier, FeedProvider provider) =>
-        provider switch
-        {
-            FeedProvider.Mdblist => $"https://mdblist.com/lists/{identifier}",
-            FeedProvider.Tmdb => $"https://www.themoviedb.org/list/{identifier}",
+            FeedProvider.Mdblist => $"https://mdblist.com/lists/{Identifier}",
+            FeedProvider.Tmdb => $"https://www.themoviedb.org/list/{Identifier}",
         };
 }

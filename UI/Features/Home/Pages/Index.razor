@@ -320,7 +320,7 @@ else
             _watchlistCount = watchlisted.Count;
             _blacklistCount = blacklisted.Count;
             _sources = LibraryView.Sources(owned, names, _watchlistCount);
-            _queued = UpNextView.InTheQueue(queue, names, brands, ProviderName, WatchlistProvider);
+            _queued = UpNextView.InTheQueue(queue, names, brands, WatchlistProvider);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
             _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);
             _candidates = RunPlan.Candidates(_feeds, overviews, _now, TimeZoneInfo.Local);
@@ -386,7 +386,7 @@ else
         try
         {
             var snapshot = await JobQueueView.GetAsync(_cancellation.Token);
-            _queued = UpNextView.InTheQueue(snapshot, FeedNames(), FeedBrands(), ProviderName, WatchlistProvider);
+            _queued = UpNextView.InTheQueue(snapshot, FeedNames(), FeedBrands(), WatchlistProvider);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(snapshot);
         }
         catch (OperationCanceledException)

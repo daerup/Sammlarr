@@ -1,5 +1,5 @@
 <a href="@Href"
-   class="@($"app-link {Class}".Trim())"
+   class="@($"app-link{(Muted ? " is-muted" : null)} {Class}".Trim())"
    style="@(Color is null ? null : $"color: {Color}")"
    title="@Title"
    target="@(External ? "_blank" : null)"
@@ -19,6 +19,8 @@
     [Parameter] public bool Arrow { get; set; } = true;
 
     [Parameter] public bool External { get; set; }
+
+    [Parameter] public bool Muted { get; set; }
 
     [Parameter] public string? Color { get; set; }
 

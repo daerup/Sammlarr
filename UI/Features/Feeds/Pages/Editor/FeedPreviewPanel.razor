@@ -81,7 +81,8 @@
                     </h2>
                     <p class="text-sm text-muted-foreground mt-0.5">
                         <FeedSourceLink Identifier="@(_appliedConfig?.Identifier ?? Config.Identifier)"
-                                        Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"/>
+                                        Provider="@(_appliedConfig?.Provider ?? Config.Provider!.Value)"
+                                        Muted="true"/>
                     </p>
                 </div>
                 <BbTooltipProvider>

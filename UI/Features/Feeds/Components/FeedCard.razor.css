@@ -84,13 +84,6 @@
     overflow-x: clip;
 }
 
-.feed-card-source ::deep > span,
-.feed-card-source ::deep > span > span {
-    display: flex;
-    min-width: 0;
-    max-width: 100%;
-}
-
 .feed-card-corner {
     display: flex;
     align-items: center;
