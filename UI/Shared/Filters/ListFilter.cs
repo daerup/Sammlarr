@@ -1,6 +1,6 @@
 using Domain.Feed;
 using Domain.Media;
-using Domain.Watchlist;
+using Domain.Wantlist;
 
 namespace UI.Shared.Filters;
 
@@ -8,7 +8,7 @@ public enum SourceKind
 {
 	Feed,
 	Manual,
-	Remote,
+	Sink,
 	Orphaned,
 }
 
@@ -24,12 +24,12 @@ public enum ListSort
 
 public readonly record struct SourceChoice(SourceKind Kind, FeedId? Feed = null)
 {
-	public bool Matches(WatchlistItemProvenance provenance) =>
+	public bool Matches(WantlistItemProvenance provenance) =>
 		Kind switch
 		{
 			SourceKind.Feed => provenance is FeedOrigin origin && origin.Feed.Id == Feed,
 			SourceKind.Manual => provenance is ManualOrigin,
-			SourceKind.Remote => provenance is RemoteOrigin,
+			SourceKind.Sink => provenance is SinkOrigin,
 			SourceKind.Orphaned => provenance is OrphanedOrigin,
 		};
 }
@@ -63,7 +63,7 @@ public sealed record ListFilter
 	public bool MatchesSearch(string? title) =>
 		string.IsNullOrWhiteSpace(Search) || (title is not null && title.Contains(Search.Trim(), StringComparison.CurrentCultureIgnoreCase));
 
-	public bool MatchesSource(WatchlistItemProvenance provenance) => Sources.Count == 0 || Sources.Any(source => source.Matches(provenance));
+	public bool MatchesSource(WantlistItemProvenance provenance) => Sources.Count == 0 || Sources.Any(source => source.Matches(provenance));
 
 	public IEnumerable<T> SortBy<T>(IEnumerable<T> items, Func<T, IdentifiedMedia> media, Func<T, DateTimeOffset> addedAt) =>
 		Sort switch

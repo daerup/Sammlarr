@@ -1,18 +1,18 @@
 using Contracts;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
-using DB.Data.Blacklist;
+using DB.Data.Blocklist;
 using DB.Data.Cleanup;
 using DB.Data.Identity;
 using DB.Data.Media;
 using DB.Data.Media.Metadata;
-using DB.Data.Watchlist;
-using DB.Data.Watchlist.Outbox;
+using DB.Data.Wantlist;
+using DB.Data.Wantlist.Outbox;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -36,7 +36,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 			.Returns(
 				new ProviderConfig
 				{
-					WatchlistProvider = WatchlistProvider.Plex,
+					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
@@ -58,29 +58,29 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PurgeAsync_WhenMediaIsBlacklisted_KeepsMediaAndOnlyItsAnchorExternalId()
+	public async Task PurgeAsync_WhenMediaIsBlocklisted_KeepsMediaAndOnlyItsAnchorExternalId()
 	{
-		var blacklistedId = PlexId.From("2000", MediaType.Movie);
-		var blacklistedImdb = ImdbId.From("tt2000", MediaType.Movie);
+		var blocklistedId = PlexId.From("2000", MediaType.Movie);
+		var blocklistedImdb = ImdbId.From("tt2000", MediaType.Movie);
 		var purgedId = TmdbId.From("2001", MediaType.Movie);
 
-		var blacklistedMedia = new MediaRow();
+		var blocklistedMedia = new MediaRow();
 		var purgedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(
-			blacklistedId.ToExternalIdEntity(blacklistedMedia),
-			blacklistedImdb.ToExternalIdEntity(blacklistedMedia),
+			blocklistedId.ToExternalIdEntity(blocklistedMedia),
+			blocklistedImdb.ToExternalIdEntity(blocklistedMedia),
 			purgedId.ToExternalIdEntity(purgedMedia)
 		);
-		var blacklistedMetadata = BuildMetadata(blacklistedMedia, "Blacklisted");
+		var blocklistedMetadata = BuildMetadata(blocklistedMedia, "Blocklisted");
 		var purgedMetadata = BuildMetadata(purgedMedia, "Purged");
-		fixture.Context.MediaMetadata.AddRange(blacklistedMetadata, purgedMetadata);
+		fixture.Context.MediaMetadata.AddRange(blocklistedMetadata, purgedMetadata);
 		fixture.Context.MediaRatings.AddRange(
 			new MediaRatingRow
 			{
 				Source = RatingProvider.Tmdb,
 				NormalizedValue = 8.0f,
 				VoteCount = 1234,
-				Metadata = blacklistedMetadata,
+				Metadata = blocklistedMetadata,
 			},
 			new MediaRatingRow
 			{
@@ -90,7 +90,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 				Metadata = purgedMetadata,
 			}
 		);
-		fixture.Context.Blacklist.Add(new BlacklistRow { Media = blacklistedMedia });
+		fixture.Context.Blocklist.Add(new BlocklistRow { Media = blocklistedMedia });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -99,34 +99,34 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		using var _ = Assert.Multiple();
 		await Assert.That(await fixture.Context.MediaMetadata.AnyAsync()).IsFalse();
 		await Assert.That(await fixture.Context.MediaRatings.AnyAsync()).IsFalse();
-		await Assert.That(await fixture.Context.Blacklist.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Blocklist.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
-		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(blacklistedMedia.Id);
+		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(blocklistedMedia.Id);
 		await Assert.That(fixture.Context.ExternalMediaIds).IsSingleElement();
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(blacklistedId);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(blocklistedId);
 	}
 
 	[Test]
-	public async Task PurgeAsync_WhenMediaIsWatchlisted_KeepsMediaAndOnlyItsAnchorExternalId()
+	public async Task PurgeAsync_WhenMediaIsWantlisted_KeepsMediaAndOnlyItsAnchorExternalId()
 	{
-		var watchlistedId = PlexId.From("3000", MediaType.Movie);
-		var watchlistedImdb = ImdbId.From("tt3000", MediaType.Movie);
+		var wantlistedId = PlexId.From("3000", MediaType.Movie);
+		var wantlistedImdb = ImdbId.From("tt3000", MediaType.Movie);
 
-		var watchlistedMedia = new MediaRow();
-		fixture.Context.ExternalMediaIds.AddRange(watchlistedId.ToExternalIdEntity(watchlistedMedia), watchlistedImdb.ToExternalIdEntity(watchlistedMedia));
-		var metadata = BuildMetadata(watchlistedMedia, "Watchlisted");
+		var wantlistedMedia = new MediaRow();
+		fixture.Context.ExternalMediaIds.AddRange(wantlistedId.ToExternalIdEntity(wantlistedMedia), wantlistedImdb.ToExternalIdEntity(wantlistedMedia));
+		var metadata = BuildMetadata(wantlistedMedia, "Wantlisted");
 		fixture.Context.MediaMetadata.Add(metadata);
-		fixture.Context.Watchlist.Add(new WatchlistRow { Media = watchlistedMedia, Origin = WatchlistEntryOrigin.Manual });
+		fixture.Context.Wantlist.Add(new WantlistRow { Media = wantlistedMedia, Origin = WantlistItemOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		await _testee.PurgeAsync();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(await fixture.Context.Watchlist.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.Wantlist.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
-		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(watchlistedMedia.Id);
-		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(watchlistedId);
+		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(wantlistedMedia.Id);
+		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(wantlistedId);
 	}
 
 	[Test]
@@ -137,14 +137,14 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var queuedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(queuedId.ToExternalIdEntity(queuedMedia), queuedImdb.ToExternalIdEntity(queuedMedia));
-		fixture.Context.WatchlistOutbox.Add(new WatchlistOutboxRow { Media = queuedMedia, Action = WatchlistOperationAction.Add });
+		fixture.Context.WantlistOutbox.Add(new WantlistOutboxRow { Media = queuedMedia, Action = WantlistOperationAction.Add });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		await _testee.PurgeAsync();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(await fixture.Context.WatchlistOutbox.CountAsync()).IsEqualTo(1);
+		await Assert.That(await fixture.Context.WantlistOutbox.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.CountAsync()).IsEqualTo(1);
 		await Assert.That(await fixture.Context.Media.Select(m => m.Id).SingleAsync()).IsEqualTo(queuedMedia.Id);
 		await Assert.That(fixture.Context.ExternalMediaIds.Single().ToExternalMediaId()).IsEqualTo<IExternalMediaId>(queuedId);
@@ -174,7 +174,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var adminId = fixture.CurrentUser.Id;
 		fixture.CurrentUser.Id = UserId.From(otherUserId);
-		fixture.Context.Watchlist.Add(new WatchlistRow { Media = sharedMedia, Origin = WatchlistEntryOrigin.Manual });
+		fixture.Context.Wantlist.Add(new WantlistRow { Media = sharedMedia, Origin = WantlistItemOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.CurrentUser.Id = adminId;
 		fixture.Context.ChangeTracker.Clear();

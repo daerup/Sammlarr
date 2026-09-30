@@ -8,10 +8,10 @@
         </p>
     </div>
 
-    <MediaCardsDemo Watchlisted="_watchlisted"/>
+    <MediaCardsDemo Wantlisted="_wantlisted"/>
 
     <DemoGrid>
-        <MediaDetailTilesDemo Watchlisted="_watchlisted" OnToggleWatchlist="ToggleWatchlist"/>
+        <MediaDetailTilesDemo Wantlisted="_wantlisted" OnToggleWantlist="ToggleWantlist"/>
         <BulkEditGridDemo/>
         <ProviderRowDemo/>
         <ServicesMapDemo/>
@@ -57,13 +57,13 @@
 </div>
 
 @code {
-    private readonly HashSet<MediaId> _watchlisted = [DemoMedia.Movie.Id];
+    private readonly HashSet<MediaId> _wantlisted = [DemoMedia.Movie.Id];
 
-    private void ToggleWatchlist(MediaLookup media)
+    private void ToggleWantlist(MediaLookup media)
     {
-        if (!_watchlisted.Remove(media.Id))
+        if (!_wantlisted.Remove(media.Id))
         {
-            _watchlisted.Add(media.Id);
+            _wantlisted.Add(media.Id);
         }
     }
 }

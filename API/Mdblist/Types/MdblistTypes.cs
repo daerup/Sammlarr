@@ -8,9 +8,9 @@ internal static class MdblistTypes
 	public static class ListItems
 	{
 		[JsonConverter(typeof(RootConverter))]
-		public record Root(IReadOnlyList<Movie> movies, IReadOnlyList<Show> shows, IReadOnlyList<UnknownListItem> unknowns);
+		public record Root(IReadOnlyList<Movie> movies, IReadOnlyList<Show> shows, IReadOnlyList<UnmatchedListItem> unmatched);
 
-		public record UnknownListItem(MediaType MediaType, Ids ids, string title, int release_year);
+		public record UnmatchedListItem(MediaType MediaType, Ids ids, string title, int release_year);
 
 		public interface IListItem
 		{

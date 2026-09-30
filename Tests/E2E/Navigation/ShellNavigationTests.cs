@@ -4,8 +4,8 @@ public class ShellNavigationTests
 {
 	[Test]
 	[Arguments("Browse", Routes.Browse)]
-	[Arguments("Watchlist", Routes.Watchlist)]
-	[Arguments("Blacklist", Routes.Blacklist)]
+	[Arguments("Wantlist", Routes.Wantlist)]
+	[Arguments("Blocklist", Routes.Blocklist)]
 	[Arguments("Feeds", Routes.Feeds)]
 	public async Task NavMenuItem_WhenClickedWhileAuthenticated_NavigatesToItsPage(string label, string route)
 	{
@@ -32,11 +32,11 @@ public class ShellNavigationTests
 	{
 		var page = await E2EApp.AdminAt(Routes.Home);
 
-		await page.MenuItem("Watchlist").First.ClickAsync();
-		await page.ShouldBeAtAsync(Routes.Watchlist);
+		await page.MenuItem("Wantlist").First.ClickAsync();
+		await page.ShouldBeAtAsync(Routes.Wantlist);
 
-		await page.MenuItem("Blacklist").First.ClickAsync();
-		await page.ShouldBeAtAsync(Routes.Blacklist);
+		await page.MenuItem("Blocklist").First.ClickAsync();
+		await page.ShouldBeAtAsync(Routes.Blocklist);
 
 		await page.MenuItem("Feeds").First.ClickAsync();
 

@@ -9,7 +9,7 @@ internal static class ProviderCaption
 	private static readonly (IReadOnlySet<MediaProvider> Providers, string Word)[] Uses =
 	[
 		(Enum.GetValues<SearchProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet(), "search"),
-		(Enum.GetValues<WatchlistProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet(), "watchlist"),
+		(Enum.GetValues<SinkKind>().Select(provider => provider.AsMediaProvider()).ToHashSet(), "wantlist"),
 		(Enum.GetValues<TrendingProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet(), "trending"),
 		(Enum.GetValues<RatingProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet(), "ratings"),
 		(Enum.GetValues<FeedProvider>().Select(provider => provider.AsMediaProvider()).ToHashSet(), "feeds"),

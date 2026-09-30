@@ -1,7 +1,7 @@
 using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Metadata;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
@@ -16,7 +16,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
 	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
 	private IMediaRatingService TmdbRatings => host.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb);
-	private IWatchlistProvider PlexWatchlist => host.ResolveKeyed<IWatchlistProvider>(WatchlistProvider.Plex);
+	private IMediaSink PlexWantlist => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -127,7 +127,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task PushAsync_WhenThePlexTokenIsMissing_Fails()
 	{
-		var results = await PlexWatchlist.AddToWatchlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
+		var results = await PlexWantlist.AddToWantlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
 
 		await Assert.That(results[^1].Success).IsFalse();
 	}
@@ -137,7 +137,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.WithPlexAccount("plex-access-token");
 
-		var results = await PlexWatchlist.AddToWatchlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
+		var results = await PlexWantlist.AddToWantlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
 
 		await Assert.That(results[^1].Success).IsTrue();
 	}

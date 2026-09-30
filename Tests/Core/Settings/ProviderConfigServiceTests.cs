@@ -60,7 +60,7 @@ public sealed class ProviderConfigServiceTests : IDisposable
 	private static ProviderConfig Config(RegistrationMode registration) =>
 		new()
 		{
-			WatchlistProvider = WatchlistProvider.Plex,
+			Sink = SinkKind.Plex,
 			TrendingProvider = TrendingProvider.Tmdb,
 			SearchProvider = SearchProvider.Plex,
 			RatingProvider = RatingProvider.Tmdb,

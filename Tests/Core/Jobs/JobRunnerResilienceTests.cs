@@ -5,7 +5,7 @@ using Contracts.Jobs;
 using Core.Jobs;
 using Domain.Identity;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -101,7 +101,7 @@ public class JobRunnerResilienceTests
 		var jobs = IJobRepository.Mock();
 		jobs.RequeueRunningAsync(Any<DateTimeOffset>(), Any()).Returns(0);
 		jobs.TakeNextAsync(Any<DateTimeOffset>(), Any())
-			.Returns(Some.Of(new RunningJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), UserId.New())));
+			.Returns(Some.Of(new RunningJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), UserId.New())));
 		jobs.NextWaitingAsync(Any()).Returns(new None());
 		jobs.CompleteAsync(Any<JobId>(), Any<DateTimeOffset>(), Any()).Throws(new InvalidOperationException("database is locked"));
 		jobs.FailAsync(Any<JobId>(), Any<DateTimeOffset>(), Any()).Throws(new InvalidOperationException("database is locked"));
@@ -131,7 +131,7 @@ public class JobRunnerResilienceTests
 		var services = new ServiceCollection();
 		services.AddSingleton(jobs.Object);
 		services.AddSingleton(userScope.Object);
-		services.AddSingleton<IJobHandler<SyncWatchlist>, NoopSyncHandler>();
+		services.AddSingleton<IJobHandler<SyncWantlist>, NoopSyncHandler>();
 		var status = new JobRunnerStatus();
 
 		var scopes = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
@@ -153,8 +153,8 @@ public class JobRunnerResilienceTests
 		public void Dispose() { }
 	}
 
-	private sealed class NoopSyncHandler : IJobHandler<SyncWatchlist>
+	private sealed class NoopSyncHandler : IJobHandler<SyncWantlist>
 	{
-		public Task HandleAsync(SyncWatchlist request, CancellationToken cancellationToken = default) => Task.CompletedTask;
+		public Task HandleAsync(SyncWantlist request, CancellationToken cancellationToken = default) => Task.CompletedTask;
 	}
 }

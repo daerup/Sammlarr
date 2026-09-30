@@ -1,0 +1,347 @@
+@using Contracts.Identity
+@using Contracts.Media
+@using Contracts.Wantlist.Sync
+@using Contracts.Blocklist
+@using Contracts.Wantlist
+@using Contracts.Announcing
+@using Contracts.Jobs
+@using Domain.Announcing
+@using UI.Shared.Announcing
+@using Domain.Jobs
+@using Domain.Wantlist
+@using UI.Shared.Changes
+@using UI.Shared.Media
+@implements IDisposable
+@inject IMediaService Media
+@inject IWantlistService WantlistService
+@inject IBlocklistService BlocklistService
+@inject IJobQueue JobQueue
+@inject IWantlistSyncPlanner Planner
+@inject ICurrentUser CurrentUser
+@inject NavigationManager Navigation
+@inject IEventPublisher Events
+@inject IJobQueueView JobQueueView
+@inject Notifier Notifier
+
+<BbButtonGroup AriaLabel="Wantlist sync">
+    @if (IsBusy)
+    {
+        <HoverButton Disabled="true" Color="@BrandColor" Class="whitespace-nowrap">
+            <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
+            <span>Syncing...</span>
+        </HoverButton>
+    }
+    else
+    {
+        <HoverButton OnClick="OpenAsync" Color="@BrandColor" Class="whitespace-nowrap">
+            <LucideIcon Name="refresh-cw" Size="16" Class="mr-2"/>
+            <span>Sync</span>
+        </HoverButton>
+    }
+    <span class="sync-status @(IsBusy ? "is-busy" : null)" style="@(string.IsNullOrEmpty(BrandColor) ? null : $"--tint: {BrandColor};")">
+        @if (_isLoadingDryRun || (_dryRun is null && _dryRunError is null))
+        {
+            <BbSpinner Size="SpinnerSize.Small"/>
+            <span class="sync-note">Comparing</span>
+        }
+        else if (_dryRun is { TotalChanges: > 0 } report)
+        {
+            @if (report.AddCount > 0)
+            {
+                <span class="is-added">@($"+{report.AddCount:N0}")</span>
+            }
+            @if (report.RemoveCount > 0)
+            {
+                <span class="is-removed">@($"−{report.RemoveCount:N0}")</span>
+            }
+        }
+        else if (_dryRun is not null)
+        {
+            <LucideIcon Name="check" Size="13"/>
+            <span class="sync-note">In sync</span>
+        }
+        else
+        {
+            <LucideIcon Name="cloud-off" Size="13"/>
+            <span class="sync-note" title="@_dryRunError">@ProviderName unreachable</span>
+        }
+    </span>
+</BbButtonGroup>
+
+@if (!IsBusy)
+{
+    <ChangeDialog Open="_open"
+                  OnOpenChanged="HandleOpenChangedAsync"
+                  Title="Review changes before syncing"
+                  Subtitle="@Subtitle"
+                  Loading="_isLoadingDryRun"
+                  Entries="_entries"
+                  Chips="_chips"
+                  OnSelect="ShowDetailsAsync"
+                  RemovedLabel="Removing"
+                  AddedLabel="Adding"
+                  UnchangedLabel="Already in sync"
+                  EmptyMessage="Everything is in sync."
+                  BandTone="ChangeBandTone.Bad"
+                  Prologue="@(OutboxEntries.Count > 0 ? OutboxStrip : null)"
+                  Band="@(_dryRunError is not null ? ErrorBand : null)">
+        <Actions>
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="CloseAsync">Cancel</BbButton>
+            <BbButton Size="ButtonSize.Small" Disabled="@(_dryRun is null || (_dryRun.TotalChanges == 0 && OutboxEntries.Count == 0))" OnClick="ConfirmAsync">
+                <LucideIcon Name="refresh-cw" Size="13" Class="mr-1.5"/>
+                Sync now
+            </BbButton>
+        </Actions>
+    </ChangeDialog>
+
+    <MediaDetailSheet Open="_selected is not null"
+                      OnOpenChanged="@(open => { if (!open) { _selected = null; } })"
+                      Media="_selected"
+                      OnEnrollmentChanged="HandleEnrollmentChangedAsync"/>
+}
+
+@code {
+    private RenderFragment OutboxStrip =>
+        @<text>
+            <LucideIcon Name="send" Size="14"/>
+            <span>@OutboxSummary</span>
+        </text>;
+
+    private RenderFragment ErrorBand =>
+        @<text>
+            <LucideIcon Name="cloud-off" Size="15" Class="shrink-0"/>
+            <span>@_dryRunError</span>
+        </text>;
+
+    [Parameter] public EventCallback OnSynced { get; set; }
+
+    [Parameter] public string? BrandColor { get; set; }
+
+    [Parameter, EditorRequired] public string ProviderName { get; set; } = string.Empty;
+
+    [Parameter] public IReadOnlyCollection<WantlistOutboxEntry> OutboxEntries { get; set; } = [];
+
+    [Parameter] public EventCallback OnStatusRefresh { get; set; }
+
+    [Parameter] public bool IsSyncing { get; set; }
+
+    [Parameter] public EventCallback OnSyncStarted { get; set; }
+
+    private const int DryRunAttempts = 3;
+    private static readonly TimeSpan DryRunRetryDelay = TimeSpan.FromSeconds(1);
+
+    private readonly CancellationTokenSource _cts = new();
+    private WantlistSyncSummary? _dryRun;
+    private string? _dryRunError;
+    private IReadOnlyList<ChangeEntry> _entries = [];
+    private IReadOnlyList<ChangeChip> _chips = [];
+    private bool _isSyncing;
+    private bool _isRunning;
+    private bool _isLoadingDryRun;
+    private bool _open;
+    private MediaLookup? _selected;
+    private bool _wantlistChanged;
+
+    private bool IsBusy => _isSyncing || _isRunning || IsSyncing;
+
+    private Task ShowDetailsAsync(MediaLookup media)
+    {
+        _selected = media;
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleEnrollmentChangedAsync(MediaListKind changed)
+    {
+        if (changed is not MediaListKind.Wantlist)
+        {
+            return;
+        }
+
+        _wantlistChanged = true;
+        await LoadDryRunAsync();
+    }
+
+    private string OutboxSummary
+    {
+        get
+        {
+            var failed = OutboxEntries.Count(entry => entry.Status is WantlistOutboxState.Failed);
+            var inFlight = OutboxEntries.Count - failed;
+            var parts = new List<string>(2);
+            if (inFlight > 0)
+            {
+                parts.Add($"{inFlight} waiting to reach Plex");
+            }
+            if (failed > 0)
+            {
+                parts.Add($"{failed} could not be delivered");
+            }
+            return string.Join(" · ", parts);
+        }
+    }
+
+    private string Subtitle => _dryRun is { } report ? $"{report.NoOps.Count + report.TotalChanges} titles compared" : "Comparing with Plex…";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.Published += OnEvent;
+        _isRunning = await IsSyncRunningAsync();
+        await RefreshAsync();
+    }
+
+    private async Task<bool> IsSyncRunningAsync()
+    {
+        var queue = await JobQueueView.GetAsync(_cts.Token);
+        return queue.Jobs.Any(job => job.Request is SyncWantlist && job.State is JobState.Running);
+    }
+
+    public async Task RefreshAsync() => await LoadDryRunAsync();
+
+    private async Task OpenAsync()
+    {
+        _open = true;
+        await OnStatusRefresh.InvokeAsync();
+        await LoadDryRunAsync();
+    }
+
+    private Task CloseAsync()
+    {
+        _open = false;
+        ReloadIfWantlistChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task HandleOpenChangedAsync(bool open)
+    {
+        _open = open;
+        if (!open)
+        {
+            ReloadIfWantlistChanged();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void ReloadIfWantlistChanged()
+    {
+        if (_wantlistChanged)
+        {
+            Navigation.Refresh(true);
+        }
+    }
+
+    private async Task LoadDryRunAsync()
+    {
+        _isLoadingDryRun = true;
+        _dryRun = null;
+        _dryRunError = null;
+        _entries = [];
+        _chips = [];
+        StateHasChanged();
+
+        var token = _cts.Token;
+        try
+        {
+            for (var attempt = 1; attempt <= DryRunAttempts && _dryRun is null; attempt++)
+            {
+                if (attempt > 1)
+                {
+                    await Task.Delay(DryRunRetryDelay, token);
+                }
+
+                await AttemptDryRunAsync(token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        _isLoadingDryRun = false;
+        StateHasChanged();
+    }
+
+    private async Task AttemptDryRunAsync(CancellationToken cancellationToken)
+    {
+        var result = await Planner.PlanAsync(cancellationToken);
+        switch (result)
+        {
+            case WantlistSyncSummary changes:
+                _dryRun = changes;
+                _dryRunError = null;
+                var metadata = await DryRunMetadataLoader.LoadAsync(Media, changes, cancellationToken);
+                _entries = WantlistSyncView.Entries(changes, metadata);
+                _chips = WantlistSyncView.Chips(changes);
+                break;
+            case WantlistSyncSinkUnreachable failed:
+                _dryRunError = failed.Reason;
+                break;
+        }
+    }
+
+    private async Task ConfirmAsync()
+    {
+        _open = false;
+        _wantlistChanged = false;
+        await SyncAsync();
+    }
+
+    public async Task SyncAsync()
+    {
+        if (_isSyncing)
+        {
+            return;
+        }
+
+        _isSyncing = true;
+        StateHasChanged();
+        try
+        {
+            await OnSyncStarted.InvokeAsync();
+            switch (await JobQueue.EnqueueAsync(new SyncWantlist(new ManualTrigger()), _cts.Token))
+            {
+                case Queued:
+                    Notifier.Info("Sync has been queued", null);
+                    break;
+                case AlreadyQueued:
+                    Notifier.Info("A sync is already queued", null);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Sync failed");
+        }
+        finally
+        {
+            _isSyncing = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        Events.Published -= OnEvent;
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    private void OnEvent(IEvent raised)
+    {
+        if (ViewerEvent.Own<JobStateChangedEvent>(raised, CurrentUser.Id) is not { Kind: JobKind.WantlistSync } job)
+        {
+            return;
+        }
+
+        _isRunning = job.State is JobState.Running;
+        _ = InvokeAsync(async () =>
+        {
+            if (!_isRunning)
+            {
+                await RefreshAsync();
+                await OnSynced.InvokeAsync();
+            }
+
+            StateHasChanged();
+        });
+    }
+}

@@ -3,8 +3,8 @@ namespace E2E.Tests.Auth;
 public class RouteProtectionTests
 {
 	[Test]
-	[Arguments(Routes.Watchlist)]
-	[Arguments(Routes.Blacklist)]
+	[Arguments(Routes.Wantlist)]
+	[Arguments(Routes.Blocklist)]
 	[Arguments(Routes.Feeds)]
 	[Arguments(Routes.Browse)]
 	[Arguments(Routes.Settings)]

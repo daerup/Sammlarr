@@ -11,7 +11,7 @@ internal enum PreviewBadge
 	Bypassed,
 	Filtered,
 	Skipped,
-	Unresolved,
+	Unmatched,
 }
 
 internal static class FeedEditor
@@ -20,7 +20,7 @@ internal static class FeedEditor
 
 	internal const string ResultRow = ".preview-main-results .search-result-row";
 
-	internal const string UnresolvedRow = ".search-result-row.is-unresolved";
+	internal const string UnmatchedRow = ".search-result-row.is-unmatched";
 
 	private const string RowTitle = $"{ResultRow} .media-title-text";
 
@@ -105,6 +105,6 @@ internal static class FeedEditor
 			PreviewBadge.Bypassed => 3,
 			PreviewBadge.Filtered => 4,
 			PreviewBadge.Skipped => 5,
-			PreviewBadge.Unresolved => 6,
+			PreviewBadge.Unmatched => 6,
 		};
 }

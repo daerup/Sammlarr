@@ -15,7 +15,7 @@ internal class JobsModule : IServiceModule
 		services.AddSingleton<JobRunnerStatus>();
 		services.AddSingleton<IJobRunnerStatus>(sp => sp.GetRequiredService<JobRunnerStatus>());
 		services.AddScoped<IJobHandler<RunFeed>, FeedRunJobHandler>();
-		services.AddScoped<IJobHandler<SyncWatchlist>, WatchlistSyncJobHandler>();
+		services.AddScoped<IJobHandler<SyncWantlist>, WantlistSyncJobHandler>();
 		services.AddTracedScoped<IJobQueue, JobQueue>();
 		services.AddHostedService<JobRunner>();
 	}

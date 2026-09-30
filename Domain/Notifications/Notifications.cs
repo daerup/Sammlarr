@@ -6,7 +6,7 @@ using Domain.Providers;
 
 namespace Domain.Notifications;
 
-public sealed record WatchlistSyncCompletedNotification(
+public sealed record WantlistSyncCompletedNotification(
 	UserId UserId,
 	DateTimeOffset OccurredAt,
 	IReadOnlyList<MediaId> PulledAdds,
@@ -18,7 +18,7 @@ public sealed record WatchlistSyncCompletedNotification(
 {
 	public Guid Id { get; init; } = Guid.CreateVersion7();
 
-	public NotificationEventType Type => NotificationEventType.WatchlistSyncCompleted;
+	public NotificationEventType Type => NotificationEventType.WantlistSyncCompleted;
 
 	public string Summary =>
 		FailedPushes.Count == 0
@@ -28,11 +28,11 @@ public sealed record WatchlistSyncCompletedNotification(
 	public NotificationLevel DefaultLevel => FailedPushes.Count == 0 ? NotificationLevel.Success : NotificationLevel.Warning;
 }
 
-public sealed record WatchlistSyncFailedNotification(UserId UserId, DateTimeOffset OccurredAt, string Reason) : INotification
+public sealed record WantlistSyncFailedNotification(UserId UserId, DateTimeOffset OccurredAt, string Reason) : INotification
 {
 	public Guid Id { get; init; } = Guid.CreateVersion7();
 
-	public NotificationEventType Type => NotificationEventType.WatchlistSyncFailed;
+	public NotificationEventType Type => NotificationEventType.WantlistSyncFailed;
 
 	public string Summary => Reason;
 

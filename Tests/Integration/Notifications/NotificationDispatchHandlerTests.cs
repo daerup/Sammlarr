@@ -17,16 +17,16 @@ public class NotificationDispatchHandlerTests
 	private static readonly UserId User = UserId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task Handle_WhenAWatchlistSyncs_FansOutOneMessagePerMatchingSubscription()
+	public async Task Handle_WhenAWantlistSyncs_FansOutOneMessagePerMatchingSubscription()
 	{
 		var targetA = Guid.NewGuid();
 		var targetB = Guid.NewGuid();
 		var subscriptions = SubscriptionsFor(
-			NotificationEventType.WatchlistSyncCompleted,
-			new NotificationSubscription(Guid.NewGuid(), targetA, [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None),
-			new NotificationSubscription(Guid.NewGuid(), targetB, [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None)
+			NotificationEventType.WantlistSyncCompleted,
+			new NotificationSubscription(Guid.NewGuid(), targetA, [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None),
+			new NotificationSubscription(Guid.NewGuid(), targetB, [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
-		var @event = new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []);
+		var @event = new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []);
 
 		var messages = await NotificationDispatchHandler.Handle(
 			@event,
@@ -45,13 +45,13 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_WhenAWatchlistSyncs_ConsolidatesPulledAndPushedSortedByDescriptor()
+	public async Task Handle_WhenAWantlistSyncs_ConsolidatesPulledAndPushedSortedByDescriptor()
 	{
 		var pulledAdd = MediaId.From(Guid.NewGuid());
 		var pushedRemove = MediaId.From(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(
-			NotificationEventType.WatchlistSyncCompleted,
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None)
+			NotificationEventType.WantlistSyncCompleted,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
 		var media = Media(
 			new CachedMedia(new PartialMovie { Identity = new MediaIdentity(pulledAdd, []), Title = "Pulled Movie" }, DateTimeOffset.UtcNow),
@@ -59,7 +59,7 @@ public class NotificationDispatchHandlerTests
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove], []),
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [pulledAdd], [], [], [pushedRemove], []),
 			Scope().Object,
 			subscriptions.Object,
 			media.Object,
@@ -76,16 +76,16 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_WhenAWatchlistSyncFails_DeliversTheReasonAsBothSummaryAndData()
+	public async Task Handle_WhenAWantlistSyncFails_DeliversTheReasonAsBothSummaryAndData()
 	{
 		var targetId = Guid.NewGuid();
 		var subscriptions = SubscriptionsFor(
-			NotificationEventType.WatchlistSyncFailed,
-			new NotificationSubscription(Guid.NewGuid(), targetId, [NotificationEventType.WatchlistSyncFailed], NotificationTemplate.None)
+			NotificationEventType.WantlistSyncFailed,
+			new NotificationSubscription(Guid.NewGuid(), targetId, [NotificationEventType.WantlistSyncFailed], NotificationTemplate.None)
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncFailedNotification(User, DateTimeOffset.UtcNow, "Couldn't reach Plex"),
+			new WantlistSyncFailedNotification(User, DateTimeOffset.UtcNow, "Couldn't reach Plex"),
 			Scope().Object,
 			subscriptions.Object,
 			Media().Object,
@@ -148,9 +148,9 @@ public class NotificationDispatchHandlerTests
 		var scope = Scope();
 
 		await NotificationDispatchHandler.Handle(
-			new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
 			scope.Object,
-			SubscriptionsFor(NotificationEventType.WatchlistSyncCompleted).Object,
+			SubscriptionsFor(NotificationEventType.WantlistSyncCompleted).Object,
 			Media().Object,
 			Feed().Object,
 			CancellationToken.None
@@ -165,9 +165,9 @@ public class NotificationDispatchHandlerTests
 		var media = Media();
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())], [], [], [], []),
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())], [], [], [], []),
 			Scope().Object,
-			SubscriptionsFor(NotificationEventType.WatchlistSyncCompleted).Object,
+			SubscriptionsFor(NotificationEventType.WantlistSyncCompleted).Object,
 			media.Object,
 			Feed().Object,
 			CancellationToken.None
@@ -182,14 +182,14 @@ public class NotificationDispatchHandlerTests
 	{
 		var id = MediaId.From(Guid.NewGuid());
 		var subscriptions = SubscriptionsFor(
-			NotificationEventType.WatchlistSyncCompleted,
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None),
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None)
+			NotificationEventType.WantlistSyncCompleted,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None),
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
 		var media = Media(new CachedMedia(new PartialMovie { Identity = new MediaIdentity(id, []), Title = "The Matrix" }, DateTimeOffset.UtcNow));
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [id], [], [], [], []),
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [id], [], [], [], []),
 			Scope().Object,
 			subscriptions.Object,
 			media.Object,
@@ -205,15 +205,15 @@ public class NotificationDispatchHandlerTests
 	}
 
 	[Test]
-	public async Task Handle_WhenAWatchlistSyncs_TitlesTheContextFromTheEventTypeDescription()
+	public async Task Handle_WhenAWantlistSyncs_TitlesTheContextFromTheEventTypeDescription()
 	{
 		var subscriptions = SubscriptionsFor(
-			NotificationEventType.WatchlistSyncCompleted,
-			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None)
+			NotificationEventType.WantlistSyncCompleted,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []),
 			Scope().Object,
 			subscriptions.Object,
 			Media().Object,
@@ -222,7 +222,7 @@ public class NotificationDispatchHandlerTests
 		);
 
 		var context = messages.OfType<DeliverNotification>().Single().Context;
-		await Assert.That(context.Title).IsEqualTo(NotificationEventType.WatchlistSyncCompleted.GetDescription());
+		await Assert.That(context.Title).IsEqualTo(NotificationEventType.WantlistSyncCompleted.GetDescription());
 		await Assert.That(context.Summary).IsEqualTo("Pulled 0, pushed 0.");
 	}
 

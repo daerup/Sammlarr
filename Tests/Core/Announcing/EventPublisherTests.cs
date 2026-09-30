@@ -2,7 +2,7 @@ using Core.Announcing;
 using Domain.Announcing;
 using Domain.Identity;
 using Domain.Media;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist.Outbox;
 
 namespace Core.Tests.Announcing;
 
@@ -38,7 +38,7 @@ public class EventPublisherTests
 		await Assert.That(seen).Count().IsEqualTo(2);
 	}
 
-	private static WatchlistOutboxEvent Pushed() => new(Owner, MediaId.From(Guid.NewGuid()), WatchlistOutboxEventKind.Pushed);
+	private static WantlistOutboxEvent Pushed() => new(Owner, MediaId.From(Guid.NewGuid()), WantlistOutboxEventKind.Pushed);
 
 	private sealed record UnrelatedEvent(UserId UserId) : IEvent;
 }

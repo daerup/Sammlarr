@@ -51,7 +51,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenPlexCannotResolveTheMovie_LeavesItUnresolved()
+	public async Task GetTrendingAsync_WhenPlexCannotResolveTheMovie_LeavesItUnmatched()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception);
 		await host.PlexFindsNothing("Inception");
@@ -59,18 +59,18 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 		var items = (await FetchTrending(1)).Items;
 
 		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertUnresolved(items[0], "Inception");
+		await AssertUnmatched(items[0], "Inception");
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenTheMediaTypeIsUnknown_LeavesItUnresolved()
+	public async Task GetTrendingAsync_WhenTheMediaTypeIsUnknown_LeavesItUnmatched()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Person("Some Person"));
 
 		var items = (await FetchTrending(1)).Items;
 
 		await Assert.That(items).Count().IsEqualTo(1);
-		await AssertUnresolved(items[0], "Some Person");
+		await AssertUnmatched(items[0], "Some Person");
 	}
 
 	[Test]
@@ -82,7 +82,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetTrendingAsync_WhenItemsMixResolvedAndUnresolved_PreservesTheirOrder()
+	public async Task GetTrendingAsync_WhenItemsMixResolvedAndUnmatched_PreservesTheirOrder()
 	{
 		await host.TmdbTrendingPage(1, TestMedia.Inception, TestMedia.Person("Christopher Nolan"), TestMedia.Interstellar);
 		await host.Movie(TestMedia.Inception).SeedAsync();
@@ -93,7 +93,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(items).Count().IsEqualTo(3);
 		await AssertResolvedAs(items[0], TestMedia.Inception);
-		await AssertUnresolved(items[1], "Christopher Nolan");
+		await AssertUnmatched(items[1], "Christopher Nolan");
 		await AssertResolvedAs(items[2], TestMedia.Interstellar);
 	}
 
@@ -110,7 +110,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private static async Task AssertUnresolved(MediaLookup item, string title)
+	private static async Task AssertUnmatched(MediaLookup item, string title)
 	{
 		await Assert.That(item).IsOfUnionType<MediaLookup, UnmatchedMedia>();
 		await Assert.That(item.Title).IsEqualTo(title);

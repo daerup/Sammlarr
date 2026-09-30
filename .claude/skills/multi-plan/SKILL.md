@@ -24,7 +24,7 @@ A multi-agent planning workflow. Five explorers map the codebase independently, 
 
 The task arrives as the skill's arguments. If empty, ask the user once for a task description.
 
-Restate it back in one or two sentences and confirm before spawning agents — five agents working off a misunderstood brief is wasted compute. If the user gives you a wide brief (e.g. "clean up the watchlist code"), ask for the specific outcome they want before continuing.
+Restate it back in one or two sentences and confirm before spawning agents — five agents working off a misunderstood brief is wasted compute. If the user gives you a wide brief (e.g. "clean up the wantlist code"), ask for the specific outcome they want before continuing.
 
 ### 2. Spawn five Plan explorers in parallel
 

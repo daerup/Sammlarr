@@ -1,15 +1,15 @@
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.Feed;
-using Contracts.Watchlist;
-using Contracts.Watchlist.Outbox;
+using Contracts.Wantlist;
+using Contracts.Wantlist.Outbox;
 using DB.Data.Feed;
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Watchlist;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
 using Harness;
 using TestInfrastructure;
 using static Harness.Ids;
@@ -29,13 +29,13 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		var feedId = await SeedFeedAsync("append-list", new Append());
 		host.MdblistFeedContains("append-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
-		var stale = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
+		var stale = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 
 		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
 		await Assert.That(completed!.Delta.Drops).IsEmpty();
-		await Assert.That(await WatchlistIdsAsync()).Contains(stale);
+		await Assert.That(await WantlistIdsAsync()).Contains(stale);
 	}
 
 	[Test]
@@ -46,27 +46,27 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains("mirror-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		var ownedButGone = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
-		var addedByHand = await host.Movie(TestMedia.Interstellar).OnWatchlist(new ManualOrigin(ManualSource.Search));
+		var ownedButGone = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
+		var addedByHand = await host.Movie(TestMedia.Interstellar).OnWantlist(new ManualOrigin(ManualSource.Search));
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var remaining = await WatchlistIdsAsync();
+		var remaining = await WantlistIdsAsync();
 		await Assert.That(remaining).DoesNotContain(ownedButGone);
 		await Assert.That(remaining).Contains(addedByHand);
 	}
 
 	[Test]
-	public async Task RunAsync_WhenTheProviderFailsOutright_LeavesTheWatchlistAlone()
+	public async Task RunAsync_WhenTheProviderFailsOutright_LeavesTheWantlistAlone()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
 		var feedId = await SeedFeedAsync("broken-list", new Mirror(1));
 		host.MdblistFeedReturnsStatus("broken-list", System.Net.HttpStatusCode.InternalServerError);
-		var owned = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
+		var owned = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
+		await Assert.That(await WantlistIdsAsync()).Contains(owned);
 	}
 
 	[Test]
@@ -91,13 +91,13 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var feedId = await SeedFeedAsync("preview-list", new Mirror(1));
 		host.MdblistFeedContains("preview-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
-		var owned = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
+		var owned = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 
 		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
 
 		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, MirrorPlan>();
 		await Assert.That(plan!.Delta.Drops).Count().IsEqualTo(1);
-		await Assert.That(await WatchlistIdsAsync()).Contains(owned);
+		await Assert.That(await WantlistIdsAsync()).Contains(owned);
 	}
 
 	[Test]
@@ -112,34 +112,34 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task RunAsync_ForABlacklistedTitleTheFeedOwns_RemovesItLikeAnyOtherOnceItStopsQualifying()
+	public async Task RunAsync_ForABlocklistedTitleTheFeedOwns_RemovesItLikeAnyOtherOnceItStopsQualifying()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("blacklist-list", new Mirror(1));
-		host.MdblistFeedContains("blacklist-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
+		var feedId = await SeedFeedAsync("blocklist-list", new Mirror(1));
+		host.MdblistFeedContains("blocklist-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		var blacklisted = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
-		await host.Resolve<IBlacklistRepository>().AddAsync(blacklisted);
+		var blocklisted = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
+		await host.Resolve<IBlocklistRepository>().AddAsync(blocklisted);
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		await Assert.That(await WatchlistIdsAsync()).DoesNotContain(blacklisted);
+		await Assert.That(await WantlistIdsAsync()).DoesNotContain(blocklisted);
 	}
 
 	[Test]
-	public async Task RunAsync_ForABlacklistedTitleTheFeedOwns_KeepsItWhileItStillQualifies()
+	public async Task RunAsync_ForABlocklistedTitleTheFeedOwns_KeepsItWhileItStillQualifies()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		var feedId = await SeedFeedAsync("blacklist-kept-list", new Mirror(1));
-		host.MdblistFeedContains("blacklist-kept-list", Item("Inception", MediaType.Movie, Tmdb("27205")));
+		var feedId = await SeedFeedAsync("blocklist-kept-list", new Mirror(1));
+		host.MdblistFeedContains("blocklist-kept-list", Item("Inception", MediaType.Movie, Tmdb("27205")));
 
-		var blacklisted = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
-		await host.Resolve<IBlacklistRepository>().AddAsync(blacklisted);
+		var blocklisted = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
+		await host.Resolve<IBlocklistRepository>().AddAsync(blocklisted);
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		await Assert.That(await WatchlistIdsAsync()).Contains(blacklisted);
+		await Assert.That(await WantlistIdsAsync()).Contains(blocklisted);
 	}
 
 	[Test]
@@ -151,12 +151,12 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		host.MdblistFeedContains("running-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		var ownedByOther = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(otherFeed));
+		var ownedByOther = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(otherFeed));
 
 		var result = await Testee.RunAsync(runningFeed, new FeedRunTrigger(new Manual()));
 
 		var completed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunCompleted>();
-		await Assert.That(await WatchlistIdsAsync()).Contains(ownedByOther);
+		await Assert.That(await WantlistIdsAsync()).Contains(ownedByOther);
 		await Assert.That(completed!.Delta.Drops).DoesNotContain(ownedByOther);
 	}
 
@@ -170,8 +170,8 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var queued = await host.Resolve<IWatchlistOutbox>().GetAsync();
-		await Assert.That(queued.Where(op => op.Action == WatchlistOperationAction.Add).Select(op => op.MediaId)).Contains(fightClub);
+		var queued = await host.Resolve<IWantlistOutbox>().GetAsync();
+		await Assert.That(queued.Where(op => op.Action == WantlistOperationAction.Add).Select(op => op.MediaId)).Contains(fightClub);
 	}
 
 	[Test]
@@ -181,12 +181,12 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var feedId = await SeedFeedAsync("dropping-list", new Mirror(1));
 		host.MdblistFeedContains("dropping-list", Item("Fight Club", MediaType.Movie, Tmdb("550")));
 		await host.Movie(TestMedia.FightClub).SeedAsync();
-		var dropped = await host.Movie(TestMedia.Inception).OnWatchlist(await host.SeedFeedOriginAsync(feedId));
+		var dropped = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(feedId));
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var queued = await host.Resolve<IWatchlistOutbox>().GetAsync();
-		await Assert.That(queued.Where(op => op.Action == WatchlistOperationAction.Remove).Select(op => op.MediaId)).Contains(dropped);
+		var queued = await host.Resolve<IWantlistOutbox>().GetAsync();
+		await Assert.That(queued.Where(op => op.Action == WantlistOperationAction.Remove).Select(op => op.MediaId)).Contains(dropped);
 	}
 
 	[Test]
@@ -200,7 +200,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
-		var entry = (await host.Resolve<IWatchlistRepository>().GetEntriesAsync()).Single(e => e.MediaId == fightClub);
+		var entry = (await host.Resolve<IWantlistRepository>().GetEntriesAsync()).Single(e => e.MediaId == fightClub);
 
 		await Assert.That(entry.Provenance.Value is FeedOrigin origin && origin.Run.Id == recorded.Id).IsTrue();
 	}
@@ -230,7 +230,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	private static FeedItemSpec Item(string? title, MediaType type, params ProviderId[] ids) =>
 		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
 
-	private async Task<IReadOnlyList<MediaId>> WatchlistIdsAsync() => await host.Resolve<IWatchlistRepository>().GetIdsAsync();
+	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => await host.Resolve<IWantlistRepository>().GetIdsAsync();
 
 	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy)
 	{

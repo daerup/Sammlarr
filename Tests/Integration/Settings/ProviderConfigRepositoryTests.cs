@@ -20,7 +20,7 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		var providerSettings = await Testee.GetAsync();
 
 		await Assert.That(providerSettings).IsNotNull();
-		await Assert.That(providerSettings.WatchlistProvider).IsEqualTo(WatchlistProvider.Plex);
+		await Assert.That(providerSettings.Sink).IsEqualTo(SinkKind.Plex);
 		await Assert.That(providerSettings.TrendingProvider).IsEqualTo(TrendingProvider.Tmdb);
 		await Assert.That(providerSettings.SearchProvider).IsEqualTo(SearchProvider.Plex);
 		await Assert.That(providerSettings.AuthProvider).IsEqualTo(AuthProvider.Plex);
@@ -29,13 +29,13 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
 	{
-		var expected = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
+		var expected = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 
 		await Testee.StoreAsync(expected);
 
 		var entity = await fixture.Context.ProviderSettings.SingleAsync();
 
-		await Assert.That(entity.WatchlistProvider).IsEqualTo(expected.WatchlistProvider);
+		await Assert.That(entity.Sink).IsEqualTo(expected.Sink);
 		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
 		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
 		await Assert.That(entity.RatingProvider).IsEqualTo(expected.RatingProvider);
@@ -44,8 +44,8 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
 	{
-		var initial = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
-		var updated = CreateProviderSettings(WatchlistProvider.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
+		var initial = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
+		var updated = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
 
 		await Testee.StoreAsync(initial);
 		await Testee.StoreAsync(updated);
@@ -56,14 +56,14 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	}
 
 	private static ProviderConfig CreateProviderSettings(
-		WatchlistProvider watchlistProvider,
+		SinkKind sinkProvider,
 		TrendingProvider trendingProvider,
 		SearchProvider searchProvider,
 		RatingProvider ratingProvider
 	) =>
 		new()
 		{
-			WatchlistProvider = watchlistProvider,
+			Sink = sinkProvider,
 			TrendingProvider = trendingProvider,
 			SearchProvider = searchProvider,
 			RatingProvider = ratingProvider,

@@ -3,7 +3,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Identity;
 using Domain.Media;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist.Outbox;
 using UI.Shared.Announcing;
 
 namespace UI.Tests.Announcing;
@@ -17,7 +17,7 @@ public class ViewerEventTests
 	{
 		var raised = Pushed(Viewer);
 
-		await Assert.That(ViewerEvent.Own<WatchlistOutboxEvent>(raised, Viewer)).IsEqualTo(raised);
+		await Assert.That(ViewerEvent.Own<WantlistOutboxEvent>(raised, Viewer)).IsEqualTo(raised);
 	}
 
 	[Test]
@@ -25,7 +25,7 @@ public class ViewerEventTests
 	{
 		var raised = new FeedRunFinishedEvent(Viewer, FeedId.From(Guid.NewGuid()));
 
-		await Assert.That(ViewerEvent.Own<WatchlistOutboxEvent>(raised, Viewer)).IsNull();
+		await Assert.That(ViewerEvent.Own<WantlistOutboxEvent>(raised, Viewer)).IsNull();
 	}
 
 	[Test]
@@ -33,7 +33,7 @@ public class ViewerEventTests
 	{
 		var raised = Pushed(UserId.From(Guid.NewGuid()));
 
-		await Assert.That(ViewerEvent.Own<WatchlistOutboxEvent>(raised, Viewer)).IsNull();
+		await Assert.That(ViewerEvent.Own<WantlistOutboxEvent>(raised, Viewer)).IsNull();
 	}
 
 	[Test]
@@ -41,8 +41,8 @@ public class ViewerEventTests
 	{
 		var raised = Pushed(Viewer);
 
-		await Assert.That(ViewerEvent.Own<WatchlistOutboxEvent>(raised, null)).IsNull();
+		await Assert.That(ViewerEvent.Own<WantlistOutboxEvent>(raised, null)).IsNull();
 	}
 
-	private static WatchlistOutboxEvent Pushed(UserId owner) => new(owner, MediaId.From(Guid.NewGuid()), WatchlistOutboxEventKind.Pushed);
+	private static WantlistOutboxEvent Pushed(UserId owner) => new(owner, MediaId.From(Guid.NewGuid()), WantlistOutboxEventKind.Pushed);
 }

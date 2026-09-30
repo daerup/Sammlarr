@@ -128,23 +128,23 @@
     z-index: 1;
 }
 
-.search-result-row.hover-bg:not(.is-unresolved):hover,
-.search-result-row.hover-bg:not(.is-unresolved).row-focused {
+.search-result-row.hover-bg:not(.is-unmatched):hover,
+.search-result-row.hover-bg:not(.is-unmatched).row-focused {
     background-color: #0a0a0a;
     border-color: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.92);
 }
 
-.search-result-row.hover-bg:not(.is-unresolved):hover::before,
-.search-result-row.hover-bg:not(.is-unresolved).row-focused::before {
+.search-result-row.hover-bg:not(.is-unmatched):hover::before,
+.search-result-row.hover-bg:not(.is-unmatched).row-focused::before {
     opacity: 0.5;
     transform: scale(1.06);
 }
 
-.search-result-row.hover-bg:not(.is-unresolved):hover .search-result-content .text-muted-foreground,
-.search-result-row.hover-bg:not(.is-unresolved).row-focused .search-result-content .text-muted-foreground,
-.search-result-row.hover-bg:not(.is-unresolved):hover .search-result-content .text-foreground,
-.search-result-row.hover-bg:not(.is-unresolved).row-focused .search-result-content .text-foreground {
+.search-result-row.hover-bg:not(.is-unmatched):hover .search-result-content .text-muted-foreground,
+.search-result-row.hover-bg:not(.is-unmatched).row-focused .search-result-content .text-muted-foreground,
+.search-result-row.hover-bg:not(.is-unmatched):hover .search-result-content .text-foreground,
+.search-result-row.hover-bg:not(.is-unmatched).row-focused .search-result-content .text-foreground {
     color: rgba(255, 255, 255, 0.92);
 }
 
@@ -152,8 +152,8 @@
     opacity: 0.1;
 }
 
-.dark .search-result-row.hover-bg:not(.is-unresolved):hover::before,
-.dark .search-result-row.hover-bg:not(.is-unresolved).row-focused::before {
+.dark .search-result-row.hover-bg:not(.is-unmatched):hover::before,
+.dark .search-result-row.hover-bg:not(.is-unmatched).row-focused::before {
     opacity: 0.5;
 }
 

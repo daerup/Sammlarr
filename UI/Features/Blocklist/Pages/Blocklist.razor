@@ -1,0 +1,172 @@
+@page "/blocklist"
+@inherits MediaListPage
+@using Contracts.Blocklist
+@using Contracts.Wantlist
+@using UI.Shared.Services.Branding
+@using UI.Shared.Filters
+@inject IBlocklistService BlocklistService
+@inject ToastService ToastService
+@inject IWantlistService WantlistService
+@inject MediaProviderBrandingService BrandingService
+
+<PageTitle>Blocklist</PageTitle>
+
+@{
+    var gridItems = GridItems;
+    var pageItems = Paged(gridItems);
+}
+
+<MediaListShell Settings="Settings"
+                Heading="Blocklist"
+                Description="Your blocklisted movies and shows."
+                IsSignedIn="IsSignedIn"
+                IsConnected="IsConnected"
+                DeniedActionDescription="managing your blocklist"
+                OnSignInChanged="HandleSignInChanged"
+                OnAccessChanged="HandleAccessChanged"
+                Search="@Filter.Search"
+                SearchChanged="ApplySearchAsync">
+    <HeaderExtras>
+        <MediaListViewActions HasItems="@(_items is { Count: > 0 })"
+                              IsEditMode="IsEditMode"
+                              ShowFilters="ShowFilters"
+                              ActiveFilters="Filter.ActiveCount"
+                              OnEnterEditMode="EnterEditMode"
+                              OnToggleFilters="ToggleFilterBar"/>
+    </HeaderExtras>
+    <ChildContent>
+        <MediaListBody IsLoading="IsLoadingList"
+                       ErrorMessage="@ErrorMessage"
+                       OnRetry="LoadAsync"
+                       TotalCount="_items?.Count"
+                       VisibleCount="gridItems.Count"
+                       ShowFilters="ShowFilters"
+                       Filter="Filter"
+                       FilterChanged="ApplyFilterAsync"
+                       CurrentPage="@PageWithin(gridItems.Count)"
+                       PageCount="@PageCount(gridItems.Count)"
+                       PageChanged="GoToPageAsync">
+            <EmptyState>
+                <MediaListEmptyState Icon="shield-off" Heading="Nothing blocklisted.">
+                    Add a title with <span class="font-medium text-foreground">Ctrl+K</span> to keep it out of your Wantlist.
+                </MediaListEmptyState>
+            </EmptyState>
+            <Grid>
+                <BulkEditableMediaGrid TItem="BlocklistedMedia"
+                                       Items="pageItems"
+                                       AllItems="gridItems"
+                                       Detail="@(i => i.Media)"
+                                       Key="@(i => i.Media.Id)"
+                                       IsEditMode="IsEditMode"
+                                       IsEditModeChanged="SetEditMode"
+                                       OnTileClick="@(i => SelectItem(i.Media))"
+                                       OnBulkRemove="RemoveBulkAsync"
+                                       RemoveLabel="Remove"
+                                       MarkLabel="Wantlist"
+                                       MarkIcon="bookmark"
+                                       MarkTint="@SinkBrandColor"
+                                       OnBulkMark="WantlistBulkAsync"
+                                       RemoveConfirm="RemoveConfirm"
+                                       MarkConfirm="WantlistConfirm"
+                                       IsMarked="@(item => _wantlistedIds.Contains(item.Media.Id))"
+                                       AlreadyMarkedHint="Every selected title is already on your wantlist."/>
+            </Grid>
+        </MediaListBody>
+    </ChildContent>
+</MediaListShell>
+
+<MediaDetailSheet Open="IsSheetOpen"
+                  OnOpenChanged="SheetOpenChangedAsync"
+                  Media="_selectedItem"
+                  OnEnrollmentChanged="@(_ => LoadAsync())"/>
+
+@code {
+    private IReadOnlyList<BlocklistedMedia>? _items;
+    private MediaLookup? _selectedItem;
+    private IReadOnlySet<MediaId> _wantlistedIds = new HashSet<MediaId>();
+
+    private IReadOnlyList<BlocklistedMedia> GridItems =>
+        [
+            .. Filter.SortBy(
+                (_items ?? []).Where(item => Filter.MatchesType(item.Media.ToMatch().MediaType) && Filter.MatchesSearch(item.Media.Title)),
+                item => item.Media,
+                item => item.AddedAt
+            ),
+        ];
+
+    protected override void ClearItems() => _items = null;
+
+    protected override void ClearSelection() => _selectedItem = null;
+
+    protected override async Task LoadAsync()
+    {
+        IsLoadingList = true;
+        ErrorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            _items = await BlocklistService.GetBlocklistItemsAsync(Cancellation.Token).ToListAsync();
+            _wantlistedIds = await WantlistService.GetWantlistIdsAsync(Cancellation.Token);
+
+            if (_selectedItem.HasValue)
+            {
+                var selectedId = _selectedItem.Value.Id;
+                _selectedItem = _items.FirstOrDefault(i => i.Media.Id == selectedId)?.Media.ToMatch();
+                if (_selectedItem is null)
+                {
+                    IsSheetOpen = false;
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Failed to load blocklist");
+            ErrorMessage = $"Failed to load blocklist: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingList = false;
+            StateHasChanged();
+        }
+    }
+
+    private void SelectItem(MediaLookup detail)
+    {
+        _selectedItem = detail;
+        IsSheetOpen = true;
+    }
+
+    private async Task RemoveBulkAsync(IReadOnlyList<BlocklistedMedia> toRemove)
+    {
+        foreach (var item in toRemove)
+        {
+            await BlocklistService.RemoveFromBlocklistAsync(item.Media.Id, Cancellation.Token);
+        }
+        ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blocklist.");
+        await LoadAsync();
+    }
+
+    private async Task WantlistBulkAsync(IReadOnlyList<BlocklistedMedia> toMark)
+    {
+        await WantlistService.AddToWantlistAsync(toMark.Select(item => item.Media.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
+        ToastService.Success($"Added {toMark.Count} title{(toMark.Count == 1 ? "" : "s")} to your wantlist.");
+    }
+
+    private string? SinkBrandColor =>
+        Settings is null ? null : BrandingService.GetBrandingInfo(Settings.Sink.AsMediaProvider()).BrandColor;
+
+    private static BulkConfirm RemoveConfirm(int count) =>
+        new(
+            $"Remove {Titles(count)} from your blocklist?",
+            "Later feed runs will be able to add them again. They are not added to your wantlist."
+        );
+
+    private static BulkConfirm WantlistConfirm(int count) => new($"Wantlist {Titles(count)}?", "They stay blocklisted.");
+
+    private static string Titles(int count) => count == 1 ? "1 title" : $"{count} titles";
+}

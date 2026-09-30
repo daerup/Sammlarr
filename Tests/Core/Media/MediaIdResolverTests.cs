@@ -52,7 +52,7 @@ public class MediaIdResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenUnresolvedCacheHit_ShortCircuitsAndReturnsNone()
+	public async Task ResolveAsync_WhenUnmatchedCacheHit_ShortCircuitsAndReturnsNone()
 	{
 		var tmdbId = TmdbId.From("456", MediaType.Movie);
 		var (testee, converter, cache) = CreateTestee();

@@ -27,7 +27,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaLookup> items, CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		var requests = BuildRequestsAsync(identifier, config.WatchlistProvider.AsMediaProvider(), items, cancellationToken);
+		var requests = BuildRequestsAsync(identifier, config.Sink.AsMediaProvider(), items, cancellationToken);
 		await foreach (var result in media.ResolveDetailsAsync(requests, cancellationToken))
 		{
 			await items.WriteAsync(result, cancellationToken);
@@ -36,22 +36,22 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private async IAsyncEnumerable<ResolveRequest> BuildRequestsAsync(
 		string identifier,
-		MediaProvider watchlistProvider,
-		ChannelWriter<MediaLookup> unknowns,
+		MediaProvider sinkProvider,
+		ChannelWriter<MediaLookup> unmatched,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
 		await foreach (var page in FetchPagesAsync(identifier, cancellationToken))
 		{
-			foreach (var unknown in page.unknowns)
+			foreach (var item in page.unmatched)
 			{
-				await unknowns.WriteAsync(BuildUnknown(unknown), cancellationToken);
+				await unmatched.WriteAsync(BuildUnmatched(item), cancellationToken);
 			}
 
 			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));
 			foreach (var pair in pairs)
 			{
-				yield return new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), watchlistProvider, BuildHints(pair));
+				yield return new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), sinkProvider, BuildHints(pair));
 			}
 		}
 	}
@@ -98,7 +98,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		);
 	}
 
-	private static MediaLookup BuildUnknown(MdblistTypes.ListItems.UnknownListItem item) =>
+	private static MediaLookup BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item) =>
 		new UnmatchedMedia
 		{
 			Externals = [.. ExtractIds(item.ids, item.MediaType)],

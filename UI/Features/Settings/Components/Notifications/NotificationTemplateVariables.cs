@@ -44,11 +44,11 @@ internal static class NotificationTemplateVariables
 	{
 		[NotificationEventType.FeedRunCompleted] = [FeedName, FeedProvider, FeedIdentifier, Added, Removed],
 		[NotificationEventType.FeedRunFailed] = [FeedName, FeedProvider, FeedIdentifier, Reason],
-		[NotificationEventType.WatchlistSyncFailed] = [Reason],
+		[NotificationEventType.WantlistSyncFailed] = [Reason],
 		[NotificationEventType.ProviderRateLimited] = [Provider, RetryAfter],
 	};
 
-	private static readonly HashSet<NotificationEventType> HasMediaLists = [NotificationEventType.WatchlistSyncCompleted];
+	private static readonly HashSet<NotificationEventType> HasMediaLists = [NotificationEventType.WantlistSyncCompleted];
 
 	public static IReadOnlyList<TemplateVariableGroup> GroupsFor(IReadOnlyCollection<NotificationEventType> eventTypes)
 	{

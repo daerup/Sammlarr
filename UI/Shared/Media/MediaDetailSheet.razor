@@ -1,13 +1,13 @@
 @using Contracts.Media
-@using Contracts.Blacklist
+@using Contracts.Blocklist
 @using Contracts.Settings
-@using Contracts.Watchlist
-@using Domain.Watchlist
-@using UI.Features.Watchlist.Components
+@using Contracts.Wantlist
+@using Domain.Wantlist
+@using UI.Features.Wantlist.Components
 @using UI.Shared.Media.Icons
 @inject IMediaService MediaService
-@inject IWatchlistService WatchlistService
-@inject IBlacklistService BlacklistService
+@inject IWantlistService WantlistService
+@inject IBlocklistService BlocklistService
 @inject IProviderConfigService ProviderConfigService
 @inject Notifier Notifier
 @if (Open)
@@ -36,20 +36,20 @@
                 </div>
 
                 <BbSheetHeader Class="media-sheet-meta">
-                    @if (!media.IsUnresolved)
+                    @if (!media.IsUnmatched)
                     {
                         <div class="media-sheet-toggles">
-                            <WatchlistProvenanceToggle Result="media"
+                            <WantlistProvenanceToggle Result="media"
                                                        Size="18"
-                                                       IsToggled="_watchlisted"
-                                                       IsToggling="_togglingWatchlist"
-                                                       Entry="@(_entry is Some<WatchlistEntry>(var shown) ? shown : null)"
-                                                       OnToggle="ToggleWatchlistAsync"/>
-                            <BlacklistToggleIcon Result="media"
+                                                       IsToggled="_wantlisted"
+                                                       IsToggling="_togglingWantlist"
+                                                       Entry="@(_entry is Some<WantlistItem>(var shown) ? shown : null)"
+                                                       OnToggle="ToggleWantlistAsync"/>
+                            <BlocklistToggleIcon Result="media"
                                                  Size="18"
-                                                 IsToggled="_blacklisted"
-                                                 IsToggling="_togglingBlacklist"
-                                                 OnToggle="ToggleBlacklistAsync"/>
+                                                 IsToggled="_blocklisted"
+                                                 IsToggling="_togglingBlocklist"
+                                                 OnToggle="ToggleBlocklistAsync"/>
                         </div>
                     }
                     <BbSheetTitle Class="font-bold tracking-wide text-xl">
@@ -124,11 +124,11 @@
     private bool _failed;
     private string? _lastImageUrl;
     private MediaId? _loadedFor;
-    private bool _watchlisted;
-    private bool _blacklisted;
-    private bool _togglingWatchlist;
-    private bool _togglingBlacklist;
-    private Optional<WatchlistEntry> _entry = new None();
+    private bool _wantlisted;
+    private bool _blocklisted;
+    private bool _togglingWantlist;
+    private bool _togglingBlocklist;
+    private Optional<WantlistItem> _entry = new None();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -139,7 +139,7 @@
             _failed = false;
         }
 
-        if (Media is { } lookup && !lookup.IsUnresolved && _loadedFor != lookup.Id)
+        if (Media is { } lookup && !lookup.IsUnmatched && _loadedFor != lookup.Id)
         {
             _loadedFor = lookup.Id;
             await LoadEnrollmentAsync(lookup.Id);
@@ -148,83 +148,83 @@
 
     private async Task LoadEnrollmentAsync(MediaId id)
     {
-        _watchlisted = (await WatchlistService.GetWatchlistIdsAsync()).Contains(id);
-        _blacklisted = (await BlacklistService.GetBlacklistIdsAsync()).Contains(id);
-        _entry = await WatchlistService.GetEntryAsync(id);
+        _wantlisted = (await WantlistService.GetWantlistIdsAsync()).Contains(id);
+        _blocklisted = (await BlocklistService.GetBlocklistIdsAsync()).Contains(id);
+        _entry = await WantlistService.GetEntryAsync(id);
     }
 
-    private async Task ToggleWatchlistAsync(MediaLookup media)
+    private async Task ToggleWantlistAsync(MediaLookup media)
     {
-        if (_togglingWatchlist)
+        if (_togglingWantlist)
         {
             return;
         }
 
-        _togglingWatchlist = true;
+        _togglingWantlist = true;
         try
         {
-            if (_watchlisted)
+            if (_wantlisted)
             {
-                await WatchlistService.RemoveFromWatchlistAsync([media.Id]);
+                await WantlistService.RemoveFromWantlistAsync([media.Id]);
             }
             else
             {
-                await WatchlistService.AddToWatchlistAsync([media.Id], new ManualOrigin(Source));
+                await WantlistService.AddToWantlistAsync([media.Id], new ManualOrigin(Source));
             }
 
             await LoadEnrollmentAsync(media.Id);
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex, "Failed to update watchlist");
+            Notifier.Error(ex, "Failed to update wantlist");
         }
         finally
         {
-            _togglingWatchlist = false;
+            _togglingWantlist = false;
         }
 
-        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Watchlist);
+        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Wantlist);
         await LoadEnrollmentAsync(media.Id);
     }
 
-    private async Task ToggleBlacklistAsync(MediaLookup media)
+    private async Task ToggleBlocklistAsync(MediaLookup media)
     {
-        if (_togglingBlacklist)
+        if (_togglingBlocklist)
         {
             return;
         }
 
-        _togglingBlacklist = true;
+        _togglingBlocklist = true;
         try
         {
-            if (_blacklisted)
+            if (_blocklisted)
             {
-                await BlacklistService.RemoveFromBacklistAsync(media.Id);
+                await BlocklistService.RemoveFromBlocklistAsync(media.Id);
             }
             else
             {
-                await BlacklistService.AddToBacklistAsync(media.Id);
+                await BlocklistService.AddToBlocklistAsync(media.Id);
             }
 
             await LoadEnrollmentAsync(media.Id);
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex, "Failed to update blacklist");
+            Notifier.Error(ex, "Failed to update blocklist");
         }
         finally
         {
-            _togglingBlacklist = false;
+            _togglingBlocklist = false;
         }
 
-        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Blacklist);
+        await OnEnrollmentChanged.InvokeAsync(MediaListKind.Blocklist);
         await LoadEnrollmentAsync(media.Id);
     }
 
     private async Task OnImageError()
     {
         _failed = true;
-        if (Media.HasValue && !Media.Value.IsUnresolved)
+        if (Media.HasValue && !Media.Value.IsUnmatched)
         {
             await MediaService.InvalidateAsync([Media.Value.Id]);
         }

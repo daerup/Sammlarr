@@ -33,7 +33,7 @@ public class NotificationDeliveryPipelineTests
 			{
 				var session = await host.TrackActivity()
 					.Timeout(TimeSpan.FromSeconds(30))
-					.PublishMessageAndWaitAsync(new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
+					.PublishMessageAndWaitAsync(new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
 
 				await Assert.That(session.Executed.MessagesOf<DeliverNotification>().ToList()).Count().IsEqualTo(1);
 				await Assert.That(channel.Sent).Count().IsEqualTo(1);
@@ -54,7 +54,7 @@ public class NotificationDeliveryPipelineTests
 					using var scope = host.Services.CreateScope();
 					await scope
 						.ServiceProvider.GetRequiredService<IMessagePublisher>()
-						.PublishAsync(new WatchlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
+						.PublishAsync(new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [], [], [], [], []));
 				};
 
 				await host.TrackActivity().Timeout(TimeSpan.FromSeconds(30)).ExecuteAndWaitAsync(publish);
@@ -71,7 +71,7 @@ public class NotificationDeliveryPipelineTests
 			.GetForEventTypeAsync(Any<NotificationEventType>(), Any())
 			.Returns(
 				(IReadOnlyList<NotificationSubscription>)
-					[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None)]
+					[new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)]
 			);
 
 		var targets = INotificationTargetRepository.Mock();

@@ -31,7 +31,7 @@ public class FeedFilteringTests
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit - 1));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 
-		await FeedEditor.Option(page, "Blacklist slot policy", "Preserved").ClickAsync();
+		await FeedEditor.Option(page, "Blocklist slot policy", "Preserved").ClickAsync();
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 

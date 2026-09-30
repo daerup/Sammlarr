@@ -1,8 +1,8 @@
-using Contracts.Blacklist;
-using Contracts.Watchlist;
+using Contracts.Blocklist;
+using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 
 namespace Harness;
 
@@ -88,17 +88,17 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		return id;
 	}
 
-	internal async Task<MediaId> OnWatchlist(WatchlistItemProvenance origin)
+	internal async Task<MediaId> OnWantlist(WantlistItemProvenance origin)
 	{
 		var id = await SeedAsync();
-		await host.Resolve<IWatchlistRepository>().AddAsync([id], origin);
+		await host.Resolve<IWantlistRepository>().AddAsync([id], origin);
 		return id;
 	}
 
-	internal async Task<MediaId> OnBlacklist()
+	internal async Task<MediaId> OnBlocklist()
 	{
 		var id = await SeedAsync();
-		await host.Resolve<IBlacklistRepository>().AddAsync(id);
+		await host.Resolve<IBlocklistRepository>().AddAsync(id);
 		return id;
 	}
 

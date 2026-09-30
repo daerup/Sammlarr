@@ -2,8 +2,8 @@
 == Context and Scope
 
 Sammlarr sits between one user and a handful of external media services. It stores curation,
-not a catalogue: the feeds a user has defined, what is on their watchlist, what they have
-blacklisted. Titles, ratings and metadata come from the services. One watchlist stays in
+not a catalogue: the feeds a user has defined, what is on their wantlist, what they have
+blocklisted. Titles, ratings and metadata come from the services. One wantlist stays in
 sync with Plex.
 
 === Business Context
@@ -12,8 +12,8 @@ sync with Plex.
 |===
 | Partner | Sammlarr receives | Sammlarr sends
 
-| User | Sign-in; feed, watchlist and blacklist edits | The curated library, watchlist and notifications
-| Plex | OAuth identity, search results, the remote watchlist | Watchlist additions and removals (push)
+| User | Sign-in; feed, wantlist and blocklist edits | The curated library, wantlist and notifications
+| Plex | OAuth identity, search results, the Plex watchlist | Wantlist additions and removals (push)
 | TMDB | Trending titles, ratings, metadata, id conversion | (none, read only)
 | MDBList | The contents of a list, for feeds | (none, read only)
 | IMDb, TheTVDB | (none) | (none; identifier namespaces only, see below)
@@ -30,13 +30,13 @@ flowchart LR
   ids[IMDb / TheTVDB IDs]
 
   user <-->|sign in, curate| sam
-  sam <-->|OAuth, search, watchlist pull + push| plex
+  sam <-->|OAuth, search, wantlist pull + push| plex
   tmdb -->|trending, ratings, metadata| sam
   mdblist -->|list contents| sam
   sam -.->|cross-reference by id| ids
 ....
 
-Plex is the only two-way integration. Sammlarr reads the watchlist from Plex and writes
+Plex is the only two-way integration. Sammlarr reads the wantlist from Plex and writes
 changes back to it. TMDB and MDBList are read-only. IMDb and TheTVDB are never called at all;
 they exist only as identifier namespaces (`ImdbId`, `TvdbId`) used to match the same title
 across providers.
@@ -47,7 +47,7 @@ across providers.
 |===
 | System | Integration | Direction
 
-| Plex | Plex OAuth (PIN flow) for sign-in; HTTPS/JSON for search and the watchlist; additions and removals via HTTP `PUT` to the Plex watchlist endpoints | Read + Write
+| Plex | Plex OAuth (PIN flow) for sign-in; HTTPS/JSON for search and the wantlist; additions and removals via HTTP `PUT` to the Plex watchlist endpoints | Read + Write
 | TMDB | REST API, authenticated with an API key | Read only
 | MDBList | REST API with an API key; list entries are paged and resolved to media | Read only
 | IMDb, TheTVDB | No HTTP client; `ImdbId` / `TvdbId` value objects converted by keyed `IExternalIdConverter` implementations | Reference only

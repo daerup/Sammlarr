@@ -2,17 +2,17 @@ using AngleSharp.Dom;
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives.Services;
 using Bunit;
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.Media;
 using Contracts.Settings;
-using Contracts.Watchlist;
-using Contracts.Watchlist.Outbox;
+using Contracts.Wantlist;
+using Contracts.Wantlist.Outbox;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
-using Domain.Watchlist;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,27 +27,27 @@ public class MediaDetailSheetTests : BunitContext
 {
 	private static readonly MediaId Id = MediaId.From(new Guid(21, 0, 0, new byte[8]));
 
-	private Mock<IWatchlistService> _watchlist = null!;
+	private Mock<IWantlistService> _wantlist = null!;
 
 	[Test]
 	public async Task Toggle_WhenARemovalIsAlreadyQueued_StillReadsAsAddRatherThanCancel()
 	{
 		Register();
-		_watchlist.GetWatchlistIdsAsync(Any()).ReturnsSequentially(Owned, Empty, Empty);
+		_wantlist.GetWantlistIdsAsync(Any()).ReturnsSequentially(Owned, Empty, Empty);
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => Toggle(cut) is not null);
 		await Toggle(cut)!.ClickAsync(new());
 
-		await Assert.That(Toggle(cut)!.GetAttribute("aria-label")).IsEqualTo("Add to watchlist");
+		await Assert.That(Toggle(cut)!.GetAttribute("aria-label")).IsEqualTo("Add to wantlist");
 	}
 
 	[Test]
 	public async Task Dot_WhenTheItemCameFromAFeed_UsesTheFeedProvidersBrand()
 	{
 		Register();
-		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
-		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed"))));
+		_wantlist.GetWantlistIdsAsync(Any()).Returns(Owned);
+		_wantlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed"))));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
@@ -59,8 +59,8 @@ public class MediaDetailSheetTests : BunitContext
 	public async Task Dot_WhenTheItemWasAddedByHand_IsNotShown()
 	{
 		Register();
-		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
-		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(new ManualOrigin(ManualSource.Search))));
+		_wantlist.GetWantlistIdsAsync(Any()).Returns(Owned);
+		_wantlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(new ManualOrigin(ManualSource.Search))));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => Toggle(cut) is not null);
@@ -69,11 +69,11 @@ public class MediaDetailSheetTests : BunitContext
 	}
 
 	[Test]
-	public async Task Provenance_WhenTheWatchlistIconIsRightClicked_IsRevealedInAPopover()
+	public async Task Provenance_WhenTheWantlistIconIsRightClicked_IsRevealedInAPopover()
 	{
 		Register();
-		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Owned);
-		_watchlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy"))));
+		_wantlist.GetWantlistIdsAsync(Any()).Returns(Owned);
+		_wantlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy"))));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".provenance-trigger").Count > 0);
@@ -93,7 +93,7 @@ public class MediaDetailSheetTests : BunitContext
 	}
 
 	[Test]
-	public async Task Provenance_ForATitleThatIsNotOnTheWatchlist_StaysHiddenOnRightClick()
+	public async Task Provenance_ForATitleThatIsNotOnTheWantlist_StaysHiddenOnRightClick()
 	{
 		Register();
 
@@ -105,11 +105,11 @@ public class MediaDetailSheetTests : BunitContext
 		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
 	}
 
-	private static WatchlistEntry Entry(WatchlistItemProvenance provenance) => new(Id, DateTimeOffset.UnixEpoch, provenance);
+	private static WantlistItem Entry(WantlistItemProvenance provenance) => new(Id, DateTimeOffset.UnixEpoch, provenance);
 
 	private static IElement? Toggle(IRenderedComponent<Harness> cut) =>
 		cut.FindAll(".media-detail-sheet-content button")
-			.FirstOrDefault(button => button.GetAttribute("aria-label") is { } label && (label.Contains("watchlist", StringComparison.OrdinalIgnoreCase)));
+			.FirstOrDefault(button => button.GetAttribute("aria-label") is { } label && (label.Contains("wantlist", StringComparison.OrdinalIgnoreCase)));
 
 	private IRenderedComponent<Harness> RenderSheet() => Render<Harness>();
 
@@ -122,14 +122,14 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
 
-		_watchlist = IWatchlistService.Mock();
-		_watchlist.GetWatchlistIdsAsync(Any()).Returns(Empty);
-		_watchlist.GetEntryAsync(Any(), Any()).Returns(new None());
-		Services.AddSingleton(_watchlist.Object);
+		_wantlist = IWantlistService.Mock();
+		_wantlist.GetWantlistIdsAsync(Any()).Returns(Empty);
+		_wantlist.GetEntryAsync(Any(), Any()).Returns(new None());
+		Services.AddSingleton(_wantlist.Object);
 
-		var blacklist = IBlacklistService.Mock();
-		blacklist.GetBlacklistIdsAsync(Any()).Returns(Empty);
-		Services.AddSingleton(blacklist.Object);
+		var blocklist = IBlocklistService.Mock();
+		blocklist.GetBlocklistIdsAsync(Any()).Returns(Empty);
+		Services.AddSingleton(blocklist.Object);
 
 		Services.AddSingleton(IMediaService.Mock().Object);
 
@@ -139,7 +139,7 @@ public class MediaDetailSheetTests : BunitContext
 			.Returns(
 				new ProviderConfig
 				{
-					WatchlistProvider = WatchlistProvider.Plex,
+					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,

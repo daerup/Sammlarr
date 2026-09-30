@@ -1,5 +1,5 @@
-<DemoCard Title="Bulk-editable grid" Where="Watchlist, blacklist" Span="4"
-          Note="BulkEditableMediaGrid in edit mode over a paged list: click tiles to select, shift-click for a range, pick the page or the whole list from the tick's menu, and page with PaginationControls. Remove and blacklist take the titles out of this demo only.">
+<DemoCard Title="Bulk-editable grid" Where="Wantlist, blocklist" Span="4"
+          Note="BulkEditableMediaGrid in edit mode over a paged list: click tiles to select, shift-click for a range, pick the page or the whole list from the tick's menu, and page with PaginationControls. Remove and blocklist take the titles out of this demo only.">
     <BulkEditableMediaGrid TItem="MediaLookup"
                            Items="PageItems"
                            AllItems="_items"
@@ -8,7 +8,7 @@
                            IsEditMode="_editing"
                            IsEditModeChanged="v => _editing = v"
                            RemoveLabel="Remove"
-                           MarkLabel="Blacklist"
+                           MarkLabel="Blocklist"
                            OnBulkRemove="Remove"
                            OnBulkMark="Remove"/>
     <div class="flex items-center gap-3">

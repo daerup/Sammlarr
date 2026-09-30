@@ -1,7 +1,7 @@
 using Contracts.Feed;
 using DB.Data.Feed;
 using DB.Data.Media;
-using DB.Data.Watchlist;
+using DB.Data.Wantlist;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
@@ -71,17 +71,17 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task DeleteFeedAsync_OrphansAttachedWatchlistEntries_PopulatesSnapshot()
+	public async Task DeleteFeedAsync_OrphansAttachedWantlistEntries_PopulatesSnapshot()
 	{
 		var feedId = await SeedFeedAsync("My Feed", "my-feed", new DateTimeOffset(2026, 07, 01, 12, 0, 0, TimeSpan.Zero));
 		var mediaId = PlexId.From("plex-feed-1", MediaType.Movie);
 		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.Add(mediaId.ToExternalIdEntity(media));
-		fixture.Context.Watchlist.Add(
-			new WatchlistRow
+		fixture.Context.Wantlist.Add(
+			new WantlistRow
 			{
 				Media = media,
-				Origin = WatchlistEntryOrigin.Feed,
+				Origin = WantlistItemOrigin.Feed,
 				SourceFeedId = feedId.Value,
 			}
 		);
@@ -90,8 +90,8 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		await _testee.DeleteFeedAsync(feedId);
 
-		var entry = await fixture.Context.Watchlist.AsNoTracking().SingleAsync();
-		await Assert.That(entry.Origin).IsEqualTo(WatchlistEntryOrigin.Orphaned);
+		var entry = await fixture.Context.Wantlist.AsNoTracking().SingleAsync();
+		await Assert.That(entry.Origin).IsEqualTo(WantlistItemOrigin.Orphaned);
 		await Assert.That(entry.SourceFeedNameSnapshot).IsEqualTo("My Feed");
 		await Assert.That(entry.SourceFeedId).IsNull();
 	}
@@ -123,13 +123,13 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Test]
 	public async Task GetFeedByIdAsync_WhenFeedExists_ReturnsProjectedFeed()
 	{
-		var id = await SeedFeedAsync("Watchlist", "my-watchlist", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
+		var id = await SeedFeedAsync("Wantlist", "my-wantlist", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
 
 		var feed = await _testee.GetFeedByIdAsync(id);
 
 		await Assert.That(feed).IsNotNull();
-		await Assert.That(feed!.Name).IsEqualTo("Watchlist");
-		await Assert.That(feed.Identifier).IsEqualTo("my-watchlist");
+		await Assert.That(feed!.Name).IsEqualTo("Wantlist");
+		await Assert.That(feed.Identifier).IsEqualTo("my-wantlist");
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Append()));
 		await Assert.That(feed.Enabled).IsTrue();
 	}

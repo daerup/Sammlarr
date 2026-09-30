@@ -54,7 +54,7 @@
     transform: scale(1);
 }
 
-.tile-unresolved .media-card-poster {
+.tile-unmatched .media-card-poster {
     filter: grayscale(0.85) brightness(60%);
 }
 
@@ -62,7 +62,7 @@
     filter: brightness(0.4) saturate(0.85);
 }
 
-.tile-unresolved-indicator {
+.tile-unmatched-indicator {
     display: inline-flex;
     align-items: center;
     justify-content: center;

@@ -32,7 +32,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	{
 		var targetId = await CreateTargetAsync();
 
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSyncCompleted, new Delivered());
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Delivered());
 
 		var recent = await RecentAsync(targetId);
 		await Assert.That(recent).Count().IsEqualTo(1);
@@ -45,7 +45,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		var targetId = await CreateTargetAsync();
 		var next = DateTimeOffset.UnixEpoch.AddMinutes(5);
 
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSyncCompleted, new Retrying("HTTP 500", next));
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Retrying("HTTP 500", next));
 
 		var recent = await RecentAsync(targetId);
 		await Assert
@@ -64,8 +64,8 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		var targetId = await CreateTargetAsync();
 		var eventId = Guid.CreateVersion7();
 
-		await _testee.RecordAsync(eventId, targetId, NotificationEventType.WatchlistSyncCompleted, new Retrying("down", DateTimeOffset.UnixEpoch.AddMinutes(1)));
-		await _testee.RecordAsync(eventId, targetId, NotificationEventType.WatchlistSyncCompleted, new Delivered());
+		await _testee.RecordAsync(eventId, targetId, NotificationEventType.WantlistSyncCompleted, new Retrying("down", DateTimeOffset.UnixEpoch.AddMinutes(1)));
+		await _testee.RecordAsync(eventId, targetId, NotificationEventType.WantlistSyncCompleted, new Delivered());
 
 		var recent = await RecentAsync(targetId);
 		await Assert.That(recent).Count().IsEqualTo(1);
@@ -78,7 +78,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		var targetId = await CreateTargetAsync();
 		for (var i = 0; i < 5; i++)
 		{
-			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSyncCompleted, new Failed($"fail {i}"));
+			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Failed($"fail {i}"));
 		}
 
 		await Assert.That(await RecentAsync(targetId, count: 3)).Count().IsEqualTo(3);
@@ -90,7 +90,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 		var targetId = await CreateTargetAsync();
 		for (var i = 0; i < 25; i++)
 		{
-			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSyncCompleted, new Delivered());
+			await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Delivered());
 		}
 
 		await Assert.That(await RecentAsync(targetId, count: 100)).Count().IsEqualTo(20);
@@ -100,7 +100,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	public async Task Outcomes_WhenTwoUsersExist_AreIsolatedPerUser()
 	{
 		var targetId = await CreateTargetAsync();
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSyncCompleted, new Delivered());
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Delivered());
 
 		fixture.CurrentUser.Id = UserId.From(Guid.NewGuid());
 		await Assert.That(await RecentAsync(targetId)).IsEmpty();
@@ -113,7 +113,7 @@ public class NotificationDeliveryOutcomeRepositoryTests(SammlarrTestHost fixture
 	public async Task DeleteAsync_WhenATargetIsDeleted_CascadesItsOutcomes()
 	{
 		var targetId = await CreateTargetAsync();
-		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WatchlistSyncCompleted, new Delivered());
+		await _testee.RecordAsync(Guid.CreateVersion7(), targetId, NotificationEventType.WantlistSyncCompleted, new Delivered());
 
 		await _targets.DeleteAsync(targetId);
 

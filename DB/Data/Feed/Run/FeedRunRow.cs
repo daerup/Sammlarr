@@ -23,7 +23,7 @@ internal record FeedRunRow : Entity<Guid>, IUserOwned
 	public int Bypassed { get; set; }
 	public int Filtered { get; set; }
 	public int Skipped { get; set; }
-	public int Unresolved { get; set; }
+	public int Unmatched { get; set; }
 	public int Removed { get; set; }
 
 	public string? SourceFailure { get; set; }

@@ -39,8 +39,8 @@ public class WebUiNotificationSeederTests
 						new[]
 						{
 							NotificationEventType.ProviderRateLimited,
-							NotificationEventType.WatchlistSyncCompleted,
-							NotificationEventType.WatchlistSyncFailed,
+							NotificationEventType.WantlistSyncCompleted,
+							NotificationEventType.WantlistSyncFailed,
 							NotificationEventType.FeedRunCompleted,
 							NotificationEventType.FeedRunFailed,
 						}

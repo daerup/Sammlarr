@@ -1,7 +1,7 @@
 using DB.Conversion.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using TestInfrastructure;
 
 namespace DB.Tests.Conversion;
@@ -34,16 +34,16 @@ public class JobRequestConverterTests
 	[Test]
 	public async Task Convert_WhenAManualSync_RoundTripsTheTrigger()
 	{
-		var restored = (SyncWatchlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWatchlist(new ManualTrigger())))!;
+		var restored = (SyncWantlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWantlist(new ManualTrigger())))!;
 
-		await Assert.That(restored.Trigger).IsOfUnionType<WatchlistSyncTrigger, ManualTrigger>();
+		await Assert.That(restored.Trigger).IsOfUnionType<WantlistSyncTrigger, ManualTrigger>();
 	}
 
 	[Test]
 	public async Task Convert_WhenAScheduledSync_RoundTripsTheTriggerRatherThanFallingBackToManual()
 	{
-		var restored = (SyncWatchlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWatchlist(new ScheduledFeedTrigger())))!;
+		var restored = (SyncWantlist)_testee.ConvertFromProvider(_testee.ConvertToProvider(new SyncWantlist(new ScheduledFeedTrigger())))!;
 
-		await Assert.That(restored.Trigger).IsOfUnionType<WatchlistSyncTrigger, ScheduledFeedTrigger>();
+		await Assert.That(restored.Trigger).IsOfUnionType<WantlistSyncTrigger, ScheduledFeedTrigger>();
 	}
 }

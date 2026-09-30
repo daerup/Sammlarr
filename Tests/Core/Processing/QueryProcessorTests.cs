@@ -129,16 +129,16 @@ public class QueryProcessorTests
 	}
 
 	[Test]
-	public async Task Execute_WhenWatchlistedIsPreserved_TheWatchlistedItemDoesNotConsumeASlot()
+	public async Task Execute_WhenWantlistedIsPreserved_TheWantlistedItemDoesNotConsumeASlot()
 	{
-		var watchlisted = new Item("Watchlisted", 2020, "Action");
+		var wantlisted = new Item("Wantlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
+		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results[0].Bypassed).IsTrue();
@@ -146,34 +146,34 @@ public class QueryProcessorTests
 	}
 
 	[Test]
-	public async Task Execute_WhenBlacklistedIsPreserved_TheBlacklistedItemDoesNotConsumeASlot()
+	public async Task Execute_WhenBlocklistedIsPreserved_TheBlocklistedItemDoesNotConsumeASlot()
 	{
-		var blacklisted = new Item("Blacklisted", 2020, "Action");
+		var blocklisted = new Item("Blocklisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit { Count = 1, Blacklisted = SlotPolicy.Preserved },
+			Limit = new QueryLimit { Count = 1, Blocklisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([blacklisted, normal], options, Enrolled(blacklisted: blacklisted)).ToListAsync();
+		var results = await _testee.ExecuteAsync([blocklisted, normal], options, Enrolled(blocklisted: blocklisted)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
-		await Assert.That(results[0].Enrollment.InBlacklist).IsTrue();
+		await Assert.That(results[0].Enrollment.InBlocklist).IsTrue();
 		await Assert.That(results[0].ConsumesSlot).IsFalse();
 	}
 
 	[Test]
 	public async Task Execute_WhenPreservedItemsAreMixedWithOthers_OnlyTheOthersConsumeTheLimit()
 	{
-		var watchlisted = new Item("Watchlisted", 2019, "Action");
+		var wantlisted = new Item("Wantlisted", 2019, "Action");
 		var normal1 = new Item("Normal1", 2020, "Drama");
 		var normal2 = new Item("Normal2", 2021, "Comedy");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal1, normal2], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
+		var results = await _testee.ExecuteAsync([wantlisted, normal1, normal2], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
 		await Assert.That(results[0].ConsumesSlot).IsFalse();
@@ -184,35 +184,35 @@ public class QueryProcessorTests
 	public async Task Execute_WhenTheLimitIsAlreadyReached_PreservedItemsAreStillTruncated()
 	{
 		var normal1 = new Item("Normal1", 2019, "Action");
-		var watchlisted = new Item("Watchlisted", 2020, "Drama");
+		var wantlisted = new Item("Wantlisted", 2020, "Drama");
 		var normal2 = new Item("Normal2", 2021, "Comedy");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([normal1, watchlisted, normal2], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
+		var results = await _testee.ExecuteAsync([normal1, wantlisted, normal2], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated, QueryOutcome.Truncated], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task Execute_WhenWatchlistedIsConsumed_TheWatchlistedItemBypassesButConsumesASlot()
+	public async Task Execute_WhenWantlistedIsConsumed_TheWantlistedItemBypassesButConsumesASlot()
 	{
-		var watchlisted = new Item("Watchlisted", 2020, "Action");
+		var wantlisted = new Item("Wantlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 2 } };
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
+		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results[0].Bypassed).IsTrue();
-		await Assert.That(results[0].Enrollment.InWatchlist).IsTrue();
+		await Assert.That(results[0].Enrollment.InWantlist).IsTrue();
 		await Assert.That(results[0].ConsumesSlot).IsTrue();
 	}
 
 	[Test]
-	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_TheWatchlistPolicyWins()
+	public async Task Execute_WhenItemIsWantlistedAndBlocklisted_TheWantlistPolicyWins()
 	{
 		var both = new Item("Both", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
@@ -221,19 +221,19 @@ public class QueryProcessorTests
 			Limit = new QueryLimit
 			{
 				Count = 1,
-				Watchlisted = SlotPolicy.Preserved,
-				Blacklisted = SlotPolicy.Consumed,
+				Wantlisted = SlotPolicy.Preserved,
+				Blocklisted = SlotPolicy.Consumed,
 			},
 		};
 
-		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(watchlisted: both, blacklisted: both)).ToListAsync();
+		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(wantlisted: both, blocklisted: both)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Qualified], CollectionOrdering.Matching);
 		await Assert.That(results[0].ConsumesSlot).IsFalse();
 	}
 
 	[Test]
-	public async Task Execute_WhenItemIsWatchlistedAndBlacklisted_TheBlacklistPolicyIsIgnored()
+	public async Task Execute_WhenItemIsWantlistedAndBlocklisted_TheBlocklistPolicyIsIgnored()
 	{
 		var both = new Item("Both", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
@@ -242,12 +242,12 @@ public class QueryProcessorTests
 			Limit = new QueryLimit
 			{
 				Count = 1,
-				Watchlisted = SlotPolicy.Consumed,
-				Blacklisted = SlotPolicy.Preserved,
+				Wantlisted = SlotPolicy.Consumed,
+				Blocklisted = SlotPolicy.Preserved,
 			},
 		};
 
-		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(watchlisted: both, blacklisted: both)).ToListAsync();
+		var results = await _testee.ExecuteAsync([both, normal], options, Enrolled(wantlisted: both, blocklisted: both)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
 		await Assert.That(results[0].ConsumesSlot).IsTrue();
@@ -256,22 +256,22 @@ public class QueryProcessorTests
 	[Test]
 	public async Task Execute_WhenABypassedItemConsumesTheOnlySlot_TheNextItemIsTruncated()
 	{
-		var watchlisted = new Item("Watchlisted", 2020, "Action");
+		var wantlisted = new Item("Wantlisted", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions { Limit = new QueryLimit { Count = 1 } };
 
-		var results = await _testee.ExecuteAsync([watchlisted, normal], options, Enrolled(watchlisted: watchlisted)).ToListAsync();
+		var results = await _testee.ExecuteAsync([wantlisted, normal], options, Enrolled(wantlisted: wantlisted)).ToListAsync();
 
 		await Assert.That(Outcomes(results)).IsEquivalentTo([QueryOutcome.Qualified, QueryOutcome.Truncated], CollectionOrdering.Matching);
 		await Assert.That(results[0].Bypassed).IsTrue();
 	}
 
 	[Test]
-	public async Task Execute_WhenAnOwnedItemIsAlsoWatchlisted_ItQualifiesAsOwnedAndIsNeverBypassed()
+	public async Task Execute_WhenAnOwnedItemIsAlsoWantlisted_ItQualifiesAsOwnedAndIsNeverBypassed()
 	{
 		var owned = new Item("Owned", 2020, "Action");
 
-		var results = await _testee.ExecuteAsync([owned], new QueryOptions(), Enrolled(watchlisted: owned, owned: owned)).ToListAsync();
+		var results = await _testee.ExecuteAsync([owned], new QueryOptions(), Enrolled(wantlisted: owned, owned: owned)).ToListAsync();
 
 		await Assert.That(results[0].Outcome).IsEqualTo(QueryOutcome.Qualified);
 		await Assert.That(results[0].Enrollment.Owned).IsTrue();
@@ -280,16 +280,16 @@ public class QueryProcessorTests
 	}
 
 	[Test]
-	public async Task Execute_WhenAnOwnedItemIsWatchlistedAndPreserved_ItStillConsumesASlot()
+	public async Task Execute_WhenAnOwnedItemIsWantlistedAndPreserved_ItStillConsumesASlot()
 	{
 		var owned = new Item("Owned", 2020, "Action");
 		var normal = new Item("Normal", 2021, "Drama");
 		var options = new QueryOptions
 		{
-			Limit = new QueryLimit { Count = 1, Watchlisted = SlotPolicy.Preserved },
+			Limit = new QueryLimit { Count = 1, Wantlisted = SlotPolicy.Preserved },
 		};
 
-		var results = await _testee.ExecuteAsync([owned, normal], options, Enrolled(watchlisted: owned, owned: owned)).ToListAsync();
+		var results = await _testee.ExecuteAsync([owned, normal], options, Enrolled(wantlisted: owned, owned: owned)).ToListAsync();
 
 		await Assert.That(results[0].ConsumesSlot).IsTrue();
 		await Assert.That(results[1].Outcome).IsEqualTo(QueryOutcome.Truncated);
@@ -321,10 +321,10 @@ public class QueryProcessorTests
 	}
 
 	[Test]
-	public async Task Execute_WhenAnOwnedItemIsBlacklisted_TheBlacklistChangesNothingAboutItsOwnership()
+	public async Task Execute_WhenAnOwnedItemIsBlocklisted_TheBlocklistChangesNothingAboutItsOwnership()
 	{
 		var owned = new Item("Owned", 2020, "Action");
-		var predicates = Enrolled(blacklisted: owned, owned: owned);
+		var predicates = Enrolled(blocklisted: owned, owned: owned);
 		var culling = new QueryOptions { Filter = Filter(Group(String("Genre", FilterPredicateOperator.Equals, "Drama"))) };
 
 		var qualified = await _testee.ExecuteAsync([owned], new QueryOptions(), predicates).ToListAsync();
@@ -334,8 +334,8 @@ public class QueryProcessorTests
 		await Assert.That(culled[0].AtRisk).IsTrue();
 	}
 
-	private static QueryPredicates<Item> Enrolled(Item? watchlisted = null, Item? blacklisted = null, Item? owned = null) =>
-		new(IsWatchlisted: item => item == watchlisted, IsBlacklisted: item => item == blacklisted, IsOwned: item => item == owned);
+	private static QueryPredicates<Item> Enrolled(Item? wantlisted = null, Item? blocklisted = null, Item? owned = null) =>
+		new(IsWantlisted: item => item == wantlisted, IsBlocklisted: item => item == blocklisted, IsOwned: item => item == owned);
 
 	private static IEnumerable<QueryOutcome> Outcomes(IEnumerable<QueryVerdict<Item>> rows) => rows.Select(row => row.Outcome);
 
@@ -380,7 +380,7 @@ public class QueryProcessorRatingTests
 		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([low, unrated]);
 	}
 
-	private static QueryPredicates<MediaQueryRow> NoEnrollment => new(IsWatchlisted: _ => false, IsBlacklisted: _ => false, IsOwned: _ => false);
+	private static QueryPredicates<MediaQueryRow> NoEnrollment => new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false);
 
 	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, QueryOutcome outcome) =>
 		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);

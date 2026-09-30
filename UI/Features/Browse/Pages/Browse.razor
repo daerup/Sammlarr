@@ -3,9 +3,9 @@
 @using Contracts.DI
 @using Contracts.Media.Trending
 @using Contracts.Settings
-@using Contracts.Watchlist
+@using Contracts.Wantlist
 @inject IKeyedServiceIndex<TrendingProvider, ITrendingService> TrendingServiceIndex
-@inject IWatchlistService WatchlistService
+@inject IWantlistService WantlistService
 @inject NavigationManager NavigationManager
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject ScrollService ScrollService
@@ -40,7 +40,7 @@
                                            Media="media"
                                            OnClick="() => SelectMedia(media)"
                                            ShowBookmark="true"
-                                           IsInWatchlist="IsInWatchlist(media)"/>
+                                           IsInWantlist="IsInWantlist(media)"/>
                         }
                     </div>
 
@@ -58,7 +58,7 @@
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedMedia"
                   Source="ManualSource.Browse"
-                  OnEnrollmentChanged="@(_ => LoadWatchlistIdsAsync())"/>
+                  OnEnrollmentChanged="@(_ => LoadWantlistIdsAsync())"/>
 
 @code {
     private IReadOnlyList<MediaLookup>? _trendingMedia;
@@ -68,7 +68,7 @@
     private bool _isSignedIn;
     private bool _hasTrendingProviderApiKey;
     private bool HasAccess => _isSignedIn && _hasTrendingProviderApiKey;
-    private IReadOnlySet<MediaId> _watchlisted = new HashSet<MediaId>();
+    private IReadOnlySet<MediaId> _wantlisted = new HashSet<MediaId>();
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
     private int _totalPages = 1;
@@ -90,14 +90,14 @@
         if (!_isSignedIn)
         {
             _hasTrendingProviderApiKey = false;
-            _watchlisted = new HashSet<MediaId>();
+            _wantlisted = new HashSet<MediaId>();
             _trendingMedia = null;
             CloseSelectedMedia();
             _isLoading = false;
             return;
         }
 
-        await LoadWatchlistIdsAsync();
+        await LoadWantlistIdsAsync();
     }
 
     private void CloseSelectedMedia()
@@ -128,9 +128,9 @@
         await LoadPageAsync();
     }
 
-    private async Task LoadWatchlistIdsAsync()
+    private async Task LoadWantlistIdsAsync()
     {
-        _watchlisted = await WatchlistService.GetWatchlistIdsAsync(_cancellationTokenSource.Token);
+        _wantlisted = await WantlistService.GetWantlistIdsAsync(_cancellationTokenSource.Token);
     }
 
     private async Task LoadPageAsync()
@@ -185,7 +185,7 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWatchlist(MediaLookup media) => !media.IsUnresolved && _watchlisted.Contains(media.Id);
+    private bool IsInWantlist(MediaLookup media) => !media.IsUnmatched && _wantlisted.Contains(media.Id);
 
     private void SelectMedia(MediaLookup media)
     {

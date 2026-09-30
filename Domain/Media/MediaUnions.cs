@@ -142,7 +142,7 @@ public static class MediaUnions
 
 	extension(MediaLookup media)
 	{
-		public bool IsUnresolved => media is UnmatchedMedia;
+		public bool IsUnmatched => media is UnmatchedMedia;
 
 		public MediaIdentity Identity =>
 			media switch

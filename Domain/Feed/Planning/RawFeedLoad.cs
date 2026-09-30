@@ -7,7 +7,7 @@ public readonly record struct RawFeedLoad(IReadOnlyList<MediaLookup> Items, Comp
 
 public readonly record struct ClassifiedFeedLoad(
 	IReadOnlyList<QueryVerdict<MediaLookup>> Verdicts,
-	IReadOnlyList<UnmatchedMedia> Unresolved,
+	IReadOnlyList<UnmatchedMedia> Unmatched,
 	Completeness Completeness,
 	string? SourceFailure = null
 );

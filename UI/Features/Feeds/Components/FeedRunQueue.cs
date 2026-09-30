@@ -1,7 +1,7 @@
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 
 namespace UI.Features.Feeds.Components;
 
@@ -20,7 +20,7 @@ internal static class FeedRunQueue
 
 		if (syncAfter && queued > 0)
 		{
-			await queue.EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()), cancellationToken);
+			await queue.EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()), cancellationToken);
 		}
 
 		return Summary(queued, feeds.Count - queued);

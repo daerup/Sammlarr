@@ -2,7 +2,7 @@ using Domain.Feed;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 using TestInfrastructure;
 using UI.Shared.Filters;
 
@@ -126,7 +126,7 @@ public class ListFilterTests
 
 	[Test]
 	[Arguments(SourceKind.Manual, true)]
-	[Arguments(SourceKind.Remote, false)]
+	[Arguments(SourceKind.Sink, false)]
 	[Arguments(SourceKind.Orphaned, false)]
 	public async Task MatchesSource_ForNonFeedKinds_MatchesOnlyItsOwnOrigin(SourceKind kind, bool expected)
 	{
@@ -139,7 +139,7 @@ public class ListFilterTests
 	public async Task MatchesType_AndMatchesSource_AcceptEverythingWhenUnset()
 	{
 		await Assert.That(ListFilter.None.MatchesType(MediaType.Show)).IsTrue();
-		await Assert.That(ListFilter.None.MatchesSource(new RemoteOrigin(WatchlistProvider.Plex))).IsTrue();
+		await Assert.That(ListFilter.None.MatchesSource(new SinkOrigin(SinkKind.Plex))).IsTrue();
 	}
 
 	[Test]

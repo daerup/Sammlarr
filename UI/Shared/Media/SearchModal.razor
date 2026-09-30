@@ -88,7 +88,7 @@
                                              OnFocusIn="() => _focusedResult = result.Key"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && !result.IsUnresolved && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaLookup>(this, ToggleAsync)))
+                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && !result.IsUnmatched && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaLookup>(this, ToggleAsync)))
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -116,7 +116,7 @@
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
     [Parameter] [EditorRequired] public SearchProvider SearchProvider { get; set; }
-    [Parameter] [EditorRequired] public required Func<MediaId, bool> IsInWatchlist { get; set; }
+    [Parameter] [EditorRequired] public required Func<MediaId, bool> IsInWantlist { get; set; }
     [Parameter] [EditorRequired] public required Func<MediaId, string, bool, Task<bool>> OnToggle { get; set; }
     [Parameter] public string? Title { get; set; }
     [Parameter] public string? Description { get; set; }
@@ -138,7 +138,7 @@
 
     private string SearchProviderName => SearchProvider.GetDescription();
     private string SearchModalTitle => Title ?? $"Search {SearchProviderName}";
-    private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your watchlist.";
+    private string SearchModalDescription => Description ?? $"Find a movie or show from {SearchProviderName} and add it to your wantlist.";
 
     protected override void OnParametersSet()
     {
@@ -165,7 +165,7 @@
     }
 
 
-    private bool IsSearchResultMarked(MediaLookup result) => !result.IsUnresolved && IsInWatchlist.Invoke(result.Id);
+    private bool IsSearchResultMarked(MediaLookup result) => !result.IsUnmatched && IsInWantlist.Invoke(result.Id);
 
     private async Task CloseAsync()
     {
@@ -239,7 +239,7 @@
 
     private async Task ToggleAsync(MediaLookup result)
     {
-        if (_isAdding || result.IsUnresolved)
+        if (_isAdding || result.IsUnmatched)
         {
             return;
         }

@@ -1,25 +1,25 @@
 @using System.Diagnostics
-@using Contracts.Blacklist
+@using Contracts.Blocklist
 @using Contracts.DI
 @using Contracts.Feed
 @using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Processing
-@using Contracts.Watchlist
+@using Contracts.Wantlist
 @using Domain.Feed
 @using Domain.Feed.Planning
 @using Domain.Feed.Run
 @using Domain.Media
 @using Domain.Processing
 @using Domain.Providers
-@using Domain.Watchlist
+@using Domain.Wantlist
 @using UI.Features.Feeds.Components
 @using UI.Shared.Services.Branding
 @using global::Observability.Tracing
 @using global::UI.Features.Feeds.Pages.Editor
 @implements IDisposable
-@inject IWatchlistService WatchlistService
-@inject IBlacklistService BlacklistService
+@inject IWantlistService WantlistService
+@inject IBlocklistService BlocklistService
 @inject IMediaService Media
 @inject IKeyedServiceIndex<FeedProvider, IFeedProvider> FeedServiceIndex
 @inject IFeedRunPlanner Planner
@@ -100,7 +100,7 @@
                         <PreviewFilterBadge Icon="redo-dot" Count="BypassedCount" Active="IsFilterActive(PreviewBucket.Bypassed)" OnClick="() => ToggleFilter(PreviewBucket.Bypassed)">
                             <Tooltip>
                                 <p class="font-medium mb-0.5">Bypasses import</p>
-                                <p>@WatchlistCount in your watchlist · @BlacklistCount in your blacklist</p>
+                                <p>@WantlistCount in your wantlist · @BlocklistCount in your blocklist</p>
                                 <p class="opacity-70 mt-0.5">These will not be imported.</p>
                             </Tooltip>
                         </PreviewFilterBadge>
@@ -110,7 +110,7 @@
                         <PreviewFilterBadge Icon="scissors" Count="SkippedCount" Active="IsFilterActive(PreviewBucket.Skipped)" OnClick="() => ToggleFilter(PreviewBucket.Skipped)">
                             <Tooltip>Items excluded by the import limit</Tooltip>
                         </PreviewFilterBadge>
-                        <PreviewFilterBadge Icon="circle-alert" Count="UnresolvedCount" Active="IsFilterActive(PreviewBucket.Unresolved)" OnClick="() => ToggleFilter(PreviewBucket.Unresolved)">
+                        <PreviewFilterBadge Icon="circle-alert" Count="UnmatchedCount" Active="IsFilterActive(PreviewBucket.Unmatched)" OnClick="() => ToggleFilter(PreviewBucket.Unmatched)">
                             <Tooltip>Items that could not be matched in your media provider</Tooltip>
                         </PreviewFilterBadge>
                     </div>
@@ -142,7 +142,7 @@
                 </BbButton>
             </div>
         }
-        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnresolvedResults.Count > 0 || _filteredGoneResults.Count > 0))
+        @if (HasItems && (_filteredResults.Count > 0 || _filteredUnmatchedResults.Count > 0 || _filteredGoneResults.Count > 0))
         {
             @if (_filteredResults.Count > 0)
             {
@@ -156,10 +156,10 @@
                     var isAtRisk = IsMirror && result.AtRisk;
                     var isDimmed = (isCulled || isTruncated) && !isAtRisk;
                     var isGreyedOut = result.Bypassed;
-                    var isBlacklisted = IsBlacklisted(item);
-                    var isInWatchlist = IsWatchlisted(item);
-                    var isTogglingWatchlist = _togglingWatchlistItem == item.Id;
-                    var isTogglingBlacklist = _togglingBlacklistItem == item.Id;
+                    var isBlocklisted = IsBlocklisted(item);
+                    var isInWantlist = IsWantlisted(item);
+                    var isTogglingWantlist = _togglingWantlistItem == item.Id;
+                    var isTogglingBlocklist = _togglingBlocklistItem == item.Id;
 
                     var hoverStyle = (isAtRisk, isDimmed, isGreyedOut) switch
                     {
@@ -208,12 +208,12 @@
                                             </BbTooltip>
                                         </BbTooltipProvider>
                                     }
-                                    <WatchlistToggleIcon Result="item"
-                                                         IsToggled="isInWatchlist"
-                                                         IsToggling="isTogglingWatchlist"
+                                    <WantlistToggleIcon Result="item"
+                                                         IsToggled="isInWantlist"
+                                                         IsToggling="isTogglingWantlist"
                                                          DotColor="@(result.Enrollment.Owned ? FeedBrandColor : null)"
-                                                         OnToggle="ToggleWatchlistAsync"/>
-                                    <BlacklistToggleIcon Result="item" IsToggled="isBlacklisted" IsToggling="isTogglingBlacklist" OnToggle="ToggleBlacklistAsync"/>
+                                                         OnToggle="ToggleWantlistAsync"/>
+                                    <BlocklistToggleIcon Result="item" IsToggled="isBlocklisted" IsToggling="isTogglingBlocklist" OnToggle="ToggleBlocklistAsync"/>
                                 </Icons>
                             </MediaDetailTile>
                         </div>
@@ -239,15 +239,15 @@
                                                  OnFocusOut="() => ClearFocus(goneItem)">
                                     <Icons>
                                         <LeavingIndicator Reason="@PreviewCopy.GoneReason" Threshold="MirrorThreshold" Absences="AbsencesOf(goneItem.Id)"/>
-                                        <WatchlistToggleIcon Result="goneItem"
-                                                             IsToggled="IsWatchlisted(goneItem)"
-                                                             IsToggling="_togglingWatchlistItem == goneItem.Id"
+                                        <WantlistToggleIcon Result="goneItem"
+                                                             IsToggled="IsWantlisted(goneItem)"
+                                                             IsToggling="_togglingWantlistItem == goneItem.Id"
                                                              DotColor="@FeedBrandColor"
-                                                             OnToggle="ToggleWatchlistAsync"/>
-                                        <BlacklistToggleIcon Result="goneItem"
-                                                             IsToggled="IsBlacklisted(goneItem)"
-                                                             IsToggling="_togglingBlacklistItem == goneItem.Id"
-                                                             OnToggle="ToggleBlacklistAsync"/>
+                                                             OnToggle="ToggleWantlistAsync"/>
+                                        <BlocklistToggleIcon Result="goneItem"
+                                                             IsToggled="IsBlocklisted(goneItem)"
+                                                             IsToggling="_togglingBlocklistItem == goneItem.Id"
+                                                             OnToggle="ToggleBlocklistAsync"/>
                                     </Icons>
                                 </MediaDetailTile>
                             </div>
@@ -260,11 +260,11 @@
                     }
                 </div>
             }
-            @if (_filteredUnresolvedResults.Count > 0)
+            @if (_filteredUnmatchedResults.Count > 0)
             {
                 <div class="mt-4">
                     <p class="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1 pb-2">Not found in provider</p>
-                    <Virtualize Items="_filteredUnresolvedResults" Context="item" ItemSize="215" OverscanCount="6">
+                    <Virtualize Items="_filteredUnmatchedResults" Context="item" ItemSize="215" OverscanCount="6">
                         <ItemContent>
                     @{
                             <div class="pb-2">
@@ -366,10 +366,10 @@
 
     private FetchState _fetchState = FetchState.Idle;
     private List<MediaLookup> _rawResults = [];
-    private IReadOnlyList<UnmatchedMedia> _unresolvedResults = [];
+    private IReadOnlyList<UnmatchedMedia> _unmatchedResults = [];
     private IReadOnlyList<QueryVerdict<MediaLookup>> _processedResults = [];
     private List<QueryVerdict<MediaLookup>> _filteredResults = [];
-    private List<MediaLookup> _filteredUnresolvedResults = [];
+    private List<MediaLookup> _filteredUnmatchedResults = [];
     private IReadOnlyDictionary<MediaId, int> _missedRuns = new Dictionary<MediaId, int>();
     private List<GoneItem> _goneResults = [];
     private List<GoneItem> _filteredGoneResults = [];
@@ -382,10 +382,10 @@
     private string _searchQuery = string.Empty;
     private readonly HashSet<PreviewBucket> _activeFilters = [];
     private string? _focusedResult;
-    private MediaId? _togglingWatchlistItem;
-    private MediaId? _togglingBlacklistItem;
-    private readonly HashSet<MediaId> _watchlisted = new();
-    private readonly HashSet<MediaId> _blacklistIds = new();
+    private MediaId? _togglingWantlistItem;
+    private MediaId? _togglingBlocklistItem;
+    private readonly HashSet<MediaId> _wantlisted = new();
+    private readonly HashSet<MediaId> _blocklistIds = new();
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
@@ -408,7 +408,7 @@
         {
             _fetchState = FetchState.Idle;
             _rawResults = [];
-            _unresolvedResults = [];
+            _unmatchedResults = [];
             _processedResults = [];
             _appliedConfig = null;
         }
@@ -435,7 +435,7 @@
         {
             _fetchState = FetchState.Loading;
             _rawResults = [];
-            _unresolvedResults = [];
+            _unmatchedResults = [];
             _processedResults = [];
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
@@ -506,9 +506,9 @@
 
         try
         {
-            _watchlisted.Clear();
-            _blacklistIds.Clear();
-            await LoadWatchlistAndBlacklistAsync();
+            _wantlisted.Clear();
+            _blocklistIds.Clear();
+            await LoadWantlistAndBlocklistAsync();
 
             var service = FeedServiceIndex[Config.Provider!.Value];
             _fetchTimer.Restart();
@@ -555,14 +555,14 @@
         catch (OperationCanceledException)
         {
             _rawResults = [];
-            _unresolvedResults = [];
+            _unmatchedResults = [];
             _processedResults = [];
             _fetchState = FetchState.Idle;
         }
         catch (FeedIdentifierNotFoundException ex)
         {
             _rawResults = [];
-            _unresolvedResults = [];
+            _unmatchedResults = [];
             _processedResults = [];
             _fetchState = FetchState.Failed;
             Notifier.Warning($"No list found with identifier '{ex.Identifier}'.", "List not found");
@@ -586,7 +586,7 @@
         catch (Exception ex)
         {
             _rawResults = [];
-            _unresolvedResults = [];
+            _unmatchedResults = [];
             _processedResults = [];
             _fetchState = FetchState.Failed;
             Notifier.Error(ex, "Failed to fetch media");
@@ -595,10 +595,10 @@
     private void ClearResults()
     {
         _rawResults = [];
-        _unresolvedResults = [];
+        _unmatchedResults = [];
         _processedResults = [];
         _filteredResults = [];
-        _filteredUnresolvedResults = [];
+        _filteredUnmatchedResults = [];
         _goneResults = [];
         _filteredGoneResults = [];
         _goneShortfall = 0;
@@ -616,7 +616,7 @@
         }
 
         _processedResults = plan.Verdicts;
-        _unresolvedResults = plan.Unresolved;
+        _unmatchedResults = plan.Unmatched;
         _missedRuns = plan is MirrorPlan mirrored ? mirrored.MissedRuns : new Dictionary<MediaId, int>();
 
         await HydrateGoneAsync(plan, completeness, cancellationToken);
@@ -681,10 +681,10 @@
         _filteredResults = _processedResults
             .Where(r => (!_atRiskOnly || r.AtRisk) && PreviewResultFilter.IsVisible(PreviewResultFilter.Bucket(r), _activeFilters) && MatchesSearch(r.Item.Title))
             .ToList();
-        _filteredUnresolvedResults = _atRiskOnly
+        _filteredUnmatchedResults = _atRiskOnly
             ? []
-            : _unresolvedResults
-                .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unresolved, _activeFilters) && MatchesSearch(r.Title ?? string.Empty))
+            : _unmatchedResults
+                .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Title ?? string.Empty))
                 .Select(MediaLookup (r) => r)
                 .ToList();
         _filteredGoneResults = _activeFilters.Count > 0 ? [] : _goneResults.Where(gone => MatchesSearch(gone.Media.Title)).ToList();
@@ -758,12 +758,12 @@
     private static string FormatElapsed(TimeSpan elapsed) =>
         elapsed.TotalSeconds < 1 ? $"{elapsed.TotalMilliseconds:0} ms" : $"{elapsed.TotalSeconds:0.0} s";
 
-    private async Task LoadWatchlistAndBlacklistAsync()
+    private async Task LoadWantlistAndBlocklistAsync()
     {
         try
         {
-            (await WatchlistService.GetWatchlistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _watchlisted.Add(item));
-            (await BlacklistService.GetBlacklistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _blacklistIds.Add(item));
+            (await WantlistService.GetWantlistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _wantlisted.Add(item));
+            (await BlocklistService.GetBlocklistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _blocklistIds.Add(item));
         }
         catch (Exception ex)
         {
@@ -776,11 +776,11 @@
     private int BypassedCount { get; set; }
     private int FilteredCount { get; set; }
     private int SkippedCount { get; set; }
-    private int UnresolvedCount => _unresolvedResults.Count;
+    private int UnmatchedCount => _unmatchedResults.Count;
     private int AtRiskCount { get; set; }
     private int LeavingCount { get; set; }
-    private int WatchlistCount { get; set; }
-    private int BlacklistCount { get; set; }
+    private int WantlistCount { get; set; }
+    private int BlocklistCount { get; set; }
 
     private void RecountBadges()
     {
@@ -795,16 +795,16 @@
         LeavingCount = AtRiskCount + _goneResults.Count + _goneShortfall;
 
         var bypassed = _processedResults.Where(result => PreviewResultFilter.Bucket(result) is PreviewBucket.Bypassed).ToList();
-        WatchlistCount = bypassed.Count(result => result.Enrollment.InWatchlist);
-        BlacklistCount = bypassed.Count(result => result.Enrollment.InBlacklist);
+        WantlistCount = bypassed.Count(result => result.Enrollment.InWantlist);
+        BlocklistCount = bypassed.Count(result => result.Enrollment.InBlocklist);
     }
 
-    private bool IsBlacklisted(MediaLookup item) => _blacklistIds.Contains(item.Id);
-    private bool IsWatchlisted(MediaLookup item) => _watchlisted.Contains(item.Id);
+    private bool IsBlocklisted(MediaLookup item) => _blocklistIds.Contains(item.Id);
+    private bool IsWantlisted(MediaLookup item) => _wantlisted.Contains(item.Id);
 
     private string BypassedTooltip(QueryVerdict<MediaLookup> row)
     {
-        var source = row.Enrollment.InWatchlist ? "On your watchlist" : "On your blacklist";
+        var source = row.Enrollment.InWantlist ? "On your wantlist" : "On your blocklist";
         if (Config.Limit is null)
             return $"{source}, will not be imported.";
         return row.ConsumesSlot ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
@@ -818,38 +818,38 @@
         }
     }
 
-    private async Task ToggleBlacklistAsync(MediaLookup item)
+    private async Task ToggleBlocklistAsync(MediaLookup item)
     {
-        if (_togglingBlacklistItem is not null)
+        if (_togglingBlocklistItem is not null)
         {
             return;
         }
 
-        _togglingBlacklistItem = item.Id;
+        _togglingBlocklistItem = item.Id;
         try
         {
-            if (_blacklistIds.Contains(item.Id))
+            if (_blocklistIds.Contains(item.Id))
             {
-                await BlacklistService.RemoveFromBacklistAsync(item.Id);
-                _blacklistIds.Remove(item.Id);
+                await BlocklistService.RemoveFromBlocklistAsync(item.Id);
+                _blocklistIds.Remove(item.Id);
             }
             else
             {
-                await BlacklistService.AddToBacklistAsync(item.Id);
-                _blacklistIds.Add(item.Id);
+                await BlocklistService.AddToBlocklistAsync(item.Id);
+                _blocklistIds.Add(item.Id);
             }
         }
         catch (UnknownMediaException)
         {
-            Notifier.Warning($"'{item.Title}' isn't ready yet — still loading.", "Can't update blacklist");
+            Notifier.Warning($"'{item.Title}' isn't ready yet — still loading.", "Can't update blocklist");
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex, "Failed to update blacklist");
+            Notifier.Error(ex, "Failed to update blocklist");
         }
         finally
         {
-            _togglingBlacklistItem = null;
+            _togglingBlocklistItem = null;
             _focusedResult = null;
             await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
@@ -857,38 +857,38 @@
         }
     }
 
-    private async Task ToggleWatchlistAsync(MediaLookup item)
+    private async Task ToggleWantlistAsync(MediaLookup item)
     {
-        if (_togglingWatchlistItem is not null)
+        if (_togglingWantlistItem is not null)
         {
             return;
         }
 
-        _togglingWatchlistItem = item.Id;
+        _togglingWantlistItem = item.Id;
         try
         {
-            if (IsWatchlisted(item))
+            if (IsWantlisted(item))
             {
-                await WatchlistService.RemoveFromWatchlistAsync([item.Id]);
-                _watchlisted.Remove(item.Id);
+                await WantlistService.RemoveFromWantlistAsync([item.Id]);
+                _wantlisted.Remove(item.Id);
             }
             else
             {
-                await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin(ManualSource.FeedPreview));
-                _watchlisted.Add(item.Id);
+                await WantlistService.AddToWantlistAsync([item.Id], new ManualOrigin(ManualSource.FeedPreview));
+                _wantlisted.Add(item.Id);
             }
         }
-        catch (MissingWatchlistExternalIdException)
+        catch (MissingSinkIdException)
         {
-            Notifier.Warning($"'{item.Title}' isn't ready yet — still loading.", "Can't update watchlist");
+            Notifier.Warning($"'{item.Title}' isn't ready yet — still loading.", "Can't update wantlist");
         }
         catch (Exception ex)
         {
-            Notifier.Error(ex, "Failed to update watchlist");
+            Notifier.Error(ex, "Failed to update wantlist");
         }
         finally
         {
-            _togglingWatchlistItem = null;
+            _togglingWantlistItem = null;
             _focusedResult = null;
             await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
             await EmitStatusIfChangedAsync();

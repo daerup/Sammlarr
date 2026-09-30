@@ -6,7 +6,7 @@
 @using Contracts.Jobs
 @using Contracts.Media
 @using Contracts.Settings
-@using Contracts.Watchlist
+@using Contracts.Wantlist
 @using Domain.Announcing
 @using Domain.Feed.Run
 @using Domain.Identity
@@ -26,7 +26,7 @@
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IMediaService Media
-@inject IWatchlistService Watchlist
+@inject IWantlistService Wantlist
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
 
@@ -312,7 +312,7 @@
 
     private IReadOnlyList<ProviderCount> ProviderCounts => FeedPulse.Providers(_rows);
 
-    private string ProviderName => _providerConfig is null ? "your watchlist provider" : _providerConfig.WatchlistProvider.GetDescription();
+    private string ProviderName => _providerConfig is null ? "your media service" : _providerConfig.Sink.GetDescription();
 
     protected override async Task OnInitializedAsync()
     {
@@ -328,7 +328,7 @@
         _now = DateTimeOffset.Now;
         await LoadQueueAsync();
         _feeds = await FeedService.GetFeedsAsync(_cancellation.Token);
-        _owned = await Watchlist.GetOwnedCountsAsync(_cancellation.Token);
+        _owned = await Wantlist.GetOwnedCountsAsync(_cancellation.Token);
         _overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
         _lastWeek = FeedPulse.Moved(await FeedService.GetRecentRunsAsync(_now - LastWeek, RunCap, _cancellation.Token));
         Rebuild();
@@ -459,11 +459,11 @@
     private string ConfirmBody(FeedsConfirm confirm) =>
         confirm switch
         {
-            FeedsConfirm.Pause => "Paused feeds skip their schedule and can't be run until you resume them. Titles they already put on your watchlist stay there."
+            FeedsConfirm.Pause => "Paused feeds skip their schedule and can't be run until you resume them. Titles they already put on your wantlist stay there."
                 + AlreadyPaused(),
             FeedsConfirm.Delete => _deleting.Count == 1
-                ? "This permanently removes the feed. Titles it put on your watchlist stay there. This can't be undone."
-                : "This permanently removes them. Titles they put on your watchlist stay there. This can't be undone.",
+                ? "This permanently removes the feed. Titles it put on your wantlist stay there. This can't be undone."
+                : "This permanently removes them. Titles they put on your wantlist stay there. This can't be undone.",
         };
 
     private string AlreadyPaused() =>

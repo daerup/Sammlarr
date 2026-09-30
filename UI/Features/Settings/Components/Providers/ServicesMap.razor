@@ -4,7 +4,7 @@
 
 <div class="overflow-hidden rounded-lg border bg-card">
     <CardHead Icon="network" Title="Which service does what">
-        @if (!CanPickWatchlist)
+        @if (!CanPickSink)
         {
             <span class="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
                 <LucideIcon Name="lock" Size="11"/>
@@ -53,7 +53,7 @@
                 else
                 {
                     <div class="map-service-slot" style="top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px">
-                        @if (CanPickWatchlist && service.Provider == WatchlistTarget)
+                        @if (CanPickSink && service.Provider == WantlistTarget)
                         {
                             <BbDropdownMenu>
                                 <BbDropdownMenuTrigger AsChild="false" Class="map-service is-picker">
@@ -61,16 +61,16 @@
                                     <LucideIcon Name="chevron-down" Size="15" Class="ml-auto text-muted-foreground"/>
                                 </BbDropdownMenuTrigger>
                                 <BbDropdownMenuContent Align="PopoverAlign.End" Class="w-72">
-                                    <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">Watchlist syncs to</BbDropdownMenuLabel>
-                                    @foreach (var target in Enum.GetValues<WatchlistProvider>())
+                                    <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">Wantlist syncs to</BbDropdownMenuLabel>
+                                    @foreach (var target in Enum.GetValues<SinkKind>())
                                     {
                                         <BbDropdownMenuItem Class="gap-2.5">
                                             <ProviderLogo Provider="@target.AsMediaProvider()" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
                                             <span class="flex flex-col">
                                                 <span>@Brand(target.AsMediaProvider()).NickName</span>
-                                                <span class="text-xs text-muted-foreground">Each user's own @Brand(target.AsMediaProvider()).NickName watchlist</span>
+                                                <span class="text-xs text-muted-foreground">Each user's own @Brand(target.AsMediaProvider()).NickName wantlist</span>
                                             </span>
-                                            @if (target == Config.WatchlistProvider)
+                                            @if (target == Config.Sink)
                                             {
                                                 <LucideIcon Name="check" Size="14" Class="ml-auto"/>
                                             }
@@ -102,11 +102,11 @@
 
     [Parameter] [EditorRequired] public required IReadOnlySet<MediaProvider> Ready { get; set; }
 
-    [Parameter] public bool CanPickWatchlist { get; set; }
+    [Parameter] public bool CanPickSink { get; set; }
 
     private ServicesMapModel _model = null!;
 
-    private MediaProvider WatchlistTarget => Config.WatchlistProvider.AsMediaProvider();
+    private MediaProvider WantlistTarget => Config.Sink.AsMediaProvider();
 
     protected override void OnParametersSet() => _model = ServicesMapModel.For(Config);
 

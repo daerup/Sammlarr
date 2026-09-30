@@ -3,7 +3,7 @@ using Contracts.Identity;
 using Contracts.Jobs;
 using Core.Announcing;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Shared.Options;
 
 namespace Core.Jobs;
@@ -18,7 +18,7 @@ internal sealed class JobQueue(
 	Announcer announcer
 ) : IJobQueue
 {
-	private static readonly SyncWatchlist ScheduledSync = new(new ScheduledFeedTrigger());
+	private static readonly SyncWantlist ScheduledSync = new(new ScheduledFeedTrigger());
 
 	public async Task<EnqueueResult> EnqueueAsync(IJobRequest request, CancellationToken cancellationToken = default)
 	{
@@ -27,7 +27,7 @@ internal sealed class JobQueue(
 		var runAfter = now + delay;
 		var result = await jobs.EnqueueAsync(new QueuedJob(request, currentUser.Id, runAfter, maxWait, skipWhileRunning), now, cancellationToken);
 		var syncQueuedBehindFeeds = await QueueSyncBehindFeedsAsync(request, now, cancellationToken);
-		if (syncQueuedBehindFeeds && request is SyncWatchlist)
+		if (syncQueuedBehindFeeds && request is SyncWantlist)
 		{
 			result = AsQueued(result);
 		}
@@ -66,7 +66,7 @@ internal sealed class JobQueue(
 
 	private async Task<bool> QueueSyncBehindFeedsAsync(IJobRequest request, DateTimeOffset now, CancellationToken cancellationToken)
 	{
-		if (request is not (RunFeed { ArmsSync: true } or SyncWatchlist(ScheduledFeedTrigger)))
+		if (request is not (RunFeed { ArmsSync: true } or SyncWantlist(ScheduledFeedTrigger)))
 		{
 			return false;
 		}
@@ -91,7 +91,7 @@ internal sealed class JobQueue(
 	private (TimeSpan Delay, TimeSpan MaxWait, bool SkipWhileRunning) Arming(IJobRequest request) =>
 		request switch
 		{
-			SyncWatchlist(ScheduledFeedTrigger) => (options.Grace, options.MaxWait, false),
+			SyncWantlist(ScheduledFeedTrigger) => (options.Grace, options.MaxWait, false),
 			RunFeed => (TimeSpan.Zero, TimeSpan.Zero, true),
 			_ => (TimeSpan.Zero, TimeSpan.Zero, false),
 		};

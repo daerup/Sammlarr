@@ -28,7 +28,7 @@ internal sealed record ServicesMapModel(IReadOnlyList<MapRole> Roles, IReadOnlyL
 		MediaProvider[] feeds = [.. Enum.GetValues<FeedProvider>().Select(provider => provider.AsMediaProvider())];
 		(string Name, string Icon, string Description, MediaProvider[] Providers, bool PerFeed)[] rows =
 		[
-			("Watchlist", "bookmark", "Where the watchlist syncs to", [config.WatchlistProvider.AsMediaProvider()], false),
+			("Wantlist", "bookmark", "Where the wantlist syncs to", [config.Sink.AsMediaProvider()], false),
 			("Search", "search", "Finding titles to add", [config.SearchProvider.AsMediaProvider()], false),
 			("Sign-in", "log-in", "Who can sign in", [config.AuthProvider.AsMediaProvider()], false),
 			("Trending", "trending-up", "What Browse shows", [config.TrendingProvider.AsMediaProvider()], false),

@@ -1,10 +1,10 @@
 using Contracts.Auth;
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.Feed;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 using Harness;
 using TestInfrastructure;
 
@@ -13,7 +13,7 @@ namespace Integration.Tests.Identity;
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
 public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 {
-	private static readonly WatchlistItemProvenance Remote = new(new RemoteOrigin(WatchlistProvider.Plex));
+	private static readonly WantlistItemProvenance Remote = new(new SinkOrigin(SinkKind.Plex));
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -67,24 +67,24 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task WatchlistEntries_WhenTwoUsersExist_ArePrivateToEach()
+	public async Task WantlistEntries_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
-		await host.Movie(TestMedia.Inception).OnWatchlist(origin: Remote);
+		await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 
 		host.SignOut();
 		await host.SignInAs("Bob");
-		await Assert.That(await host.Resolve<IWatchlistService>().GetWatchlistIdsAsync()).IsEmpty();
+		await Assert.That(await host.Resolve<IWantlistService>().GetWantlistIdsAsync()).IsEmpty();
 	}
 
 	[Test]
-	public async Task BlacklistEntries_WhenTwoUsersExist_ArePrivateToEach()
+	public async Task BlocklistEntries_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
-		await host.Movie(TestMedia.Inception).OnBlacklist();
+		await host.Movie(TestMedia.Inception).OnBlocklist();
 
 		host.SignOut();
 		await host.SignInAs("Bob");
-		await Assert.That(await host.Resolve<IBlacklistService>().GetBlacklistIdsAsync()).IsEmpty();
+		await Assert.That(await host.Resolve<IBlocklistService>().GetBlocklistIdsAsync()).IsEmpty();
 	}
 }

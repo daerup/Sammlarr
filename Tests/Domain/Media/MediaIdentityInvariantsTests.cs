@@ -24,10 +24,10 @@ public class MediaIdentityInvariantsTests
 	}
 
 	[Test]
-	public async Task EnsureWatchlistProviderPresent_WhenMissing_Throws()
+	public async Task EnsureSinkIdPresent_WhenMissing_Throws()
 	{
 		IExternalMediaId[] externals = [TmdbId.From("1", MediaType.Movie)];
 
-		await Assert.That(() => externals.EnsureWatchlistProviderPresent(MediaProvider.Plex)).Throws<MissingWatchlistExternalIdException>();
+		await Assert.That(() => externals.EnsureSinkIdPresent(MediaProvider.Plex)).Throws<MissingSinkIdException>();
 	}
 }

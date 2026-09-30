@@ -10,7 +10,7 @@ public enum ChangeBucket
 	Bypassed,
 	Filtered,
 	Skipped,
-	Unresolved,
+	Unmatched,
 }
 
 public static class ChangeBuckets

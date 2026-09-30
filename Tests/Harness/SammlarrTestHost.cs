@@ -65,7 +65,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private bool _plexAccountConfigured;
 	private bool _tmdbAccountConfigured;
 
-	private readonly RemoteWatchlistState _remote = new();
+	private readonly RemoteWantlistState _remote = new();
 	private readonly MutableClock _clock = new();
 	private readonly OAuthStub _oauth = new();
 	private readonly SessionInvalidatorStub _sessionInvalidator = new();
@@ -194,7 +194,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal HeldRequest HoldMdblistFeed(string identifier) => MdblistFeedStub.Hold(HttpStub, identifier);
 
-	internal HeldRequest HoldRemoteWatchlist() => HttpStub.Hold(PlexEndpoints.WatchlistPath);
+	internal HeldRequest HoldRemoteWantlist() => HttpStub.Hold(PlexEndpoints.WatchlistPath);
 
 	internal void MdblistFeedUnavailable(string identifier) => MdblistFeedStub.Unavailable(HttpStub, identifier);
 
@@ -236,7 +236,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void PlexLookupFails(MediaSpec spec) => PlexStub.LookupFails(HttpStub, FullVersion(spec));
 
-	internal async Task RemoteWatchlistHas(params MediaSpec[] specs)
+	internal async Task RemoteWantlistHas(params MediaSpec[] specs)
 	{
 		await EnsurePlexAccount();
 		foreach (var spec in specs)
@@ -247,16 +247,16 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 			_remote.PlexIds.Add(plexId);
 		}
 
-		RemoteWatchlistStub.Install(HttpStub, _remote);
+		RemoteWantlistStub.Install(HttpStub, _remote);
 	}
 
-	internal async Task RemoteWatchlistEmpty()
+	internal async Task RemoteWantlistEmpty()
 	{
 		await EnsurePlexAccount();
-		RemoteWatchlistStub.Install(HttpStub, _remote);
+		RemoteWantlistStub.Install(HttpStub, _remote);
 	}
 
-	internal async Task RemoteWatchlistUnavailable()
+	internal async Task RemoteWantlistUnavailable()
 	{
 		await EnsurePlexAccount();
 		HttpStub.RespondWithStatusForUrl(PlexEndpoints.WatchlistPath, HttpStatusCode.InternalServerError);
@@ -269,9 +269,9 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		HttpStub.RespondWithStatusForUrl(PlexEndpoints.RemoveFromWatchlistPath, HttpStatusCode.InternalServerError);
 	}
 
-	internal bool RemoteWatchlistContains(MediaSpec spec) => _remote.PlexIds.Contains(FullVersion(spec).Ids[MediaProvider.Plex]);
+	internal bool RemoteWantlistContains(MediaSpec spec) => _remote.PlexIds.Contains(FullVersion(spec).Ids[MediaProvider.Plex]);
 
-	internal IReadOnlyCollection<string> RemoteWatchlistPlexIds => _remote.PlexIds;
+	internal IReadOnlyCollection<string> RemoteWantlistPlexIds => _remote.PlexIds;
 
 	private static ResolvedVersion FullVersion(MediaSpec spec) =>
 		new(spec.Ids.ToDictionary(id => id.Provider, id => id.Value), spec.Type, DefaultYear, spec.Title, null, null, null);

@@ -40,10 +40,10 @@ public class FeedPlanTests
 	}
 
 	[Test]
-	public async Task Compute_WhenAnOwnedItemIsBlacklisted_StillDropsItOnceItStopsQualifying()
+	public async Task Compute_WhenAnOwnedItemIsBlocklisted_StillDropsItOnceItStopsQualifying()
 	{
 		var plan = Compute(
-			[Verdict(Kept, QueryOutcome.Qualified, owned: true), Verdict(Dropped, QueryOutcome.Culled, owned: true, inBlacklist: true)],
+			[Verdict(Kept, QueryOutcome.Qualified, owned: true), Verdict(Dropped, QueryOutcome.Culled, owned: true, inBlocklist: true)],
 			owned: [Kept, Dropped]
 		);
 
@@ -51,9 +51,9 @@ public class FeedPlanTests
 	}
 
 	[Test]
-	public async Task Compute_WhenAnOwnedBlacklistedItemStillQualifies_KeepsIt()
+	public async Task Compute_WhenAnOwnedBlocklistedItemStillQualifies_KeepsIt()
 	{
-		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true, inBlacklist: true)], owned: [Kept]);
+		var plan = Compute([Verdict(Kept, QueryOutcome.Qualified, owned: true, inBlocklist: true)], owned: [Kept]);
 
 		await Assert.That(plan.Delta.Keeps).IsEquivalentTo([Kept]);
 		await Assert.That(plan.Delta.Drops).IsEmpty();
@@ -79,7 +79,7 @@ public class FeedPlanTests
 	[Test]
 	public async Task Compute_WhenNothingResolvedInTheProvider_IsInconclusiveAndDropsNothing()
 	{
-		var plan = Compute([], owned: [Kept], unresolvedCount: 12);
+		var plan = Compute([], owned: [Kept], unmatchedCount: 12);
 
 		await Assert.That(plan.Conclusiveness).IsEqualTo(Conclusiveness.NoMatches);
 		await Assert.That(plan.Delta.Drops).IsEmpty();
@@ -136,11 +136,11 @@ public class FeedPlanTests
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
 		Completeness completeness = Completeness.Complete,
-		int unresolvedCount = 0,
+		int unmatchedCount = 0,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
 	) =>
 		FeedPlans.Compute(
-			new ClassifiedFeedLoad(verdicts, [.. Enumerable.Range(0, unresolvedCount).Select(Unmatched)], completeness),
+			new ClassifiedFeedLoad(verdicts, [.. Enumerable.Range(0, unmatchedCount).Select(Unmatched)], completeness),
 			owned.ToHashSet(),
 			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
 			strategy ?? new Mirror(3)
@@ -152,14 +152,14 @@ public class FeedPlanTests
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
 	) => (MirrorPlan)Compute(verdicts, owned, absences: absences);
 
-	private static QueryVerdict<MediaLookup> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlacklist = false) =>
+	private static QueryVerdict<MediaLookup> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false) =>
 		new(
 			Row(id),
 			outcome,
 			new Enrollment
 			{
-				InWatchlist = owned,
-				InBlacklist = inBlacklist,
+				InWantlist = owned,
+				InBlocklist = inBlocklist,
 				Owned = owned,
 			},
 			ConsumesSlot: true

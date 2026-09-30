@@ -11,7 +11,7 @@ internal class MediaModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<MediaIdResolver>();
-		services.AddScoped<IUnresolvedMediaCache, UnresolvedMediaCache>();
+		services.AddScoped<IUnmatchedMediaCache, UnmatchedMediaCache>();
 		services.AddScoped<MediaMetadataResolver>();
 		services.AddScoped<MediaIdentityCoordinator>();
 		services.AddScoped<MediaResolutionBufferFactory>();

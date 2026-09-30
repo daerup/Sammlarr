@@ -76,7 +76,7 @@ public class PlexTypesTests
 	}
 
 	[Test]
-	public async Task WatchlistMetadata_PlexId_ReturnsExpectedValueObject()
+	public async Task WantlistMetadata_PlexId_ReturnsExpectedValueObject()
 	{
 		var ratingKey = _faker.Random.Number(1, 999_999).ToString();
 		var testee = new PlexTypes.Watchlist.Metadata(

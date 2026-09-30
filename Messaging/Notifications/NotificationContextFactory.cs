@@ -36,14 +36,14 @@ internal static class NotificationContextFactory
 	private static NotificationPayload ToPayload(INotification message) =>
 		message switch
 		{
-			WatchlistSyncCompletedNotification e => Payload(
+			WantlistSyncCompletedNotification e => Payload(
 				e,
 				pulledAdds: e.PulledAdds,
 				pulledRemoves: e.PulledRemoves,
 				pushedAdds: e.PushedAdds,
 				pushedRemoves: e.PushedRemoves
 			),
-			WatchlistSyncFailedNotification e => Payload(e) with { Reason = e.Reason },
+			WantlistSyncFailedNotification e => Payload(e) with { Reason = e.Reason },
 			FeedRunCompletedNotification e => Payload(e) with { FeedId = e.FeedId.ToString(), Added = e.Added, Removed = e.Removed },
 			FeedRunFailedNotification e => Payload(e) with { FeedId = e.FeedId.ToString(), Reason = e.Reason },
 			ProviderRateLimitedNotification e => Payload(e) with { Provider = e.Provider, RetryAfter = e.RetryAfter },

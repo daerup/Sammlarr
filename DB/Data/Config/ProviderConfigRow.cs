@@ -11,7 +11,7 @@ internal record ProviderConfigRow
 
 	public int Id { get; set; } = SingletonId;
 
-	public required WatchlistProvider WatchlistProvider { get; set; }
+	public required SinkKind Sink { get; set; }
 
 	public required TrendingProvider TrendingProvider { get; set; }
 
@@ -26,7 +26,7 @@ internal record ProviderConfigRow
 	public static ProviderConfigRow Default =>
 		new()
 		{
-			WatchlistProvider = WatchlistProvider.Plex,
+			Sink = SinkKind.Plex,
 			TrendingProvider = TrendingProvider.Tmdb,
 			SearchProvider = SearchProvider.Plex,
 			RatingProvider = RatingProvider.Tmdb,

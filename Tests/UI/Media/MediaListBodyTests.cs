@@ -44,9 +44,9 @@ public class MediaListBodyTests : BunitContext
 	[Test]
 	public async Task Render_WithAnError_ShowsTheMessageAndARetry()
 	{
-		var cut = RenderBody(errorMessage: "Failed to load blacklist: boom", totalCount: 5, visibleCount: 5);
+		var cut = RenderBody(errorMessage: "Failed to load blocklist: boom", totalCount: 5, visibleCount: 5);
 
-		await Assert.That(cut.Markup).Contains("Failed to load blacklist: boom");
+		await Assert.That(cut.Markup).Contains("Failed to load blocklist: boom");
 		await Assert.That(cut.Markup).Contains("Retry");
 		await Assert.That(cut.Markup).DoesNotContain("the grid");
 	}

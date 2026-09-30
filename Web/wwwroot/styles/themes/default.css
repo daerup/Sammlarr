@@ -358,7 +358,7 @@ body:has(.error-dialog) .search-modal {
     transform: translateX(2px);
 }
 
-.watchlist-sync-preview {
+.wantlist-sync-preview {
     min-width: 12rem;
     width: max-content;
 }

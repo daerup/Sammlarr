@@ -1,6 +1,6 @@
 @using Contracts.Media
 @inject IMediaService MediaService
-<div class="search-result-row rounded-sm border bg-card @Class @(Media.IsUnresolved ? "is-unresolved" : null) @(IsFocused ? "row-focused" : "")"
+<div class="search-result-row rounded-sm border bg-card @Class @(Media.IsUnmatched ? "is-unmatched" : null) @(IsFocused ? "row-focused" : "")"
      style="@_backgroundStyle"
      @onfocusin="OnFocusIn"
      @onfocusout="OnFocusOut">
@@ -112,7 +112,7 @@
     private async Task OnPosterError()
     {
         _failed = true;
-        if (!Media.IsUnresolved)
+        if (!Media.IsUnmatched)
         {
             await MediaService.InvalidateAsync([Media.Id]);
         }

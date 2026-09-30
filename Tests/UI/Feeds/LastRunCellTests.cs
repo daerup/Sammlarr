@@ -1,11 +1,11 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Primitives.Services;
 using Bunit;
-using Contracts.Blacklist;
+using Contracts.Blocklist;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Settings;
-using Contracts.Watchlist;
+using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -90,13 +90,13 @@ public class LastRunCellTests : BunitContext
 		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(Added))));
 		Services.AddSingleton(media.Object);
 
-		var watchlist = IWatchlistService.Mock();
-		watchlist.GetWatchlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
-		Services.AddSingleton(watchlist.Object);
+		var wantlist = IWantlistService.Mock();
+		wantlist.GetWantlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		Services.AddSingleton(wantlist.Object);
 
-		var blacklist = IBlacklistService.Mock();
-		blacklist.GetBlacklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
-		Services.AddSingleton(blacklist.Object);
+		var blocklist = IBlocklistService.Mock();
+		blocklist.GetBlocklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		Services.AddSingleton(blocklist.Object);
 
 		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
@@ -104,7 +104,7 @@ public class LastRunCellTests : BunitContext
 			.Returns(
 				new ProviderConfig
 				{
-					WatchlistProvider = WatchlistProvider.Plex,
+					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
 					RatingProvider = RatingProvider.Tmdb,
@@ -138,7 +138,7 @@ public class LastRunCellTests : BunitContext
 				Bypassed = 0,
 				Filtered = 0,
 				Skipped = 0,
-				Unresolved = 0,
+				Unmatched = 0,
 				Removed = 0,
 			},
 			Items = [new FeedRunItem { MediaId = Added, State = FeedRunItemState.Added }],

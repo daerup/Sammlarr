@@ -36,12 +36,12 @@ internal static class UpNextView
 		QueueSnapshot queue,
 		IReadOnlyDictionary<FeedId, string> feedNames,
 		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		MediaProvider watchlistProvider
+		MediaProvider sinkProvider
 	) =>
 		[
 			.. queue
 				.Jobs.Where(job => job.State is JobState.Waiting or JobState.Queued or JobState.Running)
-				.Select(job => Row(job, feedNames, feedBrands, watchlistProvider)),
+				.Select(job => Row(job, feedNames, feedBrands, sinkProvider)),
 		];
 
 	internal static IReadOnlySet<FeedId> FeedsAlreadyPending(QueueSnapshot queue) =>
@@ -73,27 +73,27 @@ internal static class UpNextView
 		PendingJob job,
 		IReadOnlyDictionary<FeedId, string> feedNames,
 		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		MediaProvider watchlistProvider
+		MediaProvider sinkProvider
 	)
 	{
 		var name = Name(job.Request, feedNames);
 		var href = Href(job.Request, feedNames);
-		var brand = Brand(job.Request, feedBrands, watchlistProvider);
+		var brand = Brand(job.Request, feedBrands, sinkProvider);
 		var deleted = Deleted(job.Request, feedNames);
 		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted, Job: job.Id)
 			: job.State is JobState.Waiting ? new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted, job.RunAfter, job.Id)
 			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted, Job: job.Id);
 	}
 
-	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider watchlistProvider) =>
+	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider sinkProvider) =>
 		request switch
 		{
 			RunFeed feed => feedBrands.TryGetValue(feed.Id, out var provider) ? provider : null,
-			SyncWatchlist => watchlistProvider,
+			SyncWantlist => sinkProvider,
 			_ => null,
 		};
 
-	private static string Waiting(IJobRequest request) => request is SyncWatchlist ? "waiting for grace period" : "waiting";
+	private static string Waiting(IJobRequest request) => request is SyncWantlist ? "waiting for grace period" : "waiting";
 
 	private static bool Deleted(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) => request is RunFeed feed && !feedNames.ContainsKey(feed.Id);
 
@@ -106,7 +106,7 @@ internal static class UpNextView
 		request switch
 		{
 			RunFeed feed => FeedLabel.Of(feed.Id, feedNames),
-			SyncWatchlist => "Sync Watchlist",
+			SyncWantlist => "Sync Wantlist",
 			_ => request.Kind.GetDescription(),
 		};
 }

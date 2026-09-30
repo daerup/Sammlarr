@@ -7,7 +7,7 @@ namespace API.Tests.Mdblist;
 public class RootConverterTests
 {
 	[Test]
-	public async Task Deserialize_AllStrict_ProducesMoviesShowsAndEmptyUnknowns()
+	public async Task Deserialize_AllStrict_ProducesMoviesShowsAndEmptyUnmatched()
 	{
 		const string json = """
 			{
@@ -24,13 +24,13 @@ public class RootConverterTests
 
 		await Assert.That(root.movies).Count().IsEqualTo(1);
 		await Assert.That(root.shows).Count().IsEqualTo(1);
-		await Assert.That(root.unknowns).IsEmpty();
+		await Assert.That(root.unmatched).IsEmpty();
 		await Assert.That(root.movies[0].title).IsEqualTo("Movie A");
 		await Assert.That(root.shows[0].title).IsEqualTo("Show A");
 	}
 
 	[Test]
-	public async Task Deserialize_MovieWithNullRuntime_RoutedToUnknownsWithMediaTypeMovie()
+	public async Task Deserialize_MovieWithNullRuntime_RoutedToUnmatchedWithMediaTypeMovie()
 	{
 		const string json = """
 			{
@@ -44,16 +44,16 @@ public class RootConverterTests
 		var root = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(json)!;
 
 		await Assert.That(root.movies).IsEmpty();
-		await Assert.That(root.unknowns).Count().IsEqualTo(1);
-		await Assert.That(root.unknowns[0].MediaType).IsEqualTo(MediaType.Movie);
-		await Assert.That(root.unknowns[0].title).IsEqualTo("Broken Movie");
-		await Assert.That(root.unknowns[0].release_year).IsEqualTo(2020);
-		await Assert.That(root.unknowns[0].ids.imdb).IsEqualTo("tt1");
-		await Assert.That(root.unknowns[0].ids.tmdb).IsEqualTo(11);
+		await Assert.That(root.unmatched).Count().IsEqualTo(1);
+		await Assert.That(root.unmatched[0].MediaType).IsEqualTo(MediaType.Movie);
+		await Assert.That(root.unmatched[0].title).IsEqualTo("Broken Movie");
+		await Assert.That(root.unmatched[0].release_year).IsEqualTo(2020);
+		await Assert.That(root.unmatched[0].ids.imdb).IsEqualTo("tt1");
+		await Assert.That(root.unmatched[0].ids.tmdb).IsEqualTo(11);
 	}
 
 	[Test]
-	public async Task Deserialize_ShowWithMissingTitle_RoutedToUnknownsWithMediaTypeShow()
+	public async Task Deserialize_ShowWithMissingTitle_RoutedToUnmatchedWithMediaTypeShow()
 	{
 		const string json = """
 			{
@@ -67,14 +67,14 @@ public class RootConverterTests
 		var root = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(json)!;
 
 		await Assert.That(root.shows).IsEmpty();
-		await Assert.That(root.unknowns).Count().IsEqualTo(1);
-		await Assert.That(root.unknowns[0].MediaType).IsEqualTo(MediaType.Show);
-		await Assert.That(root.unknowns[0].title).IsEqualTo(string.Empty);
-		await Assert.That(root.unknowns[0].ids.imdb).IsEqualTo("tt2");
+		await Assert.That(root.unmatched).Count().IsEqualTo(1);
+		await Assert.That(root.unmatched[0].MediaType).IsEqualTo(MediaType.Show);
+		await Assert.That(root.unmatched[0].title).IsEqualTo(string.Empty);
+		await Assert.That(root.unmatched[0].ids.imdb).IsEqualTo("tt2");
 	}
 
 	[Test]
-	public async Task Deserialize_MalformedIdsBlock_UnknownGetsEmptyIds()
+	public async Task Deserialize_MalformedIdsBlock_UnmatchedGetsEmptyIds()
 	{
 		const string json = """
 			{
@@ -88,14 +88,14 @@ public class RootConverterTests
 		var root = JsonSerializer.Deserialize<MdblistTypes.ListItems.Root>(json)!;
 
 		await Assert.That(root.movies).IsEmpty();
-		await Assert.That(root.unknowns).Count().IsEqualTo(1);
-		await Assert.That(root.unknowns[0].title).IsEqualTo("No Ids");
-		await Assert.That(root.unknowns[0].ids.imdb).IsNull();
-		await Assert.That(root.unknowns[0].ids.tmdb).IsNull();
+		await Assert.That(root.unmatched).Count().IsEqualTo(1);
+		await Assert.That(root.unmatched[0].title).IsEqualTo("No Ids");
+		await Assert.That(root.unmatched[0].ids.imdb).IsNull();
+		await Assert.That(root.unmatched[0].ids.tmdb).IsNull();
 	}
 
 	[Test]
-	public async Task Deserialize_MixedValidAndBroken_PartitionsBetweenStrictAndUnknown()
+	public async Task Deserialize_MixedValidAndBroken_PartitionsBetweenStrictAndUnmatched()
 	{
 		const string json = """
 			{
@@ -111,8 +111,8 @@ public class RootConverterTests
 
 		await Assert.That(root.movies).Count().IsEqualTo(1);
 		await Assert.That(root.movies[0].title).IsEqualTo("Good Movie");
-		await Assert.That(root.unknowns).Count().IsEqualTo(1);
-		await Assert.That(root.unknowns[0].title).IsEqualTo("Broken Movie");
-		await Assert.That(root.unknowns[0].MediaType).IsEqualTo(MediaType.Movie);
+		await Assert.That(root.unmatched).Count().IsEqualTo(1);
+		await Assert.That(root.unmatched[0].title).IsEqualTo("Broken Movie");
+		await Assert.That(root.unmatched[0].MediaType).IsEqualTo(MediaType.Movie);
 	}
 }

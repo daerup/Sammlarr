@@ -1,6 +1,6 @@
 using Domain.Announcing;
 using Domain.Notifications;
-using Domain.Watchlist.Outbox;
+using Domain.Wantlist.Outbox;
 
 namespace Domain.Tests.Announcing;
 
@@ -21,9 +21,9 @@ public class AnnouncingMarkersTests
 	}
 
 	[Test]
-	public async Task WatchlistOutboxEvent_IsAnEvent_AndNeverANotification()
+	public async Task WantlistOutboxEvent_IsAnEvent_AndNeverANotification()
 	{
-		await Assert.That(typeof(WatchlistOutboxEvent).IsAssignableTo(typeof(IEvent))).IsTrue();
-		await Assert.That(typeof(WatchlistOutboxEvent).IsAssignableTo(typeof(INotification))).IsFalse();
+		await Assert.That(typeof(WantlistOutboxEvent).IsAssignableTo(typeof(IEvent))).IsTrue();
+		await Assert.That(typeof(WantlistOutboxEvent).IsAssignableTo(typeof(INotification))).IsFalse();
 	}
 }

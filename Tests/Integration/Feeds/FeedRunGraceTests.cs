@@ -6,7 +6,7 @@ using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
-using Domain.Watchlist;
+using Domain.Wantlist;
 using Harness;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -27,8 +27,8 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
-		var kept = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
-		var missing = await fixture.Movie(TestMedia.Inception).OnWatchlist(origin);
+		var kept = await fixture.Movie(TestMedia.FightClub).OnWantlist(origin);
+		var missing = await fixture.Movie(TestMedia.Inception).OnWantlist(origin);
 
 		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
@@ -71,7 +71,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
-		var owned = await fixture.Movie(TestMedia.FightClub).OnWatchlist(origin);
+		var owned = await fixture.Movie(TestMedia.FightClub).OnWantlist(origin);
 
 		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();

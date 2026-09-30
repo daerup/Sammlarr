@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Contracts.Feed;
 using DB.Data.Feed.Run;
-using DB.Data.Watchlist;
+using DB.Data.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -80,10 +80,10 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		}
 
 		await ctx
-			.Watchlist.Where(w => w.SourceFeedId == id.Value)
+			.Wantlist.Where(w => w.SourceFeedId == id.Value)
 			.ExecuteUpdateAsync(
 				s =>
-					s.SetProperty(w => w.Origin, WatchlistEntryOrigin.Orphaned)
+					s.SetProperty(w => w.Origin, WantlistItemOrigin.Orphaned)
 						.SetProperty(w => w.SourceFeedNameSnapshot, entity.Name)
 						.SetProperty(w => w.SourceRunId, (Guid?)null),
 				cancellationToken
@@ -299,7 +299,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		row.Bypassed = run.Counts.Bypassed;
 		row.Filtered = run.Counts.Filtered;
 		row.Skipped = run.Counts.Skipped;
-		row.Unresolved = run.Counts.Unresolved;
+		row.Unmatched = run.Counts.Unmatched;
 		row.Removed = run.Counts.Removed;
 		row.SourceFailure = run.SourceFailure;
 		row.Items.AddRange(run.Items.Select(item => new FeedRunItemRow { MediaId = item.MediaId.Value, State = item.State }));

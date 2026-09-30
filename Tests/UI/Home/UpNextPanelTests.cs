@@ -41,7 +41,7 @@ public class UpNextPanelTests : BunitContext
 		IReadOnlyList<UpNextRow> queued =
 		[
 			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, "/feeds/edit/docs"),
-			new("Sync Watchlist", "queued", "2nd in line", UpNextKind.Queued, null),
+			new("Sync Wantlist", "queued", "2nd in line", UpNextKind.Queued, null),
 		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
@@ -57,7 +57,7 @@ public class UpNextPanelTests : BunitContext
 		IReadOnlyList<UpNextRow> queued =
 		[
 			new("hdlists/documentaries", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/docs", MediaProvider.Mdblist),
-			new("Sync Watchlist", "queued", string.Empty, UpNextKind.Queued, null, MediaProvider.Plex),
+			new("Sync Wantlist", "queued", string.Empty, UpNextKind.Queued, null, MediaProvider.Plex),
 		];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
@@ -100,7 +100,7 @@ public class UpNextPanelTests : BunitContext
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(now);
 		Services.AddSingleton(clock.Object);
-		IReadOnlyList<UpNextRow> queued = [new("Sync Watchlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, RunsAt: now.AddMinutes(2))];
+		IReadOnlyList<UpNextRow> queued = [new("Sync Wantlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, RunsAt: now.AddMinutes(2))];
 
 		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
 

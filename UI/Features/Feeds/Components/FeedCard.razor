@@ -70,12 +70,12 @@
 
     <div class="feed-card-stats">
         <div>
-            <span class="feed-stat-label">Watchlist</span>
+            <span class="feed-stat-label">Wantlist</span>
             @if (Row.Owned > 0)
             {
                 <span class="feed-card-control feed-stat-link">
-                    <AppLink Href="@($"/watchlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
-                             Title="@($"Show the {Row.Owned} titles this feed put on your watchlist")">@Row.Owned</AppLink>
+                    <AppLink Href="@($"/wantlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
+                             Title="@($"Show the {Row.Owned} titles this feed put on your wantlist")">@Row.Owned</AppLink>
                 </span>
             }
             else

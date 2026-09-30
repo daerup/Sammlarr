@@ -2,7 +2,7 @@
 @page "/feeds/{FeedIdParam}/runs/{RunIdParam}"
 @using Contracts.Feed
 @using Contracts.Media
-@using Contracts.Watchlist
+@using Contracts.Wantlist
 @using Domain.Feed
 @using Domain.Feed.Run
 @using Domain.Media
@@ -12,7 +12,7 @@
 @using UI.Shared.Media
 @inject IFeedService FeedService
 @inject IMediaService Media
-@inject IWatchlistService Watchlist
+@inject IWantlistService Wantlist
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
 
@@ -54,9 +54,9 @@
                         {
                             <span>·</span>
                             <span>
-                                <AppLink Href="@($"/watchlist?feed={FeedIdParam}")" Arrow="false"
-                                         Title="@($"Show the {_owned} titles this feed put on your watchlist")">@_owned</AppLink>
-                                on your watchlist
+                                <AppLink Href="@($"/wantlist?feed={FeedIdParam}")" Arrow="false"
+                                         Title="@($"Show the {_owned} titles this feed put on your wantlist")">@_owned</AppLink>
+                                on your wantlist
                             </span>
                         }
                         <span>·</span>
@@ -292,7 +292,7 @@
         }
 
         _history = await FeedService.GetHistoryAsync(feedId);
-        _owned = (await Watchlist.GetOwnedCountsAsync()).GetValueOrDefault(feedId);
+        _owned = (await Wantlist.GetOwnedCountsAsync()).GetValueOrDefault(feedId);
         await LoadRunsAsync(feedId);
 
         var wanted = RunIdParam is null ? _runs.FirstOrDefault() : _runs.FirstOrDefault(run => UrlGuid.Encode(run.Id) == RunIdParam);

@@ -125,7 +125,7 @@
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
     [Parameter, EditorRequired] public required IReadOnlyList<RunCandidate> Candidates { get; set; }
     [Parameter] public DateTimeOffset Now { get; set; }
-    [Parameter] public string ProviderName { get; set; } = "your watchlist provider";
+    [Parameter] public string ProviderName { get; set; } = "your media service";
     [Parameter] public IReadOnlySet<FeedId> Pending { get; set; } = new HashSet<FeedId>();
     [Parameter] public EventCallback<(IReadOnlyList<FeedId> Feeds, bool SyncAfter)> OnRun { get; set; }
     [Parameter] public IReadOnlySet<FeedId>? Selection { get; set; }

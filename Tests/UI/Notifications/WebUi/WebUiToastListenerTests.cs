@@ -77,7 +77,7 @@ public class WebUiToastListenerTests : BunitContext
 
 	private IReadOnlyList<ToastData> Toasts => Services.GetRequiredService<ToastService>().Toasts;
 
-	private static Toast NewToast() => new(NotificationLevel.Info, "Watchlist sync completed", "Synced.");
+	private static Toast NewToast() => new(NotificationLevel.Info, "Wantlist sync completed", "Synced.");
 
 	private void SignedIn()
 	{

@@ -1,13 +1,13 @@
 @using Domain.Notifications
 
 <DemoCard Title="Template variables" Where="Notifications: alert dialog"
-          Note="NotificationTemplateVariablesCard for a feed run and a watchlist sync. Click a variable to insert it; here it lands in the line below.">
+          Note="NotificationTemplateVariablesCard for a feed run and a wantlist sync. Click a variable to insert it; here it lands in the line below.">
     <NotificationTemplateVariablesCard EventTypes="Events" OnInsert="Insert" OnInsertItem="Insert"/>
     <PreviewField Label="Inserted" Value="@(_inserted.Length == 0 ? "Nothing yet" : _inserted)"/>
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyCollection<NotificationEventType> Events = [NotificationEventType.FeedRunCompleted, NotificationEventType.WatchlistSyncCompleted];
+    private static readonly IReadOnlyCollection<NotificationEventType> Events = [NotificationEventType.FeedRunCompleted, NotificationEventType.WantlistSyncCompleted];
 
     private string _inserted = string.Empty;
 

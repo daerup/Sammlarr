@@ -5,7 +5,7 @@ using Core.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
 using Domain.Providers;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +23,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	private IJobQueue Testee => host.Resolve<IJobQueue>();
 
 	private static readonly DateTimeOffset Three = new(2024, 6, 1, 3, 0, 0, TimeSpan.Zero);
-	private static readonly SyncWatchlist ManualSync = new(new ManualTrigger());
+	private static readonly SyncWantlist ManualSync = new(new ManualTrigger());
 
 	private FeedId _documentaries;
 	private FeedId _anime;
@@ -38,7 +38,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task TwoNightlyFeeds()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
-		await host.RemoteWatchlistEmpty();
+		await host.RemoteWantlistEmpty();
 		_documentaries = await FeedAsync("Documentaries", "0 0 3 * * *");
 		_anime = await FeedAsync("Anime", "0 1 3 * * *");
 	}
@@ -225,7 +225,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var running = await EnqueueAsync(ManualSync);
 
-		var followUp = await WhileTheNextJobRunsAsync(host.HoldRemoteWatchlist(), () => EnqueueAsync(ManualSync));
+		var followUp = await WhileTheNextJobRunsAsync(host.HoldRemoteWantlist(), () => EnqueueAsync(ManualSync));
 
 		await Assert.That(followUp.Id).IsNotEqualTo(running.Id);
 		await Assert.That(followUp.State).IsEqualTo(JobState.Queued);
@@ -372,7 +372,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		return result;
 	}
 
-	private async Task<PendingJob> ArmedSyncAsync() => (await QueueAsync()).Single(job => job.Request is SyncWatchlist);
+	private async Task<PendingJob> ArmedSyncAsync() => (await QueueAsync()).Single(job => job.Request is SyncWantlist);
 
 	private async Task<PendingJob> JobAsync(JobId id)
 	{

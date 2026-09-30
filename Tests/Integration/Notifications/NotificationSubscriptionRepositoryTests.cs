@@ -28,13 +28,13 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	{
 		var targetId = await CreateTargetAsync();
 
-		await _testee.AddAsync(targetId, [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None);
+		await _testee.AddAsync(targetId, [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None);
 
 		var byTarget = await _testee.GetForTargetAsync(targetId);
-		var byEventType = await _testee.GetForEventTypeAsync(NotificationEventType.WatchlistSyncCompleted);
+		var byEventType = await _testee.GetForEventTypeAsync(NotificationEventType.WantlistSyncCompleted);
 
 		await Assert.That(byTarget).Count().IsEqualTo(1);
-		await Assert.That(byTarget[0].EventTypes).Contains(NotificationEventType.WatchlistSyncCompleted);
+		await Assert.That(byTarget[0].EventTypes).Contains(NotificationEventType.WantlistSyncCompleted);
 		await Assert.That(byEventType).Count().IsEqualTo(1);
 		await Assert.That(byEventType[0].TargetId).IsEqualTo(targetId);
 	}
@@ -44,9 +44,9 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	{
 		var targetId = await CreateTargetAsync();
 
-		await _testee.AddAsync(targetId, [NotificationEventType.WatchlistSyncCompleted, NotificationEventType.FeedRunCompleted], NotificationTemplate.None);
+		await _testee.AddAsync(targetId, [NotificationEventType.WantlistSyncCompleted, NotificationEventType.FeedRunCompleted], NotificationTemplate.None);
 
-		await Assert.That(await _testee.GetForEventTypeAsync(NotificationEventType.WatchlistSyncCompleted)).Count().IsEqualTo(1);
+		await Assert.That(await _testee.GetForEventTypeAsync(NotificationEventType.WantlistSyncCompleted)).Count().IsEqualTo(1);
 		await Assert.That(await _testee.GetForEventTypeAsync(NotificationEventType.FeedRunCompleted)).Count().IsEqualTo(1);
 		await Assert.That(await _testee.GetForEventTypeAsync(NotificationEventType.FeedRunFailed)).IsEmpty();
 	}
@@ -57,7 +57,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 		var targetId = await CreateTargetAsync();
 		var id = await _testee.AddAsync(
 			targetId,
-			[NotificationEventType.WatchlistSyncCompleted],
+			[NotificationEventType.WantlistSyncCompleted],
 			new NotificationTemplate(Some.Of("{{ title }}"), new None(), new None(), Some.Of(NotificationLevel.Warning), Some.Of(PushoverPriority.Low))
 		);
 
@@ -68,7 +68,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 
 		await _testee.UpdateAsync(
 			id,
-			[NotificationEventType.WatchlistSyncCompleted],
+			[NotificationEventType.WantlistSyncCompleted],
 			new NotificationTemplate(Some.Of("{{ summary }}"), new None(), new None(), new None(), new None())
 		);
 
@@ -81,7 +81,7 @@ public class NotificationSubscriptionRepositoryTests(SammlarrTestHost fixture) :
 	public async Task DeleteAsync_WhenATargetIsDeleted_CascadesItsSubscriptions()
 	{
 		var targetId = await CreateTargetAsync();
-		await _testee.AddAsync(targetId, [NotificationEventType.WatchlistSyncCompleted], NotificationTemplate.None);
+		await _testee.AddAsync(targetId, [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None);
 
 		await _targets.DeleteAsync(targetId);
 

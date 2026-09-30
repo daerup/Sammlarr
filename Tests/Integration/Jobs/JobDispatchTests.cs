@@ -1,7 +1,7 @@
 using Contracts.Jobs;
 using Domain.Feed;
 using Domain.Jobs;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using Shared.Options;
@@ -58,7 +58,7 @@ public class JobDispatchTests(SammlarrTestHost host) : IAsyncDisposable
 	public async Task TakeNextAsync_WhileAJobIsStillWaiting_TakesNothingUntilItIsReleased()
 	{
 		host.SetCurrentTime(Now);
-		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWatchlist(new ScheduledFeedTrigger()));
+		await host.Resolve<IJobQueue>().EnqueueAsync(new SyncWantlist(new ScheduledFeedTrigger()));
 
 		await Assert.That(await Testee.TakeNextAsync(Now)).IsNone();
 

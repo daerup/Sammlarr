@@ -1,5 +1,5 @@
 using Domain.Feed;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 
 namespace Domain.Jobs;
 
@@ -17,8 +17,8 @@ public readonly record struct RunFeed(FeedId Id, FeedRunTrigger Trigger, bool Sy
 	public bool ArmsSync => Trigger is Scheduled || SyncAfter;
 }
 
-public readonly record struct SyncWatchlist(WatchlistSyncTrigger Trigger) : IJobRequest
+public readonly record struct SyncWantlist(WantlistSyncTrigger Trigger) : IJobRequest
 {
-	public JobKind Kind => JobKind.WatchlistSync;
+	public JobKind Kind => JobKind.WantlistSync;
 	public string Key => string.Empty;
 }

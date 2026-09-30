@@ -33,7 +33,7 @@ public class PageContainerTests : BunitContext
 	private IRenderedComponent<PageContainer> Render(bool fill) =>
 		Render<PageContainer>(parameters =>
 			parameters
-				.Add(container => container.Heading, "Your watchlist")
+				.Add(container => container.Heading, "Your wantlist")
 				.Add(container => container.Fill, fill)
 				.Add(container => container.ChildContent, (RenderFragment)(builder => builder.AddMarkupContent(0, "<p>body</p>")))
 		);

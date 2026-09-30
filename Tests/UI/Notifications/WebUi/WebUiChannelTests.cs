@@ -122,8 +122,8 @@ public class WebUiChannelTests
 			NotificationEventType.FeedRunCompleted => "Feed run completed",
 			NotificationEventType.FeedRunFailed => "Feed run failed",
 			NotificationEventType.ProviderRateLimited => "Provider rate limited",
-			NotificationEventType.WatchlistSyncCompleted => "Watchlist sync completed",
-			NotificationEventType.WatchlistSyncFailed => "Watchlist sync failed",
+			NotificationEventType.WantlistSyncCompleted => "Wantlist sync completed",
+			NotificationEventType.WantlistSyncFailed => "Wantlist sync failed",
 			NotificationEventType.TestPing => "Test ping",
 		};
 }

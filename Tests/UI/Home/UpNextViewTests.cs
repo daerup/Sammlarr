@@ -3,7 +3,7 @@ using Domain.Feed;
 using Domain.Jobs;
 using Domain.Processing;
 using Domain.Providers;
-using Domain.Watchlist.Sync;
+using Domain.Wantlist.Sync;
 using TUnit.Assertions.Enums;
 using UI.Features.Home.Components;
 using UrlGuid = global::Shared.UrlGuid;
@@ -45,9 +45,9 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_ForASyncJob_CarriesTheWatchlistProviderSoTheRowShowsItsBrand()
+	public async Task InTheQueue_ForASyncJob_CarriesTheSinkSoTheRowShowsItsBrand()
 	{
-		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0));
+		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0));
 
 		var row = UpNextView.InTheQueue(queue, Names, Brands, MediaProvider.Plex)[0];
 
@@ -63,19 +63,19 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_NamesASyncJobSyncWatchlist()
+	public async Task InTheQueue_NamesASyncJobSyncWantlist()
 	{
-		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0));
+		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0));
 
 		var rows = UpNextView.InTheQueue(queue, Names, Brands, MediaProvider.Plex);
 
-		await Assert.That(rows[0].Name).IsEqualTo("Sync Watchlist");
+		await Assert.That(rows[0].Name).IsEqualTo("Sync Wantlist");
 	}
 
 	[Test]
 	public async Task InTheQueue_ForASyncStillInsideItsGrace_SaysItWaitsForTheGraceAndCarriesWhenItRuns()
 	{
-		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0));
+		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0));
 
 		var row = UpNextView.InTheQueue(queue, Names, Brands, MediaProvider.Plex)[0];
 
@@ -109,7 +109,7 @@ public class UpNextViewTests
 	{
 		var queue = Snapshot(
 			Job(Docs, JobState.Running),
-			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ManualTrigger()), JobState.Queued, default, 0)
+			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ManualTrigger()), JobState.Queued, default, 0)
 		);
 
 		var rows = UpNextView.InTheQueue(queue, Names, Brands, MediaProvider.Plex);
@@ -158,7 +158,7 @@ public class UpNextViewTests
 		var queue = Snapshot(
 			Job(Anime, JobState.Running),
 			Job(Docs, JobState.Queued),
-			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0)
+			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWantlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0)
 		);
 
 		var rows = UpNextView.InTheQueue(queue, Names, Brands, MediaProvider.Plex);

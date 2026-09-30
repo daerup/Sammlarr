@@ -24,7 +24,7 @@ internal static class FeedRunProjection
 			Bypassed = row.Bypassed,
 			Filtered = row.Filtered,
 			Skipped = row.Skipped,
-			Unresolved = row.Unresolved,
+			Unmatched = row.Unmatched,
 			Removed = row.Removed,
 		},
 		Items = row.Items.Select(item => new FeedRunItem { MediaId = MediaId.From(item.MediaId), State = item.State }).ToList(),
