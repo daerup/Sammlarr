@@ -31,17 +31,20 @@
         var mediaId = Key(item);
         var renderKey = mediaId.Value;
         var isSelected = _selection.Contains(mediaId);
-        <div class="relative media-card @(IsEditMode && isSelected ? "rounded-lg ring-2 ring-primary" : "")">
+        <div class="relative media-card @SelectionFrameClass(isSelected)">
             <MediaGridTile @key="renderKey"
                            Media="detail"
                            Dimmed="@(IsDimmed?.Invoke(item) ?? false)"
                            OnClick="@(() => HandleTileClickAsync(item))"/>
             @if (IsEditMode)
             {
-                <div class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
+                <div data-testid="selection-layer" class="absolute inset-0 z-10 rounded-lg cursor-pointer select-none" @onclick="e => HandleSelectionClick(mediaId, e)" @onclick:stopPropagation="true"></div>
                 <div class="absolute top-3 right-3 z-20 pointer-events-none">
-                    <div class="@SelectionPillClass(isSelected)">
-                        <LucideIcon Name="@(isSelected ? "check" : "circle")" Size="16"/>
+                    <div data-testid="selection-badge" class="@SelectionPillClass(isSelected)">
+                        @if (isSelected)
+                        {
+                            <LucideIcon Name="check" Size="16"/>
+                        }
                     </div>
                 </div>
             }
@@ -90,10 +93,15 @@
 
     private int RemovableCount => Removable.Count;
 
-    private string SelectionPillClass(bool selected) =>
-        selected
-            ? "flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow"
-            : "flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-muted-foreground border border-border shadow";
+    private const string SelectionPill = "flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow-sm shadow-black/40";
+
+    private string SelectionFrameClass(bool selected) =>
+        !IsEditMode ? ""
+        : selected ? "rounded-lg ring-2 ring-foreground ring-offset-3 ring-offset-background"
+        : "rounded-lg hover:ring-2 hover:ring-foreground/30 hover:ring-offset-3 hover:ring-offset-background";
+
+    private static string SelectionPillClass(bool selected) =>
+        selected ? $"{SelectionPill} bg-foreground text-background [&_svg]:stroke-3" : $"{SelectionPill} bg-black/30";
 
     protected override void OnParametersSet()
     {
