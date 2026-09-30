@@ -31,5 +31,5 @@ Operational risks in what is built, and deliberately deferred work.
 | E2E circuit crash | Unexplained: roughly one full E2E run in five trips the session-level circuit-crash guard while all tests pass. Not reproduced with output captured, so no stack trace yet.
 | Result-based error handling | Planned (`retire-control-flow-exceptions-to-result`): replace control-flow exceptions with `Result` at the service boundaries.
 | Metrics | Not implemented; only logs and traces over OTLP.
-| Release pipeline | Not built. CI/CD, the image, GHCR releases (Aspire-driven, Option A) and the in-app version/update footer belong to the release-engineering plan.
+| Release pipeline | Not built. CI/CD, the image, GHCR releases (Aspire-driven, Option A) and the update check belong to the release-engineering plan. The build already stamps its version from git tags with MinVer and shows it in Settings › About and the footer.
 |===

@@ -1,0 +1,9 @@
+footer ::deep .app-link {
+    color: var(--muted-foreground);
+    transition: color 150ms ease;
+}
+
+footer ::deep .app-link:hover,
+footer ::deep .app-link:focus-visible {
+    color: var(--foreground);
+}

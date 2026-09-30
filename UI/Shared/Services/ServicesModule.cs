@@ -14,5 +14,6 @@ internal class ServicesModule : IServiceModule
 		services.AddScoped<ProfileDropdownService>();
 		services.AddScoped<AccountConnectionPrompt>();
 		services.AddScoped<ArtworkSources>();
+		services.AddSingleton<AppVersionProvider>();
 	}
 }

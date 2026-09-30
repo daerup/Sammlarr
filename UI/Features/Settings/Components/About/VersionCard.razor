@@ -1,0 +1,41 @@
+<div class="overflow-hidden rounded-lg border bg-card">
+    <CardHead Icon="tag" Title="Version"/>
+    <div class="flex items-center gap-3 px-[15px] py-3">
+        <SammlarrLogo Size="24" WordSize="14"/>
+        <div class="flex min-w-0 flex-col gap-0.5">
+            <div class="flex items-center gap-2">
+                <span class="version-number font-mono text-[13px]">@Version.Number</span>
+                @if (Version.IsDevBuild)
+                {
+                    <BbBadge Variant="BadgeVariant.Outline" Class="h-5 px-2 text-[11px] font-medium text-muted-foreground">Dev build</BbBadge>
+                }
+            </div>
+            <span class="version-source text-xs text-muted-foreground">@Source</span>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Repository))
+        {
+            <div class="ml-auto flex items-center gap-4 text-xs">
+                @if (!Version.IsDevBuild)
+                {
+                    <AppLink Href="@($"{RepositoryUrl}/releases/tag/v{Version.Number}")" External="true">Release notes</AppLink>
+                }
+                <AppLink Href="@RepositoryUrl" External="true">@Repository on GitHub</AppLink>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] [EditorRequired] public required AppVersion Version { get; set; }
+
+    [Parameter] [EditorRequired] public required string Repository { get; set; }
+
+    private string RepositoryUrl => $"https://github.com/{Repository}";
+
+    private string Commits => Version.CommitsSinceRelease == 1 ? "1 commit" : $"{Version.CommitsSinceRelease} commits";
+
+    private string Source =>
+        !Version.IsDevBuild ? $"The version comes from the release tag v{Version.Number} this build was made from."
+        : Version.HasRelease ? $"The version comes from git when Sammlarr is built: this build is {Commits} past the latest release tag."
+        : $"The version comes from git when Sammlarr is built. Nothing is tagged as a release yet, so it counts the commits so far: {Version.CommitsSinceRelease}.";
+}

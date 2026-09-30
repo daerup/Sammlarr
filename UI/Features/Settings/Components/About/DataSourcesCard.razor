@@ -1,0 +1,40 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<div class="overflow-hidden rounded-lg border bg-card">
+    <CardHead Icon="database" Title="Data sources"/>
+    @foreach (var source in Sources)
+    {
+        var name = Branding.GetBrandingInfo(source.Provider).DisplayName;
+        <div class="source-row">
+            <span class="source-logo">
+                <ProviderLogo Provider="source.Provider" Form="ProviderLogoForm.Logo" Size="22"/>
+            </span>
+            <span class="source-gives">@source.Gives</span>
+            <span class="source-note">@source.Note</span>
+            <a class="source-open" href="@source.Href" target="_blank" rel="noopener noreferrer" aria-label="@($"Open {name}")">
+                <LucideIcon Name="external-link" Size="13"/>
+            </a>
+        </div>
+    }
+    <p class="source-credit">
+        Provider icons from
+        <AppLink Href="https://selfh.st/icons" External="true">selfh.st/icons</AppLink>
+        (CC BY 4.0, some recoloured) and
+        <AppLink Href="https://simpleicons.org" External="true">Simple Icons</AppLink>
+        (CC0); IMDb's square logo from Wikimedia Commons (public domain). Each logo belongs to its owner.
+    </p>
+</div>
+
+@code {
+    private static readonly IReadOnlyList<DataSource> Sources =
+    [
+        new(MediaProvider.Tmdb, "Titles, artwork, trending and ratings", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.", "https://www.themoviedb.org"),
+        new(MediaProvider.Plex, "Sign-in, search and your watchlist", "Plex and the Plex logo are trademarks of Plex and used under a license.", "https://www.plex.tv"),
+        new(MediaProvider.Mdblist, "The lists your feeds import", "Lists come from MDBList.", "https://mdblist.com"),
+        new(MediaProvider.Tvdb, "Series ids, linked from a title", "Series ids link to TheTVDB.", "https://thetvdb.com"),
+        new(MediaProvider.Imdb, "Title ids, linked from a title", "IMDb and all related logos are trademarks of IMDb.com, Inc. or its affiliates.", "https://www.imdb.com"),
+    ];
+
+    private sealed record DataSource(MediaProvider Provider, string Gives, string Note, string Href);
+}

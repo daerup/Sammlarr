@@ -7,6 +7,7 @@
 		<!-- CS8524: allow exhaustive-over-named enum switches without a default arm (Razor compiler warnings ignore .editorconfig). -->
 		<NoWarn>$(NoWarn);CS8524</NoWarn>
 		<RepoRoot>$(MSBuildThisFileDirectory)..\</RepoRoot>
+		<MinVerTagPrefix>v</MinVerTagPrefix>
 	</PropertyGroup>
 	<ItemGroup>
 		<TailwindInput Include="$(MSBuildThisFileDirectory)wwwroot\css\app-input.css;$(RepoRoot)UI\tailwind.config.js" Visible="false" />
@@ -24,6 +25,7 @@
 	<ItemGroup>
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
 		<PackageReference Include="TickerQ" />
+		<PackageReference Include="MinVer" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Web.Tests" />

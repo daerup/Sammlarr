@@ -1,3 +1,4 @@
+using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using UI.Shared.Common;
 
@@ -23,6 +24,20 @@ public class AppLinkTests : BunitContext
 		var cut = Render<AppLink>(parameters => parameters.Add(link => link.Href, "/feeds").Add(link => link.Arrow, false).AddChildContent("4"));
 
 		await Assert.That(cut.FindAll(".app-link-arrow")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Link_WhenExternal_OpensInANewTabWithTheArrowInABox()
+	{
+		var cut = Render<AppLink>(parameters =>
+			parameters.Add(link => link.Href, "https://github.com/daerup/Sammlarr").Add(link => link.External, true).AddChildContent("GitHub")
+		);
+
+		var link = cut.Find("a");
+		var boxed = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "external-link").Add(icon => icon.Size, 12));
+		await Assert.That(link.GetAttribute("target")).IsEqualTo("_blank");
+		await Assert.That(link.GetAttribute("rel")).IsEqualTo("noopener noreferrer");
+		await Assert.That(cut.Find(".app-link-arrow").InnerHtml).IsEqualTo(boxed.Find("svg").InnerHtml);
 	}
 
 	[Test]

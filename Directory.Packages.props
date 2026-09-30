@@ -28,6 +28,7 @@
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.7.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
+    <PackageVersion Include="MinVer" Version="6.0.0" />
     <PackageVersion Include="NetArchTest.eNhancedEdition" Version="1.4.5" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.2" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.11.2" />
