@@ -54,7 +54,7 @@
                     <LucideIcon Name="key-round" Size="13"/>
                     <span>
                         @(Providers.All(Unavailable.Contains) ? "No keys set." : "Missing a key?")
-                        <AppLink Href="/settings?section=providers">Open API keys</AppLink>
+                        <AppLink Href="@KeysLink">Open API keys</AppLink>
                     </span>
                 </div>
             }
@@ -72,6 +72,13 @@
     private static readonly FeedProvider[] Providers = Enum.GetValues<FeedProvider>();
 
     private bool HasNoKey => Value is { } selected && Unavailable.Contains(selected);
+
+    private FeedProvider? KeyToAdd =>
+        HasNoKey ? Value
+        : Unavailable.Count == 1 ? Unavailable.Single()
+        : null;
+
+    private string KeysLink => KeyToAdd is { } provider ? SettingsLinks.Provider(provider.AsMediaProvider()) : SettingsLinks.Providers;
 
     private BrandingInfo Brand(FeedProvider provider) => Branding.GetBrandingInfo(provider.AsMediaProvider());
 

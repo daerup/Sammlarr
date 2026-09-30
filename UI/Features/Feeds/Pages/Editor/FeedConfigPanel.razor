@@ -62,10 +62,10 @@
                     <BbFieldContent>
                         <FeedProviderSelect Value="@_provider" ValueChanged="@ChangeProvider" Unavailable="@_disabledProviders"/>
                     </BbFieldContent>
-                    @if (ProviderHasNoKey)
+                    @if (ProviderWithoutKey is { } missing)
                     {
                         <BbFieldError>
-                            API key is missing, fix in <AppLink Href="/settings?section=providers" Color="inherit">Settings</AppLink>
+                            API key is missing, fix in <AppLink Href="@SettingsLinks.Provider(missing.AsMediaProvider())" Color="inherit">Settings</AppLink>
                         </BbFieldError>
                     }
                 </BbField>
@@ -426,7 +426,8 @@
     private ScheduleMode _scheduleMode;
     private string? _scheduleCronExpression;
 
-    private bool ProviderHasNoKey => _provider is { } provider && _disabledProviders.Contains(provider);
+    private FeedProvider? ProviderWithoutKey => _provider is { } provider && _disabledProviders.Contains(provider) ? provider : null;
+    private bool ProviderHasNoKey => ProviderWithoutKey is not null;
     private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;

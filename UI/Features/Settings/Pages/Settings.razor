@@ -21,7 +21,7 @@
                 var isActive = _activeSection == item;
                 <BbButton Variant="@(isActive ? ButtonVariant.Secondary : ButtonVariant.Ghost)"
                           Class="@($"w-full justify-start font-medium {(isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground")}")"
-                          OnClick='() => Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("section", Slug(item.Label)))'>
+                          OnClick="() => Show(item)">
                     <LucideIcon Name="@item.Icon" Size="15" Class="mr-2.5 shrink-0"/>
                     @item.Label
                 </BbButton>
@@ -31,7 +31,7 @@
         <div class="border-l self-stretch"></div>
 
         <div class="flex-1 min-w-0">
-            <DynamicComponent Type="_activeSection.ComponentType"/>
+            <DynamicComponent Type="_activeSection.ComponentType" Parameters="SectionParameters"/>
         </div>
     </div>
     </ProtectedSection>
@@ -69,8 +69,19 @@
         StateHasChanged();
     }
 
-    [SupplyParameterFromQuery(Name = "section")]
+    private const string SectionQuery = "section";
+    private const string ProviderQuery = "provider";
+
+    [SupplyParameterFromQuery(Name = SectionQuery)]
     public string? Section { get; set; }
+
+    [SupplyParameterFromQuery(Name = ProviderQuery)]
+    public string? Provider { get; set; }
+
+    private IDictionary<string, object>? SectionParameters =>
+        _activeSection.ComponentType == typeof(ProvidersSection) && Enum.TryParse<MediaProvider>(Provider, ignoreCase: true, out var provider)
+            ? new Dictionary<string, object> { [nameof(ProvidersSection.Expanded)] = provider }
+            : null;
 
     protected override void OnInitialized()
     {
@@ -89,6 +100,9 @@
             _activeSection = VisibleSections.First();
         }
     }
+
+    private void Show(SettingsSection section) =>
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameters(new Dictionary<string, object?> { [SectionQuery] = Slug(section.Label), [ProviderQuery] = null }));
 
     private SettingsSection? ResolveSection() =>
         string.IsNullOrEmpty(Section) ? null : VisibleSections.FirstOrDefault(section => Slug(section.Label).Equals(Section, StringComparison.OrdinalIgnoreCase));

@@ -80,7 +80,17 @@ public class FeedProviderSelectTests : BunitContext
 		var tmdb = cut.FindAll("[role=option]").Single(option => option.TextContent.Contains("TMDb"));
 		await Assert.That(tmdb.GetAttribute("data-disabled")).IsEqualTo("true");
 		await Assert.That(tmdb.TextContent).Contains("No API key");
-		await Assert.That(cut.Find("[role=listbox] a").GetAttribute("href")).IsEqualTo("/settings?section=providers");
+		await Assert.That(cut.Find("[role=listbox] a").GetAttribute("href")).IsEqualTo("/settings?section=providers&provider=tmdb");
+	}
+
+	[Test]
+	[Arguments(FeedProvider.Mdblist, "/settings?section=providers&provider=mdblist")]
+	[Arguments(null, "/settings?section=providers")]
+	public async Task KeysLink_WithSeveralKeysMissing_OpensTheChosenProvidersKeyOrElseAllKeys(FeedProvider? value, string href)
+	{
+		var cut = await OpenAsync(value, FeedProvider.Tmdb, FeedProvider.Mdblist);
+
+		await Assert.That(cut.Find("[role=listbox] a").GetAttribute("href")).IsEqualTo(href);
 	}
 
 	[Test]
