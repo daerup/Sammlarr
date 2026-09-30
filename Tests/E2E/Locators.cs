@@ -4,6 +4,18 @@ namespace E2E.Tests;
 
 internal static class Locators
 {
+	internal const string MarkListeningInputs = """
+		const addEventListener = EventTarget.prototype.addEventListener;
+		EventTarget.prototype.addEventListener = function (type, listener, options) {
+			if (type === 'input' && this instanceof HTMLInputElement) {
+				this.dataset.e2eListening = '';
+			}
+			return addEventListener.call(this, type, listener, options);
+		};
+		""";
+
+	private const string ListeningInput = "[data-e2e-listening]";
+
 	extension(IPage page)
 	{
 		internal ILocator Button(string name) => page.GetByRole(AriaRole.Button, Exact(name));
@@ -56,6 +68,13 @@ internal static class Locators
 		internal ILocator Text(string value) => scope.GetByText(value, new LocatorGetByTextOptions { Exact = true });
 
 		internal ILocator Labelled(string label) => scope.GetByLabel(label, new LocatorGetByLabelOptions { Exact = true });
+
+		internal async Task EnterAsync(string value)
+		{
+			var input = scope.And(scope.Page.Locator(ListeningInput));
+			await input.FillAsync(value);
+			await input.PressAsync("Tab");
+		}
 	}
 
 	private static PageGetByRoleOptions Exact(string name) => new() { Name = name, Exact = true };

@@ -52,7 +52,7 @@ public class ProviderGatingTests
 
 	private static async Task RestoreKeyAsync(ILocator row, string key)
 	{
-		await row.Locator(KeyInput).FillAsync(key);
+		await row.Locator(KeyInput).EnterAsync(key);
 		await row.Button("Test").ClickAsync();
 		await row.Button("Save").ClickAsync();
 		await Expect(row.Text("Connected")).ToBeVisibleAsync();

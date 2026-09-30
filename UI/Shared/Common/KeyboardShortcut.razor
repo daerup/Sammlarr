@@ -14,8 +14,12 @@
     {
         if (Enabled && !_registered)
         {
-            _registration = await KeyboardShortcutService.RegisterAsync(Keys, () => OnInvoked.InvokeAsync(), _id);
-            _registered = true;
+            try
+            {
+                _registration = await KeyboardShortcutService.RegisterAsync(Keys, () => OnInvoked.InvokeAsync(), _id);
+                _registered = true;
+            }
+            catch (ObjectDisposedException) {}
         }
         else if (!Enabled && _registered)
         {

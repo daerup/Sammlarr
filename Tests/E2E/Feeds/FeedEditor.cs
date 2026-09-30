@@ -45,11 +45,7 @@ internal static class FeedEditor
 		return page.OptionContaining(provider);
 	}
 
-	internal static async Task FillAsync(IPage page, string selector, string value)
-	{
-		await page.Locator(selector).FillAsync(value);
-		await page.Locator(selector).PressAsync("Tab");
-	}
+	internal static Task FillAsync(IPage page, string selector, string value) => page.Locator(selector).EnterAsync(value);
 
 	internal static Task TestAsync(IPage page) => TestButton(page).ClickAsync();
 
