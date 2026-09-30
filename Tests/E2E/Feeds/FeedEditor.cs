@@ -71,8 +71,11 @@ internal static class FeedEditor
 
 	internal static ILocator Rows(IPage page) => page.Locator(ResultRow);
 
-	internal static async Task<IReadOnlyList<string>> RowTitlesAsync(IPage page) =>
-		[.. (await page.Locator(RowTitle).AllTextContentsAsync()).Select(title => title.Trim())];
+	internal static async Task<IReadOnlyList<string>> RowTitlesAsync(IPage page)
+	{
+		await Expect(page.Locator(RowTitle).First).ToBeVisibleAsync();
+		return [.. (await page.Locator(RowTitle).AllTextContentsAsync()).Select(title => title.Trim())];
+	}
 
 	internal static ILocator Badge(IPage page, PreviewBadge badge) => page.Locator(".stat-badges-row .preview-filter-badge").Nth(Position(badge));
 

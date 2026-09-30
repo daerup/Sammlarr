@@ -101,12 +101,12 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task SetEnabledAsync_WhenPausing_DisablesAndUnschedulesEverySelectedFeed()
+	public async Task PauseAsync_ForTheSelection_DisablesAndUnschedulesEverySelectedFeed()
 	{
 		var nightly = await Testee.CreateFeedAsync(Feed("Nightly", new Scheduled(Nightly)));
 		var hourly = await Testee.CreateFeedAsync(Feed("Hourly", new Scheduled(Hourly)));
 
-		await Testee.SetEnabledAsync([nightly, hourly], enabled: false);
+		await Testee.PauseAsync([nightly, hourly]);
 
 		await Assert.That((await Testee.GetFeedByIdAsync(nightly))!.Enabled).IsFalse();
 		await Assert.That((await Testee.GetFeedByIdAsync(hourly))!.Enabled).IsFalse();
@@ -114,37 +114,37 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task SetEnabledAsync_WhenResuming_SchedulesTheFeedOnItsOwnCronAgain()
+	public async Task ResumeAsync_AfterAPause_SchedulesTheFeedOnItsOwnCronAgain()
 	{
 		var id = await Testee.CreateFeedAsync(Feed("Nightly", new Scheduled(Nightly)));
-		await Testee.SetEnabledAsync([id], enabled: false);
+		await Testee.PauseAsync([id]);
 
-		await Testee.SetEnabledAsync([id], enabled: true);
+		await Testee.ResumeAsync([id]);
 
 		await Assert.That((await Testee.GetFeedByIdAsync(id))!.Enabled).IsTrue();
 		await Assert.That(Scheduler.Scheduled.Count(scheduled => scheduled == (id, new Scheduled(Nightly)))).IsEqualTo(2);
 	}
 
 	[Test]
-	public async Task SetEnabledAsync_LeavesFeedsOutsideTheSelectionRunning()
+	public async Task PauseAsync_ForFeedsOutsideTheSelection_LeavesThemRunning()
 	{
 		var paused = await Testee.CreateFeedAsync(Feed("Paused", new Scheduled(Nightly)));
 		var untouched = await Testee.CreateFeedAsync(Feed("Untouched", new Scheduled(Nightly)));
 
-		await Testee.SetEnabledAsync([paused], enabled: false);
+		await Testee.PauseAsync([paused]);
 
 		await Assert.That((await Testee.GetFeedByIdAsync(untouched))!.Enabled).IsTrue();
 		await Assert.That(Scheduler.Unscheduled).DoesNotContain(untouched);
 	}
 
 	[Test]
-	public async Task SetEnabledAsync_WhenTheFeedBelongsToAnotherUser_LeavesItRunning()
+	public async Task PauseAsync_WhenTheFeedBelongsToAnotherUser_LeavesItRunning()
 	{
 		var id = await Testee.CreateFeedAsync(Feed("Theirs", new Scheduled(Nightly)));
 		var owner = host.CurrentUser.Id;
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededMember.Id);
 
-		await Testee.SetEnabledAsync([id], enabled: false);
+		await Testee.PauseAsync([id]);
 
 		host.CurrentUser.Id = owner;
 		await Assert.That((await Testee.GetFeedByIdAsync(id))!.Enabled).IsTrue();

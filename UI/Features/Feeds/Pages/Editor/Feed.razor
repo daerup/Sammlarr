@@ -146,8 +146,8 @@
     private bool CanSave => _config.IsValid && (_previewStatus.HasResults || _previewStatus.EarlySaveAllowed) && HasChanged;
 
     private bool ShowTestButton => !_previewStatus.HasResults && !_previewStatus.IsLoading && !_isSaving;
-    private bool ShowApplyButton => _previewStatus.HasResults && (HasPendingChanges || _previewStatus.HasEnrollmentChanges) && !_isSaving;
-    private bool ShowSaveButton => _previewStatus.HasResults && !HasPendingChanges && !_previewStatus.HasEnrollmentChanges && !_isSaving;
+    private bool ShowApplyButton => _previewStatus.HasResults && HasPendingChanges && !_isSaving;
+    private bool ShowSaveButton => _previewStatus.HasResults && !HasPendingChanges && !_isSaving;
 
     private void OnPreviewStatusChanged(PreviewStatus status) => _previewStatus = status;
     private void OnConfigChanged(FeedConfig config)

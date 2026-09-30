@@ -1,0 +1,271 @@
+{
+  "MediaContainer": {
+    "librarySectionID": "home",
+    "librarySectionTitle": "Metadata",
+    "offset": 0,
+    "totalSize": 1,
+    "identifier": "tv.plex.provider.metadata",
+    "size": 1,
+    "Metadata": [
+      {
+        "art": "https://metadata-static.plex.tv/9/gracenote/95527c6ea24c87eea01e281d1fd43021.jpg",
+        "guid": "plex://movie/69c44e8318d72691506564e1",
+        "key": "/library/metadata/69c44e8318d72691506564e1",
+        "ratingKey": "69c44e8318d72691506564e1",
+        "studio": "Digital Forces",
+        "summary": "After being falsely accused of treason by a jealous king, the legendary warrior Alexander is exiled to a forbidden monster filled realm and tasked with an impossible challenge: slay three ancient Titans or die trying. Armed with a mystical medallion, a legendary sword, and the help of unlikely allies, Alexander embarks on an epic quest to save the woman he loves, reclaim his honor, and prevent a tyrant from seizing his kingdom.",
+        "type": "movie",
+        "addedAt": 1783987200,
+        "audienceRating": 3.5,
+        "audienceRatingImage": "imdb://image.rating",
+        "contentRating": "TV-MA",
+        "duration": 5520000,
+        "imdbRatingCount": 119,
+        "originallyAvailableAt": "2026-07-14",
+        "publicPagesURL": "https://watch.plex.tv/movie/the-odyssey-2026-1",
+        "slug": "the-odyssey-2026-1",
+        "thumb": "https://metadata-static.plex.tv/6/gracenote/65d9895149b34067cb30ea82d39880d1.jpg",
+        "title": "The Odyssey",
+        "userState": false,
+        "year": 2026,
+        "Image": [
+          {
+            "alt": "The Odyssey",
+            "type": "background",
+            "url": "https://metadata-static.plex.tv/9/gracenote/95527c6ea24c87eea01e281d1fd43021.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "backgroundSquare",
+            "url": "https://metadata-static.plex.tv/7/gracenote/7f8d35b95d7f2c45e3cdd70422c70ba0.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverArt",
+            "url": "https://metadata-static.plex.tv/4/gracenote/414c9c4e2751c4af963f87d3f57f5553.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverPoster",
+            "url": "https://metadata-static.plex.tv/6/gracenote/65d9895149b34067cb30ea82d39880d1.jpg"
+          },
+          {
+            "alt": "The Odyssey",
+            "type": "coverSquare",
+            "url": "https://metadata-static.plex.tv/9/gracenote/96905d4b3e6a297e1d49d4f52cfa1425.jpg"
+          }
+        ],
+        "Genre": [
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c2",
+            "id": "5d9c046c2192ba001f2ff6c2",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c2",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c2",
+            "slug": "action",
+            "tag": "Action",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c705e7a001e6c8daa",
+            "id": "5d9c046c705e7a001e6c8daa",
+            "key": "/library/sections/home/all?genre=5d9c046c705e7a001e6c8daa",
+            "ratingKey": "genre_5d9c046c705e7a001e6c8daa",
+            "slug": "fantasy",
+            "tag": "Fantasy",
+            "type": "directory",
+            "context": "tag.genre"
+          },
+          {
+            "filter": "genre=5d9c046c2192ba001f2ff6c5",
+            "id": "5d9c046c2192ba001f2ff6c5",
+            "key": "/library/sections/home/all?genre=5d9c046c2192ba001f2ff6c5",
+            "ratingKey": "genre_5d9c046c2192ba001f2ff6c5",
+            "slug": "thriller",
+            "tag": "Thriller",
+            "type": "directory",
+            "context": "tag.genre"
+          }
+        ],
+        "Guid": [
+          {
+            "id": "imdb://tt40188305"
+          },
+          {
+            "id": "tmdb://1756234"
+          }
+        ],
+        "Rating": [
+          {
+            "image": "imdb://image.rating",
+            "type": "audience",
+            "value": 3.5
+          }
+        ],
+        "Country": [
+          {
+            "tag": "South Africa"
+          }
+        ],
+        "Role": [
+          {
+            "id": "6a8ed577eee6e44d59fd580e",
+            "order": 1,
+            "slug": "luke-gericke-1",
+            "tag": "Luke Gericke",
+            "role": "Alexander",
+            "key": "/library/people/6a8ed577eee6e44d59fd580e",
+            "type": "person"
+          },
+          {
+            "id": "6a0c1fa504e137f15b967db5",
+            "order": 2,
+            "slug": "virgilio-da-silva-5",
+            "tag": "Virgilio Da Silva",
+            "role": "King Brathus",
+            "key": "/library/people/6a0c1fa504e137f15b967db5",
+            "type": "person"
+          },
+          {
+            "id": "6a91788689a26c000c00c2af",
+            "order": 3,
+            "slug": "pam-pickering-1",
+            "tag": "Pam Pickering",
+            "role": "Priestess Sophia",
+            "key": "/library/people/6a91788689a26c000c00c2af",
+            "type": "person"
+          },
+          {
+            "id": "6a91788689a26c000c00c2b0",
+            "order": 4,
+            "slug": "wendy-locker-1",
+            "tag": "Wendy Locker",
+            "role": "Sheila of the Tavern",
+            "key": "/library/people/6a91788689a26c000c00c2b0",
+            "type": "person"
+          },
+          {
+            "id": "6a91788689a26c000c00c2b1",
+            "order": 5,
+            "slug": "roger-locker-1",
+            "tag": "Roger Locker",
+            "role": "Rumbo Merchant",
+            "key": "/library/people/6a91788689a26c000c00c2b1",
+            "type": "person"
+          },
+          {
+            "id": "6a91788689a26c000c00c2b2",
+            "order": 6,
+            "slug": "kayleigh-doig-1",
+            "tag": "Kayleigh Doig",
+            "role": "Kyla",
+            "key": "/library/people/6a91788689a26c000c00c2b2",
+            "type": "person"
+          },
+          {
+            "id": "6a91788689a26c000c00c2b3",
+            "order": 7,
+            "slug": "zac-almeida-2",
+            "tag": "Zac Almeida",
+            "role": "Priest Lucius",
+            "key": "/library/people/6a91788689a26c000c00c2b3",
+            "type": "person"
+          },
+          {
+            "id": "6a91788689a26c000c00c2b4",
+            "order": 8,
+            "slug": "kelley-stewart-2",
+            "tag": "Kelley Stewart",
+            "role": "Thalia",
+            "key": "/library/people/6a91788689a26c000c00c2b4",
+            "type": "person"
+          }
+        ],
+        "Director": [
+          {
+            "id": "632d229f8d0ea5d2beb6e09d",
+            "slug": "grant-humphreys-1",
+            "tag": "Grant Humphreys",
+            "role": "Director",
+            "key": "/library/people/632d229f8d0ea5d2beb6e09d",
+            "type": "person"
+          }
+        ],
+        "Producer": [
+          {
+            "id": "69c2b2080cbe244bcec3c570",
+            "tag": "Michael Harrison",
+            "role": "Producer",
+            "key": "/library/people/69c2b2080cbe244bcec3c570",
+            "type": "person"
+          }
+        ],
+        "Writer": [
+          {
+            "id": "632d229f8d0ea5d2beb6e09d",
+            "slug": "grant-humphreys-1",
+            "tag": "Grant Humphreys",
+            "role": "Writer",
+            "key": "/library/people/632d229f8d0ea5d2beb6e09d",
+            "type": "person"
+          },
+          {
+            "id": "5d776ca8fb0d55001f58e95a",
+            "slug": "chris-hoyt",
+            "tag": "Chris Hoyt",
+            "role": "Writer",
+            "key": "/library/people/5d776ca8fb0d55001f58e95a",
+            "type": "person"
+          }
+        ],
+        "Similar": [
+          {
+            "guid": "plex://movie/629734a51829a041d818d059",
+            "tag": "Angels Fallen: Warriors of Peace"
+          },
+          {
+            "guid": "plex://movie/5f408e73fea1a1003fada07a",
+            "tag": "The Shepherd"
+          },
+          {
+            "guid": "plex://movie/5d776855e870fd001f19e208",
+            "tag": "Gotcha!"
+          },
+          {
+            "guid": "plex://movie/5d776860eb5d26001f1e86a9",
+            "tag": "Race with the Devil"
+          },
+          {
+            "guid": "plex://movie/5d776bc9fb0d55001f572aa7",
+            "tag": "The Dark Tower"
+          },
+          {
+            "guid": "plex://movie/5d776c5496b655001fe2d3b2",
+            "tag": "Overdrive"
+          },
+          {
+            "guid": "plex://movie/5d7768907e5fa10020bf1d7e",
+            "tag": "No Name on the Bullet"
+          },
+          {
+            "guid": "plex://movie/5d776894431c830024c0fb45",
+            "tag": "Basilisk: The Serpent King"
+          },
+          {
+            "guid": "plex://movie/5f590e20ba1e9c00418f9c51",
+            "tag": "The Unhealer"
+          },
+          {
+            "guid": "plex://movie/5f40d50a5a76a80042f0ee94",
+            "tag": "Indemnity"
+          }
+        ],
+        "Studio": [
+          {
+            "tag": "Digital Forces"
+          }
+        ]
+      }
+    ]
+  }
+}

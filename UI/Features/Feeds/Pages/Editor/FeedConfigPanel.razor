@@ -87,13 +87,14 @@
                         <div class="flex items-center gap-2">
                             <BbButton Variant="@(_strategyMode == StrategyMode.Append ? ButtonVariant.Default : ButtonVariant.Outline)"
                                       Class="min-w-24 justify-center"
+                                      aria-pressed="@(_strategyMode == StrategyMode.Append)"
                                       OnClick="@(() => ChangeStrategyMode(StrategyMode.Append))">
                                 Append
                             </BbButton>
                             @if (_strategyMode == StrategyMode.Mirror)
                             {
                                 <div class="flex items-stretch h-10 rounded-md border border-primary overflow-hidden">
-                                    <BbButton Variant="ButtonVariant.Default" Class="min-w-20 justify-center rounded-none border-0 h-full">Mirror</BbButton>
+                                    <BbButton Variant="ButtonVariant.Default" Class="min-w-20 justify-center rounded-none border-0 h-full" aria-pressed="@true">Mirror</BbButton>
                                     <span class="flex items-center bg-accent px-2">
                                         <input id="absence-threshold" inputmode="numeric" aria-label="Runs missing before removal"
                                                aria-invalid="@AbsenceThresholdIsInvalid"

@@ -30,6 +30,8 @@ internal static class Locators
 
 		internal ILocator AlertDialog => page.GetByRole(AriaRole.Alertdialog);
 
+		internal ILocator Modal(string name) => page.GetByRole(AriaRole.Dialog, Exact(name));
+
 		internal ILocator Field(string label) => page.Locator("[data-slot='field']").Filter(new LocatorFilterOptions { HasText = label });
 
 		internal ILocator Text(string value) => page.GetByText(value, new PageGetByTextOptions { Exact = true });

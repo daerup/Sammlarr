@@ -31,7 +31,7 @@ public class FeedFilteringTests
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Included)).ToHaveTextAsync(TestData.Count(Limit - 1));
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit));
 
-		await FeedEditor.Option(page, "Blacklist limit behavior", "Preserved").ClickAsync();
+		await FeedEditor.Option(page, "Blacklist slot policy", "Preserved").ClickAsync();
 		await FeedEditor.ApplyAsync(page);
 		await FeedEditor.PreviewLoadedAsync(page);
 
@@ -40,8 +40,6 @@ public class FeedFilteringTests
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Skipped)).ToHaveTextAsync(TestData.Count(listed - Limit - 1));
 
 		await FeedEditor.Rows(page).First.Locator(".search-result-toggle-btn[style*='destructive']").ClickAsync();
-		await FeedEditor.ApplyAsync(page);
-		await FeedEditor.PreviewLoadedAsync(page);
 
 		await Expect(FeedEditor.Badge(page, PreviewBadge.Bypassed)).ToHaveTextAsync(TestData.Count(0));
 	}

@@ -385,7 +385,6 @@
     private MediaId? _togglingBlacklistItem;
     private readonly HashSet<MediaId> _watchlisted = new();
     private readonly HashSet<MediaId> _blacklistIds = new();
-    private bool _hasEnrollmentChanges;
     private bool _refreshDialogOpen;
     private bool _providerUnavailable;
     private readonly Stopwatch _fetchTimer = new();
@@ -607,8 +606,6 @@
 
     private async Task<bool> ReprocessAsync(Completeness completeness, CancellationToken cancellationToken)
     {
-        _hasEnrollmentChanges = false;
-
         if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, completeness)), cancellationToken) is not IFeedPlan plan)
         {
             ClearResults();
@@ -747,7 +744,6 @@
         IsLoading = IsLoading,
         HasResults = HasResults,
         HasFailed = HasFailed,
-        HasEnrollmentChanges = _hasEnrollmentChanges,
         EarlySaveAllowed = EarlySaveAllowed,
         MirrorExposure = IsMirror ? LeavingCount : 0,
     };
@@ -841,7 +837,6 @@
                 await BlacklistService.AddToBacklistAsync(item.Id);
                 _blacklistIds.Add(item.Id);
             }
-            _hasEnrollmentChanges = true;
         }
         catch (UnknownMediaException)
         {
@@ -881,7 +876,6 @@
                 await WatchlistService.AddToWatchlistAsync([item.Id], new ManualOrigin(ManualSource.FeedPreview));
                 _watchlisted.Add(item.Id);
             }
-            _hasEnrollmentChanges = true;
         }
         catch (MissingWatchlistExternalIdException)
         {

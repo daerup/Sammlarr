@@ -106,7 +106,13 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return feeds.Select(feed => FeedId.From(feed.Id)).ToList();
 	}
 
-	public async Task<IReadOnlyList<FeedId>> SetEnabledAsync(IReadOnlyCollection<FeedId> ids, bool enabled, CancellationToken cancellationToken = default)
+	public Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
+		SetEnabledAsync(ids, enabled: false, cancellationToken);
+
+	public Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
+		SetEnabledAsync(ids, enabled: true, cancellationToken);
+
+	private async Task<IReadOnlyList<FeedId>> SetEnabledAsync(IReadOnlyCollection<FeedId> ids, bool enabled, CancellationToken cancellationToken)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var keys = ids.Select(id => id.Value).ToList();
