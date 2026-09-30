@@ -50,6 +50,13 @@
             <ServicesMap Config="config" Ready="_ready" CanPickWatchlist="@(CurrentUser.Role == UserRole.Admin)"/>
         </section>
     }
+    else
+    {
+        <section class="flex flex-col gap-3" aria-label="Services" aria-busy="true">
+            <h3 class="text-sm font-semibold">Services</h3>
+            <BbSkeleton Class="h-[385px] rounded-lg"/>
+        </section>
+    }
 </div>
 
 @code {
@@ -67,6 +74,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await Task.Yield();
         _config = await ProviderConfigService.GetAsync();
         _authProvider = _config.AuthProvider;
         await RefreshReadyAsync();

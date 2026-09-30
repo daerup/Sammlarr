@@ -3,11 +3,9 @@
 @page "/feeds/clone/{CloneFeedId}"
 @using Contracts.Auth
 @using Contracts.Feed
-@using Contracts.Settings
 @using global::Shared
 @inject IFeedService FeedService
 @inject NavigationManager NavigationManager
-@inject IProviderConfigService ProviderConfigService
 @inject IApiKeyService ApiKeyService
 @inject AccountConnectionPrompt AccountConnectionPrompt
 @inject Notifier Notifier
@@ -89,19 +87,29 @@
         <ProtectedSection GuardState="IsSignedIn"
                           DeniedActionDescription="managing feeds"
                           FallbackAction="() => AccountConnectionPrompt.RequestAsync()">
-            <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" @onkeydown="HandleContainerKeyDownAsync">
+            @if (_loadingFeed)
+            {
+                <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" aria-busy="true">
+                    <BbSkeleton Class="flex-1 min-w-0 rounded-lg"/>
+                    <BbSkeleton Class="flex-1 min-w-0 rounded-lg"/>
+                </div>
+            }
+            else
+            {
+                <div class="flex-1 min-h-0 flex flex-row gap-4 overflow-hidden" @onkeydown="HandleContainerKeyDownAsync">
 
-                <FeedConfigPanel @key="_configKey"
-                                 Value="@_config"
-                                 IsLoading="@(_previewStatus.IsLoading || _isApplying)"
-                                 OnChange="@OnConfigChanged"/>
+                    <FeedConfigPanel @key="_configKey"
+                                     Value="@_config"
+                                     IsLoading="@(_previewStatus.IsLoading || _isApplying)"
+                                     OnChange="@OnConfigChanged"/>
 
-                <FeedPreviewPanel @ref="_previewPanel"
-                                  Config="@_config"
-                                  SavedFeedId="@_savedFeedId"
-                                  OnStatusChanged="@OnPreviewStatusChanged"/>
+                    <FeedPreviewPanel @ref="_previewPanel"
+                                      Config="@_config"
+                                      SavedFeedId="@_savedFeedId"
+                                      OnStatusChanged="@OnPreviewStatusChanged"/>
 
-            </div>
+                </div>
+            }
         </ProtectedSection>
     </ChildContent>
 </PageContainer>
@@ -122,7 +130,7 @@
         : CloneFeedId is not null ? "Create a new feed using values copied from an existing one."
         : "Subscribe to a list from an external provider as a feed.";
 
-    private ProviderConfig _providerConfig = null!;
+    private bool _loadingFeed;
     private bool _isSignedIn;
     private bool IsSignedIn() => _isSignedIn;
 
@@ -164,11 +172,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _providerConfig = await ProviderConfigService.GetAsync();
         if (!IsEditOrClone)
         {
             return;
         }
+
+        _loadingFeed = true;
+        await Task.Yield();
 
         var sourceId = FeedId.From(UrlGuid.Decode(EditFeedId ?? CloneFeedId));
         var feed = await FeedService.GetFeedByIdAsync(sourceId);
@@ -200,6 +210,7 @@
         }
         _configKey++;
         _pendingAutoApply = true;
+        _loadingFeed = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -317,6 +317,7 @@
     protected override async Task OnInitializedAsync()
     {
         Events.Published += OnEvent;
+        await Task.Yield();
         _providerConfig = await ProviderConfigService.GetAsync();
         await LoadAsync();
         _isLoading = false;

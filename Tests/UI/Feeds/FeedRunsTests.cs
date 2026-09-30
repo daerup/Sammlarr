@@ -59,7 +59,18 @@ public class FeedRunsTests : BunitContext
 		await Assert.That(cut.Find(".runs-band").TextContent).Contains("No list found with identifier 'hdlists/comedy'.");
 	}
 
-	private void RegisterServices(FeedRun linked)
+	[Test]
+	public async Task Render_WhileTheFeedIsStillLoading_ShowsASkeleton()
+	{
+		var feeds = RegisterServices(Runs[0]);
+		feeds.GetFeedByIdAsync(Any(), Any()).ReturnsAsync(new TaskCompletionSource<Domain.Feed.Feed?>().Task);
+
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)));
+
+		await Assert.That(cut.FindAll(".runs-page[aria-busy='true']")).HasSingleItem();
+	}
+
+	private Mock<IFeedService> RegisterServices(FeedRun linked)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -110,6 +121,7 @@ public class FeedRunsTests : BunitContext
 		Services.AddSingleton<MediaProviderBrandingService>();
 		Services.AddScoped<ScrollService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
+		return feeds;
 	}
 
 	private static FeedRun Run(DateTimeOffset startedAt) =>

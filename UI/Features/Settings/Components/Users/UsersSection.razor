@@ -152,7 +152,11 @@ else
     private bool _registrationOpen;
     private bool _isLoaded;
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {

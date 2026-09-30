@@ -135,7 +135,11 @@
     private IReadOnlyDictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>> _health = new Dictionary<Guid, IReadOnlyList<NotificationDeliveryOutcome>>();
     private bool _loaded;
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {

@@ -8,7 +8,14 @@
 
 <ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
     <Status>
-        <CredentialStatus State="_state" IdleText="Not connected"/>
+        @if (_loaded)
+        {
+            <CredentialStatus State="_state" IdleText="Not connected"/>
+        }
+        else
+        {
+            <BbSkeleton Class="h-6 w-24 rounded-full"/>
+        }
     </Status>
     <ChildContent>
         <BbField>
@@ -76,6 +83,7 @@
     private string _tokenInput = string.Empty;
     private string _savedToken = string.Empty;
     private AuthProvider? _loadedProvider;
+    private bool _loaded;
     private CredentialState _state = CredentialState.Idle;
     private CredentialState _savedState = CredentialState.Idle;
     private Guid _clientId;
@@ -105,6 +113,7 @@
         }
 
         _loadedProvider = Provider;
+        await Task.Yield();
         _savedState = await Credentials
             .GetAsync(Provider)
             .Apply(credential =>
@@ -115,6 +124,7 @@
             .ApplyError(_ => _savedToken = _tokenInput = string.Empty)
             .Match(CredentialState.Saved, CredentialState.Idle);
         _state = _savedState;
+        _loaded = true;
     }
 
     private async Task TestAsync()
