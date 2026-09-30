@@ -76,7 +76,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		var endpoint = string.Format(MdblistEndpoints.ListItems, identifier, PageSize, offset);
 		var apiKey = await apiKeys
 			.GetApiKeyAsync(ApiKeyProvider.Mdblist, cancellationToken)
-			.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings → API Keys."));
+			.GetOrThrow(_ => new InvalidOperationException("No MDBList API key is configured. Add one in Settings."));
 		using var response = await client.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (response.StatusCode == HttpStatusCode.NotFound)
 		{

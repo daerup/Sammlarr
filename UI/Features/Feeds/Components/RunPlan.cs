@@ -98,7 +98,7 @@ internal static class RunPlan
 				: stalled ? RunFlag.Inconclusive
 				: group is RunGroup.WorthRunning && next is not null ? RunFlag.NotDue
 				: null,
-			next,
+			feed.Enabled ? next : null,
 			group,
 			feed.Enabled
 		);

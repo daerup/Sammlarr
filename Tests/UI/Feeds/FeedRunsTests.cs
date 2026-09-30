@@ -40,6 +40,25 @@ public class FeedRunsTests : BunitContext
 		await Assert.That(cut.FindAll("#run-selected")).HasSingleItem();
 	}
 
+	[Test]
+	public async Task Render_ForARunWhoseSourceFailed_ShowsWhyAlongsideTheFailure()
+	{
+		var failed = Run(DateTimeOffset.UtcNow) with
+		{
+			Conclusiveness = Conclusiveness.StillLoading,
+			SourceFailure = "No list found with identifier 'hdlists/comedy'.",
+		};
+		RegisterServices(failed);
+
+		var cut = Render<FeedRuns>(parameters =>
+			parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, UrlGuid.Encode(failed.Id))
+		);
+		cut.WaitForState(() => cut.FindAll(".runs-band").Count == 1);
+
+		await Assert.That(cut.Find(".runs-band").TextContent).Contains("The source could not be read");
+		await Assert.That(cut.Find(".runs-band").TextContent).Contains("No list found with identifier 'hdlists/comedy'.");
+	}
+
 	private void RegisterServices(FeedRun linked)
 	{
 		Services.AddBlazorBlueprintComponents();

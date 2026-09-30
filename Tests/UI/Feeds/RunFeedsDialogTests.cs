@@ -41,6 +41,16 @@ public class RunFeedsDialogTests : BunitContext
 		await Assert.That(cut.FindAll(".run-from")).IsEmpty();
 	}
 
+	[Test]
+	public async Task Open_HatchesOnlyThePausedFeed()
+	{
+		var cut = RenderDialog(null);
+
+		var paused = cut.FindAll(".run-row.is-paused");
+		await Assert.That(paused).HasSingleItem();
+		await Assert.That(paused[0].TextContent).Contains(WeeklyPicks.Name);
+	}
+
 	private IRenderedComponent<IComponent> RenderDialog(IReadOnlySet<FeedId>? selection) =>
 		Render(builder =>
 		{

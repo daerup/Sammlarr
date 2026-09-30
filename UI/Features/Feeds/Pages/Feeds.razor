@@ -189,7 +189,9 @@
               OnSelect="ShowDetailsAsync"
               EmptyMessage="This run would change nothing."
               RemovedLabel="Removing"
-              AddedLabel="Adding">
+              AddedLabel="Adding"
+              Band="@(_pendingPlan is {} failing && FeedRunView.Problem(failing) is {} problem ? PlanProblemBand(failing, problem) : null)"
+              BandTone="ChangeBandTone.Bad">
     <Badges>
         @if (_pendingFeed is {} pending)
         {
@@ -573,6 +575,9 @@
         _pendingEntries = FeedRunView.Entries(summary, media);
         _pendingChips = FeedRunView.Chips(FeedRunCounts.From(summary));
     }
+
+    private static RenderFragment PlanProblemBand(IFeedPlan plan, string problem) =>
+        @<RunProblem Headline="@problem" Reason="@plan.SourceFailure" Failed="true"/>;
 
     private Task ShowDetailsAsync(MediaLookup media)
     {

@@ -43,6 +43,18 @@ public class ActivityDayBlockTests : BunitContext
 		await Assert.That(cut.Find(".dstat").TextContent).DoesNotContain("removed");
 	}
 
+	[Test]
+	public async Task Problem_ForARunWhoseSourceFailed_SaysItFailedAndQuotesWhy()
+	{
+		var failed = Run(0, 0) with { Conclusiveness = Conclusiveness.StillLoading, SourceFailure = "No MDBList API key is configured." };
+		var cut = Render(ActivityLog.Days([failed], Names, TimeZoneInfo.Utc)[0]);
+
+		await cut.Find(".dtoggle").ClickAsync(new());
+
+		await Assert.That(cut.Find(".dproblem").TextContent).Contains("failed at").And.Contains("No MDBList API key is configured.");
+		await Assert.That(cut.Find(".drun-delta").TextContent.Trim()).IsEqualTo("failed");
+	}
+
 	private IRenderedComponent<ActivityDayBlock> Render(ActivityDay day) =>
 		Render<ActivityDayBlock>(parameters =>
 			parameters

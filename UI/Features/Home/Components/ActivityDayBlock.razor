@@ -60,7 +60,7 @@
         <div class="dproblem">
             <LucideIcon Name="circle-alert" Size="14"/>
             <span>
-                <span class="problem-feed">@entry.FeedName</span> ran at @At(entry) but @entry.Outcome.
+                <span class="problem-feed">@entry.FeedName</span> @Problem(entry)
             </span>
         </div>
     }
@@ -81,7 +81,7 @@
                     <span class="drun-delta">
                         @if (entry.Inconclusive)
                         {
-                            <span class="bad">inconclusive</span>
+                            <span class="bad">@(entry.Run.Failed ? "failed" : "inconclusive")</span>
                         }
                         else if (entry.Run.HasChanges)
                         {
@@ -121,6 +121,11 @@
         : Day.Date.ToString("d MMMM yyyy");
 
     private static string At(ActivityRun entry) => entry.Run.StartedAt.ToLocalTime().ToString("HH:mm");
+
+    private static string Problem(ActivityRun entry) =>
+        entry.Run.Failed ? $"failed at {At(entry)}: {entry.Reason}"
+        : entry.Reason is { } reason ? $"ran at {At(entry)} but {entry.Outcome}. {reason}"
+        : $"ran at {At(entry)} but {entry.Outcome}.";
 
     private static string FeedHref(FeedContribution feed) =>
         $"/feeds/{UrlGuid.Encode(feed.FeedId.Value)}/runs/{UrlGuid.Encode(feed.LatestRunId)}";

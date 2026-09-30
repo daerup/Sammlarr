@@ -97,7 +97,7 @@ internal sealed class FeedRunPlanner(
 			? await feeds.GetAbsencesAsync(feed.Id, owned, mirror.AbsenceThreshold, cancellationToken)
 			: new Dictionary<MediaId, int>();
 
-		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unresolved, load.Completeness), owned, absences, feed.Strategy);
+		return FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unresolved, load.Completeness, load.SourceFailure), owned, absences, feed.Strategy);
 	}
 
 	private async Task<RawFeedLoad> FetchAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ internal sealed class FeedRunPlanner(
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			logger.LogWarning(ex, "Feed {FeedId} returned a partial list; removals are suppressed for this run", feed.Id);
-			return new RawFeedLoad(items, Completeness.Partial);
+			return new RawFeedLoad(items, Completeness.Partial, ex.Message);
 		}
 	}
 }

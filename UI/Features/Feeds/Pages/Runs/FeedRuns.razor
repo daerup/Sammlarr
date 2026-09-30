@@ -127,7 +127,7 @@
                                             <span class="runs-item-meta">@RunMeta(item)</span>
                                         </span>
                                         <span class="runs-delta @(item.HasChanges ? null : "is-none")">
-                                            @if (IsFailed(item))
+                                            @if (item.Failed)
                                             {
                                                 <span class="is-removed">failed</span>
                                             }
@@ -171,7 +171,7 @@
                                 <div class="runs-detail-sub">@FeedRunView.Summary(run)</div>
                                 <div class="runs-detail-badges">
                                     <FeedStrategyChip Strategy="run.Strategy"/>
-                                    @if (IsFailed(run))
+                                    @if (run.Failed)
                                     {
                                         <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
                                     }
@@ -182,18 +182,10 @@
                                 </div>
                             </div>
 
-                            @if (IsFailed(run))
+                            @if (FeedRunView.Problem(run) is { } problem)
                             {
-                                <div class="runs-band is-bad">
-                                    <LucideIcon Name="cloud-off" Size="15"/>
-                                    <span><strong>The source returned nothing, so nothing was applied.</strong></span>
-                                </div>
-                            }
-                            else if (run.Conclusiveness is not Conclusiveness.Conclusive)
-                            {
-                                <div class="runs-band is-warn">
-                                    <LucideIcon Name="shield" Size="15"/>
-                                    <span><strong>@GuardLine(run)</strong></span>
+                                <div class="runs-band @(run.Failed ? "is-bad" : "is-warn")">
+                                    <RunProblem Headline="@problem" Reason="@run.SourceFailure" Failed="run.Failed"/>
                                 </div>
                             }
 
@@ -357,16 +349,14 @@
         return Task.CompletedTask;
     }
 
-    private static bool IsFailed(FeedRun run) => run.Counts.Total == 0 && run.Conclusiveness is not Conclusiveness.Conclusive;
-
     private IEnumerable<FeedRun> Filtered() =>
         _runs.Where(run =>
             _filter switch
             {
                 RunFilter.All => true,
                 RunFilter.Changed => run.HasChanges,
-                RunFilter.Guarded => run.Conclusiveness is not Conclusiveness.Conclusive && !IsFailed(run),
-                RunFilter.Failed => IsFailed(run),
+                RunFilter.Guarded => run.Conclusiveness is not Conclusiveness.Conclusive && !run.Failed,
+                RunFilter.Failed => run.Failed,
             }
         );
 
@@ -375,8 +365,8 @@
         {
             RunFilter.All => _runs.Count,
             RunFilter.Changed => _runs.Count(run => run.HasChanges),
-            RunFilter.Guarded => _runs.Count(run => run.Conclusiveness is not Conclusiveness.Conclusive && !IsFailed(run)),
-            RunFilter.Failed => _runs.Count(IsFailed),
+            RunFilter.Guarded => _runs.Count(run => run.Conclusiveness is not Conclusiveness.Conclusive && !run.Failed),
+            RunFilter.Failed => _runs.Count(run => run.Failed),
         };
 
     private static string FilterLabel(RunFilter filter) =>
@@ -425,7 +415,7 @@
     private static string RunMeta(FeedRun run) => $"{(run.Trigger is Scheduled ? "scheduled" : "manual")} · {StrategyLabel(run.Strategy)}";
 
     private static string DotClass(FeedRun run) =>
-        IsFailed(run) ? "is-bad"
+        run.Failed ? "is-bad"
         : run.Conclusiveness is not Conclusiveness.Conclusive ? "is-warn"
         : run.HasChanges ? "is-ok"
         : "is-idle";
@@ -436,19 +426,9 @@
         _feed is { Enabled: true, Schedule: Scheduled scheduled } ? scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) : null;
 
     private string? NextRunLine =>
-        _feed?.Schedule is Scheduled scheduled && scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next
+        _feed is { Enabled: true, Schedule: Scheduled scheduled } && scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) is { } next
             ? $"next run {next:d MMMM HH:mm}"
             : null;
-
-    private static string GuardLine(FeedRun run) =>
-        run.Conclusiveness switch
-        {
-            Conclusiveness.NoItems => "The source returned nothing, so no removals were applied.",
-            Conclusiveness.NoMatches => "Nothing the source returned could be matched, so no removals were applied.",
-            Conclusiveness.NoneAdmitted => "Nothing the source returned was admitted, so no removals were applied.",
-            Conclusiveness.StillLoading => "The source was still loading, so no removals were applied.",
-            Conclusiveness.Conclusive => string.Empty,
-        };
 
     private string HistoryLine =>
         _history.FirstRunAt is { } first

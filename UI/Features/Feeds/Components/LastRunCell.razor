@@ -60,10 +60,16 @@ else
                   OnSelect="ShowDetailsAsync"
                   EmptyMessage="Nothing was added or removed."
                   Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
-                  NoteHref="@($"/feeds/{UrlGuid.Encode(FeedId.Value)}/runs")">
+                  NoteHref="@($"/feeds/{UrlGuid.Encode(FeedId.Value)}/runs")"
+                  Band="@(FeedRunView.Problem(_run) is { } problem ? ProblemBand(_run, problem) : null)"
+                  BandTone="@(_run.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
         <Badges>
             <FeedStrategyChip Strategy="_run.Strategy"/>
-            @if (_run.Conclusiveness is not Conclusiveness.Conclusive)
+            @if (_run.Failed)
+            {
+                <FeedChip Tone="FeedChipTone.Failed" Icon="cloud-off">Failed</FeedChip>
+            }
+            else if (_run.Conclusiveness is not Conclusiveness.Conclusive)
             {
                 <FeedChip Tone="FeedChipTone.Attention" Icon="shield">Guarded</FeedChip>
             }
@@ -129,4 +135,7 @@ else
     }
 
     private static string Heading(FeedRun run) => run.StartedAt.ToLocalTime().ToString("MMMM d, HH:mm");
+
+    private static RenderFragment ProblemBand(FeedRun run, string problem) =>
+        @<RunProblem Headline="@problem" Reason="@run.SourceFailure" Failed="run.Failed"/>;
 }
