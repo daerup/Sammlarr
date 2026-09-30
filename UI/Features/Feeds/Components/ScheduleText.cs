@@ -32,6 +32,7 @@ internal static class ScheduleText
 		{
 			return "in under a minute";
 		}
+		span = TimeSpan.FromMinutes(Math.Round(span.TotalMinutes, MidpointRounding.AwayFromZero));
 		if (span < TimeSpan.FromHours(1))
 		{
 			return $"in {span.Minutes} min";
@@ -41,5 +42,18 @@ internal static class ScheduleText
 			return span.Minutes == 0 ? $"in {span.Hours} hr" : $"in {span.Hours} hr {span.Minutes} min";
 		}
 		return span.Days == 1 ? "tomorrow" : $"in {span.Days} days";
+	}
+
+	internal static string AwayExactly(DateTimeOffset at, DateTimeOffset from)
+	{
+		var span = at - from;
+
+		return span switch
+		{
+			{ TotalSeconds: < 1 } => "due now",
+			{ TotalMinutes: < 1 } => $"in {span.Seconds} s",
+			{ TotalHours: < 1 } => $"in {span.Minutes} min {span.Seconds} s",
+			_ => $"in {(int)span.TotalHours} hr {span.Minutes} min {span.Seconds} s",
+		};
 	}
 }

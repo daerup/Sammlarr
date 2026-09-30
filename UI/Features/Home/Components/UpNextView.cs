@@ -15,7 +15,16 @@ public enum UpNextKind
 	Scheduled,
 }
 
-public sealed record UpNextRow(string Name, string Detail, string When, UpNextKind Kind, string? Href, MediaProvider? Brand = null, bool Deleted = false);
+public sealed record UpNextRow(
+	string Name,
+	string Detail,
+	string When,
+	UpNextKind Kind,
+	string? Href,
+	MediaProvider? Brand = null,
+	bool Deleted = false,
+	DateTimeOffset? RunsAt = null
+);
 
 internal static class UpNextView
 {
@@ -70,7 +79,7 @@ internal static class UpNextView
 		var brand = Brand(job.Request, feedBrands, watchlistProvider);
 		var deleted = Deleted(job.Request, feedNames);
 		return job.State is JobState.Running ? new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted)
-			: job.State is JobState.Waiting ? new UpNextRow(name, "waiting", string.Empty, UpNextKind.Waiting, href, brand, deleted)
+			: job.State is JobState.Waiting ? new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted, job.RunAfter)
 			: new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted);
 	}
 
@@ -81,6 +90,8 @@ internal static class UpNextView
 			SyncWatchlist => watchlistProvider,
 			_ => null,
 		};
+
+	private static string Waiting(IJobRequest request) => request is SyncWatchlist ? "waiting for grace period" : "waiting";
 
 	private static bool Deleted(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) => request is RunFeed feed && !feedNames.ContainsKey(feed.Id);
 

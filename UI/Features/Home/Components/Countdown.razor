@@ -1,0 +1,29 @@
+@using Contracts
+@using UI.Features.Feeds.Components
+@implements IDisposable
+@inject IDateTimeProvider Clock
+
+<BbTooltip DelayDuration="200">
+    <BbTooltipTrigger AsChild="false" Class="cursor-default">
+        <span class="countdown">@ScheduleText.Away(At, Clock.Now)</span>
+    </BbTooltipTrigger>
+    <BbTooltipContent>@ScheduleText.AwayExactly(At, Clock.Now)</BbTooltipContent>
+</BbTooltip>
+
+@code {
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(1));
+
+    [Parameter, EditorRequired] public required DateTimeOffset At { get; set; }
+
+    protected override void OnInitialized() => _ = TickAsync();
+
+    private async Task TickAsync()
+    {
+        while (await _timer.WaitForNextTickAsync())
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose() => _timer.Dispose();
+}

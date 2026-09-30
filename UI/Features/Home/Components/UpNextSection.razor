@@ -36,7 +36,16 @@
                     @row.Detail
                 </span>
             </span>
-            <span class="row-when">@row.When</span>
+            <span class="row-when">
+                @if (row.RunsAt is { } runsAt)
+                {
+                    <Countdown At="runsAt"/>
+                }
+                else
+                {
+                    @row.When
+                }
+            </span>
         </div>
     }
 }

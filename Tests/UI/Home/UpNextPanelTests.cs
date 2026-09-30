@@ -1,6 +1,7 @@
 using BlazorBlueprint.Components;
 using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
+using Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Home.Components;
 using UI.Shared.Services.Branding;
@@ -71,6 +72,20 @@ public class UpNextPanelTests : BunitContext
 
 		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 12));
 		await Assert.That(cut.Find(".row-icon path").GetAttribute("d")).IsEqualTo(ghost.Find("path").GetAttribute("d"));
+	}
+
+	[Test]
+	public async Task Row_WhileWaiting_CountsDownToWhenItRuns()
+	{
+		var now = new DateTimeOffset(2026, 9, 30, 14, 0, 0, TimeSpan.Zero);
+		var clock = IDateTimeProvider.Mock();
+		clock.Now.Getter.Returns(now);
+		Services.AddSingleton(clock.Object);
+		IReadOnlyList<UpNextRow> queued = [new("Sync to Plex", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, RunsAt: now.AddMinutes(2))];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
+
+		await Assert.That(cut.Find(".row-when").TextContent.Trim()).IsEqualTo("in 2 min");
 	}
 
 	[Test]

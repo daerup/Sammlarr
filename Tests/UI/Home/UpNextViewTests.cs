@@ -31,6 +31,7 @@ public class UpNextViewTests
 		await Assert.That(rows[0].When).IsEqualTo("running");
 		await Assert.That(rows[1].Kind).IsEqualTo(UpNextKind.Queued);
 		await Assert.That(rows[1].When).IsEmpty();
+		await Assert.That(rows.Select(row => row.RunsAt)).IsEquivalentTo(new DateTimeOffset?[] { null, null });
 	}
 
 	[Test]
@@ -72,15 +73,15 @@ public class UpNextViewTests
 	}
 
 	[Test]
-	public async Task InTheQueue_ForASyncStillInsideItsGrace_SaysItIsWaitingWithoutPromisingWhen()
+	public async Task InTheQueue_ForASyncStillInsideItsGrace_SaysItWaitsForTheGraceAndCarriesWhenItRuns()
 	{
 		var queue = Snapshot(new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0));
 
 		var row = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex)[0];
 
 		await Assert.That(row.Kind).IsEqualTo(UpNextKind.Waiting);
-		await Assert.That(row.Detail).IsEqualTo("waiting");
-		await Assert.That(row.When).IsEmpty();
+		await Assert.That(row.Detail).IsEqualTo("waiting for grace period");
+		await Assert.That(row.RunsAt).IsEqualTo(Now.AddMinutes(2));
 	}
 
 	[Test]
