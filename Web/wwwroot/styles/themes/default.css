@@ -255,19 +255,6 @@ body:has(.error-dialog) .search-modal {
     z-index: 40;
 }
 
-/* Provider settings pill — BbBadge has no Style param, so use a CSS variable cascade */
-.provider-pill {
-    border-color: color-mix(in oklch, var(--brand) 60%, transparent) !important;
-    color: color-mix(in oklch, var(--brand) 90%, white);
-}
-
-/* Brand-filled badge for subscription/status pills inside the profile popover */
-.brand-badge {
-    background-color: color-mix(in oklch, var(--brand) 18%, transparent) !important;
-    border-color: color-mix(in oklch, var(--brand) 55%, transparent) !important;
-    color: var(--brand) !important;
-}
-
 .hover-button {
     background-color: transparent !important;
     color: var(--tint) !important;

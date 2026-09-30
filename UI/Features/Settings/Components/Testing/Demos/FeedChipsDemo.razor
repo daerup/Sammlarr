@@ -1,0 +1,25 @@
+@using Domain.Jobs
+@using UI.Features.Feeds.Components
+
+<DemoCard Title="Feed chips" Where="Cards, run dialog, history"
+          Note="FeedChip in every tone, then the strategy, trigger and job chips built on it.">
+    <div class="flex flex-wrap items-center gap-2">
+        @foreach (var tone in Enum.GetValues<FeedChipTone>())
+        {
+            <FeedChip Tone="tone">@tone</FeedChip>
+        }
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <FeedStrategyChip Strategy="new Append()"/>
+        <FeedStrategyChip Strategy="new Mirror(3)"/>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <FeedTriggerChip Schedule="new Manual()" Now="DemoFeeds.Now"/>
+        <FeedTriggerChip Schedule="DemoFeeds.Daily" Now="DemoFeeds.Now"/>
+        <FeedTriggerChip Schedule="DemoFeeds.Daily" NextRun="DemoFeeds.Now.AddMinutes(94)" Now="DemoFeeds.Now"/>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <FeedJobChip Job="JobState.Running"/>
+        <FeedJobChip Job="JobState.Queued"/>
+    </div>
+</DemoCard>

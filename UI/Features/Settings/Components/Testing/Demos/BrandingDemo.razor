@@ -1,0 +1,72 @@
+@using UI.Shared.Services.Branding
+@inject MediaProviderBrandingService Branding
+
+<DemoCard Title="Branding" Span="3"
+          Note="Every provider in each ProviderLogo form at the sizes the app renders it, its brand colour and the brand hover button. Switch the theme to check the other one.">
+    <div class="overflow-x-auto">
+        <table class="text-xs">
+            <thead class="text-muted-foreground">
+                <tr>
+                    <th class="pb-2 pr-6 text-left font-medium">Provider</th>
+                    <th class="pb-2 pr-6 text-left font-medium">Mark @string.Join(" · ", MarkSizes)</th>
+                    <th class="pb-2 pr-6 text-left font-medium">Logo @string.Join(" · ", LogoSizes)</th>
+                    <th class="pb-2 pr-6 text-left font-medium">Tile @string.Join(" · ", TileSizes)</th>
+                    <th class="pb-2 text-left font-medium">Brand</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var provider in Providers)
+                {
+                    var info = Branding.GetBrandingInfo(provider);
+                    <tr class="border-t">
+                        <td class="py-3 pr-6">
+                            <div class="text-sm font-medium whitespace-nowrap">@info.DisplayName</div>
+                            <div class="text-muted-foreground">@info.NickName</div>
+                        </td>
+                        <td class="py-3 pr-6">
+                            <div class="flex items-center gap-4">
+                                @foreach (var size in MarkSizes)
+                                {
+                                    <ProviderLogo Provider="provider" Size="size"/>
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3 pr-6">
+                            <div class="flex items-center gap-4">
+                                @foreach (var size in LogoSizes)
+                                {
+                                    <ProviderLogo Provider="provider" Form="ProviderLogoForm.Logo" Size="size"/>
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3 pr-6">
+                            <div class="flex items-center gap-4">
+                                @foreach (var size in TileSizes)
+                                {
+                                    <ProviderTile Provider="provider" Size="size"/>
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <div class="flex items-center gap-3">
+                                <span class="h-4 w-4 shrink-0 rounded" style="background: @info.BrandColor"></span>
+                                <code class="text-muted-foreground">@info.BrandColor</code>
+                                <HoverButton Preset="HoverButtonPreset.Custom" Color="@info.BrandColor" Text="@info.NickName"/>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</DemoCard>
+
+@code {
+    private static readonly int[] MarkSizes = [16, 20, 26];
+
+    private static readonly int[] LogoSizes = [16, 18, 22];
+
+    private static readonly int[] TileSizes = [16, 22, 30, 36];
+
+    private static readonly MediaProvider[] Providers = [MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb, MediaProvider.Mdblist];
+}

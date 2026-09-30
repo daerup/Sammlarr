@@ -1,0 +1,15 @@
+@using UI.Features.Feeds.Components
+@using UI.Features.Feeds.Pages
+
+<DemoCard Title="Provider pickers" Where="Feed editor, feeds filter"
+          Note="FeedProviderSelect with MDBList missing its API key, and the FeedProviderFilter with its counts.">
+    <FeedProviderSelect Value="_provider" ValueChanged="v => _provider = v" Unavailable="[FeedProvider.Mdblist]"/>
+    <FeedProviderFilter Options="Counts" Values="_filter" ValuesChanged="v => _filter = v"/>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<ProviderCount> Counts = [new(FeedProvider.Tmdb, 3), new(FeedProvider.Mdblist, 5)];
+
+    private FeedProvider? _provider = FeedProvider.Tmdb;
+    private IReadOnlyList<FeedProvider> _filter = [];
+}

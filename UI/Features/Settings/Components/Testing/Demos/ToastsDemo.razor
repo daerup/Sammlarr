@@ -1,0 +1,82 @@
+@inject Notifier Notifier
+
+<DemoCard Title="Toasts" Note="Fire a toast of the chosen kind. Exceptions also open the detail dialog.">
+    <div class="flex items-end gap-3">
+        <div class="w-36">
+            <BbSelect TValue="ToastKind" Value="_kind" ValueChanged="v => _kind = v" Options="KindOptions"/>
+        </div>
+        <BbButton Variant="ButtonVariant.Default" OnClick="Show">
+            <LucideIcon Name="bell" Size="14" Class="mr-1.5"/>
+            Show
+        </BbButton>
+    </div>
+    @if (_kind == ToastKind.Exception)
+    {
+        <div class="flex items-center gap-2">
+            <BbCheckbox @bind-Checked="_includeInner" Id="nested-exception" AriaLabel="Include inner exception"/>
+            <label for="nested-exception" class="text-sm cursor-pointer select-none">Include inner (nested) exception</label>
+        </div>
+    }
+</DemoCard>
+
+@code {
+    private enum ToastKind
+    {
+        Success,
+        Info,
+        Warning,
+        Error,
+        Exception,
+    }
+
+    private static readonly IReadOnlyList<SelectOption<ToastKind>> KindOptions = [.. Enum.GetValues<ToastKind>().Select(kind => new SelectOption<ToastKind>(kind, kind.ToString()))];
+
+    private ToastKind _kind = ToastKind.Success;
+    private bool _includeInner;
+
+    private void Show()
+    {
+        switch (_kind)
+        {
+            case ToastKind.Success:
+                Notifier.Success("Operation completed successfully.");
+                break;
+            case ToastKind.Info:
+                Notifier.Info("Here is some information worth noting.");
+                break;
+            case ToastKind.Warning:
+                Notifier.Warning("Something looks off, but it is not fatal.");
+                break;
+            case ToastKind.Error:
+                Notifier.Error("The operation failed.");
+                break;
+            case ToastKind.Exception:
+                ShowException();
+                break;
+        }
+    }
+
+    private void ShowException()
+    {
+        try
+        {
+            if (_includeInner)
+            {
+                try
+                {
+                    throw new InvalidOperationException("Inner cause: a lower-level operation failed.");
+                }
+                catch (Exception inner)
+                {
+                    throw new ApplicationException("Outer exception wrapping an inner cause.", inner);
+                }
+            }
+
+            throw new InvalidOperationException("This is a test exception thrown from the Testing section to verify the error dialog.");
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "Test exception");
+        }
+    }
+}

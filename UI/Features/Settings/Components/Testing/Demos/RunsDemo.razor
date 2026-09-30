@@ -1,0 +1,27 @@
+@using UI.Features.Feeds.Components
+
+<DemoCard Title="Last run &amp; run dialog" Where="Feed cards, feeds page"
+          Note="LastRunCell for a quiet run, one that changed the watchlist and one that failed. Its change dialog looks the titles up in your library, so for these sample runs it lists none (the change list demo shows a filled one). Then the RunFeedsDialog that runs several feeds at once, grouped by whether a run is worth it.">
+    <div class="flex flex-col items-start gap-2">
+        @foreach (var row in DemoFeeds.Rows)
+        {
+            <LastRunCell FeedId="row.Feed.Id" Overview="row.Overview"/>
+        }
+    </div>
+    <div>
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _runOpen = true">
+            <LucideIcon Name="play" Size="14" Class="mr-1.5"/>
+            Run feeds…
+        </BbButton>
+    </div>
+    <RunFeedsDialog Open="_runOpen"
+                    OpenChanged="v => _runOpen = v"
+                    Candidates="DemoFeeds.Candidates"
+                    Now="DemoFeeds.Now"
+                    ProviderName="Plex"
+                    OnRun="_ => _runOpen = false"/>
+</DemoCard>
+
+@code {
+    private bool _runOpen;
+}

@@ -1,0 +1,35 @@
+<section class="rounded-lg border p-6 flex flex-col gap-4 min-w-0" style="@Placement">
+    <div class="space-y-1">
+        <h3 class="text-sm font-semibold">
+            @Title
+            @if (Where is not null)
+            {
+                <span class="font-normal text-muted-foreground"> · @Where</span>
+            }
+        </h3>
+        @if (Note is not null)
+        {
+            <p class="text-xs text-muted-foreground leading-relaxed">@Note</p>
+        }
+    </div>
+    @ChildContent
+</section>
+
+@code {
+    [Parameter, EditorRequired] public required string Title { get; set; }
+
+    [Parameter] public string? Where { get; set; }
+
+    [Parameter] public string? Note { get; set; }
+
+    [Parameter] public int Span { get; set; } = 1;
+
+    [Parameter] public bool PinRight { get; set; }
+
+    [Parameter, EditorRequired] public required RenderFragment ChildContent { get; set; }
+
+    private string? Placement =>
+        PinRight ? $"grid-column: span {Span} / -1; grid-row-start: 1"
+        : Span > 1 ? $"grid-column: span {Span}"
+        : null;
+}

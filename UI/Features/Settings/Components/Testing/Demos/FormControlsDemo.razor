@@ -1,0 +1,44 @@
+<DemoCard Title="Form controls" Note="Input, sensitive input, select, switch, checkbox and radio group.">
+    <div class="space-y-2">
+        <label class="text-sm font-medium">Text input</label>
+        <BbInput Value="@_text" ValueChanged="@(v => _text = v ?? string.Empty)" Placeholder="Type something…"/>
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-medium">Sensitive input <span class="font-normal text-muted-foreground">· masked, click the eye to reveal</span></label>
+        <SensitiveInput @bind-Value="_secret" Placeholder="Enter a secret…" Label="secret"/>
+        <p class="text-xs text-muted-foreground">Bound value: <code class="font-mono">@(string.IsNullOrEmpty(_secret) ? "(empty)" : _secret)</code></p>
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-medium">Select</label>
+        <BbSelect TValue="string" Value="_selectValue" ValueChanged="v => _selectValue = v" Options="Options"/>
+    </div>
+    <div class="flex items-center gap-8">
+        <div class="flex items-center gap-3">
+            <BbSwitch @bind-Checked="_switch"/>
+            <span class="text-sm">Switch</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <BbCheckbox @bind-Checked="_check" Id="demo-check"/>
+            <label for="demo-check" class="text-sm cursor-pointer select-none">Checkbox</label>
+        </div>
+    </div>
+    <div class="space-y-2.5">
+        <label class="text-sm font-medium">Radio group</label>
+        <BbRadioGroup @bind-Value="_radio">
+            <BbRadioGroupItem Value="@("one")" Label="Option one"/>
+            <BbRadioGroupItem Value="@("two")" Label="Option two"/>
+            <BbRadioGroupItem Value="@("three")" Label="Option three"/>
+        </BbRadioGroup>
+    </div>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<SelectOption<string>> Options = [new("a", "Option A"), new("b", "Option B"), new("c", "Option C")];
+
+    private string _text = string.Empty;
+    private string _secret = string.Empty;
+    private string _selectValue = "a";
+    private bool _switch = true;
+    private bool _check;
+    private string _radio = "one";
+}

@@ -1,0 +1,21 @@
+<DemoCard Title="Guards" Note="ProtectedSection and ProtectedComponent. The toggle stands in for real auth state.">
+    <BbTooltipProvider>
+        <div class="flex items-center justify-between gap-3">
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _allowed = !_allowed">
+                Access: @(_allowed ? "granted" : "denied")
+            </BbButton>
+            <ProtectedComponent GuardState="() => _allowed" DeniedActionDescription="use this button">
+                <BbButton Variant="ButtonVariant.Default" Size="ButtonSize.Small">Protected button</BbButton>
+            </ProtectedComponent>
+        </div>
+    </BbTooltipProvider>
+    <div class="flex flex-col" style="min-height: 12rem">
+        <ProtectedSection GuardState="() => _allowed" DeniedActionDescription="view this demo section">
+            <div class="flex-1 flex items-center justify-center rounded-lg border bg-muted/40 p-5 text-sm">Protected content is visible.</div>
+        </ProtectedSection>
+    </div>
+</DemoCard>
+
+@code {
+    private bool _allowed = true;
+}

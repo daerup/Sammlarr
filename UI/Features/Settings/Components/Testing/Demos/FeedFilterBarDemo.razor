@@ -1,0 +1,13 @@
+@using UI.Features.Feeds.Components
+@using UI.Features.Feeds.Pages
+
+<DemoCard Title="Feed filters" Where="Feeds page" Span="4"
+          Note="FeedFilterBar on its FilterStrip: provider, status, trigger and strategy filters, the shown-of-total count and the sort.">
+    <FeedFilterBar Filter="_filter" FilterChanged="v => _filter = v" Providers="Counts" Shown="5" Total="8"/>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<ProviderCount> Counts = [new(FeedProvider.Tmdb, 3), new(FeedProvider.Mdblist, 5)];
+
+    private FeedFilter _filter = FeedFilter.None;
+}

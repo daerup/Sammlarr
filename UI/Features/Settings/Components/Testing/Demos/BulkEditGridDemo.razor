@@ -1,0 +1,63 @@
+<DemoCard Title="Bulk-editable grid" Where="Watchlist, blacklist" Span="4"
+          Note="BulkEditableMediaGrid in edit mode over a paged list: click tiles to select, shift-click for a range, pick the page or the whole list from the tick's menu, and page with PaginationControls. Remove and blacklist take the titles out of this demo only.">
+    <BulkEditableMediaGrid TItem="MediaLookup"
+                           Items="PageItems"
+                           AllItems="_items"
+                           Detail="media => media"
+                           Key="media => media.Id"
+                           IsEditMode="_editing"
+                           IsEditModeChanged="v => _editing = v"
+                           RemoveLabel="Remove"
+                           MarkLabel="Blacklist"
+                           OnBulkRemove="Remove"
+                           OnBulkMark="Remove"/>
+    <div class="flex items-center gap-3">
+        <PaginationControls CurrentPage="_page" TotalPages="TotalPages" IsDisabled="false" PageChanged="page => _page = Math.Clamp(page, 1, TotalPages)"/>
+        <span class="flex-1"></span>
+        @if (!_editing)
+        {
+            <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _editing = true">
+                <LucideIcon Name="pencil" Size="14" Class="mr-1.5"/>
+                Bulk edit
+            </BbButton>
+        }
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="Restore">
+            <LucideIcon Name="rotate-ccw" Size="14" Class="mr-1.5"/>
+            Restore titles
+        </BbButton>
+    </div>
+</DemoCard>
+
+@code {
+    private const int PageSize = 4;
+
+    private static readonly IReadOnlyList<MediaLookup> All =
+    [
+        DemoMedia.Movie,
+        DemoMedia.Show,
+        DemoMedia.Gohan,
+        DemoMedia.YellowMirror,
+        DemoMedia.WolfBeach,
+        DemoMedia.NoHitWonder,
+    ];
+
+    private List<MediaLookup> _items = [.. All];
+    private bool _editing = true;
+    private int _page = 1;
+
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling(_items.Count / (double)PageSize));
+
+    private IReadOnlyList<MediaLookup> PageItems => [.. _items.Skip((_page - 1) * PageSize).Take(PageSize)];
+
+    private void Remove(IReadOnlyList<MediaLookup> chosen)
+    {
+        _items = [.. _items.Where(item => !chosen.Contains(item))];
+        _page = Math.Min(_page, TotalPages);
+    }
+
+    private void Restore()
+    {
+        _items = [.. All];
+        _page = 1;
+    }
+}

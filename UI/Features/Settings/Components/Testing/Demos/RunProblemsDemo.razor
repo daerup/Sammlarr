@@ -1,0 +1,11 @@
+@using UI.Features.Feeds.Components
+
+<DemoCard Title="Run problems" Where="Last run, history, run dialog"
+          Note="RunProblem for a run that failed at the source and for one the wipe guard held back.">
+    <div class="flex items-start gap-2">
+        <RunProblem Headline="@(FeedRunView.Problem(DemoFeeds.FailedRun) ?? string.Empty)" Reason="@DemoFeeds.FailedRun.SourceFailure" Failed="true"/>
+    </div>
+    <div class="flex items-start gap-2">
+        <RunProblem Headline="@(FeedRunView.Problem(DemoFeeds.GuardedRun) ?? string.Empty)"/>
+    </div>
+</DemoCard>

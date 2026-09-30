@@ -1,0 +1,16 @@
+@using UI.Features.Watchlist.Components
+
+<DemoCard Title="Push status dot" Where="Watchlist tiles"
+          Note="PushStatusDot for each state a title's push to Plex can be in. Hover a dot for its explanation.">
+    <BbTooltipProvider>
+        <div class="flex flex-wrap items-center gap-6">
+            @foreach (var state in Enum.GetValues<PushDotState>())
+            {
+                <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                    <PushStatusDot State="state" Attempts="@(state is PushDotState.Failed ? 3 : 1)" ProviderName="Plex"/>
+                    <span>@state</span>
+                </div>
+            }
+        </div>
+    </BbTooltipProvider>
+</DemoCard>
