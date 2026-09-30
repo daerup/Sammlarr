@@ -1,6 +1,6 @@
 .source-row {
     display: grid;
-    grid-template-columns: 88px minmax(0, 170px) minmax(0, 1fr) auto;
+    grid-template-columns: 88px minmax(0, 200px) minmax(0, 1fr) auto;
     align-items: center;
     gap: 12px;
     padding: 9px 15px;

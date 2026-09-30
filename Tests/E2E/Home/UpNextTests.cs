@@ -15,6 +15,10 @@ public class UpNextTests
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.OpenOptionalSectionAsync(page, "Sync Frequency");
 		await FeedEditor.Option(page, "Trigger", "Scheduled").ClickAsync();
+		await page.GetByRole(AriaRole.Combobox).Filter(new LocatorFilterOptions { HasText = "Daily" }).ClickAsync();
+		await page.Option("Expression").ClickAsync();
+		await FeedEditor.FillAsync(page, "input[aria-label^='Minute']", "30");
+		await FeedEditor.FillAsync(page, "input[aria-label^='Hour']", "4");
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 		await Expect(page.FeedCard(name)).ToBeVisibleAsync(Wait.Settle);
