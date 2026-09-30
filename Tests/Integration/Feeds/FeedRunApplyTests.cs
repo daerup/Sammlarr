@@ -101,6 +101,17 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task PlanAsync_WithoutAnMdblistKey_ReturnsAPlanThatSaysWhyTheSourceFailed()
+	{
+		var feedId = await SeedFeedAsync("keyless-list", new Mirror(1));
+
+		var result = await host.Resolve<IFeedRunPlanner>().PlanAsync(new SavedFeed(feedId));
+
+		var plan = await Assert.That(result).IsOfUnionType<FeedPlanResult, MirrorPlan>();
+		await Assert.That(plan!.SourceFailure).IsEqualTo("No MDBList API key is configured. Add one in Settings.");
+	}
+
+	[Test]
 	public async Task RunAsync_ForABlacklistedTitleTheFeedOwns_RemovesItLikeAnyOtherOnceItStopsQualifying()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);

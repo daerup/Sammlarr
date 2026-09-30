@@ -6,9 +6,9 @@
     <PackageVersion Include="Aspire.Hosting.Docker" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageVersion Include="BlazorBlueprint.Components" Version="3.9.2" />
+    <PackageVersion Include="BlazorBlueprint.Components" Version="3.17.0" />
     <PackageVersion Include="BlazorBlueprint.Icons.Lucide" Version="2.0.0" />
-    <PackageVersion Include="BlazorBlueprint.Primitives" Version="3.9.2" />
+    <PackageVersion Include="BlazorBlueprint.Primitives" Version="3.17.0" />
     <PackageVersion Include="CronExpressionDescriptor" Version="2.45.0" />
     <PackageVersion Include="Cronos" Version="0.13.0" />
     <PackageVersion Include="Dapper" Version="2.1.72" />
