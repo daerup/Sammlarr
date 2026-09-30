@@ -40,6 +40,14 @@ public class DataSourcesCardTests : BunitContext
 	}
 
 	[Test]
+	public async Task Credit_ForTheCcByIcons_NamesTheOneWeModified()
+	{
+		var cut = Render<DataSourcesCard>();
+
+		await Assert.That(cut.Find(".source-credit").TextContent).Contains("(CC BY 4.0; the TVDB tile is modified from theirs)");
+	}
+
+	[Test]
 	public async Task Links_EveryOneOpensInANewTab()
 	{
 		var cut = Render<DataSourcesCard>();

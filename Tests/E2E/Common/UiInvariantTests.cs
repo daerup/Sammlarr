@@ -43,6 +43,25 @@ public class UiInvariantTests
 #endif
 
 	[Test]
+	public async Task Fonts_WhenAPageLoads_ComeFromTheAppInsteadOfGoogle()
+	{
+		var page = await E2EApp.OpenAuthenticatedPageAsync();
+		var requested = new List<string>();
+		page.Request += (_, request) => requested.Add(request.Url);
+
+		await page.VisitAsync(Routes.Feeds);
+		await Expect(page.Heading("Feeds")).ToBeVisibleAsync(Wait.Settle);
+		await page.EvaluateAsync("document.fonts.ready");
+
+		await Assert.That(requested.Where(url => url.Contains("/fonts/roboto/", StringComparison.Ordinal))).IsNotEmpty();
+		await Assert
+			.That(
+				requested.Where(url => url.Contains("fonts.googleapis.com", StringComparison.Ordinal) || url.Contains("fonts.gstatic.com", StringComparison.Ordinal))
+			)
+			.IsEmpty();
+	}
+
+	[Test]
 	public async Task ThemeToggle_WhenFlipped_PersistsAcrossNavigation()
 	{
 		var page = await E2EApp.AdminAt(Routes.Feeds);
