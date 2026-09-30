@@ -1,7 +1,9 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Providers;
+using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Feeds.Components;
+using UI.Shared.Services.Branding;
 
 namespace UI.Tests.Feeds;
 
@@ -11,6 +13,7 @@ public class FeedSourceLinkTests : BunitContext
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton<MediaProviderBrandingService>();
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -27,24 +30,42 @@ public class FeedSourceLinkTests : BunitContext
 	}
 
 	[Test]
-	public async Task Render_ForAnExternalLink_OpensSafelyInANewTab()
+	public async Task Render_ForAnExternalLink_OpensSafelyInANewTabAsAnAppLink()
 	{
 		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list"));
 
 		var anchor = cut.Find("a");
+		await Assert.That(anchor.ClassList).Contains("app-link");
 		await Assert.That(anchor.GetAttribute("target")).IsEqualTo("_blank");
 		await Assert.That(anchor.GetAttribute("rel")).IsEqualTo("noopener noreferrer");
 	}
 
 	[Test]
-	public async Task Render_WithASizeClass_KeepsTheLinkColour()
+	public async Task Render_ForAProvider_TitlesTheLinkWithWhereItOpens()
+	{
+		var cut = Render<FeedSourceLink>(parameters => parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list"));
+
+		await Assert.That(cut.Find("a").GetAttribute("title")).IsEqualTo("Open on MDBList");
+	}
+
+	[Test]
+	public async Task Render_WhenMuted_MutesTheLink()
+	{
+		var cut = Render<FeedSourceLink>(parameters =>
+			parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list").Add(link => link.Muted, true)
+		);
+
+		await Assert.That(cut.Find("a").ClassList).Contains("is-muted");
+	}
+
+	[Test]
+	public async Task Render_WithASizeClass_ReplacesTheDefaultSize()
 	{
 		var cut = Render<FeedSourceLink>(parameters =>
 			parameters.Add(link => link.Provider, FeedProvider.Mdblist).Add(link => link.Identifier, "some-list").Add(link => link.Class, "text-[11px]")
 		);
 
 		var classes = cut.Find("a").ClassList;
-		await Assert.That(classes).Contains("text-primary");
 		await Assert.That(classes).Contains("text-[11px]");
 		await Assert.That(classes).DoesNotContain("text-sm");
 	}

@@ -36,13 +36,12 @@ internal static class UpNextView
 		QueueSnapshot queue,
 		IReadOnlyDictionary<FeedId, string> feedNames,
 		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		string providerName,
 		MediaProvider watchlistProvider
 	) =>
 		[
 			.. queue
 				.Jobs.Where(job => job.State is JobState.Waiting or JobState.Queued or JobState.Running)
-				.Select(job => Row(job, feedNames, feedBrands, providerName, watchlistProvider)),
+				.Select(job => Row(job, feedNames, feedBrands, watchlistProvider)),
 		];
 
 	internal static IReadOnlySet<FeedId> FeedsAlreadyPending(QueueSnapshot queue) =>
@@ -74,11 +73,10 @@ internal static class UpNextView
 		PendingJob job,
 		IReadOnlyDictionary<FeedId, string> feedNames,
 		IReadOnlyDictionary<FeedId, MediaProvider> feedBrands,
-		string providerName,
 		MediaProvider watchlistProvider
 	)
 	{
-		var name = Name(job.Request, feedNames, providerName);
+		var name = Name(job.Request, feedNames);
 		var href = Href(job.Request, feedNames);
 		var brand = Brand(job.Request, feedBrands, watchlistProvider);
 		var deleted = Deleted(job.Request, feedNames);
@@ -104,11 +102,11 @@ internal static class UpNextView
 
 	private static string EditHref(FeedId feedId) => $"/feeds/edit/{UrlGuid.Encode(feedId.Value)}";
 
-	private static string Name(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames, string providerName) =>
+	private static string Name(IJobRequest request, IReadOnlyDictionary<FeedId, string> feedNames) =>
 		request switch
 		{
 			RunFeed feed => FeedLabel.Of(feed.Id, feedNames),
-			SyncWatchlist => $"Sync to {providerName}",
+			SyncWatchlist => "Sync Watchlist",
 			_ => request.Kind.GetDescription(),
 		};
 }

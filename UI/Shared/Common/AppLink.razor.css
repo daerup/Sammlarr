@@ -14,6 +14,15 @@
     text-decoration: underline;
 }
 
+.app-link.is-muted {
+    color: var(--muted-foreground);
+}
+
+.app-link.is-muted:hover,
+.app-link.is-muted:focus-visible {
+    color: var(--foreground);
+}
+
 .app-link ::deep .app-link-arrow {
     display: block;
     flex: none;

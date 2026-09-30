@@ -49,4 +49,14 @@ public class AppLinkTests : BunitContext
 
 		await Assert.That(cut.Find("a").GetAttribute("style")).IsEqualTo("color: inherit");
 	}
+
+	[Test]
+	public async Task Link_WhenMuted_MarksItMutedWithoutPinningAColour()
+	{
+		var cut = Render<AppLink>(parameters => parameters.Add(link => link.Href, "/feeds").Add(link => link.Muted, true).AddChildContent("Feeds"));
+
+		var link = cut.Find("a");
+		await Assert.That(link.ClassList).Contains("is-muted");
+		await Assert.That(link.HasAttribute("style")).IsFalse();
+	}
 }

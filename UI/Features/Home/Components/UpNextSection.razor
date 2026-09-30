@@ -15,7 +15,7 @@
         <div class="row @(row.Kind is UpNextKind.Running ? "is-running" : null)">
             @if (row.Brand is { } provider)
             {
-                <ProviderTile Provider="provider" Decorative="true"/>
+                <ProviderTile Provider="provider"/>
             }
             else
             {
