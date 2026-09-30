@@ -13,7 +13,6 @@ using Web;
 using Web.Auth;
 using Web.Health;
 using Web.Localization;
-using Westwind.AspNetCore.LiveReload;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,18 +27,8 @@ builder.Services.AddModule<WebModule>();
 builder.Services.AddSammlarrScheduling(builder.Configuration);
 builder.Host.UseSammlarrMessaging(builder.Configuration);
 
-if (builder.Environment.IsDevelopment())
-{
-	builder.Services.AddLiveReload();
-}
-
 var app = builder.Build();
 app.UseTickerQ();
-
-if (app.Environment.IsDevelopment())
-{
-	app.UseLiveReload();
-}
 
 app.UseRequestLocalization(BrowserLocalization.CreateOptions());
 
