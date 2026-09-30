@@ -263,6 +263,52 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(queue).IsEmpty();
 	}
 
+	[Test]
+	public async Task CancellingAQueuedRun_TakesItOutOfTheQueueWithoutRunningIt()
+	{
+		var queued = await EnqueueAsync(DocumentaryFeed);
+
+		var cancelled = await Testee.CancelAsync(queued.Id);
+
+		await Assert.That(cancelled).IsTrue();
+		await Assert.That((await JobAsync(queued.Id)).State).IsEqualTo(JobState.Cancelled);
+		await Assert.That(await RunNextJobAsync()).IsFalse();
+	}
+
+	[Test]
+	public async Task RunningAFeedAgainAfterCancellingIt_QueuesAFreshRun()
+	{
+		var cancelled = await EnqueueAsync(DocumentaryFeed);
+		await Testee.CancelAsync(cancelled.Id);
+
+		var again = await EnqueueAsync(DocumentaryFeed);
+
+		await Assert.That(again.Id).IsNotEqualTo(cancelled.Id);
+		await Assert.That(again.State).IsEqualTo(JobState.Queued);
+	}
+
+	[Test]
+	public async Task CancellingTheSyncWhileItWaitsOutItsGrace_TakesItOutOfTheQueue()
+	{
+		var sync = await SyncArmedByDocumentariesAsync();
+
+		await Testee.CancelAsync(sync.Id);
+
+		await Assert.That((await JobAsync(sync.Id)).State).IsEqualTo(JobState.Cancelled);
+		await Assert.That(await QueueAsync()).IsEmpty();
+	}
+
+	[Test]
+	public async Task CancellingARunThatAlreadyStarted_LetsItFinish()
+	{
+		var running = await EnqueueAsync(DocumentaryFeed);
+
+		var cancelled = await WhileTheNextJobRunsAsync(host.HoldMdblistFeed("documentaries"), () => Testee.CancelAsync(running.Id));
+
+		await Assert.That(cancelled).IsFalse();
+		await Assert.That((await JobAsync(running.Id)).State).IsEqualTo(JobState.Done);
+	}
+
 	private async Task<FeedId> FeedAsync(string name, string cron)
 	{
 		var identifier = name.ToLowerInvariant();

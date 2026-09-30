@@ -52,6 +52,18 @@ internal sealed class JobQueue(
 		return result;
 	}
 
+	public async Task<bool> CancelAsync(JobId id, CancellationToken cancellationToken = default)
+	{
+		if (await jobs.CancelAsync(id, currentUser.Id, clock.Now, cancellationToken) is not Some<IJobRequest>(var request))
+		{
+			return false;
+		}
+
+		await alarm.ArmAsync(cancellationToken);
+		announcer.Announce(new JobStateChangedEvent(currentUser.Id, request.Kind, request.Key, JobState.Cancelled));
+		return true;
+	}
+
 	private async Task<bool> QueueSyncBehindFeedsAsync(IJobRequest request, DateTimeOffset now, CancellationToken cancellationToken)
 	{
 		if (request is not (RunFeed { ArmsSync: true } or SyncWatchlist(ScheduledFeedTrigger)))

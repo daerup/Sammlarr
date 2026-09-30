@@ -152,6 +152,21 @@ public class UpNextViewTests
 		await Assert.That(UpNextView.OnASchedule(feeds, Now, TimeZoneInfo.Utc)).IsEmpty();
 	}
 
+	[Test]
+	public async Task InTheQueue_LetsOnlyTheJobsThatHaveNotStartedBeCancelled()
+	{
+		var queue = Snapshot(
+			Job(Anime, JobState.Running),
+			Job(Docs, JobState.Queued),
+			new PendingJob(JobId.From(Guid.NewGuid()), new SyncWatchlist(new ScheduledFeedTrigger()), JobState.Waiting, Now.AddMinutes(2), 0)
+		);
+
+		var rows = UpNextView.InTheQueue(queue, Names, Brands, "Plex", MediaProvider.Plex);
+
+		await Assert.That(rows.Select(row => row.CanCancel)).IsEquivalentTo([false, true, true], CollectionOrdering.Matching);
+		await Assert.That(rows.Select(row => row.Job)).IsEquivalentTo(queue.Jobs.Select(job => (JobId?)job.Id), CollectionOrdering.Matching);
+	}
+
 	private static QueueSnapshot Snapshot(params PendingJob[] jobs) => new(jobs, 0);
 
 	private static PendingJob Job(FeedId feedId, JobState state) => new(JobId.From(Guid.NewGuid()), new RunFeed(feedId, new Manual()), state, default, 0);

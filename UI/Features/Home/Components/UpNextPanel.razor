@@ -4,20 +4,9 @@
         <span class="band-note">@Note</span>
     </div>
 
-    @if (Queued.Count > 0)
-    {
-        <UpNextSection Title="Running and queued" Rows="Queued"/>
-    }
+    <UpNextSection Title="Running and queued" Rows="Queued" Empty="Nothing is running or queued right now." OnCancel="OnCancel"/>
 
-    @if (Scheduled.Count > 0)
-    {
-        <UpNextSection Title="On a schedule" Rows="NextScheduled"/>
-    }
-
-    @if (Queued.Count == 0 && Scheduled.Count == 0)
-    {
-        <p class="band-empty">No feed is on a schedule, so nothing will run on its own.</p>
-    }
+    <UpNextSection Title="On a schedule" Rows="NextScheduled" Empty="No feed is on a schedule, so nothing will run on its own."/>
 </div>
 
 @code {
@@ -25,6 +14,7 @@
 
     [Parameter] public IReadOnlyList<UpNextRow> Queued { get; set; } = [];
     [Parameter] public IReadOnlyList<UpNextRow> Scheduled { get; set; } = [];
+    [Parameter] public EventCallback<UpNextRow> OnCancel { get; set; }
 
     private IReadOnlyList<UpNextRow> NextScheduled => [.. Scheduled.Take(ScheduledShown)];
 

@@ -31,6 +31,7 @@
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IJobQueue JobQueue
+@inject DialogService DialogService
 @inject IJobQueueView JobQueueView
 @inject MediaProviderBrandingService BrandingService
 
@@ -110,7 +111,7 @@ else
             else
             {
                 <LibrarySourcesPanel Sources="_sources" Total="_watchlistCount"/>
-                <UpNextPanel Queued="_queued" Scheduled="_scheduled"/>
+                <UpNextPanel Queued="_queued" Scheduled="_scheduled" OnCancel="CancelJobAsync"/>
 
                 <div class="home-sec">
                     <h2 class="home-sec-title">Recent activity</h2>
@@ -216,6 +217,35 @@ else
         catch (Exception ex)
         {
             Notifier.Error(ex, "The feeds could not be queued");
+        }
+    }
+
+    private async Task CancelJobAsync(UpNextRow row)
+    {
+        var answer = await DialogService.ConfirmAsync(
+            $"Cancel {row.Name}?",
+            "It leaves the queue without running. You can start it again at any time, and schedules keep running as usual.",
+            new ConfirmDialogOptions { ConfirmText = "Cancel it", CancelText = "Keep it", Destructive = true }
+        );
+        if (!answer.Confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            if (await JobQueue.CancelAsync(row.Job!.Value, _cancellation.Token))
+            {
+                Notifier.Success($"{row.Name} was cancelled.");
+            }
+            else
+            {
+                Notifier.Info($"{row.Name} already started, so it could not be cancelled.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Notifier.Error(ex, "The job could not be cancelled");
         }
     }
 
