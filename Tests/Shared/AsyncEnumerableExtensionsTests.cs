@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using TUnit.Assertions.Enums;
 
 namespace Shared.Tests;
@@ -56,6 +57,26 @@ public class AsyncEnumerableExtensionsTests
 		var act = async () => await Counting(1000, () => { }).PrefetchAsync(4, cancellation.Token).ToListAsync();
 
 		await Assert.That(act).Throws<OperationCanceledException>();
+	}
+
+	[Test]
+	public async Task StreamAsync_WhileTheProducerIsStillRunning_YieldsWhatItHasWritten()
+	{
+		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+		var first = await Channel
+			.CreateUnbounded<int>()
+			.StreamAsync(
+				async (writer, token) =>
+				{
+					await writer.WriteAsync(1, token);
+					await Task.Delay(Timeout.Infinite, token);
+				},
+				timeout.Token
+			)
+			.FirstAsync(timeout.Token);
+
+		await Assert.That(first).IsEqualTo(1);
 	}
 
 	private static async IAsyncEnumerable<int> Counting(int count, Action onProduced)

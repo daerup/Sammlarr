@@ -1,7 +1,7 @@
-using System.Collections.Concurrent;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading.Channels;
 using API.Mdblist.Types;
 using Contracts.Auth;
 using Contracts.Feed;
@@ -19,28 +19,25 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
 
-	public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, CancellationToken cancellationToken = default)
+	{
+		return Channel.CreateUnbounded<MediaLookup>().StreamAsync((items, token) => ResolveIntoAsync(identifier, items, token), cancellationToken);
+	}
+
+	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaLookup> items, CancellationToken cancellationToken)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
-		var watchlistProvider = config.WatchlistProvider.AsMediaProvider();
-		var unknowns = new ConcurrentQueue<MdblistTypes.ListItems.UnknownListItem>();
-
-		var requests = BuildRequestsAsync(identifier, watchlistProvider, unknowns, cancellationToken);
+		var requests = BuildRequestsAsync(identifier, config.WatchlistProvider.AsMediaProvider(), items, cancellationToken);
 		await foreach (var result in media.ResolveDetailsAsync(requests, cancellationToken))
 		{
-			yield return result;
-		}
-
-		foreach (var unknown in unknowns)
-		{
-			yield return BuildUnknown(unknown);
+			await items.WriteAsync(result, cancellationToken);
 		}
 	}
 
 	private async IAsyncEnumerable<ResolveRequest> BuildRequestsAsync(
 		string identifier,
 		MediaProvider watchlistProvider,
-		ConcurrentQueue<MdblistTypes.ListItems.UnknownListItem> unknowns,
+		ChannelWriter<MediaLookup> unknowns,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
@@ -48,7 +45,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		{
 			foreach (var unknown in page.unknowns)
 			{
-				unknowns.Enqueue(unknown);
+				await unknowns.WriteAsync(BuildUnknown(unknown), cancellationToken);
 			}
 
 			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));

@@ -46,7 +46,28 @@ public class MdblistServiceTests
 		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).WasCalled(Times.Once);
 	}
 
-	private static MdblistService CreateTestee(HttpMessageHandler handler, out Mock<IMediaService> media)
+	[Test]
+	public async Task GetFeedItemsAsync_WhileThePageIsStillResolving_YieldsItsItemsWithoutIdsRightAway()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"""{"movies":[{"id":1,"ids":{"imdb":null,"tmdb":550,"tvdb":null,"mdblist":null,"mal":null},"rank":1,"title":"Fight Club","release_year":1999},{"title":"No Ids","release_year":2024}],"shows":[]}"""
+			);
+		var testee = CreateTestee(handler, out _, resolve: Stall);
+		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+		var first = await testee.GetFeedItemsAsync("slow-list", timeout.Token).FirstAsync(timeout.Token);
+
+		await Assert.That(first).IsOfUnionType<MediaLookup, UnmatchedMedia>();
+	}
+
+	private static MdblistService CreateTestee(
+		HttpMessageHandler handler,
+		out Mock<IMediaService> media,
+		Func<IAsyncEnumerable<ResolveRequest>, CancellationToken, IAsyncEnumerable<MediaLookup>>? resolve = null
+	)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
@@ -54,7 +75,7 @@ public class MdblistServiceTests
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
-		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => Realize(requests, token));
+		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
 		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
 			.GetAsync(Any())
@@ -106,5 +127,15 @@ public class MdblistServiceTests
 		{
 			yield return new UnmatchedMedia { Externals = [.. request.Candidates] };
 		}
+	}
+
+	private static async IAsyncEnumerable<MediaLookup> Stall(
+		IAsyncEnumerable<ResolveRequest> requests,
+		[EnumeratorCancellation] CancellationToken cancellationToken
+	)
+	{
+		await foreach (var _ in requests.WithCancellation(cancellationToken)) { }
+		await Task.Delay(Timeout.Infinite, cancellationToken);
+		yield break;
 	}
 }

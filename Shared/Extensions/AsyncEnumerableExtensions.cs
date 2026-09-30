@@ -64,43 +64,19 @@ public static class AsyncEnumerableExtensions
 			}
 		}
 
-		public async IAsyncEnumerable<TIn> PrefetchAsync(int capacity, [EnumeratorCancellation] CancellationToken cancellationToken = default)
-		{
-			var anchor = Activity.Current;
-			var channel = Channel.CreateBounded<TIn>(capacity);
-			using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-			var producer = Task.Run(async () =>
-			{
-				Activity.Current = anchor;
-				try
-				{
-					await foreach (var item in source.WithCancellation(abandon.Token))
+		public IAsyncEnumerable<TIn> PrefetchAsync(int capacity, CancellationToken cancellationToken = default) =>
+			Channel
+				.CreateBounded<TIn>(capacity)
+				.StreamAsync(
+					async (writer, token) =>
 					{
-						await channel.Writer.WriteAsync(item, abandon.Token);
-					}
-					channel.Writer.Complete();
-				}
-				catch (Exception ex)
-				{
-					channel.Writer.Complete(ex);
-				}
-			});
-
-			try
-			{
-				await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
-				{
-					Activity.Current = anchor;
-					yield return item;
-				}
-			}
-			finally
-			{
-				await abandon.CancelAsync();
-				await producer;
-			}
-		}
+						await foreach (var item in source.WithCancellation(token))
+						{
+							await writer.WriteAsync(item, token);
+						}
+					},
+					cancellationToken
+				);
 
 		public async IAsyncEnumerable<(TIn First, TOther Second)> ZipAwait<TOther>(
 			IEnumerable<TOther> other,
@@ -123,5 +99,45 @@ public static class AsyncEnumerableExtensions
 	{
 		public IAsyncEnumerable<TOut> SelectAwait<TOut>(Func<TIn, ValueTask<TOut>> predicate, int maxConcurrency, CancellationToken cancellationToken = default) =>
 			source.ToAsyncEnumerable().SelectAwait(predicate, maxConcurrency, cancellationToken);
+	}
+
+	extension<T>(Channel<T> channel)
+	{
+		public async IAsyncEnumerable<T> StreamAsync(
+			Func<ChannelWriter<T>, CancellationToken, Task> produce,
+			[EnumeratorCancellation] CancellationToken cancellationToken = default
+		)
+		{
+			var anchor = Activity.Current;
+			using var abandon = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+			var producer = Task.Run(async () =>
+			{
+				Activity.Current = anchor;
+				try
+				{
+					await produce(channel.Writer, abandon.Token);
+					channel.Writer.Complete();
+				}
+				catch (Exception ex)
+				{
+					channel.Writer.Complete(ex);
+				}
+			});
+
+			try
+			{
+				await foreach (var item in channel.Reader.ReadAllAsync(cancellationToken))
+				{
+					Activity.Current = anchor;
+					yield return item;
+				}
+			}
+			finally
+			{
+				await abandon.CancelAsync();
+				await producer;
+			}
+		}
 	}
 }
