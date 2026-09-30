@@ -111,7 +111,40 @@
     font-variant-numeric: tabular-nums;
 }
 
-.row-when.is-running {
+.row.is-running .row-when {
     color: var(--alert-warning);
     font-weight: 600;
+}
+
+.row.is-running {
+    position: relative;
+}
+
+.row.is-running::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--alert-warning), transparent) no-repeat;
+    background-size: 40% 100%;
+    animation: row-sweep 1.4s linear infinite;
+}
+
+@keyframes row-sweep {
+    from {
+        background-position: -40% 0;
+    }
+
+    to {
+        background-position: 140% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .row.is-running::after {
+        animation: none;
+        background-position: 50% 0;
+    }
 }

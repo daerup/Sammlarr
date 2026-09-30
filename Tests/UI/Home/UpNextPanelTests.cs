@@ -1,4 +1,5 @@
 using BlazorBlueprint.Components;
+using BlazorBlueprint.Icons.Lucide.Components;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using UI.Features.Home.Components;
@@ -44,6 +45,32 @@ public class UpNextPanelTests : BunitContext
 		var names = cut.FindAll(".row-name");
 		await Assert.That(names[0].Closest("a")?.GetAttribute("href")).IsEqualTo("/feeds/edit/docs");
 		await Assert.That(names[1].Closest("a")).IsNull();
+	}
+
+	[Test]
+	public async Task Row_WhileRunning_CarriesTheSweepAndTheOthersDoNot()
+	{
+		IReadOnlyList<UpNextRow> queued =
+		[
+			new("hdlists/documentaries", "running now", "running", UpNextKind.Running, "/feeds/edit/docs"),
+			new("snoak/latest-movies-digital-release", "queued", string.Empty, UpNextKind.Queued, "/feeds/edit/latest"),
+		];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
+
+		var rows = cut.FindAll(".row").Select(row => row.ClassList.Contains("is-running"));
+		await Assert.That(rows).IsEquivalentTo([true, false]);
+	}
+
+	[Test]
+	public async Task Row_ForAFeedThatWasDeleted_ShowsAGhostInPlaceOfTheStateGlyph()
+	{
+		IReadOnlyList<UpNextRow> queued = [new("A deleted feed", "queued", string.Empty, UpNextKind.Queued, null, Deleted: true)];
+
+		var cut = Render<UpNextPanel>(parameters => parameters.Add(panel => panel.Queued, queued));
+
+		var ghost = Render<LucideIcon>(parameters => parameters.Add(icon => icon.Name, "ghost").Add(icon => icon.Size, 12));
+		await Assert.That(cut.Find(".row-icon path").GetAttribute("d")).IsEqualTo(ghost.Find("path").GetAttribute("d"));
 	}
 
 	[Test]

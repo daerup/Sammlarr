@@ -18,10 +18,12 @@
         @foreach (var provider in Providers)
         {
             var branding = BrandingService.GetBrandingInfo(provider.AsMediaProvider());
-            <HoverButton OnClick="() => SignIn(provider)" Color="@branding.BrandColor" Class="font-medium w-full" Border="false">
-                <span class="provider-mark" aria-hidden="true"><ProviderLogo Provider="@branding.Provider" Size="16" Decorative="true"/></span>
-                <span class="provider-label">Sign in with @branding.NickName</span>
-            </HoverButton>
+            <div class="signin" style="--brand: @branding.BrandColor">
+                <BbButton Variant="ButtonVariant.Outline" Class="signin-button w-full gap-2 font-medium" OnClick="() => SignIn(provider)">
+                    <span>Sign in with</span>
+                    <ProviderLogo Provider="@branding.Provider" Form="ProviderLogoForm.Logo" Size="16"/>
+                </BbButton>
+            </div>
         }
     </div>
 </div>

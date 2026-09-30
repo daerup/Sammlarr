@@ -8,7 +8,7 @@
 {
     @foreach (var row in Rows)
     {
-        <div class="row">
+        <div class="row @(row.Kind is UpNextKind.Running ? "is-running" : null)">
             @if (row.Brand is { } provider)
             {
                 <ProviderTile Provider="provider" Decorative="true"/>
@@ -16,7 +16,7 @@
             else
             {
                 <span class="row-icon">
-                    <LucideIcon Name="@Icon(row.Kind)" Size="12"/>
+                    <LucideIcon Name="@(row.Deleted ? "ghost" : Icon(row.Kind))" Size="12"/>
                 </span>
             }
             <span class="row-body">
@@ -36,7 +36,7 @@
                     @row.Detail
                 </span>
             </span>
-            <span class="row-when @(row.Kind is UpNextKind.Running ? "is-running" : "")">@row.When</span>
+            <span class="row-when">@row.When</span>
         </div>
     }
 }
