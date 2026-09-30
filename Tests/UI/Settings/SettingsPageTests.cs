@@ -4,6 +4,7 @@ using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Settings;
 using Domain.Auth;
+using Domain.Identity;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.AspNetCore.Components;
@@ -85,6 +86,23 @@ public class SettingsPageTests : BunitContext
 		await cut.FindAll("nav button").Single(button => button.TextContent.Trim() == "Providers").ClickAsync(new());
 
 		await Assert.That(Services.GetRequiredService<NavigationManager>().Uri).EndsWith("/settings?section=providers");
+	}
+
+	[Test]
+	public async Task SectionNav_ForAnAdmin_OffersTheTestingPlaygroundOnlyInDebugBuilds()
+	{
+		var admin = ICurrentUser.Mock();
+		admin.Role.Getter.Returns(UserRole.Admin);
+		Services.AddSingleton(admin.Object);
+
+		var cut = RenderAt("/settings?section=providers");
+
+		var offered = cut.FindAll("nav button").Select(button => button.TextContent.Trim());
+#if DEBUG
+		await Assert.That(offered).Contains("Testing");
+#else
+		await Assert.That(offered).DoesNotContain("Testing");
+#endif
 	}
 
 	private static IEnumerable<MediaProvider> OpenRows(IRenderedComponent<SettingsPage> cut) =>
