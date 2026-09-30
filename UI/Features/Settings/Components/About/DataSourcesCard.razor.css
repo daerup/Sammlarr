@@ -1,0 +1,55 @@
+.source-row {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 170px) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 15px;
+}
+
+.source-row + .source-row {
+    border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+.source-logo {
+    display: flex;
+    align-items: center;
+    width: 88px;
+    height: 22px;
+}
+
+.source-logo ::deep .provider-logo {
+    max-width: 88px;
+    max-height: 22px;
+    object-position: left center;
+}
+
+.source-gives {
+    font-size: 12px;
+    color: color-mix(in oklch, var(--foreground) 80%, transparent);
+    line-height: 1.3;
+}
+
+.source-note {
+    font-size: 11.5px;
+    color: var(--muted-foreground);
+    line-height: 1.35;
+}
+
+.source-open {
+    display: inline-flex;
+    color: var(--muted-foreground);
+}
+
+.source-open:hover,
+.source-open:focus-visible {
+    color: var(--foreground);
+}
+
+.source-credit {
+    margin: 0;
+    padding: 9px 15px 10px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+}

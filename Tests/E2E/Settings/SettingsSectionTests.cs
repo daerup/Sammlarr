@@ -11,6 +11,7 @@ public class SettingsSectionTests
 	[Arguments("diagnostics", "Live log stream")]
 	[Arguments("users", "People with access to this Sammlarr instance.")]
 	[Arguments("testing", "Fire a toast of the chosen kind")]
+	[Arguments("about", "This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.")]
 	public async Task Section_WhenSelectedByQueryAsAdmin_RendersThatSection(string slug, string expectedContent)
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section(slug));

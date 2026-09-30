@@ -4,10 +4,12 @@ using Bunit.TestDoubles;
 using Contracts.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Options;
 using UI.Shared.Identity;
 using UI.Shared.Layout;
 using UI.Shared.Media;
 using UI.Shared.Notifications.WebUi;
+using UI.Shared.Services;
 
 namespace UI.Tests.Layout;
 
@@ -18,6 +20,7 @@ public class MainLayoutTests : BunitContext
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddScoped(_ => new CurrentUserAccessor(new CurrentUserOverride()));
+		Services.AddSingleton(new AppVersionProvider(new ReleaseOptions()));
 		ComponentFactories.AddStub<GlobalSearch>();
 		ComponentFactories.AddStub<ProfileCard>();
 		ComponentFactories.AddStub<SessionInvalidationListener>();
@@ -66,6 +69,17 @@ public class MainLayoutTests : BunitContext
 		var cut = RenderLayout();
 
 		await Assert.That(cut.Find("a[aria-label='Sammlarr home']").ClassList).DoesNotContain("active");
+	}
+
+	[Test]
+	public async Task Footer_ShowsTheVersionTheAppRuns()
+	{
+		AddAuthorization().SetAuthorized("alice");
+
+		var cut = RenderLayout();
+
+		var running = Services.GetRequiredService<AppVersionProvider>().Current.Number;
+		await Assert.That(cut.Find("footer a").TextContent).Contains(running);
 	}
 
 	private IRenderedComponent<MainLayout> RenderLayout() => Render<MainLayout>(parameters => parameters.Add(layout => layout.Body, (RenderFragment)(_ => { })));

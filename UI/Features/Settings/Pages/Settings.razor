@@ -49,6 +49,7 @@
         new("Diagnostics", "activity", typeof(DiagnosticsSection), UserRole.Admin),
         new("Users", "users", typeof(UsersSection), UserRole.Admin),
         new("Testing", "flask-conical", typeof(TestingSection), UserRole.Admin),
+        new("About", "info", typeof(AboutSection)),
     ];
 
     private IEnumerable<SettingsSection> VisibleSections => _sections.Where(section => section.RequiredRole is null || CurrentUser.Role == section.RequiredRole);

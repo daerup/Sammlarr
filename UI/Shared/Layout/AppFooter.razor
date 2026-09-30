@@ -1,0 +1,16 @@
+<footer class="shrink-0 border-t">
+    <div class="flex h-8 items-center justify-between px-6 text-xs text-muted-foreground">
+        <AppLink Href="/settings?section=about" Title="About this version">
+            <span class="font-mono font-normal">@Version.Number</span>
+        </AppLink>
+        <span class="flex items-center gap-1">
+            Made with
+            <LucideIcon Name="heart" Size="11" Class="fill-current text-destructive"/>
+            <span class="sr-only">love</span>
+        </span>
+    </div>
+</footer>
+
+@code {
+    [Parameter] [EditorRequired] public required AppVersion Version { get; set; }
+}

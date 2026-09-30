@@ -1,8 +1,13 @@
-<a href="@Href" class="@($"app-link {Class}".Trim())" style="@(Color is null ? null : $"color: {Color}")" title="@Title">
+<a href="@Href"
+   class="@($"app-link {Class}".Trim())"
+   style="@(Color is null ? null : $"color: {Color}")"
+   title="@Title"
+   target="@(External ? "_blank" : null)"
+   rel="@(External ? "noopener noreferrer" : null)">
     @ChildContent
     @if (Arrow)
     {
-        <LucideIcon Name="arrow-up-right" Size="12" Class="app-link-arrow"/>
+        <LucideIcon Name="@(External ? "external-link" : "arrow-up-right")" Size="12" Class="app-link-arrow"/>
     }
 </a>
 
@@ -12,6 +17,8 @@
     [Parameter] [EditorRequired] public required RenderFragment ChildContent { get; set; }
 
     [Parameter] public bool Arrow { get; set; } = true;
+
+    [Parameter] public bool External { get; set; }
 
     [Parameter] public string? Color { get; set; }
 
