@@ -44,6 +44,23 @@ public class ActivityDayBlockTests : BunitContext
 	}
 
 	[Test]
+	public async Task Header_WhenClicked_CollapsesTheDayToItsHeaderThenOpensItAgain()
+	{
+		var cut = Render(Day(added: 3, removed: 2));
+
+		await cut.Find(".dtop").ClickAsync(new());
+
+		await Assert.That(cut.Find(".dtop").GetAttribute("aria-expanded")).IsEqualTo("false");
+		await Assert.That(cut.FindAll(".chips, .dsub, .dtoggle")).IsEmpty();
+		await Assert.That(cut.FindAll(".dstat .part")).Count().IsEqualTo(3);
+
+		await cut.Find(".dtop").ClickAsync(new());
+
+		await Assert.That(cut.Find(".dtop").GetAttribute("aria-expanded")).IsEqualTo("true");
+		await Assert.That(cut.FindAll(".chips, .dsub, .dtoggle")).Count().IsEqualTo(3);
+	}
+
+	[Test]
 	public async Task Problem_ForARunWhoseSourceFailed_SaysItFailedAndQuotesWhy()
 	{
 		var failed = Run(0, 0) with { Conclusiveness = Conclusiveness.StillLoading, SourceFailure = "No MDBList API key is configured." };
