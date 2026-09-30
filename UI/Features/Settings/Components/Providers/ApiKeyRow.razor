@@ -5,7 +5,14 @@
 
 <ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
     <Status>
-        <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_apiKeyInput) ? "Not set" : "Not tested")"/>
+        @if (_loaded)
+        {
+            <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_apiKeyInput) ? "Not set" : "Not tested")"/>
+        }
+        else
+        {
+            <BbSkeleton Class="h-6 w-24 rounded-full"/>
+        }
     </Status>
     <ChildContent>
         <BbField>
@@ -62,6 +69,7 @@
     private string _savedApiKey = string.Empty;
     private IApiKey? _validatedKey;
     private ApiKeyProvider? _loadedProvider;
+    private bool _loaded;
     private CredentialState _state = CredentialState.Idle;
     private CredentialState _savedState = CredentialState.Idle;
 
@@ -90,12 +98,14 @@
         }
 
         _loadedProvider = Provider;
+        await Task.Yield();
         _savedState = await ApiKeyService
             .GetApiKeyAsync(Provider)
             .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
             .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
             .Match(CredentialState.Saved, CredentialState.Idle);
         _state = _savedState;
+        _loaded = true;
     }
 
     private async Task TestAsync()

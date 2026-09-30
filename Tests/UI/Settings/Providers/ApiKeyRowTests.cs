@@ -37,6 +37,17 @@ public class ApiKeyRowTests : BunitContext
 	}
 
 	[Test]
+	public async Task Status_WhileTheSavedKeyIsStillLoading_ShowsASkeletonPill()
+	{
+		_keys.GetApiKeyAsync(Any<ApiKeyProvider>(), Any()).ReturnsAsync(new ValueTask<Result<IApiKey>>(new TaskCompletionSource<Result<IApiKey>>().Task));
+
+		var cut = Render<ApiKeyRow>(parameters => parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb));
+
+		await Assert.That(cut.FindAll("button .animate-pulse")).HasSingleItem();
+		await Assert.That(cut.Markup).DoesNotContain("Not set");
+	}
+
+	[Test]
 	public async Task Status_AfterAKeyIsTyped_ReadsNotTested()
 	{
 		var cut = RenderRow();
@@ -81,6 +92,12 @@ public class ApiKeyRowTests : BunitContext
 	private static Task TypeAsync(IRenderedComponent<ApiKeyRow> cut, string key) =>
 		cut.InvokeAsync(() => cut.FindComponent<SensitiveInput>().Instance.ValueChanged.InvokeAsync(key));
 
-	private IRenderedComponent<ApiKeyRow> RenderRow() =>
-		Render<ApiKeyRow>(parameters => parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb).Add(row => row.Description, "<span>Your TMDB API key.</span>"));
+	private IRenderedComponent<ApiKeyRow> RenderRow()
+	{
+		var cut = Render<ApiKeyRow>(parameters =>
+			parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb).Add(row => row.Description, "<span>Your TMDB API key.</span>")
+		);
+		cut.WaitForState(() => Status(cut).Length > 0);
+		return cut;
+	}
 }
