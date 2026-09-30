@@ -14,7 +14,7 @@
         </div>
         @if (!string.IsNullOrWhiteSpace(Repository))
         {
-            <div class="ml-auto flex items-center gap-4 text-xs">
+            <div class="ml-auto flex shrink-0 items-center gap-4 whitespace-nowrap text-xs">
                 @if (!Version.IsDevBuild)
                 {
                     <AppLink Href="@($"{RepositoryUrl}/releases/tag/v{Version.Number}")" External="true">Release notes</AppLink>
