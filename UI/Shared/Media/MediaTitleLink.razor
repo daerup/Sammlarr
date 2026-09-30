@@ -20,19 +20,20 @@
 
                     if (url is not null)
                     {
-                        <a href="@url"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           aria-label="@ariaLabel"
-                           style="@brandStyle"
-                           class="id-link-card">
+                        <div style="@brandStyle" class="id-link-card">
 							<ProviderTile Provider="id.Source" Size="30" Decorative="true"/>
-							<span class="id-link-text">
-								<span class="id-link-name">@branding.DisplayName</span>
-								<span class="id-link-value">@id.Value</span>
-							</span>
-							<LucideIcon Name="external-link" Size="14" Class="id-link-external"/>
-						</a>
+							<a href="@url"
+							   target="_blank"
+							   rel="noopener noreferrer"
+							   aria-label="@ariaLabel"
+							   class="id-link">
+								<span class="id-link-text">
+									<span class="id-link-name">@branding.DisplayName</span>
+									<span class="id-link-value">@id.Value</span>
+								</span>
+								<LucideIcon Name="external-link" Size="14" Class="id-link-external"/>
+							</a>
+						</div>
                     }
                     else
                     {
