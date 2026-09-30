@@ -37,10 +37,21 @@ public class RunPlanTests
 	{
 		var hourly = Feed("hourly", new Scheduled("0 0 * * * *"));
 
-		var candidates = RunPlan.Candidates([hourly], Overviews((hourly.Id, Conclusiveness.NoMatches)), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([hourly], Overviews((hourly.Id, Conclusiveness.NoMatches, 12)), Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.WorthRunning);
 		await Assert.That(candidates[0].Flag).IsEqualTo(RunFlag.Inconclusive);
+	}
+
+	[Test]
+	public async Task Candidates_FlagsAFeedWhoseSourceFailedLastTimeAsFailedRatherThanInconclusive()
+	{
+		var hourly = Feed("hourly", new Scheduled("0 0 * * * *"));
+
+		var candidates = RunPlan.Candidates([hourly], Overviews((hourly.Id, Conclusiveness.StillLoading, 0)), Now, TimeZoneInfo.Utc);
+
+		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.WorthRunning);
+		await Assert.That(candidates[0].Flag).IsEqualTo(RunFlag.Failed);
 	}
 
 	[Test]
@@ -108,7 +119,7 @@ public class RunPlanTests
 		await Assert.That(candidates[0].LastRun.Changed).IsFalse();
 	}
 
-	private static Dictionary<FeedId, FeedOverview> Overviews(params (FeedId Id, Conclusiveness Outcome)[] entries) =>
+	private static Dictionary<FeedId, FeedOverview> Overviews(params (FeedId Id, Conclusiveness Outcome, int Fetched)[] entries) =>
 		entries.ToDictionary(
 			entry => entry.Id,
 			entry => new FeedOverview(
@@ -121,7 +132,7 @@ public class RunPlanTests
 					Strategy = new Append(),
 					Trigger = new Manual(),
 					Conclusiveness = entry.Outcome,
-					Counts = FeedRunCounts.None,
+					Counts = FeedRunCounts.None with { Total = entry.Fetched },
 					Items = [],
 				},
 				FeedRunHistory.None

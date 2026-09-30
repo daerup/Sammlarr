@@ -13,6 +13,7 @@ public enum RunGroup
 public enum RunFlag
 {
 	Disabled,
+	Failed,
 	Inconclusive,
 	NotDue,
 }
@@ -75,6 +76,7 @@ internal static class RunPlan
 		flag switch
 		{
 			RunFlag.Disabled => "Disabled",
+			RunFlag.Failed => "Last run failed",
 			RunFlag.Inconclusive => "Last run was inconclusive",
 			RunFlag.NotDue => "Not due for a while",
 		};
@@ -95,6 +97,7 @@ internal static class RunPlan
 			ScheduleText.Describe(feed.Schedule),
 			Outcome(overview),
 			!feed.Enabled ? RunFlag.Disabled
+				: overview is { LastRun.Failed: true } ? RunFlag.Failed
 				: stalled ? RunFlag.Inconclusive
 				: group is RunGroup.WorthRunning && next is not null ? RunFlag.NotDue
 				: null,
