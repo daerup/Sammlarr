@@ -14,6 +14,16 @@
 @source "../../../UI/Shared";
 @source "../../*.razor";
 
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--border);
+    }
+}
+
 /* Container with responsive max-width */
 .container {
     width: 100%;
