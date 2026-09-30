@@ -1,0 +1,76 @@
+@using UI.Features.Feeds.Components
+
+<DemoCard Title="Media detail tiles" Where="Feed preview" Span="2" PinRight="true"
+          Note="MediaDetailTile with watchlist / blacklist toggles and status indicators, plus the preview stat badges. Toggles are visual-only.">
+    <BbTooltipProvider>
+        <div class="flex items-start text-xs font-medium">
+            <PreviewFilterBadge Icon="list" Count="3" Active="true" OnClick="() => {}">
+                <Tooltip>Total items fetched from the source list.</Tooltip>
+            </PreviewFilterBadge>
+            <PreviewFilterBadge Icon="check" Count="2" Active="false" OnClick="() => {}">
+                <Tooltip>Items that will be imported.</Tooltip>
+            </PreviewFilterBadge>
+            <PreviewFilterBadge Icon="scissors" Count="1" Active="false" OnClick="() => {}">
+                <Tooltip>Excluded by the import limit.</Tooltip>
+            </PreviewFilterBadge>
+            <PreviewFilterBadge Icon="circle-alert" Count="1" Active="false" OnClick="() => {}">
+                <Tooltip>Could not be matched in your media provider.</Tooltip>
+            </PreviewFilterBadge>
+        </div>
+    </BbTooltipProvider>
+    <div class="space-y-2 overflow-hidden">
+        <MediaDetailTile Media="DemoMedia.Movie">
+            <Icons>
+                <WatchlistToggleIcon Result="DemoMedia.Movie" IsToggled="@Watchlisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="OnToggleWatchlist"/>
+                <BlacklistToggleIcon Result="DemoMedia.Movie" IsToggled="@_blacklisted.Contains(DemoMedia.Movie.Id)" IsToggling="false" OnToggle="ToggleBlacklist"/>
+            </Icons>
+        </MediaDetailTile>
+        <MediaDetailTile Media="DemoMedia.Show" Class="result-dimmed">
+            <Icons>
+                <BbTooltipProvider>
+                    <BbTooltip DelayDuration="300">
+                        <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                            <div class="search-result-status-indicator">
+                                <LucideIcon Name="scissors" Size="24"/>
+                            </div>
+                        </BbTooltipTrigger>
+                        <BbTooltipContent>Excluded by the specified import limit.</BbTooltipContent>
+                    </BbTooltip>
+                </BbTooltipProvider>
+                <WatchlistToggleIcon Result="DemoMedia.Show" IsToggled="@Watchlisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="OnToggleWatchlist"/>
+                <BlacklistToggleIcon Result="DemoMedia.Show" IsToggled="@_blacklisted.Contains(DemoMedia.Show.Id)" IsToggling="false" OnToggle="ToggleBlacklist"/>
+            </Icons>
+        </MediaDetailTile>
+        <MediaDetailTile Media="DemoMedia.Unknown">
+            <Icons>
+                <BbTooltipProvider>
+                    <BbTooltip DelayDuration="300">
+                        <BbTooltipTrigger AsChild="false" Class="p-0 cursor-default">
+                            <div class="search-result-status-indicator">
+                                <LucideIcon Name="circle-alert" Size="24"/>
+                            </div>
+                        </BbTooltipTrigger>
+                        <BbTooltipContent>Could not be matched in your media provider. This item will not be imported.</BbTooltipContent>
+                    </BbTooltip>
+                </BbTooltipProvider>
+            </Icons>
+        </MediaDetailTile>
+        <AutoSkeletons Preset="AutoSkeletonPreset.MediaDetailTile" Count="1"/>
+    </div>
+</DemoCard>
+
+@code {
+    [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Watchlisted { get; set; }
+
+    [Parameter] public EventCallback<MediaLookup> OnToggleWatchlist { get; set; }
+
+    private readonly HashSet<MediaId> _blacklisted = [];
+
+    private void ToggleBlacklist(MediaLookup media)
+    {
+        if (!_blacklisted.Remove(media.Id))
+        {
+            _blacklisted.Add(media.Id);
+        }
+    }
+}

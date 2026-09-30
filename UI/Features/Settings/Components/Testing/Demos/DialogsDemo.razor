@@ -1,0 +1,45 @@
+@inject Notifier Notifier
+
+<DemoCard Title="Dialogs &amp; confirms" Note="Neutral and destructive confirmation dialogs.">
+    <div class="flex flex-wrap items-center gap-3">
+        <BbAlertDialog>
+            <BbAlertDialogTrigger>
+                <BbButton Variant="ButtonVariant.Outline">Confirm action</BbButton>
+            </BbAlertDialogTrigger>
+            <BbAlertDialogContent>
+                <BbAlertDialogHeader>
+                    <BbAlertDialogTitle>Apply changes?</BbAlertDialogTitle>
+                    <BbAlertDialogDescription>A neutral confirmation dialog for testing.</BbAlertDialogDescription>
+                </BbAlertDialogHeader>
+                <BbAlertDialogFooter>
+                    <BbAlertDialogCancel>
+                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                    </BbAlertDialogCancel>
+                    <BbAlertDialogAction>
+                        <BbButton Variant="ButtonVariant.Default" OnClick="@(() => Notifier.Success("Confirmed."))">Confirm</BbButton>
+                    </BbAlertDialogAction>
+                </BbAlertDialogFooter>
+            </BbAlertDialogContent>
+        </BbAlertDialog>
+
+        <BbAlertDialog>
+            <BbAlertDialogTrigger>
+                <BbButton Variant="ButtonVariant.Outline" Class="text-muted-foreground hover:text-destructive">Delete something</BbButton>
+            </BbAlertDialogTrigger>
+            <BbAlertDialogContent>
+                <BbAlertDialogHeader>
+                    <BbAlertDialogTitle>Delete this item?</BbAlertDialogTitle>
+                    <BbAlertDialogDescription>A destructive confirmation. This cannot be undone.</BbAlertDialogDescription>
+                </BbAlertDialogHeader>
+                <BbAlertDialogFooter>
+                    <BbAlertDialogCancel>
+                        <BbButton Variant="ButtonVariant.Outline">Cancel</BbButton>
+                    </BbAlertDialogCancel>
+                    <BbAlertDialogAction>
+                        <HoverButton Preset="HoverButtonPreset.Destructive" Text="Yes, delete" OnClick="@(() => Notifier.Success("Deleted."))"/>
+                    </BbAlertDialogAction>
+                </BbAlertDialogFooter>
+            </BbAlertDialogContent>
+        </BbAlertDialog>
+    </div>
+</DemoCard>

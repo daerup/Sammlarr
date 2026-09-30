@@ -1,0 +1,13 @@
+<DemoCard Title="Version card" Where="Settings: About" Span="2"
+          Note="VersionCard for a development build, which counts commits since the last tag, and for a release, which links its release notes.">
+    <VersionCard Version="DevBuild" Repository="@Repository"/>
+    <VersionCard Version="Release" Repository="@Repository"/>
+</DemoCard>
+
+@code {
+    private const string Repository = "daerup/Sammlarr";
+
+    private static readonly AppVersion DevBuild = new("0.0.0-alpha.0.594");
+
+    private static readonly AppVersion Release = new("1.2.0");
+}

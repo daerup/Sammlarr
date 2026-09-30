@@ -1,0 +1,16 @@
+@using UI.Features.Home.Components
+
+<DemoCard Title="Library sources" Where="Home"
+          Note="LibrarySourcesPanel: how the watchlist splits across the feeds that filled it, hand-picked titles and the remote watchlist.">
+    <LibrarySourcesPanel Sources="Sources" Total="1263"/>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<SourceShare> Sources =
+    [
+        new("snoak/latest-movies-digital-release", 812),
+        new("hdlists/latest-hd-documentary-movies-1980-to-today", 402),
+        new("Added by hand", 37),
+        new("Plex watchlist", 12),
+    ];
+}

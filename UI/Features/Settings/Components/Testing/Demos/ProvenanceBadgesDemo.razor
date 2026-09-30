@@ -1,0 +1,13 @@
+@using UI.Features.Watchlist.Components
+
+<DemoCard Title="Provenance badges" Where="Watchlist tiles"
+          Note="ProvenanceBadge for every origin a watchlist title can have: added by hand from each place, the remote watchlist, a feed per provider and a feed that has since been deleted.">
+    <BbTooltipProvider>
+        <div class="flex flex-wrap items-center gap-2">
+            @foreach (var provenance in DemoProvenance.All)
+            {
+                <ProvenanceBadge Provenance="provenance" AddedAt="DemoProvenance.AddedAt"/>
+            }
+        </div>
+    </BbTooltipProvider>
+</DemoCard>

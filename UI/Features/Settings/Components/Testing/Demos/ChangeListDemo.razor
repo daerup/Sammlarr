@@ -1,0 +1,47 @@
+@using UI.Features.Feeds.Components
+@using UI.Shared.Changes
+
+<DemoCard Title="Change list" Where="Run dialog, sync dialog" Span="2"
+          Note="ChangeList with an added, a removed and an unmatched title under the run's count chips, and the ChangeDialog that frames it.">
+    <ChangeList Entries="Entries" Chips="Chips"/>
+    <div>
+        <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _open = true">
+            <LucideIcon Name="history" Size="14" Class="mr-1.5"/>
+            Open the change dialog
+        </BbButton>
+    </div>
+    <ChangeDialog Open="_open"
+                  OnOpenChanged="v => _open = v"
+                  Title="@DemoFeeds.MirrorFeed.Name"
+                  Subtitle="scheduled · 48 fetched · took 14 s"
+                  Entries="Entries"
+                  Chips="Chips"
+                  Note="30 runs"
+                  NoteHref="/feeds">
+        <Badges>
+            <FeedStrategyChip Strategy="DemoFeeds.MirrorFeed.Strategy"/>
+        </Badges>
+    </ChangeDialog>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<ChangeEntry> Entries =
+    [
+        new() { Title = "Project Hail Mary", Id = DemoMedia.Movie.Id, Media = DemoMedia.Movie, Kind = ChangeKind.Added, Subtitle = "2026 · Movie" },
+        new()
+        {
+            Title = "Breaking Bad",
+            Id = DemoMedia.Show.Id,
+            Media = DemoMedia.Show,
+            Kind = ChangeKind.Removed,
+            Subtitle = "2008 · Show",
+            ContextIcon = "log-out",
+            ContextTooltip = "Removed once it had been absent from enough runs",
+        },
+        new() { Title = "Unmatched Title", Kind = ChangeKind.Unmatched, Subtitle = "2024" },
+    ];
+
+    private static readonly IReadOnlyList<ChangeChip> Chips = FeedRunView.Chips(DemoFeeds.MirrorRun.Counts);
+
+    private bool _open;
+}

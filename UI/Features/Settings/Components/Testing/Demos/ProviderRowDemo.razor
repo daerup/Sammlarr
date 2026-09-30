@@ -1,0 +1,38 @@
+<DemoCard Title="Provider row" Where="Providers" Span="2"
+          Note="ProviderRow opened on an API key: its CredentialStatus, the masked key and CredentialActions. Type to get Test, Save and Cancel; the states only change here, nothing is stored.">
+    <ProviderRow Provider="MediaProvider.Tmdb" Open="_open" OpenChanged="v => _open = v">
+        <Status>
+            <CredentialStatus State="_state" IdleText="@(string.IsNullOrWhiteSpace(_key) ? "Not set" : "Not tested")"/>
+        </Status>
+        <ChildContent>
+            <BbField>
+                <BbFieldLabel>API key</BbFieldLabel>
+                <BbFieldContent>
+                    <SensitiveInput Value="@_key" ValueChanged="KeyChanged" Compact="true" Placeholder="Paste a TMDB API key" Label="API key"/>
+                    <BbFieldDescription>Trending, ratings and artwork come from TMDB.</BbFieldDescription>
+                </BbFieldContent>
+            </BbField>
+            <CredentialActions State="_state"
+                               HasChange="!string.IsNullOrWhiteSpace(_key)"
+                               OnTest="() => _state = CredentialState.Success"
+                               OnSave="() => _state = CredentialState.Saved"
+                               OnCancel="() => { _key = string.Empty; _state = CredentialState.Idle; }">
+                <Remove>
+                    <HoverButton Preset="HoverButtonPreset.Destructive" Size="ButtonSize.Small" Icon="trash-2" Text="Remove key" OnClick="() => { _key = string.Empty; _state = CredentialState.Idle; }"/>
+                </Remove>
+            </CredentialActions>
+        </ChildContent>
+    </ProviderRow>
+</DemoCard>
+
+@code {
+    private bool _open = true;
+    private string _key = string.Empty;
+    private CredentialState _state = CredentialState.Idle;
+
+    private void KeyChanged(string key)
+    {
+        _key = key;
+        _state = CredentialState.Idle;
+    }
+}

@@ -1,0 +1,7 @@
+<DemoCard Title="Enum toggle" Span="2" Note="EnumToggleGroup, a segmented selector over an enum's values.">
+    <EnumToggleGroup TEnum="MediaProvider" Value="_provider" OnChange="v => _provider = v" TooltipProvider="null"/>
+</DemoCard>
+
+@code {
+    private MediaProvider _provider = MediaProvider.Plex;
+}

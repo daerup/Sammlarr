@@ -1,0 +1,23 @@
+@using Domain.Jobs
+@using UI.Features.Home.Components
+
+<DemoCard Title="Up next" Where="Home" Span="2"
+          Note="UpNextPanel with a running feed, a queued sync, a sync waiting out its grace period (with its countdown), a job for a deleted feed, and the scheduled feeds. Queued and waiting jobs can be cancelled.">
+    <UpNextPanel Queued="Queued" Scheduled="Scheduled" OnCancel="_ => {}"/>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<UpNextRow> Queued =
+    [
+        new(DemoFeeds.MirrorFeed.Name, "running now", "running", UpNextKind.Running, "/feeds", MediaProvider.Mdblist),
+        new("Sync Watchlist", "queued", "2nd in line", UpNextKind.Queued, null, MediaProvider.Plex, Job: JobId.From(Guid.NewGuid())),
+        new("Sync Watchlist", "waiting for grace period", string.Empty, UpNextKind.Waiting, null, MediaProvider.Plex, RunsAt: DemoFeeds.Now.AddMinutes(2), Job: JobId.From(Guid.NewGuid())),
+        new("A deleted feed", "queued", "4th in line", UpNextKind.Queued, null, Deleted: true, Job: JobId.From(Guid.NewGuid())),
+    ];
+
+    private static readonly IReadOnlyList<UpNextRow> Scheduled =
+    [
+        new(DemoFeeds.MirrorFeed.Name, "At 09:00", "in 13 hours", UpNextKind.Scheduled, "/feeds", MediaProvider.Mdblist),
+        new("hdlists/latest-hd-documentary-movies-1980-to-today", "At 26 minutes past the hour", "in 34 min", UpNextKind.Scheduled, "/feeds", MediaProvider.Mdblist),
+    ];
+}

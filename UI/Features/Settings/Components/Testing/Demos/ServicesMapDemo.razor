@@ -1,0 +1,18 @@
+<DemoCard Title="Services map" Where="Providers" Span="2"
+          Note="ServicesMap: which provider does which job. TMDB is missing its key here, so the jobs that need it show as not ready.">
+    <ServicesMap Config="Config" Ready="Ready" CanPickWatchlist="true"/>
+</DemoCard>
+
+@code {
+    private static readonly ProviderConfig Config = new()
+    {
+        WatchlistProvider = WatchlistProvider.Plex,
+        TrendingProvider = TrendingProvider.Tmdb,
+        SearchProvider = SearchProvider.Plex,
+        RatingProvider = RatingProvider.Tmdb,
+        AuthProvider = AuthProvider.Plex,
+        RegistrationMode = RegistrationMode.Closed,
+    };
+
+    private static readonly IReadOnlySet<MediaProvider> Ready = new HashSet<MediaProvider> { MediaProvider.Plex, MediaProvider.Mdblist };
+}

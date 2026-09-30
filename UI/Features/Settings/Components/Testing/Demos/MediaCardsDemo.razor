@@ -1,0 +1,26 @@
+<DemoCard Title="Media card" Where="Browse / Watchlist grid"
+          Note="MediaGridTile in the real grid. A resolved movie and show, an unresolved item, and the loading skeleton. Click a tile to open the detail sheet.">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <MediaGridTile Media="DemoMedia.Movie" OnClick="() => OpenSheet(DemoMedia.Movie)" ShowBookmark="true" IsInWatchlist="@Watchlisted.Contains(DemoMedia.Movie.Id)"/>
+        <MediaGridTile Media="DemoMedia.Show" OnClick="() => OpenSheet(DemoMedia.Show)" ShowBookmark="true" IsInWatchlist="@Watchlisted.Contains(DemoMedia.Show.Id)"/>
+        <MediaGridTile Media="DemoMedia.Unknown" OnClick="() => OpenSheet(DemoMedia.Unknown)" ShowBookmark="false" IsInWatchlist="false"/>
+        <AutoSkeletons Preset="AutoSkeletonPreset.MediaGridTile" Count="1"/>
+    </div>
+</DemoCard>
+
+<MediaDetailSheet Open="_sheetOpen"
+                  OnOpenChanged="v => _sheetOpen = v"
+                  Media="_sheetMedia"/>
+
+@code {
+    [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Watchlisted { get; set; }
+
+    private bool _sheetOpen;
+    private MediaLookup? _sheetMedia;
+
+    private void OpenSheet(MediaLookup media)
+    {
+        _sheetMedia = media;
+        _sheetOpen = true;
+    }
+}

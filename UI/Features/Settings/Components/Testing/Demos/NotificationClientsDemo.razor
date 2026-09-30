@@ -1,0 +1,18 @@
+<DemoCard Title="Notification clients" Where="Notifications: client dialog" Span="2"
+          Note="WebhookClientFields with its regenerate option (shown when editing) next to PushoverClientFields. Nothing is saved.">
+    <div class="grid grid-cols-2 gap-6 items-start">
+        <div class="flex flex-col gap-4">
+            <WebhookClientFields @bind-Url="_url" @bind-Regenerate="_regenerate" ShowRegenerate="true"/>
+        </div>
+        <div class="flex flex-col gap-4">
+            <PushoverClientFields @bind-AppToken="_appToken" @bind-UserKey="_userKey" Placeholder="Required"/>
+        </div>
+    </div>
+</DemoCard>
+
+@code {
+    private string _url = "https://hooks.example.test/sammlarr";
+    private bool _regenerate;
+    private string _appToken = string.Empty;
+    private string _userKey = string.Empty;
+}

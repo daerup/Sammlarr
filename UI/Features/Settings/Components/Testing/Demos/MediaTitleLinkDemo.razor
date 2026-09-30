@@ -1,0 +1,11 @@
+<DemoCard Title="Title link" Where="Detail tile, detail sheet"
+          Note="MediaTitleLink: click the title for a popover of the provider pages it is known on, each in its brand colour.">
+    <MediaTitleLink Title="Project Hail Mary" Ids="MovieIds" Class="font-bold text-xl" Side="PopoverSide.Bottom" Align="PopoverAlign.Start"/>
+    <MediaTitleLink Title="Breaking Bad" Ids="ShowIds" Class="font-semibold text-base" Side="PopoverSide.Bottom" Align="PopoverAlign.Start"/>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<IExternalMediaId> MovieIds = [.. DemoMedia.Movie.Externals];
+
+    private static readonly IReadOnlyList<IExternalMediaId> ShowIds = [.. DemoMedia.Show.Externals];
+}

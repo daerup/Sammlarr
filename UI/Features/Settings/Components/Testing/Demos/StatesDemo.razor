@@ -1,0 +1,15 @@
+<DemoCard Title="Loading, empty &amp; alert states" Where="Lists, settings"
+          Note="Spinner sizes, the MediaListEmptyState a list shows with nothing in it, and the soft destructive alert.">
+    <div class="flex items-center gap-6">
+        <BbSpinner Size="SpinnerSize.Small"/>
+        <BbSpinner Size="SpinnerSize.Default"/>
+        <BbSpinner Size="SpinnerSize.Large"/>
+    </div>
+    <MediaListEmptyState Icon="shield-ban" Heading="Nothing blacklisted yet.">
+        Blacklist a title from its detail sheet and feeds will never add it again.
+    </MediaListEmptyState>
+    <div class="alert-soft-destructive rounded-lg border p-3 flex items-start gap-2">
+        <LucideIcon Name="circle-alert" Size="16" Class="shrink-0 mt-0.5"/>
+        <span class="text-sm">A soft destructive alert callout.</span>
+    </div>
+</DemoCard>

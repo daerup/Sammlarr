@@ -1,0 +1,19 @@
+<DemoCard Title="Settings cards" Where="Settings sections"
+          Note="SettingsCard with its tinted header, badge and actions.">
+    <SettingsCard Title="Media cache" Color="var(--destructive)">
+        <Icon>
+            <div class="w-9 h-9 flex items-center justify-center">
+                <LucideIcon Name="database" Size="22"/>
+            </div>
+        </Icon>
+        <Badge>
+            <BbBadge Variant="BadgeVariant.Outline" Class="whitespace-nowrap">1,263 titles</BbBadge>
+        </Badge>
+        <ChildContent>
+            <p class="text-muted-foreground text-sm leading-relaxed">Deletes the id groups, all metadata and ratings, so every title is matched again from scratch the next time it is needed.</p>
+        </ChildContent>
+        <Actions>
+            <HoverButton Preset="HoverButtonPreset.Destructive" Icon="trash-2" Text="Purge cache"/>
+        </Actions>
+    </SettingsCard>
+</DemoCard>

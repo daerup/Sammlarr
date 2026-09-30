@@ -1,0 +1,20 @@
+<DemoCard Title="Page header" Where="Watchlist, blacklist, feeds" Span="3"
+          Note="PageHeader as a list page uses it: heading, description, and the ListSearch and MediaListViewActions it carries as actions.">
+    <PageHeader Heading="Watchlist" Description="Everything Sammlarr keeps on your Plex watchlist, and where each title came from.">
+        <Actions>
+            <div class="flex items-center gap-2">
+                <ListSearch Value="_search" ValueChanged="v => _search = v" Placeholder="Search titles"/>
+                <MediaListViewActions HasItems="true"
+                                      IsEditMode="false"
+                                      ShowFilters="_showFilters"
+                                      ActiveFilters="2"
+                                      OnToggleFilters="() => _showFilters = !_showFilters"/>
+            </div>
+        </Actions>
+    </PageHeader>
+</DemoCard>
+
+@code {
+    private string? _search;
+    private bool _showFilters;
+}

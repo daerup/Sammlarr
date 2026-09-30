@@ -1,0 +1,26 @@
+@using Domain.Notifications
+
+<DemoCard Title="Alert fields" Where="Notifications: alert dialog" Span="2"
+          Note="LeveledAlertFields for Pushover (priority) or the web UI (level), next to the WebhookAlertFields body. Flip the switch to see the web UI variant.">
+    <div class="flex items-center gap-3">
+        <BbSwitch @bind-Checked="_pushover"/>
+        <span class="text-sm">@(_pushover ? "Pushover" : "Web UI")</span>
+    </div>
+    <div class="grid grid-cols-2 gap-6 items-start">
+        <div class="flex flex-col gap-4">
+            <LeveledAlertFields @bind-Title="_title" @bind-Message="_message" @bind-Level="_level" @bind-Priority="_priority" IsPushover="_pushover"/>
+        </div>
+        <div class="flex flex-col gap-4">
+            <WebhookAlertFields @bind-Body="_body"/>
+        </div>
+    </div>
+</DemoCard>
+
+@code {
+    private bool _pushover = true;
+    private string _title = "{{ title }}";
+    private string _message = "{{ summary }}";
+    private NotificationLevel? _level = NotificationLevel.Info;
+    private PushoverPriority? _priority = PushoverPriority.Normal;
+    private string _body = """{ "text": "{{ title }}: {{ summary }}" }""";
+}

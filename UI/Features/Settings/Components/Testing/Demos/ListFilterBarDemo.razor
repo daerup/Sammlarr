@@ -1,0 +1,20 @@
+@using UI.Shared.Filters
+
+<DemoCard Title="List filters" Where="Watchlist, blacklist" Span="4"
+          Note="ListFilterBar on its FilterStrip: source, type and status filters, the shown-of-total count and the sort.">
+    <ListFilterBar Filter="_filter" FilterChanged="v => _filter = v" Available="Sources" AvailableStatuses="Statuses" Shown="42" Total="57"/>
+</DemoCard>
+
+@code {
+    private static readonly IReadOnlyList<SourceOption> Sources =
+    [
+        new("feed", DemoFeeds.MirrorFeed.Name, new SourceChoice(SourceKind.Feed, DemoFeeds.MirrorFeed.Id)),
+        new("manual", "Added by hand", new SourceChoice(SourceKind.Manual)),
+        new("remote", "Remote watchlist", new SourceChoice(SourceKind.Remote)),
+        new("orphaned", "Feed deleted", new SourceChoice(SourceKind.Orphaned)),
+    ];
+
+    private static readonly IReadOnlyList<StatusOption> Statuses = [new("active", "On your watchlist"), new("removed", "Pending removal (3)")];
+
+    private ListFilter _filter = ListFilter.None;
+}
