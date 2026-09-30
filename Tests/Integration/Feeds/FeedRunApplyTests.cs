@@ -70,6 +70,21 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_WhenTheListCannotBeFound_FailsAndRecordsWhyOnTheRun()
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("missing-list", new Mirror(1));
+		host.MdblistFeedReturnsStatus("missing-list", System.Net.HttpStatusCode.NotFound);
+
+		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
+
+		var failed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunFailed>();
+		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
+		await Assert.That(failed.Reason).IsEqualTo("No list found with identifier 'missing-list'.");
+		await Assert.That(recorded.SourceFailure).IsEqualTo(failed.Reason);
+	}
+
+	[Test]
 	public async Task PlanAsync_ForAFeedWithItems_ReturnsAPlanAndChangesNothing()
 	{
 		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);

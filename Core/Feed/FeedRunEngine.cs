@@ -61,6 +61,7 @@ internal sealed class FeedRunEngine(
 			Conclusiveness = planned.Conclusiveness,
 			Counts = FeedRunCounts.From(planned),
 			Items = Record(planned.Delta),
+			SourceFailure = planned.SourceFailure,
 		};
 		await feeds.StartRunAsync(run, cancellationToken);
 
@@ -69,18 +70,18 @@ internal sealed class FeedRunEngine(
 		WarnOnDrift(feed, planned.Delta, added, removed);
 
 		var applied = planned.Delta with { Adds = added, Drops = removed };
-		await feeds.CompleteRunAsync(
-			run with
-			{
-				Duration = elapsed.Elapsed,
-				Conclusiveness = planned.Conclusiveness,
-				Counts = FeedRunCounts.From(planned, applied),
-				Items = Record(applied),
-			},
-			cancellationToken
-		);
+		var completed = run with
+		{
+			Duration = elapsed.Elapsed,
+			Conclusiveness = planned.Conclusiveness,
+			Counts = FeedRunCounts.From(planned, applied),
+			Items = Record(applied),
+		};
+		await feeds.CompleteRunAsync(completed, cancellationToken);
 
-		return new FeedRunCompleted(applied, planned.Conclusiveness);
+		return completed.Failed
+			? new FeedRunFailed(completed.SourceFailure ?? "The source returned nothing.")
+			: new FeedRunCompleted(applied, planned.Conclusiveness);
 	}
 
 	private void WarnOnDrift(Domain.Feed.Feed feed, FeedDelta planned, IReadOnlyList<MediaId> added, IReadOnlyList<MediaId> removed)

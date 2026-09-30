@@ -60,6 +60,27 @@ public class LastRunCellTests : BunitContext
 		await Assert.That(cut.Instance.Opened).IsEquivalentTo([true, false], CollectionOrdering.Matching);
 	}
 
+	[Test]
+	public async Task Dialog_ForARunWhoseSourceFailed_SaysItFailedAndWhy()
+	{
+		RegisterServices();
+		var failed = Run() with
+		{
+			Conclusiveness = Conclusiveness.StillLoading,
+			Counts = FeedRunCounts.None,
+			Items = [],
+			SourceFailure = "No list found with identifier 'hdlists/comedy'.",
+		};
+
+		var cut = Render<Harness>(parameters => parameters.Add(harness => harness.LastRun, failed));
+		cut.WaitForState(() => cut.FindAll(".last-run").Count == 1);
+		await cut.Find(".last-run").ClickAsync(new());
+		cut.WaitForState(() => cut.FindAll(".change-band").Count == 1);
+
+		await Assert.That(cut.Find(".change-badges").TextContent).Contains("Failed");
+		await Assert.That(cut.Find(".change-band").TextContent).Contains("No list found with identifier 'hdlists/comedy'.");
+	}
+
 	private void RegisterServices()
 	{
 		Services.AddBlazorBlueprintComponents();
@@ -151,6 +172,9 @@ public class LastRunCellTests : BunitContext
 	{
 		internal List<bool> Opened { get; } = [];
 
+		[Parameter]
+		public FeedRun LastRun { get; set; } = Run();
+
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
 			builder.OpenComponent<BbPortalHost>(0);
@@ -161,11 +185,11 @@ public class LastRunCellTests : BunitContext
 				3,
 				nameof(LastRunCell.Overview),
 				new FeedOverview(
-					Run(),
+					LastRun,
 					new FeedRunHistory
 					{
 						TotalRuns = 1,
-						FirstRunAt = Run().StartedAt,
+						FirstRunAt = LastRun.StartedAt,
 						TotalAdded = 1,
 						TotalRemoved = 0,
 					}

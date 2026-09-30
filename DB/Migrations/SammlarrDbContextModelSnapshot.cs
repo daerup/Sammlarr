@@ -281,6 +281,9 @@ namespace DB.Migrations
                     b.Property<int>("Skipped")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("SourceFailure")
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("StartedAt")
                         .HasColumnType("INTEGER");
 

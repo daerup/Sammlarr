@@ -26,5 +26,7 @@ internal record FeedRunRow : Entity<Guid>, IUserOwned
 	public int Unresolved { get; set; }
 	public int Removed { get; set; }
 
+	public string? SourceFailure { get; set; }
+
 	public List<FeedRunItemRow> Items { get; set; } = [];
 }

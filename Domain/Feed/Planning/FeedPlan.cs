@@ -10,6 +10,7 @@ public interface IFeedPlan
 	IReadOnlyList<UnmatchedMedia> Unresolved { get; }
 	FeedDelta Delta { get; }
 	Conclusiveness Conclusiveness { get; }
+	string? SourceFailure { get; }
 }
 
 public sealed record AppendPlan(
@@ -17,7 +18,10 @@ public sealed record AppendPlan(
 	IReadOnlyList<UnmatchedMedia> Unresolved,
 	FeedDelta Delta,
 	Conclusiveness Conclusiveness
-) : IFeedPlan;
+) : IFeedPlan
+{
+	public string? SourceFailure { get; init; }
+}
 
 public sealed record MirrorPlan(
 	IReadOnlyList<QueryVerdict<MediaLookup>> Verdicts,
@@ -25,7 +29,10 @@ public sealed record MirrorPlan(
 	FeedDelta Delta,
 	Conclusiveness Conclusiveness,
 	IReadOnlyDictionary<MediaId, int> MissedRuns
-) : IFeedPlan;
+) : IFeedPlan
+{
+	public string? SourceFailure { get; init; }
+}
 
 public static class FeedPlans
 {
@@ -50,8 +57,8 @@ public static class FeedPlans
 
 		return strategy switch
 		{
-			Append => new AppendPlan(verdicts, load.Unresolved, delta, conclusiveness),
-			Mirror => new MirrorPlan(verdicts, load.Unresolved, delta, conclusiveness, missedRuns),
+			Append => new AppendPlan(verdicts, load.Unresolved, delta, conclusiveness) { SourceFailure = load.SourceFailure },
+			Mirror => new MirrorPlan(verdicts, load.Unresolved, delta, conclusiveness, missedRuns) { SourceFailure = load.SourceFailure },
 		};
 	}
 

@@ -68,6 +68,16 @@ public class RunPlanTests
 	}
 
 	[Test]
+	public async Task Candidates_ForADisabledScheduledFeed_ShowsNoNextRunBecauseItWillNotRun()
+	{
+		var off = Feed("off", new Scheduled("0 0 * * * *"), enabled: false);
+
+		var candidates = RunPlan.Candidates([off], Overviews(), Now, TimeZoneInfo.Utc);
+
+		await Assert.That(candidates[0].NextRun).IsNull();
+	}
+
+	[Test]
 	public async Task Candidates_OrdersWorthRunningFirstThenSoonThenManual()
 	{
 		IReadOnlyList<Feed> feeds = [Feed("by hand"), Feed("hourly", new Scheduled("0 0 * * * *")), Feed("monthly", new Scheduled("0 0 6 1 * *"))];

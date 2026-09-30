@@ -45,7 +45,7 @@
                 @foreach (var candidate in inGroup)
                 {
                     var isPicked = _selected.Contains(candidate.Id);
-                    <div class="run-row @(Selectable(candidate) ? "" : "off")" @key="candidate.Id.Value" @onclick="() => Toggle(candidate)">
+                    <div class="run-row @(Selectable(candidate) ? "" : "off") @(candidate.Enabled ? "" : "is-paused")" @key="candidate.Id.Value" @onclick="() => Toggle(candidate)">
                         <span @onclick:stopPropagation="true">
                             <BbCheckbox Checked="isPicked"
                                         Disabled="@(!Selectable(candidate))"

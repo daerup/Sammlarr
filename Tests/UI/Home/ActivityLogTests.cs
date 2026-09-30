@@ -115,8 +115,26 @@ public class ActivityLogTests
 		var noItems = new ActivityRun(Run(Docs, Today, conclusiveness: Conclusiveness.NoItems), "feed");
 		var noneAdmitted = new ActivityRun(Run(Docs, Today, total: 40, conclusiveness: Conclusiveness.NoneAdmitted), "feed");
 
-		await Assert.That(noItems.Outcome).IsEqualTo("the feed returned nothing");
+		await Assert.That(noItems.Outcome).IsEqualTo("the list came back empty");
 		await Assert.That(noneAdmitted.Outcome).IsEqualTo("all 40 titles were filtered out");
+	}
+
+	[Test]
+	public async Task Reason_ForAFailedRun_QuotesTheSourceAndFallsBackWhenNothingWasRecorded()
+	{
+		var broken = new ActivityRun(
+			Run(Docs, Today, conclusiveness: Conclusiveness.StillLoading) with
+			{
+				SourceFailure = "No MDBList API key is configured.",
+			},
+			"feed"
+		);
+		var empty = new ActivityRun(Run(Docs, Today, conclusiveness: Conclusiveness.NoItems), "feed");
+		var unrecorded = new ActivityRun(Run(Docs, Today, conclusiveness: Conclusiveness.StillLoading), "feed");
+
+		await Assert.That(broken.Reason).IsEqualTo("No MDBList API key is configured.");
+		await Assert.That(empty.Reason).IsEqualTo("The list came back empty.");
+		await Assert.That(unrecorded.Reason).IsEqualTo("The reason wasn't recorded.");
 	}
 
 	[Test]
