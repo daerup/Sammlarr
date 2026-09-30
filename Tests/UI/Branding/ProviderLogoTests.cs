@@ -34,7 +34,7 @@ public class ProviderLogoTests : BunitContext
 	public async Task Logo_AtAGivenSize_HoldsThatHeightSoTheWidthFollowsTheArt()
 	{
 		var cut = Render<ProviderLogo>(parameters =>
-			parameters.Add(logo => logo.Provider, MediaProvider.Plex).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 22)
+			parameters.Add(logo => logo.Provider, MediaProvider.Tvdb).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 22)
 		);
 
 		var sizes = cut.FindAll("img").Select(image => $"{image.GetAttribute("width")}|{image.GetAttribute("style")}");
@@ -49,6 +49,16 @@ public class ProviderLogoTests : BunitContext
 		);
 
 		await Assert.That(cut.Find("img").GetAttribute("style")).IsEqualTo("height: 22.5px");
+	}
+
+	[Test]
+	public async Task Logo_ForPlex_IsDrawnTallerSoItsOfficialArtKeepsTheOldWeight()
+	{
+		var cut = Render<ProviderLogo>(parameters =>
+			parameters.Add(logo => logo.Provider, MediaProvider.Plex).Add(logo => logo.Form, ProviderLogoForm.Logo).Add(logo => logo.Size, 18)
+		);
+
+		await Assert.That(cut.FindAll("img").Select(image => image.GetAttribute("style") ?? string.Empty)).IsEquivalentTo(["height: 20.7px", "height: 20.7px"]);
 	}
 
 	[Test]

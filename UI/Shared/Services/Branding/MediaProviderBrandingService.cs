@@ -17,7 +17,7 @@ public class MediaProviderBrandingService
 				"Plex",
 				"#E5A00D",
 				new BrandArt("plex-square.svg"),
-				new BrandArt("plex-logo-light.svg", "plex-logo-dark.svg"),
+				new BrandArt("plex-logo-light.svg", "plex-logo-dark.svg") { Scale = 1.15 },
 				new BrandTile(MutedTile, new BrandArt("plex-square.svg"), 70)
 			),
 			MediaProvider.Tmdb => new(
