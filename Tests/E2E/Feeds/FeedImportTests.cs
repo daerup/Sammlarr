@@ -13,7 +13,7 @@ public class FeedImportTests
 		await page.VisitAsync("/feeds/create");
 
 		await FeedEditor.SelectMdblistAsync(page);
-		await page.Locator("#list-identifier").FillAsync(FeedEditor.ListIdentifier);
+		await page.Locator("#list-identifier").EnterAsync(FeedEditor.ListIdentifier);
 
 		await Expect(page.Button("Save")).ToBeHiddenAsync();
 	}

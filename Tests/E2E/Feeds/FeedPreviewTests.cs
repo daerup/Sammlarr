@@ -23,17 +23,17 @@ public class FeedPreviewTests
 		var term = titles[0];
 		var expected = titles.Count(title => title.Contains(term, StringComparison.OrdinalIgnoreCase));
 
-		await page.Locator(SearchBox).FillAsync(term);
+		await page.Locator(SearchBox).EnterAsync(term);
 
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(expected);
 		await Assert.That(await FeedEditor.RowTitlesAsync(page)).Contains(term);
 
-		await page.Locator(SearchBox).FillAsync(Guid.NewGuid().ToString("N"));
+		await page.Locator(SearchBox).EnterAsync(Guid.NewGuid().ToString("N"));
 
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(0);
 		await Expect(page.GetByText("No results match")).ToBeVisibleAsync();
 
-		await page.Locator(SearchBox).FillAsync(string.Empty);
+		await page.Locator(SearchBox).EnterAsync(string.Empty);
 
 		await Expect(FeedEditor.Rows(page)).ToHaveCountAsync(titles.Count);
 	}

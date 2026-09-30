@@ -23,7 +23,7 @@ public class NotificationTargetTests
 		await Expect(Client(page, name)).ToBeVisibleAsync();
 
 		await Client(page, name).GetByRole(AriaRole.Button).First.ClickAsync();
-		await FillAsync(page, NameInput, renamed);
+		await page.Locator(NameInput).EnterAsync(renamed);
 		await SaveAsync(page);
 
 		await Expect(Client(page, renamed)).ToBeVisibleAsync();
@@ -40,7 +40,7 @@ public class NotificationTargetTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await SettingsPage.VisitSectionAsync(page, "notifications");
 		await page.Button("Add client").ClickAsync();
-		await FillAsync(page, NameInput, TestData.Name("Pushover"));
+		await page.Locator(NameInput).EnterAsync(TestData.Name("Pushover"));
 		await SelectChannelAsync(page, "Pushover");
 
 		await SaveAsync(page);
@@ -102,19 +102,11 @@ public class NotificationTargetTests
 			.Locator("div.items-center.rounded-lg.border")
 			.Filter(new LocatorFilterOptions { HasText = name });
 
-	private static async Task FillAsync(IPage page, string selector, string value)
-	{
-		var input = page.Locator(selector);
-		await input.FillAsync(string.Empty);
-		await input.PressSequentiallyAsync(value, new LocatorPressSequentiallyOptions { Delay = 50 });
-		await page.WaitForTimeoutAsync(500);
-	}
-
 	private static async Task CreateWebhookAsync(IPage page, string name)
 	{
 		await page.Button("Add client").ClickAsync();
-		await FillAsync(page, NameInput, name);
-		await FillAsync(page, UrlInput, Unreachable);
+		await page.Locator(NameInput).EnterAsync(name);
+		await page.Locator(UrlInput).EnterAsync(Unreachable);
 		await SaveAsync(page);
 		await page.Button("Done").ClickAsync();
 	}

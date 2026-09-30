@@ -27,7 +27,7 @@ public class DiagnosticsTests
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await CaptureEntriesAsync(page);
 
-		await page.Locator(FilterInput).FillAsync(Guid.NewGuid().ToString("N"));
+		await page.Locator(FilterInput).EnterAsync(Guid.NewGuid().ToString("N"));
 
 		await Expect(page.Text("No entries match the filter.")).ToBeVisibleAsync(Wait.Settle);
 		await StopAsync(page);
