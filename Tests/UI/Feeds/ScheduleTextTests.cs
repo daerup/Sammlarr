@@ -17,6 +17,24 @@ public class ScheduleTextTests
 	}
 
 	[Test]
+	public async Task Away_WithSecondsLeftOver_RoundsToTheNearestMinute()
+	{
+		await Assert.That(ScheduleText.Away(Now.AddSeconds(115), Now)).IsEqualTo("in 2 min");
+		await Assert.That(ScheduleText.Away(Now.AddSeconds(80), Now)).IsEqualTo("in 1 min");
+		await Assert.That(ScheduleText.Away(Now.AddSeconds(40), Now)).IsEqualTo("in under a minute");
+		await Assert.That(ScheduleText.Away(Now.AddMinutes(59).AddSeconds(40), Now)).IsEqualTo("in 1 hr");
+	}
+
+	[Test]
+	public async Task AwayExactly_ReadsTheTimeLeftToTheSecond()
+	{
+		await Assert.That(ScheduleText.AwayExactly(Now.AddSeconds(115), Now)).IsEqualTo("in 1 min 55 s");
+		await Assert.That(ScheduleText.AwayExactly(Now.AddSeconds(42), Now)).IsEqualTo("in 42 s");
+		await Assert.That(ScheduleText.AwayExactly(Now.AddHours(1).AddSeconds(5), Now)).IsEqualTo("in 1 hr 0 min 5 s");
+		await Assert.That(ScheduleText.AwayExactly(Now.AddSeconds(-3), Now)).IsEqualTo("due now");
+	}
+
+	[Test]
 	public async Task Ago_ReadsAsAHumanWouldSayIt()
 	{
 		await Assert.That(ScheduleText.Ago(Now.AddMinutes(-16), Now)).IsEqualTo("16 min ago");
