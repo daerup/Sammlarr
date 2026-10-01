@@ -1,6 +1,5 @@
 using Contracts;
 using Contracts.Announcing;
-using Contracts.DI;
 using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Messaging;
@@ -19,15 +18,8 @@ namespace Core.Tests.Wantlist;
 
 internal static class WantlistStubs
 {
-	public static WantlistSyncPlanner Planner(Mock<IMediaSink> provider, Mock<IWantlistOutbox> outbox) =>
-		new(
-			ProviderConfigStubs.PlexWantlist().Object,
-			EmptyRepository().Object,
-			outbox.Object,
-			NothingMatches().Object,
-			new FakeKeyedServiceIndex<SinkKind, IMediaSink>().Register(SinkKind.Plex, provider.Object),
-			NullLogger<WantlistSyncPlanner>.Instance
-		);
+	public static WantlistSyncPlanner Planner(Mock<IMediaSink> sink, Mock<IWantlistOutbox> outbox) =>
+		new(Active(sink), EmptyRepository().Object, outbox.Object, NothingMatches().Object, NullLogger<WantlistSyncPlanner>.Instance);
 
 	public static Mock<IWantlistRepository> EmptyRepository()
 	{
@@ -53,7 +45,7 @@ internal static class WantlistStubs
 	}
 
 	public static WantlistSyncEngine Engine(
-		Mock<IMediaSink> provider,
+		Mock<IMediaSink> sink,
 		Mock<IWantlistOutbox>? outbox = null,
 		IReadOnlyDictionary<MediaId, IExternalMediaId>? externals = null,
 		Mock<IEventPublisher>? events = null,
@@ -71,12 +63,11 @@ internal static class WantlistStubs
 
 		return new WantlistSyncEngine(
 			gate ?? new WantlistSyncGate(),
-			Planner(provider, outbox),
-			ProviderConfigStubs.PlexWantlist().Object,
+			Planner(sink, outbox),
+			Active(sink),
 			EmptyRepository().Object,
 			outbox.Object,
 			media.Object,
-			new FakeKeyedServiceIndex<SinkKind, IMediaSink>().Register(SinkKind.Plex, provider.Object),
 			new Announcer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher()),
 			owner,
 			clock.Object,
@@ -107,4 +98,7 @@ internal static class WantlistStubs
 			await Task.CompletedTask;
 		}
 	}
+
+	private static ActiveSink Active(Mock<IMediaSink> sink) =>
+		new(ProviderConfigStubs.PlexWantlist().Object, new FakeKeyedServiceIndex<SinkKind, IMediaSink>().Register(SinkKind.Plex, sink.Object));
 }

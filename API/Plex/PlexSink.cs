@@ -3,12 +3,15 @@ using System.Text.Json;
 using API.Plex.Types;
 using Contracts.Wantlist;
 using Domain.Media;
+using Domain.Providers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
 internal class PlexSink(PlexClient plexClient, PlexUrls urls, ILogger<PlexSink> logger) : IMediaSink
 {
+	public SinkKind Kind => SinkKind.Plex;
+
 	public async IAsyncEnumerable<UnmatchedMedia> GetWantlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
 		var (items, pages) = await FetchPageAsync(1, cancellationToken);

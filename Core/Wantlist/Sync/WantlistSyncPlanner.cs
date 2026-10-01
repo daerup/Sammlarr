@@ -1,6 +1,4 @@
-using Contracts.DI;
 using Contracts.Media;
-using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
@@ -12,47 +10,40 @@ using Microsoft.Extensions.Logging;
 namespace Core.Wantlist.Sync;
 
 internal sealed class WantlistSyncPlanner(
-	IProviderConfigService config,
+	ActiveSink activeSink,
 	IWantlistRepository repo,
 	IWantlistOutbox outbox,
 	IMediaService media,
-	IKeyedServiceIndex<SinkKind, IMediaSink> remotes,
 	ILogger<WantlistSyncPlanner> logger
 ) : IWantlistSyncPlanner
 {
 	public async Task<WantlistPlanResult> PlanAsync(CancellationToken cancellationToken = default)
 	{
-		var target = await TargetAsync(cancellationToken);
-		return await PlanAsync(target, cancellationToken) switch
+		var sink = await activeSink.ResolveAsync(cancellationToken);
+		return await PlanAsync(sink, cancellationToken) switch
 		{
-			Error error => OnPlanError(error, target.Provider),
+			Error error => OnPlanError(error, sink.Kind),
 			Success<WantlistSyncPlan>(var plan) => Project(plan),
 		};
 	}
 
-	private async Task<SyncTarget> TargetAsync(CancellationToken cancellationToken)
-	{
-		var provider = (await config.GetAsync(cancellationToken)).Sink;
-		return new SyncTarget(provider, provider.AsMediaProvider(), remotes[provider]);
-	}
-
-	private async Task<Result<WantlistSyncPlan>> PlanAsync(SyncTarget target, CancellationToken cancellationToken) =>
-		await FetchRemoteAsync(target, cancellationToken)
+	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken) =>
+		await FetchRemoteAsync(sink, cancellationToken)
 			.Map(async remote =>
 			{
 				var localIds = await repo.GetIdsAsync(cancellationToken);
 				var outboxOps = await outbox.GetAsync(cancellationToken);
 				var plan = WantlistSyncPlan.Compute(remote.Resolved, localIds, outboxOps) with { Unmatched = remote.Unmatched };
-				await DropRedundantAsync(target, plan, cancellationToken);
+				await DropRedundantAsync(sink.Kind, plan, cancellationToken);
 				return Success.Of(plan);
 			});
 
-	private async Task<Result<RemoteWantlist>> FetchRemoteAsync(SyncTarget target, CancellationToken cancellationToken)
+	private async Task<Result<RemoteWantlist>> FetchRemoteAsync(IMediaSink sink, CancellationToken cancellationToken)
 	{
 		try
 		{
-			var entries = await target.Remote.GetWantlistAsync(cancellationToken).ToListAsync(cancellationToken);
-			var requests = entries.Select(entry => new ResolveRequest([.. entry.Externals], target.MediaProvider, new None()));
+			var entries = await sink.GetWantlistAsync(cancellationToken).ToListAsync(cancellationToken);
+			var requests = entries.Select(entry => new ResolveRequest([.. entry.Externals], sink.Kind.AsMediaProvider(), new None()));
 			var remoteMediaIds = new List<MediaId>(entries.Count);
 			var unmatched = new List<UnmatchedMedia>();
 			var pipeline = media.IdentifyAsync(requests, cancellationToken).ZipAwait(entries, cancellationToken);
@@ -76,7 +67,7 @@ internal sealed class WantlistSyncPlanner(
 		}
 	}
 
-	private async Task DropRedundantAsync(SyncTarget target, WantlistSyncPlan plan, CancellationToken cancellationToken)
+	private async Task DropRedundantAsync(SinkKind sink, WantlistSyncPlan plan, CancellationToken cancellationToken)
 	{
 		if (plan.Redundant.Count == 0)
 		{
@@ -84,12 +75,12 @@ internal sealed class WantlistSyncPlanner(
 		}
 
 		await outbox.DropAsync(plan.Redundant, cancellationToken);
-		logger.LogInformation("Dropped {Count} wantlist outbox entries {Provider} already agrees with", plan.Redundant.Count, target.Provider);
+		logger.LogInformation("Dropped {Count} wantlist outbox entries {Sink} already agrees with", plan.Redundant.Count, sink);
 	}
 
-	private WantlistSyncSinkUnreachable OnPlanError(Error error, SinkKind provider)
+	private WantlistSyncSinkUnreachable OnPlanError(Error error, SinkKind sink)
 	{
-		logger.LogWarning("Remote fetch failed for {Provider}: {Reason}", provider, error.Reason);
+		logger.LogWarning("Reading {Sink} failed: {Reason}", sink, error.Reason);
 		return new WantlistSyncSinkUnreachable(error.Reason);
 	}
 
@@ -97,6 +88,4 @@ internal sealed class WantlistSyncPlanner(
 		new WantlistSyncSummary(plan.Pull, plan.Push, [.. plan.NoOps, .. plan.Redundant]) { Unmatched = plan.Unmatched };
 
 	private readonly record struct RemoteWantlist(IReadOnlyList<MediaId> Resolved, IReadOnlyList<UnmatchedMedia> Unmatched);
-
-	private readonly record struct SyncTarget(SinkKind Provider, MediaProvider MediaProvider, IMediaSink Remote);
 }
