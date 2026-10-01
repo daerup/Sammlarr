@@ -39,7 +39,7 @@ internal sealed class SignInService(
 			return await CompleteSignInAsync(provider, login, existing, isInitialAdmin: false, cancellationToken);
 		}
 
-		var isFirstUser = !await users.AnyAsync(cancellationToken);
+		var isFirstUser = (await users.GetAllAsync(cancellationToken)).Count == 0;
 		if (!isFirstUser && (await providerConfig.GetAsync(cancellationToken)).RegistrationMode == RegistrationMode.Closed)
 		{
 			logger.LogWarning("Registration is closed; rejected new {Provider} sign-in", provider);

@@ -43,19 +43,6 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task<bool> AnyAsync(CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.AnyAsync(cancellationToken);
-	}
-
-	public async Task<IReadOnlyList<UserId>> GetAllIdsAsync(CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var ids = await ctx.Users.AsNoTracking().Select(user => user.Id).ToListAsync(cancellationToken);
-		return ids.Select(UserId.From).ToList();
-	}
-
 	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -76,12 +63,6 @@ internal sealed class UserRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		var row = await ctx.Users.SingleAsync(user => user.Id == id.Value, cancellationToken);
 		ctx.Users.Remove(row);
 		await ctx.SaveChangesAsync(cancellationToken);
-	}
-
-	public async Task<int> CountByRoleAsync(UserRole role, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Users.CountAsync(user => user.Role == role, cancellationToken);
 	}
 
 	private static System.Linq.Expressions.Expression<Func<UserRow, User>> Project =>
