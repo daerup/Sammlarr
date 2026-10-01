@@ -63,9 +63,9 @@ are resolved together and merged into a single identity.
 ResolutionHints:: Title, year and media type passed alongside the candidates to help a provider
 match them to the right title, mainly the Plex title search.
 
-Id converter:: An `IExternalIdConverter`, keyed by the target provider, that turns candidates
-into a canonical identity. The Plex one searches by title and confirms each hit by id; the others
-pass ids through.
+Id converter:: An `IExternalIdConverter`, keyed by the target provider (the provider the active sink
+addresses the title's type by), that turns candidates into a canonical identity. The Plex one searches
+by title and confirms each hit by id; the others pass a matching id through or read it from Plex.
 
 Enricher:: An `IMetadataEnricher`, keyed by provider, that fills missing metadata fields in
 Phase B. Sammlarr chains Plex then TMDB until the record is complete.

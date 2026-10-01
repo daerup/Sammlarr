@@ -40,9 +40,11 @@ stale title runs the two phases.
 
 ==== Phase A: ids to a Plex identity
 
-One `IExternalIdConverter`, chosen by the target provider, resolves the ids. The TMDB, IMDb and
-TheTVDB targets just pass ids through; the Plex target does the work, since an MDBList or TMDB
-reference has no Plex id and the wantlist can only push a Plex id.
+One `IExternalIdConverter`, chosen by the target provider, resolves the ids. The target is the
+provider the active sink addresses that title's type by (`IMediaSink.AddressedBy`): Plex for every
+type today, so an MDBList or TMDB reference is converted to a Plex id, the only id the wantlist can
+push. A type the sink cannot address fails as unmatched. The TMDB, IMDb and TheTVDB converters pass a
+matching id through, or read it from Plex given a Plex id.
 
 [mermaid]
 ....

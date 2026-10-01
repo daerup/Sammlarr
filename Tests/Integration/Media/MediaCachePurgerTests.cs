@@ -1,6 +1,8 @@
 using Contracts;
+using Contracts.Identity;
 using Contracts.Media.Metadata;
 using Contracts.Settings;
+using Contracts.Wantlist;
 using DB.Data.Blocklist;
 using DB.Data.Cleanup;
 using DB.Data.Identity;
@@ -25,34 +27,17 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
 	public async ValueTask DisposeAsync() => await fixture.DisposeAsync();
 
+	private static readonly Func<MediaType, Optional<MediaProvider>> PlexForEveryTitle = _ => Some.Of(MediaProvider.Plex);
+
 	private IMediaCachePurger _testee = null!;
 
 	[Before(Test)]
-	public void Setup()
-	{
-		var configRepository = IProviderConfigRepository.Mock();
-		configRepository
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					RatingProvider = RatingProvider.Tmdb,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
-		_testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, fixture.CurrentUser, NullLogger<MediaCachePurger>.Instance);
-	}
+	public void Setup() => _testee = Purger(PlexForEveryTitle, fixture.CurrentUser);
 
 	[Test]
 	public async Task PurgeAsync_WhenNotAdmin_Throws()
 	{
-		var configRepository = IProviderConfigRepository.Mock();
-		var member = new TestCurrentUser { Role = UserRole.Member };
-		var testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, member, NullLogger<MediaCachePurger>.Instance);
+		var testee = Purger(PlexForEveryTitle, new TestCurrentUser { Role = UserRole.Member });
 
 		await Assert.That(async () => await testee.PurgeAsync()).Throws<UnauthorizedAccessException>();
 	}
@@ -185,11 +170,37 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task PurgeAsync_ForASinkThatAddressesEachTypeByItsOwnId_KeepsEachTitlesAddressAndEveryIdOfATypeItCannotAddress()
+	{
+		var movie = new MediaRow();
+		var show = new MediaRow();
+		var unknown = new MediaRow();
+		fixture.Context.ExternalMediaIds.AddRange(
+			TmdbId.From("603", MediaType.Movie).ToExternalIdEntity(movie),
+			PlexId.From("603", MediaType.Movie).ToExternalIdEntity(movie),
+			TvdbId.From("81189", MediaType.Show).ToExternalIdEntity(show),
+			TmdbId.From("1396", MediaType.Show).ToExternalIdEntity(show),
+			PlexId.From("1396", MediaType.Show).ToExternalIdEntity(show),
+			TmdbId.From("42", MediaType.Unknown).ToExternalIdEntity(unknown),
+			PlexId.From("42", MediaType.Unknown).ToExternalIdEntity(unknown)
+		);
+		fixture.Context.Blocklist.AddRange(new BlocklistRow { Media = movie }, new BlocklistRow { Media = show }, new BlocklistRow { Media = unknown });
+		await fixture.Context.SaveChangesAsync();
+		fixture.Context.ChangeTracker.Clear();
+		var testee = Purger(TestAddressing.ArrLike, fixture.CurrentUser);
+
+		await testee.PurgeAsync();
+
+		var kept = await fixture.Context.ExternalMediaIds.AsNoTracking().Select(e => new { e.Media.Id, e.Source }).ToListAsync();
+		await Assert.That(kept.Where(e => e.Id == movie.Id).Select(e => e.Source)).IsEquivalentTo([MediaProvider.Tmdb]);
+		await Assert.That(kept.Where(e => e.Id == show.Id).Select(e => e.Source)).IsEquivalentTo([MediaProvider.Tvdb]);
+		await Assert.That(kept.Where(e => e.Id == unknown.Id).Select(e => e.Source)).IsEquivalentTo([MediaProvider.Tmdb, MediaProvider.Plex]);
+	}
+
+	[Test]
 	public async Task PurgeMetadataAsync_WhenNotAdmin_Throws()
 	{
-		var configRepository = IProviderConfigRepository.Mock();
-		var member = new TestCurrentUser { Role = UserRole.Member };
-		var testee = new MediaCachePurger(fixture.ContextFactory, configRepository.Object, member, NullLogger<MediaCachePurger>.Instance);
+		var testee = Purger(PlexForEveryTitle, new TestCurrentUser { Role = UserRole.Member });
 
 		await Assert.That(async () => await testee.PurgeMetadataAsync()).Throws<UnauthorizedAccessException>();
 	}
@@ -265,4 +276,26 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Genres = ["Action"],
 			Runtime = TimeSpan.FromMinutes(120),
 		};
+
+	private MediaCachePurger Purger(Func<MediaType, Optional<MediaProvider>> addressing, ICurrentUser user)
+	{
+		var configRepository = IProviderConfigRepository.Mock();
+		configRepository
+			.GetAsync(Any())
+			.Returns(
+				new ProviderConfig
+				{
+					Sink = SinkKind.Plex,
+					TrendingProvider = TrendingProvider.Tmdb,
+					SearchProvider = SearchProvider.Plex,
+					RatingProvider = RatingProvider.Tmdb,
+					AuthProvider = AuthProvider.Plex,
+					RegistrationMode = RegistrationMode.Open,
+				}
+			);
+		var sink = IMediaSink.Mock();
+		sink.AddressedBy(Any()).Returns(type => addressing(type));
+		var sinks = new FakeKeyedServiceIndex<SinkKind, IMediaSink>().Register(SinkKind.Plex, sink.Object);
+		return new MediaCachePurger(fixture.ContextFactory, configRepository.Object, sinks, user, NullLogger<MediaCachePurger>.Instance);
+	}
 }

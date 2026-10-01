@@ -87,7 +87,7 @@ public class MediaServiceOrderingTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ByRequest_PreservesInputOrder()
+	public async Task IdentifyWithDetailsAsync_PreservesInputOrder()
 	{
 		var builder = RequestBuilder.Requests(5);
 		var testee = CreateTestee(builder);
@@ -98,7 +98,7 @@ public class MediaServiceOrderingTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ByRequest_PreservesOrder_WhenSomeIdentifyFail()
+	public async Task IdentifyWithDetailsAsync_PreservesOrder_WhenSomeIdentifyFail()
 	{
 		var builder = RequestBuilder.Requests(6).FailResolveAt(2, 4, 6);
 		var testee = CreateTestee(builder);
@@ -109,7 +109,7 @@ public class MediaServiceOrderingTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ByRequest_PreservesOrder_WhenBatchExceedsConcurrencyLimit()
+	public async Task IdentifyWithDetailsAsync_PreservesOrder_WhenBatchExceedsConcurrencyLimit()
 	{
 		var batchSize = MediaService.RecommendedConcurrency * 3;
 		var builder = RequestBuilder.Requests(batchSize);
@@ -182,6 +182,7 @@ public class MediaServiceOrderingTests
 			metadataResolver,
 			coordinator,
 			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
+			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object),
 			mediaRepo.Object,
 			dateTimeProvider.Object,
 			NullLogger<MediaService>.Instance
@@ -213,7 +214,7 @@ internal sealed record TestItem
 	public required Movie Detail { get; init; }
 	public bool Resolves { get; init; } = true;
 	public bool Realizes { get; init; } = true;
-	public ResolveRequest Request => new([External], MediaProvider.Tmdb, new None());
+	public ResolveRequest Request => new([External], new None());
 
 	public static TestItem Create(int index)
 	{

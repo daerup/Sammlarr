@@ -17,10 +17,12 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 
 	public SinkKind Kind => SinkKind.Plex;
 
+	public Optional<MediaProvider> AddressedBy(MediaType type) => Some.Of(MediaProvider.Plex);
+
 	public async Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
 		var items = await WatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
-		var requests = items.Select(item => new ResolveRequest([.. item.Externals], MediaProvider.Plex, new None()));
+		var requests = items.Select(item => new ResolveRequest([.. item.Externals], new None()));
 		List<MediaId> matched = [];
 		List<UnmatchedMedia> unmatched = [];
 		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(items, cancellationToken))
@@ -45,7 +47,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var plexIds = await mediaService.GetExternalsAsync(ids, MediaProvider.Plex, cancellationToken);
+		var plexIds = await mediaService.GetSinkIdsAsync(ids, cancellationToken);
 		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();

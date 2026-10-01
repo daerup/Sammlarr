@@ -19,10 +19,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenGivenAPlexId_ResolvesTheTmdbIdThroughPlex()
 	{
+		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(TestMedia.FightClub);
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await AssertResolved(results[0], Tmdb("550"));
 	}
@@ -30,10 +31,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenGivenAPlexId_ResolvesTheImdbIdThroughPlex()
 	{
+		host.SinkAddresses(MediaProvider.Imdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"), Plex("550")));
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Imdb, null, Plex("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await AssertResolved(results[0], Imdb("tt0137523"));
 	}
@@ -41,10 +43,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenGivenAPlexId_ResolvesTheTvdbIdThroughPlex()
 	{
+		host.SinkAddresses(MediaProvider.Tvdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(Spec("Game of Thrones", Tvdb("81189"), Plex("1396")));
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Tvdb, null, Plex("1396"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("1396"))]).ToListAsync();
 
 		await AssertResolved(results[0], Tvdb("81189"));
 	}
@@ -52,10 +55,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenPlexCannotSupplyTheProvider_ResolvesToNothing()
 	{
+		host.SinkAddresses(MediaProvider.Tvdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(Spec("Fight Club", Plex("550")));
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Tvdb, null, Plex("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await Assert.That(results[0]).IsError();
 	}
@@ -63,10 +67,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenTheProviderErrors_LeavesTheIdUnmatched()
 	{
+		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.EnsurePlexAccount();
 		host.PlexLookupFails(Spec("Mystery", Plex("550")));
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await Assert.That(results[0]).IsError();
 	}
@@ -74,10 +79,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenResolvingAPlexId_StoresEveryIdPlexReported()
 	{
+		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(TestMedia.FightClub);
 
-		await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550"))]).ToListAsync();
+		await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await AssertStored(Tmdb("550"), Plex("550"));
 	}
@@ -88,7 +94,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.PlexSearchReturns("Fight Club", TestMedia.FightClub);
 		host.PlexHolds(TestMedia.FightClub);
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Plex, "Fight Club", Tmdb("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request("Fight Club", Tmdb("550"))]).ToListAsync();
 
 		await AssertResolved(results[0], Plex("550"));
 	}
@@ -98,7 +104,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.PlexFindsNothing("Unknown Movie");
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Plex, "Unknown Movie", Tmdb("999"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request("Unknown Movie", Tmdb("999"))]).ToListAsync();
 
 		await Assert.That(results[0]).IsError();
 	}
@@ -106,9 +112,10 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenTheIdIsAlreadyKnown_TranslatesFromCacheWithoutContactingPlex()
 	{
+		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await AssertResolved(results[0], Tmdb("550"));
 	}
@@ -119,7 +126,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.PlexSearchReturns("Fight Club", TestMedia.FightClub);
 		host.PlexHolds(TestMedia.FightClub);
 
-		await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550")), Request(MediaProvider.Plex, "Fight Club", Tmdb("550"))]).ToListAsync();
+		await Testee.IdentifyAsync([Request(null, Plex("550")), Request("Fight Club", Tmdb("550"))]).ToListAsync();
 
 		await AssertStored(Tmdb("550"), Plex("550"));
 	}
@@ -127,11 +134,12 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenANewIdSharesAnExistingOne_FoldsIntoThatMedia()
 	{
+		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.Movie(Spec("Fight Club", Tmdb("550"))).SeedAsync();
 		await host.EnsurePlexAccount();
 		host.PlexHolds(Spec("Fight Club Plex", Tmdb("550"), Plex("550")));
 
-		var results = await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550"))]).ToListAsync();
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
 
 		await AssertResolved(results[0], Tmdb("550"));
 		await AssertStored(Plex("550"));
@@ -140,11 +148,12 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task IdentifyAsync_WhenTwoUnknownIdsResolveAlike_CollapseIntoOneMedia()
 	{
+		host.SinkAddresses(MediaProvider.Tmdb);
 		await host.EnsurePlexAccount();
 		host.PlexHolds(TestMedia.FightClub);
 		host.PlexHolds(Spec("Fight Club Dup", Tmdb("550"), Plex("999")));
 
-		await Testee.IdentifyAsync([Request(MediaProvider.Tmdb, null, Plex("550")), Request(MediaProvider.Tmdb, null, Plex("999"))]).ToListAsync();
+		await Testee.IdentifyAsync([Request(null, Plex("550")), Request(null, Plex("999"))]).ToListAsync();
 
 		await AssertStored(Tmdb("550"), Plex("550"), Plex("999"));
 	}
@@ -158,7 +167,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexHolds(Spec("Fight Club Bridge", Tmdb("550"), Plex("550"), Imdb("tt0137523")));
 
 		await Assert
-			.That(async () => await Testee.IdentifyAsync([Request(MediaProvider.Plex, "Fight Club", Imdb("tt0137523"))]).ToListAsync())
+			.That(async () => await Testee.IdentifyAsync([Request("Fight Club", Imdb("tt0137523"))]).ToListAsync())
 			.Throws<MediaIdentityConflictException>();
 	}
 
@@ -168,9 +177,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.Movie(Spec("Fight Club (TMDB)", Tmdb("550"))).SeedAsync();
 		await host.Movie(Spec("Fight Club (Plex)", Plex("550"))).SeedAsync();
 
-		await Assert
-			.That(async () => await Testee.IdentifyAsync([Request(MediaProvider.Plex, null, Tmdb("550"), Plex("550"))]).ToListAsync())
-			.Throws<MediaIdentityConflictException>();
+		await Assert.That(async () => await Testee.IdentifyAsync([Request(null, Tmdb("550"), Plex("550"))]).ToListAsync()).Throws<MediaIdentityConflictException>();
 	}
 
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);
@@ -189,8 +196,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 				}
 			);
 
-	private static ResolveRequest Request(MediaProvider target, string? title, params ProviderId[] candidates) =>
-		new([.. candidates.Select(Ext)], target, Hints(title));
+	private static ResolveRequest Request(string? title, params ProviderId[] candidates) => new([.. candidates.Select(Ext)], Hints(title));
 
 	private static async Task AssertResolved(Result<MediaIdentity> result, ProviderId expected) =>
 		await Assert

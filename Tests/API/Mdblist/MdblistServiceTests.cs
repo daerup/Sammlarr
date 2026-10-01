@@ -5,12 +5,10 @@ using API.Mdblist;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Media;
-using Contracts.Settings;
 using Domain.Auth;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
-using Domain.Settings;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -76,21 +74,7 @@ public class MdblistServiceTests
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
 		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
-		var providerConfig = IProviderConfigService.Mock();
-		providerConfig
-			.GetAsync(Any())
-			.Returns(
-				new ProviderConfig
-				{
-					Sink = SinkKind.Plex,
-					TrendingProvider = TrendingProvider.Tmdb,
-					SearchProvider = SearchProvider.Plex,
-					RatingProvider = RatingProvider.Tmdb,
-					AuthProvider = AuthProvider.Plex,
-					RegistrationMode = RegistrationMode.Open,
-				}
-			);
-		return new MdblistService(client, media.Object, providerConfig.Object, apiKeyStore.Object);
+		return new MdblistService(client, media.Object, apiKeyStore.Object);
 	}
 
 	private sealed class StubHandler(HttpStatusCode status, int pages = 1) : HttpMessageHandler

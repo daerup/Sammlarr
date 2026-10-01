@@ -12,10 +12,13 @@ internal sealed class MediaIdResolver(IKeyedServiceIndex<MediaProvider, IExterna
 {
 	private static readonly TimeSpan unmatchedTtl = TimeSpan.FromHours(1);
 
-	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(ResolveRequest request, CancellationToken cancellationToken = default)
+	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(
+		ResolveRequest request,
+		MediaProvider target,
+		CancellationToken cancellationToken = default
+	)
 	{
 		var candidates = request.Candidates;
-		var target = request.Target;
 		var hints = request.Hints;
 		var key = MediaUnmatchedCacheKey.Build(candidates, target);
 

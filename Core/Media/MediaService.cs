@@ -4,6 +4,8 @@ using Contracts;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
+using Contracts.Wantlist;
+using Core.Wantlist.Sync;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -16,6 +18,7 @@ internal sealed class MediaService(
 	MediaMetadataResolver metadataResolver,
 	MediaIdentityCoordinator coordinator,
 	MediaResolutionBufferFactory bufferFactory,
+	ActiveSink activeSink,
 	IMediaRepository mediaRepository,
 	IDateTimeProvider dateTimeProvider,
 	ILogger<MediaService> logger
@@ -39,7 +42,8 @@ internal sealed class MediaService(
 
 		await using var buffer = bufferFactory.Create();
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
-		var resolutions = await ResolveBatchAsync(materialized, building, buffer, cancellationToken);
+		var sink = await activeSink.ResolveAsync(cancellationToken);
+		var resolutions = await ResolveBatchAsync(materialized, sink, building, buffer, cancellationToken);
 		foreach (var (request, resolution) in materialized.Zip(resolutions))
 		{
 			yield return ToIdentityResult(resolution);
@@ -85,6 +89,7 @@ internal sealed class MediaService(
 	)
 	{
 		await using var buffer = bufferFactory.Create();
+		var sink = await activeSink.ResolveAsync(cancellationToken);
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var size = FirstBatchSize;
 		var batch = new List<ResolveRequest>(size);
@@ -115,7 +120,7 @@ internal sealed class MediaService(
 				continue;
 			}
 
-			await foreach (var result in ResolveAndRealizeAsync(batch, building, buffer, cancellationToken))
+			await foreach (var result in ResolveAndRealizeAsync(batch, sink, building, buffer, cancellationToken))
 			{
 				yield return result;
 			}
@@ -126,7 +131,7 @@ internal sealed class MediaService(
 
 		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
 		{
-			await foreach (var result in ResolveAndRealizeAsync(batch, building, buffer, cancellationToken))
+			await foreach (var result in ResolveAndRealizeAsync(batch, sink, building, buffer, cancellationToken))
 			{
 				yield return result;
 			}
@@ -137,12 +142,13 @@ internal sealed class MediaService(
 
 	private async IAsyncEnumerable<MediaLookup> ResolveAndRealizeAsync(
 		IReadOnlyList<ResolveRequest> batch,
+		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		var resolutions = await ResolveBatchAsync(batch, building, buffer, cancellationToken);
+		var resolutions = await ResolveBatchAsync(batch, sink, building, buffer, cancellationToken);
 		var pipeline = batch
 			.Zip(resolutions)
 			.SelectAwait(pair => RealizeFromRequestAsync(pair.First, pair.Second, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
@@ -171,14 +177,35 @@ internal sealed class MediaService(
 		return mediaRepository.RemoveMetadataAsync([.. ids], cancellationToken);
 	}
 
-	public Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
-		IEnumerable<MediaId> ids,
-		MediaProvider source,
-		CancellationToken cancellationToken = default
-	) => mediaRepository.GetExternalsAsync(ids, source, cancellationToken);
+	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
+	{
+		var sink = await activeSink.ResolveAsync(cancellationToken);
+		var wanted = ids.ToList();
+		var sources = new HashSet<MediaProvider>();
+		foreach (var type in Enum.GetValues<MediaType>())
+		{
+			if (sink.AddressedBy(type) is Some<MediaProvider>(var addressed))
+			{
+				sources.Add(addressed);
+			}
+		}
+		var found = new Dictionary<MediaId, IExternalMediaId>();
+		foreach (var source in sources)
+		{
+			foreach (var (id, external) in await mediaRepository.GetExternalsAsync(wanted, source, cancellationToken))
+			{
+				if (sink.AddressedBy(external.Type) is Some<MediaProvider>(var expected) && expected == source)
+				{
+					found[id] = external;
+				}
+			}
+		}
+		return found;
+	}
 
 	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
 		IReadOnlyList<ResolveRequest> requests,
+		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
@@ -187,27 +214,33 @@ internal sealed class MediaService(
 		var allCandidates = requests.SelectMany(r => r.Candidates).Distinct().ToList();
 		var cached = await LoadByExternalsAsync(allCandidates, cancellationToken);
 		var preliminary = await requests
-			.SelectAwait(req => ResolveIdentityAsync(req, cached, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
+			.SelectAwait(req => ResolveIdentityAsync(req, sink, cached, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
 		return await coordinator.CoordinateResolutionsAsync(preliminary, building, buffer, cancellationToken);
 	}
 
 	private async ValueTask<Result<ResolvedIdentity>> ResolveIdentityAsync(
 		ResolveRequest request,
+		IMediaSink sink,
 		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		if (TryResolveFromCache(request, cached, buffer) is Some<ResolvedIdentity>(var resolved))
+		if (sink.AddressedBy(request.Type) is not Some<MediaProvider>(var target))
+		{
+			return Error.From($"The sink cannot address {request.Type} titles.");
+		}
+		if (TryResolveFromCache(request, target, cached, buffer) is Some<ResolvedIdentity>(var resolved))
 		{
 			return Success.Of(resolved);
 		}
-		return await ResolveFromProviderAsync(request, cancellationToken);
+		return await ResolveFromProviderAsync(request, target, cancellationToken);
 	}
 
 	private static Optional<ResolvedIdentity> TryResolveFromCache(
 		ResolveRequest request,
+		MediaProvider target,
 		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
 		MediaResolutionBuffer buffer
 	)
@@ -218,7 +251,7 @@ internal sealed class MediaService(
 			throw new MediaIdentityConflictException([.. matches.Select(m => m.Stored.Identity.Id)], [.. request.Candidates]);
 		}
 		var match = matches.FirstOrDefault();
-		if (match is null || match.Stored.Externals.OfProvider(request.Target) is null)
+		if (match is null || match.Stored.Externals.OfProvider(target) is null)
 		{
 			return new None();
 		}
@@ -233,10 +266,10 @@ internal sealed class MediaService(
 		return Some.Of(new ResolvedIdentity(merged, match));
 	}
 
-	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, CancellationToken cancellationToken)
+	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, MediaProvider target, CancellationToken cancellationToken)
 	{
 		return await idResolver
-			.ResolveAsync(request, cancellationToken)
+			.ResolveAsync(request, target, cancellationToken)
 			.Map(externals => new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), null));
 	}
 
