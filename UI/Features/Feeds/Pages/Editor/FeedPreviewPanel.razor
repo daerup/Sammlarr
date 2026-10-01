@@ -762,7 +762,7 @@
     {
         try
         {
-            (await WantlistService.GetWantlistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _wantlisted.Add(item));
+            _wantlisted.UnionWith((await WantlistService.GetAsync(CancellationToken.None)).Ids);
             (await BlocklistService.GetBlocklistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _blocklistIds.Add(item));
         }
         catch (Exception ex)
@@ -869,12 +869,12 @@
         {
             if (IsWantlisted(item))
             {
-                await WantlistService.RemoveFromWantlistAsync([item.Id]);
+                await WantlistService.RemoveAsync([item.Id]);
                 _wantlisted.Remove(item.Id);
             }
             else
             {
-                await WantlistService.AddToWantlistAsync([item.Id], new ManualOrigin(ManualSource.FeedPreview));
+                await WantlistService.AddAsync([item.Id], new ManualOrigin(ManualSource.FeedPreview));
                 _wantlisted.Add(item.Id);
             }
         }

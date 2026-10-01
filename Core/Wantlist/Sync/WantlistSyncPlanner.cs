@@ -2,6 +2,7 @@ using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using Domain.Providers;
+using Domain.Wantlist;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
 
@@ -24,9 +25,9 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 		await ReadAsync(sink, cancellationToken)
 			.Map(async contents =>
 			{
-				var localIds = await repo.GetIdsAsync(cancellationToken);
+				var wanted = new WantlistSnapshot(await repo.GetAllAsync(cancellationToken));
 				var outboxOps = await outbox.GetAsync(cancellationToken);
-				var plan = WantlistSyncPlan.Compute(contents.Matched, localIds, outboxOps) with { Unmatched = contents.Unmatched };
+				var plan = WantlistSyncPlan.Compute(contents.Matched, [.. wanted.Ids], outboxOps) with { Unmatched = contents.Unmatched };
 				await DropRedundantAsync(sink.Kind, plan, cancellationToken);
 				return Success.Of(plan);
 			});

@@ -22,7 +22,7 @@
                 <WantlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="false"/>
                 @foreach (var provenance in Origins)
                 {
-                    <WantlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="true" Entry="new WantlistItem(DemoMedia.Movie.Id, DemoProvenance.AddedAt, provenance)"/>
+                    <WantlistProvenanceToggle Result="DemoMedia.Movie" IsToggled="true" Item="new WantlistItem(DemoMedia.Movie.Id, DemoProvenance.AddedAt, provenance)"/>
                 }
             </div>
             <span>Indicator</span>

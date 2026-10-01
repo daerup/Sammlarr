@@ -68,7 +68,7 @@
                                        OnBulkMark="WantlistBulkAsync"
                                        RemoveConfirm="RemoveConfirm"
                                        MarkConfirm="WantlistConfirm"
-                                       IsMarked="@(item => _wantlistedIds.Contains(item.Media.Id))"
+                                       IsMarked="@(item => _wantlist.Contains(item.Media.Id))"
                                        AlreadyMarkedHint="Every selected title is already on your wantlist."/>
             </Grid>
         </MediaListBody>
@@ -83,7 +83,7 @@
 @code {
     private IReadOnlyList<BlocklistedMedia>? _items;
     private MediaLookup? _selectedItem;
-    private IReadOnlySet<MediaId> _wantlistedIds = new HashSet<MediaId>();
+    private WantlistSnapshot _wantlist = new([]);
 
     private IReadOnlyList<BlocklistedMedia> GridItems =>
         [
@@ -107,7 +107,7 @@
         try
         {
             _items = await BlocklistService.GetBlocklistItemsAsync(Cancellation.Token).ToListAsync();
-            _wantlistedIds = await WantlistService.GetWantlistIdsAsync(Cancellation.Token);
+            _wantlist = await WantlistService.GetAsync(Cancellation.Token);
 
             if (_selectedItem.HasValue)
             {
@@ -153,7 +153,7 @@
 
     private async Task WantlistBulkAsync(IReadOnlyList<BlocklistedMedia> toMark)
     {
-        await WantlistService.AddToWantlistAsync(toMark.Select(item => item.Media.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
+        await WantlistService.AddAsync(toMark.Select(item => item.Media.Id), new ManualOrigin(ManualSource.Search), Cancellation.Token);
         ToastService.Success($"Added {toMark.Count} title{(toMark.Count == 1 ? "" : "s")} to your wantlist.");
     }
 

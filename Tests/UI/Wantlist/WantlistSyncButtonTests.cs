@@ -232,7 +232,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
-		wantlist.GetWantlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		Services.AddSingleton(wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();

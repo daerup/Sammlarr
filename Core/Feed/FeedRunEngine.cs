@@ -65,8 +65,8 @@ internal sealed class FeedRunEngine(
 		};
 		await feeds.StartRunAsync(run, cancellationToken);
 
-		var added = await wantlist.AddToWantlistAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
-		var removed = await wantlist.RemoveOwnedAsync(planned.Delta.Drops, feed.Id, cancellationToken);
+		var added = await wantlist.AddAsync(planned.Delta.Adds, new FeedOrigin(feed, run), cancellationToken);
+		var removed = await wantlist.RemoveAsync(planned.Delta.Drops, addedBy: feed.Id, cancellationToken);
 		WarnOnDrift(feed, planned.Delta, added, removed);
 
 		var applied = planned.Delta with { Adds = added, Drops = removed };

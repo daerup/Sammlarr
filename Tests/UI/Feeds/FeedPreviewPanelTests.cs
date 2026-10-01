@@ -52,8 +52,8 @@ public class FeedPreviewPanelTests : BunitContext
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
 
-		await Assert.That(cut.FindAll(".preview-main-results .result-leaving")).HasCount(2);
-		await Assert.That(cut.FindAll(".preview-main-results .search-result-row")).HasCount(5);
+		await Assert.That(cut.FindAll(".preview-main-results .result-leaving")).Count().IsEqualTo(2);
+		await Assert.That(cut.FindAll(".preview-main-results .search-result-row")).Count().IsEqualTo(5);
 		await Assert.That(BadgeCounts(cut)[4]).IsEqualTo(2);
 		await Assert.That(LeavingBadge(cut)).IsEqualTo(2);
 	}
@@ -66,7 +66,7 @@ public class FeedPreviewPanelTests : BunitContext
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-main-results .search-result-row").Count == 5);
 
-		await Assert.That(cut.FindAll(".preview-main-results .result-leaving")).HasCount(2);
+		await Assert.That(cut.FindAll(".preview-main-results .result-leaving")).Count().IsEqualTo(2);
 		await Assert.That(BadgeCounts(cut)[2]).IsEqualTo(2);
 	}
 
@@ -123,7 +123,7 @@ public class FeedPreviewPanelTests : BunitContext
 		await ApplyAsync(cut, new Mirror(3));
 		cut.WaitForState(() => cut.FindAll(".preview-gone-results .search-result-row").Count == 1);
 
-		await Assert.That(cut.FindAll(".preview-gone-results .search-result-toggle-btn")).HasCount(2);
+		await Assert.That(cut.FindAll(".preview-gone-results .search-result-toggle-btn")).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -165,7 +165,7 @@ public class FeedPreviewPanelTests : BunitContext
 		Services.AddLogging();
 		Services.AddSingleton(planner);
 		var wantlist = IWantlistService.Mock();
-		wantlist.GetWantlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetBlocklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
 		Services.AddSingleton(wantlist.Object);

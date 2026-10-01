@@ -27,7 +27,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	[Test]
 	public async Task Render_WhenWantlistedByAFeed_ShowsTheProvenanceDot()
 	{
-		var cut = RenderToggle(isToggled: true, entry: FeedEntry());
+		var cut = RenderToggle(isToggled: true, item: FeedItem());
 
 		await Assert.That(cut.FindAll(".toggle-dot").Count).IsEqualTo(1);
 	}
@@ -37,7 +37,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	{
 		var cut = RenderToggle(
 			isToggled: true,
-			entry: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)))
+			item: new WantlistItem(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)))
 		);
 
 		await Assert.That(cut.FindAll(".toggle-dot")).IsEmpty();
@@ -46,7 +46,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	[Test]
 	public async Task Render_WhenNotWantlisted_ShowsNoDot()
 	{
-		var cut = RenderToggle(isToggled: false, entry: null);
+		var cut = RenderToggle(isToggled: false, item: null);
 
 		await Assert.That(cut.FindAll(".toggle-dot")).IsEmpty();
 	}
@@ -54,7 +54,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	[Test]
 	public async Task RightClick_WhenWantlisted_RevealsTheProvenanceDetails()
 	{
-		var cut = RenderToggle(isToggled: true, entry: FeedEntry());
+		var cut = RenderToggle(isToggled: true, item: FeedItem());
 
 		await cut.Find(".provenance-trigger").ContextMenuAsync(new());
 
@@ -64,7 +64,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 	[Test]
 	public async Task RightClick_WhenNotWantlisted_RevealsNothing()
 	{
-		var cut = RenderToggle(isToggled: false, entry: null);
+		var cut = RenderToggle(isToggled: false, item: null);
 
 		await cut.Find(".provenance-trigger").ContextMenuAsync(new());
 
@@ -84,8 +84,8 @@ public class WantlistProvenanceToggleTests : BunitContext
 		await Assert.That(toggled).IsNotNull();
 	}
 
-	private IRenderedComponent<Harness> RenderToggle(bool isToggled, WantlistItem? entry) =>
-		Render<Harness>(parameters => parameters.Add(harness => harness.IsToggled, isToggled).Add(harness => harness.Entry, entry));
+	private IRenderedComponent<Harness> RenderToggle(bool isToggled, WantlistItem? item) =>
+		Render<Harness>(parameters => parameters.Add(harness => harness.IsToggled, isToggled).Add(harness => harness.Item, item));
 
 	private sealed class Harness : ComponentBase
 	{
@@ -93,7 +93,7 @@ public class WantlistProvenanceToggleTests : BunitContext
 		public bool IsToggled { get; set; }
 
 		[Parameter]
-		public WantlistItem? Entry { get; set; }
+		public WantlistItem? Item { get; set; }
 
 		protected override void BuildRenderTree(RenderTreeBuilder builder)
 		{
@@ -102,12 +102,12 @@ public class WantlistProvenanceToggleTests : BunitContext
 			builder.OpenComponent<WantlistProvenanceToggle>(1);
 			builder.AddAttribute(2, nameof(WantlistProvenanceToggle.Result), Lookup());
 			builder.AddAttribute(3, nameof(WantlistProvenanceToggle.IsToggled), IsToggled);
-			builder.AddAttribute(4, nameof(WantlistProvenanceToggle.Entry), Entry);
+			builder.AddAttribute(4, nameof(WantlistProvenanceToggle.Item), Item);
 			builder.CloseComponent();
 		}
 	}
 
-	private static WantlistItem FeedEntry() =>
+	private static WantlistItem FeedItem() =>
 		new(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), Guid.Empty, "Documentaries")));
 
 	private static MediaLookup Lookup() => new PartialMovie { Identity = new MediaIdentity(Id, []) }.ToMatch();

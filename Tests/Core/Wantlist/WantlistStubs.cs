@@ -39,7 +39,7 @@ internal static class WantlistStubs
 	public static Mock<IWantlistRepository> EmptyRepository()
 	{
 		var repository = IWantlistRepository.Mock();
-		repository.GetIdsAsync(Any()).Returns([]);
+		repository.GetAllAsync(Any()).Returns([]);
 		repository.AddAsync(Any<IEnumerable<MediaId>>(), Any<WantlistItemProvenance>(), Any()).Returns([]);
 		repository.RemoveAsync(Any<IEnumerable<MediaId>>(), Any()).Returns([]);
 		return repository;

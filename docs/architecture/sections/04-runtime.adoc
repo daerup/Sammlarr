@@ -228,7 +228,7 @@ sequenceDiagram
 
   Note over U,DB: Add: local only, no Plex call
   U->>W: add title
-  W->>S: AddToWantlistAsync(ids, origin)
+  W->>S: AddAsync(ids, origin)
   S->>DB: insert wantlist row + outbox row (Pending)
   S-->>W: item shows a Pending push dot
 

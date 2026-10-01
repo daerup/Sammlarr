@@ -1,6 +1,7 @@
 @page "/wantlist"
 @inherits MediaListPage
 @using Contracts.Identity
+@using Contracts.Media
 @using Contracts.Announcing
 @using Contracts.Blocklist
 @using Contracts.Wantlist
@@ -15,6 +16,7 @@
 @using UI.Shared.Filters
 @using UI.Shared.Services.Branding
 @inject IWantlistService WantlistService
+@inject IMediaService Media
 @inject IWantlistOutbox Outbox
 @inject IBlocklistService BlocklistService
 @inject MediaProviderBrandingService BrandingService
@@ -237,7 +239,8 @@
 
             _blocklistedIds = await BlocklistService.GetBlocklistIdsAsync(Cancellation.Token);
 
-            var all = await WantlistService.GetWantlistItemsAsync(WantlistQueryOptions.WithRemoved, Cancellation.Token).ToListAsync(Cancellation.Token);
+            var listed = WantlistStatusView.WithPendingRemovals(await WantlistService.GetAsync(Cancellation.Token), _outboxEntries.Values);
+            var all = await Media.GetDetailsAsync(listed, Cancellation.Token).ToListAsync(Cancellation.Token);
             _items = all.Where(item => !_removedIds.Contains(item.Media.Id)).ToList();
             _removedItems = all.Where(item => _removedIds.Contains(item.Media.Id)).ToList();
             Filter = Filter with { Statuses = WantlistStatusView.Adjusted(Filter.Statuses, _items.Count, _removedItems.Count) };
@@ -425,7 +428,7 @@
 
     private async Task RemoveBulkAsync(IReadOnlyList<WantlistedMedia> toRemove)
     {
-        await WantlistService.RemoveFromWantlistAsync(toRemove.Select(item => item.Media.Id), Cancellation.Token);
+        await WantlistService.RemoveAsync(toRemove.Select(item => item.Media.Id), Cancellation.Token);
         Notifier.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your wantlist.");
         await LoadAsync();
         await RefreshPendingAsync();
