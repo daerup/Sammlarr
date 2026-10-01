@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using API.Plex.Types;
+using Contracts.Media;
 using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
@@ -8,11 +9,33 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexSink(PlexClient plexClient, PlexUrls urls, ILogger<PlexSink> logger) : IMediaSink
+internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService mediaService, ILogger<PlexSink> logger) : IMediaSink
 {
 	public SinkKind Kind => SinkKind.Plex;
 
-	public async IAsyncEnumerable<UnmatchedMedia> GetWantlistAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+	public async Task<SinkContents> ReadAsync(CancellationToken cancellationToken = default)
+	{
+		var entries = await WatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
+		var requests = entries.Select(entry => new ResolveRequest([.. entry.Externals], MediaProvider.Plex, new None()));
+		List<MediaId> matched = [];
+		List<UnmatchedMedia> unmatched = [];
+		await foreach (var (result, entry) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(entries, cancellationToken))
+		{
+			if (result is Success<MediaIdentity>(var identity))
+			{
+				matched.Add(identity.Id);
+			}
+			else
+			{
+				unmatched.Add(entry);
+				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", entry.Title ?? entry.Externals.FirstOrDefault()?.Value);
+			}
+		}
+
+		return new SinkContents(matched, unmatched);
+	}
+
+	private async IAsyncEnumerable<UnmatchedMedia> WatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var (items, pages) = await FetchPageAsync(1, cancellationToken);
 		foreach (var item in items)

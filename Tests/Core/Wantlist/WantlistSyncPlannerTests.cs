@@ -2,34 +2,59 @@ using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Domain.Media;
 using Domain.Wantlist.Outbox;
+using Domain.Wantlist.Sync;
+using TestInfrastructure;
 
 namespace Core.Tests.Wantlist;
 
 public class WantlistSyncPlannerTests
 {
 	[Test]
-	public async Task PlanAsync_WhenAQueuedRemovalTheProviderAlreadyAgreesWith_DropsItWithoutRunningASync()
+	public async Task PlanAsync_WhenAQueuedRemovalTheSinkAlreadyAgreesWith_DropsItWithoutRunningASync()
 	{
 		var stale = MediaId.From(new Guid(11, 0, 0, new byte[8]));
 		var outbox = IWantlistOutbox.Mock();
 		outbox.GetAsync(Any()).Returns([new WantlistOutboxEntry(stale, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
-		var provider = IMediaSink.Mock();
-		provider.GetWantlistAsync(Any()).Returns(WantlistStubs.NothingRemote());
 
-		await WantlistStubs.Planner(provider, outbox).PlanAsync();
+		await WantlistStubs.Planner(WantlistStubs.EmptySink(), outbox).PlanAsync();
 
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task PlanAsync_WhenTheOutboxAgreesWithTheProvider_LeavesItAlone()
+	public async Task PlanAsync_WhenTheOutboxAgreesWithTheSink_LeavesItAlone()
 	{
-		var provider = IMediaSink.Mock();
-		provider.GetWantlistAsync(Any()).Returns(WantlistStubs.NothingRemote());
 		var outbox = WantlistStubs.EmptyOutbox();
 
-		await WantlistStubs.Planner(provider, outbox).PlanAsync();
+		await WantlistStubs.Planner(WantlistStubs.EmptySink(), outbox).PlanAsync();
 
 		outbox.DropAsync(Any<IEnumerable<MediaId>>(), Any()).WasNeverCalled();
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenTheSinkHoldsAMatchedAndAnUnmatchedItem_PullsTheMatchedOneAndReportsTheOther()
+	{
+		var matched = MediaId.From(Guid.NewGuid());
+		var unmatched = new UnmatchedMedia { Externals = [PlexId.From("plex-1", MediaType.Movie)], Title = "Solaris" };
+		var sink = IMediaSink.Mock();
+		sink.ReadAsync(Any()).Returns(new SinkContents([matched], [unmatched]));
+
+		var result = await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox()).PlanAsync();
+
+		var summary = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSummary>();
+		await Assert.That(summary!.Pull.Adds).IsEquivalentTo([matched]);
+		await Assert.That(summary.Unmatched).IsEquivalentTo([unmatched]);
+	}
+
+	[Test]
+	public async Task PlanAsync_WhenTheSinkCannotBeRead_ReportsItUnreachable()
+	{
+		var sink = IMediaSink.Mock();
+		sink.ReadAsync(Any()).Throws(new HttpRequestException("plex is down"));
+
+		var result = await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox()).PlanAsync();
+
+		var unreachable = await Assert.That(result).IsOfUnionType<WantlistPlanResult, WantlistSyncSinkUnreachable>();
+		await Assert.That(unreachable.Reason).Contains("plex is down");
 	}
 }

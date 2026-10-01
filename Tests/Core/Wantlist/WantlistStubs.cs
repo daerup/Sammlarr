@@ -18,8 +18,17 @@ namespace Core.Tests.Wantlist;
 
 internal static class WantlistStubs
 {
+	public static readonly SinkContents NothingOnTheSink = new([], []);
+
+	public static Mock<IMediaSink> EmptySink()
+	{
+		var sink = IMediaSink.Mock();
+		sink.ReadAsync(Any()).Returns(NothingOnTheSink);
+		return sink;
+	}
+
 	public static WantlistSyncPlanner Planner(Mock<IMediaSink> sink, Mock<IWantlistOutbox> outbox) =>
-		new(Active(sink), EmptyRepository().Object, outbox.Object, NothingMatches().Object, NullLogger<WantlistSyncPlanner>.Instance);
+		new(Active(sink), EmptyRepository().Object, outbox.Object, NullLogger<WantlistSyncPlanner>.Instance);
 
 	public static Mock<IWantlistRepository> EmptyRepository()
 	{
@@ -73,30 +82,6 @@ internal static class WantlistStubs
 			clock.Object,
 			NullLogger<WantlistSyncEngine>.Instance
 		);
-	}
-
-	public static Mock<IMediaService> NothingMatches()
-	{
-		var media = IMediaService.Mock();
-		media.IdentifyAsync(Any<IEnumerable<ResolveRequest>>(), Any()).Returns((requests, _) => AsAsyncEnumerable(requests.Select(Unmatched).ToList()));
-		return media;
-	}
-
-	public static async IAsyncEnumerable<UnmatchedMedia> NothingRemote()
-	{
-		await Task.CompletedTask;
-		yield break;
-	}
-
-	private static Result<MediaIdentity> Unmatched(ResolveRequest request) => Error.From("unmatched");
-
-	private static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(IReadOnlyList<T> items)
-	{
-		foreach (var item in items)
-		{
-			yield return item;
-			await Task.CompletedTask;
-		}
 	}
 
 	private static ActiveSink Active(Mock<IMediaSink> sink) =>
