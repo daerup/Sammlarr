@@ -1,6 +1,8 @@
 @using Contracts.Identity
+@using Contracts.Settings
 @using Domain.Identity
 @inject IUserManagementService Users
+@inject IProviderConfigService ProviderConfigService
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 
@@ -160,8 +162,8 @@ else
 
     private async Task LoadAsync()
     {
-        _users = await Users.ListAsync();
-        _registrationOpen = await Users.GetRegistrationModeAsync() == RegistrationMode.Open;
+        _users = await Users.GetAllAsync();
+        _registrationOpen = (await ProviderConfigService.GetAsync()).RegistrationMode == RegistrationMode.Open;
         _isLoaded = true;
     }
 
@@ -185,7 +187,7 @@ else
     {
         try
         {
-            await Users.RemoveAsync(user.Id);
+            await Users.DeleteAsync(user.Id);
             Notifier.Success($"Removed {user.DisplayName}.");
             await LoadAsync();
         }

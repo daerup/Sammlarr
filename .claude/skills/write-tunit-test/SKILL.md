@@ -95,7 +95,7 @@ Use this whenever an API-tier unit takes an `HttpClient`. Never hit a real netwo
 Interfaces have generated `.Mock()` factories:
 ```csharp
 var users = IUserRepository.Mock();
-users.AnyAsync(Any()).Returns(false);
+users.GetAllAsync(Any()).Returns([]);
 users.FindByLoginAsync(AuthProvider.Plex, "plex-uuid", Any()).Returns(new None());
 ```
 `Any()` / `Any<T>()` come from `TestInfrastructure`. Verify calls with `.WasCalled(Times.Once)` / `.WasNeverCalled()` — but prefer asserting real output/state over delegation checks.

@@ -13,33 +13,30 @@ internal sealed class UserManagementService(
 	ISessionInvalidator sessionInvalidator
 ) : IUserManagementService
 {
-	public async Task<IReadOnlyList<User>> ListAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
 		return await users.GetAllAsync(cancellationToken);
 	}
 
-	public async Task ChangeRoleAsync(UserId userId, UserRole role, CancellationToken cancellationToken = default)
+	public async Task ChangeRoleAsync(UserId id, UserRole role, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
 		if (role == UserRole.Member)
 		{
-			await EnsureNotLastAdminAsync(userId, cancellationToken);
+			await EnsureNotLastAdminAsync(id, cancellationToken);
 		}
-		await users.ChangeRoleAsync(userId, role, cancellationToken);
-		sessionInvalidator.Invalidate(userId);
+		await users.ChangeRoleAsync(id, role, cancellationToken);
+		sessionInvalidator.Invalidate(id);
 	}
 
-	public async Task RemoveAsync(UserId userId, CancellationToken cancellationToken = default)
+	public async Task DeleteAsync(UserId id, CancellationToken cancellationToken = default)
 	{
 		await EnsureCallerIsAdminAsync(cancellationToken);
-		await EnsureNotLastAdminAsync(userId, cancellationToken);
-		await users.DeleteAsync(userId, cancellationToken);
-		sessionInvalidator.Invalidate(userId);
+		await EnsureNotLastAdminAsync(id, cancellationToken);
+		await users.DeleteAsync(id, cancellationToken);
+		sessionInvalidator.Invalidate(id);
 	}
-
-	public async ValueTask<RegistrationMode> GetRegistrationModeAsync(CancellationToken cancellationToken = default) =>
-		(await providerConfig.GetAsync(cancellationToken)).RegistrationMode;
 
 	public async Task SetRegistrationModeAsync(RegistrationMode mode, CancellationToken cancellationToken = default)
 	{
@@ -56,10 +53,10 @@ internal sealed class UserManagementService(
 		}
 	}
 
-	private async Task EnsureNotLastAdminAsync(UserId userId, CancellationToken cancellationToken)
+	private async Task EnsureNotLastAdminAsync(UserId id, CancellationToken cancellationToken)
 	{
-		var target = await users.GetAsync(userId, cancellationToken);
-		if (target.Role == UserRole.Admin && await users.CountByRoleAsync(UserRole.Admin, cancellationToken) <= 1)
+		var target = await users.GetAsync(id, cancellationToken);
+		if (target.Role == UserRole.Admin && (await users.GetAllAsync(cancellationToken)).Count(user => user.Role == UserRole.Admin) <= 1)
 		{
 			throw new InvalidOperationException("Cannot remove or demote the last admin.");
 		}
