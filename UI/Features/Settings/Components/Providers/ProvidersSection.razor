@@ -97,7 +97,7 @@
         var ready = new HashSet<MediaProvider>();
         foreach (var provider in Enum.GetValues<AuthProvider>())
         {
-            if (await Credentials.HasCredentialAsync(provider))
+            if (await Credentials.GetAsync(provider).IsSuccess())
             {
                 ready.Add(provider.AsMediaProvider());
             }
@@ -105,7 +105,7 @@
 
         foreach (var provider in Enum.GetValues<ApiKeyProvider>())
         {
-            if (await ApiKeys.HasApiKeyAsync(provider))
+            if (await ApiKeys.GetAsync(provider).IsSuccess())
             {
                 ready.Add(provider.AsMediaProvider());
             }

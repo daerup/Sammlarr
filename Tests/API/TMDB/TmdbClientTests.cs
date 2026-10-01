@@ -39,7 +39,7 @@ public class TmdbClientTests
 
 		await testee.SendAsync(HttpMethod.Get, "trending/all/week?page=1", new TestApiKey(ApiKeyProvider.Tmdb, GetApiKey()));
 
-		apiKeys.Invalidate(ApiKeyProvider.Tmdb).WasCalled(Times.Once);
+		apiKeys.ReportRejected(ApiKeyProvider.Tmdb).WasCalled(Times.Once);
 	}
 
 	private string GetApiKey() => new Faker().Random.AlphaNumeric(32);

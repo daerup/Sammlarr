@@ -100,6 +100,6 @@ public class PlexClientTests
 
 		await testee.SendAsync(HttpMethod.Get, PlexBaseUrl);
 
-		credentialStore.Invalidate(AuthProvider.Plex).WasCalled(Times.Once);
+		credentialStore.ReportRejected(AuthProvider.Plex).WasCalled(Times.Once);
 	}
 }

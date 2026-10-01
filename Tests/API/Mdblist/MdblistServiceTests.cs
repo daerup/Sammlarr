@@ -69,7 +69,7 @@ public class MdblistServiceTests
 	{
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Mdblist, "test-key");
-		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
+		apiKeyStore.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Success.Of(apiKey));
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();

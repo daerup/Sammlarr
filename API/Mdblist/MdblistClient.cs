@@ -27,7 +27,7 @@ internal class MdblistClient(HttpClient client, MdblistOptions options, IApiKeyS
 		request.Content = content;
 		try
 		{
-			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.Invalidate(ApiKeyProvider.Mdblist));
+			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Mdblist));
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{

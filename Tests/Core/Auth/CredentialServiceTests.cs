@@ -23,8 +23,7 @@ public sealed class CredentialServiceTests : IDisposable
 		Testee = new CredentialService(
 			_credentials.Object,
 			new TestCredentialFactory(),
-			new TypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>(_memory),
-			new TestCurrentUser()
+			new SecretCache<AuthProvider, ICredential>(new TypedMemoryCache<(Guid User, AuthProvider Provider), ICredential>(_memory), new TestCurrentUser())
 		);
 	}
 
@@ -43,11 +42,11 @@ public sealed class CredentialServiceTests : IDisposable
 	}
 
 	[Test]
-	public async Task Invalidate_AfterARead_MakesTheNextReadLoadTheStoredCredentialAgain()
+	public async Task ReportRejected_AfterARead_MakesTheNextReadLoadTheStoredCredentialAgain()
 	{
 		await Testee.GetAsync(AuthProvider.Plex);
 
-		Testee.Invalidate(AuthProvider.Plex);
+		Testee.ReportRejected(AuthProvider.Plex);
 
 		await Testee.GetAsync(AuthProvider.Plex);
 		_credentials.GetAsync(AuthProvider.Plex, Any()).WasCalled(Times.Exactly(2));
@@ -58,7 +57,7 @@ public sealed class CredentialServiceTests : IDisposable
 	{
 		await Testee.GetAsync(AuthProvider.Plex);
 
-		await Testee.StoreAsync(AuthProvider.Plex, "new-token", Stored.ExpiresAt, Stored.ClientId);
+		await Testee.StoreAsync(AuthProvider.Plex, Stored with { AccessToken = "new-token" });
 
 		await Testee.GetAsync(AuthProvider.Plex);
 		_credentials.StoreAsync(AuthProvider.Plex, "new-token", Stored.ExpiresAt, Stored.ClientId, Any()).WasCalled(Times.Once);

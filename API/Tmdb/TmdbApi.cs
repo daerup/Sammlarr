@@ -12,10 +12,10 @@ namespace API.Tmdb;
 internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<TmdbApi> logger)
 {
 	public async Task<Result<TmdbTypes.Details>> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default) =>
-		await apiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
+		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
 
 	public async Task<Result<TmdbTypes.FindItem>> FindByImdbIdAsync(ImdbId id, CancellationToken cancellationToken = default) =>
-		await apiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
 
 	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{

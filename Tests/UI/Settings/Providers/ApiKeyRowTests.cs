@@ -17,14 +17,16 @@ public class ApiKeyRowTests : BunitContext
 	private const string Rejection = "The TMDB API key is not valid.";
 
 	private readonly Mock<IApiKeyService> _keys = IApiKeyService.Mock();
+	private readonly Mock<IApiKeyFactory> _factory = IApiKeyFactory.Mock();
 
 	[Before(Test)]
 	public void Setup()
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddSingleton<MediaProviderBrandingService>();
-		_keys.GetApiKeyAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
+		_keys.GetAsync(Any<ApiKeyProvider>(), Any()).Returns(Error.From("No API key is configured for this provider."));
 		Services.AddSingleton(_keys.Object);
+		Services.AddSingleton(_factory.Object);
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
@@ -39,7 +41,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Status_WhileTheSavedKeyIsStillLoading_ShowsASkeletonPill()
 	{
-		_keys.GetApiKeyAsync(Any<ApiKeyProvider>(), Any()).ReturnsAsync(new ValueTask<Result<IApiKey>>(new TaskCompletionSource<Result<IApiKey>>().Task));
+		_keys.GetAsync(Any<ApiKeyProvider>(), Any()).ReturnsAsync(new ValueTask<Result<IApiKey>>(new TaskCompletionSource<Result<IApiKey>>().Task));
 
 		var cut = Render<ApiKeyRow>(parameters => parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb));
 
@@ -60,7 +62,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Test_WhenTheProviderRejectsTheKey_OutlinesTheFieldAndLeavesTheReasonToTheBadge()
 	{
-		_keys.TestApiKeyAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
+		_factory.CreateAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Error.From(Rejection));
 		var cut = RenderRow();
 		await TypeAsync(cut, "a-wrong-key");
 
@@ -74,7 +76,7 @@ public class ApiKeyRowTests : BunitContext
 	[Test]
 	public async Task Test_WhenTheProviderAcceptsTheKey_ReadsVerifiedAndOffersSaveWithNoSubtext()
 	{
-		_keys.TestApiKeyAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Success.Of(IApiKey.Mock().Object));
+		_factory.CreateAsync(Any<ApiKeyProvider>(), Any<string>(), Any()).Returns(Success.Of(IApiKey.Mock().Object));
 		var cut = RenderRow();
 		await TypeAsync(cut, "a-good-key");
 
