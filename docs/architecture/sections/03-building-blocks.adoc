@@ -90,7 +90,7 @@ all.
 
 | TMDB | `ITrendingService`, `IMediaRatingService`, `IMetadataEnricher`, `IExternalIdConverter`
 | Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IMetadataEnricher`, `IExternalIdConverter`
-| MDBList | `IFeedService`
+| MDBList | `IFeedProvider`
 | IMDb | `IExternalIdConverter`
 | TheTVDB | `IExternalIdConverter`
 |===
@@ -124,12 +124,12 @@ The anatomy of a provider module, using MDBList. The whole registration is three
 ----
 services.AddHttpClient<MdblistClient>().AddProviderHttp<MdblistOptions>();
 services.AddHttpClient(MdblistClient.Unauthenticated).AddProviderHttp<MdblistOptions>();
-services.AddTracedKeyedScoped<IFeedService, MdblistService>(FeedProvider.Mdblist);
+services.AddTracedKeyedScoped<IFeedProvider, MdblistService>(FeedProvider.Mdblist);
 ----
 
 * `MdblistClient` is a typed HTTP client. `AddProviderHttp` gives it the resilience pipeline and a concurrency gate sized from `MdblistOptions`.
-* `MdblistService` implements `IFeedService`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a generated subset of `MediaProvider` holding only the providers with the `Feed` capability.
-* Nothing outside the folder references `MdblistService`. The feed preview resolves `IFeedService` by the feed's `FeedProvider` key.
+* `MdblistService` implements `IFeedProvider`, keyed to `FeedProvider.Mdblist`. `FeedProvider` is a generated subset of `MediaProvider` holding only the providers with the `Feed` capability.
+* Nothing outside the folder references `MdblistService`. The feed preview resolves `IFeedProvider` by the feed's `FeedProvider` key.
 
 Adding a provider is four steps, with no change to any consumer:
 

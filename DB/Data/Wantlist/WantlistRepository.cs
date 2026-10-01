@@ -88,4 +88,20 @@ internal sealed class WantlistRepository(IDbContextFactory<SammlarrDbContext> db
 		await added.ExecuteDeleteAsync(cancellationToken);
 		return [.. removed.Select(MediaId.From)];
 	}
+
+	public async Task OrphanAsync(Domain.Feed.Feed addedBy, CancellationToken cancellationToken = default)
+	{
+		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+		var feedId = addedBy.Id.Value;
+		var name = addedBy.Name;
+		await ctx
+			.Wantlist.Where(w => w.SourceFeedId == feedId)
+			.ExecuteUpdateAsync(
+				s =>
+					s.SetProperty(w => w.Origin, WantlistItemOrigin.Orphaned)
+						.SetProperty(w => w.SourceFeedNameSnapshot, name)
+						.SetProperty(w => w.SourceRunId, (Guid?)null),
+				cancellationToken
+			);
+	}
 }

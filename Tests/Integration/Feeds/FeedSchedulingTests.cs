@@ -1,7 +1,9 @@
 using Contracts.Feed;
+using Contracts.Wantlist;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Providers;
+using Domain.Wantlist;
 using Harness;
 using TestInfrastructure;
 
@@ -85,6 +87,21 @@ public class FeedSchedulingTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(Scheduler.Unscheduled).Contains(id);
 		await Assert.That((await Testee.GetAsync()).Find(id)).IsNone();
+	}
+
+	[Test]
+	public async Task DeleteAsync_ForAFeedWithTitlesOnTheWantlist_KeepsThemAsOrphanedUnderItsName()
+	{
+		var id = await Testee.CreateAsync(Feed("Nightly", new Scheduled(Nightly)));
+		var title = await host.Movie(TestMedia.Inception).OnWantlist(await host.SeedFeedOriginAsync(id));
+
+		await Testee.DeleteAsync(id);
+
+		var item = await Assert.That((await host.Resolve<IWantlistService>().GetAsync()).Find(title)).IsSome();
+		await Assert
+			.That(item!.Provenance)
+			.IsOfUnionType<WantlistItemProvenance, OrphanedOrigin>()
+			.And.Multiple(async orphan => await Assert.That(orphan.FormerFeedName).IsEqualTo("Nightly"));
 	}
 
 	[Test]

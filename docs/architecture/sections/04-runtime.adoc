@@ -102,7 +102,7 @@ written anywhere; it just shows what the feed would resolve to right now.
 sequenceDiagram
   actor U as User
   participant P as Feeds editor (UI)
-  participant F as IFeedService (MDBList)
+  participant F as IFeedProvider (MDBList)
   participant M as MDBList
   participant R as IMediaService (+ cache, DB)
   participant E as IFeedRunPlanner
@@ -126,7 +126,7 @@ sequenceDiagram
   P-->>U: tiles, stat badges, unmatched list
 ....
 
-`IFeedService` is resolved by the feed's `FeedProvider` key. Each entry is resolved to a
+`IFeedProvider` is resolved by the feed's `FeedProvider` key. Each entry is resolved to a
 `MediaLookup` by the pipeline above, so a preview reuses cached rows and rarely hits every
 provider. On a circuit-breaker trip or timeout the client raises `ProviderUnavailableException`;
 the panel shows partial results and a retry rather than failing the whole preview.
