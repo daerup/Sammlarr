@@ -23,6 +23,6 @@ internal class TmdbClient(HttpClient client, TmdbOptions options, IApiKeyService
 		using var request = new HttpRequestMessage(method, ApiKeyRequest.BuildUri(options.BaseUrl, endpoint, QueryParam, apiKey.Value));
 		request.StampTriggeredBy(currentUser);
 		request.Content = content;
-		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.Invalidate(ApiKeyProvider.Tmdb));
+		return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => apiKeys.ReportRejected(ApiKeyProvider.Tmdb));
 	}
 }

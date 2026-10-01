@@ -9,7 +9,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var hasAccess = await Credentials.HasCredentialAsync(Provider);
+        var hasAccess = await Credentials.GetAsync(Provider).IsSuccess();
 
         if (AccessChanged.HasDelegate && _lastReportedAccess != hasAccess)
         {

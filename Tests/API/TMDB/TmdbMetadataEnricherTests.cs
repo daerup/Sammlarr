@@ -66,7 +66,7 @@ public class TmdbMetadataEnricherTests
 	{
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
-		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
+		apiKeyStore.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
 		var tmdbApi = new TmdbApi(
 			new TmdbClient(handler.CreateClient(Options.BaseUrl), Options, apiKeyStore.Object, ICurrentUser.Mock().Object),
 			apiKeyStore.Object,

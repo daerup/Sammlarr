@@ -22,52 +22,49 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task GetApiKeyAsync_WhenNoKeyWasStored_ReturnsNothing() => await Assert.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsError();
+	public async Task GetAsync_WhenNoKeyWasStored_ReturnsNothing() => await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
 
 	[Test]
-	public async Task GetApiKeyAsync_WhenAKeyWasStored_ReturnsIt()
+	public async Task GetAsync_WhenAKeyWasStored_ReturnsIt()
 	{
-		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
+		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
 
 		await Assert
-			.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb))
+			.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb))
 			.IsSuccess()
 			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("tmdb-key-12345"));
 	}
 
 	[Test]
-	public async Task SetApiKeyAsync_WhenAKeyAlreadyExists_ReplacesIt()
+	public async Task StoreAsync_WhenAKeyAlreadyExists_ReplacesIt()
 	{
-		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "old-key"));
+		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "old-key"));
 
-		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
+		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "new-key"));
 
-		await Assert
-			.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb))
-			.IsSuccess()
-			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("new-key"));
+		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess().And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("new-key"));
 	}
 
 	[Test]
-	public async Task ClearApiKeyAsync_WhenAKeyExists_RemovesIt()
+	public async Task ClearAsync_WhenAKeyExists_RemovesIt()
 	{
-		await ApiKeys.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "secret-key"));
+		await ApiKeys.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "secret-key"));
 
-		await ApiKeys.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await ApiKeys.ClearAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsError();
+		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
 	}
 
 	[Test]
-	public async Task ClearApiKeyAsync_WhenNoKeyWasStored_IsSafe()
+	public async Task ClearAsync_WhenNoKeyWasStored_IsSafe()
 	{
-		await ApiKeys.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await ApiKeys.ClearAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsError();
+		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
 	}
 
 	[Test]
-	public async Task VerifyAsync_WhenTmdbRejectsTheKey_ReportsItInvalid()
+	public async Task CreateAsync_WhenTmdbRejectsTheKey_ReportsItInvalid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
@@ -75,7 +72,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task VerifyAsync_WhenTmdbAcceptsTheKey_ReportsItValid()
+	public async Task CreateAsync_WhenTmdbAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 
@@ -83,7 +80,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task VerifyAsync_WhenMdblistRejectsTheKey_ReportsItInvalid()
+	public async Task CreateAsync_WhenMdblistRejectsTheKey_ReportsItInvalid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
@@ -91,7 +88,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task VerifyAsync_WhenMdblistAcceptsTheKey_ReportsItValid()
+	public async Task CreateAsync_WhenMdblistAcceptsTheKey_ReportsItValid()
 	{
 		await host.WithMdblistAccount("valid-mdblist-key");
 
@@ -99,7 +96,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task VerifyAsync_WhenTheProviderIsUnreachable_FailsGracefully()
+	public async Task CreateAsync_WhenTheProviderIsUnreachable_FailsGracefully()
 	{
 		host.TmdbUnreachable();
 
@@ -147,12 +144,12 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task ClearApiKeyAsync_WhenTheTmdbKeyIsCleared_LeavesTheCachedRatingsToTheCachePurger()
+	public async Task ClearAsync_WhenTheTmdbKeyIsCleared_LeavesTheCachedRatingsToTheCachePurger()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
 		await host.Resolve<IMediaService>().GetDetailsAsync([fightClub]).ToListAsync();
 
-		await ApiKeys.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await ApiKeys.ClearAsync(ApiKeyProvider.Tmdb);
 
 		host.ScopedDbContext.ChangeTracker.Clear();
 		var cached = await host.ScopedDbContext.MediaRatings.AsNoTracking().AnyAsync(rating => rating.Source == RatingProvider.Tmdb);

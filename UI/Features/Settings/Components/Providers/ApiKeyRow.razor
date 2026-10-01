@@ -1,6 +1,7 @@
 @using Contracts.Auth
 @using UI.Shared.Services.Branding
 @inject IApiKeyService ApiKeyService
+@inject IApiKeyFactory ApiKeyFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 
 <ProviderRow Provider="@Provider.AsMediaProvider()" Open="Open" OpenChanged="OpenChanged">
@@ -100,7 +101,7 @@
         _loadedProvider = Provider;
         await Task.Yield();
         _savedState = await ApiKeyService
-            .GetApiKeyAsync(Provider)
+            .GetAsync(Provider)
             .Apply(key => _savedApiKey = _apiKeyInput = key.Value)
             .ApplyError(_ => _savedApiKey = _apiKeyInput = string.Empty)
             .Match(CredentialState.Saved, CredentialState.Idle);
@@ -112,8 +113,8 @@
     {
         _state = CredentialState.Testing;
 
-        _state = await ApiKeyService
-            .TestApiKeyAsync(Provider, _apiKeyInput)
+        _state = await ApiKeyFactory
+            .CreateAsync(Provider, _apiKeyInput)
             .Apply(key => _validatedKey = key)
             .ApplyError(_ => _validatedKey = null)
             .Match(CredentialState.Success, CredentialState.Failed);
@@ -123,7 +124,7 @@
     {
         _state = CredentialState.Saving;
 
-        await ApiKeyService.SaveApiKeyAsync(_validatedKey!);
+        await ApiKeyService.StoreAsync(_validatedKey!);
         _savedApiKey = _apiKeyInput;
         _savedState = CredentialState.Saved;
 
@@ -133,7 +134,7 @@
 
     private async Task DeleteAsync()
     {
-        await ApiKeyService.RemoveApiKeyAsync(Provider);
+        await ApiKeyService.ClearAsync(Provider);
         _savedApiKey = string.Empty;
         _apiKeyInput = string.Empty;
         _savedState = CredentialState.Idle;

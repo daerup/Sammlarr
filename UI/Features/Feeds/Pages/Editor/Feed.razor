@@ -198,7 +198,7 @@
             Sort = feed.Sort,
             Limit = feed.Limit,
             Schedule = feed.Schedule,
-            IsProviderAvailable = await ApiKeyService.HasApiKeyAsync(feed.Provider.AsApiKeyProvider()),
+            IsProviderAvailable = await ApiKeyService.GetAsync(feed.Provider.AsApiKeyProvider()).IsSuccess(),
         };
         _storedHash = _config.GetSaveHash();
         _storedStrategy = _config.Strategy;

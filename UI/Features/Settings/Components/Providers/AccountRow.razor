@@ -2,6 +2,7 @@
 @using Contracts.Identity
 @using UI.Shared.Services.Branding
 @inject ICredentialService Credentials
+@inject ICredentialFactory CredentialFactory
 @inject MediaProviderBrandingService MediaProviderBrandingService
 @inject ICurrentUser CurrentUser
 @inject NavigationManager NavigationManager
@@ -131,13 +132,13 @@
     {
         _state = CredentialState.Testing;
         _clientId = Guid.NewGuid();
-        _state = await Credentials.TestAsync(Provider, _clientId, _tokenInput, DateTimeOffset.MaxValue).Match(CredentialState.Success, CredentialState.Failed);
+        _state = await CredentialFactory.CreateAsync(Provider, _clientId, _tokenInput, DateTimeOffset.MaxValue).Match(CredentialState.Success, CredentialState.Failed);
     }
 
     private async Task SaveAsync()
     {
         _state = CredentialState.Saving;
-        await Credentials.StoreAsync(Provider, _tokenInput, DateTimeOffset.MaxValue, _clientId);
+        await Credentials.StoreAsync(Provider, new StoredCredential(_tokenInput, DateTimeOffset.MaxValue, _clientId));
         _savedToken = _tokenInput;
         _savedState = CredentialState.Saved;
         _state = CredentialState.Saved;

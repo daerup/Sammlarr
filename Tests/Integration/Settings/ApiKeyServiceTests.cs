@@ -25,64 +25,56 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 	private RecordingFeedScheduler Scheduler => host.Resolve<RecordingFeedScheduler>();
 
 	[Test]
-	public async Task SaveApiKeyAsync_ThenGetApiKeyAsync_ReturnsTheSavedKey()
+	public async Task StoreAsync_ThenGetAsync_ReturnsTheSavedKey()
 	{
-		await Testee.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
+		await Testee.StoreAsync(new TestApiKey(ApiKeyProvider.Tmdb, "tmdb-key-12345"));
 
 		await Assert
-			.That(await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb))
+			.That(await Testee.GetAsync(ApiKeyProvider.Tmdb))
 			.IsSuccess()
 			.And.Multiple(async key => await Assert.That(key.Value).IsEqualTo("tmdb-key-12345"));
 	}
 
 	[Test]
-	public async Task GetFeedProvidersWithoutKeyAsync_WithOnlyAnMdblistKey_ListsTheFeedProvidersThatNeedTheOthers()
+	public async Task ClearAsync_WhenAKeyIsStored_RemovesIt()
 	{
-		await Testee.SaveApiKeyAsync(new TestApiKey(ApiKeyProvider.Mdblist, "mdblist-key-12345"));
+		await ApiKeys.StoreAsync(ApiKeyProvider.Tmdb, "tmdb-key-12345");
 
-		await Assert.That(await Testee.GetFeedProvidersWithoutKeyAsync()).IsEquivalentTo([FeedProvider.Tmdb]);
+		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
+
+		await Assert.That(await ApiKeys.GetAsync(ApiKeyProvider.Tmdb)).IsError();
 	}
 
 	[Test]
-	public async Task RemoveApiKeyAsync_WhenAKeyIsStored_RemovesIt()
-	{
-		await ApiKeys.SetApiKeyAsync(ApiKeyProvider.Tmdb, "tmdb-key-12345");
-
-		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
-
-		await Assert.That(await ApiKeys.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsError();
-	}
-
-	[Test]
-	public async Task RemoveApiKeyAsync_DisablesAndUnschedulesEveryFeedThatNeedsTheKey()
+	public async Task ClearAsync_DisablesAndUnschedulesEveryFeedThatNeedsTheKey()
 	{
 		var trending = await Feeds.CreateAsync(Feed("Trending movies", FeedProvider.Tmdb));
 
-		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 
 		await Assert.That((await host.FeedAsync(trending)).Enabled).IsFalse();
 		await Assert.That(Scheduler.Unscheduled).Contains(trending);
 	}
 
 	[Test]
-	public async Task RemoveApiKeyAsync_LeavesFeedsOnOtherKeysRunning()
+	public async Task ClearAsync_LeavesFeedsOnOtherKeysRunning()
 	{
 		var documentaries = await Feeds.CreateAsync(Feed("Documentaries", FeedProvider.Mdblist));
 
-		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 
 		await Assert.That((await host.FeedAsync(documentaries)).Enabled).IsTrue();
 		await Assert.That(Scheduler.Unscheduled).DoesNotContain(documentaries);
 	}
 
 	[Test]
-	public async Task RemoveApiKeyAsync_WhenAnotherUserRemovesTheirKey_LeavesYourFeedsRunning()
+	public async Task ClearAsync_WhenAnotherUserRemovesTheirKey_LeavesYourFeedsRunning()
 	{
 		var yours = await Feeds.CreateAsync(Feed("Trending movies", FeedProvider.Tmdb));
 		var owner = host.CurrentUser.Id;
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededMember.Id);
 
-		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 
 		host.CurrentUser.Id = owner;
 		await Assert.That((await host.FeedAsync(yours)).Enabled).IsTrue();

@@ -33,7 +33,7 @@ internal class PlexClient(HttpClient client, ICredentialService credentials, ICu
 
 		try
 		{
-			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentials.Invalidate(AuthProvider.Plex));
+			return await client.SendAsync(request, cancellationToken).OnUnauthorizedAsync(() => credentials.ReportRejected(AuthProvider.Plex));
 		}
 		catch (Exception ex) when (ex is BrokenCircuitException or TimeoutRejectedException)
 		{

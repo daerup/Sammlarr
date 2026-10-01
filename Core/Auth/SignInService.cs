@@ -67,7 +67,7 @@ internal sealed class SignInService(
 	{
 		using (userScope.As(user))
 		{
-			await credentials.StoreAsync(provider, login.Token.AccessToken, login.Token.ExpiresAt, login.Token.ClientId, cancellationToken);
+			await credentials.StoreAsync(provider, new StoredCredential(login.Token.AccessToken, login.Token.ExpiresAt, login.Token.ClientId), cancellationToken);
 			if (isInitialAdmin)
 			{
 				await SetAuthProviderAsync(provider, cancellationToken);

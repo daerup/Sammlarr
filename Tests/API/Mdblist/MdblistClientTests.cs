@@ -39,6 +39,6 @@ public class MdblistClientTests
 
 		await testee.SendAsync(HttpMethod.Get, "lists/1/items", new TestApiKey(ApiKeyProvider.Mdblist, new Faker().Random.AlphaNumeric(32)));
 
-		apiKeys.Invalidate(ApiKeyProvider.Mdblist).WasCalled(Times.Once);
+		apiKeys.ReportRejected(ApiKeyProvider.Mdblist).WasCalled(Times.Once);
 	}
 }

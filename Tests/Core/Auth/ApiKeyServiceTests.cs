@@ -21,60 +21,59 @@ public sealed class ApiKeyServiceTests : IDisposable
 
 	public ApiKeyServiceTests()
 	{
-		_keys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of("stored-key"));
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of("stored-key"));
 		_factory.CreateAsync(ApiKeyProvider.Tmdb, "stored-key", Any()).Returns(Success.Of(StoredKey));
 		Testee = new ApiKeyService(
 			_keys.Object,
 			_factory.Object,
 			IFeedService.Mock().Object,
-			new TypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>(_memory),
-			new TestCurrentUser()
+			new SecretCache<ApiKeyProvider, IApiKey>(new TypedMemoryCache<(Guid User, ApiKeyProvider Provider), IApiKey>(_memory), new TestCurrentUser())
 		);
 	}
 
 	public void Dispose() => _memory.Dispose();
 
 	[Test]
-	public async Task GetApiKeyAsync_WhenReadTwice_LoadsAndValidatesTheStoredKeyOnce()
+	public async Task GetAsync_WhenReadTwice_LoadsAndValidatesTheStoredKeyOnce()
 	{
-		await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That(await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsSuccess();
-		_keys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Once);
+		await Assert.That(await Testee.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess();
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Once);
 		_factory.CreateAsync(ApiKeyProvider.Tmdb, "stored-key", Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task Invalidate_AfterARead_MakesTheNextReadLoadTheStoredKeyAgain()
+	public async Task ReportRejected_AfterARead_MakesTheNextReadLoadTheStoredKeyAgain()
 	{
-		await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
 
-		Testee.Invalidate(ApiKeyProvider.Tmdb);
+		Testee.ReportRejected(ApiKeyProvider.Tmdb);
 
-		await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
-		_keys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Exactly(2));
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Exactly(2));
 	}
 
 	[Test]
-	public async Task SaveApiKeyAsync_ServesTheSavedKeyWithoutReadingItBack()
+	public async Task StoreAsync_ServesTheSavedKeyWithoutReadingItBack()
 	{
 		var saved = new TestApiKey(ApiKeyProvider.Tmdb, "new-key");
 
-		await Testee.SaveApiKeyAsync(saved);
+		await Testee.StoreAsync(saved);
 
-		await Assert.That(await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb)).IsSuccess().And.Multiple(async key => await Assert.That(key).IsEqualTo(saved));
-		_keys.SetApiKeyAsync(ApiKeyProvider.Tmdb, "new-key", Any()).WasCalled(Times.Once);
-		_keys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Never);
+		await Assert.That(await Testee.GetAsync(ApiKeyProvider.Tmdb)).IsSuccess().And.Multiple(async key => await Assert.That(key).IsEqualTo(saved));
+		_keys.StoreAsync(ApiKeyProvider.Tmdb, "new-key", Any()).WasCalled(Times.Once);
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task RemoveApiKeyAsync_AfterARead_DropsTheCachedKey()
+	public async Task ClearAsync_AfterARead_DropsTheCachedKey()
 	{
-		await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
 
-		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 
-		await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
-		_keys.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Exactly(2));
+		await Testee.GetAsync(ApiKeyProvider.Tmdb);
+		_keys.GetAsync(ApiKeyProvider.Tmdb, Any()).WasCalled(Times.Exactly(2));
 	}
 }

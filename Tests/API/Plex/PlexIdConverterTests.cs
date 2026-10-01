@@ -78,7 +78,7 @@ public class PlexIdConverterTests
 		handler.OnAnyRequest().RespondWithJson(JsonSerializer.Serialize(details));
 		var apiKeyStore = IApiKeyService.Mock();
 		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-api-key");
-		apiKeyStore.GetApiKeyAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
+		apiKeyStore.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
 		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
 		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		return new TmdbApi(tmdbClient, apiKeyStore.Object, NullLogger<TmdbApi>.Instance);

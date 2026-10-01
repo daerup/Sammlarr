@@ -19,7 +19,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 	{
 		var formattedEndpoint = string.Format(TmdbEndpoints.Trending, page);
 		var apiKey = await apiKeys
-			.GetApiKeyAsync(ApiKeyProvider.Tmdb, cancellationToken)
+			.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)
 			.GetOrThrow(_ => new InvalidOperationException("No TMDB API key is configured. Add one in Settings."));
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, formattedEndpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)

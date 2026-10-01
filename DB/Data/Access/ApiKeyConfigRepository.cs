@@ -6,7 +6,7 @@ namespace DB.Data.Access;
 
 internal sealed class ApiKeyConfigRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IApiKeyConfigRepository
 {
-	public async Task<Result<string>> GetApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	public async Task<Result<string>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		return await ctx
@@ -14,7 +14,7 @@ internal sealed class ApiKeyConfigRepository(IDbContextFactory<SammlarrDbContext
 			.Map(stored => stored.ApiKey);
 	}
 
-	public async Task SetApiKeyAsync(ApiKeyProvider provider, string value, CancellationToken cancellationToken = default)
+	public async Task StoreAsync(ApiKeyProvider provider, string value, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var setting = await ctx.ApiKeySettings.FirstOrDefaultAsync(s => s.Provider == provider, cancellationToken);
@@ -30,7 +30,7 @@ internal sealed class ApiKeyConfigRepository(IDbContextFactory<SammlarrDbContext
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task RemoveApiKeyAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	public async Task ClearAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		await ctx.ApiKeySettings.Where(s => s.Provider == provider).ExecuteDeleteAsync(cancellationToken);

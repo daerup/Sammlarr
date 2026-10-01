@@ -15,11 +15,11 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	private IApiKeyConfigRepository Testee => new ApiKeyConfigRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task SetApiKey_WithEncryption_StoresEncryptedInDatabase()
+	public async Task StoreAsync_WithEncryption_StoresEncryptedInDatabase()
 	{
 		var plainKey = "secret-api-key";
 
-		await Testee.SetApiKeyAsync(ApiKeyProvider.Tmdb, plainKey);
+		await Testee.StoreAsync(ApiKeyProvider.Tmdb, plainKey);
 
 		var encrypted = (await fixture.RawContext.Table<ApiKeyConfigRow>().QueryAsync(x => x.ApiKey)).Single();
 
@@ -33,9 +33,9 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	[Arguments("special!@#$%^&*()")]
 	[Arguments("unicode-café")]
 	[Arguments("")]
-	public async Task SetApiKey_WithVariousKeys_PreservesPlaintext(string apiKey)
+	public async Task StoreAsync_WithVariousKeys_PreservesPlaintext(string apiKey)
 	{
-		await Testee.SetApiKeyAsync(ApiKeyProvider.Tmdb, apiKey);
+		await Testee.StoreAsync(ApiKeyProvider.Tmdb, apiKey);
 
 		var setting = await fixture.Context.ApiKeySettings.SingleAsync();
 
@@ -43,12 +43,12 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task SetMultipleApiKeys_WithDifferentProviders_StoresIndependently()
+	public async Task StoreAsync_WithDifferentProviders_StoresIndependently()
 	{
 		var key = "shared-api-key";
 
-		await Testee.SetApiKeyAsync(ApiKeyProvider.Tmdb, key);
-		await Testee.SetApiKeyAsync(ApiKeyProvider.Mdblist, key);
+		await Testee.StoreAsync(ApiKeyProvider.Tmdb, key);
+		await Testee.StoreAsync(ApiKeyProvider.Mdblist, key);
 
 		var keys = await fixture.Context.ApiKeySettings.ToListAsync();
 		var tmdb = keys.Single(s => s.Provider == ApiKeyProvider.Tmdb);
@@ -60,29 +60,29 @@ public class ApiKeyConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	}
 
 	[Test]
-	public async Task GetApiKeyAsync_WhenNotStored_ReturnsError()
+	public async Task GetAsync_WhenNotStored_ReturnsError()
 	{
-		var apiKey = await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
+		var apiKey = await Testee.GetAsync(ApiKeyProvider.Tmdb);
 
 		await Assert.That(apiKey).IsError();
 	}
 
 	[Test]
-	public async Task GetApiKeyAsync_WhenStored_ReturnsTheStoredValue()
+	public async Task GetAsync_WhenStored_ReturnsTheStoredValue()
 	{
 		await SetUpApiKeyAsync(ApiKeyProvider.Tmdb, "secret-api-key");
 
-		var apiKey = await Testee.GetApiKeyAsync(ApiKeyProvider.Tmdb);
+		var apiKey = await Testee.GetAsync(ApiKeyProvider.Tmdb);
 
 		await Assert.That(apiKey).IsSuccess().And.Multiple(async value => await Assert.That(value).IsEqualTo("secret-api-key"));
 	}
 
 	[Test]
-	public async Task RemoveApiKeyAsync_WhenStored_DeletesIt()
+	public async Task ClearAsync_WhenStored_DeletesIt()
 	{
 		await SetUpApiKeyAsync(ApiKeyProvider.Tmdb, "secret-api-key");
 
-		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
+		await Testee.ClearAsync(ApiKeyProvider.Tmdb);
 
 		await Assert.That(await fixture.Context.ApiKeySettings.AnyAsync()).IsFalse();
 	}
