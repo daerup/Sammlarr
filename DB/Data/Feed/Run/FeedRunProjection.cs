@@ -9,7 +9,7 @@ internal static class FeedRunProjection
 {
 	public static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> Project = row => new Domain.Feed.Run.FeedRun
 	{
-		Id = row.Id,
+		Id = RunId.From(row.Id),
 		FeedId = FeedId.From(row.FeedId),
 		StartedAt = row.StartedAt,
 		Duration = TimeSpan.FromMilliseconds(row.DurationMs),

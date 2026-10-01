@@ -52,7 +52,7 @@ internal sealed class FeedRunEngine(
 
 		var run = new FeedRun
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = feed.Id,
 			StartedAt = startedAt,
 			Duration = elapsed.Elapsed,

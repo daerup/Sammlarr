@@ -125,7 +125,7 @@ public class LastRunCellTests : BunitContext
 	private static FeedRun Run() =>
 		new()
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = Feed,
 			StartedAt = DateTimeOffset.UtcNow.AddMinutes(-5),
 			Duration = TimeSpan.FromSeconds(2),

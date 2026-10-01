@@ -40,7 +40,7 @@ internal static class WantlistItemMapping
 				Media = media,
 				Origin = WantlistItemOrigin.Feed,
 				SourceFeedId = feed.Feed.Id.Value,
-				SourceRunId = feed.Run.Id,
+				SourceRunId = feed.Run.Id.Value,
 			},
 			OrphanedOrigin orphaned => new WantlistRow
 			{

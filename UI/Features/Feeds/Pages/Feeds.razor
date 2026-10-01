@@ -324,7 +324,7 @@
         _now = DateTimeOffset.Now;
         await LoadQueueAsync();
         _feeds = (await FeedService.GetAsync(_cancellation.Token)).Feeds;
-        _lastWeek = FeedPulse.Moved(await FeedService.GetRecentRunsAsync(_now - LastWeek, RunCap, _cancellation.Token));
+        _lastWeek = FeedPulse.Moved(await FeedService.GetRunsAsync(RunQuery.Take(RunCap) with { Since = Some.Of(_now - LastWeek) }, _cancellation.Token));
         Rebuild();
     }
 

@@ -85,7 +85,7 @@ public class ActivityDayBlockTests : BunitContext
 	private static FeedRun Run(int added, int removed) =>
 		new()
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = Docs,
 			StartedAt = Noon,
 			Duration = TimeSpan.FromSeconds(4),

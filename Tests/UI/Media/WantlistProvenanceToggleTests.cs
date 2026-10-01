@@ -108,7 +108,11 @@ public class WantlistProvenanceToggleTests : BunitContext
 	}
 
 	private static WantlistItem FeedItem() =>
-		new(Id, DateTimeOffset.UnixEpoch, new WantlistItemProvenance(TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), Guid.Empty, "Documentaries")));
+		new(
+			Id,
+			DateTimeOffset.UnixEpoch,
+			new WantlistItemProvenance(TestFeeds.Origin(new Guid(21, 0, 0, new byte[8]), new Guid(22, 0, 0, new byte[8]), "Documentaries"))
+		);
 
 	private static MediaLookup Lookup() => new PartialMovie { Identity = new MediaIdentity(Id, []) }.ToMatch();
 }

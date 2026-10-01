@@ -133,7 +133,7 @@ public class FeedCardTests : BunitContext
 		new(
 			new FeedRun
 			{
-				Id = Guid.NewGuid(),
+				Id = RunId.From(Guid.NewGuid()),
 				FeedId = Comedy,
 				StartedAt = Now.AddMinutes(-16),
 				Duration = TimeSpan.FromSeconds(2),

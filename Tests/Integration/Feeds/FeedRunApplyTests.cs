@@ -79,7 +79,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		var result = await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var failed = await Assert.That(result).IsOfUnionType<FeedRunResult, FeedRunFailed>();
-		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
+		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feedId) })).Single();
 		await Assert.That(failed.Reason).IsEqualTo("No list found with identifier 'missing-list'.");
 		await Assert.That(recorded.SourceFailure).IsEqualTo(failed.Reason);
 	}
@@ -199,7 +199,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
+		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(1) with { Feed = Some.Of(feedId) })).Single();
 		var item = (await host.Resolve<IWantlistRepository>().GetAllAsync()).Single(added => added.MediaId == fightClub);
 
 		await Assert
@@ -225,7 +225,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
-		var runs = await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 5);
+		var runs = await host.Resolve<IFeedRepository>().GetRunsAsync(RunQuery.Take(5) with { Feed = Some.Of(feedId) });
 		await Assert.That(runs).IsNotEmpty();
 		await Assert.That(runs[0].Trigger).IsEqualTo(new FeedRunTrigger(new Manual()));
 	}

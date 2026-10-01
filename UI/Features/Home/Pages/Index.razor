@@ -306,7 +306,7 @@ else
         {
             var feeds = await FeedService.GetAsync(_cancellation.Token);
             _feeds = [.. feeds.Feeds.Select(overview => overview.Feed)];
-            var runs = await FeedService.GetRecentRunsAsync(_now - ActivityWindow, RunCap, _cancellation.Token);
+            var runs = await FeedService.GetRunsAsync(RunQuery.Take(RunCap) with { Since = Some.Of(_now - ActivityWindow) }, _cancellation.Token);
             var wantlist = await WantlistService.GetAsync(_cancellation.Token);
             var blocklist = await BlocklistService.GetAsync(_cancellation.Token);
             _outbox = (await WantlistService.GetOutboxAsync(_cancellation.Token)).Entries;
