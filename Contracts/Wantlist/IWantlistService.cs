@@ -1,12 +1,15 @@
 using Domain.Feed;
 using Domain.Media;
 using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
 
 namespace Contracts.Wantlist;
 
 public interface IWantlistService
 {
 	Task<WantlistSnapshot> GetAsync(CancellationToken cancellationToken = default);
+
+	Task<OutboxSnapshot> GetOutboxAsync(CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default);
 

@@ -80,7 +80,7 @@ internal sealed class WantlistSyncEngine(
 
 	private async Task<IReadOnlyList<PushOutcome>> DrainAsync(IMediaSink sink, CancellationToken cancellationToken)
 	{
-		var pending = (await outbox.GetAsync(cancellationToken)).Where(entry => entry.Status is WantlistOutboxState.Pending);
+		var pending = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken)).Pending;
 		List<PushOutcome> outcomes = [];
 		foreach (var batch in pending.GroupBy(entry => entry.Action))
 		{

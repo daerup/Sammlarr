@@ -10,7 +10,6 @@ using Contracts.Jobs;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
-using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using Domain.Blocklist;
 using Domain.Identity;
@@ -20,7 +19,6 @@ using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;
-using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -239,10 +237,6 @@ public class WantlistSyncButtonTests : BunitContext
 		var blocklist = IBlocklistService.Mock();
 		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(blocklist.Object);
-
-		var outbox = IWantlistOutbox.Mock();
-		outbox.FindPendingAsync(Any(), Any()).Returns((WantlistOutboxEntry?)null);
-		Services.AddSingleton(outbox.Object);
 
 		var providerConfig = IProviderConfigService.Mock();
 		providerConfig

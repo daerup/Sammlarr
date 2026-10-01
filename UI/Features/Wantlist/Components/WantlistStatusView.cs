@@ -28,14 +28,10 @@ internal static class WantlistStatusView
 		return shownRemoved.Count == 0 ? shownActive : [.. shownActive.Concat(shownRemoved)];
 	}
 
-	internal static IReadOnlyList<WantlistItem> WithPendingRemovals(WantlistSnapshot wantlist, IEnumerable<WantlistOutboxEntry> outbox) =>
+	internal static IReadOnlyList<WantlistItem> WithPendingRemovals(WantlistSnapshot wantlist, OutboxSnapshot outbox) =>
 		[
 			.. wantlist
-				.Items.Concat(
-					outbox
-						.Where(entry => entry.Action == WantlistOperationAction.Remove)
-						.Select(entry => new WantlistItem(entry.MediaId, entry.AddedAt, new ManualOrigin(ManualSource.Unknown)))
-				)
+				.Items.Concat(outbox.Removes.Values.Select(entry => new WantlistItem(entry.MediaId, entry.AddedAt, new ManualOrigin(ManualSource.Unknown))))
 				.OrderByDescending(item => item.AddedAt),
 		];
 }

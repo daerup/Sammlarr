@@ -26,7 +26,7 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 			.Map(async contents =>
 			{
 				var wanted = new WantlistSnapshot(await repo.GetAllAsync(cancellationToken));
-				var outboxOps = await outbox.GetAsync(cancellationToken);
+				var outboxOps = await outbox.GetAllAsync(cancellationToken);
 				var plan = WantlistSyncPlan.Compute(contents.Matched, [.. wanted.Ids], outboxOps) with { Unmatched = contents.Unmatched };
 				await DropRedundantAsync(sink.Kind, plan, cancellationToken);
 				return Success.Of(plan);

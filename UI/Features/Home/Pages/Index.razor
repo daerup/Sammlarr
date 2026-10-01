@@ -7,7 +7,6 @@
 @using Contracts.Media
 @using Contracts.Settings
 @using Contracts.Wantlist
-@using Contracts.Wantlist.Outbox
 @using Domain.Announcing
 @using Domain.Feed
 @using Domain.Feed.Run
@@ -25,7 +24,6 @@
 @inject IMediaService MediaService
 @inject IWantlistService WantlistService
 @inject IBlocklistService BlocklistService
-@inject IWantlistOutbox Outbox
 @inject IProviderConfigService ProviderConfigService
 @inject IEventPublisher Events
 @inject ICurrentUser CurrentUser
@@ -295,7 +293,7 @@ else
 
     private async Task LoadOutboxAsync()
     {
-        _outbox = await Outbox.GetAsync(_cancellation.Token);
+        _outbox = (await WantlistService.GetOutboxAsync(_cancellation.Token)).Entries;
         StateHasChanged();
     }
 
@@ -312,7 +310,7 @@ else
             var wantlist = await WantlistService.GetAsync(_cancellation.Token);
             var blocklist = await BlocklistService.GetAsync(_cancellation.Token);
             var overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
-            _outbox = await Outbox.GetAsync(_cancellation.Token);
+            _outbox = (await WantlistService.GetOutboxAsync(_cancellation.Token)).Entries;
             var queue = await JobQueueView.GetAsync(_cancellation.Token);
 
             var names = FeedNames();

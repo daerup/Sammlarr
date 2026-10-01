@@ -14,7 +14,7 @@ public class WantlistSyncPlannerTests
 	{
 		var stale = MediaId.From(new Guid(11, 0, 0, new byte[8]));
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([new WantlistOutboxEntry(stale, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
+		outbox.GetAllAsync(Any()).Returns([new WantlistOutboxEntry(stale, WantlistOperationAction.Remove, WantlistOutboxState.Pending, 0)]);
 
 		await WantlistStubs.Planner(WantlistStubs.EmptySink(), outbox).PlanAsync();
 

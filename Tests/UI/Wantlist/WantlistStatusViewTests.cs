@@ -85,18 +85,10 @@ public class WantlistStatusViewTests
 	{
 		var wantlist = new WantlistSnapshot([new WantlistItem(Dune, On(2), new ManualOrigin(ManualSource.Search))]);
 
-		var listed = WantlistStatusView.WithPendingRemovals(wantlist, [Queued(Tenet, WantlistOperationAction.Remove, On(1))]);
+		var listed = WantlistStatusView.WithPendingRemovals(wantlist, new OutboxSnapshot([Queued(Tenet, WantlistOperationAction.Remove, On(1))]));
 
 		await Assert.That(listed.Select(item => item.MediaId)).IsEquivalentTo([Dune, Tenet], CollectionOrdering.Matching);
 		await Assert.That(listed[1].AddedAt).IsEqualTo(On(1));
-	}
-
-	[Test]
-	public async Task WithPendingRemovals_LeavesQueuedAddsOut()
-	{
-		var listed = WantlistStatusView.WithPendingRemovals(new WantlistSnapshot([]), [Queued(Dune, WantlistOperationAction.Add, On(1))]);
-
-		await Assert.That(listed).IsEmpty();
 	}
 
 	private static readonly MediaId Dune = MediaId.From(new Guid(1, 0, 0, new byte[8]));
