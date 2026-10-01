@@ -31,12 +31,13 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 
 	public async Task DeleteAsync(FeedId id, CancellationToken cancellationToken = default)
 	{
-		if (await repository.FindAsync(id, cancellationToken) is not Some<Domain.Feed.Feed>)
+		if (await repository.FindAsync(id, cancellationToken) is not Some<Domain.Feed.Feed>(var feed))
 		{
 			return;
 		}
 
 		await scheduler.UnscheduleAsync(id, cancellationToken);
+		await wantlist.OrphanAsync(feed, cancellationToken);
 		await repository.DeleteAsync(id, cancellationToken);
 	}
 

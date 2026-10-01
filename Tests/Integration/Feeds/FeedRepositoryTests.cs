@@ -1,9 +1,6 @@
 using Contracts.Feed;
 using DB.Data.Feed;
-using DB.Data.Media;
-using DB.Data.Wantlist;
 using Domain.Feed;
-using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
@@ -68,32 +65,6 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var feeds = await fixture.Context.Feeds.AsNoTracking().ToListAsync();
 		await Assert.That(feeds).Count().IsEqualTo(1);
 		await Assert.That(feeds[0].Id).IsEqualTo(id.Value);
-	}
-
-	[Test]
-	public async Task DeleteAsync_OrphansAttachedWantlistEntries_PopulatesSnapshot()
-	{
-		var feedId = await SeedFeedAsync("My Feed", "my-feed", new DateTimeOffset(2026, 07, 01, 12, 0, 0, TimeSpan.Zero));
-		var mediaId = PlexId.From("plex-feed-1", MediaType.Movie);
-		var media = new MediaRow();
-		fixture.Context.ExternalMediaIds.Add(mediaId.ToExternalIdEntity(media));
-		fixture.Context.Wantlist.Add(
-			new WantlistRow
-			{
-				Media = media,
-				Origin = WantlistItemOrigin.Feed,
-				SourceFeedId = feedId.Value,
-			}
-		);
-		await fixture.Context.SaveChangesAsync();
-		fixture.Context.ChangeTracker.Clear();
-
-		await _testee.DeleteAsync(feedId);
-
-		var entry = await fixture.Context.Wantlist.AsNoTracking().SingleAsync();
-		await Assert.That(entry.Origin).IsEqualTo(WantlistItemOrigin.Orphaned);
-		await Assert.That(entry.SourceFeedNameSnapshot).IsEqualTo("My Feed");
-		await Assert.That(entry.SourceFeedId).IsNull();
 	}
 
 	[Test]

@@ -24,6 +24,17 @@ public class NamingTests
 	}
 
 	[Test]
+	public async Task Naming_OfEntryTypes_RestrictsThemToLogsAndQueues() =>
+		await Types
+			.InAssemblies(Projects.All)
+			.That()
+			.HaveNameEndingWith("Entry")
+			.Should()
+			.HaveNameMatching("^(WantlistOutboxEntry|DiagnosticsLogEntry|DiagnosticsSpanEntry)$")
+			.GetResult()
+			.AssertNone();
+
+	[Test]
 	public async Task Naming_OfAsyncMethods_RequiresAnAsyncOrAwaitSuffix()
 	{
 		await Methods.Public.Where(ViolatesAsyncNaming).Select(Methods.Describe).AssertNone();

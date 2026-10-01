@@ -133,7 +133,7 @@ such as `FeedProvider` or `AuthProvider`. See <<section-concepts>>.
 Module:: An `IServiceModule`: a layer's or a provider's self-contained DI registration, added
 from `Web`'s `Program.cs` via `AddModule<T>()`.
 
-Keyed service:: A service resolved by an enum key, so a caller asks for, say, `IFeedService`
+Keyed service:: A service resolved by an enum key, so a caller asks for, say, `IFeedProvider`
 keyed to `FeedProvider.Mdblist`.
 
 `ProviderConfig`:: The single global, admin-managed row of active provider selections (search,
@@ -227,6 +227,21 @@ now, so nothing pushes it back.
 
 Cron ticker:: TickerQ's persisted per-feed cron entry. When it fires it only enqueues a `RunFeed`
 job; it never runs the feed itself.
+
+=== Naming vocabulary
+
+Id:: Identity only, no data (`MediaId`, `FeedId`, `RunId`).
+
+Item:: A title as a member of a collection: a list, a run's results, a change list
+(`WantlistItem`, `BlocklistItem`, `FeedRunItem`, `ChangeItem`).
+
+Media:: A title with its display details (`IdentifiedMedia`, `WantlistedMedia`, `BlocklistedMedia`).
+
+Entry:: A record in a log or a queue, ordered by time (`WantlistOutboxEntry`, `DiagnosticsLogEntry`,
+`DiagnosticsSpanEntry`). The Architecture suite allows no other `*Entry` type in the layers it scans.
+
+Row:: A table row: a persisted DB type, internal to `DB` (`WantlistRow`, `FeedRunItemRow`), or a rendered UI
+line (`UpNextRow`).
 
 === Kernel types
 

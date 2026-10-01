@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Contracts.Feed;
 using DB.Data.Feed.Run;
-using DB.Data.Wantlist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -78,16 +77,6 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		{
 			return;
 		}
-
-		await ctx
-			.Wantlist.Where(w => w.SourceFeedId == id.Value)
-			.ExecuteUpdateAsync(
-				s =>
-					s.SetProperty(w => w.Origin, WantlistItemOrigin.Orphaned)
-						.SetProperty(w => w.SourceFeedNameSnapshot, entity.Name)
-						.SetProperty(w => w.SourceRunId, (Guid?)null),
-				cancellationToken
-			);
 
 		ctx.Feeds.Remove(entity);
 		await ctx.SaveChangesAsync(cancellationToken);

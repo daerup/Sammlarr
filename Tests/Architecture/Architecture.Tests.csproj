@@ -21,5 +21,6 @@
 		<ProjectReference Include="..\..\API\API.csproj" />
 		<ProjectReference Include="..\..\Observability\Observability.csproj" />
 		<ProjectReference Include="..\..\UI\UI.csproj" />
+		<ProjectReference Include="..\..\Messaging\Messaging.csproj" />
 	</ItemGroup>
 </Project>

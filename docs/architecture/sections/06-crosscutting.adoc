@@ -18,8 +18,43 @@ expected failure is a `Result` not an exception. Unions are matched by case dire
 
 Every layer and provider ships an `IServiceModule`; `Web`'s `Program.cs` composes them with `AddModule<T>()`
 (see <<section-building-block-view>>), and modules nest. Anything with more than one implementation
-is a keyed service, resolved by an enum key (`IFeedService` keyed `FeedProvider.Mdblist`);
+is a keyed service, resolved by an enum key (`IFeedProvider` keyed `FeedProvider.Mdblist`);
 `IKeyedServiceIndex<TKey, TService>` wraps the lookup when the key is only known at runtime.
+
+=== Contract shape
+
+Small per-user lists are read whole as snapshots; history that grows is read through a query record.
+
+* *Snapshots.* The wantlist, blocklist, outbox and feeds are small and bounded per user, so one read returns the whole
+list as a Domain snapshot that callers question (`Contains`, `Find`, `Ids`, `Items`) instead of calling the
+database per question: `GetAsync()` gives the `WantlistSnapshot`, `BlocklistSnapshot` and `FeedSnapshot`, and
+`IWantlistService.GetOutboxAsync()` the `OutboxSnapshot`.
+* *Repositories access, services compose.* A repository returns items and aggregates from its own tables and never
+builds a snapshot; the service builds it (the feed snapshot adds `OnWantlist` from
+`IWantlistRepository.CountByFeedAsync`). UI never injects a repository (except the notification settings ones) or
+`IWantlistOutbox`; it asks a service. `RepositoryTests` in the Architecture suite pins who may use the wantlist,
+outbox, feed, blocklist, media, API key and credential repositories, and keeps the feed, blocklist and wantlist
+persistence code off each other's tables (the wantlist still reads feed rows for its provenance).
+* *A query record for unbounded history.* Feed runs grow with every scheduled run and are paged, so they are read
+through `GetRunsAsync(RunQuery)`: `RunQuery.Take(limit)` with optional `Feed`, `Since` and `MustInclude`.
+
+Members say what they do; the type already says what to:
+
+[cols="1,2,2"]
+|===
+| Verb | Means | Returns
+
+| `Get` | read something that exists | the value; a snapshot for a list; items from a repository
+| `Find` | look up something that may be missing | `Optional`
+| `Count…By` | an aggregate count | a dictionary
+| `Create` / `Update` / `Delete` | an entity (feed, user) | the new id / nothing / nothing
+| `Add` / `Remove` | membership of a list | bulk: the ids changed; single: nothing
+| `Orphan` | keep a deleted feed's titles, without the feed | nothing
+| `Store` / `Clear` | a stored secret | nothing
+| `Pause` / `Resume` | feed scheduling | the ids changed
+| `Apply` | push a batch to the sink | a stream of acks
+| `ReportRejected` | the provider answered 401 | nothing
+|===
 
 === Provider extensibility and code generation
 

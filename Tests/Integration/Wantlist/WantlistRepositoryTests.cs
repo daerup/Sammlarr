@@ -51,6 +51,40 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 		await Assert.That(counts).DoesNotContainKey(feedId);
 	}
 
+	[Test]
+	public async Task OrphanAsync_ForTheTitlesAFeedAdded_KeepsThemUnderTheFeedsNameWithoutItsRun()
+	{
+		var feedId = await SeedFeedAsync("my-feed");
+		var fromFeed = await SeedMediaAsync([PlexId.From("plex-950", MediaType.Movie)]);
+		var byHand = await SeedMediaAsync([PlexId.From("plex-951", MediaType.Movie)]);
+		await _testee.AddAsync([fromFeed], await fixture.SeedFeedOriginAsync(feedId));
+		await _testee.AddAsync([byHand], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
+		await _testee.OrphanAsync(await fixture.FeedAsync(feedId));
+
+		var rows = await fixture
+			.Context.Wantlist.AsNoTracking()
+			.Select(w => new
+			{
+				w.Media.Id,
+				w.Origin,
+				w.SourceFeedNameSnapshot,
+				w.SourceRunId,
+			})
+			.ToListAsync();
+		await Assert
+			.That(rows.Single(row => row.Id == fromFeed.Value))
+			.IsEqualTo(
+				new
+				{
+					Id = fromFeed.Value,
+					Origin = WantlistItemOrigin.Orphaned,
+					SourceFeedNameSnapshot = (string?)"my-feed",
+					SourceRunId = (Guid?)null,
+				}
+			);
+		await Assert.That(rows.Single(row => row.Id == byHand.Value).Origin).IsEqualTo(WantlistItemOrigin.Manual);
+	}
+
 	private async Task<FeedId> SeedFeedAsync(string identifier)
 	{
 		var entity = new FeedRow
