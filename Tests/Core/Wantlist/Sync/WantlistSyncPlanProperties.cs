@@ -2,6 +2,7 @@ using Core.Wantlist.Sync;
 using CsCheck;
 using Domain.Media;
 using Domain.Wantlist.Outbox;
+using Domain.Wantlist.Sync;
 
 namespace Core.Tests.Wantlist.Sync;
 
@@ -67,6 +68,6 @@ public class WantlistSyncPlanProperties
 			}
 		}
 
-		return new Scenario(WantlistSyncPlan.Compute(remote, local, outbox), outbox.Count);
+		return new Scenario(WantlistSyncPlan.Compute(new SinkSnapshot(remote, []), WantlistStubs.Wanted(local), new OutboxSnapshot(outbox)), outbox.Count);
 	}
 }

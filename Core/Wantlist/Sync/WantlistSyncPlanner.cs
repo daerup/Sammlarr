@@ -3,6 +3,7 @@ using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
 using Domain.Providers;
 using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
 using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
 
@@ -22,21 +23,21 @@ internal sealed class WantlistSyncPlanner(ActiveSink activeSink, IWantlistReposi
 	}
 
 	private async Task<Result<WantlistSyncPlan>> PlanAsync(IMediaSink sink, CancellationToken cancellationToken) =>
-		await ReadAsync(sink, cancellationToken)
-			.Map(async contents =>
+		await TryGetAsync(sink, cancellationToken)
+			.Map(async snapshot =>
 			{
 				var wanted = new WantlistSnapshot(await repo.GetAllAsync(cancellationToken));
-				var outboxOps = await outbox.GetAllAsync(cancellationToken);
-				var plan = WantlistSyncPlan.Compute(contents.Matched, [.. wanted.Ids], outboxOps) with { Unmatched = contents.Unmatched };
+				var queued = new OutboxSnapshot(await outbox.GetAllAsync(cancellationToken));
+				var plan = WantlistSyncPlan.Compute(snapshot, wanted, queued);
 				await DropRedundantAsync(sink.Kind, plan, cancellationToken);
 				return Success.Of(plan);
 			});
 
-	private static async Task<Result<SinkContents>> ReadAsync(IMediaSink sink, CancellationToken cancellationToken)
+	private static async Task<Result<SinkSnapshot>> TryGetAsync(IMediaSink sink, CancellationToken cancellationToken)
 	{
 		try
 		{
-			return Success.Of(await sink.ReadAsync(cancellationToken));
+			return Success.Of(await sink.GetAsync(cancellationToken));
 		}
 		catch (Exception ex)
 		{

@@ -6,21 +6,24 @@ using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist.Outbox;
+using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
 internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService mediaService, ILogger<PlexSink> logger) : IMediaSink
 {
+	private const int PageConcurrency = 10;
+
 	public SinkKind Kind => SinkKind.Plex;
 
-	public async Task<SinkContents> ReadAsync(CancellationToken cancellationToken = default)
+	public async Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default)
 	{
-		var entries = await WatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
-		var requests = entries.Select(entry => new ResolveRequest([.. entry.Externals], MediaProvider.Plex, new None()));
+		var items = await WatchlistAsync(cancellationToken).ToListAsync(cancellationToken);
+		var requests = items.Select(item => new ResolveRequest([.. item.Externals], MediaProvider.Plex, new None()));
 		List<MediaId> matched = [];
 		List<UnmatchedMedia> unmatched = [];
-		await foreach (var (result, entry) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(entries, cancellationToken))
+		await foreach (var (result, item) in mediaService.IdentifyAsync(requests, cancellationToken).ZipAwait(items, cancellationToken))
 		{
 			if (result is Success<MediaIdentity>(var identity))
 			{
@@ -28,26 +31,26 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			}
 			else
 			{
-				unmatched.Add(entry);
-				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", entry.Title ?? entry.Externals.FirstOrDefault()?.Value);
+				unmatched.Add(item);
+				logger.LogWarning("Plex watchlist item {Title} could not be matched during sync", item.Title ?? item.Externals.FirstOrDefault()?.Value);
 			}
 		}
 
-		return new SinkContents(matched, unmatched);
+		return new SinkSnapshot(matched, unmatched);
 	}
 
 	public async IAsyncEnumerable<SinkSyncAck> ApplyAsync(
 		WantlistOperationAction action,
-		IReadOnlyList<MediaId> mediaIds,
+		IReadOnlyList<MediaId> ids,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var plexIds = await mediaService.GetExternalsAsync(mediaIds, MediaProvider.Plex, cancellationToken);
-		foreach (var mediaId in mediaIds)
+		var plexIds = await mediaService.GetExternalsAsync(ids, MediaProvider.Plex, cancellationToken);
+		foreach (var id in ids)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			var outcome = plexIds.TryGetValue(mediaId, out var plexId) ? await PushAsync(action, plexId, cancellationToken) : SinkSyncOutcome.Unaddressable;
-			yield return new SinkSyncAck(mediaId, outcome);
+			var outcome = plexIds.TryGetValue(id, out var plexId) ? await PushAsync(action, plexId, cancellationToken) : SinkSyncOutcome.Unaddressable;
+			yield return new SinkSyncAck(id, outcome);
 		}
 	}
 
@@ -74,7 +77,7 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		var rest = Enumerable
 			.Range(2, pages - 1)
 			.ToAsyncEnumerable()
-			.SelectAwait(async p => await FetchPageAsync(p, cancellationToken), IWantlistService.RecommendedConcurrency, cancellationToken);
+			.SelectAwait(async page => await FetchPageAsync(page, cancellationToken), PageConcurrency, cancellationToken);
 
 		await foreach (var (remaining, _) in rest)
 		{
@@ -114,13 +117,13 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 			await JsonSerializer.DeserializeAsync<PlexTypes.Watchlist.Root>(stream, cancellationToken: cancellationToken)
 			?? throw new InvalidOperationException("Plex watchlist response was empty.");
 
-		var items = (result.MediaContainer.Metadata ?? []).Select(Entry).ToList();
+		var items = (result.MediaContainer.Metadata ?? []).Select(Item).ToList();
 		var totalPages = result.MediaContainer.TotalSize <= 0 ? 1 : (int)Math.Ceiling(result.MediaContainer.TotalSize / (double)PlexClient.ContainerSize);
 
 		return (items, totalPages);
 	}
 
-	private static UnmatchedMedia Entry(PlexTypes.Watchlist.Metadata metadata) =>
+	private static UnmatchedMedia Item(PlexTypes.Watchlist.Metadata metadata) =>
 		new()
 		{
 			Externals = [metadata.PlexId],
