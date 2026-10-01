@@ -10,6 +10,7 @@ using Domain.Media;
 using Domain.Providers;
 using Domain.Wantlist;
 using Domain.Wantlist.Outbox;
+using Domain.Wantlist.Sync;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
@@ -17,12 +18,12 @@ namespace Core.Tests.Wantlist;
 
 internal static class WantlistStubs
 {
-	public static readonly SinkContents NothingOnTheSink = new([], []);
+	public static readonly SinkSnapshot NothingOnTheSink = new([], []);
 
 	public static Mock<IMediaSink> EmptySink()
 	{
 		var sink = IMediaSink.Mock();
-		sink.ReadAsync(Any()).Returns(NothingOnTheSink);
+		sink.GetAsync(Any()).Returns(NothingOnTheSink);
 		return sink;
 	}
 
@@ -35,6 +36,9 @@ internal static class WantlistStubs
 
 	public static WantlistSyncPlanner Planner(Mock<IMediaSink> sink, Mock<IWantlistOutbox> outbox) =>
 		new(Active(sink), EmptyRepository().Object, outbox.Object, NullLogger<WantlistSyncPlanner>.Instance);
+
+	public static WantlistSnapshot Wanted(IEnumerable<MediaId> ids) =>
+		new([.. ids.Select(id => new WantlistItem(id, DateTimeOffset.UnixEpoch, new ManualOrigin(ManualSource.Unknown)))]);
 
 	public static Mock<IWantlistRepository> EmptyRepository()
 	{

@@ -18,9 +18,9 @@ public class WantlistSyncEngineTests
 	[Test]
 	public async Task SyncAsync_OverlappingCalls_ReturnsAlreadyRunning()
 	{
-		var held = new TaskCompletionSource<SinkContents>();
+		var held = new TaskCompletionSource<SinkSnapshot>();
 		var sink = IMediaSink.Mock();
-		sink.ReadAsync(Any()).ReturnsAsync(held.Task);
+		sink.GetAsync(Any()).ReturnsAsync(held.Task);
 		var engine = BuildEngine(sink);
 
 		var first = engine.SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
@@ -36,9 +36,9 @@ public class WantlistSyncEngineTests
 	[Test]
 	public async Task SyncAsync_WhileAnotherUserIsSyncing_RunsAnyway()
 	{
-		var held = new TaskCompletionSource<SinkContents>();
+		var held = new TaskCompletionSource<SinkSnapshot>();
 		var busy = IMediaSink.Mock();
-		busy.ReadAsync(Any()).ReturnsAsync(held.Task);
+		busy.GetAsync(Any()).ReturnsAsync(held.Task);
 		var idle = WantlistStubs.EmptySink();
 		var shared = new WantlistSyncGate();
 

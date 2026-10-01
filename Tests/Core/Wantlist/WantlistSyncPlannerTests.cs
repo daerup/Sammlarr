@@ -37,7 +37,7 @@ public class WantlistSyncPlannerTests
 		var matched = MediaId.From(Guid.NewGuid());
 		var unmatched = new UnmatchedMedia { Externals = [PlexId.From("plex-1", MediaType.Movie)], Title = "Solaris" };
 		var sink = IMediaSink.Mock();
-		sink.ReadAsync(Any()).Returns(new SinkContents([matched], [unmatched]));
+		sink.GetAsync(Any()).Returns(new SinkSnapshot([matched], [unmatched]));
 
 		var result = await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox()).PlanAsync();
 
@@ -50,7 +50,7 @@ public class WantlistSyncPlannerTests
 	public async Task PlanAsync_WhenTheSinkCannotBeRead_ReportsItUnreachable()
 	{
 		var sink = IMediaSink.Mock();
-		sink.ReadAsync(Any()).Throws(new HttpRequestException("plex is down"));
+		sink.GetAsync(Any()).Throws(new HttpRequestException("plex is down"));
 
 		var result = await WantlistStubs.Planner(sink, WantlistStubs.EmptyOutbox()).PlanAsync();
 

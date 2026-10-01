@@ -22,15 +22,15 @@ public class PlexSinkTests
 	private static readonly MediaId Known = MediaId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task ReadAsync_WhenAnItemMatches_ReturnsItsMediaIdFromItsPlexId()
+	public async Task GetAsync_WhenAnItemMatches_ReturnsItsMediaIdFromItsPlexId()
 	{
 		var media = MatchingAs(Known);
 		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42")), media);
 
-		var contents = await testee.ReadAsync();
+		var snapshot = await testee.GetAsync();
 
-		await Assert.That(contents.Matched).IsEquivalentTo([Known]);
-		await Assert.That(contents.Unmatched).IsEmpty();
+		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
+		await Assert.That(snapshot.Unmatched).IsEmpty();
 		media
 			.IdentifyAsync(
 				Arg.Is<IEnumerable<ResolveRequest>>(requests => requests?.Single() is { Target: MediaProvider.Plex, Candidates: [{ Value: "plex-42" }] }),
@@ -40,58 +40,58 @@ public class PlexSinkTests
 	}
 
 	[Test]
-	public async Task ReadAsync_WhenAnItemCannotBeMatched_ReportsItWithItsTitleAndPlexId()
+	public async Task GetAsync_WhenAnItemCannotBeMatched_ReportsItWithItsTitleAndPlexId()
 	{
 		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42", title: "Futurama")), MatchingNothing());
 
-		var contents = await testee.ReadAsync();
+		var snapshot = await testee.GetAsync();
 
-		await Assert.That(contents.Matched).IsEmpty();
-		await Assert.That(contents.Unmatched.Single().Title).IsEqualTo("Futurama");
-		await Assert.That(contents.Unmatched.Single().Externals.Single().Value).IsEqualTo("plex-42");
-		await Assert.That(contents.Unmatched.Single().Type).IsEqualTo(MediaType.Movie);
+		await Assert.That(snapshot.Ids).IsEmpty();
+		await Assert.That(snapshot.Unmatched.Single().Title).IsEqualTo("Futurama");
+		await Assert.That(snapshot.Unmatched.Single().Externals.Single().Value).IsEqualTo("plex-42");
+		await Assert.That(snapshot.Unmatched.Single().Type).IsEqualTo(MediaType.Movie);
 	}
 
 	[Test]
-	public async Task ReadAsync_WhenAnUnmatchedItemHasNoTitle_StillReportsItsPlexId()
+	public async Task GetAsync_WhenAnUnmatchedItemHasNoTitle_StillReportsItsPlexId()
 	{
 		var testee = Sink(BuildWantlistJson(1, CreateMetadata(title: string.Empty, ratingKey: "plex-7")), MatchingNothing());
 
-		var unmatched = (await testee.ReadAsync()).Unmatched.Single();
+		var unmatched = (await testee.GetAsync()).Unmatched.Single();
 
 		await Assert.That(unmatched.Title).IsNull();
 		await Assert.That(unmatched.Externals.Single().Value).IsEqualTo("plex-7");
 	}
 
 	[Test]
-	public async Task ReadAsync_WhenAnUnmatchedItemHasNoYearOrDate_ReportsItWithoutAReleaseDate()
+	public async Task GetAsync_WhenAnUnmatchedItemHasNoYearOrDate_ReportsItWithoutAReleaseDate()
 	{
 		var testee = Sink(BuildWantlistJson(1, CreateMetadata(year: 0, originallyAvailableAt: string.Empty)), MatchingNothing());
 
-		var unmatched = (await testee.ReadAsync()).Unmatched.Single();
+		var unmatched = (await testee.GetAsync()).Unmatched.Single();
 
 		await Assert.That(unmatched.ReleaseDate).IsNull();
 	}
 
 	[Test]
-	public async Task ReadAsync_WhenAnUnmatchedItemHasOnlyAYear_DatesItToThatYear()
+	public async Task GetAsync_WhenAnUnmatchedItemHasOnlyAYear_DatesItToThatYear()
 	{
 		var testee = Sink(BuildWantlistJson(1, CreateMetadata(year: 1999, originallyAvailableAt: string.Empty)), MatchingNothing());
 
-		var unmatched = (await testee.ReadAsync()).Unmatched.Single();
+		var unmatched = (await testee.GetAsync()).Unmatched.Single();
 
 		await Assert.That(unmatched.ReleaseDate).IsEqualTo(new DateOnly(1999, 1, 1));
 	}
 
 	[Test]
-	public async Task ReadAsync_WhenTheWatchlistIsEmpty_ReturnsNothingInsteadOfThrowing()
+	public async Task GetAsync_WhenTheWatchlistIsEmpty_ReturnsNothingInsteadOfThrowing()
 	{
 		var testee = Sink(EmptyWantlistJson(), MatchingNothing());
 
-		var contents = await testee.ReadAsync();
+		var snapshot = await testee.GetAsync();
 
-		await Assert.That(contents.Matched).IsEmpty();
-		await Assert.That(contents.Unmatched).IsEmpty();
+		await Assert.That(snapshot.Ids).IsEmpty();
+		await Assert.That(snapshot.Unmatched).IsEmpty();
 	}
 
 	[Test]
