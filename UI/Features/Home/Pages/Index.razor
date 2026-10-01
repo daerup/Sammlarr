@@ -310,7 +310,7 @@ else
             var runs = await FeedService.GetRecentRunsAsync(_now - ActivityWindow, RunCap, _cancellation.Token);
             var owned = await WantlistService.GetOwnedCountsAsync(_cancellation.Token);
             var wantlist = await WantlistService.GetAsync(_cancellation.Token);
-            var blocklisted = await BlocklistService.GetBlocklistIdsAsync(_cancellation.Token);
+            var blocklist = await BlocklistService.GetAsync(_cancellation.Token);
             var overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
             _outbox = await Outbox.GetAsync(_cancellation.Token);
             var queue = await JobQueueView.GetAsync(_cancellation.Token);
@@ -318,7 +318,7 @@ else
             var names = FeedNames();
             var brands = FeedBrands();
             _wantlistCount = wantlist.Ids.Count;
-            _blocklistCount = blocklisted.Count;
+            _blocklistCount = blocklist.Ids.Count;
             _sources = LibraryView.Sources(owned, names, _wantlistCount);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);

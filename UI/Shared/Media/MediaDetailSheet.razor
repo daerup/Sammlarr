@@ -150,7 +150,7 @@
     {
         var wantlist = await WantlistService.GetAsync();
         _item = wantlist.Find(id);
-        _blocklisted = (await BlocklistService.GetBlocklistIdsAsync()).Contains(id);
+        _blocklisted = (await BlocklistService.GetAsync()).Contains(id);
     }
 
     private async Task ToggleWantlistAsync(MediaLookup media)
@@ -199,11 +199,11 @@
         {
             if (_blocklisted)
             {
-                await BlocklistService.RemoveFromBlocklistAsync(media.Id);
+                await BlocklistService.RemoveAsync(media.Id);
             }
             else
             {
-                await BlocklistService.AddToBlocklistAsync(media.Id);
+                await BlocklistService.AddAsync(media.Id);
             }
 
             await LoadEnrollmentAsync(media.Id);

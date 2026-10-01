@@ -12,6 +12,7 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using Contracts.Wantlist.Sync;
+using Domain.Blocklist;
 using Domain.Identity;
 using Domain.Jobs;
 using Domain.Media;
@@ -236,7 +237,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();
-		blocklist.GetBlocklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(blocklist.Object);
 
 		var outbox = IWantlistOutbox.Mock();

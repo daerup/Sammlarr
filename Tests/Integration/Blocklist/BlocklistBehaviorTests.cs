@@ -1,4 +1,5 @@
 using Contracts.Blocklist;
+using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
@@ -12,14 +13,14 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task AddAsync_WhenAMovieIsBlocklisted_PersistsTheEntry()
+	public async Task AddAsync_WhenAMovieIsBlocklisted_PersistsTheItem()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).SeedAsync();
 
-		await host.Resolve<IBlocklistService>().AddToBlocklistAsync(fightClub);
+		await host.Resolve<IBlocklistService>().AddAsync(fightClub);
 
-		var entries = await host.Resolve<IBlocklistRepository>().GetBlocklistedEntriesAsync();
-		await Assert.That(entries.Select(entry => entry.MediaId)).IsEquivalentTo([fightClub]);
+		var items = await host.Resolve<IBlocklistRepository>().GetAllAsync();
+		await Assert.That(items.Select(item => item.MediaId)).IsEquivalentTo([fightClub]);
 	}
 
 	[Test]
@@ -27,41 +28,41 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
 
-		await host.Resolve<IBlocklistService>().AddToBlocklistAsync(fightClub);
+		await host.Resolve<IBlocklistService>().AddAsync(fightClub);
 
-		var entries = await host.Resolve<IBlocklistRepository>().GetBlocklistedEntriesAsync();
-		await Assert.That(entries.Select(entry => entry.MediaId)).IsEquivalentTo([fightClub]);
+		var items = await host.Resolve<IBlocklistRepository>().GetAllAsync();
+		await Assert.That(items.Select(item => item.MediaId)).IsEquivalentTo([fightClub]);
 	}
 
 	[Test]
-	public async Task RemoveAsync_WhenAMovieIsRemoved_DeletesTheEntry()
+	public async Task RemoveAsync_WhenAMovieIsRemoved_DeletesTheItem()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
 
-		await host.Resolve<IBlocklistService>().RemoveFromBlocklistAsync(fightClub);
+		await host.Resolve<IBlocklistService>().RemoveAsync(fightClub);
 
-		var entries = await host.Resolve<IBlocklistRepository>().GetBlocklistedEntriesAsync();
-		await Assert.That(entries).IsEmpty();
+		var items = await host.Resolve<IBlocklistRepository>().GetAllAsync();
+		await Assert.That(items).IsEmpty();
 	}
 
 	[Test]
-	public async Task GetIdsAsync_WhenItemsAreBlocklisted_ReturnsAllOfTheirIds()
+	public async Task GetAsync_WhenTitlesAreBlocklisted_HoldsAllOfTheirIds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnBlocklist();
 		var inception = await host.Movie(TestMedia.Inception).OnBlocklist();
 
-		var ids = await host.Resolve<IBlocklistService>().GetBlocklistIdsAsync();
+		var blocklist = await host.Resolve<IBlocklistService>().GetAsync();
 
-		await Assert.That(ids).Contains(fightClub);
-		await Assert.That(ids).Contains(inception);
+		await Assert.That(blocklist.Ids).IsEquivalentTo([fightClub, inception]);
 	}
 
 	[Test]
-	public async Task GetItemsAsync_WhenEntriesExist_EnrichesThemWithMetadataAndRating()
+	public async Task GetDetailsAsync_ForBlocklistItems_EnrichesThemWithMetadataAndRating()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnBlocklist();
+		var blocklist = await host.Resolve<IBlocklistService>().GetAsync();
 
-		var items = await host.Resolve<IBlocklistService>().GetBlocklistItemsAsync().ToListAsync();
+		var items = await host.Resolve<IMediaService>().GetDetailsAsync(blocklist.Items).ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
 		await Assert
@@ -78,6 +79,6 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_WhenTheMediaIsNotInTheLibrary_IsRejected()
 	{
-		await Assert.That(async () => await host.Resolve<IBlocklistService>().AddToBlocklistAsync(MediaId.From(Guid.NewGuid()))).Throws<UnknownMediaException>();
+		await Assert.That(async () => await host.Resolve<IBlocklistService>().AddAsync(MediaId.From(Guid.NewGuid()))).Throws<UnknownMediaException>();
 	}
 }

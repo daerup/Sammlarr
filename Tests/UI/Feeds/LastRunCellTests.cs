@@ -6,6 +6,7 @@ using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
+using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
@@ -96,7 +97,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddSingleton(wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();
-		blocklist.GetBlocklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(blocklist.Object);
 
 		var providerConfig = IProviderConfigService.Mock();

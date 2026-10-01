@@ -1,7 +1,6 @@
 @using Contracts.Identity
 @using Contracts.Media
 @using Contracts.Wantlist.Sync
-@using Contracts.Blocklist
 @using Contracts.Announcing
 @using Contracts.Jobs
 @using Domain.Announcing
@@ -12,7 +11,6 @@
 @using UI.Shared.Media
 @implements IDisposable
 @inject IMediaService Media
-@inject IBlocklistService BlocklistService
 @inject IJobQueue JobQueue
 @inject IWantlistSyncPlanner Planner
 @inject ICurrentUser CurrentUser

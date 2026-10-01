@@ -91,7 +91,7 @@
                                        OnBulkMark="BlocklistBulkAsync"
                                        RemoveConfirm="RemoveConfirm"
                                        MarkConfirm="BlocklistConfirm"
-                                       IsMarked="@(item => _blocklistedIds.Contains(item.Media.Id))"
+                                       IsMarked="@(item => _blocklist.Contains(item.Media.Id))"
                                        AlreadyMarkedHint="Every selected title is already blocklisted."
                                        IsRemoved="@(item => _removedIds.Contains(item.Media.Id))"
                                        AlreadyRemovedHint="Every selected title is already pending removal.">
@@ -134,7 +134,7 @@
     private List<WantlistedMedia> _removedItems = [];
     private HashSet<MediaId> _removedIds = [];
     private readonly HashSet<MediaId> _pushed = [];
-    private IReadOnlySet<MediaId> _blocklistedIds = new HashSet<MediaId>();
+    private BlocklistSnapshot _blocklist = new([]);
     private UserId? _userId;
     private bool _syncing;
     private WantlistedMedia? _selectedItem;
@@ -237,7 +237,7 @@
             await LoadOutboxAsync();
             _removedIds = _outboxEntries.Values.Where(entry => entry.Action == WantlistOperationAction.Remove).Select(entry => entry.MediaId).ToHashSet();
 
-            _blocklistedIds = await BlocklistService.GetBlocklistIdsAsync(Cancellation.Token);
+            _blocklist = await BlocklistService.GetAsync(Cancellation.Token);
 
             var listed = WantlistStatusView.WithPendingRemovals(await WantlistService.GetAsync(Cancellation.Token), _outboxEntries.Values);
             var all = await Media.GetDetailsAsync(listed, Cancellation.Token).ToListAsync(Cancellation.Token);
@@ -438,7 +438,7 @@
     {
         foreach (var item in toMark)
         {
-            await BlocklistService.AddToBlocklistAsync(item.Media.Id, Cancellation.Token);
+            await BlocklistService.AddAsync(item.Media.Id, Cancellation.Token);
         }
         Notifier.Success($"Blocklisted {toMark.Count} title{(toMark.Count == 1 ? "" : "s")}.");
     }

@@ -25,7 +25,7 @@
                                        Item="@ItemFor(ctx.Result.Id)"
                                        OnToggle="ctx.OnToggle"/>
             <BlocklistToggleIcon Result="ctx.Result"
-                                 IsToggled="@_blocklisted.Contains(ctx.Result.Id)"
+                                 IsToggled="@_blocklist.Contains(ctx.Result.Id)"
                                  IsToggling="@(_blocklisting == ctx.Result.Id)"
                                  OnToggle="ToggleBlocklistAsync"/>
         </TileIcons>
@@ -35,7 +35,7 @@
 @code {
     private readonly CancellationTokenSource _cancellation = new();
     private ProviderConfig? _settings;
-    private IReadOnlySet<MediaId> _blocklisted = new HashSet<MediaId>();
+    private BlocklistSnapshot _blocklist = new([]);
     private WantlistSnapshot _wantlist = new([]);
     private MediaId? _blocklisting;
 
@@ -56,7 +56,7 @@
     private async Task RefreshAsync()
     {
         _wantlist = await WantlistService.GetAsync(_cancellation.Token);
-        _blocklisted = await BlocklistService.GetBlocklistIdsAsync(_cancellation.Token);
+        _blocklist = await BlocklistService.GetAsync(_cancellation.Token);
     }
 
     private async Task<bool> ToggleWantlistAsync(MediaId id, string title, bool isMarked)
@@ -86,14 +86,14 @@
         _blocklisting = media.Id;
         try
         {
-            if (_blocklisted.Contains(media.Id))
+            if (_blocklist.Contains(media.Id))
             {
-                await BlocklistService.RemoveFromBlocklistAsync(media.Id, _cancellation.Token);
+                await BlocklistService.RemoveAsync(media.Id, _cancellation.Token);
                 Notifier.Success($"'{media.Title}' has been removed from your blocklist.");
             }
             else
             {
-                await BlocklistService.AddToBlocklistAsync(media.Id, _cancellation.Token);
+                await BlocklistService.AddAsync(media.Id, _cancellation.Token);
                 Notifier.Success($"'{media.Title}' has been blocklisted.");
             }
 
