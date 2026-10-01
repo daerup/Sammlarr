@@ -4,10 +4,12 @@ using API.Plex;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
+using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
+using TUnit.Mocks.Http;
 
 namespace API.Tests.Plex;
 
@@ -15,71 +17,85 @@ public class PlexSinkTests
 {
 	private const string PlexBaseUrl = "https://plex.tv";
 	private static readonly Faker Faker = new();
+	private static readonly MediaId Known = MediaId.From(Guid.NewGuid());
 
 	[Test]
-	public async Task GetWantlistAsync_WhenItemHasNoYearOrDate_StillReturnsItWithoutAReleaseDate()
+	public async Task ReadAsync_WhenAnItemMatches_ReturnsItsMediaIdFromItsPlexId()
 	{
-		var json = BuildWantlistJson(1, CreateMetadata(year: 0, originallyAvailableAt: string.Empty));
-		var testee = CreateWantlistService(json);
+		var media = MatchingAs(Known);
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42")), media);
 
-		var result = await testee.GetWantlistAsync().ToListAsync();
+		var contents = await testee.ReadAsync();
 
-		await Assert.That(result).Count().IsEqualTo(1);
-		await Assert.That(result[0].ReleaseDate).IsNull();
+		await Assert.That(contents.Matched).IsEquivalentTo([Known]);
+		await Assert.That(contents.Unmatched).IsEmpty();
+		media
+			.IdentifyAsync(
+				Arg.Is<IEnumerable<ResolveRequest>>(requests => requests?.Single() is { Target: MediaProvider.Plex, Candidates: [{ Value: "plex-42" }] }),
+				Any()
+			)
+			.WasCalled(Times.Once);
 	}
 
 	[Test]
-	public async Task GetWantlistAsync_WhenItemHasOnlyAYear_DatesItToThatYear()
+	public async Task ReadAsync_WhenAnItemCannotBeMatched_ReportsItWithItsTitleAndPlexId()
 	{
-		var json = BuildWantlistJson(1, CreateMetadata(year: 1999, originallyAvailableAt: string.Empty));
-		var testee = CreateWantlistService(json);
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42", title: "Futurama")), MatchingNothing());
 
-		var result = await testee.GetWantlistAsync().ToListAsync();
+		var contents = await testee.ReadAsync();
 
-		await Assert.That(result[0].ReleaseDate).IsEqualTo(new DateOnly(1999, 1, 1));
+		await Assert.That(contents.Matched).IsEmpty();
+		await Assert.That(contents.Unmatched.Single().Title).IsEqualTo("Futurama");
+		await Assert.That(contents.Unmatched.Single().Externals.Single().Value).IsEqualTo("plex-42");
+		await Assert.That(contents.Unmatched.Single().Type).IsEqualTo(MediaType.Movie);
 	}
 
 	[Test]
-	public async Task GetWantlistAsync_WhenItemHasNoTitle_StillReturnsItWithItsExternalId()
+	public async Task ReadAsync_WhenAnUnmatchedItemHasNoTitle_StillReportsItsPlexId()
 	{
-		var json = BuildWantlistJson(1, CreateMetadata(title: string.Empty, ratingKey: "plex-7"));
-		var testee = CreateWantlistService(json);
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(title: string.Empty, ratingKey: "plex-7")), MatchingNothing());
 
-		var result = await testee.GetWantlistAsync().ToListAsync();
+		var unmatched = (await testee.ReadAsync()).Unmatched.Single();
 
-		await Assert.That(result).Count().IsEqualTo(1);
-		await Assert.That(result[0].Title).IsNull();
-		await Assert.That(result[0].Externals.First().Value).IsEqualTo("plex-7");
+		await Assert.That(unmatched.Title).IsNull();
+		await Assert.That(unmatched.Externals.Single().Value).IsEqualTo("plex-7");
 	}
 
 	[Test]
-	public async Task GetWantlistAsync_WhenItemIsComplete_CarriesItsTitleAlongsideItsExternalId()
+	public async Task ReadAsync_WhenAnUnmatchedItemHasNoYearOrDate_ReportsItWithoutAReleaseDate()
 	{
-		var json = BuildWantlistJson(1, CreateMetadata(ratingKey: "plex-42", title: "Futurama"));
-		var testee = CreateWantlistService(json);
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(year: 0, originallyAvailableAt: string.Empty)), MatchingNothing());
 
-		var result = await testee.GetWantlistAsync().ToListAsync();
+		var unmatched = (await testee.ReadAsync()).Unmatched.Single();
 
-		await Assert.That(result).Count().IsEqualTo(1);
-		await Assert.That(result[0].Title).IsEqualTo("Futurama");
-		await Assert.That(result[0].Externals.First().Value).IsEqualTo("plex-42");
-		await Assert.That(result[0].Type).IsEqualTo(MediaType.Movie);
+		await Assert.That(unmatched.ReleaseDate).IsNull();
 	}
 
 	[Test]
-	public async Task GetWantlistAsync_WhenTheWantlistIsEmpty_ReturnsNothingInsteadOfThrowing()
+	public async Task ReadAsync_WhenAnUnmatchedItemHasOnlyAYear_DatesItToThatYear()
 	{
-		var testee = CreateWantlistService(EmptyWantlistJson());
+		var testee = Sink(BuildWantlistJson(1, CreateMetadata(year: 1999, originallyAvailableAt: string.Empty)), MatchingNothing());
 
-		var result = await testee.GetWantlistAsync().ToListAsync();
+		var unmatched = (await testee.ReadAsync()).Unmatched.Single();
 
-		await Assert.That(result).IsEmpty();
+		await Assert.That(unmatched.ReleaseDate).IsEqualTo(new DateOnly(1999, 1, 1));
+	}
+
+	[Test]
+	public async Task ReadAsync_WhenTheWatchlistIsEmpty_ReturnsNothingInsteadOfThrowing()
+	{
+		var testee = Sink(EmptyWantlistJson(), MatchingNothing());
+
+		var contents = await testee.ReadAsync();
+
+		await Assert.That(contents.Matched).IsEmpty();
+		await Assert.That(contents.Unmatched).IsEmpty();
 	}
 
 	[Test]
 	public async Task AddToWantlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
 	{
-		var testee = CreateWantlistService(HttpStatusCode.OK);
+		var testee = Sink(HttpStatusCode.OK);
 		var id = PlexId.From("plex-1", MediaType.Movie);
 
 		var results = await testee.AddToWantlistAsync([id]).ToListAsync();
@@ -91,7 +107,7 @@ public class PlexSinkTests
 	[Test]
 	public async Task AddToWantlistAsync_WhenRequestFails_YieldsFailureResult()
 	{
-		var testee = CreateWantlistService(HttpStatusCode.Unauthorized);
+		var testee = Sink(HttpStatusCode.Unauthorized);
 		var id = PlexId.From("plex-1", MediaType.Movie);
 
 		var results = await testee.AddToWantlistAsync([id]).ToListAsync();
@@ -103,7 +119,7 @@ public class PlexSinkTests
 	[Test]
 	public async Task RemoveFromWantlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
 	{
-		var testee = CreateWantlistService(HttpStatusCode.OK);
+		var testee = Sink(HttpStatusCode.OK);
 		var id = PlexId.From("plex-1", MediaType.Movie);
 
 		var results = await testee.RemoveFromWantlistAsync([id]).ToListAsync();
@@ -115,7 +131,7 @@ public class PlexSinkTests
 	[Test]
 	public async Task RemoveFromWantlistAsync_WhenRequestFails_YieldsFailureResult()
 	{
-		var testee = CreateWantlistService(HttpStatusCode.Unauthorized);
+		var testee = Sink(HttpStatusCode.Unauthorized);
 		var id = PlexId.From("plex-1", MediaType.Movie);
 
 		var results = await testee.RemoveFromWantlistAsync([id]).ToListAsync();
@@ -124,31 +140,35 @@ public class PlexSinkTests
 		await Assert.That(results[0].Success).IsFalse();
 	}
 
-	private static PlexSink CreateWantlistService(string json) =>
-		new(CreatePlexClient(json), PlexTestUrls.Instance, NullLogger<PlexSink>.Instance);
-
-	private static PlexSink CreateWantlistService(HttpStatusCode statusCode) =>
-		new(CreatePlexClient(statusCode), PlexTestUrls.Instance, NullLogger<PlexSink>.Instance);
-
-	private static PlexClient CreatePlexClient(string json)
+	private static PlexSink Sink(string json, Mock<IMediaService> media)
 	{
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(json);
-		var client = handler.CreateClient(PlexBaseUrl);
-		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
-		var credentialStore = ICredentialService.Mock();
-		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		return new PlexClient(client, credentialStore, ICurrentUser.Mock().Object);
+		return Sink(handler, media);
 	}
 
-	private static PlexClient CreatePlexClient(HttpStatusCode statusCode)
+	private static PlexSink Sink(HttpStatusCode status) => Sink(Mock.HttpHandler().WithDefaultStatus(status), IMediaService.Mock());
+
+	private static PlexSink Sink(MockHttpHandler handler, Mock<IMediaService> media) =>
+		new(Client(handler), PlexTestUrls.Instance, media.Object, NullLogger<PlexSink>.Instance);
+
+	private static Mock<IMediaService> MatchingAs(MediaId mediaId) => Identifying(request => Success.Of(new MediaIdentity(mediaId, [.. request.Candidates])));
+
+	private static Mock<IMediaService> MatchingNothing() => Identifying(_ => Error.From("unmatched"));
+
+	private static Mock<IMediaService> Identifying(Func<ResolveRequest, Result<MediaIdentity>> identify)
 	{
-		var handler = Mock.HttpHandler().WithDefaultStatus(statusCode);
-		var client = handler.CreateClient(PlexBaseUrl);
+		var media = IMediaService.Mock();
+		media.IdentifyAsync(Any<IEnumerable<ResolveRequest>>(), Any()).Returns((requests, _) => requests.Select(identify).ToAsyncEnumerable());
+		return media;
+	}
+
+	private static PlexClient Client(MockHttpHandler handler)
+	{
 		var credential = new TestCredential(AuthProvider.Plex, Guid.NewGuid(), "test-token", DateTimeOffset.MaxValue);
 		var credentialStore = ICredentialService.Mock();
 		credentialStore.GetAsync(AuthProvider.Plex, Any()).Returns(credential);
-		return new PlexClient(client, credentialStore, ICurrentUser.Mock().Object);
+		return new PlexClient(handler.CreateClient(PlexBaseUrl), credentialStore, ICurrentUser.Mock().Object);
 	}
 
 	private static string BuildWantlistJson(int totalSize, object metadata)

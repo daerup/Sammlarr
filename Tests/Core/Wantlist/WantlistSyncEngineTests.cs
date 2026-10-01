@@ -1,4 +1,3 @@
-using Contracts;
 using Contracts.Identity;
 using Contracts.Messaging;
 using Contracts.Wantlist;
@@ -7,7 +6,6 @@ using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Domain.Wantlist.Sync;
-using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 
 namespace Core.Tests.Wantlist;
@@ -20,10 +18,10 @@ public class WantlistSyncEngineTests
 	[Test]
 	public async Task SyncAsync_OverlappingCalls_ReturnsAlreadyRunning()
 	{
-		var held = new TaskCompletionSource();
-		var provider = IMediaSink.Mock();
-		provider.GetWantlistAsync(Any()).Returns(WaitingRemote(held));
-		var engine = BuildEngine(provider);
+		var held = new TaskCompletionSource<SinkContents>();
+		var sink = IMediaSink.Mock();
+		sink.ReadAsync(Any()).ReturnsAsync(held.Task);
+		var engine = BuildEngine(sink);
 
 		var first = engine.SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
 		await Task.Delay(50);
@@ -31,18 +29,17 @@ public class WantlistSyncEngineTests
 
 		await Assert.That(second).IsOfUnionType<WantlistSyncResult, WantlistSyncAlreadyRunning>();
 
-		held.SetResult();
+		held.SetResult(WantlistStubs.NothingOnTheSink);
 		await Assert.That(await first).IsOfUnionType<WantlistSyncResult, WantlistSyncSummary>();
 	}
 
 	[Test]
 	public async Task SyncAsync_WhileAnotherUserIsSyncing_RunsAnyway()
 	{
-		var held = new TaskCompletionSource();
+		var held = new TaskCompletionSource<SinkContents>();
 		var busy = IMediaSink.Mock();
-		busy.GetWantlistAsync(Any()).Returns(WaitingRemote(held));
-		var idle = IMediaSink.Mock();
-		idle.GetWantlistAsync(Any()).Returns(WantlistStubs.NothingRemote());
+		busy.ReadAsync(Any()).ReturnsAsync(held.Task);
+		var idle = WantlistStubs.EmptySink();
 		var shared = new WantlistSyncGate();
 
 		var blocking = BuildEngine(busy, shared).SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
@@ -51,7 +48,7 @@ public class WantlistSyncEngineTests
 
 		await Assert.That(other).IsOfUnionType<WantlistSyncResult, WantlistSyncSummary>();
 
-		held.SetResult();
+		held.SetResult(WantlistStubs.NothingOnTheSink);
 		await blocking;
 	}
 
@@ -60,11 +57,10 @@ public class WantlistSyncEngineTests
 	{
 		var stranded = MediaId.From(Guid.NewGuid());
 		var alsoStranded = MediaId.From(Guid.NewGuid());
-		var provider = IMediaSink.Mock();
-		provider.GetWantlistAsync(Any()).Returns(WantlistStubs.NothingRemote());
+		var sink = WantlistStubs.EmptySink();
 		var published = new RecordingPublisher();
 
-		await BuildEngine(provider, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
+		await BuildEngine(sink, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
 
 		var events = published.Published<WantlistSyncCompletedNotification>();
 		await Assert.That(events).Count().IsEqualTo(1);
@@ -73,23 +69,17 @@ public class WantlistSyncEngineTests
 	}
 
 	private static WantlistSyncEngine BuildEngine(
-		Mock<IMediaSink> provider,
+		Mock<IMediaSink> sink,
 		WantlistSyncGate? gate = null,
 		ICurrentUser? user = null,
 		IMessagePublisher? publisher = null,
 		IReadOnlyList<MediaId>? pending = null
 	) =>
 		WantlistStubs.Engine(
-			provider,
+			sink,
 			pending is null ? WantlistStubs.EmptyOutbox() : WantlistStubs.OutboxPending(pending),
 			gate: gate,
 			user: user ?? User,
 			publisher: publisher
 		);
-
-	private static async IAsyncEnumerable<UnmatchedMedia> WaitingRemote(TaskCompletionSource gate)
-	{
-		await gate.Task;
-		yield break;
-	}
 }

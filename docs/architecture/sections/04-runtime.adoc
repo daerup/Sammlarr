@@ -233,7 +233,9 @@ sequenceDiagram
   S-->>W: item shows a Pending push dot
 
   Note over U,Plex: Sync: pull, then push pending changes
-  SE->>PX: read the Plex watchlist
+  SE->>PX: ReadAsync
+  PX->>Plex: read the Plex watchlist
+  PX-->>SE: its items matched to titles, plus the unmatched
   SE->>DB: apply remote adds and removes
   SE->>DB: read Pending outbox rows, grouped by add / remove
   SE->>PX: push each group as one batch

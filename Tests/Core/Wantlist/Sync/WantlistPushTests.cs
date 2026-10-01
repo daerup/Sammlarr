@@ -157,8 +157,7 @@ public class WantlistPushTests
 
 	private static Mock<IMediaSink> ProviderAcking(params SinkSyncAck[] acks)
 	{
-		var provider = IMediaSink.Mock();
-		provider.GetWantlistAsync(Any()).Returns(WantlistStubs.NothingRemote());
+		var provider = WantlistStubs.EmptySink();
 		provider.AddToWantlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(acks));
 		provider.RemoveFromWantlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(acks));
 		return provider;
@@ -177,8 +176,7 @@ public class WantlistPushTests
 
 	private static Mock<IMediaSink> ProviderPushing(IExternalMediaId external, bool success)
 	{
-		var provider = IMediaSink.Mock();
-		provider.GetWantlistAsync(Any()).Returns(WantlistStubs.NothingRemote());
+		var provider = WantlistStubs.EmptySink();
 		provider.AddToWantlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(new SinkSyncAck(external, success)));
 		provider.RemoveFromWantlistAsync(Any<IEnumerable<IExternalMediaId>>(), Any()).Returns(Stream(new SinkSyncAck(external, success)));
 		return provider;
