@@ -5,7 +5,6 @@
 @using Contracts.Announcing
 @using Contracts.Blocklist
 @using Contracts.Wantlist
-@using Contracts.Wantlist.Outbox
 @using Domain.Announcing
 @using Domain.Identity
 @using Domain.Feed
@@ -17,7 +16,6 @@
 @using UI.Shared.Services.Branding
 @inject IWantlistService WantlistService
 @inject IMediaService Media
-@inject IWantlistOutbox Outbox
 @inject IBlocklistService BlocklistService
 @inject MediaProviderBrandingService BrandingService
 @inject IEventPublisher Events
@@ -234,12 +232,13 @@
 
         try
         {
-            await LoadOutboxAsync();
-            _removedIds = _outboxEntries.Values.Where(entry => entry.Action == WantlistOperationAction.Remove).Select(entry => entry.MediaId).ToHashSet();
+            var outbox = await WantlistService.GetOutboxAsync(Cancellation.Token);
+            ApplyOutbox(outbox);
+            _removedIds = [.. outbox.Removes.Keys];
 
             _blocklist = await BlocklistService.GetAsync(Cancellation.Token);
 
-            var listed = WantlistStatusView.WithPendingRemovals(await WantlistService.GetAsync(Cancellation.Token), _outboxEntries.Values);
+            var listed = WantlistStatusView.WithPendingRemovals(await WantlistService.GetAsync(Cancellation.Token), outbox);
             var all = await Media.GetDetailsAsync(listed, Cancellation.Token).ToListAsync(Cancellation.Token);
             _items = all.Where(item => !_removedIds.Contains(item.Media.Id)).ToList();
             _removedItems = all.Where(item => _removedIds.Contains(item.Media.Id)).ToList();
@@ -273,9 +272,11 @@
 
     private Task RefreshPendingAsync() => _syncControl?.RefreshAsync() ?? Task.CompletedTask;
 
-    private async Task LoadOutboxAsync()
+    private async Task LoadOutboxAsync() => ApplyOutbox(await WantlistService.GetOutboxAsync(Cancellation.Token));
+
+    private void ApplyOutbox(OutboxSnapshot outbox)
     {
-        _outboxEntries = (await Outbox.GetAsync(Cancellation.Token)).ToDictionary(entry => entry.MediaId);
+        _outboxEntries = outbox.Entries.ToDictionary(entry => entry.MediaId);
         CompleteIfDrained();
         StateHasChanged();
     }

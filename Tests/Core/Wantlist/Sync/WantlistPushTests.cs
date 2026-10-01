@@ -155,7 +155,7 @@ public class WantlistPushTests
 	private static Mock<IWantlistOutbox> OutboxWith(params WantlistOutboxEntry[] entries)
 	{
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns(entries);
+		outbox.GetAllAsync(Any()).Returns(entries);
 		return outbox;
 	}
 }

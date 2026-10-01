@@ -140,7 +140,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task AssertOutbox(params (WantlistOperationAction Action, MediaId MediaId)[] expected)
 	{
-		var entries = await Outbox.GetAsync();
+		var entries = await Outbox.GetAllAsync();
 		await Assert.That(entries).Count().IsEqualTo(expected.Length);
 		foreach (var (action, mediaId) in expected)
 		{
@@ -148,5 +148,5 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		}
 	}
 
-	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAsync()).IsEmpty();
+	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAllAsync()).IsEmpty();
 }

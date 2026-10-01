@@ -19,6 +19,8 @@ internal sealed class WantlistService(
 {
 	public async Task<WantlistSnapshot> GetAsync(CancellationToken cancellationToken = default) => new(await repository.GetAllAsync(cancellationToken));
 
+	public async Task<OutboxSnapshot> GetOutboxAsync(CancellationToken cancellationToken = default) => new(await outbox.GetAllAsync(cancellationToken));
+
 	public Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default) =>
 		repository.CountByFeedAsync(cancellationToken);
 
@@ -30,12 +32,11 @@ internal sealed class WantlistService(
 			return [];
 		}
 
-		var ops = await outbox.GetAsync(cancellationToken);
-		var pendingRemoves = ops.Where(o => o.Action == WantlistOperationAction.Remove).Select(o => o.MediaId).ToHashSet();
+		var queued = await GetOutboxAsync(cancellationToken);
 		var wantlist = await GetAsync(cancellationToken);
 
-		var uncancel = adding.Where(pendingRemoves.Contains).ToList();
-		var needsPush = adding.Where(id => !wantlist.Contains(id) && !pendingRemoves.Contains(id)).ToList();
+		var uncancel = adding.Where(queued.Removes.ContainsKey).ToList();
+		var needsPush = adding.Where(id => !wantlist.Contains(id) && !queued.Removes.ContainsKey(id)).ToList();
 
 		await EnsureSinkIdInExternalsAsync(needsPush, cancellationToken);
 
@@ -53,11 +54,10 @@ internal sealed class WantlistService(
 			return [];
 		}
 
-		var ops = await outbox.GetAsync(cancellationToken);
-		var unpushedAdds = ops.Where(o => o.Action == WantlistOperationAction.Add).Select(o => o.MediaId).ToHashSet();
+		var queued = await GetOutboxAsync(cancellationToken);
 
-		var cancelAdds = removing.Where(unpushedAdds.Contains).ToList();
-		var needsEnqueue = removing.Where(id => !unpushedAdds.Contains(id)).ToList();
+		var cancelAdds = removing.Where(queued.Adds.ContainsKey).ToList();
+		var needsEnqueue = removing.Where(id => !queued.Adds.ContainsKey(id)).ToList();
 
 		await EnsureSinkIdInExternalsAsync(needsEnqueue, cancellationToken);
 
@@ -80,8 +80,7 @@ internal sealed class WantlistService(
 			return [];
 		}
 
-		var ops = await outbox.GetAsync(cancellationToken);
-		var unpushedAdds = ops.Where(o => o.Action == WantlistOperationAction.Add).Select(o => o.MediaId).ToHashSet();
+		var queued = await GetOutboxAsync(cancellationToken);
 
 		var removed = await repository.RemoveAsync(removing, addedBy, cancellationToken);
 		if (removed.Count == 0)
@@ -89,8 +88,8 @@ internal sealed class WantlistService(
 			return removed;
 		}
 
-		var cancelAdds = removed.Where(unpushedAdds.Contains).ToList();
-		var candidates = removed.Where(id => !unpushedAdds.Contains(id)).ToList();
+		var cancelAdds = removed.Where(queued.Adds.ContainsKey).ToList();
+		var candidates = removed.Where(id => !queued.Adds.ContainsKey(id)).ToList();
 		var pushable = await PushableAsync(candidates, cancellationToken);
 
 		await outbox.DropAsync(cancelAdds, cancellationToken);

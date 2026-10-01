@@ -315,7 +315,7 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Testee.SyncAsync(Trigger);
 
-		await Assert.That((await Outbox.GetAsync()).Single().Attempts).IsEqualTo(3);
+		await Assert.That((await Outbox.GetAllAsync()).Single().Attempts).IsEqualTo(3);
 	}
 
 	private static async Task AssertPlanned(WantlistSyncSummary summary, WantlistSyncDirection direction, WantlistOperationAction action, MediaId mediaId) =>
@@ -330,11 +330,11 @@ public class SyncEngineTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task AssertWantlistEmpty() => await Assert.That(await host.ScopedDbContext.Wantlist.CountAsync()).IsEqualTo(0);
 
-	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAsync()).IsEmpty();
+	private async Task AssertOutboxEmpty() => await Assert.That(await Outbox.GetAllAsync()).IsEmpty();
 
 	private async Task AssertOutbox(WantlistOperationAction action, MediaId mediaId, int? attempts = null)
 	{
-		var entries = await Outbox.GetAsync();
+		var entries = await Outbox.GetAllAsync();
 		await Assert.That(entries).Count().IsEqualTo(1);
 		await Assert.That(entries.Any(entry => entry.MediaId == mediaId && entry.Action == action)).IsTrue();
 		if (attempts is { } expected)

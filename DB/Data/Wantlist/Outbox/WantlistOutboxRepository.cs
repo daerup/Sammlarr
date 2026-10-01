@@ -7,7 +7,7 @@ namespace DB.Data.Wantlist.Outbox;
 
 internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWantlistOutbox
 {
-	public async Task<IReadOnlyList<WantlistOutboxEntry>> GetAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WantlistOutboxEntry>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
@@ -24,26 +24,14 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 		return rows.Select(row => new WantlistOutboxEntry(MediaId.From(row.MediaIdValue), row.Kind, row.Status, row.Attempts) { AddedAt = row.AddedAt }).ToList();
 	}
 
-	public async Task<WantlistOutboxEntry?> FindPendingAsync(MediaId mediaId, CancellationToken cancellationToken = default)
+	public async Task EnqueueAsync(WantlistOperationAction action, IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		var rawId = mediaId.Value;
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var row = await ctx
-			.WantlistOutbox.AsNoTracking()
-			.Where(o => o.Media.Id == rawId && o.Status == WantlistOutboxState.Pending)
-			.Select(o => new { Kind = o.Action, o.Attempts })
-			.FirstOrDefaultAsync(cancellationToken);
-		return row is null ? null : new WantlistOutboxEntry(mediaId, row.Kind, WantlistOutboxState.Pending, row.Attempts);
-	}
-
-	public async Task EnqueueAsync(WantlistOperationAction action, IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
-	{
-		var ids = mediaIds.Distinct().ToList();
-		if (ids.Count == 0)
+		var distinct = ids.Distinct().ToList();
+		if (distinct.Count == 0)
 		{
 			return;
 		}
-		var rawIds = ids.Select(id => id.Value).ToList();
+		var rawIds = distinct.Select(id => id.Value).ToList();
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -79,9 +67,9 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task DropAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
+	public async Task DropAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		var rawIds = mediaIds.Select(id => id.Value).Distinct().ToList();
+		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
 		if (rawIds.Count == 0)
 		{
 			return;
@@ -91,9 +79,9 @@ internal sealed class WantlistOutboxRepository(IDbContextFactory<SammlarrDbConte
 		await ctx.WantlistOutbox.Where(o => rawIds.Contains(o.Media.Id)).ExecuteDeleteAsync(cancellationToken);
 	}
 
-	public async Task RecordFailedAttemptAsync(IEnumerable<MediaId> mediaIds, WantlistOutboxState resultingState, CancellationToken cancellationToken = default)
+	public async Task RecordFailedAttemptAsync(IEnumerable<MediaId> ids, WantlistOutboxState resultingState, CancellationToken cancellationToken = default)
 	{
-		var rawIds = mediaIds.Select(id => id.Value).Distinct().ToList();
+		var rawIds = ids.Select(id => id.Value).Distinct().ToList();
 		if (rawIds.Count == 0)
 		{
 			return;

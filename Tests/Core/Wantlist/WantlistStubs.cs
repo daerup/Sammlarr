@@ -48,14 +48,14 @@ internal static class WantlistStubs
 	public static Mock<IWantlistOutbox> EmptyOutbox()
 	{
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([]);
+		outbox.GetAllAsync(Any()).Returns([]);
 		return outbox;
 	}
 
 	public static Mock<IWantlistOutbox> OutboxPending(IReadOnlyList<MediaId> mediaIds)
 	{
 		var outbox = IWantlistOutbox.Mock();
-		outbox.GetAsync(Any()).Returns([.. mediaIds.Select(id => new WantlistOutboxEntry(id, WantlistOperationAction.Add, WantlistOutboxState.Pending, 0))]);
+		outbox.GetAllAsync(Any()).Returns([.. mediaIds.Select(id => new WantlistOutboxEntry(id, WantlistOperationAction.Add, WantlistOutboxState.Pending, 0))]);
 		return outbox;
 	}
 
