@@ -763,7 +763,7 @@
         try
         {
             _wantlisted.UnionWith((await WantlistService.GetAsync(CancellationToken.None)).Ids);
-            (await BlocklistService.GetBlocklistIdsAsync(CancellationToken.None)).ToList().ForEach(item => _blocklistIds.Add(item));
+            _blocklistIds.UnionWith((await BlocklistService.GetAsync(CancellationToken.None)).Ids);
         }
         catch (Exception ex)
         {
@@ -830,12 +830,12 @@
         {
             if (_blocklistIds.Contains(item.Id))
             {
-                await BlocklistService.RemoveFromBlocklistAsync(item.Id);
+                await BlocklistService.RemoveAsync(item.Id);
                 _blocklistIds.Remove(item.Id);
             }
             else
             {
-                await BlocklistService.AddToBlocklistAsync(item.Id);
+                await BlocklistService.AddAsync(item.Id);
                 _blocklistIds.Add(item.Id);
             }
         }

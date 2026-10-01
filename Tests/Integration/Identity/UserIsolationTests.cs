@@ -67,7 +67,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task WantlistEntries_WhenTwoUsersExist_ArePrivateToEach()
+	public async Task WantlistItems_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
@@ -78,13 +78,13 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task BlocklistEntries_WhenTwoUsersExist_ArePrivateToEach()
+	public async Task BlocklistItems_WhenTwoUsersExist_ArePrivateToEach()
 	{
 		await host.SignInAs("Alice");
 		await host.Movie(TestMedia.Inception).OnBlocklist();
 
 		host.SignOut();
 		await host.SignInAs("Bob");
-		await Assert.That(await host.Resolve<IBlocklistService>().GetBlocklistIdsAsync()).IsEmpty();
+		await Assert.That((await host.Resolve<IBlocklistService>().GetAsync()).Ids).IsEmpty();
 	}
 }

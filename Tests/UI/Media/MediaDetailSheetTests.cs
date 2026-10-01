@@ -7,6 +7,7 @@ using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
+using Domain.Blocklist;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -110,8 +111,6 @@ public class MediaDetailSheetTests : BunitContext
 
 	private IRenderedComponent<Harness> RenderSheet() => Render<Harness>();
 
-	private static IReadOnlySet<MediaId> Empty => new HashSet<MediaId>();
-
 	private static WantlistSnapshot Nothing => new([]);
 
 	private void Register()
@@ -124,7 +123,7 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddSingleton(_wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();
-		blocklist.GetBlocklistIdsAsync(Any()).Returns(Empty);
+		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(blocklist.Object);
 
 		Services.AddSingleton(IMediaService.Mock().Object);

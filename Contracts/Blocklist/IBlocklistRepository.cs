@@ -5,9 +5,9 @@ namespace Contracts.Blocklist;
 
 public interface IBlocklistRepository
 {
-	Task<IReadOnlyList<BlocklistEntry>> GetBlocklistedEntriesAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<BlocklistItem>> GetAllAsync(CancellationToken cancellationToken = default);
 
-	Task AddAsync(MediaId mediaId, CancellationToken cancellationToken = default);
+	Task AddAsync(MediaId id, CancellationToken cancellationToken = default);
 
-	Task RemoveAsync(MediaId mediaId, CancellationToken cancellationToken = default);
+	Task RemoveAsync(MediaId id, CancellationToken cancellationToken = default);
 }

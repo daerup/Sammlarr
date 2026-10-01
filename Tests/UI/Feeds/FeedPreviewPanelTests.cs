@@ -167,7 +167,7 @@ public class FeedPreviewPanelTests : BunitContext
 		var wantlist = IWantlistService.Mock();
 		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		var blocklist = IBlocklistService.Mock();
-		blocklist.GetBlocklistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		blocklist.GetAsync(Any()).Returns(new BlocklistSnapshot([]));
 		Services.AddSingleton(wantlist.Object);
 		Services.AddSingleton(blocklist.Object);
 		Services.AddSingleton(ICurrentUser.Mock().Object);

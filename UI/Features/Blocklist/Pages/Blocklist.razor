@@ -1,12 +1,14 @@
 @page "/blocklist"
 @inherits MediaListPage
 @using Contracts.Blocklist
+@using Contracts.Media
 @using Contracts.Wantlist
 @using UI.Shared.Services.Branding
 @using UI.Shared.Filters
 @inject IBlocklistService BlocklistService
 @inject ToastService ToastService
 @inject IWantlistService WantlistService
+@inject IMediaService Media
 @inject MediaProviderBrandingService BrandingService
 
 <PageTitle>Blocklist</PageTitle>
@@ -106,7 +108,8 @@
 
         try
         {
-            _items = await BlocklistService.GetBlocklistItemsAsync(Cancellation.Token).ToListAsync();
+            var blocklist = await BlocklistService.GetAsync(Cancellation.Token);
+            _items = await Media.GetDetailsAsync(blocklist.Items, Cancellation.Token).ToListAsync(Cancellation.Token);
             _wantlist = await WantlistService.GetAsync(Cancellation.Token);
 
             if (_selectedItem.HasValue)
@@ -145,7 +148,7 @@
     {
         foreach (var item in toRemove)
         {
-            await BlocklistService.RemoveFromBlocklistAsync(item.Media.Id, Cancellation.Token);
+            await BlocklistService.RemoveAsync(item.Media.Id, Cancellation.Token);
         }
         ToastService.Success($"Removed {toRemove.Count} item{(toRemove.Count == 1 ? "" : "s")} from your blocklist.");
         await LoadAsync();
