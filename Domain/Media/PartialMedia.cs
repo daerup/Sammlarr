@@ -14,6 +14,7 @@ public interface IPartialMedia
 	DateOnly? ReleaseDate { get; }
 	ValueSet<string> Genres { get; }
 	RatingSummary Rating { get; }
+	MediaField ConfirmedMissing { get; }
 }
 
 public sealed record PartialMovie : IPartialMedia
@@ -28,6 +29,7 @@ public sealed record PartialMovie : IPartialMedia
 	public DateOnly? ReleaseDate { get; init; }
 	public ValueSet<string> Genres { get; init; }
 	public RatingSummary Rating { get; init; }
+	public MediaField ConfirmedMissing { get; init; }
 	public TimeSpan? Runtime { get; init; }
 }
 
@@ -43,6 +45,7 @@ public sealed record PartialShow : IPartialMedia
 	public DateOnly? ReleaseDate { get; init; }
 	public ValueSet<string> Genres { get; init; }
 	public RatingSummary Rating { get; init; }
+	public MediaField ConfirmedMissing { get; init; }
 	public int? Seasons { get; init; }
 	public int? Episodes { get; init; }
 	public TimeSpan? RuntimePerEpisode { get; init; }

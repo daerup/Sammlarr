@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using API.Tmdb.Types;
 using Contracts.Auth;
@@ -31,12 +32,16 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 				(int)response.StatusCode,
 				id.Value
 			);
-			return Error.From($"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
+			return IsTransient(response.StatusCode)
+				? Error.From(new ProviderUnavailableException(MediaProvider.Tmdb))
+				: Error.From($"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no metadata for {id.Value}";
 		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.Details>(stream), reason).When(detail => detail.Id != 0, reason);
 	}
+
+	private static bool IsTransient(HttpStatusCode status) => status is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)status >= 500;
 
 	private async Task<Result<TmdbTypes.FindItem>> FetchFindAsync(ImdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{

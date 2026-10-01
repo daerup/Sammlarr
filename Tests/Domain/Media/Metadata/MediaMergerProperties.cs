@@ -22,10 +22,7 @@ public class MediaMergerProperties
 	[Test]
 	public void MergeWith_WhenFillingGaps_NeverRemovesData() =>
 		Gen.Select(Movies, Movies)
-			.Sample(
-				(primary, secondary) =>
-					((IPartialMedia)primary).MergeWith(secondary) is not IPartialMedia merged || merged.MissingFields.All(primary.MissingFields.Contains)
-			);
+			.Sample((primary, secondary) => ((IPartialMedia)primary).MergeWith(secondary) is not IPartialMedia merged || !merged.Missing.Overlaps(~primary.Missing));
 
 	private static PartialMovie Build(bool[] flags) =>
 		new()

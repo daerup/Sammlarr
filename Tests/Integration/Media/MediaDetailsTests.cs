@@ -1,3 +1,4 @@
+using System.Net;
 using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
@@ -220,7 +221,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_WhenFreshButIncomplete_RehydratesTheMissingFields()
+	public async Task GetDetailsAsync_WhenFreshButIncomplete_RehydratesTheGaps()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "Plex summary")
@@ -231,6 +232,34 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await AssertDetail(results[0], "Fight Club", summary: "Plex summary", genres: ["Drama", "Thriller"], rating: RatingProvider.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_WhenEveryEnricherAnsweredButAGapRemains_ServesTheCacheForTheWeek()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub)
+			.ServedByPlex(title: "Fight Club", summary: "Plex summary")
+			.ServedByTmdb(rating: 8.4, votes: 23000)
+			.SeedAsync();
+		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		host.SetCurrentTime(At(6, 3));
+
+		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+
+		await AssertCachedAs(fightClub, "Fight Club", At(6, 1));
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_WhenTheEnricherWasUnavailable_RetriesTheGapAfterTheCooldown()
+	{
+		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(title: "Fight Club", summary: "Plex summary").SeedAsync();
+		host.TmdbDetailFails(TestMedia.FightClub, HttpStatusCode.ServiceUnavailable);
+		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+		host.SetCurrentTime(At(6, 1, 2));
+
+		await Testee.GetDetailsAsync([fightClub]).ToListAsync();
+
+		await AssertCachedAs(fightClub, "Fight Club", At(6, 1, 2));
 	}
 
 	[Test]

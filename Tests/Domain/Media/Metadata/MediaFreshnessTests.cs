@@ -32,41 +32,40 @@ public class MediaFreshnessTests
 	}
 
 	[Test]
-	public async Task IsFresh_WhenPartialLacksOnlyTagline_StaysFreshForTheWeek()
+	public async Task IsFresh_WhenEveryGapIsConfirmed_StaysFreshForTheWeek()
 	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null });
+		var stored = IdentifiedMedia.From(
+			MediaFakes.CompletePartialMovie() with
+			{
+				Tagline = null,
+				Summary = null,
+				ConfirmedMissing = MediaField.Tagline | MediaField.Summary,
+			}
+		);
 
-		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromHours(2), Now)).IsTrue();
+		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromDays(6), Now)).IsTrue();
 	}
 
 	[Test]
-	public async Task IsFresh_WhenPartialLacksOnlyBackdrop_StaysFreshForTheWeek()
+	public async Task IsFresh_WhenAGapIsUnconfirmed_GoesStaleAfterTheCooldown()
 	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { BackdropUrl = null });
-
-		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromHours(2), Now)).IsTrue();
-	}
-
-	[Test]
-	public async Task IsFresh_WhenPartialLacksARequiredField_GoesStaleAfterTheCooldown()
-	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Summary = null });
+		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, Runtime = null, ConfirmedMissing = MediaField.Tagline });
 
 		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromHours(2), Now)).IsFalse();
 	}
 
 	[Test]
-	public async Task IsFresh_WhenPartialLacksAnOptionalAndARequiredField_GoesStaleAfterTheCooldown()
+	public async Task IsFresh_WhenNoGapIsConfirmed_GoesStaleAfterTheCooldownEvenForATagline()
 	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, Runtime = null });
+		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null });
 
 		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromHours(2), Now)).IsFalse();
 	}
 
 	[Test]
-	public async Task IsFresh_WhenPartialLacksOnlyTaglineAndIsOlderThanTheWeek_IsStale()
+	public async Task IsFresh_WhenEveryGapIsConfirmedButOlderThanTheWeek_IsStale()
 	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null });
+		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, ConfirmedMissing = MediaField.Tagline });
 
 		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromDays(8), Now)).IsFalse();
 	}
