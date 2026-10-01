@@ -138,48 +138,29 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.ToDictionary(entry => entry.Id, entry => entry.Absences);
 	}
 
-	public async Task<IReadOnlyList<Domain.Feed.Run.FeedRun>> GetRunsAsync(FeedId feedId, int take, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<Domain.Feed.Run.FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		return await ctx
-			.FeedRuns.AsNoTracking()
-			.Where(row => row.FeedId == feedId.Value)
+		IQueryable<FeedRunRow> runs = ctx.FeedRuns.AsNoTracking();
+		if (query.Feed is Some<FeedId>(var feedId))
+		{
+			runs = runs.Where(row => row.FeedId == feedId.Value);
+		}
+		if (query.Since is Some<DateTimeOffset>(var since))
+		{
+			var cutoff = since.ToUniversalTime();
+			runs = runs.Where(row => row.StartedAt >= cutoff);
+		}
+
+		Guid? linked = query.MustInclude is Some<RunId>(var runId) ? runId.Value : null;
+		var newest = runs.OrderByDescending(row => row.StartedAt).Take(query.Limit).Select(row => row.Id);
+		var linkedStart = runs.Where(row => row.Id == linked).Select(row => row.StartedAt);
+
+		return await runs.Where(row => newest.Contains(row.Id) || linkedStart.Any(start => row.StartedAt >= start))
 			.OrderByDescending(row => row.StartedAt)
-			.Take(take)
 			.Select(projectRun)
 			.ToListAsync(cancellationToken);
-	}
-
-	public async Task<IReadOnlyList<Domain.Feed.Run.FeedRun>> GetRecentRunsAsync(DateTimeOffset since, int take, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var cutoff = since.ToUniversalTime();
-
-		return await ctx
-			.FeedRuns.AsNoTracking()
-			.Where(row => row.StartedAt >= cutoff)
-			.OrderByDescending(row => row.StartedAt)
-			.Take(take)
-			.Select(projectRun)
-			.ToListAsync(cancellationToken);
-	}
-
-	public async Task<int> CountRunsSinceAsync(FeedId feedId, DateTimeOffset since, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var cutoff = since.ToUniversalTime();
-
-		return await ctx.FeedRuns.AsNoTracking().CountAsync(row => row.FeedId == feedId.Value && row.StartedAt >= cutoff, cancellationToken);
-	}
-
-	public async Task<Optional<Domain.Feed.Run.FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-		var run = await ctx.FeedRuns.AsNoTracking().Where(row => row.Id == runId).Select(projectRun).FirstOrDefaultAsync(cancellationToken);
-
-		return run is null ? new None() : Some.Of(run);
 	}
 
 	public async Task<IReadOnlyDictionary<FeedId, FeedRunTotals>> GetRunTotalsAsync(CancellationToken cancellationToken = default)
@@ -234,7 +215,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		var row = new FeedRunRow
 		{
-			Id = run.Id,
+			Id = run.Id.Value,
 			FeedId = run.FeedId.Value,
 			StartedAt = run.StartedAt,
 		};
@@ -248,7 +229,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-		var row = await ctx.FeedRuns.Include(r => r.Items).FirstAsync(r => r.Id == run.Id, cancellationToken);
+		var row = await ctx.FeedRuns.Include(r => r.Items).FirstAsync(r => r.Id == run.Id.Value, cancellationToken);
 		row.Items.Clear();
 		Fill(row, run);
 

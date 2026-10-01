@@ -248,6 +248,8 @@
 
     private MediaId? Highlight => ItemParam is null ? null : MediaId.From(UrlGuid.Decode(ItemParam));
 
+    private Optional<RunId> LinkedRun => RunIdParam is null ? new None() : Some.Of(RunId.From(UrlGuid.Decode(RunIdParam)));
+
     private const int PageSize = 25;
 
     private enum RunFilter
@@ -295,13 +297,7 @@
         _onWantlist = overview.OnWantlist;
         await LoadRunsAsync(feedId);
 
-        var wanted = RunIdParam is null ? _runs.FirstOrDefault() : _runs.FirstOrDefault(run => UrlGuid.Encode(run.Id) == RunIdParam);
-        if (wanted is null && RunIdParam is not null && await FeedService.GetRunAsync(UrlGuid.Decode(RunIdParam)) is Some<FeedRun>(var linked))
-        {
-            wanted = linked;
-            _take = await FeedService.CountRunsSinceAsync(feedId, linked.StartedAt);
-            await LoadRunsAsync(feedId);
-        }
+        var wanted = LinkedRun is Some<RunId>(var linked) ? _runs.FirstOrDefault(run => run.Id == linked) : _runs.FirstOrDefault();
 
         if (wanted is not null && wanted.Id != _selected?.Id)
         {
@@ -323,9 +319,9 @@
 
     private async Task LoadRunsAsync(FeedId feedId)
     {
-        var loaded = await FeedService.GetRunsAsync(feedId, _take + 1);
-        _more = loaded.Count > _take;
-        _runs = [.. loaded.Take(_take)];
+        _runs = await FeedService.GetRunsAsync(RunQuery.Take(_take) with { Feed = Some.Of(feedId), MustInclude = LinkedRun });
+        _take = Math.Max(_take, _runs.Count);
+        _more = _runs.Count < _history.TotalRuns;
     }
 
     private async Task LoadOlderAsync()
@@ -337,7 +333,7 @@
     private async Task SelectAsync(FeedRun run)
     {
         await ShowRunAsync(run);
-        Navigation.NavigateTo($"/feeds/{FeedIdParam}/runs/{UrlGuid.Encode(run.Id)}", forceLoad: false, replace: true);
+        Navigation.NavigateTo($"/feeds/{FeedIdParam}/runs/{UrlGuid.Encode(run.Id.Value)}", forceLoad: false, replace: true);
     }
 
     private async Task ShowRunAsync(FeedRun run)

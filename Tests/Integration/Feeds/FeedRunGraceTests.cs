@@ -44,7 +44,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 			await log.StartRunAsync(
 				new FeedRun
 				{
-					Id = Guid.NewGuid(),
+					Id = RunId.From(Guid.NewGuid()),
 					FeedId = feedId,
 					StartedAt = new DateTimeOffset(2026, 03, run, 4, 0, 0, TimeSpan.Zero),
 					Duration = TimeSpan.FromSeconds(1),
@@ -85,7 +85,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 			await log.StartRunAsync(
 				new FeedRun
 				{
-					Id = Guid.NewGuid(),
+					Id = RunId.From(Guid.NewGuid()),
 					FeedId = feedId,
 					StartedAt = new DateTimeOffset(2026, 03, run, 4, 0, 0, TimeSpan.Zero),
 					Duration = TimeSpan.FromSeconds(1),

@@ -133,7 +133,7 @@ internal static class DemoFeeds
 	private static FeedRun Run(Feed feed, Conclusiveness conclusiveness, FeedRunCounts counts, IReadOnlyList<FeedRunItem> items) =>
 		new()
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = feed.Id,
 			StartedAt = Now.AddHours(-22),
 			Duration = TimeSpan.FromSeconds(14),

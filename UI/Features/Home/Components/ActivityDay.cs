@@ -27,7 +27,7 @@ public sealed record ActivityRun(FeedRun Run, string FeedName)
 		);
 }
 
-public sealed record FeedContribution(FeedId FeedId, string Name, int Added, int Removed, int Runs, Guid LatestRunId);
+public sealed record FeedContribution(FeedId FeedId, string Name, int Added, int Removed, int Runs, RunId LatestRunId);
 
 public sealed record ActivityDay(
 	DateOnly Date,

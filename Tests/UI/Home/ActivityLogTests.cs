@@ -180,7 +180,7 @@ public class ActivityLogTests
 	) =>
 		new()
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = feedId,
 			StartedAt = startedAt,
 			Duration = TimeSpan.FromSeconds(4),

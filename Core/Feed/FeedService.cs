@@ -55,16 +55,8 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 		return await PauseAsync(affected, cancellationToken);
 	}
 
-	public Task<IReadOnlyList<FeedRun>> GetRunsAsync(FeedId feedId, int take, CancellationToken cancellationToken = default) =>
-		repository.GetRunsAsync(feedId, take, cancellationToken);
-
-	public Task<IReadOnlyList<FeedRun>> GetRecentRunsAsync(DateTimeOffset since, int take, CancellationToken cancellationToken = default) =>
-		repository.GetRecentRunsAsync(since, take, cancellationToken);
-
-	public Task<int> CountRunsSinceAsync(FeedId feedId, DateTimeOffset since, CancellationToken cancellationToken = default) =>
-		repository.CountRunsSinceAsync(feedId, since, cancellationToken);
-
-	public Task<Optional<FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default) => repository.GetRunAsync(runId, cancellationToken);
+	public Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default) =>
+		repository.GetRunsAsync(query, cancellationToken);
 
 	private async Task<IReadOnlyList<FeedId>> RescheduleAllAsync(IReadOnlyList<FeedId> changed, CancellationToken cancellationToken)
 	{

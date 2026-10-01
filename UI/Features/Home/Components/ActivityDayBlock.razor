@@ -134,7 +134,7 @@
         : $"ran at {At(entry)} but {entry.Outcome}.";
 
     private static string FeedHref(FeedContribution feed) =>
-        $"/feeds/{UrlGuid.Encode(feed.FeedId.Value)}/runs/{UrlGuid.Encode(feed.LatestRunId)}";
+        $"/feeds/{UrlGuid.Encode(feed.FeedId.Value)}/runs/{UrlGuid.Encode(feed.LatestRunId.Value)}";
 
-    private static string RunHref(ActivityRun entry) => $"/feeds/{UrlGuid.Encode(entry.Run.FeedId.Value)}/runs/{UrlGuid.Encode(entry.Run.Id)}";
+    private static string RunHref(ActivityRun entry) => $"/feeds/{UrlGuid.Encode(entry.Run.FeedId.Value)}/runs/{UrlGuid.Encode(entry.Run.Id.Value)}";
 }

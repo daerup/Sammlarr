@@ -6,6 +6,7 @@ using Domain.Media;
 using Domain.Providers;
 using Harness;
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 
 namespace Integration.Tests.Feeds;
 
@@ -104,7 +105,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 			}
 		);
 
-		var run = (await _testee.GetRunsAsync(feedId, take: 10)).Single();
+		var run = (await _testee.GetRunsAsync(RunQuery.Take(10) with { Feed = Some.Of(feedId) })).Single();
 
 		await Assert.That(run.Counts.Kept).IsEqualTo(178);
 		await Assert.That(run.Counts.Filtered).IsEqualTo(12);
@@ -112,23 +113,23 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetRunsAsync_WhenSeveralRunsExist_ReturnsNewestFirst()
+	public async Task GetRunsAsync_ForOneFeed_ReturnsItsNewestRunsFirstUpToTheLimit()
 	{
-		var feedId = await SeedFeedAsync();
+		var comedy = await SeedFeedAsync();
+		var horror = await SeedFeedAsync();
 
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
-		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(horror, kept: [Held], 4));
 
-		var runs = await _testee.GetRunsAsync(feedId, take: 2);
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { Feed = Some.Of(comedy) });
 
-		await Assert.That(runs).Count().IsEqualTo(2);
-		await Assert.That(runs[0].StartedAt).IsEqualTo(Day(3));
-		await Assert.That(runs[1].StartedAt).IsEqualTo(Day(2));
+		await Assert.That(runs.Select(run => run.StartedAt)).IsEquivalentTo([Day(3), Day(2)], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task GetRecentRunsAsync_AcrossFeeds_ReturnsTheRunsSinceTheCutoffNewestFirst()
+	public async Task GetRunsAsync_SinceACutoff_ReturnsEveryFeedsRunsFromThenNewestFirst()
 	{
 		var comedy = await SeedFeedAsync();
 		var horror = await SeedFeedAsync();
@@ -137,39 +138,84 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
 		await _testee.StartRunAsync(Run(horror, kept: [Held], 2));
 
-		var runs = await _testee.GetRecentRunsAsync(since: Day(2), take: 10);
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(10) with { Since = Some.Of(Day(2)) });
 
-		await Assert.That(runs).Count().IsEqualTo(2);
-		await Assert.That(runs[0].FeedId).IsEqualTo(comedy);
-		await Assert.That(runs[1].FeedId).IsEqualTo(horror);
+		await Assert.That(runs.Select(run => run.FeedId)).IsEquivalentTo([comedy, horror], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task GetRecentRunsAsync_ForACutoffInAnotherOffset_ComparesTheSameInstant()
+	public async Task GetRunsAsync_ForACutoffInAnotherOffset_ComparesTheSameInstant()
 	{
 		var feedId = await SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
 
-		var runs = await _testee.GetRecentRunsAsync(since: Day(2).ToOffset(TimeSpan.FromHours(2)), take: 10);
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(10) with { Since = Some.Of(Day(2).ToOffset(TimeSpan.FromHours(2))) });
 
 		await Assert.That(runs).HasSingleItem();
 	}
 
 	[Test]
-	public async Task CountRunsSinceAsync_CountsOnlyThatFeedsRunsFromTheCutoffOn()
+	public async Task GetRunsAsync_WhenTheRunToIncludeIsOlderThanTheLimit_KeepsGoingUntilItIsInTheList()
+	{
+		var feedId = await SeedFeedAsync();
+		var oldest = Run(feedId, kept: [Held], 1);
+
+		await _testee.StartRunAsync(oldest);
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 4));
+
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { Feed = Some.Of(feedId), MustInclude = Some.Of(oldest.Id) });
+
+		await Assert.That(runs.Select(run => run.StartedAt)).IsEquivalentTo([Day(4), Day(3), Day(2), Day(1)], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task GetRunsAsync_WhenTheRunToIncludeIsUnknown_ReturnsThePlainLimit()
+	{
+		var feedId = await SeedFeedAsync();
+
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(feedId, kept: [Held], 3));
+
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { MustInclude = Some.Of(RunId.From(Guid.NewGuid())) });
+
+		await Assert.That(runs.Select(run => run.StartedAt)).IsEquivalentTo([Day(3), Day(2)], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task GetRunsAsync_WhenTheRunToIncludeBelongsToAnotherFeed_ReturnsThePlainLimit()
 	{
 		var comedy = await SeedFeedAsync();
 		var horror = await SeedFeedAsync();
+		var elsewhere = Run(horror, kept: [Held], 1);
 
-		await _testee.StartRunAsync(Run(comedy, kept: [Held], 1));
+		await _testee.StartRunAsync(elsewhere);
 		await _testee.StartRunAsync(Run(comedy, kept: [Held], 2));
 		await _testee.StartRunAsync(Run(comedy, kept: [Held], 3));
-		await _testee.StartRunAsync(Run(horror, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(comedy, kept: [Held], 4));
 
-		var count = await _testee.CountRunsSinceAsync(comedy, since: Day(2));
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(2) with { Feed = Some.Of(comedy), MustInclude = Some.Of(elsewhere.Id) });
 
-		await Assert.That(count).IsEqualTo(2);
+		await Assert.That(runs.Select(run => run.StartedAt)).IsEquivalentTo([Day(4), Day(3)], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task GetRunsAsync_ForAnotherUsersRuns_NeverReturnsThemEvenWhenAskedToIncludeOne()
+	{
+		var theirs = Run(await SeedFeedAsync(), kept: [Held], 1);
+		await _testee.StartRunAsync(theirs);
+		await fixture.SignInAs("Member");
+		var mine = await SeedFeedAsync();
+		await _testee.StartRunAsync(Run(mine, kept: [Held], 2));
+		await _testee.StartRunAsync(Run(mine, kept: [Held], 3));
+		await _testee.StartRunAsync(Run(mine, kept: [Held], 4));
+
+		var runs = await _testee.GetRunsAsync(RunQuery.Take(1) with { MustInclude = Some.Of(theirs.Id) });
+
+		await Assert.That(runs.Select(run => run.StartedAt)).IsEquivalentTo([Day(4)], CollectionOrdering.Matching);
 	}
 
 	[Test]
@@ -222,7 +268,7 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	private static FeedRun Run(FeedId feedId, IReadOnlyList<MediaId> kept, int day) =>
 		new()
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = feedId,
 			StartedAt = Day(day),
 			Duration = TimeSpan.FromSeconds(4),

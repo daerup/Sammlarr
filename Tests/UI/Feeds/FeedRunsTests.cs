@@ -21,23 +21,34 @@ public class FeedRunsTests : BunitContext
 {
 	private static readonly FeedId Feed = FeedId.From(new Guid(31, 0, 0, new byte[8]));
 
-	private static readonly IReadOnlyList<FeedRun> Runs = [.. Enumerable.Range(0, 30).Select(hoursAgo => Run(DateTimeOffset.UtcNow.AddHours(-hoursAgo)))];
+	private static readonly IReadOnlyList<FeedRun> Runs = History(30);
 
 	[Test]
 	public async Task Render_WhenTheLinkedRunIsBehindLoadOlder_ListsItAndScrollsToIt()
 	{
-		var linked = Runs[27];
-		RegisterServices(linked);
+		RegisterServices(Runs);
 		var scroll = JSInterop.SetupVoid("sammlarrScroll.intoView", "run-selected");
 		scroll.SetVoidResult();
 
-		var cut = Render<FeedRuns>(parameters =>
-			parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, UrlGuid.Encode(linked.Id))
-		);
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(Runs[27])));
 		cut.WaitForState(() => scroll.Invocations.Count == 1);
 
 		await Assert.That(cut.FindAll(".runs-item")).Count().IsEqualTo(28);
 		await Assert.That(cut.FindAll("#run-selected")).HasSingleItem();
+	}
+
+	[Test]
+	public async Task LoadOlder_AfterJumpingToALinkedRun_ShowsTheRestAndThenHidesTheButton()
+	{
+		var runs = History(80);
+		RegisterServices(runs);
+
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(runs[60])));
+		cut.WaitForState(() => cut.FindAll(".runs-older").Count == 1);
+		await cut.Find(".runs-older").ClickAsync(new());
+
+		cut.WaitForState(() => cut.FindAll(".runs-item").Count == runs.Count);
+		await Assert.That(cut.FindAll(".runs-older")).IsEmpty();
 	}
 
 	[Test]
@@ -48,11 +59,9 @@ public class FeedRunsTests : BunitContext
 			Conclusiveness = Conclusiveness.StillLoading,
 			SourceFailure = "No list found with identifier 'hdlists/comedy'.",
 		};
-		RegisterServices(failed);
+		RegisterServices([failed]);
 
-		var cut = Render<FeedRuns>(parameters =>
-			parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, UrlGuid.Encode(failed.Id))
-		);
+		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)).Add(page => page.RunIdParam, Link(failed)));
 		cut.WaitForState(() => cut.FindAll(".runs-band").Count == 1);
 
 		await Assert.That(cut.Find(".runs-band").TextContent).Contains("The source could not be read");
@@ -62,7 +71,7 @@ public class FeedRunsTests : BunitContext
 	[Test]
 	public async Task Render_WhileTheFeedIsStillLoading_ShowsASkeleton()
 	{
-		var feeds = RegisterServices(Runs[0]);
+		var feeds = RegisterServices(Runs);
 		feeds.GetAsync(Any()).ReturnsAsync(new TaskCompletionSource<FeedSnapshot>().Task);
 
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)));
@@ -70,7 +79,7 @@ public class FeedRunsTests : BunitContext
 		await Assert.That(cut.FindAll(".runs-page[aria-busy='true']")).HasSingleItem();
 	}
 
-	private Mock<IFeedService> RegisterServices(FeedRun linked)
+	private Mock<IFeedService> RegisterServices(IReadOnlyList<FeedRun> runs)
 	{
 		Services.AddBlazorBlueprintComponents();
 		Services.AddLogging();
@@ -89,14 +98,14 @@ public class FeedRunsTests : BunitContext
 							Provider = FeedProvider.Mdblist,
 							Strategy = new FeedStrategy(new Append()),
 							Identifier = "hdlists/comedy",
-							CreatedAt = Runs[^1].StartedAt,
+							CreatedAt = runs[^1].StartedAt,
 							Schedule = new FeedRunTrigger(new Manual()),
 						},
-						Some.Of(Runs[0]),
+						Some.Of(runs[0]),
 						new FeedRunHistory
 						{
-							TotalRuns = Runs.Count,
-							FirstRunAt = Runs[^1].StartedAt,
+							TotalRuns = runs.Count,
+							FirstRunAt = runs[^1].StartedAt,
 							TotalAdded = 0,
 							TotalRemoved = 0,
 						},
@@ -104,9 +113,7 @@ public class FeedRunsTests : BunitContext
 					),
 				])
 			);
-		feeds.GetRunsAsync(Any(), Any(), Any()).Returns((_, take, _) => [.. Runs.Take(take)]);
-		feeds.GetRunAsync(Any(), Any()).Returns(Some.Of(linked));
-		feeds.CountRunsSinceAsync(Any(), Any(), Any()).Returns((_, since, _) => Runs.Count(run => run.StartedAt >= since));
+		feeds.GetRunsAsync(Any(), Any()).Returns((query, _) => Page(runs, query));
 		Services.AddSingleton(feeds.Object);
 
 		var media = IMediaService.Mock();
@@ -124,10 +131,25 @@ public class FeedRunsTests : BunitContext
 		return feeds;
 	}
 
+	private static IReadOnlyList<FeedRun> Page(IReadOnlyList<FeedRun> runs, RunQuery query)
+	{
+		if (query.Feed is not Some<FeedId>(var feed) || feed != Feed)
+		{
+			return [];
+		}
+		var reach = query.MustInclude is Some<RunId>(var id) ? runs.ToList().FindIndex(run => run.Id == id) + 1 : 0;
+		return [.. runs.Take(Math.Max(query.Limit, reach))];
+	}
+
+	private static IReadOnlyList<FeedRun> History(int count) =>
+		[.. Enumerable.Range(0, count).Select(hoursAgo => Run(DateTimeOffset.UtcNow.AddHours(-hoursAgo)))];
+
+	private static string Link(FeedRun run) => UrlGuid.Encode(run.Id.Value);
+
 	private static FeedRun Run(DateTimeOffset startedAt) =>
 		new()
 		{
-			Id = Guid.NewGuid(),
+			Id = RunId.From(Guid.NewGuid()),
 			FeedId = Feed,
 			StartedAt = startedAt,
 			Duration = TimeSpan.FromSeconds(2),

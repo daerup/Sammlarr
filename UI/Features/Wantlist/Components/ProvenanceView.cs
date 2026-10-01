@@ -75,7 +75,7 @@ internal static class ProvenanceView
 	}
 
 	internal static string? RunUrl(WantlistItemProvenance provenance, MediaId? itemId) =>
-		provenance.Value is FeedOrigin feed ? $"/feeds/{UrlGuid.Encode(feed.Feed.Id.Value)}/runs/{UrlGuid.Encode(feed.Run.Id)}{ItemQuery(itemId)}" : null;
+		provenance.Value is FeedOrigin feed ? $"/feeds/{UrlGuid.Encode(feed.Feed.Id.Value)}/runs/{UrlGuid.Encode(feed.Run.Id.Value)}{ItemQuery(itemId)}" : null;
 
 	private static string ItemQuery(MediaId? itemId) => itemId is { } id ? $"?item={UrlGuid.Encode(id.Value)}" : string.Empty;
 

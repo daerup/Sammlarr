@@ -127,7 +127,7 @@ public class RunPlanTests
 			new FeedRunTotals(
 				new FeedRun
 				{
-					Id = Guid.NewGuid(),
+					Id = RunId.From(Guid.NewGuid()),
 					FeedId = feed.Id,
 					StartedAt = Now.AddHours(-1),
 					Duration = TimeSpan.FromSeconds(2),

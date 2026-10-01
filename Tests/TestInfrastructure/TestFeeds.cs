@@ -25,7 +25,7 @@ public static class TestFeeds
 	public static FeedRun Run(Domain.Feed.Feed feed, Guid id, Conclusiveness conclusiveness = Conclusiveness.Conclusive) =>
 		new()
 		{
-			Id = id,
+			Id = RunId.From(id),
 			FeedId = feed.Id,
 			StartedAt = epoch,
 			Duration = TimeSpan.Zero,
