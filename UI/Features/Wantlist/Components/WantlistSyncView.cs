@@ -7,11 +7,11 @@ namespace UI.Features.Wantlist.Components;
 
 internal static class WantlistSyncView
 {
-	internal static IReadOnlyList<ChangeEntry> Entries(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
 		[
 			.. dryRun
 				.Changes.Where(change => media.ContainsKey(change.MediaId))
-				.Select(change => new ChangeEntry
+				.Select(change => new ChangeItem
 				{
 					Title = media[change.MediaId] is IdentifiedMedia named ? named.Title : string.Empty,
 					Media = media[change.MediaId],
@@ -22,14 +22,14 @@ internal static class WantlistSyncView
 				}),
 			.. dryRun
 				.NoOps.Where(media.ContainsKey)
-				.Select(id => new ChangeEntry
+				.Select(id => new ChangeItem
 				{
 					Title = media[id] is IdentifiedMedia named ? named.Title : string.Empty,
 					Media = media[id],
 					Kind = ChangeKind.Unchanged,
 					Subtitle = Subtitle(media[id]),
 				}),
-			.. dryRun.Unmatched.Select(unmatched => new ChangeEntry
+			.. dryRun.Unmatched.Select(unmatched => new ChangeItem
 			{
 				Title = UnmatchedTitle(unmatched),
 				Kind = ChangeKind.Unmatched,

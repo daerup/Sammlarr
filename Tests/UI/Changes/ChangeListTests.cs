@@ -26,9 +26,9 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Render_ForEveryRow_ShowsTheContextAsAnIconWithoutWritingItOut()
 	{
-		var entry = Removed("Gone") with { ContextIcon = "log-out", ContextTooltip = "Absent from 3 of 3 runs" };
+		var item = Removed("Gone") with { ContextIcon = "log-out", ContextTooltip = "Absent from 3 of 3 runs" };
 
-		var cut = RenderList(entry);
+		var cut = RenderList(item);
 
 		await Assert.That(cut.FindAll(".change-context")).HasCount(1);
 		await Assert.That(cut.Find(".change-row").TextContent).DoesNotContain("Absent from");
@@ -37,7 +37,7 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Render_ForAnUnmatchedRow_UsesAPlaceholderInsteadOfAPoster()
 	{
-		var cut = RenderList(new ChangeEntry { Title = "Nowhere", Kind = ChangeKind.Unmatched });
+		var cut = RenderList(new ChangeItem { Title = "Nowhere", Kind = ChangeKind.Unmatched });
 
 		await Assert.That(cut.FindAll(".change-poster.is-missing")).HasCount(1);
 		await Assert.That(cut.FindAll("img.change-poster")).IsEmpty();
@@ -134,13 +134,13 @@ public class ChangeListTests : BunitContext
 	public async Task Render_WhenARowIsClicked_RaisesTheSelectionWithItsMedia()
 	{
 		MediaLookup? selected = null;
-		var entry = Added("Fresh");
-		var cut = RenderList([entry], [], media => selected = media);
+		var item = Added("Fresh");
+		var cut = RenderList([item], [], media => selected = media);
 
 		await cut.Find(".change-row").ClickAsync(new MouseEventArgs());
 
 		await Assert.That(selected).IsNotNull();
-		await Assert.That(selected!.Value.AsIdentified()!.Value.Identity.Id).IsEqualTo(entry.Media!.Value.AsIdentified()!.Value.Identity.Id);
+		await Assert.That(selected!.Value.AsIdentified()!.Value.Identity.Id).IsEqualTo(item.Media!.Value.AsIdentified()!.Value.Identity.Id);
 	}
 
 	[Test]
@@ -154,7 +154,7 @@ public class ChangeListTests : BunitContext
 				.Add(dialog => dialog.Open, true)
 				.Add(dialog => dialog.Title, "Review changes before syncing")
 				.Add(dialog => dialog.Subtitle, "7 titles compared")
-				.Add(dialog => dialog.Entries, [Removed("Gone"), Added("Fresh"), Unchanged("Held")])
+				.Add(dialog => dialog.Items, [Removed("Gone"), Added("Fresh"), Unchanged("Held")])
 				.Add(dialog => dialog.Chips, [])
 				.Add(dialog => dialog.RemovedLabel, "Removing")
 				.Add(dialog => dialog.AddedLabel, "Adding")
@@ -168,11 +168,11 @@ public class ChangeListTests : BunitContext
 		);
 
 		await Assert.That(cut.Instance.UnchangedLabel).IsEqualTo("Already in sync");
-		await Assert.That(cut.Instance.Entries).HasCount(3);
+		await Assert.That(cut.Instance.Items).HasCount(3);
 	}
 
 	[Test]
-	public async Task Render_ForUnchangedEntries_GroupsThemLastUnderTheCallersLabel()
+	public async Task Render_ForUnchangedItems_GroupsThemLastUnderTheCallersLabel()
 	{
 		var cut = RenderList([Unchanged("Held"), Added("Fresh"), Removed("Gone")], [], unchangedLabel: "Already in sync");
 
@@ -278,7 +278,7 @@ public class ChangeListTests : BunitContext
 			Filters = filters,
 		};
 
-	private static ChangeEntry Unchanged(string title) =>
+	private static ChangeItem Unchanged(string title) =>
 		new()
 		{
 			Title = title,
@@ -286,7 +286,7 @@ public class ChangeListTests : BunitContext
 			Kind = ChangeKind.Unchanged,
 		};
 
-	private static ChangeEntry Removed(string title) =>
+	private static ChangeItem Removed(string title) =>
 		new()
 		{
 			Title = title,
@@ -294,7 +294,7 @@ public class ChangeListTests : BunitContext
 			Kind = ChangeKind.Removed,
 		};
 
-	private static ChangeEntry Added(string title) =>
+	private static ChangeItem Added(string title) =>
 		new()
 		{
 			Title = title,
@@ -302,10 +302,10 @@ public class ChangeListTests : BunitContext
 			Kind = ChangeKind.Added,
 		};
 
-	private IRenderedComponent<ChangeList> RenderList(params ChangeEntry[] entries) => RenderList(entries, []);
+	private IRenderedComponent<ChangeList> RenderList(params ChangeItem[] items) => RenderList(items, []);
 
 	private IRenderedComponent<ChangeList> RenderList(
-		IReadOnlyList<ChangeEntry> entries,
+		IReadOnlyList<ChangeItem> items,
 		IReadOnlyList<ChangeChip> chips,
 		Action<MediaLookup>? onSelect = null,
 		string? unchangedLabel = null,
@@ -317,7 +317,7 @@ public class ChangeListTests : BunitContext
 
 		return Render<ChangeList>(parameters =>
 		{
-			parameters.Add(list => list.Entries, entries);
+			parameters.Add(list => list.Items, items);
 			parameters.Add(list => list.Chips, chips);
 			if (highlight is not null)
 			{

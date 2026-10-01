@@ -8,12 +8,12 @@ namespace UI.Features.Feeds.Components;
 
 internal static class FeedRunView
 {
-	internal static IReadOnlyList<ChangeEntry> Entries(FeedRun run, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeItem> Items(FeedRun run, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
 		[
 			.. run
 				.Items.Where(item => item.State is not FeedRunItemState.Kept)
 				.Where(item => media.ContainsKey(item.MediaId))
-				.Select(item => new ChangeEntry
+				.Select(item => new ChangeItem
 				{
 					Title = media[item.MediaId] is IdentifiedMedia named ? named.Title : string.Empty,
 					Id = item.MediaId,
@@ -25,13 +25,13 @@ internal static class FeedRunView
 				}),
 		];
 
-	internal static IReadOnlyList<ChangeEntry> Entries(IFeedPlan summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
+	internal static IReadOnlyList<ChangeItem> Items(IFeedPlan summary, IReadOnlyDictionary<MediaId, MediaLookup> media) =>
 		[
 			.. summary.Delta.Drops.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Removed)),
 			.. summary.Delta.Adds.Where(media.ContainsKey).Select(id => Pending(id, media[id], ChangeKind.Added)),
 		];
 
-	private static ChangeEntry Pending(MediaId id, MediaLookup item, ChangeKind kind) =>
+	private static ChangeItem Pending(MediaId id, MediaLookup item, ChangeKind kind) =>
 		new()
 		{
 			Title = item is IdentifiedMedia named ? named.Title : string.Empty,
