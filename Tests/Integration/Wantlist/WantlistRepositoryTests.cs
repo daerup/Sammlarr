@@ -23,7 +23,7 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	public void Setup() => _testee = new WantlistRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task GetOwnedCountsAsync_ForTitlesAFeedAdded_CountsThemPerFeedAndIgnoresOtherOrigins()
+	public async Task CountByFeedAsync_ForTitlesAFeedAdded_CountsThemPerFeedAndIgnoresOtherOrigins()
 	{
 		var feedId = await SeedFeedAsync("owned-list");
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
@@ -35,18 +35,18 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 		await _testee.AddAsync([first, second], origin);
 		await _testee.AddAsync([byHand], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
 
-		var counts = await _testee.GetOwnedCountsAsync();
+		var counts = await _testee.CountByFeedAsync();
 
 		await Assert.That(counts[feedId]).IsEqualTo(2);
-		await Assert.That(counts).HasCount(1);
+		await Assert.That(counts).Count().IsEqualTo(1);
 	}
 
 	[Test]
-	public async Task GetOwnedCountsAsync_ForAFeedThatOwnsNothing_LeavesItOutRatherThanReportingZero()
+	public async Task CountByFeedAsync_ForAFeedThatAddedNothing_LeavesItOutRatherThanReportingZero()
 	{
 		var feedId = await SeedFeedAsync("empty-list");
 
-		var counts = await _testee.GetOwnedCountsAsync();
+		var counts = await _testee.CountByFeedAsync();
 
 		await Assert.That(counts).DoesNotContainKey(feedId);
 	}
@@ -69,15 +69,15 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	}
 
 	[Test]
-	public async Task AddAsync_BatchOfDistinctMedia_CreatesSeparateEntries()
+	public async Task AddAsync_BatchOfDistinctMedia_CreatesOneRowEach()
 	{
 		var first = await SeedMediaAsync([PlexId.From("plex-200", MediaType.Movie)]);
 		var second = await SeedMediaAsync([PlexId.From("plex-201", MediaType.Movie)]);
 
 		await _testee.AddAsync([first, second], new WantlistItemProvenance(new SinkOrigin(SinkKind.Plex)));
 
-		var entries = await fixture.Context.Wantlist.AsNoTracking().ToListAsync();
-		await Assert.That(entries).Count().IsEqualTo(2);
+		var rows = await fixture.Context.Wantlist.AsNoTracking().ToListAsync();
+		await Assert.That(rows).Count().IsEqualTo(2);
 	}
 
 	[Test]
@@ -138,52 +138,61 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	}
 
 	[Test]
-	public async Task GetIdsAsync_ReturnsAllEntries()
+	public async Task RemoveAsync_ByFeed_RemovesOnlyTheTitlesThatFeedAdded()
 	{
-		var mediaId = await SeedWantlistItemAsync(PlexId.From("plex-105", MediaType.Movie), WantlistItemOrigin.Manual);
+		var feedId = await SeedFeedAsync("mirror-list");
+		var otherFeedId = await SeedFeedAsync("other-list");
+		var fromFeed = await SeedMediaAsync([PlexId.From("plex-400", MediaType.Movie)]);
+		var fromOtherFeed = await SeedMediaAsync([PlexId.From("plex-401", MediaType.Movie)]);
+		var byHand = await SeedMediaAsync([PlexId.From("plex-402", MediaType.Movie)]);
+		await _testee.AddAsync([fromFeed], await fixture.SeedFeedOriginAsync(feedId));
+		await _testee.AddAsync([fromOtherFeed], await fixture.SeedFeedOriginAsync(otherFeedId));
+		await _testee.AddAsync([byHand], new WantlistItemProvenance(new ManualOrigin(ManualSource.Search)));
 
-		var ids = await _testee.GetIdsAsync();
+		var removed = await _testee.RemoveAsync([fromFeed, fromOtherFeed, byHand], addedBy: feedId);
 
-		await Assert.That(ids).Count().IsEqualTo(1);
-		await Assert.That(ids[0]).IsEqualTo(mediaId);
+		await Assert.That(removed).IsEquivalentTo([fromFeed]);
+		await Assert.That((await _testee.GetAllAsync()).Select(item => item.MediaId)).IsEquivalentTo([fromOtherFeed, byHand]);
 	}
 
 	[Test]
-	public async Task GetEntriesAsync_ReturnsEntries_WithProvenance()
+	public async Task GetAllAsync_ReturnsTheItems_WithTheirProvenance()
 	{
 		var mediaId = await SeedWantlistItemAsync(PlexId.From("plex-106", MediaType.Movie), WantlistItemOrigin.Manual);
 
-		var entries = await _testee.GetEntriesAsync();
+		var items = await _testee.GetAllAsync();
 
-		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].MediaId).IsEqualTo(mediaId);
-		await Assert.That(entries[0].Provenance.Value).IsTypeOf<ManualOrigin>();
+		await Assert.That(items).Count().IsEqualTo(1);
+		await Assert.That(items[0].MediaId).IsEqualTo(mediaId);
+		await Assert.That(items[0].Provenance).IsOfUnionType<WantlistItemProvenance, ManualOrigin>();
 	}
 
 	[Test]
-	public async Task GetEntriesAsync_SinkEntry_CarriesStoredSink()
+	public async Task GetAllAsync_ForASinkItem_CarriesTheStoredSink()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-107", MediaType.Movie)]);
 		await _testee.AddAsync([mediaId], new WantlistItemProvenance(new SinkOrigin(SinkKind.Plex)));
 
-		var entries = await _testee.GetEntriesAsync();
+		var items = await _testee.GetAllAsync();
 
-		await Assert.That(entries[0].Provenance).IsOfUnionType<WantlistItemProvenance, SinkOrigin>();
-		var remote = (SinkOrigin)entries[0].Provenance.Value!;
-		await Assert.That(remote.Provider).IsEqualTo(SinkKind.Plex);
+		await Assert
+			.That(items[0].Provenance)
+			.IsOfUnionType<WantlistItemProvenance, SinkOrigin>()
+			.And.Multiple(async sink => await Assert.That(sink.Provider).IsEqualTo(SinkKind.Plex));
 	}
 
 	[Test]
-	public async Task GetEntriesAsync_ManualEntry_CarriesStoredSource()
+	public async Task GetAllAsync_ForAManualItem_CarriesTheStoredSource()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-110", MediaType.Movie)]);
 		await _testee.AddAsync([mediaId], new WantlistItemProvenance(new ManualOrigin(ManualSource.Browse)));
 
-		var entries = await _testee.GetEntriesAsync();
+		var items = await _testee.GetAllAsync();
 
-		await Assert.That(entries[0].Provenance).IsOfUnionType<WantlistItemProvenance, ManualOrigin>();
-		var manual = (ManualOrigin)entries[0].Provenance.Value!;
-		await Assert.That(manual.Source).IsEqualTo(ManualSource.Browse);
+		await Assert
+			.That(items[0].Provenance)
+			.IsOfUnionType<WantlistItemProvenance, ManualOrigin>()
+			.And.Multiple(async manual => await Assert.That(manual.Source).IsEqualTo(ManualSource.Browse));
 	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)

@@ -24,7 +24,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 
-		await Wantlist.AddToWantlistAsync([inception], Manual);
+		await Wantlist.AddAsync([inception], Manual);
 
 		await AssertOutbox((WantlistOperationAction.Add, inception));
 	}
@@ -35,7 +35,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
 
-		await Wantlist.AddToWantlistAsync([inception], Manual);
+		await Wantlist.AddAsync([inception], Manual);
 
 		await AssertOutboxEmpty();
 	}
@@ -46,7 +46,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
 
-		await Wantlist.AddToWantlistAsync([], Manual);
+		await Wantlist.AddAsync([], Manual);
 
 		await AssertOutbox((WantlistOperationAction.Add, inception));
 	}
@@ -56,7 +56,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 
-		await Wantlist.AddToWantlistAsync([inception], Manual);
+		await Wantlist.AddAsync([inception], Manual);
 
 		await AssertOutboxEmpty();
 	}
@@ -67,7 +67,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
 
-		await Wantlist.AddToWantlistAsync([inception], Manual);
+		await Wantlist.AddAsync([inception], Manual);
 
 		await AssertOutbox((WantlistOperationAction.Add, inception));
 	}
@@ -77,7 +77,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 
-		await Wantlist.RemoveFromWantlistAsync([inception]);
+		await Wantlist.RemoveAsync([inception]);
 
 		await AssertOutbox((WantlistOperationAction.Remove, inception));
 	}
@@ -88,7 +88,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
 
-		await Wantlist.RemoveFromWantlistAsync([inception]);
+		await Wantlist.RemoveAsync([inception]);
 
 		await AssertOutboxEmpty();
 	}
@@ -99,7 +99,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
 
-		await Wantlist.RemoveFromWantlistAsync([inception]);
+		await Wantlist.RemoveAsync([inception]);
 
 		await AssertOutbox((WantlistOperationAction.Remove, inception));
 	}
@@ -110,7 +110,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 		await Outbox.EnqueueAsync(WantlistOperationAction.Add, [inception]);
 
-		await Wantlist.RemoveFromWantlistAsync([]);
+		await Wantlist.RemoveAsync([]);
 
 		await AssertOutbox((WantlistOperationAction.Add, inception));
 	}
@@ -120,7 +120,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 
-		await Wantlist.AddToWantlistAsync([inception, inception], Manual);
+		await Wantlist.AddAsync([inception, inception], Manual);
 
 		await AssertOutbox((WantlistOperationAction.Add, inception));
 	}
@@ -133,7 +133,7 @@ public class OutboxBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 		var matrix = await host.Movie("The Matrix", tmdb: "603", plex: "603").OnWantlist(origin: Remote);
 		await Outbox.EnqueueAsync(WantlistOperationAction.Remove, [inception]);
 
-		await Wantlist.AddToWantlistAsync([inception, fightClub, matrix], Manual);
+		await Wantlist.AddAsync([inception, fightClub, matrix], Manual);
 
 		await AssertOutbox((WantlistOperationAction.Add, fightClub));
 	}

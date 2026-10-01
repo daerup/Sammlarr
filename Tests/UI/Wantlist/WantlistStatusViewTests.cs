@@ -1,3 +1,7 @@
+using Domain.Media;
+using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
+using TUnit.Assertions.Enums;
 using UI.Features.Wantlist.Components;
 using UI.Shared.Filters;
 
@@ -75,4 +79,31 @@ public class WantlistStatusViewTests
 
 		await Assert.That(options.Select(option => option.Label)).IsEquivalentTo(new[] { "On your wantlist", "Pending removal (3)" });
 	}
+
+	[Test]
+	public async Task WithPendingRemovals_ListsThePendingRemovalAtItsOriginalAddedAt_NewestFirst()
+	{
+		var wantlist = new WantlistSnapshot([new WantlistItem(Dune, On(2), new ManualOrigin(ManualSource.Search))]);
+
+		var listed = WantlistStatusView.WithPendingRemovals(wantlist, [Queued(Tenet, WantlistOperationAction.Remove, On(1))]);
+
+		await Assert.That(listed.Select(item => item.MediaId)).IsEquivalentTo([Dune, Tenet], CollectionOrdering.Matching);
+		await Assert.That(listed[1].AddedAt).IsEqualTo(On(1));
+	}
+
+	[Test]
+	public async Task WithPendingRemovals_LeavesQueuedAddsOut()
+	{
+		var listed = WantlistStatusView.WithPendingRemovals(new WantlistSnapshot([]), [Queued(Dune, WantlistOperationAction.Add, On(1))]);
+
+		await Assert.That(listed).IsEmpty();
+	}
+
+	private static readonly MediaId Dune = MediaId.From(new Guid(1, 0, 0, new byte[8]));
+	private static readonly MediaId Tenet = MediaId.From(new Guid(2, 0, 0, new byte[8]));
+
+	private static DateTimeOffset On(int day) => new(2026, 1, day, 0, 0, 0, TimeSpan.Zero);
+
+	private static WantlistOutboxEntry Queued(MediaId id, WantlistOperationAction action, DateTimeOffset addedAt) =>
+		new(id, action, WantlistOutboxState.Pending, 0) { AddedAt = addedAt };
 }

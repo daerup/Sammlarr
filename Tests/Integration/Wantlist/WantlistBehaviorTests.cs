@@ -1,3 +1,4 @@
+using Contracts.Media;
 using Contracts.Wantlist;
 using DB.Data.Wantlist;
 using Domain.Media;
@@ -18,73 +19,74 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
-	public async Task AddToWantlistAsync_WithAManualOrigin_PersistsTheEntry()
+	public async Task AddAsync_WithAManualOrigin_PersistsTheItem()
 	{
 		var inception = await host.Movie(TestMedia.Inception).SeedAsync();
 
-		await host.Resolve<IWantlistService>().AddToWantlistAsync([inception], Manual);
+		await host.Resolve<IWantlistService>().AddAsync([inception], Manual);
 
-		var entries = await host.ScopedDbContext.Wantlist.AsNoTracking().ToListAsync();
-		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].Origin).IsEqualTo(WantlistItemOrigin.Manual);
+		var rows = await host.ScopedDbContext.Wantlist.AsNoTracking().ToListAsync();
+		await Assert.That(rows).Count().IsEqualTo(1);
+		await Assert.That(rows[0].Origin).IsEqualTo(WantlistItemOrigin.Manual);
 	}
 
 	[Test]
-	public async Task AddToWantlistAsync_WhenTheEntryAlreadyExists_KeepsItsOriginalOrigin()
+	public async Task AddAsync_WhenTheTitleIsAlreadyWantlisted_KeepsItsOriginalOrigin()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 
-		await host.Resolve<IWantlistService>().AddToWantlistAsync([inception], Manual);
+		await host.Resolve<IWantlistService>().AddAsync([inception], Manual);
 
-		var entries = await host.ScopedDbContext.Wantlist.AsNoTracking().ToListAsync();
-		await Assert.That(entries).Count().IsEqualTo(1);
-		await Assert.That(entries[0].Origin).IsEqualTo(WantlistItemOrigin.Sink);
+		var rows = await host.ScopedDbContext.Wantlist.AsNoTracking().ToListAsync();
+		await Assert.That(rows).Count().IsEqualTo(1);
+		await Assert.That(rows[0].Origin).IsEqualTo(WantlistItemOrigin.Sink);
 	}
 
 	[Test]
-	public async Task RemoveFromWantlistAsync_WhenAnEntryIsRemoved_HardDeletesIt()
+	public async Task RemoveAsync_ForAWantlistedTitle_HardDeletesItsRow()
 	{
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Manual);
 
-		await host.Resolve<IWantlistService>().RemoveFromWantlistAsync([inception]);
+		await host.Resolve<IWantlistService>().RemoveAsync([inception]);
 
 		await Assert.That(await host.ScopedDbContext.Wantlist.AsNoTracking().CountAsync()).IsEqualTo(0);
 	}
 
 	[Test]
-	public async Task GetIdsAsync_WhenItemsAreWantlisted_ReturnsAllOfTheirIds()
+	public async Task GetAsync_WhenItemsAreWantlisted_HoldsAllOfTheirIds()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub).OnWantlist(origin: Remote);
 		var inception = await host.Movie(TestMedia.Inception).OnWantlist(origin: Remote);
 
-		var ids = await host.Resolve<IWantlistService>().GetWantlistIdsAsync();
+		var wantlist = await host.Resolve<IWantlistService>().GetAsync();
 
-		await Assert.That(ids).Contains(fightClub);
-		await Assert.That(ids).Contains(inception);
+		await Assert.That(wantlist.Ids).Contains(fightClub);
+		await Assert.That(wantlist.Ids).Contains(inception);
 	}
 
 	[Test]
-	public async Task AddToWantlistAsync_WhenTheSinkIdIsMissing_IsRejected()
+	public async Task AddAsync_WhenTheSinkIdIsMissing_IsRejected()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").SeedAsync();
 
-		await Assert.That(async () => await host.Resolve<IWantlistService>().AddToWantlistAsync([solaris], Manual)).Throws<MissingSinkIdException>();
+		await Assert.That(async () => await host.Resolve<IWantlistService>().AddAsync([solaris], Manual)).Throws<MissingSinkIdException>();
 	}
 
 	[Test]
-	public async Task RemoveFromWantlistAsync_WhenTheSinkIdIsMissing_IsRejected()
+	public async Task RemoveAsync_WhenTheSinkIdIsMissing_IsRejected()
 	{
 		var solaris = await host.Movie("Solaris", tmdb: "11321").OnWantlist(origin: Manual);
 
-		await Assert.That(async () => await host.Resolve<IWantlistService>().RemoveFromWantlistAsync([solaris])).Throws<MissingSinkIdException>();
+		await Assert.That(async () => await host.Resolve<IWantlistService>().RemoveAsync([solaris])).Throws<MissingSinkIdException>();
 	}
 
 	[Test]
-	public async Task GetItemsAsync_WhenEntriesExist_EnrichesThemWithMetadataAndRating()
+	public async Task GetDetailsAsync_ForWantlistItems_EnrichesThemWithMetadataAndRating()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnWantlist(origin: Remote);
+		var wantlist = await host.Resolve<IWantlistService>().GetAsync();
 
-		var items = await host.Resolve<IWantlistService>().GetWantlistItemsAsync(WantlistQueryOptions.Default).ToListAsync();
+		var items = await host.Resolve<IMediaService>().GetDetailsAsync(wantlist.Items).ToListAsync();
 
 		await Assert.That(items).Count().IsEqualTo(1);
 		await Assert
@@ -99,32 +101,17 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetItemsAsync_WhenRemovedAreRequested_IncludesPendingRemovals()
+	public async Task RemoveAsync_ReturnsTheRemovedIds_AndTakesThemOutOfTheSnapshot()
 	{
 		var service = host.Resolve<IWantlistService>();
 		var removed = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().OnWantlist(origin: Manual);
 		var active = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().OnWantlist(origin: Manual);
 
-		await service.RemoveFromWantlistAsync([removed]);
+		var removedIds = await service.RemoveAsync([removed]);
 
-		var items = await service.GetWantlistItemsAsync(WantlistQueryOptions.WithRemoved).ToListAsync();
-
-		await Assert.That(items.Select(item => item.Media.Id)).Contains(active);
-		await Assert.That(items.Select(item => item.Media.Id)).Contains(removed);
-	}
-
-	[Test]
-	public async Task GetItemsAsync_ByDefault_ExcludesPendingRemovals()
-	{
-		var service = host.Resolve<IWantlistService>();
-		var removed = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().OnWantlist(origin: Manual);
-		var active = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().OnWantlist(origin: Manual);
-
-		await service.RemoveFromWantlistAsync([removed]);
-
-		var items = await service.GetWantlistItemsAsync(WantlistQueryOptions.Default).ToListAsync();
-
-		await Assert.That(items.Select(item => item.Media.Id)).Contains(active);
-		await Assert.That(items.Select(item => item.Media.Id)).DoesNotContain(removed);
+		var wantlist = await service.GetAsync();
+		await Assert.That(removedIds).IsEquivalentTo([removed]);
+		await Assert.That(wantlist.Contains(active)).IsTrue();
+		await Assert.That(wantlist.Contains(removed)).IsFalse();
 	}
 }

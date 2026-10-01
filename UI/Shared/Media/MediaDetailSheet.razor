@@ -41,9 +41,9 @@
                         <div class="media-sheet-toggles">
                             <WantlistProvenanceToggle Result="media"
                                                        Size="18"
-                                                       IsToggled="_wantlisted"
+                                                       IsToggled="IsWantlisted"
                                                        IsToggling="_togglingWantlist"
-                                                       Entry="@(_entry is Some<WantlistItem>(var shown) ? shown : null)"
+                                                       Item="@(_item is Some<WantlistItem>(var shown) ? shown : null)"
                                                        OnToggle="ToggleWantlistAsync"/>
                             <BlocklistToggleIcon Result="media"
                                                  Size="18"
@@ -124,11 +124,11 @@
     private bool _failed;
     private string? _lastImageUrl;
     private MediaId? _loadedFor;
-    private bool _wantlisted;
+    private bool IsWantlisted => _item is Some<WantlistItem>;
     private bool _blocklisted;
     private bool _togglingWantlist;
     private bool _togglingBlocklist;
-    private Optional<WantlistItem> _entry = new None();
+    private Optional<WantlistItem> _item = new None();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -148,9 +148,9 @@
 
     private async Task LoadEnrollmentAsync(MediaId id)
     {
-        _wantlisted = (await WantlistService.GetWantlistIdsAsync()).Contains(id);
+        var wantlist = await WantlistService.GetAsync();
+        _item = wantlist.Find(id);
         _blocklisted = (await BlocklistService.GetBlocklistIdsAsync()).Contains(id);
-        _entry = await WantlistService.GetEntryAsync(id);
     }
 
     private async Task ToggleWantlistAsync(MediaLookup media)
@@ -163,13 +163,13 @@
         _togglingWantlist = true;
         try
         {
-            if (_wantlisted)
+            if (IsWantlisted)
             {
-                await WantlistService.RemoveFromWantlistAsync([media.Id]);
+                await WantlistService.RemoveAsync([media.Id]);
             }
             else
             {
-                await WantlistService.AddToWantlistAsync([media.Id], new ManualOrigin(Source));
+                await WantlistService.AddAsync([media.Id], new ManualOrigin(Source));
             }
 
             await LoadEnrollmentAsync(media.Id);

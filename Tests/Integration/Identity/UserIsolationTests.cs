@@ -74,7 +74,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 
 		host.SignOut();
 		await host.SignInAs("Bob");
-		await Assert.That(await host.Resolve<IWantlistService>().GetWantlistIdsAsync()).IsEmpty();
+		await Assert.That((await host.Resolve<IWantlistService>().GetAsync()).Ids).IsEmpty();
 	}
 
 	[Test]

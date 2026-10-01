@@ -33,7 +33,7 @@ public class MediaDetailSheetTests : BunitContext
 	public async Task Toggle_WhenARemovalIsAlreadyQueued_StillReadsAsAddRatherThanCancel()
 	{
 		Register();
-		_wantlist.GetWantlistIdsAsync(Any()).ReturnsSequentially(Owned, Empty, Empty);
+		_wantlist.GetAsync(Any()).ReturnsSequentially(Wantlisted(new ManualOrigin(ManualSource.Search)), Nothing, Nothing);
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => Toggle(cut) is not null);
@@ -46,8 +46,7 @@ public class MediaDetailSheetTests : BunitContext
 	public async Task Dot_WhenTheItemCameFromAFeed_UsesTheFeedProvidersBrand()
 	{
 		Register();
-		_wantlist.GetWantlistIdsAsync(Any()).Returns(Owned);
-		_wantlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed"))));
+		_wantlist.GetAsync(Any()).Returns(Wantlisted(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "feed")));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".toggle-dot").Count > 0);
@@ -59,8 +58,7 @@ public class MediaDetailSheetTests : BunitContext
 	public async Task Dot_WhenTheItemWasAddedByHand_IsNotShown()
 	{
 		Register();
-		_wantlist.GetWantlistIdsAsync(Any()).Returns(Owned);
-		_wantlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(new ManualOrigin(ManualSource.Search))));
+		_wantlist.GetAsync(Any()).Returns(Wantlisted(new ManualOrigin(ManualSource.Search)));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => Toggle(cut) is not null);
@@ -72,8 +70,7 @@ public class MediaDetailSheetTests : BunitContext
 	public async Task Provenance_WhenTheWantlistIconIsRightClicked_IsRevealedInAPopover()
 	{
 		Register();
-		_wantlist.GetWantlistIdsAsync(Any()).Returns(Owned);
-		_wantlist.GetEntryAsync(Any(), Any()).Returns(Some.Of(Entry(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy"))));
+		_wantlist.GetAsync(Any()).Returns(Wantlisted(TestFeeds.Origin(Guid.NewGuid(), Guid.NewGuid(), "Comedy")));
 
 		var cut = RenderSheet();
 		cut.WaitForState(() => cut.FindAll(".provenance-trigger").Count > 0);
@@ -86,7 +83,7 @@ public class MediaDetailSheetTests : BunitContext
 		var links = details.QuerySelectorAll("a").Select(link => link.GetAttribute("href")).ToList();
 
 		await Assert.That(details.TextContent).Contains("Comedy");
-		await Assert.That(links).HasCount(2);
+		await Assert.That(links).Count().IsEqualTo(2);
 		await Assert.That(links[0]).StartsWith("/feeds/edit/");
 		await Assert.That(links[1]).Contains("/runs/");
 		await Assert.That(links[1]).Contains("?item=");
@@ -105,7 +102,7 @@ public class MediaDetailSheetTests : BunitContext
 		await Assert.That(cut.FindAll(".provenance-details")).IsEmpty();
 	}
 
-	private static WantlistItem Entry(WantlistItemProvenance provenance) => new(Id, DateTimeOffset.UnixEpoch, provenance);
+	private static WantlistSnapshot Wantlisted(WantlistItemProvenance provenance) => new([new WantlistItem(Id, DateTimeOffset.UnixEpoch, provenance)]);
 
 	private static IElement? Toggle(IRenderedComponent<Harness> cut) =>
 		cut.FindAll(".media-detail-sheet-content button")
@@ -113,9 +110,9 @@ public class MediaDetailSheetTests : BunitContext
 
 	private IRenderedComponent<Harness> RenderSheet() => Render<Harness>();
 
-	private static IReadOnlySet<MediaId> Owned => new HashSet<MediaId> { Id };
-
 	private static IReadOnlySet<MediaId> Empty => new HashSet<MediaId>();
+
+	private static WantlistSnapshot Nothing => new([]);
 
 	private void Register()
 	{
@@ -123,8 +120,7 @@ public class MediaDetailSheetTests : BunitContext
 		Services.AddLogging();
 
 		_wantlist = IWantlistService.Mock();
-		_wantlist.GetWantlistIdsAsync(Any()).Returns(Empty);
-		_wantlist.GetEntryAsync(Any(), Any()).Returns(new None());
+		_wantlist.GetAsync(Any()).Returns(Nothing);
 		Services.AddSingleton(_wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();

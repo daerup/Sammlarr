@@ -8,7 +8,7 @@ namespace DB.Data.Wantlist;
 
 internal sealed class WantlistRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory) : IWantlistRepository
 {
-	public async Task<IReadOnlyList<WantlistItem>> GetEntriesAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<WantlistItem>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rows = await (
@@ -19,14 +19,7 @@ internal sealed class WantlistRepository(IDbContextFactory<SammlarrDbContext> db
 		return [.. rows.Select(row => new WantlistItem(MediaId.From(row.MediaIdValue), row.WantlistItem.CreatedAt, row.WantlistItem.ToProvenance()))];
 	}
 
-	public async Task<IReadOnlyList<MediaId>> GetIdsAsync(CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var values = await ctx.Wantlist.AsNoTracking().Select(w => w.Media.Id).ToListAsync(cancellationToken);
-		return [.. values.Select(MediaId.From)];
-	}
-
-	public async Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyDictionary<FeedId, int>> CountByFeedAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -37,22 +30,18 @@ internal sealed class WantlistRepository(IDbContextFactory<SammlarrDbContext> db
 			.Select(group => new { FeedId = group.Key, Count = group.Count() })
 			.ToListAsync(cancellationToken);
 
-		return counts.ToDictionary(entry => FeedId.From(entry.FeedId), entry => entry.Count);
+		return counts.ToDictionary(count => FeedId.From(count.FeedId), count => count.Count);
 	}
 
-	public async Task<IReadOnlyList<MediaId>> AddAsync(
-		IEnumerable<MediaId> mediaIds,
-		WantlistItemProvenance provenance,
-		CancellationToken cancellationToken = default
-	)
+	public async Task<IReadOnlyList<MediaId>> AddAsync(IEnumerable<MediaId> ids, WantlistItemProvenance provenance, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds.Distinct().ToList();
-		if (ids.Count == 0)
+		var distinct = ids.Distinct().ToList();
+		if (distinct.Count == 0)
 		{
 			return [];
 		}
 
-		var rawIds = ids.Select(id => id.Value).ToList();
+		var rawIds = distinct.Select(id => id.Value).ToList();
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -69,14 +58,14 @@ internal sealed class WantlistRepository(IDbContextFactory<SammlarrDbContext> db
 		return [.. inserted.Select(m => MediaId.From(m.Id))];
 	}
 
-	public async Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds.Distinct().ToList();
-		if (ids.Count == 0)
+		var distinct = ids.Distinct().ToList();
+		if (distinct.Count == 0)
 		{
 			return [];
 		}
-		var rawIds = ids.Select(id => id.Value).ToList();
+		var rawIds = distinct.Select(id => id.Value).ToList();
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var removed = await ctx.Wantlist.Where(w => rawIds.Contains(w.Media.Id)).Select(w => w.Media.Id).ToListAsync(cancellationToken);
@@ -84,19 +73,19 @@ internal sealed class WantlistRepository(IDbContextFactory<SammlarrDbContext> db
 		return [.. removed.Select(MediaId.From)];
 	}
 
-	public async Task<IReadOnlyList<MediaId>> RemoveOwnedAsync(IEnumerable<MediaId> mediaIds, FeedId owner, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, FeedId addedBy, CancellationToken cancellationToken = default)
 	{
-		var ids = mediaIds.Distinct().ToList();
-		if (ids.Count == 0)
+		var distinct = ids.Distinct().ToList();
+		if (distinct.Count == 0)
 		{
 			return [];
 		}
-		var rawIds = ids.Select(id => id.Value).ToList();
+		var rawIds = distinct.Select(id => id.Value).ToList();
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var owned = ctx.Wantlist.Where(w => rawIds.Contains(w.Media.Id) && w.SourceFeedId == owner.Value && w.Origin == WantlistItemOrigin.Feed);
-		var removed = await owned.Select(w => w.Media.Id).ToListAsync(cancellationToken);
-		await owned.ExecuteDeleteAsync(cancellationToken);
+		var added = ctx.Wantlist.Where(w => rawIds.Contains(w.Media.Id) && w.SourceFeedId == addedBy.Value && w.Origin == WantlistItemOrigin.Feed);
+		var removed = await added.Select(w => w.Media.Id).ToListAsync(cancellationToken);
+		await added.ExecuteDeleteAsync(cancellationToken);
 		return [.. removed.Select(MediaId.From)];
 	}
 }

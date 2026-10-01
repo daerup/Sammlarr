@@ -119,7 +119,7 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
     {
         var inception = await host.Movie(TestMedia.Inception).ServedByPlex().ServedByTmdb().SeedAsync();
 
-        await Testee.AddToWantlistAsync([inception], new WantlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
+        await Testee.AddAsync([inception], new WantlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
 
         var entries = await host.ScopedDbContext.Wantlist.AsNoTracking().ToListAsync();
         await Assert.That(entries).Count().IsEqualTo(1);

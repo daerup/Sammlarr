@@ -200,9 +200,12 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.RunAsync(feedId, new FeedRunTrigger(new Manual()));
 
 		var recorded = (await host.Resolve<IFeedRepository>().GetRunsAsync(feedId, take: 1)).Single();
-		var entry = (await host.Resolve<IWantlistRepository>().GetEntriesAsync()).Single(e => e.MediaId == fightClub);
+		var item = (await host.Resolve<IWantlistRepository>().GetAllAsync()).Single(added => added.MediaId == fightClub);
 
-		await Assert.That(entry.Provenance.Value is FeedOrigin origin && origin.Run.Id == recorded.Id).IsTrue();
+		await Assert
+			.That(item.Provenance)
+			.IsOfUnionType<WantlistItemProvenance, FeedOrigin>()
+			.And.Multiple(async origin => await Assert.That(origin.Run.Id).IsEqualTo(recorded.Id));
 	}
 
 	[Test]
@@ -230,7 +233,7 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	private static FeedItemSpec Item(string? title, MediaType type, params ProviderId[] ids) =>
 		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
 
-	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => await host.Resolve<IWantlistRepository>().GetIdsAsync();
+	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => [.. (await host.Resolve<IWantlistRepository>().GetAllAsync()).Select(item => item.MediaId)];
 
 	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy)
 	{

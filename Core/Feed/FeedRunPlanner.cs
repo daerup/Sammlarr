@@ -71,10 +71,9 @@ internal sealed class FeedRunPlanner(
 			}
 		}
 
-		var entries = await wantlist.GetEntriesAsync(cancellationToken);
+		var wanted = new WantlistSnapshot(await wantlist.GetAllAsync(cancellationToken));
 		var blocklisted = await blocklist.GetBlocklistIdsAsync(cancellationToken);
-		var wantlisted = entries.Select(entry => entry.MediaId).ToHashSet();
-		var owned = entries.Where(entry => entry.Provenance is FeedOrigin origin && origin.Feed.Id == feed.Id).Select(entry => entry.MediaId).ToHashSet();
+		var owned = wanted.Items.Where(item => item.Provenance is FeedOrigin origin && origin.Feed.Id == feed.Id).Select(item => item.MediaId).ToHashSet();
 
 		var options = new QueryOptions
 		{
@@ -83,7 +82,7 @@ internal sealed class FeedRunPlanner(
 			Filter = feed.Filter,
 		};
 		var predicates = new QueryPredicates<MediaQueryRow>(
-			IsWantlisted: row => wantlisted.Contains(row.Media.Identity.Id),
+			IsWantlisted: row => wanted.Contains(row.Media.Identity.Id),
 			IsBlocklisted: row => blocklisted.Contains(row.Media.Identity.Id),
 			IsOwned: row => owned.Contains(row.Media.Identity.Id)
 		);

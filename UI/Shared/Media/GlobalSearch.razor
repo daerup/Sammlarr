@@ -22,7 +22,7 @@
             <WantlistProvenanceToggle Result="ctx.Result"
                                        IsToggled="ctx.IsToggled"
                                        IsToggling="ctx.IsToggling"
-                                       Entry="@EntryFor(ctx.Result.Id)"
+                                       Item="@ItemFor(ctx.Result.Id)"
                                        OnToggle="ctx.OnToggle"/>
             <BlocklistToggleIcon Result="ctx.Result"
                                  IsToggled="@_blocklisted.Contains(ctx.Result.Id)"
@@ -36,7 +36,7 @@
     private readonly CancellationTokenSource _cancellation = new();
     private ProviderConfig? _settings;
     private IReadOnlySet<MediaId> _blocklisted = new HashSet<MediaId>();
-    private IReadOnlyDictionary<MediaId, WantlistItem> _entries = new Dictionary<MediaId, WantlistItem>();
+    private WantlistSnapshot _wantlist = new([]);
     private MediaId? _blocklisting;
 
     [Parameter] public bool IsOpen { get; set; }
@@ -49,13 +49,13 @@
         await RefreshAsync();
     }
 
-    private bool IsWantlisted(MediaId mediaId) => _entries.ContainsKey(mediaId);
+    private bool IsWantlisted(MediaId mediaId) => _wantlist.Contains(mediaId);
 
-    private WantlistItem? EntryFor(MediaId mediaId) => _entries.TryGetValue(mediaId, out var entry) ? entry : null;
+    private WantlistItem? ItemFor(MediaId mediaId) => _wantlist.Find(mediaId) is Some<WantlistItem>(var item) ? item : null;
 
     private async Task RefreshAsync()
     {
-        _entries = await WantlistService.GetEntriesAsync(_cancellation.Token);
+        _wantlist = await WantlistService.GetAsync(_cancellation.Token);
         _blocklisted = await BlocklistService.GetBlocklistIdsAsync(_cancellation.Token);
     }
 
@@ -63,12 +63,12 @@
     {
         if (isMarked)
         {
-            await WantlistService.RemoveFromWantlistAsync([id], _cancellation.Token);
+            await WantlistService.RemoveAsync([id], _cancellation.Token);
             Notifier.Success($"'{title}' has been removed from your wantlist.");
         }
         else
         {
-            await WantlistService.AddToWantlistAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
+            await WantlistService.AddAsync([id], new ManualOrigin(ManualSource.Search), _cancellation.Token);
             Notifier.Success($"'{title}' has been added to your wantlist.");
         }
 

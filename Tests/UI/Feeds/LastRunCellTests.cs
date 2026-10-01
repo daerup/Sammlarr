@@ -12,6 +12,7 @@ using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Wantlist;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,7 +92,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
-		wantlist.GetWantlistIdsAsync(Any()).Returns(new HashSet<MediaId>());
+		wantlist.GetAsync(Any()).Returns(new WantlistSnapshot([]));
 		Services.AddSingleton(wantlist.Object);
 
 		var blocklist = IBlocklistService.Mock();

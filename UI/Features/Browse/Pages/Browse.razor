@@ -58,7 +58,7 @@
                   OnOpenChanged="DetailsOpenChangedAsync"
                   Media="_selectedMedia"
                   Source="ManualSource.Browse"
-                  OnEnrollmentChanged="@(_ => LoadWantlistIdsAsync())"/>
+                  OnEnrollmentChanged="@(_ => LoadWantlistAsync())"/>
 
 @code {
     private IReadOnlyList<MediaLookup>? _trendingMedia;
@@ -68,7 +68,7 @@
     private bool _isSignedIn;
     private bool _hasTrendingProviderApiKey;
     private bool HasAccess => _isSignedIn && _hasTrendingProviderApiKey;
-    private IReadOnlySet<MediaId> _wantlisted = new HashSet<MediaId>();
+    private WantlistSnapshot _wantlist = new([]);
     private ProviderConfig _providerConfig = null!;
     private int _currentPage = 1;
     private int _totalPages = 1;
@@ -90,14 +90,14 @@
         if (!_isSignedIn)
         {
             _hasTrendingProviderApiKey = false;
-            _wantlisted = new HashSet<MediaId>();
+            _wantlist = new([]);
             _trendingMedia = null;
             CloseSelectedMedia();
             _isLoading = false;
             return;
         }
 
-        await LoadWantlistIdsAsync();
+        await LoadWantlistAsync();
     }
 
     private void CloseSelectedMedia()
@@ -128,9 +128,9 @@
         await LoadPageAsync();
     }
 
-    private async Task LoadWantlistIdsAsync()
+    private async Task LoadWantlistAsync()
     {
-        _wantlisted = await WantlistService.GetWantlistIdsAsync(_cancellationTokenSource.Token);
+        _wantlist = await WantlistService.GetAsync(_cancellationTokenSource.Token);
     }
 
     private async Task LoadPageAsync()
@@ -185,7 +185,7 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWantlist(MediaLookup media) => !media.IsUnmatched && _wantlisted.Contains(media.Id);
+    private bool IsInWantlist(MediaLookup media) => !media.IsUnmatched && _wantlist.Contains(media.Id);
 
     private void SelectMedia(MediaLookup media)
     {

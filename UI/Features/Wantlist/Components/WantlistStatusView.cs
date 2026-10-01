@@ -1,3 +1,5 @@
+using Domain.Wantlist;
+using Domain.Wantlist.Outbox;
 using UI.Shared.Filters;
 
 namespace UI.Features.Wantlist.Components;
@@ -25,4 +27,15 @@ internal static class WantlistStatusView
 		var shownRemoved = unfiltered || filter.HasStatus(Removed) ? removed : [];
 		return shownRemoved.Count == 0 ? shownActive : [.. shownActive.Concat(shownRemoved)];
 	}
+
+	internal static IReadOnlyList<WantlistItem> WithPendingRemovals(WantlistSnapshot wantlist, IEnumerable<WantlistOutboxEntry> outbox) =>
+		[
+			.. wantlist
+				.Items.Concat(
+					outbox
+						.Where(entry => entry.Action == WantlistOperationAction.Remove)
+						.Select(entry => new WantlistItem(entry.MediaId, entry.AddedAt, new ManualOrigin(ManualSource.Unknown)))
+				)
+				.OrderByDescending(item => item.AddedAt),
+		];
 }
