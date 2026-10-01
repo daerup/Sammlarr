@@ -10,6 +10,7 @@ internal class SyncModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddSingleton<WantlistSyncGate>();
+		services.AddScoped<ActiveSink>();
 		services.AddTracedScoped<IWantlistSyncPlanner, WantlistSyncPlanner>();
 		services.AddTracedScoped<IWantlistSyncEngine, WantlistSyncEngine>();
 	}
