@@ -55,7 +55,7 @@ else
                   OnOpenChanged="SetOpenAsync"
                   Title="@Heading(_run)"
                   Subtitle="@FeedRunView.Summary(_run)"
-                  Entries="_entries"
+                  Items="_items"
                   Chips="@FeedRunView.Chips(_run.Counts)"
                   OnSelect="ShowDetailsAsync"
                   EmptyMessage="Nothing was added or removed."
@@ -89,7 +89,7 @@ else
     private FeedRun? _run;
     private int _runCount;
     private bool _open;
-    private IReadOnlyList<ChangeEntry> _entries = [];
+    private IReadOnlyList<ChangeItem> _items = [];
     private MediaLookup? _selected;
 
     private Task ShowDetailsAsync(MediaLookup media)
@@ -122,7 +122,7 @@ else
             }
         }
 
-        _entries = FeedRunView.Entries(_run, described);
+        _items = FeedRunView.Items(_run, described);
         await SetOpenAsync(true);
     }
 

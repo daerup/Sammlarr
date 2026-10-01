@@ -187,9 +187,9 @@
                                 </div>
                             }
 
-                            @if (_entries.Count > 0)
+                            @if (_items.Count > 0)
                             {
-                                <ChangeList Entries="_entries"
+                                <ChangeList Items="_items"
                                             Chips="@FeedRunView.Chips(run.Counts)"
                                             OnSelect="ShowDetailsAsync"
                                             Highlight="Highlight"
@@ -268,7 +268,7 @@
 
     private bool _revealSelected;
     private FeedRun? _selected;
-    private IReadOnlyList<ChangeEntry> _entries = [];
+    private IReadOnlyList<ChangeItem> _items = [];
     private MediaLookup? _sheet;
     private RunFilter _filter = RunFilter.All;
     private int _take = PageSize;
@@ -350,7 +350,7 @@
             }
         }
 
-        _entries = FeedRunView.Entries(run, described);
+        _items = FeedRunView.Items(run, described);
     }
 
     private Task ShowDetailsAsync(MediaLookup media)

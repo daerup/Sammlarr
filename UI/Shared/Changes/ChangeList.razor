@@ -52,16 +52,16 @@
                 <span>@GroupLabel(group.Key)</span>
                 <span class="change-group-count">@group.Count()</span>
             </div>
-            @foreach (var entry in group)
+            @foreach (var item in group)
             {
-                <ChangeRow @key="entry" Entry="entry" OnSelect="SelectAsync" Highlighted="@IsHighlighted(entry)"/>
+                <ChangeRow @key="item" Item="item" OnSelect="SelectAsync" Highlighted="@IsHighlighted(item)"/>
             }
         }
     </div>
 </div>
 
 @code {
-    [Parameter] [EditorRequired] public required IReadOnlyList<ChangeEntry> Entries { get; set; }
+    [Parameter] [EditorRequired] public required IReadOnlyList<ChangeItem> Items { get; set; }
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeChip> Chips { get; set; }
     [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
     [Parameter] public MediaId? Highlight { get; set; }
@@ -86,7 +86,7 @@
         _dismissed = false;
     }
 
-    private bool IsHighlighted(ChangeEntry entry) => !_dismissed && Highlight is { } wanted && entry.Id == wanted;
+    private bool IsHighlighted(ChangeItem item) => !_dismissed && Highlight is { } wanted && item.Id == wanted;
 
     private async Task SelectAsync(MediaLookup media)
     {
@@ -94,11 +94,11 @@
         await OnSelect.InvokeAsync(media);
     }
 
-    private IEnumerable<IGrouping<ChangeKind, ChangeEntry>> Groups() =>
-        Entries
-            .Where(entry => _active.Count == 0 || _active.Contains(entry.Kind))
-            .Where(entry => string.IsNullOrWhiteSpace(_search) || entry.Title.Contains(_search, StringComparison.OrdinalIgnoreCase))
-            .GroupBy(entry => entry.Kind)
+    private IEnumerable<IGrouping<ChangeKind, ChangeItem>> Groups() =>
+        Items
+            .Where(item => _active.Count == 0 || _active.Contains(item.Kind))
+            .Where(item => string.IsNullOrWhiteSpace(_search) || item.Title.Contains(_search, StringComparison.OrdinalIgnoreCase))
+            .GroupBy(item => item.Kind)
             .OrderBy(group => group.Key);
 
     private RenderFragment ChipFace(ChangeChip chip) =>

@@ -182,7 +182,7 @@
               Title="@($"Run \"{_pendingFeed?.Name}\" now?")"
               Subtitle="@(_pendingPlan is {} loaded ? FeedRunView.Pending(loaded) : null)"
               Loading="_isPreviewing"
-              Entries="_pendingEntries"
+              Items="_pendingItems"
               Chips="_pendingChips"
               OnSelect="ShowDetailsAsync"
               EmptyMessage="This run would change nothing."
@@ -294,7 +294,7 @@
     private bool _isPreviewing;
     private Feed? _pendingFeed;
     private IFeedPlan? _pendingPlan;
-    private IReadOnlyList<ChangeEntry> _pendingEntries = [];
+    private IReadOnlyList<ChangeItem> _pendingItems = [];
     private IReadOnlyList<ChangeChip> _pendingChips = [];
     private MediaLookup? _selected;
 
@@ -515,7 +515,7 @@
     private async Task LoadPreviewAsync(Feed feed)
     {
         _pendingPlan = null;
-        _pendingEntries = [];
+        _pendingItems = [];
         _pendingChips = [];
         _isPreviewing = true;
         StateHasChanged();
@@ -567,7 +567,7 @@
         }
 
         _pendingPlan = summary;
-        _pendingEntries = FeedRunView.Entries(summary, media);
+        _pendingItems = FeedRunView.Items(summary, media);
         _pendingChips = FeedRunView.Chips(FeedRunCounts.From(summary));
     }
 

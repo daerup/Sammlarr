@@ -71,7 +71,7 @@
                   Title="Review changes before syncing"
                   Subtitle="@Subtitle"
                   Loading="_isLoadingDryRun"
-                  Entries="_entries"
+                  Items="_items"
                   Chips="_chips"
                   OnSelect="ShowDetailsAsync"
                   RemovedLabel="Removing"
@@ -129,7 +129,7 @@
     private readonly CancellationTokenSource _cts = new();
     private WantlistSyncSummary? _dryRun;
     private string? _dryRunError;
-    private IReadOnlyList<ChangeEntry> _entries = [];
+    private IReadOnlyList<ChangeItem> _items = [];
     private IReadOnlyList<ChangeChip> _chips = [];
     private bool _isSyncing;
     private bool _isRunning;
@@ -231,7 +231,7 @@
         _isLoadingDryRun = true;
         _dryRun = null;
         _dryRunError = null;
-        _entries = [];
+        _items = [];
         _chips = [];
         StateHasChanged();
 
@@ -266,7 +266,7 @@
                 _dryRun = changes;
                 _dryRunError = null;
                 var metadata = await DryRunMetadataLoader.LoadAsync(Media, changes, cancellationToken);
-                _entries = WantlistSyncView.Entries(changes, metadata);
+                _items = WantlistSyncView.Items(changes, metadata);
                 _chips = WantlistSyncView.Chips(changes);
                 break;
             case WantlistSyncSinkUnreachable failed:

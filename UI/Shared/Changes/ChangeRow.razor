@@ -2,10 +2,10 @@
 @using UI.Shared.Media
 
 <div @ref="_root"
-     class="change-row @(Entry.Kind is ChangeKind.Removed ? "is-leaving" : null) @(Highlighted ? "is-highlight" : null)"
+     class="change-row @(Item.Kind is ChangeKind.Removed ? "is-leaving" : null) @(Highlighted ? "is-highlight" : null)"
      tabindex="@(Highlighted ? "-1" : null)"
      @onclick="HandleClickAsync">
-    @if (Entry.Media is { } media && !string.IsNullOrWhiteSpace(media.PosterUrl))
+    @if (Item.Media is { } media && !string.IsNullOrWhiteSpace(media.PosterUrl))
     {
         <img class="change-poster" src="@media.PosterUrl" alt=""/>
     }
@@ -16,13 +16,13 @@
         </span>
     }
     <span class="change-text">
-        <span class="change-title">@Entry.Title</span>
-        @if (!string.IsNullOrWhiteSpace(Entry.Subtitle))
+        <span class="change-title">@Item.Title</span>
+        @if (!string.IsNullOrWhiteSpace(Item.Subtitle))
         {
-            <span class="change-subtitle">@Entry.Subtitle</span>
+            <span class="change-subtitle">@Item.Subtitle</span>
         }
     </span>
-    @if (Entry.ContextIcon is { } icon)
+    @if (Item.ContextIcon is { } icon)
     {
         <BbTooltipProvider>
             <BbTooltip DelayDuration="200">
@@ -31,14 +31,14 @@
                         <LucideIcon Name="@icon" Size="14"/>
                     </span>
                 </BbTooltipTrigger>
-                <BbTooltipContent>@Entry.ContextTooltip</BbTooltipContent>
+                <BbTooltipContent>@Item.ContextTooltip</BbTooltipContent>
             </BbTooltip>
         </BbTooltipProvider>
     }
 </div>
 
 @code {
-    [Parameter] [EditorRequired] public required ChangeEntry Entry { get; set; }
+    [Parameter] [EditorRequired] public required ChangeItem Item { get; set; }
     [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
     [Parameter] public bool Highlighted { get; set; }
 
@@ -56,5 +56,5 @@
         await _root.FocusAsync();
     }
 
-    private Task HandleClickAsync() => Entry.Media is { } media ? OnSelect.InvokeAsync(media) : Task.CompletedTask;
+    private Task HandleClickAsync() => Item.Media is { } media ? OnSelect.InvokeAsync(media) : Task.CompletedTask;
 }

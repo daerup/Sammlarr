@@ -35,9 +35,9 @@
                 <span>Loading…</span>
             </div>
         }
-        else if (Entries.Count > 0)
+        else if (Items.Count > 0)
         {
-            <ChangeList Entries="Entries"
+            <ChangeList Items="Items"
                         Chips="Chips"
                         OnSelect="OnSelect"
                         RemovedLabel="@RemovedLabel"
@@ -77,7 +77,7 @@
 
     [Parameter] public bool Loading { get; set; }
 
-    [Parameter] public IReadOnlyList<ChangeEntry> Entries { get; set; } = [];
+    [Parameter] public IReadOnlyList<ChangeItem> Items { get; set; } = [];
     [Parameter] public IReadOnlyList<ChangeChip> Chips { get; set; } = [];
     [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
 

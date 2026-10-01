@@ -3,7 +3,7 @@
 
 <DemoCard Title="Change list" Where="Run dialog, sync dialog" Span="2"
           Note="ChangeList with an added, a removed and an unmatched title under the run's count chips, and the ChangeDialog that frames it.">
-    <ChangeList Entries="Entries" Chips="Chips"/>
+    <ChangeList Items="Items" Chips="Chips"/>
     <div>
         <BbButton Variant="ButtonVariant.Outline" Size="ButtonSize.Small" OnClick="() => _open = true">
             <LucideIcon Name="history" Size="14" Class="mr-1.5"/>
@@ -14,7 +14,7 @@
                   OnOpenChanged="v => _open = v"
                   Title="@DemoFeeds.MirrorFeed.Name"
                   Subtitle="scheduled · 48 fetched · took 14 s"
-                  Entries="Entries"
+                  Items="Items"
                   Chips="Chips"
                   Note="30 runs"
                   NoteHref="/feeds">
@@ -25,7 +25,7 @@
 </DemoCard>
 
 @code {
-    private static readonly IReadOnlyList<ChangeEntry> Entries =
+    private static readonly IReadOnlyList<ChangeItem> Items =
     [
         new() { Title = "Project Hail Mary", Id = DemoMedia.Movie.Id, Media = DemoMedia.Movie, Kind = ChangeKind.Added, Subtitle = "2026 · Movie" },
         new()

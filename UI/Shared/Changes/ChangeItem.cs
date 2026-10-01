@@ -18,7 +18,7 @@ public enum ChipTone
 	Unmatched,
 }
 
-public sealed record ChangeEntry
+public sealed record ChangeItem
 {
 	public required string Title { get; init; }
 	public MediaId? Id { get; init; }
