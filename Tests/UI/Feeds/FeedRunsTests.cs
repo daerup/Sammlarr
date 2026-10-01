@@ -63,7 +63,7 @@ public class FeedRunsTests : BunitContext
 	public async Task Render_WhileTheFeedIsStillLoading_ShowsASkeleton()
 	{
 		var feeds = RegisterServices(Runs[0]);
-		feeds.GetFeedByIdAsync(Any(), Any()).ReturnsAsync(new TaskCompletionSource<Domain.Feed.Feed?>().Task);
+		feeds.GetAsync(Any()).ReturnsAsync(new TaskCompletionSource<FeedSnapshot>().Task);
 
 		var cut = Render<FeedRuns>(parameters => parameters.Add(page => page.FeedIdParam, UrlGuid.Encode(Feed.Value)));
 
@@ -77,30 +77,32 @@ public class FeedRunsTests : BunitContext
 
 		var feeds = IFeedService.Mock();
 		feeds
-			.GetFeedByIdAsync(Any(), Any())
+			.GetAsync(Any())
 			.Returns(
-				new Domain.Feed.Feed
-				{
-					Name = "Comedy",
-					Id = Feed,
-					Enabled = true,
-					Provider = FeedProvider.Mdblist,
-					Strategy = new FeedStrategy(new Append()),
-					Identifier = "hdlists/comedy",
-					CreatedAt = Runs[^1].StartedAt,
-					Schedule = new FeedRunTrigger(new Manual()),
-				}
-			);
-		feeds
-			.GetHistoryAsync(Any(), Any())
-			.Returns(
-				new FeedRunHistory
-				{
-					TotalRuns = Runs.Count,
-					FirstRunAt = Runs[^1].StartedAt,
-					TotalAdded = 0,
-					TotalRemoved = 0,
-				}
+				new FeedSnapshot([
+					new FeedOverview(
+						new Domain.Feed.Feed
+						{
+							Name = "Comedy",
+							Id = Feed,
+							Enabled = true,
+							Provider = FeedProvider.Mdblist,
+							Strategy = new FeedStrategy(new Append()),
+							Identifier = "hdlists/comedy",
+							CreatedAt = Runs[^1].StartedAt,
+							Schedule = new FeedRunTrigger(new Manual()),
+						},
+						Some.Of(Runs[0]),
+						new FeedRunHistory
+						{
+							TotalRuns = Runs.Count,
+							FirstRunAt = Runs[^1].StartedAt,
+							TotalAdded = 0,
+							TotalRemoved = 0,
+						},
+						0
+					),
+				])
 			);
 		feeds.GetRunsAsync(Any(), Any(), Any()).Returns((_, take, _) => [.. Runs.Take(take)]);
 		feeds.GetRunAsync(Any(), Any()).Returns(Some.Of(linked));
@@ -111,9 +113,7 @@ public class FeedRunsTests : BunitContext
 		media.GetDetailsAsync(Any(), Any()).Returns(AsyncEnumerable.Empty<Result<IdentifiedMedia>>());
 		Services.AddSingleton(media.Object);
 
-		var wantlist = IWantlistService.Mock();
-		wantlist.GetOwnedCountsAsync(Any()).Returns(new Dictionary<FeedId, int>());
-		Services.AddSingleton(wantlist.Object);
+		Services.AddSingleton(IWantlistService.Mock().Object);
 
 		Services.AddSingleton(IBlocklistService.Mock().Object);
 		Services.AddSingleton(IProviderConfigService.Mock().Object);

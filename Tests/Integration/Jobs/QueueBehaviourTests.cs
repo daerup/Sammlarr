@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shared.Options;
+using TestInfrastructure;
 
 namespace Integration.Tests.Jobs;
 
@@ -314,7 +315,7 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 		var identifier = name.ToLowerInvariant();
 		host.MdblistFeedEmpty(identifier);
 		return await host.Resolve<IFeedService>()
-			.CreateFeedAsync(
+			.CreateAsync(
 				new FeedCreateData
 				{
 					Name = name,
@@ -337,8 +338,8 @@ public class QueueBehaviourTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task<PendingJob> CronFiresAsync(FeedId feed)
 	{
-		var scheduled = await host.Resolve<IFeedService>().GetFeedByIdAsync(feed);
-		return await EnqueueAsync(new RunFeed(feed, scheduled!.Schedule));
+		var scheduled = (await Assert.That(await host.Resolve<IFeedRepository>().FindAsync(feed)).IsSome())!;
+		return await EnqueueAsync(new RunFeed(feed, scheduled.Schedule));
 	}
 
 	private async Task ClockReachesAsync(DateTimeOffset at)

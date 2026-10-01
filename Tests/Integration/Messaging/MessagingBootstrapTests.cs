@@ -73,7 +73,7 @@ public class MessagingBootstrapTests
 		services.AddSingleton(userScope.Object);
 		services.AddSingleton(subscriptions.Object);
 		services.AddSingleton(IMediaRepository.Mock().Object);
-		services.AddSingleton(IFeedService.Mock().Object);
+		services.AddSingleton(IFeedRepository.Mock().Object);
 	}
 
 	private static async Task WithHostAsync(Func<IHost, Task> body, Action<IServiceCollection>? configureServices = null)

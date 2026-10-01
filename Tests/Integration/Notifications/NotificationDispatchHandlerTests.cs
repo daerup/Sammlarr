@@ -3,12 +3,14 @@ using Contracts.Identity;
 using Contracts.Media;
 using Contracts.Media.Metadata;
 using Contracts.Notifications;
+using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
 using Domain.Notifications;
 using Domain.Providers;
 using Messaging.Notifications;
 using Shared.Extensions;
+using TestInfrastructure;
 
 namespace Integration.Tests.Notifications;
 
@@ -226,6 +228,29 @@ public class NotificationDispatchHandlerTests
 		await Assert.That(context.Summary).IsEqualTo("Pulled 0, pushed 0.");
 	}
 
+	[Test]
+	public async Task Handle_WhenAFeedRunCompletes_NamesTheFeedInTheContext()
+	{
+		var feed = TestFeeds.Feed(Guid.NewGuid(), "Comedy");
+		var subscriptions = SubscriptionsFor(
+			NotificationEventType.FeedRunCompleted,
+			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.FeedRunCompleted], NotificationTemplate.None)
+		);
+
+		var messages = await NotificationDispatchHandler.Handle(
+			new FeedRunCompletedNotification(User, DateTimeOffset.UtcNow, feed.Id, 2, 1),
+			Scope().Object,
+			subscriptions.Object,
+			Media().Object,
+			Finding(Some.Of(feed)).Object,
+			CancellationToken.None
+		);
+
+		var data = messages.OfType<DeliverNotification>().Single().Context.Data;
+		await Assert.That(data.Feed!.Name).IsEqualTo("Comedy");
+		await Assert.That(data.Added).IsEqualTo(2);
+	}
+
 	private static Mock<INotificationSubscriptionRepository> SubscriptionsFor(NotificationEventType eventType, params NotificationSubscription[] subscriptions)
 	{
 		var repository = INotificationSubscriptionRepository.Mock();
@@ -240,10 +265,12 @@ public class NotificationDispatchHandlerTests
 		return repository;
 	}
 
-	private static Mock<IFeedService> Feed()
+	private static Mock<IFeedRepository> Feed() => Finding(new None());
+
+	private static Mock<IFeedRepository> Finding(Optional<Domain.Feed.Feed> feed)
 	{
-		var repository = IFeedService.Mock();
-		repository.GetFeedByIdAsync(Any(), Any()).Returns((Domain.Feed.Feed?)null);
+		var repository = IFeedRepository.Mock();
+		repository.FindAsync(Any<FeedId>(), Any()).Returns(feed);
 		return repository;
 	}
 

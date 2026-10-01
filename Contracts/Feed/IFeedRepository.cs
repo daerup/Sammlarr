@@ -1,23 +1,20 @@
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
-using Domain.Providers;
 
 namespace Contracts.Feed;
 
 public interface IFeedRepository
 {
-	Task<IReadOnlyList<Domain.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<Domain.Feed.Feed>> GetAllAsync(CancellationToken cancellationToken = default);
 
-	Task<Domain.Feed.Feed?> GetFeedByIdAsync(FeedId id, CancellationToken cancellationToken = default);
+	Task<Optional<Domain.Feed.Feed>> FindAsync(FeedId id, CancellationToken cancellationToken = default);
 
-	Task<FeedId> CreateFeedAsync(FeedCreateData createData, CancellationToken cancellationToken = default);
+	Task<FeedId> CreateAsync(FeedCreateData data, CancellationToken cancellationToken = default);
 
-	Task UpdateFeedAsync(FeedId id, FeedUpdateData updateData, CancellationToken cancellationToken = default);
+	Task UpdateAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken = default);
 
-	Task DeleteFeedAsync(FeedId id, CancellationToken cancellationToken = default);
-
-	Task<IReadOnlyList<FeedId>> DisableFeedsAsync(IReadOnlyCollection<FeedProvider> providers, CancellationToken cancellationToken = default);
+	Task DeleteAsync(FeedId id, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
 
@@ -38,9 +35,7 @@ public interface IFeedRepository
 
 	Task<Optional<FeedRun>> GetRunAsync(Guid runId, CancellationToken cancellationToken = default);
 
-	Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default);
-
-	Task<IReadOnlyDictionary<FeedId, FeedOverview>> GetOverviewsAsync(CancellationToken cancellationToken = default);
+	Task<IReadOnlyDictionary<FeedId, FeedRunTotals>> GetRunTotalsAsync(CancellationToken cancellationToken = default);
 
 	Task StartRunAsync(FeedRun run, CancellationToken cancellationToken = default);
 

@@ -173,14 +173,14 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetOverviewsAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
+	public async Task GetRunTotalsAsync_SeparatesFeedsWithHistoryFromOnesThatNeverRan()
 	{
 		var ran = await SeedFeedAsync();
 		var neverRan = await SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(ran, kept: [Held], 1));
 
-		var everRan = await _testee.GetOverviewsAsync();
+		var everRan = await _testee.GetRunTotalsAsync();
 
 		await Assert.That(everRan).ContainsKey(ran);
 		await Assert.That(everRan).DoesNotContainKey(neverRan);
@@ -191,30 +191,19 @@ public class FeedRunLogTests(SammlarrTestHost fixture) : IAsyncDisposable
 	private static DateTimeOffset Day(int day) => new(2026, 03, day, 4, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task GetHistoryAsync_ForAFeedWithRuns_TotalsTheCountsAndDatesTheFirstRun()
+	public async Task GetRunTotalsAsync_ForAFeedWithRuns_TotalsTheCountsAndDatesTheFirstRun()
 	{
 		var feedId = await SeedFeedAsync();
 
 		await _testee.StartRunAsync(Run(feedId, kept: [Held], 1) with { Counts = Counts(added: 3, removed: 1) });
 		await _testee.StartRunAsync(Run(feedId, kept: [Held], 2) with { Counts = Counts(added: 2, removed: 0) });
 
-		var history = await _testee.GetHistoryAsync(feedId);
+		var history = (await _testee.GetRunTotalsAsync())[feedId].History;
 
 		await Assert.That(history.TotalRuns).IsEqualTo(2);
 		await Assert.That(history.TotalAdded).IsEqualTo(5);
 		await Assert.That(history.TotalRemoved).IsEqualTo(1);
 		await Assert.That(history.FirstRunAt).IsEqualTo(Day(1));
-	}
-
-	[Test]
-	public async Task GetHistoryAsync_ForAFeedThatNeverRan_ReportsNothingRatherThanThrowing()
-	{
-		var feedId = await SeedFeedAsync();
-
-		var history = await _testee.GetHistoryAsync(feedId);
-
-		await Assert.That(history.TotalRuns).IsEqualTo(0);
-		await Assert.That(history.FirstRunAt).IsNull();
 	}
 
 	private static FeedRunCounts Counts(int added, int removed) =>

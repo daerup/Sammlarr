@@ -35,8 +35,14 @@ public enum FeedSort
 
 public sealed record ProviderCount(FeedProvider Provider, int Count);
 
-public sealed record FeedRow(Feed Feed, FeedOverview? Overview, int Owned, JobState? Job, DateTimeOffset? NextRun)
+public sealed record FeedRow(FeedOverview Overview, JobState? Job, DateTimeOffset? NextRun)
 {
+	public Feed Feed => Overview.Feed;
+
+	public int OnWantlist => Overview.OnWantlist;
+
+	public DateTimeOffset? LastRunAt => Overview.LastRun is Some<FeedRun>(var run) ? run.StartedAt : null;
+
 	public bool IsBusy => Job is JobState.Waiting or JobState.Queued or JobState.Running;
 
 	public bool Is(FeedStatus status) =>
@@ -61,20 +67,11 @@ public sealed record FeedRow(Feed Feed, FeedOverview? Overview, int Owned, JobSt
 			FeedStrategyKind.Mirror => Feed.Strategy is Mirror,
 		};
 
-	public static FeedRow Of(
-		Feed feed,
-		IReadOnlyDictionary<FeedId, FeedOverview> overviews,
-		IReadOnlyDictionary<FeedId, int> owned,
-		IReadOnlyDictionary<FeedId, JobState> jobs,
-		DateTimeOffset now,
-		TimeZoneInfo zone
-	) =>
+	public static FeedRow Of(FeedOverview overview, IReadOnlyDictionary<FeedId, JobState> jobs, DateTimeOffset now, TimeZoneInfo zone) =>
 		new(
-			feed,
-			overviews.GetValueOrDefault(feed.Id),
-			owned.GetValueOrDefault(feed.Id),
-			jobs.TryGetValue(feed.Id, out var job) ? job : null,
-			feed.Enabled && feed.Schedule is Scheduled scheduled ? scheduled.NextRun(now, zone) : null
+			overview,
+			jobs.TryGetValue(overview.Feed.Id, out var job) ? job : null,
+			overview.Feed.Enabled && overview.Feed.Schedule is Scheduled scheduled ? scheduled.NextRun(now, zone) : null
 		);
 }
 
@@ -118,9 +115,9 @@ public sealed record FeedFilter
 		Sort switch
 		{
 			FeedSort.Name => rows.OrderBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
-			FeedSort.RecentlyRun => rows.OrderBy(row => row.Overview is null).ThenByDescending(row => row.Overview?.LastRun.StartedAt),
+			FeedSort.RecentlyRun => rows.OrderBy(row => row.LastRunAt is null).ThenByDescending(row => row.LastRunAt),
 			FeedSort.NextRun => rows.OrderBy(row => row.NextRun is null).ThenBy(row => row.NextRun),
-			FeedSort.MostOnWantlist => rows.OrderByDescending(row => row.Owned).ThenBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
+			FeedSort.MostOnWantlist => rows.OrderByDescending(row => row.OnWantlist).ThenBy(row => row.Feed.Name, StringComparer.CurrentCultureIgnoreCase),
 			FeedSort.RecentlyAdded => rows.OrderByDescending(row => row.Feed.CreatedAt),
 		};
 }

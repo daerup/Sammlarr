@@ -8,13 +8,12 @@ internal static class LibraryView
 {
 	private const string Elsewhere = "Added by hand or from Plex";
 
-	internal static IReadOnlyList<SourceShare> Sources(IReadOnlyDictionary<FeedId, int> ownedCounts, IReadOnlyDictionary<FeedId, string> feedNames, int total)
+	internal static IReadOnlyList<SourceShare> Sources(IReadOnlyList<FeedOverview> feeds, int total)
 	{
-		var named = ownedCounts
-			.Where(owned => owned.Value > 0)
-			.Select(owned => (Name: FeedLabel.Of(owned.Key, feedNames), owned.Value))
-			.GroupBy(entry => entry.Name)
-			.Select(group => (Name: group.Key, Count: group.Sum(entry => entry.Value)))
+		var named = feeds
+			.Where(overview => overview.OnWantlist > 0)
+			.GroupBy(overview => overview.Feed.Name)
+			.Select(group => (Name: group.Key, Count: group.Sum(overview => overview.OnWantlist)))
 			.OrderByDescending(entry => entry.Count)
 			.ToList();
 

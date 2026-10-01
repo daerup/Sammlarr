@@ -6,7 +6,6 @@
 @using Contracts.Jobs
 @using Contracts.Media
 @using Contracts.Settings
-@using Contracts.Wantlist
 @using Domain.Announcing
 @using Domain.Feed.Run
 @using Domain.Identity
@@ -26,7 +25,6 @@
 @inject ICurrentUser CurrentUser
 @inject Notifier Notifier
 @inject IMediaService Media
-@inject IWantlistService Wantlist
 @inject IEventPublisher Events
 @inject IJobQueueView JobQueueView
 
@@ -277,9 +275,7 @@
     private UserId? _viewer;
     private DateTimeOffset _now = DateTimeOffset.Now;
 
-    private IReadOnlyList<Feed> _feeds = [];
-    private IReadOnlyDictionary<FeedId, int> _owned = new Dictionary<FeedId, int>();
-    private IReadOnlyDictionary<FeedId, FeedOverview> _overviews = new Dictionary<FeedId, FeedOverview>();
+    private IReadOnlyList<FeedOverview> _feeds = [];
     private IReadOnlyList<FeedRow> _rows = [];
     private IReadOnlyList<FeedRow> _visible = [];
     private IReadOnlyList<RunCandidate> _candidates = [];
@@ -327,18 +323,16 @@
     {
         _now = DateTimeOffset.Now;
         await LoadQueueAsync();
-        _feeds = await FeedService.GetFeedsAsync(_cancellation.Token);
-        _owned = await Wantlist.GetOwnedCountsAsync(_cancellation.Token);
-        _overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
+        _feeds = (await FeedService.GetAsync(_cancellation.Token)).Feeds;
         _lastWeek = FeedPulse.Moved(await FeedService.GetRecentRunsAsync(_now - LastWeek, RunCap, _cancellation.Token));
         Rebuild();
     }
 
     private void Rebuild()
     {
-        _rows = [.. _feeds.Select(feed => FeedRow.Of(feed, _overviews, _owned, _feedJobs, _now, TimeZoneInfo.Local))];
+        _rows = [.. _feeds.Select(overview => FeedRow.Of(overview, _feedJobs, _now, TimeZoneInfo.Local))];
         _visible = _filter.Apply(_rows);
-        _candidates = RunPlan.Candidates(_feeds, _overviews, _now, TimeZoneInfo.Local);
+        _candidates = RunPlan.Candidates(_feeds, _now, TimeZoneInfo.Local);
     }
 
     private async Task LoadQueueAsync()
@@ -394,7 +388,7 @@
     private void OpenBulkRun()
     {
         _now = DateTimeOffset.Now;
-        _candidates = RunPlan.Candidates(_feeds, _overviews, _now, TimeZoneInfo.Local);
+        _candidates = RunPlan.Candidates(_feeds, _now, TimeZoneInfo.Local);
         _isRunOpen = true;
     }
 
@@ -437,7 +431,7 @@
         _confirm = null;
         foreach (var row in _deleting)
         {
-            await FeedService.DeleteFeedAsync(row.Feed.Id, _cancellation.Token);
+            await FeedService.DeleteAsync(row.Feed.Id, _cancellation.Token);
         }
 
         _deleting = [];

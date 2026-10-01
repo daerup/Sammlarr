@@ -182,22 +182,23 @@ public class LastRunCellTests : BunitContext
 			builder.OpenComponent<BbPortalHost>(0);
 			builder.CloseComponent();
 			builder.OpenComponent<LastRunCell>(1);
-			builder.AddComponentParameter(2, nameof(LastRunCell.FeedId), Feed);
 			builder.AddComponentParameter(
-				3,
+				2,
 				nameof(LastRunCell.Overview),
 				new FeedOverview(
-					LastRun,
+					TestFeeds.Feed(Feed.Value),
+					Some.Of(LastRun),
 					new FeedRunHistory
 					{
 						TotalRuns = 1,
 						FirstRunAt = LastRun.StartedAt,
 						TotalAdded = 1,
 						TotalRemoved = 0,
-					}
+					},
+					0
 				)
 			);
-			builder.AddComponentParameter(4, nameof(LastRunCell.DialogOpenChanged), EventCallback.Factory.Create<bool>(this, Opened.Add));
+			builder.AddComponentParameter(3, nameof(LastRunCell.DialogOpenChanged), EventCallback.Factory.Create<bool>(this, Opened.Add));
 			builder.CloseComponent();
 		}
 	}

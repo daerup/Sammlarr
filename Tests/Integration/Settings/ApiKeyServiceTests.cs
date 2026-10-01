@@ -4,6 +4,7 @@ using Domain.Feed;
 using Domain.Identity;
 using Domain.Providers;
 using Harness;
+using Integration.Tests.Feeds;
 using TestInfrastructure;
 
 namespace Integration.Tests.Settings;
@@ -55,36 +56,36 @@ public class ApiKeyServiceTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task RemoveApiKeyAsync_DisablesAndUnschedulesEveryFeedThatNeedsTheKey()
 	{
-		var trending = await Feeds.CreateFeedAsync(Feed("Trending movies", FeedProvider.Tmdb));
+		var trending = await Feeds.CreateAsync(Feed("Trending movies", FeedProvider.Tmdb));
 
 		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That((await Feeds.GetFeedByIdAsync(trending))!.Enabled).IsFalse();
+		await Assert.That((await host.FeedAsync(trending)).Enabled).IsFalse();
 		await Assert.That(Scheduler.Unscheduled).Contains(trending);
 	}
 
 	[Test]
 	public async Task RemoveApiKeyAsync_LeavesFeedsOnOtherKeysRunning()
 	{
-		var documentaries = await Feeds.CreateFeedAsync(Feed("Documentaries", FeedProvider.Mdblist));
+		var documentaries = await Feeds.CreateAsync(Feed("Documentaries", FeedProvider.Mdblist));
 
 		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 
-		await Assert.That((await Feeds.GetFeedByIdAsync(documentaries))!.Enabled).IsTrue();
+		await Assert.That((await host.FeedAsync(documentaries)).Enabled).IsTrue();
 		await Assert.That(Scheduler.Unscheduled).DoesNotContain(documentaries);
 	}
 
 	[Test]
 	public async Task RemoveApiKeyAsync_WhenAnotherUserRemovesTheirKey_LeavesYourFeedsRunning()
 	{
-		var yours = await Feeds.CreateFeedAsync(Feed("Trending movies", FeedProvider.Tmdb));
+		var yours = await Feeds.CreateAsync(Feed("Trending movies", FeedProvider.Tmdb));
 		var owner = host.CurrentUser.Id;
 		host.CurrentUser.Id = UserId.From(SammlarrTestHost.SeededMember.Id);
 
 		await Testee.RemoveApiKeyAsync(ApiKeyProvider.Tmdb);
 
 		host.CurrentUser.Id = owner;
-		await Assert.That((await Feeds.GetFeedByIdAsync(yours))!.Enabled).IsTrue();
+		await Assert.That((await host.FeedAsync(yours)).Enabled).IsTrue();
 		await Assert.That(Scheduler.Unscheduled).DoesNotContain(yours);
 	}
 

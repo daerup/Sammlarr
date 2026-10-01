@@ -38,15 +38,10 @@ internal static class RunPlan
 {
 	private static readonly TimeSpan Soon = TimeSpan.FromHours(24);
 
-	internal static IReadOnlyList<RunCandidate> Candidates(
-		IReadOnlyList<Feed> feeds,
-		IReadOnlyDictionary<FeedId, FeedOverview> overviews,
-		DateTimeOffset from,
-		TimeZoneInfo zone
-	) =>
+	internal static IReadOnlyList<RunCandidate> Candidates(IReadOnlyList<FeedOverview> feeds, DateTimeOffset from, TimeZoneInfo zone) =>
 		[
 			.. feeds
-				.Select(feed => Candidate(feed, overviews.GetValueOrDefault(feed.Id), from, zone))
+				.Select(overview => Candidate(overview, from, zone))
 				.OrderBy(candidate => candidate.Enabled ? 0 : 1)
 				.ThenBy(candidate => candidate.Group)
 				.ThenBy(candidate => candidate.NextRun ?? DateTimeOffset.MaxValue)
@@ -81,10 +76,11 @@ internal static class RunPlan
 			RunFlag.NotDue => "Not due for a while",
 		};
 
-	private static RunCandidate Candidate(Feed feed, FeedOverview? overview, DateTimeOffset from, TimeZoneInfo zone)
+	private static RunCandidate Candidate(FeedOverview overview, DateTimeOffset from, TimeZoneInfo zone)
 	{
+		var feed = overview.Feed;
 		var next = feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : null;
-		var stalled = overview is not null && overview.LastRun.Conclusiveness is not Conclusiveness.Conclusive;
+		var stalled = overview.LastRun is Some<FeedRun>({ Conclusiveness: not Conclusiveness.Conclusive });
 
 		var group =
 			feed.Schedule is Manual ? RunGroup.ManualOnly
@@ -95,9 +91,9 @@ internal static class RunPlan
 			feed.Id,
 			feed.Name,
 			ScheduleText.Describe(feed.Schedule),
-			Outcome(overview),
+			Outcome(overview.LastRun),
 			!feed.Enabled ? RunFlag.Disabled
-				: overview is { LastRun.Failed: true } ? RunFlag.Failed
+				: overview.LastRun is Some<FeedRun>({ Failed: true }) ? RunFlag.Failed
 				: stalled ? RunFlag.Inconclusive
 				: group is RunGroup.WorthRunning && next is not null ? RunFlag.NotDue
 				: null,
@@ -107,6 +103,6 @@ internal static class RunPlan
 		);
 	}
 
-	private static LastRun Outcome(FeedOverview? overview) =>
-		overview is null ? new LastRun(false, 0, 0) : new LastRun(true, overview.LastRun.Counts.Added, overview.LastRun.Counts.Removed);
+	private static LastRun Outcome(Optional<FeedRun> last) =>
+		last is Some<FeedRun>(var run) ? new LastRun(true, run.Counts.Added, run.Counts.Removed) : new LastRun(false, 0, 0);
 }

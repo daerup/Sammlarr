@@ -181,9 +181,7 @@
         await Task.Yield();
 
         var sourceId = FeedId.From(UrlGuid.Decode(EditFeedId ?? CloneFeedId));
-        var feed = await FeedService.GetFeedByIdAsync(sourceId);
-
-        if (feed is null)
+        if ((await FeedService.GetAsync()).Find(sourceId) is not Some<FeedOverview>({ Feed: var feed }))
         {
             NavigationManager.NavigateTo("/feeds");
             return;
@@ -337,11 +335,11 @@
     {
         if (_savedFeedId is { } id)
         {
-            await FeedService.UpdateFeedAsync(id, BuildUpdateData(), CancellationToken.None);
+            await FeedService.UpdateAsync(id, BuildUpdateData(), CancellationToken.None);
         }
         else
         {
-            _savedFeedId = await FeedService.CreateFeedAsync(BuildCreateData(), CancellationToken.None);
+            _savedFeedId = await FeedService.CreateAsync(BuildCreateData(), CancellationToken.None);
         }
 
         _storedHash = _config.GetSaveHash();

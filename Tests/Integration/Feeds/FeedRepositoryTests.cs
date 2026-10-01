@@ -22,13 +22,13 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public void Setup() => _testee = new FeedRepository(fixture.ContextFactory);
 
 	[Test]
-	public async Task GetFeedsAsync_WhenFeedsExist_ReturnsNewestFirst()
+	public async Task GetAllAsync_WhenFeedsExist_ReturnsNewestFirst()
 	{
 		var oldestId = await SeedFeedAsync("Oldest", "oldest", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
 		var middleId = await SeedFeedAsync("Middle", "middle", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
 		var newestId = await SeedFeedAsync("Newest", "newest", new DateTimeOffset(2026, 03, 01, 8, 0, 0, TimeSpan.Zero));
 
-		var feeds = await _testee.GetFeedsAsync();
+		var feeds = await _testee.GetAllAsync();
 
 		await Assert.That(feeds).Count().IsEqualTo(3);
 		await Assert.That(feeds[0].Id).IsEqualTo(newestId);
@@ -37,33 +37,33 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedsAsync_WhenFeedExists_MapsCreatedAt()
+	public async Task GetAllAsync_WhenFeedExists_MapsCreatedAt()
 	{
 		var expectedCreatedAt = new DateTimeOffset(2026, 04, 01, 10, 30, 0, TimeSpan.Zero);
 		var id = await SeedFeedAsync("CreatedAt Check", "created-at-check", expectedCreatedAt);
 
-		var feed = (await _testee.GetFeedsAsync()).Single(l => l.Id == id);
+		var feed = (await _testee.GetAllAsync()).Single(l => l.Id == id);
 
 		await Assert.That(feed.CreatedAt).IsEqualTo(expectedCreatedAt);
 	}
 
 	[Test]
-	public async Task DeleteFeedAsync_WhenFeedExists_RemovesFeed()
+	public async Task DeleteAsync_WhenFeedExists_RemovesFeed()
 	{
 		var id = await SeedFeedAsync("To Delete", "to-delete", new DateTimeOffset(2026, 05, 01, 12, 0, 0, TimeSpan.Zero));
 
-		await _testee.DeleteFeedAsync(id);
+		await _testee.DeleteAsync(id);
 
 		var exists = await fixture.Context.Feeds.AnyAsync(l => l.Id == id.Value);
 		await Assert.That(exists).IsFalse();
 	}
 
 	[Test]
-	public async Task DeleteFeedAsync_WhenFeedDoesNotExist_DoesNotChangeData()
+	public async Task DeleteAsync_WhenFeedDoesNotExist_DoesNotChangeData()
 	{
 		var id = await SeedFeedAsync("Keep", "keep", new DateTimeOffset(2026, 06, 01, 12, 0, 0, TimeSpan.Zero));
 
-		await _testee.DeleteFeedAsync(FeedId.From(Guid.NewGuid()));
+		await _testee.DeleteAsync(FeedId.From(Guid.NewGuid()));
 
 		var feeds = await fixture.Context.Feeds.AsNoTracking().ToListAsync();
 		await Assert.That(feeds).Count().IsEqualTo(1);
@@ -71,7 +71,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task DeleteFeedAsync_OrphansAttachedWantlistEntries_PopulatesSnapshot()
+	public async Task DeleteAsync_OrphansAttachedWantlistEntries_PopulatesSnapshot()
 	{
 		var feedId = await SeedFeedAsync("My Feed", "my-feed", new DateTimeOffset(2026, 07, 01, 12, 0, 0, TimeSpan.Zero));
 		var mediaId = PlexId.From("plex-feed-1", MediaType.Movie);
@@ -88,7 +88,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		await _testee.DeleteFeedAsync(feedId);
+		await _testee.DeleteAsync(feedId);
 
 		var entry = await fixture.Context.Wantlist.AsNoTracking().SingleAsync();
 		await Assert.That(entry.Origin).IsEqualTo(WantlistItemOrigin.Orphaned);
@@ -97,7 +97,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task CreateFeedAsync_PersistsAllFields()
+	public async Task CreateAsync_PersistsAllFields()
 	{
 		var createData = new FeedCreateData
 		{
@@ -109,9 +109,9 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Schedule = new FeedRunTrigger(new Scheduled("0 0 9 * * *")),
 		};
 
-		await _testee.CreateFeedAsync(createData);
+		await _testee.CreateAsync(createData);
 
-		var feed = (await _testee.GetFeedsAsync()).Single();
+		var feed = (await _testee.GetAllAsync()).Single();
 		await Assert.That(feed.Name).IsEqualTo("Top 250");
 		await Assert.That(feed.Identifier).IsEqualTo("top-250");
 		await Assert.That(feed.Provider).IsEqualTo(FeedProvider.Mdblist);
@@ -121,13 +121,12 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedByIdAsync_WhenFeedExists_ReturnsProjectedFeed()
+	public async Task FindAsync_WhenFeedExists_ReturnsProjectedFeed()
 	{
 		var id = await SeedFeedAsync("Wantlist", "my-wantlist", new DateTimeOffset(2026, 01, 01, 8, 0, 0, TimeSpan.Zero));
 
-		var feed = await _testee.GetFeedByIdAsync(id);
+		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
 
-		await Assert.That(feed).IsNotNull();
 		await Assert.That(feed!.Name).IsEqualTo("Wantlist");
 		await Assert.That(feed.Identifier).IsEqualTo("my-wantlist");
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Append()));
@@ -135,15 +134,13 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedByIdAsync_WhenFeedDoesNotExist_ReturnsNull()
+	public async Task FindAsync_WhenFeedDoesNotExist_ReturnsNone()
 	{
-		var feed = await _testee.GetFeedByIdAsync(FeedId.From(Guid.NewGuid()));
-
-		await Assert.That(feed).IsNull();
+		await Assert.That(await _testee.FindAsync(FeedId.From(Guid.NewGuid()))).IsNone();
 	}
 
 	[Test]
-	public async Task UpdateFeedAsync_WhenFeedExists_ChangesAllFields()
+	public async Task UpdateAsync_WhenFeedExists_ChangesAllFields()
 	{
 		var id = await SeedFeedAsync("Old Name", "old-id", new DateTimeOffset(2026, 02, 01, 8, 0, 0, TimeSpan.Zero));
 		var updateData = new FeedUpdateData
@@ -156,9 +153,9 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Schedule = new FeedRunTrigger(new Manual()),
 		};
 
-		await _testee.UpdateFeedAsync(id, updateData);
+		await _testee.UpdateAsync(id, updateData);
 
-		var feed = await _testee.GetFeedByIdAsync(id);
+		var feed = await Assert.That(await _testee.FindAsync(id)).IsSome();
 		await Assert.That(feed!.Name).IsEqualTo("New Name");
 		await Assert.That(feed.Identifier).IsEqualTo("new-id");
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Mirror(5)));
@@ -167,7 +164,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task UpdateFeedAsync_WhenFeedDoesNotExist_Throws()
+	public async Task UpdateAsync_WhenFeedDoesNotExist_Throws()
 	{
 		var updateData = new FeedUpdateData
 		{
@@ -179,7 +176,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Schedule = new FeedRunTrigger(new Manual()),
 		};
 
-		await Assert.That(async () => await _testee.UpdateFeedAsync(FeedId.From(Guid.NewGuid()), updateData)).Throws<InvalidOperationException>();
+		await Assert.That(async () => await _testee.UpdateAsync(FeedId.From(Guid.NewGuid()), updateData)).Throws<InvalidOperationException>();
 	}
 
 	private async Task<FeedId> SeedFeedAsync(string name, string identifier, DateTimeOffset createdAt)

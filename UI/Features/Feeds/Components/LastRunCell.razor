@@ -60,7 +60,7 @@ else
                   OnSelect="ShowDetailsAsync"
                   EmptyMessage="Nothing was added or removed."
                   Note="@($"{_runCount} {(_runCount == 1 ? "run" : "runs")}")"
-                  NoteHref="@($"/feeds/{UrlGuid.Encode(FeedId.Value)}/runs")"
+                  NoteHref="@($"/feeds/{UrlGuid.Encode(Overview.Feed.Id.Value)}/runs")"
                   Band="@(FeedRunView.Problem(_run) is { } problem ? ProblemBand(_run, problem) : null)"
                   BandTone="@(_run.Failed ? ChangeBandTone.Bad : ChangeBandTone.Warn)">
         <Badges>
@@ -82,9 +82,7 @@ else
 }
 
 @code {
-    [Parameter] [EditorRequired] public required FeedId FeedId { get; set; }
-
-    [Parameter] public FeedOverview? Overview { get; set; }
+    [Parameter] [EditorRequired] public required FeedOverview Overview { get; set; }
 
     [Parameter] public EventCallback<bool> DialogOpenChanged { get; set; }
 
@@ -102,8 +100,8 @@ else
 
     protected override void OnParametersSet()
     {
-        _run = Overview?.LastRun;
-        _runCount = Overview?.History.TotalRuns ?? 0;
+        _run = Overview.LastRun is Some<FeedRun>(var run) ? run : null;
+        _runCount = Overview.History.TotalRuns;
     }
 
     private async Task OpenAsync()

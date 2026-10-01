@@ -71,11 +71,11 @@
     <div class="feed-card-stats">
         <div>
             <span class="feed-stat-label">Wantlist</span>
-            @if (Row.Owned > 0)
+            @if (Row.OnWantlist > 0)
             {
                 <span class="feed-card-control feed-stat-link">
                     <AppLink Href="@($"/wantlist?feed={UrlGuid.Encode(Feed.Id.Value)}")"
-                             Title="@($"Show the {Row.Owned} titles this feed put on your wantlist")">@Row.Owned</AppLink>
+                             Title="@($"Show the {Row.OnWantlist} titles this feed put on your wantlist")">@Row.OnWantlist</AppLink>
                 </span>
             }
             else
@@ -117,7 +117,7 @@
 
     <div class="feed-card-foot">
         <span class="feed-card-control">
-            <LastRunCell @key="(Feed.Id, RunVersion)" FeedId="Feed.Id" Overview="@Row.Overview"/>
+            <LastRunCell @key="(Feed.Id, RunVersion)" Overview="@Row.Overview"/>
         </span>
         <div class="feed-card-actions">
             <a class="feed-card-control feed-card-icon" href="@EditHref" aria-label="Edit" title="Edit">
@@ -154,7 +154,7 @@
 
     private Feed Feed => Row.Feed;
 
-    private FeedRunHistory History => Row.Overview?.History ?? FeedRunHistory.None;
+    private FeedRunHistory History => Row.Overview.History;
 
     private BrandingInfo Brand => Branding.GetBrandingInfo(Feed.Provider.AsMediaProvider());
 

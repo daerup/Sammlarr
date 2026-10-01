@@ -2,7 +2,6 @@
 @page "/feeds/{FeedIdParam}/runs/{RunIdParam}"
 @using Contracts.Feed
 @using Contracts.Media
-@using Contracts.Wantlist
 @using Domain.Feed
 @using Domain.Feed.Run
 @using Domain.Media
@@ -12,7 +11,6 @@
 @using UI.Shared.Media
 @inject IFeedService FeedService
 @inject IMediaService Media
-@inject IWantlistService Wantlist
 @inject NavigationManager Navigation
 @inject ScrollService ScrollService
 
@@ -50,12 +48,12 @@
                     <div class="runs-meta">
                         <LucideIcon Name="clapperboard" Size="13"/>
                         <FeedSourceLink Provider="feed.Provider" Identifier="@feed.Identifier"/>
-                        @if (_owned > 0)
+                        @if (_onWantlist > 0)
                         {
                             <span>·</span>
                             <span>
                                 <AppLink Href="@($"/wantlist?feed={FeedIdParam}")" Arrow="false"
-                                         Title="@($"Show the {_owned} titles this feed put on your wantlist")">@_owned</AppLink>
+                                         Title="@($"Show the {_onWantlist} titles this feed put on your wantlist")">@_onWantlist</AppLink>
                                 on your wantlist
                             </span>
                         }
@@ -262,7 +260,7 @@
 
     private Feed? _feed;
     private FeedRunHistory _history = FeedRunHistory.None;
-    private int _owned;
+    private int _onWantlist;
     private IReadOnlyList<FeedRun> _runs = [];
     private const string SelectedAnchor = "run-selected";
 
@@ -284,15 +282,17 @@
 
         await Task.Yield();
         var feedId = FeedId.From(UrlGuid.Decode(FeedIdParam));
-        _feed = await FeedService.GetFeedByIdAsync(feedId);
+        var found = (await FeedService.GetAsync()).Find(feedId);
         _loading = false;
-        if (_feed is null)
+        if (found is not Some<FeedOverview>(var overview))
         {
+            _feed = null;
             return;
         }
 
-        _history = await FeedService.GetHistoryAsync(feedId);
-        _owned = (await Wantlist.GetOwnedCountsAsync()).GetValueOrDefault(feedId);
+        _feed = overview.Feed;
+        _history = overview.History;
+        _onWantlist = overview.OnWantlist;
         await LoadRunsAsync(feedId);
 
         var wanted = RunIdParam is null ? _runs.FirstOrDefault() : _runs.FirstOrDefault(run => UrlGuid.Encode(run.Id) == RunIdParam);

@@ -42,7 +42,7 @@
                         <span class="next-meta">
                             <span><span class="next-key">At</span><span class="next-value">@When(at)</span></span>
                             <span><span class="next-key">Repeats</span><span class="next-value">@ScheduleText.Describe(next.Feed.Schedule)</span></span>
-                            <span class="next-last"><span class="next-key">Last run</span><LastRunCell FeedId="next.Feed.Id" Overview="next.Overview" DialogOpenChanged="open => _runOpen = open"/></span>
+                            <span class="next-last"><span class="next-key">Last run</span><LastRunCell Overview="next.Overview" DialogOpenChanged="open => _runOpen = open"/></span>
                         </span>
                         <span class="next-foot">
                             <AppLink Href="@($"/feeds/{UrlGuid.Encode(next.Feed.Id.Value)}/runs")" Class="text-xs">Run history</AppLink>

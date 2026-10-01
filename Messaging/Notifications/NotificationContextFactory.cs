@@ -13,24 +13,25 @@ internal static class NotificationContextFactory
 	public static async Task<NotificationContext> BuildAsync(
 		INotification message,
 		IMediaRepository mediaRepository,
-		IFeedService feedService,
+		IFeedRepository feedRepository,
 		CancellationToken cancellationToken
 	)
 	{
 		var payload = ToPayload(message);
 		var resolved = await ResolveAsync(payload, mediaRepository, cancellationToken);
-		var feed = await ResolveFeedAsync(payload.FeedId, feedService, cancellationToken);
+		var feed = await ResolveFeedAsync(payload.FeedId, feedRepository, cancellationToken);
 		return Build(payload, resolved, feed);
 	}
 
-	private static async Task<NotificationFeed?> ResolveFeedAsync(string? feedId, IFeedService feedService, CancellationToken cancellationToken)
+	private static async Task<NotificationFeed?> ResolveFeedAsync(string? feedId, IFeedRepository feedRepository, CancellationToken cancellationToken)
 	{
 		if (feedId is null || !Guid.TryParse(feedId, out var guid))
 		{
 			return null;
 		}
-		var feed = await feedService.GetFeedByIdAsync(FeedId.From(guid), cancellationToken);
-		return feed is null ? null : new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier);
+		return await feedRepository.FindAsync(FeedId.From(guid), cancellationToken) is Some<Feed>(var feed)
+			? new NotificationFeed(feed.Id.ToString(), feed.Name, feed.Provider, feed.Identifier)
+			: null;
 	}
 
 	private static NotificationPayload ToPayload(INotification message) =>

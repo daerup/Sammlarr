@@ -29,7 +29,7 @@ internal sealed class FeedRunEngine(
 		using var _ = lease;
 		try
 		{
-			if (await feeds.GetFeedByIdAsync(feedId, cancellationToken) is not { } feed)
+			if (await feeds.FindAsync(feedId, cancellationToken) is not Some<Domain.Feed.Feed>(var feed))
 			{
 				return new FeedRunFailed("The feed no longer exists.");
 			}

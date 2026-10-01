@@ -1,4 +1,5 @@
 using Domain.Providers;
+using TestInfrastructure;
 using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Pages;
 using static UI.Tests.Feeds.TestFeedRows;
@@ -56,6 +57,25 @@ public class FeedFilterTests
 	}
 
 	[Test]
+	public async Task Apply_SortedByRecentlyRun_PutsTheNewestRunFirstAndFeedsThatNeverRanLast()
+	{
+		var older = Ran(Comedy, Now.AddDays(-2));
+		var newer = Ran(Trending, Now.AddHours(-1));
+
+		var shown = (FeedFilter.None with { Sort = FeedSort.RecentlyRun }).Apply([Documentaries, older, newer]);
+
+		await Assert.That(shown).IsEquivalentTo([newer, older, Documentaries], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task Apply_SortedByMostOnWantlist_PutsTheBiggestCountFirstAndBreaksTiesByName()
+	{
+		var shown = (FeedFilter.None with { Sort = FeedSort.MostOnWantlist }).Apply(All);
+
+		await Assert.That(shown).IsEquivalentTo([Trending, Comedy, Documentaries, WeeklyPicks], CollectionOrdering.Matching);
+	}
+
+	[Test]
 	public async Task ClearFilters_KeepsTheChosenSort()
 	{
 		var filter = FeedFilter.None with { Providers = [FeedProvider.Tmdb], Search = "picks", Sort = FeedSort.RecentlyAdded };
@@ -87,4 +107,10 @@ public class FeedFilterTests
 		await Assert.That(FeedPulse.Running(All)).IsEqualTo(1);
 		await Assert.That(FeedPulse.Queued(All)).IsEqualTo(1);
 	}
+
+	private static FeedRow Ran(FeedRow row, DateTimeOffset startedAt) =>
+		row with
+		{
+			Overview = row.Overview with { LastRun = Some.Of(TestFeeds.Run(row.Feed, Guid.NewGuid()) with { StartedAt = startedAt }) },
+		};
 }
