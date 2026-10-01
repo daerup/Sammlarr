@@ -43,7 +43,7 @@ public class MdblistServiceTests
 		var results = await testee.GetFeedItemsAsync("multi-page").ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).WasCalled(Times.Once);
+		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -75,7 +75,7 @@ public class MdblistServiceTests
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
-		media.ResolveDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
+		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<ResolveRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
 		var providerConfig = IProviderConfigService.Mock();
 		providerConfig
 			.GetAsync(Any())

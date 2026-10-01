@@ -26,7 +26,7 @@ internal sealed class MediaSearchService(
 			return raws;
 		}
 		var groups = raws.Select(r => r.Externals.ToList()).ToList();
-		var identities = await mediaService.ResolveIdentitiesAsync(groups, cancellationToken);
+		var identities = await mediaService.RegisterAsync(groups, cancellationToken);
 		return raws.Zip(identities, (raw, identity) => raw.CombineIdentity(identity)).ToList();
 	}
 }

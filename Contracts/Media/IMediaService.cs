@@ -8,21 +8,21 @@ public interface IMediaService
 {
 	IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(IEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<TMedia> GetDetailsAsync<TMedia>(IEnumerable<IListItem<TMedia>> items, CancellationToken cancellationToken = default);
 
-	IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(IAsyncEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
+	IAsyncEnumerable<MediaLookup> IdentifyWithDetailsAsync(IAsyncEnumerable<ResolveRequest> requests, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<MediaIdentity>> ResolveIdentitiesAsync(
+	Task<IReadOnlyList<MediaIdentity>> RegisterAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
 		CancellationToken cancellationToken = default
 	);
 
-	Task InvalidateAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
+	Task InvalidateAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
-		IEnumerable<MediaId> mediaIds,
+		IEnumerable<MediaId> ids,
 		MediaProvider source,
 		CancellationToken cancellationToken = default
 	);

@@ -20,7 +20,7 @@ sequenceDiagram
   participant IC as Id converter
   participant MR as Metadata resolver
 
-  C->>MS: ResolveDetailsAsync(external ids + hints)
+  C->>MS: IdentifyWithDetailsAsync(external ids + hints)
   MS->>DB: GetByExternalsAsync (one batched read)
   alt in library and fresh
     DB-->>MS: stored title
@@ -111,7 +111,7 @@ sequenceDiagram
   loop each page, while X-Has-More
     F->>M: GET list items (resilience pipeline)
     M-->>F: entries
-    F->>R: ResolveDetailsAsync(externals)
+    F->>R: IdentifyWithDetailsAsync(externals)
     R-->>F: MediaLookup (matched or unmatched)
     F-->>P: stream items
   end
