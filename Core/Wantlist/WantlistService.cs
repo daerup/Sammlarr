@@ -10,12 +10,8 @@ using Domain.Wantlist.Outbox;
 
 namespace Core.Wantlist;
 
-internal sealed class WantlistService(
-	IWantlistRepository repository,
-	IWantlistOutbox outbox,
-	IMediaRepository mediaRepository,
-	IProviderConfigService providerConfig
-) : IWantlistService
+internal sealed class WantlistService(IWantlistRepository repository, IWantlistOutbox outbox, IMediaService media, IProviderConfigService providerConfig)
+	: IWantlistService
 {
 	public async Task<WantlistSnapshot> GetAsync(CancellationToken cancellationToken = default) => new(await repository.GetAllAsync(cancellationToken));
 
@@ -100,12 +96,11 @@ internal sealed class WantlistService(
 		{
 			return;
 		}
-		var config = await providerConfig.GetAsync(cancellationToken);
-		var sinkProvider = config.Sink.AsMediaProvider();
-		var externals = await mediaRepository.GetExternalsAsync(ids, sinkProvider, cancellationToken);
-		if (ids.Any(id => !externals.ContainsKey(id)))
+		var sinkIds = await media.GetSinkIdsAsync(ids, cancellationToken);
+		if (ids.Any(id => !sinkIds.ContainsKey(id)))
 		{
-			throw new MissingSinkIdException(sinkProvider);
+			var config = await providerConfig.GetAsync(cancellationToken);
+			throw new MissingSinkIdException(config.Sink.AsMediaProvider());
 		}
 	}
 
@@ -115,8 +110,7 @@ internal sealed class WantlistService(
 		{
 			return [];
 		}
-		var config = await providerConfig.GetAsync(cancellationToken);
-		var externals = await mediaRepository.GetExternalsAsync(ids, config.Sink.AsMediaProvider(), cancellationToken);
-		return [.. ids.Where(externals.ContainsKey)];
+		var sinkIds = await media.GetSinkIdsAsync(ids, cancellationToken);
+		return [.. ids.Where(sinkIds.ContainsKey)];
 	}
 }

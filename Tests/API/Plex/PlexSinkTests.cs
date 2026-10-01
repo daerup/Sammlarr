@@ -22,6 +22,13 @@ public class PlexSinkTests
 	private static readonly MediaId Known = MediaId.From(Guid.NewGuid());
 
 	[Test]
+	[Arguments(MediaType.Movie)]
+	[Arguments(MediaType.Show)]
+	[Arguments(MediaType.Unknown)]
+	public async Task AddressedBy_ForEveryMediaType_IsPlex(MediaType type) =>
+		await Assert.That(Sink(HttpStatusCode.OK, IMediaService.Mock()).AddressedBy(type)).IsSome().And.IsEqualTo(MediaProvider.Plex);
+
+	[Test]
 	public async Task GetAsync_WhenAnItemMatches_ReturnsItsMediaIdFromItsPlexId()
 	{
 		var media = MatchingAs(Known);
@@ -32,10 +39,7 @@ public class PlexSinkTests
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
 		await Assert.That(snapshot.Unmatched).IsEmpty();
 		media
-			.IdentifyAsync(
-				Arg.Is<IEnumerable<ResolveRequest>>(requests => requests?.Single() is { Target: MediaProvider.Plex, Candidates: [{ Value: "plex-42" }] }),
-				Any()
-			)
+			.IdentifyAsync(Arg.Is<IEnumerable<ResolveRequest>>(requests => requests?.Single() is { Candidates: [{ Value: "plex-42" }] }), Any())
 			.WasCalled(Times.Once);
 	}
 
@@ -134,7 +138,7 @@ public class PlexSinkTests
 	private static Mock<IMediaService> Addressing(MediaId mediaId, IExternalMediaId plexId)
 	{
 		var media = IMediaService.Mock();
-		media.GetExternalsAsync(Any<IEnumerable<MediaId>>(), MediaProvider.Plex, Any()).Returns(new Dictionary<MediaId, IExternalMediaId> { [mediaId] = plexId });
+		media.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, IExternalMediaId> { [mediaId] = plexId });
 		return media;
 	}
 

@@ -9,6 +9,8 @@ public interface IMediaSink
 {
 	SinkKind Kind { get; }
 
+	Optional<MediaProvider> AddressedBy(MediaType type);
+
 	Task<SinkSnapshot> GetAsync(CancellationToken cancellationToken = default);
 
 	IAsyncEnumerable<SinkSyncAck> ApplyAsync(WantlistOperationAction action, IReadOnlyList<MediaId> ids, CancellationToken cancellationToken = default);

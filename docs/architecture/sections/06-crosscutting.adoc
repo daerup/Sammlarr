@@ -38,8 +38,8 @@ per-provider concurrency gate, then the standard resilience handler (retry with 
 On breaker-open or timeout the client raises `ProviderUnavailableException`, which callers degrade
 on rather than fail a whole run. Per-provider numbers are in configuration
 (<<section-deployment-view>>); the rate-limit-storm interaction is in <<section-runtime-view>>.
-`MediaService.RecommendedConcurrency` (100) is how many titles identify and details resolve at
-once, so each provider's concurrency gate must stay at or above it: a gate of 8 slows a large feed
+`MediaService.RecommendedConcurrency` (100) is how many titles `MediaService` identifies or fetches
+details for at once, so each provider's concurrency gate must stay at or above it: a gate of 8 slows a large feed
 by roughly an order of magnitude.
 
 === Persistence and migrations

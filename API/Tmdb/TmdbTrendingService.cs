@@ -7,20 +7,13 @@ using Contracts.Auth;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Trending;
-using Contracts.Settings;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
 
 namespace API.Tmdb;
 
-internal sealed class TmdbTrendingService(
-	TmdbClient tmdbClient,
-	TmdbArtwork artwork,
-	IMediaService media,
-	IProviderConfigService providerConfig,
-	IApiKeyService apiKeys
-) : ITrendingService
+internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork artwork, IMediaService media, IApiKeyService apiKeys) : ITrendingService
 {
 	public async Task<PagedResult<MediaLookup>> GetTrendingAsync(int page, CancellationToken cancellationToken = default)
 	{
@@ -35,7 +28,6 @@ internal sealed class TmdbTrendingService(
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Trending.Root>(stream) ?? throw new InvalidOperationException("TMDB trending response was empty.");
-		var settings = await providerConfig.GetAsync(cancellationToken);
 
 		var finalItems = new MediaLookup[result.Results.Count];
 		var indexed = result.Results.Index().ToList();
@@ -44,7 +36,7 @@ internal sealed class TmdbTrendingService(
 		unresolvable.ForEach(r => finalItems[r.Index] = BuildUnmatched(r.Item));
 
 		var resolvable = indexed.Except(unresolvable).ToList();
-		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], settings.Sink.AsMediaProvider(), BuildHints(x.Item)));
+		var requests = resolvable.Select(x => new ResolveRequest([x.Item.TmdbId], BuildHints(x.Item)));
 		var pipeline = media.IdentifyAsync(requests, cancellationToken);
 
 		await foreach (var (identity, entry) in pipeline.ZipAwait(resolvable, cancellationToken))

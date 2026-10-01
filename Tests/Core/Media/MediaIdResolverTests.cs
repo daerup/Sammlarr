@@ -17,7 +17,7 @@ public class MediaIdResolverTests
 		var (testee, converter, cache) = CreateTestee();
 		converter.ConvertAsync(Any(), Any(), Any()).Returns(Error.From("no ids resolved"));
 
-		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
+		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], new None()), MediaProvider.Tvdb);
 
 		await Assert.That(result).IsError();
 		cache.Set(Any(), true, TimeSpan.FromHours(1)).WasCalled();
@@ -30,7 +30,7 @@ public class MediaIdResolverTests
 		var (testee, converter, cache) = CreateTestee();
 		converter.ConvertAsync(Any(), Any(), Any()).Throws(new InvalidOperationException("transient"));
 
-		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
+		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], new None()), MediaProvider.Tvdb);
 
 		await Assert.That(result).IsError();
 		cache.Set(Any(), Any(), Any()).WasNeverCalled();
@@ -42,10 +42,10 @@ public class MediaIdResolverTests
 		var tmdbId = TmdbId.From("321", MediaType.Movie);
 		var (testee, converter, cache) = CreateTestee();
 		converter.ConvertAsync(Any(), Any(), Any()).Throws(new ProviderUnavailableException(MediaProvider.Plex));
-		var request = new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None());
+		var request = new ResolveRequest([tmdbId], new None());
 
-		await Assert.That(await testee.ResolveAsync(request)).IsError();
-		await Assert.That(await testee.ResolveAsync(request)).IsError();
+		await Assert.That(await testee.ResolveAsync(request, MediaProvider.Tvdb)).IsError();
+		await Assert.That(await testee.ResolveAsync(request, MediaProvider.Tvdb)).IsError();
 
 		cache.Set(Any(), Any(), Any()).WasNeverCalled();
 		converter.ConvertAsync(Any(), Any(), Any()).WasCalled(Times.Exactly(2));
@@ -58,7 +58,7 @@ public class MediaIdResolverTests
 		var (testee, converter, cache) = CreateTestee();
 		cache.TryGetValue(Any()).Returns(true);
 
-		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], MediaProvider.Tvdb, new None()));
+		var result = await testee.ResolveAsync(new ResolveRequest([tmdbId], new None()), MediaProvider.Tvdb);
 
 		await Assert.That(result).IsError();
 		converter.ConvertAsync(Any(), Any(), Any()).WasNeverCalled();

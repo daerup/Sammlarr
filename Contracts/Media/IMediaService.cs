@@ -1,6 +1,5 @@
 using Contracts.Media.Conversions;
 using Domain.Media;
-using Domain.Providers;
 
 namespace Contracts.Media;
 
@@ -21,11 +20,10 @@ public interface IMediaService
 
 	Task InvalidateAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
-		IEnumerable<MediaId> ids,
-		MediaProvider source,
-		CancellationToken cancellationToken = default
-	);
+	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);
 }
 
-public record ResolveRequest(IReadOnlyList<IExternalMediaId> Candidates, MediaProvider Target, Optional<ResolutionHints> Hints);
+public record ResolveRequest(IReadOnlyList<IExternalMediaId> Candidates, Optional<ResolutionHints> Hints)
+{
+	public MediaType Type => Candidates.Count == 0 ? MediaType.Unknown : Candidates[0].Type;
+}

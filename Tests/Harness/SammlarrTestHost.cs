@@ -10,6 +10,7 @@ using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Messaging;
+using Contracts.Wantlist;
 using Core;
 using DB;
 using DB.Data.Access;
@@ -63,6 +64,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	private IDbContextFactory<SammlarrDbContext>? _contextFactory;
 	private RawDbContext? _rawContext;
 	private bool _plexAccountConfigured;
+	private Func<MediaType, Optional<MediaProvider>>? _sinkAddressing;
 	private bool _tmdbAccountConfigured;
 
 	private readonly RemoteWantlistState _remote = new();
@@ -123,6 +125,10 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void SetCurrentTime(DateTimeOffset now) => _clock.Now = now;
+
+	internal void SinkAddresses(Func<MediaType, Optional<MediaProvider>> addressing) => _sinkAddressing = addressing;
+
+	internal void SinkAddresses(MediaProvider provider) => SinkAddresses(_ => Some.Of(provider));
 
 	internal async Task<MediaId> SeedWithMetadataAsync(ResolvedVersion resolved, DateTimeOffset? fetched)
 	{
@@ -499,6 +505,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		return services.BuildServiceProvider();
 	}
 
+	private AddressingSink AddressedPlexSink(PlexSink plex) => new(plex, type => (_sinkAddressing ?? plex.AddressedBy)(type));
+
 	private ServiceProvider BuildFullGraphProvider()
 	{
 		var services = new ServiceCollection();
@@ -517,6 +525,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		services.AddModule<CoreModule>();
 		services.AddModule<DbModule>();
 		services.AddModule<ApiModule>();
+		services.AddKeyedScoped<IMediaSink>(SinkKind.Plex, (sp, _) => AddressedPlexSink(ActivatorUtilities.CreateInstance<PlexSink>(sp)));
 		services.AddSingleton<RecordingFeedScheduler>();
 		services.AddSingleton<IFeedScheduler>(sp => sp.GetRequiredService<RecordingFeedScheduler>());
 		services.AddKeyedSingleton<IOAuthProvider>(AuthProvider.Plex, _oauth);

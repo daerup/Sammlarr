@@ -7,14 +7,13 @@ using Contracts.Auth;
 using Contracts.Feed;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Contracts.Settings;
 using Domain.Feed;
 using Domain.Media;
 using Domain.Providers;
 
 namespace API.Mdblist;
 
-internal sealed class MdblistService(MdblistClient client, IMediaService media, IProviderConfigService providerConfig, IApiKeyService apiKeys) : IFeedProvider
+internal sealed class MdblistService(MdblistClient client, IMediaService media, IApiKeyService apiKeys) : IFeedProvider
 {
 	private const int PageSize = 1000;
 	private const string HasMoreHeader = "X-Has-More";
@@ -26,9 +25,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private async Task ResolveIntoAsync(string identifier, ChannelWriter<MediaLookup> items, CancellationToken cancellationToken)
 	{
-		var config = await providerConfig.GetAsync(cancellationToken);
-		var requests = BuildRequestsAsync(identifier, config.Sink.AsMediaProvider(), items, cancellationToken);
-		await foreach (var result in media.IdentifyWithDetailsAsync(requests, cancellationToken))
+		await foreach (var result in media.IdentifyWithDetailsAsync(BuildRequestsAsync(identifier, items, cancellationToken), cancellationToken))
 		{
 			await items.WriteAsync(result, cancellationToken);
 		}
@@ -36,7 +33,6 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 
 	private async IAsyncEnumerable<ResolveRequest> BuildRequestsAsync(
 		string identifier,
-		MediaProvider sinkProvider,
 		ChannelWriter<MediaLookup> unmatched,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
@@ -51,7 +47,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 			var pairs = page.shows.Select(FeedItemResolution.Show).Concat(page.movies.Select(FeedItemResolution.Movie));
 			foreach (var pair in pairs)
 			{
-				yield return new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), sinkProvider, BuildHints(pair));
+				yield return new ResolveRequest(ExtractIds(pair.ListItem.ids, pair.MediaType), BuildHints(pair));
 			}
 		}
 	}
