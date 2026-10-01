@@ -4,6 +4,7 @@ using Contracts.Media.Metadata;
 using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Wantlist.Outbox;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
@@ -16,7 +17,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
 	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
 	private IMediaRatingService TmdbRatings => host.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb);
-	private IMediaSink PlexWantlist => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
+	private IMediaSink PlexSink => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
@@ -125,21 +126,24 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PushAsync_WhenThePlexTokenIsMissing_Fails()
+	public async Task ApplyAsync_WhenThePlexTokenIsMissing_Fails()
 	{
-		var results = await PlexWantlist.AddToWantlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
+		var solaris = await host.Movie("Solaris", plex: "plex-100").SeedAsync();
 
-		await Assert.That(results[^1].Success).IsFalse();
+		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [solaris]).ToListAsync();
+
+		await Assert.That(acks.Single().Outcome).IsEqualTo(SinkSyncOutcome.Failed);
 	}
 
 	[Test]
-	public async Task PushAsync_WhenThePlexTokenIsConfigured_Succeeds()
+	public async Task ApplyAsync_WhenThePlexTokenIsConfigured_Succeeds()
 	{
 		await host.WithPlexAccount("plex-access-token");
+		var solaris = await host.Movie("Solaris", plex: "plex-100").SeedAsync();
 
-		var results = await PlexWantlist.AddToWantlistAsync([PlexId.From("plex-100", MediaType.Movie)]).ToListAsync();
+		var acks = await PlexSink.ApplyAsync(WantlistOperationAction.Add, [solaris]).ToListAsync();
 
-		await Assert.That(results[^1].Success).IsTrue();
+		await Assert.That(acks.Single().Outcome).IsEqualTo(SinkSyncOutcome.Applied);
 	}
 
 	[Test]

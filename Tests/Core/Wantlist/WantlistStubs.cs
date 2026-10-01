@@ -1,7 +1,6 @@
 using Contracts;
 using Contracts.Announcing;
 using Contracts.Identity;
-using Contracts.Media;
 using Contracts.Messaging;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
@@ -24,6 +23,13 @@ internal static class WantlistStubs
 	{
 		var sink = IMediaSink.Mock();
 		sink.ReadAsync(Any()).Returns(NothingOnTheSink);
+		return sink;
+	}
+
+	public static Mock<IMediaSink> SinkAcking(params SinkSyncAck[] acks)
+	{
+		var sink = EmptySink();
+		sink.ApplyAsync(Any(), Any(), Any()).Returns(acks.ToAsyncEnumerable());
 		return sink;
 	}
 
@@ -56,7 +62,6 @@ internal static class WantlistStubs
 	public static WantlistSyncEngine Engine(
 		Mock<IMediaSink> sink,
 		Mock<IWantlistOutbox>? outbox = null,
-		IReadOnlyDictionary<MediaId, IExternalMediaId>? externals = null,
 		Mock<IEventPublisher>? events = null,
 		WantlistSyncGate? gate = null,
 		ICurrentUser? user = null,
@@ -64,11 +69,8 @@ internal static class WantlistStubs
 	)
 	{
 		outbox ??= EmptyOutbox();
-		var owner = user ?? new TestCurrentUser();
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Getter.Returns(new DateTimeOffset(2026, 9, 23, 12, 0, 0, TimeSpan.Zero));
-		var media = IMediaRepository.Mock();
-		media.GetExternalsAsync(Any<IEnumerable<MediaId>>(), Any<MediaProvider>(), Any()).Returns(externals ?? new Dictionary<MediaId, IExternalMediaId>());
 
 		return new WantlistSyncEngine(
 			gate ?? new WantlistSyncGate(),
@@ -76,9 +78,8 @@ internal static class WantlistStubs
 			Active(sink),
 			EmptyRepository().Object,
 			outbox.Object,
-			media.Object,
 			new Announcer((events ?? IEventPublisher.Mock()).Object, publisher ?? new RecordingPublisher()),
-			owner,
+			user ?? new TestCurrentUser(),
 			clock.Object,
 			NullLogger<WantlistSyncEngine>.Instance
 		);
