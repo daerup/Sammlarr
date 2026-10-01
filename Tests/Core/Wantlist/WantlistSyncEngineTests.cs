@@ -57,7 +57,7 @@ public class WantlistSyncEngineTests
 	{
 		var stranded = MediaId.From(Guid.NewGuid());
 		var alsoStranded = MediaId.From(Guid.NewGuid());
-		var sink = WantlistStubs.EmptySink();
+		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(stranded, SinkSyncOutcome.Unaddressable), new SinkSyncAck(alsoStranded, SinkSyncOutcome.Unaddressable));
 		var published = new RecordingPublisher();
 
 		await BuildEngine(sink, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));

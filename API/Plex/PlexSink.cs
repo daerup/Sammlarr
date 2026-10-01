@@ -5,6 +5,7 @@ using Contracts.Media;
 using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Wantlist.Outbox;
 using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
@@ -35,6 +36,28 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		return new SinkContents(matched, unmatched);
 	}
 
+	public async IAsyncEnumerable<SinkSyncAck> ApplyAsync(
+		WantlistOperationAction action,
+		IReadOnlyList<MediaId> mediaIds,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
+	{
+		var plexIds = await mediaService.GetExternalsAsync(mediaIds, MediaProvider.Plex, cancellationToken);
+		foreach (var mediaId in mediaIds)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			var outcome = plexIds.TryGetValue(mediaId, out var plexId) ? await PushAsync(action, plexId, cancellationToken) : SinkSyncOutcome.Unaddressable;
+			yield return new SinkSyncAck(mediaId, outcome);
+		}
+	}
+
+	private string Endpoint(WantlistOperationAction action, IExternalMediaId plexId) =>
+		action switch
+		{
+			WantlistOperationAction.Add => urls.AddToWatchlist(plexId.Value),
+			WantlistOperationAction.Remove => urls.RemoveFromWatchlist(plexId.Value),
+		};
+
 	private async IAsyncEnumerable<UnmatchedMedia> WatchlistAsync([EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var (items, pages) = await FetchPageAsync(1, cancellationToken);
@@ -62,45 +85,22 @@ internal class PlexSink(PlexClient plexClient, PlexUrls urls, IMediaService medi
 		}
 	}
 
-	public async IAsyncEnumerable<SinkSyncAck> AddToWantlistAsync(
-		IEnumerable<IExternalMediaId> ids,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default
-	)
+	private async Task<SinkSyncOutcome> PushAsync(WantlistOperationAction action, IExternalMediaId plexId, CancellationToken cancellationToken)
 	{
-		foreach (var id in ids)
-		{
-			cancellationToken.ThrowIfCancellationRequested();
-			yield return await PushAsync(urls.AddToWatchlist(id.Value), id, cancellationToken);
-		}
-	}
-
-	public async IAsyncEnumerable<SinkSyncAck> RemoveFromWantlistAsync(
-		IEnumerable<IExternalMediaId> ids,
-		[EnumeratorCancellation] CancellationToken cancellationToken = default
-	)
-	{
-		foreach (var id in ids)
-		{
-			cancellationToken.ThrowIfCancellationRequested();
-			yield return await PushAsync(urls.RemoveFromWatchlist(id.Value), id, cancellationToken);
-		}
-	}
-
-	private async Task<SinkSyncAck> PushAsync(string formattedEndpoint, IExternalMediaId id, CancellationToken cancellationToken)
-	{
+		var endpoint = Endpoint(action, plexId);
 		try
 		{
-			using var response = await plexClient.SendAsync(HttpMethod.Put, formattedEndpoint, cancellationToken, new StringContent(string.Empty));
+			using var response = await plexClient.SendAsync(HttpMethod.Put, endpoint, cancellationToken, new StringContent(string.Empty));
 			if (!response.IsSuccessStatusCode)
 			{
-				logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, id.Value, formattedEndpoint);
+				logger.LogWarning("Plex watchlist push failed ({StatusCode}) for {ExternalId} at {Endpoint}", (int)response.StatusCode, plexId.Value, endpoint);
 			}
-			return new SinkSyncAck(id, response.IsSuccessStatusCode);
+			return response.IsSuccessStatusCode ? SinkSyncOutcome.Applied : SinkSyncOutcome.Failed;
 		}
 		catch (Exception ex)
 		{
-			logger.LogWarning(ex, "Plex watchlist push threw for {ExternalId} at {Endpoint}", id.Value, formattedEndpoint);
-			return new SinkSyncAck(id, false);
+			logger.LogWarning(ex, "Plex watchlist push threw for {ExternalId} at {Endpoint}", plexId.Value, endpoint);
+			return SinkSyncOutcome.Failed;
 		}
 	}
 

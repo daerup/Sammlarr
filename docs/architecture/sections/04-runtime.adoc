@@ -238,9 +238,9 @@ sequenceDiagram
   PX-->>SE: its items matched to titles, plus the unmatched
   SE->>DB: apply remote adds and removes
   SE->>DB: read Pending outbox rows, grouped by add / remove
-  SE->>PX: push each group as one batch
-  PX->>Plex: PUT / DELETE wantlist
-  Plex-->>PX: ack per item
+  SE->>PX: ApplyAsync per group, as title ids
+  PX->>Plex: PUT per item, by its Plex id
+  PX-->>SE: ack per title
   alt acked
     SE->>DB: drop outbox row
     SE-->>W: event Pushed (dot clears)
@@ -255,9 +255,10 @@ Adds and removes cancel each other in the outbox (adding cancels a pending remov
 cancels an un-pushed add), so opposing changes never reach Plex. Each item gets five attempts, one
 per sync; the fifth failure marks it `Failed`, which is terminal: later syncs no longer push it,
 but still count it as intent, so an abandoned add is not mistaken for a remote deletion. An item
-with no Plex id is abandoned at once. Per-item status reaches the open page as in-process events,
-and the sync ends with one notification that reports what actually reached Plex, not what was
-queued. The engine holds a per-user gate, so two syncs for one user never overlap.
+the sink cannot address (for Plex, one with no Plex id) is abandoned at once. Per-item status
+reaches the open page as in-process events, and the sync ends with one notification that reports
+what actually reached Plex, not what was queued. The engine holds a per-user gate, so two syncs
+for one user never overlap.
 
 === Other flows
 

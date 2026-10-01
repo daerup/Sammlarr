@@ -6,6 +6,7 @@ using Contracts.Media.Conversions;
 using Contracts.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Media;
@@ -163,6 +164,12 @@ internal sealed class MediaService(
 	{
 		return mediaRepository.RemoveMetadataAsync([.. mediaIds], cancellationToken);
 	}
+
+	public Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
+		IEnumerable<MediaId> mediaIds,
+		MediaProvider source,
+		CancellationToken cancellationToken = default
+	) => mediaRepository.GetExternalsAsync(mediaIds, source, cancellationToken);
 
 	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
 		IReadOnlyList<ResolveRequest> requests,

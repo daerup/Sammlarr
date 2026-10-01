@@ -18,6 +18,12 @@ public interface IMediaService
 	);
 
 	Task InvalidateAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default);
+
+	Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
+		IEnumerable<MediaId> mediaIds,
+		MediaProvider source,
+		CancellationToken cancellationToken = default
+	);
 }
 
 public record ResolveRequest(IReadOnlyList<IExternalMediaId> Candidates, MediaProvider Target, Optional<ResolutionHints> Hints);

@@ -5,8 +5,10 @@ using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
 using Contracts.Media;
+using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
+using Domain.Wantlist.Outbox;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
@@ -93,51 +95,17 @@ public class PlexSinkTests
 	}
 
 	[Test]
-	public async Task AddToWantlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
+	[Arguments(WantlistOperationAction.Add, HttpStatusCode.OK, SinkSyncOutcome.Applied)]
+	[Arguments(WantlistOperationAction.Add, HttpStatusCode.Unauthorized, SinkSyncOutcome.Failed)]
+	[Arguments(WantlistOperationAction.Remove, HttpStatusCode.OK, SinkSyncOutcome.Applied)]
+	[Arguments(WantlistOperationAction.Remove, HttpStatusCode.Unauthorized, SinkSyncOutcome.Failed)]
+	public async Task ApplyAsync_ForATitleWithAPlexId_AcksWhatPlexAnswered(WantlistOperationAction action, HttpStatusCode status, SinkSyncOutcome expected)
 	{
-		var testee = Sink(HttpStatusCode.OK);
-		var id = PlexId.From("plex-1", MediaType.Movie);
+		var testee = Sink(status, Addressing(Known, PlexId.From("plex-1", MediaType.Movie)));
 
-		var results = await testee.AddToWantlistAsync([id]).ToListAsync();
+		var acks = await testee.ApplyAsync(action, [Known]).ToListAsync();
 
-		await Assert.That(results).Count().IsEqualTo(1);
-		await Assert.That(results[0].Success).IsTrue();
-	}
-
-	[Test]
-	public async Task AddToWantlistAsync_WhenRequestFails_YieldsFailureResult()
-	{
-		var testee = Sink(HttpStatusCode.Unauthorized);
-		var id = PlexId.From("plex-1", MediaType.Movie);
-
-		var results = await testee.AddToWantlistAsync([id]).ToListAsync();
-
-		await Assert.That(results).Count().IsEqualTo(1);
-		await Assert.That(results[0].Success).IsFalse();
-	}
-
-	[Test]
-	public async Task RemoveFromWantlistAsync_WhenRequestSucceeds_YieldsSuccessResult()
-	{
-		var testee = Sink(HttpStatusCode.OK);
-		var id = PlexId.From("plex-1", MediaType.Movie);
-
-		var results = await testee.RemoveFromWantlistAsync([id]).ToListAsync();
-
-		await Assert.That(results).Count().IsEqualTo(1);
-		await Assert.That(results[0].Success).IsTrue();
-	}
-
-	[Test]
-	public async Task RemoveFromWantlistAsync_WhenRequestFails_YieldsFailureResult()
-	{
-		var testee = Sink(HttpStatusCode.Unauthorized);
-		var id = PlexId.From("plex-1", MediaType.Movie);
-
-		var results = await testee.RemoveFromWantlistAsync([id]).ToListAsync();
-
-		await Assert.That(results).Count().IsEqualTo(1);
-		await Assert.That(results[0].Success).IsFalse();
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, expected)]);
 	}
 
 	private static PlexSink Sink(string json, Mock<IMediaService> media)
@@ -147,7 +115,7 @@ public class PlexSinkTests
 		return Sink(handler, media);
 	}
 
-	private static PlexSink Sink(HttpStatusCode status) => Sink(Mock.HttpHandler().WithDefaultStatus(status), IMediaService.Mock());
+	private static PlexSink Sink(HttpStatusCode status, Mock<IMediaService> media) => Sink(Mock.HttpHandler().WithDefaultStatus(status), media);
 
 	private static PlexSink Sink(MockHttpHandler handler, Mock<IMediaService> media) =>
 		new(Client(handler), PlexTestUrls.Instance, media.Object, NullLogger<PlexSink>.Instance);
@@ -160,6 +128,13 @@ public class PlexSinkTests
 	{
 		var media = IMediaService.Mock();
 		media.IdentifyAsync(Any<IEnumerable<ResolveRequest>>(), Any()).Returns((requests, _) => requests.Select(identify).ToAsyncEnumerable());
+		return media;
+	}
+
+	private static Mock<IMediaService> Addressing(MediaId mediaId, IExternalMediaId plexId)
+	{
+		var media = IMediaService.Mock();
+		media.GetExternalsAsync(Any<IEnumerable<MediaId>>(), MediaProvider.Plex, Any()).Returns(new Dictionary<MediaId, IExternalMediaId> { [mediaId] = plexId });
 		return media;
 	}
 
