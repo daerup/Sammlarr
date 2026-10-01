@@ -9,6 +9,7 @@ using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Domain.Settings;
+using Domain.Wantlist;
 using Microsoft.Extensions.Logging.Abstractions;
 using TestInfrastructure;
 using TUnit.Assertions.Enums;
@@ -91,6 +92,41 @@ public class MediaServiceTests
 
 		await Assert.That(results.Count).IsEqualTo(1);
 		await Assert.That(results[0]).IsError();
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ForListItems_MapsEachThroughItsItem_InOrder()
+	{
+		var firstId = MediaId.From(Guid.NewGuid());
+		var secondId = MediaId.From(Guid.NewGuid());
+		IdentifiedMedia firstDetail = BuildDetail(firstId);
+		IdentifiedMedia secondDetail = BuildDetail(secondId);
+		var (testee, deps) = CreateTestee();
+		deps.MediaRepo.GetAsync(Any(), Any()).Returns([new CachedMedia(secondDetail, _now), new CachedMedia(firstDetail, _now)]);
+		WantlistItem[] items = [WantlistItemFor(firstId, 1), WantlistItemFor(secondId, 2)];
+
+		var results = await testee.GetDetailsAsync(items).ToListAsync();
+
+		await Assert
+			.That(results)
+			.IsEquivalentTo(
+				[new WantlistedMedia(firstDetail, items[0].AddedAt, items[0].Provenance), new WantlistedMedia(secondDetail, items[1].AddedAt, items[1].Provenance)],
+				CollectionOrdering.Matching
+			);
+	}
+
+	[Test]
+	public async Task GetDetailsAsync_ForListItems_LeavesOutItemsWhoseDetailsCannotBeLoaded()
+	{
+		var cachedId = MediaId.From(Guid.NewGuid());
+		var missingId = MediaId.From(Guid.NewGuid());
+		IdentifiedMedia cachedDetail = BuildDetail(cachedId);
+		var (testee, deps) = CreateTestee();
+		deps.MediaRepo.GetAsync(Any(), Any()).Returns([new CachedMedia(cachedDetail, _now)]);
+
+		var results = await testee.GetDetailsAsync([WantlistItemFor(missingId, 1), WantlistItemFor(cachedId, 2)]).ToListAsync();
+
+		await Assert.That(results.Select(result => result.Media)).IsEquivalentTo([cachedDetail]);
 	}
 
 	[Test]
@@ -438,6 +474,9 @@ public class MediaServiceTests
 
 	private static CachedMedia StaleCached(MediaId id) =>
 		new(new PartialMovie { Identity = new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]) }, null);
+
+	private static WantlistItem WantlistItemFor(MediaId id, int day) =>
+		new(id, new DateTimeOffset(2026, 1, day, 0, 0, 0, TimeSpan.Zero), new ManualOrigin(ManualSource.Search));
 
 	private static Movie BuildDetail(MediaId id, IExternalMediaId? extra = null)
 	{

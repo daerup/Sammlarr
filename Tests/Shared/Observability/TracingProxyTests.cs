@@ -10,6 +10,7 @@ public class TracingProxyTests
 		int Sync(int value);
 		Task<string> DoAsync(string value);
 		IAsyncEnumerable<int> Stream();
+		IAsyncEnumerable<T> Echo<T>(IEnumerable<T> items);
 	}
 
 	private sealed class Thing : IThing
@@ -30,10 +31,19 @@ public class TracingProxyTests
 				yield return i;
 			}
 		}
+
+		public async IAsyncEnumerable<T> Echo<T>(IEnumerable<T> items)
+		{
+			foreach (var item in items)
+			{
+				await Task.Delay(1);
+				yield return item;
+			}
+		}
 	}
 
 	[Test]
-	public async Task Proxy_CreatesOneActivityPerCall_AcrossSyncTaskAndStream()
+	public async Task Proxy_CreatesOneActivityPerCall_AcrossSyncTaskStreamAndGenericStream()
 	{
 		var stopped = new List<Activity>();
 		using var listener = new ActivityListener
@@ -49,15 +59,18 @@ public class TracingProxyTests
 		var sync = proxy.Sync(21);
 		var done = await proxy.DoAsync("hi");
 		var streamed = await proxy.Stream().ToListAsync();
+		var echoed = await proxy.Echo(["a", "b"]).ToListAsync();
 
 		await Assert.That(sync).IsEqualTo(42);
 		await Assert.That(done).IsEqualTo("hi!");
 		await Assert.That(streamed).IsEquivalentTo([0, 1, 2]);
+		await Assert.That(echoed).IsEquivalentTo(["a", "b"]);
 
 		var names = stopped.Select(activity => activity.OperationName).ToList();
 		await Assert.That(names).Contains("IThing.Sync");
 		await Assert.That(names).Contains("IThing.DoAsync");
 		await Assert.That(names).Contains("IThing.Stream");
+		await Assert.That(names).Contains("IThing.Echo");
 		await Assert.That(stopped.All(activity => activity.Duration >= TimeSpan.Zero)).IsTrue();
 	}
 }
