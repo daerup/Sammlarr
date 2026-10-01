@@ -28,7 +28,7 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		var requests = BuildRequestsAsync(identifier, config.Sink.AsMediaProvider(), items, cancellationToken);
-		await foreach (var result in media.ResolveDetailsAsync(requests, cancellationToken))
+		await foreach (var result in media.IdentifyWithDetailsAsync(requests, cancellationToken))
 		{
 			await items.WriteAsync(result, cancellationToken);
 		}

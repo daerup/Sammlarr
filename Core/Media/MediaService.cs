@@ -21,6 +21,7 @@ internal sealed class MediaService(
 	ILogger<MediaService> logger
 ) : IMediaService
 {
+	internal const int RecommendedConcurrency = 100;
 	private const int FirstBatchSize = 10;
 	private const int MaxBatchSize = 200;
 	private const int PrefetchCapacity = 1000;
@@ -46,11 +47,11 @@ internal sealed class MediaService(
 	}
 
 	public async IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(
-		IEnumerable<MediaId> mediaIds,
+		IEnumerable<MediaId> ids,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
-		var materialized = mediaIds.ToList();
+		var materialized = ids.ToList();
 		if (materialized.Count == 0)
 		{
 			yield break;
@@ -58,11 +59,7 @@ internal sealed class MediaService(
 
 		await using var buffer = bufferFactory.Create();
 		var cached = await LoadByInternalsAsync(materialized, cancellationToken);
-		var pipeline = materialized.SelectAwait(
-			id => RealizeFromCacheAsync(id, cached, buffer, cancellationToken),
-			IMediaService.RecommendedConcurrency,
-			cancellationToken
-		);
+		var pipeline = materialized.SelectAwait(id => RealizeFromCacheAsync(id, cached, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
 		{
 			yield return result;
@@ -82,7 +79,7 @@ internal sealed class MediaService(
 		}
 	}
 
-	public async IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(
+	public async IAsyncEnumerable<MediaLookup> IdentifyWithDetailsAsync(
 		IAsyncEnumerable<ResolveRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -148,18 +145,14 @@ internal sealed class MediaService(
 		var resolutions = await ResolveBatchAsync(batch, building, buffer, cancellationToken);
 		var pipeline = batch
 			.Zip(resolutions)
-			.SelectAwait(
-				pair => RealizeFromRequestAsync(pair.First, pair.Second, buffer, cancellationToken),
-				IMediaService.RecommendedConcurrency,
-				cancellationToken
-			);
+			.SelectAwait(pair => RealizeFromRequestAsync(pair.First, pair.Second, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
 		{
 			yield return result;
 		}
 	}
 
-	public async Task<IReadOnlyList<MediaIdentity>> ResolveIdentitiesAsync(
+	public async Task<IReadOnlyList<MediaIdentity>> RegisterAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
 		CancellationToken cancellationToken = default
 	)
@@ -173,16 +166,16 @@ internal sealed class MediaService(
 		return await coordinator.CoordinateAsync(preliminary, buffer, cancellationToken);
 	}
 
-	public Task InvalidateAsync(IEnumerable<MediaId> mediaIds, CancellationToken cancellationToken = default)
+	public Task InvalidateAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
-		return mediaRepository.RemoveMetadataAsync([.. mediaIds], cancellationToken);
+		return mediaRepository.RemoveMetadataAsync([.. ids], cancellationToken);
 	}
 
 	public Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
-		IEnumerable<MediaId> mediaIds,
+		IEnumerable<MediaId> ids,
 		MediaProvider source,
 		CancellationToken cancellationToken = default
-	) => mediaRepository.GetExternalsAsync(mediaIds, source, cancellationToken);
+	) => mediaRepository.GetExternalsAsync(ids, source, cancellationToken);
 
 	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
 		IReadOnlyList<ResolveRequest> requests,
@@ -194,7 +187,7 @@ internal sealed class MediaService(
 		var allCandidates = requests.SelectMany(r => r.Candidates).Distinct().ToList();
 		var cached = await LoadByExternalsAsync(allCandidates, cancellationToken);
 		var preliminary = await requests
-			.SelectAwait(req => ResolveIdentityAsync(req, cached, buffer, cancellationToken), IMediaService.RecommendedConcurrency, cancellationToken)
+			.SelectAwait(req => ResolveIdentityAsync(req, cached, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
 		return await coordinator.CoordinateResolutionsAsync(preliminary, building, buffer, cancellationToken);
 	}

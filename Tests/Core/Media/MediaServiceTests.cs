@@ -170,7 +170,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([new CachedMedia(firstDetail, _now), new CachedMedia(secondDetail, _now)]);
 
 		var results = await testee
-			.ResolveDetailsAsync(
+			.IdentifyWithDetailsAsync(
 				new List<ResolveRequest>
 				{
 					new([firstExternal], MediaProvider.Tmdb, new None()),
@@ -185,14 +185,14 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenIdentifyFails_YieldsUnmatchedWithoutFetching()
+	public async Task IdentifyWithDetailsAsync_WhenIdentifyFails_YieldsUnmatchedWithoutFetching()
 	{
 		var external = TmdbId.From("999", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
 		deps.UnmatchedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
 
 		var results = await testee
-			.ResolveDetailsAsync(new List<ResolveRequest> { new([external], MediaProvider.Tmdb, new None()) }.ToAsyncEnumerable())
+			.IdentifyWithDetailsAsync(new List<ResolveRequest> { new([external], MediaProvider.Tmdb, new None()) }.ToAsyncEnumerable())
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
@@ -201,23 +201,23 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenManyRequests_RampsBatchSizesFromTen()
+	public async Task IdentifyWithDetailsAsync_WhenManyRequests_RampsBatchSizesFromTen()
 	{
 		var (testee, deps) = CreateTestee();
 		var batches = RecordBatchSizes(deps);
 
-		await testee.ResolveDetailsAsync(BuildRequests(100)).ToListAsync();
+		await testee.IdentifyWithDetailsAsync(BuildRequests(100)).ToListAsync();
 
 		await Assert.That(batches).IsEquivalentTo([10, 20, 40, 30], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenManyRequests_YieldsTheFirstResultBeforeResolvingEverything()
+	public async Task IdentifyWithDetailsAsync_WhenManyRequests_YieldsTheFirstResultBeforeResolvingEverything()
 	{
 		var (testee, deps) = CreateTestee();
 		var batches = RecordBatchSizes(deps);
 
-		await foreach (var _ in testee.ResolveDetailsAsync(BuildRequests(500)))
+		await foreach (var _ in testee.IdentifyWithDetailsAsync(BuildRequests(500)))
 		{
 			break;
 		}
@@ -226,24 +226,24 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenRequestsSpanManyBatches_CapsTheRampAndNeverRestartsIt()
+	public async Task IdentifyWithDetailsAsync_WhenRequestsSpanManyBatches_CapsTheRampAndNeverRestartsIt()
 	{
 		var (testee, deps) = CreateTestee();
 		var batches = RecordBatchSizes(deps);
 
-		await testee.ResolveDetailsAsync(BuildRequests(600)).ToListAsync();
+		await testee.IdentifyWithDetailsAsync(BuildRequests(600)).ToListAsync();
 
 		await Assert.That(batches).IsEquivalentTo([10, 20, 40, 80, 160, 200, 90], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenTheRequestStreamIsLazy_DoesNotDrainItBeforeYielding()
+	public async Task IdentifyWithDetailsAsync_WhenTheRequestStreamIsLazy_DoesNotDrainItBeforeYielding()
 	{
 		var (testee, deps) = CreateTestee();
 		RecordBatchSizes(deps);
 		var pulled = 0;
 
-		await foreach (var _ in testee.ResolveDetailsAsync(CountingRequests(4000, () => Interlocked.Increment(ref pulled))))
+		await foreach (var _ in testee.IdentifyWithDetailsAsync(CountingRequests(4000, () => Interlocked.Increment(ref pulled))))
 		{
 			break;
 		}
@@ -262,30 +262,30 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenRequestCountIsBelowTheFirstBatch_UsesASingleBatch()
+	public async Task IdentifyWithDetailsAsync_WhenRequestCountIsBelowTheFirstBatch_UsesASingleBatch()
 	{
 		var (testee, deps) = CreateTestee();
 		var batches = RecordBatchSizes(deps);
 
-		var results = await testee.ResolveDetailsAsync(BuildRequests(3)).ToListAsync();
+		var results = await testee.IdentifyWithDetailsAsync(BuildRequests(3)).ToListAsync();
 
 		await Assert.That(batches).IsEquivalentTo([3], CollectionOrdering.Matching);
 		await Assert.That(results.Count).IsEqualTo(3);
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenBatchesRamp_StillYieldsOneResultPerRequestInOrder()
+	public async Task IdentifyWithDetailsAsync_WhenBatchesRamp_StillYieldsOneResultPerRequestInOrder()
 	{
 		var (testee, _) = CreateTestee();
 
-		var results = await testee.ResolveDetailsAsync(BuildRequests(75)).ToListAsync();
+		var results = await testee.IdentifyWithDetailsAsync(BuildRequests(75)).ToListAsync();
 
 		var externals = results.Select(r => r.Externals.OfType<TmdbId>().Single().Value).ToList();
 		await Assert.That(externals).IsEquivalentTo([.. Enumerable.Range(0, 75).Select(i => i.ToString())], CollectionOrdering.Matching);
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenTwoBatchesShareAnExternalId_YieldsBothUnderOneIdentity()
+	public async Task IdentifyWithDetailsAsync_WhenTwoBatchesShareAnExternalId_YieldsBothUnderOneIdentity()
 	{
 		var shared = TmdbId.From("shared", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
@@ -294,13 +294,13 @@ public class MediaServiceTests
 		requests[0] = new ResolveRequest([shared], MediaProvider.Tmdb, new None());
 		requests[55] = new ResolveRequest([shared], MediaProvider.Tmdb, new None());
 
-		var results = await testee.ResolveDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results[0].Identity.Id).IsEqualTo(results[55].Identity.Id);
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenALaterRequestBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
+	public async Task IdentifyWithDetailsAsync_WhenALaterRequestBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
 	{
 		var first = TmdbId.From("bridge-a", MediaType.Movie);
 		var second = ImdbId.From("tt7777777", MediaType.Movie);
@@ -309,7 +309,7 @@ public class MediaServiceTests
 		var upserted = RecordUpsertedIdentities(deps);
 
 		var results = await testee
-			.ResolveDetailsAsync(
+			.IdentifyWithDetailsAsync(
 				new List<ResolveRequest>
 				{
 					new([first], MediaProvider.Tmdb, new None()),
@@ -326,7 +326,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenALaterBatchBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
+	public async Task IdentifyWithDetailsAsync_WhenALaterBatchBridgesTwoIdentities_PersistsOnlyTheSurvivingIdentity()
 	{
 		var first = TmdbId.From("batch-bridge-a", MediaType.Movie);
 		var second = ImdbId.From("tt8888888", MediaType.Movie);
@@ -338,14 +338,14 @@ public class MediaServiceTests
 		requests[1] = new ResolveRequest([second], MediaProvider.Tmdb, new None());
 		requests[55] = new ResolveRequest([first, second], MediaProvider.Tmdb, new None());
 
-		var results = await testee.ResolveDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
 
 		var survivor = results[55].Identity.Id;
 		await Assert.That(Bridged(upserted, first, second)).IsEquivalentTo([survivor]);
 	}
 
 	[Test]
-	public async Task ResolveDetailsAsync_WhenALaterBatchMatchesAPersistedIdentity_KeepsThePersistedMediaId()
+	public async Task IdentifyWithDetailsAsync_WhenALaterBatchMatchesAPersistedIdentity_KeepsThePersistedMediaId()
 	{
 		var minted = TmdbId.From("batch-persisted-a", MediaType.Movie);
 		var known = ImdbId.From("tt6666666", MediaType.Movie);
@@ -359,18 +359,18 @@ public class MediaServiceTests
 		requests[0] = new ResolveRequest([minted], MediaProvider.Tmdb, new None());
 		requests[55] = new ResolveRequest([minted, known], MediaProvider.Tmdb, new None());
 
-		var results = await testee.ResolveDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results[55].Identity.Id).IsEqualTo(persisted.Id);
 		await Assert.That(Bridged(upserted, minted, known)).IsEquivalentTo([persisted.Id]);
 	}
 
 	[Test]
-	public async Task ResolveIdentitiesAsync_WhenEmpty_DoesNotWriteToRepository()
+	public async Task RegisterAsync_WhenEmpty_DoesNotWriteToRepository()
 	{
 		var (testee, deps) = CreateTestee();
 
-		var identities = await testee.ResolveIdentitiesAsync([]);
+		var identities = await testee.RegisterAsync([]);
 
 		await Assert.That(identities).IsEmpty();
 		deps.MediaRepo.UpsertIdentitiesAsync(Any(), Any()).WasNeverCalled();
