@@ -69,6 +69,19 @@ internal sealed class MediaService(
 		}
 	}
 
+	public async IAsyncEnumerable<TMedia> GetDetailsAsync<TMedia>(
+		IEnumerable<IListItem<TMedia>> items,
+		[EnumeratorCancellation] CancellationToken cancellationToken = default
+	)
+	{
+		var listed = items.ToList();
+		var pipeline = GetDetailsAsync(listed.Select(item => item.MediaId), cancellationToken).ZipAwait(listed, cancellationToken);
+		await foreach (var (media, item) in pipeline.WhereSuccessAwait().WithCancellation(cancellationToken))
+		{
+			yield return item.With(media);
+		}
+	}
+
 	public async IAsyncEnumerable<MediaLookup> ResolveDetailsAsync(
 		IAsyncEnumerable<ResolveRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
