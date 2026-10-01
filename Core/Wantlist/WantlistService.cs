@@ -21,9 +21,6 @@ internal sealed class WantlistService(
 
 	public async Task<OutboxSnapshot> GetOutboxAsync(CancellationToken cancellationToken = default) => new(await outbox.GetAllAsync(cancellationToken));
 
-	public Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default) =>
-		repository.CountByFeedAsync(cancellationToken);
-
 	public async Task<IReadOnlyList<MediaId>> AddAsync(IEnumerable<MediaId> ids, WantlistItemProvenance provenance, CancellationToken cancellationToken = default)
 	{
 		var adding = ids.ToList();

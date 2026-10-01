@@ -15,31 +15,31 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 	private static readonly Expression<Func<FeedRow, Domain.Feed.Feed>> project = FeedProjection.Project;
 	private static readonly Expression<Func<FeedRunRow, Domain.Feed.Run.FeedRun>> projectRun = FeedRunProjection.Project;
 
-	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetFeedsAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<Domain.Feed.Feed>> GetAllAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		return await ctx.Feeds.AsNoTracking().OrderByDescending(l => l.CreatedAt).Select(project).ToListAsync(cancellationToken);
 	}
 
-	public async Task<Domain.Feed.Feed?> GetFeedByIdAsync(FeedId id, CancellationToken cancellationToken = default)
+	public async Task<Optional<Domain.Feed.Feed>> FindAsync(FeedId id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		return await ctx.Feeds.AsNoTracking().Where(l => l.Id == id.Value).Select(project).FirstOrDefaultAsync(cancellationToken);
+		return Optional.Of(await ctx.Feeds.AsNoTracking().Where(l => l.Id == id.Value).Select(project).FirstOrDefaultAsync(cancellationToken));
 	}
 
-	public async Task<FeedId> CreateFeedAsync(FeedCreateData createData, CancellationToken cancellationToken = default)
+	public async Task<FeedId> CreateAsync(FeedCreateData data, CancellationToken cancellationToken = default)
 	{
 		var entity = new FeedRow
 		{
-			Name = createData.Name,
-			IsEnabled = createData.IsEnabled,
-			Provider = createData.Provider,
-			Strategy = createData.Strategy,
-			Identifier = createData.Identifier,
-			Filter = createData.Filter,
-			Sort = createData.Sort,
-			Limit = createData.Limit,
-			Trigger = createData.Schedule,
+			Name = data.Name,
+			IsEnabled = data.IsEnabled,
+			Provider = data.Provider,
+			Strategy = data.Strategy,
+			Identifier = data.Identifier,
+			Filter = data.Filter,
+			Sort = data.Sort,
+			Limit = data.Limit,
+			Trigger = data.Schedule,
 		};
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -48,7 +48,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return FeedId.From(entity.Id);
 	}
 
-	public async Task UpdateFeedAsync(FeedId id, FeedUpdateData updateData, CancellationToken cancellationToken = default)
+	public async Task UpdateAsync(FeedId id, FeedUpdateData data, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var entity = await ctx.Feeds.FindAsync([id.Value], cancellationToken);
@@ -57,20 +57,20 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			throw new InvalidOperationException($"Feed with id {id} not found.");
 		}
 
-		entity.Name = updateData.Name;
-		entity.IsEnabled = updateData.IsEnabled;
-		entity.Provider = updateData.Provider;
-		entity.Strategy = updateData.Strategy;
-		entity.Identifier = updateData.Identifier;
-		entity.Filter = updateData.Filter;
-		entity.Sort = updateData.Sort;
-		entity.Limit = updateData.Limit;
-		entity.Trigger = updateData.Schedule;
+		entity.Name = data.Name;
+		entity.IsEnabled = data.IsEnabled;
+		entity.Provider = data.Provider;
+		entity.Strategy = data.Strategy;
+		entity.Identifier = data.Identifier;
+		entity.Filter = data.Filter;
+		entity.Sort = data.Sort;
+		entity.Limit = data.Limit;
+		entity.Trigger = data.Schedule;
 
 		await ctx.SaveChangesAsync(cancellationToken);
 	}
 
-	public async Task DeleteFeedAsync(FeedId id, CancellationToken cancellationToken = default)
+	public async Task DeleteAsync(FeedId id, CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var entity = await ctx.Feeds.FindAsync([id.Value], cancellationToken);
@@ -91,19 +91,6 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		ctx.Feeds.Remove(entity);
 		await ctx.SaveChangesAsync(cancellationToken);
-	}
-
-	public async Task<IReadOnlyList<FeedId>> DisableFeedsAsync(IReadOnlyCollection<FeedProvider> providers, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var feeds = await ctx.Feeds.Where(feed => feed.IsEnabled && providers.Contains(feed.Provider)).ToListAsync(cancellationToken);
-		foreach (var feed in feeds)
-		{
-			feed.IsEnabled = false;
-		}
-
-		await ctx.SaveChangesAsync(cancellationToken);
-		return feeds.Select(feed => FeedId.From(feed.Id)).ToList();
 	}
 
 	public Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
@@ -195,26 +182,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		return run is null ? new None() : Some.Of(run);
 	}
 
-	public async Task<FeedRunHistory> GetHistoryAsync(FeedId feedId, CancellationToken cancellationToken = default)
-	{
-		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-
-		var runs = ctx.FeedRuns.AsNoTracking().Where(row => row.FeedId == feedId.Value);
-		if (!await runs.AnyAsync(cancellationToken))
-		{
-			return FeedRunHistory.None;
-		}
-
-		return new FeedRunHistory
-		{
-			TotalRuns = await runs.CountAsync(cancellationToken),
-			FirstRunAt = await runs.MinAsync(row => row.StartedAt, cancellationToken),
-			TotalAdded = await runs.SumAsync(row => row.Added, cancellationToken),
-			TotalRemoved = await runs.SumAsync(row => row.Removed, cancellationToken),
-		};
-	}
-
-	public async Task<IReadOnlyDictionary<FeedId, FeedOverview>> GetOverviewsAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyDictionary<FeedId, FeedRunTotals>> GetRunTotalsAsync(CancellationToken cancellationToken = default)
 	{
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -234,7 +202,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 
 		if (totals.Count == 0)
 		{
-			return new Dictionary<FeedId, FeedOverview>();
+			return new Dictionary<FeedId, FeedRunTotals>();
 		}
 
 		var latestStamps = totals.Select(total => total.LatestAt).ToList();
@@ -247,7 +215,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			.Where(entry => latest.ContainsKey(entry.Id))
 			.ToDictionary(
 				entry => entry.Id,
-				entry => new FeedOverview(
+				entry => new FeedRunTotals(
 					latest[entry.Id],
 					new FeedRunHistory
 					{

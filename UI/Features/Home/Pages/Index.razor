@@ -304,12 +304,11 @@ else
 
         try
         {
-            _feeds = await FeedService.GetFeedsAsync(_cancellation.Token);
+            var feeds = await FeedService.GetAsync(_cancellation.Token);
+            _feeds = [.. feeds.Feeds.Select(overview => overview.Feed)];
             var runs = await FeedService.GetRecentRunsAsync(_now - ActivityWindow, RunCap, _cancellation.Token);
-            var owned = await WantlistService.GetOwnedCountsAsync(_cancellation.Token);
             var wantlist = await WantlistService.GetAsync(_cancellation.Token);
             var blocklist = await BlocklistService.GetAsync(_cancellation.Token);
-            var overviews = await FeedService.GetOverviewsAsync(_cancellation.Token);
             _outbox = (await WantlistService.GetOutboxAsync(_cancellation.Token)).Entries;
             var queue = await JobQueueView.GetAsync(_cancellation.Token);
 
@@ -317,11 +316,11 @@ else
             var brands = FeedBrands();
             _wantlistCount = wantlist.Ids.Count;
             _blocklistCount = blocklist.Ids.Count;
-            _sources = LibraryView.Sources(owned, names, _wantlistCount);
+            _sources = LibraryView.Sources(feeds.Feeds, _wantlistCount);
             _queued = UpNextView.InTheQueue(queue, names, brands, Sink);
             _pendingFeeds = UpNextView.FeedsAlreadyPending(queue);
             _scheduled = UpNextView.OnASchedule(_feeds, _now, TimeZoneInfo.Local);
-            _candidates = RunPlan.Candidates(_feeds, overviews, _now, TimeZoneInfo.Local);
+            _candidates = RunPlan.Candidates(feeds.Feeds, _now, TimeZoneInfo.Local);
             _days = ActivityLog.Days(runs, names, TimeZoneInfo.Local);
         }
         catch (OperationCanceledException)

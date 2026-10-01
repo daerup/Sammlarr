@@ -66,61 +66,56 @@ internal static class DemoFeeds
 	public static readonly IReadOnlyList<FeedRow> Rows =
 	[
 		new(
-			DocumentariesFeed,
 			new FeedOverview(
-				QuietRun,
+				DocumentariesFeed,
+				Some.Of(QuietRun),
 				new FeedRunHistory
 				{
 					TotalRuns = 15,
 					FirstRunAt = Now.AddDays(-12),
 					TotalAdded = 13913,
 					TotalRemoved = 0,
-				}
+				},
+				402
 			),
-			402,
 			null,
 			Now.AddMinutes(34)
 		),
 		new(
-			MirrorFeed,
 			new FeedOverview(
-				MirrorRun,
+				MirrorFeed,
+				Some.Of(MirrorRun),
 				new FeedRunHistory
 				{
 					TotalRuns = 30,
 					FirstRunAt = Now.AddDays(-30),
 					TotalAdded = 180,
 					TotalRemoved = 40,
-				}
+				},
+				12
 			),
-			12,
 			JobState.Running,
 			Now.AddMinutes(94)
 		),
 		new(
-			TrendingFeed,
 			new FeedOverview(
-				FailedRun,
+				TrendingFeed,
+				Some.Of(FailedRun),
 				new FeedRunHistory
 				{
 					TotalRuns = 2,
 					FirstRunAt = Now.AddDays(-3),
 					TotalAdded = 9,
 					TotalRemoved = 0,
-				}
+				},
+				0
 			),
-			0,
 			null,
 			null
 		),
 	];
 
-	public static readonly IReadOnlyList<RunCandidate> Candidates = RunPlan.Candidates(
-		[.. Rows.Select(row => row.Feed)],
-		Rows.Select(row => row.Overview).OfType<FeedOverview>().ToDictionary(overview => overview.LastRun.FeedId),
-		Now,
-		TimeZoneInfo.Local
-	);
+	public static readonly IReadOnlyList<RunCandidate> Candidates = RunPlan.Candidates([.. Rows.Select(row => row.Overview)], Now, TimeZoneInfo.Local);
 
 	private static Feed Create(string name, FeedProvider provider, string identifier, FeedStrategy strategy, FeedRunTrigger schedule, bool enabled) =>
 		new()

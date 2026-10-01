@@ -31,7 +31,7 @@ internal sealed class FeedRunPlanner(
 			return target switch
 			{
 				DraftFeed(var definition, var load) => await PlanAsync(definition, load, cancellationToken),
-				SavedFeed(var id) => await feeds.GetFeedByIdAsync(id, cancellationToken) is { } feed
+				SavedFeed(var id) => await feeds.FindAsync(id, cancellationToken) is Some<Domain.Feed.Feed>(var feed)
 					? await PlanAsync(feed, cancellationToken)
 					: new FeedPlanFailed("The feed no longer exists."),
 			};

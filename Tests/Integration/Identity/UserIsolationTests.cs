@@ -22,7 +22,7 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 	{
 		await host.SignInAs("Alice");
 		await host.Resolve<IFeedRepository>()
-			.CreateFeedAsync(
+			.CreateAsync(
 				new FeedCreateData
 				{
 					Name = "Weekly",
@@ -36,11 +36,11 @@ public class UserIsolationTests(SammlarrTestHost host) : IAsyncDisposable
 
 		host.SignOut();
 		await host.SignInAs("Bob");
-		await Assert.That(await host.Resolve<IFeedRepository>().GetFeedsAsync()).IsEmpty();
+		await Assert.That(await host.Resolve<IFeedRepository>().GetAllAsync()).IsEmpty();
 
 		host.SignOut();
 		await host.SignInAs("Alice");
-		var feeds = await host.Resolve<IFeedRepository>().GetFeedsAsync();
+		var feeds = await host.Resolve<IFeedRepository>().GetAllAsync();
 		await Assert.That(feeds.Any(feed => feed.Name == "Weekly")).IsTrue();
 	}
 

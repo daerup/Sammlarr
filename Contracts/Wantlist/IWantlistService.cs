@@ -11,8 +11,6 @@ public interface IWantlistService
 
 	Task<OutboxSnapshot> GetOutboxAsync(CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyDictionary<FeedId, int>> GetOwnedCountsAsync(CancellationToken cancellationToken = default);
-
 	Task<IReadOnlyList<MediaId>> AddAsync(IEnumerable<MediaId> ids, WantlistItemProvenance provenance, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<MediaId>> RemoveAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default);

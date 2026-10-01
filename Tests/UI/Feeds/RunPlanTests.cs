@@ -15,7 +15,7 @@ public class RunPlanTests
 	{
 		var monthly = Feed("monthly", new Scheduled("0 0 6 1 * *"));
 
-		var candidates = RunPlan.Candidates([monthly], Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([NeverRan(monthly)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.WorthRunning);
 		await Assert.That(candidates[0].Flag).IsEqualTo(RunFlag.NotDue);
@@ -26,7 +26,7 @@ public class RunPlanTests
 	{
 		var hourly = Feed("hourly", new Scheduled("0 0 * * * *"));
 
-		var candidates = RunPlan.Candidates([hourly], Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([NeverRan(hourly)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.SoonAnyway);
 		await Assert.That(candidates[0].Flag).IsNull();
@@ -37,7 +37,7 @@ public class RunPlanTests
 	{
 		var hourly = Feed("hourly", new Scheduled("0 0 * * * *"));
 
-		var candidates = RunPlan.Candidates([hourly], Overviews((hourly.Id, Conclusiveness.NoMatches, 12)), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([Ran(hourly, Conclusiveness.NoMatches, 12)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.WorthRunning);
 		await Assert.That(candidates[0].Flag).IsEqualTo(RunFlag.Inconclusive);
@@ -48,7 +48,7 @@ public class RunPlanTests
 	{
 		var hourly = Feed("hourly", new Scheduled("0 0 * * * *"));
 
-		var candidates = RunPlan.Candidates([hourly], Overviews((hourly.Id, Conclusiveness.StillLoading, 0)), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([Ran(hourly, Conclusiveness.StillLoading, 0)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.WorthRunning);
 		await Assert.That(candidates[0].Flag).IsEqualTo(RunFlag.Failed);
@@ -59,7 +59,7 @@ public class RunPlanTests
 	{
 		var manual = Feed("by hand");
 
-		var candidates = RunPlan.Candidates([manual], Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([NeverRan(manual)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].Group).IsEqualTo(RunGroup.ManualOnly);
 		await Assert.That(candidates[0].NextRun).IsNull();
@@ -70,7 +70,7 @@ public class RunPlanTests
 	{
 		var off = Feed("off", new Scheduled("0 0 * * * *"), enabled: false);
 
-		var candidates = RunPlan.Candidates([off], Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([NeverRan(off)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates).HasSingleItem();
 		await Assert.That(candidates[0].Enabled).IsFalse();
@@ -83,7 +83,7 @@ public class RunPlanTests
 	{
 		var off = Feed("off", new Scheduled("0 0 * * * *"), enabled: false);
 
-		var candidates = RunPlan.Candidates([off], Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([NeverRan(off)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].NextRun).IsNull();
 	}
@@ -93,7 +93,7 @@ public class RunPlanTests
 	{
 		IReadOnlyList<Feed> feeds = [Feed("by hand"), Feed("hourly", new Scheduled("0 0 * * * *")), Feed("monthly", new Scheduled("0 0 6 1 * *"))];
 
-		var candidates = RunPlan.Candidates(feeds, Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([.. feeds.Select(NeverRan)], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates.Select(candidate => candidate.Name)).IsEquivalentTo(["monthly", "hourly", "by hand"], CollectionOrdering.Matching);
 	}
@@ -102,7 +102,7 @@ public class RunPlanTests
 	public async Task DefaultSelection_TicksOnlyTheFeedsWorthRunning()
 	{
 		IReadOnlyList<Feed> feeds = [Feed("by hand"), Feed("hourly", new Scheduled("0 0 * * * *")), Feed("monthly", new Scheduled("0 0 6 1 * *"))];
-		var candidates = RunPlan.Candidates(feeds, Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([.. feeds.Select(NeverRan)], Now, TimeZoneInfo.Utc);
 
 		var selected = RunPlan.DefaultSelection(candidates);
 
@@ -113,30 +113,33 @@ public class RunPlanTests
 	[Test]
 	public async Task Candidates_ForAFeedThatNeverRan_SaysSoRatherThanShowingAZeroDelta()
 	{
-		var candidates = RunPlan.Candidates([Feed("fresh", new Scheduled("0 0 * * * *"))], Overviews(), Now, TimeZoneInfo.Utc);
+		var candidates = RunPlan.Candidates([NeverRan(Feed("fresh", new Scheduled("0 0 * * * *")))], Now, TimeZoneInfo.Utc);
 
 		await Assert.That(candidates[0].LastRun.EverRan).IsFalse();
 		await Assert.That(candidates[0].LastRun.Changed).IsFalse();
 	}
 
-	private static Dictionary<FeedId, FeedOverview> Overviews(params (FeedId Id, Conclusiveness Outcome, int Fetched)[] entries) =>
-		entries.ToDictionary(
-			entry => entry.Id,
-			entry => new FeedOverview(
+	private static FeedOverview NeverRan(Feed feed) => FeedOverview.Of(feed, null, 0);
+
+	private static FeedOverview Ran(Feed feed, Conclusiveness outcome, int fetched) =>
+		FeedOverview.Of(
+			feed,
+			new FeedRunTotals(
 				new FeedRun
 				{
 					Id = Guid.NewGuid(),
-					FeedId = entry.Id,
+					FeedId = feed.Id,
 					StartedAt = Now.AddHours(-1),
 					Duration = TimeSpan.FromSeconds(2),
 					Strategy = new Append(),
 					Trigger = new Manual(),
-					Conclusiveness = entry.Outcome,
-					Counts = FeedRunCounts.None with { Total = entry.Fetched },
+					Conclusiveness = outcome,
+					Counts = FeedRunCounts.None with { Total = fetched },
 					Items = [],
 				},
 				FeedRunHistory.None
-			)
+			),
+			0
 		);
 
 	private static Feed Feed(string name, FeedRunTrigger? schedule = null, bool enabled = true) =>

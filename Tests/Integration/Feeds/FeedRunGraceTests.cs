@@ -24,7 +24,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task PlanAsync_ForAnOwnedItemMissingFromTheList_DropsItOnlyOnceGraceIsSpent()
 	{
 		var feedId = await SeedFeedAsync();
-		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
+		var feed = (await Assert.That(await fixture.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
 		var kept = await fixture.Movie(TestMedia.FightClub).OnWantlist(origin);
@@ -68,7 +68,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 	public async Task PlanAsync_WhenTheListOutageIsInconclusive_NeverBurnsGrace()
 	{
 		var feedId = await SeedFeedAsync();
-		var feed = (await fixture.Resolve<IFeedRepository>().GetFeedByIdAsync(feedId))!;
+		var feed = (await Assert.That(await fixture.Resolve<IFeedRepository>().FindAsync(feedId)).IsSome())!;
 		var origin = await fixture.SeedFeedOriginAsync(feedId);
 
 		var owned = await fixture.Movie(TestMedia.FightClub).OnWantlist(origin);

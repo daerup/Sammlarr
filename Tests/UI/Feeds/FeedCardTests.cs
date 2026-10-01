@@ -61,7 +61,7 @@ public class FeedCardTests : BunitContext
 	[Test]
 	public async Task Render_ForAFeedWithHistory_LinksItsCountsToTheWantlistAndTheRunHistory()
 	{
-		var cut = RenderCard(Row(owned: 1, runs: 79));
+		var cut = RenderCard(Row(onWantlist: 1, runs: 79));
 
 		var links = cut.FindAll(".feed-stat-link a").Select(link => link.GetAttribute("href") ?? string.Empty).ToList();
 		await Assert.That(links).IsEquivalentTo([$"/wantlist?feed={UrlGuid.Encode(Comedy.Value)}", $"/feeds/{UrlGuid.Encode(Comedy.Value)}/runs"]);
@@ -70,7 +70,7 @@ public class FeedCardTests : BunitContext
 	[Test]
 	public async Task Render_WithNothingOnTheWantlist_ShowsAPlainZeroRatherThanALink()
 	{
-		var cut = RenderCard(Row(owned: 0, runs: 0));
+		var cut = RenderCard(Row(onWantlist: 0, runs: 0));
 
 		await Assert.That(cut.FindAll(".feed-stat-link a")).IsEmpty();
 	}
@@ -108,26 +108,28 @@ public class FeedCardTests : BunitContext
 
 	private static string Normalized(string text) => string.Join(' ', text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 
-	private static FeedRow Row(bool enabled = true, int? mirror = null, int owned = 0, int runs = 0, JobState? job = null) =>
+	private static FeedRow Row(bool enabled = true, int? mirror = null, int onWantlist = 0, int runs = 0, JobState? job = null) =>
 		new(
-			new Feed
-			{
-				Name = "hdlists/comedy-movies-2001-20207",
-				Id = Comedy,
-				Enabled = enabled,
-				Provider = FeedProvider.Mdblist,
-				Strategy = mirror is { } grace ? new FeedStrategy(new Mirror(grace)) : new FeedStrategy(new Append()),
-				Identifier = "hdlists/comedy-movies-2001-2020",
-				CreatedAt = Now,
-				Schedule = new FeedRunTrigger(new Scheduled("0 26 * * * *")),
-			},
-			runs > 0 ? Overview(runs) : null,
-			owned,
+			FeedOverview.Of(
+				new Feed
+				{
+					Name = "hdlists/comedy-movies-2001-20207",
+					Id = Comedy,
+					Enabled = enabled,
+					Provider = FeedProvider.Mdblist,
+					Strategy = mirror is { } grace ? new FeedStrategy(new Mirror(grace)) : new FeedStrategy(new Append()),
+					Identifier = "hdlists/comedy-movies-2001-2020",
+					CreatedAt = Now,
+					Schedule = new FeedRunTrigger(new Scheduled("0 26 * * * *")),
+				},
+				runs > 0 ? Totals(runs) : null,
+				onWantlist
+			),
 			job,
 			enabled ? Now.AddMinutes(43) : null
 		);
 
-	private static FeedOverview Overview(int runs) =>
+	private static FeedRunTotals Totals(int runs) =>
 		new(
 			new FeedRun
 			{

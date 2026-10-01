@@ -61,7 +61,7 @@ internal sealed class ApiKeyService(
 	{
 		await keys.RemoveApiKeyAsync(provider, cancellationToken);
 		cache.Remove(CacheKey(provider));
-		await feeds.DisableFeedsUsingAsync(provider, cancellationToken);
+		await feeds.PauseUsingAsync(provider, cancellationToken);
 	}
 
 	public void Invalidate(ApiKeyProvider provider) => cache.Remove(CacheKey(provider));
