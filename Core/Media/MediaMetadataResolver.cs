@@ -37,7 +37,7 @@ internal sealed class MediaMetadataResolver(
 		{
 			return detail;
 		}
-		var enriched = await EnrichAsync(identified.Value, searchProvider, cancellationToken);
+		var enriched = await EnrichAsync(identified.Value, searchProvider, ratingProvider, cancellationToken);
 		return await ApplyRatingsAsync(enriched, ratingProvider, cancellationToken);
 	}
 
@@ -50,7 +50,7 @@ internal sealed class MediaMetadataResolver(
 
 	private async Task<IdentifiedMedia> ApplyRatingsAsync(IdentifiedMedia details, RatingProvider ratingProvider, CancellationToken cancellationToken)
 	{
-		if (details.Rating.Sources.Any(rating => rating.Source == ratingProvider))
+		if (HasRatingFrom(details.Rating, ratingProvider))
 		{
 			return details;
 		}
@@ -67,9 +67,15 @@ internal sealed class MediaMetadataResolver(
 			.GetValueOr(details);
 	}
 
-	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia details, SearchProvider searchProvider, CancellationToken cancellationToken)
+	private async Task<IdentifiedMedia> EnrichAsync(
+		IdentifiedMedia details,
+		SearchProvider searchProvider,
+		RatingProvider ratingProvider,
+		CancellationToken cancellationToken
+	)
 	{
 		var primaryProvider = searchProvider.AsMediaProvider();
+		var unanswered = MediaField.None;
 		foreach (var provider in EnricherChain.Where(p => p != primaryProvider))
 		{
 			if (details is not IPartialMedia partial)
@@ -77,14 +83,28 @@ internal sealed class MediaMetadataResolver(
 				break;
 			}
 
-			details = await EnrichFromAsync(partial, provider, cancellationToken).Map(enriched => partial.MergeWith(enriched)).GetValueOr(details);
+			var enricher = enricherIndex[provider];
+			var fills = provider == ratingProvider.AsMediaProvider() ? enricher.Fills : enricher.Fills & ~MediaField.Rating;
+			if (!Needed(partial, ratingProvider).Overlaps(fills) || partial.Identity.Externals.OfProvider(provider) is not { } id)
+			{
+				continue;
+			}
+
+			switch (await enricher.LookUpAsync(id, cancellationToken))
+			{
+				case Success<MediaLookup>(var lookup) when lookup.ToIdentified() is Some<IdentifiedMedia>(var enriched):
+					details = partial.MergeWith(enriched);
+					break;
+				case Error { Exception: ProviderUnavailableException }:
+					unanswered |= fills;
+					break;
+			}
 		}
-		return details;
+		return details is IPartialMedia remaining ? remaining.Confirming(remaining.Missing & ~unanswered) : details;
 	}
 
-	private Task<Optional<IdentifiedMedia>> EnrichFromAsync(IPartialMedia partial, MediaProvider provider, CancellationToken cancellationToken) =>
-		Optional
-			.Of(partial.Identity.Externals.OfProvider(provider))
-			.Map(id => enricherIndex[provider].LookUpAsync(id, cancellationToken).ToOptional())
-			.Map(lookup => lookup.ToIdentified());
+	private static MediaField Needed(IPartialMedia partial, RatingProvider ratingProvider) =>
+		HasRatingFrom(partial.Rating, ratingProvider) ? partial.Missing : partial.Missing | MediaField.Rating;
+
+	private static bool HasRatingFrom(RatingSummary rating, RatingProvider provider) => rating.Sources.Any(source => source.Source == provider);
 }

@@ -6,45 +6,33 @@ public static class MediaCompleteness
 {
 	extension(IPartialMedia partial)
 	{
-		public IReadOnlyList<string> MissingFields
-		{
-			get
+		public MediaField Missing =>
+			Gap(!HasText(partial.Title), MediaField.Title)
+			| Gap(!HasText(partial.Tagline), MediaField.Tagline)
+			| Gap(!HasText(partial.Summary), MediaField.Summary)
+			| Gap(!HasText(partial.PosterUrl), MediaField.Poster)
+			| Gap(!HasText(partial.BackdropUrl), MediaField.Backdrop)
+			| Gap(!HasDate(partial.ReleaseDate), MediaField.ReleaseDate)
+			| Gap(!HasItems(partial.Genres), MediaField.Genres)
+			| partial switch
 			{
-				var missing = new List<string>();
-				if (!HasText(partial.Title))
-					missing.Add(nameof(IPartialMedia.Title));
-				if (!HasText(partial.Tagline))
-					missing.Add(nameof(IPartialMedia.Tagline));
-				if (!HasText(partial.Summary))
-					missing.Add(nameof(IPartialMedia.Summary));
-				if (!HasText(partial.PosterUrl))
-					missing.Add(nameof(IPartialMedia.PosterUrl));
-				if (!HasText(partial.BackdropUrl))
-					missing.Add(nameof(IPartialMedia.BackdropUrl));
-				if (!HasDate(partial.ReleaseDate))
-					missing.Add(nameof(IPartialMedia.ReleaseDate));
-				if (!HasItems(partial.Genres))
-					missing.Add(nameof(IPartialMedia.Genres));
+				PartialMovie movie => Gap(!HasDuration(movie.Runtime), MediaField.Runtime),
+				PartialShow show => Gap(!HasCount(show.Seasons), MediaField.Seasons)
+					| Gap(!HasCount(show.Episodes), MediaField.Episodes)
+					| Gap(!HasDuration(show.RuntimePerEpisode), MediaField.RuntimePerEpisode),
+				_ => MediaField.None,
+			};
 
-				switch (partial)
-				{
-					case PartialMovie movie when !HasDuration(movie.Runtime):
-						missing.Add(nameof(PartialMovie.Runtime));
-						break;
-					case PartialShow show:
-						if (!HasCount(show.Seasons))
-							missing.Add(nameof(PartialShow.Seasons));
-						if (!HasCount(show.Episodes))
-							missing.Add(nameof(PartialShow.Episodes));
-						if (!HasDuration(show.RuntimePerEpisode))
-							missing.Add(nameof(PartialShow.RuntimePerEpisode));
-						break;
-				}
+		public bool IsComplete => partial.Missing is MediaField.None;
 
-				return missing;
-			}
-		}
-
-		public bool IsComplete => partial.MissingFields.Count == 0;
+		public IdentifiedMedia Confirming(MediaField fields) =>
+			partial switch
+			{
+				PartialMovie movie => IdentifiedMedia.From(movie with { ConfirmedMissing = fields }),
+				PartialShow show => IdentifiedMedia.From(show with { ConfirmedMissing = fields }),
+				_ => IdentifiedMedia.From(partial),
+			};
 	}
+
+	private static MediaField Gap(bool missing, MediaField field) => missing ? field : MediaField.None;
 }

@@ -74,6 +74,35 @@ public class PlexApiTests
 	}
 
 	[Test]
+	public async Task ByIdAsync_AfterPlexWasUnavailable_AsksPlexAgain()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWith(new HttpResponseMessage(HttpStatusCode.TooManyRequests)).Then().RespondWithJson(BuildEmptyByIdPayload());
+		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl));
+		var id = PlexId.From("plex-1", MediaType.Movie);
+		await Assert.That(async () => await testee.ByIdAsync(id)).Throws<ProviderUnavailableException>();
+
+		var retried = await testee.ByIdAsync(id);
+
+		await Assert.That(retried).IsError();
+		await Assert.That(handler.Requests).Count().IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task ByIdAsync_ForATitleAlreadyFetched_AnswersFromTheFirstFetch()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson(BuildEmptyByIdPayload());
+		var testee = BuildPlexApi(handler.CreateClient(PlexBaseUrl));
+		var id = PlexId.From("plex-1", MediaType.Movie);
+		await testee.ByIdAsync(id);
+
+		await testee.ByIdAsync(id);
+
+		await Assert.That(handler.Requests).Count().IsEqualTo(1);
+	}
+
+	[Test]
 	public async Task SearchAsync_WhenNoMatches_ReturnsEmpty()
 	{
 		var json = BuildEmptySearchPayload();

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using DB.Data.Media;
 using Domain.Media;
+using Domain.Media.Metadata;
 
 namespace DB.Data.Media.Metadata;
 
@@ -41,6 +42,8 @@ internal abstract record MediaMetadataRow : IAuditable
 
 	[Required]
 	public MediaType MediaType { get; init; }
+
+	public MediaField ConfirmedMissing { get; set; }
 
 	public List<MediaRatingRow> Ratings { get; set; } = [];
 }

@@ -34,11 +34,16 @@ ids that resolve to it.
 Cases: `TmdbId`, `ImdbId`, `TvdbId`, `PlexId`, `MdblistId`.
 
 Completeness:: Whether a partial title has all its fields. A complete partial is promoted to a
-full `Movie` or `Show` (`MediaCompleteness.IsComplete`, `MissingFields`).
+full `Movie` or `Show` (`MediaCompleteness.IsComplete`; `Missing` names the gaps as a `MediaField`).
 
 Freshness:: Whether a stored title is recent enough to skip a re-fetch: 7 days for a complete
-title or a partial whose only gaps are `Tagline` and `BackdropUrl`, 1 hour for any other partial
-(`MediaFreshness`).
+title or a partial whose gaps are all confirmed, 1 hour for any other partial (`MediaFreshness`).
+
+Confirmed gap:: A field still missing after every enricher that could fill it answered
+(`IPartialMedia.ConfirmedMissing`). An enricher that was unavailable (rate limited or down) leaves its fields
+unconfirmed, so they retry after the hour; a lookup that finds nothing counts as an answer. An enricher is only asked when its `Fills` overlap a missing field. A confirmed gap
+lasts until the title goes stale after 7 days, even if a new enricher, a config change or a newly
+learned id could fill it sooner.
 
 CachedMedia:: The stored form of a title with the time it was fetched (an `IdentifiedMedia`
 plus `FetchedAt`). Freshness reads `FetchedAt` to decide whether a re-fetch is due.

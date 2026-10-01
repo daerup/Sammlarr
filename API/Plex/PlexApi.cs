@@ -3,16 +3,31 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using API.Plex.Types;
+using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider
+internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider, IMetadataEnricher
 {
 	private const int SearchLimit = 30;
+
+	public MediaField Fills =>
+		MediaField.Title
+		| MediaField.Tagline
+		| MediaField.Summary
+		| MediaField.Poster
+		| MediaField.Backdrop
+		| MediaField.ReleaseDate
+		| MediaField.Genres
+		| MediaField.Runtime
+		| MediaField.Seasons
+		| MediaField.Episodes
+		| MediaField.RuntimePerEpisode;
 
 	private readonly ConcurrentDictionary<string, Lazy<Task<Result<MediaLookup>>>> _byRatingKey = new();
 
@@ -60,7 +75,20 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 	}
 
 	internal Task<Result<MediaLookup>> ByIdAsync(PlexId plexId, CancellationToken cancellationToken = default) =>
-		_byRatingKey.GetOrAdd(plexId.Value, _ => new Lazy<Task<Result<MediaLookup>>>(() => FetchByIdAsync(plexId, cancellationToken))).Value;
+		_byRatingKey.GetOrAdd(plexId.Value, key => new Lazy<Task<Result<MediaLookup>>>(() => FetchOnceAsync(key, plexId))).Value.WaitAsync(cancellationToken);
+
+	private async Task<Result<MediaLookup>> FetchOnceAsync(string key, PlexId plexId)
+	{
+		try
+		{
+			return await FetchByIdAsync(plexId, CancellationToken.None);
+		}
+		catch (Exception)
+		{
+			_byRatingKey.TryRemove(key, out _);
+			throw;
+		}
+	}
 
 	private async Task<Result<MediaLookup>> FetchByIdAsync(PlexId plexId, CancellationToken cancellationToken)
 	{

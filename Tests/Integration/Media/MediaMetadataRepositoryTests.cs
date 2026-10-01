@@ -93,6 +93,25 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	}
 
 	[Test]
+	public async Task UpsertAsync_ForAPartial_KeepsWhichGapsAreConfirmed()
+	{
+		var plexId = PlexId.From("plex-812", MediaType.Movie);
+		var mediaId = await SeedMediaAsync([plexId]);
+		var partial = new PartialMovie
+		{
+			Identity = new MediaIdentity(mediaId, [plexId]),
+			Title = "Solaris",
+			ConfirmedMissing = MediaField.Tagline | MediaField.Backdrop,
+		};
+
+		await _testee.UpsertMetadataAsync([IdentifiedMedia.From(partial)]);
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = await Assert.That((await _testee.GetAsync([mediaId])).Single().Stored).IsOfUnionType<IdentifiedMedia, IPartialMedia>();
+		await Assert.That(stored!.ConfirmedMissing).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
+	}
+
+	[Test]
 	public async Task QueryMediaMetadata_WhenMetadataMissing_YieldsUnmatchedMediaWithoutFetchedAt()
 	{
 		var plexId = PlexId.From("plex-811", MediaType.Movie);

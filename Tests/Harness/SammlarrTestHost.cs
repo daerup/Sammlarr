@@ -216,6 +216,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		HttpStub.RespondWithJsonForUrl(string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, tmdbId), """{ "id": 0 }""");
 	}
 
+	internal void TmdbDetailFails(MediaSpec spec, HttpStatusCode status)
+	{
+		var tmdbId = spec.Ids.First(id => id.Provider == MediaProvider.Tmdb).Value;
+		HttpStub.RespondForUrl(string.Format(TmdbEndpoints.Detail, TmdbEndpoints.MovieType, tmdbId), _ => new HttpResponseMessage(status));
+	}
+
 	internal async Task TmdbTrendingPage(int page, params MediaSpec[] items)
 	{
 		await EnsureTmdbAccount();
