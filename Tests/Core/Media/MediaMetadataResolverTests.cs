@@ -21,7 +21,7 @@ public class MediaMetadataResolverTests
 	private static readonly TmdbId Tmdb = TmdbId.From("500", MediaType.Movie);
 	private static readonly MediaIdentity Identity = new(Id, [Plex, Tmdb]);
 	private static readonly MediaIdentity PlexOnly = new(Id, [Plex]);
-	private static readonly RatingSummary TmdbRating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8f, 500)]);
+	private static readonly RatingSummary TmdbRating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8f, 500)]);
 	private static readonly Error Unavailable = Error.From(new ProviderUnavailableException(MediaProvider.Tmdb));
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 

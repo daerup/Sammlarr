@@ -7,7 +7,7 @@ public class ProviderCaptionTests
 {
 	[Test]
 	[Arguments(MediaProvider.Plex, "Account · search, wantlist, sign-in")]
-	[Arguments(MediaProvider.Tmdb, "API key · trending, ratings, feeds")]
+	[Arguments(MediaProvider.Tmdb, "API key · trending, feeds")]
 	[Arguments(MediaProvider.Mdblist, "API key · feeds")]
 	public async Task For_AProvider_NamesItsCredentialThenEveryOtherCapability(MediaProvider provider, string caption)
 	{

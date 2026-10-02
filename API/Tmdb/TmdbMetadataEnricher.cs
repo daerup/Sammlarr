@@ -70,7 +70,7 @@ internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMet
 
 	private static RatingSummary BuildRating(TmdbTypes.Details details) =>
 		details.VoteAverage is { } vote && vote > 0
-			? RatingSummary.From([new MediaRating(RatingProvider.Tmdb, (float)vote, details.VoteCount)])
+			? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, (float)vote, details.VoteCount)])
 			: RatingSummary.None;
 
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;

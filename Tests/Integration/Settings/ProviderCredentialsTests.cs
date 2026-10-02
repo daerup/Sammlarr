@@ -147,7 +147,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 		await ApiKeys.ClearAsync(ApiKeyProvider.Tmdb);
 
 		host.ScopedDbContext.ChangeTracker.Clear();
-		var cached = await host.ScopedDbContext.MediaRatings.AsNoTracking().AnyAsync(rating => rating.Source == RatingProvider.Tmdb);
+		var cached = await host.ScopedDbContext.MediaRatings.AsNoTracking().AnyAsync(rating => rating.Source == MediaProvider.Tmdb);
 		await Assert.That(cached).IsTrue();
 	}
 }

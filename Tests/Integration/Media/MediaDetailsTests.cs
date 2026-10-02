@@ -141,7 +141,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
-		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: RatingProvider.Tmdb);
+		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: MediaProvider.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
 	}
 
@@ -155,7 +155,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
-		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: RatingProvider.Tmdb);
+		await AssertDetail(results[0], "Fight Club", summary: "An insomniac office worker", genres: ["Drama", "Thriller"], rating: MediaProvider.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
 	}
 
@@ -204,7 +204,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
-		await AssertDetail(results[0], "Fight Club", summary: "Plex summary", genres: ["Action", "Crime"], rating: RatingProvider.Tmdb);
+		await AssertDetail(results[0], "Fight Club", summary: "Plex summary", genres: ["Action", "Crime"], rating: MediaProvider.Tmdb);
 	}
 
 	[Test]
@@ -217,7 +217,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
-		await AssertDetail(results[0], "Fight Club", summary: "TMDB summary", genres: ["Drama", "Thriller"], rating: RatingProvider.Tmdb);
+		await AssertDetail(results[0], "Fight Club", summary: "TMDB summary", genres: ["Drama", "Thriller"], rating: MediaProvider.Tmdb);
 	}
 
 	[Test]
@@ -230,7 +230,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
-		await AssertDetail(results[0], "Fight Club", summary: "Plex summary", genres: ["Drama", "Thriller"], rating: RatingProvider.Tmdb);
+		await AssertDetail(results[0], "Fight Club", summary: "Plex summary", genres: ["Drama", "Thriller"], rating: MediaProvider.Tmdb);
 		await AssertDetailCachedAs(Detail(results[0]), fightClub, At(6, 1));
 	}
 
@@ -341,7 +341,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		string title,
 		string? summary = null,
 		IReadOnlyList<string>? genres = null,
-		RatingProvider? rating = null,
+		MediaProvider? rating = null,
 		bool noRating = false
 	)
 	{

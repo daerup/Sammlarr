@@ -147,7 +147,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var rated = CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.5f, 1200)]) };
+		var rated = CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, 1200)]) };
 		await _testee.UpsertMetadataAsync([rated]);
 		fixture.Context.ChangeTracker.Clear();
 
@@ -157,7 +157,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, Movie>();
 		await Assert.That(row.Stored.Rating.Sources.Count).IsEqualTo(1);
 		var rating = row.Stored.Rating.Sources.Single();
-		await Assert.That(rating.Source).IsEqualTo(RatingProvider.Tmdb);
+		await Assert.That(rating.Source).IsEqualTo(MediaProvider.Tmdb);
 		await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
 		await Assert.That(rating.VoteCount).IsEqualTo(1200);
 	}

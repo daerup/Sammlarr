@@ -20,7 +20,7 @@ internal static class DemoMedia
 		BackdropUrl = "https://image.tmdb.org/t/p/w780/qL4dBGLkWOVP5vImN7EEoqJQYd8.jpg",
 		ReleaseDate = new DateOnly(2026, 3, 20),
 		Genres = ["Science Fiction", "Adventure"],
-		Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.4f)]),
+		Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.4f)]),
 		Runtime = TimeSpan.FromMinutes(150),
 	}.ToMatch();
 
@@ -42,7 +42,7 @@ internal static class DemoMedia
 		BackdropUrl = "https://image.tmdb.org/t/p/w780/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
 		ReleaseDate = new DateOnly(2008, 1, 20),
 		Genres = ["Drama", "Crime"],
-		Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.9f)]),
+		Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.9f)]),
 		Seasons = 5,
 		Episodes = 62,
 		RuntimePerEpisode = TimeSpan.FromMinutes(47),
@@ -59,7 +59,7 @@ internal static class DemoMedia
 		BackdropUrl = "https://image.tmdb.org/t/p/w780/edS1AlGAXopVq0L2voGOooYcE1S.jpg",
 		ReleaseDate = new DateOnly(2026, 4, 2),
 		Genres = [],
-		Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 7.1f)]),
+		Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.1f)]),
 		Runtime = TimeSpan.Zero,
 	}.ToMatch();
 
@@ -73,7 +73,7 @@ internal static class DemoMedia
 		BackdropUrl = "https://image.tmdb.org/t/p/w780/rFjlsx5IygrHmBqr0KsVolAHhy7.jpg",
 		ReleaseDate = new DateOnly(2026, 8, 26),
 		Genres = [],
-		Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 8.1f)]),
+		Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.1f)]),
 		Runtime = TimeSpan.Zero,
 	}.ToMatch();
 
@@ -88,7 +88,7 @@ internal static class DemoMedia
 		BackdropUrl = "https://image.tmdb.org/t/p/w780/pOGqAA6AOOKLRWOfYvRAdDP0vOl.jpg",
 		ReleaseDate = new DateOnly(2025, 12, 5),
 		Genres = [],
-		Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 5.8f)]),
+		Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.8f)]),
 		Runtime = TimeSpan.Zero,
 	}.ToMatch();
 
@@ -102,7 +102,7 @@ internal static class DemoMedia
 		BackdropUrl = "https://image.tmdb.org/t/p/w780/hDp8Itlhln0aBjlHXVIsUsxiRaa.jpg",
 		ReleaseDate = new DateOnly(2025, 10, 30),
 		Genres = [],
-		Rating = RatingSummary.From([new MediaRating(RatingProvider.Tmdb, 6.8f)]),
+		Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 6.8f)]),
 		Runtime = TimeSpan.Zero,
 	}.ToMatch();
 

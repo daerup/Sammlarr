@@ -6,7 +6,7 @@ namespace DB.Data.Media.Metadata;
 internal record MediaRatingRow
 {
 	[Required]
-	public required RatingProvider Source { get; set; }
+	public required MediaProvider Source { get; set; }
 
 	[Required]
 	public required float NormalizedValue { get; set; }
