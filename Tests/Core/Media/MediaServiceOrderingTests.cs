@@ -185,7 +185,7 @@ public class MediaServiceOrderingTests
 		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
-			new MediaIdResolver(null, unmatchedCache.Object),
+			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
 			metadataResolver,
 			coordinator,
 			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),

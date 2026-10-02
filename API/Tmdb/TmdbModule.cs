@@ -22,6 +22,6 @@ internal class TmdbModule : IServiceModule
 		services.AddKeyedScoped<ITrendingService, TmdbTrendingService>(TrendingProvider.Tmdb);
 		services.AddKeyedScoped<IMetadataEnricher, TmdbMetadataEnricher>(MediaProvider.Tmdb);
 		services.AddKeyedScoped<IMediaRatingService, TmdbRatingService>(RatingProvider.Tmdb);
-		services.AddKeyedScoped<IExternalIdConverter, TmdbIdConverter>(MediaProvider.Tmdb);
+		services.AddScoped<IExternalIdConverter, TmdbIdConverter>();
 	}
 }

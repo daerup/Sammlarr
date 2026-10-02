@@ -35,9 +35,11 @@ _Response:_ B sees only B's rows; a query with no authenticated user throws rath
 everyone's. _Measure:_ the isolation integration tests pass; the current-user lookup is fail-closed.
 
 Scenario R (resilience):: A feed resolves while Plex returns 429 or is unreachable. _Response:_
-affected ids become `UnmatchedMedia` ("not found"), the run completes, no exception escapes, and
-the ids are cached unmatched for an hour so the storm is not amplified. _Measure:_ partial results
-are returned; `ProviderUnavailableException` is handled, not propagated.
+affected ids become `UnmatchedMedia` ("not found"), the run completes and no exception escapes.
+A provider blocked by a 429 or an open circuit breaker is skipped by every title, and one that answered
+as unavailable is not asked again by the same title's other routes, so the storm is not amplified; the
+ids are not cached unmatched, so the next run retries them. _Measure:_ partial results are returned;
+`ProviderUnavailableException` is handled, not propagated.
 
 Scenario P (performance):: A feed of N items is previewed. _Response:_ resolution reuses fresh
 library rows and the negative cache and calls providers at the recommended concurrency, so a

@@ -395,13 +395,23 @@ public class MediaServiceTests
 		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
 
 		var converter = IExternalIdConverter.Mock();
-		converter.ConvertAsync(Any(), Any(), Any()).Returns((candidates, _, _) => Success.Of<IReadOnlyList<IExternalMediaId>>([.. candidates]));
-		var converters = new FakeKeyedServiceIndex<MediaProvider, IExternalIdConverter>().Register(MediaProvider.Tmdb, converter.Object);
+		converter.Routes.Returns([
+			new IdRoute(Some.Of(MediaProvider.Tmdb), MediaProvider.Tmdb, [], 0),
+			new IdRoute(Some.Of(MediaProvider.Imdb), MediaProvider.Tmdb, [MediaProvider.Tmdb], 1),
+		]);
+		converter
+			.ConvertAsync(Any(), Any(), Any(), Any())
+			.Returns(
+				(route, candidates, _, _) =>
+					Success.Of<IReadOnlyList<IExternalMediaId>>(
+						route.From is Some<MediaProvider>(MediaProvider.Imdb) ? [.. candidates.Select(id => TmdbId.From($"found-{id.Value}", id.Type))] : [.. candidates]
+					)
+			);
 
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
-			new MediaIdResolver(converters, unmatchedCache.Object),
+			new MediaIdResolver([converter.Object], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
 			metadataResolver,
 			coordinator,
 			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),

@@ -1,16 +1,16 @@
+using System.Net;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
+using API.Tests.TMDB;
 using API.Tmdb;
 using API.Tmdb.Types;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
-using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Options;
 using TestInfrastructure;
 
 namespace API.Tests.Plex;
@@ -20,12 +20,24 @@ public class PlexIdConverterTests
 	private const string PlexBaseUrl = "https://plex.tv";
 
 	[Test]
+	public async Task ConvertAsync_FromATmdbIdWhileTmdbIsUnavailable_FailsAsUnavailable()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.ServiceUnavailable);
+		var testee = new PlexIdConverter(TmdbApis.Over(handler), null!);
+
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Tmdb), [TmdbId.From("550", MediaType.Movie)], new None());
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsTypeOf<ProviderUnavailableException>());
+	}
+
+	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsPlexId_ReturnsPlexIdWithAdditionalIds()
 	{
 		var payload = CreatePlexByIdPayload(true, true);
 		var testee = new PlexIdConverter(null!, CreatePlexApi(payload.Json));
 
-		var result = await testee.ConvertAsync([payload.PlexId], new None());
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Plex), [payload.PlexId], new None());
 
 		await Assert
 			.That(result)
@@ -46,7 +58,7 @@ public class PlexIdConverterTests
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApiWithSearch(payload));
 
-		var result = await testee.ConvertAsync([payload.TmdbId], new None());
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Tmdb), [payload.TmdbId], new None());
 
 		await Assert
 			.That(result)
@@ -67,7 +79,7 @@ public class PlexIdConverterTests
 		var tmdbApi = CreateTmdbApi(payload.TmdbId, "match");
 		var testee = new PlexIdConverter(tmdbApi, CreatePlexApiWithEmptySearch());
 
-		var result = await testee.ConvertAsync([payload.TmdbId], new None());
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Tmdb), [payload.TmdbId], new None());
 		await Assert.That(result).IsError();
 	}
 
@@ -76,12 +88,7 @@ public class PlexIdConverterTests
 		var details = new TmdbTypes.Details(int.Parse(tmdbId.Value), originalTitle, null, "2021-01-01", null, originalTitle, null, "movie");
 		var handler = Mock.HttpHandler();
 		handler.OnAnyRequest().RespondWithJson(JsonSerializer.Serialize(details));
-		var apiKeyStore = IApiKeyService.Mock();
-		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-api-key");
-		apiKeyStore.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
-		var options = new TmdbOptions { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
-		var tmdbClient = new TmdbClient(handler.CreateClient(options.BaseUrl), options, apiKeyStore.Object, ICurrentUser.Mock().Object);
-		return new TmdbApi(tmdbClient, apiKeyStore.Object, NullLogger<TmdbApi>.Instance);
+		return TmdbApis.Over(handler);
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeImdbId, bool includeTvdbId)

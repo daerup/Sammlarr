@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
 using System.Web;
@@ -11,6 +12,10 @@ internal sealed class HttpStub : HttpMessageHandler
 	private readonly List<(string UrlContains, Func<HttpRequestMessage, bool> Validator)> _credentialValidators = [];
 
 	private readonly Dictionary<string, Func<HttpRequestMessage, Task<HttpResponseMessage>>> _urlResponders = new();
+
+	private readonly ConcurrentQueue<string> _requested = new();
+
+	public int Requests(string urlContains) => _requested.Count(url => url.Contains(urlContains, StringComparison.OrdinalIgnoreCase));
 
 	public void RespondWithJson(string json) =>
 		_respond = _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") });
@@ -55,6 +60,7 @@ internal sealed class HttpStub : HttpMessageHandler
 	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 	{
 		var url = request.RequestUri?.AbsoluteUri ?? string.Empty;
+		_requested.Enqueue(url);
 
 		foreach (var (urlContains, validator) in _credentialValidators)
 		{

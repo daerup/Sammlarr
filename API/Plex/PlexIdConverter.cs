@@ -10,22 +10,36 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 	private const int LookupConcurrency = 4;
 	private const int MaxCandidateLookups = 3;
 
+	public IReadOnlyList<IdRoute> Routes { get; } =
+	[
+		new(Some.Of(MediaProvider.Plex), MediaProvider.Plex, [MediaProvider.Plex], 1),
+		new(new None(), MediaProvider.Plex, [MediaProvider.Plex], 1 + MaxCandidateLookups),
+		new(Some.Of(MediaProvider.Tmdb), MediaProvider.Plex, [MediaProvider.Tmdb, MediaProvider.Plex], 2 + MaxCandidateLookups),
+		new(Some.Of(MediaProvider.Imdb), MediaProvider.Plex, [MediaProvider.Tmdb, MediaProvider.Plex], 2 + MaxCandidateLookups),
+	];
+
 	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
+		IdRoute route,
 		IEnumerable<IExternalMediaId> candidates,
 		Optional<ResolutionHints> hints,
 		CancellationToken cancellationToken = default
 	)
 	{
 		var materialized = candidates.ToList();
-		foreach (var plexId in materialized.OfType<PlexId>())
+		return route.From switch
 		{
-			return await plexApi.LookUpExternalsAsync(plexId, cancellationToken);
-		}
-
-		return await hints
-			.Map(h => ResolveByTitleAsync(h.Title, h.Year, h.MediaType, materialized, cancellationToken))
-			.Or(() => ResolveByTmdbTitleAsync(materialized, cancellationToken))
-			.ToResult("No Plex id could be resolved for the given candidates.");
+			Some<MediaProvider>(MediaProvider.Plex) => materialized.OfType<PlexId>().FirstOrDefault() is { Value: not null } plexId
+				? await plexApi.LookUpExternalsAsync(plexId, cancellationToken)
+				: Error.From("The candidates hold no Plex id to look up."),
+			Some<MediaProvider> => await route.ConvertEachAsync(
+				materialized,
+				source => ResolveByOriginalTitleAsync(source, materialized, cancellationToken),
+				"No Plex id could be resolved from an original title."
+			),
+			None => hints is Some<ResolutionHints>(var hint)
+				? await ResolveByTitleAsync(hint.Title, hint.Year, hint.MediaType, materialized, cancellationToken).ToResult("Plex found no title matching the hints.")
+				: Error.From("Plex needs title hints to search by."),
+		};
 	}
 
 	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveByTitleAsync(
@@ -72,12 +86,13 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 		return match;
 	}
 
-	private Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveByTmdbTitleAsync(List<IExternalMediaId> candidates, CancellationToken cancellationToken)
-	{
-		return candidates.FirstSomeAsync(candidate =>
-			GetOriginalTitleAsync(candidate, cancellationToken).Map(title => ResolveByTitleAsync(title, 0, candidate.Type, candidates, cancellationToken))
-		);
-	}
+	private Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveByOriginalTitleAsync(
+		IExternalMediaId source,
+		List<IExternalMediaId> candidates,
+		CancellationToken cancellationToken
+	) =>
+		GetOriginalTitleAsync(source, cancellationToken)
+			.Map(title => ResolveByTitleAsync(title, 0, source.Type, candidates, cancellationToken).ToResult($"Plex found no title matching {title}."));
 
 	private static IEnumerable<MediaLookup> RankByHints(IReadOnlyList<MediaLookup> results, string title, int year) =>
 		results.OrderByDescending(result => Score(result, title, year));
@@ -108,16 +123,13 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 		return new([.. trimmed.Where(char.IsLetterOrDigit).Select(char.ToLowerInvariant)]);
 	}
 
-	private async Task<Optional<string>> GetOriginalTitleAsync(IExternalMediaId candidate, CancellationToken cancellationToken) =>
+	private async Task<Result<string>> GetOriginalTitleAsync(IExternalMediaId candidate, CancellationToken cancellationToken) =>
 		candidate switch
 		{
-			TmdbId tmdbId => OriginalTitleOrNone(await tmdbApi.GetDetailAsync(tmdbId, cancellationToken), detail => detail.DisplayOriginalTitle),
-			ImdbId imdbId => OriginalTitleOrNone(await tmdbApi.FindByImdbIdAsync(imdbId, cancellationToken), item => item.DisplayOriginalTitle),
-			_ => new None(),
+			TmdbId tmdbId => await tmdbApi.GetDetailAsync(tmdbId, cancellationToken).Map(detail => detail.DisplayOriginalTitle),
+			ImdbId imdbId => await tmdbApi.FindAsync(imdbId, cancellationToken).Map(item => item.DisplayOriginalTitle),
+			_ => Error.From($"TMDB has no original title for a {candidate.Source} id."),
 		};
-
-	private static Optional<string> OriginalTitleOrNone<T>(Result<T> lookup, Func<T, string> originalTitle)
-		where T : notnull => lookup.Match(found => Optional.Of(originalTitle(found)), _ => new None());
 
 	private static bool ContainsAnyCandidate(IEnumerable<IExternalMediaId> externals, IEnumerable<IExternalMediaId> candidates) =>
 		candidates.Any(externals.Contains);

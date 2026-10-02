@@ -22,7 +22,7 @@ internal class PlexModule : IServiceModule
 		services.AddKeyedScoped<IMetadataEnricher>(MediaProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
 		services.AddKeyedScoped<IOAuthProvider, PlexOAuthProvider>(AuthProvider.Plex);
 		services.AddKeyedScoped<IMediaSink, PlexSink>(SinkKind.Plex);
-		services.AddKeyedScoped<IExternalIdConverter, PlexIdConverter>(MediaProvider.Plex);
+		services.AddScoped<IExternalIdConverter, PlexIdConverter>();
 
 		services.AddSingleton<PlexUrls>();
 		services.AddKeyedSingleton<IArtworkResizer, PlexArtwork>(ArtworkProvider.Plex);

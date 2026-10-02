@@ -14,8 +14,11 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 	public async Task<Result<TmdbTypes.Details>> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default) =>
 		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
 
-	public async Task<Result<TmdbTypes.FindItem>> FindByImdbIdAsync(ImdbId id, CancellationToken cancellationToken = default) =>
+	public async Task<Result<TmdbTypes.FindItem>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
 		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+
+	public async Task<Result<TmdbTypes.ExternalIds>> GetExternalIdsAsync(TmdbId id, CancellationToken cancellationToken = default) =>
+		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchExternalIdsAsync(id, apiKey, cancellationToken));
 
 	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{
@@ -32,25 +35,55 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 				(int)response.StatusCode,
 				id.Value
 			);
-			return IsTransient(response.StatusCode)
-				? Error.From(new ProviderUnavailableException(MediaProvider.Tmdb))
-				: Error.From($"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
+			return Unanswered(response.StatusCode, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no metadata for {id.Value}";
 		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.Details>(stream), reason).When(detail => detail.Id != 0, reason);
 	}
 
-	private static bool IsTransient(HttpStatusCode status) => status is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)status >= 500;
-
-	private async Task<Result<TmdbTypes.FindItem>> FetchFindAsync(ImdbId id, IApiKey apiKey, CancellationToken cancellationToken)
+	private async Task<Result<TmdbTypes.ExternalIds>> FetchExternalIdsAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)
 	{
-		var endpoint = string.Format(TmdbEndpoints.Find, id.Value);
+		if (ToTmdbMediaType(id.Type) is not { } mediaType)
+		{
+			return Error.From($"TMDB does not support media type {id.Type}.");
+		}
+		var endpoint = string.Format(TmdbEndpoints.ExternalIds, mediaType, id.Value);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
-			logger.LogWarning("TMDB find returned {StatusCode} for {ImdbId}; treated as no match (check API key / rate limits)", (int)response.StatusCode, id.Value);
-			return Error.From($"TMDB find returned {(int)response.StatusCode} for {id.Value}");
+			logger.LogWarning("TMDB external ids returned {StatusCode} for {MediaId}", (int)response.StatusCode, id.Value);
+			return Unanswered(response.StatusCode, $"TMDB external ids returned {(int)response.StatusCode} for {id.Value}");
+		}
+		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.ExternalIds>(stream), $"TMDB has no external ids for {id.Value}");
+	}
+
+	private static string? FindSource(IExternalMediaId id) =>
+		id switch
+		{
+			ImdbId => "imdb_id",
+			TvdbId => "tvdb_id",
+			_ => null,
+		};
+
+	private static Error Unanswered(HttpStatusCode status, string reason) =>
+		IsTransient(status) ? Error.From(new ProviderUnavailableException(MediaProvider.Tmdb)) : Error.From(reason);
+
+	private static bool IsTransient(HttpStatusCode status) => status is HttpStatusCode.TooManyRequests or HttpStatusCode.RequestTimeout || (int)status >= 500;
+
+	private async Task<Result<TmdbTypes.FindItem>> FetchFindAsync(IExternalMediaId id, IApiKey apiKey, CancellationToken cancellationToken)
+	{
+		if (FindSource(id) is not { } source)
+		{
+			return Error.From($"TMDB cannot find a title by a {id.Source} id.");
+		}
+		var endpoint = string.Format(TmdbEndpoints.Find, id.Value, source);
+		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
+		if (!response.IsSuccessStatusCode)
+		{
+			logger.LogWarning("TMDB find returned {StatusCode} for {ExternalId}", (int)response.StatusCode, id.Value);
+			return Unanswered(response.StatusCode, $"TMDB find returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var result = JsonSerializer.Deserialize<TmdbTypes.Find>(stream);

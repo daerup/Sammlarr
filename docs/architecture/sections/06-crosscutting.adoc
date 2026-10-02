@@ -91,6 +91,16 @@ title is complete or nobody is left. An enricher that was skipped because it was
 leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. A blocked rating provider is still
 asked while the title owes its rating, since the rating fetch would make the same call anyway.
 
+Id resolution routes the same way. Each `IExternalIdConverter` lists its `IdRoute`s: which provider's id it starts
+from (or the title hints), which provider's id it yields, which providers it calls on the way (`Via`) and how many
+calls a hop costs. `MediaIdResolver` plans every chain of up to three hops from the ids the title already has to
+the target, drops the chains through a blocked provider, and tries the rest cheapest first, weighting each hop's
+calls by how busy its providers are. TMDB answers IMDb and TheTVDB ids through `find` and its own ids through
+`external_ids`, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex. Capacity is
+checked again before every hop, and a provider that answered as unavailable is not asked again by the
+title's remaining chains. A title is cached as unmatched only when every chain was tried and answered; a
+chain that was blocked or met an unavailable provider leaves it to the next run.
+
 === Persistence and migrations
 
 State is one SQLite database via EF Core. Repositories create a context per operation from
