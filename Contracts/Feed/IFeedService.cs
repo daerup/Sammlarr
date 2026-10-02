@@ -16,9 +16,9 @@ public interface IFeedService
 
 	Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<FeedId>> PauseAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
 
-	Task<IReadOnlyList<FeedId>> PauseUsingAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
+	Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default);
 
 	Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default);
 }
