@@ -13,6 +13,30 @@ internal static class TmdbStub
 		http.RespondWithJsonForUrl(string.Format(TmdbEndpoints.Detail, endpointType, tmdbId), DetailJson(tmdbId, v, voteAverage, voteCount, hasVoteData));
 	}
 
+	public static void Find(HttpStub http, ResolvedVersion v)
+	{
+		var hit = $$"""[{ "id": {{v.Ids[MediaProvider.Tmdb]}} }]""";
+		var json = v.Type == MediaType.Show ? $$"""{ "movie_results": [], "tv_results": {{hit}} }""" : $$"""{ "movie_results": {{hit}}, "tv_results": [] }""";
+		foreach (var (provider, source) in new[] { (MediaProvider.Imdb, "imdb_id"), (MediaProvider.Tvdb, "tvdb_id") })
+		{
+			if (v.Ids.TryGetValue(provider, out var id))
+			{
+				http.RespondWithJsonForUrl(string.Format(TmdbEndpoints.Find, id, source), json);
+			}
+		}
+	}
+
+	public static void ExternalIds(HttpStub http, ResolvedVersion v)
+	{
+		var endpointType = v.Type == MediaType.Show ? TmdbEndpoints.ShowType : TmdbEndpoints.MovieType;
+		var imdb = v.Ids.TryGetValue(MediaProvider.Imdb, out var imdbId) ? $"\"{imdbId}\"" : "null";
+		var tvdb = v.Ids.GetValueOrDefault(MediaProvider.Tvdb, "null");
+		http.RespondWithJsonForUrl(
+			string.Format(TmdbEndpoints.ExternalIds, endpointType, v.Ids[MediaProvider.Tmdb]),
+			$$"""{ "imdb_id": {{imdb}}, "tvdb_id": {{tvdb}} }"""
+		);
+	}
+
 	public static string TrendingJson(IReadOnlyList<ResolvedVersion> items, int page) =>
 		$$"""
 			{

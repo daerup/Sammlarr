@@ -83,6 +83,8 @@ internal static class TmdbTypes
 		[property: JsonPropertyName("tv_results")] IReadOnlyList<FindItem> TvResults
 	);
 
+	public record ExternalIds([property: JsonPropertyName("imdb_id")] string? ImdbId, [property: JsonPropertyName("tvdb_id")] int? TvdbId);
+
 	public record FindItem(
 		[property: JsonPropertyName("id")] int Id,
 		[property: JsonPropertyName("original_title")] string? OriginalTitle,

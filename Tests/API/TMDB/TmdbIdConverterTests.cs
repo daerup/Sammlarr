@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
@@ -20,10 +21,10 @@ public class TmdbIdConverterTests
 	[Test]
 	public async Task ConvertAsync_WhenMediaIdIsTmdbId_ReturnsSameId()
 	{
-		var testee = new TmdbIdConverter(null!);
+		var testee = new TmdbIdConverter(null!, null!);
 		var tmdbId = TmdbId.From("100", MediaType.Movie);
 
-		var result = await testee.ConvertAsync([tmdbId], new None());
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Tmdb), [tmdbId], new None());
 
 		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(tmdbId));
 	}
@@ -32,9 +33,9 @@ public class TmdbIdConverterTests
 	public async Task ConvertAsync_WhenPlexMetadataContainsTmdbIds_ReturnsFirstTmdbAndOtherIds()
 	{
 		var payload = CreatePlexByIdPayload(true, true, true);
-		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json));
+		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json), null!);
 
-		var result = await testee.ConvertAsync([payload.PlexId], new None());
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Plex), [payload.PlexId], new None());
 
 		await Assert
 			.That(result)
@@ -53,11 +54,54 @@ public class TmdbIdConverterTests
 	public async Task ConvertAsync_WhenPlexMetadataHasNoTmdbIds_ReturnsUnmatchedWithOtherIds()
 	{
 		var payload = CreatePlexByIdPayload(false, false, false);
-		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json));
+		var testee = new TmdbIdConverter(CreatePlexApi(payload.Json), null!);
 
-		var result = await testee.ConvertAsync([payload.PlexId], new None());
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Plex), [payload.PlexId], new None());
 
 		await Assert.That(result).IsError();
+	}
+
+	[Test]
+	public async Task ConvertAsync_FromAnImdbId_FindsTheTmdbIdThroughTmdb()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnRequest(request => request.PathMatches(".*find/tt0137523.*external_source=imdb_id.*"))
+			.RespondWithJson("{\"movie_results\":[{\"id\":550}],\"tv_results\":[]}");
+		var testee = new TmdbIdConverter(null!, TmdbApis.Over(handler));
+
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Imdb), [ImdbId.From("tt0137523", MediaType.Movie)], new None());
+
+		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(TmdbId.From("550", MediaType.Movie)));
+	}
+
+	[Test]
+	public async Task ConvertAsync_WhenTmdbKnowsOnlyTheSecondImdbId_FindsTheTmdbIdThroughIt()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnRequest(request => request.PathMatches(".*find/tt0000001.*")).RespondWithJson("{\"movie_results\":[],\"tv_results\":[]}");
+		handler.OnRequest(request => request.PathMatches(".*find/tt0137523.*")).RespondWithJson("{\"movie_results\":[{\"id\":550}],\"tv_results\":[]}");
+		var testee = new TmdbIdConverter(null!, TmdbApis.Over(handler));
+
+		var result = await testee.ConvertAsync(
+			testee.From(MediaProvider.Imdb),
+			[ImdbId.From("tt0000001", MediaType.Movie), ImdbId.From("tt0137523", MediaType.Movie)],
+			new None()
+		);
+
+		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(TmdbId.From("550", MediaType.Movie)));
+	}
+
+	[Test]
+	public async Task ConvertAsync_FromATvdbIdWhileTmdbIsRateLimited_FailsAsUnavailable()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().Respond(HttpStatusCode.TooManyRequests);
+		var testee = new TmdbIdConverter(null!, TmdbApis.Over(handler));
+
+		var result = await testee.ConvertAsync(testee.From(MediaProvider.Tvdb), [TvdbId.From("81189", MediaType.Show)], new None());
+
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsTypeOf<ProviderUnavailableException>());
 	}
 
 	private static PlexByIdPayload CreatePlexByIdPayload(bool includeTmdbId, bool includeExtraTmdbId, bool includeTvdbId)

@@ -40,11 +40,12 @@ stale title runs the two phases.
 
 ==== Phase A: ids to a Plex identity
 
-One `IExternalIdConverter`, chosen by the target provider, resolves the ids. The target is the
-provider the active sink addresses that title's type by (`IMediaSink.AddressedBy`): Plex for every
-type today, so an MDBList or TMDB reference is converted to a Plex id, the only id the wantlist can
-push. A type the sink cannot address fails as unmatched. The TMDB, IMDb and TheTVDB converters pass a
-matching id through, or read it from Plex given a Plex id.
+`MediaIdResolver` resolves the ids along the cheapest open chain of `IdRoute`s to the target
+(see Provider routing in <<section-concepts>>). The target is the provider the active sink addresses
+that title's type by (`IMediaSink.AddressedBy`): Plex for every type today, so an MDBList or TMDB
+reference is converted to a Plex id, the only id the wantlist can push. A type the sink cannot address
+fails as unmatched. The TMDB, IMDb and TheTVDB converters pass a matching id through, read it from Plex
+given a Plex id, or ask TMDB: `find` for an IMDb or TheTVDB id, `external_ids` for a TMDB id.
 
 [mermaid]
 ....
@@ -55,7 +56,7 @@ sequenceDiagram
   participant PX as Plex
 
   MS->>NC: known unmatched? (skip providers if cached)
-  MS->>IC: ConvertAsync(ids, title hint)
+  MS->>IC: ConvertAsync(route, ids, title hint)
   alt candidate already has a Plex id
     IC->>PX: look up externals by that id
     PX-->>IC: external ids
@@ -72,7 +73,7 @@ sequenceDiagram
     IC-->>MS: canonical identity
   else nothing matched
     IC-->>MS: unmatched
-    MS->>NC: cache unmatched (1h)
+    MS->>NC: cache unmatched (1h), unless a route was blocked or unavailable
   end
 ....
 
@@ -85,12 +86,12 @@ library ids.
 
 ==== Phase B: metadata
 
-Metadata comes from the search provider first (Plex), then an enricher chain (TMDB) until the
-record is complete, then ratings (TMDB); writes are batched write-behind (one identity + one
-metadata upsert per run). Two failure behaviours matter: an unmatched candidate becomes
-`UnmatchedMedia` (surfaced, never persisted); and when a provider is down or rate-limiting the id
-is cached unmatched for the hour, which is why a Plex 429 storm reports existing titles as "not
-found" (see <<section-technical-risks>>).
+Metadata comes from the search provider first (Plex), then from the open enricher that fills the
+most missing fields, one at a time, until the record is complete, then ratings (TMDB); writes are
+batched write-behind (one identity + one metadata upsert per run). Two failure behaviours matter: an
+unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down
+or rate-limiting the title shows as "not found" for that run but is not cached unmatched, so the next
+run retries it (see <<section-technical-risks>>).
 
 === Feed preview
 

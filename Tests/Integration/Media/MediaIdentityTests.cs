@@ -1,3 +1,4 @@
+using API.Plex;
 using Contracts.Media;
 using Contracts.Media.Conversions;
 using Domain.Media;
@@ -48,6 +49,44 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexHolds(Spec("Game of Thrones", Tvdb("81189"), Plex("1396")));
 
 		var results = await Testee.IdentifyAsync([Request(null, Plex("1396"))]).ToListAsync();
+
+		await AssertResolved(results[0], Tvdb("81189"));
+	}
+
+	[Test]
+	public async Task IdentifyAsync_ForAnImdbOnlyMovie_ResolvesTheTmdbIdThroughFind()
+	{
+		host.SinkAddresses(MediaProvider.Tmdb);
+		await host.TmdbFinds(Spec("Fight Club", Tmdb("550"), Imdb("tt0137523")));
+
+		var results = await Testee.IdentifyAsync([Request(null, Imdb("tt0137523"))]).ToListAsync();
+
+		await AssertResolved(results[0], Tmdb("550"));
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhilePlexIsRateLimited_ResolvesThroughTmdbWithoutAskingPlex()
+	{
+		var fightClub = Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"), Plex("550"));
+		host.SinkAddresses(MediaProvider.Tmdb);
+		await host.EnsurePlexAccount();
+		host.PlexHolds(fightClub);
+		await host.TmdbFinds(fightClub);
+		host.RateLimited(MediaProvider.Plex);
+
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"), Imdb("tt0137523"))]).ToListAsync();
+
+		await AssertResolved(results[0], Tmdb("550"));
+		await Assert.That(host.HttpStub.Requests(PlexEndpoints.MetadataPath)).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WithoutPlex_ResolvesATmdbShowToTvdbThroughTmdbsExternalIds()
+	{
+		host.SinkAddresses(MediaProvider.Tvdb);
+		await host.TmdbKnowsTheExternalIdsOf(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189")]));
+
+		var results = await Testee.IdentifyAsync([new ResolveRequest([Tmdb("1396").ToExternal(MediaType.Show)], new None())]).ToListAsync();
 
 		await AssertResolved(results[0], Tvdb("81189"));
 	}

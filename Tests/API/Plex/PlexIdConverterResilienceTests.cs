@@ -26,7 +26,7 @@ public class PlexIdConverterResilienceTests
 		var stub = new PlexStub().Returns(throttled).Returns(wanted).RateLimits(throttled);
 		var testee = new PlexIdConverter(null!, stub.CreateApi());
 
-		var result = await testee.ConvertAsync([wanted.TmdbId], Hints);
+		var result = await testee.ConvertAsync(testee.ByHints(), [wanted.TmdbId], Hints);
 
 		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
 	}
@@ -39,7 +39,7 @@ public class PlexIdConverterResilienceTests
 		var stub = new PlexStub().Returns(broken).Returns(wanted).Fails(broken, HttpStatusCode.NotFound);
 		var testee = new PlexIdConverter(null!, stub.CreateApi());
 
-		var result = await testee.ConvertAsync([wanted.TmdbId], Hints);
+		var result = await testee.ConvertAsync(testee.ByHints(), [wanted.TmdbId], Hints);
 
 		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
 	}
@@ -52,7 +52,7 @@ public class PlexIdConverterResilienceTests
 		var stub = new PlexStub().Returns(first).Returns(second).RateLimits(first).RateLimits(second);
 		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
 
-		await Assert.That(async () => await testee.ConvertAsync([PlexCandidate.Create().TmdbId], Hints)).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.ConvertAsync(testee.ByHints(), [PlexCandidate.Create().TmdbId], Hints)).Throws<ProviderUnavailableException>();
 	}
 
 	[Test]
@@ -68,6 +68,7 @@ public class PlexIdConverterResilienceTests
 		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
 
 		var result = await testee.ConvertAsync(
+			testee.ByHints(),
 			[wanted.TmdbId],
 			Some.Of(
 				new ResolutionHints
@@ -92,6 +93,7 @@ public class PlexIdConverterResilienceTests
 		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
 
 		var result = await testee.ConvertAsync(
+			testee.ByHints(),
 			[wanted.TmdbId],
 			Some.Of(
 				new ResolutionHints
@@ -120,6 +122,7 @@ public class PlexIdConverterResilienceTests
 		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
 
 		var result = await testee.ConvertAsync(
+			testee.ByHints(),
 			[wanted.TmdbId],
 			Some.Of(
 				new ResolutionHints
@@ -144,7 +147,7 @@ public class PlexIdConverterResilienceTests
 		}
 		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
 
-		var result = await testee.ConvertAsync([PlexCandidate.Create().TmdbId], Hints);
+		var result = await testee.ConvertAsync(testee.ByHints(), [PlexCandidate.Create().TmdbId], Hints);
 
 		await Assert.That(result).IsError();
 		await Assert.That(stub.MetadataLookups()).IsLessThanOrEqualTo(3);
@@ -159,9 +162,9 @@ public class PlexIdConverterResilienceTests
 		var plexApi = stub.CreateApi();
 		var testee = new PlexIdConverter(null!, plexApi);
 
-		var first = testee.ConvertAsync([shared.TmdbId], Hints);
+		var first = testee.ConvertAsync(testee.ByHints(), [shared.TmdbId], Hints);
 		await WaitForMetadataLookups(stub, 1);
-		var second = testee.ConvertAsync([shared.TmdbId], Hints);
+		var second = testee.ConvertAsync(testee.ByHints(), [shared.TmdbId], Hints);
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
 		stub.MetadataGate.SetResult();
 		await Task.WhenAll(first, second);

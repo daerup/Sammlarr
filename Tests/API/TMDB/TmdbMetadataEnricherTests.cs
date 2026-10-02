@@ -1,12 +1,7 @@
 using System.Net;
 using API.Tmdb;
-using Contracts.Auth;
-using Contracts.Identity;
-using Domain.Auth;
 using Domain.Media;
 using Domain.Providers;
-using Microsoft.Extensions.Logging.Abstractions;
-using Shared.Options;
 using TestInfrastructure;
 using TUnit.Mocks.Http;
 
@@ -14,7 +9,6 @@ namespace API.Tests.TMDB;
 
 public class TmdbMetadataEnricherTests
 {
-	private static readonly TmdbOptions Options = new() { BaseUrl = "https://api.themoviedb.org/3", ImageBaseUrl = "https://image.tmdb.org/t/p" };
 	private static readonly TmdbId Id = TmdbId.From("123", MediaType.Movie);
 
 	[Test]
@@ -62,16 +56,5 @@ public class TmdbMetadataEnricherTests
 		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNull());
 	}
 
-	private static TmdbMetadataEnricher CreateTestee(MockHttpHandler handler)
-	{
-		var apiKeyStore = IApiKeyService.Mock();
-		IApiKey apiKey = new TestApiKey(ApiKeyProvider.Tmdb, "test-key");
-		apiKeyStore.GetAsync(ApiKeyProvider.Tmdb, Any()).Returns(Success.Of(apiKey));
-		var tmdbApi = new TmdbApi(
-			new TmdbClient(handler.CreateClient(Options.BaseUrl), Options, apiKeyStore.Object, ICurrentUser.Mock().Object),
-			apiKeyStore.Object,
-			NullLogger<TmdbApi>.Instance
-		);
-		return new TmdbMetadataEnricher(tmdbApi, new TmdbArtwork(Options));
-	}
+	private static TmdbMetadataEnricher CreateTestee(MockHttpHandler handler) => new(TmdbApis.Over(handler), new TmdbArtwork(TmdbApis.Options));
 }

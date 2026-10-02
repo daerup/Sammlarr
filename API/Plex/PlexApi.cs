@@ -101,11 +101,11 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		return Result.WhenNotNull(result?.MediaContainer?.Metadata, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToMedia());
 	}
 
-	internal Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
+	internal Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
 		PlexId plexId,
 		Func<IExternalMediaId, bool> requires,
 		CancellationToken cancellationToken = default
-	) => LookUpExternalsAsync(plexId, cancellationToken).ToOptional().When(list => list.Any(requires));
+	) => LookUpExternalsAsync(plexId, cancellationToken).When(list => list.Any(requires), $"Plex knows no matching id for {plexId.Value}.");
 
 	private static string ToPlexMediaType(MediaType mediaType) =>
 		mediaType switch

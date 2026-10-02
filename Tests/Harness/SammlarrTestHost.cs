@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using API;
+using API.Http;
 using API.Mdblist;
 using API.Plex;
 using API.Tmdb;
@@ -215,6 +216,20 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void TmdbHolds(ResolvedVersion version, double? rating, int votes) =>
 		TmdbStub.Detail(HttpStub, version, rating ?? 0, votes, hasVoteData: rating.HasValue);
+
+	internal async Task TmdbFinds(MediaSpec spec)
+	{
+		await EnsureTmdbAccount();
+		TmdbStub.Find(HttpStub, FullVersion(spec));
+	}
+
+	internal async Task TmdbKnowsTheExternalIdsOf(MediaSpec spec)
+	{
+		await EnsureTmdbAccount();
+		TmdbStub.ExternalIds(HttpStub, FullVersion(spec));
+	}
+
+	internal void RateLimited(MediaProvider provider) => Resolve<ProviderCapacity>().Block(provider, TimeSpan.FromMinutes(1));
 
 	internal void TmdbHasNoDetail(MediaSpec spec)
 	{
