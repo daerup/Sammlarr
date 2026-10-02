@@ -2,12 +2,21 @@ using System.Globalization;
 using API.Plex;
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Media.Conversions;
 using Domain.Providers;
 
 namespace API.Tmdb;
 
 internal class TmdbIdConverter(PlexApi plexApi, TmdbApi tmdbApi) : IExternalIdConverter
 {
+	private static readonly ById ByTmdbId = new(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
+
+	private static readonly ById Find = new(Accepts: [MediaProvider.Imdb, MediaProvider.Tvdb], Yields: [MediaProvider.Tmdb], Cost: 1);
+
+	public MediaProvider Provider => MediaProvider.Tmdb;
+
+	public IReadOnlyList<IdLookup> Lookups { get; } = [ByTmdbId, Find];
+
 	public IReadOnlyList<IdRoute> Routes { get; } =
 	[
 		new(Some.Of(MediaProvider.Tmdb), MediaProvider.Tmdb, [], 0),

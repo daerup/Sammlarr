@@ -15,3 +15,6 @@ Domain/Feed/Run/FeedRunResult.cs
 Domain/Feed/Planning/FeedPlanTarget.cs
 Domain/Feed/Planning/FeedPlanResult.cs
 Domain/Jobs/EnqueueResult.cs
+Domain/Media/Conversions/IdLookup.cs
+Contracts/Media/Conversions/IdLookupRequest.cs
+Core/Media/Hop.cs
