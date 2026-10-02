@@ -1,6 +1,8 @@
+using Contracts;
 using Contracts.DI;
 using Contracts.Media.Metadata;
 using Contracts.Media.Search;
+using Contracts.Providers;
 using Contracts.Settings;
 using Domain.Media;
 using Domain.Media.Metadata;
@@ -12,11 +14,11 @@ internal sealed class MediaMetadataResolver(
 	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> searchIndex,
 	IKeyedServiceIndex<MediaProvider, IMetadataEnricher> enricherIndex,
 	IKeyedServiceIndex<RatingProvider, IMediaRatingService> ratingIndex,
-	IProviderConfigService providerConfig
+	IProviderConfigService providerConfig,
+	IProviderCapacity capacity,
+	IDateTimeProvider clock
 )
 {
-	private static readonly MediaProvider[] EnricherChain = [MediaProvider.Plex, MediaProvider.Tmdb];
-
 	public async Task<Result<MediaLookup>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
@@ -74,33 +76,50 @@ internal sealed class MediaMetadataResolver(
 		CancellationToken cancellationToken
 	)
 	{
-		var primaryProvider = searchProvider.AsMediaProvider();
+		var now = clock.Now;
+		var asked = new HashSet<MediaProvider> { searchProvider.AsMediaProvider() };
 		var unanswered = MediaField.None;
-		foreach (var provider in EnricherChain.Where(p => p != primaryProvider))
+		while (details is IPartialMedia partial)
 		{
-			if (details is not IPartialMedia partial)
+			var needed = Needed(partial, ratingProvider);
+			var options = Options(partial, ratingProvider, asked);
+			if (EnricherChoice.Next(needed, options, now) is not { } next)
 			{
+				unanswered |= EnricherChoice.Blocked(needed, options, now);
 				break;
 			}
 
-			var enricher = enricherIndex[provider];
-			var fills = provider == ratingProvider.AsMediaProvider() ? enricher.Fills : enricher.Fills & ~MediaField.Rating;
-			if (!Needed(partial, ratingProvider).Overlaps(fills) || partial.Identity.Externals.OfProvider(provider) is not { } id)
-			{
-				continue;
-			}
-
-			switch (await enricher.LookUpAsync(id, cancellationToken))
+			asked.Add(next.Provider);
+			switch (await enricherIndex[next.Provider].LookUpAsync(next.Id, cancellationToken))
 			{
 				case Success<MediaLookup>(var lookup) when lookup.ToIdentified() is Some<IdentifiedMedia>(var enriched):
 					details = partial.MergeWith(enriched);
 					break;
 				case Error { Exception: ProviderUnavailableException }:
-					unanswered |= fills;
+					unanswered |= next.Fills;
 					break;
 			}
 		}
 		return details is IPartialMedia remaining ? remaining.Confirming(remaining.Missing & ~unanswered) : details;
+	}
+
+	private List<EnricherOption> Options(IPartialMedia partial, RatingProvider ratingProvider, IReadOnlySet<MediaProvider> asked)
+	{
+		var options = new List<EnricherOption>();
+		foreach (var provider in Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider()))
+		{
+			if (!asked.Contains(provider) && partial.Identity.Externals.OfProvider(provider) is { } id)
+			{
+				var fills = enricherIndex[provider].Fills;
+				var ratesForUs = provider == ratingProvider.AsMediaProvider();
+				var load = capacity.Of(provider);
+				var unavoidable = ratesForUs && !HasRatingFrom(partial.Rating, ratingProvider);
+				options.Add(
+					new EnricherOption(provider, id, ratesForUs ? fills : fills & ~MediaField.Rating, unavoidable ? load with { BlockedUntil = new None() } : load)
+				);
+			}
+		}
+		return options;
 	}
 
 	private static MediaField Needed(IPartialMedia partial, RatingProvider ratingProvider) =>

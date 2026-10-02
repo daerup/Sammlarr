@@ -77,6 +77,20 @@ on rather than fail a whole run. Per-provider numbers are in configuration
 details for at once, so each provider's concurrency gate must stay at or above it: a gate of 8 slows a large feed
 by roughly an order of magnitude.
 
+=== Provider routing
+
+Which provider is asked depends on its load. `IProviderCapacity.Of(provider)` gives a `ProviderLoad`:
+`BlockedUntil` (set by a 429's `Retry-After`, 30 seconds without one, or an open circuit breaker's break) and `Busy`
+(in-flight requests over the concurrency gate's limit). It lives in `API/Http` next to the gates and handlers that
+feed it; Core reads only the contract. A blocked provider is skipped, never waited for: the request already in
+flight still honours `Retry-After` through the retry policy.
+
+Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
+whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until the
+title is complete or nobody is left. An enricher that was skipped because it was blocked, or answered as unavailable,
+leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. A blocked rating provider is still
+asked while the title owes its rating, since the rating fetch would make the same call anyway.
+
 === Persistence and migrations
 
 State is one SQLite database via EF Core. Repositories create a context per operation from

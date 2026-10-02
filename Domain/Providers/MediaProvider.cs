@@ -6,7 +6,12 @@ public enum MediaProvider
 {
 	[Description("TMDB")]
 	[Capabilities<ProviderCapability>(
-		ProviderCapability.Trending | ProviderCapability.Rating | ProviderCapability.Feed | ProviderCapability.ApiKey | ProviderCapability.Artwork
+		ProviderCapability.Trending
+			| ProviderCapability.Rating
+			| ProviderCapability.Feed
+			| ProviderCapability.ApiKey
+			| ProviderCapability.Artwork
+			| ProviderCapability.Enricher
 	)]
 	Tmdb,
 
@@ -17,7 +22,7 @@ public enum MediaProvider
 	Tvdb,
 
 	[Description("Plex")]
-	[Capabilities<ProviderCapability>(ProviderCapability.Search | ProviderCapability.Auth | ProviderCapability.Artwork)]
+	[Capabilities<ProviderCapability>(ProviderCapability.Search | ProviderCapability.Auth | ProviderCapability.Artwork | ProviderCapability.Enricher)]
 	Plex,
 
 	[Description("Mdblist")]

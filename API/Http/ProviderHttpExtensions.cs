@@ -29,13 +29,18 @@ internal static class ProviderHttpExtensions
 		builder.AddHttpMessageHandler(sp =>
 		{
 			var http = Resolve(sp);
-			var gate = http.MaxConcurrency > 0 ? sp.GetRequiredService<ProviderConcurrencyGates>().Get(clientName, http.MaxConcurrency) : null;
+			var gate = http.MaxConcurrency > 0 ? sp.GetRequiredService<ProviderConcurrencyGates>().Get(clientName, http.MaxConcurrency, provider) : null;
 			return new ConcurrencyGateHandler(gate);
 		});
 
 		builder.ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler { EnableMultipleHttp2Connections = Resolve(sp).EnableMultipleHttp2Connections });
 
 		builder.AddStandardResilienceHandler().Configure((options, sp) => Apply(options, Resolve(sp), provider, sp));
+
+		if (provider is { } measured)
+		{
+			builder.AddHttpMessageHandler(sp => new CapacityHandler(measured, sp.GetRequiredService<ProviderCapacity>()));
+		}
 
 		return builder;
 	}
@@ -73,6 +78,15 @@ internal static class ProviderHttpExtensions
 
 		options.CircuitBreaker.FailureRatio = http.CircuitBreakerFailureRatio;
 		options.CircuitBreaker.MinimumThroughput = http.CircuitBreakerMinimumThroughput;
+		if (provider is { } broken)
+		{
+			var capacity = services.GetRequiredService<ProviderCapacity>();
+			options.CircuitBreaker.OnOpened = args =>
+			{
+				capacity.Block(broken, args.BreakDuration);
+				return default;
+			};
+		}
 	}
 
 	private static Version ParseVersion(string version) =>
@@ -87,9 +101,17 @@ internal static class ProviderHttpExtensions
 
 internal sealed class ProviderConcurrencyGates
 {
-	private readonly ConcurrentDictionary<string, SemaphoreSlim> _gates = new();
+	private readonly ConcurrentDictionary<string, (SemaphoreSlim Gate, int Limit, MediaProvider? Provider)> _gates = new();
 
-	public SemaphoreSlim Get(string key, int limit) => _gates.GetOrAdd(key, static (_, max) => new SemaphoreSlim(max, max), limit);
+	public SemaphoreSlim Get(string key, int limit, MediaProvider? provider) =>
+		_gates.GetOrAdd(key, static (_, gate) => (new SemaphoreSlim(gate.limit, gate.limit), gate.limit, gate.provider), (limit, provider)).Gate;
+
+	public double Busy(MediaProvider provider) =>
+		_gates
+			.Where(pair => pair.Value.Provider == provider)
+			.Select(pair => (pair.Value.Limit - pair.Value.Gate.CurrentCount) / (double)pair.Value.Limit)
+			.DefaultIfEmpty(0)
+			.Max();
 }
 
 internal sealed class ConcurrencyGateHandler(SemaphoreSlim? gate) : DelegatingHandler
