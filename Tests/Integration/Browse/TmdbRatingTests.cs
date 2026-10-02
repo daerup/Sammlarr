@@ -22,7 +22,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		var ratings = await FetchTmdbRatings(TmdbId.From("550", MediaType.Movie));
 
 		await Assert.That(ratings).Count().IsEqualTo(1);
-		await Assert.That(ratings[0].Source).IsEqualTo(RatingProvider.Tmdb);
+		await Assert.That(ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
 		await Assert.That(ratings[0].NormalizedValue).IsEqualTo((float)average);
 		await Assert.That(ratings[0].VoteCount).IsEqualTo(votes);
 	}

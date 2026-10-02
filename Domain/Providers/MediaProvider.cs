@@ -6,12 +6,7 @@ public enum MediaProvider
 {
 	[Description("TMDB")]
 	[Capabilities<ProviderCapability>(
-		ProviderCapability.Trending
-			| ProviderCapability.Rating
-			| ProviderCapability.Feed
-			| ProviderCapability.ApiKey
-			| ProviderCapability.Artwork
-			| ProviderCapability.Enricher
+		ProviderCapability.Trending | ProviderCapability.Feed | ProviderCapability.ApiKey | ProviderCapability.Artwork | ProviderCapability.Enricher
 	)]
 	Tmdb,
 

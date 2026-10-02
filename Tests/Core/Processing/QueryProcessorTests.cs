@@ -398,7 +398,7 @@ public class QueryProcessorRatingTests
 				ReleaseDate = new DateOnly(year, 1, 1),
 				Genres = [],
 				Runtime = TimeSpan.FromMinutes(90),
-				Rating = rating is { } value ? RatingSummary.From([new MediaRating(RatingProvider.Tmdb, value, 1)]) : RatingSummary.None,
+				Rating = rating is { } value ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, value, 1)]) : RatingSummary.None,
 			}
 		);
 }

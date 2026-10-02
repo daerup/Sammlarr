@@ -10,7 +10,6 @@ public class ProviderMatrixTests
 		await Assert.That(Enum.GetValues<SearchProvider>().Length).IsEqualTo(1);
 		await Assert.That(Enum.GetValues<SinkKind>().Length).IsEqualTo(1);
 		await Assert.That(Enum.GetValues<TrendingProvider>().Length).IsEqualTo(1);
-		await Assert.That(Enum.GetValues<RatingProvider>().Length).IsEqualTo(1);
 		await Assert.That(Enum.GetValues<FeedProvider>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<ApiKeyProvider>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<ArtworkProvider>().Length).IsEqualTo(2);
@@ -22,7 +21,6 @@ public class ProviderMatrixTests
 	{
 		await Assert.That(SinkKind.Plex.AsMediaProvider()).IsEqualTo(MediaProvider.Plex);
 		await Assert.That(SearchProvider.Plex.AsMediaProvider()).IsEqualTo(MediaProvider.Plex);
-		await Assert.That(RatingProvider.Tmdb.AsMediaProvider()).IsEqualTo(MediaProvider.Tmdb);
 		await Assert.That(FeedProvider.Mdblist.AsMediaProvider()).IsEqualTo(MediaProvider.Mdblist);
 	}
 
@@ -31,13 +29,6 @@ public class ProviderMatrixTests
 	{
 		await Assert.That(TrendingProvider.Tmdb.AsApiKeyProvider()).IsEqualTo(ApiKeyProvider.Tmdb);
 		await Assert.That(FeedProvider.Tmdb.AsApiKeyProvider()).IsEqualTo(ApiKeyProvider.Tmdb);
-		await Assert.That(ApiKeyProvider.Tmdb.AsRatingProvider()).IsEqualTo(RatingProvider.Tmdb);
-	}
-
-	[Test]
-	public async Task Convert_WhenTheBrandLacksTheCapability_IsNull()
-	{
-		await Assert.That(ApiKeyProvider.Mdblist.AsRatingProvider()).IsNull();
 	}
 
 	[Test]

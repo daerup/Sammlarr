@@ -88,10 +88,11 @@ flight still honours `Retry-After` through the retry policy.
 Enrichment asks, one at a time, the open enricher (`EnricherProvider`, generated from `ProviderCapability.Enricher`)
 whose `Fills` cover the most missing fields, the least busy first, among those the title has an id for, until the
 title is complete or nobody is left. An enricher that was skipped because it was blocked, or answered as unavailable,
-leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. The rating is one of those fields,
-and no setting picks a rating provider: a title owes a rating while it has none, even when every other field is
-present. Any enricher whose `Fills` include `MediaField.Rating` (today only TMDB) is asked for it, and is asked even
-while blocked, so the retry pipeline waits out its `Retry-After` rather than storing the title without a rating.
+leaves its fields unconfirmed, so the title is refetched after the 1-hour cooldown. The rating is one of those fields:
+there is no rating service or rating setting, and a rating's source is the `MediaProvider` that supplied it. A title
+owes a rating while it has none, even when every other field is present. Any enricher whose `Fills` include
+`MediaField.Rating` (today only TMDB) is asked for it, and is asked even while blocked, so the retry pipeline waits out
+its `Retry-After` rather than storing the title without a rating.
 
 Id resolution routes the same way. Each `IExternalIdConverter` lists its `IdRoute`s: which provider's id it starts
 from (or the title hints), which provider's id it yields, which providers it calls on the way (`Via`) and how many

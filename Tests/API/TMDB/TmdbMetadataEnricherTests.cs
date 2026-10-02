@@ -27,7 +27,7 @@ public class TmdbMetadataEnricherTests
 				var identified = lookup.AsIdentified();
 				await Assert.That(identified).IsNotNull();
 				var rating = identified!.Value.Rating;
-				await Assert.That(rating.Sources.Any(source => source.Source == RatingProvider.Tmdb)).IsTrue();
+				await Assert.That(rating.Sources.Any(source => source.Source == MediaProvider.Tmdb)).IsTrue();
 				await Assert.That(rating.Average).IsEqualTo(7.5f);
 			});
 	}

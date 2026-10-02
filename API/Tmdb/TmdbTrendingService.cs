@@ -98,5 +98,5 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 
 	private static RatingSummary BuildRating(double voteAverage) =>
-		voteAverage > 0 ? RatingSummary.From([new MediaRating(RatingProvider.Tmdb, (float)voteAverage)]) : RatingSummary.None;
+		voteAverage > 0 ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, (float)voteAverage)]) : RatingSummary.None;
 }

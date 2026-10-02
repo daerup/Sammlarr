@@ -10,4 +10,4 @@ public readonly record struct RatingSummary(float? Average, ValueSet<MediaRating
 		sources.Count == 0 ? None : new(sources.Average(rating => rating.NormalizedValue), [.. sources]);
 }
 
-public readonly record struct MediaRating(RatingProvider Source, float NormalizedValue, int? VoteCount = null);
+public readonly record struct MediaRating(MediaProvider Source, float NormalizedValue, int? VoteCount = null);

@@ -136,7 +136,7 @@ public class MediaMergerTests
 	{
 		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Dune" };
 
-		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(RatingProvider.Tmdb, 7f)]);
+		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(MediaProvider.Tmdb, 7f)]);
 
 		await Assert
 			.That(withRatings)
