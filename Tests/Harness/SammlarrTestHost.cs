@@ -50,7 +50,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	private static SeededUser Project(TestCurrentUser user) => new(user.Id.Value, user.DisplayName, user.Role);
 
-	private const int DefaultYear = 2024;
+	internal const int DefaultYear = 2024;
 
 	private static readonly SqliteConnection Template = BuildTemplate();
 	private static readonly Lock BackupGate = new();
@@ -238,6 +238,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		TmdbStub.ExternalIds(HttpStub, FullVersion(spec));
 	}
 
+	internal async Task TmdbDescribes(MediaSpec spec)
+	{
+		await EnsureTmdbAccount();
+		TmdbStub.Detail(HttpStub, FullVersion(spec));
+	}
+
 	internal void RateLimited(MediaProvider provider) => Resolve<ProviderCapacity>().Block(provider, TimeSpan.FromMinutes(1));
 
 	internal void TmdbHasNoDetail(MediaSpec spec)
@@ -271,6 +277,8 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	}
 
 	internal void PlexLookupFails(MediaSpec spec) => PlexStub.LookupFails(HttpStub, FullVersion(spec));
+
+	internal void PlexHasNoMetadataFor(MediaSpec spec) => PlexStub.LookupHasNoMetadata(HttpStub, FullVersion(spec));
 
 	internal async Task RemoteWantlistHas(params MediaSpec[] specs)
 	{

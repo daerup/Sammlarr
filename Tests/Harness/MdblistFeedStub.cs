@@ -14,8 +14,6 @@ internal sealed record FeedPage(int Offset, bool HasMore, IReadOnlyList<string> 
 
 internal static class MdblistFeedStub
 {
-	private const int DefaultYear = 2024;
-
 	internal static void Contains(HttpStub http, string identifier, IReadOnlyList<FeedItemSpec> items) =>
 		http.RespondWithJsonForUrl(Url(identifier), Build(items));
 
@@ -90,7 +88,7 @@ internal static class MdblistFeedStub
 	private static string ItemJson(FeedItemSpec item, int index)
 	{
 		var titleJson = item.Title is null ? "null" : $"\"{item.Title}\"";
-		var resolvedYear = item.Year ?? DefaultYear;
+		var resolvedYear = item.Year ?? SammlarrTestHost.DefaultYear;
 		var releaseDateJson = $"\"{resolvedYear}-01-15\"";
 		var mediatype = item.Type == MediaType.Show ? "show" : "movie";
 

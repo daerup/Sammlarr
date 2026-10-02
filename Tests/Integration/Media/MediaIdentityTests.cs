@@ -1,6 +1,8 @@
 using API.Plex;
+using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
+using Core.Media;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
@@ -219,23 +221,146 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(async () => await Testee.IdentifyAsync([Request(null, Tmdb("550"), Plex("550"))]).ToListAsync()).Throws<MediaIdentityConflictException>();
 	}
 
+	[Test]
+	public async Task IdentifyAsync_ForThePlexSink_StoresEveryIdPlexReportsForAPlexId()
+	{
+		await host.EnsurePlexAccount();
+		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"), Plex("550")));
+
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
+
+		await AssertResolved(results[0], Plex("550"));
+		await AssertStored(Plex("550"), Tmdb("550"), Imdb("tt0137523"));
+	}
+
+	[Test]
+	public async Task IdentifyAsync_ForThePlexSink_FoldsAPlexIdIntoTheRowHoldingItsTmdbId()
+	{
+		await host.Movie(Spec("Fight Club", Tmdb("550"))).SeedAsync();
+		await host.EnsurePlexAccount();
+		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Plex("550")));
+
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
+
+		await AssertResolved(results[0], Plex("550"));
+		await AssertStored(Plex("550"), Tmdb("550"));
+		await Assert.That(await host.ScopedDbContext.Media.CountAsync()).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task IdentifyAsync_ForThePlexSink_CachesAPlexIdWithoutMetadataAsUnmatched()
+	{
+		await host.EnsurePlexAccount();
+		host.PlexHasNoMetadataFor(Spec("Mystery", Plex("777")));
+
+		var results = await Testee.IdentifyAsync([Request(null, Plex("777"))]).ToListAsync();
+
+		await Assert.That(results[0]).IsError();
+		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
+		await Assert.That(unmatched.TryGetValue(MediaUnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex), out _)).IsTrue();
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhenPlexKnowsOnlyTheImdbId_ResolvesTheTmdbIdThroughFind()
+	{
+		host.SinkAddresses(MediaProvider.Tmdb);
+		await host.EnsurePlexAccount();
+		host.PlexHolds(Spec("Fight Club", Imdb("tt0137523"), Plex("550")));
+		await host.TmdbFinds(Spec("Fight Club", Tmdb("550"), Imdb("tt0137523")));
+
+		var results = await Testee.IdentifyAsync([Request(null, Plex("550"))]).ToListAsync();
+
+		await AssertResolved(results[0], Tmdb("550"));
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhenThePlexEntryCarriesOnlyAnImdbGuid_ResolvesThePlexIdThroughTheImdbId()
+	{
+		var fightClub = Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"));
+		await host.TmdbKnowsTheExternalIdsOf(fightClub);
+		await host.TmdbDescribes(fightClub);
+		await host.TmdbFinds(fightClub);
+		await host.PlexSearchReturns("Fight Club", Spec("Fight Club", Plex("550")));
+		host.PlexHolds(Spec("Fight Club", Imdb("tt0137523"), Plex("550")));
+
+		var results = await Testee.IdentifyAsync([Request("Fight Club", Tmdb("550"))]).ToListAsync();
+
+		await AssertResolved(results[0], Plex("550"));
+	}
+
+	[Test]
+	public async Task IdentifyAsync_ForAnImdbIdThatPlexCannotPlace_GivesUpAfterEveryRoute()
+	{
+		var fightClub = Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"));
+		await host.TmdbFinds(fightClub);
+		await host.TmdbDescribes(fightClub);
+		await host.PlexFindsNothing("Fight Club");
+
+		var results = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Imdb("tt0137523"))]).ToListAsync();
+
+		await Assert.That(results[0]).IsError();
+		await AssertRequests(search: 3, find: 2, detail: 1, externalIds: 0, detailUrl: "movie/550?");
+	}
+
+	[Test]
+	public async Task IdentifyAsync_ForTmdbImdbAndTvdbIdsThatPlexCannotPlace_GivesUpAfterEveryRoute()
+	{
+		var fightClub = Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"), Tvdb("81189"));
+		await host.TmdbFinds(fightClub);
+		await host.TmdbDescribes(fightClub);
+		await host.PlexFindsNothing("Fight Club");
+
+		var results = await Testee
+			.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Tmdb("550"), Imdb("tt0137523"), Tvdb("81189"))])
+			.ToListAsync();
+
+		await Assert.That(results[0]).IsError();
+		await AssertRequests(search: 3, find: 1, detail: 1, externalIds: 0, detailUrl: "movie/550?");
+	}
+
+	[Test]
+	public async Task IdentifyAsync_ForATvdbOnlyShow_ResolvesThePlexIdThroughTmdb()
+	{
+		var breakingBad = new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189"), Plex("1396")]);
+		await host.TmdbFinds(breakingBad);
+		await host.TmdbDescribes(breakingBad);
+		await host.PlexSearchReturns("Breaking Bad", breakingBad);
+		host.PlexHolds(breakingBad);
+
+		var results = await Testee.IdentifyAsync([new ResolveRequest([Tvdb("81189").ToExternal(MediaType.Show)], new None())]).ToListAsync();
+
+		await AssertResolved(results[0], Plex("1396"));
+		await AssertRequests(search: 1, find: 1, detail: 1, externalIds: 0, detailUrl: "tv/1396?");
+	}
+
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);
 
 	private static IExternalMediaId Ext(ProviderId id) => id.ToExternal(MediaType.Movie);
 
-	private static Optional<ResolutionHints> Hints(string? title) =>
-		title is null
-			? new None()
-			: Some.Of(
-				new ResolutionHints
-				{
-					Title = title,
-					Year = 0,
-					MediaType = MediaType.Movie,
-				}
-			);
+	private static Optional<ResolutionHints> Hints(string? title, int year)
+	{
+		return Optional
+			.Of(title)
+			.Map(value => new ResolutionHints
+			{
+				Title = value,
+				Year = year,
+				MediaType = MediaType.Movie,
+			});
+	}
 
-	private static ResolveRequest Request(string? title, params ProviderId[] candidates) => new([.. candidates.Select(Ext)], Hints(title));
+	private static ResolveRequest Request(string? title, params ProviderId[] candidates) => Request(title, 0, candidates);
+
+	private static ResolveRequest Request(string? title, int year, params ProviderId[] candidates) => new([.. candidates.Select(Ext)], Hints(title, year));
+
+	private async Task AssertRequests(int search, int find, int detail, int externalIds, string detailUrl)
+	{
+		using var _ = Assert.Multiple();
+		await Assert.That(host.HttpStub.Requests(PlexEndpoints.SearchPath)).IsEqualTo(search);
+		await Assert.That(host.HttpStub.Requests("/find/")).IsEqualTo(find);
+		await Assert.That(host.HttpStub.Requests(detailUrl)).IsEqualTo(detail);
+		await Assert.That(host.HttpStub.Requests("/external_ids")).IsEqualTo(externalIds);
+	}
 
 	private static async Task AssertResolved(Result<MediaIdentity> result, ProviderId expected) =>
 		await Assert
