@@ -26,11 +26,11 @@ public static class MediaCompleteness
 
 		public bool IsComplete => partial.Missing is MediaField.None;
 
-		public IdentifiedMedia Confirming(MediaField fields) =>
+		public IdentifiedMedia WithConfirmedAbsent(MediaField fields) =>
 			partial switch
 			{
-				PartialMovie movie => IdentifiedMedia.From(movie with { ConfirmedMissing = fields }),
-				PartialShow show => IdentifiedMedia.From(show with { ConfirmedMissing = fields }),
+				PartialMovie movie => IdentifiedMedia.From(movie with { ConfirmedAbsent = fields }),
+				PartialShow show => IdentifiedMedia.From(show with { ConfirmedAbsent = fields }),
 				_ => IdentifiedMedia.From(partial),
 			};
 	}

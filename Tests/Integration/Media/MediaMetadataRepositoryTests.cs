@@ -101,14 +101,14 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		{
 			Identity = new MediaIdentity(mediaId, [plexId]),
 			Title = "Solaris",
-			ConfirmedMissing = MediaField.Tagline | MediaField.Backdrop,
+			ConfirmedAbsent = MediaField.Tagline | MediaField.Backdrop,
 		};
 
 		await _testee.UpsertMetadataAsync([IdentifiedMedia.From(partial)]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await Assert.That((await _testee.GetAsync([mediaId])).Single().Stored).IsOfUnionType<IdentifiedMedia, IPartialMedia>();
-		await Assert.That(stored!.ConfirmedMissing).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
+		await Assert.That(stored!.ConfirmedAbsent).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
 	}
 
 	[Test]

@@ -63,13 +63,13 @@ public class MediaCompletenessTests
 	}
 
 	[Test]
-	public async Task Confirming_KeepsTheFieldsOnThePartial()
+	public async Task WithConfirmedAbsent_KeepsTheFieldsOnThePartial()
 	{
 		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Tagline = null };
 
 		await Assert
-			.That(movie.Confirming(MediaField.Tagline))
+			.That(movie.WithConfirmedAbsent(MediaField.Tagline))
 			.IsOfUnionType<IdentifiedMedia, IPartialMedia>()
-			.And.Multiple(async partial => await Assert.That(partial.ConfirmedMissing).IsEqualTo(MediaField.Tagline));
+			.And.Multiple(async partial => await Assert.That(partial.ConfirmedAbsent).IsEqualTo(MediaField.Tagline));
 	}
 }

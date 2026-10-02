@@ -26,6 +26,8 @@ public static class MediaFieldExtensions
 	{
 		public bool Overlaps(MediaField other) => (fields & other) is not MediaField.None;
 
+		public MediaField Except(MediaField other) => fields & ~other;
+
 		public int Count => BitOperations.PopCount((uint)fields);
 	}
 }

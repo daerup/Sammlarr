@@ -52,7 +52,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 				ReleaseDate = movie.ReleaseDate == DateOnly.MinValue ? null : movie.ReleaseDate,
 				Genres = [.. movie.Genres],
 				Rating = RatingSummary.From(ToRatings(movie.Ratings)),
-				ConfirmedMissing = movie.ConfirmedMissing,
+				ConfirmedAbsent = movie.ConfirmedAbsent,
 				Runtime = movie.Runtime == TimeSpan.Zero ? null : movie.Runtime,
 			},
 			ShowMetadataRow show => new PartialShow
@@ -66,7 +66,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 				ReleaseDate = show.ReleaseDate == DateOnly.MinValue ? null : show.ReleaseDate,
 				Genres = [.. show.Genres],
 				Rating = RatingSummary.From(ToRatings(show.Ratings)),
-				ConfirmedMissing = show.ConfirmedMissing,
+				ConfirmedAbsent = show.ConfirmedAbsent,
 				Seasons = show.Seasons == 0 ? null : show.Seasons,
 				Episodes = show.Episodes == 0 ? null : show.Episodes,
 				RuntimePerEpisode = show.RuntimePerEpisode == TimeSpan.Zero ? null : show.RuntimePerEpisode,
@@ -102,7 +102,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 				entity.BackdropUrl = resolved.BackdropUrl;
 				entity.ReleaseDate = resolved.ReleaseDate;
 				entity.Genres = [.. resolved.Genres];
-				entity.ConfirmedMissing = MediaField.None;
+				entity.ConfirmedAbsent = MediaField.None;
 				break;
 			case IPartialMedia partial:
 				entity.Title = partial.Title ?? string.Empty;
@@ -112,7 +112,7 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 				entity.BackdropUrl = partial.BackdropUrl ?? string.Empty;
 				entity.ReleaseDate = partial.ReleaseDate ?? DateOnly.MinValue;
 				entity.Genres = [.. partial.Genres];
-				entity.ConfirmedMissing = partial.ConfirmedMissing;
+				entity.ConfirmedAbsent = partial.ConfirmedAbsent;
 				break;
 		}
 	}
