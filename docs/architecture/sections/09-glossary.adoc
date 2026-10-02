@@ -40,7 +40,7 @@ Freshness:: Whether a stored title is recent enough to skip a re-fetch: 7 days f
 title or a partial whose gaps are all confirmed, 1 hour for any other partial (`MediaFreshness`).
 
 Confirmed gap:: A field still missing after every enricher that could fill it answered
-(`IPartialMedia.ConfirmedMissing`). The rating is such a field: a title no enricher has rated has a
+(`IPartialMedia.ConfirmedAbsent`). The rating is such a field: a title no enricher has rated has a
 `Rating` gap, confirmed once the enricher that fills ratings answers without votes. An enricher that was unavailable (rate limited or down) leaves its fields
 unconfirmed, so they retry after the hour; a lookup that finds nothing counts as an answer. An enricher is only asked when its `Fills` overlap a missing field. A confirmed gap
 lasts until the title goes stale after 7 days, even if a new enricher, a config change or a newly

@@ -16,6 +16,6 @@ internal static class EnricherChoice
 			.Select(option => (EnricherOption?)option)
 			.FirstOrDefault();
 
-	internal static MediaField Blocked(MediaField needed, IEnumerable<EnricherOption> options, DateTimeOffset now) =>
+	internal static MediaField BlockedFills(MediaField needed, IEnumerable<EnricherOption> options, DateTimeOffset now) =>
 		options.Where(option => needed.Overlaps(option.Fills) && !option.Load.IsOpen(now)).Aggregate(MediaField.None, (fields, option) => fields | option.Fills);
 }

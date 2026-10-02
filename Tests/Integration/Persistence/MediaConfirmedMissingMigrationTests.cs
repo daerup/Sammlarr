@@ -36,7 +36,7 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 		await MigrateAsync(BeforeConfirmedGaps);
 		await MigrateAsync(null);
 
-		await Assert.That(await ConfirmedMissingAsync(movie)).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
+		await Assert.That(await ConfirmedAbsentAsync(movie)).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
 	}
 
 	[Test]
@@ -56,15 +56,15 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 		await MigrateAsync(BeforeConfirmedGaps);
 		await MigrateAsync(null);
 
-		await Assert.That(await ConfirmedMissingAsync(show)).IsEqualTo(MediaField.None);
+		await Assert.That(await ConfirmedAbsentAsync(show)).IsEqualTo(MediaField.None);
 	}
 
 	private Task SeedAsync(IPartialMedia partial) => host.Resolve<IMediaRepository>().UpsertMetadataAsync([IdentifiedMedia.From(partial)]);
 
-	private async Task<MediaField> ConfirmedMissingAsync(MediaId id)
+	private async Task<MediaField> ConfirmedAbsentAsync(MediaId id)
 	{
 		var stored = (await host.Resolve<IMediaRepository>().GetAsync([id])).Single().Stored;
-		return (await Assert.That(stored).IsOfUnionType<IdentifiedMedia, IPartialMedia>())!.ConfirmedMissing;
+		return (await Assert.That(stored).IsOfUnionType<IdentifiedMedia, IPartialMedia>())!.ConfirmedAbsent;
 	}
 
 	private Task MigrateAsync(string? target) => host.Context.GetService<IMigrator>().MigrateAsync(target);

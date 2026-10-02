@@ -39,7 +39,7 @@ public class MediaFreshnessTests
 			{
 				Tagline = null,
 				Summary = null,
-				ConfirmedMissing = MediaField.Tagline | MediaField.Summary,
+				ConfirmedAbsent = MediaField.Tagline | MediaField.Summary,
 			}
 		);
 
@@ -49,7 +49,7 @@ public class MediaFreshnessTests
 	[Test]
 	public async Task IsFresh_WhenAGapIsUnconfirmed_GoesStaleAfterTheCooldown()
 	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, Runtime = null, ConfirmedMissing = MediaField.Tagline });
+		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, Runtime = null, ConfirmedAbsent = MediaField.Tagline });
 
 		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromHours(2), Now)).IsFalse();
 	}
@@ -65,7 +65,7 @@ public class MediaFreshnessTests
 	[Test]
 	public async Task IsFresh_WhenEveryGapIsConfirmedButOlderThanTheWeek_IsStale()
 	{
-		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, ConfirmedMissing = MediaField.Tagline });
+		var stored = IdentifiedMedia.From(MediaFakes.CompletePartialMovie() with { Tagline = null, ConfirmedAbsent = MediaField.Tagline });
 
 		await Assert.That(MediaFreshness.IsFresh(stored, Now - TimeSpan.FromDays(8), Now)).IsFalse();
 	}

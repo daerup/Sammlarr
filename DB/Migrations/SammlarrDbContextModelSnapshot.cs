@@ -454,7 +454,7 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ConfirmedMissing")
+                    b.Property<string>("ConfirmedAbsent")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

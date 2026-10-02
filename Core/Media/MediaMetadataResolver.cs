@@ -47,13 +47,13 @@ internal sealed class MediaMetadataResolver(
 	{
 		var now = clock.Now;
 		var asked = new HashSet<MediaProvider> { searchProvider.AsMediaProvider() };
-		var unanswered = MediaField.None;
+		var unconfirmed = MediaField.None;
 		while (details is IPartialMedia partial)
 		{
 			var options = Options(partial, asked);
 			if (EnricherChoice.Next(partial.Missing, options, now) is not { } next)
 			{
-				unanswered |= EnricherChoice.Blocked(partial.Missing, options, now);
+				unconfirmed |= EnricherChoice.BlockedFills(partial.Missing, options, now);
 				break;
 			}
 
@@ -64,11 +64,11 @@ internal sealed class MediaMetadataResolver(
 					details = partial.MergeWith(enriched);
 					break;
 				case Error { Exception: ProviderUnavailableException }:
-					unanswered |= next.Fills;
+					unconfirmed |= next.Fills;
 					break;
 			}
 		}
-		return details is IPartialMedia remaining ? remaining.Confirming(remaining.Missing & ~unanswered) : details;
+		return details is IPartialMedia remaining ? remaining.WithConfirmedAbsent(remaining.Missing.Except(unconfirmed)) : details;
 	}
 
 	private List<EnricherOption> Options(IPartialMedia partial, IReadOnlySet<MediaProvider> asked)

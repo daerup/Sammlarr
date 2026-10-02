@@ -67,10 +67,10 @@ public class EnricherChoiceTests
 			.IsEqualTo(MediaProvider.Tmdb);
 
 	[Test]
-	public async Task Blocked_NamesTheFieldsOfTheBlockedEnrichersThatCouldHaveHelped() =>
+	public async Task BlockedFills_NamesTheFieldsOfTheBlockedEnrichersThatCouldHaveHelped() =>
 		await Assert
 			.That(
-				EnricherChoice.Blocked(
+				EnricherChoice.BlockedFills(
 					MediaField.Tagline,
 					[
 						Option(MediaProvider.Tmdb, MediaField.Tagline | MediaField.Summary, Idle with { BlockedUntil = Some.Of(Now.AddSeconds(30)) }),

@@ -35,7 +35,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Rating);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.Rating);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
@@ -50,7 +50,7 @@ public class MediaMetadataResolverTests
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
 		await Assert.That(resolved).IsOfUnionType<IdentifiedMedia, PartialMovie>();
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.None);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.None);
 	}
 
 	[Test]
@@ -127,7 +127,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Tagline);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.Tagline);
 	}
 
 	[Test]
@@ -140,7 +140,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Tagline);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.Tagline);
 	}
 
 	[Test]
@@ -153,7 +153,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Tagline);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.Tagline);
 	}
 
 	[Test]
@@ -166,7 +166,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Summary);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.Summary);
 	}
 
 	[Test]
@@ -178,7 +178,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(PlexOnly, buffer));
 
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Tagline);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.Tagline);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
@@ -209,13 +209,13 @@ public class MediaMetadataResolverTests
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
-		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.None);
+		await Assert.That(ConfirmedAbsent(resolved)).IsEqualTo(MediaField.None);
 	}
 
 	private static async Task<IdentifiedMedia> Identified(Result<MediaLookup> result) =>
 		await Assert.That((await Assert.That(result).IsSuccess())!.ToIdentified()).IsSome();
 
-	private static MediaField ConfirmedMissing(IdentifiedMedia media) => media is IPartialMedia partial ? partial.ConfirmedMissing : MediaField.None;
+	private static MediaField ConfirmedAbsent(IdentifiedMedia media) => media is IPartialMedia partial ? partial.ConfirmedAbsent : MediaField.None;
 
 	private static PartialMovie Complete() =>
 		new()
