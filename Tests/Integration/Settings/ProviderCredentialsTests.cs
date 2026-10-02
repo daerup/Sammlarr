@@ -16,7 +16,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
 	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
-	private IMediaRatingService TmdbRatings => host.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb);
+	private IMetadataEnricher Tmdb => host.ResolveKeyed<IMetadataEnricher>(MediaProvider.Tmdb);
 	private IMediaSink PlexSink => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
@@ -104,22 +104,17 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetRatingsAsync_WhenTheTmdbKeyIsMissing_AreUnavailable()
-	{
-		var ratings = (await TmdbRatings.GetRatingsAsync(TmdbId.From("550", MediaType.Movie))).GetValueOr([]);
-
-		await Assert.That(ratings).IsEmpty();
-	}
+	public async Task LookUpAsync_WhenTheTmdbKeyIsMissing_Fails() => await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsError();
 
 	[Test]
-	public async Task GetRatingsAsync_WhenTheTmdbKeyIsConfigured_LoadsThem()
+	public async Task LookUpAsync_WhenTheTmdbKeyIsConfigured_LoadsTheRating()
 	{
 		await host.WithTmdbAccount("valid-tmdb-key");
 		host.Movie("Test Movie", tmdb: "550").ServedByTmdb(rating: 7.8, votes: 5000);
 
-		var ratings = (await TmdbRatings.GetRatingsAsync(TmdbId.From("550", MediaType.Movie))).GetValueOr([]);
+		var lookup = await Assert.That(await Tmdb.LookUpAsync(TmdbId.From("550", MediaType.Movie))).IsSuccess();
 
-		await Assert.That(ratings).IsNotEmpty();
+		await Assert.That(lookup!.ToIdentified()).IsSome().And.Multiple(async media => await Assert.That(media.Rating.Sources).IsNotEmpty());
 	}
 
 	[Test]

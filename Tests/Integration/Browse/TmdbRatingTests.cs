@@ -15,7 +15,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	[Arguments(8.4, 23000)]
 	[Arguments(6.5, 0)]
 	[Arguments(0.1, 1)]
-	public async Task GetRatingsAsync_WhenTheVoteAverageIsPositive_DeliversARating(double average, int votes)
+	public async Task LookUpAsync_WhenTheVoteAverageIsPositive_DeliversARating(double average, int votes)
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb(rating: average, votes: votes).SeedAsync();
 
@@ -28,7 +28,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetRatingsAsync_WhenTheVoteAverageIsZero_ReturnsNone()
+	public async Task LookUpAsync_WhenTheVoteAverageIsZero_ReturnsNone()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb(rating: 0, votes: 0).SeedAsync();
 
@@ -36,7 +36,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetRatingsAsync_WhenVoteDataIsMissing_ReturnsNone()
+	public async Task LookUpAsync_WhenVoteDataIsMissing_ReturnsNone()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByTmdb().SeedAsync();
 
@@ -44,11 +44,11 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetRatingsAsync_WhenTheIdIsNotTmdb_ReturnsNone() =>
+	public async Task LookUpAsync_WhenTheIdIsNotTmdb_ReturnsNone() =>
 		await Assert.That(await FetchTmdbRatings(ImdbId.From("tt0137523", MediaType.Movie))).IsEmpty();
 
 	[Test]
-	public async Task GetRatingsAsync_ForAShow_RetrievesRatings()
+	public async Task LookUpAsync_ForAShow_RetrievesRatings()
 	{
 		await host.Show(TestMedia.BreakingBad).ServedByTmdb(rating: 9.5, votes: 50000).SeedAsync();
 
@@ -60,5 +60,8 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	private async Task<IReadOnlyList<MediaRating>> FetchTmdbRatings(IExternalMediaId id) =>
-		(await host.ResolveKeyed<IMediaRatingService>(RatingProvider.Tmdb).GetRatingsAsync(id)).GetValueOr([]);
+		(await host.ResolveKeyed<IMetadataEnricher>(MediaProvider.Tmdb).LookUpAsync(id)).Match(
+			lookup => lookup.ToIdentified() is Some<IdentifiedMedia>(var media) ? [.. media.Rating.Sources] : [],
+			_ => (IReadOnlyList<MediaRating>)[]
+		);
 }

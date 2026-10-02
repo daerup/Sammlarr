@@ -26,16 +26,16 @@ public class MediaMetadataResolverTests
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task ResolveAsync_WhenEnrichmentSuppliesRating_SkipsSeparateRatingFetch()
+	public async Task ResolveAsync_WhenTheRatingProviderHasNoVotesEither_AsksItOnlyOnce()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Tagline = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial()).ToMatch()));
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.ResolveAsync(Identity, buffer);
 
-		deps.Rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -75,20 +75,32 @@ public class MediaMetadataResolverTests
 		await deps.Testee.ResolveAsync(Identity, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
-		deps.Rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
 	}
 
 	[Test]
-	public async Task ResolveAsync_ForACompletePrimaryResult_MakesOnlyTheRatingCall()
+	public async Task ResolveAsync_ForACompletePrimaryResultThatOwesItsRating_TakesTheRatingFromTheRatingProvidersEnricher()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete());
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
+		await using var buffer = deps.Buffer();
+
+		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+
+		await Assert.That(resolved.Rating).IsEqualTo(TmdbRating);
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForACompletePrimaryResultWithItsRating_AsksNoEnricher()
+	{
+		var deps = Dependencies.Create();
+		deps.Primary(Complete() with { Rating = TmdbRating });
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.ResolveAsync(Identity, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
-		deps.Rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 
 	[Test]
@@ -169,7 +181,21 @@ public class MediaMetadataResolverTests
 		await deps.Testee.ResolveAsync(Identity, buffer);
 
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
-		deps.Rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForACompleteResultWhileTheRatingProviderIsRateLimited_StillAsksItForTheRating()
+	{
+		var deps = Dependencies.Create(
+			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
+		);
+		deps.Primary(Complete());
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
+		await using var buffer = deps.Buffer();
+
+		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+
+		await Assert.That(resolved.Rating).IsEqualTo(TmdbRating);
 	}
 
 	[Test]
@@ -212,7 +238,6 @@ public class MediaMetadataResolverTests
 		Mock<IMediaRepository> MediaRepository,
 		Mock<IMediaSearchProvider> Search,
 		Mock<IMetadataEnricher> Tmdb,
-		Mock<IMediaRatingService> Rating,
 		MediaMetadataResolver Testee
 	)
 	{
@@ -223,8 +248,6 @@ public class MediaMetadataResolverTests
 			var search = IMediaSearchProvider.Mock();
 			var tmdb = IMetadataEnricher.Mock();
 			tmdb.Fills.Returns(tmdbFills);
-			var rating = IMediaRatingService.Mock();
-			rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of<IReadOnlyList<MediaRating>>([]));
 
 			var config = IProviderConfigService.Mock();
 			config
@@ -246,12 +269,11 @@ public class MediaMetadataResolverTests
 				new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
 					.Register(MediaProvider.Plex, IMetadataEnricher.Mock().Object)
 					.Register(MediaProvider.Tmdb, tmdb.Object),
-				new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object),
 				config.Object,
 				capacity ?? TestCapacity.Open(),
 				Clock()
 			);
-			return new Dependencies(mediaRepository, search, tmdb, rating, testee);
+			return new Dependencies(mediaRepository, search, tmdb, testee);
 		}
 
 		public void Primary(PartialMovie movie) => Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(movie).ToMatch()));
