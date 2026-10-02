@@ -14,6 +14,7 @@ public static class MediaCompleteness
 			| Gap(!HasText(partial.BackdropUrl), MediaField.Backdrop)
 			| Gap(!HasDate(partial.ReleaseDate), MediaField.ReleaseDate)
 			| Gap(!HasItems(partial.Genres), MediaField.Genres)
+			| Gap(!HasItems(partial.Rating.Sources), MediaField.Rating)
 			| partial switch
 			{
 				PartialMovie movie => Gap(!HasDuration(movie.Runtime), MediaField.Runtime),

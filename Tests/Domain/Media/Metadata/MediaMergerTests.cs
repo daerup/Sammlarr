@@ -45,6 +45,7 @@ public class MediaMergerTests
 			PosterUrl = "poster",
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2021, 10, 22),
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.8f)]),
 			Runtime = TimeSpan.FromMinutes(155),
 		};
 
@@ -129,19 +130,6 @@ public class MediaMergerTests
 		var merged = first.MergeWith(second);
 
 		await Assert.That(merged).IsOfUnionType<IdentifiedMedia, PartialMovie>().And.Multiple(async movie => await Assert.That(movie.Title).IsEqualTo("Dune"));
-	}
-
-	[Test]
-	public async Task WithRatings_WhenPartial_AppliesRating()
-	{
-		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Dune" };
-
-		var withRatings = MediaMerger.WithRatings(partial, [new MediaRating(MediaProvider.Tmdb, 7f)]);
-
-		await Assert
-			.That(withRatings)
-			.IsOfUnionType<IdentifiedMedia, PartialMovie>()
-			.And.Multiple(async movie => await Assert.That(movie.Rating.Average).IsEqualTo(7f));
 	}
 
 	[Test]

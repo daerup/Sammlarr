@@ -131,7 +131,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			mediaId
 		);
 
-		_testee.Update(existing, CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.None });
+		_testee.Update(existing, new PartialMovie { Identity = new MediaIdentity(mediaId, [plexId]), Title = "Title" });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
@@ -324,6 +324,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			BackdropUrl = "https://example.com/backdrop.jpg",
 			ReleaseDate = new DateOnly(2024, 1, 1),
 			Genres = ["Action"],
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
 			Runtime = TimeSpan.FromMinutes(120),
 		};
 
@@ -338,6 +339,7 @@ public class MediaMetadataFactoryTests(SammlarrTestHost fixture) : IAsyncDisposa
 			BackdropUrl = "https://example.com/show-backdrop.jpg",
 			ReleaseDate = new DateOnly(2020, 1, 1),
 			Genres = ["Drama"],
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
 			Seasons = 3,
 			Episodes = 30,
 			RuntimePerEpisode = TimeSpan.FromMinutes(45),

@@ -6,6 +6,7 @@ using Contracts.Media.Search;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
+using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -231,6 +232,7 @@ internal sealed record TestItem
 				BackdropUrl = "https://example.com/b.jpg",
 				ReleaseDate = new DateOnly(2024, 1, 1),
 				Genres = ["Action"],
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
 				Runtime = TimeSpan.FromMinutes(120),
 			},
 		};

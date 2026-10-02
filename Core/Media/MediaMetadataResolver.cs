@@ -48,12 +48,12 @@ internal sealed class MediaMetadataResolver(
 		var now = clock.Now;
 		var asked = new HashSet<MediaProvider> { searchProvider.AsMediaProvider() };
 		var unanswered = MediaField.None;
-		while (Needed(details) is var needed && needed is not MediaField.None)
+		while (details is IPartialMedia partial)
 		{
-			var options = Options(details, asked);
-			if (EnricherChoice.Next(needed, options, now) is not { } next)
+			var options = Options(partial, asked);
+			if (EnricherChoice.Next(partial.Missing, options, now) is not { } next)
 			{
-				unanswered |= EnricherChoice.Blocked(needed, options, now);
+				unanswered |= EnricherChoice.Blocked(partial.Missing, options, now);
 				break;
 			}
 
@@ -61,7 +61,7 @@ internal sealed class MediaMetadataResolver(
 			switch (await enricherIndex[next.Provider].LookUpAsync(next.Id, cancellationToken))
 			{
 				case Success<MediaLookup>(var lookup) when lookup.ToIdentified() is Some<IdentifiedMedia>(var enriched):
-					details = Merge(details, enriched);
+					details = partial.MergeWith(enriched);
 					break;
 				case Error { Exception: ProviderUnavailableException }:
 					unanswered |= next.Fills;
@@ -71,33 +71,19 @@ internal sealed class MediaMetadataResolver(
 		return details is IPartialMedia remaining ? remaining.Confirming(remaining.Missing & ~unanswered) : details;
 	}
 
-	private List<EnricherOption> Options(IdentifiedMedia details, IReadOnlySet<MediaProvider> asked)
+	private List<EnricherOption> Options(IPartialMedia partial, IReadOnlySet<MediaProvider> asked)
 	{
 		var options = new List<EnricherOption>();
 		foreach (var provider in Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider()))
 		{
-			if (!asked.Contains(provider) && details.Externals.OfProvider(provider) is { } id)
+			if (!asked.Contains(provider) && partial.Identity.Externals.OfProvider(provider) is { } id)
 			{
 				var fills = enricherIndex[provider].Fills;
 				var load = capacity.Of(provider);
-				var unavoidable = fills.Overlaps(MediaField.Rating) && OwesRating(details);
+				var unavoidable = fills.Overlaps(MediaField.Rating) && partial.Missing.Overlaps(MediaField.Rating);
 				options.Add(new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load));
 			}
 		}
 		return options;
 	}
-
-	private static MediaField Needed(IdentifiedMedia details)
-	{
-		return (details is IPartialMedia partial ? partial.Missing : MediaField.None) | (OwesRating(details) ? MediaField.Rating : MediaField.None);
-	}
-
-	private static IdentifiedMedia Merge(IdentifiedMedia details, IdentifiedMedia enriched) =>
-		details switch
-		{
-			IPartialMedia partial => partial.MergeWith(enriched),
-			IMedia => enriched.Rating.Sources.Count > 0 ? MediaMerger.WithRatings(details, [.. enriched.Rating.Sources]) : details,
-		};
-
-	private static bool OwesRating(IdentifiedMedia details) => details.Rating.Sources.Count == 0;
 }

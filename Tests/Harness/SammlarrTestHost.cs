@@ -167,6 +167,15 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		metadata.BackdropUrl = "/backdrop.jpg";
 		metadata.ReleaseDate = new DateOnly(resolved.Year, 1, 15);
 		metadata.Genres = resolved.Genres is null ? ["Action"] : [.. resolved.Genres];
+		metadata.Ratings =
+		[
+			new MediaRatingRow
+			{
+				Source = MediaProvider.Tmdb,
+				NormalizedValue = 7.5f,
+				VoteCount = 100,
+			},
+		];
 		metadata.LastFetchedAt = fetched ?? _clock.Now;
 		return metadata;
 	}
