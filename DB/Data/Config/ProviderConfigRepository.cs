@@ -15,7 +15,6 @@ internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbConte
 			Sink = row.Sink,
 			TrendingProvider = row.TrendingProvider,
 			SearchProvider = row.SearchProvider,
-			RatingProvider = row.RatingProvider,
 			AuthProvider = row.AuthProvider,
 			RegistrationMode = row.RegistrationMode,
 		};
@@ -33,7 +32,6 @@ internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbConte
 					Sink = config.Sink,
 					TrendingProvider = config.TrendingProvider,
 					SearchProvider = config.SearchProvider,
-					RatingProvider = config.RatingProvider,
 					AuthProvider = config.AuthProvider,
 					RegistrationMode = config.RegistrationMode,
 				}
@@ -44,7 +42,6 @@ internal sealed class ProviderConfigRepository(IDbContextFactory<SammlarrDbConte
 			row.Sink = config.Sink;
 			row.TrendingProvider = config.TrendingProvider;
 			row.SearchProvider = config.SearchProvider;
-			row.RatingProvider = config.RatingProvider;
 			row.AuthProvider = config.AuthProvider;
 			row.RegistrationMode = config.RegistrationMode;
 		}

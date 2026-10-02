@@ -36,7 +36,6 @@ public class SettingsPageTests : BunitContext
 					Sink = SinkKind.Plex,
 					TrendingProvider = TrendingProvider.Tmdb,
 					SearchProvider = SearchProvider.Plex,
-					RatingProvider = RatingProvider.Tmdb,
 					AuthProvider = AuthProvider.Plex,
 					RegistrationMode = RegistrationMode.Open,
 				}

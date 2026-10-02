@@ -63,7 +63,6 @@ public sealed class ProviderConfigServiceTests : IDisposable
 			Sink = SinkKind.Plex,
 			TrendingProvider = TrendingProvider.Tmdb,
 			SearchProvider = SearchProvider.Plex,
-			RatingProvider = RatingProvider.Tmdb,
 			AuthProvider = AuthProvider.Plex,
 			RegistrationMode = registration,
 		};

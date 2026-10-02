@@ -26,7 +26,7 @@ public class MediaMetadataResolverTests
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task ResolveAsync_WhenTheRatingProviderHasNoVotesEither_AsksItOnlyOnce()
+	public async Task ResolveAsync_WhenTheEnricherHasNoVotesEither_AsksItOnlyOnce()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Tagline = null });
@@ -65,7 +65,7 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenTheRatingIsMissing_CallsTheRatingProvidersEnricherForItAlone()
+	public async Task ResolveAsync_WhenTheRatingIsMissing_CallsAnEnricherThatRatesForItAlone()
 	{
 		var deps = Dependencies.Create(tmdbFills: MediaField.Rating);
 		deps.Primary(Complete() with { Tagline = null });
@@ -78,7 +78,7 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_ForACompletePrimaryResultThatOwesItsRating_TakesTheRatingFromTheRatingProvidersEnricher()
+	public async Task ResolveAsync_ForACompletePrimaryResultThatOwesItsRating_TakesTheRatingFromAnEnricherThatRates()
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete());
@@ -96,6 +96,18 @@ public class MediaMetadataResolverTests
 	{
 		var deps = Dependencies.Create();
 		deps.Primary(Complete() with { Rating = TmdbRating });
+		await using var buffer = deps.Buffer();
+
+		await deps.Testee.ResolveAsync(Identity, buffer);
+
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task ResolveAsync_ForACompletePrimaryResultThatOwesItsRating_NeverAsksAnEnricherThatCannotRate()
+	{
+		var deps = Dependencies.Create(tmdbFills: ~MediaField.Rating);
+		deps.Primary(Complete());
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.ResolveAsync(Identity, buffer);
@@ -169,7 +181,7 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenTheRatingProviderIsRateLimitedButTheRatingIsStillOwed_AsksItOnceForBoth()
+	public async Task ResolveAsync_WhenTheEnricherThatRatesIsRateLimitedButTheRatingIsStillOwed_AsksItOnceForBoth()
 	{
 		var deps = Dependencies.Create(
 			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
@@ -184,7 +196,7 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_ForACompleteResultWhileTheRatingProviderIsRateLimited_StillAsksItForTheRating()
+	public async Task ResolveAsync_ForACompleteResultWhileTheEnricherThatRatesIsRateLimited_StillAsksItForTheRating()
 	{
 		var deps = Dependencies.Create(
 			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
@@ -258,7 +270,6 @@ public class MediaMetadataResolverTests
 						Sink = SinkKind.Plex,
 						TrendingProvider = TrendingProvider.Tmdb,
 						SearchProvider = SearchProvider.Plex,
-						RatingProvider = RatingProvider.Tmdb,
 						AuthProvider = AuthProvider.Plex,
 						RegistrationMode = RegistrationMode.Open,
 					}

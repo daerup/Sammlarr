@@ -87,8 +87,8 @@ library ids.
 ==== Phase B: metadata
 
 Metadata comes from the search provider first (Plex), then from the open enricher that fills the
-most missing fields, one at a time, until the record is complete and carries the rating provider's
-rating (TMDB, whose enricher fills `MediaField.Rating`); writes are
+most missing fields, one at a time, until the record is complete and carries a rating (from an enricher whose `Fills` include
+`MediaField.Rating`, today TMDB); writes are
 batched write-behind (one identity + one metadata upsert per run). Two failure behaviours matter: an
 unmatched candidate becomes `UnmatchedMedia` (surfaced, never persisted); and when a provider is down
 or rate-limiting the title shows as "not found" for that run but is not cached unmatched, so the next

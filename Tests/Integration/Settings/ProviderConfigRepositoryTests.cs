@@ -29,7 +29,7 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 	[Test]
 	public async Task StoreAsync_StoresAndRetrievesSuccessfully()
 	{
-		var expected = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
+		var expected = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex);
 
 		await Testee.StoreAsync(expected);
 
@@ -38,14 +38,13 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		await Assert.That(entity.Sink).IsEqualTo(expected.Sink);
 		await Assert.That(entity.TrendingProvider).IsEqualTo(expected.TrendingProvider);
 		await Assert.That(entity.SearchProvider).IsEqualTo(expected.SearchProvider);
-		await Assert.That(entity.RatingProvider).IsEqualTo(expected.RatingProvider);
 	}
 
 	[Test]
 	public async Task StoreAsync_WhenCalledTwice_UpdatesSingletonRow()
 	{
-		var initial = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
-		var updated = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex, RatingProvider.Tmdb);
+		var initial = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex);
+		var updated = CreateProviderSettings(SinkKind.Plex, TrendingProvider.Tmdb, SearchProvider.Plex);
 
 		await Testee.StoreAsync(initial);
 		await Testee.StoreAsync(updated);
@@ -55,18 +54,12 @@ public class ProviderConfigRepositoryTests(SammlarrTestHost fixture) : IAsyncDis
 		await Assert.That(entities).Count().IsEqualTo(1);
 	}
 
-	private static ProviderConfig CreateProviderSettings(
-		SinkKind sinkProvider,
-		TrendingProvider trendingProvider,
-		SearchProvider searchProvider,
-		RatingProvider ratingProvider
-	) =>
+	private static ProviderConfig CreateProviderSettings(SinkKind sinkProvider, TrendingProvider trendingProvider, SearchProvider searchProvider) =>
 		new()
 		{
 			Sink = sinkProvider,
 			TrendingProvider = trendingProvider,
 			SearchProvider = searchProvider,
-			RatingProvider = ratingProvider,
 			AuthProvider = AuthProvider.Plex,
 			RegistrationMode = RegistrationMode.Open,
 		};
