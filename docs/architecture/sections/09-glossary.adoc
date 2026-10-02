@@ -130,8 +130,8 @@ Blocklist:: Titles excluded from curation so they never enter a list.
 Provider:: An external service (TMDB, MDBList, Plex) or an id namespace (IMDb, TheTVDB),
 modelled as a `MediaProvider` enum value.
 
-Capability:: What a provider can do: `Search`, `Trending`, `Rating`, `Feed`, `Artwork`,
-`ApiKey`, or `Auth`. Declared per provider and used to generate the provider-subset enums.
+Capability:: What a provider can do: `Search`, `Trending`, `Feed`, `ApiKey`, `Auth`, `Artwork` or
+`Enricher`. Declared per provider and used to generate the provider-subset enums.
 
 Provider-subset enum:: A generated enum holding only the providers with a given capability,
 such as `FeedProvider` or `AuthProvider`. See <<section-concepts>>.
