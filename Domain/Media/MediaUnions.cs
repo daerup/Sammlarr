@@ -161,7 +161,7 @@ public static class MediaUnions
 		public IdentifiedMedia? AsIdentified() =>
 			media switch
 			{
-				IdentifiedMedia identified => identified,
+				IdentifiedMedia identified => (IdentifiedMedia?)identified,
 				UnmatchedMedia => null,
 			};
 

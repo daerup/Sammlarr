@@ -12,16 +12,17 @@ public class ServicesMapTests
 		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
 		await Expect(page.Text("Managed by an admin")).ToBeVisibleAsync();
 		await Expect(page.Locator("button.map-service")).ToHaveCountAsync(0);
+		await Expect(page.Locator(".map-chip")).ToHaveCountAsync(0);
 	}
 
 	[Test]
-	public async Task Map_ForAnAdmin_OpensTheWantlistTargetFromThePlexBox()
+	public async Task Map_ForAnAdminWhileEveryRoleHasOneOption_OffersNoPicker()
 	{
 		var page = await E2EApp.AdminAt(SettingsPage.Section("providers"));
 
-		await page.Locator("button.map-service").Filter(new() { HasText = "Plex" }).ClickAsync();
-
-		await Expect(page.Text("Wantlist syncs to")).ToBeVisibleAsync();
-		await Expect(page.MenuItem("Plex")).ToBeVisibleAsync();
+		await Expect(SettingsPage.MapService(page, "Plex")).ToBeVisibleAsync();
+		await Expect(page.Text("Managed by an admin")).ToHaveCountAsync(0);
+		await Expect(page.Locator("button.map-service")).ToHaveCountAsync(0);
+		await Expect(page.Locator(".map-chip")).ToHaveCountAsync(0);
 	}
 }
