@@ -3,8 +3,6 @@ using System.Text;
 using System.Text.Json;
 using API.Plex;
 using API.Plex.Types;
-using API.Tests.TMDB;
-using API.Tmdb;
 using Bogus;
 using Contracts.Auth;
 using Contracts.Identity;
@@ -57,13 +55,6 @@ internal sealed class PlexStub : HttpMessageHandler
 	{
 		_failures[candidate.PlexId.Value] = status;
 		return this;
-	}
-
-	public static TmdbApi UnmatchedTmdbApi()
-	{
-		var handler = Mock.HttpHandler();
-		handler.OnAnyRequest().Respond(HttpStatusCode.NotFound);
-		return TmdbApis.Over(handler);
 	}
 
 	public PlexApi CreateApi()

@@ -50,7 +50,7 @@ across providers.
 | Plex | Plex OAuth (PIN flow) for sign-in; HTTPS/JSON for search and the wantlist; additions and removals via HTTP `PUT` to the Plex watchlist endpoints | Read + Write
 | TMDB | REST API, authenticated with an API key | Read only
 | MDBList | REST API with an API key; list entries are paged and resolved to media | Read only
-| IMDb, TheTVDB | No HTTP client; `ImdbId` / `TvdbId` value objects reached through Plex or TMDB (`find`, `external_ids`) by `IExternalIdConverter` routes | Reference only
+| IMDb, TheTVDB | No HTTP client; `ImdbId` / `TvdbId` value objects reached through Plex or TMDB lookups | Reference only
 |===
 
 Provider credentials and API keys are held as `[Sensitive]` secrets and redacted from logs.

@@ -1,5 +1,5 @@
 using System.Globalization;
-using API.Plex;
+using API.Tmdb.Types;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
@@ -7,7 +7,7 @@ using Domain.Providers;
 
 namespace API.Tmdb;
 
-internal class TmdbIdConverter(PlexApi plexApi, TmdbApi tmdbApi) : IExternalIdConverter
+internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 {
 	private static readonly ById ByTmdbId = new(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Imdb, MediaProvider.Tvdb], Cost: 1);
 
@@ -17,28 +17,59 @@ internal class TmdbIdConverter(PlexApi plexApi, TmdbApi tmdbApi) : IExternalIdCo
 
 	public IReadOnlyList<IdLookup> Lookups { get; } = [ByTmdbId, Find];
 
-	public IReadOnlyList<IdRoute> Routes { get; } =
-	[
-		new(Some.Of(MediaProvider.Tmdb), MediaProvider.Tmdb, [], 0),
-		new(Some.Of(MediaProvider.Plex), MediaProvider.Tmdb, [MediaProvider.Plex], 1),
-		new(Some.Of(MediaProvider.Imdb), MediaProvider.Tmdb, [MediaProvider.Tmdb], 1),
-		new(Some.Of(MediaProvider.Tvdb), MediaProvider.Tmdb, [MediaProvider.Tmdb], 1),
-	];
-
-	public Task<Result<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
-		IdRoute route,
-		IEnumerable<IExternalMediaId> candidates,
-		Optional<ResolutionHints> hints,
-		CancellationToken cancellationToken = default
-	) => route.ConvertEachAsync(candidates, candidate => ConvertAsync(candidate, cancellationToken), "No TMDB id could be resolved for the given candidates.");
-
-	private async Task<Result<IReadOnlyList<IExternalMediaId>>> ConvertAsync(IExternalMediaId id, CancellationToken cancellationToken) =>
-		id switch
+	public async Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default)
+	{
+		return request switch
 		{
-			TmdbId tmdbId => Success.Of<IReadOnlyList<IExternalMediaId>>([tmdbId]),
-			PlexId plexId => await plexApi.ResolveExternalsByPlexAsync(plexId, external => external is TmdbId, cancellationToken),
-			_ => await tmdbApi
-				.FindAsync(id, cancellationToken)
-				.Map(item => (IReadOnlyList<IExternalMediaId>)[TmdbId.From(item.Id.ToString(CultureInfo.InvariantCulture), id.Type)]),
+			ByIdRequest(var lookup, TmdbId tmdbId) when lookup == ByTmdbId => await DetailAsync(tmdbId, cancellationToken),
+			ByIdRequest(var lookup, var id) when lookup == Find => await FindAsync(id, cancellationToken),
+			_ => Error.From("TMDB does not offer this lookup."),
 		};
+	}
+
+	private Task<Result<IdLookupResult>> DetailAsync(TmdbId tmdbId, CancellationToken cancellationToken)
+	{
+		return tmdbApi.GetDetailWithExternalIdsAsync(tmdbId, cancellationToken).Map(detail => FoundByDetail(detail, tmdbId));
+	}
+
+	private Task<Result<IdLookupResult>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken)
+	{
+		return tmdbApi.FindAsync(id, cancellationToken).Map(item => FoundByFind(item, id));
+	}
+
+	private static IdLookupResult FoundByDetail(TmdbTypes.Details detail, TmdbId tmdbId)
+	{
+		return new IdLookupResult([.. IdsOf(detail.ExternalIds, tmdbId.Type)], HintsOf(detail.OriginalTitle ?? detail.OriginalName, tmdbId.Type));
+	}
+
+	private static IdLookupResult FoundByFind(TmdbTypes.FindItem item, IExternalMediaId id)
+	{
+		IReadOnlyList<IExternalMediaId> ids = [TmdbId.From(item.Id.ToString(CultureInfo.InvariantCulture), id.Type)];
+		return new IdLookupResult(ids, HintsOf(item.OriginalTitle ?? item.OriginalName, id.Type));
+	}
+
+	private static IEnumerable<IExternalMediaId> IdsOf(TmdbTypes.ExternalIds? externals, MediaType type)
+	{
+		if (!string.IsNullOrWhiteSpace(externals?.ImdbId))
+		{
+			yield return ImdbId.From(externals.ImdbId, type);
+		}
+
+		if (externals?.TvdbId is > 0)
+		{
+			yield return TvdbId.From(externals.TvdbId.Value.ToString(CultureInfo.InvariantCulture), type);
+		}
+	}
+
+	private static Optional<ResolutionHints> HintsOf(string? originalTitle, MediaType type)
+	{
+		return Optional
+			.Of(originalTitle)
+			.Map(title => new ResolutionHints
+			{
+				Title = title,
+				Year = 0,
+				MediaType = type,
+			});
+	}
 }

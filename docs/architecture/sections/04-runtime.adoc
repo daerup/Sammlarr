@@ -40,12 +40,13 @@ any other partial row). Only a missing or stale title runs the two phases.
 
 ==== Phase A: ids to a Plex identity
 
-`MediaIdResolver` resolves the ids along the cheapest open chain of `IdRoute`s to the target
+`MediaIdResolver` resolves the ids along the cheapest open path of id lookups to the target
 (see Provider routing in <<section-concepts>>). The target is the provider the active sink addresses
 that title's type by (`IMediaSink.AddressedBy`): Plex for every type today, so an MDBList or TMDB
 reference is converted to a Plex id, the only id the wantlist can push. A type the sink cannot address
-fails as unmatched. The TMDB, IMDb and TheTVDB converters pass a matching id through, read it from Plex
-given a Plex id, or ask TMDB: `find` for an IMDb or TheTVDB id, `external_ids` for a TMDB id.
+fails as unmatched. Plex looks up a Plex id and searches by the title hints. TMDB answers a TMDB id with its
+detail, whose appended `external_ids` carry the IMDb and TheTVDB ids, and an IMDb or TheTVDB id through `find`.
+Every TMDB answer also carries the original title, so a Plex search can follow it.
 
 [mermaid]
 ....
@@ -56,7 +57,7 @@ sequenceDiagram
   participant PX as Plex
 
   MS->>NC: known unmatched? (skip providers if cached)
-  MS->>IC: ConvertAsync(route, ids, title hint)
+  MS->>IC: LookUpAsync(a Plex id, or the hints and known ids)
   alt candidate already has a Plex id
     IC->>PX: look up externals by that id
     PX-->>IC: external ids
@@ -67,13 +68,13 @@ sequenceDiagram
       IC->>PX: look up the hit's externals
       PX-->>IC: its external ids
     end
-    Note over IC,PX: keep the hit whose externals<br/>contain one of the original ids
+    Note over IC,PX: keep the hit whose externals<br/>contain one of the known ids
   end
   alt a hit matched
     IC-->>MS: canonical identity
   else nothing matched
     IC-->>MS: unmatched
-    MS->>NC: cache unmatched (1h), unless a route was blocked or unavailable
+    MS->>NC: cache unmatched (1h), unless a path was blocked or unavailable
   end
 ....
 

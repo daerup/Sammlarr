@@ -5,6 +5,7 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Providers;
 using Domain.Media;
+using Domain.Media.Conversions;
 using Domain.Providers;
 
 namespace Core.Media;
@@ -18,7 +19,7 @@ internal sealed class MediaIdResolver(
 {
 	private static readonly TimeSpan unmatchedTtl = TimeSpan.FromHours(1);
 
-	private readonly IReadOnlyList<RouteStep> _steps = [.. converters.SelectMany(converter => converter.Routes.Select(route => new RouteStep(converter, route)))];
+	private readonly IReadOnlyList<Hop> _hops = IdLookupPlanner.Derive(converters);
 
 	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(
 		ResolveRequest request,
@@ -33,23 +34,17 @@ internal sealed class MediaIdResolver(
 			return Error.From("Candidates were previously resolved as unmatched.");
 		}
 
-		var plan = IdRoutePlanner.Plan(
-			candidates.Select(candidate => candidate.Source).ToHashSet(),
-			request.Hints is Some<ResolutionHints>,
-			target,
-			_steps,
-			capacity.Of,
-			clock.Now
-		);
+		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, _hops, capacity, clock.Now);
+		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
 		var transient = plan.Blocked;
-		var tried = new Dictionary<string, StepOutcome>();
+		var answers = new Dictionary<AnswerKey, LookupAnswer>();
 		var down = new HashSet<MediaProvider>();
 		foreach (var path in plan.Paths)
 		{
-			var outcome = await FollowAsync(path, candidates, request.Hints, target, tried, down, cancellationToken);
-			if (outcome.Found is { } found)
+			var outcome = await FollowAsync(path, candidates, request.Hints, target, answers, down, cancellationToken);
+			if (outcome.Found.IsSome())
 			{
-				return Success.Of(found);
+				return outcome.Found.Map(found => found.Ids).ToResult(unresolved);
 			}
 			transient |= outcome.Transient;
 		}
@@ -58,60 +53,116 @@ internal sealed class MediaIdResolver(
 		{
 			unmatchedCache.Set(key, true, unmatchedTtl);
 		}
-		return Error.From($"No route resolved the candidates to a {target} id.");
+		return unresolved;
 	}
 
 	private async Task<StepOutcome> FollowAsync(
-		IReadOnlyList<RouteStep> path,
+		IReadOnlyList<Hop> path,
 		IReadOnlyList<IExternalMediaId> candidates,
 		Optional<ResolutionHints> hints,
 		MediaProvider target,
-		Dictionary<string, StepOutcome> tried,
+		Dictionary<AnswerKey, LookupAnswer> answers,
 		HashSet<MediaProvider> down,
 		CancellationToken cancellationToken
 	)
 	{
-		IReadOnlyList<IExternalMediaId> current = candidates;
-		for (var hop = 0; hop < path.Count; hop++)
+		var ids = candidates;
+		var current = hints;
+		for (var index = 0; index < path.Count; index++)
 		{
-			if (!path.Skip(hop).All(remaining => IsOpen(remaining, down)))
+			if (!path.Skip(index).All(remaining => IsOpen(remaining, down)))
 			{
-				return new StepOutcome(null, true);
+				return new StepOutcome(new None(), true);
 			}
 
-			var step = path[hop];
-			var key = StepKey(step.Route, current);
-			if (!tried.TryGetValue(key, out var outcome))
-			{
-				outcome = await TakeAsync(step, current, hints, down, cancellationToken);
-				tried[key] = outcome;
-			}
-			if (outcome.Found is not { } found)
+			var outcome = await TakeAsync(path[index], ids, current, answers, down, cancellationToken);
+			if (outcome.Found.IsNone())
 			{
 				return outcome;
 			}
-			current = [.. current.Concat(found).Distinct()];
+
+			outcome.Found.Apply(found =>
+			{
+				ids = [.. ids.Concat(found.Ids).Distinct()];
+				current = found.Hints.Or(current);
+			});
 		}
 
-		return current.Any(id => id.Source == target) ? new StepOutcome(current, false) : new StepOutcome(null, false);
+		return new StepOutcome(ids.Any(id => id.Source == target) ? Some.Of(new IdLookupResult(ids, current)) : new None(), false);
 	}
 
 	private static async Task<StepOutcome> TakeAsync(
-		RouteStep step,
-		IReadOnlyList<IExternalMediaId> candidates,
+		Hop hop,
+		IReadOnlyList<IExternalMediaId> ids,
 		Optional<ResolutionHints> hints,
+		Dictionary<AnswerKey, LookupAnswer> answers,
+		HashSet<MediaProvider> down,
+		CancellationToken cancellationToken
+	)
+	{
+		foreach (var request in Requests(hop, ids, hints))
+		{
+			var key = AnswerKey.Of(hop.Converter, request);
+			if (!answers.TryGetValue(key, out var answer))
+			{
+				answer = await AskAsync(hop.Converter, request, down, cancellationToken);
+				answers[key] = answer;
+			}
+
+			if (answer.Transient)
+			{
+				return new StepOutcome(new None(), true);
+			}
+
+			var found = answer.Result.ToOptional().When(result => Holds(hop, result));
+			if (found.IsSome())
+			{
+				return new StepOutcome(found, false);
+			}
+		}
+
+		return new StepOutcome(new None(), false);
+	}
+
+	private static IEnumerable<IdLookupRequest> Requests(Hop hop, IReadOnlyList<IExternalMediaId> ids, Optional<ResolutionHints> hints)
+	{
+		return hop switch
+		{
+			IdToId id => ByIdRequests(id.Lookup, id.From, ids),
+			IdToHints toHints => ByIdRequests(toHints.Lookup, toHints.From, ids),
+			HintsToId search => hints.Match(given => new IdLookupRequest[] { new ByHintsRequest(search.Lookup, given, ids) }, () => []),
+		};
+	}
+
+	private static IEnumerable<IdLookupRequest> ByIdRequests(ById lookup, MediaProvider from, IReadOnlyList<IExternalMediaId> ids)
+	{
+		return ids.Where(id => id.Source == from).Select(id => (IdLookupRequest)new ByIdRequest(lookup, id));
+	}
+
+	private static bool Holds(Hop hop, IdLookupResult found)
+	{
+		return hop switch
+		{
+			IdToId id => found.Ids.Any(each => each.Source == id.To),
+			HintsToId search => found.Ids.Any(each => each.Source == search.To),
+			IdToHints => found.Hints.IsSome(),
+		};
+	}
+
+	private static async Task<LookupAnswer> AskAsync(
+		IExternalIdConverter converter,
+		IdLookupRequest request,
 		HashSet<MediaProvider> down,
 		CancellationToken cancellationToken
 	)
 	{
 		try
 		{
-			return await step.Converter.ConvertAsync(step.Route, candidates, hints, cancellationToken) switch
-			{
-				Success<IReadOnlyList<IExternalMediaId>>(var found) => new StepOutcome(found, false),
-				Error { Exception: ProviderUnavailableException unavailable } => Unavailable(unavailable, down),
-				_ => new StepOutcome(null, false),
-			};
+			var answer = await converter.LookUpAsync(request, cancellationToken);
+			return answer.Match(
+				_ => new LookupAnswer(answer, false),
+				error => error.Exception is ProviderUnavailableException unavailable ? Unavailable(unavailable, down) : new LookupAnswer(answer, false)
+			);
 		}
 		catch (ProviderUnavailableException unavailable)
 		{
@@ -121,28 +172,41 @@ internal sealed class MediaIdResolver(
 		catch (Exception ex) when (ex is not OperationCanceledException)
 		{
 			Activity.Current?.AddException(ex);
-			return new StepOutcome(null, true);
+			return new LookupAnswer(Error.From(ex), true);
 		}
 	}
 
-	private static StepOutcome Unavailable(ProviderUnavailableException unavailable, HashSet<MediaProvider> down)
+	private static LookupAnswer Unavailable(ProviderUnavailableException unavailable, HashSet<MediaProvider> down)
 	{
 		down.Add(unavailable.Provider);
-		return new StepOutcome(null, true);
+		return new LookupAnswer(Error.From(unavailable), true);
 	}
 
-	private bool IsOpen(RouteStep step, HashSet<MediaProvider> down) =>
-		step.Route.Via.All(provider => !down.Contains(provider) && capacity.Of(provider).IsOpen(clock.Now));
-
-	private static string StepKey(IdRoute route, IReadOnlyList<IExternalMediaId> candidates)
+	private bool IsOpen(Hop hop, HashSet<MediaProvider> down)
 	{
-		var from = route.From is Some<MediaProvider>(var source) ? source.ToString() : "hints";
-		var inputs = candidates
-			.Where(id => route.From is not Some<MediaProvider>(var provider) || id.Source == provider)
-			.Select(id => id.ToString())
-			.Order(StringComparer.Ordinal);
-		return $"{from}>{route.To}:{string.Join(",", inputs)}";
+		var provider = hop.Converter.Provider;
+		return !down.Contains(provider) && capacity.Of(provider).IsOpen(clock.Now);
 	}
 
-	private readonly record struct StepOutcome(IReadOnlyList<IExternalMediaId>? Found, bool Transient);
+	private readonly record struct StepOutcome(Optional<IdLookupResult> Found, bool Transient);
+
+	private readonly record struct LookupAnswer(Result<IdLookupResult> Result, bool Transient);
+
+	private readonly record struct AnswerKey(IExternalIdConverter Converter, IdLookup Lookup, string Request)
+	{
+		public static AnswerKey Of(IExternalIdConverter converter, IdLookupRequest request)
+		{
+			return request switch
+			{
+				ByIdRequest byId => new AnswerKey(converter, byId.Lookup, $"{byId.Id}"),
+				ByHintsRequest search => new AnswerKey(converter, search.Lookup, HintsKey(search.Hints, search.Known)),
+			};
+		}
+
+		private static string HintsKey(ResolutionHints hints, IReadOnlyList<IExternalMediaId> known)
+		{
+			var ids = known.Select(id => $"{id}").Order(StringComparer.Ordinal);
+			return $"{hints.MediaType}:{hints.Year}:{hints.Title}|{string.Join(",", ids)}";
+		}
+	}
 }

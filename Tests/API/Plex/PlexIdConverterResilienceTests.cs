@@ -9,54 +9,52 @@ namespace API.Tests.Plex;
 
 public class PlexIdConverterResilienceTests
 {
-	private static readonly Optional<ResolutionHints> Hints = Some.Of(
-		new ResolutionHints
-		{
-			Title = "match",
-			Year = 2021,
-			MediaType = MediaType.Movie,
-		}
-	);
+	private static readonly ResolutionHints Hints = new()
+	{
+		Title = "match",
+		Year = 2021,
+		MediaType = MediaType.Movie,
+	};
 
 	[Test]
-	public async Task ConvertAsync_WhenOneCandidateLookupIsRateLimited_StillResolvesFromAnotherCandidate()
+	public async Task LookUpAsync_WhenOneCandidateLookupIsRateLimited_StillResolvesFromAnotherCandidate()
 	{
 		var throttled = PlexCandidate.Create();
 		var wanted = PlexCandidate.Create();
 		var stub = new PlexStub().Returns(throttled).Returns(wanted).RateLimits(throttled);
-		var testee = new PlexIdConverter(null!, stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		var result = await testee.ConvertAsync(testee.ByHints(), [wanted.TmdbId], Hints);
+		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, wanted.TmdbId));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(wanted.PlexId));
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenOneCandidateLookupFailsPermanently_StillResolvesFromAnotherCandidate()
+	public async Task LookUpAsync_WhenOneCandidateLookupFailsPermanently_StillResolvesFromAnotherCandidate()
 	{
 		var broken = PlexCandidate.Create();
 		var wanted = PlexCandidate.Create();
 		var stub = new PlexStub().Returns(broken).Returns(wanted).Fails(broken, HttpStatusCode.NotFound);
-		var testee = new PlexIdConverter(null!, stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		var result = await testee.ConvertAsync(testee.ByHints(), [wanted.TmdbId], Hints);
+		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, wanted.TmdbId));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(wanted.PlexId));
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenEveryCandidateIsRateLimited_ThrowsProviderUnavailable()
+	public async Task LookUpAsync_WhenEveryCandidateIsRateLimited_ThrowsProviderUnavailable()
 	{
 		var first = PlexCandidate.Create();
 		var second = PlexCandidate.Create();
 		var stub = new PlexStub().Returns(first).Returns(second).RateLimits(first).RateLimits(second);
-		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		await Assert.That(async () => await testee.ConvertAsync(testee.ByHints(), [PlexCandidate.Create().TmdbId], Hints)).Throws<ProviderUnavailableException>();
+		await Assert.That(async () => await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId))).Throws<ProviderUnavailableException>();
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenTheExactTitleRanksBelowTheLookupCap_StillResolvesIt()
+	public async Task LookUpAsync_WhenTheExactTitleRanksBelowTheLookupCap_StillResolvesIt()
 	{
 		var wanted = PlexCandidate.Create("Up", 2009);
 		var stub = new PlexStub();
@@ -65,52 +63,30 @@ public class PlexIdConverterResilienceTests
 			stub.Returns(PlexCandidate.Create($"Fed Up {index}", 1990));
 		}
 		stub.Returns(wanted);
-		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		var result = await testee.ConvertAsync(
-			testee.ByHints(),
-			[wanted.TmdbId],
-			Some.Of(
-				new ResolutionHints
-				{
-					Title = "Up",
-					Year = 2009,
-					MediaType = MediaType.Movie,
-				}
-			)
-		);
+		var result = await testee.LookUpAsync(testee.RequestByHints(Hints with { Title = "Up", Year = 2009 }, wanted.TmdbId));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(wanted.PlexId));
 		await Assert.That(stub.MetadataLookups()).IsLessThanOrEqualTo(5);
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenTwoResultsShareATitle_PrefersTheYearFromTheHints()
+	public async Task LookUpAsync_WhenTwoResultsShareATitle_PrefersTheYearFromTheHints()
 	{
 		var remake = PlexCandidate.Create("Ben-Hur", 2016);
 		var wanted = PlexCandidate.Create("Ben-Hur", 1959);
 		var stub = new PlexStub().Returns(remake).Returns(wanted);
-		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		var result = await testee.ConvertAsync(
-			testee.ByHints(),
-			[wanted.TmdbId],
-			Some.Of(
-				new ResolutionHints
-				{
-					Title = "Ben-Hur",
-					Year = 1959,
-					MediaType = MediaType.Movie,
-				}
-			)
-		);
+		var result = await testee.LookUpAsync(testee.RequestByHints(Hints with { Title = "Ben-Hur", Year = 1959 }, wanted.TmdbId));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(wanted.PlexId));
 		await Assert.That(stub.MetadataLookups(wanted.PlexId.Value)).IsEqualTo(1);
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenTheProviderQualifiesTheTitleWithARegion_StillPrefersTheYearMatch()
+	public async Task LookUpAsync_WhenTheProviderQualifiesTheTitleWithARegion_StillPrefersTheYearMatch()
 	{
 		var wanted = PlexCandidate.Create("The Office (US)", 2005);
 		var stub = new PlexStub();
@@ -119,52 +95,41 @@ public class PlexIdConverterResilienceTests
 			stub.Returns(PlexCandidate.Create("The Office", year));
 		}
 		stub.Returns(wanted);
-		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		var result = await testee.ConvertAsync(
-			testee.ByHints(),
-			[wanted.TmdbId],
-			Some.Of(
-				new ResolutionHints
-				{
-					Title = "The Office",
-					Year = 2005,
-					MediaType = MediaType.Movie,
-				}
-			)
-		);
+		var result = await testee.LookUpAsync(testee.RequestByHints(Hints with { Title = "The Office", Year = 2005 }, wanted.TmdbId));
 
-		await Assert.That(result).IsSuccess().And.Multiple(async externals => await Assert.That(externals).Contains(wanted.PlexId));
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(wanted.PlexId));
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenNoCandidateMatches_LooksUpAtMostThreeCandidates()
+	public async Task LookUpAsync_WhenNoCandidateMatches_LooksUpAtMostThreeCandidates()
 	{
 		var stub = new PlexStub();
 		for (var i = 0; i < 5; i++)
 		{
 			stub.Returns(PlexCandidate.Create());
 		}
-		var testee = new PlexIdConverter(PlexStub.UnmatchedTmdbApi(), stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi());
 
-		var result = await testee.ConvertAsync(testee.ByHints(), [PlexCandidate.Create().TmdbId], Hints);
+		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId));
 
 		await Assert.That(result).IsError();
 		await Assert.That(stub.MetadataLookups()).IsLessThanOrEqualTo(3);
 	}
 
 	[Test]
-	public async Task ConvertAsync_WhenTwoConcurrentResolvesShareARatingKey_LooksUpThatRatingKeyOnce()
+	public async Task LookUpAsync_WhenTwoConcurrentResolvesShareARatingKey_LooksUpThatRatingKeyOnce()
 	{
 		var shared = PlexCandidate.Create();
 		var stub = new PlexStub { MetadataGate = new TaskCompletionSource() };
 		stub.Returns(shared);
 		var plexApi = stub.CreateApi();
-		var testee = new PlexIdConverter(null!, plexApi);
+		var testee = new PlexIdConverter(plexApi);
 
-		var first = testee.ConvertAsync(testee.ByHints(), [shared.TmdbId], Hints);
+		var first = testee.LookUpAsync(testee.RequestByHints(Hints, shared.TmdbId));
 		await WaitForMetadataLookups(stub, 1);
-		var second = testee.ConvertAsync(testee.ByHints(), [shared.TmdbId], Hints);
+		var second = testee.LookUpAsync(testee.RequestByHints(Hints, shared.TmdbId));
 		await Task.Delay(TimeSpan.FromMilliseconds(200));
 		stub.MetadataGate.SetResult();
 		await Task.WhenAll(first, second);

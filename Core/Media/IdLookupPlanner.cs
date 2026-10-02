@@ -1,4 +1,5 @@
 using Contracts.Media.Conversions;
+using Contracts.Providers;
 using Domain.Media.Conversions;
 using Domain.Providers;
 
@@ -20,20 +21,20 @@ internal static class IdLookupPlanner
 		bool hasHints,
 		MediaProvider target,
 		IReadOnlyList<Hop> hops,
-		Func<MediaProvider, ProviderLoad> load,
+		IProviderCapacity capacity,
 		DateTimeOffset now
 	)
 	{
 		if (have.Contains(target))
 		{
-			return PlanPresent(target, hops, load, now);
+			return PlanPresent(target, hops, capacity, now);
 		}
 
 		var paths = new List<IReadOnlyList<Hop>>();
 		Walk([], have, hasHints, target, hops, paths);
 
-		var open = paths.Where(path => path.All(hop => load(hop.Converter.Provider).IsOpen(now))).ToList();
-		return new IdLookupPlan([.. open.OrderBy(path => Weight(path, load)).ThenBy(path => path.Count)], open.Count < paths.Count);
+		var open = paths.Where(path => path.All(hop => capacity.Of(hop.Converter.Provider).IsOpen(now))).ToList();
+		return new IdLookupPlan([.. open.OrderBy(path => Weight(path, capacity)).ThenBy(path => path.Count)], open.Count < paths.Count);
 	}
 
 	private static IEnumerable<Hop> HopsOf(IExternalIdConverter converter, IdLookup lookup)
@@ -58,7 +59,7 @@ internal static class IdLookupPlanner
 		}
 	}
 
-	private static IdLookupPlan PlanPresent(MediaProvider target, IReadOnlyList<Hop> hops, Func<MediaProvider, ProviderLoad> load, DateTimeOffset now)
+	private static IdLookupPlan PlanPresent(MediaProvider target, IReadOnlyList<Hop> hops, IProviderCapacity capacity, DateTimeOffset now)
 	{
 		var self = hops.Where(hop => hop is IdToId id && id.From == target && id.To == target).ToList();
 		if (self.Count == 0)
@@ -71,7 +72,7 @@ internal static class IdLookupPlanner
 			);
 		}
 
-		var open = self.Where(hop => load(hop.Converter.Provider).IsOpen(now)).ToList();
+		var open = self.Where(hop => capacity.Of(hop.Converter.Provider).IsOpen(now)).ToList();
 		return new IdLookupPlan([.. open.Select(hop => (IReadOnlyList<Hop>)[hop])], open.Count < self.Count);
 	}
 
@@ -146,8 +147,8 @@ internal static class IdLookupPlanner
 		};
 	}
 
-	private static double Weight(IReadOnlyList<Hop> path, Func<MediaProvider, ProviderLoad> load)
+	private static double Weight(IReadOnlyList<Hop> path, IProviderCapacity capacity)
 	{
-		return path.Sum(hop => hop.Cost * (1 + load(hop.Converter.Provider).Busy));
+		return path.Sum(hop => hop.Cost * (1 + capacity.Of(hop.Converter.Provider).Busy));
 	}
 }
