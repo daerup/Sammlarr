@@ -32,7 +32,6 @@ internal sealed record ServicesMapModel(IReadOnlyList<MapRole> Roles, IReadOnlyL
 			("Search", "search", "Finding titles to add", [config.SearchProvider.AsMediaProvider()], false),
 			("Sign-in", "log-in", "Who can sign in", [config.AuthProvider.AsMediaProvider()], false),
 			("Trending", "trending-up", "What Browse shows", [config.TrendingProvider.AsMediaProvider()], false),
-			("Ratings", "star", "Scores, filters and sorting", [config.RatingProvider.AsMediaProvider()], false),
 			("Feeds", "rss", "Imported lists; each feed picks its source", feeds, true),
 		];
 		var roles = rows.Select((row, index) => new MapRole(row.Name, row.Icon, row.Description, index * RowHeight + RowHeight / 2, row.Providers, row.PerFeed))

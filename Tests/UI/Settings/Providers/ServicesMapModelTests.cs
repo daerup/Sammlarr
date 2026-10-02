@@ -11,7 +11,6 @@ public class ServicesMapModelTests
 		Sink = SinkKind.Plex,
 		TrendingProvider = TrendingProvider.Tmdb,
 		SearchProvider = SearchProvider.Plex,
-		RatingProvider = RatingProvider.Tmdb,
 		AuthProvider = AuthProvider.Plex,
 		RegistrationMode = RegistrationMode.Open,
 	};
@@ -21,7 +20,7 @@ public class ServicesMapModelTests
 	{
 		var lines = ServicesMapModel.For(Config).Lines.Select(line => line.PerFeed ? $"{line.Provider} per feed" : $"{line.Provider}");
 
-		await Assert.That(lines).IsEquivalentTo(["Plex", "Plex", "Plex", "Tmdb", "Tmdb", "Tmdb per feed", "Mdblist per feed"]);
+		await Assert.That(lines).IsEquivalentTo(["Plex", "Plex", "Plex", "Tmdb", "Tmdb per feed", "Mdblist per feed"]);
 	}
 
 	[Test]
@@ -31,6 +30,6 @@ public class ServicesMapModelTests
 			.For(Config)
 			.Services.Select(service => service.IsFeedSource ? $"{service.Provider} {service.Y} source" : $"{service.Provider} {service.Y}");
 
-		await Assert.That(services).IsEquivalentTo(["Plex 72", "Tmdb 192", "Mdblist 259 source"]);
+		await Assert.That(services).IsEquivalentTo(["Plex 72", "Tmdb 168", "Mdblist 235 source"]);
 	}
 }

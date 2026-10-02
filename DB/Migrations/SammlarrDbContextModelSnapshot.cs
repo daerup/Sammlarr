@@ -118,10 +118,6 @@ namespace DB.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RatingProvider")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("RegistrationMode")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -147,7 +143,6 @@ namespace DB.Migrations
                         {
                             Id = 1,
                             AuthProvider = "Plex",
-                            RatingProvider = "Tmdb",
                             RegistrationMode = "Open",
                             SearchProvider = "Plex",
                             Sink = "Plex",

@@ -141,8 +141,8 @@ from `Web`'s `Program.cs` via `AddModule<T>()`.
 Keyed service:: A service resolved by an enum key, so a caller asks for, say, `IFeedProvider`
 keyed to `FeedProvider.Mdblist`.
 
-`ProviderConfig`:: The single global, admin-managed row of active provider selections (search,
-rating, auth) plus the registration mode. Not per-user.
+`ProviderConfig`:: The single global, admin-managed row of active provider selections (sink,
+search, trending, auth) plus the registration mode. Not per-user.
 
 `ProviderUnavailableException`:: Raised when a provider's circuit breaker is open or a call times
 out. Callers degrade on it (partial results) rather than fail a whole run.

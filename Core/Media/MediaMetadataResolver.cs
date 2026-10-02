@@ -22,23 +22,18 @@ internal sealed class MediaMetadataResolver(
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
-			.Map(detail => CompleteAsync(detail, config.SearchProvider, config.RatingProvider, cancellationToken))
+			.Map(detail => CompleteAsync(detail, config.SearchProvider, cancellationToken))
 			.Apply(buffer.Add);
 	}
 
-	private async Task<MediaLookup> CompleteAsync(
-		MediaLookup detail,
-		SearchProvider searchProvider,
-		RatingProvider ratingProvider,
-		CancellationToken cancellationToken
-	)
+	private async Task<MediaLookup> CompleteAsync(MediaLookup detail, SearchProvider searchProvider, CancellationToken cancellationToken)
 	{
 		var identified = detail.AsIdentified();
 		if (identified is null)
 		{
 			return detail;
 		}
-		return await EnrichAsync(identified.Value, searchProvider, ratingProvider, cancellationToken);
+		return await EnrichAsync(identified.Value, searchProvider, cancellationToken);
 	}
 
 	private Task<Result<MediaLookup>> LookUpAsync(MediaIdentity identity, SearchProvider provider, CancellationToken cancellationToken)
@@ -48,19 +43,14 @@ internal sealed class MediaMetadataResolver(
 		return searchIndex[provider].LookUpAsync(external, cancellationToken).Map(detail => detail.CombineIdentity(identity));
 	}
 
-	private async Task<IdentifiedMedia> EnrichAsync(
-		IdentifiedMedia details,
-		SearchProvider searchProvider,
-		RatingProvider ratingProvider,
-		CancellationToken cancellationToken
-	)
+	private async Task<IdentifiedMedia> EnrichAsync(IdentifiedMedia details, SearchProvider searchProvider, CancellationToken cancellationToken)
 	{
 		var now = clock.Now;
 		var asked = new HashSet<MediaProvider> { searchProvider.AsMediaProvider() };
 		var unanswered = MediaField.None;
-		while (Needed(details, ratingProvider) is var needed && needed is not MediaField.None)
+		while (Needed(details) is var needed && needed is not MediaField.None)
 		{
-			var options = Options(details, ratingProvider, asked);
+			var options = Options(details, asked);
 			if (EnricherChoice.Next(needed, options, now) is not { } next)
 			{
 				unanswered |= EnricherChoice.Blocked(needed, options, now);
@@ -81,7 +71,7 @@ internal sealed class MediaMetadataResolver(
 		return details is IPartialMedia remaining ? remaining.Confirming(remaining.Missing & ~unanswered) : details;
 	}
 
-	private List<EnricherOption> Options(IdentifiedMedia details, RatingProvider ratingProvider, IReadOnlySet<MediaProvider> asked)
+	private List<EnricherOption> Options(IdentifiedMedia details, IReadOnlySet<MediaProvider> asked)
 	{
 		var options = new List<EnricherOption>();
 		foreach (var provider in Enum.GetValues<EnricherProvider>().Select(enricher => enricher.AsMediaProvider()))
@@ -89,20 +79,18 @@ internal sealed class MediaMetadataResolver(
 			if (!asked.Contains(provider) && details.Externals.OfProvider(provider) is { } id)
 			{
 				var fills = enricherIndex[provider].Fills;
-				var ratesForUs = provider == ratingProvider.AsMediaProvider();
 				var load = capacity.Of(provider);
-				var unavoidable = ratesForUs && !HasRatingFrom(details.Rating, ratingProvider);
-				options.Add(
-					new EnricherOption(provider, id, ratesForUs ? fills : fills & ~MediaField.Rating, unavoidable ? load with { BlockedUntil = new None() } : load)
-				);
+				var unavoidable = fills.Overlaps(MediaField.Rating) && OwesRating(details);
+				options.Add(new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load));
 			}
 		}
 		return options;
 	}
 
-	private static MediaField Needed(IdentifiedMedia details, RatingProvider ratingProvider) =>
-		(details is IPartialMedia partial ? partial.Missing : MediaField.None)
-		| (HasRatingFrom(details.Rating, ratingProvider) ? MediaField.None : MediaField.Rating);
+	private static MediaField Needed(IdentifiedMedia details)
+	{
+		return (details is IPartialMedia partial ? partial.Missing : MediaField.None) | (OwesRating(details) ? MediaField.Rating : MediaField.None);
+	}
 
 	private static IdentifiedMedia Merge(IdentifiedMedia details, IdentifiedMedia enriched) =>
 		details switch
@@ -111,5 +99,5 @@ internal sealed class MediaMetadataResolver(
 			IMedia => enriched.Rating.Sources.Count > 0 ? MediaMerger.WithRatings(details, [.. enriched.Rating.Sources]) : details,
 		};
 
-	private static bool HasRatingFrom(RatingSummary rating, RatingProvider provider) => rating.Sources.Any(source => source.Source == provider);
+	private static bool OwesRating(IdentifiedMedia details) => details.Rating.Sources.Count == 0;
 }

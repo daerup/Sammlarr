@@ -15,7 +15,6 @@ public class ServicesMapTests : BunitContext
 		Sink = SinkKind.Plex,
 		TrendingProvider = TrendingProvider.Tmdb,
 		SearchProvider = SearchProvider.Plex,
-		RatingProvider = RatingProvider.Tmdb,
 		AuthProvider = AuthProvider.Plex,
 		RegistrationMode = RegistrationMode.Open,
 	};
@@ -49,13 +48,13 @@ public class ServicesMapTests : BunitContext
 		var cut = RenderMap(canPick: false, MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Mdblist);
 
 		var lines = cut.FindAll(".map-lines path").Select(path => path.GetAttribute("d")![..2]);
-		await Assert.That(lines).IsEquivalentTo(Enumerable.Repeat("M0", 7));
+		await Assert.That(lines).IsEquivalentTo(Enumerable.Repeat("M0", 6));
 	}
 
 	[Test]
 	[Arguments(new[] { MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Mdblist }, 0)]
 	[Arguments(new[] { MediaProvider.Plex, MediaProvider.Tmdb }, 1)]
-	[Arguments(new MediaProvider[0], 7)]
+	[Arguments(new MediaProvider[0], 6)]
 	public async Task Lines_ToAServiceTheViewerHasNotSetUp_AreDotted(MediaProvider[] ready, int dotted)
 	{
 		var cut = RenderMap(false, ready);

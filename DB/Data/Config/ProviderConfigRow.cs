@@ -17,8 +17,6 @@ internal record ProviderConfigRow
 
 	public required SearchProvider SearchProvider { get; set; }
 
-	public required RatingProvider RatingProvider { get; set; }
-
 	public required AuthProvider AuthProvider { get; set; }
 
 	public required RegistrationMode RegistrationMode { get; set; }
@@ -29,7 +27,6 @@ internal record ProviderConfigRow
 			Sink = SinkKind.Plex,
 			TrendingProvider = TrendingProvider.Tmdb,
 			SearchProvider = SearchProvider.Plex,
-			RatingProvider = RatingProvider.Tmdb,
 			AuthProvider = AuthProvider.Plex,
 			RegistrationMode = RegistrationMode.Open,
 		};
