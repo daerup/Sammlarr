@@ -8,8 +8,13 @@ namespace Core.Auth;
 internal sealed class ApiKeyService(IApiKeyConfigRepository keys, IApiKeyFactory factory, IFeedService feeds, SecretCache<ApiKeyProvider, IApiKey> cache)
 	: IApiKeyService
 {
-	public ValueTask<Result<IApiKey>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default) =>
-		cache.GetOrLoadAsync(provider, () => keys.GetAsync(provider, cancellationToken).Map(value => factory.CreateAsync(provider, value, cancellationToken)));
+	public ValueTask<Result<IApiKey>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	{
+		return cache.GetOrLoadAsync(
+			provider,
+			() => keys.GetAsync(provider, cancellationToken).Map(value => factory.CreateAsync(provider, value, cancellationToken))
+		);
+	}
 
 	public async Task StoreAsync(IApiKey key, CancellationToken cancellationToken = default)
 	{
@@ -24,5 +29,8 @@ internal sealed class ApiKeyService(IApiKeyConfigRepository keys, IApiKeyFactory
 		await feeds.PauseAsync(provider, cancellationToken);
 	}
 
-	public void ReportRejected(ApiKeyProvider provider) => cache.Evict(provider);
+	public void ReportRejected(ApiKeyProvider provider)
+	{
+		cache.Evict(provider);
+	}
 }

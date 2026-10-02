@@ -9,12 +9,23 @@ internal sealed class SecretCache<TProvider, TSecret>(ITypedMemoryCache<(Guid Us
 {
 	private static readonly TimeSpan Lifetime = TimeSpan.FromMinutes(10);
 
-	public async ValueTask<Result<TSecret>> GetOrLoadAsync(TProvider provider, Func<Task<Result<TSecret>>> load) =>
-		cache.TryGetValue(Key(provider), out var cached) && cached is not null ? Success.Of(cached) : await load().Apply(secret => Put(provider, secret));
+	public async ValueTask<Result<TSecret>> GetOrLoadAsync(TProvider provider, Func<Task<Result<TSecret>>> load)
+	{
+		return cache.TryGetValue(Key(provider), out var cached) && cached is not null ? Success.Of(cached) : await load().Apply(secret => Put(provider, secret));
+	}
 
-	public void Put(TProvider provider, TSecret secret) => cache.Set(Key(provider), secret, Lifetime);
+	public void Put(TProvider provider, TSecret secret)
+	{
+		cache.Set(Key(provider), secret, Lifetime);
+	}
 
-	public void Evict(TProvider provider) => cache.Remove(Key(provider));
+	public void Evict(TProvider provider)
+	{
+		cache.Remove(Key(provider));
+	}
 
-	private (Guid User, TProvider Provider) Key(TProvider provider) => (currentUser.IsAuthenticated ? currentUser.Id.Value : Guid.Empty, provider);
+	private (Guid User, TProvider Provider) Key(TProvider provider)
+	{
+		return (currentUser.IsAuthenticated ? currentUser.Id.Value : Guid.Empty, provider);
+	}
 }

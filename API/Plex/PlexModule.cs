@@ -18,6 +18,7 @@ internal class PlexModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddScoped<PlexApi>();
+		// Forwarded so search and enrichment share one PlexApi (and its _byRatingKey cache) per scope.
 		services.AddKeyedScoped<IMediaSearchProvider>(SearchProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
 		services.AddKeyedScoped<IMetadataEnricher>(MediaProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
 		services.AddKeyedScoped<IOAuthProvider, PlexOAuthProvider>(AuthProvider.Plex);

@@ -497,7 +497,8 @@
         _scheduleCronExpression = Value.Schedule is Scheduled scheduled ? scheduled.ToString() : null;
         _syncFrequencySectionOpen = _scheduleMode == ScheduleMode.Scheduled;
 
-        _disabledProviders.UnionWith(await FeedProviderKeys.WithoutKeyAsync(ApiKeyService));
+        var ready = await ApiKeyService.GetReadyAsync();
+        _disabledProviders.UnionWith(Enum.GetValues<FeedProvider>().ExceptBy(ready, provider => provider.AsApiKeyProvider()));
 
         if (ProviderHasNoKey)
         {

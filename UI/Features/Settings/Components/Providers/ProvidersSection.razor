@@ -66,7 +66,7 @@
 
     private ProviderConfig? _config;
 
-    private IReadOnlySet<MediaProvider> _ready = new HashSet<MediaProvider>();
+    private HashSet<MediaProvider> _ready = [];
 
     private MediaProvider? _open;
 
@@ -94,24 +94,11 @@
 
     private async Task RefreshReadyAsync()
     {
-        var ready = new HashSet<MediaProvider>();
-        foreach (var provider in Enum.GetValues<AuthProvider>())
-        {
-            if (await Credentials.GetAsync(provider).IsSuccess())
-            {
-                ready.Add(provider.AsMediaProvider());
-            }
-        }
-
-        foreach (var provider in Enum.GetValues<ApiKeyProvider>())
-        {
-            if (await ApiKeys.GetAsync(provider).IsSuccess())
-            {
-                ready.Add(provider.AsMediaProvider());
-            }
-        }
-
-        _ready = ready;
+        _ready =
+        [
+            .. (await Credentials.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+            .. (await ApiKeys.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),
+        ];
     }
 
     private bool IsOpen(MediaProvider provider) => _open == provider;
