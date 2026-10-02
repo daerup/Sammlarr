@@ -2,9 +2,9 @@
 @using UI.Shared.Services.Branding
 @inject MediaProviderBrandingService Branding
 
-<div class="overflow-hidden rounded-lg border bg-card">
+<div class="w-fit max-w-full overflow-hidden rounded-lg border bg-card">
     <CardHead Icon="network" Title="Which service does what">
-        @if (!CanPickSink)
+        @if (!CanPick)
         {
             <span class="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
                 <LucideIcon Name="lock" Size="11"/>
@@ -13,11 +13,11 @@
         }
     </CardHead>
 
-    <div class="map">
-        <div class="map-roles">
+    <div class="overflow-x-auto px-4 pb-2.5 pt-2">
+        <div class="map" style="width: @Px(ServicesMapModel.Width)px; height: @Px(_model.Height)px">
             @foreach (var role in _model.Roles)
             {
-                <div class="map-role">
+                <div class="map-role" style="top: @Px(role.Y - ServicesMapModel.ServiceHeight / 2)px">
                     <span class="map-role-icon"><LucideIcon Name="@role.Icon" Size="14"/></span>
                     <div>
                         <div class="map-role-name">@role.Name</div>
@@ -25,52 +25,77 @@
                     </div>
                 </div>
             }
-        </div>
 
-        <svg class="map-lines" width="100%" height="@Px(_model.Height)" viewBox="0 0 100 @Px(_model.Height)" preserveAspectRatio="none" aria-hidden="true">
-            @foreach (var line in _model.Lines)
-            {
-                <path d="@Curve(line.From, line.To)" stroke="@Brand(line.Provider).BrandColor" stroke-dasharray="@Dash(line.Provider)"/>
-            }
-        </svg>
+            <svg class="map-traces" width="@Px(ServicesMapModel.Width)" height="@Px(_model.Height)" viewBox="0 0 @Px(ServicesMapModel.Width) @Px(_model.Height)" aria-hidden="true">
+                @foreach (var trace in _model.Traces)
+                {
+                    <path class="@(trace.Role == Hot ? "is-hot" : null)" d="@trace.Path" stroke="@Brand(trace.Provider).BrandColor" stroke-dasharray="@Dash(trace.Provider)"/>
+                }
+                @foreach (var service in _model.Services)
+                {
+                    @foreach (var pin in service.Pins)
+                    {
+                        <rect x="@Px(ServicesMapModel.ServiceX - 5)" y="@Px(pin - 1.3)" width="5" height="2.6" rx="0.6" fill="@Brand(service.Provider).BrandColor"/>
+                    }
+                }
+            </svg>
 
-        <div class="map-services" style="height: @Px(_model.Height)px">
-            @if (_model.SourcesCaptionY is { } captionY)
-            {
-                <span class="map-sources-caption" style="top: @Px(captionY)px">Feed sources</span>
-            }
             @foreach (var service in _model.Services)
             {
-                @if (service.IsFeedSource)
+                <div class="map-service" style="left: @Px(ServicesMapModel.ServiceX)px; top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px; --brand: @Brand(service.Provider).BrandColor">
+                    <ProviderLogo Provider="service.Provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
+                    <span class="flex min-w-0 flex-col items-start">
+                        <span class="map-service-name">@Brand(service.Provider).NickName</span>
+                        <span class="map-service-status">
+                            <span class="map-dot @DotClass(service.Provider)"></span>
+                            @Status(service.Provider)
+                        </span>
+                    </span>
+                </div>
+            }
+
+            @foreach (var tile in _model.Tiles)
+            {
+                <div class="map-tile @EdgeClass(tile) @(Ready.Contains(tile.Provider) ? null : "is-off")"
+                     style="left: @Px(tile.X)px; top: @Px(tile.Y)px; --brand: @Brand(tile.Provider).BrandColor"
+                     title="@TileLabel(tile)">
+                    <ProviderLogo Provider="tile.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
+                    @if (!Ready.Contains(tile.Provider))
+                    {
+                        <span class="map-dot bg-destructive"></span>
+                    }
+                    <span class="sr-only">@TileLabel(tile)</span>
+                </div>
+            }
+
+            <svg class="map-vias" width="@Px(ServicesMapModel.Width)" height="@Px(_model.Height)" viewBox="0 0 @Px(ServicesMapModel.Width) @Px(_model.Height)" aria-hidden="true">
+                @foreach (var role in _model.Roles)
                 {
-                    <div class="map-source" style="top: @Px(service.Y - ServicesMapModel.SourceHeight / 2)px" title="@Status(service.Provider)">
-                        <ProviderLogo Provider="service.Provider" Form="ProviderLogoForm.Mark" Size="18" Decorative="true"/>
-                        <span class="map-source-name">@Brand(service.Provider).NickName</span>
-                        <span class="map-dot ml-auto @DotClass(service.Provider)"></span>
-                        <span class="sr-only">@Status(service.Provider)</span>
-                    </div>
+                    <circle class="@(role.Provider is null ? "is-feeds" : null)" cx="@Px(ServicesMapModel.RoleWidth)" cy="@Px(role.Y)" r="2.6"
+                            stroke="@(role.Provider is { } provider ? Brand(provider).BrandColor : null)"/>
                 }
-                else
+            </svg>
+
+            @if (CanPick)
+            {
+                @foreach (var role in _model.Roles)
                 {
-                    <div class="map-service-slot" style="top: @Px(service.Y - ServicesMapModel.ServiceHeight / 2)px">
-                        @if (CanPickSink && service.Provider == WantlistTarget)
-                        {
-                            <BbDropdownMenu>
-                                <BbDropdownMenuTrigger AsChild="false" Class="map-service is-picker">
-                                    @ServiceBody(service)
-                                    <LucideIcon Name="chevron-down" Size="15" Class="ml-auto text-muted-foreground"/>
+                    @if (role.Picker is { } picker)
+                    {
+                        <span class="map-chip-slot" style="left: @Px(ServicesMapModel.ChipX)px; top: @Px(role.Y)px; --brand: @Brand(picker.Current).BrandColor"
+                              @onmouseenter="() => _hovered = role.Name" @onmouseleave="() => _hovered = null">
+                            <BbDropdownMenu OnOpenChange="open => Opened(role.Name, open)">
+                                <BbDropdownMenuTrigger AsChild="false" Class="map-chip" ActiveClass="is-open" aria-label="@($"Change what {role.Name} uses")">
+                                    <LucideIcon Name="chevrons-up-down" Size="12"/>
                                 </BbDropdownMenuTrigger>
-                                <BbDropdownMenuContent Align="PopoverAlign.End" Class="w-72">
-                                    <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">Wantlist syncs to</BbDropdownMenuLabel>
-                                    @foreach (var target in Enum.GetValues<SinkKind>())
+                                <BbDropdownMenuContent Class="w-56">
+                                    <BbDropdownMenuLabel Class="text-xs font-normal text-muted-foreground">@picker.Label</BbDropdownMenuLabel>
+                                    @foreach (var option in picker.Options)
                                     {
                                         <BbDropdownMenuItem Class="gap-2.5">
-                                            <ProviderLogo Provider="@target.AsMediaProvider()" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
-                                            <span class="flex flex-col">
-                                                <span>@Brand(target.AsMediaProvider()).NickName</span>
-                                                <span class="text-xs text-muted-foreground">Each user's own @Brand(target.AsMediaProvider()).NickName wantlist</span>
-                                            </span>
-                                            @if (target == Config.Sink)
+                                            <ProviderLogo Provider="option" Form="ProviderLogoForm.Mark" Size="20" Decorative="true"/>
+                                            <span>@Brand(option).NickName</span>
+                                            @if (option == picker.Current)
                                             {
                                                 <LucideIcon Name="check" Size="14" Class="ml-auto"/>
                                             }
@@ -78,12 +103,8 @@
                                     }
                                 </BbDropdownMenuContent>
                             </BbDropdownMenu>
-                        }
-                        else
-                        {
-                            <div class="map-service">@ServiceBody(service)</div>
-                        }
-                    </div>
+                        </span>
+                    }
                 }
             }
         </div>
@@ -102,11 +123,17 @@
 
     [Parameter] [EditorRequired] public required IReadOnlySet<MediaProvider> Ready { get; set; }
 
-    [Parameter] public bool CanPickSink { get; set; }
+    [Parameter] public bool CanPick { get; set; }
 
     private ServicesMapModel _model = null!;
 
-    private MediaProvider WantlistTarget => Config.Sink.AsMediaProvider();
+    private string? _hovered;
+
+    private string? _opened;
+
+    private string? Hot => _opened ?? _hovered;
+
+    private void Opened(string role, bool open) => _opened = open ? role : _opened == role ? null : _opened;
 
     protected override void OnParametersSet() => _model = ServicesMapModel.For(Config);
 
@@ -125,19 +152,14 @@
             (false, false) => "No key yet",
         };
 
-    private static string Px(double value) => value.ToString(CultureInfo.InvariantCulture);
+    private string TileLabel(MapTile tile) => $"{Brand(tile.Provider).NickName}: {Status(tile.Provider)}";
 
-    private static string Curve(double from, double to) => FormattableString.Invariant($"M0 {from} C 60 {from}, 40 {to}, 100 {to}");
+    private static string EdgeClass(MapTile tile) =>
+        tile.Entry switch
+        {
+            TileEntry.Bottom => "is-bottom",
+            TileEntry.Top => "is-top",
+        };
 
-    private RenderFragment ServiceBody(MapService service) =>
-        @<text>
-            <ProviderLogo Provider="service.Provider" Form="ProviderLogoForm.Mark" Size="26" Decorative="true"/>
-            <span class="flex min-w-0 flex-col items-start">
-                <span class="map-service-name">@Brand(service.Provider).NickName</span>
-                <span class="map-service-status">
-                    <span class="map-dot @DotClass(service.Provider)"></span>
-                    @Status(service.Provider)
-                </span>
-            </span>
-        </text>;
+    private static string Px(double value) => Math.Round(value, 2).ToString(CultureInfo.InvariantCulture);
 }

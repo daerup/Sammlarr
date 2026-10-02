@@ -36,53 +36,60 @@ public class ServicesMapTests : BunitContext
 			.Select(service =>
 				$"{service.QuerySelector(".map-service-name")!.TextContent.Trim()}: {service.QuerySelector(".map-service-status")!.TextContent.Trim()}"
 			);
-		var sources = cut.FindAll(".map-source")
-			.Select(source => $"{source.QuerySelector(".map-source-name")!.TextContent.Trim()}: {source.QuerySelector(".sr-only")!.TextContent.Trim()}");
+		var tiles = cut.FindAll(".map-tile").Select(tile => tile.QuerySelector(".sr-only")!.TextContent.Trim());
 		await Assert.That(boxes).IsEquivalentTo(["Plex: Your account", "TMDb: Your key is set"]);
-		await Assert.That(sources).IsEquivalentTo(["MDBList: No key yet"]);
+		await Assert.That(tiles).IsEquivalentTo(["MDBList: No key yet"]);
 	}
 
 	[Test]
-	public async Task Feeds_Always_ConnectStraightToEachSource()
+	public async Task Traces_Always_StartFromTheRoleColumn()
 	{
 		var cut = RenderMap(canPick: false, MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Mdblist);
 
-		var lines = cut.FindAll(".map-lines path").Select(path => path.GetAttribute("d")![..2]);
-		await Assert.That(lines).IsEquivalentTo(Enumerable.Repeat("M0", 6));
+		var starts = cut.FindAll(".map-traces path").Select(path => path.GetAttribute("d")!.Split(' ')[0]);
+		await Assert.That(starts).IsEquivalentTo(Enumerable.Repeat("M256", 6));
 	}
 
 	[Test]
 	[Arguments(new[] { MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Mdblist }, 0)]
 	[Arguments(new[] { MediaProvider.Plex, MediaProvider.Tmdb }, 1)]
 	[Arguments(new MediaProvider[0], 6)]
-	public async Task Lines_ToAServiceTheViewerHasNotSetUp_AreDotted(MediaProvider[] ready, int dotted)
+	public async Task Traces_ToAServiceTheViewerHasNotSetUp_AreDotted(MediaProvider[] ready, int dotted)
 	{
 		var cut = RenderMap(false, ready);
 
-		await Assert.That(cut.FindAll(".map-lines path[stroke-dasharray]").Count).IsEqualTo(dotted);
+		await Assert.That(cut.FindAll(".map-traces path[stroke-dasharray]").Count).IsEqualTo(dotted);
 	}
 
 	[Test]
-	public async Task Map_ForAnAdmin_OpensTheWantlistPickerFromItsTarget()
+	[Arguments(true)]
+	[Arguments(false)]
+	public async Task Map_WhileEveryRoleHasOneOption_OffersNoControl(bool canPick)
+	{
+		var cut = RenderMap(canPick);
+
+		await Assert.That(cut.FindAll("button.map-service")).IsEmpty();
+		await Assert.That(cut.FindAll(".map-chip")).IsEmpty();
+	}
+
+	[Test]
+	public async Task Map_ForAnAdmin_SaysNothingAboutWhoManagesIt()
 	{
 		var cut = RenderMap(canPick: true);
 
-		var picker = cut.Find("button.map-service");
-		await Assert.That(picker.TextContent).Contains("Plex");
 		await Assert.That(cut.Markup).DoesNotContain("Managed by an admin");
 	}
 
 	[Test]
-	public async Task Map_ForAMember_IsReadOnlyAndSaysWhoManagesIt()
+	public async Task Map_ForAMember_SaysWhoManagesIt()
 	{
 		var cut = RenderMap(canPick: false);
 
-		await Assert.That(cut.FindAll("button.map-service")).IsEmpty();
 		await Assert.That(cut.Markup).Contains("Managed by an admin");
 	}
 
 	private IRenderedComponent<ServicesMap> RenderMap(bool canPick, params MediaProvider[] ready) =>
 		Render<ServicesMap>(parameters =>
-			parameters.Add(map => map.Config, Config).Add(map => map.Ready, (IReadOnlySet<MediaProvider>)ready.ToHashSet()).Add(map => map.CanPickSink, canPick)
+			parameters.Add(map => map.Config, Config).Add(map => map.Ready, (IReadOnlySet<MediaProvider>)ready.ToHashSet()).Add(map => map.CanPick, canPick)
 		);
 }

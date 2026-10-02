@@ -47,14 +47,14 @@
     {
         <section class="flex flex-col gap-3" aria-label="Services">
             <h3 class="text-sm font-semibold">Services</h3>
-            <ServicesMap Config="config" Ready="_ready" CanPickSink="@(CurrentUser.Role == UserRole.Admin)"/>
+            <ServicesMap Config="config" Ready="_ready" CanPick="@(CurrentUser.Role == UserRole.Admin)"/>
         </section>
     }
     else
     {
         <section class="flex flex-col gap-3" aria-label="Services" aria-busy="true">
             <h3 class="text-sm font-semibold">Services</h3>
-            <BbSkeleton Class="h-[385px] rounded-lg"/>
+            <BbSkeleton Class="h-[337px] w-full rounded-lg"/>
         </section>
     }
 </div>

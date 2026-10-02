@@ -1,20 +1,14 @@
 .map {
-    display: grid;
-    grid-template-columns: auto 1fr 214px;
-    padding: 8px 16px 10px;
-}
-
-.map-roles {
-    display: flex;
-    flex-direction: column;
-    padding-right: 14px;
+    position: relative;
 }
 
 .map-role {
+    position: absolute;
+    left: 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    height: 48px;
+    height: 44px;
 }
 
 .map-role-icon {
@@ -33,58 +27,57 @@
     font-size: 13px;
     font-weight: 500;
     line-height: 1.25;
+    white-space: nowrap;
 }
 
 .map-role-description {
+    max-width: 208px;
     font-size: 11px;
     line-height: 1.25;
     color: var(--muted-foreground);
 }
 
-.map-lines {
-    display: block;
+.map-traces,
+.map-vias {
+    position: absolute;
+    inset: 0;
     overflow: visible;
+    pointer-events: none;
 }
 
-.map-lines path {
+.map-traces path {
     fill: none;
     stroke-width: 1.7;
-    vector-effect: non-scaling-stroke;
     opacity: 0.85;
+    transition: stroke-width 150ms ease, opacity 150ms ease;
 }
 
-.map-services {
-    position: relative;
+.map-traces path.is-hot {
+    stroke-width: 3;
+    opacity: 1;
 }
 
-.map-service-slot {
+.map-vias circle {
+    fill: var(--card);
+    stroke-width: 1.4;
+}
+
+.map-vias circle.is-feeds {
+    stroke: var(--muted-foreground);
+}
+
+.map-service {
     position: absolute;
-    left: 0;
-    right: 0;
-    height: 44px;
-}
-
-.map-services ::deep .map-service {
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 100%;
+    width: 266px;
     height: 44px;
-    padding: 6px 10px;
+    padding: 6px 10px 6px 8px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-left: 3px solid var(--brand);
+    border-radius: 5px 10px 10px 5px;
     background: var(--card);
-    text-align: left;
-}
-
-.map-services ::deep .map-service.is-picker {
-    cursor: pointer;
-    transition: background-color 150ms ease;
-}
-
-.map-services ::deep .map-service.is-picker:hover,
-.map-services ::deep .map-service.is-picker[data-state=open] {
-    background: color-mix(in oklch, var(--muted) 60%, var(--card));
 }
 
 .map-service-name {
@@ -101,6 +94,76 @@
     font-size: 11px;
     color: var(--muted-foreground);
     white-space: nowrap;
+}
+
+.map-tile {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--card);
+}
+
+.map-tile.is-bottom {
+    border-bottom: 3px solid var(--brand);
+    border-radius: 7px 7px 4px 4px;
+}
+
+.map-tile.is-top {
+    border-top: 3px solid var(--brand);
+    border-radius: 4px 4px 7px 7px;
+}
+
+.map-tile.is-off {
+    border-style: dashed;
+}
+
+.map-tile.is-off.is-bottom {
+    border-bottom-style: solid;
+    border-bottom-color: color-mix(in oklch, var(--brand) 35%, transparent);
+}
+
+.map-tile.is-off.is-top {
+    border-top-style: solid;
+    border-top-color: color-mix(in oklch, var(--brand) 35%, transparent);
+}
+
+.map-tile .map-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    box-shadow: 0 0 0 2px var(--card);
+}
+
+.map-chip-slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.map-chip-slot ::deep .map-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    background: var(--card);
+    color: var(--muted-foreground);
+    box-shadow: 0 0 0 3px var(--card);
+    cursor: pointer;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.map-chip-slot ::deep .map-chip:hover,
+.map-chip-slot ::deep .map-chip.is-open {
+    border-color: var(--brand);
+    background: color-mix(in oklch, var(--brand) 14%, var(--card));
+    color: var(--foreground);
 }
 
 .map-dot {
@@ -130,35 +193,4 @@
 .map-legend line {
     stroke: var(--muted-foreground);
     stroke-width: 1.8;
-}
-
-.map-sources-caption {
-    position: absolute;
-    left: 0;
-    font-size: 10px;
-    font-weight: 600;
-    line-height: 18px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-}
-
-.map-source {
-    position: absolute;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 26px;
-    padding: 3px 8px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card);
-}
-
-.map-source-name {
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
 }
