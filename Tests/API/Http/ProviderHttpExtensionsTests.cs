@@ -2,12 +2,14 @@ using System.Net;
 using System.Net.Http.Headers;
 using API.Http;
 using API.Notifications.Webhook;
+using Contracts;
 using Contracts.Identity;
 using Contracts.Providers;
 using Domain.Identity;
 using Domain.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Polly.CircuitBreaker;
 using Shared.Options;
 using TestInfrastructure;
 
@@ -39,7 +41,7 @@ public class ProviderHttpExtensionsTests
 		var reporter = IProviderRateLimitReporter.Mock();
 		using var host = Host(reporter.Object);
 
-		using var response = await SendThrottledAsync(host, Stamped());
+		using var response = await SendAsync(host, Stamped());
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
 		reporter.ReportAsync(MediaProvider.Plex, Any(), user, Any()).WasCalled(Times.Once);
@@ -51,10 +53,30 @@ public class ProviderHttpExtensionsTests
 		var reporter = IProviderRateLimitReporter.Mock();
 		using var host = Host(reporter.Object);
 
-		using var response = await SendThrottledAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"));
+		using var response = await SendAsync(host, new HttpRequestMessage(HttpMethod.Get, "https://plex.test/library"));
 
 		await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.TooManyRequests);
 		reporter.ReportAsync(Any<MediaProvider>(), Any(), Any<UserId>(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
+	public async Task AddProviderHttp_WhenThrottled_BlocksTheProviderInItsCapacity()
+	{
+		using var host = Host(IProviderRateLimitReporter.Mock().Object);
+
+		using var response = await SendAsync(host, Stamped());
+
+		await Assert.That(host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex).BlockedUntil).IsSome();
+	}
+
+	[Test]
+	public async Task AddProviderHttp_WhenTheCircuitBreakerOpens_BlocksTheProviderInItsCapacity()
+	{
+		using var host = Host(IProviderRateLimitReporter.Mock().Object, HttpStatusCode.ServiceUnavailable, minimumThroughput: 2);
+		using var failed = await SendAsync(host, Stamped());
+
+		await Assert.That(async () => await SendAsync(host, Stamped())).Throws<BrokenCircuitException>();
+		await Assert.That(host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex).BlockedUntil).IsSome();
 	}
 
 	private static HttpRequestMessage Stamped()
@@ -68,13 +90,13 @@ public class ProviderHttpExtensionsTests
 		return request;
 	}
 
-	private static async Task<HttpResponseMessage> SendThrottledAsync(IHost host, HttpRequestMessage request)
+	private static async Task<HttpResponseMessage> SendAsync(IHost host, HttpRequestMessage request)
 	{
 		var client = host.Services.GetRequiredService<IHttpClientFactory>().CreateClient("plex");
 		return await client.SendAsync(request);
 	}
 
-	private static IHost Host(IProviderRateLimitReporter reporter) =>
+	private static IHost Host(IProviderRateLimitReporter reporter, HttpStatusCode answer = HttpStatusCode.TooManyRequests, int minimumThroughput = 20) =>
 		new HostBuilder()
 			.ConfigureServices(services =>
 			{
@@ -83,20 +105,22 @@ public class ProviderHttpExtensionsTests
 					{
 						BaseUrl = "https://plex.test",
 						Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
-						Http = new ProviderHttpOptions { RetryAttempts = 1 },
+						Http = new ProviderHttpOptions { RetryAttempts = 1, CircuitBreakerMinimumThroughput = minimumThroughput },
 					}
 				);
 				services.AddSingleton<ProviderConcurrencyGates>();
+				services.AddSingleton<ProviderCapacity>();
+				services.AddSingleton(IDateTimeProvider.Mock().Object);
 				services.AddSingleton(reporter);
-				services.AddHttpClient("plex").AddProviderHttp<PlexOptions>(MediaProvider.Plex).ConfigurePrimaryHttpMessageHandler(() => new ThrottlingHandler());
+				services.AddHttpClient("plex").AddProviderHttp<PlexOptions>(MediaProvider.Plex).ConfigurePrimaryHttpMessageHandler(() => new AnsweringHandler(answer));
 			})
 			.Build();
 
-	private sealed class ThrottlingHandler : HttpMessageHandler
+	private sealed class AnsweringHandler(HttpStatusCode answer) : HttpMessageHandler
 	{
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
-			var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests)
+			var response = new HttpResponseMessage(answer)
 			{
 				RequestMessage = request,
 				Headers = { RetryAfter = new RetryConditionHeaderValue(TimeSpan.FromSeconds(1)) },

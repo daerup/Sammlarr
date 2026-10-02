@@ -14,6 +14,7 @@ public class ProviderMatrixTests
 		await Assert.That(Enum.GetValues<FeedProvider>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<ApiKeyProvider>().Length).IsEqualTo(2);
 		await Assert.That(Enum.GetValues<ArtworkProvider>().Length).IsEqualTo(2);
+		await Assert.That(Enum.GetValues<EnricherProvider>().Length).IsEqualTo(2);
 	}
 
 	[Test]

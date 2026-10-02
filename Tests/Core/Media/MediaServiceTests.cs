@@ -398,7 +398,7 @@ public class MediaServiceTests
 		converter.ConvertAsync(Any(), Any(), Any()).Returns((candidates, _, _) => Success.Of<IReadOnlyList<IExternalMediaId>>([.. candidates]));
 		var converters = new FakeKeyedServiceIndex<MediaProvider, IExternalIdConverter>().Register(MediaProvider.Tmdb, converter.Object);
 
-		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object);
+		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
 			new MediaIdResolver(converters, unmatchedCache.Object),

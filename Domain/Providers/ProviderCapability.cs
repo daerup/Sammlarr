@@ -17,4 +17,5 @@ internal enum ProviderCapability
 
 	Auth = 64,
 	Artwork = 128,
+	Enricher = 256,
 }

@@ -175,7 +175,14 @@ public class MediaServiceOrderingTests
 			.Register(MediaProvider.Tmdb, enricher.Object);
 		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
 
-		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepository.Object);
+		var metadataResolver = new MediaMetadataResolver(
+			searchIndex,
+			enricherIndex,
+			ratingIndex,
+			configRepository.Object,
+			TestCapacity.Open(),
+			dateTimeProvider.Object
+		);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
 			new MediaIdResolver(null, unmatchedCache.Object),
