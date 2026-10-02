@@ -15,7 +15,10 @@ internal static class TmdbStub
 
 	public static void Find(HttpStub http, ResolvedVersion v)
 	{
-		var hit = $$"""[{ "id": {{v.Ids[MediaProvider.Tmdb]}} }]""";
+		var hit =
+			v.Type == MediaType.Show
+				? $$"""[{ "id": {{v.Ids[MediaProvider.Tmdb]}}, "original_name": "{{v.Title}}", "first_air_date": "{{v.Year}}-01-15" }]"""
+				: $$"""[{ "id": {{v.Ids[MediaProvider.Tmdb]}}, "original_title": "{{v.Title}}", "release_date": "{{v.Year}}-01-15" }]""";
 		var json = v.Type == MediaType.Show ? $$"""{ "movie_results": [], "tv_results": {{hit}} }""" : $$"""{ "movie_results": {{hit}}, "tv_results": [] }""";
 		foreach (var (provider, source) in new[] { (MediaProvider.Imdb, "imdb_id"), (MediaProvider.Tvdb, "tvdb_id") })
 		{
@@ -101,6 +104,8 @@ internal static class TmdbStub
 			  "id": {{tmdbId}},
 			  "title": {{titleField}},
 			  "name": {{nameJson}},
+			  "original_title": {{titleField}},
+			  "original_name": {{nameJson}},
 			  "media_type": "{{mediaType}}",
 			  "overview": {{overviewJson}},
 			  "genres": {{genresJson}}{{voteFields}}

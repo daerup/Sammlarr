@@ -34,7 +34,6 @@ internal static class Ids
 
 internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string title, IReadOnlyList<ProviderId> ids)
 {
-	private const int DefaultYear = 2024;
 	private bool _usesPlex;
 	private bool _usesTmdb;
 	private MediaId? _seeded;
@@ -123,7 +122,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		var resolved = new ResolvedVersion(
 			ids.ToDictionary(providerId => providerId.Provider, providerId => providerId.Value),
 			type,
-			DefaultYear,
+			SammlarrTestHost.DefaultYear,
 			title,
 			poster,
 			summary,
@@ -139,7 +138,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		return new ResolvedVersion(
 			source.ToDictionary(providerId => providerId.Provider, providerId => providerId.Value),
 			type,
-			DefaultYear,
+			SammlarrTestHost.DefaultYear,
 			titleOverride ?? title,
 			poster,
 			summary,

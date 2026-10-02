@@ -19,6 +19,24 @@ internal static class PlexStub
 		http.RespondWithStatusForUrl($"{PlexEndpoints.MetadataPath}/{plexId}", HttpStatusCode.InternalServerError);
 	}
 
+	public static void LookupHasNoMetadata(HttpStub http, ResolvedVersion v)
+	{
+		var plexId = v.Ids.GetValueOrDefault(MediaProvider.Plex, "0");
+		http.RespondWithJsonForUrl($"{PlexEndpoints.MetadataPath}/{plexId}", EmptyLookupJson);
+	}
+
+	private const string EmptyLookupJson = """
+		{
+		  "MediaContainer": {
+		    "librarySectionID": "1",
+		    "librarySectionTitle": "Movies",
+		    "offset": 0,
+		    "totalSize": 0,
+		    "Metadata": []
+		  }
+		}
+		""";
+
 	public static void Search(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results) =>
 		http.RespondWithJsonForUrl($"{PlexEndpoints.SearchQueryParam}={Uri.EscapeDataString(term)}", results.Count == 0 ? EmptySearchJson : SearchJson(results));
 
