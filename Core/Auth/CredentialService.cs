@@ -7,14 +7,16 @@ namespace Core.Auth;
 internal sealed class CredentialService(ICredentialRepository credentials, ICredentialFactory factory, SecretCache<AuthProvider, ICredential> cache)
 	: ICredentialService
 {
-	public ValueTask<Result<ICredential>> GetAsync(AuthProvider provider, CancellationToken cancellationToken = default) =>
-		cache.GetOrLoadAsync(
+	public ValueTask<Result<ICredential>> GetAsync(AuthProvider provider, CancellationToken cancellationToken = default)
+	{
+		return cache.GetOrLoadAsync(
 			provider,
 			() =>
 				credentials
 					.GetAsync(provider, cancellationToken)
 					.Map(stored => factory.CreateAsync(provider, stored.ClientId, stored.AccessToken, stored.ExpiresAt, cancellationToken))
 		);
+	}
 
 	public async Task StoreAsync(AuthProvider provider, StoredCredential credential, CancellationToken cancellationToken = default)
 	{
@@ -28,5 +30,8 @@ internal sealed class CredentialService(ICredentialRepository credentials, ICred
 		cache.Evict(provider);
 	}
 
-	public void ReportRejected(AuthProvider provider) => cache.Evict(provider);
+	public void ReportRejected(AuthProvider provider)
+	{
+		cache.Evict(provider);
+	}
 }
