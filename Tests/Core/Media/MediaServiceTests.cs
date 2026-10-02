@@ -371,8 +371,6 @@ public class MediaServiceTests
 		mediaRepo.GetByExternalsAsync(Any(), Any()).Returns(Array.Empty<CachedMedia>());
 
 		var enricher = IMetadataEnricher.Mock();
-		var rating = IMediaRatingService.Mock();
-		rating.GetRatingsAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("no ratings"));
 		var configRepo = IProviderConfigService.Mock();
 		configRepo
 			.GetAsync(Any())
@@ -392,7 +390,6 @@ public class MediaServiceTests
 		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);
-		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
 
 		var converter = IExternalIdConverter.Mock();
 		converter.Routes.Returns([
@@ -408,7 +405,7 @@ public class MediaServiceTests
 					)
 			);
 
-		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, ratingIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
+		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
 			new MediaIdResolver([converter.Object], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),

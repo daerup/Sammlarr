@@ -153,7 +153,6 @@ public class MediaServiceOrderingTests
 		dateTimeProvider.Now.Returns(_now);
 		var search = IMediaSearchProvider.Mock();
 		var enricher = IMetadataEnricher.Mock();
-		var rating = IMediaRatingService.Mock();
 		var configRepository = IProviderConfigService.Mock();
 		configRepository
 			.GetAsync(Any())
@@ -173,16 +172,8 @@ public class MediaServiceOrderingTests
 		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);
-		var ratingIndex = new FakeKeyedServiceIndex<RatingProvider, IMediaRatingService>().Register(RatingProvider.Tmdb, rating.Object);
 
-		var metadataResolver = new MediaMetadataResolver(
-			searchIndex,
-			enricherIndex,
-			ratingIndex,
-			configRepository.Object,
-			TestCapacity.Open(),
-			dateTimeProvider.Object
-		);
+		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, configRepository.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
 			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),

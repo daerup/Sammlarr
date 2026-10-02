@@ -88,7 +88,7 @@ all.
 |===
 | Provider | Implements, keyed by provider except `IExternalIdConverter` (one enumerable of routes)
 
-| TMDB | `ITrendingService`, `IMediaRatingService`, `IMetadataEnricher`, `IExternalIdConverter`
+| TMDB | `ITrendingService`, `IMetadataEnricher` (also the rating provider), `IExternalIdConverter`
 | Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IMetadataEnricher`, `IExternalIdConverter`
 | MDBList | `IFeedProvider`
 | IMDb | `IExternalIdConverter`
