@@ -21,7 +21,7 @@ internal sealed class ApiKeyService(IApiKeyConfigRepository keys, IApiKeyFactory
 	{
 		await keys.ClearAsync(provider, cancellationToken);
 		cache.Evict(provider);
-		await feeds.PauseUsingAsync(provider, cancellationToken);
+		await feeds.PauseAsync(provider, cancellationToken);
 	}
 
 	public void ReportRejected(ApiKeyProvider provider) => cache.Evict(provider);

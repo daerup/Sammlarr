@@ -41,13 +41,12 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 		await repository.DeleteAsync(id, cancellationToken);
 	}
 
-	public async Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
-		await RescheduleAllAsync(await repository.PauseAsync(ids, cancellationToken), cancellationToken);
+	public async Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default)
+	{
+		return await RescheduleAllAsync(await repository.PauseAsync(ids, cancellationToken), cancellationToken);
+	}
 
-	public async Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default) =>
-		await RescheduleAllAsync(await repository.ResumeAsync(ids, cancellationToken), cancellationToken);
-
-	public async Task<IReadOnlyList<FeedId>> PauseUsingAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<FeedId>> PauseAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
 	{
 		var affected = (await repository.GetAllAsync(cancellationToken))
 			.Where(feed => feed.Provider.AsApiKeyProvider() == provider)
@@ -56,8 +55,15 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 		return await PauseAsync(affected, cancellationToken);
 	}
 
-	public Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default) =>
-		repository.GetRunsAsync(query, cancellationToken);
+	public async Task<IReadOnlyList<FeedId>> ResumeAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default)
+	{
+		return await RescheduleAllAsync(await repository.ResumeAsync(ids, cancellationToken), cancellationToken);
+	}
+
+	public Task<IReadOnlyList<FeedRun>> GetRunsAsync(RunQuery query, CancellationToken cancellationToken = default)
+	{
+		return repository.GetRunsAsync(query, cancellationToken);
+	}
 
 	private async Task<IReadOnlyList<FeedId>> RescheduleAllAsync(IReadOnlyList<FeedId> changed, CancellationToken cancellationToken)
 	{
