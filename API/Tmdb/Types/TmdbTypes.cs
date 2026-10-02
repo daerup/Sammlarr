@@ -64,7 +64,8 @@ internal static class TmdbTypes
 		[property: JsonPropertyName("number_of_episodes")] int? NumberOfEpisodes = null,
 		[property: JsonPropertyName("episode_run_time")] IReadOnlyList<int>? EpisodeRunTime = null,
 		[property: JsonPropertyName("vote_average")] double? VoteAverage = null,
-		[property: JsonPropertyName("vote_count")] int? VoteCount = null
+		[property: JsonPropertyName("vote_count")] int? VoteCount = null,
+		[property: JsonPropertyName("external_ids")] ExternalIds? ExternalIds = null
 	)
 	{
 		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");

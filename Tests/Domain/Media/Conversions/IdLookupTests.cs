@@ -32,4 +32,13 @@ public class IdLookupTests
 	{
 		await Assert.That(Search.Cost).IsEqualTo(4);
 	}
+
+	[Test]
+	public async Task Equals_ForTwoLookupsDeclaredAlike_HoldsAndTheyHashAlike()
+	{
+		IdLookup alike = new ById(Accepts: [MediaProvider.Tmdb], Yields: [MediaProvider.Tvdb, MediaProvider.Imdb], Cost: 1);
+
+		await Assert.That(alike).IsEqualTo(Detail);
+		await Assert.That(alike.GetHashCode()).IsEqualTo(Detail.GetHashCode());
+	}
 }

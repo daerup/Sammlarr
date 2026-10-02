@@ -1,11 +1,9 @@
 using API.Auth;
-using API.Imdb;
 using API.Mdblist;
 using API.Notifications;
 using API.Observability;
 using API.Plex;
 using API.Tmdb;
-using API.TvDB;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
 
@@ -16,8 +14,6 @@ public class ApiModule : IServiceModule
 	public void RegisterServices(IServiceCollection services)
 	{
 		services.AddModule<AuthModule>();
-		services.AddModule<ImdbModule>();
-		services.AddModule<TvdbModule>();
 		services.AddModule<PlexModule>();
 		services.AddModule<TmdbModule>();
 		services.AddModule<MdblistModule>();

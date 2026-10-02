@@ -235,7 +235,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 	internal async Task TmdbKnowsTheExternalIdsOf(MediaSpec spec)
 	{
 		await EnsureTmdbAccount();
-		TmdbStub.ExternalIds(HttpStub, FullVersion(spec));
+		TmdbStub.Detail(HttpStub, FullVersion(spec), withExternalIds: true);
 	}
 
 	internal async Task TmdbDescribes(MediaSpec spec)

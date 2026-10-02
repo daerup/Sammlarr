@@ -86,13 +86,13 @@ all.
 
 [cols="1,3", options="header"]
 |===
-| Provider | Implements, keyed by provider except `IExternalIdConverter` (one enumerable of routes)
+| Provider | Implements, keyed by provider except `IExternalIdConverter` (one enumerable of converters, each announcing its lookups)
 
 | TMDB | `ITrendingService`, `IMetadataEnricher` (also fills ratings), `IExternalIdConverter`
 | Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IMetadataEnricher`, `IExternalIdConverter`
 | MDBList | `IFeedProvider`
-| IMDb | `IExternalIdConverter`
-| TheTVDB | `IExternalIdConverter`
+| IMDb | nothing: `ImdbId` is reached through Plex and TMDB lookups
+| TheTVDB | nothing: `TvdbId` is reached through Plex and TMDB lookups
 |===
 
 The cross-cutting folders under `API`:

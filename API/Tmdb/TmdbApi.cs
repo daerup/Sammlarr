@@ -11,22 +11,30 @@ namespace API.Tmdb;
 
 internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<TmdbApi> logger)
 {
-	public async Task<Result<TmdbTypes.Details>> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default) =>
-		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, apiKey, cancellationToken));
+	public async Task<Result<TmdbTypes.Details>> GetDetailAsync(TmdbId id, CancellationToken cancellationToken = default)
+	{
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchDetailAsync(id, TmdbEndpoints.Detail, apiKey, cancellationToken));
+	}
 
-	public async Task<Result<TmdbTypes.FindItem>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default) =>
-		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+	public async Task<Result<TmdbTypes.Details>> GetDetailWithExternalIdsAsync(TmdbId id, CancellationToken cancellationToken = default)
+	{
+		return await apiKeys
+			.GetAsync(ApiKeyProvider.Tmdb, cancellationToken)
+			.Map(apiKey => FetchDetailAsync(id, TmdbEndpoints.DetailWithExternalIds, apiKey, cancellationToken));
+	}
 
-	public async Task<Result<TmdbTypes.ExternalIds>> GetExternalIdsAsync(TmdbId id, CancellationToken cancellationToken = default) =>
-		await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchExternalIdsAsync(id, apiKey, cancellationToken));
+	public async Task<Result<TmdbTypes.FindItem>> FindAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
+	{
+		return await apiKeys.GetAsync(ApiKeyProvider.Tmdb, cancellationToken).Map(apiKey => FetchFindAsync(id, apiKey, cancellationToken));
+	}
 
-	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)
+	private async Task<Result<TmdbTypes.Details>> FetchDetailAsync(TmdbId id, string endpointFormat, IApiKey apiKey, CancellationToken cancellationToken)
 	{
 		if (ToTmdbMediaType(id.Type) is not { } mediaType)
 		{
 			return Error.From($"TMDB does not support media type {id.Type}.");
 		}
-		var endpoint = string.Format(TmdbEndpoints.Detail, mediaType, id.Value);
+		var endpoint = string.Format(endpointFormat, mediaType, id.Value);
 		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
 		if (!response.IsSuccessStatusCode)
 		{
@@ -40,23 +48,6 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 		var reason = $"TMDB has no metadata for {id.Value}";
 		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.Details>(stream), reason).When(detail => detail.Id != 0, reason);
-	}
-
-	private async Task<Result<TmdbTypes.ExternalIds>> FetchExternalIdsAsync(TmdbId id, IApiKey apiKey, CancellationToken cancellationToken)
-	{
-		if (ToTmdbMediaType(id.Type) is not { } mediaType)
-		{
-			return Error.From($"TMDB does not support media type {id.Type}.");
-		}
-		var endpoint = string.Format(TmdbEndpoints.ExternalIds, mediaType, id.Value);
-		var response = await tmdbClient.SendAsync(HttpMethod.Get, endpoint, apiKey, cancellationToken);
-		if (!response.IsSuccessStatusCode)
-		{
-			logger.LogWarning("TMDB external ids returned {StatusCode} for {MediaId}", (int)response.StatusCode, id.Value);
-			return Unanswered(response.StatusCode, $"TMDB external ids returned {(int)response.StatusCode} for {id.Value}");
-		}
-		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.ExternalIds>(stream), $"TMDB has no external ids for {id.Value}");
 	}
 
 	private static string? FindSource(IExternalMediaId id) =>

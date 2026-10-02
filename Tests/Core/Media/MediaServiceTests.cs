@@ -7,6 +7,7 @@ using Contracts.Media.Search;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
+using Domain.Media.Conversions;
 using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
@@ -392,18 +393,9 @@ public class MediaServiceTests
 			.Register(MediaProvider.Tmdb, enricher.Object);
 
 		var converter = IExternalIdConverter.Mock();
-		converter.Routes.Returns([
-			new IdRoute(Some.Of(MediaProvider.Tmdb), MediaProvider.Tmdb, [], 0),
-			new IdRoute(Some.Of(MediaProvider.Imdb), MediaProvider.Tmdb, [MediaProvider.Tmdb], 1),
-		]);
-		converter
-			.ConvertAsync(Any(), Any(), Any(), Any())
-			.Returns(
-				(route, candidates, _, _) =>
-					Success.Of<IReadOnlyList<IExternalMediaId>>(
-						route.From is Some<MediaProvider>(MediaProvider.Imdb) ? [.. candidates.Select(id => TmdbId.From($"found-{id.Value}", id.Type))] : [.. candidates]
-					)
-			);
+		converter.Provider.Returns(MediaProvider.Tmdb);
+		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
+		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
 
 		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
@@ -421,6 +413,15 @@ public class MediaServiceTests
 	}
 
 	private record Deps(Mock<IMediaRepository> MediaRepo, Mock<IMediaSearchProvider> Search, Mock<ITypedMemoryCache<string, bool>> UnmatchedCache);
+
+	private static Result<IdLookupResult> FoundByFind(IdLookupRequest request)
+	{
+		return request switch
+		{
+			ByIdRequest(_, var id) => Success.Of(new IdLookupResult([TmdbId.From($"found-{id.Value}", id.Type)], new None())),
+			ByHintsRequest => Error.From("The test converter offers no search."),
+		};
+	}
 
 	private static List<MediaIdentity> RecordUpsertedIdentities(Deps deps)
 	{

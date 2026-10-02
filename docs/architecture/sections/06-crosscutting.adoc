@@ -95,15 +95,19 @@ empty answer. Unlike the other fields, an enricher whose `Fills` include `MediaF
 while the rating is missing even when it is blocked, so the retry pipeline waits out its `Retry-After`; if it still
 answers as unavailable, the rating stays unconfirmed and is fetched again after the cooldown.
 
-Id resolution routes the same way. Each `IExternalIdConverter` lists its `IdRoute`s: which provider's id it starts
-from (or the title hints), which provider's id it yields, which providers it calls on the way (`Via`) and how many
-calls a hop costs. `MediaIdResolver` plans every chain of up to three hops from the ids the title already has to
-the target, drops the chains through a blocked provider, and tries the rest cheapest first, weighting each hop's
-calls by how busy its providers are. TMDB answers IMDb and TheTVDB ids through `find` and its own ids through
-`external_ids`, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex. Capacity is
-checked again before every hop, and a provider that answered as unavailable is not asked again by the
-title's remaining chains. A title is cached as unmatched only when every chain was tried and answered; a
-chain that was blocked or met an unavailable provider leaves it to the next run.
+Id resolution routes the same way. Each `IExternalIdConverter` announces its `Lookups`, the calls its own provider
+answers: a `ById` lookup accepts some providers' ids, a `ByHints` lookup accepts the title hints, and each says
+which providers' ids its answer may yield and what it costs in calls. `IdLookupPlanner` turns them into hops (an id
+to an id, an id to the hints, the hints to an id), plans every path of up to three hops from the ids the title
+already has to the target and drops the paths through a blocked provider. `MediaIdResolver` tries the rest cheapest
+first, weighting each hop's cost by how busy its provider is. Plex looks up a Plex id and searches by the hints;
+TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id
+by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex. A TMDB answer
+also carries the original title, which a following Plex search uses. Within one resolution each lookup is asked
+once per input, so paths that share a call make it once. Capacity is checked again before every hop, and a provider
+that answered as unavailable is not asked again by the title's remaining paths. A title is cached as unmatched only
+when every path was tried and answered; a path that was blocked or met an unavailable provider leaves it to the next
+run.
 
 === Persistence and migrations
 

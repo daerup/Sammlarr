@@ -101,12 +101,6 @@ internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> lo
 		return Result.WhenNotNull(result?.MediaContainer?.Metadata, reason).When(metadata => metadata.Count > 0, reason).Map(metadata => metadata[0].ToMedia());
 	}
 
-	internal Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveExternalsByPlexAsync(
-		PlexId plexId,
-		Func<IExternalMediaId, bool> requires,
-		CancellationToken cancellationToken = default
-	) => LookUpExternalsAsync(plexId, cancellationToken).When(list => list.Any(requires), $"Plex knows no matching id for {plexId.Value}.");
-
 	private static string ToPlexMediaType(MediaType mediaType) =>
 		mediaType switch
 		{
@@ -216,31 +210,26 @@ file static class PlexMetadataMappingExtensions
 	private static List<IExternalMediaId> BuildExternals(PlexId plex, IEnumerable<TmdbId> tmdb, IEnumerable<ImdbId> imdb, IEnumerable<TvdbId> tvdb)
 	{
 		var set = new List<IExternalMediaId> { plex };
-		foreach (var id in tmdb)
-		{
-			set.Add(id);
-		}
-		foreach (var id in imdb)
-		{
-			set.Add(id);
-		}
-		foreach (var id in tvdb)
-		{
-			set.Add(id);
-		}
+		set.AddRange(tmdb.Cast<IExternalMediaId>());
+		set.AddRange(imdb.Cast<IExternalMediaId>());
+		set.AddRange(tvdb.Cast<IExternalMediaId>());
 		return set;
 	}
 
-	private static IEnumerable<string> GenreTags(IEnumerable<string>? tags) =>
-		(tags ?? []).Where(tag => !string.IsNullOrWhiteSpace(tag)).Distinct(StringComparer.OrdinalIgnoreCase);
+	private static IEnumerable<string> GenreTags(IEnumerable<string>? tags)
+	{
+		return (tags ?? []).Where(tag => !string.IsNullOrWhiteSpace(tag)).Distinct(StringComparer.OrdinalIgnoreCase);
+	}
 
-	private static MediaType ParseMediaType(string value) =>
-		value.ToLowerInvariant() switch
+	private static MediaType ParseMediaType(string value)
+	{
+		return value.ToLowerInvariant() switch
 		{
 			"movie" => MediaType.Movie,
 			"show" => MediaType.Show,
 			_ => MediaType.Unknown,
 		};
+	}
 
 	private static DateOnly? ParseReleaseDate(string? value) => DateOnly.TryParse(value, CultureInfo.InvariantCulture, out var releaseDate) ? releaseDate : null;
 

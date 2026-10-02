@@ -1,4 +1,3 @@
-using Domain.Media;
 using Domain.Media.Conversions;
 using Domain.Providers;
 
@@ -10,12 +9,5 @@ public interface IExternalIdConverter
 
 	IReadOnlyList<IdLookup> Lookups { get; }
 
-	IReadOnlyList<IdRoute> Routes { get; }
-
-	Task<Result<IReadOnlyList<IExternalMediaId>>> ConvertAsync(
-		IdRoute route,
-		IEnumerable<IExternalMediaId> candidates,
-		Optional<ResolutionHints> hints,
-		CancellationToken cancellationToken = default
-	);
+	Task<Result<IdLookupResult>> LookUpAsync(IdLookupRequest request, CancellationToken cancellationToken = default);
 }
