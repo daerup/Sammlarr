@@ -50,19 +50,6 @@ public static class MediaMerger
 			};
 	}
 
-	public static IdentifiedMedia WithRatings(IdentifiedMedia media, IReadOnlyList<MediaRating> ratings)
-	{
-		var summary = RatingSummary.From(ratings);
-		return media switch
-		{
-			Movie movie => movie with { Rating = summary },
-			Show show => show with { Rating = summary },
-			PartialMovie movie => movie with { Rating = summary },
-			PartialShow show => show with { Rating = summary },
-			_ => media,
-		};
-	}
-
 	private static IPartialMedia Fill(IPartialMedia primary, IPartialMedia secondary) =>
 		(primary, secondary) switch
 		{

@@ -184,6 +184,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 			BackdropUrl = "https://example.com/backdrop.jpg",
 			ReleaseDate = new DateOnly(2024, 1, 1),
 			Genres = ["Action"],
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
 			Runtime = TimeSpan.FromMinutes(120),
 		};
 }

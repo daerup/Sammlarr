@@ -1,5 +1,6 @@
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 using TestInfrastructure;
 
 namespace Domain.Tests.Media.Metadata;
@@ -25,6 +26,15 @@ public class MediaCompletenessTests
 	}
 
 	[Test]
+	public async Task Missing_WhenNoProviderHasRatedTheTitle_NamesRating()
+	{
+		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Rating = RatingSummary.None };
+
+		await Assert.That(movie.IsComplete).IsFalse();
+		await Assert.That(movie.Missing).IsEqualTo(MediaField.Rating);
+	}
+
+	[Test]
 	public async Task Missing_WhenSeveralFieldsAreBlank_NamesEachOfThem()
 	{
 		IPartialMedia movie = MediaFakes.CompletePartialMovie() with { Genres = [], Tagline = " ", BackdropUrl = null };
@@ -45,6 +55,7 @@ public class MediaCompletenessTests
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2022, 2, 18),
 			Genres = ["Drama"],
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.7f)]),
 			RuntimePerEpisode = TimeSpan.FromMinutes(50),
 		};
 

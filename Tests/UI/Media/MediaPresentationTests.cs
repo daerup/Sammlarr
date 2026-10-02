@@ -1,4 +1,6 @@
 using Domain.Media;
+using Domain.Media.Metadata;
+using Domain.Providers;
 using UI.Shared.Media;
 
 namespace UI.Tests.Media;
@@ -97,6 +99,7 @@ public class MediaPresentationTests
 			BackdropUrl = "/backdrop.jpg",
 			ReleaseDate = new DateOnly(2010, 7, 16),
 			Genres = ["Action"],
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
 			Runtime = TimeSpan.FromMinutes(148),
 		};
 }

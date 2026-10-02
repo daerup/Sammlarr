@@ -26,23 +26,38 @@ public class MediaMetadataResolverTests
 	private static readonly DateTimeOffset Now = new(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
 
 	[Test]
-	public async Task ResolveAsync_WhenTheEnricherHasNoVotesEither_AsksItOnlyOnce()
+	public async Task ResolveAsync_WhenTheEnricherThatRatesHasNoRating_AsksItOnceAndConfirmsTheGap()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Tagline = null });
+		deps.Primary(Unrated());
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial()).ToMatch()));
 		await using var buffer = deps.Buffer();
 
-		await deps.Testee.ResolveAsync(Identity, buffer);
+		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
+		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.Rating);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
+	}
+
+	[Test]
+	public async Task ResolveAsync_WhenTheEnricherThatRatesIsUnavailable_LeavesTheRatingUnconfirmed()
+	{
+		var deps = Dependencies.Create();
+		deps.Primary(Unrated());
+		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
+		await using var buffer = deps.Buffer();
+
+		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
+
+		await Assert.That(resolved).IsOfUnionType<IdentifiedMedia, PartialMovie>();
+		await Assert.That(ConfirmedMissing(resolved)).IsEqualTo(MediaField.None);
 	}
 
 	[Test]
 	public async Task ResolveAsync_WhenTheEnricherCannotFillAnyMissingField_NeverCallsIt()
 	{
 		var deps = Dependencies.Create(tmdbFills: MediaField.Poster);
-		deps.Primary(Complete() with { Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.ResolveAsync(Identity, buffer);
@@ -54,7 +69,7 @@ public class MediaMetadataResolverTests
 	public async Task ResolveAsync_WhenTheEnricherCanFillAMissingField_CallsItAndMergesWhatItFound()
 	{
 		var deps = Dependencies.Create(tmdbFills: MediaField.Tagline);
-		deps.Primary(Complete() with { Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any())
 			.Returns(Success.Of(IdentifiedMedia.From(Partial() with { Tagline = "Your mind is the scene of the crime." }).ToMatch()));
 		await using var buffer = deps.Buffer();
@@ -65,23 +80,10 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenTheRatingIsMissing_CallsAnEnricherThatRatesForItAlone()
-	{
-		var deps = Dependencies.Create(tmdbFills: MediaField.Rating);
-		deps.Primary(Complete() with { Tagline = null });
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
-		await using var buffer = deps.Buffer();
-
-		await deps.Testee.ResolveAsync(Identity, buffer);
-
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
-	}
-
-	[Test]
-	public async Task ResolveAsync_ForACompletePrimaryResultThatOwesItsRating_TakesTheRatingFromAnEnricherThatRates()
+	public async Task ResolveAsync_WhenOnlyTheRatingIsMissing_TakesItFromAnEnricherThatRates()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete());
+		deps.Primary(Unrated());
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
 		await using var buffer = deps.Buffer();
 
@@ -92,10 +94,10 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_ForACompletePrimaryResultWithItsRating_AsksNoEnricher()
+	public async Task ResolveAsync_ForACompletePrimaryResult_AsksNoEnricher()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Rating = TmdbRating });
+		deps.Primary(Complete());
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.ResolveAsync(Identity, buffer);
@@ -104,10 +106,10 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_ForACompletePrimaryResultThatOwesItsRating_NeverAsksAnEnricherThatCannotRate()
+	public async Task ResolveAsync_WhenOnlyTheRatingIsMissing_NeverAsksAnEnricherThatCannotRate()
 	{
 		var deps = Dependencies.Create(tmdbFills: ~MediaField.Rating);
-		deps.Primary(Complete());
+		deps.Primary(Unrated());
 		await using var buffer = deps.Buffer();
 
 		await deps.Testee.ResolveAsync(Identity, buffer);
@@ -119,7 +121,7 @@ public class MediaMetadataResolverTests
 	public async Task ResolveAsync_WhenAGapSurvivesEveryEnricher_RecordsItAsConfirmed()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial()).ToMatch()));
 		await using var buffer = deps.Buffer();
 
@@ -132,7 +134,7 @@ public class MediaMetadataResolverTests
 	public async Task ResolveAsync_WhenTheEnricherAnswersThatItHasNothing_ConfirmsTheGap()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Error.From("TMDB detail returned 404 for 500"));
 		await using var buffer = deps.Buffer();
 
@@ -145,7 +147,7 @@ public class MediaMetadataResolverTests
 	public async Task ResolveAsync_WhenTheEnricherFindsNoMatch_ConfirmsTheGap()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of<MediaLookup>(new UnmatchedMedia { Externals = [Tmdb] }));
 		await using var buffer = deps.Buffer();
 
@@ -158,7 +160,7 @@ public class MediaMetadataResolverTests
 	public async Task ResolveAsync_WhenTheEnricherIsUnavailable_LeavesOnlyItsFieldsUnconfirmed()
 	{
 		var deps = Dependencies.Create(tmdbFills: MediaField.Tagline);
-		deps.Primary(Complete() with { Tagline = null, Summary = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null, Summary = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Unavailable);
 		await using var buffer = deps.Buffer();
 
@@ -171,7 +173,7 @@ public class MediaMetadataResolverTests
 	public async Task ResolveAsync_WhenTheTitleHasNoIdForTheEnricher_ConfirmsTheGapWithoutAsking()
 	{
 		var deps = Dependencies.Create();
-		deps.Primary(Complete() with { Identity = PlexOnly, Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Identity = PlexOnly, Tagline = null });
 		await using var buffer = deps.Buffer();
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(PlexOnly, buffer));
@@ -181,12 +183,12 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_WhenTheEnricherThatRatesIsRateLimitedButTheRatingIsStillOwed_AsksItOnceForBoth()
+	public async Task ResolveAsync_WhenTheEnricherThatRatesIsRateLimitedAndTheRatingIsMissing_StillAsksItOnce()
 	{
 		var deps = Dependencies.Create(
 			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
 		);
-		deps.Primary(Complete() with { Tagline = null });
+		deps.Primary(Unrated() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
 		await using var buffer = deps.Buffer();
 
@@ -196,27 +198,12 @@ public class MediaMetadataResolverTests
 	}
 
 	[Test]
-	public async Task ResolveAsync_ForACompleteResultWhileTheEnricherThatRatesIsRateLimited_StillAsksItForTheRating()
-	{
-		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
-		);
-		deps.Primary(Complete());
-		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Success.Of(IdentifiedMedia.From(Partial() with { Rating = TmdbRating }).ToMatch()));
-		await using var buffer = deps.Buffer();
-
-		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
-
-		await Assert.That(resolved.Rating).IsEqualTo(TmdbRating);
-	}
-
-	[Test]
 	public async Task ResolveAsync_WhenTheEnricherIsRateLimited_SkipsItAndLeavesItsFieldsUnconfirmed()
 	{
 		var deps = Dependencies.Create(
 			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
 		);
-		deps.Primary(Complete() with { Tagline = null, Rating = TmdbRating });
+		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
@@ -241,8 +228,11 @@ public class MediaMetadataResolverTests
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2010, 7, 16),
 			Genres = ["Science Fiction"],
+			Rating = TmdbRating,
 			Runtime = TimeSpan.FromMinutes(148),
 		};
+
+	private static PartialMovie Unrated() => Complete() with { Rating = RatingSummary.None };
 
 	private static PartialMovie Partial() => new() { Identity = new MediaIdentity(Id, [Tmdb]) };
 
