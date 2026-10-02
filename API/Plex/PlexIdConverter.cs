@@ -1,6 +1,7 @@
 using API.Tmdb;
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Media.Conversions;
 using Domain.Providers;
 
 namespace API.Plex;
@@ -9,6 +10,16 @@ internal class PlexIdConverter(TmdbApi tmdbApi, PlexApi plexApi) : IExternalIdCo
 {
 	private const int LookupConcurrency = 4;
 	private const int MaxCandidateLookups = 3;
+
+	private static readonly ValueSet<MediaProvider> Guids = [MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb];
+
+	private static readonly ById ByRatingKey = new(Accepts: [MediaProvider.Plex], Yields: Guids, Cost: 1);
+
+	private static readonly ByHints Search = new(Yields: Guids, Cost: 1 + MaxCandidateLookups);
+
+	public MediaProvider Provider => MediaProvider.Plex;
+
+	public IReadOnlyList<IdLookup> Lookups { get; } = [ByRatingKey, Search];
 
 	public IReadOnlyList<IdRoute> Routes { get; } =
 	[

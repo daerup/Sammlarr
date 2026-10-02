@@ -2,12 +2,17 @@ using API.Plex;
 using API.Tmdb;
 using Contracts.Media.Conversions;
 using Domain.Media;
+using Domain.Media.Conversions;
 using Domain.Providers;
 
 namespace API.Imdb;
 
 internal class ImdbIdConverter(PlexApi plexApi, TmdbApi tmdbApi) : IExternalIdConverter
 {
+	public MediaProvider Provider => MediaProvider.Imdb;
+
+	public IReadOnlyList<IdLookup> Lookups { get; } = [];
+
 	public IReadOnlyList<IdRoute> Routes { get; } =
 	[
 		new(Some.Of(MediaProvider.Imdb), MediaProvider.Imdb, [], 0),
