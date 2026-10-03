@@ -141,20 +141,8 @@ public sealed class LogCaptureService(LoggingLevelSwitch appLevel)
 		var spans = _spans.ToArray();
 		var bytes = EstimateBytes(logs) + EstimateBytes(spans);
 
-		DateTimeOffset? oldest = null;
-		DateTimeOffset? newest = null;
-		foreach (var log in logs)
-		{
-			oldest = oldest is null || log.Timestamp < oldest ? log.Timestamp : oldest;
-			newest = newest is null || log.Timestamp > newest ? log.Timestamp : newest;
-		}
-		foreach (var span in spans)
-		{
-			oldest = oldest is null || span.StartTime < oldest ? span.StartTime : oldest;
-			newest = newest is null || span.StartTime > newest ? span.StartTime : newest;
-		}
-
-		return new DiagnosticsStats(logs.Length, spans.Length, bytes, oldest, newest);
+		var times = logs.Select(log => (DateTimeOffset?)log.Timestamp).Concat(spans.Select(span => (DateTimeOffset?)span.StartTime));
+		return new DiagnosticsStats(logs.Length, spans.Length, bytes, Optional.Of(times.Min()), Optional.Of(times.Max()));
 	}
 
 	public Stream ExportJsonLines()

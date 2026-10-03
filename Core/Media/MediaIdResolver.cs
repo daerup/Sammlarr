@@ -29,7 +29,7 @@ internal sealed class MediaIdResolver(
 	{
 		var candidates = request.Candidates;
 		var key = UnmatchedCacheKey.Build(candidates, target);
-		if (unmatchedCache.TryGetValue(key, out _))
+		if (unmatchedCache.GetValueOrNone(key).IsSome())
 		{
 			return Error.From("Candidates were previously resolved as unmatched.");
 		}

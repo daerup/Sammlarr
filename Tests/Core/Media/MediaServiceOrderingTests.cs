@@ -148,7 +148,7 @@ public class MediaServiceOrderingTests
 		foreach (var item in builder.Items.Where(i => !i.Identifies))
 		{
 			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
-			unmatchedCache.TryGetValue(Arg.Is<string>(k => k == key)).Returns(true).SetsOutValue(true);
+			unmatchedCache.GetValueOrNone(Arg.Is<string>(k => k == key)).Returns(Some.Of(true));
 		}
 
 		var dateTimeProvider = IDateTimeProvider.Mock();

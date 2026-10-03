@@ -258,7 +258,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results[0]).IsError();
 		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		await Assert.That(unmatched.TryGetValue(UnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex), out _)).IsTrue();
+		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex))).IsSome();
 	}
 
 	[Test]
@@ -367,7 +367,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results[0]).IsError();
 		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		await Assert.That(unmatched.TryGetValue(UnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex), out _)).IsFalse();
+		await Assert.That(unmatched.GetValueOrNone(UnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex))).IsNone();
 	}
 
 	[Test]

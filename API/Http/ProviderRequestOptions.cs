@@ -15,6 +15,10 @@ internal static class ProviderRequestOptions
 		}
 	}
 
-	public static UserId? TriggeredBy(this HttpResponseMessage? response) =>
-		response?.RequestMessage is { } request && request.Options.TryGetValue(triggeredBy, out var userId) ? userId : null;
+	public static Optional<UserId> TriggeredBy(this HttpResponseMessage? response) => Optional.Of(response?.RequestMessage).Map(StampedUser);
+
+	private static Optional<UserId> StampedUser(HttpRequestMessage request)
+	{
+		return request.Options.TryGetValue(triggeredBy, out var userId) ? Some.Of(userId) : new None();
+	}
 }

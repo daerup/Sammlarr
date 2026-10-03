@@ -12,14 +12,7 @@ internal sealed class ProviderConfigService(IProviderConfigRepository repository
 
 	public async ValueTask<ProviderConfig> GetAsync(CancellationToken cancellationToken = default)
 	{
-		if (cache.TryGetValue(CacheKey, out var cached) && cached is not null)
-		{
-			return cached;
-		}
-
-		var config = await repository.GetAsync(cancellationToken);
-		cache.Set(CacheKey, config);
-		return config;
+		return await cache.GetValueOrNone(CacheKey).Match(Task.FromResult, () => LoadAsync(cancellationToken));
 	}
 
 	public async Task StoreAsync(ProviderConfig config, CancellationToken cancellationToken = default)
@@ -27,5 +20,12 @@ internal sealed class ProviderConfigService(IProviderConfigRepository repository
 		currentUser.EnsureAdmin();
 		await repository.StoreAsync(config, cancellationToken);
 		cache.Set(CacheKey, config);
+	}
+
+	private async Task<ProviderConfig> LoadAsync(CancellationToken cancellationToken)
+	{
+		var config = await repository.GetAsync(cancellationToken);
+		cache.Set(CacheKey, config);
+		return config;
 	}
 }

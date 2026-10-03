@@ -3,21 +3,19 @@ using Core.Caching;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.DI;
+using TestInfrastructure;
 
 namespace Core.Tests.Caching;
 
 public class TypedMemoryCacheTests
 {
 	[Test]
-	public async Task TypedMemoryCache_WhenKeyDoesNotExist_ReturnsFalseAndNullValue()
+	public async Task TypedMemoryCache_WhenKeyDoesNotExist_ReturnsNone()
 	{
 		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
 		var testee = new TypedMemoryCache<string, string>(memoryCache);
 
-		var found = testee.TryGetValue("missing", out var value);
-
-		await Assert.That(found).IsFalse();
-		await Assert.That(value).IsNull();
+		await Assert.That(testee.GetValueOrNone("missing")).IsNone();
 	}
 
 	[Test]
@@ -27,10 +25,18 @@ public class TypedMemoryCacheTests
 		var testee = new TypedMemoryCache<string, string>(memoryCache);
 
 		testee.Set("key", "value");
-		var found = testee.TryGetValue("key", out var value);
+		await Assert.That(testee.GetValueOrNone("key")).IsSome().And.IsEqualTo("value");
+	}
 
-		await Assert.That(found).IsTrue();
-		await Assert.That(value).IsEqualTo("value");
+	[Test]
+	public async Task TypedMemoryCache_WhenTheStoredValueIsTheDefault_StillFindsIt()
+	{
+		using var memoryCache = new MemoryCache(new MemoryCacheOptions());
+		var testee = new TypedMemoryCache<string, bool>(memoryCache);
+
+		testee.Set("key", false);
+
+		await Assert.That(testee.GetValueOrNone("key")).IsSome().And.IsFalse();
 	}
 
 	[Test]
@@ -41,10 +47,7 @@ public class TypedMemoryCacheTests
 
 		testee.Set("key", "value-1");
 		testee.Set("key", "value-2");
-		var found = testee.TryGetValue("key", out var value);
-
-		await Assert.That(found).IsTrue();
-		await Assert.That(value).IsEqualTo("value-2");
+		await Assert.That(testee.GetValueOrNone("key")).IsSome().And.IsEqualTo("value-2");
 	}
 
 	[Test]
@@ -55,9 +58,7 @@ public class TypedMemoryCacheTests
 
 		testee.Set("key", "value");
 		testee.Remove("key");
-		var found = testee.TryGetValue("key", out _);
-
-		await Assert.That(found).IsFalse();
+		await Assert.That(testee.GetValueOrNone("key")).IsNone();
 	}
 
 	[Test]
@@ -67,10 +68,7 @@ public class TypedMemoryCacheTests
 		var testee = new TypedMemoryCache<string, string>(memoryCache);
 
 		testee.Remove("missing");
-		var found = testee.TryGetValue("missing", out var value);
-
-		await Assert.That(found).IsFalse();
-		await Assert.That(value).IsNull();
+		await Assert.That(testee.GetValueOrNone("missing")).IsNone();
 	}
 
 	[Test]
@@ -83,13 +81,8 @@ public class TypedMemoryCacheTests
 		credentials.Set("plex", "credential");
 		counts.Set("plex", 42);
 
-		var credentialFound = credentials.TryGetValue("plex", out var credential);
-		var countFound = counts.TryGetValue("plex", out var count);
-
-		await Assert.That(credentialFound).IsTrue();
-		await Assert.That(credential).IsEqualTo("credential");
-		await Assert.That(countFound).IsTrue();
-		await Assert.That(count).IsEqualTo(42);
+		await Assert.That(credentials.GetValueOrNone("plex")).IsSome().And.IsEqualTo("credential");
+		await Assert.That(counts.GetValueOrNone("plex")).IsSome().And.IsEqualTo(42);
 	}
 
 	[Test]
@@ -99,14 +92,12 @@ public class TypedMemoryCacheTests
 		var testee = new TypedMemoryCache<string, string>(memoryCache);
 
 		testee.Set("key", "value", TimeSpan.FromMilliseconds(10));
-		var foundImmediately = testee.TryGetValue("key", out var initial);
+		var immediately = testee.GetValueOrNone("key");
 		await Task.Delay(100);
-		var foundAfterExpiry = testee.TryGetValue("key", out var expired);
+		var afterExpiry = testee.GetValueOrNone("key");
 
-		await Assert.That(foundImmediately).IsTrue();
-		await Assert.That(initial).IsEqualTo("value");
-		await Assert.That(foundAfterExpiry).IsFalse();
-		await Assert.That(expired).IsNull();
+		await Assert.That(immediately).IsSome().And.IsEqualTo("value");
+		await Assert.That(afterExpiry).IsNone();
 	}
 
 	[Test]
@@ -120,8 +111,8 @@ public class TypedMemoryCacheTests
 		testee.Set("second", false);
 		testee.Clear();
 
-		await Assert.That(testee.TryGetValue("first", out _)).IsFalse();
-		await Assert.That(testee.TryGetValue("second", out _)).IsFalse();
+		await Assert.That(testee.GetValueOrNone("first")).IsNone();
+		await Assert.That(testee.GetValueOrNone("second")).IsNone();
 	}
 
 	[Test]
@@ -134,7 +125,7 @@ public class TypedMemoryCacheTests
 		testee.Set("ttl", true, TimeSpan.FromHours(1));
 		testee.Clear();
 
-		await Assert.That(testee.TryGetValue("ttl", out _)).IsFalse();
+		await Assert.That(testee.GetValueOrNone("ttl")).IsNone();
 	}
 
 	[Test]
@@ -149,10 +140,8 @@ public class TypedMemoryCacheTests
 		counts.Set("shared", 7);
 		flags.Clear();
 
-		await Assert.That(flags.TryGetValue("shared", out _)).IsFalse();
-		var countFound = counts.TryGetValue("shared", out var count);
-		await Assert.That(countFound).IsTrue();
-		await Assert.That(count).IsEqualTo(7);
+		await Assert.That(flags.GetValueOrNone("shared")).IsNone();
+		await Assert.That(counts.GetValueOrNone("shared")).IsSome().And.IsEqualTo(7);
 	}
 
 	[Test]
@@ -166,7 +155,6 @@ public class TypedMemoryCacheTests
 
 		testee.Set("key", "value");
 
-		await Assert.That(testee.TryGetValue("key", out var value)).IsTrue();
-		await Assert.That(value).IsEqualTo("value");
+		await Assert.That(testee.GetValueOrNone("key")).IsSome().And.IsEqualTo("value");
 	}
 }

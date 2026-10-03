@@ -66,12 +66,21 @@ public class ProviderCapacityTests
 	[Test]
 	public async Task Of_WhileHalfTheGateIsInUse_ReportsTheProviderHalfBusy()
 	{
-		var gate = _gates.Get("tmdb", 4, MediaProvider.Tmdb);
+		var gate = _gates.Get("tmdb", 4, Some.Of(MediaProvider.Tmdb));
 		await gate.WaitAsync();
 		await gate.WaitAsync();
 
 		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(0.5);
 		await Assert.That(Testee.Of(MediaProvider.Plex).Busy).IsEqualTo(0);
+	}
+
+	[Test]
+	public async Task Of_WhileAGateWithoutAProviderIsInUse_CountsItForNoProvider()
+	{
+		var gate = _gates.Get("webhook", 2, new None());
+		await gate.WaitAsync();
+
+		await Assert.That(Testee.Of(MediaProvider.Tmdb).Busy).IsEqualTo(0);
 	}
 
 	private async Task SendAsync(HttpResponseMessage response)
