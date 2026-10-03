@@ -7,7 +7,7 @@ public class MediaValueEqualityTests
 	[Test]
 	public async Task MediaIdentity_WhenSameContentDifferentInstances_AreEqual()
 	{
-		var id = MediaId.From(Guid.NewGuid());
+		var id = MediaId.New();
 		var first = new MediaIdentity(id, [TmdbId.From("42", MediaType.Movie)]);
 		var second = new MediaIdentity(id, [TmdbId.From("42", MediaType.Movie)]);
 

@@ -1,10 +1,16 @@
+using System.Text.Json;
+using Domain.Identity;
 using Domain.Media;
+using Domain.Notifications;
 using TestInfrastructure;
+using Vogen;
 
 namespace Domain.Tests.Media;
 
 public class MediaIdTests
 {
+	private static readonly MediaId Uninitialized = new MediaId[1].Single();
+
 	[Test]
 	public async Task Require_WhenMatchingType_IsSuccess()
 	{
@@ -26,7 +32,7 @@ public class MediaIdTests
 	[Test]
 	public async Task From_WhenEmptyGuid_Throws()
 	{
-		await Assert.That(() => MediaId.From(Guid.Empty)).Throws<ArgumentException>();
+		await Assert.That(() => MediaId.From(Guid.Empty)).Throws<ValueObjectValidationException>();
 	}
 
 	[Test]
@@ -40,15 +46,21 @@ public class MediaIdTests
 	}
 
 	[Test]
-	public async Task MediaIdentity_WhenTheMediaIdIsDefault_Throws()
+	public async Task MediaIdentity_WhenTheMediaIdIsUninitialized_Throws()
 	{
-		await Assert.That(() => new MediaIdentity(new MediaId(), [TmdbId.From("550", MediaType.Movie)])).Throws<ArgumentException>();
+		await Assert.That(() => new MediaIdentity(Uninitialized, [TmdbId.From("550", MediaType.Movie)])).Throws<ArgumentException>();
+	}
+
+	[Test]
+	public async Task ToString_WhenUninitialized_SaysSoInsteadOfThrowing()
+	{
+		await Assert.That(Uninitialized.ToString()).IsEqualTo("[UNINITIALIZED]");
 	}
 
 	[Test]
 	public async Task Type_ForAShowIdentity_IsShow()
 	{
-		var identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("1396", MediaType.Show)]);
+		var identity = new MediaIdentity(MediaId.New(), [TmdbId.From("1396", MediaType.Show)]);
 
 		await Assert.That(identity.Type).IsEqualTo(MediaType.Show);
 	}
@@ -56,9 +68,27 @@ public class MediaIdTests
 	[Test]
 	public async Task Type_WithoutExternalIds_IsUnknown()
 	{
-		var identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), []);
+		var identity = new MediaIdentity(MediaId.New(), []);
 
 		await Assert.That(identity.Type).IsEqualTo(MediaType.Unknown);
+	}
+
+	[Test]
+	public async Task ToString_IsTheGuidWithoutDashes()
+	{
+		var guid = new Guid("0c1d2e3f-4a5b-6c7d-8e9f-a0b1c2d3e4f5");
+
+		await Assert.That(MediaId.From(guid).ToString()).IsEqualTo("0c1d2e3f4a5b6c7d8e9fa0b1c2d3e4f5");
+	}
+
+	[Test]
+	public async Task Json_WhenANotificationCarriesMediaIds_RoundTripsThem()
+	{
+		var notification = new WantlistSyncCompletedNotification(UserId.New(), DateTimeOffset.UnixEpoch, [MediaId.New(), MediaId.New()], [], [], [], []);
+
+		var roundTripped = JsonSerializer.Deserialize<WantlistSyncCompletedNotification>(JsonSerializer.Serialize(notification))!;
+
+		await Assert.That(roundTripped.PulledAdds).IsEquivalentTo(notification.PulledAdds);
 	}
 
 	[Test]

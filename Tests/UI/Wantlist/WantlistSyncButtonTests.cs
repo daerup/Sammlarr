@@ -278,7 +278,7 @@ public class WantlistSyncButtonTests : BunitContext
 
 	private static WantlistSyncSummary Summary(WantlistDelta? pull = null, WantlistDelta? push = null) => new(pull ?? NoChanges, push ?? NoChanges, [Synced]);
 
-	private static IReadOnlyList<MediaId> Ids(int count) => [.. Enumerable.Range(0, count).Select(_ => MediaId.From(Guid.NewGuid()))];
+	private static IReadOnlyList<MediaId> Ids(int count) => [.. Enumerable.Range(0, count).Select(_ => MediaId.New())];
 
 	private static async IAsyncEnumerable<T> Async<T>(params T[] items)
 	{

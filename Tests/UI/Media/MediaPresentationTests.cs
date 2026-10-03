@@ -49,7 +49,7 @@ public class MediaPresentationTests
 	private static MatchedMedia Matched()
 	{
 		return new(
-			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("27205", MediaType.Movie)]),
+			new MediaIdentity(MediaId.New(), [TmdbId.From("27205", MediaType.Movie)]),
 			new MovieDetails
 			{
 				Title = "Inception",

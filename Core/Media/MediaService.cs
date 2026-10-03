@@ -166,7 +166,7 @@ internal sealed class MediaService(
 			return [];
 		}
 		await using var buffer = bufferFactory.Create();
-		var preliminary = candidateGroups.Select(g => new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. g])).ToList();
+		var preliminary = candidateGroups.Select(g => new MediaIdentity(MediaId.New(), [.. g])).ToList();
 		return await coordinator.CoordinateAsync(preliminary, buffer, cancellationToken);
 	}
 
@@ -268,7 +268,7 @@ internal sealed class MediaService(
 	{
 		return await idResolver
 			.ResolveAsync(request, target, cancellationToken)
-			.Map(externals => new IdentityMatch(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), new None()));
+			.Map(externals => new IdentityMatch(new MediaIdentity(MediaId.New(), [.. externals]), new None()));
 	}
 
 	private async ValueTask<Result<MatchedMedia>> LoadStoredDetailsAsync(

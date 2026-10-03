@@ -48,8 +48,8 @@ public class NotificationDispatchHandlerTests
 	[Test]
 	public async Task Handle_WhenAWantlistSyncs_ConsolidatesPulledAndPushedSortedByDescriptor()
 	{
-		var pulledAdd = MediaId.From(Guid.NewGuid());
-		var pushedRemove = MediaId.From(Guid.NewGuid());
+		var pulledAdd = MediaId.New();
+		var pushedRemove = MediaId.New();
 		var subscriptions = SubscriptionsFor(
 			NotificationEventType.WantlistSyncCompleted,
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
@@ -163,7 +163,7 @@ public class NotificationDispatchHandlerTests
 		var media = Media();
 
 		var messages = await NotificationDispatchHandler.Handle(
-			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.From(Guid.NewGuid())], [], [], [], []),
+			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [MediaId.New()], [], [], [], []),
 			Scope().Object,
 			SubscriptionsFor(NotificationEventType.WantlistSyncCompleted).Object,
 			media.Object,
@@ -178,7 +178,7 @@ public class NotificationDispatchHandlerTests
 	[Test]
 	public async Task Handle_WhenSeveralTargetsMatch_ResolvesMediaOnceAndSharesTheContext()
 	{
-		var id = MediaId.From(Guid.NewGuid());
+		var id = MediaId.New();
 		var subscriptions = SubscriptionsFor(
 			NotificationEventType.WantlistSyncCompleted,
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None),
@@ -205,8 +205,8 @@ public class NotificationDispatchHandlerTests
 	[Test]
 	public async Task Handle_ForStoredTitles_DescribesThemFromTheirCachedDetailsOrByTheirTypeAlone()
 	{
-		var described = MediaId.From(Guid.NewGuid());
-		var bare = MediaId.From(Guid.NewGuid());
+		var described = MediaId.New();
+		var bare = MediaId.New();
 		var subscriptions = SubscriptionsFor(
 			NotificationEventType.WantlistSyncCompleted,
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)

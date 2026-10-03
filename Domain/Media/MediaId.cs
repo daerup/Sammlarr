@@ -1,29 +1,24 @@
 using Domain.Providers;
+using Vogen;
 
 namespace Domain.Media;
 
 public readonly record struct MediaIdentity(MediaId Id, ValueSet<IExternalMediaId> Externals)
 {
 	public MediaId Id { get; init; } =
-		Id == default ? throw new ArgumentException("An identity needs a MediaId; a provider's answer is FoundMedia.", nameof(Id)) : Id;
+		Id.IsInitialized() ? Id : throw new ArgumentException("An identity needs a MediaId; a provider's answer is FoundMedia.", nameof(Id));
 
 	public MediaType Type => Externals.FirstOrDefault()?.Type ?? MediaType.Unknown;
 }
 
-public readonly record struct MediaId
+[ValueObject<Guid>]
+public readonly partial struct MediaId
 {
-	public Guid Value { get; private init; }
+	private static Validation Validate(Guid input) => input == Guid.Empty ? Validation.Invalid("MediaId cannot be empty.") : Validation.Ok;
 
-	public static MediaId From(Guid value)
-	{
-		if (value == Guid.Empty)
-		{
-			throw new ArgumentException("MediaId cannot be empty.", nameof(value));
-		}
-		return new() { Value = value };
-	}
+	public static MediaId New() => From(Guid.NewGuid());
 
-	public override string ToString() => Value.ToString("N");
+	public override string ToString() => IsInitialized() ? Value.ToString("N") : "[UNINITIALIZED]";
 }
 
 public interface IExternalMediaId

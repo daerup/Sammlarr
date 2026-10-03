@@ -100,5 +100,5 @@ public class ActivityDayBlockTests : BunitContext
 			],
 		};
 
-	private static FeedRunItem Item(FeedRunItemState state) => new() { MediaId = MediaId.From(Guid.NewGuid()), State = state };
+	private static FeedRunItem Item(FeedRunItemState state) => new() { MediaId = MediaId.New(), State = state };
 }

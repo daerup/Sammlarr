@@ -55,8 +55,8 @@ public class WantlistSyncEngineTests
 	[Test]
 	public async Task SyncAsync_WhenPushesFailMidBatch_PublishesOneEventNamingTheFailures()
 	{
-		var stranded = MediaId.From(Guid.NewGuid());
-		var alsoStranded = MediaId.From(Guid.NewGuid());
+		var stranded = MediaId.New();
+		var alsoStranded = MediaId.New();
 		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(stranded, SinkSyncOutcome.Unaddressable), new SinkSyncAck(alsoStranded, SinkSyncOutcome.Unaddressable));
 		var published = new RecordingPublisher();
 

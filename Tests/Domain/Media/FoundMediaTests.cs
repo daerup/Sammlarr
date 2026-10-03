@@ -5,7 +5,7 @@ namespace Domain.Tests.Media;
 
 public class FoundMediaTests
 {
-	private static readonly MediaIdentity Movie = new(MediaId.From(Guid.NewGuid()), [PlexId.From("plex-1", MediaType.Movie)]);
+	private static readonly MediaIdentity Movie = new(MediaId.New(), [PlexId.From("plex-1", MediaType.Movie)]);
 
 	[Test]
 	public async Task MatchTo_WhenTheTypeMatches_KeepsTheIdentitysMediaIdAndAddsWhatTheProviderFound()
@@ -30,7 +30,7 @@ public class FoundMediaTests
 		var found = new FoundMedia([TmdbId.From("525", MediaType.Unknown)], new UnknownDetails { Title = "Christopher Nolan" });
 
 		await Assert
-			.That(found.MatchTo(new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("525", MediaType.Unknown)])))
+			.That(found.MatchTo(new MediaIdentity(MediaId.New(), [TmdbId.From("525", MediaType.Unknown)])))
 			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 	}
 

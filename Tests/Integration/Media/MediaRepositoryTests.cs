@@ -125,9 +125,9 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	{
 		IReadOnlyList<MediaIdentity> identitiesInput =
 		[
-			new(MediaId.From(Guid.NewGuid()), [TmdbId.From("301", MediaType.Movie), ImdbId.From("tt0301", MediaType.Movie)]),
-			new(MediaId.From(Guid.NewGuid()), [TmdbId.From("302", MediaType.Movie), ImdbId.From("tt0302", MediaType.Movie)]),
-			new(MediaId.From(Guid.NewGuid()), [TmdbId.From("303", MediaType.Movie)]),
+			new(MediaId.New(), [TmdbId.From("301", MediaType.Movie), ImdbId.From("tt0301", MediaType.Movie)]),
+			new(MediaId.New(), [TmdbId.From("302", MediaType.Movie), ImdbId.From("tt0302", MediaType.Movie)]),
+			new(MediaId.New(), [TmdbId.From("303", MediaType.Movie)]),
 		];
 
 		var identities = await _testee.UpsertIdentitiesAsync(identitiesInput);
@@ -159,7 +159,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var tmdbId = TmdbId.From("312", MediaType.Movie);
 		var existingId = await SetUpMediaAsync([tmdbId]);
 
-		var incoming = new MediaIdentity(MediaId.From(Guid.NewGuid()), [tmdbId, ImdbId.From("tt0312", MediaType.Movie)]);
+		var incoming = new MediaIdentity(MediaId.New(), [tmdbId, ImdbId.From("tt0312", MediaType.Movie)]);
 		var identities = await _testee.UpsertIdentitiesAsync([incoming]);
 
 		await Assert.That(identities[0].Id).IsEqualTo(existingId);
@@ -174,8 +174,8 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var shared = ImdbId.From("tt0320", MediaType.Movie);
 		IReadOnlyList<MediaIdentity> input =
 		[
-			new(MediaId.From(Guid.NewGuid()), [TmdbId.From("320", MediaType.Movie), shared]),
-			new(MediaId.From(Guid.NewGuid()), [shared, TvdbId.From("420", MediaType.Movie)]),
+			new(MediaId.New(), [TmdbId.From("320", MediaType.Movie), shared]),
+			new(MediaId.New(), [shared, TvdbId.From("420", MediaType.Movie)]),
 		];
 
 		var identities = await _testee.UpsertIdentitiesAsync(input);
@@ -192,7 +192,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		var shared = ImdbId.From("tt0321", MediaType.Movie);
 		var calls = Enumerable
 			.Range(0, 8)
-			.Select(i => Task.Run(() => _testee.UpsertIdentitiesAsync([new(MediaId.From(Guid.NewGuid()), [shared, TmdbId.From($"32{i}1", MediaType.Movie)])])));
+			.Select(i => Task.Run(() => _testee.UpsertIdentitiesAsync([new(MediaId.New(), [shared, TmdbId.From($"32{i}1", MediaType.Movie)])])));
 
 		await Assert.That(async () => await Task.WhenAll(calls)).ThrowsNothing();
 		var persisted = await fixture.Context.Media.Include(m => m.ExternalIds).ToListAsync();
@@ -209,7 +209,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await SetUpMediaAsync([imdbId]);
 
 		await Assert
-			.That(async () => await _testee.UpsertIdentitiesAsync([new MediaIdentity(MediaId.From(Guid.NewGuid()), [tmdbId, imdbId])]))
+			.That(async () => await _testee.UpsertIdentitiesAsync([new MediaIdentity(MediaId.New(), [tmdbId, imdbId])]))
 			.Throws<MediaIdentityConflictException>();
 	}
 

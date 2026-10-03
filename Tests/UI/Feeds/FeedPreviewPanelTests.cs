@@ -341,7 +341,7 @@ public class FeedPreviewPanelTests : BunitContext
 		private static MatchedMedia Movie(int index)
 		{
 			return new(
-				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From($"movie-{index}", MediaType.Movie)]),
+				new MediaIdentity(MediaId.New(), [TmdbId.From($"movie-{index}", MediaType.Movie)]),
 				new MovieDetails
 				{
 					Title = $"Movie {index}",

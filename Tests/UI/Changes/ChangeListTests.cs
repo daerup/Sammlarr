@@ -237,9 +237,9 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Render_WhenTheCallerPointsAtOneItem_MarksOnlyThatRowAsHighlighted()
 	{
-		var wanted = MediaId.From(Guid.NewGuid());
+		var wanted = MediaId.New();
 		var target = Added("Wanted") with { Id = wanted };
-		var other = Added("Ignored") with { Id = MediaId.From(Guid.NewGuid()) };
+		var other = Added("Ignored") with { Id = MediaId.New() };
 
 		var cut = RenderList([target, other], [], highlight: wanted);
 
@@ -252,7 +252,7 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Highlight_OnceARowIsOpened_StopsMarkingTheRowItPointedAt()
 	{
-		var wanted = MediaId.From(Guid.NewGuid());
+		var wanted = MediaId.New();
 		var cut = RenderList([Added("Wanted") with { Id = wanted }], [], highlight: wanted);
 
 		await cut.Find(".change-row").ClickAsync(new MouseEventArgs());
@@ -263,7 +263,7 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Render_WhenTheCallerPointsAtNothing_LeavesEveryRowUnhighlighted()
 	{
-		var cut = RenderList([Added("Wanted") with { Id = MediaId.From(Guid.NewGuid()) }], []);
+		var cut = RenderList([Added("Wanted") with { Id = MediaId.New() }], []);
 
 		await Assert.That(cut.FindAll(".change-row.is-highlight")).IsEmpty();
 	}
@@ -336,7 +336,7 @@ public class ChangeListTests : BunitContext
 	private static MatchedMedia Media(string title)
 	{
 		return new(
-			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
+			new MediaIdentity(MediaId.New(), [TmdbId.From(title, MediaType.Movie)]),
 			new MovieDetails
 			{
 				Title = title,

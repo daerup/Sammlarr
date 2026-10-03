@@ -14,7 +14,7 @@ namespace Core.Tests.Media;
 
 public class DetailsFetcherTests
 {
-	private static readonly MediaId Id = MediaId.From(Guid.NewGuid());
+	private static readonly MediaId Id = MediaId.New();
 	private static readonly PlexId Plex = PlexId.From("plex-rating", MediaType.Movie);
 	private static readonly TmdbId Tmdb = TmdbId.From("500", MediaType.Movie);
 	private static readonly MediaIdentity Identity = new(Id, [Plex, Tmdb]);

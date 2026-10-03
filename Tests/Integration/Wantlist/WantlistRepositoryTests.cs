@@ -119,7 +119,7 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	{
 		var alreadyWantlisted = await SeedWantlistItemAsync(PlexId.From("plex-300", MediaType.Movie), WantlistItemOrigin.Manual);
 		var newMedia = await SeedMediaAsync([PlexId.From("plex-301", MediaType.Movie)]);
-		var unknown = MediaId.From(Guid.NewGuid());
+		var unknown = MediaId.New();
 
 		var added = await _testee.AddAsync([alreadyWantlisted, newMedia, unknown], new WantlistItemProvenance(new ManualOrigin(ManualSource.Unknown)));
 
@@ -131,7 +131,7 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	public async Task RemoveAsync_ReturnsOnlyActuallyRemovedIds()
 	{
 		var wantlisted = await SeedWantlistItemAsync(PlexId.From("plex-302", MediaType.Movie), WantlistItemOrigin.Manual);
-		var unknown = MediaId.From(Guid.NewGuid());
+		var unknown = MediaId.New();
 
 		var removed = await _testee.RemoveAsync([wantlisted, unknown]);
 
@@ -163,7 +163,7 @@ public class WantlistRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposabl
 	public async Task RemoveAsync_UnknownId_IsNoOp()
 	{
 		await SeedWantlistItemAsync(PlexId.From("plex-109", MediaType.Movie), WantlistItemOrigin.Manual);
-		var unknown = MediaId.From(Guid.NewGuid());
+		var unknown = MediaId.New();
 
 		await _testee.RemoveAsync([unknown]);
 

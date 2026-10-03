@@ -44,5 +44,5 @@ public class ViewerEventTests
 		await Assert.That(ViewerEvent.Own<WantlistOutboxEvent>(raised, null)).IsNull();
 	}
 
-	private static WantlistOutboxEvent Pushed(UserId owner) => new(owner, MediaId.From(Guid.NewGuid()), WantlistOutboxEventKind.Pushed);
+	private static WantlistOutboxEvent Pushed(UserId owner) => new(owner, MediaId.New(), WantlistOutboxEventKind.Pushed);
 }
