@@ -79,6 +79,16 @@ public class ProviderHttpExtensionsTests
 		await Assert.That(host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex).BlockedUntil).IsSome();
 	}
 
+	[Test]
+	public async Task AddProviderHttp_ForAProviderWithAMaxWait_ReportsItInItsCapacity()
+	{
+		using var host = Host(IProviderRateLimitReporter.Mock().Object, maxWaitSeconds: 90);
+
+		var load = host.Services.GetRequiredService<ProviderCapacity>().Of(MediaProvider.Plex);
+
+		await Assert.That(load.MaxWait).IsEqualTo(TimeSpan.FromSeconds(90));
+	}
+
 	private static HttpRequestMessage Stamped()
 	{
 		var currentUser = ICurrentUser.Mock();
@@ -96,8 +106,14 @@ public class ProviderHttpExtensionsTests
 		return await client.SendAsync(request);
 	}
 
-	private static IHost Host(IProviderRateLimitReporter reporter, HttpStatusCode answer = HttpStatusCode.TooManyRequests, int minimumThroughput = 20) =>
-		new HostBuilder()
+	private static IHost Host(
+		IProviderRateLimitReporter reporter,
+		HttpStatusCode answer = HttpStatusCode.TooManyRequests,
+		int minimumThroughput = 20,
+		int maxWaitSeconds = 0
+	)
+	{
+		return new HostBuilder()
 			.ConfigureServices(services =>
 			{
 				services.AddSingleton(
@@ -105,7 +121,12 @@ public class ProviderHttpExtensionsTests
 					{
 						BaseUrl = "https://plex.test",
 						Authentication = new OAuthenticationOptions { ProductName = "Sammlarr" },
-						Http = new ProviderHttpOptions { RetryAttempts = 1, CircuitBreakerMinimumThroughput = minimumThroughput },
+						Http = new ProviderHttpOptions
+						{
+							RetryAttempts = 1,
+							CircuitBreakerMinimumThroughput = minimumThroughput,
+							MaxWaitSeconds = maxWaitSeconds,
+						},
 					}
 				);
 				services.AddSingleton<ProviderConcurrencyGates>();
@@ -115,6 +136,7 @@ public class ProviderHttpExtensionsTests
 				services.AddHttpClient("plex").AddProviderHttp<PlexOptions>(MediaProvider.Plex).ConfigurePrimaryHttpMessageHandler(() => new AnsweringHandler(answer));
 			})
 			.Build();
+	}
 
 	private sealed class AnsweringHandler(HttpStatusCode answer) : HttpMessageHandler
 	{

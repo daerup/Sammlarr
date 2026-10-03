@@ -9,6 +9,7 @@ public record ProviderHttpOptions
 	public int TotalTimeoutSeconds { get; set; } = 15;
 	public int RetryAttempts { get; set; } = 2;
 	public bool HonorRetryAfter { get; set; } = true;
+	public int MaxWaitSeconds { get; set; }
 	public double CircuitBreakerFailureRatio { get; set; } = 0.5;
 	public int CircuitBreakerMinimumThroughput { get; set; } = 20;
 }

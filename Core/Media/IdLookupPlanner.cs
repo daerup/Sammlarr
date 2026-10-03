@@ -5,7 +5,7 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal sealed record IdLookupPlan(IReadOnlyList<IReadOnlyList<Hop>> Paths, bool Blocked);
+internal sealed record IdLookupPlan(IReadOnlyList<IReadOnlyList<Hop>> Paths);
 
 internal static class IdLookupPlanner
 {
@@ -33,8 +33,25 @@ internal static class IdLookupPlanner
 		var paths = new List<IReadOnlyList<Hop>>();
 		Walk([], have, hasHints, target, hops, paths);
 
-		var open = paths.Where(path => path.All(hop => capacity.Of(hop.Converter.Provider).IsOpen(now))).ToList();
-		return new IdLookupPlan([.. open.OrderBy(path => Weight(path, capacity)).ThenBy(path => path.Count)], open.Count < paths.Count);
+		return new IdLookupPlan(Ordered(paths, capacity, now));
+	}
+
+	private static IReadOnlyList<IReadOnlyList<Hop>> Ordered(IReadOnlyList<IReadOnlyList<Hop>> paths, IProviderCapacity capacity, DateTimeOffset now)
+	{
+		var byOpen = paths.ToLookup(path => IsOpen(path, capacity, now));
+		var open = byOpen[true].OrderBy(path => Weight(path, capacity)).ThenBy(path => path.Count);
+		var blocked = byOpen[false].OrderBy(path => FreeAt(path, capacity)).ThenBy(path => Weight(path, capacity)).ThenBy(path => path.Count);
+		return [.. open, .. blocked];
+	}
+
+	private static bool IsOpen(IReadOnlyList<Hop> path, IProviderCapacity capacity, DateTimeOffset now)
+	{
+		return path.All(hop => capacity.Of(hop.Converter.Provider).IsOpen(now));
+	}
+
+	private static DateTimeOffset FreeAt(IReadOnlyList<Hop> path, IProviderCapacity capacity)
+	{
+		return path.Max(hop => capacity.Of(hop.Converter.Provider).BlockedUntil.GetValueOr(DateTimeOffset.MinValue));
 	}
 
 	private static IEnumerable<Hop> HopsOf(IExternalIdConverter converter, IdLookup lookup)
@@ -61,19 +78,15 @@ internal static class IdLookupPlanner
 
 	private static IdLookupPlan PlanPresent(MediaProvider target, IReadOnlyList<Hop> hops, IProviderCapacity capacity, DateTimeOffset now)
 	{
-		var self = hops.Where(hop => hop is IdToId id && id.From == target && id.To == target).ToList();
-		if (self.Count == 0)
-		{
-			return new IdLookupPlan(
-				[
-					[],
-				],
-				false
-			);
-		}
-
-		var open = self.Where(hop => capacity.Of(hop.Converter.Provider).IsOpen(now)).ToList();
-		return new IdLookupPlan([.. open.Select(hop => (IReadOnlyList<Hop>)[hop])], open.Count < self.Count);
+		IReadOnlyList<IReadOnlyList<Hop>> self =
+		[
+			.. hops.Where(hop => hop is IdToId id && id.From == target && id.To == target).Select(hop => (IReadOnlyList<Hop>)[hop]),
+		];
+		return self.Count == 0
+			? new IdLookupPlan([
+				[],
+			])
+			: new IdLookupPlan(Ordered(self, capacity, now));
 	}
 
 	private static void Walk(

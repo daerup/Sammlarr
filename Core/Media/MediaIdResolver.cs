@@ -36,12 +36,13 @@ internal sealed class MediaIdResolver(
 
 		var plan = IdLookupPlanner.Plan(candidates.Select(candidate => candidate.Source).ToHashSet(), request.Hints.IsSome(), target, _hops, capacity, clock.Now);
 		var unresolved = Error.From($"No lookup resolved the candidates to a {target} id.");
-		var transient = plan.Blocked;
+		var transient = false;
 		var answers = new Dictionary<AnswerKey, LookupAnswer>();
 		var down = new HashSet<MediaProvider>();
+		var waited = new HashSet<MediaProvider>();
 		foreach (var path in plan.Paths)
 		{
-			var outcome = await FollowAsync(path, candidates, request.Hints, target, answers, down, cancellationToken);
+			var outcome = await FollowAsync(path, candidates, request.Hints, target, answers, down, waited, cancellationToken);
 			if (outcome.Found.IsSome())
 			{
 				return outcome.Found.Map(found => found.Ids).ToResult(unresolved);
@@ -63,6 +64,7 @@ internal sealed class MediaIdResolver(
 		MediaProvider target,
 		Dictionary<AnswerKey, LookupAnswer> answers,
 		HashSet<MediaProvider> down,
+		HashSet<MediaProvider> waited,
 		CancellationToken cancellationToken
 	)
 	{
@@ -70,7 +72,7 @@ internal sealed class MediaIdResolver(
 		var current = hints;
 		for (var index = 0; index < path.Count; index++)
 		{
-			if (!path.Skip(index).All(remaining => IsOpen(remaining, down)))
+			if (!await WaitForAsync(path.Skip(index), waited, down, cancellationToken))
 			{
 				return new StepOutcome(new None(), true);
 			}
@@ -182,10 +184,46 @@ internal sealed class MediaIdResolver(
 		return new LookupAnswer(Error.From(unavailable), true);
 	}
 
-	private bool IsOpen(Hop hop, HashSet<MediaProvider> down)
+	private async Task<bool> WaitForAsync(
+		IEnumerable<Hop> remaining,
+		HashSet<MediaProvider> waited,
+		HashSet<MediaProvider> down,
+		CancellationToken cancellationToken
+	)
 	{
-		var provider = hop.Converter.Provider;
-		return !down.Contains(provider) && capacity.Of(provider).IsOpen(clock.Now);
+		var now = clock.Now;
+		var blocked = new Dictionary<MediaProvider, DateTimeOffset>();
+		foreach (var provider in remaining.Select(hop => hop.Converter.Provider).Distinct())
+		{
+			if (down.Contains(provider))
+			{
+				return false;
+			}
+
+			var load = capacity.Of(provider);
+			if (load.IsOpen(now))
+			{
+				continue;
+			}
+
+			var until = load.BlockedUntil.GetValueOr(now);
+			if (waited.Contains(provider) || until - now > load.MaxWait)
+			{
+				return false;
+			}
+
+			blocked[provider] = until;
+		}
+
+		if (blocked.Count == 0)
+		{
+			return true;
+		}
+
+		var freeAt = blocked.Values.Max();
+		waited.UnionWith(blocked.Keys);
+		await Task.Delay(freeAt, clock, cancellationToken);
+		return blocked.Keys.All(provider => capacity.Of(provider).IsOpen(freeAt));
 	}
 
 	private readonly record struct StepOutcome(Optional<IdLookupResult> Found, bool Transient);
@@ -207,6 +245,18 @@ internal sealed class MediaIdResolver(
 		{
 			var ids = known.Select(id => $"{id}").Order(StringComparer.Ordinal);
 			return $"{hints.MediaType}:{hints.Year}:{hints.Title}|{string.Join(",", ids)}";
+		}
+	}
+}
+
+file static class TaskExtensions
+{
+	extension(Task)
+	{
+		public static Task Delay(DateTimeOffset until, IDateTimeProvider clock, CancellationToken cancellationToken)
+		{
+			var remaining = until - clock.Now;
+			return Task.Delay(remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero, cancellationToken);
 		}
 	}
 }

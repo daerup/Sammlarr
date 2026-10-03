@@ -18,7 +18,7 @@ public class ProviderCapacityTests
 	{
 		var clock = IDateTimeProvider.Mock();
 		clock.Now.Returns(Now);
-		Testee = new ProviderCapacity(_gates, clock.Object);
+		Testee = new ProviderCapacity(_gates, clock.Object, []);
 	}
 
 	[Test]
