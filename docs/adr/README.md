@@ -25,3 +25,4 @@ Decisions are append-only. To change one, add a new ADR and mark the old one
 | 0006 | [Run background work through one job queue](0006-run-background-work-through-one-job-queue.md) | accepted | 2026-09-24 |
 | 0007 | [Push watchlist changes inline during sync](0007-push-watchlist-changes-inline-during-sync.md) | accepted | 2026-09-26 |
 | 0008 | [Separate events from notifications](0008-separate-events-from-notifications.md) | accepted | 2026-09-27 |
+| 0009 | [Model a title as an identity plus optional details](0009-model-a-title-as-an-identity-plus-optional-details.md) | accepted | 2026-10-03 |

@@ -1,65 +1,75 @@
 [[section-glossary]]
 == Glossary
 
-Project vocabulary, the coined domain terms especially. The media-model terms are the union types
-resolution produces; their structure is in <<section-concepts>>.
+Project vocabulary, the coined domain terms especially. The media-model terms are the types
+identify produces; their structure is in <<section-concepts>>.
 
 === Media model
 
 Media:: The movies and shows Sammlarr tracks. No single `Media` type; a title is one of the union
-types below.
+cases below.
 
-MediaType:: `Movie`, `Show`, or `Unknown`.
+MediaType:: `Movie`, `Show`, or `Unknown` (a provider result that is neither, such as a person in a
+search).
 
-`IMedia`:: A fully resolved title, `Movie` or `Show`. Every field is present.
-
-`IPartialMedia`:: A title that has an identity but is still missing some fields (`PartialMovie`,
-`PartialShow`). It is promoted to an `IMedia` once complete.
-
-`IdentifiedMedia`:: The union of `IMedia` and `IPartialMedia`: a title matched to a library
-row, so it carries a `MediaIdentity`. It may be fully or partially filled.
-
-`UnmatchedMedia`:: External ids that could not be matched to any library row. It has externals
-but no `MediaIdentity`.
-
-`MediaLookup`:: The union of `IdentifiedMedia` and `UnmatchedMedia`: the result of resolving
-external ids, matched or not. List building works over it.
-
-`MediaIdentity`:: The identity of a matched title: Sammlarr's own `MediaId` plus the external
-ids that resolve to it.
-
-`MediaId`:: Sammlarr's internal GUID for a title. Never empty.
+`MediaId`:: Sammlarr's own id for a title: a Vogen value object over a GUID, never empty and never a
+placeholder. `MediaId.New()` mints one, `MediaId.From` reads a stored one.
 
 `IExternalMediaId`:: One provider's id for a title, with source provider, media type, and value.
 Cases: `TmdbId`, `ImdbId`, `TvdbId`, `PlexId`, `MdblistId`.
 
-Completeness:: Whether a partial title has all its fields. A complete partial is promoted to a
-full `Movie` or `Show` (`MediaCompleteness.IsComplete`; `Missing` names the gaps as a `MediaField`).
+`MediaIdentity`:: A `MediaId` plus the external ids identified as that title. Only titles Sammlarr stores
+have one.
 
-Freshness:: Whether a stored title is recent enough to skip a re-fetch: 7 days for a complete
-title or a partial whose gaps are all confirmed, 1 hour for any other partial (`MediaFreshness`).
+`MediaDetails`:: What is known about a title: title, tagline, summary, artwork, release date,
+genres and rating, plus the runtime (`MovieDetails`) or seasons, episodes and runtime per episode
+(`ShowDetails`); `UnknownDetails` carries the common fields only. Every field is optional: a
+missing value is `null` (never `""`, `0` or a sentinel date), missing genres are an empty set and a
+missing rating is `RatingSummary.None`.
+
+`FoundMedia`:: A provider's answer: external ids plus details, no `MediaId`. `MatchTo(identity)`
+turns it into a match result.
+
+`MatchedMedia`:: A title with its `MediaIdentity` and its details.
+
+`UnmatchedMedia`:: A title Sammlarr could not match to a library row, with the external ids and
+details known about it. It has no `MediaIdentity`, so it cannot be wantlisted or blocklisted.
+
+`MediaMatchResult`:: The union of `MatchedMedia` and `UnmatchedMedia`: the outcome of identifying a
+title. Search, trending and feed loading answer with it; list building works over it.
+
+Missing:: The details fields with no value (`MediaDetails.Missing`, a `MediaField` set), computed and
+never stored. A title nobody has rated is missing its `Rating`.
 
 Confirmed gap:: A field still missing after every enricher that could fill it answered
-(`IPartialMedia.ConfirmedAbsent`). The rating is such a field: a title no enricher has rated has a
-`Rating` gap, confirmed once the enricher that fills ratings answers without votes. An enricher that was unavailable (rate limited or down) leaves its fields
-unconfirmed, so they retry after the hour; a lookup that finds nothing counts as an answer. An enricher is only asked when its `Fills` overlap a missing field. A confirmed gap
-lasts until the title goes stale after 7 days, even if a new enricher, a config change or a newly
-learned id could fill it sooner.
+(`CachedDetails.ConfirmedAbsent`). An enricher that was unavailable (rate limited or down) leaves its
+fields unconfirmed, so they retry after the hour; a lookup that finds nothing counts as an answer. An
+enricher is only asked when its `Fills` overlap a missing field. A confirmed gap lasts until the
+title goes stale after 7 days, even if a new enricher, a config change or a newly learned id could
+fill it sooner.
 
-CachedMedia:: The stored form of a title with the time it was fetched (an `IdentifiedMedia`
-plus `FetchedAt`). Freshness reads `FetchedAt` to decide whether a re-fetch is due.
+`CachedDetails`:: Stored details with the time they were fetched (`FetchedAt`) and their confirmed
+gaps.
+
+Freshness:: Whether cached details are recent enough to skip a re-fetch (`CachedDetails.IsFresh`):
+younger than 7 days, and younger than 1 hour while any missing field is still unconfirmed.
+
+`StoredMedia`:: A stored title as the repository returns it: its `MediaIdentity` and its
+`CachedDetails`, if it has any.
 
 RatingSummary:: A title's aggregate rating: an average over the per-provider `MediaRating`
 values, or `None` when it is unrated.
 
-=== Resolution
+=== Identify and details
 
-Resolution:: Turning external references into the right library title, in two phases: _identity_
-(Phase A, which library row the ids are) then _metadata_ (Phase B, filling in title, art and
-ratings). The correctness-critical operation; see <<section-runtime-view>>.
+Identify:: Turning external references into the right library title (`IMediaService.IdentifyAsync`
+and `IdentifyWithDetailsAsync`). The correctness-critical operation; see <<section-runtime-view>>.
 
-Candidate:: One external id offered as input to resolution. Several candidates for the same title
-are resolved together and merged into a single identity.
+Details:: Loading what is known about an identified title: the cached details while they are fresh,
+otherwise a fetch through the `DetailsFetcher` (the primary lookup, then the enrichers).
+
+Candidate:: One external id offered as input to identify. Several candidates for the same title
+are identified together and merged into a single identity.
 
 IdentifyHints:: Title, year and media type passed alongside the candidates to help a provider
 match them to the right title, mainly the Plex title search.
@@ -73,12 +83,15 @@ Id lookup:: An `IdLookup`: what one provider call accepts (`ById`: some provider
 hints), which providers' ids its answer may yield, and its cost in calls. The planner turns each into hops; a path
 through a blocked provider waits for it, capped by its `MaxWait`, or gives up.
 
-Enricher:: An `IMetadataEnricher`, keyed by provider, that fills missing metadata fields in
-Phase B. Sammlarr asks the open enricher that fills the most missing fields, one at a time, until
-the record is complete.
+Enricher:: An `IDetailsEnricher`, keyed by provider, that fills missing details fields after the
+primary lookup. Sammlarr asks the open enricher that fills the most missing fields, one at a time,
+until no open enricher can fill what is still missing.
 
-Coordinator:: The step that merges freshly resolved ids against existing library rows, so two
+Coordinator:: The step that merges freshly identified ids against existing library rows, so two
 references to the same title never create two library ids.
+
+Write buffer:: The `MediaWriteBuffer` that collects one call's new identities and fetched details and
+writes them in one go at the end.
 
 Negative cache:: The in-memory cache of ids already known to be unmatched, kept for an hour and
 checked before any provider call, so a repeated miss skips the providers (`IUnmatchedMediaCache`).
@@ -242,7 +255,7 @@ Id:: Identity only, no data (`MediaId`, `FeedId`, `RunId`).
 Item:: A title as a member of a collection: a list, a run's results, a change list
 (`WantlistItem`, `BlocklistItem`, `FeedRunItem`, `ChangeItem`).
 
-Media:: A title with its display details (`IdentifiedMedia`, `WantlistedMedia`, `BlocklistedMedia`).
+Media:: A title with its display details (`MatchedMedia`, `WantlistedMedia`, `BlocklistedMedia`).
 
 Entry:: A record in a log or a queue, ordered by time (`WantlistOutboxEntry`, `DiagnosticsLogEntry`,
 `DiagnosticsSpanEntry`). The Architecture suite allows no other `*Entry` type in the layers it scans.
@@ -254,7 +267,7 @@ line (`UpNextRow`).
 
 These live in `Shared`, the kernel below `Domain`, and are used throughout.
 
-`union`:: A closed set of case types, e.g. `MediaLookup` is `IdentifiedMedia` or
+`union`:: A closed set of case types, e.g. `MediaMatchResult` is `MatchedMedia` or
 `UnmatchedMedia`. Matched by case directly.
 
 `Optional<T>`:: A present-or-absent value (`Some` / `None`). Used instead of null for a missing

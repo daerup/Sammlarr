@@ -58,7 +58,7 @@ shape and never reference each other. Every project also references the `Shared`
 | Domain | The pure model: entities, value objects, the media union types, and the feed, wantlist, blocklist, provider and notification vocabulary. No infrastructure. See <<section-glossary>>.
 | Contracts | The seams: service, repository and provider interfaces, the record-struct ids, and DI markers. Depends on `Domain` because its signatures use domain types.
 | Observability | Serilog and OpenTelemetry setup, plus the tracing helpers (`AddTracedScoped`, `AddTracedKeyedScoped`) the other layers register through.
-| Core | Business logic: media resolution and merging, the query processor (filter, sort, limit), caching, the blocklist, the wantlist and its sync, feed runs and their cron tickers, the job queue and its runner, the `Announcer` that publishes events and notifications, sign-in and user management. Implements most `Contracts` interfaces.
+| Core | Business logic: identifying media and merging identities, the query processor (filter, sort, limit), caching, the blocklist, the wantlist and its sync, feed runs and their cron tickers, the job queue and its runner, the `Announcer` that publishes events and notifications, sign-in and user management. Implements most `Contracts` interfaces.
 | DB | Persistence: `SammlarrDbContext`, entities, repositories and migrations on SQLite, including the `Jobs` table, plus the TickerQ scheduler store in the same file. Holds secrets under data protection.
 | API | One folder per external provider, each an `IServiceModule` that registers a typed HTTP client and keyed services. Also the shared HTTP resilience pipeline and the notification channels.
 | Messaging | Wolverine durable messaging on SQLite, used for notifications only: the handlers that fan a notification out to its subscriptions and deliver it with retry.
@@ -88,8 +88,8 @@ all.
 |===
 | Provider | Implements, keyed by provider except `IExternalIdConverter` (one enumerable of converters, each announcing its lookups)
 
-| TMDB | `ITrendingService`, `IMetadataEnricher` (also fills ratings), `IExternalIdConverter`
-| Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IMetadataEnricher`, `IExternalIdConverter`
+| TMDB | `ITrendingService`, `IDetailsEnricher` (also fills ratings), `IExternalIdConverter`
+| Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IDetailsEnricher`, `IExternalIdConverter`
 | MDBList | `IFeedProvider`
 | IMDb | nothing: `ImdbId` is reached through Plex and TMDB lookups
 | TheTVDB | nothing: `TvdbId` is reached through Plex and TMDB lookups

@@ -1,7 +1,9 @@
+using System.Reflection;
 using Domain.Announcing;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NetArchTest.Rules;
+using Vogen;
 
 namespace Architecture.Tests;
 
@@ -101,5 +103,18 @@ public class DesignTests
 	public async Task Design_OfAnnouncedFacts_IsEitherAnEventOrANotification()
 	{
 		await Types.InAssemblies(Projects.All).That().ImplementInterface<IEvent>().And().ImplementInterface<INotification>().GetTypes().AssertNone();
+	}
+
+	[Test]
+	public async Task Design_OfGuidIds_IsAlwaysAVogenValueObject()
+	{
+		var ids = Projects
+			.Domain.GetTypes()
+			.Where(type => type.IsValueType && type.Name.EndsWith("Id", StringComparison.Ordinal))
+			.Where(type => type.GetProperty("Value")?.PropertyType == typeof(Guid))
+			.ToList();
+
+		await Assert.That(ids).Contains(typeof(Domain.Media.MediaId));
+		await ids.Where(type => type.GetCustomAttribute<ValueObjectAttribute<Guid>>() is null).Select(type => type.FullName).AssertNone();
 	}
 }
