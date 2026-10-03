@@ -79,7 +79,7 @@ public sealed class MonadPatternAnalyzer : DiagnosticAnalyzer
 				AnalyzeSwitch(context, switchStatement.Value, CasePatterns(switchStatement), monads);
 				break;
 			case IConditionalOperation conditional:
-				AnalyzeNullTernary(context, conditional);
+				AnalyzeConstruction(context, conditional, monads);
 				break;
 			case IInvocationOperation invocation:
 				AnalyzeInvocation(context, invocation, monads);
@@ -166,20 +166,168 @@ public sealed class MonadPatternAnalyzer : DiagnosticAnalyzer
 		Report(context, value, "Match or Map(…).GetValueOr(…)", "a switch over the cases");
 	}
 
-	private static void AnalyzeNullTernary(OperationAnalysisContext context, IConditionalOperation conditional)
+	private static void AnalyzeConstruction(OperationAnalysisContext context, IConditionalOperation conditional, MonadTypes monads)
 	{
-		if (conditional.Syntax is not ConditionalExpressionSyntax || conditional.WhenFalse is null)
+		if (conditional.Syntax is not ConditionalExpressionSyntax syntax || conditional.WhenFalse is null)
 		{
 			return;
 		}
 
 		var branches = new[] { MonadTypes.Unwrap(conditional.WhenTrue), MonadTypes.Unwrap(conditional.WhenFalse) };
-		if (!branches.Any(IsSomeOf) || !branches.Any(IsNone) || !IsNullTest(MonadTypes.Unwrap(conditional.Condition)))
+		var condition = MonadTypes.Unwrap(conditional.Condition);
+		if (!branches.Any(IsNone) || ReadsMonad(condition, monads))
 		{
 			return;
 		}
 
-		Report(context, conditional, "Optional.Of(…)", "a conditional that builds Some.Of or new None() from a null test");
+		var kept = branches.First(branch => !IsNone(branch));
+		if (IsSomeOf(kept))
+		{
+			AnalyzeSomeOrNone(context, conditional, kept, condition, syntax.Condition);
+			return;
+		}
+
+		if (IsPlainRead(kept) && monads.IsOptional(kept.Type) && Defers(kept, syntax.Condition))
+		{
+			Report(context, conditional, "When(…) on the Optional", "a conditional that picks an Optional or new None()");
+		}
+	}
+
+	private static void AnalyzeSomeOrNone(
+		OperationAnalysisContext context,
+		IOperation conditional,
+		IOperation some,
+		IOperation condition,
+		ExpressionSyntax conditionSyntax
+	)
+	{
+		if (IsNullTest(condition))
+		{
+			Report(context, conditional, "Optional.Of(…)", "a conditional that builds Some.Of or new None() from a null test");
+			return;
+		}
+
+		if (!Defers(some, conditionSyntax))
+		{
+			return;
+		}
+
+		if (IsDictionaryLookup(condition))
+		{
+			Report(context, conditional, "GetValueOrNone(…)", "a conditional that builds Some.Of or new None() from TryGetValue");
+			return;
+		}
+
+		var use = HoldsNullTest(condition) ? "Optional.Of(…).When(…)" : "Optional.When(…)";
+		Report(context, conditional, use, "a conditional that builds Some.Of or new None()");
+	}
+
+	private static bool ReadsMonad(IOperation condition, MonadTypes monads)
+	{
+		return condition.DescendantsAndSelf().Any(operation => monads.IsMonad(operation.Type));
+	}
+
+	private static bool Defers(IOperation value, ExpressionSyntax condition)
+	{
+		var flow = value.SemanticModel?.AnalyzeDataFlow(condition);
+		if (flow is not { Succeeded: true })
+		{
+			return false;
+		}
+
+		var unassigned = flow.VariablesDeclared.Except(flow.AlwaysAssigned, SymbolEqualityComparer.Default).ToList();
+		return !value.DescendantsAndSelf().Any(operation => Pinned(operation, unassigned));
+	}
+
+	private static bool Pinned(IOperation operation, IReadOnlyList<ISymbol> unassigned)
+	{
+		return operation switch
+		{
+			IAwaitOperation => true,
+			ILocalReferenceOperation local => local.Local.IsRef || local.Local.Type.IsRefLikeType || unassigned.Contains(local.Local, SymbolEqualityComparer.Default),
+			IParameterReferenceOperation parameter => parameter.Parameter.RefKind != RefKind.None || parameter.Parameter.Type.IsRefLikeType,
+			IInstanceReferenceOperation instance => instance.Type?.IsValueType == true,
+			_ => false,
+		};
+	}
+
+	private static bool IsDictionaryLookup(IOperation condition)
+	{
+		return condition is IInvocationOperation { TargetMethod: { Name: "TryGetValue", IsGenericMethod: false } method }
+			&& method.ContainingType.AllInterfaces.Add(method.ContainingType).Any(IsDictionary);
+	}
+
+	private static bool IsDictionary(INamedTypeSymbol type)
+	{
+		return type.MetadataName is "IReadOnlyDictionary`2" or "IDictionary`2" && type.ContainingNamespace?.ToDisplayString() == "System.Collections.Generic";
+	}
+
+	private static bool HoldsNullTest(IOperation condition)
+	{
+		return condition is IBinaryOperation { OperatorKind: BinaryOperatorKind.ConditionalAnd } both
+			&& new[] { MonadTypes.Unwrap(both.LeftOperand), MonadTypes.Unwrap(both.RightOperand) }.Any(side => IsNullTest(side) || HoldsNullTest(side));
+	}
+
+	private static bool IsPlainRead(IOperation operation)
+	{
+		return operation is ILocalReferenceOperation or IParameterReferenceOperation or IFieldReferenceOperation or IPropertyReferenceOperation;
+	}
+
+	private static bool PicksNull(IInvocationOperation invocation)
+	{
+		if (
+			invocation.Arguments.Length != 1
+			|| MonadTypes.Unwrap(invocation.Arguments[0].Value)
+				is not IConditionalOperation { WhenFalse: { } whenFalse, Syntax: ConditionalExpressionSyntax syntax } picked
+		)
+		{
+			return false;
+		}
+
+		var kept = Kept(picked.WhenTrue, whenFalse);
+		return kept is not null && !IsNullTest(MonadTypes.Unwrap(picked.Condition)) && IsNotNull(kept) && Defers(kept, syntax.Condition);
+	}
+
+	private static IOperation? Kept(IOperation whenTrue, IOperation whenFalse)
+	{
+		if (IsNullArm(whenFalse))
+		{
+			return whenTrue;
+		}
+
+		return IsNullArm(whenTrue) ? whenFalse : null;
+	}
+
+	private static bool IsNullArm(IOperation operation)
+	{
+		return Stripped(operation) is ILiteralOperation { ConstantValue: { HasValue: true, Value: null } } or IDefaultValueOperation;
+	}
+
+	private static bool IsNotNull(IOperation operation)
+	{
+		var value = Stripped(operation);
+		if (value.Type is { IsValueType: true } type)
+		{
+			return type.OriginalDefinition.SpecialType != SpecialType.System_Nullable_T;
+		}
+
+		return value.SemanticModel?.GetTypeInfo(value.Syntax).Nullability.FlowState == NullableFlowState.NotNull;
+	}
+
+	private static IOperation Stripped(IOperation operation)
+	{
+		var current = operation;
+		while (current is IConversionOperation or IParenthesizedOperation)
+		{
+			current = current switch
+			{
+				IConversionOperation conversion => conversion.Operand,
+				IParenthesizedOperation parenthesized => parenthesized.Operand,
+				_ => current,
+			};
+		}
+
+		return current;
 	}
 
 	private static void AnalyzeInvocation(OperationAnalysisContext context, IInvocationOperation invocation, MonadTypes monads)
@@ -202,6 +350,12 @@ public sealed class MonadPatternAnalyzer : DiagnosticAnalyzer
 				Report(context, invocation, ".ToNullable() in the key", "an Optional or a Result as an ordering key");
 			}
 
+			return;
+		}
+
+		if (method.ContainingType?.Name == "Optional" && MonadTypes.IsHelper(method, "Of") && PicksNull(invocation))
+		{
+			Report(context, invocation, "Optional.When(…)", "Optional.Of over a conditional that picks null");
 			return;
 		}
 

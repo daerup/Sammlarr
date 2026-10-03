@@ -52,7 +52,7 @@ internal static class UpNextView
 		[
 			.. feeds
 				.Where(feed => feed.Enabled)
-				.Select(feed => NextRunOf(feed, from, zone).Map(next => (feed, next)))
+				.Select(feed => feed.Schedule.NextRun(from, zone).Map(next => (feed, next)))
 				.WhereSome()
 				.OrderBy(entry => entry.next)
 				.Select(entry => new UpNextRow(
@@ -64,11 +64,6 @@ internal static class UpNextView
 					entry.feed.Provider.AsMediaProvider()
 				)),
 		];
-	}
-
-	private static Optional<DateTimeOffset> NextRunOf(Feed feed, DateTimeOffset from, TimeZoneInfo zone)
-	{
-		return feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : new None();
 	}
 
 	private static UpNextRow Row(

@@ -439,7 +439,7 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		deps.MediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
-			.Returns((groups, _) => [.. groups.Select(group => Optional.Of<MediaIdentity>(group.Contains(known) ? persisted : null))]);
+			.Returns((groups, _) => [.. groups.Select(group => Optional.When(group.Contains(known), () => persisted))]);
 		var upserted = RecordUpsertedIdentities(deps);
 		var requests = await BuildRequests(60).ToListAsync();
 		requests[0] = new IdentifyRequest([minted], new None());

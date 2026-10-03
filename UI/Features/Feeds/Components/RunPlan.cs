@@ -82,7 +82,7 @@ internal static class RunPlan
 	private static RunCandidate Candidate(FeedOverview overview, DateTimeOffset from, TimeZoneInfo zone)
 	{
 		var feed = overview.Feed;
-		var next = feed.Schedule is Scheduled scheduled ? scheduled.NextRun(from, zone) : new None();
+		var next = feed.Schedule.NextRun(from, zone);
 		var stalled = overview.LastRun.Match(run => run.Conclusiveness is not Conclusiveness.Conclusive, () => false);
 		var dueSoon = next.Match(at => at - from <= Soon, () => false);
 		var group = Group(feed.Schedule, stalled, dueSoon);
@@ -92,7 +92,7 @@ internal static class RunPlan
 			ScheduleText.Describe(feed.Schedule),
 			Outcome(overview.LastRun),
 			Flag(overview, stalled, group is RunGroup.WorthRunning && next.IsSome()),
-			feed.Enabled ? next : new None(),
+			next.When(feed.Enabled),
 			group,
 			feed.Enabled
 		);

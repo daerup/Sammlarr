@@ -304,12 +304,13 @@ internal sealed class MediaService(
 		CancellationToken cancellationToken
 	)
 	{
-		var cached = stored.Map(row => row.Cached);
-		return await cached
+		return await stored
+			.Map(row => row.Cached)
 			.When(details => details.IsFresh(dateTimeProvider.Now))
+			.Map(fresh => Success.Of(new MatchedMedia(identity, fresh.Details)))
 			.Match(
-				fresh => ValueTask.FromResult<Result<MatchedMedia>>(Success.Of(new MatchedMedia(identity, fresh.Details))),
-				() => FetchAsync(identity, stored, cached, buffer, cancellationToken)
+				fresh => ValueTask.FromResult<Result<MatchedMedia>>(fresh),
+				() => FetchAsync(identity, stored, stored.Map(row => row.Cached), buffer, cancellationToken)
 			);
 	}
 

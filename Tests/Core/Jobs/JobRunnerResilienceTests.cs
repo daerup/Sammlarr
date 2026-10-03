@@ -64,7 +64,7 @@ public class JobRunnerResilienceTests
 		var released = false;
 		var jobs = IJobRepository.Mock();
 		jobs.RequeueRunningAsync(Any<DateTimeOffset>(), Any()).Returns(0);
-		jobs.NextWaitingAsync(Any()).Returns(() => released ? new None() : Some.Of(DateTimeOffset.UnixEpoch + TimeSpan.FromMilliseconds(100)));
+		jobs.NextWaitingAsync(Any()).Returns(() => Optional.When(!released, () => DateTimeOffset.UnixEpoch + TimeSpan.FromMilliseconds(100)));
 		jobs.ReleaseDueAsync(Any<DateTimeOffset>(), Any())
 			.Returns(() =>
 			{

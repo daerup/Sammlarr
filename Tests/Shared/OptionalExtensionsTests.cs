@@ -439,6 +439,18 @@ public class OptionalExtensionsTests
 	}
 
 	[Test]
+	public async Task When_WhenTheConditionHolds_IsTheBuiltValue()
+	{
+		await Assert.That(Optional.When(true, () => 4)).IsSome().And.IsEqualTo(4);
+	}
+
+	[Test]
+	public async Task When_WhenTheConditionFails_IsNoneWithoutBuildingTheValue()
+	{
+		await Assert.That(Optional.When<int>(false, () => throw new InvalidOperationException("built"))).IsNone();
+	}
+
+	[Test]
 	public async Task ToNullable_WhenSomeReference_IsTheValue()
 	{
 		Optional<string> optional = Some.Of("x");
@@ -578,5 +590,5 @@ public class OptionalExtensionsTests
 		}
 	}
 
-	private static Optional<string> ToLabel(int value) => value > 0 ? Some.Of($"n{value}") : new None();
+	private static Optional<string> ToLabel(int value) => Optional.When(value > 0, () => $"n{value}");
 }

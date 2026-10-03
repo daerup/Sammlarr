@@ -127,7 +127,7 @@ public class MediaIdentityCoordinatorTests
 		MediaIdentity result
 	)
 	{
-		return [.. groups.Select(group => Optional.Of<MediaIdentity>(group.Any(e => e.Source == key.Source && e.Value == key.Value) ? result : null))];
+		return [.. groups.Select(group => Optional.When(group.Any(e => e.Source == key.Source && e.Value == key.Value), () => result))];
 	}
 
 	private static IReadOnlyList<Optional<MediaIdentity>> Unknown(int count)

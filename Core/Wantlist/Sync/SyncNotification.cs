@@ -19,9 +19,10 @@ internal static class SyncNotification
 		var pushedAdds = Delivered(pushed, WantlistOperationAction.Add);
 		var pushedRemoves = Delivered(pushed, WantlistOperationAction.Remove);
 		var failed = pushed.Where(outcome => outcome.Kind is not WantlistOutboxEventKind.Pushed).Select(outcome => outcome.MediaId).ToList();
-		return pulledAdds.Count + pulledRemoves.Count + pushedAdds.Count + pushedRemoves.Count + failed.Count == 0
-			? new None()
-			: Some.Of<INotification>(new WantlistSyncCompletedNotification(owner, now, pulledAdds, pulledRemoves, pushedAdds, pushedRemoves, failed));
+		return Optional.When<INotification>(
+			pulledAdds.Count + pulledRemoves.Count + pushedAdds.Count + pushedRemoves.Count + failed.Count > 0,
+			() => new WantlistSyncCompletedNotification(owner, now, pulledAdds, pulledRemoves, pushedAdds, pushedRemoves, failed)
+		);
 	}
 
 	private static List<MediaId> Delivered(IReadOnlyList<PushOutcome> outcomes, WantlistOperationAction action) =>

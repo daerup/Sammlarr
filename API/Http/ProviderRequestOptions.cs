@@ -19,6 +19,6 @@ internal static class ProviderRequestOptions
 
 	private static Optional<UserId> StampedUser(HttpRequestMessage request)
 	{
-		return request.Options.TryGetValue(triggeredBy, out var userId) ? Some.Of(userId) : new None();
+		return Optional.When(request.Options.TryGetValue(triggeredBy, out var userId), () => userId);
 	}
 }

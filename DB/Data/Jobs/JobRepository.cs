@@ -82,7 +82,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 		var affected = await context
 			.Jobs.Where(row => row.Id == claimed && row.State == JobState.Queued)
 			.ExecuteUpdateAsync(setters => setters.SetProperty(row => row.State, JobState.Running).SetProperty(row => row.UpdatedAt, now), cancellationToken);
-		return affected == 1 ? Some.Of(new RunningJob(JobId.From(claimed), candidate.Request, UserId.From(candidate.OwnerId))) : new None();
+		return Optional.When(affected == 1, () => new RunningJob(JobId.From(claimed), candidate.Request, UserId.From(candidate.OwnerId)));
 	}
 
 	public async Task<Optional<DateTimeOffset>> NextWaitingAsync(CancellationToken cancellationToken = default)
@@ -141,7 +141,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			setters => setters.SetProperty(row => row.State, JobState.Cancelled).SetProperty(row => row.UpdatedAt, cancelledAt),
 			cancellationToken
 		);
-		return affected == 1 ? Some.Of(request) : new None();
+		return Optional.When(affected == 1, () => request);
 	}
 
 	public async Task CompleteAsync(JobId id, DateTimeOffset completedAt, CancellationToken cancellationToken = default) =>

@@ -420,7 +420,7 @@
     {
         get
         {
-            return _feed is { Enabled: true, Schedule: Scheduled scheduled } ? scheduled.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local) : new None();
+            return Optional.Of(_feed).When(feed => feed.Enabled).Map(feed => feed.Schedule.NextRun(DateTimeOffset.UtcNow, TimeZoneInfo.Local));
         }
     }
 

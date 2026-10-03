@@ -186,7 +186,7 @@ public class DetailsFetcherTests
 	public async Task FetchAsync_WhenTheEnricherThatRatesIsRateLimitedAndTheRatingIsMissing_StillAsksItOnce()
 	{
 		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
+			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
 		);
 		deps.Primary(Unrated() with { Tagline = null });
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns(Answer(new MovieDetails { Rating = TmdbRating }));
@@ -201,7 +201,7 @@ public class DetailsFetcherTests
 	public async Task FetchAsync_WhenTheEnricherIsRateLimited_SkipsItAndLeavesItsFieldsUnconfirmed()
 	{
 		var deps = Dependencies.Create(
-			capacity: TestCapacity.With(provider => new ProviderLoad(provider is MediaProvider.Tmdb ? Some.Of(Now.AddMinutes(1)) : new None(), 0))
+			capacity: TestCapacity.With(provider => new ProviderLoad(Optional.When(provider is MediaProvider.Tmdb, () => Now.AddMinutes(1)), 0))
 		);
 		deps.Primary(Complete() with { Tagline = null });
 		await using var buffer = deps.Buffer();

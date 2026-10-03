@@ -41,8 +41,7 @@ internal static class ProviderHttpExtensions
 		builder.AddHttpMessageHandler(sp =>
 		{
 			var http = Resolve(sp);
-			Optional<SemaphoreSlim> gate =
-				http.MaxConcurrency > 0 ? Some.Of(sp.GetRequiredService<ProviderConcurrencyGates>().Get(clientName, http.MaxConcurrency, provider)) : new None();
+			var gate = Optional.When(http.MaxConcurrency > 0, () => sp.GetRequiredService<ProviderConcurrencyGates>().Get(clientName, http.MaxConcurrency, provider));
 			return new ConcurrencyGateHandler(gate);
 		});
 
