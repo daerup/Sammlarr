@@ -1,12 +1,11 @@
 using System.Diagnostics;
 using API.Tmdb.Types;
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 
 namespace API.Tmdb;
 
-internal class TmdbMetadataEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IMetadataEnricher
+internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDetailsEnricher
 {
 	public MediaField Fills =>
 		MediaField.Title

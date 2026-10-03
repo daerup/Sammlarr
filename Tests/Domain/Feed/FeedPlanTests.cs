@@ -1,7 +1,6 @@
 using Domain.Feed;
 using Domain.Feed.Planning;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Processing;
 using Domain.Providers;
 using TestInfrastructure;

@@ -1,15 +1,14 @@
 using System.Collections.Concurrent;
 using Contracts.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Media;
 
-internal sealed class MediaResolutionBuffer : IAsyncDisposable
+internal sealed class MediaWriteBuffer : IAsyncDisposable
 {
 	private readonly IMediaRepository _mediaRepository;
-	private readonly ILogger<MediaResolutionBuffer> _logger;
+	private readonly ILogger<MediaWriteBuffer> _logger;
 	private readonly ConcurrentDictionary<MediaId, MediaIdentity> _identities = new();
 	private readonly ConcurrentDictionary<MediaId, MediaId> _absorbed = new();
 	private readonly ConcurrentDictionary<MediaId, CachedDetails> _details = new();
@@ -17,7 +16,7 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 	public IReadOnlyCollection<MediaIdentity> NewIdentities => [.. _identities.Values];
 	public IReadOnlyDictionary<MediaId, CachedDetails> NewDetails => _details;
 
-	public MediaResolutionBuffer(IMediaRepository mediaRepository, ILogger<MediaResolutionBuffer> logger)
+	public MediaWriteBuffer(IMediaRepository mediaRepository, ILogger<MediaWriteBuffer> logger)
 	{
 		_mediaRepository = mediaRepository;
 		_logger = logger;
@@ -54,7 +53,7 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 		}
 		if (identities.Count > 0 || details.Count > 0)
 		{
-			_logger.LogDebug("Media resolution buffer flushed: upserted {Identities} identities, {Details} details rows", identities.Count, details.Count);
+			_logger.LogDebug("Media write buffer flushed: upserted {Identities} identities, {Details} details rows", identities.Count, details.Count);
 		}
 	}
 

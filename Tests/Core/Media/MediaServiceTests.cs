@@ -2,13 +2,11 @@ using Contracts;
 using Contracts.Caching;
 using Contracts.Media;
 using Contracts.Media.Conversions;
-using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
 using Domain.Media.Conversions;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;
@@ -48,7 +46,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task IdentifyAsync_IssuesSingleBatchedMetadataQuery()
+	public async Task IdentifyAsync_IssuesOneBatchedQueryForTheStoredTitles()
 	{
 		var first = TmdbId.From("10", MediaType.Movie);
 		var second = TmdbId.From("11", MediaType.Movie);
@@ -79,7 +77,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ById_WhenMetadataMissing_YieldsError()
+	public async Task GetDetailsAsync_ById_WhenTheDetailsAreMissing_YieldsError()
 	{
 		var id = MediaId.From(Guid.NewGuid());
 		var (testee, _) = CreateTestee();
@@ -139,7 +137,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ById_OnMisses_FlushesMetadataUpsertOnceAtEnd()
+	public async Task GetDetailsAsync_ById_OnMisses_FlushesTheDetailsUpsertOnceAtTheEnd()
 	{
 		var firstId = MediaId.From(Guid.NewGuid());
 		var secondId = MediaId.From(Guid.NewGuid());
@@ -154,7 +152,7 @@ public class MediaServiceTests
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ByRequest_IdentifiesAndFetches_YieldingMetadataPerRequest()
+	public async Task GetDetailsAsync_ByRequest_IdentifiesAndFetches_YieldingDetailsPerRequest()
 	{
 		var firstExternal = TmdbId.From("100", MediaType.Movie);
 		var secondExternal = TmdbId.From("200", MediaType.Movie);
@@ -437,7 +435,7 @@ public class MediaServiceTests
 		mediaRepo.GetAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 		mediaRepo.GetByExternalsAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 
-		var enricher = IMetadataEnricher.Mock();
+		var enricher = IDetailsEnricher.Mock();
 		var configRepo = IProviderConfigService.Mock();
 		configRepo
 			.GetAsync(Any())
@@ -453,7 +451,7 @@ public class MediaServiceTests
 			);
 
 		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, search.Object);
-		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
+		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);
 
@@ -462,13 +460,13 @@ public class MediaServiceTests
 		converter.Lookups.Returns([new ById(Accepts: [MediaProvider.Imdb], Yields: [MediaProvider.Tmdb], Cost: 1)]);
 		converter.LookUpAsync(Any(), Any()).Returns((request, _) => FoundByFind(request));
 
-		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
+		var detailsFetcher = new DetailsFetcher(searchIndex, enricherIndex, configRepo.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var testee = new MediaService(
 			new MediaIdResolver([converter.Object], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
-			metadataResolver,
+			detailsFetcher,
 			coordinator,
-			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
+			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
 			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepo.Object),
 			mediaRepo.Object,
 			dateTimeProvider.Object,

@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Domain.Media.Metadata;
+namespace Domain.Media;
 
 [Flags]
 public enum MediaField

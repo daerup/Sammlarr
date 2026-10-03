@@ -1,6 +1,5 @@
 using Domain.Feed;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Wantlist;
 using TestInfrastructure;

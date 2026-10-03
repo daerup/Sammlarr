@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Contracts.Feed;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
@@ -111,7 +110,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenMetadataCannotBeResolved_ReturnsTheItemAsUnmatched()
+	public async Task GetFeedItemsAsync_WhenTheDetailsCannotBeFetched_ReturnsTheItemAsUnmatched()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.WithPlexAccount("plex-token");
@@ -170,7 +169,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenAnItemLoads_EnrichesItWithMetadataAndRating()
+	public async Task GetFeedItemsAsync_WhenAnItemLoads_EnrichesItWithDetailsAndRating()
 	{
 		await host.WithMdblistAccount("test-key");
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).SeedAsync();
@@ -195,7 +194,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetFeedItemsAsync_WhenItemsLoad_CachesTheirMetadata()
+	public async Task GetFeedItemsAsync_WhenItemsLoad_CachesTheirDetails()
 	{
 		await host.WithMdblistAccount("test-key");
 		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb().SeedAsync();

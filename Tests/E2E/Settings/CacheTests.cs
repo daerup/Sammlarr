@@ -6,24 +6,24 @@ namespace E2E.Tests.Settings;
 
 public class CacheTests
 {
-	private const string MetadataRequests = "/movie/";
+	private const string DetailsRequests = "/movie/";
 
 	[Test]
-	public async Task PurgeCache_WhenConfirmed_ForcesReResolution()
+	public async Task PurgeCache_WhenConfirmed_IdentifiesTheTitlesAgain()
 	{
 		var page = await E2EApp.AdminAt(Routes.CreateFeed);
 		await PreviewAsync(page);
-		var warm = await E2EApp.RequestCountAsync(MetadataRequests);
+		var warm = await E2EApp.RequestCountAsync(DetailsRequests);
 
 		await PreviewAsync(page);
 
-		await Assert.That(await E2EApp.RequestCountAsync(MetadataRequests)).IsEqualTo(warm);
+		await Assert.That(await E2EApp.RequestCountAsync(DetailsRequests)).IsEqualTo(warm);
 
 		await SettingsPage.VisitSectionAsync(page, "cache");
 		await PurgeAsync(page);
 		await PreviewAsync(page);
 
-		await Assert.That(await E2EApp.RequestCountAsync(MetadataRequests)).IsGreaterThan(warm);
+		await Assert.That(await E2EApp.RequestCountAsync(DetailsRequests)).IsGreaterThan(warm);
 	}
 
 	private static async Task PreviewAsync(IPage page)

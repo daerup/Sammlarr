@@ -1,6 +1,6 @@
 using Contracts;
 using Contracts.Identity;
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using DB.Data.Blocklist;
@@ -98,8 +98,8 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var wantlistedMedia = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(wantlistedId.ToExternalIdEntity(wantlistedMedia), wantlistedImdb.ToExternalIdEntity(wantlistedMedia));
-		var metadata = BuildDetails(wantlistedMedia, "Wantlisted");
-		fixture.Context.MediaDetails.Add(metadata);
+		var details = BuildDetails(wantlistedMedia, "Wantlisted");
+		fixture.Context.MediaDetails.Add(details);
 		fixture.Context.Wantlist.Add(new WantlistRow { Media = wantlistedMedia, Origin = WantlistItemOrigin.Manual });
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
@@ -197,36 +197,36 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PurgeMetadataAsync_WhenNotAdmin_Throws()
+	public async Task PurgeDetailsAsync_WhenNotAdmin_Throws()
 	{
 		var testee = Purger(PlexForEveryTitle, new TestCurrentUser { Role = UserRole.Member });
 
-		await Assert.That(async () => await testee.PurgeMetadataAsync()).Throws<UnauthorizedAccessException>();
+		await Assert.That(async () => await testee.PurgeDetailsAsync()).Throws<UnauthorizedAccessException>();
 	}
 
 	[Test]
-	public async Task PurgeMetadataAsync_DeletesAllMetadataAndRatings_KeepsMediaAndExternalIds()
+	public async Task PurgeDetailsAsync_DeletesAllDetailsAndRatings_KeepsMediaAndExternalIds()
 	{
 		var plexId = PlexId.From("5000", MediaType.Movie);
 		var imdbId = ImdbId.From("tt5000", MediaType.Movie);
 
 		var media = new MediaRow();
 		fixture.Context.ExternalMediaIds.AddRange(plexId.ToExternalIdEntity(media), imdbId.ToExternalIdEntity(media));
-		var metadata = BuildDetails(media, "Cached");
-		fixture.Context.MediaDetails.Add(metadata);
+		var details = BuildDetails(media, "Cached");
+		fixture.Context.MediaDetails.Add(details);
 		fixture.Context.MediaRatings.Add(
 			new MediaRatingRow
 			{
 				Source = MediaProvider.Tmdb,
 				NormalizedValue = 8.5f,
 				VoteCount = 999,
-				Details = metadata,
+				Details = details,
 			}
 		);
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		await _testee.PurgeMetadataAsync();
+		await _testee.PurgeDetailsAsync();
 
 		using var _ = Assert.Multiple();
 		await Assert.That(await fixture.Context.MediaDetails.AnyAsync()).IsFalse();
@@ -236,7 +236,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task PurgeMetadataAsync_RetainedMediaStillResolvesAsPartial()
+	public async Task PurgeDetailsAsync_RetainedMediaKeepsItsIdentityWithoutDetails()
 	{
 		var plexId = PlexId.From("6000", MediaType.Movie);
 		var imdbId = ImdbId.From("tt6000", MediaType.Movie);
@@ -247,7 +247,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
-		await _testee.PurgeMetadataAsync();
+		await _testee.PurgeDetailsAsync();
 
 		var repository = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
 		var cached = await repository.GetAsync([MediaId.From(media.Id)]);

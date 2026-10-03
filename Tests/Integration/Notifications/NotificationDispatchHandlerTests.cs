@@ -1,12 +1,10 @@
 using Contracts.Feed;
 using Contracts.Identity;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Contracts.Notifications;
 using Domain.Feed;
 using Domain.Identity;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Notifications;
 using Domain.Providers;
 using Messaging.Notifications;

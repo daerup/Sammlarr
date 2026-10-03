@@ -7,7 +7,7 @@ using TUnit.Mocks.Http;
 
 namespace API.Tests.TMDB;
 
-public class TmdbMetadataEnricherTests
+public class TmdbDetailsEnricherTests
 {
 	private static readonly TmdbId Id = TmdbId.From("123", MediaType.Movie);
 
@@ -89,5 +89,5 @@ public class TmdbMetadataEnricherTests
 			);
 	}
 
-	private static TmdbMetadataEnricher CreateTestee(MockHttpHandler handler) => new(TmdbApis.Over(handler), new TmdbArtwork(TmdbApis.Options));
+	private static TmdbDetailsEnricher CreateTestee(MockHttpHandler handler) => new(TmdbApis.Over(handler), new TmdbArtwork(TmdbApis.Options));
 }

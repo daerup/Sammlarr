@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using API.Http;
 using Contracts.Auth;
+using Contracts.Media;
 using Contracts.Media.Artwork;
 using Contracts.Media.Conversions;
-using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Wantlist;
 using Domain.Providers;
@@ -20,7 +20,7 @@ internal class PlexModule : IServiceModule
 		services.AddScoped<PlexApi>();
 		// Forwarded so search and enrichment share one PlexApi (and its _byRatingKey cache) per scope.
 		services.AddKeyedScoped<IMediaSearchProvider>(SearchProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
-		services.AddKeyedScoped<IMetadataEnricher>(MediaProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
+		services.AddKeyedScoped<IDetailsEnricher>(MediaProvider.Plex, (provider, _) => provider.GetRequiredService<PlexApi>());
 		services.AddKeyedScoped<IOAuthProvider, PlexOAuthProvider>(AuthProvider.Plex);
 		services.AddKeyedScoped<IMediaSink, PlexSink>(SinkKind.Plex);
 		services.AddScoped<IExternalIdConverter, PlexIdConverter>();

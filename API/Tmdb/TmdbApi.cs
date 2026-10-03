@@ -39,14 +39,14 @@ internal class TmdbApi(TmdbClient tmdbClient, IApiKeyService apiKeys, ILogger<Tm
 		if (!response.IsSuccessStatusCode)
 		{
 			logger.LogWarning(
-				"TMDB detail returned {StatusCode} for {MediaId}; treated as no metadata (check API key / rate limits)",
+				"TMDB detail returned {StatusCode} for {MediaId}; treated as no details (check API key / rate limits)",
 				(int)response.StatusCode,
 				id.Value
 			);
 			return Unanswered(response.StatusCode, $"TMDB detail returned {(int)response.StatusCode} for {id.Value}");
 		}
 		await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-		var reason = $"TMDB has no metadata for {id.Value}";
+		var reason = $"TMDB has no details for {id.Value}";
 		return Result.WhenNotNull(JsonSerializer.Deserialize<TmdbTypes.Details>(stream), reason).When(detail => detail.Id != 0, reason);
 	}
 

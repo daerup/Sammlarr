@@ -1,6 +1,6 @@
-using static Domain.Media.Metadata.MediaFields;
+using static Domain.Media.MediaFields;
 
-namespace Domain.Media.Metadata;
+namespace Domain.Media;
 
 public static class MediaMerger
 {

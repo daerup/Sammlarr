@@ -8,7 +8,6 @@ using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Blocklist;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;

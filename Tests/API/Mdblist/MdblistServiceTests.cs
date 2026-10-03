@@ -53,7 +53,7 @@ public class MdblistServiceTests
 			.RespondWithJson(
 				"""{"movies":[{"id":1,"ids":{"imdb":null,"tmdb":550,"tvdb":null,"mdblist":null,"mal":null},"rank":1,"title":"Fight Club","release_year":1999},{"title":"No Ids","release_year":2024}],"shows":[]}"""
 			);
-		var testee = CreateTestee(handler, out _, resolve: Stall);
+		var testee = CreateTestee(handler, out _, identify: Stall);
 		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
 		var first = await testee.GetFeedItemsAsync("slow-list", timeout.Token).FirstAsync(timeout.Token);
@@ -96,7 +96,7 @@ public class MdblistServiceTests
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,
-		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaLookup>>? resolve = null
+		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaLookup>>? identify = null
 	)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
@@ -105,7 +105,9 @@ public class MdblistServiceTests
 		var options = new MdblistOptions { BaseUrl = BaseUrl };
 		var client = new MdblistClient(new HttpClient(handler) { BaseAddress = new Uri(BaseUrl) }, options, apiKeyStore.Object, ICurrentUser.Mock().Object);
 		media = IMediaService.Mock();
-		media.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any()).Returns((requests, token) => (resolve ?? Realize)(requests, token));
+		media
+			.IdentifyWithDetailsAsync(Any<IAsyncEnumerable<IdentifyRequest>>(), Any())
+			.Returns((requests, token) => (identify ?? IdentifyWithDetails)(requests, token));
 		return new MdblistService(client, media.Object, apiKeyStore.Object);
 	}
 
@@ -134,7 +136,7 @@ public class MdblistServiceTests
 			$$"""{"movies":[{"id":1,"ids":{"imdb":null,"tmdb":{{title.GetHashCode(StringComparison.Ordinal) & 0xffff}},"tvdb":null,"mdblist":null,"mal":null},"rank":1,"title":"{{title}}","release_year":2020}],"shows":[]}""";
 	}
 
-	private static async IAsyncEnumerable<MediaLookup> Realize(
+	private static async IAsyncEnumerable<MediaLookup> IdentifyWithDetails(
 		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)

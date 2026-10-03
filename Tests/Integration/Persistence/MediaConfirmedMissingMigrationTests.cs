@@ -1,6 +1,5 @@
 using Contracts.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Harness;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;

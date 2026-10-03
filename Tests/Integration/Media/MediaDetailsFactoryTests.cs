@@ -1,6 +1,5 @@
 using DB.Data.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;

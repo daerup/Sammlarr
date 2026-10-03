@@ -115,13 +115,13 @@ public class MediaIdentityCoordinatorTests
 		await Assert.That(corrected[0].Externals).Contains(freshPlex);
 	}
 
-	private static (MediaIdentityCoordinator Coordinator, MediaResolutionBuffer Buffer) CreateCoordinator(Action<Mock<IMediaRepository>>? setup = null)
+	private static (MediaIdentityCoordinator Coordinator, MediaWriteBuffer Buffer) CreateCoordinator(Action<Mock<IMediaRepository>>? setup = null)
 	{
 		var mediaRepo = IMediaRepository.Mock();
 		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
 		setup?.Invoke(mediaRepo);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
-		var buffer = new MediaResolutionBuffer(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance);
+		var buffer = new MediaWriteBuffer(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance);
 		return (coordinator, buffer);
 	}
 

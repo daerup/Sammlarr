@@ -2,16 +2,15 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json;
 using API.Plex.Types;
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Contracts.Media.Search;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Plex;
 
-internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider, IMetadataEnricher
+internal class PlexApi(PlexClient plexClient, PlexUrls urls, ILogger<PlexApi> logger) : IMediaSearchProvider, IDetailsEnricher
 {
 	private const int SearchLimit = 30;
 

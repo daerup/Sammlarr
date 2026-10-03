@@ -1,7 +1,6 @@
 using BlazorBlueprint.Components;
 using Bunit;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;

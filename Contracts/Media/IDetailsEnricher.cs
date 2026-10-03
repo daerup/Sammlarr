@@ -1,9 +1,8 @@
 using Domain.Media;
-using Domain.Media.Metadata;
 
-namespace Contracts.Media.Metadata;
+namespace Contracts.Media;
 
-public interface IMetadataEnricher
+public interface IDetailsEnricher
 {
 	MediaField Fills { get; }
 

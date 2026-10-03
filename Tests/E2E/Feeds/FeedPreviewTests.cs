@@ -68,7 +68,7 @@ public class FeedPreviewTests
 	}
 
 	[Test]
-	public async Task RefreshAssets_WhenConfirmed_RefetchesMetadata()
+	public async Task RefreshAssets_WhenConfirmed_RefetchesDetails()
 	{
 		var page = await E2EApp.OpenAuthenticatedPageAsync();
 		await PreviewAsync(page, "Refresh");

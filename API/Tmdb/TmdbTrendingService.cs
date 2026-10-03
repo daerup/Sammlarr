@@ -6,7 +6,6 @@ using Contracts.Media;
 using Contracts.Media.Conversions;
 using Contracts.Media.Trending;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 
 namespace API.Tmdb;

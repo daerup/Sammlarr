@@ -1,6 +1,5 @@
 using Contracts.Auth;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Contracts.Wantlist;
 using Domain.Media;
 using Domain.Providers;
@@ -16,7 +15,7 @@ public class ProviderCredentialsTests(SammlarrTestHost host) : IAsyncDisposable
 {
 	private IApiKeyService ApiKeys => host.Resolve<IApiKeyService>();
 	private IApiKeyFactory ApiKeyFactory => host.Resolve<IApiKeyFactory>();
-	private IMetadataEnricher Tmdb => host.ResolveKeyed<IMetadataEnricher>(MediaProvider.Tmdb);
+	private IDetailsEnricher Tmdb => host.ResolveKeyed<IDetailsEnricher>(MediaProvider.Tmdb);
 	private IMediaSink PlexSink => host.ResolveKeyed<IMediaSink>(SinkKind.Plex);
 
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();

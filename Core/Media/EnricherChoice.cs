@@ -1,5 +1,4 @@
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 
 namespace Core.Media;
