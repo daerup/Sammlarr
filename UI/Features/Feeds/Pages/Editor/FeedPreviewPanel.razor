@@ -443,7 +443,7 @@
         }
         else
         {
-            await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
+            await ReprocessAsync(LoadedState(), CancellationToken.None);
         }
 
         await EmitStatusIfChangedAsync();
@@ -521,7 +521,7 @@
                 if (reprocessed)
                 {
                     reprocessAt = _rawResults.Count * 2;
-                    if (!await ReprocessAsync(Completeness.Partial, ct))
+                    if (!await ReprocessAsync(FeedLoadState.Unfinished, ct))
                     {
                         return;
                     }
@@ -536,7 +536,7 @@
             }
             _fetchTimer.Stop();
 
-            if (!await ReprocessAsync(Completeness.Complete, ct))
+            if (!await ReprocessAsync(FeedLoadState.Finished, ct))
             {
                 return;
             }
@@ -577,7 +577,7 @@
                 return;
             }
 
-            if (await ReprocessAsync(Completeness.Partial, ct))
+            if (await ReprocessAsync(FeedLoadState.Unfinished, ct))
             {
                 _fetchState = FetchState.Success;
                 Notifier.Warning("The provider became unavailable before the full list loaded. Showing partial results — retry to load the rest.", "Provider unavailable");
@@ -605,9 +605,9 @@
         _providerUnavailable = false;
     }
 
-    private async Task<bool> ReprocessAsync(Completeness completeness, CancellationToken cancellationToken)
+    private async Task<bool> ReprocessAsync(FeedLoadState state, CancellationToken cancellationToken)
     {
-        if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, completeness)), cancellationToken) is not IFeedPlan plan)
+        if (await Planner.PlanAsync(new DraftFeed(SynthesizeFeed(), new RawFeedLoad(_rawResults, state)), cancellationToken) is not IFeedPlan plan)
         {
             ClearResults();
             _fetchState = FetchState.Failed;
@@ -619,14 +619,14 @@
         _unmatchedResults = plan.Unmatched;
         _missedRuns = plan is MirrorPlan mirrored ? mirrored.MissedRuns : new Dictionary<MediaId, int>();
 
-        await HydrateGoneAsync(plan, completeness, cancellationToken);
+        await HydrateGoneAsync(plan, state, cancellationToken);
         RebuildFilteredViews();
         return true;
     }
 
-    private async Task HydrateGoneAsync(IFeedPlan plan, Completeness completeness, CancellationToken cancellationToken)
+    private async Task HydrateGoneAsync(IFeedPlan plan, FeedLoadState state, CancellationToken cancellationToken)
     {
-        if (completeness is Completeness.Partial || plan is not MirrorPlan mirrored)
+        if (state is FeedLoadState.Unfinished || plan is not MirrorPlan mirrored)
         {
             _goneResults = [];
             _goneShortfall = 0;
@@ -642,7 +642,7 @@
         _goneShortfall = gone.Count - _goneResults.Count;
     }
 
-    private Completeness LoadedCompleteness() => _providerUnavailable ? Completeness.Partial : Completeness.Complete;
+    private FeedLoadState LoadedState() => _providerUnavailable ? FeedLoadState.Unfinished : FeedLoadState.Finished;
 
     private Domain.Feed.Feed SynthesizeFeed()
     {
@@ -846,7 +846,7 @@
         {
             _togglingBlocklistItem = null;
             _focusedResult = null;
-            await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
+            await ReprocessAsync(LoadedState(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }
@@ -885,7 +885,7 @@
         {
             _togglingWantlistItem = null;
             _focusedResult = null;
-            await ReprocessAsync(LoadedCompleteness(), CancellationToken.None);
+            await ReprocessAsync(LoadedState(), CancellationToken.None);
             await EmitStatusIfChangedAsync();
             await InvokeAsync(StateHasChanged);
         }

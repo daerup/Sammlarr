@@ -122,7 +122,7 @@ sequenceDiagram
     F-->>P: stream items
   end
   loop as items arrive, then once more when settled
-    P->>E: PlanAsync(DraftFeed(feed, RawFeedLoad(items so far, Partial or Complete)))
+    P->>E: PlanAsync(DraftFeed(feed, RawFeedLoad(items so far, Unfinished or Finished)))
     E->>W: wantlist ids, blocklist ids, this feed's own slice
     E->>E: classify each row, then FeedPlans.Compute
     E-->>P: FeedPlanResult (an AppendPlan or MirrorPlan, or FeedPlanFailed)
@@ -142,11 +142,11 @@ run cannot drift apart about what a run would do: they are the same call. The pa
 items arrive, on a geometric schedule (after items 1, 2, 4, 8 …) rather than on a timer, which
 keeps total classification work linear in the size of the list.
 
-Every call made before the fetch settles passes `Completeness.Partial`. The planner then reports
-`Conclusiveness.StillLoading` and withholds removals, because absence from a list that is still
-loading is not evidence that an item has left it. The panel keeps reporting a partial source for
-as long as it is showing truncated results after a provider outage, so tightening a filter
-against a half-loaded list cannot propose deleting the part that never arrived.
+Every call made before the fetch settles passes `FeedLoadState.Unfinished`. The planner then
+reports `Conclusiveness.StillLoading` and withholds removals, because absence from a list that is
+still loading is not evidence that an item has left it. The panel keeps reporting the load as
+unfinished for as long as it is showing truncated results after a provider outage, so tightening
+a filter against a half-loaded list cannot propose deleting the part that never arrived.
 
 === Feed runs and the job queue
 

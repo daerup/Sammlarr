@@ -32,7 +32,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
-		var load = new RawFeedLoad([Lookup(kept)], Completeness.Complete);
+		var load = new RawFeedLoad([Lookup(kept)], FeedLoadState.Finished);
 
 		var drops = new List<int>();
 
@@ -79,7 +79,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		for (var run = 1; run <= Threshold + 2; run++)
 		{
 			var summary = await Assert
-				.That(await planner.PlanAsync(new DraftFeed(feed, new RawFeedLoad([], Completeness.Complete))))
+				.That(await planner.PlanAsync(new DraftFeed(feed, new RawFeedLoad([], FeedLoadState.Finished))))
 				.IsOfUnionType<FeedPlanResult, MirrorPlan>();
 
 			await log.StartRunAsync(
