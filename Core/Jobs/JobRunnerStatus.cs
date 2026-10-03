@@ -18,7 +18,14 @@ internal sealed class JobRunnerStatus : IJobRunnerStatus
 
 	public int ConsecutiveFailures => Volatile.Read(ref _consecutiveFailures);
 
-	public DateTimeOffset? LastFailureAt => Volatile.Read(ref _lastFailureAt) is var ticks && ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero);
+	public Optional<DateTimeOffset> LastFailureAt
+	{
+		get
+		{
+			var ticks = Volatile.Read(ref _lastFailureAt);
+			return ticks == 0 ? new None() : Some.Of(new DateTimeOffset(ticks, TimeSpan.Zero));
+		}
+	}
 
 	internal IDisposable Running()
 	{

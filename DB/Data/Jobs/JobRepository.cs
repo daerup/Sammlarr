@@ -94,7 +94,7 @@ internal sealed class JobRepository(IDbContextFactory<SammlarrDbContext> dbConte
 			.OrderBy(row => row.RunAfter)
 			.Select(row => (DateTimeOffset?)row.RunAfter)
 			.FirstOrDefaultAsync(cancellationToken);
-		return due is { } next ? Some.Of(next) : new None();
+		return Optional.Of(due);
 	}
 
 	public async Task<int> ReleaseDueAsync(DateTimeOffset now, CancellationToken cancellationToken = default)

@@ -2,6 +2,7 @@ using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Jobs;
 using Domain.Providers;
+using UI.Features.Feeds.Components;
 
 namespace UI.Features.Feeds.Pages;
 
@@ -35,13 +36,13 @@ public enum FeedSort
 
 public sealed record ProviderCount(FeedProvider Provider, int Count);
 
-public sealed record FeedRow(FeedOverview Overview, JobState? Job, Optional<DateTimeOffset> NextRun)
+public sealed record FeedRow(FeedOverview Overview, Optional<JobState> Job, Optional<DateTimeOffset> NextRun)
 {
 	public Feed Feed => Overview.Feed;
 
 	public int OnWantlist => Overview.OnWantlist;
 
-	public bool IsBusy => Job is JobState.Waiting or JobState.Queued or JobState.Running;
+	public bool IsBusy => Job.IsRunning || Job.IsQueued;
 
 	public bool Is(FeedStatus status) =>
 		status switch
@@ -69,7 +70,7 @@ public sealed record FeedRow(FeedOverview Overview, JobState? Job, Optional<Date
 	{
 		return new(
 			overview,
-			jobs.TryGetValue(overview.Feed.Id, out var job) ? job : null,
+			jobs.GetValueOrNone(overview.Feed.Id),
 			overview.Feed.Enabled && overview.Feed.Schedule is Scheduled scheduled ? scheduled.NextRun(now, zone) : new None()
 		);
 	}
@@ -162,9 +163,9 @@ internal static class FeedFilterText
 
 internal static class FeedPulse
 {
-	internal static int Running(IEnumerable<FeedRow> rows) => rows.Count(row => row.Job is JobState.Running);
+	internal static int Running(IEnumerable<FeedRow> rows) => rows.Count(row => row.Job.IsRunning);
 
-	internal static int Queued(IEnumerable<FeedRow> rows) => rows.Count(row => row.Job is JobState.Waiting or JobState.Queued);
+	internal static int Queued(IEnumerable<FeedRow> rows) => rows.Count(row => row.Job.IsQueued);
 
 	internal static FeedRow? Next(IEnumerable<FeedRow> rows) => rows.Where(row => !row.IsBusy && row.NextRun.IsSome()).MinBy(row => row.NextRun.ToNullable());
 

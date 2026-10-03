@@ -1,15 +1,14 @@
 @using Domain.Jobs
 
-@switch (Job)
+@if (Job.IsRunning)
 {
-    case JobState.Running:
-        <FeedChip Tone="FeedChipTone.Attention"><span class="feed-chip-dot"></span>Running</FeedChip>
-        break;
-    case JobState.Waiting or JobState.Queued:
-        <FeedChip Tone="FeedChipTone.Quiet" Icon="hourglass">Queued</FeedChip>
-        break;
+    <FeedChip Tone="FeedChipTone.Attention"><span class="feed-chip-dot"></span>Running</FeedChip>
+}
+else if (Job.IsQueued)
+{
+    <FeedChip Tone="FeedChipTone.Quiet" Icon="hourglass">Queued</FeedChip>
 }
 
 @code {
-    [Parameter] public JobState? Job { get; set; }
+    [Parameter] public Optional<JobState> Job { get; set; } = new None();
 }

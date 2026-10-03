@@ -78,7 +78,7 @@ internal static class DemoFeeds
 				},
 				402
 			),
-			null,
+			new None(),
 			Some.Of(Now.AddMinutes(34))
 		),
 		new(
@@ -94,7 +94,7 @@ internal static class DemoFeeds
 				},
 				12
 			),
-			JobState.Running,
+			Some.Of(JobState.Running),
 			Some.Of(Now.AddMinutes(94))
 		),
 		new(
@@ -110,7 +110,7 @@ internal static class DemoFeeds
 				},
 				0
 			),
-			null,
+			new None(),
 			new None()
 		),
 	];

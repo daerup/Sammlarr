@@ -19,9 +19,9 @@ public sealed record UpNextRow(string Name, string Detail, string When, UpNextKi
 {
 	public Optional<DateTimeOffset> RunsAt { get; init; } = new None();
 
-	public JobId? Job { get; init; }
+	public Optional<JobId> Job { get; init; } = new None();
 
-	public bool CanCancel => Job is not null && Kind is UpNextKind.Queued or UpNextKind.Waiting;
+	public bool CanCancel => Job.IsSome() && Kind is UpNextKind.Queued or UpNextKind.Waiting;
 }
 
 internal static class UpNextView
@@ -84,13 +84,17 @@ internal static class UpNextView
 		var deleted = Deleted(job.Request, feedNames);
 		if (job.State is JobState.Running)
 		{
-			return new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted) { Job = job.Id };
+			return new UpNextRow(name, "running now", "running", UpNextKind.Running, href, brand, deleted) { Job = Some.Of(job.Id) };
 		}
 		if (job.State is JobState.Waiting)
 		{
-			return new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted) { RunsAt = Some.Of(job.RunAfter), Job = job.Id };
+			return new UpNextRow(name, Waiting(job.Request), string.Empty, UpNextKind.Waiting, href, brand, deleted)
+			{
+				RunsAt = Some.Of(job.RunAfter),
+				Job = Some.Of(job.Id),
+			};
 		}
-		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted) { Job = job.Id };
+		return new UpNextRow(name, "queued", string.Empty, UpNextKind.Queued, href, brand, deleted) { Job = Some.Of(job.Id) };
 	}
 
 	private static MediaProvider? Brand(IJobRequest request, IReadOnlyDictionary<FeedId, MediaProvider> feedBrands, MediaProvider sinkProvider) =>

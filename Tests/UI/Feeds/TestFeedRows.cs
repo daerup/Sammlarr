@@ -43,7 +43,7 @@ internal static class TestFeedRows
 				new None(),
 				onWantlist
 			),
-			job,
+			Optional.Of(job),
 			Optional.Of(next)
 		);
 	}

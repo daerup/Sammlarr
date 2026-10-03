@@ -1,6 +1,5 @@
 @using Domain.Feed
 @using Domain.Feed.Run
-@using Domain.Jobs
 @using UI.Features.Feeds.Pages
 @using UI.Shared.Services.Branding
 @using UrlGuid = global::Shared.UrlGuid
@@ -45,17 +44,17 @@
                         title="@RunLabel"
                         disabled="@(Row.IsBusy || !Feed.Enabled || RunDisabled)"
                         @onclick="OnRun">
-                    @switch (Row.Job)
+                    @if (Row.Job.IsRunning)
                     {
-                        case JobState.Running:
-                            <LucideIcon Name="loader-circle" Size="15" Class="animate-spin"/>
-                            break;
-                        case JobState.Waiting or JobState.Queued:
-                            <LucideIcon Name="clock" Size="15"/>
-                            break;
-                        default:
-                            <LucideIcon Name="play" Size="15"/>
-                            break;
+                        <LucideIcon Name="loader-circle" Size="15" Class="animate-spin"/>
+                    }
+                    else if (Row.Job.IsQueued)
+                    {
+                        <LucideIcon Name="clock" Size="15"/>
+                    }
+                    else
+                    {
+                        <LucideIcon Name="play" Size="15"/>
                     }
                 </button>
             }
@@ -162,21 +161,31 @@
 
     private string RunsHref => $"/feeds/{UrlGuid.Encode(Feed.Id.Value)}/runs";
 
-    private string RunLabel =>
-        Row.Job switch
+    private string RunLabel
+    {
+        get
         {
-            JobState.Running => "Running now",
-            JobState.Waiting or JobState.Queued => "Waiting in the queue",
-            _ when !Feed.Enabled => "Paused: resume the feed to run it",
-            _ => "Run now",
-        };
+            return (Row.Job.IsRunning, Row.Job.IsQueued, Feed.Enabled) switch
+            {
+                (true, _, _) => "Running now",
+                (_, true, _) => "Waiting in the queue",
+                (_, _, false) => "Paused: resume the feed to run it",
+                _ => "Run now",
+            };
+        }
+    }
 
-    private string? RunClass =>
-        Row.Job switch
+    private string? RunClass
+    {
+        get
         {
-            JobState.Running => "is-running",
-            JobState.Waiting or JobState.Queued => "is-queued",
-            _ when !Feed.Enabled => "is-paused",
-            _ => null,
-        };
+            return (Row.Job.IsRunning, Row.Job.IsQueued, Feed.Enabled) switch
+            {
+                (true, _, _) => "is-running",
+                (_, true, _) => "is-queued",
+                (_, _, false) => "is-paused",
+                _ => null,
+            };
+        }
+    }
 }

@@ -232,7 +232,7 @@ else
 
         try
         {
-            if (await JobQueue.CancelAsync(row.Job!.Value, _cancellation.Token))
+            if (await row.Job.Map(job => JobQueue.CancelAsync(job, _cancellation.Token)).GetValueOr(false))
             {
                 Notifier.Success($"{row.Name} was cancelled.");
             }

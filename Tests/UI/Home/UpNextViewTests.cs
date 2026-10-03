@@ -176,7 +176,7 @@ public class UpNextViewTests
 		var rows = UpNextView.InTheQueue(queue, Names, Brands, MediaProvider.Plex);
 
 		await Assert.That(rows.Select(row => row.CanCancel)).IsEquivalentTo([false, true, true], CollectionOrdering.Matching);
-		await Assert.That(rows.Select(row => row.Job)).IsEquivalentTo(queue.Jobs.Select(job => (JobId?)job.Id), CollectionOrdering.Matching);
+		await Assert.That(rows.Select(row => row.Job.ToNullable())).IsEquivalentTo(queue.Jobs.Select(job => (JobId?)job.Id), CollectionOrdering.Matching);
 	}
 
 	private static QueueSnapshot Snapshot(params PendingJob[] jobs) => new(jobs, 0);
