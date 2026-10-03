@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using Domain.Media;
 
@@ -5,6 +6,8 @@ namespace API.Tmdb.Types;
 
 internal static class TmdbTypes
 {
+	private static int YearOf(string? date) => DateTimeOffset.TryParse(date, CultureInfo.InvariantCulture, out var parsed) ? parsed.Year : 0;
+
 	internal static class Trending
 	{
 		public record Result(
@@ -35,6 +38,7 @@ internal static class TmdbTypes
 			public string DisplayOriginalTitle =>
 				OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
 			public string? AvailableDate => FirstAirDate ?? ReleaseDate;
+			public int AvailableYear => YearOf(AvailableDate);
 		}
 
 		public record Root(
@@ -72,6 +76,7 @@ internal static class TmdbTypes
 		public string DisplayOriginalTitle =>
 			OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null for Id: " + Id);
 		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
+		public int AvailableYear => YearOf(AvailableDate);
 
 		public MediaType MediaType => MediaType.Parse(Type);
 		public TmdbId TmdbId => TmdbId.From(Id.ToString(), MediaType);
@@ -99,5 +104,6 @@ internal static class TmdbTypes
 		public string DisplayTitle => Title ?? Name ?? throw new InvalidOperationException("Both Title and Name are null");
 		public string DisplayOriginalTitle => OriginalTitle ?? OriginalName ?? throw new InvalidOperationException("Both OriginalTitle and OriginalName are null");
 		public string? AvailableDate => FirstAirDate ?? ReleaseDate;
+		public int AvailableYear => YearOf(AvailableDate);
 	}
 }

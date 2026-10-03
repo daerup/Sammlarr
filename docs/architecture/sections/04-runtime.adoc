@@ -46,7 +46,8 @@ that title's type by (`IMediaSink.AddressedBy`): Plex for every type today, so a
 reference is converted to a Plex id, the only id the wantlist can push. A type the sink cannot address
 fails as unmatched. Plex looks up a Plex id and searches by the title hints. TMDB answers a TMDB id with its
 detail, whose appended `external_ids` carry the IMDb and TheTVDB ids, and an IMDb or TheTVDB id through `find`.
-Every TMDB answer also carries the original title, so a Plex search can follow it.
+Every TMDB answer also carries the original title and its release year, so a Plex search can follow it. Plex keeps
+a search's hits for 10 minutes per hints (title, year and type), shared by every user, so equal hints are searched once.
 
 [mermaid]
 ....

@@ -22,7 +22,7 @@ public class PlexIdConverterResilienceTests
 		var throttled = PlexCandidate.Create();
 		var wanted = PlexCandidate.Create();
 		var stub = new PlexStub().Returns(throttled).Returns(wanted).RateLimits(throttled);
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, wanted.TmdbId));
 
@@ -35,7 +35,7 @@ public class PlexIdConverterResilienceTests
 		var broken = PlexCandidate.Create();
 		var wanted = PlexCandidate.Create();
 		var stub = new PlexStub().Returns(broken).Returns(wanted).Fails(broken, HttpStatusCode.NotFound);
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, wanted.TmdbId));
 
@@ -48,7 +48,7 @@ public class PlexIdConverterResilienceTests
 		var first = PlexCandidate.Create();
 		var second = PlexCandidate.Create();
 		var stub = new PlexStub().Returns(first).Returns(second).RateLimits(first).RateLimits(second);
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		await Assert.That(async () => await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId))).Throws<ProviderUnavailableException>();
 	}
@@ -63,7 +63,7 @@ public class PlexIdConverterResilienceTests
 			stub.Returns(PlexCandidate.Create($"Fed Up {index}", 1990));
 		}
 		stub.Returns(wanted);
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints with { Title = "Up", Year = 2009 }, wanted.TmdbId));
 
@@ -77,7 +77,7 @@ public class PlexIdConverterResilienceTests
 		var remake = PlexCandidate.Create("Ben-Hur", 2016);
 		var wanted = PlexCandidate.Create("Ben-Hur", 1959);
 		var stub = new PlexStub().Returns(remake).Returns(wanted);
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints with { Title = "Ben-Hur", Year = 1959 }, wanted.TmdbId));
 
@@ -95,7 +95,7 @@ public class PlexIdConverterResilienceTests
 			stub.Returns(PlexCandidate.Create("The Office", year));
 		}
 		stub.Returns(wanted);
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints with { Title = "The Office", Year = 2005 }, wanted.TmdbId));
 
@@ -110,7 +110,7 @@ public class PlexIdConverterResilienceTests
 		{
 			stub.Returns(PlexCandidate.Create());
 		}
-		var testee = new PlexIdConverter(stub.CreateApi());
+		var testee = new PlexIdConverter(stub.CreateApi(), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestByHints(Hints, PlexCandidate.Create().TmdbId));
 
@@ -125,7 +125,7 @@ public class PlexIdConverterResilienceTests
 		var stub = new PlexStub { MetadataGate = new TaskCompletionSource() };
 		stub.Returns(shared);
 		var plexApi = stub.CreateApi();
-		var testee = new PlexIdConverter(plexApi);
+		var testee = new PlexIdConverter(plexApi, PlexStub.NoSearchCache());
 
 		var first = testee.LookUpAsync(testee.RequestByHints(Hints, shared.TmdbId));
 		await WaitForMetadataLookups(stub, 1);

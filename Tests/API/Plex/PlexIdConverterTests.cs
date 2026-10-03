@@ -19,7 +19,7 @@ public class PlexIdConverterTests
 	public async Task LookUpAsync_ForAPlexId_ReturnsEveryGuidPlexHolds()
 	{
 		var payload = CreatePlexByIdPayload(true, false, true);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
+		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
 
@@ -39,7 +39,7 @@ public class PlexIdConverterTests
 	public async Task LookUpAsync_ForAPlexIdWithTwoTmdbGuids_ReturnsBothAndTheOtherGuids()
 	{
 		var payload = CreatePlexByIdPayload(true, true, true);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
+		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
 
@@ -60,7 +60,7 @@ public class PlexIdConverterTests
 	public async Task LookUpAsync_ForAPlexIdWithoutATmdbGuid_StillReturnsTheOtherGuids()
 	{
 		var payload = CreatePlexByIdPayload(false, false, false);
-		var testee = new PlexIdConverter(CreatePlexApi(payload.Json));
+		var testee = new PlexIdConverter(CreatePlexApi(payload.Json), PlexStub.NoSearchCache());
 
 		var result = await testee.LookUpAsync(testee.RequestById(payload.PlexId));
 

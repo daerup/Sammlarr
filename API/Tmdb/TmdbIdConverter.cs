@@ -39,13 +39,14 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 
 	private static IdLookupResult FoundByDetail(TmdbTypes.Details detail, TmdbId tmdbId)
 	{
-		return new IdLookupResult([.. IdsOf(detail.ExternalIds, tmdbId.Type)], HintsOf(detail.OriginalTitle ?? detail.OriginalName, tmdbId.Type));
+		var hints = HintsOf(detail.OriginalTitle ?? detail.OriginalName, detail.AvailableYear, tmdbId.Type);
+		return new IdLookupResult([.. IdsOf(detail.ExternalIds, tmdbId.Type)], hints);
 	}
 
 	private static IdLookupResult FoundByFind(TmdbTypes.FindItem item, IExternalMediaId id)
 	{
 		IReadOnlyList<IExternalMediaId> ids = [TmdbId.From(item.Id.ToString(CultureInfo.InvariantCulture), id.Type)];
-		return new IdLookupResult(ids, HintsOf(item.OriginalTitle ?? item.OriginalName, id.Type));
+		return new IdLookupResult(ids, HintsOf(item.OriginalTitle ?? item.OriginalName, item.AvailableYear, id.Type));
 	}
 
 	private static IEnumerable<IExternalMediaId> IdsOf(TmdbTypes.ExternalIds? externals, MediaType type)
@@ -61,14 +62,14 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 		}
 	}
 
-	private static Optional<IdentifyHints> HintsOf(string? originalTitle, MediaType type)
+	private static Optional<IdentifyHints> HintsOf(string? originalTitle, int year, MediaType type)
 	{
 		return Optional
 			.Of(originalTitle)
 			.Map(title => new IdentifyHints
 			{
 				Title = title,
-				Year = 0,
+				Year = year,
 				MediaType = type,
 			});
 	}
