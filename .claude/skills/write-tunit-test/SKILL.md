@@ -180,7 +180,7 @@ public class WantlistToggleIconTests : BunitContext
     }
 }
 ```
-`.cs`-only (no `.razor` test files — TUnit source-gen constraint). Test **behavior** (click → callback) and **semantics** (text, aria) — not CSS/`:hover`/scoped styles (bUnit renders no CSS; that's the E2E tier). Blazor bool attributes render present/absent, so assert `.HasAttribute("aria-pressed")`, not `="true"`. Auth via `AddAuthorization().SetAuthorized("name")` / `.SetNotAuthorized()`.
+`.cs`-only (no `.razor` test files — TUnit source-gen constraint). Test **behavior** (click → callback) and **semantics** (text, aria) — not CSS/`:hover`/scoped styles (bUnit renders no CSS; that's the E2E tier). An attribute given a `bool` (`aria-pressed="@isOn"`) renders present or absent, so assert `.HasAttribute(...)`; one given a string keeps its text, as BlazorBlueprint's radios do (`GetAttribute("aria-checked")` is `"true"` or `"false"`). Auth via `AddAuthorization().SetAuthorized("name")` / `.SetNotAuthorized()`.
 
 ## Running
 

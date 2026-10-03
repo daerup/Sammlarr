@@ -1,39 +1,27 @@
 @typeparam TEnum where TEnum : struct, Enum
 
-<div class="flex flex-wrap gap-2" role="group" aria-label="Enum selection">
-    @foreach (var option in All)
+<BbToggleGroup TValue="TEnum?" Value="Value" ValueChanged="SelectAsync" Required="true" Disabled="Disabled"
+               Class="h-10 w-fit gap-0 rounded-md bg-muted p-1 text-muted-foreground" aria-label="Enum selection">
+    @foreach (var option in Enum.GetValues<TEnum>())
     {
-        var isSelected = Value.HasValue && EqualityComparer<TEnum>.Default.Equals(option, Value.Value);
-        var isOptionDisabled = Disabled || DisabledValues.Contains(option);
-        RenderFragment button =
-            @<BbButton Variant="@(isSelected ? ButtonVariant.Default : ButtonVariant.Outline)"
-                       Disabled="@isOptionDisabled"
-                       Class="min-w-24 justify-center flex items-center gap-2"
-                       aria-pressed="@isSelected"
-                       @onclick="() => SelectAsync(option)">
+        <BbToggleGroupItem TValue="TEnum?" Value="@option" Disabled="@DisabledValues.Contains(option)"
+                           Class="h-full rounded-sm px-3 hover:text-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs">
+            @if (TooltipProvider is null)
+            {
                 @option.GetDescription()
-            </BbButton>;
-
-        @if (TooltipProvider is null)
-        {
-            @button
-        }
-        else
-        {
-            <BbTooltipProvider>
+            }
+            else
+            {
                 <BbTooltip>
-                    <BbTooltipTrigger AsChild="true">@button</BbTooltipTrigger>
-                    <BbTooltipContent>@TooltipProvider?.Invoke(option)</BbTooltipContent>
+                    <BbTooltipTrigger Focusable="false">@option.GetDescription()</BbTooltipTrigger>
+                    <BbTooltipContent>@TooltipProvider(option)</BbTooltipContent>
                 </BbTooltip>
-            </BbTooltipProvider>
-        }
+            }
+        </BbToggleGroupItem>
     }
-</div>
+</BbToggleGroup>
 
 @code {
-    private List<TEnum> All => Enum.GetValues<TEnum>().ToList();
-
-
     [Parameter] public required Func<TEnum, string>? TooltipProvider { get; set; }
 
     [Parameter] [EditorRequired] public TEnum? Value { get; set; }
@@ -44,16 +32,5 @@
 
     [Parameter] public IReadOnlyCollection<TEnum> DisabledValues { get; set; } = [];
 
-    [Parameter] public IReadOnlyList<TEnum>? AllValues { get; set; }
-
-
-    private async Task SelectAsync(TEnum value)
-    {
-        if (Disabled || DisabledValues.Contains(value))
-        {
-            return;
-        }
-
-        await OnChange.InvokeAsync(value);
-    }
+    private Task SelectAsync(TEnum? value) => Optional.Of(value).Match(OnChange.InvokeAsync, () => Task.CompletedTask);
 }
