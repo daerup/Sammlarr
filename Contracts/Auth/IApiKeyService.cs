@@ -7,6 +7,8 @@ public interface IApiKeyService
 {
 	ValueTask<Result<IApiKey>> GetAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
 
+	Task<bool> IsStoredAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);
+
 	Task StoreAsync(IApiKey key, CancellationToken cancellationToken = default);
 
 	Task ClearAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default);

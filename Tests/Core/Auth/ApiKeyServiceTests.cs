@@ -44,6 +44,16 @@ public sealed class ApiKeyServiceTests : IDisposable
 	}
 
 	[Test]
+	public async Task IsStoredAsync_WhenAKeyIsStored_SaysSoWithoutValidatingIt()
+	{
+		_keys.GetAsync(ApiKeyProvider.Mdblist, Any()).Returns(Error.From("No API key is configured for this provider."));
+
+		await Assert.That(await Testee.IsStoredAsync(ApiKeyProvider.Tmdb)).IsTrue();
+		await Assert.That(await Testee.IsStoredAsync(ApiKeyProvider.Mdblist)).IsFalse();
+		_factory.CreateAsync(Any<ApiKeyProvider>(), Any(), Any()).WasCalled(Times.Never);
+	}
+
+	[Test]
 	public async Task ReportRejected_AfterARead_MakesTheNextReadLoadTheStoredKeyAgain()
 	{
 		await Testee.GetAsync(ApiKeyProvider.Tmdb);

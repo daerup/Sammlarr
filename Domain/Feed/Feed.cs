@@ -1,3 +1,4 @@
+using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
 
@@ -16,4 +17,5 @@ public record Feed
 	public Optional<QuerySort> Sort { get; init; } = new None();
 	public Optional<QueryLimit> Limit { get; init; } = new None();
 	public required FeedRunTrigger Schedule { get; init; }
+	public Optional<RatingStrategy> RatingStrategy { get; init; } = new None();
 }

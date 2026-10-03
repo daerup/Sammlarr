@@ -137,7 +137,9 @@ provider. On a circuit-breaker trip or timeout the client raises `ProviderUnavai
 the panel shows partial results and a retry rather than failing the whole preview.
 
 The preview does not classify for itself. It goes through `IFeedRunPlanner`, which reads the
-enrollment collections, classifies the rows and hands them to the pure `FeedPlans.Compute`.
+enrollment collections, classifies the rows and hands them to the pure `FeedPlans.Compute`. Each row
+carries the feed's Sammlarr rating, resolved once per plan from the feed's `RatingStrategy` (else the
+owner's default) over the available rating sources; the `Rating` and `Votes` filter and sort fields read it.
 `IFeedRunEngine` plans through that same planner before it applies anything, so a preview and a
 run cannot drift apart about what a run would do: they are the same call. The panel re-plans as
 items arrive, on a geometric schedule (after items 1, 2, 4, 8 …) rather than on a timer, which

@@ -2,9 +2,12 @@ using Domain.Media;
 
 namespace Contracts.Processing;
 
-public sealed record MediaQueryRow(MatchedMedia Media)
+public sealed record MediaQueryRow(MatchedMedia Media, Optional<SammlarrRating> Sammlarr)
 {
-	public static MediaQueryRow From(MatchedMedia media) => new(media);
+	public static MediaQueryRow From(MatchedMedia media, RatingStrategy strategy, ValueSet<RatingSource> available)
+	{
+		return new(media, strategy.Resolve(media.Details.Rating, available));
+	}
 
 	public MediaType MediaType => Media.Details.Type;
 
@@ -18,7 +21,9 @@ public sealed record MediaQueryRow(MatchedMedia Media)
 
 	public DateOnly? ReleaseDate => Media.Details.ReleaseDate;
 
-	public float? Rating => Media.Details.Rating.Average.ToNullable();
+	public float? Rating => Sammlarr.Map(rating => rating.Value).ToNullable();
+
+	public int? Votes => Sammlarr.Map(rating => rating.Votes).ToNullable();
 
 	public int? RuntimeMinutes
 	{

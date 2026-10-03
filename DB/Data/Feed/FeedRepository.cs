@@ -38,6 +38,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			Sort = data.Sort.ToNullable(),
 			Limit = data.Limit.ToNullable(),
 			Trigger = data.Schedule,
+			RatingStrategy = data.RatingStrategy.ToNullable(),
 		};
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -64,6 +65,7 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		entity.Sort = data.Sort.ToNullable();
 		entity.Limit = data.Limit.ToNullable();
 		entity.Trigger = data.Schedule;
+		entity.RatingStrategy = data.RatingStrategy.ToNullable();
 
 		await ctx.SaveChangesAsync(cancellationToken);
 	}

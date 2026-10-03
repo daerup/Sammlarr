@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Contracts.Feed;
 using DB.Data.Feed;
 using Domain.Feed;
+using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
 using Harness;
@@ -86,6 +87,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			Schedule = new FeedRunTrigger(new Scheduled("0 0 9 * * *")),
 			Sort = Some.Of(Sort),
 			Limit = Some.Of(Limit),
+			RatingStrategy = Some.Of(new RatingStrategy(new OrderedRating([RatingSource.Imdb]))),
 		};
 
 		await _testee.CreateAsync(createData);
@@ -99,6 +101,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Schedule).IsOfUnionType<FeedRunTrigger, Scheduled>();
 		await Assert.That(feed.Sort).IsSome().And.IsEqualTo(Sort);
 		await Assert.That(feed.Limit).IsSome().And.IsEqualTo(Limit);
+		await Assert.That(feed.RatingStrategy).IsSome().And.IsEqualTo(new RatingStrategy(new OrderedRating([RatingSource.Imdb])));
 	}
 
 	[Test]
@@ -112,6 +115,7 @@ public class FeedRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(feed.Identifier).IsEqualTo("my-wantlist");
 		await Assert.That(feed.Strategy).IsEqualTo(new FeedStrategy(new Append()));
 		await Assert.That(feed.Enabled).IsTrue();
+		await Assert.That(feed.RatingStrategy).IsNone();
 	}
 
 	[Test]

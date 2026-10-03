@@ -18,6 +18,7 @@ internal static class FeedProjection
 		Sort = Optional.Of(row.Sort),
 		Limit = Optional.Of(row.Limit),
 		Schedule = row.Trigger,
+		RatingStrategy = Optional.Of(row.RatingStrategy),
 	};
 
 	private static readonly Func<FeedRow, Domain.Feed.Feed> map = Project.Compile();

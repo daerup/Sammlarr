@@ -1,5 +1,6 @@
 using Contracts.Blocklist;
 using Contracts.Feed;
+using Contracts.Ratings;
 using Contracts.Wantlist;
 using Contracts.Wantlist.Outbox;
 using DB.Data.Feed;
@@ -239,6 +240,37 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task RunAsync_ForAFeedOnFirstAvailableWithImdbFirst_FiltersOnTheImdbRatingWhereThereIsOne()
+	{
+		var rated = await SeedRatedFeedAsync("ordered:Imdb");
+
+		await Testee.RunAsync(rated.Feed, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(await WantlistIdsAsync()).IsEquivalentTo([rated.Inception]);
+	}
+
+	[Test]
+	public async Task RunAsync_ForAFeedWithoutItsOwnRatingStrategy_FollowsItsOwnersDefault()
+	{
+		var rated = await SeedRatedFeedAsync(null);
+		await host.Resolve<IRatingService>().StoreDefaultAsync(new RatingStrategy(new OrderedRating([RatingSource.Imdb])));
+
+		await Testee.RunAsync(rated.Feed, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(await WantlistIdsAsync()).IsEquivalentTo([rated.Inception]);
+	}
+
+	[Test]
+	public async Task RunAsync_ForAFeedOnAverage_FiltersOnTheMeanOfEveryRating()
+	{
+		var rated = await SeedRatedFeedAsync("averaged");
+
+		await Testee.RunAsync(rated.Feed, new FeedRunTrigger(new Manual()));
+
+		await Assert.That(await WantlistIdsAsync()).IsEquivalentTo([rated.FightClub, rated.Inception]);
+	}
+
+	[Test]
 	public async Task RunAsync_ForAFeedThatNoLongerExists_FailsWithoutThrowing()
 	{
 		var result = await Testee.RunAsync(FeedId.From(Guid.NewGuid()), new FeedRunTrigger(new Manual()));
@@ -264,6 +296,33 @@ public class FeedRunApplyTests(SammlarrTestHost host) : IAsyncDisposable
 		new(title, type, null, ids.ToDictionary(id => id.Provider, id => id.Value));
 
 	private async Task<IReadOnlyList<MediaId>> WantlistIdsAsync() => [.. (await host.Resolve<IWantlistRepository>().GetAllAsync()).Select(item => item.MediaId)];
+
+	private async Task<(FeedId Feed, MediaId FightClub, MediaId Inception)> SeedRatedFeedAsync(string? ratingStrategy)
+	{
+		await host.WithMdblistAccount(SammlarrTestHost.MdblistApiKey);
+		var feedId = await SeedFeedAsync("rated-list", new Append());
+		await host.Context.Database.ExecuteSqlAsync(
+			$$"""
+			UPDATE "Feeds" SET
+				"Filter" = '{"Groups":[{"Predicates":[{"Field":"Rating","Operator":"GreaterOrEqual","ValueKind":"Number","Value":"7"}],"Groups":[],"Operator":"And"}],"Operator":"And"}',
+				"RatingStrategy" = {{ratingStrategy}}
+			WHERE "Id" = {{feedId.Value}}
+			"""
+		);
+		host.MdblistFeedContains(
+			"rated-list",
+			Item("Fight Club", MediaType.Movie, Tmdb("550")),
+			Item("Inception", MediaType.Movie, Tmdb("27205")),
+			Item("Interstellar", MediaType.Movie, Tmdb("157336"))
+		);
+		var fightClub = await host.Movie(TestMedia.FightClub).ServedByPlex(imdbRating: 6.5, imdbVotes: 900).ServedByTmdb(rating: 8.4, votes: 1000).SeedAsync();
+		var inception = await host.Movie(TestMedia.Inception)
+			.ServedByPlex(imdbRating: 8.8, imdbVotes: 2_700_000)
+			.ServedByTmdb(rating: 6.0, votes: 1000)
+			.SeedAsync();
+		await host.Movie(TestMedia.Interstellar).ServedByPlex().ServedByTmdb(rating: 6.5, votes: 1000).SeedAsync();
+		return (feedId, fightClub, inception);
+	}
 
 	private async Task<FeedId> SeedFeedAsync(string identifier, FeedStrategy strategy)
 	{

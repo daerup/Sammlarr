@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Text;
 using API.Plex;
@@ -8,10 +9,10 @@ namespace Harness;
 
 internal static class PlexStub
 {
-	public static void Lookup(HttpStub http, ResolvedVersion v)
+	public static void Lookup(HttpStub http, ResolvedVersion v, double? imdbRating = null, int imdbVotes = 0)
 	{
 		var plexId = v.Ids.GetValueOrDefault(MediaProvider.Plex, "0");
-		http.RespondWithJsonForUrl($"{PlexEndpoints.MetadataPath}/{plexId}", LookupJson(v, plexId));
+		http.RespondWithJsonForUrl($"{PlexEndpoints.MetadataPath}/{plexId}", LookupJson(v, plexId, imdbRating, imdbVotes));
 	}
 
 	public static void LookupFails(HttpStub http, ResolvedVersion v)
@@ -104,7 +105,7 @@ internal static class PlexStub
 			""";
 	}
 
-	private static string LookupJson(ResolvedVersion v, string plexId) =>
+	private static string LookupJson(ResolvedVersion v, string plexId, double? imdbRating, int imdbVotes) =>
 		$$"""
 			{
 			  "MediaContainer": {
@@ -126,12 +127,19 @@ internal static class PlexStub
 			        "year": {{v.Year}},
 			        "duration": 9000000,
 			        "Guid": [{{GuidsJson(v)}}],
-			        "Genre": [{{GenresJson(v)}}]
+			        "Genre": [{{GenresJson(v)}}]{{ImdbJson(imdbRating, imdbVotes)}}
 			      }
 			    ]
 			  }
 			}
 			""";
+
+	private static string ImdbJson(double? rating, int votes)
+	{
+		return rating is { } value
+			? $$""", "Rating": [{ "image": "imdb://image.rating", "type": "audience", "value": {{value.ToString(CultureInfo.InvariantCulture)}} }], "imdbRatingCount": {{votes}}"""
+			: string.Empty;
+	}
 
 	private static string SummaryJson(ResolvedVersion v) => v.Summary is null ? "null" : $"\"{v.Summary}\"";
 

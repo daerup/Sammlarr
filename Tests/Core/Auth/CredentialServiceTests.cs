@@ -42,6 +42,16 @@ public sealed class CredentialServiceTests : IDisposable
 	}
 
 	[Test]
+	public async Task IsStoredAsync_ReadsWhetherACredentialIsStored()
+	{
+		await Assert.That(await Testee.IsStoredAsync(AuthProvider.Plex)).IsTrue();
+
+		_credentials.GetAsync(AuthProvider.Plex, Any()).Returns(Error.From("No credential is stored for this provider."));
+
+		await Assert.That(await Testee.IsStoredAsync(AuthProvider.Plex)).IsFalse();
+	}
+
+	[Test]
 	public async Task ReportRejected_AfterARead_MakesTheNextReadLoadTheStoredCredentialAgain()
 	{
 		await Testee.GetAsync(AuthProvider.Plex);

@@ -15,7 +15,7 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261003222031_RatingSources";
+    public override string LastMigrationId => "20261003224618_RatingStrategies";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -183,6 +183,9 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
 
                 b.Property<string>("Provider")
                     .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("RatingStrategy")
                     .HasColumnType("TEXT");
 
                 b.Property<string>("Sort")
@@ -672,6 +675,33 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("NotificationTargets");
             });
 
+        modelBuilder.Entity("DB.Data.Ratings.RatingDefaultRow", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("CreatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("Strategy")
+                    .IsRequired()
+                    .HasColumnType("TEXT");
+
+                b.Property<long>("UpdatedAt")
+                    .HasColumnType("INTEGER");
+
+                b.Property<Guid>("UserId")
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId")
+                    .IsUnique();
+
+                b.ToTable("RatingDefaults");
+            });
+
         modelBuilder.Entity("DB.Data.Wantlist.Outbox.WantlistOutboxRow", b =>
             {
                 b.Property<Guid>("UserId")
@@ -1108,6 +1138,15 @@ partial class SammlarrDbContextModelSnapshot : ModelSnapshot
             });
 
         modelBuilder.Entity("DB.Data.Notifications.NotificationTargetRow", b =>
+            {
+                b.HasOne("DB.Data.Identity.UserRow", null)
+                    .WithMany()
+                    .HasForeignKey("UserId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+        modelBuilder.Entity("DB.Data.Ratings.RatingDefaultRow", b =>
             {
                 b.HasOne("DB.Data.Identity.UserRow", null)
                     .WithMany()

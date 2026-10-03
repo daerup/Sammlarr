@@ -16,6 +16,11 @@ internal sealed class ApiKeyService(IApiKeyConfigRepository keys, IApiKeyFactory
 		);
 	}
 
+	public Task<bool> IsStoredAsync(ApiKeyProvider provider, CancellationToken cancellationToken = default)
+	{
+		return keys.GetAsync(provider, cancellationToken).IsSuccess();
+	}
+
 	public async Task StoreAsync(IApiKey key, CancellationToken cancellationToken = default)
 	{
 		await keys.StoreAsync(key.Provider, key.Value, cancellationToken);

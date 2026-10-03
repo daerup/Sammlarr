@@ -39,7 +39,7 @@ public readonly struct ValueSet<T> : IReadOnlySet<T>, IEquatable<ValueSet<T>>
 		var hash = 0;
 		foreach (var item in Items)
 		{
-			hash ^= item?.GetHashCode() ?? 0;
+			hash = unchecked(hash + HashCode.Combine(item));
 		}
 		return hash;
 	}

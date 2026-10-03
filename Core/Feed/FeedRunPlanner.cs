@@ -2,6 +2,7 @@ using Contracts.Blocklist;
 using Contracts.DI;
 using Contracts.Feed;
 using Contracts.Processing;
+using Contracts.Ratings;
 using Contracts.Wantlist;
 using Core.Processing;
 using Domain.Feed;
@@ -20,6 +21,7 @@ internal sealed class FeedRunPlanner(
 	QueryProcessor<MediaQueryRow> processor,
 	IFeedRepository feeds,
 	IKeyedServiceIndex<FeedProvider, IFeedProvider> providers,
+	IRatingService ratings,
 	ILogger<FeedRunPlanner> logger
 ) : IFeedRunPlanner
 {
@@ -57,6 +59,8 @@ internal sealed class FeedRunPlanner(
 
 	private async Task<IFeedPlan> PlanAsync(Domain.Feed.Feed feed, RawFeedLoad load, CancellationToken cancellationToken = default)
 	{
+		var strategy = await feed.RatingStrategy.Match(Task.FromResult, () => ratings.GetDefaultAsync(cancellationToken));
+		var available = await ratings.GetAvailableAsync(cancellationToken);
 		var unmatchedItems = new List<UnmatchedMedia>();
 		var resolved = new List<MediaQueryRow>();
 		foreach (var item in load.Items)
@@ -64,7 +68,7 @@ internal sealed class FeedRunPlanner(
 			switch (item)
 			{
 				case MatchedMedia matched:
-					resolved.Add(MediaQueryRow.From(matched));
+					resolved.Add(MediaQueryRow.From(matched, strategy, available));
 					break;
 				case UnmatchedMedia unmatched:
 					unmatchedItems.Add(unmatched);

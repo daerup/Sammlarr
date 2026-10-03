@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Feed;
+using Domain.Media;
 using Domain.Processing;
 using Domain.Providers;
 
@@ -26,4 +27,5 @@ internal record FeedRow : Entity<Guid>, IUserOwned
 	public QuerySort? Sort { get; set; }
 	public QueryLimit? Limit { get; set; }
 	public FeedRunTrigger Trigger { get; set; } = new(new Manual());
+	public RatingStrategy? RatingStrategy { get; set; }
 }

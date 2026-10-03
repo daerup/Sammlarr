@@ -41,10 +41,12 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		string? summary = null,
 		IReadOnlyList<string>? genres = null,
 		string? poster = null,
-		string? title = null
+		string? title = null,
+		double? imdbRating = null,
+		int imdbVotes = 0
 	)
 	{
-		host.PlexHolds(Version(reports, summary, genres, poster, title));
+		host.PlexHolds(Version(reports, summary, genres, poster, title), imdbRating, imdbVotes);
 		_usesPlex = true;
 		return this;
 	}

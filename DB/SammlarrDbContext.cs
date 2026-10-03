@@ -11,6 +11,7 @@ using DB.Data.Identity;
 using DB.Data.Jobs;
 using DB.Data.Media;
 using DB.Data.Notifications;
+using DB.Data.Ratings;
 using DB.Data.Wantlist;
 using DB.Data.Wantlist.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -81,6 +82,7 @@ internal sealed class SammlarrDbContext : DbContext
 	public DbSet<NotificationTargetRow> NotificationTargets => Set<NotificationTargetRow>();
 	public DbSet<NotificationSubscriptionRow> NotificationSubscriptions => Set<NotificationSubscriptionRow>();
 	public DbSet<NotificationDeliveryOutcomeRow> NotificationDeliveryOutcomes => Set<NotificationDeliveryOutcomeRow>();
+	public DbSet<RatingDefaultRow> RatingDefaults => Set<RatingDefaultRow>();
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{

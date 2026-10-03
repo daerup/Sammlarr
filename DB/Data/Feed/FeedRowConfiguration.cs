@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using DB.Conversion.Feed;
+using DB.Conversion.Ratings;
 using Domain.Processing;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,5 +23,6 @@ internal sealed class FeedRowConfiguration : IModelConfiguration
 			builder.Property(x => x.Limit).HasConversion(v => JsonSerializer.Serialize(v, JsonOptions), v => JsonSerializer.Deserialize<QueryLimit>(v, JsonOptions)!);
 			builder.Property(x => x.Trigger).HasConversion(new FeedRunTriggerConverter());
 			builder.Property(x => x.Strategy).HasConversion(new FeedStrategyConverter());
+			builder.Property(x => x.RatingStrategy).HasConversion(new RatingStrategyConverter());
 		});
 }

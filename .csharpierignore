@@ -17,3 +17,4 @@ Domain/Jobs/EnqueueResult.cs
 Domain/Media/Conversions/IdLookup.cs
 Contracts/Media/Conversions/IdLookupRequest.cs
 Core/Media/Hop.cs
+Domain/Media/RatingStrategy.cs
