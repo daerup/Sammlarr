@@ -2,9 +2,15 @@
 	<PropertyGroup>
 		<RestoreEnablePackagePruning>false</RestoreEnablePackagePruning>
 	</PropertyGroup>
-	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests'">
+	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests' and '$(MSBuildProjectName)' != 'Analyzers'">
 		<Using Include="Shared" />
 		<Using Include="Shared.Collections" />
 		<Using Include="Shared.Extensions" />
+		<ProjectReference
+			Include="$(MSBuildThisFileDirectory)Analyzers\Analyzers.csproj"
+			OutputItemType="Analyzer"
+			ReferenceOutputAssembly="false"
+			IsAspireProjectResource="false"
+		/>
 	</ItemGroup>
 </Project>

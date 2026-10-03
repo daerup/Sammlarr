@@ -6,7 +6,7 @@
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="5.9.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
@@ -16,6 +16,8 @@
 		<PackageReference Include="TUnit.Mocks" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\..\Analyzers\Analyzers.csproj" />
 		<ProjectReference Include="..\..\Roslyn\Roslyn.csproj" />
+		<ProjectReference Include="..\..\Shared\Shared.csproj" />
 	</ItemGroup>
 </Project>
