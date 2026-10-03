@@ -205,8 +205,8 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 		await Testee.GetFeedItemsAsync("top-250").ToListAsync();
 
 		host.ScopedDbContext.ChangeTracker.Clear();
-		var metadata = await host.ScopedDbContext.MediaMetadata.AsNoTracking().FirstAsync(entry => entry.MediaId == fightClub.Value);
-		await Assert.That(metadata.Title).IsEqualTo("Fight Club");
+		var details = await host.ScopedDbContext.MediaDetails.AsNoTracking().FirstAsync(entry => entry.MediaId == fightClub.Value);
+		await Assert.That(details.Title).IsEqualTo("Fight Club");
 	}
 
 	[Test]

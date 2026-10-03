@@ -1,6 +1,5 @@
 using Contracts.Media;
 using DB.Data.Media;
-using DB.Data.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -11,7 +10,7 @@ using TestInfrastructure;
 namespace Integration.Tests.Media;
 
 [ClassDataSource<SammlarrTestHost>(Shared = SharedType.None)]
-public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
+public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 {
 	private static readonly DateTimeOffset FetchedAt = new(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
@@ -22,7 +21,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(), new MediaWriteLock());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
 	}
 
 	private async Task<MediaId> SeedMediaAsync(IEnumerable<IExternalMediaId> ids)
@@ -59,12 +58,12 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		fixture.Context.ChangeTracker.Clear();
 
 		var marker = new DateTimeOffset(2020, 6, 15, 0, 0, 0, TimeSpan.Zero);
-		await fixture.Context.MediaMetadata.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
+		await fixture.Context.MediaDetails.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
 
 		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { Title = "Updated" })));
 		fixture.Context.ChangeTracker.Clear();
 
-		var stored = await fixture.Context.MediaMetadata.AsNoTracking().SingleAsync();
+		var stored = await fixture.Context.MediaDetails.AsNoTracking().SingleAsync();
 		using var _ = Assert.Multiple();
 		await Assert.That(stored.Title).IsEqualTo("Updated");
 		await Assert.That(stored.CreatedAt).IsEqualTo(marker);

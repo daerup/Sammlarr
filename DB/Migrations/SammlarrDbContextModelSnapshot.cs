@@ -428,30 +428,12 @@ namespace DB.Migrations
                     b.ToTable("ExternalMediaIds");
                 });
 
-            modelBuilder.Entity("DB.Data.Media.MediaRow", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("CreatedAt")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UpdatedAt")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Media");
-                });
-
-            modelBuilder.Entity("DB.Data.Media.Metadata.MediaMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
                 {
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("BackdropUrl")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ConfirmedAbsent")
@@ -461,34 +443,30 @@ namespace DB.Migrations
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("FetchedAt")
+                        .HasColumnType("INTEGER");
+
                     b.PrimitiveCollection<string>("Genres")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<long>("LastFetchedAt")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("MediaType")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PosterUrl")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateOnly>("ReleaseDate")
+                    b.Property<DateOnly?>("ReleaseDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Summary")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Tagline")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
@@ -497,14 +475,14 @@ namespace DB.Migrations
 
                     b.HasKey("MediaId");
 
-                    b.ToTable("MediaMetadata");
+                    b.ToTable("MediaDetails");
 
                     b.HasDiscriminator<string>("MediaType");
 
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("DB.Data.Media.Metadata.MediaRatingRow", b =>
+            modelBuilder.Entity("DB.Data.Media.MediaRatingRow", b =>
                 {
                     b.Property<Guid>("MediaId")
                         .HasColumnType("TEXT");
@@ -523,6 +501,23 @@ namespace DB.Migrations
                     b.HasIndex("Source");
 
                     b.ToTable("MediaRatings");
+                });
+
+            modelBuilder.Entity("DB.Data.Media.MediaRow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Media");
                 });
 
             modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
@@ -935,27 +930,27 @@ namespace DB.Migrations
                     b.ToTable("TimeTickers", (string)null);
                 });
 
-            modelBuilder.Entity("DB.Data.Media.Metadata.MovieMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.MovieDetailsRow", b =>
                 {
-                    b.HasBaseType("DB.Data.Media.Metadata.MediaMetadataRow");
+                    b.HasBaseType("DB.Data.Media.MediaDetailsRow");
 
-                    b.Property<TimeSpan>("Runtime")
+                    b.Property<TimeSpan?>("Runtime")
                         .HasColumnType("TEXT");
 
                     b.HasDiscriminator().HasValue("Movie");
                 });
 
-            modelBuilder.Entity("DB.Data.Media.Metadata.ShowMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.ShowDetailsRow", b =>
                 {
-                    b.HasBaseType("DB.Data.Media.Metadata.MediaMetadataRow");
+                    b.HasBaseType("DB.Data.Media.MediaDetailsRow");
 
-                    b.Property<int>("Episodes")
+                    b.Property<int?>("Episodes")
                         .HasColumnType("INTEGER");
 
-                    b.Property<TimeSpan>("RuntimePerEpisode")
+                    b.Property<TimeSpan?>("RuntimePerEpisode")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Seasons")
+                    b.Property<int?>("Seasons")
                         .HasColumnType("INTEGER");
 
                     b.HasDiscriminator().HasValue("Show");
@@ -1055,26 +1050,26 @@ namespace DB.Migrations
                     b.Navigation("Media");
                 });
 
-            modelBuilder.Entity("DB.Data.Media.Metadata.MediaMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
                 {
                     b.HasOne("DB.Data.Media.MediaRow", "Media")
-                        .WithOne("Metadata")
-                        .HasForeignKey("DB.Data.Media.Metadata.MediaMetadataRow", "MediaId")
+                        .WithOne("Details")
+                        .HasForeignKey("DB.Data.Media.MediaDetailsRow", "MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Media");
                 });
 
-            modelBuilder.Entity("DB.Data.Media.Metadata.MediaRatingRow", b =>
+            modelBuilder.Entity("DB.Data.Media.MediaRatingRow", b =>
                 {
-                    b.HasOne("DB.Data.Media.Metadata.MediaMetadataRow", "Metadata")
+                    b.HasOne("DB.Data.Media.MediaDetailsRow", "Details")
                         .WithMany("Ratings")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Metadata");
+                    b.Navigation("Details");
                 });
 
             modelBuilder.Entity("DB.Data.Notifications.NotificationDeliveryOutcomeRow", b =>
@@ -1190,16 +1185,16 @@ namespace DB.Migrations
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("DB.Data.Media.MediaRow", b =>
-                {
-                    b.Navigation("ExternalIds");
-
-                    b.Navigation("Metadata");
-                });
-
-            modelBuilder.Entity("DB.Data.Media.Metadata.MediaMetadataRow", b =>
+            modelBuilder.Entity("DB.Data.Media.MediaDetailsRow", b =>
                 {
                     b.Navigation("Ratings");
+                });
+
+            modelBuilder.Entity("DB.Data.Media.MediaRow", b =>
+                {
+                    b.Navigation("Details");
+
+                    b.Navigation("ExternalIds");
                 });
 
             modelBuilder.Entity("TickerQ.Utilities.Entities.TimeTickerEntity", b =>

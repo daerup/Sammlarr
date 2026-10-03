@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Providers;
 
-namespace DB.Data.Media.Metadata;
+namespace DB.Data.Media;
 
 internal record MediaRatingRow
 {
@@ -14,6 +14,6 @@ internal record MediaRatingRow
 	public int? VoteCount { get; set; }
 
 #pragma warning disable CS8618
-	public MediaMetadataRow Metadata { get; set; }
+	public MediaDetailsRow Details { get; set; }
 #pragma warning restore CS8618
 }

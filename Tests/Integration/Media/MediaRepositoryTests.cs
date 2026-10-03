@@ -1,7 +1,6 @@
 using Contracts;
 using Contracts.Media;
 using DB.Data.Media;
-using DB.Data.Media.Metadata;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
@@ -19,7 +18,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	[Before(Test)]
 	public void Setup()
 	{
-		_testee = new MediaRepository(fixture.ContextFactory, new MediaMetadataFactory(), new MediaWriteLock());
+		_testee = new MediaRepository(fixture.ContextFactory, new MediaDetailsFactory(), new MediaWriteLock());
 	}
 
 	[Test]

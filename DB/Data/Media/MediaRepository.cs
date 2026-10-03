@@ -1,6 +1,5 @@
 using System.Data;
 using Contracts.Media;
-using DB.Data.Media.Metadata;
 using Domain.Media;
 using Domain.Media.Metadata;
 using Domain.Providers;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DB.Data.Media;
 
-internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaMetadataFactory metadataFactory, MediaWriteLock writeLock)
+internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaDetailsFactory detailsFactory, MediaWriteLock writeLock)
 	: IMediaRepository
 {
 	public async Task<IReadOnlyList<MediaIdentity?>> FindIdentitiesAsync(
@@ -121,12 +120,12 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		var rows = await media
 			.AsNoTracking()
 			.Include(m => m.ExternalIds)
-			.Include(m => m.Metadata!)
-				.ThenInclude(metadata => metadata.Ratings)
+			.Include(m => m.Details!)
+				.ThenInclude(details => details.Ratings)
 			.AsSplitQuery()
 			.ToListAsync(cancellationToken);
 
-		return [.. rows.Select(row => new StoredMedia(ToIdentity(row), Optional.Of(row.Metadata).Map(metadataFactory.ToCached)))];
+		return [.. rows.Select(row => new StoredMedia(ToIdentity(row), Optional.Of(row.Details).Map(detailsFactory.ToCached)))];
 	}
 
 	public async Task UpsertDetailsAsync(IReadOnlyDictionary<MediaId, CachedDetails> details, CancellationToken cancellationToken = default)
@@ -139,17 +138,17 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var rawIds = details.Keys.Select(id => id.Value).ToList();
-		var existing = await ctx.MediaMetadata.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);
+		var existing = await ctx.MediaDetails.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
 		foreach (var (id, cached) in details)
 		{
 			if (existing.TryGetValue(id.Value, out var entity))
 			{
-				metadataFactory.Update(entity, cached);
+				detailsFactory.Update(entity, cached);
 			}
 			else
 			{
-				ctx.MediaMetadata.Add(metadataFactory.BuildFrom(cached, id.Value));
+				ctx.MediaDetails.Add(detailsFactory.BuildFrom(cached, id.Value));
 			}
 		}
 
@@ -165,7 +164,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 
 		var rawIds = ids.Select(id => id.Value).ToList();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		await ctx.MediaMetadata.Where(m => rawIds.Contains(m.MediaId)).ExecuteDeleteAsync(cancellationToken);
+		await ctx.MediaDetails.Where(m => rawIds.Contains(m.MediaId)).ExecuteDeleteAsync(cancellationToken);
 	}
 
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetExternalsAsync(
