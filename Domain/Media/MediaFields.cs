@@ -15,6 +15,4 @@ internal static class MediaFields
 	public static bool HasCount([NotNullWhen(true)] int? value) => value is not null;
 
 	public static ValueSet<T> Coalesce<T>(ValueSet<T> primary, ValueSet<T> secondary) => primary.Count > 0 ? primary : secondary;
-
-	public static RatingSummary Coalesce(RatingSummary primary, RatingSummary secondary) => primary.Sources.Count > 0 ? primary : secondary;
 }

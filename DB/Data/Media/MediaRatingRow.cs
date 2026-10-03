@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
-using Domain.Providers;
+using Domain.Media;
 
 namespace DB.Data.Media;
 
 internal record MediaRatingRow
 {
 	[Required]
-	public required MediaProvider Source { get; set; }
+	public required RatingSource Source { get; set; }
 
 	[Required]
 	public required float NormalizedValue { get; set; }

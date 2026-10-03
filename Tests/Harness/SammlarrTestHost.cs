@@ -170,11 +170,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		[
 			new MediaRatingRow
 			{
-				Source = MediaProvider.Tmdb,
+				Source = RatingSource.Tmdb,
 				NormalizedValue = 7.5f,
 				VoteCount = 100,
 			},
 		];
+		details.ConfirmedAbsent = MediaField.Ratings.Except(MediaField.TmdbRating);
 		details.FetchedAt = fetched ?? _clock.Now;
 		return details;
 	}

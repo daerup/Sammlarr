@@ -12,6 +12,8 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 {
 	private const string BeforeConfirmedGaps = "20260930221057_RenameWantlistSinkBlocklist";
 
+	private const MediaField RatingsAddedLater = MediaField.ImdbRating | MediaField.RottenTomatoesCriticsRating | MediaField.RottenTomatoesAudienceRating;
+
 	public async ValueTask DisposeAsync() => await host.DisposeAsync();
 
 	[Test]
@@ -35,7 +37,7 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 		await MigrateAsync(BeforeConfirmedGaps);
 		await MigrateAsync(null);
 
-		await Assert.That(await ConfirmedAbsentAsync(movie)).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
+		await Assert.That(await ConfirmedAbsentAsync(movie)).IsEqualTo(MediaField.Tagline | MediaField.Backdrop | RatingsAddedLater);
 	}
 
 	[Test]
@@ -55,7 +57,7 @@ public class MediaConfirmedMissingMigrationTests(SammlarrTestHost host) : IAsync
 		await MigrateAsync(BeforeConfirmedGaps);
 		await MigrateAsync(null);
 
-		await Assert.That(await ConfirmedAbsentAsync(show)).IsEqualTo(MediaField.None);
+		await Assert.That(await ConfirmedAbsentAsync(show)).IsEqualTo(RatingsAddedLater);
 	}
 
 	private Task SeedAsync(MediaId id, MediaDetails details)

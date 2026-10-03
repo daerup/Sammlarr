@@ -1,6 +1,5 @@
 using DB.Data.Media;
 using Domain.Media;
-using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 
@@ -68,12 +67,12 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	[Test]
 	public async Task BuildFrom_WhenDetailsHaveRatings_BuildsRatings()
 	{
-		var details = MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.4f, Some.Of(1234))]) };
+		var details = MovieDetails() with { Rating = RatingSummary.From([new TmdbRating(8.4f, Some.Of(1234))]) };
 
 		var entity = (MovieDetailsRow)_testee.BuildFrom(Cached(details), Guid.NewGuid());
 
 		await Assert.That(entity.Ratings).Count().IsEqualTo(1);
-		await Assert.That(entity.Ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(entity.Ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
 		await Assert.That(entity.Ratings[0].NormalizedValue).IsEqualTo(8.4f);
 	}
 
@@ -97,18 +96,15 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	{
 		var plexId = PlexId.From("plex-310", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var existing = await PersistAsync(
-			Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.0f, Some.Of(10))]) }),
-			mediaId
-		);
+		var existing = await PersistAsync(Cached(MovieDetails() with { Rating = RatingSummary.From([new TmdbRating(5.0f, Some.Of(10))]) }), mediaId);
 
-		_testee.Update(existing, Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 9.0f, Some.Of(9999))]) }));
+		_testee.Update(existing, Cached(MovieDetails() with { Rating = RatingSummary.From([new TmdbRating(9.0f, Some.Of(9999))]) }));
 		await fixture.Context.SaveChangesAsync();
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaRatings.AsNoTracking().SingleAsync();
 		using var _ = Assert.Multiple();
-		await Assert.That(stored.Source).IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(stored.Source).IsEqualTo(RatingSource.Tmdb);
 		await Assert.That(stored.NormalizedValue).IsEqualTo(9.0f);
 		await Assert.That(stored.VoteCount).IsEqualTo(9999);
 	}
@@ -118,10 +114,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	{
 		var plexId = PlexId.From("plex-315", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var existing = await PersistAsync(
-			Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 5.0f, Some.Of(10))]) }),
-			mediaId
-		);
+		var existing = await PersistAsync(Cached(MovieDetails() with { Rating = RatingSummary.From([new TmdbRating(5.0f, Some.Of(10))]) }), mediaId);
 
 		_testee.Update(existing, Cached(new MovieDetails { Title = "Title" }));
 		await fixture.Context.SaveChangesAsync();
@@ -166,16 +159,13 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 	{
 		var plexId = PlexId.From("plex-420", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var entity = await PersistAsync(
-			Cached(MovieDetails() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(500))]) }),
-			mediaId
-		);
+		var entity = await PersistAsync(Cached(MovieDetails() with { Rating = RatingSummary.From([new TmdbRating(7.5f, Some.Of(500))]) }), mediaId);
 
 		var cached = _testee.ToCached(entity);
 
 		using var _ = Assert.Multiple();
 		await Assert.That(cached.Details.Rating.Sources.Count).IsEqualTo(1);
-		await Assert.That(cached.Details.Rating.Sources.Single().Source).IsEqualTo(MediaProvider.Tmdb);
+		await Assert.That(cached.Details.Rating.Sources.Single().Source).IsEqualTo(RatingSource.Tmdb);
 	}
 
 	[Test]
@@ -268,7 +258,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 			BackdropUrl = "https://example.com/backdrop.jpg",
 			ReleaseDate = new DateOnly(2024, 1, 1),
 			Genres = ["Action"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
+			Rating = RatingSummary.From([new TmdbRating(7.5f, Some.Of(100))]),
 			Runtime = TimeSpan.FromMinutes(120),
 		};
 	}
@@ -284,7 +274,7 @@ public class MediaDetailsFactoryTests(SammlarrTestHost fixture) : IAsyncDisposab
 			BackdropUrl = "https://example.com/show-backdrop.jpg",
 			ReleaseDate = new DateOnly(2020, 1, 1),
 			Genres = ["Drama"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
+			Rating = RatingSummary.From([new TmdbRating(7.5f, Some.Of(100))]),
 			Seasons = 3,
 			Episodes = 30,
 			RuntimePerEpisode = TimeSpan.FromMinutes(45),

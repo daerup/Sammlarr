@@ -18,4 +18,11 @@
 		<ProjectReference Include="..\..\API\API.csproj" />
 		<ProjectReference Include="..\TestInfrastructure\TestInfrastructure.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<None
+			Include="..\E2E\wiremock\responses\plex-metadata\library-metadata-5d77682eeb5d26001f1df4fe.verified.json"
+			Link="Plex\Recorded\obsession.json"
+			CopyToOutputDirectory="PreserveNewest"
+		/>
+	</ItemGroup>
 </Project>

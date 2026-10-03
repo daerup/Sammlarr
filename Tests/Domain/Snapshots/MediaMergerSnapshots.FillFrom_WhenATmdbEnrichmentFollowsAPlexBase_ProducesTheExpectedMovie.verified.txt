@@ -9,9 +9,5 @@
   Genres: [
     Drama,
     Thriller
-  ],
-  Rating: {
-    Average: None,
-    Sources: null
-  }
+  ]
 }

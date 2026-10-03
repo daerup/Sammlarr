@@ -1,6 +1,5 @@
 using CsCheck;
 using Domain.Media;
-using Domain.Providers;
 
 namespace Domain.Tests.Media;
 
@@ -60,7 +59,7 @@ public class MediaMergerProperties
 			BackdropUrl = flags[4] ? $"/{side}-backdrop.jpg" : null,
 			ReleaseDate = flags[5] ? new DateOnly(2020, 1, side.Length) : null,
 			Genres = flags[6] ? [side] : [],
-			Rating = flags[8] ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, side.Length)]) : RatingSummary.None,
+			Rating = flags[8] ? RatingSummary.From([new TmdbRating(side.Length, new None())]) : RatingSummary.None,
 			Runtime = flags[7] ? TimeSpan.FromMinutes(side.Length) : null,
 		};
 	}

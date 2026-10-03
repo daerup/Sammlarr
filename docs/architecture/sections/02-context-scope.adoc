@@ -13,7 +13,7 @@ sync with Plex.
 | Partner | Sammlarr receives | Sammlarr sends
 
 | User | Sign-in; feed, wantlist and blocklist edits | The curated library, wantlist and notifications
-| Plex | OAuth identity, search results, the Plex watchlist | Wantlist additions and removals (push)
+| Plex | OAuth identity, search results, ratings (IMDb, Rotten Tomatoes, a copy of TMDB's), the Plex watchlist | Wantlist additions and removals (push)
 | TMDB | Trending titles, ratings, metadata, id conversion | (none, read only)
 | MDBList | The contents of a list, for feeds | (none, read only)
 | IMDb, TheTVDB | (none) | (none; identifier namespaces only, see below)
@@ -30,7 +30,7 @@ flowchart LR
   ids[IMDb / TheTVDB IDs]
 
   user <-->|sign in, curate| sam
-  sam <-->|OAuth, search, wantlist pull + push| plex
+  sam <-->|OAuth, search, ratings, wantlist pull + push| plex
   tmdb -->|trending, ratings, metadata| sam
   mdblist -->|list contents| sam
   sam -.->|cross-reference by id| ids

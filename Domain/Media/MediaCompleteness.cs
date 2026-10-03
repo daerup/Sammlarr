@@ -17,7 +17,7 @@ public static class MediaCompleteness
 					| Gap(!HasText(details.BackdropUrl), MediaField.Backdrop)
 					| Gap(!HasDate(details.ReleaseDate), MediaField.ReleaseDate)
 					| Gap(!HasItems(details.Genres), MediaField.Genres)
-					| Gap(!HasItems(details.Rating.Sources), MediaField.Rating)
+					| RatingGaps(details.Rating)
 					| details switch
 					{
 						MovieDetails movie => Gap(!HasDuration(movie.Runtime), MediaField.Runtime),
@@ -31,4 +31,12 @@ public static class MediaCompleteness
 	}
 
 	private static MediaField Gap(bool missing, MediaField field) => missing ? field : MediaField.None;
+
+	private static MediaField RatingGaps(RatingSummary rating)
+	{
+		return Enum.GetValues<RatingSource>()
+			.Aggregate(MediaField.None, (gaps, source) => gaps | rating.Of(source).When(Complete).Match(_ => MediaField.None, () => source.Field));
+	}
+
+	private static bool Complete(IMediaRating rating) => rating.Votes.IsSome() || !rating.Source.PublishesVotes;
 }

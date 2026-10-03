@@ -1,5 +1,4 @@
 using Domain.Media;
-using Domain.Providers;
 
 namespace Domain.Tests.Media;
 
@@ -20,7 +19,7 @@ public class MediaMergerTests
 			PosterUrl = "poster",
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2021, 10, 22),
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.8f)]),
+			Rating = MediaFakes.EverySourceRating(),
 			Runtime = TimeSpan.FromMinutes(155),
 		};
 

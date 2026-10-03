@@ -64,7 +64,9 @@ internal static class PlexTypes
 			[property: JsonPropertyName("childCount")] int? SeasonCount,
 			[property: JsonPropertyName("leafCount")] int? EpisodeCount,
 			[property: JsonPropertyName("Guid")] IReadOnlyList<Guid> Guid,
-			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre> Genre
+			[property: JsonPropertyName("Genre")] IReadOnlyList<Genre> Genre,
+			[property: JsonPropertyName("Rating")] IReadOnlyList<Rating>? Ratings = null,
+			[property: JsonPropertyName("imdbRatingCount")] int? ImdbRatingCount = null
 		)
 		{
 			public MediaType MediaType => MediaType.Parse(Type);
@@ -78,6 +80,12 @@ internal static class PlexTypes
 		}
 
 		public record Genre([property: JsonPropertyName("tag")] string Tag);
+
+		public record Rating(
+			[property: JsonPropertyName("image")] string Image,
+			[property: JsonPropertyName("type")] string Type,
+			[property: JsonPropertyName("value")] double Value
+		);
 
 		public record Root([property: JsonPropertyName("MediaContainer")] MediaContainer MediaContainer);
 	}

@@ -25,7 +25,8 @@ public class TmdbDetailsEnricherTests
 			.And.Multiple(async found =>
 			{
 				var rating = found.Details.Rating;
-				await Assert.That(rating.Sources.Any(source => source.Source == MediaProvider.Tmdb)).IsTrue();
+				await Assert.That(rating.Sources.Any(source => source.Source == RatingSource.Tmdb)).IsTrue();
+				await Assert.That(rating.Sources.All(source => source.Source.SuppliedBy().Contains(MediaProvider.Tmdb))).IsTrue();
 				await Assert.That(rating.Average).IsSome().And.IsEqualTo(7.5f);
 			});
 	}
