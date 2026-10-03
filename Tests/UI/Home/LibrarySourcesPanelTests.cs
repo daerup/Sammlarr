@@ -1,6 +1,6 @@
 using AngleSharp.Dom;
 using BlazorBlueprint.Components;
-using BlazorBlueprint.Primitives.Services;
+using BlazorBlueprint.Primitives;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;

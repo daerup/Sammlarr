@@ -131,7 +131,7 @@
     --alert-danger-bg: oklch(0.18 0.008 27);
 }
 
-.fixed.inset-0.z-50.bg-black\/80 {
+.bb\:fixed.bb\:inset-0.bb\:z-50.bb\:bg-black\/80 {
     background-color: color-mix(in oklab, black 40%, transparent);
     backdrop-filter: blur(16px) saturate(120%);
 }
@@ -245,7 +245,7 @@
 }
 
 /* Blur the page behind dialog overlays only while the .error-dialog component is mounted */
-body:has(.error-dialog) .fixed.inset-0.z-50.bg-black\/80 {
+body:has(.error-dialog) .bb\:fixed.bb\:inset-0.bb\:z-50.bb\:bg-black\/80 {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
 }
@@ -326,7 +326,7 @@ body:has(.error-dialog) .search-modal {
 .toast-soft-destructive * {
     color: var(--destructive) !important;
 }
-.toast-soft-destructive button:not(.absolute) {
+.toast-soft-destructive button:not(.bb\:absolute) {
     height: auto !important;
     padding: 0 !important;
     border: none !important;
@@ -336,7 +336,7 @@ body:has(.error-dialog) .search-modal {
     text-underline-offset: 3px;
     text-decoration-color: oklch(from var(--destructive) l c h / 0.5);
 }
-.toast-soft-destructive button:not(.absolute)::after {
+.toast-soft-destructive button:not(.bb\:absolute)::after {
     content: "";
     display: inline-block;
     width: 0.85em;
@@ -348,13 +348,13 @@ body:has(.error-dialog) .search-modal {
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
     transition: transform 150ms ease;
 }
-.toast-soft-destructive button:not(.absolute):hover,
-.toast-soft-destructive button:not(.absolute):focus-visible {
+.toast-soft-destructive button:not(.bb\:absolute):hover,
+.toast-soft-destructive button:not(.bb\:absolute):focus-visible {
     background-color: transparent !important;
     text-decoration-color: var(--destructive) !important;
 }
-.toast-soft-destructive button:not(.absolute):hover::after,
-.toast-soft-destructive button:not(.absolute):focus-visible::after {
+.toast-soft-destructive button:not(.bb\:absolute):hover::after,
+.toast-soft-destructive button:not(.bb\:absolute):focus-visible::after {
     transform: translateX(2px);
 }
 

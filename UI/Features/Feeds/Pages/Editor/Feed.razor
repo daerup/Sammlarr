@@ -26,7 +26,7 @@
             @if (_previewStatus.EarlySaveAllowed && CanSave)
             {
                 <BbTooltip>
-                    <BbTooltipTrigger>
+                    <BbTooltipTrigger AsChild="true">
                         <HoverButton Preset="HoverButtonPreset.Success" OnClick="QuickSaveAsync" Disabled="_isSaving">
                             <BbSpinner Size="SpinnerSize.Small" Class="mr-2"/>
                             <span>Quick save</span>

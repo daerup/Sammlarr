@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
 	<ItemGroup>
 		<ProjectReference Include="..\Web\Web.csproj" />
 		<ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
@@ -12,5 +12,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<UserSecretsId>dd1c3e72-9603-4986-88d2-125fe513419d</UserSecretsId>
+		<MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);ASPIRE010</MSBuildWarningsAsMessages>
 	</PropertyGroup>
 </Project>

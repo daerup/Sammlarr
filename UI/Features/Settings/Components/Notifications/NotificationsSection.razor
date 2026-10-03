@@ -45,7 +45,7 @@
                             @if (ChannelHint(client.Channel) is { } hint)
                             {
                                 <BbTooltip>
-                                    <BbTooltipTrigger>
+                                    <BbTooltipTrigger AsChild="false" Class="inline-flex shrink-0" Focusable="false">
                                         <LucideIcon Name="info" Size="13" Class="shrink-0 text-muted-foreground"/>
                                     </BbTooltipTrigger>
                                     <BbTooltipContent>@hint</BbTooltipContent>

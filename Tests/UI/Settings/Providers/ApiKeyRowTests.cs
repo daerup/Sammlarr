@@ -45,7 +45,7 @@ public class ApiKeyRowTests : BunitContext
 
 		var cut = Render<ApiKeyRow>(parameters => parameters.Add(row => row.Provider, ApiKeyProvider.Tmdb));
 
-		await Assert.That(cut.FindAll("button .animate-pulse")).HasSingleItem();
+		await Assert.That(cut.FindAll(@"button .bb\:animate-pulse")).HasSingleItem();
 		await Assert.That(cut.Markup).DoesNotContain("Not set");
 	}
 
