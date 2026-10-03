@@ -1,4 +1,39 @@
-.absence-threshold-count {
+.run-count-line ::deep [data-run-count] {
+    width: 46px;
+    height: 24px;
+    border: 1px solid var(--input);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--accent);
+}
+
+.run-count-line ::deep [data-run-count]:focus-within {
+    box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+}
+
+.run-count-line ::deep [data-run-count] > div {
+    width: 14px;
+    margin: 0;
+    border-left: 1px solid var(--input);
+}
+
+.run-count-line ::deep [data-run-count] button {
+    width: 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted-foreground);
+}
+
+.run-count-line ::deep [data-run-count] button:hover:not(:disabled) {
     color: var(--foreground);
-    font-weight: 500;
+}
+
+.run-count-line ::deep [data-run-count] button + button {
+    border-top: 1px solid var(--input);
+}
+
+.run-count-line ::deep [data-run-count] button svg {
+    width: 9px;
+    height: 9px;
 }

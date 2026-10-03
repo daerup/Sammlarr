@@ -104,17 +104,20 @@ public class FeedConfigurationTests
 		await page.VisitAsync("/feeds/create");
 		await FeedEditor.ConfigureAsync(page, name);
 		await FeedEditor.Option(page, "Strategy", "Mirror").ClickAsync();
+		await FeedEditor.RunCount(page).EnterAsync("5");
 		await FeedEditor.TestAsync(page);
 		await FeedEditor.SaveAsync(page);
 
 		var card = page.FeedCard(name);
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
-		await Expect(card.GetByText("Mirror")).ToBeVisibleAsync();
+		await Expect(card).ToContainTextAsync("Mirror · 5");
 
 		await card.Labelled("Edit").ClickAsync();
 
-		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-pressed", "");
-		await Expect(FeedEditor.Option(page, "Strategy", "Append")).Not.ToHaveAttributeAsync("aria-pressed", "");
+		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-checked", "true");
+		await Expect(FeedEditor.Option(page, "Strategy", "Append")).ToHaveAttributeAsync("aria-checked", "false");
+		await Expect(FeedEditor.RunCount(page)).ToHaveValueAsync("5");
+		await Expect(page.GetByText("missed runs.")).ToBeVisibleAsync();
 	}
 
 	[Test]
@@ -144,7 +147,7 @@ public class FeedConfigurationTests
 		await Expect(card).ToBeVisibleAsync(Wait.Settle);
 		await card.Labelled("Edit").ClickAsync();
 
-		await Expect(FeedEditor.Option(page, "Trigger", "Scheduled")).ToHaveAttributeAsync("aria-pressed", "");
+		await Expect(FeedEditor.Option(page, "Trigger", "Scheduled")).ToHaveAttributeAsync("aria-checked", "true");
 		await Expect(page.Locator(CronField("Minute"))).ToHaveValueAsync(minute);
 		await Expect(page.Locator(CronField("Hour"))).ToHaveValueAsync(hour);
 	}
@@ -169,7 +172,7 @@ public class FeedConfigurationTests
 		await Expect(page.GetByText("Clone feed").First).ToBeVisibleAsync();
 		await Expect(page.Locator("#name")).ToHaveValueAsync(original);
 		await Expect(page.Locator("#list-identifier")).ToHaveValueAsync(FeedEditor.ListIdentifier);
-		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-pressed", "");
+		await Expect(FeedEditor.Option(page, "Strategy", "Mirror")).ToHaveAttributeAsync("aria-checked", "true");
 
 		await FeedEditor.FillAsync(page, "#name", copy);
 		await FeedEditor.SaveAsync(page);

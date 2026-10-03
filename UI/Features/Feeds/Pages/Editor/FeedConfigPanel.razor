@@ -84,56 +84,18 @@
                     </BbFieldLabel>
                     <BbFieldContent>
                         <div class="relative">
-                        <div class="flex items-center gap-2">
-                            <BbButton Variant="@(_strategyMode == StrategyMode.Append ? ButtonVariant.Default : ButtonVariant.Outline)"
-                                      Class="min-w-24 justify-center"
-                                      aria-pressed="@(_strategyMode == StrategyMode.Append)"
-                                      OnClick="@(() => ChangeStrategyMode(StrategyMode.Append))">
-                                Append
-                            </BbButton>
+                            <EnumToggleGroup TEnum="StrategyMode" Value="@_strategyMode" OnChange="@ChangeStrategyMode" TooltipProvider="null"/>
                             @if (_strategyMode == StrategyMode.Mirror)
                             {
-                                <div class="flex items-stretch h-10 rounded-md border border-primary overflow-hidden">
-                                    <BbButton Variant="ButtonVariant.Default" Class="min-w-20 justify-center rounded-none border-0 h-full" aria-pressed="@true">Mirror</BbButton>
-                                    <span class="flex items-center bg-accent px-2">
-                                        <input id="absence-threshold" inputmode="numeric" aria-label="Runs missing before removal"
-                                               aria-invalid="@AbsenceThresholdIsInvalid"
-                                               value="@_absenceThresholdRaw"
-                                               @oninput="@(e => ChangeAbsenceThreshold(e.Value?.ToString() ?? string.Empty))"
-                                               class="w-9 bg-transparent border-0 text-center text-sm text-foreground focus:outline-none"/>
-                                    </span>
+                                <div class="run-count-line absolute left-0 top-full mt-[3px] flex h-[26px] items-center gap-1 whitespace-nowrap text-sm @AbsenceToneClass">
+                                    <span>Removes an item after</span>
+                                    <BbNumericInput TValue="int" Value="@_absenceThreshold" ValueChanged="@ChangeAbsenceThreshold"
+                                                    Min="1" AllowNegative="false" ShowButtons="true" DisableDebounce="true"
+                                                    AriaLabel="Runs missing before removal" data-run-count
+                                                    Class="h-full w-auto min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 py-0 text-center text-sm tabular-nums text-foreground focus-visible:ring-0 focus-visible:ring-offset-0"/>
+                                    <span>missed @(_absenceThreshold == 1 ? "run" : "runs").</span>
                                 </div>
                             }
-                            else
-                            {
-                                <BbButton Variant="ButtonVariant.Outline"
-                                          Class="min-w-24 justify-center"
-                                          OnClick="@(() => ChangeStrategyMode(StrategyMode.Mirror))">
-                                    Mirror
-                                </BbButton>
-                            }
-                        </div>
-                        @if (_strategyMode == StrategyMode.Mirror)
-                        {
-                            <p class="absolute left-0 top-full mt-1.5 whitespace-nowrap text-sm @AbsenceHelperClass">
-                                @if (AbsenceThresholdIsInvalid)
-                                {
-                                    <span>Enter a whole number of at least 1.</span>
-                                }
-                                else if (AbsenceThresholdIsRisky)
-                                {
-                                    <span>Removes an item as soon as it leaves the list.</span>
-                                }
-                                else
-                                {
-                                    <span>
-                                        Waits
-                                        <span class="absence-threshold-count">@ParsedAbsenceThreshold</span>
-                                        runs before removing an item that left the list.
-                                    </span>
-                                }
-                            </p>
-                        }
                         </div>
                     </BbFieldContent>
                 </BbField>
@@ -413,7 +375,7 @@
     private string _name = string.Empty;
     private FeedProvider? _provider;
     private StrategyMode _strategyMode;
-    private string _absenceThresholdRaw = new Mirror().AbsenceThreshold.ToString();
+    private int _absenceThreshold = new Mirror().AbsenceThreshold;
     private string _identifier = string.Empty;
     private bool _filtersSectionOpen;
     private bool _filterEnabled;
@@ -432,10 +394,7 @@
     private bool ScheduleIsInvalid => _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is null;
     private int? ParsedLimit => int.TryParse(_limitRaw, out var n) && n > 0 ? n : null;
     private bool LimitIsInvalid => _limitEnabled && ParsedLimit is null;
-    private int? ParsedAbsenceThreshold => int.TryParse(_absenceThresholdRaw, out var n) && n >= 1 ? n : null;
-    private bool AbsenceThresholdIsInvalid => _strategyMode == StrategyMode.Mirror && ParsedAbsenceThreshold is null;
-    private bool AbsenceThresholdIsRisky => _strategyMode == StrategyMode.Mirror && ParsedAbsenceThreshold == 1;
-    private string AbsenceHelperClass => AbsenceThresholdIsInvalid ? "text-destructive" : AbsenceThresholdIsRisky ? "text-amber-500" : "text-muted-foreground";
+    private string AbsenceToneClass => _absenceThreshold == 1 ? "text-amber-500" : "text-muted-foreground";
 
     private string SortField => _sort.Property;
     private ListSortDirection SortDir => _sort.Direction;
@@ -483,7 +442,7 @@
         _name = Value.Name;
         _provider = Value.Provider;
         _strategyMode = Value.Strategy is Mirror ? StrategyMode.Mirror : StrategyMode.Append;
-        _absenceThresholdRaw = (Value.Strategy is Mirror m ? m : new Mirror()).AbsenceThreshold.ToString();
+        _absenceThreshold = (Value.Strategy is Mirror m ? m : new Mirror()).AbsenceThreshold;
         _identifier = Value.Identifier;
         _filterEnabled = Value.Filter is not null;
         _filter = Value.Filter ?? new FilterDefinition();
@@ -513,13 +472,12 @@
         IsEnabled = _isEnabled,
         Name = _name,
         Provider = _provider,
-        Strategy = _strategyMode == StrategyMode.Mirror ? new FeedStrategy(ParsedAbsenceThreshold is { } threshold ? new Mirror(threshold) : new Mirror()) : new FeedStrategy(new Append()),
+        Strategy = _strategyMode == StrategyMode.Mirror ? new FeedStrategy(new Mirror(_absenceThreshold)) : new FeedStrategy(new Append()),
         Identifier = _identifier,
         Filter = _filterEnabled ? _filter : null,
         Sort = _sortEnabled ? _sort : null,
         Limit = _limitEnabled ? _limit : null,
         IsScheduleValid = !ScheduleIsInvalid,
-        IsStrategyValid = !AbsenceThresholdIsInvalid,
         IsProviderAvailable = !ProviderHasNoKey,
         Schedule = _scheduleMode == ScheduleMode.Scheduled && _scheduleCronExpression is not null
             ? new FeedRunTrigger(new Scheduled(_scheduleCronExpression))
@@ -541,9 +499,9 @@
         _strategyMode = v;
         NotifyChange();
     }
-    private void ChangeAbsenceThreshold(string v)
+    private void ChangeAbsenceThreshold(int v)
     {
-        _absenceThresholdRaw = v;
+        _absenceThreshold = v;
         NotifyChange();
     }
     private void ChangeIdentifier(string v)

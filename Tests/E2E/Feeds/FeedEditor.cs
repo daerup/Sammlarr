@@ -77,7 +77,9 @@ internal static class FeedEditor
 
 	internal static ILocator Toggle(IPage page, string label) => page.Field(label).Switch;
 
-	internal static ILocator Option(IPage page, string label, string value) => page.Field(label).Button(value);
+	internal static ILocator Option(IPage page, string label, string value) => page.Field(label).Radio(value);
+
+	internal static ILocator RunCount(IPage page) => page.Locator("input[aria-label='Runs missing before removal']");
 
 	internal static async Task AddConditionAsync(IPage page, string field, string value)
 	{

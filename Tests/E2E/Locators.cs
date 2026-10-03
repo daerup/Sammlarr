@@ -51,6 +51,8 @@ internal static class Locators
 
 		internal ILocator ButtonContaining(string name) => scope.GetByRole(AriaRole.Button, new LocatorGetByRoleOptions { Name = name });
 
+		internal ILocator Radio(string name) => scope.GetByRole(AriaRole.Radio, ExactIn(name));
+
 		internal ILocator Combobox => scope.GetByRole(AriaRole.Combobox);
 
 		internal ILocator Switch => scope.GetByRole(AriaRole.Switch);

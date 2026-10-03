@@ -126,13 +126,11 @@ public record FeedConfig
 
 	public bool IsScheduleValid { get; init; } = true;
 
-	public bool IsStrategyValid { get; init; } = true;
-
 	public bool IsProviderAvailable { get; init; } = true;
 
 	public bool IsTestable => Provider is not null && IsProviderAvailable && !string.IsNullOrWhiteSpace(Identifier) && (Limit is null || Limit.Count > 0);
 
-	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid && IsStrategyValid;
+	public bool IsValid => IsTestable && !string.IsNullOrWhiteSpace(Name) && IsScheduleValid;
 
 	public int GetPreviewHash() =>
 		HashCode.Combine(HashCode.Combine(Provider, Identifier, Filter is not null, Filter?.Version), HashCode.Combine(Sort, Limit, Strategy));
