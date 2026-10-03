@@ -3,6 +3,7 @@
 @using Contracts.Settings
 @using Domain.Identity
 @inject IProviderConfigService ProviderConfigService
+@inject RatingContext RatingContext
 @inject IApiKeyService ApiKeys
 @inject ICredentialService Credentials
 @inject ICurrentUser CurrentUser
@@ -94,6 +95,7 @@
 
     private async Task RefreshReadyAsync()
     {
+        RatingContext.Refresh();
         _ready =
         [
             .. (await Credentials.GetReadyAsync()).Select(provider => provider.AsMediaProvider()),

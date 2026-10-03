@@ -175,6 +175,15 @@ internal sealed class MediaService(
 		return mediaRepository.RemoveDetailsAsync([.. ids], cancellationToken);
 	}
 
+	public async Task<IReadOnlyDictionary<MediaId, RatingSummary>> GetStoredRatingsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
+	{
+		var stored = await mediaRepository.GetAsync([.. ids], cancellationToken);
+		return stored
+			.Select(media => media.Cached.Map(cached => (media.Identity.Id, cached.Details.Rating)))
+			.WhereSome()
+			.ToDictionary(entry => entry.Id, entry => entry.Rating);
+	}
+
 	public async Task<IReadOnlyDictionary<MediaId, IExternalMediaId>> GetSinkIdsAsync(IEnumerable<MediaId> ids, CancellationToken cancellationToken = default)
 	{
 		var sink = await activeSink.ResolveAsync(cancellationToken);

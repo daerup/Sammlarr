@@ -1,0 +1,46 @@
+@if (Art.Tile is { } tile)
+{
+    <ProviderTile Provider="tile" Size="16" Decorative="true"/>
+}
+else
+{
+    <img class="rating-mark" src="@Assets[$"_content/UI/providers/{Art.File}"]" alt="" width="16" height="16"/>
+}
+
+@code {
+    [Parameter] [EditorRequired] public required RatingSource Source { get; set; }
+
+    [Parameter] public Optional<IMediaRating> Rating { get; set; } = new None();
+
+    private RatingMark Shown => Rating.Map(rating => rating.Mark).GetValueOr(Plain);
+
+    private RatingMark Plain
+    {
+        get
+        {
+            return Source switch
+            {
+                RatingSource.Tmdb => RatingMark.Tmdb,
+                RatingSource.Imdb => RatingMark.Imdb,
+                RatingSource.RottenTomatoesCritics => RatingMark.Fresh,
+                RatingSource.RottenTomatoesAudience => RatingMark.Upright,
+            };
+        }
+    }
+
+    private (MediaProvider? Tile, string? File) Art
+    {
+        get
+        {
+            return Shown switch
+            {
+                RatingMark.Tmdb => (MediaProvider.Tmdb, null),
+                RatingMark.Imdb => (MediaProvider.Imdb, null),
+                RatingMark.Fresh => (null, "rt-fresh.svg"),
+                RatingMark.Rotten => (null, "rt-rotten.svg"),
+                RatingMark.Upright => (null, "rt-upright.svg"),
+                RatingMark.Spilled => (null, "rt-spilled.svg"),
+            };
+        }
+    }
+}

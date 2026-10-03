@@ -1,0 +1,46 @@
+@using System.Globalization
+
+<svg class="rating-star @(Shines ? "shine" : null)" viewBox="@MagpieGeometry.StarViewBox" width="@Size" height="@Size" style="@Margin" aria-hidden="true" focusable="false">
+    @if (Value is { } value)
+    {
+        <defs>
+            <clipPath id="@_clipId">
+                <rect x="@Number(MagpieGeometry.StarLeft)" y="@Number(FillTop(value))" width="@Number(MagpieGeometry.StarWidth)" height="@Number(FillHeight(value))"/>
+            </clipPath>
+        </defs>
+        <g class="rating-star-body">
+            <path d="@MagpieGeometry.Star" fill="currentColor" opacity="0.3"/>
+            <path d="@MagpieGeometry.Star" fill="currentColor" clip-path="url(#@_clipId)"/>
+        </g>
+        @if (Shines)
+        {
+            <path class="rating-star-rays" d="@MagpieGeometry.RatingRays" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>
+        }
+    }
+    else
+    {
+        <path d="@MagpieGeometry.Star" fill="none" stroke="currentColor" stroke-width="3.4" stroke-dasharray="5 3.5"/>
+    }
+</svg>
+
+@code {
+    private const float ShineFrom = 9.5f;
+
+    private readonly string _clipId = $"rating-star-{Guid.NewGuid():N}";
+
+    [Parameter] public float? Value { get; set; }
+
+    [Parameter] public int Size { get; set; } = 17;
+
+    private bool Shines => Value >= ShineFrom;
+
+    private string? Margin => Shines ? $"margin: 0 {Math.Round(Size * 0.14)}px" : null;
+
+    private static double Filled(float value) => Math.Clamp(value / 10d, 0, 1);
+
+    private static double FillHeight(float value) => MagpieGeometry.StarHeight * Filled(value);
+
+    private static double FillTop(float value) => MagpieGeometry.StarTop + MagpieGeometry.StarHeight * (1 - Filled(value));
+
+    private static string Number(double value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+}

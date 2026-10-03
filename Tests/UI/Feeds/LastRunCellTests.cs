@@ -20,6 +20,7 @@ using TUnit.Assertions.Enums;
 using UI.Features.Feeds.Components;
 using UI.Shared.Services;
 using UI.Shared.Services.Branding;
+using UI.Tests.Media;
 
 namespace UI.Tests.Feeds;
 
@@ -84,6 +85,7 @@ public class LastRunCellTests : BunitContext
 	private void RegisterServices()
 	{
 		Services.AddBlazorBlueprintComponents();
+		Services.AddSingleton(RatingStub.Context());
 		Services.AddLogging();
 
 		var media = IMediaService.Mock();

@@ -445,6 +445,13 @@ body:has([aria-modal="true"][data-state="open"]) [data-portal-content]:has(.next
     z-index: 40 !important;
 }
 
+@layer components {
+    .popover-band {
+        background: oklch(from var(--muted) calc(l - 0.08) c h);
+        border-bottom: 2px solid var(--border);
+    }
+}
+
 /* Classes the scanner cannot see because they are assembled in C# go here, e.g.
    @source inline("px-6 mt-7"); — plain literals in markup are found automatically. */
 

@@ -79,15 +79,6 @@ public readonly record struct RatingSummary(ValueSet<IMediaRating> Sources)
 {
 	public static readonly RatingSummary None = new([]);
 
-	public Optional<float> Average
-	{
-		get
-		{
-			var sources = Sources;
-			return Optional.When(sources.Count > 0, () => sources.Average(rating => rating.SammlarrValue));
-		}
-	}
-
 	public static RatingSummary From(IEnumerable<IMediaRating> sources) => new([.. sources.DistinctBy(rating => rating.Source)]);
 
 	public Optional<IMediaRating> Of(RatingSource source) => Sources.FirstOrNone(rating => rating.Source == source);

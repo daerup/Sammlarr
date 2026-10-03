@@ -3,7 +3,7 @@
 @inject IMediaService MediaService
 @inject ArtworkSources Artwork
 <div data-testid="media-tile" class="cursor-pointer group @(Media is UnmatchedMedia ? "tile-unmatched" : "")" @onclick="OnClick">
-    <div class="relative overflow-hidden rounded-lg media-card-backdrop @(Dimmed ? "media-card-dimmed" : "")">
+    <div class="relative overflow-hidden rounded-lg media-card-backdrop shine-host @(Dimmed ? "media-card-dimmed" : "")">
         @if (_failed)
         {
             <div class="media-card-failed">
@@ -42,13 +42,7 @@
         }
 
         <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-            @if (Details.Rating.Average is Some<float>(var rating))
-            {
-                <div class="flex items-center gap-1.5 text-yellow-400 text-sm tracking-wide antialiased">
-                    <LucideIcon Name="star" Size="16" Fill="currentColor"/>
-                    <span class="font-medium">@(rating == 0 ? "N/A" : rating.ToString("F1"))</span>
-                </div>
-            }
+            <SammlarrRatingBadge Ratings="@Details.Rating" Ids="@([.. Media.Externals])" Title="@Details.Title" Look="RatingBadgeLook.OnImage" Size="17" StoredOnly="RatingsStoredOnly"/>
 
             @if (Details.Tagline is not null)
             {
@@ -82,6 +76,7 @@
     [Parameter] public bool ShowBookmark { get; set; }
     [Parameter] public bool IsInWantlist { get; set; }
     [Parameter] public bool Dimmed { get; set; }
+    [Parameter] public bool RatingsStoredOnly { get; set; }
 
     private MediaDetails Details => Media.Details;
 

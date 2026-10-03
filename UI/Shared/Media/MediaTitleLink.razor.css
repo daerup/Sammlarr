@@ -5,8 +5,6 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted-foreground);
-    background: oklch(from var(--muted) calc(l - 0.08) c h);
-    border-bottom: 2px solid var(--border);
 }
 
 .id-links-popover-list {
