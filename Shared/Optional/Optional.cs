@@ -18,6 +18,8 @@ public static class Optional
 {
     public static Optional<T> Of<T>(T? value) where T : class => value is not null ? Some.Of(value) : new None();
 
+    public static Optional<T> Of<T>(T? value) where T : struct => value is { } present ? Some.Of(present) : new None();
+
     [SuppressArchTest]
     public static async Task<Optional<T>> Of<T>(Task<T?> value) where T : class => Of(await value);
 }

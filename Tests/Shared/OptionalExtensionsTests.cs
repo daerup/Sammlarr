@@ -1,4 +1,5 @@
 using TestInfrastructure;
+using TUnit.Assertions.Enums;
 
 namespace Shared.Tests;
 
@@ -31,7 +32,7 @@ public class OptionalExtensionsTests
 
 		var result = optional.Map(value => value.ToString());
 
-		await Assert.That(result.GetValueOr("none")).IsEqualTo("5");
+		await Assert.That(result).IsSome().And.IsEqualTo("5");
 	}
 
 	[Test]
@@ -51,7 +52,7 @@ public class OptionalExtensionsTests
 
 		var result = optional.Map(ToLabel);
 
-		await Assert.That(result.GetValueOr("none")).IsEqualTo("n4");
+		await Assert.That(result).IsSome().And.IsEqualTo("n4");
 	}
 
 	[Test]
@@ -96,7 +97,7 @@ public class OptionalExtensionsTests
 
 		var result = optional.Or(Some.Of(9));
 
-		await Assert.That(result.GetValueOr(0)).IsEqualTo(9);
+		await Assert.That(result).IsSome().And.IsEqualTo(9);
 	}
 
 	[Test]
@@ -106,7 +107,7 @@ public class OptionalExtensionsTests
 
 		var result = optional.Or(() => Some.Of(9));
 
-		await Assert.That(result.GetValueOr(0)).IsEqualTo(1);
+		await Assert.That(result).IsSome().And.IsEqualTo(1);
 	}
 
 	[Test]
@@ -116,7 +117,7 @@ public class OptionalExtensionsTests
 
 		var result = await optional.Or(() => Task.FromResult<Optional<int>>(Some.Of(9)));
 
-		await Assert.That(result.GetValueOr(0)).IsEqualTo(9);
+		await Assert.That(result).IsSome().And.IsEqualTo(9);
 	}
 
 	[Test]
@@ -131,7 +132,7 @@ public class OptionalExtensionsTests
 			return Task.FromResult<Optional<int>>(Some.Of(9));
 		});
 
-		await Assert.That(result.GetValueOr(0)).IsEqualTo(1);
+		await Assert.That(result).IsSome().And.IsEqualTo(1);
 		await Assert.That(invoked).IsFalse();
 	}
 
@@ -144,7 +145,7 @@ public class OptionalExtensionsTests
 		var result = optional.Apply(value => captured = value);
 
 		await Assert.That(captured).IsEqualTo(7);
-		await Assert.That(result.GetValueOr(0)).IsEqualTo(7);
+		await Assert.That(result).IsSome().And.IsEqualTo(7);
 	}
 
 	[Test]
@@ -175,7 +176,7 @@ public class OptionalExtensionsTests
 
 		var result = await optional.Map(value => Task.FromResult(value + 1));
 
-		await Assert.That(result.GetValueOr(0)).IsEqualTo(4);
+		await Assert.That(result).IsSome().And.IsEqualTo(4);
 	}
 
 	[Test]
@@ -205,7 +206,7 @@ public class OptionalExtensionsTests
 
 		Optional<string> mapped = optional.Map(value => Some.Of(value.ToString()));
 
-		await Assert.That(mapped.GetValueOr("none")).IsEqualTo("4");
+		await Assert.That(mapped).IsSome().And.IsEqualTo("4");
 	}
 
 	[Test]
@@ -214,14 +215,16 @@ public class OptionalExtensionsTests
 		Optional<int> optional = Some.Of(7);
 		var captured = 0;
 
-		var applied = await optional.Apply(async value =>
+		var applied = await optional.Apply(CaptureAsync);
+
+		await Assert.That(captured).IsEqualTo(7);
+		await Assert.That(applied).IsSome().And.IsEqualTo(7);
+
+		async Task CaptureAsync(int value)
 		{
 			await Task.Yield();
 			captured = value;
-		});
-
-		await Assert.That(captured).IsEqualTo(7);
-		await Assert.That(applied.GetValueOr(0)).IsEqualTo(7);
+		}
 	}
 
 	[Test]
@@ -243,7 +246,7 @@ public class OptionalExtensionsTests
 	[Test]
 	public async Task Of_WhenNotNull_IsSome()
 	{
-		await Assert.That(Optional.Of((string?)"x").GetValueOr("none")).IsEqualTo("x");
+		await Assert.That(Optional.Of((string?)"x")).IsSome().And.IsEqualTo("x");
 	}
 
 	[Test]
@@ -273,7 +276,7 @@ public class OptionalExtensionsTests
 	{
 		Optional<int> optional = Some.Of(5);
 
-		await Assert.That(optional.When(value => value > 1).GetValueOr(0)).IsEqualTo(5);
+		await Assert.That(optional.When(value => value > 1)).IsSome().And.IsEqualTo(5);
 	}
 
 	[Test]
@@ -291,7 +294,7 @@ public class OptionalExtensionsTests
 	{
 		Optional<int> optional = Some.Of(5);
 
-		await Assert.That(optional.ToResult("missing").GetValueOr(0)).IsEqualTo(5);
+		await Assert.That(optional.ToResult("missing")).IsSuccess().And.IsEqualTo(5);
 	}
 
 	[Test]
@@ -331,7 +334,7 @@ public class OptionalExtensionsTests
 	{
 		var result = await new[] { 0, 0, 2 }.FirstSomeAsync(n => Task.FromResult(ToLabel(n)));
 
-		await Assert.That(result.GetValueOr("none")).IsEqualTo("n2");
+		await Assert.That(result).IsSome().And.IsEqualTo("n2");
 	}
 
 	[Test]
@@ -395,14 +398,16 @@ public class OptionalExtensionsTests
 		Optional<int> optional = new None();
 		var invoked = false;
 
-		var result = await optional.ApplyNone(async () =>
-		{
-			await Task.Yield();
-			invoked = true;
-		});
+		var result = await optional.ApplyNone(InvokeAsync);
 
 		await Assert.That(invoked).IsTrue();
 		await Assert.That(result).IsNone();
+
+		async Task InvokeAsync()
+		{
+			await Task.Yield();
+			invoked = true;
+		}
 	}
 
 	[Test]
@@ -410,7 +415,7 @@ public class OptionalExtensionsTests
 	{
 		var result = await ToAsync<string?>(null, "a", "bb", "ccc").FirstOrNoneAsync(s => s.Length >= 2);
 
-		await Assert.That(result.GetValueOr("none")).IsEqualTo("bb");
+		await Assert.That(result).IsSome().And.IsEqualTo("bb");
 	}
 
 	[Test]
@@ -419,6 +424,137 @@ public class OptionalExtensionsTests
 		var result = await ToAsync<string?>(null, "a").FirstOrNoneAsync(s => s.Length >= 5);
 
 		await Assert.That(result).IsNone();
+	}
+
+	[Test]
+	public async Task Of_WhenNullValueType_IsNone()
+	{
+		await Assert.That(Optional.Of((int?)null)).IsNone();
+	}
+
+	[Test]
+	public async Task Of_WhenNonNullValueType_IsSome()
+	{
+		await Assert.That(Optional.Of((int?)4)).IsSome().And.IsEqualTo(4);
+	}
+
+	[Test]
+	public async Task ToNullable_WhenSomeReference_IsTheValue()
+	{
+		Optional<string> optional = Some.Of("x");
+
+		await Assert.That(optional.ToNullable()).IsEqualTo("x");
+	}
+
+	[Test]
+	public async Task ToNullable_WhenNoneReference_IsNull()
+	{
+		Optional<string> optional = new None();
+
+		await Assert.That(optional.ToNullable()).IsNull();
+	}
+
+	[Test]
+	public async Task ToNullable_WhenSomeValueType_IsTheValue()
+	{
+		Optional<int> optional = Some.Of(3);
+
+		await Assert.That(optional.ToNullable()).IsEqualTo(3);
+	}
+
+	[Test]
+	public async Task ToNullable_WhenNoneValueType_IsNull()
+	{
+		Optional<int> optional = new None();
+
+		await Assert.That(optional.ToNullable()).IsNull();
+	}
+
+	[Test]
+	public async Task GetValueOrNone_WhenTheKeyIsPresent_IsSome()
+	{
+		var source = new Dictionary<string, int> { ["a"] = 1 };
+
+		await Assert.That(source.GetValueOrNone("a")).IsSome().And.IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task GetValueOrNone_WhenTheKeyIsMissing_IsNone()
+	{
+		var source = new Dictionary<string, int> { ["a"] = 1 };
+
+		await Assert.That(source.GetValueOrNone("b")).IsNone();
+	}
+
+	[Test]
+	public async Task WhereSome_WhenSomeAndNoneMixed_KeepsThePresentValuesInOrder()
+	{
+		Optional<int>[] source = [Some.Of(3), new None(), Some.Of(1)];
+
+		await Assert.That(source.WhereSome()).IsEquivalentTo([3, 1], CollectionOrdering.Matching);
+	}
+
+	[Test]
+	public async Task When_WhenConditionTrue_KeepsValue()
+	{
+		Optional<int> optional = Some.Of(5);
+
+		await Assert.That(optional.When(true)).IsSome().And.IsEqualTo(5);
+	}
+
+	[Test]
+	public async Task When_WhenNone_IsNoneWithoutAskingThePredicate()
+	{
+		Optional<int> optional = new None();
+		var asked = false;
+
+		var result = optional.When(_ => asked = true);
+
+		await Assert.That(result).IsNone();
+		await Assert.That(asked).IsFalse();
+	}
+
+	[Test]
+	public async Task Or_WhenSomeAndOptionalFallback_KeepsOriginal()
+	{
+		Optional<int> optional = Some.Of(1);
+
+		await Assert.That(optional.Or(Some.Of(9))).IsSome().And.IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task ToResult_WhenNoneAndAnError_IsThatError()
+	{
+		Optional<int> optional = new None();
+		var error = Error.From("missing");
+
+		await Assert.That(optional.ToResult(error)).IsError().And.IsSameReferenceAs(error);
+	}
+
+	[Test]
+	public async Task SomeOf_WhenGivenATask_AwaitsItsValue()
+	{
+		var some = await Some.Of(Task.FromResult(6));
+
+		await Assert.That(some.Value).IsEqualTo(6);
+	}
+
+	[Test]
+	public async Task Apply_WhenChainedOnATask_FinishesTheAsyncStepBeforeTheNext()
+	{
+		var steps = new List<string>();
+		var start = Task.FromResult<Optional<int>>(Some.Of(1));
+
+		var present = await start.Apply(_ => FirstAsync()).Apply(_ => steps.Add("second")).IsSome();
+
+		await Assert.That(present).IsTrue();
+		await Assert.That(steps).IsEquivalentTo(["first", "second"], CollectionOrdering.Matching);
+
+		async Task FirstAsync()
+		{
+			await Task.Delay(20);
+			steps.Add("first");
+		}
 	}
 
 	private static async IAsyncEnumerable<T> ToAsync<T>(params T[] items)

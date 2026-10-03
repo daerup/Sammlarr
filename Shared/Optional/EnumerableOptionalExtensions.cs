@@ -14,4 +14,22 @@ public static class EnumerableOptionalExtensions
 		}
 		return new None();
 	}
+
+	public static Optional<TValue> GetValueOrNone<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> source, TKey key)
+		where TValue : notnull
+	{
+		return source.TryGetValue(key, out var value) ? Some.Of(value) : new None();
+	}
+
+	public static IEnumerable<T> WhereSome<T>(this IEnumerable<Optional<T>> source)
+		where T : notnull
+	{
+		foreach (var item in source)
+		{
+			if (item is Some<T>(var value))
+			{
+				yield return value;
+			}
+		}
+	}
 }

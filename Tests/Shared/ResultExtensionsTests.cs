@@ -31,7 +31,7 @@ public class ResultExtensionsTests
 
 		var mapped = result.Map(value => value.ToString());
 
-		await Assert.That(mapped.GetValueOr("none")).IsEqualTo("5");
+		await Assert.That(mapped).IsSuccess().And.IsEqualTo("5");
 	}
 
 	[Test]
@@ -51,7 +51,7 @@ public class ResultExtensionsTests
 
 		var bound = result.Map(Halve);
 
-		await Assert.That(bound.GetValueOr(-1)).IsEqualTo(2);
+		await Assert.That(bound).IsSuccess().And.IsEqualTo(2);
 	}
 
 	[Test]
@@ -95,7 +95,7 @@ public class ResultExtensionsTests
 	{
 		Result<int> result = Success.Of(7);
 
-		await Assert.That(result.ToOptional().GetValueOr(0)).IsEqualTo(7);
+		await Assert.That(result.ToOptional()).IsSome().And.IsEqualTo(7);
 	}
 
 	[Test]
@@ -124,7 +124,7 @@ public class ResultExtensionsTests
 		var applied = result.Apply(value => captured = value);
 
 		await Assert.That(captured).IsEqualTo(7);
-		await Assert.That(applied.GetValueOr(0)).IsEqualTo(7);
+		await Assert.That(applied).IsSuccess().And.IsEqualTo(7);
 	}
 
 	[Test]
@@ -145,7 +145,7 @@ public class ResultExtensionsTests
 
 		var mapped = await result.Map(value => Task.FromResult(value + 1));
 
-		await Assert.That(mapped.GetValueOr(0)).IsEqualTo(4);
+		await Assert.That(mapped).IsSuccess().And.IsEqualTo(4);
 	}
 
 	[Test]
@@ -189,7 +189,7 @@ public class ResultExtensionsTests
 
 		Result<string> mapped = result.Map(value => Success.Of(value.ToString()));
 
-		await Assert.That(mapped.GetValueOr("none")).IsEqualTo("4");
+		await Assert.That(mapped).IsSuccess().And.IsEqualTo("4");
 	}
 
 	[Test]
@@ -248,7 +248,7 @@ public class ResultExtensionsTests
 
 		Result<string> mapped = await result.Map(value => Task.FromResult(Success.Of(value.ToString())));
 
-		await Assert.That(mapped.GetValueOr("none")).IsEqualTo("4");
+		await Assert.That(mapped).IsSuccess().And.IsEqualTo("4");
 	}
 
 	[Test]
@@ -257,14 +257,16 @@ public class ResultExtensionsTests
 		Result<int> result = Success.Of(7);
 		var captured = 0;
 
-		var applied = await result.Apply(async value =>
+		var applied = await result.Apply(CaptureAsync);
+
+		await Assert.That(captured).IsEqualTo(7);
+		await Assert.That(applied).IsSuccess().And.IsEqualTo(7);
+
+		async Task CaptureAsync(int value)
 		{
 			await Task.Yield();
 			captured = value;
-		});
-
-		await Assert.That(captured).IsEqualTo(7);
-		await Assert.That(applied.GetValueOr(0)).IsEqualTo(7);
+		}
 	}
 
 	[Test]
@@ -273,13 +275,15 @@ public class ResultExtensionsTests
 		Result<int> result = Error.From("boom");
 		var captured = "";
 
-		await result.ApplyError(async error =>
+		await result.ApplyError(CaptureAsync);
+
+		await Assert.That(captured).IsEqualTo("boom");
+
+		async Task CaptureAsync(Error error)
 		{
 			await Task.Yield();
 			captured = error.Reason;
-		});
-
-		await Assert.That(captured).IsEqualTo("boom");
+		}
 	}
 
 	[Test]
@@ -310,7 +314,7 @@ public class ResultExtensionsTests
 	{
 		var result = Result.WhenNotNull((string?)"x", "missing");
 
-		await Assert.That(result.GetValueOr("none")).IsEqualTo("x");
+		await Assert.That(result).IsSuccess().And.IsEqualTo("x");
 	}
 
 	[Test]
@@ -330,7 +334,7 @@ public class ResultExtensionsTests
 
 		var filtered = result.When(value => value.Length > 3, "too short");
 
-		await Assert.That(filtered.GetValueOr("none")).IsEqualTo("xyzw");
+		await Assert.That(filtered).IsSuccess().And.IsEqualTo("xyzw");
 	}
 
 	[Test]
@@ -356,7 +360,7 @@ public class ResultExtensionsTests
 	{
 		var result = await Result.WhenNotNull(Task.FromResult<string?>("x"), "missing");
 
-		await Assert.That(result.GetValueOr("none")).IsEqualTo("x");
+		await Assert.That(result).IsSuccess().And.IsEqualTo("x");
 	}
 
 	[Test]
