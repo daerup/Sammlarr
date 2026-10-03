@@ -190,14 +190,10 @@ public class PushoverChannelTests
 
 	private static NotificationTarget PushoverTarget() => new(Guid.NewGuid(), "Push", true, new PushoverConfig("app-token", "user-key"));
 
-	private static NotificationTemplate Template(
-		string? title = null,
-		string? message = null,
-		NotificationLevel? level = null,
-		PushoverPriority? priority = null
-	) => new(new None(), Opt(title), Opt(message), level is { } value ? Some.Of(value) : new None(), priority is { } chosen ? Some.Of(chosen) : new None());
-
-	private static Optional<string> Opt(string? value) => value is null ? new None() : Some.Of(value);
+	private static NotificationTemplate Template(string? title = null, string? message = null, NotificationLevel? level = null, PushoverPriority? priority = null)
+	{
+		return new NotificationTemplate(new None(), Optional.Of(title), Optional.Of(message), Optional.Of(level), Optional.Of(priority));
+	}
 
 	private static Dictionary<string, string> Form(CapturingHandler handler) =>
 		Encoding

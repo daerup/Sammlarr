@@ -109,6 +109,13 @@ constant `case` stop compiling. A `null` passed where an `Optional<T>` is expect
 that holds no case: pass `new None()`. A value handed over untyped (`RenderTreeBuilder.AddAttribute`, a
 parameter dictionary) is not converted at all and fails at run time: pass `Optional.Of(x)`.
 
+The build enforces this. The `Analyzers` project's `SAM0002` fails it on a hand match outside these guards, on a null
+or constant pattern against a monad, on `null` or `default` converted to one, on a block lambda or an unawaited `Task` or `ValueTask` step passed to
+`Apply`, and on a monad used as an ordering key or written as text; its message names the helper to use. `SAM0003` warns
+when a branch reads a monad as a `bool` (`if (x.IsSome())`, `if (x.Map(…).GetValueOr(false))`) and proposes the
+`Apply` / `ApplyNone` / `ApplyError` or `Match` chain instead. The `AbsenceTests` architecture test fails on a nullable
+non-private member outside the framework edges and bridges listed in it.
+
 === Modularity and dependency injection
 
 Every layer and provider ships an `IServiceModule`; `Web`'s `Program.cs` composes them with `AddModule<T>()`

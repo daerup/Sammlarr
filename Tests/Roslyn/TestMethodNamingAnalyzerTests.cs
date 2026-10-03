@@ -8,11 +8,6 @@ namespace Roslyn.Tests;
 
 public class TestMethodNamingAnalyzerTests
 {
-	private static readonly MetadataReference[] References =
-	[
-		.. ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!).Split(Path.PathSeparator).Select(path => MetadataReference.CreateFromFile(path)),
-	];
-
 	[Test]
 	[Arguments("From_WhenEmptyGuid_Throws")]
 	[Arguments("SendAsync_WhenUnauthorized_IsUnrecoverable")]
@@ -65,7 +60,7 @@ public class TestMethodNamingAnalyzerTests
 		var compilation = CSharpCompilation.Create(
 			"Probe",
 			[CSharpSyntaxTree.ParseText(source)],
-			References,
+			MonadCompilation.References,
 			new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
 		);
 

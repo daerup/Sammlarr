@@ -219,3 +219,6 @@ end_of_line = crlf
 [Shared/{Optional,Result}/*.cs]
 dotnet_style_namespace_match_folder = false
 resharper_check_namespace_highlighting = none
+
+[{Core/Media/**.cs,Tests/Core/Media/**.cs}]
+dotnet_diagnostic.SAM0002.severity = none
