@@ -185,7 +185,7 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWantlist(MediaLookup media) => !media.IsUnmatched && _wantlist.Contains(media.Id);
+    private bool IsInWantlist(MediaLookup media) => media is IdentifiedMedia identified && _wantlist.Contains(identified.Identity.Id);
 
     private void SelectMedia(MediaLookup media)
     {

@@ -8,18 +8,18 @@
 @code {
     private static readonly DateOnly Today = DateOnly.FromDateTime(DemoFeeds.Now.LocalDateTime);
 
-    private static readonly IReadOnlyDictionary<MediaId, MediaLookup> Media = new Dictionary<MediaId, MediaLookup>
+    private static readonly IReadOnlyDictionary<MediaId, IdentifiedMedia> Media = new Dictionary<MediaId, IdentifiedMedia>
     {
-        [DemoMedia.Movie.Id] = DemoMedia.Movie,
-        [DemoMedia.Show.Id] = DemoMedia.Show,
-        [DemoMedia.Gohan.Id] = DemoMedia.Gohan,
-        [DemoMedia.YellowMirror.Id] = DemoMedia.YellowMirror,
+        [DemoMedia.Movie.Identity.Id] = DemoMedia.Movie,
+        [DemoMedia.Show.Identity.Id] = DemoMedia.Show,
+        [DemoMedia.Gohan.Identity.Id] = DemoMedia.Gohan,
+        [DemoMedia.YellowMirror.Identity.Id] = DemoMedia.YellowMirror,
     };
 
     private static readonly ActivityDay Day = new(
         Today,
-        [DemoMedia.Movie.Id, DemoMedia.Gohan.Id, DemoMedia.YellowMirror.Id],
-        [DemoMedia.Show.Id],
+        [DemoMedia.Movie.Identity.Id, DemoMedia.Gohan.Identity.Id, DemoMedia.YellowMirror.Identity.Id],
+        [DemoMedia.Show.Identity.Id],
         [new FeedContribution(DemoFeeds.MirrorFeed.Id, DemoFeeds.MirrorFeed.Name, 3, 1, 1, DemoFeeds.MirrorRun.Id)],
         [new ActivityRun(DemoFeeds.MirrorRun, DemoFeeds.MirrorFeed.Name)],
         [new ActivityRun(DemoFeeds.FailedRun, DemoFeeds.TrendingFeed.Name)],

@@ -2,7 +2,7 @@
 @using Contracts.Media.Artwork
 @inject IMediaService MediaService
 @inject ArtworkSources Artwork
-<div data-testid="media-tile" class="cursor-pointer group @(Media.IsUnmatched ? "tile-unmatched" : "")" @onclick="OnClick">
+<div data-testid="media-tile" class="cursor-pointer group @(Media is UnmatchedMedia ? "tile-unmatched" : "")" @onclick="OnClick">
     <div class="relative overflow-hidden rounded-lg media-card-backdrop @(Dimmed ? "media-card-dimmed" : "")">
         @if (_failed)
         {
@@ -16,7 +16,7 @@
             <div class="media-card-scrim"></div>
         }
 
-        @if (Media.IsUnmatched)
+        @if (Media is UnmatchedMedia)
         {
             <div class="absolute top-4 right-4 z-10">
                 <BbTooltipProvider>
@@ -42,7 +42,7 @@
         }
 
         <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-            @if (Media.Rating is { } rating)
+            @if (Details.Rating.Average is { } rating)
             {
                 <div class="flex items-center gap-1.5 text-yellow-400 text-sm tracking-wide antialiased">
                     <LucideIcon Name="star" Size="16" Fill="currentColor"/>
@@ -50,23 +50,23 @@
                 </div>
             }
 
-            @if (!string.IsNullOrWhiteSpace(Media.Tagline))
+            @if (!string.IsNullOrWhiteSpace(Details.Tagline))
             {
-                <h3 class="text-white text-base font-bold text-lg">@Media.Title</h3>
+                <h3 class="text-white text-base font-bold text-lg">@Details.Title</h3>
             }
 
             <div class="flex items-end justify-between gap-2">
-                @if (!string.IsNullOrWhiteSpace(Media.Tagline))
+                @if (!string.IsNullOrWhiteSpace(Details.Tagline))
                 {
-                    <p class="text-white text-xs line-clamp-2">@Media.Tagline</p>
+                    <p class="text-white text-xs line-clamp-2">@Details.Tagline</p>
                 }
                 else
                 {
-                    <h3 class="text-white text-base font-bold text-lg">@Media.Title</h3>
+                    <h3 class="text-white text-base font-bold text-lg">@Details.Title</h3>
                 }
-                @if (Media.ReleaseDate > DateOnly.MinValue)
+                @if (Details.ReleaseDate is { } released)
                 {
-                    <span class="text-white/70 font-medium text-sm shrink-0">@Media.ReleaseDate.ToString("MMM d, yyyy")</span>
+                    <span class="text-white/70 font-medium text-sm shrink-0">@released.ToString("MMM d, yyyy")</span>
                 }
             </div>
         </div>
@@ -83,6 +83,8 @@
     [Parameter] public bool IsInWantlist { get; set; }
     [Parameter] public bool Dimmed { get; set; }
 
+    private MediaDetails Details => Media.Details;
+
     private const string Sizes = "(min-width: 768px) calc(30vw - 40px), calc(120vw - 76px)";
     private static readonly ArtworkSize[] Candidates = [new(780, 413), new(1280, 678)];
 
@@ -94,19 +96,19 @@
 
     protected override void OnParametersSet()
     {
-        if (_lastImageUrl != Media.BackdropUrl)
+        if (_lastImageUrl != Details.BackdropUrl)
         {
-            _lastImageUrl = Media.BackdropUrl;
-            Show(Media.BackdropUrl);
+            _lastImageUrl = Details.BackdropUrl;
+            Show(Details.BackdropUrl);
             _isShowingPoster = false;
             _failed = false;
         }
     }
 
-    private void Show(string url)
+    private void Show(string? url)
     {
-        _src = url;
-        _srcSet = Artwork.ByWidth(url, Candidates);
+        _src = url ?? string.Empty;
+        _srcSet = url is null ? null : Artwork.ByWidth(url, Candidates);
     }
 
     private async Task OnImageError()
@@ -117,16 +119,16 @@
             return;
         }
 
-        if (_isShowingPoster || string.IsNullOrWhiteSpace(Media.PosterUrl))
+        if (_isShowingPoster || string.IsNullOrWhiteSpace(Details.PosterUrl))
         {
             _failed = true;
-            if (!Media.IsUnmatched)
+            if (Media is IdentifiedMedia identified)
             {
-                await MediaService.InvalidateAsync([Media.Id]);
+                await MediaService.InvalidateAsync([identified.Identity.Id]);
             }
             return;
         }
         _isShowingPoster = true;
-        Show(Media.PosterUrl);
+        Show(Details.PosterUrl);
     }
 }

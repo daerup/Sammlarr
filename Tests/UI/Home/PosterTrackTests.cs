@@ -28,7 +28,7 @@ public class PosterTrackTests : BunitContext
 		var cut = Render<PosterTrack>(parameters =>
 			parameters
 				.Add(track => track.Ids, [First, Second])
-				.Add(track => track.Media, new Dictionary<MediaId, MediaLookup>())
+				.Add(track => track.Media, new Dictionary<MediaId, IdentifiedMedia>())
 				.Add(track => track.OnNeedMedia, ids => requests.Add(ids))
 		);
 
@@ -41,9 +41,9 @@ public class PosterTrackTests : BunitContext
 	[Test]
 	public async Task ImageError_WhenTheSizedPosterFails_FallsBackToTheOriginal()
 	{
-		var media = new IdentifiedMedia(new MediaIdentity(First, []), new MovieDetails { PosterUrl = Poster }).ToMatch();
+		var media = new IdentifiedMedia(new MediaIdentity(First, []), new MovieDetails { PosterUrl = Poster });
 		var cut = Render<PosterTrack>(parameters =>
-			parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, MediaLookup> { [First] = media })
+			parameters.Add(track => track.Ids, [First]).Add(track => track.Media, new Dictionary<MediaId, IdentifiedMedia> { [First] = media })
 		);
 		await Assert.That(cut.Find("img.track-poster").GetAttribute("srcset")).IsEqualTo($"{Poster}?width=110 1x, {Poster}?width=220 2x");
 

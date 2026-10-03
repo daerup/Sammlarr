@@ -92,7 +92,7 @@ else
     private IReadOnlyList<ChangeItem> _items = [];
     private MediaLookup? _selected;
 
-    private Task ShowDetailsAsync(MediaLookup media)
+    private Task ShowDetailsAsync(IdentifiedMedia media)
     {
         _selected = media;
         return Task.CompletedTask;
@@ -112,13 +112,13 @@ else
         }
 
         var wanted = _run.Items.Where(item => item.State is not FeedRunItemState.Kept).Select(item => item.MediaId).ToList();
-        var described = new Dictionary<MediaId, MediaLookup>();
+        var described = new Dictionary<MediaId, IdentifiedMedia>();
 
         await foreach (var result in Media.GetDetailsAsync(wanted))
         {
             if (result is Success<IdentifiedMedia>(var media))
             {
-                described[media.Id] = media;
+                described[media.Identity.Id] = media;
             }
         }
 

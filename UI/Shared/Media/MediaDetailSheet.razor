@@ -19,33 +19,34 @@
         @if (Media.HasValue)
         {
             var media = Media.Value;
+            var details = media.Details;
             <div class="space-y-6">
                 <div class="media-sheet-hero">
-                    @if (_failed || string.IsNullOrWhiteSpace(media.PosterUrl))
+                    @if (_failed || string.IsNullOrWhiteSpace(details.PosterUrl))
                     {
                         <div class="media-sheet-poster relative overflow-hidden">
                             <div class="w-full h-full bg-muted flex items-center justify-center">
-                                <LucideIcon Name="@(media.MediaType is MediaType.Movie ? "film" : "tv")" Size="64" Class="text-muted-foreground"/>
+                                <LucideIcon Name="@(details.Type is MediaType.Movie ? "film" : "tv")" Size="64" Class="text-muted-foreground"/>
                             </div>
                         </div>
                     }
                     else
                     {
-                        <PosterFade Src="@media.PosterUrl" Alt="@media.Title" OnError="OnImageError"/>
+                        <PosterFade Src="@details.PosterUrl" Alt="@details.Title" OnError="OnImageError"/>
                     }
                 </div>
 
                 <BbSheetHeader Class="media-sheet-meta">
-                    @if (!media.IsUnmatched)
+                    @if (media is IdentifiedMedia identified)
                     {
                         <div class="media-sheet-toggles">
-                            <WantlistProvenanceToggle Result="media"
+                            <WantlistProvenanceToggle Result="identified"
                                                        Size="18"
                                                        IsToggled="IsWantlisted"
                                                        IsToggling="_togglingWantlist"
                                                        Item="@(_item is Some<WantlistItem>(var shown) ? shown : null)"
                                                        OnToggle="ToggleWantlistAsync"/>
-                            <BlocklistToggleIcon Result="media"
+                            <BlocklistToggleIcon Result="identified"
                                                  Size="18"
                                                  IsToggled="_blocklisted"
                                                  IsToggling="_togglingBlocklist"
@@ -53,23 +54,23 @@
                         </div>
                     }
                     <BbSheetTitle Class="font-bold tracking-wide text-xl">
-                        <MediaTitleLink Title="@media.Title" Ids="@media.ExternalIds" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
+                        <MediaTitleLink Title="@details.Title" Ids="@(media.Externals.ToList())" Side="PopoverSide.Bottom" Align="PopoverAlign.Center"/>
                     </BbSheetTitle>
                     <BbSheetDescription Class="font-normal tracking-wide">
                         <span class="media-sheet-meta-line inline-flex items-center gap-1.5 flex-wrap">
-                            <LucideIcon Name="@(media.MediaType is MediaType.Movie ? "film" : "tv")" Size="16" Class="@(media.MediaType is MediaType.Movie ? "" : "meta-tv-icon")"/>
-                            <span>@media.MediaType.GetDescription()</span>
-                            @if (media.ReleaseDate > DateOnly.MinValue)
+                            <LucideIcon Name="@(details.Type is MediaType.Movie ? "film" : "tv")" Size="16" Class="@(details.Type is MediaType.Movie ? "" : "meta-tv-icon")"/>
+                            <span>@details.Type.GetDescription()</span>
+                            @if (details.ReleaseDate is { } released)
                             {
                                 <span aria-hidden="true">•</span>
-                                <span>@media.ReleaseDate.Year</span>
+                                <span>@released.Year</span>
                             }
-                            @foreach (var fact in MediaFacts.GetDisplayFacts(media))
+                            @foreach (var fact in MediaFacts.GetDisplayFacts(details))
                             {
                                 <span aria-hidden="true">•</span>
                                 <span>@fact</span>
                             }
-                            @if (media.Rating is { } rating)
+                            @if (details.Rating.Average is { } rating)
                             {
                                 <span aria-hidden="true">•</span>
                                 <span class="inline-flex items-center gap-1 text-yellow-400">
@@ -79,10 +80,10 @@
                             }
                         </span>
                     </BbSheetDescription>
-                    @if (media.Genres.Count > 0)
+                    @if (details.Genres.Count > 0)
                     {
                         <div class="flex flex-wrap justify-center gap-1.5">
-                            @foreach (var genre in media.Genres)
+                            @foreach (var genre in details.Genres)
                             {
                                 <BbBadge Variant="BadgeVariant.Secondary" Class="px-2 py-0.5">@genre</BbBadge>
                             }
@@ -90,12 +91,12 @@
                     }
                 </BbSheetHeader>
 
-                @if (!string.IsNullOrWhiteSpace(media.Summary))
+                @if (!string.IsNullOrWhiteSpace(details.Summary))
                 {
                     <div class="space-y-3">
                         <h3 class="text-sm font-bold tracking-wide">Overview</h3>
                         <p class="text-sm text-muted-foreground leading-relaxed font-normal tracking-wide antialiased">
-                            @media.Summary
+                            @details.Summary
                         </p>
                     </div>
                 }
@@ -132,17 +133,17 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var poster = Media.HasValue ? Media.Value.PosterUrl : null;
+        var poster = Media?.Details.PosterUrl;
         if (_lastImageUrl != poster)
         {
             _lastImageUrl = poster;
             _failed = false;
         }
 
-        if (Media is { } lookup && !lookup.IsUnmatched && _loadedFor != lookup.Id)
+        if (Media is IdentifiedMedia identified && _loadedFor != identified.Identity.Id)
         {
-            _loadedFor = lookup.Id;
-            await LoadEnrollmentAsync(lookup.Id);
+            _loadedFor = identified.Identity.Id;
+            await LoadEnrollmentAsync(identified.Identity.Id);
         }
     }
 
@@ -153,7 +154,7 @@
         _blocklisted = (await BlocklistService.GetAsync()).Contains(id);
     }
 
-    private async Task ToggleWantlistAsync(MediaLookup media)
+    private async Task ToggleWantlistAsync(IdentifiedMedia media)
     {
         if (_togglingWantlist)
         {
@@ -165,14 +166,14 @@
         {
             if (IsWantlisted)
             {
-                await WantlistService.RemoveAsync([media.Id]);
+                await WantlistService.RemoveAsync([media.Identity.Id]);
             }
             else
             {
-                await WantlistService.AddAsync([media.Id], new ManualOrigin(Source));
+                await WantlistService.AddAsync([media.Identity.Id], new ManualOrigin(Source));
             }
 
-            await LoadEnrollmentAsync(media.Id);
+            await LoadEnrollmentAsync(media.Identity.Id);
         }
         catch (Exception ex)
         {
@@ -184,10 +185,10 @@
         }
 
         await OnEnrollmentChanged.InvokeAsync(MediaListKind.Wantlist);
-        await LoadEnrollmentAsync(media.Id);
+        await LoadEnrollmentAsync(media.Identity.Id);
     }
 
-    private async Task ToggleBlocklistAsync(MediaLookup media)
+    private async Task ToggleBlocklistAsync(IdentifiedMedia media)
     {
         if (_togglingBlocklist)
         {
@@ -199,14 +200,14 @@
         {
             if (_blocklisted)
             {
-                await BlocklistService.RemoveAsync(media.Id);
+                await BlocklistService.RemoveAsync(media.Identity.Id);
             }
             else
             {
-                await BlocklistService.AddAsync(media.Id);
+                await BlocklistService.AddAsync(media.Identity.Id);
             }
 
-            await LoadEnrollmentAsync(media.Id);
+            await LoadEnrollmentAsync(media.Identity.Id);
         }
         catch (Exception ex)
         {
@@ -218,15 +219,15 @@
         }
 
         await OnEnrollmentChanged.InvokeAsync(MediaListKind.Blocklist);
-        await LoadEnrollmentAsync(media.Id);
+        await LoadEnrollmentAsync(media.Identity.Id);
     }
 
     private async Task OnImageError()
     {
         _failed = true;
-        if (Media.HasValue && !Media.Value.IsUnmatched)
+        if (Media is IdentifiedMedia identified)
         {
-            await MediaService.InvalidateAsync([Media.Value.Id]);
+            await MediaService.InvalidateAsync([identified.Identity.Id]);
         }
     }
 

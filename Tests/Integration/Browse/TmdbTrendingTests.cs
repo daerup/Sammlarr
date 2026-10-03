@@ -3,7 +3,6 @@ using Contracts.Media.Trending;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
-using Integration.Tests.Assertions;
 using TestInfrastructure;
 
 namespace Integration.Tests.Browse;
@@ -103,7 +102,7 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	private static async Task AssertResolvedAs(MediaLookup item, MediaSpec spec)
 	{
 		await Assert.That(item).IsOfUnionType<MediaLookup, IdentifiedMedia>();
-		await Assert.That(item.Title).IsEqualTo(spec.Title);
+		await Assert.That(item.Details.Title).IsEqualTo(spec.Title);
 		foreach (var id in spec.Ids)
 		{
 			await Assert.That(item.Externals.Any(external => external.Source == id.Provider && external.Value == id.Value)).IsTrue();
@@ -113,6 +112,6 @@ public class TmdbTrendingTests(SammlarrTestHost host) : IAsyncDisposable
 	private static async Task AssertUnmatched(MediaLookup item, string title)
 	{
 		await Assert.That(item).IsOfUnionType<MediaLookup, UnmatchedMedia>();
-		await Assert.That(item.Title).IsEqualTo(title);
+		await Assert.That(item.Details.Title).IsEqualTo(title);
 	}
 }

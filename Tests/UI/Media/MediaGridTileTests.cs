@@ -49,6 +49,6 @@ public class MediaGridTileTests : BunitContext
 
 	private static MediaLookup Lookup()
 	{
-		return new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = Backdrop, PosterUrl = Poster }).ToMatch();
+		return new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = Backdrop, PosterUrl = Poster });
 	}
 }

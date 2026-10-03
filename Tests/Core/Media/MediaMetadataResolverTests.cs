@@ -75,7 +75,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(resolved.Tagline).IsEqualTo("Your mind is the scene of the crime.");
+		await Assert.That(resolved.Details.Tagline).IsEqualTo("Your mind is the scene of the crime.");
 	}
 
 	[Test]
@@ -88,7 +88,7 @@ public class MediaMetadataResolverTests
 
 		var resolved = await Identified(await deps.Testee.ResolveAsync(Identity, buffer));
 
-		await Assert.That(resolved.Rating).IsEqualTo(TmdbRating);
+		await Assert.That(resolved.Details.Rating).IsEqualTo(TmdbRating);
 		deps.Tmdb.LookUpAsync(Any<IExternalMediaId>(), Any()).WasCalled(Times.Once);
 	}
 

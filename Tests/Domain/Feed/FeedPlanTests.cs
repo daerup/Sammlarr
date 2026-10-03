@@ -132,28 +132,34 @@ public class FeedPlanTests
 	}
 
 	private static IFeedPlan Compute(
-		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
+		IReadOnlyList<QueryVerdict<IdentifiedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
 		Completeness completeness = Completeness.Complete,
 		int unmatchedCount = 0,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
-	) =>
-		FeedPlans.Compute(
+	)
+	{
+		return FeedPlans.Compute(
 			new ClassifiedFeedLoad(verdicts, [.. Enumerable.Range(0, unmatchedCount).Select(Unmatched)], completeness),
 			owned.ToHashSet(),
 			(absences ?? [.. owned.Select(id => (Id: id, Absences: 10))]).ToDictionary(entry => entry.Id, entry => entry.Absences),
 			strategy ?? new Mirror(3)
 		);
+	}
 
 	private static MirrorPlan Mirrored(
-		IReadOnlyList<QueryVerdict<MediaLookup>> verdicts,
+		IReadOnlyList<QueryVerdict<IdentifiedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
-	) => (MirrorPlan)Compute(verdicts, owned, absences: absences);
+	)
+	{
+		return (MirrorPlan)Compute(verdicts, owned, absences: absences);
+	}
 
-	private static QueryVerdict<MediaLookup> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false) =>
-		new(
+	private static QueryVerdict<IdentifiedMedia> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+	{
+		return new(
 			Row(id),
 			outcome,
 			new Enrollment
@@ -164,12 +170,13 @@ public class FeedPlanTests
 			},
 			ConsumesSlot: true
 		);
+	}
 
 	private static MediaId Id(int seed) => MediaId.From(new Guid(seed, 0, 0, new byte[8]));
 
 	private static UnmatchedMedia Unmatched(int seed) => new([TmdbId.From($"unmatched-{seed}", MediaType.Movie)], new MovieDetails());
 
-	private static MediaLookup Row(MediaId id)
+	private static IdentifiedMedia Row(MediaId id)
 	{
 		return new IdentifiedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),

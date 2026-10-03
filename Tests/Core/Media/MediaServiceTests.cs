@@ -345,8 +345,9 @@ public class MediaServiceTests
 		requests[0] = new IdentifyRequest([shared], new None());
 		requests[55] = new IdentifyRequest([shared], new None());
 
-		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Identified().ToList();
 
+		await Assert.That(results).Count().IsEqualTo(requests.Count);
 		await Assert.That(results[0].Identity.Id).IsEqualTo(results[55].Identity.Id);
 	}
 
@@ -359,12 +360,11 @@ public class MediaServiceTests
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		var upserted = RecordUpsertedIdentities(deps);
 
-		var results = await testee
-			.IdentifyWithDetailsAsync(
-				new List<IdentifyRequest> { new([first], new None()), new([second], new None()), new([first, second], new None()) }.ToAsyncEnumerable()
-			)
-			.ToListAsync();
+		var requests = new List<IdentifyRequest> { new([first], new None()), new([second], new None()), new([first, second], new None()) };
 
+		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Identified().ToList();
+
+		await Assert.That(results).Count().IsEqualTo(requests.Count);
 		var survivor = results[0].Identity.Id;
 		await Assert.That(results[1].Identity.Id).IsEqualTo(survivor);
 		await Assert.That(results[2].Identity.Id).IsEqualTo(survivor);
@@ -384,8 +384,9 @@ public class MediaServiceTests
 		requests[1] = new IdentifyRequest([second], new None());
 		requests[55] = new IdentifyRequest([first, second], new None());
 
-		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Identified().ToList();
 
+		await Assert.That(results).Count().IsEqualTo(requests.Count);
 		var survivor = results[55].Identity.Id;
 		await Assert.That(Bridged(upserted, first, second)).IsEquivalentTo([survivor]);
 	}
@@ -405,8 +406,9 @@ public class MediaServiceTests
 		requests[0] = new IdentifyRequest([minted], new None());
 		requests[55] = new IdentifyRequest([minted, known], new None());
 
-		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
+		var results = (await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync()).Identified().ToList();
 
+		await Assert.That(results).Count().IsEqualTo(requests.Count);
 		await Assert.That(results[55].Identity.Id).IsEqualTo(persisted.Id);
 		await Assert.That(Bridged(upserted, minted, known)).IsEquivalentTo([persisted.Id]);
 	}

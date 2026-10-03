@@ -1,7 +1,6 @@
 using Contracts.Media.Search;
 using Domain.Media;
 using Harness;
-using Integration.Tests.Assertions;
 using TestInfrastructure;
 
 namespace Integration.Tests.Media;
@@ -43,15 +42,15 @@ public class MediaSearchTests(SammlarrTestHost host) : IAsyncDisposable
 		var results = await Testee.SearchAsync("thriller", [MediaType.Movie, MediaType.Show]);
 
 		await Assert.That(results).Count().IsEqualTo(2);
-		await AssertResolvedAs(results.Single(item => item.Title == "Fight Club"), TestMedia.FightClub);
-		await AssertResolvedAs(results.Single(item => item.Title == "Breaking Bad"), TestMedia.BreakingBad);
+		await AssertResolvedAs(results.Single(item => item.Details.Title == "Fight Club"), TestMedia.FightClub);
+		await AssertResolvedAs(results.Single(item => item.Details.Title == "Breaking Bad"), TestMedia.BreakingBad);
 	}
 
 	private static async Task AssertResolvedAs(MediaLookup item, MediaSpec spec)
 	{
 		await Assert.That(item).IsOfUnionType<MediaLookup, IdentifiedMedia>();
-		await Assert.That(item.Title).IsEqualTo(spec.Title);
-		await Assert.That(item.MediaType).IsEqualTo(spec.Type);
+		await Assert.That(item.Details.Title).IsEqualTo(spec.Title);
+		await Assert.That(item.Details.Type).IsEqualTo(spec.Type);
 		foreach (var id in spec.Ids)
 		{
 			await Assert.That(item.Externals.Any(external => external.Source == id.Provider && external.Value == id.Value)).IsTrue();

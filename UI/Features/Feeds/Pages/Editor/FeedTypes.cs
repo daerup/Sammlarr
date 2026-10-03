@@ -31,20 +31,24 @@ public enum PreviewBucket
 
 public static class PreviewResultFilter
 {
-	public static PreviewBucket Bucket(QueryVerdict<MediaLookup> verdict) =>
-		verdict.Outcome switch
+	public static PreviewBucket Bucket(QueryVerdict<IdentifiedMedia> verdict)
+	{
+		return verdict.Outcome switch
 		{
 			QueryOutcome.Culled => PreviewBucket.Filtered,
 			QueryOutcome.Truncated => PreviewBucket.Skipped,
 			QueryOutcome.Qualified => Qualified(verdict),
 		};
+	}
 
 	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
 
-	private static PreviewBucket Qualified(QueryVerdict<MediaLookup> verdict) =>
-		verdict.Kept ? PreviewBucket.Kept
-		: verdict.WillImport ? PreviewBucket.Added
-		: PreviewBucket.Bypassed;
+	private static PreviewBucket Qualified(QueryVerdict<IdentifiedMedia> verdict)
+	{
+		return verdict.Kept ? PreviewBucket.Kept
+			: verdict.WillImport ? PreviewBucket.Added
+			: PreviewBucket.Bypassed;
+	}
 }
 
 internal static class PreviewCopy
@@ -57,26 +61,30 @@ internal static class PreviewCopy
 
 	internal static AbsencePhrase Absence => new("Absent from", "of", "runs");
 
-	internal static string OutcomeIcon(QueryVerdict<MediaLookup> verdict) =>
-		verdict.Outcome switch
+	internal static string OutcomeIcon(QueryVerdict<IdentifiedMedia> verdict)
+	{
+		return verdict.Outcome switch
 		{
 			QueryOutcome.Culled => "filter-x",
 			QueryOutcome.Truncated => "scissors",
 			QueryOutcome.Qualified => "circle-help",
 		};
+	}
 
-	internal static string AtRiskReason(QueryVerdict<MediaLookup> verdict) =>
-		verdict.Outcome switch
+	internal static string AtRiskReason(QueryVerdict<IdentifiedMedia> verdict)
+	{
+		return verdict.Outcome switch
 		{
 			QueryOutcome.Culled => "It no longer matches your filter rules.",
 			QueryOutcome.Truncated => "Your import limit no longer reaches it.",
 			QueryOutcome.Qualified => string.Empty,
 		};
+	}
 }
 
 internal sealed record AbsencePhrase(string Lead, string Join, string Tail);
 
-internal sealed record GoneItem(MediaLookup Media);
+internal sealed record GoneItem(IdentifiedMedia Media);
 
 public record PreviewStatus
 {

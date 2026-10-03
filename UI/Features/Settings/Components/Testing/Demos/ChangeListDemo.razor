@@ -27,11 +27,11 @@
 @code {
     private static readonly IReadOnlyList<ChangeItem> Items =
     [
-        new() { Title = "Project Hail Mary", Id = DemoMedia.Movie.Id, Media = DemoMedia.Movie, Kind = ChangeKind.Added, Subtitle = "2026 · Movie" },
+        new() { Title = "Project Hail Mary", Id = DemoMedia.Movie.Identity.Id, Media = DemoMedia.Movie, Kind = ChangeKind.Added, Subtitle = "2026 · Movie" },
         new()
         {
             Title = "Breaking Bad",
-            Id = DemoMedia.Show.Id,
+            Id = DemoMedia.Show.Identity.Id,
             Media = DemoMedia.Show,
             Kind = ChangeKind.Removed,
             Subtitle = "2008 · Show",

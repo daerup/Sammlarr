@@ -140,7 +140,7 @@
 
     private bool IsBusy => _isSyncing || _isRunning || IsSyncing;
 
-    private Task ShowDetailsAsync(MediaLookup media)
+    private Task ShowDetailsAsync(IdentifiedMedia media)
     {
         _selected = media;
         return Task.CompletedTask;

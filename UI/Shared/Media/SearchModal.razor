@@ -88,7 +88,10 @@
                                              OnFocusIn="() => _focusedResult = result.Key"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @TileIcons?.Invoke(new TileIconContext(result, IsSearchResultMarked(result), _isAdding && !result.IsUnmatched && Equals(_activeToggledSourceId, result.Id), EventCallback.Factory.Create<MediaLookup>(this, ToggleAsync)))
+                                    @if (result is IdentifiedMedia identified)
+                                    {
+                                        @TileIcons?.Invoke(new TileIconContext(identified, IsSearchResultMarked(identified), _isAdding && Equals(_activeToggledSourceId, identified.Identity.Id), EventCallback.Factory.Create<IdentifiedMedia>(this, ToggleAsync)))
+                                    }
                                 </Icons>
                             </MediaDetailTile>
                         }
@@ -165,7 +168,7 @@
     }
 
 
-    private bool IsSearchResultMarked(MediaLookup result) => !result.IsUnmatched && IsInWantlist.Invoke(result.Id);
+    private bool IsSearchResultMarked(IdentifiedMedia result) => IsInWantlist.Invoke(result.Identity.Id);
 
     private async Task CloseAsync()
     {
@@ -237,20 +240,20 @@
         }
     }
 
-    private async Task ToggleAsync(MediaLookup result)
+    private async Task ToggleAsync(IdentifiedMedia result)
     {
-        if (_isAdding || result.IsUnmatched)
+        if (_isAdding)
         {
             return;
         }
 
         _isAdding = true;
-        _activeToggledSourceId = result.Id;
+        _activeToggledSourceId = result.Identity.Id;
         _searchHint = null;
         _searchError = null;
 
         var isMarked = IsSearchResultMarked(result);
-        await OnToggle(result.Id, result.Title, isMarked);
+        await OnToggle(result.Identity.Id, result.Details.Title ?? string.Empty, isMarked);
 
         _isAdding = false;
         _activeToggledSourceId = null;

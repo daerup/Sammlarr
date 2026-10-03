@@ -22,11 +22,11 @@
             <WantlistProvenanceToggle Result="ctx.Result"
                                        IsToggled="ctx.IsToggled"
                                        IsToggling="ctx.IsToggling"
-                                       Item="@ItemFor(ctx.Result.Id)"
+                                       Item="@ItemFor(ctx.Result.Identity.Id)"
                                        OnToggle="ctx.OnToggle"/>
             <BlocklistToggleIcon Result="ctx.Result"
-                                 IsToggled="@_blocklist.Contains(ctx.Result.Id)"
-                                 IsToggling="@(_blocklisting == ctx.Result.Id)"
+                                 IsToggled="@_blocklist.Contains(ctx.Result.Identity.Id)"
+                                 IsToggling="@(_blocklisting == ctx.Result.Identity.Id)"
                                  OnToggle="ToggleBlocklistAsync"/>
         </TileIcons>
     </SearchModal>
@@ -76,25 +76,25 @@
         return true;
     }
 
-    private async Task ToggleBlocklistAsync(MediaLookup media)
+    private async Task ToggleBlocklistAsync(IdentifiedMedia media)
     {
         if (_blocklisting is not null)
         {
             return;
         }
 
-        _blocklisting = media.Id;
+        _blocklisting = media.Identity.Id;
         try
         {
-            if (_blocklist.Contains(media.Id))
+            if (_blocklist.Contains(media.Identity.Id))
             {
-                await BlocklistService.RemoveAsync(media.Id, _cancellation.Token);
-                Notifier.Success($"'{media.Title}' has been removed from your blocklist.");
+                await BlocklistService.RemoveAsync(media.Identity.Id, _cancellation.Token);
+                Notifier.Success($"'{media.Details.Title}' has been removed from your blocklist.");
             }
             else
             {
-                await BlocklistService.AddAsync(media.Id, _cancellation.Token);
-                Notifier.Success($"'{media.Title}' has been blocklisted.");
+                await BlocklistService.AddAsync(media.Identity.Id, _cancellation.Token);
+                Notifier.Success($"'{media.Details.Title}' has been blocklisted.");
             }
 
             await RefreshAsync();

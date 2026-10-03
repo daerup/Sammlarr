@@ -133,14 +133,14 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Render_WhenARowIsClicked_RaisesTheSelectionWithItsMedia()
 	{
-		MediaLookup? selected = null;
+		IdentifiedMedia? selected = null;
 		var item = Added("Fresh");
 		var cut = RenderList([item], [], media => selected = media);
 
 		await cut.Find(".change-row").ClickAsync(new MouseEventArgs());
 
 		await Assert.That(selected).IsNotNull();
-		await Assert.That(selected!.Value.AsIdentified()!.Identity.Id).IsEqualTo(item.Media!.Value.AsIdentified()!.Identity.Id);
+		await Assert.That(selected!.Identity.Id).IsEqualTo(item.Media!.Identity.Id);
 	}
 
 	[Test]
@@ -307,7 +307,7 @@ public class ChangeListTests : BunitContext
 	private IRenderedComponent<ChangeList> RenderList(
 		IReadOnlyList<ChangeItem> items,
 		IReadOnlyList<ChangeChip> chips,
-		Action<MediaLookup>? onSelect = null,
+		Action<IdentifiedMedia>? onSelect = null,
 		string? unchangedLabel = null,
 		MediaId? highlight = null
 	)
@@ -334,9 +334,9 @@ public class ChangeListTests : BunitContext
 		});
 	}
 
-	private static MediaLookup Media(string title)
+	private static IdentifiedMedia Media(string title)
 	{
-		return new IdentifiedMedia(
+		return new(
 			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
 			new MovieDetails
 			{
@@ -350,6 +350,6 @@ public class ChangeListTests : BunitContext
 				Runtime = TimeSpan.FromMinutes(90),
 				Rating = RatingSummary.None,
 			}
-		).ToMatch();
+		);
 	}
 }

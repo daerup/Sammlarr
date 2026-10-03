@@ -86,7 +86,7 @@ public class FeedPlanProperties
 		int unmatchedCount
 	)
 	{
-		var verdicts = new List<QueryVerdict<MediaLookup>>();
+		var verdicts = new List<QueryVerdict<IdentifiedMedia>>();
 		var owned = new HashSet<MediaId>();
 		var absences = new Dictionary<MediaId, int>();
 
@@ -109,7 +109,7 @@ public class FeedPlanProperties
 					InBlocklist = inBlocklist,
 					Owned = isOwned,
 				};
-				verdicts.Add(new QueryVerdict<MediaLookup>(Row(id), outcome, enrollment, ConsumesSlot: true));
+				verdicts.Add(new QueryVerdict<IdentifiedMedia>(Row(id), outcome, enrollment, ConsumesSlot: true));
 			}
 		}
 
@@ -121,7 +121,7 @@ public class FeedPlanProperties
 		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatched, completeness), owned, absences, strategy), owned, strategy, absences);
 	}
 
-	private static MediaLookup Row(MediaId id)
+	private static IdentifiedMedia Row(MediaId id)
 	{
 		return new IdentifiedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),

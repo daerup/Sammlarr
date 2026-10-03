@@ -3,7 +3,6 @@ using Contracts.Media;
 using Domain.Media;
 using Domain.Providers;
 using Harness;
-using Integration.Tests.Assertions;
 using Microsoft.EntityFrameworkCore;
 using static Harness.Ids;
 
@@ -331,8 +330,10 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);
 
-	private static MediaLookup Detail(Result<IdentifiedMedia> result) =>
-		result is Success<IdentifiedMedia>(var detail) ? detail.ToMatch() : throw new InvalidOperationException($"Expected a resolved detail but got {result}.");
+	private static MediaDetails Detail(Result<IdentifiedMedia> result)
+	{
+		return result.Map(media => media.Details).GetValueOr(error => throw new InvalidOperationException($"Expected a resolved detail but got {error}."));
+	}
 
 	private static async Task AssertTitle(Result<IdentifiedMedia> result, string title) => await Assert.That(Detail(result).Title).IsEqualTo(title);
 
@@ -359,12 +360,12 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 
 		if (rating is { } source)
 		{
-			await Assert.That(detail.Ratings.Any(entry => entry.Source == source)).IsTrue();
+			await Assert.That(detail.Rating.Sources.Any(entry => entry.Source == source)).IsTrue();
 		}
 
 		if (noRating)
 		{
-			await Assert.That(detail.Ratings).IsEmpty();
+			await Assert.That(detail.Rating.Sources).IsEmpty();
 		}
 	}
 
@@ -376,14 +377,14 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert.That(details.FetchedAt).IsEqualTo(fetched);
 	}
 
-	private async Task AssertDetailCachedAs(MediaLookup detail, MediaId mediaId, DateTimeOffset fetched)
+	private async Task AssertDetailCachedAs(MediaDetails detail, MediaId mediaId, DateTimeOffset fetched)
 	{
 		host.ScopedDbContext.ChangeTracker.Clear();
 		var details = await host.ScopedDbContext.MediaDetails.AsNoTracking().Include(entry => entry.Ratings).FirstAsync(entry => entry.MediaId == mediaId.Value);
 		await Assert.That(details.Title).IsEqualTo(detail.Title);
 		await Assert.That(details.Summary).IsEqualTo(detail.Summary);
 		await Assert.That(details.Genres).IsEquivalentTo(detail.Genres);
-		await Assert.That(details.Ratings.Select(rating => rating.Source)).IsEquivalentTo(detail.Ratings.Select(rating => rating.Source));
+		await Assert.That(details.Ratings.Select(rating => rating.Source)).IsEquivalentTo(detail.Rating.Sources.Select(rating => rating.Source));
 		await Assert.That(details.FetchedAt).IsEqualTo(fetched);
 	}
 

@@ -202,7 +202,7 @@ public class FeedPreviewPanelTests : BunitContext
 	{
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var verdicts = Load(target).Items.Select(Owned).ToList();
+			var verdicts = Load(target).Items.Identified().Select(Owned).ToList();
 
 			return Task.FromResult<FeedPlanResult>(
 				target is DraftFeed(var definition, _) && definition.Strategy is Mirror
@@ -211,8 +211,9 @@ public class FeedPreviewPanelTests : BunitContext
 			);
 		}
 
-		private static QueryVerdict<MediaLookup> Owned(MediaLookup item, int index) =>
-			index switch
+		private static QueryVerdict<IdentifiedMedia> Owned(IdentifiedMedia item, int index)
+		{
+			return index switch
 			{
 				0 => Verdict(item, QueryOutcome.Culled, owned: true),
 				1 => Verdict(item, QueryOutcome.Qualified, owned: true, inBlocklist: true),
@@ -220,9 +221,11 @@ public class FeedPreviewPanelTests : BunitContext
 				3 => Verdict(item, QueryOutcome.Qualified, owned: true),
 				_ => Verdict(item, QueryOutcome.Qualified),
 			};
+		}
 
-		private static QueryVerdict<MediaLookup> Verdict(MediaLookup item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false) =>
-			new(
+		private static QueryVerdict<IdentifiedMedia> Verdict(IdentifiedMedia item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+		{
+			return new(
 				item,
 				outcome,
 				new Enrollment
@@ -233,6 +236,7 @@ public class FeedPreviewPanelTests : BunitContext
 				},
 				ConsumesSlot: true
 			);
+		}
 	}
 
 	private sealed class GonePlanner(MediaId gone) : IFeedRunPlanner
@@ -240,7 +244,8 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
 			var verdicts = Load(target)
-				.Items.Select(item => new QueryVerdict<MediaLookup>(
+				.Items.Identified()
+				.Select(item => new QueryVerdict<IdentifiedMedia>(
 					item,
 					QueryOutcome.Qualified,
 					new Enrollment
@@ -295,20 +300,22 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			var load = Load(target);
 			var unmatchedItems = load.Items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
-			var verdicts = load.Items.Where(item => item is not UnmatchedMedia).Select(Spread).ToList();
+			var verdicts = load.Items.Identified().Select(Spread).ToList();
 
 			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, unmatchedItems, FeedDelta.None, Conclusiveness.Conclusive));
 		}
 
-		private static QueryVerdict<MediaLookup> Spread(MediaLookup item, int index) =>
-			index switch
+		private static QueryVerdict<IdentifiedMedia> Spread(IdentifiedMedia item, int index)
+		{
+			return index switch
 			{
-				0 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(), true),
-				1 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
-				2 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Culled, Enrolled(), false),
-				3 => new QueryVerdict<MediaLookup>(item, QueryOutcome.Truncated, Enrolled(), false),
-				_ => new QueryVerdict<MediaLookup>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
+				0 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Qualified, Enrolled(), true),
+				1 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
+				2 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Culled, Enrolled(), false),
+				3 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Truncated, Enrolled(), false),
+				_ => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
 			};
+		}
 
 		private static Enrollment Enrolled(bool inWantlist = false, bool inBlocklist = false) =>
 			new()
@@ -336,9 +343,9 @@ public class FeedPreviewPanelTests : BunitContext
 			}
 		}
 
-		private static MediaLookup Movie(int index)
+		private static IdentifiedMedia Movie(int index)
 		{
-			return new IdentifiedMedia(
+			return new(
 				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From($"movie-{index}", MediaType.Movie)]),
 				new MovieDetails
 				{
@@ -352,12 +359,12 @@ public class FeedPreviewPanelTests : BunitContext
 					Runtime = TimeSpan.FromMinutes(90),
 					Rating = RatingSummary.None,
 				}
-			).ToMatch();
+			);
 		}
 
-		private static MediaLookup Unknown(int index)
+		private static UnmatchedMedia Unknown(int index)
 		{
-			return new UnmatchedMedia([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails { Title = $"Unmatched {index}" });
+			return new([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails { Title = $"Unmatched {index}" });
 		}
 	}
 }

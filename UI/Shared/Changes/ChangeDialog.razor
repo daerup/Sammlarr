@@ -79,7 +79,7 @@
 
     [Parameter] public IReadOnlyList<ChangeItem> Items { get; set; } = [];
     [Parameter] public IReadOnlyList<ChangeChip> Chips { get; set; } = [];
-    [Parameter] public EventCallback<MediaLookup> OnSelect { get; set; }
+    [Parameter] public EventCallback<IdentifiedMedia> OnSelect { get; set; }
 
     [Parameter] public string RemovedLabel { get; set; } = "Removed";
     [Parameter] public string AddedLabel { get; set; } = "Added";
