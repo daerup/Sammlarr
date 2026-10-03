@@ -235,7 +235,7 @@ public class MediaServiceTests
 	{
 		var external = TmdbId.From("999", MediaType.Movie);
 		var (testee, deps) = CreateTestee();
-		deps.UnmatchedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
+		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
 
 		var results = await testee.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([external], new None()) }.ToAsyncEnumerable()).ToListAsync();
 

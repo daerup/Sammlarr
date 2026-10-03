@@ -2,8 +2,9 @@ namespace Contracts.Caching;
 
 public interface ITypedMemoryCache<in TKey, TValue>
 	where TKey : notnull
+	where TValue : notnull
 {
-	bool TryGetValue(TKey key, out TValue? value);
+	Optional<TValue> GetValueOrNone(TKey key);
 
 	void Set(TKey key, TValue value);
 

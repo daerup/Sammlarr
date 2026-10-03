@@ -46,13 +46,13 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 
 	private static IdLookupResult Answer(IReadOnlyList<IExternalMediaId> ids) => new(ids, new None());
 
-	private async Task<IReadOnlyList<FoundMedia>> CachedSearchAsync(IdentifyHints hints, CancellationToken cancellationToken)
+	private Task<IReadOnlyList<FoundMedia>> CachedSearchAsync(IdentifyHints hints, CancellationToken cancellationToken)
 	{
-		if (searches.TryGetValue(hints, out var cached) && cached is not null)
-		{
-			return cached;
-		}
+		return searches.GetValueOrNone(hints).Match(Task.FromResult, () => SearchAsync(hints, cancellationToken));
+	}
 
+	private async Task<IReadOnlyList<FoundMedia>> SearchAsync(IdentifyHints hints, CancellationToken cancellationToken)
+	{
 		var hits = await plexApi.SearchAsync(hints.Title, [hints.MediaType], cancellationToken);
 		searches.Set(hints, hits, SearchLifetime);
 		return hits;

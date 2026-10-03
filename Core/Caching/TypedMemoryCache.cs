@@ -6,10 +6,14 @@ namespace Core.Caching;
 
 internal class TypedMemoryCache<TKey, TValue>(IMemoryCache cache) : ITypedMemoryCache<TKey, TValue>
 	where TKey : notnull
+	where TValue : notnull
 {
 	private static CancellationTokenSource clearSignal = new();
 
-	public bool TryGetValue(TKey key, out TValue? value) => cache.TryGetValue(Namespaced(key), out value);
+	public Optional<TValue> GetValueOrNone(TKey key)
+	{
+		return cache.TryGetValue(Namespaced(key), out var value) && value is TValue cached ? Some.Of(cached) : new None();
+	}
 
 	public void Set(TKey key, TValue value) => SetInternal(key, value, null);
 

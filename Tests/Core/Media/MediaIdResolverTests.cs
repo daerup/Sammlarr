@@ -378,7 +378,7 @@ public class MediaIdResolverTests
 	[Test]
 	public async Task ResolveAsync_WhenTheTitleIsCachedAsUnmatched_AsksNobody()
 	{
-		_cache.TryGetValue(Any()).Returns(true);
+		_cache.GetValueOrNone(Any()).Returns(Some.Of(true));
 
 		var resolved = await Testee().ResolveAsync(Request, MediaProvider.Tvdb);
 

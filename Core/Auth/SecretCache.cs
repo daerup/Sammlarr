@@ -11,7 +11,9 @@ internal sealed class SecretCache<TProvider, TSecret>(ITypedMemoryCache<(Guid Us
 
 	public async ValueTask<Result<TSecret>> GetOrLoadAsync(TProvider provider, Func<Task<Result<TSecret>>> load)
 	{
-		return cache.TryGetValue(Key(provider), out var cached) && cached is not null ? Success.Of(cached) : await load().Apply(secret => Put(provider, secret));
+		return await cache
+			.GetValueOrNone(Key(provider))
+			.Match(cached => Task.FromResult<Result<TSecret>>(Success.Of(cached)), () => load().Apply(secret => Put(provider, secret)));
 	}
 
 	public void Put(TProvider provider, TSecret secret)

@@ -114,7 +114,7 @@ public class ProviderMatrixGenerator : IIncrementalGenerator
 
 		foreach (var capability in capabilities)
 		{
-			AppendConversion(sb, capability.EnumName, "MediaProvider", BrandsWith(brands, capability.Bit), nullable: false);
+			AppendConversion(sb, capability.EnumName, "MediaProvider", BrandsWith(brands, capability.Bit));
 		}
 
 		foreach (var conversion in conversions)
@@ -137,9 +137,9 @@ public class ProviderMatrixGenerator : IIncrementalGenerator
 					.Where(brand => (brand.Capabilities & conversion.SourceBit) != 0 && (brand.Capabilities & capability.Bit) != 0)
 					.Select(static brand => brand.Name)
 					.ToList();
-				if (shared.Count > 0)
+				if (shared.Count > 0 && shared.Count == sourceCount)
 				{
-					AppendConversion(sb, sourceEnum, capability.EnumName, shared, nullable: shared.Count != sourceCount);
+					AppendConversion(sb, sourceEnum, capability.EnumName, shared);
 				}
 			}
 		}
@@ -148,11 +148,11 @@ public class ProviderMatrixGenerator : IIncrementalGenerator
 		return sb.ToString();
 	}
 
-	private static void AppendConversion(StringBuilder sb, string sourceEnum, string targetEnum, List<string> mappedBrands, bool nullable)
+	private static void AppendConversion(StringBuilder sb, string sourceEnum, string targetEnum, List<string> mappedBrands)
 	{
 		sb.Append("\t[CompilerGenerated]\n\tpublic static ")
 			.Append(targetEnum)
-			.Append(nullable ? "? As" : " As")
+			.Append(" As")
 			.Append(targetEnum)
 			.Append("(this ")
 			.Append(sourceEnum)
@@ -161,11 +161,6 @@ public class ProviderMatrixGenerator : IIncrementalGenerator
 		foreach (var brand in mappedBrands)
 		{
 			sb.Append("\t\t\t").Append(sourceEnum).Append('.').Append(brand).Append(" => ").Append(targetEnum).Append('.').Append(brand).Append(",\n");
-		}
-
-		if (nullable)
-		{
-			sb.Append("\t\t\t_ => null,\n");
 		}
 
 		sb.Append("\t\t};\n\n");

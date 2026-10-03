@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Observability.Diagnostics;
 using Serilog.Core;
+using TestInfrastructure;
 
 namespace Shared.Tests.Observability;
 
@@ -253,6 +254,15 @@ public class LogCaptureServiceTests
 	}
 
 	[Test]
+	public async Task GetStats_WhenNothingWasCaptured_HasNoWindow()
+	{
+		var stats = new LogCaptureService(new LoggingLevelSwitch()).GetStats();
+
+		await Assert.That(stats.Oldest).IsNone();
+		await Assert.That(stats.Newest).IsNone();
+	}
+
+	[Test]
 	public async Task GetStats_WhenLogsAndSpansPresent_ReportsCountsAndWindow()
 	{
 		var testee = new LogCaptureService(new LoggingLevelSwitch());
@@ -261,14 +271,15 @@ public class LogCaptureServiceTests
 		var last = DateTimeOffset.UtcNow;
 		testee.AppendLog(MakeLog(LogLevel.Information, "first", first));
 		testee.AppendLog(MakeLog(LogLevel.Information, "last", last));
-		testee.AppendSpan(MakeSpan("span.one", last));
+		var earliest = first.AddMinutes(-1);
+		testee.AppendSpan(MakeSpan("span.one", earliest));
 
 		var stats = testee.GetStats();
 
 		await Assert.That(stats.LogCount).IsEqualTo(2);
 		await Assert.That(stats.SpanCount).IsEqualTo(1);
-		await Assert.That(stats.Oldest).IsEqualTo(first);
-		await Assert.That(stats.Newest).IsEqualTo(last);
+		await Assert.That(stats.Oldest).IsSome().And.IsEqualTo(earliest);
+		await Assert.That(stats.Newest).IsSome().And.IsEqualTo(last);
 		await Assert.That(stats.EstimatedBytes).IsGreaterThan(0);
 	}
 

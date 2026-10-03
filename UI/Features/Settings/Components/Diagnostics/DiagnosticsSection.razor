@@ -77,7 +77,7 @@
             <BbSeparator Orientation="SeparatorOrientation.Vertical" Class="h-5"/>
             <span class="tabular-nums">
                 <span class="text-foreground font-semibold">
-                    @if (_stats is { Oldest: { } oldest, Newest: { } newest })
+                    @if (_stats is { Oldest: Some<DateTimeOffset>(var oldest), Newest: Some<DateTimeOffset>(var newest) })
                     {
                         @FormatDuration(newest - oldest)
                     }
@@ -175,7 +175,7 @@
     private bool _scrollPending;
     private int _lastRenderedCount;
 
-    private DiagnosticsStats _stats = new(0, 0, 0, null, null);
+    private DiagnosticsStats _stats = new(0, 0, 0, new None(), new None());
     private List<DiagnosticsLogEntry> _filteredLogs = [];
     private ElementReference _scrollRef;
     private IJSObjectReference? _jsModule;

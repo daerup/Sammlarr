@@ -10,7 +10,7 @@ public class ConcurrencyGateHandlerTests
 	{
 		var tracker = new ConcurrencyTrackingHandler(TimeSpan.FromMilliseconds(40));
 		var gate = new SemaphoreSlim(25, 25);
-		using var invoker = new HttpMessageInvoker(new ConcurrencyGateHandler(gate) { InnerHandler = tracker });
+		using var invoker = new HttpMessageInvoker(new ConcurrencyGateHandler(Some.Of(gate)) { InnerHandler = tracker });
 
 		var tasks = Enumerable
 			.Range(0, 100)
@@ -25,7 +25,7 @@ public class ConcurrencyGateHandlerTests
 	public async Task SendAsync_WithoutGate_DoesNotCapConcurrency()
 	{
 		var tracker = new ConcurrencyTrackingHandler(TimeSpan.FromMilliseconds(40));
-		using var invoker = new HttpMessageInvoker(new ConcurrencyGateHandler(null) { InnerHandler = tracker });
+		using var invoker = new HttpMessageInvoker(new ConcurrencyGateHandler(new None()) { InnerHandler = tracker });
 
 		var tasks = Enumerable
 			.Range(0, 50)

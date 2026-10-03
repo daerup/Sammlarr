@@ -32,4 +32,4 @@ public sealed record DiagnosticsSpanEntry(
 
 public sealed record DiagnosticsSpanEvent(string Name, DateTimeOffset Timestamp, IReadOnlyDictionary<string, string?> Tags);
 
-public sealed record DiagnosticsStats(int LogCount, int SpanCount, long EstimatedBytes, DateTimeOffset? Oldest, DateTimeOffset? Newest);
+public sealed record DiagnosticsStats(int LogCount, int SpanCount, long EstimatedBytes, Optional<DateTimeOffset> Oldest, Optional<DateTimeOffset> Newest);
