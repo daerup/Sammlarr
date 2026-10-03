@@ -3,7 +3,7 @@ using Domain.Providers;
 
 namespace Core.Media;
 
-internal static class MediaUnmatchedCacheKey
+internal static class UnmatchedCacheKey
 {
 	public static string Build(IEnumerable<IExternalMediaId> candidates, MediaProvider target)
 	{

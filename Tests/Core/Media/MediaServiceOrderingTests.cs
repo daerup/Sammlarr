@@ -146,7 +146,7 @@ public class MediaServiceOrderingTests
 
 		foreach (var item in builder.Items.Where(i => !i.Resolves))
 		{
-			var key = MediaUnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
+			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
 			unmatchedCache.TryGetValue(Arg.Is<string>(k => k == key)).Returns(true).SetsOutValue(true);
 		}
 
@@ -212,7 +212,7 @@ internal sealed record TestItem
 	public required Movie Detail { get; init; }
 	public bool Resolves { get; init; } = true;
 	public bool Realizes { get; init; } = true;
-	public ResolveRequest Request => new([External], new None());
+	public IdentifyRequest Request => new([External], new None());
 
 	public static TestItem Create(int index)
 	{
@@ -266,7 +266,7 @@ internal sealed class RequestBuilder
 		return this;
 	}
 
-	public IEnumerable<ResolveRequest> AsRequests() => _items.Select(i => i.Request);
+	public IEnumerable<IdentifyRequest> AsRequests() => _items.Select(i => i.Request);
 
 	public IEnumerable<MediaId> AsMediaIds() => _items.Select(i => i.MediaId);
 

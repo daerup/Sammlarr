@@ -20,7 +20,7 @@ internal static class ConverterRequests
 		return new ByIdRequest(lookup, id);
 	}
 
-	internal static IdLookupRequest RequestByHints(this IExternalIdConverter converter, ResolutionHints hints, params IExternalMediaId[] known)
+	internal static IdLookupRequest RequestByHints(this IExternalIdConverter converter, IdentifyHints hints, params IExternalMediaId[] known)
 	{
 		var lookup = converter
 			.Lookups.SelectMany<IdLookup, ByHints>(each =>

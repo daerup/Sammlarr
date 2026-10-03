@@ -30,7 +30,7 @@ internal sealed class MediaService(
 	private const int PrefetchCapacity = 1000;
 
 	public async IAsyncEnumerable<Result<MediaIdentity>> IdentifyAsync(
-		IEnumerable<ResolveRequest> requests,
+		IEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
@@ -84,7 +84,7 @@ internal sealed class MediaService(
 	}
 
 	public async IAsyncEnumerable<MediaLookup> IdentifyWithDetailsAsync(
-		IAsyncEnumerable<ResolveRequest> requests,
+		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
 	{
@@ -92,7 +92,7 @@ internal sealed class MediaService(
 		var sink = await activeSink.ResolveAsync(cancellationToken);
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var size = FirstBatchSize;
-		var batch = new List<ResolveRequest>(size);
+		var batch = new List<IdentifyRequest>(size);
 		await using var source = requests.PrefetchAsync(PrefetchCapacity, cancellationToken).GetAsyncEnumerator(cancellationToken);
 		ExceptionDispatchInfo? failure = null;
 
@@ -126,7 +126,7 @@ internal sealed class MediaService(
 			}
 
 			size = Math.Min(size * 2, MaxBatchSize);
-			batch = new List<ResolveRequest>(size);
+			batch = new List<IdentifyRequest>(size);
 		}
 
 		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
@@ -141,7 +141,7 @@ internal sealed class MediaService(
 	}
 
 	private async IAsyncEnumerable<MediaLookup> ResolveAndRealizeAsync(
-		IReadOnlyList<ResolveRequest> batch,
+		IReadOnlyList<IdentifyRequest> batch,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
@@ -204,7 +204,7 @@ internal sealed class MediaService(
 	}
 
 	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
-		IReadOnlyList<ResolveRequest> requests,
+		IReadOnlyList<IdentifyRequest> requests,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
 		MediaResolutionBuffer buffer,
@@ -220,7 +220,7 @@ internal sealed class MediaService(
 	}
 
 	private async ValueTask<Result<ResolvedIdentity>> ResolveIdentityAsync(
-		ResolveRequest request,
+		IdentifyRequest request,
 		IMediaSink sink,
 		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
 		MediaResolutionBuffer buffer,
@@ -239,7 +239,7 @@ internal sealed class MediaService(
 	}
 
 	private static Optional<ResolvedIdentity> TryResolveFromCache(
-		ResolveRequest request,
+		IdentifyRequest request,
 		MediaProvider target,
 		IReadOnlyDictionary<IExternalMediaId, CachedMedia> cached,
 		MediaResolutionBuffer buffer
@@ -266,7 +266,7 @@ internal sealed class MediaService(
 		return Some.Of(new ResolvedIdentity(merged, match));
 	}
 
-	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(ResolveRequest request, MediaProvider target, CancellationToken cancellationToken)
+	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
 	{
 		return await idResolver
 			.ResolveAsync(request, target, cancellationToken)
@@ -288,7 +288,7 @@ internal sealed class MediaService(
 	}
 
 	private async ValueTask<MediaLookup> RealizeFromRequestAsync(
-		ResolveRequest request,
+		IdentifyRequest request,
 		Result<ResolvedIdentity> resolution,
 		MediaResolutionBuffer buffer,
 		CancellationToken cancellationToken
@@ -364,13 +364,13 @@ internal sealed class MediaService(
 	}
 }
 
-file static class ResolveRequestExtensions
+file static class IdentifyRequestExtensions
 {
-	extension(ResolveRequest request)
+	extension(IdentifyRequest request)
 	{
 		public MediaLookup ToUnmatched()
 		{
-			var hint = request.Hints is Some<ResolutionHints>(var hints) ? hints : null;
+			var hint = request.Hints is Some<IdentifyHints>(var hints) ? hints : null;
 			return new UnmatchedMedia
 			{
 				Externals = [.. request.Candidates],

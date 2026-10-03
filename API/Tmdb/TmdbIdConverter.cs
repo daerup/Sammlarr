@@ -61,11 +61,11 @@ internal class TmdbIdConverter(TmdbApi tmdbApi) : IExternalIdConverter
 		}
 	}
 
-	private static Optional<ResolutionHints> HintsOf(string? originalTitle, MediaType type)
+	private static Optional<IdentifyHints> HintsOf(string? originalTitle, MediaType type)
 	{
 		return Optional
 			.Of(originalTitle)
-			.Map(title => new ResolutionHints
+			.Map(title => new IdentifyHints
 			{
 				Title = title,
 				Year = 0,

@@ -9,7 +9,7 @@ namespace API.Tests.Plex;
 
 public class PlexIdConverterResilienceTests
 {
-	private static readonly ResolutionHints Hints = new()
+	private static readonly IdentifyHints Hints = new()
 	{
 		Title = "match",
 		Year = 2021,

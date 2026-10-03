@@ -75,5 +75,5 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 			.Throws<MissingSinkIdException>();
 	}
 
-	private static ResolveRequest Request(MediaType type, ProviderId id) => new([id.ToExternal(type)], new None());
+	private static IdentifyRequest Request(MediaType type, ProviderId id) => new([id.ToExternal(type)], new None());
 }

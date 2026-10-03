@@ -22,13 +22,13 @@ internal sealed class MediaIdResolver(
 	private readonly IReadOnlyList<Hop> _hops = IdLookupPlanner.Derive(converters);
 
 	public async Task<Result<IReadOnlyList<IExternalMediaId>>> ResolveAsync(
-		ResolveRequest request,
+		IdentifyRequest request,
 		MediaProvider target,
 		CancellationToken cancellationToken = default
 	)
 	{
 		var candidates = request.Candidates;
-		var key = MediaUnmatchedCacheKey.Build(candidates, target);
+		var key = UnmatchedCacheKey.Build(candidates, target);
 		if (unmatchedCache.TryGetValue(key, out _))
 		{
 			return Error.From("Candidates were previously resolved as unmatched.");
@@ -59,7 +59,7 @@ internal sealed class MediaIdResolver(
 	private async Task<StepOutcome> FollowAsync(
 		IReadOnlyList<Hop> path,
 		IReadOnlyList<IExternalMediaId> candidates,
-		Optional<ResolutionHints> hints,
+		Optional<IdentifyHints> hints,
 		MediaProvider target,
 		Dictionary<AnswerKey, LookupAnswer> answers,
 		HashSet<MediaProvider> down,
@@ -94,7 +94,7 @@ internal sealed class MediaIdResolver(
 	private static async Task<StepOutcome> TakeAsync(
 		Hop hop,
 		IReadOnlyList<IExternalMediaId> ids,
-		Optional<ResolutionHints> hints,
+		Optional<IdentifyHints> hints,
 		Dictionary<AnswerKey, LookupAnswer> answers,
 		HashSet<MediaProvider> down,
 		CancellationToken cancellationToken
@@ -124,7 +124,7 @@ internal sealed class MediaIdResolver(
 		return new StepOutcome(new None(), false);
 	}
 
-	private static IEnumerable<IdLookupRequest> Requests(Hop hop, IReadOnlyList<IExternalMediaId> ids, Optional<ResolutionHints> hints)
+	private static IEnumerable<IdLookupRequest> Requests(Hop hop, IReadOnlyList<IExternalMediaId> ids, Optional<IdentifyHints> hints)
 	{
 		return hop switch
 		{
@@ -203,7 +203,7 @@ internal sealed class MediaIdResolver(
 			};
 		}
 
-		private static string HintsKey(ResolutionHints hints, IReadOnlyList<IExternalMediaId> known)
+		private static string HintsKey(IdentifyHints hints, IReadOnlyList<IExternalMediaId> known)
 		{
 			var ids = known.Select(id => $"{id}").Order(StringComparer.Ordinal);
 			return $"{hints.MediaType}:{hints.Year}:{hints.Title}|{string.Join(",", ids)}";

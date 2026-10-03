@@ -89,7 +89,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		host.SinkAddresses(MediaProvider.Tvdb);
 		await host.TmdbKnowsTheExternalIdsOf(new MediaSpec("Breaking Bad", MediaType.Show, [Tmdb("1396"), Tvdb("81189")]));
 
-		var results = await Testee.IdentifyAsync([new ResolveRequest([Tmdb("1396").ToExternal(MediaType.Show)], new None())]).ToListAsync();
+		var results = await Testee.IdentifyAsync([new IdentifyRequest([Tmdb("1396").ToExternal(MediaType.Show)], new None())]).ToListAsync();
 
 		await AssertResolved(results[0], Tvdb("81189"));
 	}
@@ -258,7 +258,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results[0]).IsError();
 		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		await Assert.That(unmatched.TryGetValue(MediaUnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex), out _)).IsTrue();
+		await Assert.That(unmatched.TryGetValue(UnmatchedCacheKey.Build([Ext(Plex("777"))], MediaProvider.Plex), out _)).IsTrue();
 	}
 
 	[Test]
@@ -327,7 +327,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		await host.PlexSearchReturns("Breaking Bad", breakingBad);
 		host.PlexHolds(breakingBad);
 
-		var results = await Testee.IdentifyAsync([new ResolveRequest([Tvdb("81189").ToExternal(MediaType.Show)], new None())]).ToListAsync();
+		var results = await Testee.IdentifyAsync([new IdentifyRequest([Tvdb("81189").ToExternal(MediaType.Show)], new None())]).ToListAsync();
 
 		await AssertResolved(results[0], Plex("1396"));
 		await AssertRequests(search: 1, find: 1, detail: 0, detailUrl: "tv/1396?");
@@ -367,7 +367,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 		await Assert.That(results[0]).IsError();
 		var unmatched = host.Resolve<ITypedMemoryCache<string, bool>>();
-		await Assert.That(unmatched.TryGetValue(MediaUnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex), out _)).IsFalse();
+		await Assert.That(unmatched.TryGetValue(UnmatchedCacheKey.Build([Ext(Tmdb("550"))], MediaProvider.Plex), out _)).IsFalse();
 	}
 
 	[Test]
@@ -386,11 +386,11 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static IExternalMediaId Ext(ProviderId id) => id.ToExternal(MediaType.Movie);
 
-	private static Optional<ResolutionHints> Hints(string? title, int year)
+	private static Optional<IdentifyHints> Hints(string? title, int year)
 	{
 		return Optional
 			.Of(title)
-			.Map(value => new ResolutionHints
+			.Map(value => new IdentifyHints
 			{
 				Title = value,
 				Year = year,
@@ -398,9 +398,9 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			});
 	}
 
-	private static ResolveRequest Request(string? title, params ProviderId[] candidates) => Request(title, 0, candidates);
+	private static IdentifyRequest Request(string? title, params ProviderId[] candidates) => Request(title, 0, candidates);
 
-	private static ResolveRequest Request(string? title, int year, params ProviderId[] candidates) => new([.. candidates.Select(Ext)], Hints(title, year));
+	private static IdentifyRequest Request(string? title, int year, params ProviderId[] candidates) => new([.. candidates.Select(Ext)], Hints(title, year));
 
 	private async Task AssertRequests(int search, int find, int detail, string detailUrl)
 	{

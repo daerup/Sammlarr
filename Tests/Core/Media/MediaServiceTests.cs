@@ -37,7 +37,7 @@ public class MediaServiceTests
 			]);
 
 		var results = await testee
-			.IdentifyAsync([new ResolveRequest([first], new None()), new ResolveRequest([second], new None()), new ResolveRequest([third], new None())])
+			.IdentifyAsync([new IdentifyRequest([first], new None()), new IdentifyRequest([second], new None()), new IdentifyRequest([third], new None())])
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(3);
@@ -56,7 +56,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any())
 			.Returns([FreshCached(MediaId.From(Guid.NewGuid()), first), FreshCached(MediaId.From(Guid.NewGuid()), second)]);
 
-		await testee.IdentifyAsync([new ResolveRequest([first], new None()), new ResolveRequest([second], new None())]).ToListAsync();
+		await testee.IdentifyAsync([new IdentifyRequest([first], new None()), new IdentifyRequest([second], new None())]).ToListAsync();
 
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).WasCalled(Times.Once);
 	}
@@ -166,7 +166,7 @@ public class MediaServiceTests
 		deps.MediaRepo.GetByExternalsAsync(Any(), Any()).Returns([new CachedMedia(firstDetail, _now), new CachedMedia(secondDetail, _now)]);
 
 		var results = await testee
-			.IdentifyWithDetailsAsync(new List<ResolveRequest> { new([firstExternal], new None()), new([secondExternal], new None()) }.ToAsyncEnumerable())
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([firstExternal], new None()), new([secondExternal], new None()) }.ToAsyncEnumerable())
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
@@ -181,7 +181,7 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.UnmatchedCache.TryGetValue(Any<string>()).Returns(true).SetsOutValue(true);
 
-		var results = await testee.IdentifyWithDetailsAsync(new List<ResolveRequest> { new([external], new None()) }.ToAsyncEnumerable()).ToListAsync();
+		var results = await testee.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([external], new None()) }.ToAsyncEnumerable()).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(1);
 		await Assert.That(results[0]).IsOfUnionType<MediaLookup, UnmatchedMedia>();
@@ -239,12 +239,12 @@ public class MediaServiceTests
 		await Assert.That(pulled).IsGreaterThanOrEqualTo(10).And.IsLessThan(2000);
 	}
 
-	private static async IAsyncEnumerable<ResolveRequest> CountingRequests(int count, Action onPulled)
+	private static async IAsyncEnumerable<IdentifyRequest> CountingRequests(int count, Action onPulled)
 	{
 		foreach (var i in Enumerable.Range(0, count))
 		{
 			onPulled();
-			yield return new ResolveRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None());
+			yield return new IdentifyRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None());
 			await Task.Yield();
 		}
 	}
@@ -279,8 +279,8 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
 		var requests = await BuildRequests(60).ToListAsync();
-		requests[0] = new ResolveRequest([shared], new None());
-		requests[55] = new ResolveRequest([shared], new None());
+		requests[0] = new IdentifyRequest([shared], new None());
+		requests[55] = new IdentifyRequest([shared], new None());
 
 		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
 
@@ -298,7 +298,7 @@ public class MediaServiceTests
 
 		var results = await testee
 			.IdentifyWithDetailsAsync(
-				new List<ResolveRequest> { new([first], new None()), new([second], new None()), new([first, second], new None()) }.ToAsyncEnumerable()
+				new List<IdentifyRequest> { new([first], new None()), new([second], new None()), new([first, second], new None()) }.ToAsyncEnumerable()
 			)
 			.ToListAsync();
 
@@ -317,9 +317,9 @@ public class MediaServiceTests
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext).ToMatch()));
 		var upserted = RecordUpsertedIdentities(deps);
 		var requests = await BuildRequests(60).ToListAsync();
-		requests[0] = new ResolveRequest([first], new None());
-		requests[1] = new ResolveRequest([second], new None());
-		requests[55] = new ResolveRequest([first, second], new None());
+		requests[0] = new IdentifyRequest([first], new None());
+		requests[1] = new IdentifyRequest([second], new None());
+		requests[55] = new IdentifyRequest([first, second], new None());
 
 		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
 
@@ -339,8 +339,8 @@ public class MediaServiceTests
 			.Returns((groups, _) => [.. groups.Select(group => group.Contains(known) ? persisted : (MediaIdentity?)null)]);
 		var upserted = RecordUpsertedIdentities(deps);
 		var requests = await BuildRequests(60).ToListAsync();
-		requests[0] = new ResolveRequest([minted], new None());
-		requests[55] = new ResolveRequest([minted, known], new None());
+		requests[0] = new IdentifyRequest([minted], new None());
+		requests[55] = new IdentifyRequest([minted, known], new None());
 
 		var results = await testee.IdentifyWithDetailsAsync(requests.ToAsyncEnumerable()).ToListAsync();
 
@@ -454,8 +454,8 @@ public class MediaServiceTests
 		return batches;
 	}
 
-	private static IAsyncEnumerable<ResolveRequest> BuildRequests(int count) =>
-		Enumerable.Range(0, count).Select(i => new ResolveRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None())).ToAsyncEnumerable();
+	private static IAsyncEnumerable<IdentifyRequest> BuildRequests(int count) =>
+		Enumerable.Range(0, count).Select(i => new IdentifyRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None())).ToAsyncEnumerable();
 
 	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external) => new(new PartialMovie { Identity = new MediaIdentity(id, [external]) }, _now);
 

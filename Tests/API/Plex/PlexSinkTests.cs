@@ -39,7 +39,7 @@ public class PlexSinkTests
 		await Assert.That(snapshot.Ids).IsEquivalentTo([Known]);
 		await Assert.That(snapshot.Unmatched).IsEmpty();
 		media
-			.IdentifyAsync(Arg.Is<IEnumerable<ResolveRequest>>(requests => requests?.Single() is { Candidates: [{ Value: "plex-42" }] }), Any())
+			.IdentifyAsync(Arg.Is<IEnumerable<IdentifyRequest>>(requests => requests?.Single() is { Candidates: [{ Value: "plex-42" }] }), Any())
 			.WasCalled(Times.Once);
 	}
 
@@ -128,10 +128,10 @@ public class PlexSinkTests
 
 	private static Mock<IMediaService> MatchingNothing() => Identifying(_ => Error.From("unmatched"));
 
-	private static Mock<IMediaService> Identifying(Func<ResolveRequest, Result<MediaIdentity>> identify)
+	private static Mock<IMediaService> Identifying(Func<IdentifyRequest, Result<MediaIdentity>> identify)
 	{
 		var media = IMediaService.Mock();
-		media.IdentifyAsync(Any<IEnumerable<ResolveRequest>>(), Any()).Returns((requests, _) => requests.Select(identify).ToAsyncEnumerable());
+		media.IdentifyAsync(Any<IEnumerable<IdentifyRequest>>(), Any()).Returns((requests, _) => requests.Select(identify).ToAsyncEnumerable());
 		return media;
 	}
 
