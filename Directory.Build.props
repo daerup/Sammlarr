@@ -4,6 +4,8 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);CS1591</NoWarn>
+		<Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+		<Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
 	</PropertyGroup>
 	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests' and '$(MSBuildProjectName)' != 'Analyzers'">
 		<Using Include="Shared" />
