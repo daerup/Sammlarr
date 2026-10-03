@@ -21,8 +21,7 @@ flowchart TD
   contracts["Contracts<br/>interfaces + ids"]
   domain["Domain<br/>model + unions"]
   shared["Shared<br/>kernel"]
-  gen["Roslyn<br/>generators + analyzers"]
-  analyzers["Analyzers<br/>SAM0002 + SAM0003"]
+  gen["Roslyn<br/>generators + analyzers<br/>SAM0001 to SAM0003"]
 
   apphost --> web
   web --> ui
@@ -44,7 +43,7 @@ flowchart TD
   contracts --> domain
   domain --> shared
   domain -. build-time .-> gen
-  shared -. build-time .-> analyzers
+  shared -. build-time .-> gen
 ....
 
 Arrows are direct project references; every project reaches `Domain` transitively through
@@ -67,15 +66,13 @@ shape and never reference each other. Every project also references the `Shared`
 | UI | Blazor components as a Razor class library: the `Features/*` vertical slices and the `Shared` cross-feature components and services. References only `Contracts`, `Shared` and `Observability`, never an implementation.
 | Web | The Blazor host and composition root. Holds the root components (`App`, `Routes`) and, in `Program.cs`, the single `AddModule<T>()` wiring of every layer, plus the endpoints, health checks and host services. The one project that references every implementation and `UI`.
 | AppHost | The Aspire host that runs `Web` and its dependencies for local development.
-| Roslyn | Roslyn components, build-time only: source generators for the provider-subset enums and their conversions from the capability matrix and for the options-section registration, plus the analyzers, currently `SAM0001` enforcing the test naming convention.
-| Analyzers | Build-time analyzers wired from the root `Directory.Build.props` into every project except `Roslyn`, its tests and itself: `SAM0002` (an `Optional` or a `Result` read by hand instead of through its helpers) and `SAM0003` (a branch on one read as a `bool`). Kept apart from `Roslyn`, whose generators inject internal types into every consumer.
+| Roslyn | Roslyn components, build-time only, wired from the root `Directory.Build.props` into every project but itself: source generators for the provider-subset enums and their conversions from the capability matrix, for the options-section registration and for the `Task` mirrors of the monad helpers, plus the analyzers: `SAM0001` (the test naming convention), `SAM0002` (an `Optional` or a `Result` read by hand instead of through its helpers) and `SAM0003` (a branch on one read as a `bool`). The generators inject nothing: they key off markers declared in `Shared` (`GenerateAsyncAttribute`, `IOptionsSection`) or `Domain` (`[Capabilities]`), so a project without them gets no generated code.
 |===
 
 The load-bearing rule: `Core`, `DB` and `API` are siblings that never reference each other; when
 `Core` pushes to Plex it goes through the `IMediaSink` that `API` implements, resolved by
 DI. `UI` is presentation on abstractions only; `Web` is the one project that sees every
-implementation and the only place they compose. `Roslyn` and `Analyzers` run at build time and ship no
-runtime assembly.
+implementation and the only place they compose. `Roslyn` runs at build time and ships no runtime assembly.
 
 === Level 2
 

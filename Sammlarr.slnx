@@ -46,7 +46,6 @@
 		<Project Path="Tests/UI/UI.Tests.csproj" />
 		<Project Path="Tests/Web/Web.Tests.csproj" />
 	</Folder>
-	<Project Path="Analyzers/Analyzers.csproj" />
 	<Project Path="API/API.csproj" />
 	<Project Path="Contracts/Contracts.csproj" />
 	<Project Path="Core/Core.csproj" />

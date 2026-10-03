@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Operations;
 
-namespace Analyzers.Monads;
+namespace Roslyn.Monads;
 
 internal sealed class MonadTypes
 {

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
-namespace Analyzers.Monads;
+namespace Roslyn.Monads;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MonadBranchAnalyzer : DiagnosticAnalyzer

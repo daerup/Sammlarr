@@ -1,5 +1,5 @@
-using Analyzers.Monads;
 using Microsoft.CodeAnalysis;
+using Roslyn.Monads;
 
 namespace Roslyn.Tests;
 

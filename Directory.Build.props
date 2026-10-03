@@ -7,12 +7,14 @@
 		<Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
 		<Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
 	</PropertyGroup>
-	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests' and '$(MSBuildProjectName)' != 'Analyzers'">
+	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn' and '$(MSBuildProjectName)' != 'Roslyn.Tests'">
 		<Using Include="Shared" />
 		<Using Include="Shared.Collections" />
 		<Using Include="Shared.Extensions" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(MSBuildProjectName)' != 'Roslyn'">
 		<ProjectReference
-			Include="$(MSBuildThisFileDirectory)Analyzers\Analyzers.csproj"
+			Include="$(MSBuildThisFileDirectory)Roslyn\Roslyn.csproj"
 			OutputItemType="Analyzer"
 			ReferenceOutputAssembly="false"
 			IsAspireProjectResource="false"
