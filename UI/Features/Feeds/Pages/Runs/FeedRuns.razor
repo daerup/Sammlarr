@@ -248,7 +248,7 @@
 
     private MediaId? Highlight => ItemParam is null ? null : MediaId.From(UrlGuid.Decode(ItemParam));
 
-    private Optional<RunId> LinkedRun => RunIdParam is null ? new None() : Some.Of(RunId.From(UrlGuid.Decode(RunIdParam)));
+    private Optional<RunId> LinkedRun => Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)));
 
     private const int PageSize = 25;
 
@@ -286,19 +286,16 @@
         var feedId = FeedId.From(UrlGuid.Decode(FeedIdParam));
         var found = (await FeedService.GetAsync()).Find(feedId);
         _loading = false;
-        if (found is not Some<FeedOverview>(var overview))
-        {
-            _feed = null;
-            return;
-        }
+        await found
+            .ApplyNone(() => _feed = null)
+            .Apply(overview => (_feed, _history, _onWantlist) = (overview.Feed, overview.History, overview.OnWantlist))
+            .Apply(_ => LoadRunsAsync(feedId))
+            .Apply(_ => RevealLinkedRunAsync());
+    }
 
-        _feed = overview.Feed;
-        _history = overview.History;
-        _onWantlist = overview.OnWantlist;
-        await LoadRunsAsync(feedId);
-
-        var wanted = LinkedRun is Some<RunId>(var linked) ? _runs.FirstOrDefault(run => run.Id == linked) : _runs.FirstOrDefault();
-
+    private async Task RevealLinkedRunAsync()
+    {
+        var wanted = LinkedRun.Match(linked => _runs.FirstOrDefault(run => run.Id == linked), () => _runs.FirstOrDefault());
         if (wanted is not null && wanted.Id != _selected?.Id)
         {
             await ShowRunAsync(wanted);

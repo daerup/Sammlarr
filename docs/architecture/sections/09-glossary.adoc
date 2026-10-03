@@ -268,13 +268,14 @@ line (`UpNextRow`).
 These live in `Shared`, the kernel below `Domain`, and are used throughout.
 
 `union`:: A closed set of case types, e.g. `MediaMatchResult` is `MatchedMedia` or
-`UnmatchedMedia`. Matched by case directly.
+`UnmatchedMedia`. Matched by case directly, except `Optional` and `Result`, which are read through their helpers
+(<<absence>>).
 
-`Optional<T>`:: A present-or-absent value (`Some` / `None`). Used instead of null for a missing
-domain value.
+`Optional<T>`:: A present-or-absent value (`Some` / `None`): how our code says a value may be missing; `T?` is
+left to framework edges and UI-only state (<<absence>>).
 
 `Result<T>`:: A success-or-error value (`Success<T>` / `Error`). Used instead of exceptions for
-expected failures.
+expected failures, and read through its helpers (<<absence>>).
 
 `ValueSet<T>`:: A set with value equality: two sets with the same elements are equal. Used for
 genres and external ids.
