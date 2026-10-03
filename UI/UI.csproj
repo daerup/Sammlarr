@@ -6,7 +6,7 @@
 		<LangVersion>preview</LangVersion>
 		<!-- CS8524: allow exhaustive-over-named enum switches without a default arm (Razor compiler warnings ignore .editorconfig). -->
 		<NoWarn>$(NoWarn);CS8524</NoWarn>
-		<NoWarn>$(NoWarn);BL0012;BL0013;BL0016</NoWarn>
+		<NoWarn>$(NoWarn);BL0013;BL0016</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<Using Include="Microsoft.Extensions.DependencyInjection" />

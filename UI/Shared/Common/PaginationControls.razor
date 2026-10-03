@@ -173,7 +173,6 @@
     private Task HandleJumpValueChangedAsync(int value)
     {
         _jumpPageValue = value;
-        StateHasChanged();
         return Task.CompletedTask;
     }
 

@@ -188,7 +188,6 @@ else
     private void StartSync()
     {
         _syncing = true;
-        StateHasChanged();
     }
 
     private async Task SyncFinishedAsync()
@@ -200,7 +199,6 @@ else
     private void HandleConnectionChanged(bool hasAccess)
     {
         _isConnected = hasAccess;
-        StateHasChanged();
     }
 
     private async Task RunFeedsAsync((IReadOnlyList<FeedId> Feeds, bool SyncAfter) plan)
@@ -260,7 +258,6 @@ else
 
         _userId = CurrentUser.Id;
         _isLoading = true;
-        StateHasChanged();
         await Task.Yield();
         await LoadAsync();
     }
@@ -287,7 +284,6 @@ else
     private async Task LoadOutboxAsync()
     {
         _outbox = (await WantlistService.GetOutboxAsync(_cancellation.Token)).Entries;
-        StateHasChanged();
     }
 
     private async Task LoadAsync()
@@ -350,8 +346,6 @@ else
         {
             return;
         }
-
-        StateHasChanged();
     }
 
     private void OnEvent(IEvent raised)
