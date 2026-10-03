@@ -12,9 +12,9 @@ internal class MediaModule : IServiceModule
 	{
 		services.AddScoped<MediaIdResolver>();
 		services.AddScoped<IUnmatchedMediaCache, UnmatchedMediaCache>();
-		services.AddScoped<MediaMetadataResolver>();
+		services.AddScoped<DetailsFetcher>();
 		services.AddScoped<MediaIdentityCoordinator>();
-		services.AddScoped<MediaResolutionBufferFactory>();
+		services.AddScoped<MediaWriteBufferFactory>();
 		services.AddTracedScoped<IMediaService, MediaService>();
 		services.AddTracedScoped<IMediaSearchService, MediaSearchService>();
 	}

@@ -130,7 +130,7 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 
 	internal void SinkAddresses(MediaProvider provider) => SinkAddresses(_ => Some.Of(provider));
 
-	internal async Task<MediaId> SeedWithMetadataAsync(ResolvedVersion resolved, DateTimeOffset? fetched)
+	internal async Task<MediaId> SeedWithDetailsAsync(ResolvedVersion resolved, DateTimeOffset? fetched)
 	{
 		var context = ScopedDbContext;
 		var media = new MediaRow();

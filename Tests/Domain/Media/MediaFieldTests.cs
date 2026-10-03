@@ -1,6 +1,6 @@
-using Domain.Media.Metadata;
+using Domain.Media;
 
-namespace Domain.Tests.Media.Metadata;
+namespace Domain.Tests.Media;
 
 public class MediaFieldTests
 {

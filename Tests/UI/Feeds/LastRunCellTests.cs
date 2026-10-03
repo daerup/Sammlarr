@@ -10,7 +10,6 @@ using Domain.Blocklist;
 using Domain.Feed;
 using Domain.Feed.Run;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;

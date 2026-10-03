@@ -1,4 +1,4 @@
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Microsoft.Extensions.DependencyInjection;
 using Observability.Tracing;
 using Shared.DI;

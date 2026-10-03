@@ -57,7 +57,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ForBlocklistItems_EnrichesThemWithMetadataAndRating()
+	public async Task GetDetailsAsync_ForBlocklistItems_EnrichesThemWithDetailsAndRating()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnBlocklist();
 		var blocklist = await host.Resolve<IBlocklistService>().GetAsync();

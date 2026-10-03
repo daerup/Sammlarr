@@ -1,5 +1,4 @@
 @using Contracts.Media
-@using Contracts.Media.Metadata
 @inject IMediaCachePurger CachePurger
 @inject IUnmatchedMediaCache UnmatchedCache
 @inject Notifier Notifier
@@ -192,7 +191,7 @@
         _isRemovingAssets = true;
         try
         {
-            await CachePurger.PurgeMetadataAsync();
+            await CachePurger.PurgeDetailsAsync();
             Notifier.Success("Cached assets removed. Metadata will refetch on demand.");
         }
         catch (Exception ex)

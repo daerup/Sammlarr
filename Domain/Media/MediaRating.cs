@@ -1,6 +1,6 @@
 using Domain.Providers;
 
-namespace Domain.Media.Metadata;
+namespace Domain.Media;
 
 public readonly record struct RatingSummary(float? Average, ValueSet<MediaRating> Sources)
 {

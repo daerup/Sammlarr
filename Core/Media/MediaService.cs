@@ -6,7 +6,6 @@ using Contracts.Media.Conversions;
 using Contracts.Wantlist;
 using Core.Wantlist.Sync;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.Extensions.Logging;
 
@@ -14,9 +13,9 @@ namespace Core.Media;
 
 internal sealed class MediaService(
 	MediaIdResolver idResolver,
-	MediaMetadataResolver metadataResolver,
+	DetailsFetcher detailsFetcher,
 	MediaIdentityCoordinator coordinator,
-	MediaResolutionBufferFactory bufferFactory,
+	MediaWriteBufferFactory bufferFactory,
 	ActiveSink activeSink,
 	IMediaRepository mediaRepository,
 	IDateTimeProvider dateTimeProvider,
@@ -42,10 +41,10 @@ internal sealed class MediaService(
 		await using var buffer = bufferFactory.Create();
 		var building = new Dictionary<IExternalMediaId, MediaIdentity>();
 		var sink = await activeSink.ResolveAsync(cancellationToken);
-		var resolutions = await ResolveBatchAsync(materialized, sink, building, buffer, cancellationToken);
-		foreach (var (request, resolution) in materialized.Zip(resolutions))
+		var identityMatches = await IdentifyBatchAsync(materialized, sink, building, buffer, cancellationToken);
+		foreach (var (request, identityMatch) in materialized.Zip(identityMatches))
 		{
-			yield return ToIdentityResult(resolution);
+			yield return ToIdentityResult(identityMatch);
 		}
 	}
 
@@ -61,8 +60,8 @@ internal sealed class MediaService(
 		}
 
 		await using var buffer = bufferFactory.Create();
-		var cached = await LoadByInternalsAsync(materialized, cancellationToken);
-		var pipeline = materialized.SelectAwait(id => RealizeFromCacheAsync(id, cached, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
+		var stored = await LoadByInternalsAsync(materialized, cancellationToken);
+		var pipeline = materialized.SelectAwait(id => LoadStoredDetailsAsync(id, stored, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
 		{
 			yield return result;
@@ -119,7 +118,7 @@ internal sealed class MediaService(
 				continue;
 			}
 
-			await foreach (var result in ResolveAndRealizeAsync(batch, sink, building, buffer, cancellationToken))
+			await foreach (var result in IdentifyAndLoadAsync(batch, sink, building, buffer, cancellationToken))
 			{
 				yield return result;
 			}
@@ -130,7 +129,7 @@ internal sealed class MediaService(
 
 		if (batch.Count > 0 && failure?.SourceException is not OperationCanceledException)
 		{
-			await foreach (var result in ResolveAndRealizeAsync(batch, sink, building, buffer, cancellationToken))
+			await foreach (var result in IdentifyAndLoadAsync(batch, sink, building, buffer, cancellationToken))
 			{
 				yield return result;
 			}
@@ -139,18 +138,18 @@ internal sealed class MediaService(
 		failure?.Throw();
 	}
 
-	private async IAsyncEnumerable<MediaLookup> ResolveAndRealizeAsync(
+	private async IAsyncEnumerable<MediaLookup> IdentifyAndLoadAsync(
 		IReadOnlyList<IdentifyRequest> batch,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
 	{
-		var resolutions = await ResolveBatchAsync(batch, sink, building, buffer, cancellationToken);
+		var identityMatches = await IdentifyBatchAsync(batch, sink, building, buffer, cancellationToken);
 		var pipeline = batch
-			.Zip(resolutions)
-			.SelectAwait(pair => RealizeFromRequestAsync(pair.First, pair.Second, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
+			.Zip(identityMatches)
+			.SelectAwait(pair => LoadRequestDetailsAsync(pair.First, pair.Second, buffer, cancellationToken), RecommendedConcurrency, cancellationToken);
 		await foreach (var result in pipeline)
 		{
 			yield return result;
@@ -202,27 +201,27 @@ internal sealed class MediaService(
 		return found;
 	}
 
-	private async Task<IReadOnlyList<Result<ResolvedIdentity>>> ResolveBatchAsync(
+	private async Task<IReadOnlyList<Result<IdentityMatch>>> IdentifyBatchAsync(
 		IReadOnlyList<IdentifyRequest> requests,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		var allCandidates = requests.SelectMany(r => r.Candidates).Distinct().ToList();
-		var cached = await LoadByExternalsAsync(allCandidates, cancellationToken);
+		var stored = await LoadByExternalsAsync(allCandidates, cancellationToken);
 		var preliminary = await requests
-			.SelectAwait(req => ResolveIdentityAsync(req, sink, cached, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
+			.SelectAwait(req => IdentifyOneAsync(req, sink, stored, buffer, cancellationToken), RecommendedConcurrency, cancellationToken)
 			.ToListAsync(cancellationToken);
-		return await coordinator.CoordinateResolutionsAsync(preliminary, building, buffer, cancellationToken);
+		return await coordinator.CoordinateIdentityMatchesAsync(preliminary, building, buffer, cancellationToken);
 	}
 
-	private async ValueTask<Result<ResolvedIdentity>> ResolveIdentityAsync(
+	private async ValueTask<Result<IdentityMatch>> IdentifyOneAsync(
 		IdentifyRequest request,
 		IMediaSink sink,
-		IReadOnlyDictionary<IExternalMediaId, StoredMedia> cached,
-		MediaResolutionBuffer buffer,
+		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
@@ -230,21 +229,21 @@ internal sealed class MediaService(
 		{
 			return Error.From($"The sink cannot address {request.Type} titles.");
 		}
-		if (TryResolveFromCache(request, target, cached, buffer) is Some<ResolvedIdentity>(var resolved))
+		if (FindStored(request, target, stored, buffer) is Some<IdentityMatch>(var found))
 		{
-			return Success.Of(resolved);
+			return Success.Of(found);
 		}
-		return await ResolveFromProviderAsync(request, target, cancellationToken);
+		return await FindSinkIdAsync(request, target, cancellationToken);
 	}
 
-	private static Optional<ResolvedIdentity> TryResolveFromCache(
+	private static Optional<IdentityMatch> FindStored(
 		IdentifyRequest request,
 		MediaProvider target,
-		IReadOnlyDictionary<IExternalMediaId, StoredMedia> cached,
-		MediaResolutionBuffer buffer
+		IReadOnlyDictionary<IExternalMediaId, StoredMedia> stored,
+		MediaWriteBuffer buffer
 	)
 	{
-		var matches = request.Candidates.Select(cached.GetValueOrDefault).Where(r => r is not null).Select(r => r!).DistinctBy(r => r.Identity.Id).ToList();
+		var matches = request.Candidates.Select(stored.GetValueOrDefault).Where(r => r is not null).Select(r => r!).DistinctBy(r => r.Identity.Id).ToList();
 		if (matches.Count > 1)
 		{
 			throw new MediaIdentityConflictException([.. matches.Select(m => m.Identity.Id)], [.. request.Candidates]);
@@ -258,53 +257,53 @@ internal sealed class MediaService(
 		var missing = request.Candidates.Where(c => !matched.Externals.Contains(c)).ToList();
 		if (missing.Count == 0)
 		{
-			return Some.Of(new ResolvedIdentity(matched, Some.Of(match)));
+			return Some.Of(new IdentityMatch(matched, Some.Of(match)));
 		}
 		var merged = matched with { Externals = matched.Externals + missing };
 		buffer.AddIdentity(merged);
-		return Some.Of(new ResolvedIdentity(merged, Some.Of(match)));
+		return Some.Of(new IdentityMatch(merged, Some.Of(match)));
 	}
 
-	private async ValueTask<Result<ResolvedIdentity>> ResolveFromProviderAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
+	private async ValueTask<Result<IdentityMatch>> FindSinkIdAsync(IdentifyRequest request, MediaProvider target, CancellationToken cancellationToken)
 	{
 		return await idResolver
 			.ResolveAsync(request, target, cancellationToken)
-			.Map(externals => new ResolvedIdentity(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), new None()));
+			.Map(externals => new IdentityMatch(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), new None()));
 	}
 
-	private async ValueTask<Result<IdentifiedMedia>> RealizeFromCacheAsync(
+	private async ValueTask<Result<IdentifiedMedia>> LoadStoredDetailsAsync(
 		MediaId id,
-		IReadOnlyDictionary<MediaId, StoredMedia> cached,
-		MediaResolutionBuffer buffer,
+		IReadOnlyDictionary<MediaId, StoredMedia> stored,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		if (!cached.TryGetValue(id, out var row))
+		if (!stored.TryGetValue(id, out var row))
 		{
 			return Error.From("identity not found");
 		}
-		return await RealizeAsync(row.Identity, Some.Of(row), buffer, cancellationToken);
+		return await LoadDetailsAsync(row.Identity, Some.Of(row), buffer, cancellationToken);
 	}
 
-	private async ValueTask<MediaLookup> RealizeFromRequestAsync(
+	private async ValueTask<MediaLookup> LoadRequestDetailsAsync(
 		IdentifyRequest request,
-		Result<ResolvedIdentity> resolution,
-		MediaResolutionBuffer buffer,
+		Result<IdentityMatch> identityMatch,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
-		if (resolution is not Success<ResolvedIdentity>(var r))
+		if (identityMatch is not Success<IdentityMatch>(var r))
 		{
-			return request.ToUnmatched();
+			return request.Unmatched();
 		}
-		var realized = await RealizeAsync(r.Identity, r.Cached, buffer, cancellationToken);
-		return realized is Success<IdentifiedMedia>(var identified) ? identified : request.ToUnmatched();
+		var loaded = await LoadDetailsAsync(r.Identity, r.Stored, buffer, cancellationToken);
+		return loaded is Success<IdentifiedMedia>(var identified) ? identified : request.Unmatched();
 	}
 
-	private async ValueTask<Result<IdentifiedMedia>> RealizeAsync(
+	private async ValueTask<Result<IdentifiedMedia>> LoadDetailsAsync(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
@@ -321,13 +320,13 @@ internal sealed class MediaService(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
 		Optional<CachedDetails> cached,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		try
 		{
-			var fetched = await metadataResolver.ResolveAsync(identity, buffer, cancellationToken);
+			var fetched = await detailsFetcher.FetchAsync(identity, buffer, cancellationToken);
 			return fetched.Match(_ => fetched, error => Fallback(identity, stored, cached, error));
 		}
 		catch (Exception ex)
@@ -346,7 +345,7 @@ internal sealed class MediaService(
 			.ToResult(error);
 	}
 
-	private static Result<MediaIdentity> ToIdentityResult(Result<ResolvedIdentity> resolution) => resolution.Map(r => r.Identity);
+	private static Result<MediaIdentity> ToIdentityResult(Result<IdentityMatch> identityMatch) => identityMatch.Map(r => r.Identity);
 
 	private async Task<IReadOnlyDictionary<MediaId, StoredMedia>> LoadByInternalsAsync(IReadOnlyList<MediaId> ids, CancellationToken cancellationToken)
 	{
@@ -376,7 +375,7 @@ file static class IdentifyRequestExtensions
 {
 	extension(IdentifyRequest request)
 	{
-		public MediaLookup ToUnmatched()
+		public MediaLookup Unmatched()
 		{
 			var hint = request.Hints is Some<IdentifyHints>(var hints) ? hints : null;
 			return new UnmatchedMedia(

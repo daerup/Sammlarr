@@ -1,12 +1,11 @@
 using Contracts.Media;
 using Core.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.Tests.Media;
 
-public class MediaResolutionBufferTests
+public class MediaWriteBufferTests
 {
 	private static readonly DateTimeOffset FetchedAt = new(2026, 10, 3, 12, 0, 0, TimeSpan.Zero);
 	private static readonly MediaIdentity Survivor = new(MediaId.From(Guid.NewGuid()), [TmdbId.From("1", MediaType.Movie)]);
@@ -17,7 +16,7 @@ public class MediaResolutionBufferTests
 	[Test]
 	public async Task DisposeAsync_WhenTwoTitlesWithDetailsMergeIntoOne_FlushesOneDetailsRowForTheSurvivor()
 	{
-		await using (var testee = new MediaResolutionBuffer(_repository.Object, NullLogger<MediaResolutionBuffer>.Instance))
+		await using (var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance))
 		{
 			testee.Add(new IdentifiedMedia(Survivor, new MovieDetails { Title = "Survivor" }), Cached("Survivor"));
 			testee.Add(new IdentifiedMedia(Absorbed, new MovieDetails { Title = "Absorbed" }), Cached("Absorbed"));
@@ -35,7 +34,7 @@ public class MediaResolutionBufferTests
 		var plexOnly = new MediaIdentity(MediaId.From(Guid.NewGuid()), [PlexId.From("plex-1", MediaType.Movie)]);
 		var learned = TmdbId.From("27205", MediaType.Movie);
 
-		await using (var testee = new MediaResolutionBuffer(_repository.Object, NullLogger<MediaResolutionBuffer>.Instance))
+		await using (var testee = new MediaWriteBuffer(_repository.Object, NullLogger<MediaWriteBuffer>.Instance))
 		{
 			testee.Add(new IdentifiedMedia(plexOnly with { Externals = plexOnly.Externals + [learned] }, new MovieDetails()), Cached("Inception"));
 		}

@@ -101,7 +101,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 		return id;
 	}
 
-	internal async Task<MediaId> SeedWithMetadataAsync(
+	internal async Task<MediaId> SeedWithDetailsAsync(
 		string title,
 		DateTimeOffset fetched,
 		string? summary = null,
@@ -128,7 +128,7 @@ internal sealed class MediaBuilder(SammlarrTestHost host, MediaType type, string
 			summary,
 			genres
 		);
-		_seeded = await host.SeedWithMetadataAsync(resolved, fetched);
+		_seeded = await host.SeedWithDetailsAsync(resolved, fetched);
 		return _seeded.Value;
 	}
 

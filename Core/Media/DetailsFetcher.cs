@@ -1,24 +1,23 @@
 using Contracts;
 using Contracts.DI;
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Contracts.Media.Search;
 using Contracts.Providers;
 using Contracts.Settings;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 
 namespace Core.Media;
 
-internal sealed class MediaMetadataResolver(
+internal sealed class DetailsFetcher(
 	IKeyedServiceIndex<SearchProvider, IMediaSearchProvider> searchIndex,
-	IKeyedServiceIndex<MediaProvider, IMetadataEnricher> enricherIndex,
+	IKeyedServiceIndex<MediaProvider, IDetailsEnricher> enricherIndex,
 	IProviderConfigService providerConfig,
 	IProviderCapacity capacity,
 	IDateTimeProvider clock
 )
 {
-	public async Task<Result<IdentifiedMedia>> ResolveAsync(MediaIdentity identity, MediaResolutionBuffer buffer, CancellationToken cancellationToken = default)
+	public async Task<Result<IdentifiedMedia>> FetchAsync(MediaIdentity identity, MediaWriteBuffer buffer, CancellationToken cancellationToken = default)
 	{
 		var config = await providerConfig.GetAsync(cancellationToken);
 		return await LookUpAsync(identity, config.SearchProvider, cancellationToken)
@@ -31,14 +30,14 @@ internal sealed class MediaMetadataResolver(
 		var external = identity.Externals.OfProvider(providerMedia) ?? identity.Externals.First();
 		return searchIndex[provider]
 			.LookUpAsync(external, cancellationToken)
-			.When(found => found.Fits(identity.Type), "media could not be resolved")
+			.When(found => found.Fits(identity.Type), "the details could not be fetched")
 			.Map(found => found.IdentifiedAs(identity));
 	}
 
 	private async Task<IdentifiedMedia> EnrichAsync(
 		IdentifiedMedia current,
 		SearchProvider searchProvider,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{

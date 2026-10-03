@@ -1,6 +1,6 @@
 using Contracts.DI;
 using Contracts.Identity;
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Contracts.Settings;
 using Contracts.Wantlist;
 using Domain.Media;
@@ -33,7 +33,7 @@ internal class MediaCachePurger(
 			.Union(ctx.FeedRunItems.IgnoreQueryFilters().Select(i => i.MediaId))
 			.ToListAsync(cancellationToken);
 
-		var metadataDeleted = await ctx.MediaDetails.ExecuteDeleteAsync(cancellationToken);
+		var detailsDeleted = await ctx.MediaDetails.ExecuteDeleteAsync(cancellationToken);
 		var mediaDeleted = await ctx.Media.Where(m => !protectedMediaIds.Contains(m.Id)).ExecuteDeleteAsync(cancellationToken);
 		var externalsDeleted = 0;
 		foreach (var type in Enum.GetValues<MediaType>())
@@ -48,20 +48,20 @@ internal class MediaCachePurger(
 		}
 
 		logger.LogInformation(
-			"Media cache purged: {ProtectedCount} protected ids; deleted {MetadataDeleted} metadata, {MediaDeleted} media, {ExternalsDeleted} external ids (kept the ids the {Sink} sink addresses each type by)",
+			"Media cache purged: {ProtectedCount} protected ids; deleted {DetailsDeleted} details, {MediaDeleted} media, {ExternalsDeleted} external ids (kept the ids the {Sink} sink addresses each type by)",
 			protectedMediaIds.Count,
-			metadataDeleted,
+			detailsDeleted,
 			mediaDeleted,
 			externalsDeleted,
 			config.Sink
 		);
 	}
 
-	public async Task PurgeMetadataAsync(CancellationToken cancellationToken = default)
+	public async Task PurgeDetailsAsync(CancellationToken cancellationToken = default)
 	{
 		currentUser.EnsureAdmin();
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 		var deleted = await ctx.MediaDetails.ExecuteDeleteAsync(cancellationToken);
-		logger.LogInformation("Media metadata purged: deleted {MetadataDeleted} metadata records", deleted);
+		logger.LogInformation("Media details purged: deleted {DetailsDeleted} details records", deleted);
 	}
 }

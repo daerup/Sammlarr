@@ -1,12 +1,10 @@
 using Contracts;
 using Contracts.Caching;
 using Contracts.Media;
-using Contracts.Media.Metadata;
 using Contracts.Media.Search;
 using Contracts.Settings;
 using Core.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -33,7 +31,7 @@ public class MediaServiceOrderingTests
 	[Test]
 	public async Task IdentifyAsync_PreservesOrder_WhenSomeFail()
 	{
-		var builder = RequestBuilder.Requests(6).FailResolveAt(2, 4, 6);
+		var builder = RequestBuilder.Requests(6).FailIdentifyAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
 		var results = await testee.IdentifyAsync(builder.AsRequests()).ToListAsync();
@@ -67,7 +65,7 @@ public class MediaServiceOrderingTests
 	[Test]
 	public async Task GetDetailsAsync_ById_PreservesOrder_WhenSomeFail()
 	{
-		var builder = RequestBuilder.Requests(6).FailRealizeAt(2, 4, 6);
+		var builder = RequestBuilder.Requests(6).FailDetailsAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
 		var results = await testee.GetDetailsAsync(builder.AsMediaIds()).ToListAsync();
@@ -101,7 +99,7 @@ public class MediaServiceOrderingTests
 	[Test]
 	public async Task IdentifyWithDetailsAsync_PreservesOrder_WhenSomeIdentifyFail()
 	{
-		var builder = RequestBuilder.Requests(6).FailResolveAt(2, 4, 6);
+		var builder = RequestBuilder.Requests(6).FailIdentifyAt(2, 4, 6);
 		var testee = CreateTestee(builder);
 
 		var results = await testee.IdentifyWithDetailsAsync(builder.AsRequests().ToAsyncEnumerable()).ToListAsync();
@@ -126,28 +124,28 @@ public class MediaServiceOrderingTests
 		var mediaRepo = IMediaRepository.Mock();
 		var unmatchedCache = ITypedMemoryCache<string, bool>.Mock();
 
-		var externalToId = builder.Items.Where(i => i.Resolves).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
+		var externalToId = builder.Items.Where(i => i.Identifies).ToDictionary(i => (IExternalMediaId)i.External, i => i.MediaId.Value);
 
 		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
 		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
 
-		var metadataMap = builder
-			.Items.Where(i => i.Realizes)
+		var storedMap = builder
+			.Items.Where(i => i.HasDetails)
 			.ToDictionary(
 				i => i.MediaId.Value,
 				i => new StoredMedia(new MediaIdentity(i.MediaId, [i.External]), Some.Of(new CachedDetails(i.Detail.Details, _now, MediaField.None)))
 			);
 
-		mediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList());
+		mediaRepo.GetAsync(Any(), Any()).Returns((ids, _) => ids.Select(id => id.Value).Where(storedMap.ContainsKey).Select(g => storedMap[g]).ToList());
 
 		mediaRepo
 			.GetByExternalsAsync(Any(), Any())
 			.Returns(
 				(externals, _) =>
-					externals.Where(externalToId.ContainsKey).Select(e => externalToId[e]).Distinct().Where(metadataMap.ContainsKey).Select(g => metadataMap[g]).ToList()
+					externals.Where(externalToId.ContainsKey).Select(e => externalToId[e]).Distinct().Where(storedMap.ContainsKey).Select(g => storedMap[g]).ToList()
 			);
 
-		foreach (var item in builder.Items.Where(i => !i.Resolves))
+		foreach (var item in builder.Items.Where(i => !i.Identifies))
 		{
 			var key = UnmatchedCacheKey.Build([item.External], MediaProvider.Tmdb);
 			unmatchedCache.TryGetValue(Arg.Is<string>(k => k == key)).Returns(true).SetsOutValue(true);
@@ -156,7 +154,7 @@ public class MediaServiceOrderingTests
 		var dateTimeProvider = IDateTimeProvider.Mock();
 		dateTimeProvider.Now.Returns(_now);
 		var search = IMediaSearchProvider.Mock();
-		var enricher = IMetadataEnricher.Mock();
+		var enricher = IDetailsEnricher.Mock();
 		var configRepository = IProviderConfigService.Mock();
 		configRepository
 			.GetAsync(Any())
@@ -172,17 +170,17 @@ public class MediaServiceOrderingTests
 			);
 
 		var searchIndex = new FakeKeyedServiceIndex<SearchProvider, IMediaSearchProvider>().Register(SearchProvider.Plex, search.Object);
-		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IMetadataEnricher>()
+		var enricherIndex = new FakeKeyedServiceIndex<MediaProvider, IDetailsEnricher>()
 			.Register(MediaProvider.Plex, enricher.Object)
 			.Register(MediaProvider.Tmdb, enricher.Object);
 
-		var metadataResolver = new MediaMetadataResolver(searchIndex, enricherIndex, configRepository.Object, TestCapacity.Open(), dateTimeProvider.Object);
+		var detailsFetcher = new DetailsFetcher(searchIndex, enricherIndex, configRepository.Object, TestCapacity.Open(), dateTimeProvider.Object);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		return new MediaService(
 			new MediaIdResolver([], unmatchedCache.Object, TestCapacity.Open(), dateTimeProvider.Object),
-			metadataResolver,
+			detailsFetcher,
 			coordinator,
-			new MediaResolutionBufferFactory(mediaRepo.Object, NullLogger<MediaResolutionBuffer>.Instance),
+			new MediaWriteBufferFactory(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance),
 			TestSinks.AddressingBy(MediaProvider.Tmdb, configRepository.Object),
 			mediaRepo.Object,
 			dateTimeProvider.Object,
@@ -217,8 +215,8 @@ internal sealed record TestItem
 	public required IExternalMediaId External { get; init; }
 	public required MediaId MediaId { get; init; }
 	public required IdentifiedMedia Detail { get; init; }
-	public bool Resolves { get; init; } = true;
-	public bool Realizes { get; init; } = true;
+	public bool Identifies { get; init; } = true;
+	public bool HasDetails { get; init; } = true;
 	public IdentifyRequest Request => new([External], new None());
 
 	public static TestItem Create(int index)
@@ -261,17 +259,17 @@ internal sealed class RequestBuilder
 
 	public IReadOnlyList<TestItem> Items => _items;
 
-	public RequestBuilder FailResolveAt(params int[] indices)
+	public RequestBuilder FailIdentifyAt(params int[] indices)
 	{
 		var set = indices.ToHashSet();
-		Mutate(item => item with { Resolves = !set.Contains(item.Index) });
+		Mutate(item => item with { Identifies = !set.Contains(item.Index) });
 		return this;
 	}
 
-	public RequestBuilder FailRealizeAt(params int[] indices)
+	public RequestBuilder FailDetailsAt(params int[] indices)
 	{
 		var set = indices.ToHashSet();
-		Mutate(item => item with { Realizes = !set.Contains(item.Index) });
+		Mutate(item => item with { HasDetails = !set.Contains(item.Index) });
 		return this;
 	}
 
@@ -279,7 +277,7 @@ internal sealed class RequestBuilder
 
 	public IEnumerable<MediaId> AsMediaIds() => _items.Select(i => i.MediaId);
 
-	public IReadOnlyList<MediaId?> ExpectedMediaIds => [.. _items.Select(i => i.Resolves && i.Realizes ? (MediaId?)i.MediaId : null)];
+	public IReadOnlyList<MediaId?> ExpectedMediaIds => [.. _items.Select(i => i.Identifies && i.HasDetails ? (MediaId?)i.MediaId : null)];
 
 	private void Mutate(Func<TestItem, TestItem> map)
 	{

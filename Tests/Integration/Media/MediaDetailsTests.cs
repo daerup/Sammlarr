@@ -21,7 +21,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(5, 31));
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 31));
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -34,7 +34,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(5, 24));
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 24));
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -48,7 +48,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(5, 24));
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 24));
 		host.PlexLookupFails(TestMedia.FightClub);
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
@@ -75,7 +75,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(6, 1, 11, 0), genres: []);
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 11, 0), genres: []);
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -90,7 +90,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), genres: []);
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), genres: []);
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -105,7 +105,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), poster: "");
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1, 9, 0), poster: "");
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -118,11 +118,11 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Fresh Title", fetched: At(6, 1));
+			.SeedWithDetailsAsync(title: "Fresh Title", fetched: At(6, 1));
 		var matrix = await host.Movie(Spec("The Matrix", Tmdb("603"), Plex("603")))
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Matrix")
-			.SeedWithMetadataAsync(title: "Old Matrix", fetched: At(5, 24));
+			.SeedWithDetailsAsync(title: "Old Matrix", fetched: At(5, 24));
 
 		var results = await Testee.GetDetailsAsync([fightClub, matrix]).ToListAsync();
 
@@ -150,7 +150,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "An insomniac office worker")
 			.ServedByTmdb(title: "TMDB Fight Club", summary: "TMDB plot synopsis", genres: ["Drama", "Thriller"], rating: 8.4, votes: 23000)
-			.SeedWithMetadataAsync(title: "Stale Title", summary: "Stale summary", genres: ["Stale"], fetched: At(5, 24));
+			.SeedWithDetailsAsync(title: "Stale Title", summary: "Stale summary", genres: ["Stale"], fetched: At(5, 24));
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -225,7 +225,7 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "Fight Club", summary: "Plex summary")
 			.ServedByTmdb(genres: ["Drama", "Thriller"], rating: 8.4, votes: 23000)
-			.SeedWithMetadataAsync(title: "Cached Title", genres: [], fetched: At(5, 31));
+			.SeedWithDetailsAsync(title: "Cached Title", genres: [], fetched: At(5, 31));
 
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 
@@ -262,12 +262,12 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task InvalidateAsync_WhenMetadataIsInvalidated_RefetchesOnTheNextRead()
+	public async Task InvalidateAsync_WhenTheDetailsAreInvalidated_RefetchesOnTheNextRead()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(5, 31));
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 31));
 
 		var first = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
 		await AssertTitle(first[0], "Cached Title");
@@ -278,9 +278,9 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task InvalidateAsync_WhenMetadataIsInvalidated_PreservesTheIdentityAndExternalIds()
+	public async Task InvalidateAsync_WhenTheDetailsAreInvalidated_PreservesTheIdentityAndExternalIds()
 	{
-		var fightClub = await host.Movie(TestMedia.FightClub).SeedWithMetadataAsync(title: "Cached Text", fetched: At(5, 31));
+		var fightClub = await host.Movie(TestMedia.FightClub).SeedWithDetailsAsync(title: "Cached Text", fetched: At(5, 31));
 
 		await Testee.InvalidateAsync([fightClub]);
 
@@ -288,12 +288,12 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task InvalidateAsync_WhenTheMetadataIsFresh_StillForcesARefetch()
+	public async Task InvalidateAsync_WhenTheDetailsAreFresh_StillForcesARefetch()
 	{
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(6, 1));
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(6, 1));
 
 		await Testee.InvalidateAsync([fightClub]);
 		var results = await Testee.GetDetailsAsync([fightClub]).ToListAsync();
@@ -307,11 +307,11 @@ public class MediaDetailsTests(SammlarrTestHost host) : IAsyncDisposable
 		var fightClub = await host.Movie(TestMedia.FightClub)
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Title")
-			.SeedWithMetadataAsync(title: "Cached Title", fetched: At(5, 31));
+			.SeedWithDetailsAsync(title: "Cached Title", fetched: At(5, 31));
 		var matrix = await host.Movie(Spec("The Matrix", Tmdb("603"), Plex("603")))
 			.ServedByPlex(title: "")
 			.ServedByTmdb(title: "Live Matrix")
-			.SeedWithMetadataAsync(title: "Cached Matrix", fetched: At(5, 31));
+			.SeedWithDetailsAsync(title: "Cached Matrix", fetched: At(5, 31));
 
 		await Testee.InvalidateAsync([fightClub, matrix]);
 

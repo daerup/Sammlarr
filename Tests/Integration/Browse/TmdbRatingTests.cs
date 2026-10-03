@@ -1,6 +1,5 @@
-using Contracts.Media.Metadata;
+using Contracts.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Harness;
 
@@ -61,7 +60,7 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private async Task<IReadOnlyList<MediaRating>> FetchTmdbRatings(IExternalMediaId id)
 	{
-		var found = await host.ResolveKeyed<IMetadataEnricher>(MediaProvider.Tmdb).LookUpAsync(id);
+		var found = await host.ResolveKeyed<IDetailsEnricher>(MediaProvider.Tmdb).LookUpAsync(id);
 		return found.Map<FoundMedia, IReadOnlyList<MediaRating>>(media => [.. media.Details.Rating.Sources]).GetValueOr([]);
 	}
 }

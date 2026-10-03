@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Domain.Media.Metadata;
+namespace Domain.Media;
 
 internal static class MediaFields
 {

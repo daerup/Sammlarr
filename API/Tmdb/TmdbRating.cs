@@ -1,4 +1,4 @@
-using Domain.Media.Metadata;
+using Domain.Media;
 using Domain.Providers;
 
 namespace API.Tmdb;

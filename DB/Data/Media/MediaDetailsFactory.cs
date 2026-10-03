@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Domain.Media;
-using Domain.Media.Metadata;
 
 namespace DB.Data.Media;
 

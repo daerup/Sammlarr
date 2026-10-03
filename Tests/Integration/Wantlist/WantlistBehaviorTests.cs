@@ -81,7 +81,7 @@ public class WantlistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	}
 
 	[Test]
-	public async Task GetDetailsAsync_ForWantlistItems_EnrichesThemWithMetadataAndRating()
+	public async Task GetDetailsAsync_ForWantlistItems_EnrichesThemWithDetailsAndRating()
 	{
 		await host.Movie(TestMedia.FightClub).ServedByPlex().ServedByTmdb(rating: 8.4, votes: 23000).OnWantlist(origin: Remote);
 		var wantlist = await host.Resolve<IWantlistService>().GetAsync();

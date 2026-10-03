@@ -15,7 +15,6 @@ using Domain.Blocklist;
 using Domain.Identity;
 using Domain.Jobs;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Domain.Settings;
 using Domain.Wantlist;

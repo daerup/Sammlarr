@@ -7,14 +7,14 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 {
 	public Task<IReadOnlyList<MediaIdentity>> CoordinateAsync(
 		IReadOnlyList<MediaIdentity> preliminary,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	) => CoordinateAsync(preliminary, [], buffer, cancellationToken);
 
 	public async Task<IReadOnlyList<MediaIdentity>> CoordinateAsync(
 		IReadOnlyList<MediaIdentity> preliminary,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
@@ -38,18 +38,18 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		return preliminary.Select(p => p.Externals.Count > 0 ? building[p.Externals.First()] : p).ToArray();
 	}
 
-	public async Task<IReadOnlyList<Result<ResolvedIdentity>>> CoordinateResolutionsAsync(
-		List<Result<ResolvedIdentity>> resolutions,
+	public async Task<IReadOnlyList<Result<IdentityMatch>>> CoordinateIdentityMatchesAsync(
+		List<Result<IdentityMatch>> identityMatches,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
-		MediaResolutionBuffer buffer,
+		MediaWriteBuffer buffer,
 		CancellationToken cancellationToken
 	)
 	{
 		var pendingIndices = new List<int>();
 		var pendingPreliminary = new List<MediaIdentity>();
-		foreach (var (idx, resolution) in resolutions.Index())
+		foreach (var (idx, identityMatch) in identityMatches.Index())
 		{
-			if (resolution is Success<ResolvedIdentity>(var r) && r.Cached.IsNone())
+			if (identityMatch is Success<IdentityMatch>(var r) && r.Stored.IsNone())
 			{
 				pendingIndices.Add(idx);
 				pendingPreliminary.Add(r.Identity);
@@ -57,21 +57,21 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		}
 		if (pendingPreliminary.Count == 0)
 		{
-			return resolutions;
+			return identityMatches;
 		}
 		var corrected = await CoordinateAsync(pendingPreliminary, building, buffer, cancellationToken);
 		for (var i = 0; i < corrected.Count; i++)
 		{
-			resolutions[pendingIndices[i]] = Success.Of(new ResolvedIdentity(corrected[i], new None()));
+			identityMatches[pendingIndices[i]] = Success.Of(new IdentityMatch(corrected[i], new None()));
 		}
-		return resolutions;
+		return identityMatches;
 	}
 
 	private static void MergeIntoCanonical(
 		MediaIdentity preliminary,
 		IReadOnlyDictionary<IExternalMediaId, MediaIdentity> persisted,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
-		MediaResolutionBuffer buffer
+		MediaWriteBuffer buffer
 	)
 	{
 		var touching = Matches(preliminary, persisted).Concat(Matches(preliminary, building)).DistinctBy(match => match.Id).ToList();

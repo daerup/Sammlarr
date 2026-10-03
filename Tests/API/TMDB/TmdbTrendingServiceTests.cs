@@ -4,7 +4,6 @@ using Contracts.Identity;
 using Contracts.Media;
 using Domain.Auth;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using TestInfrastructure;
 using TUnit.Mocks.Http;

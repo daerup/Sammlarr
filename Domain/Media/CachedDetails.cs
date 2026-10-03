@@ -1,4 +1,4 @@
-namespace Domain.Media.Metadata;
+namespace Domain.Media;
 
 public sealed record CachedDetails(MediaDetails Details, DateTimeOffset FetchedAt, MediaField ConfirmedAbsent)
 {

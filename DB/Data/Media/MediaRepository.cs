@@ -1,7 +1,6 @@
 using System.Data;
 using Contracts.Media;
 using Domain.Media;
-using Domain.Media.Metadata;
 using Domain.Providers;
 using Microsoft.EntityFrameworkCore;
 

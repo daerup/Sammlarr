@@ -1,5 +1,3 @@
-using Domain.Media.Metadata;
-
 namespace Domain.Media;
 
 public closed record MediaDetails
