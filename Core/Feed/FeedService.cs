@@ -31,14 +31,11 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 
 	public async Task DeleteAsync(FeedId id, CancellationToken cancellationToken = default)
 	{
-		if (await repository.FindAsync(id, cancellationToken) is not Some<Domain.Feed.Feed>(var feed))
-		{
-			return;
-		}
-
-		await scheduler.UnscheduleAsync(id, cancellationToken);
-		await wantlist.OrphanAsync(feed, cancellationToken);
-		await repository.DeleteAsync(id, cancellationToken);
+		await repository
+			.FindAsync(id, cancellationToken)
+			.Apply(_ => scheduler.UnscheduleAsync(id, cancellationToken))
+			.Apply(feed => wantlist.OrphanAsync(feed, cancellationToken))
+			.Apply(_ => repository.DeleteAsync(id, cancellationToken));
 	}
 
 	public async Task<IReadOnlyList<FeedId>> PauseAsync(IReadOnlyCollection<FeedId> ids, CancellationToken cancellationToken = default)
@@ -77,18 +74,18 @@ internal sealed class FeedService(IFeedRepository repository, IWantlistRepositor
 
 	private async Task RescheduleAsync(FeedId id, CancellationToken cancellationToken)
 	{
-		if (await repository.FindAsync(id, cancellationToken) is not Some<Domain.Feed.Feed>(var feed))
-		{
-			return;
-		}
+		await repository.FindAsync(id, cancellationToken).Apply(feed => ApplyScheduleAsync(feed, cancellationToken));
+	}
 
+	private async Task ApplyScheduleAsync(Domain.Feed.Feed feed, CancellationToken cancellationToken)
+	{
 		if (feed is { Enabled: true, Schedule: Scheduled schedule })
 		{
-			await scheduler.ScheduleAsync(id, schedule, cancellationToken);
+			await scheduler.ScheduleAsync(feed.Id, schedule, cancellationToken);
 		}
 		else
 		{
-			await scheduler.UnscheduleAsync(id, cancellationToken);
+			await scheduler.UnscheduleAsync(feed.Id, cancellationToken);
 		}
 	}
 }

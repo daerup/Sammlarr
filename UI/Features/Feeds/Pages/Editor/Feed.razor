@@ -181,12 +181,15 @@
         await Task.Yield();
 
         var sourceId = FeedId.From(UrlGuid.Decode(EditFeedId ?? CloneFeedId));
-        if ((await FeedService.GetAsync()).Find(sourceId) is not Some<FeedOverview>({ Feed: var feed }))
-        {
-            NavigationManager.NavigateTo("/feeds");
-            return;
-        }
+        await (await FeedService.GetAsync())
+            .Find(sourceId)
+            .Map(overview => overview.Feed)
+            .ApplyNone(() => NavigationManager.NavigateTo("/feeds"))
+            .Apply(LoadConfigAsync);
+    }
 
+    private async Task LoadConfigAsync(Domain.Feed.Feed feed)
+    {
         _config = new FeedConfig
         {
             Name = feed.Name.Trim(),
@@ -194,9 +197,9 @@
             Provider = feed.Provider,
             Strategy = feed.Strategy,
             Identifier = feed.Identifier.Trim(),
-            Filter = FilterDefinitionConverter.FromQueryFilter(feed.Filter),
-            Sort = feed.Sort,
-            Limit = feed.Limit,
+            Filter = FilterDefinitionConverter.FromQueryFilter(feed.Filter.ToNullable()),
+            Sort = feed.Sort.ToNullable(),
+            Limit = feed.Limit.ToNullable(),
             Schedule = feed.Schedule,
             IsProviderAvailable = await ApiKeyService.GetAsync(feed.Provider.AsApiKeyProvider()).IsSuccess(),
         };
@@ -204,7 +207,7 @@
         _storedStrategy = _config.Strategy;
         if (EditFeedId is not null)
         {
-            _savedFeedId = sourceId;
+            _savedFeedId = feed.Id;
         }
         _configKey++;
         _pendingAutoApply = true;
@@ -358,9 +361,9 @@
             Provider = _config.Provider!.Value,
             Strategy = _config.Strategy,
             Identifier = _config.Identifier.Trim(),
-            Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
-            Sort = _config.Sort,
-            Limit = _config.Limit,
+            Filter = Optional.Of(FilterDefinitionConverter.ToQueryFilter(_config.Filter)),
+            Sort = Optional.Of(_config.Sort),
+            Limit = Optional.Of(_config.Limit),
             Schedule = _config.Schedule,
         };
 
@@ -372,9 +375,9 @@
             Provider = _config.Provider!.Value,
             Strategy = _config.Strategy,
             Identifier = _config.Identifier.Trim(),
-            Filter = FilterDefinitionConverter.ToQueryFilter(_config.Filter),
-            Sort = _config.Sort,
-            Limit = _config.Limit,
+            Filter = Optional.Of(FilterDefinitionConverter.ToQueryFilter(_config.Filter)),
+            Sort = Optional.Of(_config.Sort),
+            Limit = Optional.Of(_config.Limit),
             Schedule = _config.Schedule,
         };
 

@@ -12,8 +12,8 @@ public record Feed
 	public required FeedStrategy Strategy { get; init; }
 	public required string Identifier { get; init; }
 	public required DateTimeOffset CreatedAt { get; init; }
-	public QueryFilter? Filter { get; init; }
-	public QuerySort? Sort { get; init; }
-	public QueryLimit? Limit { get; init; }
+	public Optional<QueryFilter> Filter { get; init; } = new None();
+	public Optional<QuerySort> Sort { get; init; } = new None();
+	public Optional<QueryLimit> Limit { get; init; } = new None();
 	public required FeedRunTrigger Schedule { get; init; }
 }

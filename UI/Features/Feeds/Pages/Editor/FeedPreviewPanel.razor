@@ -656,9 +656,9 @@
             Strategy = applied.Strategy,
             Identifier = applied.Identifier,
             CreatedAt = DateTimeOffset.MinValue,
-            Filter = FilterDefinitionConverter.ToQueryFilter(applied.Filter),
-            Sort = applied.Sort,
-            Limit = applied.Limit,
+            Filter = Optional.Of(FilterDefinitionConverter.ToQueryFilter(applied.Filter)),
+            Sort = Optional.Of(applied.Sort),
+            Limit = Optional.Of(applied.Limit),
             Schedule = applied.Schedule,
         };
     }

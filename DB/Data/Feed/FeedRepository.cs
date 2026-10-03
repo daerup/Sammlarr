@@ -35,9 +35,9 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 			Provider = data.Provider,
 			Strategy = data.Strategy,
 			Identifier = data.Identifier,
-			Filter = data.Filter,
-			Sort = data.Sort,
-			Limit = data.Limit,
+			Filter = data.Filter.ToNullable(),
+			Sort = data.Sort.ToNullable(),
+			Limit = data.Limit.ToNullable(),
 			Trigger = data.Schedule,
 		};
 
@@ -61,9 +61,9 @@ internal sealed class FeedRepository(IDbContextFactory<SammlarrDbContext> dbCont
 		entity.Provider = data.Provider;
 		entity.Strategy = data.Strategy;
 		entity.Identifier = data.Identifier;
-		entity.Filter = data.Filter;
-		entity.Sort = data.Sort;
-		entity.Limit = data.Limit;
+		entity.Filter = data.Filter.ToNullable();
+		entity.Sort = data.Sort.ToNullable();
+		entity.Limit = data.Limit.ToNullable();
 		entity.Trigger = data.Schedule;
 
 		await ctx.SaveChangesAsync(cancellationToken);

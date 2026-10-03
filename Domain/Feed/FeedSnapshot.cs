@@ -6,5 +6,5 @@ public sealed class FeedSnapshot(IReadOnlyList<FeedOverview> feeds)
 
 	public IReadOnlyList<FeedOverview> Feeds { get; } = feeds;
 
-	public Optional<FeedOverview> Find(FeedId id) => _byId.TryGetValue(id, out var overview) ? Some.Of(overview) : new None();
+	public Optional<FeedOverview> Find(FeedId id) => _byId.GetValueOrNone(id);
 }

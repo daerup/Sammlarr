@@ -14,9 +14,9 @@ internal static class FeedProjection
 		Strategy = row.Strategy,
 		Identifier = row.Identifier,
 		CreatedAt = row.CreatedAt,
-		Filter = row.Filter,
-		Sort = row.Sort,
-		Limit = row.Limit,
+		Filter = Optional.Of(row.Filter),
+		Sort = Optional.Of(row.Sort),
+		Limit = Optional.Of(row.Limit),
 		Schedule = row.Trigger,
 	};
 
