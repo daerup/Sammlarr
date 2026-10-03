@@ -144,6 +144,49 @@ public class MediaMergerTests
 	}
 
 	[Test]
+	public async Task MergeWith_WhenAProviderAnswersACompleteMovie_KeepsThePartialsMediaId()
+	{
+		var identity = MediaFakes.MovieIdentity();
+		IPartialMedia partial = new PartialMovie { Identity = identity, Title = "Custom" };
+		var answer = MediaFakes.CompleteMovie();
+		IMedia complete = answer with { Identity = answer.Identity with { Id = default } };
+
+		var merged = partial.MergeWith(complete);
+
+		await Assert.That(merged.Identity.Id).IsEqualTo(identity.Id);
+		await Assert.That(merged.Identity.Externals).IsEquivalentTo([.. identity.Externals, .. answer.Identity.Externals]);
+	}
+
+	[Test]
+	public async Task MergeWith_WhenAProviderAnswersACompleteShow_KeepsThePartialsMediaId()
+	{
+		var identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From("1396", MediaType.Show)]);
+		IPartialMedia partial = new PartialShow { Identity = identity, Title = "Breaking Bad" };
+		IMedia complete = new Show
+		{
+			Identity = new MediaIdentity(default, [TvdbId.From("81189", MediaType.Show)]),
+			Title = "Breaking Bad",
+			Tagline = "Say my name.",
+			Summary = "A chemistry teacher turns to crime.",
+			PosterUrl = "/poster.jpg",
+			BackdropUrl = "/backdrop.jpg",
+			ReleaseDate = new DateOnly(2008, 1, 20),
+			Genres = ["Drama"],
+			Rating = RatingSummary.None,
+			Seasons = 5,
+			Episodes = 62,
+			RuntimePerEpisode = TimeSpan.FromMinutes(47),
+		};
+
+		var merged = partial.MergeWith(complete);
+
+		await Assert.That(merged.Identity.Id).IsEqualTo(identity.Id);
+		await Assert
+			.That(merged.Identity.Externals)
+			.IsEquivalentTo(new IExternalMediaId[] { TmdbId.From("1396", MediaType.Show), TvdbId.From("81189", MediaType.Show) });
+	}
+
+	[Test]
 	public async Task MergeWith_WhenOtherIsIdentifiedComplete_DispatchesToMediaOverload()
 	{
 		IPartialMedia partial = new PartialMovie { Identity = MediaFakes.MovieIdentity(), Title = "Custom" };
