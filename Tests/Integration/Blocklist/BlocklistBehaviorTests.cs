@@ -78,6 +78,6 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 	[Test]
 	public async Task AddAsync_WhenTheMediaIsNotInTheLibrary_IsRejected()
 	{
-		await Assert.That(async () => await host.Resolve<IBlocklistService>().AddAsync(MediaId.From(Guid.NewGuid()))).Throws<UnknownMediaException>();
+		await Assert.That(async () => await host.Resolve<IBlocklistService>().AddAsync(MediaId.New())).Throws<UnknownMediaException>();
 	}
 }

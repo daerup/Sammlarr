@@ -43,5 +43,5 @@ public class FeedRunNotificationTests
 
 	private static FeedRunCompleted Completed(int added, int removed) => new(new FeedDelta([.. Ids(added)], [], [.. Ids(removed)]), Conclusiveness.Conclusive);
 
-	private static IEnumerable<MediaId> Ids(int count) => Enumerable.Range(0, count).Select(_ => MediaId.From(Guid.NewGuid()));
+	private static IEnumerable<MediaId> Ids(int count) => Enumerable.Range(0, count).Select(_ => MediaId.New());
 }

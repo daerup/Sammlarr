@@ -10,7 +10,7 @@ public class DefaultLevelTests
 {
 	private static readonly UserId Owner = UserId.From(Guid.NewGuid());
 	private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch;
-	private static readonly MediaId Media = MediaId.From(Guid.NewGuid());
+	private static readonly MediaId Media = MediaId.New();
 
 	[Test]
 	public async Task DefaultLevel_OfACleanSync_IsSuccess()

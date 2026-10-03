@@ -45,7 +45,7 @@ public class ActivityLogTests
 	[Test]
 	public async Task Days_WhenTwoFeedsAddedTheSameTitleThatDay_CountsAndShowsItOnce()
 	{
-		var shared = MediaId.From(Guid.NewGuid());
+		var shared = MediaId.New();
 		var runs = new[] { Run(Docs, Today, addedIds: [shared]), Run(Trending, Today.AddHours(-1), addedIds: [shared]) };
 
 		var days = ActivityLog.Days(runs, Names, TimeZoneInfo.Utc);
@@ -190,7 +190,7 @@ public class ActivityLogTests
 			Counts = FeedRunCounts.None with { Total = total, Added = addedIds?.Count ?? added, Removed = removed },
 			Items =
 			[
-				.. (addedIds ?? [.. Enumerable.Range(0, added).Select(_ => MediaId.From(Guid.NewGuid()))]).Select(id => new FeedRunItem
+				.. (addedIds ?? [.. Enumerable.Range(0, added).Select(_ => MediaId.New())]).Select(id => new FeedRunItem
 				{
 					MediaId = id,
 					State = FeedRunItemState.Added,
@@ -199,5 +199,5 @@ public class ActivityLogTests
 			],
 		};
 
-	private static FeedRunItem Item(FeedRunItemState state) => new() { MediaId = MediaId.From(Guid.NewGuid()), State = state };
+	private static FeedRunItem Item(FeedRunItemState state) => new() { MediaId = MediaId.New(), State = state };
 }

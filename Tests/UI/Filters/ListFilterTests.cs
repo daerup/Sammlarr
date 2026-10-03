@@ -170,7 +170,7 @@ public class ListFilterTests
 	private static MatchedMedia Movie(string title)
 	{
 		return new MatchedMedia(
-			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
+			new MediaIdentity(MediaId.New(), [TmdbId.From(title, MediaType.Movie)]),
 			new MovieDetails
 			{
 				Title = title,

@@ -76,6 +76,6 @@ public class MediaGridTileTests : BunitContext
 
 	private static MediaMatchResult Movie(string? backdrop = Backdrop, string? poster = Poster)
 	{
-		return new MatchedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = backdrop, PosterUrl = poster });
+		return new MatchedMedia(new MediaIdentity(MediaId.New(), []), new MovieDetails { BackdropUrl = backdrop, PosterUrl = poster });
 	}
 }

@@ -388,7 +388,7 @@ public class QueryProcessorRatingTests
 	{
 		return MediaQueryRow.From(
 			new MatchedMedia(
-				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(year.ToString(), MediaType.Movie)]),
+				new MediaIdentity(MediaId.New(), [TmdbId.From(year.ToString(), MediaType.Movie)]),
 				new MovieDetails
 				{
 					Title = $"Movie {year}",

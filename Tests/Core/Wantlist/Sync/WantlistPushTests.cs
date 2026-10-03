@@ -17,7 +17,7 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenAPendingAddPushesSuccessfully_DropsItAndAnnouncesPushed()
 	{
-		var mediaId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.New();
 		var outbox = OutboxWith(Pending(mediaId, WantlistOperationAction.Add));
 		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Applied));
 		var events = IEventPublisher.Mock();
@@ -34,7 +34,7 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenAnEntryHasAlreadyFailed_LeavesItAloneAndPushesNothing()
 	{
-		var mediaId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.New();
 		var outbox = OutboxWith(new WantlistOutboxEntry(mediaId, WantlistOperationAction.Add, WantlistOutboxState.Failed, 5));
 		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Applied));
 		var testee = WantlistStubs.Engine(sink, outbox, user: Owner);
@@ -60,7 +60,7 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenTheSinkCannotAddressAnEntry_AbandonsItWithoutRetrying()
 	{
-		var mediaId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.New();
 		var outbox = OutboxWith(Pending(mediaId, WantlistOperationAction.Add));
 		var events = IEventPublisher.Mock();
 		var testee = WantlistStubs.Engine(WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Unaddressable)), outbox, events, user: Owner);
@@ -74,7 +74,7 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenAPushFailsBelowMaxAttempts_KeepsItPendingAndAnnouncesRetrying()
 	{
-		var mediaId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.New();
 		var outbox = OutboxWith(Pending(mediaId, WantlistOperationAction.Remove));
 		var events = IEventPublisher.Mock();
 		var testee = WantlistStubs.Engine(WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Failed)), outbox, events, user: Owner);
@@ -88,7 +88,7 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenAPushFailsAtMaxAttempts_MarksItFailedAndAnnouncesAbandoned()
 	{
-		var mediaId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.New();
 		var outbox = OutboxWith(new WantlistOutboxEntry(mediaId, WantlistOperationAction.Add, WantlistOutboxState.Pending, 4));
 		var events = IEventPublisher.Mock();
 		var testee = WantlistStubs.Engine(WantlistStubs.SinkAcking(new SinkSyncAck(mediaId, SinkSyncOutcome.Failed)), outbox, events, user: Owner);
@@ -103,8 +103,8 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenOnePushSucceedsAndTheSinkCannotAddressAnother_AnnouncesBoth()
 	{
-		var pushable = MediaId.From(Guid.NewGuid());
-		var stranded = MediaId.From(Guid.NewGuid());
+		var pushable = MediaId.New();
+		var stranded = MediaId.New();
 		var outbox = OutboxWith(Pending(pushable, WantlistOperationAction.Add), Pending(stranded, WantlistOperationAction.Add));
 		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(pushable, SinkSyncOutcome.Applied), new SinkSyncAck(stranded, SinkSyncOutcome.Unaddressable));
 		var events = IEventPublisher.Mock();
@@ -119,8 +119,8 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenSeveralEntriesShareAnAction_SendsThemAsOneSinkCall()
 	{
-		var first = MediaId.From(Guid.NewGuid());
-		var second = MediaId.From(Guid.NewGuid());
+		var first = MediaId.New();
+		var second = MediaId.New();
 		var outbox = OutboxWith(Pending(first, WantlistOperationAction.Add), Pending(second, WantlistOperationAction.Add));
 		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(first, SinkSyncOutcome.Applied), new SinkSyncAck(second, SinkSyncOutcome.Applied));
 		var events = IEventPublisher.Mock();
@@ -136,8 +136,8 @@ public class WantlistPushTests
 	[Test]
 	public async Task SyncAsync_WhenTheSinkAcksFewerThanItWasSent_TreatsTheSilentOnesAsFailures()
 	{
-		var acked = MediaId.From(Guid.NewGuid());
-		var ignored = MediaId.From(Guid.NewGuid());
+		var acked = MediaId.New();
+		var ignored = MediaId.New();
 		var outbox = OutboxWith(Pending(acked, WantlistOperationAction.Add), Pending(ignored, WantlistOperationAction.Add));
 		var events = IEventPublisher.Mock();
 		var testee = WantlistStubs.Engine(WantlistStubs.SinkAcking(new SinkSyncAck(acked, SinkSyncOutcome.Applied)), outbox, events, user: Owner);

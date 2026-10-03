@@ -221,7 +221,7 @@ internal sealed record TestItem
 
 	public static TestItem Create(int index)
 	{
-		var mediaId = MediaId.From(Guid.NewGuid());
+		var mediaId = MediaId.New();
 		return new TestItem
 		{
 			Index = index,

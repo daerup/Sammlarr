@@ -41,6 +41,6 @@ public class BulkEditableMediaGridTests : BunitContext
 
 	private static MatchedMedia Movie()
 	{
-		return new(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = "https://cdn.example.test/backdrop.jpg" });
+		return new(new MediaIdentity(MediaId.New(), []), new MovieDetails { BackdropUrl = "https://cdn.example.test/backdrop.jpg" });
 	}
 }

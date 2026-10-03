@@ -16,7 +16,7 @@ public class MediaIdentityCoordinatorTests
 		var (coordinator, buffer) = CreateCoordinator();
 
 		var corrected = await coordinator.CoordinateAsync(
-			[new(MediaId.From(Guid.NewGuid()), [tmdbA, sharedImdb]), new(MediaId.From(Guid.NewGuid()), [tmdbB, sharedImdb])],
+			[new(MediaId.New(), [tmdbA, sharedImdb]), new(MediaId.New(), [tmdbB, sharedImdb])],
 			buffer,
 			CancellationToken.None
 		);
@@ -35,11 +35,7 @@ public class MediaIdentityCoordinatorTests
 		var sharedImdb = ImdbId.From("tt0010", MediaType.Movie);
 		var (coordinator, buffer) = CreateCoordinator();
 
-		await coordinator.CoordinateAsync(
-			[new(MediaId.From(Guid.NewGuid()), [tmdbA, sharedImdb]), new(MediaId.From(Guid.NewGuid()), [tmdbB, sharedImdb])],
-			buffer,
-			CancellationToken.None
-		);
+		await coordinator.CoordinateAsync([new(MediaId.New(), [tmdbA, sharedImdb]), new(MediaId.New(), [tmdbB, sharedImdb])], buffer, CancellationToken.None);
 
 		await Assert.That(buffer.NewIdentities.DistinctBy(i => i.Id).Count()).IsEqualTo(1);
 	}
@@ -50,14 +46,14 @@ public class MediaIdentityCoordinatorTests
 		var tmdbExisting = TmdbId.From("20", MediaType.Movie);
 		var sharedImdb = ImdbId.From("tt0020", MediaType.Movie);
 		var tmdbNew = TmdbId.From("21", MediaType.Movie);
-		var existingId = MediaId.From(Guid.NewGuid());
+		var existingId = MediaId.New();
 		var existingIdentity = new MediaIdentity(existingId, [tmdbExisting]);
 		var (coordinator, buffer) = CreateCoordinator(repo =>
 			repo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, tmdbExisting, existingIdentity))
 		);
 
 		var corrected = await coordinator.CoordinateAsync(
-			[new(MediaId.From(Guid.NewGuid()), [tmdbExisting, sharedImdb]), new(MediaId.From(Guid.NewGuid()), [tmdbNew, sharedImdb])],
+			[new(MediaId.New(), [tmdbExisting, sharedImdb]), new(MediaId.New(), [tmdbNew, sharedImdb])],
 			buffer,
 			CancellationToken.None
 		);
@@ -71,7 +67,7 @@ public class MediaIdentityCoordinatorTests
 	{
 		var external = TmdbId.From("9001", MediaType.Movie);
 		var (coordinator, buffer) = CreateCoordinator();
-		var preliminary = new List<MediaIdentity> { new(MediaId.From(Guid.NewGuid()), [external]) };
+		var preliminary = new List<MediaIdentity> { new(MediaId.New(), [external]) };
 
 		var corrected = await coordinator.CoordinateAsync(preliminary, buffer, CancellationToken.None);
 
@@ -84,13 +80,13 @@ public class MediaIdentityCoordinatorTests
 	public async Task CoordinateAsync_WhenExternalKnown_ReusesPersistedMediaId()
 	{
 		var external = TmdbId.From("9002", MediaType.Movie);
-		var existingId = MediaId.From(Guid.NewGuid());
+		var existingId = MediaId.New();
 		var existingIdentity = new MediaIdentity(existingId, [external]);
 		var (coordinator, buffer) = CreateCoordinator(repo =>
 			repo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, external, existingIdentity))
 		);
 
-		var corrected = await coordinator.CoordinateAsync([new(MediaId.From(Guid.NewGuid()), [external])], buffer, CancellationToken.None);
+		var corrected = await coordinator.CoordinateAsync([new(MediaId.New(), [external])], buffer, CancellationToken.None);
 
 		await Assert.That(corrected[0].Id).IsEqualTo(existingId);
 	}
@@ -101,13 +97,13 @@ public class MediaIdentityCoordinatorTests
 		var sharedTmdb = TmdbId.From("9003", MediaType.Movie);
 		var dbImdb = ImdbId.From("tt9003", MediaType.Movie);
 		var freshPlex = PlexId.From("plex-9003", MediaType.Movie);
-		var existingId = MediaId.From(Guid.NewGuid());
+		var existingId = MediaId.New();
 		var existingIdentity = new MediaIdentity(existingId, [sharedTmdb, dbImdb]);
 		var (coordinator, buffer) = CreateCoordinator(repo =>
 			repo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => MatchGroups(groups, sharedTmdb, existingIdentity))
 		);
 
-		var corrected = await coordinator.CoordinateAsync([new(MediaId.From(Guid.NewGuid()), [sharedTmdb, freshPlex])], buffer, CancellationToken.None);
+		var corrected = await coordinator.CoordinateAsync([new(MediaId.New(), [sharedTmdb, freshPlex])], buffer, CancellationToken.None);
 
 		await Assert.That(corrected[0].Id).IsEqualTo(existingId);
 		await Assert.That(corrected[0].Externals).Contains(sharedTmdb);

@@ -38,7 +38,7 @@ public class EventPublisherTests
 		await Assert.That(seen).Count().IsEqualTo(2);
 	}
 
-	private static WantlistOutboxEvent Pushed() => new(Owner, MediaId.From(Guid.NewGuid()), WantlistOutboxEventKind.Pushed);
+	private static WantlistOutboxEvent Pushed() => new(Owner, MediaId.New(), WantlistOutboxEventKind.Pushed);
 
 	private sealed record UnrelatedEvent(UserId UserId) : IEvent;
 }

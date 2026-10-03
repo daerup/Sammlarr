@@ -25,7 +25,7 @@ public class GlobalSearchTests : BunitContext
 	private const string Person = "Christopher Nolan";
 
 	private static readonly MediaMatchResult Matched = new MatchedMedia(
-		new MediaIdentity(MediaId.From(Guid.NewGuid()), [PlexId.From("1", MediaType.Movie)]),
+		new MediaIdentity(MediaId.New(), [PlexId.From("1", MediaType.Movie)]),
 		new MovieDetails { Title = Movie }
 	);
 

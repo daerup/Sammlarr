@@ -19,7 +19,7 @@ public class PlexSinkTests
 {
 	private const string PlexBaseUrl = "https://plex.tv";
 	private static readonly Faker Faker = new();
-	private static readonly MediaId Known = MediaId.From(Guid.NewGuid());
+	private static readonly MediaId Known = MediaId.New();
 
 	[Test]
 	[Arguments(MediaType.Movie)]

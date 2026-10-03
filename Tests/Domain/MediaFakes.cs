@@ -9,7 +9,7 @@ internal static class MediaFakes
 	public static MediaIdentity MovieIdentity()
 	{
 		var faker = new Faker();
-		return new(MediaId.From(Guid.NewGuid()), [TmdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie)]);
+		return new(MediaId.New(), [TmdbId.From(faker.Random.Int(1, 1_000_000).ToString(), MediaType.Movie)]);
 	}
 
 	public static MovieDetails CompleteMovieDetails()
