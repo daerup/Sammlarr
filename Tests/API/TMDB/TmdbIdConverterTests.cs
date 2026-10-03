@@ -1,5 +1,6 @@
 using System.Net;
 using API.Tmdb;
+using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using TestInfrastructure;
@@ -23,6 +24,78 @@ public class TmdbIdConverterTests
 		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0137523", MediaType.Movie)));
 
 		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Ids).Contains(FightClub));
+	}
+
+	[Test]
+	public async Task LookUpAsync_FindByAnImdbId_HintsAtTheOriginalTitleAndItsReleaseYear()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson("{\"movie_results\":[{\"id\":550,\"original_title\":\"Fight Club\",\"release_date\":\"1999-10-15\"}],\"tv_results\":[]}");
+		var testee = new TmdbIdConverter(TmdbApis.Over(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0137523", MediaType.Movie)));
+
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async found =>
+				await Assert
+					.That(found.Hints)
+					.IsSome()
+					.And.IsEqualTo(
+						new IdentifyHints
+						{
+							Title = "Fight Club",
+							Year = 1999,
+							MediaType = MediaType.Movie,
+						}
+					)
+			);
+	}
+
+	[Test]
+	public async Task LookUpAsync_FindForAnUnreleasedTitle_HintsAtYearZero()
+	{
+		var handler = Mock.HttpHandler();
+		handler.OnAnyRequest().RespondWithJson("{\"movie_results\":[{\"id\":550,\"original_title\":\"Fight Club\",\"release_date\":\"\"}],\"tv_results\":[]}");
+		var testee = new TmdbIdConverter(TmdbApis.Over(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(ImdbId.From("tt0137523", MediaType.Movie)));
+
+		await Assert.That(result).IsSuccess().And.Multiple(async found => await Assert.That(found.Hints.Map(hints => hints.Year)).IsSome().And.IsEqualTo(0));
+	}
+
+	[Test]
+	public async Task LookUpAsync_DetailOfAShow_HintsAtTheOriginalNameAndItsFirstAirYear()
+	{
+		var handler = Mock.HttpHandler();
+		handler
+			.OnAnyRequest()
+			.RespondWithJson(
+				"{\"id\":1396,\"original_name\":\"Breaking Bad\",\"first_air_date\":\"2008-01-20\",\"external_ids\":{\"imdb_id\":null,\"tvdb_id\":81189}}"
+			);
+		var testee = new TmdbIdConverter(TmdbApis.Over(handler));
+
+		var result = await testee.LookUpAsync(testee.RequestById(BreakingBad));
+
+		await Assert
+			.That(result)
+			.IsSuccess()
+			.And.Multiple(async found =>
+				await Assert
+					.That(found.Hints)
+					.IsSome()
+					.And.IsEqualTo(
+						new IdentifyHints
+						{
+							Title = "Breaking Bad",
+							Year = 2008,
+							MediaType = MediaType.Show,
+						}
+					)
+			);
 	}
 
 	[Test]

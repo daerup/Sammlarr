@@ -90,6 +90,7 @@ internal static class TmdbStub
 		var mediaType = v.Type == MediaType.Show ? "tv" : "movie";
 		var nameJson = v.Type == MediaType.Show ? titleJson : "null";
 		var titleField = v.Type == MediaType.Show ? "null" : titleJson;
+		var dateField = v.Type == MediaType.Show ? "first_air_date" : "release_date";
 		return $$"""
 			{
 			  "id": {{tmdbId}},
@@ -97,6 +98,7 @@ internal static class TmdbStub
 			  "name": {{nameJson}},
 			  "original_title": {{titleField}},
 			  "original_name": {{nameJson}},
+			  "{{dateField}}": "{{v.Year}}-01-15",
 			  "media_type": "{{mediaType}}",
 			  "overview": {{overviewJson}},
 			  "genres": {{genresJson}}{{voteFields}}{{externalIdsField}}

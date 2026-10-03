@@ -270,6 +270,12 @@ public sealed class SammlarrTestHost : IAsyncDisposable
 		PlexStub.Search(HttpStub, term, [.. hits.Select(PlexHit)]);
 	}
 
+	internal async Task PlexSearchFailsOnceThenReturns(string term, params MediaSpec[] hits)
+	{
+		await EnsurePlexAccount();
+		PlexStub.SearchFailsOnce(HttpStub, term, [.. hits.Select(PlexHit)]);
+	}
+
 	internal async Task PlexFindsNothing(string term)
 	{
 		await EnsurePlexAccount();

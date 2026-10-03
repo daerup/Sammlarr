@@ -299,7 +299,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		var results = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Imdb("tt0137523"))]).ToListAsync();
 
 		await Assert.That(results[0]).IsError();
-		await AssertRequests(search: 2, find: 1, detail: 1, detailUrl: "movie/550?");
+		await AssertRequests(search: 1, find: 1, detail: 1, detailUrl: "movie/550?");
 	}
 
 	[Test]
@@ -315,7 +315,7 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 			.ToListAsync();
 
 		await Assert.That(results[0]).IsError();
-		await AssertRequests(search: 2, find: 2, detail: 1, detailUrl: "movie/550?");
+		await AssertRequests(search: 1, find: 2, detail: 1, detailUrl: "movie/550?");
 	}
 
 	[Test]
@@ -380,6 +380,61 @@ public class MediaIdentityTests(SammlarrTestHost host) : IAsyncDisposable
 		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Plex("550")));
 
 		await Assert.That(async () => await Testee.IdentifyAsync([Request(null, Tmdb("550"))]).ToListAsync()).Throws<MediaIdentityConflictException>();
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhenThePlexHitCarriesOnlyATmdbGuid_ConfirmsItThroughTheTmdbIdOfTheImdbId()
+	{
+		await host.TmdbFinds(Spec("Fight Club", Tmdb("550"), Imdb("tt0137523")));
+		await host.PlexSearchReturns("Fight Club", Spec("Fight Club", Plex("550")));
+		host.PlexHolds(Spec("Fight Club", Tmdb("550"), Plex("550")));
+
+		var results = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Imdb("tt0137523"))]).ToListAsync();
+
+		await AssertResolved(results[0], Plex("550"));
+		await AssertRequests(search: 1, find: 1, detail: 0, detailUrl: "movie/550?");
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhenTmdbsHintsMatchTheFeeds_SearchesPlexOnce()
+	{
+		var fightClub = Spec("Fight Club", Tmdb("550"), Imdb("tt0137523"));
+		await host.TmdbKnowsTheExternalIdsOf(fightClub);
+		await host.TmdbFinds(fightClub);
+		await host.PlexFindsNothing("Fight Club");
+
+		var results = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Tmdb("550"))]).ToListAsync();
+
+		await Assert.That(results[0]).IsError();
+		await Assert.That(host.HttpStub.Requests(PlexEndpoints.SearchPath)).IsEqualTo(1);
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhenThePlexSearchFailed_SearchesAgainOnTheNextRun()
+	{
+		var fightClub = Spec("Fight Club", Tmdb("550"), Plex("550"));
+		await host.PlexSearchFailsOnceThenReturns("Fight Club", fightClub);
+		host.PlexHolds(fightClub);
+
+		var first = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Tmdb("550"))]).ToListAsync();
+		var second = await Testee.IdentifyAsync([Request("Fight Club", SammlarrTestHost.DefaultYear, Tmdb("550"))]).ToListAsync();
+
+		await Assert.That(first[0]).IsError();
+		await AssertResolved(second[0], Plex("550"));
+		await Assert.That(host.HttpStub.Requests(PlexEndpoints.SearchPath)).IsEqualTo(2);
+	}
+
+	[Test]
+	public async Task IdentifyAsync_WhenTmdbsOriginalTitleDiffers_SearchesPlexForItToo()
+	{
+		await host.TmdbDescribes(Spec("Sen to Chihiro no Kamikakushi", Tmdb("129")));
+		await host.PlexFindsNothing("Spirited Away");
+		await host.PlexFindsNothing("Sen to Chihiro no Kamikakushi");
+
+		var results = await Testee.IdentifyAsync([Request("Spirited Away", SammlarrTestHost.DefaultYear, Tmdb("129"))]).ToListAsync();
+
+		await Assert.That(results[0]).IsError();
+		await Assert.That(host.HttpStub.Requests(PlexEndpoints.SearchPath)).IsEqualTo(2);
 	}
 
 	private static MediaSpec Spec(string title, params ProviderId[] ids) => new(title, MediaType.Movie, ids);

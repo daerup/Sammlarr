@@ -1,3 +1,4 @@
+using Contracts.Caching;
 using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Media.Conversions;
@@ -5,10 +6,12 @@ using Domain.Providers;
 
 namespace API.Plex;
 
-internal class PlexIdConverter(PlexApi plexApi) : IExternalIdConverter
+internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints, IReadOnlyList<MediaLookup>> searches) : IExternalIdConverter
 {
 	private const int LookupConcurrency = 4;
 	private const int MaxCandidateLookups = 3;
+
+	private static readonly TimeSpan SearchLifetime = TimeSpan.FromMinutes(10);
 
 	private static readonly ValueSet<MediaProvider> Guids = [MediaProvider.Plex, MediaProvider.Tmdb, MediaProvider.Imdb, MediaProvider.Tvdb];
 
@@ -43,13 +46,25 @@ internal class PlexIdConverter(PlexApi plexApi) : IExternalIdConverter
 
 	private static IdLookupResult Answer(IReadOnlyList<IExternalMediaId> ids) => new(ids, new None());
 
+	private async Task<IReadOnlyList<MediaLookup>> CachedSearchAsync(IdentifyHints hints, CancellationToken cancellationToken)
+	{
+		if (searches.TryGetValue(hints, out var cached) && cached is not null)
+		{
+			return cached;
+		}
+
+		var hits = await plexApi.SearchAsync(hints.Title, [hints.MediaType], cancellationToken);
+		searches.Set(hints, hits, SearchLifetime);
+		return hits;
+	}
+
 	private async Task<Optional<IReadOnlyList<IExternalMediaId>>> ResolveByTitleAsync(
 		IdentifyHints hints,
 		IReadOnlyList<IExternalMediaId> known,
 		CancellationToken cancellationToken
 	)
 	{
-		var searchResults = await plexApi.SearchAsync(hints.Title, [hints.MediaType], cancellationToken);
+		var searchResults = await CachedSearchAsync(hints, cancellationToken);
 		var unavailable = false;
 		var match = await RankByHints(searchResults, hints.Title, hints.Year)
 			.Take(MaxCandidateLookups)

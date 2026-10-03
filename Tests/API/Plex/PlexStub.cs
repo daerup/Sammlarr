@@ -5,7 +5,9 @@ using API.Plex;
 using API.Plex.Types;
 using Bogus;
 using Contracts.Auth;
+using Contracts.Caching;
 using Contracts.Identity;
+using Contracts.Media.Conversions;
 using Domain.Media;
 using Domain.Providers;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -55,6 +57,11 @@ internal sealed class PlexStub : HttpMessageHandler
 	{
 		_failures[candidate.PlexId.Value] = status;
 		return this;
+	}
+
+	public static ITypedMemoryCache<IdentifyHints, IReadOnlyList<MediaLookup>> NoSearchCache()
+	{
+		return ITypedMemoryCache<IdentifyHints, IReadOnlyList<MediaLookup>>.Mock().Object;
 	}
 
 	public PlexApi CreateApi()

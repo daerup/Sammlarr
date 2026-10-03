@@ -105,8 +105,9 @@ provider is, then the paths through a blocked provider, the soonest free first. 
 order. Plex looks up a Plex id and searches by the hints;
 TMDB looks up a TMDB id's detail (its appended `external_ids` carry the IMDb and TheTVDB ids) and finds a TMDB id
 by an IMDb or TheTVDB id, so a title that carries a TMDB, IMDb or TheTVDB id can resolve without Plex. A TMDB answer
-also carries the original title, which a following Plex search uses. Within one resolution each lookup is asked
-once per input, so paths that share a call make it once. Before every hop the resolver
+also carries the original title and its release year, which a following Plex search uses; Plex keeps a search's hits
+for 10 minutes per hints (title, year and type), shared by every user, so equal hints are searched once. Within one
+resolution each lookup is asked once per input, so paths that share a call make it once. Before every hop the resolver
 checks the providers of the hops left: a blocked one is waited for until it frees, once per provider per title and at
 most its `MaxWait`; a longer block, a second block of a provider already waited for, or a provider that answered as
 unavailable makes the path give up. A title is cached as unmatched only when no path gave up; a path that waited and

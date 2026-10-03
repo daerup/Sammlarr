@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using API.Plex;
 using Domain.Media;
 using Domain.Providers;
@@ -39,6 +40,24 @@ internal static class PlexStub
 
 	public static void Search(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results) =>
 		http.RespondWithJsonForUrl($"{PlexEndpoints.SearchQueryParam}={Uri.EscapeDataString(term)}", results.Count == 0 ? EmptySearchJson : SearchJson(results));
+
+	public static void SearchFailsOnce(HttpStub http, string term, IReadOnlyList<ResolvedVersion> results)
+	{
+		var failed = false;
+		http.RespondForUrl(
+			$"{PlexEndpoints.SearchQueryParam}={Uri.EscapeDataString(term)}",
+			_ =>
+			{
+				if (!failed)
+				{
+					failed = true;
+					return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+				}
+
+				return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(SearchJson(results), Encoding.UTF8, "application/json") };
+			}
+		);
+	}
 
 	private const string EmptySearchJson = """
 		{

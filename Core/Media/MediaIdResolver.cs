@@ -220,8 +220,8 @@ internal sealed class MediaIdResolver(
 			return true;
 		}
 
-		var freeAt = blocked.Values.Max();
 		waited.UnionWith(blocked.Keys);
+		var freeAt = blocked.Values.Max();
 		await Task.Delay(freeAt, clock, cancellationToken);
 		return blocked.Keys.All(provider => capacity.Of(provider).IsOpen(freeAt));
 	}

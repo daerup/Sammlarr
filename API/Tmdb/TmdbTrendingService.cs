@@ -50,7 +50,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 		new IdentifyHints
 		{
 			Title = response.DisplayTitle,
-			Year = DateTimeOffset.TryParse(response.AvailableDate, out var d) ? d.Year : 0,
+			Year = response.AvailableYear,
 			MediaType = response.MediaType,
 		};
 
