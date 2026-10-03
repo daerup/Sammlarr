@@ -53,19 +53,25 @@ public class WantlistSyncEngineTests
 	}
 
 	[Test]
-	public async Task SyncAsync_WhenPushesFailMidBatch_PublishesOneEventNamingTheFailures()
+	public async Task SyncAsync_WhenSomePushesFail_PublishesOneEventCountingWhatTheSinkAcked()
 	{
+		var delivered = MediaId.New();
+		var rejected = MediaId.New();
 		var stranded = MediaId.New();
-		var alsoStranded = MediaId.New();
-		var sink = WantlistStubs.SinkAcking(new SinkSyncAck(stranded, SinkSyncOutcome.Unaddressable), new SinkSyncAck(alsoStranded, SinkSyncOutcome.Unaddressable));
+		var sink = WantlistStubs.SinkAcking(
+			new SinkSyncAck(delivered, SinkSyncOutcome.Applied),
+			new SinkSyncAck(rejected, SinkSyncOutcome.Failed),
+			new SinkSyncAck(stranded, SinkSyncOutcome.Unaddressable)
+		);
 		var published = new RecordingPublisher();
 
-		await BuildEngine(sink, publisher: published, pending: [stranded, alsoStranded]).SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
+		await BuildEngine(sink, publisher: published, pending: [delivered, rejected, stranded]).SyncAsync(new WantlistSyncTrigger(new ManualTrigger()));
 
 		var events = published.Published<WantlistSyncCompletedNotification>();
 		await Assert.That(events).Count().IsEqualTo(1);
-		await Assert.That(events[0].FailedPushes).Contains(stranded).And.Contains(alsoStranded);
-		await Assert.That(events[0].PushedAdds).IsEmpty();
+		await Assert.That(events[0].PushedAdds).IsEquivalentTo([delivered]);
+		await Assert.That(events[0].FailedPushes).IsEquivalentTo([rejected, stranded]);
+		await Assert.That(published.Published<WantlistSyncFailedNotification>()).IsEmpty();
 	}
 
 	private static WantlistSyncEngine BuildEngine(

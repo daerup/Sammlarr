@@ -126,6 +126,20 @@ public class PlexSinkTests
 		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, expected)]);
 	}
 
+	[Test]
+	public async Task ApplyAsync_ForATitleWithoutAPlexId_AcksUnaddressableWithoutCallingPlex()
+	{
+		var handler = Mock.HttpHandler();
+		var media = IMediaService.Mock();
+		media.GetSinkIdsAsync(Any<IEnumerable<MediaId>>(), Any()).Returns(new Dictionary<MediaId, IExternalMediaId>());
+		var testee = Sink(handler, media);
+
+		var acks = await testee.ApplyAsync(WantlistOperationAction.Add, [Known]).ToListAsync();
+
+		await Assert.That(acks).IsEquivalentTo([new SinkSyncAck(Known, SinkSyncOutcome.Unaddressable)]);
+		await Assert.That(handler.Requests).IsEmpty();
+	}
+
 	private static PlexSink Sink(string json, Mock<IMediaService> media, ILogger<PlexSink>? logger = null)
 	{
 		var handler = Mock.HttpHandler();
