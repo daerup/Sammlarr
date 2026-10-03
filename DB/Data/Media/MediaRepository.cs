@@ -116,7 +116,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.Include(m => m.ExternalIds)
 			.Include(m => m.Details!)
 				.ThenInclude(details => details.Ratings)
-			.AsSplitQuery()
+			.AsSingleQuery()
 			.ToListAsync(cancellationToken);
 
 		return [.. rows.Select(row => new StoredMedia(ToIdentity(row), Optional.Of(row.Details).Map(detailsFactory.ToCached)))];
