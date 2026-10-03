@@ -17,14 +17,13 @@ public class MediaValueEqualityTests
 	}
 
 	[Test]
-	public async Task Movie_WhenSameContentDifferentInstances_AreEqual()
+	public async Task IdentifiedMedia_WhenSameContentDifferentInstances_AreEqual()
 	{
 		var first = MediaFakes.CompleteMovie();
 		var second = first with
 		{
 			Identity = first.Identity with { Externals = [.. first.Identity.Externals] },
-			Genres = [.. first.Genres],
-			Rating = RatingSummary.From([.. first.Rating.Sources]),
+			Details = first.Details with { Genres = [.. first.Details.Genres], Rating = RatingSummary.From([.. first.Details.Rating.Sources]) },
 		};
 
 		await Assert.That(first).IsEqualTo(second);
@@ -32,11 +31,20 @@ public class MediaValueEqualityTests
 	}
 
 	[Test]
-	public async Task Movie_WhenDifferentGenres_AreNotEqual()
+	public async Task IdentifiedMedia_WhenDifferentGenres_AreNotEqual()
 	{
 		var first = MediaFakes.CompleteMovie();
-		var second = first with { Genres = [.. first.Genres, "Extra Genre"] };
+		var second = first with { Details = first.Details with { Genres = [.. first.Details.Genres, "Extra Genre"] } };
 
 		await Assert.That(first).IsNotEqualTo(second);
+	}
+
+	[Test]
+	public async Task MediaDetails_WhenSameFieldsButDifferentTypes_AreNotEqual()
+	{
+		MediaDetails movie = new MovieDetails { Title = "Dune" };
+		MediaDetails show = new ShowDetails { Title = "Dune" };
+
+		await Assert.That(movie).IsNotEqualTo(show);
 	}
 }

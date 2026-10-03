@@ -39,6 +39,11 @@ public class BulkEditableMediaGridTests : BunitContext
 		await Assert.That(cut.Find(".media-card").ClassList).Contains("ring-foreground");
 	}
 
-	private static MediaLookup Lookup() =>
-		new PartialMovie { Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), []), BackdropUrl = "https://cdn.example.test/backdrop.jpg" }.ToMatch();
+	private static MediaLookup Lookup()
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(MediaId.From(Guid.NewGuid()), []),
+			new MovieDetails { BackdropUrl = "https://cdn.example.test/backdrop.jpg" }
+		).ToMatch();
+	}
 }

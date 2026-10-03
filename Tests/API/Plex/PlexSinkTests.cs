@@ -51,9 +51,9 @@ public class PlexSinkTests
 		var snapshot = await testee.GetAsync();
 
 		await Assert.That(snapshot.Ids).IsEmpty();
-		await Assert.That(snapshot.Unmatched.Single().Title).IsEqualTo("Futurama");
+		await Assert.That(snapshot.Unmatched.Single().Details.Title).IsEqualTo("Futurama");
 		await Assert.That(snapshot.Unmatched.Single().Externals.Single().Value).IsEqualTo("plex-42");
-		await Assert.That(snapshot.Unmatched.Single().Type).IsEqualTo(MediaType.Movie);
+		await Assert.That(snapshot.Unmatched.Single().Details.Type).IsEqualTo(MediaType.Movie);
 	}
 
 	[Test]
@@ -63,7 +63,7 @@ public class PlexSinkTests
 
 		var unmatched = (await testee.GetAsync()).Unmatched.Single();
 
-		await Assert.That(unmatched.Title).IsNull();
+		await Assert.That(unmatched.Details.Title).IsNull();
 		await Assert.That(unmatched.Externals.Single().Value).IsEqualTo("plex-7");
 	}
 
@@ -74,7 +74,7 @@ public class PlexSinkTests
 
 		var unmatched = (await testee.GetAsync()).Unmatched.Single();
 
-		await Assert.That(unmatched.ReleaseDate).IsNull();
+		await Assert.That(unmatched.Details.ReleaseDate).IsNull();
 	}
 
 	[Test]
@@ -84,7 +84,7 @@ public class PlexSinkTests
 
 		var unmatched = (await testee.GetAsync()).Unmatched.Single();
 
-		await Assert.That(unmatched.ReleaseDate).IsEqualTo(new DateOnly(1999, 1, 1));
+		await Assert.That(unmatched.Details.ReleaseDate).IsEqualTo(new DateOnly(1999, 1, 1));
 	}
 
 	[Test]

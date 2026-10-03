@@ -197,11 +197,15 @@ internal static class OrderingAssertionExtensions
 				.Select(r => r is Success<MediaIdentity>(var identity) ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
 		];
 
-	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<IdentifiedMedia>> results) =>
-		[.. results.Select(r => r is Success<IdentifiedMedia>(var identified) && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<IdentifiedMedia>> results)
+	{
+		return [.. results.Select(r => r is Success<IdentifiedMedia>(var identified) ? (MediaId?)identified.Identity.Id : null)];
+	}
 
-	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaLookup> results) =>
-		[.. results.Select(r => r is IdentifiedMedia identified && identified is IMedia d ? (MediaId?)d.Identity.Id : null)];
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaLookup> results)
+	{
+		return [.. results.Select(r => r is IdentifiedMedia identified ? (MediaId?)identified.Identity.Id : null)];
+	}
 }
 
 internal sealed record TestItem
@@ -209,7 +213,7 @@ internal sealed record TestItem
 	public required int Index { get; init; }
 	public required IExternalMediaId External { get; init; }
 	public required MediaId MediaId { get; init; }
-	public required Movie Detail { get; init; }
+	public required IdentifiedMedia Detail { get; init; }
 	public bool Resolves { get; init; } = true;
 	public bool Realizes { get; init; } = true;
 	public IdentifyRequest Request => new([External], new None());
@@ -222,19 +226,21 @@ internal sealed record TestItem
 			Index = index,
 			External = TmdbId.From(index.ToString(), MediaType.Movie),
 			MediaId = mediaId,
-			Detail = new Movie
-			{
-				Identity = new MediaIdentity(mediaId, [PlexId.From($"plex-{index}", MediaType.Movie)]),
-				Title = $"Item {index}",
-				Tagline = "Tag",
-				Summary = "Summary",
-				PosterUrl = "https://example.com/p.jpg",
-				BackdropUrl = "https://example.com/b.jpg",
-				ReleaseDate = new DateOnly(2024, 1, 1),
-				Genres = ["Action"],
-				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
-				Runtime = TimeSpan.FromMinutes(120),
-			},
+			Detail = new IdentifiedMedia(
+				new MediaIdentity(mediaId, [PlexId.From($"plex-{index}", MediaType.Movie)]),
+				new MovieDetails
+				{
+					Title = $"Item {index}",
+					Tagline = "Tag",
+					Summary = "Summary",
+					PosterUrl = "https://example.com/p.jpg",
+					BackdropUrl = "https://example.com/b.jpg",
+					ReleaseDate = new DateOnly(2024, 1, 1),
+					Genres = ["Action"],
+					Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+					Runtime = TimeSpan.FromMinutes(120),
+				}
+			),
 		};
 	}
 }

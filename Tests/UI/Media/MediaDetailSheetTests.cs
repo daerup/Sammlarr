@@ -159,18 +159,22 @@ public class MediaDetailSheetTests : BunitContext
 		}
 	}
 
-	private static IdentifiedMedia Detail() =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(Id, [TmdbId.From(Id.Value.ToString(), MediaType.Movie)]),
-			Title = "Futurama",
-			Tagline = string.Empty,
-			Summary = "A delivery boy is frozen.",
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(1999, 3, 28),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(22),
-			Rating = RatingSummary.None,
-		};
+	private static IdentifiedMedia Detail()
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(Id, [TmdbId.From(Id.Value.ToString(), MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Futurama",
+				Tagline = string.Empty,
+				Summary = "A delivery boy is frozen.",
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(1999, 3, 28),
+				Genres = [],
+				Runtime = TimeSpan.FromMinutes(22),
+				Rating = RatingSummary.None,
+			}
+		);
+	}
 }

@@ -115,24 +115,26 @@ public class FeedPlanProperties
 
 		var unmatched = Enumerable
 			.Range(0, unmatchedCount)
-			.Select(index => new UnmatchedMedia { Externals = [TmdbId.From($"unmatched-{index}", MediaType.Movie)] })
+			.Select(index => new UnmatchedMedia([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails()))
 			.ToList();
 
 		return new Scenario(FeedPlans.Compute(new ClassifiedFeedLoad(verdicts, unmatched, completeness), owned, absences, strategy), owned, strategy, absences);
 	}
 
-	private static MediaLookup Row(MediaId id) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
-			Title = "Title",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(2020, 1, 1),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(90),
-			Rating = RatingSummary.None,
-		}.ToMatch();
+	private static MediaLookup Row(MediaId id)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Title",
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(2020, 1, 1),
+				Runtime = TimeSpan.FromMinutes(90),
+			}
+		);
+	}
 }

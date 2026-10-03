@@ -74,8 +74,8 @@ public class MediaServiceTests
 		var results = await testee.GetDetailsAsync([firstId, secondId]).ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		await Assert.That(results[0]).IsOfUnionType<Result<IdentifiedMedia>, Movie>().And.IsSameReferenceAs(firstDetail);
-		await Assert.That(results[1]).IsOfUnionType<Result<IdentifiedMedia>, Movie>().And.IsSameReferenceAs(secondDetail);
+		await Assert.That(results[0]).IsOfUnionType<Result<IdentifiedMedia>, IdentifiedMedia>().And.IsSameReferenceAs(firstDetail);
+		await Assert.That(results[1]).IsOfUnionType<Result<IdentifiedMedia>, IdentifiedMedia>().And.IsSameReferenceAs(secondDetail);
 	}
 
 	[Test]
@@ -170,8 +170,8 @@ public class MediaServiceTests
 			.ToListAsync();
 
 		await Assert.That(results.Count).IsEqualTo(2);
-		await Assert.That(results[0]).IsOfUnionType<MediaLookup, Movie>().And.IsSameReferenceAs(firstDetail);
-		await Assert.That(results[1]).IsOfUnionType<MediaLookup, Movie>().And.IsSameReferenceAs(secondDetail);
+		await Assert.That(results[0]).IsOfUnionType<MediaLookup, IdentifiedMedia>().And.IsSameReferenceAs(firstDetail);
+		await Assert.That(results[1]).IsOfUnionType<MediaLookup, IdentifiedMedia>().And.IsSameReferenceAs(secondDetail);
 	}
 
 	[Test]
@@ -457,44 +457,57 @@ public class MediaServiceTests
 	private static IAsyncEnumerable<IdentifyRequest> BuildRequests(int count) =>
 		Enumerable.Range(0, count).Select(i => new IdentifyRequest([TmdbId.From(i.ToString(), MediaType.Movie)], new None())).ToAsyncEnumerable();
 
-	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external) => new(new PartialMovie { Identity = new MediaIdentity(id, [external]) }, _now);
-
-	private static CachedMedia StaleCached(MediaId id) =>
-		new(new PartialMovie { Identity = new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]) }, null);
-
-	private static WantlistItem WantlistItemFor(MediaId id, int day) =>
-		new(id, new DateTimeOffset(2026, 1, day, 0, 0, 0, TimeSpan.Zero), new ManualOrigin(ManualSource.Search));
-
-	private static Movie BuildDetail(MediaId id, IExternalMediaId? extra = null)
+	private static CachedMedia FreshCached(MediaId id, IExternalMediaId external)
 	{
-		var plex = PlexId.From($"plex-{id}", MediaType.Movie);
-		return new()
-		{
-			Identity = new MediaIdentity(id, extra is null ? [plex] : [plex, extra]),
-			Title = "Test",
-			Tagline = "Tag",
-			Summary = "Summary",
-			PosterUrl = "https://example.com/p.jpg",
-			BackdropUrl = "https://example.com/b.jpg",
-			ReleaseDate = new DateOnly(2024, 1, 1),
-			Genres = ["Action"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
-			Runtime = TimeSpan.FromMinutes(120),
-		};
+		return new(new IdentifiedMedia(new MediaIdentity(id, [external]), new MovieDetails()), _now);
 	}
 
-	private static Movie CompleteMovie(IExternalMediaId external) =>
-		new()
-		{
-			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [external]),
-			Title = "T",
-			Tagline = "T",
-			Summary = "T",
-			PosterUrl = "https://example.com/p.jpg",
-			BackdropUrl = "https://example.com/b.jpg",
-			ReleaseDate = new DateOnly(2024, 1, 1),
-			Genres = ["Action"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
-			Runtime = TimeSpan.FromMinutes(90),
-		};
+	private static CachedMedia StaleCached(MediaId id)
+	{
+		return new(new IdentifiedMedia(new MediaIdentity(id, [PlexId.From($"plex-{id}", MediaType.Movie)]), new MovieDetails()), null);
+	}
+
+	private static WantlistItem WantlistItemFor(MediaId id, int day)
+	{
+		return new(id, new DateTimeOffset(2026, 1, day, 0, 0, 0, TimeSpan.Zero), new ManualOrigin(ManualSource.Search));
+	}
+
+	private static IdentifiedMedia BuildDetail(MediaId id, IExternalMediaId? extra = null)
+	{
+		var plex = PlexId.From($"plex-{id}", MediaType.Movie);
+		return new(
+			new MediaIdentity(id, extra is null ? [plex] : [plex, extra]),
+			new MovieDetails
+			{
+				Title = "Test",
+				Tagline = "Tag",
+				Summary = "Summary",
+				PosterUrl = "https://example.com/p.jpg",
+				BackdropUrl = "https://example.com/b.jpg",
+				ReleaseDate = new DateOnly(2024, 1, 1),
+				Genres = ["Action"],
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+				Runtime = TimeSpan.FromMinutes(120),
+			}
+		);
+	}
+
+	private static IdentifiedMedia CompleteMovie(IExternalMediaId external)
+	{
+		return new(
+			new MediaIdentity(MediaId.From(Guid.NewGuid()), [external]),
+			new MovieDetails
+			{
+				Title = "T",
+				Tagline = "T",
+				Summary = "T",
+				PosterUrl = "https://example.com/p.jpg",
+				BackdropUrl = "https://example.com/b.jpg",
+				ReleaseDate = new DateOnly(2024, 1, 1),
+				Genres = ["Action"],
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+				Runtime = TimeSpan.FromMinutes(90),
+			}
+		);
+	}
 }

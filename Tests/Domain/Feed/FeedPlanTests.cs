@@ -167,20 +167,22 @@ public class FeedPlanTests
 
 	private static MediaId Id(int seed) => MediaId.From(new Guid(seed, 0, 0, new byte[8]));
 
-	private static UnmatchedMedia Unmatched(int seed) => new() { Externals = [TmdbId.From($"unmatched-{seed}", MediaType.Movie)] };
+	private static UnmatchedMedia Unmatched(int seed) => new([TmdbId.From($"unmatched-{seed}", MediaType.Movie)], new MovieDetails());
 
-	private static MediaLookup Row(MediaId id) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
-			Title = "Title",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(2020, 1, 1),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(90),
-			Rating = RatingSummary.None,
-		}.ToMatch();
+	private static MediaLookup Row(MediaId id)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Title",
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(2020, 1, 1),
+				Runtime = TimeSpan.FromMinutes(90),
+			}
+		);
+	}
 }

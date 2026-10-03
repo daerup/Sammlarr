@@ -1,67 +1,68 @@
 using CsCheck;
 using Domain.Media;
 using Domain.Media.Metadata;
+using Domain.Providers;
 
 namespace Domain.Tests.Media.Metadata;
 
 public class MediaMergerProperties
 {
-	private static readonly Gen<PartialMovie> Movies = Gen.Bool.Array[12].Select(Build);
+	private static readonly Gen<MovieDetails> Primaries = Gen.Bool.Array[9].Select(flags => Build(flags, "primary"));
+	private static readonly Gen<MovieDetails> Others = Gen.Bool.Array[9].Select(flags => Build(flags, "other"));
 
 	[Test]
-	public void MergeWith_WhenBothPartialsCarryExternals_KeepsThemAll() =>
-		Gen.Select(Movies, Movies)
-			.Sample(
-				(primary, secondary) =>
-				{
-					var merged = ((IPartialMedia)primary).MergeWith(secondary);
-					return merged.Externals.IsSupersetOf(primary.Identity.Externals) && merged.Externals.IsSupersetOf(secondary.Identity.Externals);
-				}
-			);
-
-	[Test]
-	public void MergeWith_WhenFillingGaps_NeverRemovesData() =>
-		Gen.Select(Movies, Movies)
-			.Sample((primary, secondary) => ((IPartialMedia)primary).MergeWith(secondary) is not IPartialMedia merged || !merged.Missing.Overlaps(~primary.Missing));
-
-	private static PartialMovie Build(bool[] flags) =>
-		new()
-		{
-			Identity = new MediaIdentity(default, Externals(flags)),
-			Title = flags[4] ? "Title" : null,
-			Tagline = flags[5] ? "Tagline" : null,
-			Summary = flags[6] ? "Summary" : null,
-			PosterUrl = flags[7] ? "/poster.jpg" : null,
-			BackdropUrl = flags[8] ? "/backdrop.jpg" : null,
-			ReleaseDate = flags[9] ? new DateOnly(2020, 1, 1) : null,
-			Genres = flags[10] ? ["Drama"] : [],
-			Runtime = flags[11] ? TimeSpan.FromHours(2) : null,
-			Rating = RatingSummary.None,
-		};
-
-	private static ValueSet<IExternalMediaId> Externals(bool[] flags)
+	public void FillFrom_ForAnyTwoMovies_TakesEachFieldFromThePrimaryFirst()
 	{
-		var ids = new List<IExternalMediaId>();
-		if (flags[0])
-		{
-			ids.Add(TmdbId.From("1", MediaType.Movie));
-		}
+		Gen.Select(Primaries, Others).Sample((primary, other) => primary.FillFrom(other) == Expected(primary, other));
+	}
 
-		if (flags[1])
-		{
-			ids.Add(TmdbId.From("2", MediaType.Movie));
-		}
+	[Test]
+	public void FillFrom_WhenFillingGaps_NeverRemovesData()
+	{
+		Gen.Select(Primaries, Others).Sample((primary, other) => !primary.FillFrom(other).Missing.Overlaps(~primary.Missing));
+	}
 
-		if (flags[2])
-		{
-			ids.Add(PlexId.From("1", MediaType.Movie));
-		}
+	[Test]
+	public void FillFrom_WhenRepeated_ChangesNothing()
+	{
+		Gen.Select(Primaries, Others).Sample((primary, other) => primary.FillFrom(other).FillFrom(other) == primary.FillFrom(other));
+	}
 
-		if (flags[3])
-		{
-			ids.Add(ImdbId.From("1", MediaType.Movie));
-		}
+	[Test]
+	public void FillFrom_WhenTheOtherIsAShow_LeavesTheMovieUnchanged()
+	{
+		Primaries.Sample(movie => movie.FillFrom(new ShowDetails { Title = "Show", Seasons = 2 }) == movie);
+	}
 
-		return [.. ids];
+	private static MovieDetails Expected(MovieDetails primary, MovieDetails other)
+	{
+		return new()
+		{
+			Title = primary.Title ?? other.Title,
+			Tagline = primary.Tagline ?? other.Tagline,
+			Summary = primary.Summary ?? other.Summary,
+			PosterUrl = primary.PosterUrl ?? other.PosterUrl,
+			BackdropUrl = primary.BackdropUrl ?? other.BackdropUrl,
+			ReleaseDate = primary.ReleaseDate ?? other.ReleaseDate,
+			Genres = primary.Genres.Count > 0 ? primary.Genres : other.Genres,
+			Rating = primary.Rating.Sources.Count > 0 ? primary.Rating : other.Rating,
+			Runtime = primary.Runtime ?? other.Runtime,
+		};
+	}
+
+	private static MovieDetails Build(bool[] flags, string side)
+	{
+		return new()
+		{
+			Title = flags[0] ? $"{side} title" : null,
+			Tagline = flags[1] ? $"{side} tagline" : null,
+			Summary = flags[2] ? $"{side} summary" : null,
+			PosterUrl = flags[3] ? $"/{side}-poster.jpg" : null,
+			BackdropUrl = flags[4] ? $"/{side}-backdrop.jpg" : null,
+			ReleaseDate = flags[5] ? new DateOnly(2020, 1, side.Length) : null,
+			Genres = flags[6] ? [side] : [],
+			Rating = flags[8] ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, side.Length)]) : RatingSummary.None,
+			Runtime = flags[7] ? TimeSpan.FromMinutes(side.Length) : null,
+		};
 	}
 }

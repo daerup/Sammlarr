@@ -33,13 +33,12 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 
 	public void Add(MediaLookup detail)
 	{
-		var stored = detail.AsIdentified();
-		if (stored is null)
+		if (detail is not IdentifiedMedia stored)
 		{
 			return;
 		}
-		AddIdentity(stored.Value.Identity);
-		NewMetadata.Add(stored.Value);
+		AddIdentity(stored.Identity);
+		NewMetadata.Add(stored);
 	}
 
 	public async ValueTask DisposeAsync()
@@ -80,6 +79,8 @@ internal sealed class MediaResolutionBuffer : IAsyncDisposable
 		return upserted.GetValueOrDefault(id, id);
 	}
 
-	private static IdentifiedMedia Remap(IdentifiedMedia item, MediaId survivor) =>
-		survivor == item.Id ? item : item.WithIdentity(item.Identity with { Id = survivor });
+	private static IdentifiedMedia Remap(IdentifiedMedia item, MediaId survivor)
+	{
+		return survivor == item.Id ? item : item with { Identity = item.Identity with { Id = survivor } };
+	}
 }

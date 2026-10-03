@@ -9,7 +9,7 @@ public class BlocklistItemTests
 	public async Task With_MapsTheItemOntoItsDetails_KeepingWhenItWasBlocklisted()
 	{
 		var saw = MediaId.From(new Guid(1, 0, 0, new byte[8]));
-		IdentifiedMedia media = new PartialMovie { Identity = new MediaIdentity(saw, []), Title = "Saw" };
+		var media = new IdentifiedMedia(new MediaIdentity(saw, []), new MovieDetails { Title = "Saw" });
 
 		var blocklisted = new BlocklistItem(saw, DateTimeOffset.UnixEpoch).With(media);
 

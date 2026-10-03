@@ -47,11 +47,8 @@ public class MediaGridTileTests : BunitContext
 		await Assert.That(poster.GetAttribute("srcset")).Contains($"{Poster}?width=780 780w");
 	}
 
-	private static MediaLookup Lookup() =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), []),
-			BackdropUrl = Backdrop,
-			PosterUrl = Poster,
-		}.ToMatch();
+	private static MediaLookup Lookup()
+	{
+		return new IdentifiedMedia(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = Backdrop, PosterUrl = Poster }).ToMatch();
+	}
 }

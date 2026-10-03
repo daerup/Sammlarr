@@ -35,7 +35,7 @@ public class WantlistSyncPlannerTests
 	public async Task PlanAsync_WhenTheSinkHoldsAMatchedAndAnUnmatchedItem_PullsTheMatchedOneAndReportsTheOther()
 	{
 		var matched = MediaId.From(Guid.NewGuid());
-		var unmatched = new UnmatchedMedia { Externals = [PlexId.From("plex-1", MediaType.Movie)], Title = "Solaris" };
+		var unmatched = new UnmatchedMedia([PlexId.From("plex-1", MediaType.Movie)], new MovieDetails { Title = "Solaris" });
 		var sink = IMediaSink.Mock();
 		sink.GetAsync(Any()).Returns(new SinkSnapshot([matched], [unmatched]));
 

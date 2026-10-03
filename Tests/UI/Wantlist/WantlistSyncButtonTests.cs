@@ -156,7 +156,7 @@ public class WantlistSyncButtonTests : BunitContext
 	public async Task Status_WithUnmatchedTitles_LeavesThemOutOfTheCounts()
 	{
 		var (_, planner) = RegisterServices();
-		planner.PlanAsync(Any()).Returns(Summary() with { Unmatched = [new UnmatchedMedia { Externals = [], Title = "Unsung Hero" }] });
+		planner.PlanAsync(Any()).Returns(Summary() with { Unmatched = [new UnmatchedMedia([], new MovieDetails { Title = "Unsung Hero" })] });
 
 		var cut = Render<WantlistSyncButton>();
 
@@ -290,18 +290,22 @@ public class WantlistSyncButtonTests : BunitContext
 		}
 	}
 
-	private static IdentifiedMedia Detail(MediaId id) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
-			Title = "Futurama",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(1999, 3, 28),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(22),
-			Rating = RatingSummary.None,
-		};
+	private static IdentifiedMedia Detail(MediaId id)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Futurama",
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(1999, 3, 28),
+				Genres = [],
+				Runtime = TimeSpan.FromMinutes(22),
+				Rating = RatingSummary.None,
+			}
+		);
+	}
 }

@@ -270,20 +270,24 @@ public class FeedPreviewPanelTests : BunitContext
 		}
 	}
 
-	private static IdentifiedMedia Detail(MediaId id) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
-			Title = "Gone",
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(2020, 1, 1),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(90),
-			Rating = RatingSummary.None,
-		};
+	private static IdentifiedMedia Detail(MediaId id)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = "Gone",
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(2020, 1, 1),
+				Genres = [],
+				Runtime = TimeSpan.FromMinutes(90),
+				Rating = RatingSummary.None,
+			}
+		);
+	}
 
 	private sealed class SpreadPlanner : IFeedRunPlanner
 	{
@@ -332,22 +336,28 @@ public class FeedPreviewPanelTests : BunitContext
 			}
 		}
 
-		private static MediaLookup Movie(int index) =>
-			new PartialMovie
-			{
-				Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From($"movie-{index}", MediaType.Movie)]),
-				Title = $"Movie {index}",
-				Tagline = string.Empty,
-				Summary = string.Empty,
-				PosterUrl = string.Empty,
-				BackdropUrl = string.Empty,
-				ReleaseDate = new DateOnly(2020, 1, 1),
-				Genres = [],
-				Runtime = TimeSpan.FromMinutes(90),
-				Rating = RatingSummary.None,
-			}.ToMatch();
+		private static MediaLookup Movie(int index)
+		{
+			return new IdentifiedMedia(
+				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From($"movie-{index}", MediaType.Movie)]),
+				new MovieDetails
+				{
+					Title = $"Movie {index}",
+					Tagline = string.Empty,
+					Summary = string.Empty,
+					PosterUrl = string.Empty,
+					BackdropUrl = string.Empty,
+					ReleaseDate = new DateOnly(2020, 1, 1),
+					Genres = [],
+					Runtime = TimeSpan.FromMinutes(90),
+					Rating = RatingSummary.None,
+				}
+			).ToMatch();
+		}
 
-		private static MediaLookup Unknown(int index) =>
-			new UnmatchedMedia { Externals = [TmdbId.From($"unmatched-{index}", MediaType.Movie)], Title = $"Unmatched {index}" };
+		private static MediaLookup Unknown(int index)
+		{
+			return new UnmatchedMedia([TmdbId.From($"unmatched-{index}", MediaType.Movie)], new MovieDetails { Title = $"Unmatched {index}" });
+		}
 	}
 }

@@ -138,13 +138,10 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			.ToList();
 	}
 
-	private static IdentifiedMedia EmptyMedia(MediaIdentity identity) =>
-		identity.Externals.FirstOrDefault()?.Type switch
-		{
-			MediaType.Show => new PartialShow { Identity = identity },
-			MediaType.Movie => new PartialMovie { Identity = identity },
-			_ => throw new InvalidOperationException("Persisted media identity must be typed."),
-		};
+	private static IdentifiedMedia EmptyMedia(MediaIdentity identity)
+	{
+		return new(identity, MediaDetails.Empty(identity.Externals.FirstOrDefault()?.Type ?? MediaType.Unknown));
+	}
 
 	public async Task UpsertMetadataAsync(IReadOnlyList<IdentifiedMedia> media, CancellationToken cancellationToken = default)
 	{
@@ -153,22 +150,22 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			return;
 		}
 
-		var deduped = media.GroupBy(m => m.Id.Value).Select(g => g.Last()).ToList();
+		var deduped = media.GroupBy(m => m.Identity.Id.Value).Select(g => g.Last()).ToList();
 
 		using var _ = await writeLock.AcquireAsync(cancellationToken);
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-		var rawIds = deduped.Select(m => m.Id.Value).ToList();
+		var rawIds = deduped.Select(m => m.Identity.Id.Value).ToList();
 		var existing = await ctx.MediaMetadata.Include(m => m.Ratings).Where(m => rawIds.Contains(m.MediaId)).ToDictionaryAsync(m => m.MediaId, cancellationToken);
 
 		foreach (var item in deduped)
 		{
-			if (existing.TryGetValue(item.Id.Value, out var entity))
+			if (existing.TryGetValue(item.Identity.Id.Value, out var entity))
 			{
 				metadataFactory.Update(entity, item);
 			}
 			else
 			{
-				ctx.MediaMetadata.Add(metadataFactory.BuildFrom(item, item.Id.Value));
+				ctx.MediaMetadata.Add(metadataFactory.BuildFrom(item, item.Identity.Id.Value));
 			}
 		}
 

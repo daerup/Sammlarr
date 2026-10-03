@@ -316,13 +316,9 @@ internal sealed class MediaService(
 				return Success.Of(row.Stored);
 			}
 			var resolved = await metadataResolver.ResolveAsync(identity, buffer, cancellationToken);
-			if (resolved is Success<MediaLookup>(var lookup))
+			if (resolved is Success<MediaLookup>(var lookup) && lookup is IdentifiedMedia identified)
 			{
-				var identified = lookup.AsIdentified();
-				if (identified is not null)
-				{
-					return Success.Of(identified.Value);
-				}
+				return Success.Of(identified);
 			}
 			return cached is { } fallback ? Success.Of(fallback.Stored) : Error.From("media could not be resolved");
 		}
@@ -371,12 +367,14 @@ file static class IdentifyRequestExtensions
 		public MediaLookup ToUnmatched()
 		{
 			var hint = request.Hints is Some<IdentifyHints>(var hints) ? hints : null;
-			return new UnmatchedMedia
-			{
-				Externals = [.. request.Candidates],
-				Title = hint?.Title ?? "",
-				ReleaseDate = hint is { Year: > 0 } year ? new DateOnly(year.Year, 1, 1) : null,
-			};
+			return new UnmatchedMedia(
+				[.. request.Candidates],
+				MediaDetails.Empty(hint?.MediaType ?? request.Type) with
+				{
+					Title = hint?.Title,
+					ReleaseDate = hint is { Year: > 0 } year ? new DateOnly(year.Year, 1, 1) : null,
+				}
+			);
 		}
 	}
 }

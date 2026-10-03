@@ -20,12 +20,22 @@ public sealed record MediaQueryRow(IdentifiedMedia Media)
 
 	public float? Rating => Media.Rating.Average;
 
-	public int? RuntimeMinutes =>
-		Media.RuntimePerEpisode is { } showRuntime ? (int)Math.Round(showRuntime.TotalMinutes)
-		: Media.Runtime is { } movieRuntime ? (int)Math.Round(movieRuntime.TotalMinutes)
-		: null;
+	public int? RuntimeMinutes
+	{
+		get
+		{
+			return Media.Details switch
+			{
+				ShowDetails show => Minutes(show.RuntimePerEpisode),
+				MovieDetails movie => Minutes(movie.Runtime),
+				UnknownDetails => null,
+			};
+		}
+	}
 
 	public int? Seasons => Media.Seasons;
 
 	public int? Episodes => Media.Episodes;
+
+	private static int? Minutes(TimeSpan? runtime) => runtime is { } value ? (int)Math.Round(value.TotalMinutes) : null;
 }

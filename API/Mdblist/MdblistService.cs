@@ -94,13 +94,17 @@ internal sealed class MdblistService(MdblistClient client, IMediaService media, 
 		);
 	}
 
-	private static MediaLookup BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item) =>
-		new UnmatchedMedia
-		{
-			Externals = [.. ExtractIds(item.ids, item.MediaType)],
-			Title = item.title,
-			ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
-		};
+	private static MediaLookup BuildUnmatched(MdblistTypes.ListItems.UnmatchedListItem item)
+	{
+		return new UnmatchedMedia(
+			[.. ExtractIds(item.ids, item.MediaType)],
+			MediaDetails.Empty(item.MediaType) with
+			{
+				Title = item.title,
+				ReleaseDate = item.release_year > 0 ? new DateOnly(item.release_year, 1, 1) : null,
+			}
+		);
+	}
 
 	private static IExternalMediaId[] ExtractIds(MdblistTypes.ListItems.Ids ids, MediaType mediaType)
 	{

@@ -56,8 +56,8 @@ public class NotificationDispatchHandlerTests
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
 		var media = Media(
-			new CachedMedia(new PartialMovie { Identity = new MediaIdentity(pulledAdd, []), Title = "Pulled Movie" }, DateTimeOffset.UtcNow),
-			new CachedMedia(new PartialMovie { Identity = new MediaIdentity(pushedRemove, []), Title = "Pushed Movie" }, DateTimeOffset.UtcNow)
+			new CachedMedia(new IdentifiedMedia(new MediaIdentity(pulledAdd, []), new MovieDetails { Title = "Pulled Movie" }), DateTimeOffset.UtcNow),
+			new CachedMedia(new IdentifiedMedia(new MediaIdentity(pushedRemove, []), new MovieDetails { Title = "Pushed Movie" }), DateTimeOffset.UtcNow)
 		);
 
 		var messages = await NotificationDispatchHandler.Handle(
@@ -188,7 +188,7 @@ public class NotificationDispatchHandlerTests
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None),
 			new NotificationSubscription(Guid.NewGuid(), Guid.NewGuid(), [NotificationEventType.WantlistSyncCompleted], NotificationTemplate.None)
 		);
-		var media = Media(new CachedMedia(new PartialMovie { Identity = new MediaIdentity(id, []), Title = "The Matrix" }, DateTimeOffset.UtcNow));
+		var media = Media(new CachedMedia(new IdentifiedMedia(new MediaIdentity(id, []), new MovieDetails { Title = "The Matrix" }), DateTimeOffset.UtcNow));
 
 		var messages = await NotificationDispatchHandler.Handle(
 			new WantlistSyncCompletedNotification(User, DateTimeOffset.UtcNow, [id], [], [], [], []),

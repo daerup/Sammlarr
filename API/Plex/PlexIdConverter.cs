@@ -111,12 +111,16 @@ internal class PlexIdConverter(PlexApi plexApi, ITypedMemoryCache<IdentifyHints,
 		return (yearMatches ? 2 : 0) + (titleMatches ? 1 : 0);
 	}
 
-	private static (string? Title, int? Year) Describe(MediaLookup result) =>
-		result switch
+	private static (string? Title, int? Year) Describe(MediaLookup result)
+	{
+		return result switch
 		{
-			IdentifiedMedia identified => (identified.Title, identified.ReleaseDate?.Year),
-			UnmatchedMedia unmatched => (unmatched.Title, unmatched.ReleaseDate?.Year),
+			IdentifiedMedia identified => Describe(identified.Details),
+			UnmatchedMedia unmatched => Describe(unmatched.Details),
 		};
+	}
+
+	private static (string? Title, int? Year) Describe(MediaDetails details) => (details.Title, details.ReleaseDate?.Year);
 
 	private static string Comparable(string value)
 	{

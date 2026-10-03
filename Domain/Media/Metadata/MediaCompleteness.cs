@@ -4,35 +4,30 @@ namespace Domain.Media.Metadata;
 
 public static class MediaCompleteness
 {
-	extension(IPartialMedia partial)
+	extension(MediaDetails details)
 	{
-		public MediaField Missing =>
-			Gap(!HasText(partial.Title), MediaField.Title)
-			| Gap(!HasText(partial.Tagline), MediaField.Tagline)
-			| Gap(!HasText(partial.Summary), MediaField.Summary)
-			| Gap(!HasText(partial.PosterUrl), MediaField.Poster)
-			| Gap(!HasText(partial.BackdropUrl), MediaField.Backdrop)
-			| Gap(!HasDate(partial.ReleaseDate), MediaField.ReleaseDate)
-			| Gap(!HasItems(partial.Genres), MediaField.Genres)
-			| Gap(!HasItems(partial.Rating.Sources), MediaField.Rating)
-			| partial switch
+		public MediaField Missing
+		{
+			get
 			{
-				PartialMovie movie => Gap(!HasDuration(movie.Runtime), MediaField.Runtime),
-				PartialShow show => Gap(!HasCount(show.Seasons), MediaField.Seasons)
-					| Gap(!HasCount(show.Episodes), MediaField.Episodes)
-					| Gap(!HasDuration(show.RuntimePerEpisode), MediaField.RuntimePerEpisode),
-				_ => MediaField.None,
-			};
-
-		public bool IsComplete => partial.Missing is MediaField.None;
-
-		public IdentifiedMedia WithConfirmedAbsent(MediaField fields) =>
-			partial switch
-			{
-				PartialMovie movie => IdentifiedMedia.From(movie with { ConfirmedAbsent = fields }),
-				PartialShow show => IdentifiedMedia.From(show with { ConfirmedAbsent = fields }),
-				_ => IdentifiedMedia.From(partial),
-			};
+				return Gap(!HasText(details.Title), MediaField.Title)
+					| Gap(!HasText(details.Tagline), MediaField.Tagline)
+					| Gap(!HasText(details.Summary), MediaField.Summary)
+					| Gap(!HasText(details.PosterUrl), MediaField.Poster)
+					| Gap(!HasText(details.BackdropUrl), MediaField.Backdrop)
+					| Gap(!HasDate(details.ReleaseDate), MediaField.ReleaseDate)
+					| Gap(!HasItems(details.Genres), MediaField.Genres)
+					| Gap(!HasItems(details.Rating.Sources), MediaField.Rating)
+					| details switch
+					{
+						MovieDetails movie => Gap(!HasDuration(movie.Runtime), MediaField.Runtime),
+						ShowDetails show => Gap(!HasCount(show.Seasons), MediaField.Seasons)
+							| Gap(!HasCount(show.Episodes), MediaField.Episodes)
+							| Gap(!HasDuration(show.RuntimePerEpisode), MediaField.RuntimePerEpisode),
+						UnknownDetails => MediaField.None,
+					};
+			}
+		}
 	}
 
 	private static MediaField Gap(bool missing, MediaField field) => missing ? field : MediaField.None;

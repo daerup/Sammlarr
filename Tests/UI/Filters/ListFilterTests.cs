@@ -168,18 +168,22 @@ public class ListFilterTests
 		await Assert.That(sorted).IsEquivalentTo(["Zodiac", "Moana", "Arrival"]);
 	}
 
-	private static IdentifiedMedia Movie(string title) =>
-		new PartialMovie
-		{
-			Identity = new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
-			Title = title,
-			Tagline = string.Empty,
-			Summary = string.Empty,
-			PosterUrl = string.Empty,
-			BackdropUrl = string.Empty,
-			ReleaseDate = new DateOnly(2020, 1, 1),
-			Genres = [],
-			Runtime = TimeSpan.FromMinutes(90),
-			Rating = RatingSummary.None,
-		};
+	private static IdentifiedMedia Movie(string title)
+	{
+		return new IdentifiedMedia(
+			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),
+			new MovieDetails
+			{
+				Title = title,
+				Tagline = string.Empty,
+				Summary = string.Empty,
+				PosterUrl = string.Empty,
+				BackdropUrl = string.Empty,
+				ReleaseDate = new DateOnly(2020, 1, 1),
+				Genres = [],
+				Runtime = TimeSpan.FromMinutes(90),
+				Rating = RatingSummary.None,
+			}
+		);
+	}
 }

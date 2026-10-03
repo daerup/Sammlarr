@@ -8,154 +8,97 @@ internal class MediaMetadataFactory(IDateTimeProvider dateTimeProvider)
 {
 	public MediaMetadataRow BuildFrom(IdentifiedMedia media, Guid mediaId)
 	{
-		var entity = NewEntity(media);
+		var entity = NewEntity(media.Details);
 		ApplyCommonFields(entity, media, mediaId);
 		entity.LastFetchedAt = dateTimeProvider.Now;
-		entity.Ratings = [.. Ratings(media).Select(rating => BuildRating(rating, entity))];
+		entity.Ratings = [.. media.Details.Rating.Sources.Select(rating => BuildRating(rating, entity))];
 		return entity;
 	}
 
 	public void Update(MediaMetadataRow existing, IdentifiedMedia media)
 	{
-		switch (existing)
+		switch (existing, media.Details)
 		{
-			case MovieMetadataRow movie when media is Movie or PartialMovie:
+			case (MovieMetadataRow movie, MovieDetails details):
 				ApplyCommonFields(movie, media, movie.MediaId);
-				movie.Runtime = Runtime(media);
-				ReplaceRatings(movie, Ratings(media));
+				movie.Runtime = details.Runtime ?? TimeSpan.Zero;
 				break;
-			case ShowMetadataRow show when media is Show or PartialShow:
+			case (ShowMetadataRow show, ShowDetails details):
 				ApplyCommonFields(show, media, show.MediaId);
-				show.Seasons = Seasons(media);
-				show.Episodes = Episodes(media);
-				show.RuntimePerEpisode = RuntimePerEpisode(media);
-				ReplaceRatings(show, Ratings(media));
+				show.Seasons = details.Seasons ?? 0;
+				show.Episodes = details.Episodes ?? 0;
+				show.RuntimePerEpisode = details.RuntimePerEpisode ?? TimeSpan.Zero;
 				break;
 			default:
 				throw new InvalidOperationException($"Cannot update existing {existing.GetType().Name}.");
 		}
+		ReplaceRatings(existing, [.. media.Details.Rating.Sources]);
 		existing.LastFetchedAt = dateTimeProvider.Now;
 	}
 
 	public IdentifiedMedia ToStored(MediaMetadataRow entity, MediaIdentity identity)
 	{
-		IPartialMedia partial = entity switch
+		return new(identity, Details(entity)) { ConfirmedAbsent = entity.ConfirmedAbsent };
+	}
+
+	private static MediaDetails Details(MediaMetadataRow entity)
+	{
+		return Shape(entity) with
 		{
-			MovieMetadataRow movie => new PartialMovie
+			Title = entity.Title.NullIfBlank(),
+			Tagline = entity.Tagline.NullIfBlank(),
+			Summary = entity.Summary.NullIfBlank(),
+			PosterUrl = entity.PosterUrl.NullIfBlank(),
+			BackdropUrl = entity.BackdropUrl.NullIfBlank(),
+			ReleaseDate = entity.ReleaseDate == DateOnly.MinValue ? null : entity.ReleaseDate,
+			Genres = [.. entity.Genres],
+			Rating = RatingSummary.From(ToRatings(entity.Ratings)),
+		};
+	}
+
+	private static MediaDetails Shape(MediaMetadataRow entity)
+	{
+		return entity switch
+		{
+			MovieMetadataRow movie => new MovieDetails { Runtime = movie.Runtime == TimeSpan.Zero ? null : movie.Runtime },
+			ShowMetadataRow show => new ShowDetails
 			{
-				Identity = identity,
-				Title = movie.Title.NullIfBlank(),
-				Tagline = movie.Tagline.NullIfBlank(),
-				Summary = movie.Summary.NullIfBlank(),
-				PosterUrl = movie.PosterUrl.NullIfBlank(),
-				BackdropUrl = movie.BackdropUrl.NullIfBlank(),
-				ReleaseDate = movie.ReleaseDate == DateOnly.MinValue ? null : movie.ReleaseDate,
-				Genres = [.. movie.Genres],
-				Rating = RatingSummary.From(ToRatings(movie.Ratings)),
-				ConfirmedAbsent = movie.ConfirmedAbsent,
-				Runtime = movie.Runtime == TimeSpan.Zero ? null : movie.Runtime,
-			},
-			ShowMetadataRow show => new PartialShow
-			{
-				Identity = identity,
-				Title = show.Title.NullIfBlank(),
-				Tagline = show.Tagline.NullIfBlank(),
-				Summary = show.Summary.NullIfBlank(),
-				PosterUrl = show.PosterUrl.NullIfBlank(),
-				BackdropUrl = show.BackdropUrl.NullIfBlank(),
-				ReleaseDate = show.ReleaseDate == DateOnly.MinValue ? null : show.ReleaseDate,
-				Genres = [.. show.Genres],
-				Rating = RatingSummary.From(ToRatings(show.Ratings)),
-				ConfirmedAbsent = show.ConfirmedAbsent,
 				Seasons = show.Seasons == 0 ? null : show.Seasons,
 				Episodes = show.Episodes == 0 ? null : show.Episodes,
 				RuntimePerEpisode = show.RuntimePerEpisode == TimeSpan.Zero ? null : show.RuntimePerEpisode,
 			},
 			_ => throw new InvalidOperationException($"Unsupported metadata entity type '{entity.GetType().Name}'."),
 		};
-		return IdentifiedMedia.From(partial);
 	}
 
-	private static MediaMetadataRow NewEntity(IdentifiedMedia media) =>
-		media switch
+	private static MediaMetadataRow NewEntity(MediaDetails details)
+	{
+		return details switch
 		{
-			Movie or PartialMovie => new MovieMetadataRow { Runtime = Runtime(media) },
-			Show or PartialShow => new ShowMetadataRow
+			MovieDetails movie => new MovieMetadataRow { Runtime = movie.Runtime ?? TimeSpan.Zero },
+			ShowDetails show => new ShowMetadataRow
 			{
-				Seasons = Seasons(media),
-				Episodes = Episodes(media),
-				RuntimePerEpisode = RuntimePerEpisode(media),
+				Seasons = show.Seasons ?? 0,
+				Episodes = show.Episodes ?? 0,
+				RuntimePerEpisode = show.RuntimePerEpisode ?? TimeSpan.Zero,
 			},
-			_ => throw new InvalidOperationException($"Unsupported media type '{media.GetType().Name}'."),
+			UnknownDetails => throw new InvalidOperationException($"Unsupported media type '{details.Type}'."),
 		};
+	}
 
 	private static void ApplyCommonFields(MediaMetadataRow entity, IdentifiedMedia media, Guid mediaId)
 	{
+		var details = media.Details;
 		entity.MediaId = mediaId;
-		switch (media)
-		{
-			case IMedia resolved:
-				entity.Title = resolved.Title;
-				entity.Tagline = resolved.Tagline;
-				entity.Summary = resolved.Summary;
-				entity.PosterUrl = resolved.PosterUrl;
-				entity.BackdropUrl = resolved.BackdropUrl;
-				entity.ReleaseDate = resolved.ReleaseDate;
-				entity.Genres = [.. resolved.Genres];
-				entity.ConfirmedAbsent = MediaField.None;
-				break;
-			case IPartialMedia partial:
-				entity.Title = partial.Title ?? string.Empty;
-				entity.Tagline = partial.Tagline ?? string.Empty;
-				entity.Summary = partial.Summary ?? string.Empty;
-				entity.PosterUrl = partial.PosterUrl ?? string.Empty;
-				entity.BackdropUrl = partial.BackdropUrl ?? string.Empty;
-				entity.ReleaseDate = partial.ReleaseDate ?? DateOnly.MinValue;
-				entity.Genres = [.. partial.Genres];
-				entity.ConfirmedAbsent = partial.ConfirmedAbsent;
-				break;
-		}
+		entity.Title = details.Title ?? string.Empty;
+		entity.Tagline = details.Tagline ?? string.Empty;
+		entity.Summary = details.Summary ?? string.Empty;
+		entity.PosterUrl = details.PosterUrl ?? string.Empty;
+		entity.BackdropUrl = details.BackdropUrl ?? string.Empty;
+		entity.ReleaseDate = details.ReleaseDate ?? DateOnly.MinValue;
+		entity.Genres = [.. details.Genres];
+		entity.ConfirmedAbsent = media.ConfirmedAbsent;
 	}
-
-	private static TimeSpan Runtime(IdentifiedMedia media) =>
-		media switch
-		{
-			Movie movie => movie.Runtime,
-			PartialMovie movie => movie.Runtime ?? TimeSpan.Zero,
-			_ => TimeSpan.Zero,
-		};
-
-	private static int Seasons(IdentifiedMedia media) =>
-		media switch
-		{
-			Show show => show.Seasons,
-			PartialShow show => show.Seasons ?? 0,
-			_ => 0,
-		};
-
-	private static int Episodes(IdentifiedMedia media) =>
-		media switch
-		{
-			Show show => show.Episodes,
-			PartialShow show => show.Episodes ?? 0,
-			_ => 0,
-		};
-
-	private static TimeSpan RuntimePerEpisode(IdentifiedMedia media) =>
-		media switch
-		{
-			Show show => show.RuntimePerEpisode,
-			PartialShow show => show.RuntimePerEpisode ?? TimeSpan.Zero,
-			_ => TimeSpan.Zero,
-		};
-
-	private static IReadOnlyList<MediaRating> Ratings(IdentifiedMedia media) =>
-		media switch
-		{
-			IMedia resolved => [.. resolved.Rating.Sources],
-			IPartialMedia partial => [.. partial.Rating.Sources],
-			_ => [],
-		};
 
 	private static void ReplaceRatings(MediaMetadataRow entity, IReadOnlyList<MediaRating> ratings)
 	{

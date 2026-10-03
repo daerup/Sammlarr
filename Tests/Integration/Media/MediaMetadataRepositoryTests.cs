@@ -67,7 +67,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		var marker = new DateTimeOffset(2020, 6, 15, 0, 0, 0, TimeSpan.Zero);
 		await fixture.Context.MediaMetadata.ExecuteUpdateAsync(s => s.SetProperty(m => m.CreatedAt, marker));
 
-		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId]) with { Title = "Updated" }]);
+		await _testee.UpsertMetadataAsync([CreateMovieDetails(mediaId, [plexId], Complete() with { Title = "Updated" })]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var stored = await fixture.Context.MediaMetadata.AsNoTracking().SingleAsync();
@@ -87,7 +87,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		var row = (await _testee.GetAsync([mediaId])).Single();
 
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
-		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, Movie>();
+		await Assert.That(row.Stored.Details.Missing).IsEqualTo(MediaField.None);
 		await Assert.That(row.Stored.Identity.Externals).Contains(plexId);
 		await Assert.That(row.FetchedAt).IsNotNull();
 	}
@@ -97,18 +97,16 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	{
 		var plexId = PlexId.From("plex-812", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var partial = new PartialMovie
+		var partial = new IdentifiedMedia(new MediaIdentity(mediaId, [plexId]), new MovieDetails { Title = "Solaris" })
 		{
-			Identity = new MediaIdentity(mediaId, [plexId]),
-			Title = "Solaris",
 			ConfirmedAbsent = MediaField.Tagline | MediaField.Backdrop,
 		};
 
-		await _testee.UpsertMetadataAsync([IdentifiedMedia.From(partial)]);
+		await _testee.UpsertMetadataAsync([partial]);
 		fixture.Context.ChangeTracker.Clear();
 
-		var stored = await Assert.That((await _testee.GetAsync([mediaId])).Single().Stored).IsOfUnionType<IdentifiedMedia, IPartialMedia>();
-		await Assert.That(stored!.ConfirmedAbsent).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
+		var stored = (await _testee.GetAsync([mediaId])).Single().Stored;
+		await Assert.That(stored.ConfirmedAbsent).IsEqualTo(MediaField.Tagline | MediaField.Backdrop);
 	}
 
 	[Test]
@@ -120,7 +118,7 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 
 		var row = (await _testee.GetAsync([mediaId])).Single();
 
-		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, PartialMovie>();
+		await Assert.That(row.Stored.Details).IsEqualTo(new MovieDetails());
 		await Assert.That(row.Stored.Identity.Id).IsEqualTo(mediaId);
 		await Assert.That(row.FetchedAt).IsNull();
 	}
@@ -138,8 +136,8 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		var rows = await _testee.GetAsync([firstId, secondId]);
 
 		await Assert.That(rows.Count).IsEqualTo(2);
-		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored).IsOfUnionType<IdentifiedMedia, Movie>();
-		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored).IsOfUnionType<IdentifiedMedia, PartialMovie>();
+		await Assert.That(rows.Single(r => r.Stored.Identity.Id == firstId).Stored.Details.Missing).IsEqualTo(MediaField.None);
+		await Assert.That(rows.Single(r => r.Stored.Identity.Id == secondId).Stored.Details).IsEqualTo(new MovieDetails());
 	}
 
 	[Test]
@@ -147,14 +145,14 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var rated = CreateMovieDetails(mediaId, [plexId]) with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, 1200)]) };
+		var rated = CreateMovieDetails(mediaId, [plexId], Complete() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, 1200)]) });
 		await _testee.UpsertMetadataAsync([rated]);
 		fixture.Context.ChangeTracker.Clear();
 
 		var row = (await _testee.GetAsync([mediaId])).Single();
 
 		using var _ = Assert.Multiple();
-		await Assert.That(row.Stored).IsOfUnionType<IdentifiedMedia, Movie>();
+		await Assert.That(row.Stored.Details.Missing).IsEqualTo(MediaField.None);
 		await Assert.That(row.Stored.Rating.Sources.Count).IsEqualTo(1);
 		var rating = row.Stored.Rating.Sources.Single();
 		await Assert.That(rating.Source).IsEqualTo(MediaProvider.Tmdb);
@@ -173,10 +171,15 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 		await Assert.That(async () => await Task.WhenAll(flushes)).ThrowsNothing();
 	}
 
-	private static Movie CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals) =>
-		new()
+	private static IdentifiedMedia CreateMovieDetails(MediaId mediaId, IExternalMediaId[] externals, MovieDetails? details = null)
+	{
+		return new(new MediaIdentity(mediaId, [.. externals]), details ?? Complete());
+	}
+
+	private static MovieDetails Complete()
+	{
+		return new()
 		{
-			Identity = new MediaIdentity(mediaId, [.. externals]),
 			Title = "Title",
 			Tagline = "Tagline",
 			Summary = "Summary",
@@ -187,4 +190,5 @@ public class MediaMetadataRepositoryTests(SammlarrTestHost fixture) : IAsyncDisp
 			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
 			Runtime = TimeSpan.FromMinutes(120),
 		};
+	}
 }
