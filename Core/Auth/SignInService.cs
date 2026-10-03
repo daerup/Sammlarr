@@ -25,20 +25,26 @@ internal sealed class SignInService(
 	public Task<string> BeginAsync(AuthProvider provider, string callbackUrl, CancellationToken cancellationToken = default) =>
 		providers[provider].BeginLoginAsync(callbackUrl, cancellationToken);
 
-	public async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default) =>
-		await providers[provider].CompleteLoginAsync(callbackQuery, cancellationToken) switch
-		{
-			Success<ExternalLogin>(var login) => await ProvisionAsync(provider, login, cancellationToken),
-			Error error => OnFailed(provider, error),
-		};
+	public async Task<Result<User>> CompleteAsync(AuthProvider provider, string callbackQuery, CancellationToken cancellationToken = default)
+	{
+		return await providers[provider]
+			.CompleteLoginAsync(callbackQuery, cancellationToken)
+			.ApplyError(error => LogFailed(provider, error))
+			.Map(login => ProvisionAsync(provider, login, cancellationToken));
+	}
 
 	private async Task<Result<User>> ProvisionAsync(AuthProvider provider, ExternalLogin login, CancellationToken cancellationToken)
 	{
-		if (await users.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken) is Some<User>(var existing))
-		{
-			return await CompleteSignInAsync(provider, login, existing, isInitialAdmin: false, cancellationToken);
-		}
+		return await users
+			.FindByLoginAsync(provider, login.ExternalUserId, cancellationToken)
+			.Match(
+				existing => CompleteSignInAsync(provider, login, existing, isInitialAdmin: false, cancellationToken),
+				() => RegisterAsync(provider, login, cancellationToken)
+			);
+	}
 
+	private async Task<Result<User>> RegisterAsync(AuthProvider provider, ExternalLogin login, CancellationToken cancellationToken)
+	{
 		var isFirstUser = (await users.GetAllAsync(cancellationToken)).Count == 0;
 		if (!isFirstUser && (await providerConfig.GetAsync(cancellationToken)).RegistrationMode == RegistrationMode.Closed)
 		{
@@ -84,9 +90,5 @@ internal sealed class SignInService(
 		await providerConfig.StoreAsync(config with { AuthProvider = provider }, cancellationToken);
 	}
 
-	private Result<User> OnFailed(AuthProvider provider, Error error)
-	{
-		logger.LogWarning("Sign-in failed for {Provider}: {Reason}", provider, error.Reason);
-		return error;
-	}
+	private void LogFailed(AuthProvider provider, Error error) => logger.LogWarning("Sign-in failed for {Provider}: {Reason}", provider, error.Reason);
 }

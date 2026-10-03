@@ -117,11 +117,8 @@
         await Task.Yield();
         _savedState = await Credentials
             .GetAsync(Provider)
-            .Apply(credential =>
-            {
-                _savedToken = _tokenInput = credential.AccessToken;
-                _clientId = credential.ClientId;
-            })
+            .Apply(credential => _savedToken = _tokenInput = credential.AccessToken)
+            .Apply(credential => _clientId = credential.ClientId)
             .ApplyError(_ => _savedToken = _tokenInput = string.Empty)
             .Match(CredentialState.Saved, CredentialState.Idle);
         _state = _savedState;

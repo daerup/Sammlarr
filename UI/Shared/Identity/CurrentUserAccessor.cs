@@ -6,25 +6,40 @@ namespace UI.Shared.Identity;
 
 internal sealed class CurrentUserAccessor(CurrentUserOverride currentUserOverride) : ICurrentUser
 {
-	private ClaimsPrincipal principal = new(new ClaimsIdentity());
+	private ClaimsUser claims = new(new ClaimsPrincipal(new ClaimsIdentity()));
 
-	public void SetPrincipal(ClaimsPrincipal value) => principal = value;
+	public void SetPrincipal(ClaimsPrincipal value) => claims = new ClaimsUser(value);
 
-	public bool IsAuthenticated =>
-		currentUserOverride.Value?.IsAuthenticated ?? (principal.Identity?.IsAuthenticated == true && principal.FindFirst(ClaimTypes.NameIdentifier) is not null);
+	private ICurrentUser Active => currentUserOverride.Value.GetValueOr(claims);
 
-	public UserId Id =>
-		currentUserOverride.Value?.Id
-		?? (
-			Guid.TryParse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id)
-				? UserId.From(id)
-				: throw new InvalidOperationException("No authenticated user is present.")
-		);
+	public bool IsAuthenticated => Active.IsAuthenticated;
 
-	public string DisplayName => currentUserOverride.Value?.DisplayName ?? principal.Identity?.Name ?? string.Empty;
+	public UserId Id => Active.Id;
 
-	public string AvatarUrl => currentUserOverride.Value?.AvatarUrl ?? principal.FindFirst(AuthClaims.Avatar)?.Value ?? string.Empty;
+	public string DisplayName => Active.DisplayName;
 
-	public UserRole Role =>
-		currentUserOverride.Value?.Role ?? (Enum.TryParse<UserRole>(principal.FindFirst(ClaimTypes.Role)?.Value, out var role) ? role : UserRole.Member);
+	public string AvatarUrl => Active.AvatarUrl;
+
+	public UserRole Role => Active.Role;
+
+	private sealed class ClaimsUser(ClaimsPrincipal principal) : ICurrentUser
+	{
+		public bool IsAuthenticated => principal.Identity?.IsAuthenticated == true && principal.FindFirst(ClaimTypes.NameIdentifier) is not null;
+
+		public UserId Id
+		{
+			get
+			{
+				return Guid.TryParse(principal.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id)
+					? UserId.From(id)
+					: throw new InvalidOperationException("No authenticated user is present.");
+			}
+		}
+
+		public string DisplayName => principal.Identity?.Name ?? string.Empty;
+
+		public string AvatarUrl => principal.FindFirst(AuthClaims.Avatar)?.Value ?? string.Empty;
+
+		public UserRole Role => Enum.TryParse<UserRole>(principal.FindFirst(ClaimTypes.Role)?.Value, out var role) ? role : UserRole.Member;
+	}
 }
