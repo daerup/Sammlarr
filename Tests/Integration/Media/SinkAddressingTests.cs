@@ -34,11 +34,11 @@ public class SinkAddressingTests(SammlarrTestHost host) : IAsyncDisposable
 		await Assert
 			.That(results[0])
 			.IsSuccess()
-			.And.Multiple(async movie => await Assert.That(movie.Externals.OfProvider(MediaProvider.Tmdb)?.Value).IsEqualTo("550"));
+			.And.Multiple(async movie => await Assert.That(movie.Externals.OfProvider(MediaProvider.Tmdb).Map(id => id.Value)).IsSome().And.IsEqualTo("550"));
 		await Assert
 			.That(results[1])
 			.IsSuccess()
-			.And.Multiple(async show => await Assert.That(show.Externals.OfProvider(MediaProvider.Tvdb)?.Value).IsEqualTo("81189"));
+			.And.Multiple(async show => await Assert.That(show.Externals.OfProvider(MediaProvider.Tvdb).Map(id => id.Value)).IsSome().And.IsEqualTo("81189"));
 	}
 
 	[Test]

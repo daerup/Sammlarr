@@ -59,7 +59,7 @@ public class MediaPresentationTests
 				BackdropUrl = "/backdrop.jpg",
 				ReleaseDate = new DateOnly(2010, 7, 16),
 				Genres = ["Action"],
-				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
 				Runtime = TimeSpan.FromMinutes(148),
 			}
 		);

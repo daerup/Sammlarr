@@ -427,6 +427,34 @@ public class ResultExtensionsTests
 		await Assert.That(error.Match("ok", "fail")).IsEqualTo("fail");
 	}
 
+	[Test]
+	public async Task CausedBy_WhenTheExceptionIsOfTheType_IsTheTypedException()
+	{
+		var cause = new ArgumentNullException("id");
+
+		await Assert.That(Error.From(cause).CausedBy<ArgumentNullException>()).IsSome().And.IsSameReferenceAs(cause);
+	}
+
+	[Test]
+	public async Task CausedBy_WhenTheExceptionDerivesFromTheType_IsTheException()
+	{
+		var cause = new ArgumentNullException("id");
+
+		await Assert.That(Error.From(cause).CausedBy<ArgumentException>()).IsSome().And.IsSameReferenceAs(cause);
+	}
+
+	[Test]
+	public async Task CausedBy_WhenTheExceptionIsAnotherType_IsNone()
+	{
+		await Assert.That(Error.From(new InvalidOperationException()).CausedBy<ArgumentException>()).IsNone();
+	}
+
+	[Test]
+	public async Task CausedBy_WhenTheErrorHasNoException_IsNone()
+	{
+		await Assert.That(Error.From("boom").CausedBy<Exception>()).IsNone();
+	}
+
 	private static async IAsyncEnumerable<T> ToAsync<T>(params T[] items)
 	{
 		foreach (var item in items)

@@ -69,7 +69,7 @@ public class PlexApiTests
 
 		var result = await testee.ByIdAsync(PlexId.From("plex-1", MediaType.Movie));
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNull());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNone());
 	}
 
 	[Test]

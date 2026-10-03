@@ -245,6 +245,52 @@ public class MediaServiceTests
 	}
 
 	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenAHintedRequestStaysUnmatched_DescribesItByTheHints()
+	{
+		var (testee, deps) = CreateTestee();
+		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
+		var hints = new IdentifyHints
+		{
+			Title = "Fight Club",
+			Year = 1999,
+			MediaType = MediaType.Show,
+		};
+
+		var results = await testee
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([TmdbId.From("999", MediaType.Movie)], Some.Of(hints)) }.ToAsyncEnumerable())
+			.ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
+			.And.Multiple(async unmatched =>
+				await Assert.That(unmatched.Details).IsEqualTo(new ShowDetails { Title = "Fight Club", ReleaseDate = new DateOnly(1999, 1, 1) })
+			);
+	}
+
+	[Test]
+	public async Task IdentifyWithDetailsAsync_WhenAHintedRequestWithoutAYearStaysUnmatched_LeavesTheReleaseDateOpen()
+	{
+		var (testee, deps) = CreateTestee();
+		deps.UnmatchedCache.GetValueOrNone(Any<string>()).Returns(Some.Of(true));
+		var hints = new IdentifyHints
+		{
+			Title = "Fight Club",
+			Year = 0,
+			MediaType = MediaType.Movie,
+		};
+
+		var results = await testee
+			.IdentifyWithDetailsAsync(new List<IdentifyRequest> { new([TmdbId.From("999", MediaType.Movie)], Some.Of(hints)) }.ToAsyncEnumerable())
+			.ToListAsync();
+
+		await Assert
+			.That(results.Single())
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
+			.And.Multiple(async unmatched => await Assert.That(unmatched.Details).IsEqualTo(new MovieDetails { Title = "Fight Club" }));
+	}
+
+	[Test]
 	public async Task IdentifyWithDetailsAsync_WhenManyRequests_RampsBatchSizesFromTen()
 	{
 		var (testee, deps) = CreateTestee();
@@ -393,7 +439,7 @@ public class MediaServiceTests
 		var (testee, deps) = CreateTestee();
 		deps.Search.LookUpAsync(Any<IExternalMediaId>(), Any()).Returns((ext, _) => Success.Of(CompleteMovie(ext)));
 		deps.MediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
-			.Returns((groups, _) => [.. groups.Select(group => group.Contains(known) ? persisted : (MediaIdentity?)null)]);
+			.Returns((groups, _) => [.. groups.Select(group => Optional.Of<MediaIdentity>(group.Contains(known) ? persisted : null))]);
 		var upserted = RecordUpsertedIdentities(deps);
 		var requests = await BuildRequests(60).ToListAsync();
 		requests[0] = new IdentifyRequest([minted], new None());
@@ -425,7 +471,9 @@ public class MediaServiceTests
 		var search = IMediaSearchProvider.Mock();
 		var unmatchedCache = ITypedMemoryCache<string, bool>.Mock();
 
-		mediaRepo.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
+		mediaRepo
+			.FindIdentitiesAsync(Any<IReadOnlyList<IReadOnlyList<IExternalMediaId>>>(), Any())
+			.Returns((groups, _) => [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), groups.Count)]);
 		mediaRepo.UpsertIdentitiesAsync(Any<IReadOnlyList<MediaIdentity>>(), Any()).Returns((identities, _) => [.. identities]);
 		mediaRepo.GetAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
 		mediaRepo.GetByExternalsAsync(Any(), Any()).Returns(Array.Empty<StoredMedia>());
@@ -543,7 +591,7 @@ public class MediaServiceTests
 				BackdropUrl = "https://example.com/b.jpg",
 				ReleaseDate = new DateOnly(2024, 1, 1),
 				Genres = ["Action"],
-				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
 				Runtime = TimeSpan.FromMinutes(120),
 			}
 		);
@@ -562,7 +610,7 @@ public class MediaServiceTests
 				BackdropUrl = "https://example.com/b.jpg",
 				ReleaseDate = new DateOnly(2024, 1, 1),
 				Genres = ["Action"],
-				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+				Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
 				Runtime = TimeSpan.FromMinutes(90),
 			}
 		);

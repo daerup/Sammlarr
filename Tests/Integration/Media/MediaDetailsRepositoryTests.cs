@@ -134,7 +134,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var rated = Complete() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, 1200)]) };
+		var rated = Complete() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, Some.Of(1200))]) };
 		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
 		fixture.Context.ChangeTracker.Clear();
 
@@ -148,7 +148,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 				var rating = cached.Details.Rating.Sources.Single();
 				await Assert.That(rating.Source).IsEqualTo(MediaProvider.Tmdb);
 				await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
-				await Assert.That(rating.VoteCount).IsEqualTo(1200);
+				await Assert.That(rating.VoteCount).IsSome().And.IsEqualTo(1200);
 			});
 	}
 
@@ -178,7 +178,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 			BackdropUrl = "https://example.com/backdrop.jpg",
 			ReleaseDate = new DateOnly(2024, 1, 1),
 			Genres = ["Action"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, 100)]),
+			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
 			Runtime = TimeSpan.FromMinutes(120),
 		};
 	}

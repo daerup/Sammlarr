@@ -22,7 +22,7 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var found = await mediaRepository.FindIdentitiesAsync(groups, cancellationToken);
 
 		var persisted = new Dictionary<IExternalMediaId, MediaIdentity>();
-		foreach (var match in found.Where(f => f.HasValue).Select(f => f!.Value))
+		foreach (var match in found.WhereSome())
 		{
 			foreach (var external in match.Externals)
 			{
@@ -49,11 +49,11 @@ internal sealed class MediaIdentityCoordinator(IMediaRepository mediaRepository)
 		var pendingPreliminary = new List<MediaIdentity>();
 		foreach (var (idx, identityMatch) in identityMatches.Index())
 		{
-			if (identityMatch is Success<IdentityMatch>(var r) && r.Stored.IsNone())
-			{
-				pendingIndices.Add(idx);
-				pendingPreliminary.Add(r.Identity);
-			}
+			identityMatch
+				.ToOptional()
+				.When(match => match.Stored.IsNone())
+				.Apply(_ => pendingIndices.Add(idx))
+				.Apply(match => pendingPreliminary.Add(match.Identity));
 		}
 		if (pendingPreliminary.Count == 0)
 		{

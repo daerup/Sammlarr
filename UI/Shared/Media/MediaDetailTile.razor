@@ -28,7 +28,7 @@
                         <span aria-hidden="true">•</span>
                         <span>@fact</span>
                     }
-                    @if (Details.Rating.Average is { } rating)
+                    @if (Details.Rating.Average is Some<float>(var rating))
                     {
                         <span aria-hidden="true">•</span>
                         <span class="inline-flex items-center gap-1 text-yellow-400">

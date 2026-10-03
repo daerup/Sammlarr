@@ -109,13 +109,13 @@ internal class MediaDetailsFactory
 		{
 			Source = rating.Source,
 			NormalizedValue = rating.NormalizedValue,
-			VoteCount = rating.VoteCount,
+			VoteCount = rating.VoteCount.ToNullable(),
 			Details = parent,
 		};
 	}
 
 	private static IReadOnlyList<MediaRating> ToRatings(IEnumerable<MediaRatingRow> ratings)
 	{
-		return [.. ratings.Select(rating => new MediaRating(rating.Source, rating.NormalizedValue, rating.VoteCount))];
+		return [.. ratings.Select(rating => new MediaRating(rating.Source, rating.NormalizedValue, Optional.Of(rating.VoteCount)))];
 	}
 }

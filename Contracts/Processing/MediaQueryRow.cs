@@ -18,7 +18,7 @@ public sealed record MediaQueryRow(MatchedMedia Media)
 
 	public DateOnly? ReleaseDate => Media.Details.ReleaseDate;
 
-	public float? Rating => Media.Details.Rating.Average;
+	public float? Rating => Media.Details.Rating.Average.ToNullable();
 
 	public int? RuntimeMinutes
 	{

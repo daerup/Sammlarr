@@ -30,9 +30,7 @@ internal static class IdLookupPlanner
 			return PlanPresent(target, hops, capacity, now);
 		}
 
-		var paths = new List<IReadOnlyList<Hop>>();
-		Walk([], have, hasHints, target, hops, paths);
-
+		var paths = new PathSearch(hasHints, target, hops).From([], have).ToList();
 		return new IdLookupPlan(Ordered(paths, capacity, now));
 	}
 
@@ -89,44 +87,16 @@ internal static class IdLookupPlanner
 			: new IdLookupPlan(Ordered(self, capacity, now));
 	}
 
-	private static void Walk(
-		IReadOnlyList<Hop> path,
-		IReadOnlySet<MediaProvider> reached,
-		bool hasHints,
-		MediaProvider target,
-		IReadOnlyList<Hop> hops,
-		List<IReadOnlyList<Hop>> paths
-	)
+	private static HashSet<MediaProvider> Reached(IReadOnlySet<MediaProvider> reached, Hop hop)
 	{
-		if (path.Count == MaxHops)
+		var next = new HashSet<MediaProvider>(reached);
+		To(hop).Apply(provider => next.Add(provider));
+		if (hop is HintsToId)
 		{
-			return;
+			next.Add(hop.Converter.Provider);
 		}
 
-		foreach (var hop in hops)
-		{
-			var to = To(hop);
-			if (!Starts(hop, path, reached, hasHints) || to.When(reached.Contains).IsSome())
-			{
-				continue;
-			}
-
-			IReadOnlyList<Hop> next = [.. path, hop];
-			if (to.When(provider => provider == target).IsSome())
-			{
-				paths.Add(next);
-				continue;
-			}
-
-			var reachedNext = new HashSet<MediaProvider>(reached);
-			to.Apply(provider => reachedNext.Add(provider));
-			if (hop is HintsToId)
-			{
-				reachedNext.Add(hop.Converter.Provider);
-			}
-
-			Walk(next, reachedNext, hasHints, target, hops, paths);
-		}
+		return next;
 	}
 
 	private static bool Starts(Hop hop, IReadOnlyList<Hop> path, IReadOnlySet<MediaProvider> reached, bool hasHints)
@@ -163,5 +133,25 @@ internal static class IdLookupPlanner
 	private static double Weight(IReadOnlyList<Hop> path, IProviderCapacity capacity)
 	{
 		return path.Sum(hop => hop.Cost * (1 + capacity.Of(hop.Converter.Provider).Busy));
+	}
+
+	private sealed record PathSearch(bool HasHints, MediaProvider Target, IReadOnlyList<Hop> Hops)
+	{
+		internal IEnumerable<IReadOnlyList<Hop>> From(IReadOnlyList<Hop> path, IReadOnlySet<MediaProvider> reached)
+		{
+			if (path.Count == MaxHops)
+			{
+				return [];
+			}
+
+			return Hops.Where(hop => Starts(hop, path, reached, HasHints))
+				.Where(hop => To(hop).Match(provider => !reached.Contains(provider), () => true))
+				.SelectMany(hop => Extend([.. path, hop], hop, reached));
+		}
+
+		private IEnumerable<IReadOnlyList<Hop>> Extend(IReadOnlyList<Hop> next, Hop hop, IReadOnlySet<MediaProvider> reached)
+		{
+			return To(hop).Match(provider => provider == Target, () => false) ? [next] : From(next, Reached(reached, hop));
+		}
 	}
 }

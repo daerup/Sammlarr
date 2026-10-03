@@ -26,7 +26,7 @@ public class TmdbDetailsEnricherTests
 			{
 				var rating = found.Details.Rating;
 				await Assert.That(rating.Sources.Any(source => source.Source == MediaProvider.Tmdb)).IsTrue();
-				await Assert.That(rating.Average).IsEqualTo(7.5f);
+				await Assert.That(rating.Average).IsSome().And.IsEqualTo(7.5f);
 			});
 	}
 
@@ -40,7 +40,7 @@ public class TmdbDetailsEnricherTests
 
 		var result = await CreateTestee(handler).LookUpAsync(Id);
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsTypeOf<ProviderUnavailableException>());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.CausedBy<ProviderUnavailableException>()).IsSome());
 	}
 
 	[Test]
@@ -51,7 +51,7 @@ public class TmdbDetailsEnricherTests
 
 		var result = await CreateTestee(handler).LookUpAsync(Id);
 
-		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNull());
+		await Assert.That(result).IsError().And.Multiple(async error => await Assert.That(error.Exception).IsNone());
 	}
 
 	[Test]

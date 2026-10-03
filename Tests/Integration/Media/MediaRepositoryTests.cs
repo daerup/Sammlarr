@@ -5,6 +5,7 @@ using Domain.Media;
 using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
+using TestInfrastructure;
 
 namespace Integration.Tests.Media;
 
@@ -34,7 +35,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		]);
 
 		await Assert.That(identities.Count).IsEqualTo(1);
-		await Assert.That(identities[0]!.Value.Id).IsEqualTo(seededMediaId);
+		await Assert.That(identities[0].Map(identity => identity.Id)).IsSome().And.IsEqualTo(seededMediaId);
 	}
 
 	[Test]
@@ -50,7 +51,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			[imdbId, tmdbId],
 		]);
 
-		await Assert.That(identities[0]!.Value.Id).IsEqualTo(seededMediaId);
+		await Assert.That(identities[0].Map(identity => identity.Id)).IsSome().And.IsEqualTo(seededMediaId);
 	}
 
 	[Test]
@@ -60,7 +61,7 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 			[ImdbId.From("tt-not-found", MediaType.Movie)],
 		]);
 
-		await Assert.That(identities[0]).IsNull();
+		await Assert.That(identities[0]).IsNone();
 	}
 
 	[Test]
@@ -89,6 +90,19 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 	}
 
 	[Test]
+	public async Task FindManyAsync_WhenEveryGroupIsEmpty_ReturnsANoneSlotPerGroup()
+	{
+		var identities = await _testee.FindIdentitiesAsync([
+			[],
+			[],
+		]);
+
+		await Assert.That(identities).Count().IsEqualTo(2);
+		await Assert.That(identities[0]).IsNone();
+		await Assert.That(identities[1]).IsNone();
+	}
+
+	[Test]
 	public async Task FindManyAsync_WhenMultipleGroups_ReturnsPositionalResults()
 	{
 		var firstImdb = ImdbId.From("tt0104", MediaType.Movie);
@@ -103,9 +117,9 @@ public class MediaRepositoryTests(SammlarrTestHost fixture) : IAsyncDisposable
 		]);
 
 		await Assert.That(identities.Count).IsEqualTo(3);
-		await Assert.That(identities[0]!.Value.Id).IsEqualTo(firstMediaId);
-		await Assert.That(identities[1]).IsNull();
-		await Assert.That(identities[2]!.Value.Id).IsEqualTo(secondMediaId);
+		await Assert.That(identities[0].Map(identity => identity.Id)).IsSome().And.IsEqualTo(firstMediaId);
+		await Assert.That(identities[1]).IsNone();
+		await Assert.That(identities[2].Map(identity => identity.Id)).IsSome().And.IsEqualTo(secondMediaId);
 	}
 
 	[Test]

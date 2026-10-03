@@ -20,6 +20,5 @@ internal sealed class TmdbArtwork(TmdbOptions options) : IArtworkResizer
 		return slash > 0 && slash < sized.Length - 1 ? Some.Of(sized[(slash + 1)..]) : new None();
 	}
 
-	private static Optional<int> WidthFor(ArtworkSize size) =>
-		Widths.FirstOrDefault(width => width >= size.Width) is var width and > 0 ? Some.Of(width) : new None();
+	private static Optional<int> WidthFor(ArtworkSize size) => Widths.FirstOrNone(width => width >= size.Width);
 }

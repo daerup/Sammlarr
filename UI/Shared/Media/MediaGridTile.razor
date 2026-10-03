@@ -42,7 +42,7 @@
         }
 
         <div class="absolute bottom-0 left-0 right-0 p-4 space-y-2 z-10">
-            @if (Details.Rating.Average is { } rating)
+            @if (Details.Rating.Average is Some<float>(var rating))
             {
                 <div class="flex items-center gap-1.5 text-yellow-400 text-sm tracking-wide antialiased">
                     <LucideIcon Name="star" Size="16" Fill="currentColor"/>

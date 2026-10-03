@@ -9,7 +9,7 @@ namespace DB.Data.Media;
 internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbContextFactory, MediaDetailsFactory detailsFactory, MediaWriteLock writeLock)
 	: IMediaRepository
 {
-	public async Task<IReadOnlyList<MediaIdentity?>> FindIdentitiesAsync(
+	public async Task<IReadOnlyList<Optional<MediaIdentity>>> FindIdentitiesAsync(
 		IReadOnlyList<IReadOnlyList<IExternalMediaId>> candidateGroups,
 		CancellationToken cancellationToken = default
 	)
@@ -22,7 +22,7 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 		var union = candidateGroups.SelectMany(group => group).Distinct().ToList();
 		if (union.Count == 0)
 		{
-			return new MediaIdentity?[candidateGroups.Count];
+			return [.. candidateGroups.Select(_ => (Optional<MediaIdentity>)new None())];
 		}
 
 		await using var ctx = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -38,26 +38,21 @@ internal sealed class MediaRepository(IDbContextFactory<SammlarrDbContext> dbCon
 			}
 		}
 
-		var results = new MediaIdentity?[candidateGroups.Count];
-		for (var i = 0; i < candidateGroups.Count; i++)
+		return [.. candidateGroups.Select(group => Identify(group, identityByExternal))];
+	}
+
+	private static Optional<MediaIdentity> Identify(
+		IReadOnlyList<IExternalMediaId> group,
+		IReadOnlyDictionary<IExternalMediaId, MediaIdentity> identityByExternal
+	)
+	{
+		var matches = group.Select(identityByExternal.GetValueOrNone).WhereSome().ToHashSet();
+		return matches.Count switch
 		{
-			var group = candidateGroups[i];
-			var matches = new HashSet<MediaIdentity>();
-			foreach (var candidate in group)
-			{
-				if (identityByExternal.TryGetValue(candidate, out var identity))
-				{
-					matches.Add(identity);
-				}
-			}
-			results[i] = matches.Count switch
-			{
-				0 => null,
-				1 => matches.First(),
-				_ => throw new MediaIdentityConflictException([.. matches.Select(m => m.Id)], [.. group]),
-			};
-		}
-		return results;
+			0 => new None(),
+			1 => Some.Of(matches.First()),
+			_ => throw new MediaIdentityConflictException([.. matches.Select(m => m.Id)], [.. group]),
+		};
 	}
 
 	public async Task<IReadOnlyList<MediaIdentity>> UpsertIdentitiesAsync(IReadOnlyList<MediaIdentity> identities, CancellationToken cancellationToken = default)

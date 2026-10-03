@@ -114,13 +114,24 @@ public class MediaIdentityCoordinatorTests
 	private static (MediaIdentityCoordinator Coordinator, MediaWriteBuffer Buffer) CreateCoordinator(Action<Mock<IMediaRepository>>? setup = null)
 	{
 		var mediaRepo = IMediaRepository.Mock();
-		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => new MediaIdentity?[groups.Count]);
+		mediaRepo.FindIdentitiesAsync(Any(), Any()).Returns((groups, _) => Unknown(groups.Count));
 		setup?.Invoke(mediaRepo);
 		var coordinator = new MediaIdentityCoordinator(mediaRepo.Object);
 		var buffer = new MediaWriteBuffer(mediaRepo.Object, NullLogger<MediaWriteBuffer>.Instance);
 		return (coordinator, buffer);
 	}
 
-	private static MediaIdentity?[] MatchGroups(IReadOnlyList<IReadOnlyList<IExternalMediaId>> groups, IExternalMediaId key, MediaIdentity result) =>
-		[.. groups.Select(g => g.Any(e => e.Source == key.Source && e.Value == key.Value) ? (MediaIdentity?)result : null)];
+	private static IReadOnlyList<Optional<MediaIdentity>> MatchGroups(
+		IReadOnlyList<IReadOnlyList<IExternalMediaId>> groups,
+		IExternalMediaId key,
+		MediaIdentity result
+	)
+	{
+		return [.. groups.Select(group => Optional.Of<MediaIdentity>(group.Any(e => e.Source == key.Source && e.Value == key.Value) ? result : null))];
+	}
+
+	private static IReadOnlyList<Optional<MediaIdentity>> Unknown(int count)
+	{
+		return [.. Enumerable.Repeat<Optional<MediaIdentity>>(new None(), count)];
+	}
 }

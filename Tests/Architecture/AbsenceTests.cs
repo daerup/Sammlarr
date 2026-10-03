@@ -31,17 +31,6 @@ internal static class Edges
 		("ObservabilityContext", "ShouldUseOtlp"),
 	];
 
-	private static readonly string[] MediaResolutionTypes = ["RatingSummary", "MediaRating"];
-
-	private static readonly (string Type, string Member)[] MediaResolution =
-	[
-		("Error", "Exception"),
-		("ExternalMediaIds", "OfProvider"),
-		("IMediaRepository", "FindIdentitiesAsync"),
-		("MediaRepository", "FindIdentitiesAsync"),
-		("EnricherChoice", "Next"),
-	];
-
 	internal static bool Allow(NullableMember member)
 	{
 		var type = member.Type.Name;
@@ -55,8 +44,6 @@ internal static class Edges
 			|| (member.Member.Name is "SendAsync" && member.Namespace.StartsWith("API.") && type.EndsWith("Client"))
 			|| Bridges.Contains((type, member.Member.Name))
 			|| (MediaDetails.Contains(type) && member.Namespace is "Domain.Media")
-			|| MediaDetailsFeeders.Contains(type)
-			|| (MediaResolutionTypes.Contains(type) && member.Namespace is "Domain.Media")
-			|| MediaResolution.Contains((type, member.Member.Name));
+			|| MediaDetailsFeeders.Contains(type);
 	}
 }
