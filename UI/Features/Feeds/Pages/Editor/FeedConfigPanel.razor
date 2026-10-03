@@ -377,6 +377,7 @@
     private StrategyMode _strategyMode;
     private int _absenceThreshold = new Mirror().AbsenceThreshold;
     private string _identifier = string.Empty;
+    private Optional<RatingStrategy> _ratingStrategy = new None();
     private bool _filtersSectionOpen;
     private bool _filterEnabled;
     private FilterDefinition _filter = new();
@@ -417,6 +418,7 @@
         ),
         new(nameof(MediaQueryRow.ReleaseDate), "Release Date", FilterFieldType.Date),
         new(nameof(MediaQueryRow.Rating), "Rating", FilterFieldType.Number),
+        new(nameof(MediaQueryRow.Votes), "Votes", FilterFieldType.Number),
         new(nameof(MediaQueryRow.RuntimeMinutes), "Runtime (min)", FilterFieldType.Number),
         new(nameof(MediaQueryRow.Seasons), "Seasons", FilterFieldType.Number),
         new(nameof(MediaQueryRow.Episodes), "Episodes", FilterFieldType.Number),
@@ -444,6 +446,7 @@
         _strategyMode = Value.Strategy is Mirror ? StrategyMode.Mirror : StrategyMode.Append;
         _absenceThreshold = (Value.Strategy is Mirror m ? m : new Mirror()).AbsenceThreshold;
         _identifier = Value.Identifier;
+        _ratingStrategy = Value.RatingStrategy;
         _filterEnabled = Value.Filter is not null;
         _filter = Value.Filter ?? new FilterDefinition();
         _filtersSectionOpen = Value.Filter is not null || Value.Sort is not null || Value.Limit is not null;
@@ -474,6 +477,7 @@
         Provider = _provider,
         Strategy = _strategyMode == StrategyMode.Mirror ? new FeedStrategy(new Mirror(_absenceThreshold)) : new FeedStrategy(new Append()),
         Identifier = _identifier,
+        RatingStrategy = _ratingStrategy,
         Filter = _filterEnabled ? _filter : null,
         Sort = _sortEnabled ? _sort : null,
         Limit = _limitEnabled ? _limit : null,

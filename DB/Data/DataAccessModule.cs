@@ -7,6 +7,7 @@ using DB.Data.Identity;
 using DB.Data.Jobs;
 using DB.Data.Media;
 using DB.Data.Notifications;
+using DB.Data.Ratings;
 using DB.Data.Scheduler;
 using DB.Data.Wantlist;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ internal class DataAccessModule : IServiceModule
 		services.AddModule<JobModule>();
 		services.AddModule<MediaModule>();
 		services.AddModule<NotificationDataModule>();
+		services.AddModule<RatingsDataModule>();
 		services.AddModule<SchedulerDataModule>();
 		services.AddModule<WantlistModule>();
 	}

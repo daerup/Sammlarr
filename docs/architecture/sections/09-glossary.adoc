@@ -66,6 +66,21 @@ Plex supplies the IMDb and Rotten Tomatoes ratings (`[SuppliedBy]`).
 IMediaRating:: One source's rating, its own type per source: `Value` as the source writes it ("8.2", "95%"),
 `SammlarrValue` on the Sammlarr scale of 0 to 10, its `Votes` if the source publishes them, and the `Mark` the UI draws.
 
+Sammlarr rating:: The one rating Sammlarr shows, filters and sorts on (`SammlarrRating`): a value on the 0 to 10 scale
+and the ratings it came from, whose votes add up to its `Votes`. A `RatingStrategy` derives it from a title's
+`RatingSummary`.
+
+RatingStrategy:: How a Sammlarr rating is derived: `AveragedRating` (the mean of its switched-on sources; none listed
+means every source) or `OrderedRating` (First available: the first source in its order that rates the title). Each
+feed may keep its own (`Feed.RatingStrategy`); without one, a feed follows its owner's default, which Average over
+every source stands in for until the owner picks one.
+
+Available rating source:: A `RatingSource` one of whose suppliers is connected for the current user
+(`IRatingService.GetAvailableAsync`). Only available sources count; an Average none of whose sources is available
+falls back to every available source, so disconnecting the provider behind a kept choice does not empty a feed while
+another provider still supplies ratings. Availability is read from the stored keys and accounts, never from a live
+check, so a provider that is briefly unreachable still counts.
+
 === Identify and details
 
 Identify:: Turning external references into the right library title (`IMediaService.IdentifyAsync`

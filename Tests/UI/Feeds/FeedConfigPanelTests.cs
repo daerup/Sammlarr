@@ -4,6 +4,7 @@ using Bunit;
 using Contracts.Auth;
 using Domain.Auth;
 using Domain.Feed;
+using Domain.Media;
 using Domain.Providers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -107,6 +108,17 @@ public class FeedConfigPanelTests : BunitContext
 		await Assert.That(mirror.AbsenceThreshold).IsEqualTo(1);
 	}
 
+	[Test]
+	public async Task RatingStrategy_WhenAnotherFieldChanges_KeepsTheFeedsOwn()
+	{
+		var ordered = new RatingStrategy(new OrderedRating([RatingSource.Imdb]));
+		var cut = RenderPanel(FeedProvider.Mdblist, new Append(), ordered);
+
+		await StrategyRadio(cut, "Mirror").ClickAsync();
+
+		await Assert.That(_changes.Last().RatingStrategy).IsSome().And.IsEqualTo(ordered);
+	}
+
 	private static IElement ProviderLabel(IRenderedComponent<FeedConfigPanel> cut)
 	{
 		return cut.FindAll("label").First(label => label.TextContent.Trim().StartsWith("Provider"));
@@ -121,7 +133,7 @@ public class FeedConfigPanelTests : BunitContext
 
 	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider) => RenderPanel(provider, new Append());
 
-	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider, FeedStrategy strategy)
+	private IRenderedComponent<FeedConfigPanel> RenderPanel(FeedProvider? provider, FeedStrategy strategy, RatingStrategy? rating = null)
 	{
 		return Render<FeedConfigPanel>(parameters =>
 			parameters
@@ -133,6 +145,7 @@ public class FeedConfigPanelTests : BunitContext
 						Provider = provider,
 						Identifier = "hdlists/documentaries",
 						Strategy = strategy,
+						RatingStrategy = Optional.Of(rating),
 					}
 				)
 				.Add(panel => panel.OnChange, EventCallback.Factory.Create<FeedConfig>(this, _changes.Add))

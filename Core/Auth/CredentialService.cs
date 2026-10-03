@@ -18,6 +18,11 @@ internal sealed class CredentialService(ICredentialRepository credentials, ICred
 		);
 	}
 
+	public Task<bool> IsStoredAsync(AuthProvider provider, CancellationToken cancellationToken = default)
+	{
+		return credentials.GetAsync(provider, cancellationToken).IsSuccess();
+	}
+
 	public async Task StoreAsync(AuthProvider provider, StoredCredential credential, CancellationToken cancellationToken = default)
 	{
 		await credentials.StoreAsync(provider, credential.AccessToken, credential.ExpiresAt, credential.ClientId, cancellationToken);

@@ -25,6 +25,25 @@ public class ValueSetTests
 	}
 
 	[Test]
+	public async Task GetHashCode_WhenAnItemHashesToZero_StillTellsTheSetsApart()
+	{
+		ValueSet<RatingSource> withTmdb = [RatingSource.Tmdb, RatingSource.Imdb];
+		ValueSet<RatingSource> without = [RatingSource.Imdb];
+
+		await Assert.That(withTmdb.GetHashCode()).IsNotEqualTo(without.GetHashCode());
+		await Assert.That(new ValueSet<RatingSource>().GetHashCode()).IsNotEqualTo(((ValueSet<RatingSource>)[RatingSource.Tmdb]).GetHashCode());
+	}
+
+	[Test]
+	public async Task GetHashCode_WhenSameItemsDifferentOrder_IsTheSame()
+	{
+		ValueSet<RatingSource> first = [RatingSource.Tmdb, RatingSource.RottenTomatoesAudience];
+		ValueSet<RatingSource> second = [RatingSource.RottenTomatoesAudience, RatingSource.Tmdb];
+
+		await Assert.That(first.GetHashCode()).IsEqualTo(second.GetHashCode());
+	}
+
+	[Test]
 	public async Task Equals_WhenDifferentItems_AreNotEqual()
 	{
 		ValueSet<IExternalMediaId> first = [TmdbId.From("1", MediaType.Movie)];

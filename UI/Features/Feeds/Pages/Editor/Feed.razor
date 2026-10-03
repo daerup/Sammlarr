@@ -200,6 +200,7 @@
             Sort = feed.Sort.ToNullable(),
             Limit = feed.Limit.ToNullable(),
             Schedule = feed.Schedule,
+            RatingStrategy = feed.RatingStrategy,
             IsProviderAvailable = await ApiKeyService.GetAsync(feed.Provider.AsApiKeyProvider()).IsSuccess(),
         };
         _storedHash = _config.GetSaveHash();
@@ -364,6 +365,7 @@
             Sort = Optional.Of(_config.Sort),
             Limit = Optional.Of(_config.Limit),
             Schedule = _config.Schedule,
+            RatingStrategy = _config.RatingStrategy,
         };
 
     private FeedCreateData BuildCreateData() =>
@@ -378,6 +380,7 @@
             Sort = Optional.Of(_config.Sort),
             Limit = Optional.Of(_config.Limit),
             Schedule = _config.Schedule,
+            RatingStrategy = _config.RatingStrategy,
         };
 
     private Task HandleContainerKeyDownAsync(KeyboardEventArgs args)

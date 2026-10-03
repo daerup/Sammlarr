@@ -365,12 +365,26 @@ public class QueryProcessorRatingTests
 		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([low, unrated]);
 	}
 
+	[Test]
+	public async Task Execute_WhenFilterVotesGreaterOrEqual_ExcludesFewerAndThoseWithoutVotes()
+	{
+		var many = MovieWithRating(2020, 7.0f, votes: 900);
+		var few = MovieWithRating(2021, 7.0f, votes: 300);
+		var unvoted = MovieWithRating(2022, 7.0f, votes: null);
+		var options = new QueryOptions { Filter = Some.Of(Filter(Group(Number(nameof(MediaQueryRow.Votes), FilterPredicateOperator.GreaterOrEqual, 500.0)))) };
+
+		var results = await _testee.ExecuteAsync([many, few, unvoted], options, NoEnrollment).ToListAsync();
+
+		await Assert.That(Items(results, QueryOutcome.Qualified)).IsEquivalentTo([many]);
+		await Assert.That(Items(results, QueryOutcome.Culled)).IsEquivalentTo([few, unvoted]);
+	}
+
 	private static QueryPredicates<MediaQueryRow> NoEnrollment => new(IsWantlisted: _ => false, IsBlocklisted: _ => false, IsOwned: _ => false);
 
 	private static IEnumerable<MediaQueryRow> Items(IEnumerable<QueryVerdict<MediaQueryRow>> rows, QueryOutcome outcome) =>
 		rows.Where(row => row.Outcome == outcome).Select(row => row.Item);
 
-	private static MediaQueryRow MovieWithRating(int year, float? rating)
+	private static MediaQueryRow MovieWithRating(int year, float? rating, int? votes = 1)
 	{
 		return MediaQueryRow.From(
 			new MatchedMedia(
@@ -380,9 +394,11 @@ public class QueryProcessorRatingTests
 					Title = $"Movie {year}",
 					ReleaseDate = new DateOnly(year, 1, 1),
 					Runtime = TimeSpan.FromMinutes(90),
-					Rating = rating is { } value ? RatingSummary.From([new TmdbRating(value, Some.Of(1))]) : RatingSummary.None,
+					Rating = rating is { } value ? RatingSummary.From([new TmdbRating(value, Optional.Of(votes))]) : RatingSummary.None,
 				}
-			)
+			),
+			new RatingStrategy(AveragedRating.Everything),
+			[RatingSource.Tmdb]
 		);
 	}
 }
