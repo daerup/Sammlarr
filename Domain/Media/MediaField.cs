@@ -17,7 +17,11 @@ public enum MediaField
 	Seasons = 1 << 8,
 	Episodes = 1 << 9,
 	RuntimePerEpisode = 1 << 10,
-	Rating = 1 << 11,
+	TmdbRating = 1 << 11,
+	ImdbRating = 1 << 12,
+	RottenTomatoesCriticsRating = 1 << 13,
+	RottenTomatoesAudienceRating = 1 << 14,
+	Ratings = TmdbRating | ImdbRating | RottenTomatoesCriticsRating | RottenTomatoesAudienceRating,
 }
 
 public static class MediaFieldExtensions

@@ -177,7 +177,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var items = await Testee.GetFeedItemsAsync("top-250").ToListAsync();
 
-		await AssertItems(items, ("Fight Club", Poster: true, MediaProvider.Tmdb));
+		await AssertItems(items, ("Fight Club", Poster: true, RatingSource.Tmdb));
 	}
 
 	[Test]
@@ -190,7 +190,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 		var items = await Testee.GetFeedItemsAsync("top-250").ToListAsync();
 
-		await AssertItems(items, ("Fight Club", Poster: false, MediaProvider.Tmdb), ("Inception", Poster: false, MediaProvider.Tmdb));
+		await AssertItems(items, ("Fight Club", Poster: false, RatingSource.Tmdb), ("Inception", Poster: false, RatingSource.Tmdb));
 	}
 
 	[Test]
@@ -263,7 +263,7 @@ public class FeedTests(SammlarrTestHost host) : IAsyncDisposable
 
 	private static FeedPage Page(int offset, bool hasMore, params string[] titles) => new(offset, hasMore, titles);
 
-	private static async Task AssertItems(IReadOnlyList<MediaMatchResult> items, params (string Title, bool Poster, MediaProvider? Rating)[] expected)
+	private static async Task AssertItems(IReadOnlyList<MediaMatchResult> items, params (string Title, bool Poster, RatingSource? Rating)[] expected)
 	{
 		await Assert.That(items).Count().IsEqualTo(expected.Length);
 		foreach (var (item, row) in items.Zip(expected))

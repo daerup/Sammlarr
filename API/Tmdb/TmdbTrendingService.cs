@@ -72,7 +72,7 @@ internal sealed class TmdbTrendingService(TmdbClient tmdbClient, TmdbArtwork art
 			PosterUrl = artwork.Original(response.PosterPath),
 			BackdropUrl = artwork.Original(response.BackdropPath),
 			ReleaseDate = response.Released,
-			Rating = TmdbRating.Of(response.VoteAverage, response.VoteCount),
+			Rating = TmdbRatings.Of(response.VoteAverage, response.VoteCount),
 		};
 	}
 }

@@ -60,14 +60,14 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		fixture.Context.MediaRatings.AddRange(
 			new MediaRatingRow
 			{
-				Source = MediaProvider.Tmdb,
+				Source = RatingSource.Tmdb,
 				NormalizedValue = 8.0f,
 				VoteCount = 1234,
 				Details = blocklistedDetails,
 			},
 			new MediaRatingRow
 			{
-				Source = MediaProvider.Tmdb,
+				Source = RatingSource.Tmdb,
 				NormalizedValue = 7.0f,
 				VoteCount = 567,
 				Details = purgedDetails,
@@ -216,7 +216,7 @@ public class MediaCachePurgerTests(SammlarrTestHost fixture) : IAsyncDisposable
 		fixture.Context.MediaRatings.Add(
 			new MediaRatingRow
 			{
-				Source = MediaProvider.Tmdb,
+				Source = RatingSource.Tmdb,
 				NormalizedValue = 8.5f,
 				VoteCount = 999,
 				Details = details,

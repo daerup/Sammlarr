@@ -4,7 +4,6 @@ using Core.Processing;
 using Domain.Feed.Run;
 using Domain.Media;
 using Domain.Processing;
-using Domain.Providers;
 using TUnit.Assertions.Enums;
 using static TestInfrastructure.QueryFilterFactory;
 
@@ -381,7 +380,7 @@ public class QueryProcessorRatingTests
 					Title = $"Movie {year}",
 					ReleaseDate = new DateOnly(year, 1, 1),
 					Runtime = TimeSpan.FromMinutes(90),
-					Rating = rating is { } value ? RatingSummary.From([new MediaRating(MediaProvider.Tmdb, value, Some.Of(1))]) : RatingSummary.None,
+					Rating = rating is { } value ? RatingSummary.From([new TmdbRating(value, Some.Of(1))]) : RatingSummary.None,
 				}
 			)
 		);

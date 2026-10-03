@@ -94,7 +94,7 @@ internal class MediaDetailsFactory
 		row.FetchedAt = cached.FetchedAt;
 	}
 
-	private static void ReplaceRatings(MediaDetailsRow row, IReadOnlyList<MediaRating> ratings)
+	private static void ReplaceRatings(MediaDetailsRow row, IReadOnlyList<IMediaRating> ratings)
 	{
 		row.Ratings.Clear();
 		foreach (var rating in ratings)
@@ -103,19 +103,19 @@ internal class MediaDetailsFactory
 		}
 	}
 
-	private static MediaRatingRow BuildRating(MediaRating rating, MediaDetailsRow parent)
+	private static MediaRatingRow BuildRating(IMediaRating rating, MediaDetailsRow parent)
 	{
 		return new()
 		{
 			Source = rating.Source,
-			NormalizedValue = rating.NormalizedValue,
-			VoteCount = rating.VoteCount.ToNullable(),
+			NormalizedValue = rating.SammlarrValue,
+			VoteCount = rating.Votes.ToNullable(),
 			Details = parent,
 		};
 	}
 
-	private static IReadOnlyList<MediaRating> ToRatings(IEnumerable<MediaRatingRow> ratings)
+	private static IReadOnlyList<IMediaRating> ToRatings(IEnumerable<MediaRatingRow> ratings)
 	{
-		return [.. ratings.Select(rating => new MediaRating(rating.Source, rating.NormalizedValue, Optional.Of(rating.VoteCount)))];
+		return [.. ratings.Select(rating => rating.Source.Rate(rating.NormalizedValue, Optional.Of(rating.VoteCount)))];
 	}
 }

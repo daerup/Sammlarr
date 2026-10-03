@@ -1,7 +1,6 @@
 using Contracts.Blocklist;
 using Contracts.Media;
 using Domain.Media;
-using Domain.Providers;
 using Harness;
 using TestInfrastructure;
 
@@ -71,7 +70,7 @@ public class BlocklistBehaviorTests(SammlarrTestHost host) : IAsyncDisposable
 			{
 				await Assert.That(movie.Details.Title).IsEqualTo("Fight Club");
 				await Assert.That(movie.Details.PosterUrl).IsNotNullOrEmpty();
-				await Assert.That(movie.Details.Rating.Sources.Any(source => source.Source == MediaProvider.Tmdb)).IsTrue();
+				await Assert.That(movie.Details.Rating.Sources.Any(source => source.Source == RatingSource.Tmdb)).IsTrue();
 			});
 	}
 

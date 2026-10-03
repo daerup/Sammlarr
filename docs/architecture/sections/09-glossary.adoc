@@ -39,7 +39,8 @@ details known about it. It has no `MediaIdentity`, so it cannot be wantlisted or
 title. Search, trending and feed loading answer with it; list building works over it.
 
 Missing:: The details fields with no value (`MediaDetails.Missing`, a `MediaField` set), computed and
-never stored. A title nobody has rated is missing its `Rating`.
+never stored. A title nobody has rated is missing every rating source (`MediaField.Ratings`); a TMDB or IMDb rating
+without votes still counts as missing.
 
 Confirmed gap:: A field still missing after every enricher that could fill it answered
 (`CachedDetails.ConfirmedAbsent`). An enricher that was unavailable (rate limited or down) leaves its
@@ -57,8 +58,13 @@ younger than 7 days, and younger than 1 hour while any missing field is still un
 `StoredMedia`:: A stored title as the repository returns it: its `MediaIdentity` and its
 `CachedDetails`, if it has any.
 
-RatingSummary:: A title's aggregate rating: an average over the per-provider `MediaRating`
-values, or `None` when it is unrated.
+RatingSummary:: A title's ratings, one `IMediaRating` per `RatingSource`, or `None` when it is unrated.
+
+RatingSource:: Where a rating comes from: TMDB, IMDb, Rotten Tomatoes critics or audience. Not a `MediaProvider`:
+Plex supplies the IMDb and Rotten Tomatoes ratings (`[SuppliedBy]`).
+
+IMediaRating:: One source's rating, its own type per source: `Value` as the source writes it ("8.2", "95%"),
+`SammlarrValue` on the Sammlarr scale of 0 to 10, its `Votes` if the source publishes them, and the `Mark` the UI draws.
 
 === Identify and details
 

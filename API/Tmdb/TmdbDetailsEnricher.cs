@@ -19,7 +19,7 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 		| MediaField.Seasons
 		| MediaField.Episodes
 		| MediaField.RuntimePerEpisode
-		| MediaField.Rating;
+		| MediaField.TmdbRating;
 
 	public Task<Result<FoundMedia>> LookUpAsync(IExternalMediaId id, CancellationToken cancellationToken = default)
 	{
@@ -49,7 +49,7 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 			BackdropUrl = artwork.Original(details.BackdropPath),
 			ReleaseDate = details.ReleasedAs(MediaType.Movie),
 			Genres = ProviderValues.Genres(details.Genres?.Select(genre => genre.Name)),
-			Rating = TmdbRating.Of(details.VoteAverage, details.VoteCount),
+			Rating = TmdbRatings.Of(details.VoteAverage, details.VoteCount),
 			Runtime = ProviderValues.Minutes(details.Runtime),
 		};
 	}
@@ -65,7 +65,7 @@ internal class TmdbDetailsEnricher(TmdbApi tmdbApi, TmdbArtwork artwork) : IDeta
 			BackdropUrl = artwork.Original(details.BackdropPath),
 			ReleaseDate = details.ReleasedAs(MediaType.Show),
 			Genres = ProviderValues.Genres(details.Genres?.Select(genre => genre.Name)),
-			Rating = TmdbRating.Of(details.VoteAverage, details.VoteCount),
+			Rating = TmdbRatings.Of(details.VoteAverage, details.VoteCount),
 			Seasons = ProviderValues.Count(details.NumberOfSeasons),
 			Episodes = ProviderValues.Count(details.NumberOfEpisodes),
 			RuntimePerEpisode = ProviderValues.Minutes(details.EpisodeRunTime?.FirstOrDefault()),

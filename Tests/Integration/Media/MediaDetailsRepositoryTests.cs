@@ -1,6 +1,5 @@
 using DB.Data.Media;
 using Domain.Media;
-using Domain.Providers;
 using Harness;
 using Microsoft.EntityFrameworkCore;
 using TestInfrastructure;
@@ -133,7 +132,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 	{
 		var plexId = PlexId.From("plex-814", MediaType.Movie);
 		var mediaId = await SeedMediaAsync([plexId]);
-		var rated = Complete() with { Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, Some.Of(1200))]) };
+		var rated = Complete() with { Rating = RatingSummary.From([new TmdbRating(8.5f, Some.Of(1200))]) };
 		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
 		fixture.Context.ChangeTracker.Clear();
 
@@ -145,20 +144,35 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 			.And.Multiple(async cached =>
 			{
 				var rating = cached.Details.Rating.Sources.Single();
-				await Assert.That(rating.Source).IsEqualTo(MediaProvider.Tmdb);
-				await Assert.That(rating.NormalizedValue).IsEqualTo(8.5f);
-				await Assert.That(rating.VoteCount).IsSome().And.IsEqualTo(1200);
+				await Assert.That(rating.Source).IsEqualTo(RatingSource.Tmdb);
+				await Assert.That(rating.SammlarrValue).IsEqualTo(8.5f);
+				await Assert.That(rating.Votes).IsSome().And.IsEqualTo(1200);
 			});
+	}
+
+	[Test]
+	public async Task GetAsync_WhenEverySourceRatedTheTitle_RoundTripsEachRatingType()
+	{
+		var mediaId = await SeedMediaAsync([PlexId.From("plex-816", MediaType.Movie)]);
+		var ratings = RatingSummary.From([
+			new TmdbRating(8.6f, Some.Of(7705)),
+			new ImdbRating(8.2f, Some.Of(542195)),
+			new RottenTomatoesCriticsRating(64),
+			new RottenTomatoesAudienceRating(95),
+		]);
+		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(Complete() with { Rating = ratings })));
+		fixture.Context.ChangeTracker.Clear();
+
+		var stored = (await _testee.GetAsync([mediaId])).Single();
+
+		await Assert.That(stored.Cached).IsSome().And.Multiple(async cached => await Assert.That(cached.Details.Rating).IsEqualTo(ratings));
 	}
 
 	[Test]
 	public async Task GetAsync_WhenAMediaHasSeveralIdsAndRatings_ReadsEachOnce()
 	{
 		var mediaId = await SeedMediaAsync([PlexId.From("plex-815", MediaType.Movie), TmdbId.From("815", MediaType.Movie), ImdbId.From("tt0815", MediaType.Movie)]);
-		var rated = Complete() with
-		{
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.5f, Some.Of(1200)), new MediaRating(MediaProvider.Plex, 7.0f)]),
-		};
+		var rated = Complete() with { Rating = RatingSummary.From([new TmdbRating(8.5f, Some.Of(1200)), new ImdbRating(7.0f, new None())]) };
 		await _testee.UpsertDetailsAsync(Details(mediaId, Cached(rated)));
 		fixture.Context.ChangeTracker.Clear();
 
@@ -194,7 +208,7 @@ public class MediaDetailsRepositoryTests(SammlarrTestHost fixture) : IAsyncDispo
 			BackdropUrl = "https://example.com/backdrop.jpg",
 			ReleaseDate = new DateOnly(2024, 1, 1),
 			Genres = ["Action"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 7.5f, Some.Of(100))]),
+			Rating = RatingSummary.From([new TmdbRating(7.5f, Some.Of(100))]),
 			Runtime = TimeSpan.FromMinutes(120),
 		};
 	}

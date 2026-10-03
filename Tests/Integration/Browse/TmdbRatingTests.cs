@@ -22,9 +22,9 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		var ratings = await FetchTmdbRatings(TmdbId.From("550", MediaType.Movie));
 
 		await Assert.That(ratings).Count().IsEqualTo(1);
-		await Assert.That(ratings[0].Source).IsEqualTo(MediaProvider.Tmdb);
-		await Assert.That(ratings[0].NormalizedValue).IsEqualTo((float)average);
-		await Assert.That(ratings[0].VoteCount).IsEqualTo(Optional.Of(voteCount));
+		await Assert.That(ratings[0].Source).IsEqualTo(RatingSource.Tmdb);
+		await Assert.That(ratings[0].SammlarrValue).IsEqualTo((float)average);
+		await Assert.That(ratings[0].Votes).IsEqualTo(Optional.Of(voteCount));
 	}
 
 	[Test]
@@ -55,13 +55,13 @@ public class TmdbRatingTests(SammlarrTestHost host) : IAsyncDisposable
 		var ratings = await FetchTmdbRatings(TmdbId.From("1396", MediaType.Show));
 
 		await Assert.That(ratings).Count().IsEqualTo(1);
-		await Assert.That(ratings[0].NormalizedValue).IsEqualTo(9.5f);
-		await Assert.That(ratings[0].VoteCount).IsSome().And.IsEqualTo(50000);
+		await Assert.That(ratings[0].SammlarrValue).IsEqualTo(9.5f);
+		await Assert.That(ratings[0].Votes).IsSome().And.IsEqualTo(50000);
 	}
 
-	private async Task<IReadOnlyList<MediaRating>> FetchTmdbRatings(IExternalMediaId id)
+	private async Task<IReadOnlyList<IMediaRating>> FetchTmdbRatings(IExternalMediaId id)
 	{
 		var found = await host.ResolveKeyed<IDetailsEnricher>(MediaProvider.Tmdb).LookUpAsync(id);
-		return found.Map<FoundMedia, IReadOnlyList<MediaRating>>(media => [.. media.Details.Rating.Sources]).GetValueOr([]);
+		return found.Map<FoundMedia, IReadOnlyList<IMediaRating>>(media => [.. media.Details.Rating.Sources]).GetValueOr([]);
 	}
 }

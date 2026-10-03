@@ -88,10 +88,10 @@ all.
 |===
 | Provider | Implements, keyed by provider except `IExternalIdConverter` (one enumerable of converters, each announcing its lookups)
 
-| TMDB | `ITrendingService`, `IDetailsEnricher` (also fills ratings), `IExternalIdConverter`
-| Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IDetailsEnricher`, `IExternalIdConverter`
+| TMDB | `ITrendingService`, `IDetailsEnricher` (also fills its own rating, with votes), `IExternalIdConverter`
+| Plex | `IMediaSearchProvider`, `IMediaSink`, `IOAuthProvider`, `IDetailsEnricher` (also fills the IMDb, Rotten Tomatoes and TMDB ratings its answer carries), `IExternalIdConverter`
 | MDBList | `IFeedProvider`
-| IMDb | nothing: `ImdbId` is reached through Plex and TMDB lookups
+| IMDb | nothing: `ImdbId` is reached through Plex and TMDB lookups, and its rating arrives in Plex's answer
 | TheTVDB | nothing: `TvdbId` is reached through Plex and TMDB lookups
 |===
 

@@ -1,5 +1,4 @@
 using Domain.Media;
-using Domain.Providers;
 
 namespace Domain.Tests.Media;
 
@@ -22,11 +21,35 @@ public class MediaCompletenessTests
 	}
 
 	[Test]
-	public async Task Missing_WhenNoProviderHasRatedTheTitle_NamesRating()
+	public async Task Missing_WhenNoProviderHasRatedTheTitle_NamesEveryRatingSource()
 	{
 		var movie = MediaFakes.CompleteMovieDetails() with { Rating = RatingSummary.None };
 
-		await Assert.That(movie.Missing).IsEqualTo(MediaField.Rating);
+		await Assert.That(movie.Missing).IsEqualTo(MediaField.Ratings);
+	}
+
+	[Test]
+	public async Task Missing_WhenOnlyTmdbHasRatedTheTitle_NamesTheOtherSources()
+	{
+		var movie = MediaFakes.CompleteMovieDetails() with { Rating = RatingSummary.From([new TmdbRating(7.4f, Some.Of(900))]) };
+
+		await Assert.That(movie.Missing).IsEqualTo(MediaField.ImdbRating | MediaField.RottenTomatoesCriticsRating | MediaField.RottenTomatoesAudienceRating);
+	}
+
+	[Test]
+	public async Task Missing_WhenARatingFromASourceThatPublishesVotesHasNone_StillNamesIt()
+	{
+		var movie = MediaFakes.CompleteMovieDetails() with
+		{
+			Rating = RatingSummary.From([
+				new TmdbRating(8.9f, new None()),
+				new ImdbRating(7.6f, Some.Of(303)),
+				new RottenTomatoesCriticsRating(87),
+				new RottenTomatoesAudienceRating(91),
+			]),
+		};
+
+		await Assert.That(movie.Missing).IsEqualTo(MediaField.TmdbRating);
 	}
 
 	[Test]
@@ -49,7 +72,7 @@ public class MediaCompletenessTests
 			BackdropUrl = "backdrop",
 			ReleaseDate = new DateOnly(2022, 2, 18),
 			Genres = ["Drama"],
-			Rating = RatingSummary.From([new MediaRating(MediaProvider.Tmdb, 8.7f)]),
+			Rating = MediaFakes.EverySourceRating(),
 			RuntimePerEpisode = TimeSpan.FromMinutes(50),
 		};
 
@@ -64,7 +87,7 @@ public class MediaCompletenessTests
 		await Assert
 			.That(unknown.Missing)
 			.IsEqualTo(
-				MediaField.Tagline | MediaField.Summary | MediaField.Poster | MediaField.Backdrop | MediaField.ReleaseDate | MediaField.Genres | MediaField.Rating
+				MediaField.Tagline | MediaField.Summary | MediaField.Poster | MediaField.Backdrop | MediaField.ReleaseDate | MediaField.Genres | MediaField.Ratings
 			);
 	}
 }

@@ -46,7 +46,7 @@ internal sealed class DetailsFetcher(
 		var unconfirmed = MediaField.None;
 		while (current.Details.Missing is var missing && missing is not MediaField.None)
 		{
-			var options = Options(current, missing, asked);
+			var options = Options(current, asked);
 			if (EnricherChoice.Next(missing, options, now) is not Some<EnricherOption>(var next))
 			{
 				unconfirmed |= EnricherChoice.BlockedFills(missing, options, now);
@@ -71,23 +71,23 @@ internal sealed class DetailsFetcher(
 		};
 	}
 
-	private List<EnricherOption> Options(MatchedMedia current, MediaField missing, IReadOnlySet<MediaProvider> asked)
+	private List<EnricherOption> Options(MatchedMedia current, IReadOnlySet<MediaProvider> asked)
 	{
 		return
 		[
 			.. Enum.GetValues<EnricherProvider>()
 				.Select(enricher => enricher.AsMediaProvider())
 				.Where(provider => !asked.Contains(provider))
-				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => Option(provider, id, missing)))
+				.Select(provider => current.Identity.Externals.OfProvider(provider).Map(id => Option(provider, id, current.Details.Rating)))
 				.WhereSome(),
 		];
 	}
 
-	private EnricherOption Option(MediaProvider provider, IExternalMediaId id, MediaField missing)
+	private EnricherOption Option(MediaProvider provider, IExternalMediaId id, RatingSummary ratings)
 	{
 		var fills = enricherIndex[provider].Fills;
 		var load = capacity.Of(provider);
-		var unavoidable = fills.Overlaps(MediaField.Rating) && missing.Overlaps(MediaField.Rating);
+		var unavoidable = fills.Overlaps(MediaField.Ratings) && ratings.Sources.Count == 0;
 		return new EnricherOption(provider, id, fills, unavoidable ? load with { BlockedUntil = new None() } : load);
 	}
 }

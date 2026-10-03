@@ -125,6 +125,69 @@ public class PlexApiTests
 	}
 
 	[Test]
+	public async Task ByIdAsync_WhenPlexRatesTheTitle_MapsEachRatingToASourcePlexSupplies()
+	{
+		var metadata = ObsessionById() with
+		{
+			Ratings =
+			[
+				new("imdb://image.rating", "audience", 7.5),
+				new("rottentomatoes://image.rating.ripe", "critic", 10),
+				new("rottentomatoes://image.rating.upright", "audience", 8.5),
+				new("themoviedb://image.rating", "audience", 7.5),
+				new("letterboxd://image.rating", "audience", 8),
+			],
+			ImdbRatingCount = 9133,
+		};
+		var testee = CreatePlexApi(ByIdPayloadOf(metadata));
+
+		var found = await Assert.That(await testee.ByIdAsync(PlexId.From(metadata.RatingKey, MediaType.Movie))).IsSuccess();
+
+		var ratings = found!.Details.Rating.Sources;
+		await Assert
+			.That(ratings)
+			.IsEquivalentTo(
+				new IMediaRating[]
+				{
+					new ImdbRating(7.5f, Some.Of(9133)),
+					new RottenTomatoesCriticsRating(100),
+					new RottenTomatoesAudienceRating(85),
+					new TmdbRating(7.5f, new None()),
+				}
+			);
+		await Assert.That(ratings.All(rating => rating.Source.SuppliedBy().Contains(MediaProvider.Plex))).IsTrue();
+	}
+
+	[Test]
+	public async Task ByIdAsync_ForARecordedAnswer_ReadsEveryRatingPlexSends()
+	{
+		var testee = CreatePlexApi(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "Plex", "Recorded", "obsession.json")));
+
+		var found = await Assert.That(await testee.ByIdAsync(PlexId.From("5d77682eeb5d26001f1df4fe", MediaType.Movie))).IsSuccess();
+
+		await Assert
+			.That(found!.Details.Rating)
+			.IsEqualTo(
+				RatingSummary.From([
+					new ImdbRating(7.5f, Some.Of(9133)),
+					new RottenTomatoesCriticsRating(100),
+					new RottenTomatoesAudienceRating(85),
+					new TmdbRating(7.5f, new None()),
+				])
+			);
+	}
+
+	[Test]
+	public async Task ByIdAsync_WhenPlexSendsNoRatings_LeavesTheTitleUnrated()
+	{
+		var testee = CreatePlexApi(ByIdPayloadOf(ObsessionById()));
+
+		var found = await Assert.That(await testee.ByIdAsync(PlexId.From(ObsessionById().RatingKey, MediaType.Movie))).IsSuccess();
+
+		await Assert.That(found!.Details.Rating).IsEqualTo(RatingSummary.None);
+	}
+
+	[Test]
 	public async Task SearchAsync_WhenNoMatches_ReturnsEmpty()
 	{
 		var json = BuildEmptySearchPayload();
@@ -170,6 +233,33 @@ public class PlexApiTests
 
 	private static string BuildEmptyByIdPayload() =>
 		JsonSerializer.Serialize(new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 0, [])));
+
+	private static string ByIdPayloadOf(PlexTypes.ById.Metadata metadata)
+	{
+		return JsonSerializer.Serialize(new PlexTypes.ById.Root(new PlexTypes.ById.MediaContainer("1", "Movies", 0, 1, [metadata])));
+	}
+
+	private static PlexTypes.ById.Metadata ObsessionById()
+	{
+		return new PlexTypes.ById.Metadata(
+			Art: "/art.jpg",
+			RatingKey: "5d77682eeb5d26001f1df4fe",
+			Summary: null,
+			Tagline: null,
+			Type: "movie",
+			AddedAt: 0,
+			AudienceRating: 8.5,
+			OriginallyAvailableAt: "2025-05-16",
+			Poster: "/thumb.jpg",
+			Title: "Obsession",
+			Year: 2025,
+			Duration: 0,
+			SeasonCount: null,
+			EpisodeCount: null,
+			Guid: [],
+			Genre: []
+		);
+	}
 
 	private static PlexApi CreateFailingPlexApi(HttpStatusCode status)
 	{
