@@ -70,7 +70,7 @@ await Assert.That(result)
         await Assert.That(user.Role).IsEqualTo(UserRole.Admin);
     });
 ```
-(Only exception: a collection "all cases are X" check — `values.All(v => v is Success<T>)` — has no dedicated extension and is fine.)
+A collection "all cases are X" check reads `values.All(v => v.IsSuccess())`. Test helpers and mock callbacks read an `Optional` or a `Result` through its helpers too, never `is Some<T>` or `is Success<T>` (`FeedRunsTests.Page`: `query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])`).
 
 ## Fake data — Bogus
 

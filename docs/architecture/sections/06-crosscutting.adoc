@@ -13,11 +13,94 @@ pipeline), isolation (auth + query filters), maintainability (modules + code gen
 which has no `MediaId`. The terms are defined in <<section-glossary>>, produced by identify in <<section-runtime-view>>,
 and the shape is
 link:https://github.com/daerup/Sammlarr/blob/main/docs/adr/0009-model-a-title-as-an-identity-plus-optional-details.md[ADR 0009]. Below it, `Shared` is the kernel: `Optional<T>`,
-`Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional` not null;
-expected failure is a `Result` not an exception. Media details are the exception: a missing details value is
-`null` from the provider mapper to the column (missing genres are an empty set, a missing rating is
-`RatingSummary.None`). Unions are matched by case directly, never through
-`.Value`, and enum switches are exhaustive with no default arm.
+`Result<T>`, `ValueSet<T>`, and the `union` types. Expected absence is an `Optional`, not null
+(<<absence>>); expected failure is a `Result`, not an exception. Media details are the exception: a missing details
+value is `null` from the provider mapper to the column (missing genres are an empty set, a missing rating is
+`RatingSummary.None`). Unions are matched by case directly, never through `.Value`; `Optional` and `Result` are read
+through their helpers instead. Enum switches are exhaustive with no default arm.
+
+[[absence]]
+=== Absence and failure: `Optional`, `Result` or `null`
+
+A value that can be missing is an `Optional<T>` wherever our own code hands it on. `T?` is left to the places a
+framework reads or writes, and to state that never leaves its type.
+
+[cols="1,1", options="header"]
+|===
+| `Optional<T>` | `T?`
+
+| non-private returns, parameters and properties of our types: `Find…`, lookups, query criteria, record fields that
+can be missing (`RunQuery.MustInclude`, `FeedOverview.LastRun`, `NotificationTemplate.Level`, `IMediaSink.AddressedBy`)
+| framework edges: EF rows and LINQ query parameters, JSON-persisted columns (`QueryFilter`), provider JSON DTOs,
+`IOptions` records, Blazor route, query and cascading parameters, `@bind` pairs, Fluid, webhook and Wolverine
+payloads, Serilog and OpenTelemetry models, BCL overrides and exception constructors
+
+| a UI parameter or view model whose value comes from the domain
+| UI-only state (selection, loading, busy, binding, create or edit mode, links), private fields, locals, sort keys
+|===
+
+* `None` means absent, never "not loaded yet".
+* Convert once, at the edge: `Optional.Of(x)` in, `.ToNullable()` out (an awaited chain writes `(await x).ToNullable()`).
+* An `Optional<T>` member always holds a case: initialise it with `new None()`. `default(Optional<T>)` holds neither,
+and every helper throws on it.
+* `Optional` says nothing about why. A failure with a reason is a `Result`; bridge with `.ToResult(reason)`.
+* An `Optional` is never a sort key and never sits inside an operator EF translates; `Optional.Of(row.X)` in a final
+`Select` projection runs client-side and is fine.
+* `GetValueOr(value)` and `Match(value, value)` evaluate eagerly; pass a `Func` when the fallback throws or costs.
+
+Build and read an `Optional` or a `Result` by chaining its helpers: values move through `Map`, `When` and `Or`; side
+effects go in `Apply`, `ApplyNone` and `ApplyError`, one step each (a step that needs more than one statement is a named
+method); at most one exit (`Match`, `GetValueOr`, `IsSome`, `ToNullable`, `ToResult`, …) leaves the chain, last. An async step finishes before the next
+one starts, and one `await` covers the chain. A step that returns a `ValueTask` is written `+async x => await StepAsync(x)+`,
+because a bare `+x => StepAsync(x)+` binds to the synchronous `Action` overload and is not awaited.
+
+[source,csharp]
+----
+_state = await ApiKeyFactory
+    .CreateAsync(Provider, _apiKeyInput)
+    .Apply(key => _validatedKey = key)
+    .ApplyError(_ => _validatedKey = null)
+    .Match(CredentialState.Success, CredentialState.Failed);
+----
+
+[cols="1,2,2", options="header"]
+|===
+| To | `Optional`: write | not
+
+| build from a nullable | `+Optional.Of(RunIdParam).Map(id => RunId.From(UrlGuid.Decode(id)))+` | `RunIdParam is null ? new None() : Some.Of(…)`
+| build from a dictionary | `_byId.GetValueOrNone(id)` | `TryGetValue(…) ? Some.Of(v) : new None()`
+| project either way | `+LinkedRun.Match(linked => …, () => …)+` | `LinkedRun is Some<RunId>(var linked) ? … : …`
+| a value or a fallback | `due.Map(Until).GetValueOr(Timeout.InfiniteTimeSpan)` | `due is Some<DateTimeOffset>(var at) ? Until(at) : …`
+| an async value or a fallback | `+await feeds.FindAsync(id).Map(async feed => (FeedPlanResult)await PlanAsync(feed)).GetValueOr(new FeedPlanFailed(…))+` | a ternary around `await`
+| test presence | `_item.IsSome()` | `_item is Some<WantlistItem>`
+| a yes/no that ends the expression | `+run.Match(r => r.Failed, () => false)+` | `is Some<FeedRun>({ Failed: true })`, `+run.When(r => r.Failed).IsSome()+`
+| route around the value | `+query.Feed.When(feed => feed == Feed).Map(…).GetValueOr([])+` | `if (query.Feed is not Some<FeedId>(var feed) \|\| feed != Feed) { return []; }`
+| keep the present values | `+….Select(feed => NextRunOf(feed).Map(next => (feed, next))).WhereSome()+` | `+.Where(e => e.next is not null)+`, then `e.next!.Value`
+| act when present or absent | `.Apply(…).Apply(…)`, `+.ApplyNone(() => …)+` | `if (x is Some<T>(var v)) { … }`, one block lambda
+| hand it to a framework | `+query.MustInclude.Map(run => run.Value).ToNullable()+` | `is Some<RunId>(var id) ? id.Value : null`
+| turn it into a `Result` | `.ToResult("The sink cannot address …")` | `is not Some<…> … { return Error.From(…); }`
+|===
+
+[cols="1,2,2", options="header"]
+|===
+| To | `Result`: write | not
+
+| project either way | `+await signIn.CompleteAsync(…).Map(user => SignInAndRedirectAsync(context, user, returnUrl)).GetValueOr(error => Results.Redirect(…))+` | `+switch { Success<User>(var user) => …, Error error => … }+`
+| pick a case, both sync | `+PlanAsync(sink).Match(plan => (WantlistPlanResult)Project(plan), error => OnPlanError(error, sink.Kind))+` | a type `switch` over the cases
+| act on success or failure | `result.Apply(…).ApplyError(…)` | `if (result is Success<T>(var v)) { … } else { … }`
+| keep the successes of a stream | `await foreach (var media in stream.WhereSuccessAwait())` | `if (result is Success<T>(var v))` inside the loop
+| a value or a fallback | `+loaded.Match(matched => (MediaMatchResult)matched, _ => request.Unmatched())+` | `loaded is Success<MatchedMedia>(var matched) ? matched : …`
+| test the value | `+identityMatch.Match(match => match.Stored.IsNone(), _ => false)+` | `is Success<IdentityMatch>(var match) && …`
+| chain a fallible step | `.Map(next)` (flattens a `Result`-returning step), `.MapError(…)` | a guard that returns the error by hand
+| leave the monad at a boundary | `+.GetOrThrow(error => new …Exception(error.Reason))+`, `.ToOptional()` | `is Error e ? throw … : …`
+|===
+
+Outside `Shared`'s own helpers, either monad is pattern-matched only in a guard (`if (x is not Some<T>(var v)) { return …; }`,
+or the same on `Success<T>`) whose following code holds a method-scoped `using var` or a `try`, or that itself leaves a
+loop with `continue` or `break`. Razor markup may also `@if` on a case. When a member turns from `T?` into `Optional<T>`, its old
+readers that still compile change meaning: `x is null` is always false, `x is not null` and `x is { } v` always true
+(`v` is the `Optional` itself), `OrderBy` on it throws, and interpolation prints the union; `x ?? y`, `x!.Value` and a
+constant `case` stop compiling.
 
 === Modularity and dependency injection
 

@@ -133,12 +133,12 @@ public class FeedRunsTests : BunitContext
 
 	private static IReadOnlyList<FeedRun> Page(IReadOnlyList<FeedRun> runs, RunQuery query)
 	{
-		if (query.Feed is not Some<FeedId>(var feed) || feed != Feed)
-		{
-			return [];
-		}
-		var reach = query.MustInclude is Some<RunId>(var id) ? runs.ToList().FindIndex(run => run.Id == id) + 1 : 0;
-		return [.. runs.Take(Math.Max(query.Limit, reach))];
+		return query.Feed.When(feed => feed == Feed).Map(_ => runs.Take(Math.Max(query.Limit, Reach(runs, query))).ToList()).GetValueOr([]);
+	}
+
+	private static int Reach(IReadOnlyList<FeedRun> runs, RunQuery query)
+	{
+		return query.MustInclude.Match(id => runs.ToList().FindIndex(run => run.Id == id) + 1, () => 0);
 	}
 
 	private static IReadOnlyList<FeedRun> History(int count) =>
