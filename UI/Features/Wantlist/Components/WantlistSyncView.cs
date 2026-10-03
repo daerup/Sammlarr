@@ -8,7 +8,7 @@ namespace UI.Features.Wantlist.Components;
 
 internal static class WantlistSyncView
 {
-	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, IdentifiedMedia> media)
+	internal static IReadOnlyList<ChangeItem> Items(WantlistSyncSummary dryRun, IReadOnlyDictionary<MediaId, MatchedMedia> media)
 	{
 		return
 		[
@@ -96,5 +96,5 @@ internal static class WantlistSyncView
 			},
 		];
 
-	private static string Subtitle(IdentifiedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
+	private static string Subtitle(MatchedMedia media) => media.Details.Year?.ToString() ?? string.Empty;
 }

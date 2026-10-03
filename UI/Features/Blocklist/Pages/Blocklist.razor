@@ -137,7 +137,7 @@
         }
     }
 
-    private MediaLookup? SelectedMedia => _selectedItem is null ? null : (MediaLookup?)_selectedItem.Media;
+    private MediaMatchResult? SelectedMedia => _selectedItem is null ? null : (MediaMatchResult?)_selectedItem.Media;
 
     private void SelectItem(BlocklistedMedia item)
     {

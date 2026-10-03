@@ -61,8 +61,8 @@
                   OnEnrollmentChanged="@(_ => LoadWantlistAsync())"/>
 
 @code {
-    private IReadOnlyList<MediaLookup>? _trendingMedia;
-    private MediaLookup? _selectedMedia;
+    private IReadOnlyList<MediaMatchResult>? _trendingMedia;
+    private MediaMatchResult? _selectedMedia;
     private bool _isLoading;
     private bool _isSheetOpen;
     private bool _isSignedIn;
@@ -185,9 +185,9 @@
         _cancellationTokenSource.Dispose();
     }
 
-    private bool IsInWantlist(MediaLookup media) => media is IdentifiedMedia identified && _wantlist.Contains(identified.Identity.Id);
+    private bool IsInWantlist(MediaMatchResult media) => media is MatchedMedia matched && _wantlist.Contains(matched.Identity.Id);
 
-    private void SelectMedia(MediaLookup media)
+    private void SelectMedia(MediaMatchResult media)
     {
         _selectedMedia = media;
         _isSheetOpen = true;

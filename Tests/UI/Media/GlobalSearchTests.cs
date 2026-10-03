@@ -24,12 +24,12 @@ public class GlobalSearchTests : BunitContext
 	private const string Movie = "Inception";
 	private const string Person = "Christopher Nolan";
 
-	private static readonly MediaLookup Identified = new IdentifiedMedia(
+	private static readonly MediaMatchResult Matched = new MatchedMedia(
 		new MediaIdentity(MediaId.From(Guid.NewGuid()), [PlexId.From("1", MediaType.Movie)]),
 		new MovieDetails { Title = Movie }
 	);
 
-	private static readonly MediaLookup Unmatched = new UnmatchedMedia([PlexId.From("123", MediaType.Unknown)], new UnknownDetails { Title = Person });
+	private static readonly MediaMatchResult Unmatched = new UnmatchedMedia([PlexId.From("123", MediaType.Unknown)], new UnknownDetails { Title = Person });
 
 	[Before(Test)]
 	public void Setup()
@@ -64,14 +64,14 @@ public class GlobalSearchTests : BunitContext
 		Services.AddSingleton(blocklist.Object);
 
 		var search = IMediaSearchService.Mock();
-		search.SearchAsync(Any(), Any(), Any()).Returns([Identified, Unmatched]);
+		search.SearchAsync(Any(), Any(), Any()).Returns([Matched, Unmatched]);
 		Services.AddSingleton(search.Object);
 
 		JSInterop.Mode = JSRuntimeMode.Loose;
 	}
 
 	[Test]
-	public async Task Search_WithAnIdentifiedAndAnUnmatchedResult_RendersBothButTogglesOnlyTheIdentified()
+	public async Task Search_WithAMatchedAndAnUnmatchedResult_RendersBothButTogglesOnlyTheMatched()
 	{
 		var cut = Render<GlobalSearch>(parameters => parameters.Add(search => search.IsOpen, true));
 		await cut.Find("#search-input").InputAsync(new ChangeEventArgs { Value = Person });

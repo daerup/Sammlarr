@@ -31,7 +31,7 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 
 		var planner = fixture.Resolve<IFeedRunPlanner>();
 		var log = fixture.Resolve<IFeedRepository>();
-		var load = new RawFeedLoad([Lookup(kept)], FeedLoadState.Finished);
+		var load = new RawFeedLoad([Matched(kept)], FeedLoadState.Finished);
 
 		var drops = new List<int>();
 
@@ -102,9 +102,9 @@ public class FeedRunGraceTests(SammlarrTestHost fixture) : IAsyncDisposable
 		await Assert.That(absences).IsEmpty();
 	}
 
-	private static MediaLookup Lookup(MediaId id)
+	private static MediaMatchResult Matched(MediaId id)
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{

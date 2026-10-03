@@ -132,7 +132,7 @@ public class ChangeListTests : BunitContext
 	[Test]
 	public async Task Render_WhenARowIsClicked_RaisesTheSelectionWithItsMedia()
 	{
-		IdentifiedMedia? selected = null;
+		MatchedMedia? selected = null;
 		var item = Added("Fresh");
 		var cut = RenderList([item], [], media => selected = media);
 
@@ -306,7 +306,7 @@ public class ChangeListTests : BunitContext
 	private IRenderedComponent<ChangeList> RenderList(
 		IReadOnlyList<ChangeItem> items,
 		IReadOnlyList<ChangeChip> chips,
-		Action<IdentifiedMedia>? onSelect = null,
+		Action<MatchedMedia>? onSelect = null,
 		string? unchangedLabel = null,
 		MediaId? highlight = null
 	)
@@ -333,7 +333,7 @@ public class ChangeListTests : BunitContext
 		});
 	}
 
-	private static IdentifiedMedia Media(string title)
+	private static MatchedMedia Media(string title)
 	{
 		return new(
 			new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From(title, MediaType.Movie)]),

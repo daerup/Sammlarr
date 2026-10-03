@@ -59,7 +59,7 @@
 @code {
     private readonly HashSet<MediaId> _wantlisted = [DemoMedia.Movie.Identity.Id];
 
-    private void ToggleWantlist(IdentifiedMedia media)
+    private void ToggleWantlist(MatchedMedia media)
     {
         if (!_wantlisted.Remove(media.Identity.Id))
         {

@@ -30,7 +30,7 @@ public class TmdbTrendingServiceTests
 
 		await Assert
 			.That(page.Items.Single())
-			.IsOfUnionType<MediaLookup, UnmatchedMedia>()
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
 			.And.Multiple(async unmatched =>
 				await Assert
 					.That(unmatched.Details)

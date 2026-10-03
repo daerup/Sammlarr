@@ -4,7 +4,7 @@ namespace UI.Shared.Media;
 
 public static class MediaPresentation
 {
-	extension(MediaLookup media)
+	extension(MediaMatchResult media)
 	{
 		public string Key
 		{
@@ -12,14 +12,14 @@ public static class MediaPresentation
 			{
 				return media switch
 				{
-					IdentifiedMedia identified => identified.Key,
+					MatchedMedia matched => matched.Key,
 					UnmatchedMedia unmatched => string.Join("|", unmatched.Externals.Select(id => $"{id.Source}:{id.Value}").Order(StringComparer.Ordinal)),
 				};
 			}
 		}
 	}
 
-	extension(IdentifiedMedia media)
+	extension(MatchedMedia media)
 	{
 		public string Key => media.Identity.Id.Value.ToString();
 	}

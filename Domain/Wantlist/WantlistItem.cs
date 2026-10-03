@@ -4,5 +4,5 @@ namespace Domain.Wantlist;
 
 public record WantlistItem(MediaId MediaId, DateTimeOffset AddedAt, WantlistItemProvenance Provenance) : IListItem<WantlistedMedia>
 {
-	public WantlistedMedia With(IdentifiedMedia media) => new(media, AddedAt, Provenance);
+	public WantlistedMedia With(MatchedMedia media) => new(media, AddedAt, Provenance);
 }

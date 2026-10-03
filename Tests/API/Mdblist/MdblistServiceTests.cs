@@ -58,7 +58,7 @@ public class MdblistServiceTests
 
 		var first = await testee.GetFeedItemsAsync("slow-list", timeout.Token).FirstAsync(timeout.Token);
 
-		await Assert.That(first).IsOfUnionType<MediaLookup, UnmatchedMedia>();
+		await Assert.That(first).IsOfUnionType<MediaMatchResult, UnmatchedMedia>();
 	}
 
 	[Test]
@@ -72,7 +72,7 @@ public class MdblistServiceTests
 
 		await Assert
 			.That(results.Single())
-			.IsOfUnionType<MediaLookup, UnmatchedMedia>()
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
 			.And.Multiple(async unmatched =>
 				await Assert.That(unmatched.Details).IsEqualTo(new ShowDetails { Title = "No Ids", ReleaseDate = new DateOnly(2024, 1, 1) })
 			);
@@ -89,14 +89,14 @@ public class MdblistServiceTests
 
 		await Assert
 			.That(results.Single())
-			.IsOfUnionType<MediaLookup, UnmatchedMedia>()
+			.IsOfUnionType<MediaMatchResult, UnmatchedMedia>()
 			.And.Multiple(async unmatched => await Assert.That(unmatched.Details).IsEqualTo(new MovieDetails()));
 	}
 
 	private static MdblistService CreateTestee(
 		HttpMessageHandler handler,
 		out Mock<IMediaService> media,
-		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaLookup>>? identify = null
+		Func<IAsyncEnumerable<IdentifyRequest>, CancellationToken, IAsyncEnumerable<MediaMatchResult>>? identify = null
 	)
 	{
 		var apiKeyStore = IApiKeyService.Mock();
@@ -136,7 +136,7 @@ public class MdblistServiceTests
 			$$"""{"movies":[{"id":1,"ids":{"imdb":null,"tmdb":{{title.GetHashCode(StringComparison.Ordinal) & 0xffff}},"tvdb":null,"mdblist":null,"mal":null},"rank":1,"title":"{{title}}","release_year":2020}],"shows":[]}""";
 	}
 
-	private static async IAsyncEnumerable<MediaLookup> IdentifyWithDetails(
+	private static async IAsyncEnumerable<MediaMatchResult> IdentifyWithDetails(
 		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)
@@ -147,7 +147,7 @@ public class MdblistServiceTests
 		}
 	}
 
-	private static async IAsyncEnumerable<MediaLookup> Stall(
+	private static async IAsyncEnumerable<MediaMatchResult> Stall(
 		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken
 	)

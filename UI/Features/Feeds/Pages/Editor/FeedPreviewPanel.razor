@@ -365,11 +365,11 @@
     private enum FetchState { Idle, Loading, Success, Failed }
 
     private FetchState _fetchState = FetchState.Idle;
-    private List<MediaLookup> _rawResults = [];
+    private List<MediaMatchResult> _rawResults = [];
     private IReadOnlyList<UnmatchedMedia> _unmatchedResults = [];
-    private IReadOnlyList<QueryVerdict<IdentifiedMedia>> _processedResults = [];
-    private List<QueryVerdict<IdentifiedMedia>> _filteredResults = [];
-    private List<MediaLookup> _filteredUnmatchedResults = [];
+    private IReadOnlyList<QueryVerdict<MatchedMedia>> _processedResults = [];
+    private List<QueryVerdict<MatchedMedia>> _filteredResults = [];
+    private List<MediaMatchResult> _filteredUnmatchedResults = [];
     private IReadOnlyDictionary<MediaId, int> _missedRuns = new Dictionary<MediaId, int>();
     private List<GoneItem> _goneResults = [];
     private List<GoneItem> _filteredGoneResults = [];
@@ -463,7 +463,7 @@
             return;
         }
 
-        var staleIds = _rawResults.Identified().Select(media => media.Identity.Id).ToList();
+        var staleIds = _rawResults.Matched().Select(media => media.Identity.Id).ToList();
         _refreshDialogOpen = false;
         _fetchState = FetchState.Loading;
         ClearResults();
@@ -678,7 +678,7 @@
             ? []
             : _unmatchedResults
                 .Where(r => PreviewResultFilter.IsVisible(PreviewBucket.Unmatched, _activeFilters) && MatchesSearch(r.Details.Title))
-                .Select(MediaLookup (r) => r)
+                .Select(MediaMatchResult (r) => r)
                 .ToList();
         _filteredGoneResults = _activeFilters.Count > 0 ? [] : _goneResults.Where(gone => MatchesSearch(gone.Media.Details.Title)).ToList();
         RecountBadges();
@@ -794,10 +794,10 @@
         BlocklistCount = bypassed.Count(result => result.Enrollment.InBlocklist);
     }
 
-    private bool IsBlocklisted(IdentifiedMedia item) => _blocklistIds.Contains(item.Identity.Id);
-    private bool IsWantlisted(IdentifiedMedia item) => _wantlisted.Contains(item.Identity.Id);
+    private bool IsBlocklisted(MatchedMedia item) => _blocklistIds.Contains(item.Identity.Id);
+    private bool IsWantlisted(MatchedMedia item) => _wantlisted.Contains(item.Identity.Id);
 
-    private string BypassedTooltip(QueryVerdict<IdentifiedMedia> row)
+    private string BypassedTooltip(QueryVerdict<MatchedMedia> row)
     {
         var source = row.Enrollment.InWantlist ? "On your wantlist" : "On your blocklist";
         if (Config.Limit is null)
@@ -805,7 +805,7 @@
         return row.ConsumesSlot ? $"{source}, skipped but counts toward your import limit." : $"{source}, skipped and does not count toward your import limit.";
     }
 
-    private void ClearFocus(MediaLookup item)
+    private void ClearFocus(MediaMatchResult item)
     {
         if (_focusedResult == item.Key)
         {
@@ -813,7 +813,7 @@
         }
     }
 
-    private async Task ToggleBlocklistAsync(IdentifiedMedia item)
+    private async Task ToggleBlocklistAsync(MatchedMedia item)
     {
         if (_togglingBlocklistItem is not null)
         {
@@ -852,7 +852,7 @@
         }
     }
 
-    private async Task ToggleWantlistAsync(IdentifiedMedia item)
+    private async Task ToggleWantlistAsync(MatchedMedia item)
     {
         if (_togglingWantlistItem is not null)
         {

@@ -88,7 +88,7 @@ public class LastRunCellTests : BunitContext
 		Services.AddLogging();
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(Added))));
+		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Added))));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
@@ -153,9 +153,9 @@ public class LastRunCellTests : BunitContext
 		}
 	}
 
-	private static IdentifiedMedia Detail(MediaId id)
+	private static MatchedMedia Detail(MediaId id)
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{

@@ -153,14 +153,14 @@ public class MediaDetailSheetTests : BunitContext
 			builder.CloseComponent();
 			builder.OpenComponent<MediaDetailSheet>(1);
 			builder.AddAttribute(2, nameof(MediaDetailSheet.Open), true);
-			builder.AddAttribute(3, nameof(MediaDetailSheet.Media), (MediaLookup?)Detail());
+			builder.AddAttribute(3, nameof(MediaDetailSheet.Media), (MediaMatchResult?)Detail());
 			builder.CloseComponent();
 		}
 	}
 
-	private static IdentifiedMedia Detail()
+	private static MatchedMedia Detail()
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(Id, [TmdbId.From(Id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{

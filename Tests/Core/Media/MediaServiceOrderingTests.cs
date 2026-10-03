@@ -198,14 +198,14 @@ internal static class OrderingAssertionExtensions
 				.Select(r => r is Success<MediaIdentity>(var identity) ? int.Parse(identity.Externals.OfProvider(MediaProvider.Tmdb)!.Value) : 0),
 		];
 
-	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<IdentifiedMedia>> results)
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<Result<MatchedMedia>> results)
 	{
-		return [.. results.Select(r => r is Success<IdentifiedMedia>(var identified) ? (MediaId?)identified.Identity.Id : null)];
+		return [.. results.Select(r => r is Success<MatchedMedia>(var matched) ? (MediaId?)matched.Identity.Id : null)];
 	}
 
-	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaLookup> results)
+	public static List<MediaId?> ExtractMediaIds(this IEnumerable<MediaMatchResult> results)
 	{
-		return [.. results.Select(r => r is IdentifiedMedia identified ? (MediaId?)identified.Identity.Id : null)];
+		return [.. results.Select(r => r is MatchedMedia matched ? (MediaId?)matched.Identity.Id : null)];
 	}
 }
 
@@ -214,7 +214,7 @@ internal sealed record TestItem
 	public required int Index { get; init; }
 	public required IExternalMediaId External { get; init; }
 	public required MediaId MediaId { get; init; }
-	public required IdentifiedMedia Detail { get; init; }
+	public required MatchedMedia Detail { get; init; }
 	public bool Identifies { get; init; } = true;
 	public bool HasDetails { get; init; } = true;
 	public IdentifyRequest Request => new([External], new None());
@@ -227,7 +227,7 @@ internal sealed record TestItem
 			Index = index,
 			External = TmdbId.From(index.ToString(), MediaType.Movie),
 			MediaId = mediaId,
-			Detail = new IdentifiedMedia(
+			Detail = new MatchedMedia(
 				new MediaIdentity(mediaId, [PlexId.From($"plex-{index}", MediaType.Movie)]),
 				new MovieDetails
 				{

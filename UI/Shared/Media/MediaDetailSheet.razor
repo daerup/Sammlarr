@@ -37,16 +37,16 @@
                 </div>
 
                 <BbSheetHeader Class="media-sheet-meta">
-                    @if (media is IdentifiedMedia identified)
+                    @if (media is MatchedMedia matched)
                     {
                         <div class="media-sheet-toggles">
-                            <WantlistProvenanceToggle Result="identified"
+                            <WantlistProvenanceToggle Result="matched"
                                                        Size="18"
                                                        IsToggled="IsWantlisted"
                                                        IsToggling="_togglingWantlist"
                                                        Item="@(_item is Some<WantlistItem>(var shown) ? shown : null)"
                                                        OnToggle="ToggleWantlistAsync"/>
-                            <BlocklistToggleIcon Result="identified"
+                            <BlocklistToggleIcon Result="matched"
                                                  Size="18"
                                                  IsToggled="_blocklisted"
                                                  IsToggling="_togglingBlocklist"
@@ -114,7 +114,7 @@
     public EventCallback<bool> OnOpenChanged { get; set; }
 
     [Parameter]
-    public MediaLookup? Media { get; set; }
+    public MediaMatchResult? Media { get; set; }
 
     [Parameter]
     public EventCallback<MediaListKind> OnEnrollmentChanged { get; set; }
@@ -140,10 +140,10 @@
             _failed = false;
         }
 
-        if (Media is IdentifiedMedia identified && _loadedFor != identified.Identity.Id)
+        if (Media is MatchedMedia matched && _loadedFor != matched.Identity.Id)
         {
-            _loadedFor = identified.Identity.Id;
-            await LoadEnrollmentAsync(identified.Identity.Id);
+            _loadedFor = matched.Identity.Id;
+            await LoadEnrollmentAsync(matched.Identity.Id);
         }
     }
 
@@ -154,7 +154,7 @@
         _blocklisted = (await BlocklistService.GetAsync()).Contains(id);
     }
 
-    private async Task ToggleWantlistAsync(IdentifiedMedia media)
+    private async Task ToggleWantlistAsync(MatchedMedia media)
     {
         if (_togglingWantlist)
         {
@@ -188,7 +188,7 @@
         await LoadEnrollmentAsync(media.Identity.Id);
     }
 
-    private async Task ToggleBlocklistAsync(IdentifiedMedia media)
+    private async Task ToggleBlocklistAsync(MatchedMedia media)
     {
         if (_togglingBlocklist)
         {
@@ -225,9 +225,9 @@
     private async Task OnImageError()
     {
         _failed = true;
-        if (Media is IdentifiedMedia identified)
+        if (Media is MatchedMedia matched)
         {
-            await MediaService.InvalidateAsync([identified.Identity.Id]);
+            await MediaService.InvalidateAsync([matched.Identity.Id]);
         }
     }
 

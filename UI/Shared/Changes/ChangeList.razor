@@ -63,7 +63,7 @@
 @code {
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeItem> Items { get; set; }
     [Parameter] [EditorRequired] public required IReadOnlyList<ChangeChip> Chips { get; set; }
-    [Parameter] public EventCallback<IdentifiedMedia> OnSelect { get; set; }
+    [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public MediaId? Highlight { get; set; }
     [Parameter] public bool Fill { get; set; }
     [Parameter] public string RemovedLabel { get; set; } = "Removed";
@@ -88,7 +88,7 @@
 
     private bool IsHighlighted(ChangeItem item) => !_dismissed && Highlight is { } wanted && item.Id == wanted;
 
-    private async Task SelectAsync(IdentifiedMedia media)
+    private async Task SelectAsync(MatchedMedia media)
     {
         _dismissed = true;
         await OnSelect.InvokeAsync(media);

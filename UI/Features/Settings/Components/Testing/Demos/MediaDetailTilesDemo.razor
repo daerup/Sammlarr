@@ -62,11 +62,11 @@
 @code {
     [Parameter, EditorRequired] public required IReadOnlySet<MediaId> Wantlisted { get; set; }
 
-    [Parameter] public EventCallback<IdentifiedMedia> OnToggleWantlist { get; set; }
+    [Parameter] public EventCallback<MatchedMedia> OnToggleWantlist { get; set; }
 
     private readonly HashSet<MediaId> _blocklisted = [];
 
-    private void ToggleBlocklist(IdentifiedMedia media)
+    private void ToggleBlocklist(MatchedMedia media)
     {
         if (!_blocklisted.Remove(media.Identity.Id))
         {

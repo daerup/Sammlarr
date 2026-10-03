@@ -173,7 +173,7 @@ public class FeedPreviewPanelTests : BunitContext
 		var media = IMediaService.Mock();
 		if (gone is { } id)
 		{
-			media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(id))));
+			media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(id))));
 		}
 		Services.AddSingleton(media.Object);
 		Services.AddSingleton<IKeyedServiceIndex<FeedProvider, IFeedProvider>>(
@@ -201,7 +201,7 @@ public class FeedPreviewPanelTests : BunitContext
 	{
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
-			var verdicts = Load(target).Items.Identified().Select(Owned).ToList();
+			var verdicts = Load(target).Items.Matched().Select(Owned).ToList();
 
 			return Task.FromResult<FeedPlanResult>(
 				target is DraftFeed(var definition, _) && definition.Strategy is Mirror
@@ -210,7 +210,7 @@ public class FeedPreviewPanelTests : BunitContext
 			);
 		}
 
-		private static QueryVerdict<IdentifiedMedia> Owned(IdentifiedMedia item, int index)
+		private static QueryVerdict<MatchedMedia> Owned(MatchedMedia item, int index)
 		{
 			return index switch
 			{
@@ -222,7 +222,7 @@ public class FeedPreviewPanelTests : BunitContext
 			};
 		}
 
-		private static QueryVerdict<IdentifiedMedia> Verdict(IdentifiedMedia item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+		private static QueryVerdict<MatchedMedia> Verdict(MatchedMedia item, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
 		{
 			return new(
 				item,
@@ -243,8 +243,8 @@ public class FeedPreviewPanelTests : BunitContext
 		public Task<FeedPlanResult> PlanAsync(FeedPlanTarget target, CancellationToken cancellationToken = default)
 		{
 			var verdicts = Load(target)
-				.Items.Identified()
-				.Select(item => new QueryVerdict<IdentifiedMedia>(
+				.Items.Matched()
+				.Select(item => new QueryVerdict<MatchedMedia>(
 					item,
 					QueryOutcome.Qualified,
 					new Enrollment
@@ -274,9 +274,9 @@ public class FeedPreviewPanelTests : BunitContext
 		}
 	}
 
-	private static IdentifiedMedia Detail(MediaId id)
+	private static MatchedMedia Detail(MediaId id)
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{
@@ -295,20 +295,20 @@ public class FeedPreviewPanelTests : BunitContext
 		{
 			var load = Load(target);
 			var unmatchedItems = load.Items.Select(item => item is UnmatchedMedia unmatched ? unmatched : null).OfType<UnmatchedMedia>().ToList();
-			var verdicts = load.Items.Identified().Select(Spread).ToList();
+			var verdicts = load.Items.Matched().Select(Spread).ToList();
 
 			return Task.FromResult<FeedPlanResult>(new AppendPlan(verdicts, unmatchedItems, FeedDelta.None, Conclusiveness.Conclusive));
 		}
 
-		private static QueryVerdict<IdentifiedMedia> Spread(IdentifiedMedia item, int index)
+		private static QueryVerdict<MatchedMedia> Spread(MatchedMedia item, int index)
 		{
 			return index switch
 			{
-				0 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Qualified, Enrolled(), true),
-				1 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
-				2 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Culled, Enrolled(), false),
-				3 => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Truncated, Enrolled(), false),
-				_ => new QueryVerdict<IdentifiedMedia>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
+				0 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(), true),
+				1 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(inWantlist: true), true),
+				2 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Culled, Enrolled(), false),
+				3 => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Truncated, Enrolled(), false),
+				_ => new QueryVerdict<MatchedMedia>(item, QueryOutcome.Qualified, Enrolled(inBlocklist: true), true),
 			};
 		}
 
@@ -323,7 +323,7 @@ public class FeedPreviewPanelTests : BunitContext
 
 	private sealed class StubFeedService(int resolved, int unmatched) : IFeedProvider
 	{
-		public async IAsyncEnumerable<MediaLookup> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+		public async IAsyncEnumerable<MediaMatchResult> GetFeedItemsAsync(string identifier, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 		{
 			for (var i = 0; i < resolved; i++)
 			{
@@ -338,7 +338,7 @@ public class FeedPreviewPanelTests : BunitContext
 			}
 		}
 
-		private static IdentifiedMedia Movie(int index)
+		private static MatchedMedia Movie(int index)
 		{
 			return new(
 				new MediaIdentity(MediaId.From(Guid.NewGuid()), [TmdbId.From($"movie-{index}", MediaType.Movie)]),

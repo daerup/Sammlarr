@@ -135,12 +135,12 @@
     private bool _isRunning;
     private bool _isLoadingDryRun;
     private bool _open;
-    private MediaLookup? _selected;
+    private MediaMatchResult? _selected;
     private bool _wantlistChanged;
 
     private bool IsBusy => _isSyncing || _isRunning || IsSyncing;
 
-    private Task ShowDetailsAsync(IdentifiedMedia media)
+    private Task ShowDetailsAsync(MatchedMedia media)
     {
         _selected = media;
         return Task.CompletedTask;

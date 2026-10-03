@@ -21,10 +21,10 @@
 </button>
 
 @code {
-    [Parameter] [EditorRequired] public required IdentifiedMedia Result { get; set; }
+    [Parameter] [EditorRequired] public required MatchedMedia Result { get; set; }
     [Parameter] public bool IsToggled { get; set; }
     [Parameter] public bool IsToggling { get; set; }
-    [Parameter] public EventCallback<IdentifiedMedia> OnToggle { get; set; }
+    [Parameter] public EventCallback<MatchedMedia> OnToggle { get; set; }
 
     private string _iconClass = string.Empty;
 

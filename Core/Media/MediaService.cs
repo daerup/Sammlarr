@@ -48,7 +48,7 @@ internal sealed class MediaService(
 		}
 	}
 
-	public async IAsyncEnumerable<Result<IdentifiedMedia>> GetDetailsAsync(
+	public async IAsyncEnumerable<Result<MatchedMedia>> GetDetailsAsync(
 		IEnumerable<MediaId> ids,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -81,7 +81,7 @@ internal sealed class MediaService(
 		}
 	}
 
-	public async IAsyncEnumerable<MediaLookup> IdentifyWithDetailsAsync(
+	public async IAsyncEnumerable<MediaMatchResult> IdentifyWithDetailsAsync(
 		IAsyncEnumerable<IdentifyRequest> requests,
 		[EnumeratorCancellation] CancellationToken cancellationToken = default
 	)
@@ -138,7 +138,7 @@ internal sealed class MediaService(
 		failure?.Throw();
 	}
 
-	private async IAsyncEnumerable<MediaLookup> IdentifyAndLoadAsync(
+	private async IAsyncEnumerable<MediaMatchResult> IdentifyAndLoadAsync(
 		IReadOnlyList<IdentifyRequest> batch,
 		IMediaSink sink,
 		Dictionary<IExternalMediaId, MediaIdentity> building,
@@ -271,7 +271,7 @@ internal sealed class MediaService(
 			.Map(externals => new IdentityMatch(new MediaIdentity(MediaId.From(Guid.NewGuid()), [.. externals]), new None()));
 	}
 
-	private async ValueTask<Result<IdentifiedMedia>> LoadStoredDetailsAsync(
+	private async ValueTask<Result<MatchedMedia>> LoadStoredDetailsAsync(
 		MediaId id,
 		IReadOnlyDictionary<MediaId, StoredMedia> stored,
 		MediaWriteBuffer buffer,
@@ -285,7 +285,7 @@ internal sealed class MediaService(
 		return await LoadDetailsAsync(row.Identity, Some.Of(row), buffer, cancellationToken);
 	}
 
-	private async ValueTask<MediaLookup> LoadRequestDetailsAsync(
+	private async ValueTask<MediaMatchResult> LoadRequestDetailsAsync(
 		IdentifyRequest request,
 		Result<IdentityMatch> identityMatch,
 		MediaWriteBuffer buffer,
@@ -297,10 +297,10 @@ internal sealed class MediaService(
 			return request.Unmatched();
 		}
 		var loaded = await LoadDetailsAsync(r.Identity, r.Stored, buffer, cancellationToken);
-		return loaded is Success<IdentifiedMedia>(var identified) ? identified : request.Unmatched();
+		return loaded is Success<MatchedMedia>(var matched) ? matched : request.Unmatched();
 	}
 
-	private async ValueTask<Result<IdentifiedMedia>> LoadDetailsAsync(
+	private async ValueTask<Result<MatchedMedia>> LoadDetailsAsync(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
 		MediaWriteBuffer buffer,
@@ -311,12 +311,12 @@ internal sealed class MediaService(
 		return await cached
 			.When(details => details.IsFresh(dateTimeProvider.Now))
 			.Match(
-				fresh => ValueTask.FromResult<Result<IdentifiedMedia>>(Success.Of(new IdentifiedMedia(identity, fresh.Details))),
+				fresh => ValueTask.FromResult<Result<MatchedMedia>>(Success.Of(new MatchedMedia(identity, fresh.Details))),
 				() => FetchAsync(identity, stored, cached, buffer, cancellationToken)
 			);
 	}
 
-	private async ValueTask<Result<IdentifiedMedia>> FetchAsync(
+	private async ValueTask<Result<MatchedMedia>> FetchAsync(
 		MediaIdentity identity,
 		Optional<StoredMedia> stored,
 		Optional<CachedDetails> cached,
@@ -336,12 +336,12 @@ internal sealed class MediaService(
 		}
 	}
 
-	private static Result<IdentifiedMedia> Fallback(MediaIdentity identity, Optional<StoredMedia> stored, Optional<CachedDetails> cached, Error error)
+	private static Result<MatchedMedia> Fallback(MediaIdentity identity, Optional<StoredMedia> stored, Optional<CachedDetails> cached, Error error)
 	{
 		return cached
 			.Map(stale => stale.Details)
 			.Or(() => stored.Map(_ => MediaDetails.Empty(identity.Type)))
-			.Map(details => new IdentifiedMedia(identity, details))
+			.Map(details => new MatchedMedia(identity, details))
 			.ToResult(error);
 	}
 
@@ -375,7 +375,7 @@ file static class IdentifyRequestExtensions
 {
 	extension(IdentifyRequest request)
 	{
-		public MediaLookup Unmatched()
+		public MediaMatchResult Unmatched()
 		{
 			var hint = request.Hints is Some<IdentifyHints>(var hints) ? hints : null;
 			return new UnmatchedMedia(

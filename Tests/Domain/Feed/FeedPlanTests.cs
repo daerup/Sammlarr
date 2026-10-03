@@ -131,7 +131,7 @@ public class FeedPlanTests
 	}
 
 	private static IFeedPlan Compute(
-		IReadOnlyList<QueryVerdict<IdentifiedMedia>> verdicts,
+		IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		FeedStrategy? strategy = null,
 		FeedLoadState state = FeedLoadState.Finished,
@@ -148,7 +148,7 @@ public class FeedPlanTests
 	}
 
 	private static MirrorPlan Mirrored(
-		IReadOnlyList<QueryVerdict<IdentifiedMedia>> verdicts,
+		IReadOnlyList<QueryVerdict<MatchedMedia>> verdicts,
 		IReadOnlyList<MediaId> owned,
 		IReadOnlyList<(MediaId Id, int Absences)>? absences = null
 	)
@@ -156,7 +156,7 @@ public class FeedPlanTests
 		return (MirrorPlan)Compute(verdicts, owned, absences: absences);
 	}
 
-	private static QueryVerdict<IdentifiedMedia> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
+	private static QueryVerdict<MatchedMedia> Verdict(MediaId id, QueryOutcome outcome, bool owned = false, bool inBlocklist = false)
 	{
 		return new(
 			Row(id),
@@ -175,9 +175,9 @@ public class FeedPlanTests
 
 	private static UnmatchedMedia Unmatched(int seed) => new([TmdbId.From($"unmatched-{seed}", MediaType.Movie)], new MovieDetails());
 
-	private static IdentifiedMedia Row(MediaId id)
+	private static MatchedMedia Row(MediaId id)
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{

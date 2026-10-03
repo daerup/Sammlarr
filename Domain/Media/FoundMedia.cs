@@ -4,9 +4,9 @@ public sealed record FoundMedia(ValueSet<IExternalMediaId> Externals, MediaDetai
 {
 	public bool Fits(MediaType type) => Details is not UnknownDetails && Details.Type == type && Externals.All(id => id.Type == type);
 
-	public IdentifiedMedia IdentifiedAs(MediaIdentity identity) => new(identity with { Externals = identity.Externals + Externals }, Details);
+	public MatchedMedia Matched(MediaIdentity identity) => new(identity with { Externals = identity.Externals + Externals }, Details);
 
 	public UnmatchedMedia Unmatched() => new(Externals, Details);
 
-	public MediaLookup LookUpAs(MediaIdentity identity) => Fits(identity.Type) ? IdentifiedAs(identity) : Unmatched();
+	public MediaMatchResult MatchTo(MediaIdentity identity) => Fits(identity.Type) ? Matched(identity) : Unmatched();
 }

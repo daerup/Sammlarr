@@ -22,7 +22,7 @@ public sealed record ChangeItem
 {
 	public required string Title { get; init; }
 	public MediaId? Id { get; init; }
-	public IdentifiedMedia? Media { get; init; }
+	public MatchedMedia? Media { get; init; }
 	public required ChangeKind Kind { get; init; }
 	public string? Subtitle { get; init; }
 	public string? ContextIcon { get; init; }

@@ -111,8 +111,8 @@
 
 @code {
     [Parameter, EditorRequired] public required ActivityDay Day { get; set; }
-    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, IdentifiedMedia> Media { get; set; }
-    [Parameter] public EventCallback<IdentifiedMedia> OnSelect { get; set; }
+    [Parameter, EditorRequired] public required IReadOnlyDictionary<MediaId, MatchedMedia> Media { get; set; }
+    [Parameter] public EventCallback<MatchedMedia> OnSelect { get; set; }
     [Parameter] public EventCallback<IReadOnlyList<MediaId>> OnNeedMedia { get; set; }
     [Parameter] public DateOnly Today { get; set; }
 

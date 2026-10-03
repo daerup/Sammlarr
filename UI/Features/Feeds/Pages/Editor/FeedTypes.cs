@@ -31,7 +31,7 @@ public enum PreviewBucket
 
 public static class PreviewResultFilter
 {
-	public static PreviewBucket Bucket(QueryVerdict<IdentifiedMedia> verdict)
+	public static PreviewBucket Bucket(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Outcome switch
 		{
@@ -43,7 +43,7 @@ public static class PreviewResultFilter
 
 	public static bool IsVisible(PreviewBucket bucket, IReadOnlyCollection<PreviewBucket> active) => active.Count == 0 || active.Contains(bucket);
 
-	private static PreviewBucket Qualified(QueryVerdict<IdentifiedMedia> verdict)
+	private static PreviewBucket Qualified(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Kept ? PreviewBucket.Kept
 			: verdict.WillImport ? PreviewBucket.Added
@@ -61,7 +61,7 @@ internal static class PreviewCopy
 
 	internal static AbsencePhrase Absence => new("Absent from", "of", "runs");
 
-	internal static string OutcomeIcon(QueryVerdict<IdentifiedMedia> verdict)
+	internal static string OutcomeIcon(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Outcome switch
 		{
@@ -71,7 +71,7 @@ internal static class PreviewCopy
 		};
 	}
 
-	internal static string AtRiskReason(QueryVerdict<IdentifiedMedia> verdict)
+	internal static string AtRiskReason(QueryVerdict<MatchedMedia> verdict)
 	{
 		return verdict.Outcome switch
 		{
@@ -84,7 +84,7 @@ internal static class PreviewCopy
 
 internal sealed record AbsencePhrase(string Lead, string Join, string Tail);
 
-internal sealed record GoneItem(IdentifiedMedia Media);
+internal sealed record GoneItem(MatchedMedia Media);
 
 public record PreviewStatus
 {

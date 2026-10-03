@@ -88,9 +88,9 @@
                                              OnFocusIn="() => _focusedResult = result.Key"
                                              OnFocusOut="() => ClearFocusedResult(result)">
                                 <Icons>
-                                    @if (result is IdentifiedMedia identified)
+                                    @if (result is MatchedMedia matched)
                                     {
-                                        @TileIcons?.Invoke(new TileIconContext(identified, IsSearchResultMarked(identified), _isAdding && Equals(_activeToggledSourceId, identified.Identity.Id), EventCallback.Factory.Create<IdentifiedMedia>(this, ToggleAsync)))
+                                        @TileIcons?.Invoke(new TileIconContext(matched, IsSearchResultMarked(matched), _isAdding && Equals(_activeToggledSourceId, matched.Identity.Id), EventCallback.Factory.Create<MatchedMedia>(this, ToggleAsync)))
                                     }
                                 </Icons>
                             </MediaDetailTile>
@@ -133,7 +133,7 @@
     private string? _searchHint;
     private string? _searchError;
     private MediaId? _activeToggledSourceId;
-    private List<MediaLookup> _searchResults = [];
+    private List<MediaMatchResult> _searchResults = [];
     private ElementReference _searchInputRef;
     private bool _shouldFocusSearchInput;
     private bool _wasOpen;
@@ -168,7 +168,7 @@
     }
 
 
-    private bool IsSearchResultMarked(IdentifiedMedia result) => IsInWantlist.Invoke(result.Identity.Id);
+    private bool IsSearchResultMarked(MatchedMedia result) => IsInWantlist.Invoke(result.Identity.Id);
 
     private async Task CloseAsync()
     {
@@ -240,7 +240,7 @@
         }
     }
 
-    private async Task ToggleAsync(IdentifiedMedia result)
+    private async Task ToggleAsync(MatchedMedia result)
     {
         if (_isAdding)
         {
@@ -260,7 +260,7 @@
         _focusedResult = null;
     }
 
-    private void ClearFocusedResult(MediaLookup result)
+    private void ClearFocusedResult(MediaMatchResult result)
     {
         if (_focusedResult == result.Key)
         {

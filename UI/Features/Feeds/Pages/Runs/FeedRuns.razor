@@ -269,7 +269,7 @@
     private bool _revealSelected;
     private FeedRun? _selected;
     private IReadOnlyList<ChangeItem> _items = [];
-    private MediaLookup? _sheet;
+    private MediaMatchResult? _sheet;
     private RunFilter _filter = RunFilter.All;
     private int _take = PageSize;
     private bool _more;
@@ -343,7 +343,7 @@
         _items = FeedRunView.Items(run, await Media.GetDetailsByIdAsync(wanted));
     }
 
-    private Task ShowDetailsAsync(IdentifiedMedia media)
+    private Task ShowDetailsAsync(MatchedMedia media)
     {
         _sheet = media;
         return Task.CompletedTask;

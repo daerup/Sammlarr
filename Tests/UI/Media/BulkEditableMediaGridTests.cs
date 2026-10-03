@@ -22,7 +22,7 @@ public class BulkEditableMediaGridTests : BunitContext
 	[Test]
 	public async Task SelectionClick_InEditMode_FramesTheTileInTheThemeRingAndFillsItsEmptyBadgeWithACheck()
 	{
-		var cut = Render<BulkEditableMediaGrid<IdentifiedMedia>>(parameters =>
+		var cut = Render<BulkEditableMediaGrid<MatchedMedia>>(parameters =>
 			parameters
 				.Add(grid => grid.Items, [Movie()])
 				.Add(grid => grid.Detail, media => media)
@@ -39,7 +39,7 @@ public class BulkEditableMediaGridTests : BunitContext
 		await Assert.That(cut.Find(".media-card").ClassList).Contains("ring-foreground");
 	}
 
-	private static IdentifiedMedia Movie()
+	private static MatchedMedia Movie()
 	{
 		return new(new MediaIdentity(MediaId.From(Guid.NewGuid()), []), new MovieDetails { BackdropUrl = "https://cdn.example.test/backdrop.jpg" });
 	}

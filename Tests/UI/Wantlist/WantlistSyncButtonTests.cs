@@ -226,7 +226,7 @@ public class WantlistSyncButtonTests : BunitContext
 		Services.AddSingleton(planner.Object);
 
 		var media = IMediaService.Mock();
-		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<IdentifiedMedia>>(Success.Of(Detail(Synced))));
+		media.GetDetailsAsync(Any(), Any()).Returns(Async<Result<MatchedMedia>>(Success.Of(Detail(Synced))));
 		Services.AddSingleton(media.Object);
 
 		var wantlist = IWantlistService.Mock();
@@ -289,9 +289,9 @@ public class WantlistSyncButtonTests : BunitContext
 		}
 	}
 
-	private static IdentifiedMedia Detail(MediaId id)
+	private static MatchedMedia Detail(MediaId id)
 	{
-		return new IdentifiedMedia(
+		return new MatchedMedia(
 			new MediaIdentity(id, [TmdbId.From(id.Value.ToString(), MediaType.Movie)]),
 			new MovieDetails
 			{
